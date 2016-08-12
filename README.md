@@ -9,12 +9,12 @@ Documentation
 [**Users Guide**](docs/gridDynUsersGuide.pdf) for GridDyn is a good place to start
 
 also available are a series of presentations
-[Intro] (docs/pres/Griddyn_intro.pptx)
-[Execution Flow] (docs/pres/GridDyn_execution_flow.pptx)
-[Objects] (docs/pres/GridDyn_objects.pptx)
-[Object Construction and properties] (docs/pres/GridDyn_object_construction_and_properties.pptx)
-[States and offsets] (docs/pres/stateData_solverModes_solverOffsets.pptx)
-[Validation and Performance] (docs/pres/GridDyn_validation_and_performance.pptx)
+*[Intro] (docs/presentations/Griddyn_intro.pptx)
+*[Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
+*[Objects] (docs/presentations/GridDyn_objects.pptx)
+*[Object Construction and properties] (docs/presentations/GridDyn_object_construction_and_properties.pptx)
+*[States and offsets] (docs/presentations/stateData_solverModes_solverOffsets.pptx)
+*[Validation and Performance] (docs/presentations/GridDyn_validation_and_performance.pptx)
 
 
 Get Involved!
@@ -27,8 +27,10 @@ making it better, as well as development related to specific projects.
 
 ### Contributions
 
-Contributing to GridDyn is relatively Easy.  Just send us a
+We are still working out the details of accepting contributions
+For the moment you can submit a
 [pull request](https://help.github.com/articles/using-pull-requests/).
+and we can work with you to make sure the licensing is order, which basically involves making sure your contributions are released back to the repo under a BSD license like the rest of the code.  
 
 Before you send a PR, your code should pass all the non-experimental test cases in testSystem, testLibrary, and testComponents
 
@@ -49,6 +51,6 @@ A number of other people have contributed, see the Users Guide for more details
 Release
 ----------------
 GridDyn is released under a BSD license.  For more details see the
-LICENSE file.
+[LICENSE](LICENSE) file.
 
 ``LLNL-CODE-681053``
