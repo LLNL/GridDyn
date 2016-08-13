@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test file reading-->
+<griddyn name="test1" version="0.0.1">
+   <import file="Buslist30.csv"/>
+   <import file="Branchlist30.csv"/>
+
+</griddyn>

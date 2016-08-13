@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<griddyn name="test1" version="0.0.1">
+   <bus name="bus1">
+      <bustype>SLK</bustype>
+	  <dyntype>fixangle</dyntype>
+      <angle>0</angle>
+      <voltage>1</voltage>
+      <generator name="gen1">
+		<base>300</base>
+		<model type="inverter"/>
+      </generator>
+	</bus>
+<bus>
+	<name>bus2</name>
+     <load name="load3">
+       <P>1.500</P>
+       <Q>0.3</Q>
+       <event>
+         <field>q</field>
+         <value>0.1</value>
+         <time>1.0</time>
+       </event>
+       
+     </load>
+   </bus>
+ <link from="bus1" name="bus1_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0.002</r>
+      <x>0.015</x>
+   </link>
+   <basepower>100</basepower>
+   <timestart>0</timestart>
+   <timestop>30</timestop>
+<recorder field="auto,bus1:genreactive, bus2:loadreactive" period=0.01>
+   <file>excitertest.dat</file>
+   </recorder>
+</griddyn>

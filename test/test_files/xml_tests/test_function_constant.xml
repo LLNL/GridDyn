@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test link creation-->
+<griddyn name="test1" version="0.0.1">
+  <bus name="bus1">
+    <type>SLK</type>
+    <angle>0</angle>
+    <voltage>cos(0)</voltage>
+  </bus>
+  <bus name="bus2">
+    <type>PV</type>
+    <angle>acos(0.1734)</angle>
+    <voltage>cos(0)</voltage>
+  </bus>
+  <bus name="bus3">
+    <type>PV</type>
+    <angle>0</angle>
+    <voltage>0.7+0.2576</voltage>
+  </bus>
+  <bus name="bus4">
+    <type>PQ</type>
+    <angle>0</angle>
+    <voltage>(0.4+0.2)+(-6.034/(-6.034/(1.0*2.0)))*0.25</voltage>
+  </bus>
+
+</griddyn>

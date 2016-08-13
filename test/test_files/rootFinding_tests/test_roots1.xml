@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test library reading-->
+<griddyn name="test1" version="0.0.1">
+<library>
+ <model name="gm1">
+        <type>fourthOrder</type>
+        <D>0.040</D>
+        <H>5</H>
+        <Tdop>8</Tdop>
+        <Tqop>1</Tqop>
+        <Xd>1.050</Xd>
+        <Xdp>0.350</Xdp>
+        <Xq>0.850</Xq>
+        <Xqp>0.350</Xqp>
+      </model>
+      <exciter name="ex1">
+        <type>type1</type>
+        <Aex>0</Aex>
+        <Bex>0</Bex>
+        <Ka>20</Ka>
+        <Ke>1</Ke>
+        <Kf>0.040</Kf>
+        <Ta>0.200</Ta>
+        <Te>0.700</Te>
+        <Tf>1</Tf>
+        <Urmax>50</Urmax>
+        <Urmin>-50</Urmin>
+      </exciter>
+      <governor name="gov1">
+        <type>basic</type>
+        <K>16.667</K>
+        <Pdown>0</Pdown>
+        <Pmax>0</Pmax>
+        <Pmin>0</Pmin>
+        <Pup>0</Pup>
+        <T1>0.100</T1>
+        <T2>0.150</T2>
+        <T3>0.050</T3>
+      </governor>
+</library>
+  <bus name="bus1">
+    <type>SLK</type>
+    <angle>0</angle>
+    <voltage>1</voltage>
+        <generator name="gen1">
+      <model><ref>gm1</ref></model>
+      </generator>
+  </bus>
+   <bus name="bus2">
+    <load name="load3" type="ramp">
+         <P>1.5</P>
+         <Q>0</Q>
+        <dpdt>0.001</dpdt>
+      </load>
+  </bus>
+  <bus name="bus3">
+    <type>PV</type>
+    <angle>0</angle>
+    <voltage>1</voltage>
+        <generator name="gen3">
+      <model><ref>gm1</ref></model>
+	  <P>0.75</P>
+      </generator>
+  </bus>
+  <link from="bus1" name="bus1_to_bus3" to="bus3">
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <link from="bus3" name="bus3_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <link from="bus1" name="bus1_to_bus2" to="bus2">
+   <fuse terminal=1>
+   <limit>0.76</limit>
+   </fuse>
+   <fuse terminal=2>
+   <limit>0.76</limit>
+   </fuse>
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <timestart>0</timestart>
+   <timestop>30</timestop>
+</griddyn>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<griddyn name="test1" version="0.0.1">
+   <bus name="bus1">
+      <type>SLK</type>
+      <angle>0</angle>
+      <voltage>1</voltage>
+      <generator name="gen1">
+        <model>
+          <type>4</type> 
+        </model>
+		<exciter type="basic"/>
+		<recorder>
+		<file>datafile.dat</file>
+		<field>freq,angle</field>
+		<period>0.1</period>
+		</recorder>
+      </generator>
+	</bus>
+<bus>
+	<name>bus2</name>
+	<type>PV</type>
+	<generator name="gen2">
+        <model type="4"/>
+		<P>1.2</P>
+		<Pmax>3</Pmax>
+		<recorder>
+		<file>datafile.dat</file>
+		<field>freq,angle</field>
+		<period>0.1</period>
+		</recorder>
+      </generator>
+
+     <load name="load2">
+       <P>1.500</P>
+       <Q>0</Q>
+       <event>
+         <field>P</field>
+         <value>1.3,1.5</value>
+         <time>1,10</time>
+       </event>
+     </load>
+   </bus>
+   <bus>
+	<name>bus3</name>
+     <load name="load3" type="fdep">
+       <P>0.3</P>
+       <Q>0.1</Q>
+	   <loadtype>flourescent</loadtype>
+     </load>
+	 <recorder>
+		<file>datafile.dat</file>
+		<field>freq,angle,loadp,loadq</field>
+		<period>0.1</period>
+		</recorder>
+   </bus>
+ <link from="bus1" name="bus1_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <link from="bus1" name="bus1_to_bus3" to="bus3">
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <link from="bus2" name="bus2_to_bus3" to="bus3">
+      <b>0</b>
+      <r>0</r>
+      <x>0.015</x>
+   </link>
+   <basepower>100</basepower>
+   <timestart>0</timestart>
+   <timestop>60</timestop>
+   <timestep>0.010</timestep>
+</griddyn>

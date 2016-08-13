@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test custom elements-->
+<griddyn name="customtest">
+<custom name="cbus">
+  <bus name="bus1">
+    <voltage>rand(0.95,1.05)</voltage>
+  </bus>
+ </custom>
+  <array count=10> 
+    <cbus/>
+  </array>
+</griddyn>

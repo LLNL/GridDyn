@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test matdyn execution-->
+<griddyn name="test1" version="0.0.1">
+<library>
+ <relay flags="comm_enabled" name="t1">
+ <commtype>basic</commtype>
+   <terminal>1</terminal>
+   <type>zonal</type>
+   <zones>2</zones>
+    <delay>1,2</delay>
+   </relay>
+  <relay flags="comm_enabled" name="t2">
+  <commtype>basic</commtype>
+   <terminal>2</terminal>
+   <type>zonal</type>
+   <zones>2</zones>
+   <delay>1,2</delay>
+   </relay>
+   </library>
+   <import file="../IEEE_test_cases/IEEE39.raw"/>
+   <import file="../IEEE_test_cases/IEEE39.dyr"/>
+	<import file="ieee39_relays.csv"/>
+<event>
+<target>LINK#5</target>
+<field>fault</field>
+<value>0.5,-1</value>
+<time>1,1.05</time>
+</event>
+<recorder field="auto" period=0.001>
+   <file>dynfault.dat</file>
+   </recorder>
+   
+   <timestart>0</timestart>
+   <timestop>10</timestop>
+</griddyn>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test simple bus creation-->
+<griddyn name="test1" version="0.0.1">
+   <bus name="bus1">
+      <type>SLK</type>
+      <angle>0</angle>
+      <voltage>1.04</voltage>
+      <generator name="gen1">
+          <P>0.7160</P>
+      </generator>
+   </bus>
+  <bus name="bus2">
+    <type>PV</type>
+    <angle>0</angle>
+    <voltage>1.025</voltage>
+    <generator name="gen2">
+      <P>1.63</P>
+    </generator>
+  </bus>
+  <bus name="bus4">
+    <type>PQ</type>
+  </bus>
+  <bus name="bus5">
+    <type>PQ</type>
+    <load name="load5">
+      <P>1.25</P>
+      <Q>0.5</Q>
+    </load>
+  </bus>
+</griddyn>

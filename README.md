@@ -6,16 +6,19 @@ GridDyn is a power system simulator developed at Lawrence Livermore National Lab
 Documentation
 ----------------
 
-[**Users Guide**](docs/gridDynUsersGuide.pdf) for GridDyn is a good place to start
+[**Users Guide Undergoing final review for release**](docs/gridDynUsersGuide.pdf) for GridDyn is a good place to start (
 
 also available are a series of presentations
-*[Intro] (docs/presentations/Griddyn_intro.pptx)
-*[Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
-*[Objects] (docs/presentations/GridDyn_objects.pptx)
-*[Object Construction and properties] (docs/presentations/GridDyn_object_construction_and_properties.pptx)
-*[States and offsets] (docs/presentations/stateData_solverModes_solverOffsets.pptx)
-*[Validation and Performance] (docs/presentations/GridDyn_validation_and_performance.pptx)
+*Item [Intro] (docs/presentations/Griddyn_intro.pptx)
+*Item [Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
+*Item [Objects] (docs/presentations/GridDyn_objects.pptx)
+*Item [Object Construction and properties] (docs/presentations/GridDyn_object_construction_and_properties.pptx)
+*Item [States and offsets] (docs/presentations/stateData_solverModes_solverOffsets.pptx)
+*Item [Validation and Performance] (docs/presentations/GridDyn_validation_and_performance.pptx)
 
+Installation
+------------------------
+[Installation Guide](install.md) file.
 
 Get Involved!
 ------------------------

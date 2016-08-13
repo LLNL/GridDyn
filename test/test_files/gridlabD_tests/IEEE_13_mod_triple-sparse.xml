@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--xml file to test mpi running for gridDyn-->
+<griddyn name="test1" version="0.0.1">
+  <library>
+    <generator name="default">
+      <exciter>
+	<type>type1</type>
+      </exciter>
+      <model></model>
+      <governor></governor>
+    </generator>
+  </library>
+  <bus name="bus1">
+    <basevoltage>7.2</basevoltage>
+    <type>SLK</type>
+    <angle>0</angle>
+    <voltage>1.04</voltage>
+    <generator name="gen1" ref="default">
+      <P>0.7160</P>
+    </generator>
+  </bus>
+  <bus name="bus2">
+    <basevoltage>7.2</basevoltage>
+    <type>PV</type>
+    <angle>0</angle>
+    <voltage>1.00</voltage>
+    <generator name="gen1" ref="default">
+      <P>0.4</P>
+    </generator>
+    <load>
+      <type>gridlab</type>
+      <file>IEEE_13_mod.glm</file>
+      <workdir>IEEE_13_mod_workdir</workdir>
+      <detail>triple</detail>
+
+      <recorder field="all" >
+        <file>output/test-IEEE_13_mod_triple-sparse/gridlabd.csv</file>
+        <period>0.010</period>
+      </recorder>
+
+    </load>
+  </bus>
+  <link from="bus1" to="bus2">
+    <x>0.04</x>
+  </link>
+
+  <recorder field="auto" period=0.010>
+    <file>output/test-IEEE_13_mod_triple-sparse/output.csv</file>
+  </recorder>
+
+  <basepower>10</basepower>
+  <timestart>0</timestart>
+  <timestop>30</timestop>
+  <timestep>0.010</timestep>
+
+  <flags>sparse</flags>
+  
+</griddyn>

@@ -1,0 +1,204 @@
+// $Id: Distribution Simple model. 
+// For verification purposes on gridDyn we are also going to need a very simple model, which consists of a swing bus, and 3 
+// other buses.  All the other busses should be connected to the swing bus via lossless 3 phase transmission lines and have a 
+// single load object with a constant power load of 3 MW and 0.9 MVar. So 1 MW and 0.3 Mvar reactive power per phase per
+// object. So in total the model has a load of 9 MW real power and 2.7 MW reactive power.  
+
+// Yining Qin; qin3@LLNL.GOV
+
+
+//////////////////////////
+
+//  START               //
+
+//////////////////////////
+
+
+
+//--- Define Set Parameters - start
+
+#set minimum_timestep=1;
+#set profiler=1;
+#set relax_naming_rules=1;
+#set iteration_limit=10;
+
+//--- Define Set Parameters - end
+
+
+//--- Define simulation time - start
+
+clock {
+	timezone PST+8PDT;
+     starttime '2011-07-04 00:00:00';
+     stoptime '2011-07-04 00:01:00';
+}
+
+//--- Define simulation time - end
+
+
+
+//--- Define Modules - start
+
+module tape;
+module powerflow {						
+     solver_method NR;						
+     NR_iteration_limit 50;						
+   };		
+
+//--- Define Modules - End
+
+
+//---Define meter - start
+
+object  meter{
+name  swingbus_meter;
+parent  node_swingbus;
+nominal_voltage 12470 ;
+phases  ABCN;
+}
+
+//---Define meter - End
+
+
+
+//---Define transformer - start
+
+object  transformer{
+name  transformer_Link_network_to_node_bus_A;
+phases  A|B|C;
+from  swingbus_meter;
+to  node_bus_A;
+configuration  network_node_transformer_configuration1;
+}
+
+object  transformer{
+name  transformer_Link_network_to_node_bus_B;
+phases  A|B|C;
+from  swingbus_meter;
+to  node_bus_B;
+configuration  network_node_transformer_configuration1;
+}
+
+object  transformer{
+name  transformer_Link_network_to_node_bus_C;
+phases  A|B|C;
+from  swingbus_meter;
+to  node_bus_C;
+configuration  network_node_transformer_configuration1;
+}
+
+//---Define transformer - end
+
+
+
+//---Create node objects - start
+
+object  node{
+	name  node_swingbus;
+	bustype  SWING;
+	phases ABCN;
+	nominal_voltage 12470;
+ }
+
+object node {     
+      name node_bus_A;     
+      phases ABCN;     
+      nominal_voltage 2400;     
+}       
+
+object node {     
+      name node_bus_B;     
+      phases ABCN;     
+      nominal_voltage 2400;     
+}       
+
+object node {     
+      name node_bus_C;     
+      phases ABCN;     
+      nominal_voltage 2400;     
+}       
+
+
+//---Create node objects - End
+
+
+
+//---Create Lode objects - start
+
+object  load{
+name  load_bus_A;
+parent  node_bus_A;
+phases   A|B|C;
+constant_current_A  +416.6651759-125.0028435j;
+constant_current_B  -316.5884277-298.342429j;
+constant_current_C  -100.077441+423.3452725j;
+maximum_voltage_error  0.001;
+nominal_voltage  2400;
+}
+
+object  load{
+name  load_bus_B;
+parent  node_bus_B;
+phases   A|B|C;
+constant_current_A  +416.6651759-125.0028435j;
+constant_current_B  -316.5884277-298.342429j;
+constant_current_C  -100.077441+423.3452725j;
+maximum_voltage_error  0.001;
+nominal_voltage  2400;
+}
+
+object  load {
+name  load_bus_C;
+parent  node_bus_C;
+phases   A|B|C;
+constant_current_A  +416.6651759-125.0028435j;
+constant_current_B  -316.5884277-298.342429j;
+constant_current_C  -100.077441+423.3452725j;
+maximum_voltage_error  0.001;
+nominal_voltage  2400;
+}
+
+
+//---Create Lode objects - End
+
+
+//---Create Transformer configuration - start
+
+object  transformer_configuration{
+name  network_node_transformer_configuration1;
+connect_type  2;
+power_rating   9000000;
+primary_voltage  12470;
+secondary_voltage  2400;
+resistance  0.001;
+reactance  0.06;
+}
+
+//---Create Transformer configuration - end
+
+
+
+// record  network_swingbus_meter - start
+
+object recorder {
+parent swingbus_meter;
+property measured_power,measured_power_A,measured_power_B,measured_power_C,measured_current_A,measured_current_B,measured_current_C,measured_voltage_A,measured_voltage_B,measured_voltage_C;
+file node_swingbus_meter_current_load.csv;
+interval 1;
+limit  -1;
+
+}
+
+// record  network_swingbus_meter - end
+
+
+
+
+
+
+
+//////////////////////////------------------------------------------------------------------------------------------------------
+
+//  END                 //
+
+//////////////////////////------------------------------------------------------------------------------------------------------

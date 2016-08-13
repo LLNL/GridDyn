@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<griddyn name="fault_testSim" version="0.0.1">
+   <bus name="bus1">
+      <type>infinite</type>
+      <angle>0</angle>
+      <voltage>1</voltage>
+	</bus>
+<bus>
+	<name>bus2</name>
+     <load name="load3">
+       <yp>1.500</yp>
+       <yq>0.3</yq>    
+     </load>
+	 <gen name="gen1">
+	 <p>1.0</p>
+	 <mbase>100</mbase>
+	 </gen>
+   </bus>
+ <link from="bus1" name="bus1_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0.002</r>
+      <x>0.015</x>
+   </link>
+   <event>
+   <target>bus1</target>
+   <field>voltage</field>
+   <time>1.0,1.05</time>
+   <value>0.1,1.0</value>
+   </event>
+   <timestart>0</timestart>
+   <timestop>10</timestop>
+<recorder field="auto,bus2::gen1:angle(deg)" period=0.01>
+   <file>faulttest.dat</file>
+   </recorder>
+</griddyn>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<griddyn name="test_fault" version="0.0.1">
+   <bus name="bus1">
+      <type>SLK</type>
+      <angle>0</angle>
+      <voltage>1.04</voltage>
+      <generator name="gen1" dynmodel="typical">
+          <P>0.7160</P>
+      </generator>
+   </bus>
+
+   <bus name="bus2">
+      <type>PQ</type>
+      <load name="load2">
+         <P>1.25</P>
+         <Q>0.5</Q>
+      </load>
+   </bus>
+   <bus name="bus3">
+      <type>PQ</type>
+      <load name="load3">
+         <P>0.9</P>
+         <Q>0.3</Q>
+      </load>
+   </bus>
+ 
+   
+   <link from="bus1" name="bus1_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0</r>
+      <x>0.0576</x>
+      <tapangle>0</tapangle>
+   </link>
+   <link from="bus1" name="bus1_to_bus3" to="bus3">
+	  <type>ac</type>
+      <b>0</b>
+      <r>0.03</r>
+      <x>0.085</x>
+   </link>
+  
+   <link from="bus2" name="bus2_to_bus3" to="bus3">
+      <b>0.0</b>
+      <r>0.069</r>
+      <x>0.2008</x>
+	  <relay>
+	   <type>breaker</type>
+	  <limit>0.5</limit>
+	  </relay>
+	  <relay>
+	   <type>breaker</type>
+	   <terminal>2</terminal>
+	  <limit>0.5</limit>
+	  </relay>
+	  <event>
+	  <field>fault</field>
+	  <time>1.0></time>
+	  <value>0.5></value>
+	  </event>
+   </link>
+   
+   <basepower>100</basepower>
+   <timestart>0</timestart>
+   <timestop>10</timestop>
+   <recorder field="auto" period=0.005>
+   <file>linkfault.dat</file>
+   </recorder>
+   
+   
+</griddyn>

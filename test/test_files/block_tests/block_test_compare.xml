@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<griddyn name="test1" version="0.0.1">
+   <bus name="bus1">
+      <type>infinite</type>
+      <angle>0</angle>
+      <voltage>1</voltage>
+   </bus>
+   <bus name="bus2" flags="compute_frequency">
+     <load name="load1">
+	 <p>0.4</p>
+	 <q>0.1</q>
+	 </load>
+	 <load name="loadP" type="pulse">
+	 <p>0</p>
+	 <period>2</period>
+	 <a>0.15</a>
+	 <pulsetype>triangle</pulsetype>
+	 </load>
+   </bus>
+   
+   <link from="bus1" name="bus1_to_bus2" to="bus2">
+      <b>0</b>
+      <r>0.002</r>
+      <x>0.015</x>
+   </link>
+   
+   <sensor>
+   <input>bus2::loadP:p</input>
+	
+	</sensor>
+	 <sensor>
+   <input>bus2::loadP:p</input>
+   <flags>sampled</flags>
+   <period>0.05</period>
+	</sensor>
+	<recorder field="bus2::loadP:p, relay#0:output0, relay#1:output0" period=0.05>
+    <file>blocktest.dat</file>
+  </recorder>
+   <basepower>100</basepower>
+   <timestart>0</timestart>
+   <timestop>8</timestop>
+   <timestep>0.010</timestep>
+</griddyn>
