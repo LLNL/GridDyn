@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 
 BOOST_AUTO_TEST_CASE(geco_fault_case)
 {
-	std::string fname = other_test_directory + "geco_fault_uncoupled.xml";
+	std::string fname = fault_test_directory + "geco_fault_uncoupled.xml";
 
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 	gds->consolePrintLevel = GD_DEBUG_PRINT;

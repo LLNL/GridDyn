@@ -13,11 +13,7 @@
 
 
 
-#if !WIN32
-#define BOOST_TEST_DYN_LINK
-#endif
-
-#if MINGW
+#if !_WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
 

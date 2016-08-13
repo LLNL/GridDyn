@@ -13,13 +13,10 @@
 
 
 
-#if !WIN32
+#if !_WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
 
-#if MINGW
-#define BOOST_TEST_DYN_LINK
-#endif
 
 #define BOOST_TEST_MODULE gridCoreObject testSystem
 #define BOOST_TEST_DETECT_MEMORY_LEAK 0

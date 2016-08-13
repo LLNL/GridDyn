@@ -54,6 +54,21 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 ENDIF()
 
 
+
+# -------------------------------------------------------------
+# Sundials
+# -------------------------------------------------------------
+
+#-------------------------------------------------------------
+# Enable Cvode and Arkode modules
+#-------------------------------------------------------------
+OPTION(LOAD_CVODE "Enable CVODE Support" OFF)
+OPTION(LOAD_ARKODE "Enable ARKODE support" OFF)
+
+SHOW_VARIABLE(SUNDIALS_INSTALL_DIR PATH
+  "sundials library directory" "${SUNDIALS_INSTALL_DIR}")
+find_package(sundials)
+
 # -------------------------------------------------------------
 # Find (and test) the KLU libraries
 # -------------------------------------------------------------
@@ -78,20 +93,6 @@ if(KLU_ENABLE)
 
 endif(KLU_ENABLE)
 
-
-# -------------------------------------------------------------
-# Sundials
-# -------------------------------------------------------------
-
-#-------------------------------------------------------------
-# Enable Cvode and Arkode modules
-#-------------------------------------------------------------
-OPTION(LOAD_CVODE "Enable CVODE Support" OFF)
-OPTION(LOAD_ARKODE "Enable ARKODE support" OFF)
-
-SHOW_VARIABLE(SUNDIALS_INSTALL_DIR PATH
-  "sundials library directory" "${SUNDIALS_INSTALL_DIR}")
-find_package(sundials)
 
 # -------------------------------------------------------------
 # FSKIT
@@ -213,9 +214,9 @@ if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
   OPTION(ENABLE_64_BIT_INDEXING "set all indexing and count variables to 64 bit unsigned (Usually not required)" OFF)
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
  
-OPTION(BUILD_SERVERMODE "Build Griddyn Server" OFF)
+#OPTION(BUILD_SERVERMODE "Build Griddyn Server" OFF)
 IF (BUILD_SERVERMODE)
- add_subdirectory(gridDynServer)
+ #add_subdirectory(gridDynServer)
 ENDIF(BUILD_SERVERMODE)
 
 # -------------------------------------------------------------
@@ -224,7 +225,7 @@ ENDIF(BUILD_SERVERMODE)
 IF(MSVC)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
   ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-  ADD_DEFINITIONS(-W4  /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800)
+  ADD_DEFINITIONS(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800)
 ENDIF(MSVC)
 
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)
@@ -291,7 +292,6 @@ OPTION(TEST_ENABLE "Enable unit testing construction" ON)
 
 IF (TEST_ENABLE)
 add_subdirectory(test)
-OPTION(ENABLE_EXPERIMENTAL_TEST_CASES "Enable experimental test cases" OFF)
 #enable_testing()
 #add_test(NAME gridDynTest COMMAND testCore)
 
