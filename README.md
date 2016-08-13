@@ -8,7 +8,7 @@ GridDyn is a power system simulator developed at Lawrence Livermore National Lab
 Documentation
 ----------------
 
-[**Users Guide Undergoing final review for release**](docs/gridDynUsersGuide.pdf) for GridDyn is a good place to start (try the presentations for some initial material)
+[**Users Guide Undergoing final review for release**](docs/gridDynUsersGuide.pdf) try the presentations for some initial material
 
 also available are a series of presentations
 	*[Intro] (docs/presentations/Griddyn_intro.pptx)
