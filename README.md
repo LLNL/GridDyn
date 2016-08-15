@@ -22,7 +22,7 @@ We expect there are still many issues so any bug reports or fixes are welcome.
 Documentation
 ----------------
 
-[**Users Guide**](docs/manuals/gridDynUsersManual.pdf)
+[**Users Guide**](docs/manuals/GridDynUserManual.pdf)
 
 ** API Guide ** --coming soon
 
