@@ -73,12 +73,11 @@ int gridDynSimulation::powerflow ()
               guess (timeCurr, pFlowData->state_data (), nullptr,sm);
 
               // solve
-
               retval = pFlowData->solve (timeCurr, timeCurr);
 
               if (retval < 0)
                 {
-				  printf("solver error return \n");
+				  LOG_WARNING("solver error return");
 			
                   if (controlFlags[no_powerflow_error_recovery])
                     {

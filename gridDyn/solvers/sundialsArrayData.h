@@ -59,6 +59,7 @@ class arrayDataSundialsSparse : public arrayData<double>
 {
 private:
   SlsMat J;               //!< the vector of tuples containing the data
+  index_t ccol = 0;
 public:
   /** @brief compact constructor
   */
@@ -86,6 +87,10 @@ public:
   double val (index_t N) const override;
 
   double at (index_t rowN, index_t colN) const override;
+
+  virtual void start() override;
+
+  virtual data_triple<double> next() override;
 };
 
 #endif

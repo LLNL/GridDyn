@@ -1938,13 +1938,14 @@ void acBus::guess (double ttime, double state[], double dstate_dt[], const solve
 
   auto Voffset = offsets.getVOffset (sMode);
   auto Aoffset = offsets.getAOffset (sMode);
+  
   if (!opFlags[slave_bus])
     {
       if (Voffset != kNullLocation)
         {
           state[Voffset] = voltage;
 
-          if (!isAlgebraicOnly (sMode))
+          if (hasDifferential(sMode))
             {
               dstate_dt[Voffset] = 0.0;
             }
@@ -1952,7 +1953,7 @@ void acBus::guess (double ttime, double state[], double dstate_dt[], const solve
       if (Aoffset != kNullLocation)
         {
           state[Aoffset] = angle;
-          if (!isAlgebraicOnly (sMode))
+          if (hasDifferential(sMode))
             {
               dstate_dt[Aoffset] = 0.0;
             }
@@ -2110,12 +2111,11 @@ void acBus::setState (double ttime, const double state[], const double dstate_dt
 // residual
 void acBus::residual (const stateData *sD, double resid[], const solverMode &sMode)
 {
-
   gridBus::residual (sD, resid, sMode);
 
-  updateLocalCache (sD, sMode);
   auto Aoffset = offsets.getAOffset (sMode);
   auto Voffset = offsets.getVOffset (sMode);
+ 
   // output
   if (hasAlgebraic (sMode))
     {
@@ -3294,6 +3294,7 @@ void acBus::computeDerivatives (const stateData *sD, const solverMode &sMode)
 // computed power at bus
 void acBus::updateLocalCache (const stateData *sD, const solverMode &sMode)
 {
+	
   if (!S.needsUpdate (sD))
     {
       return;

@@ -1704,7 +1704,7 @@ static const IOlocs inLoc {
 };
 
 
-
+//#define DEBUG_KEY_BUS 1445
 // computed power at bus
 void gridBus::updateLocalCache  (const stateData *sD, const solverMode &sMode)
 {
@@ -1720,7 +1720,12 @@ void gridBus::updateLocalCache  (const stateData *sD, const solverMode &sMode)
   outputs[voltageInLocation] = getVoltage (sD, sMode);
   outputs[angleInLocation] = getAngle (sD, sMode);
   outputs[frequencyInLocation] = getFreq (sD, sMode);
-
+#if DEBUG_KEY_BUS > 0
+  if (id == DEBUG_KEY_BUS)
+  {
+	  printf("%d V=%f, A=%f voltage=%f, angle=%f \n", DEBUG_KEY_BUS, outputs[voltageInLocation], outputs[angleInLocation]*180.0/kPI,voltage,angle*180/kPI );
+  }
+#endif
   auto cid = getID ();
   for (auto &link : attachedLinks)
     {

@@ -29,13 +29,18 @@ class gridDynGenerator;
 #define VLIMIT_VIOLATION (2)
 #define PLIMIT_VIOLATION (3)
 
+/** @brief helper class for gridBus to store the power information
+*/
 class busPowers
 {
 public:
-  double linkP = 0.0, linkQ = 0.0;                                //!< [p.u.]    power coming from Links
-  double loadP = 0.0, loadQ = 0.0;                                                    //!< [p.u.]    power coming from Loads
-  double genP = 0.0, genQ = 0.0;                                                              //!< [p.u.]    power coming from Generators
-  index_t seqID;
+	double linkP = 0.0;						 //!< [p.u.]    reactive power coming from Links
+	 double linkQ = 0.0;                                //!< [p.u.]    reactive power coming from Links
+	 double loadP = 0.0;					//!< [pu] real power coming from the loads
+	 double loadQ = 0.0;                    //!< [p.u.]  reactive  power coming from Loads
+	 double genP = 0.0;						//!< [pu] real power from the generators
+    double  genQ = 0.0;                     //!< [pu]  reactive power from the generators
+  index_t seqID=0;						//!< the sequence id of the latest state from which the powers are computed
   busPowers ()
   {
   }

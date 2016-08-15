@@ -14,6 +14,7 @@
 #include "sundialsInterface.h"
 
 #include "gridDyn.h"
+#include "simulation/gridDynSimulationFileOps.h"
 #include "sundialsArrayData.h"
 //#include "arrayDataBoost.h"
 #include "arrayDataSparseSM.h"
@@ -429,6 +430,43 @@ int kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
   return FUNCTION_EXECUTION_SUCCESS;
 
 }
+int kinsolInterface::set(const std::string &param, const std::string &val)
+{
+	int out = PARAMETER_FOUND;
+	if (param == "jacfile")
+	{
+		jacFile = val;
+	}
+	else if (param == "statefile")
+	{
+		stateFile = val;
+	}
+	if (param == "capturefile")
+	{
+		jacFile = val;
+		stateFile = val;
+	}
+	else
+	{
+		out = solverInterface::set(param, val);
+	}
+	return out;
+}
+
+
+int kinsolInterface::set(const std::string &param, double val)
+{
+	int out = PARAMETER_FOUND;
+	if (param == "filecapture")
+	{
+		fileCapture = (val >= 0.1);
+	}
+	else
+	{
+		out = solverInterface::set(param, val);
+	}
+	return out;
+}
 
 
 double kinsolInterface::get (const std::string &param) const
@@ -468,6 +506,10 @@ double kinsolInterface::get (const std::string &param) const
 
 #define SHOW_MISSING_ELEMENTS 0
 
+//#define KIN_NONE       0
+//#define KIN_LINESEARCH 1
+//#define KIN_PICARD     2
+//#define KIN_FP         3
 int kinsolInterface::solve (double tStop, double &tReturn, step_mode /*mode*/)
 {
   solveTime = tStop;
@@ -536,6 +578,7 @@ void kinsolInterface::setConstraints ()
 int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
+  sd->residCallCount++;
 #if MEASURE_TIMINGS > 0
   auto start_t = std::chrono::high_resolution_clock::now ();
 
@@ -544,6 +587,7 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
   std::chrono::duration<double> elapsed_t = stop_t - start_t;
   sd->residTime += elapsed_t.count ();
 #else
+ 
   int ret = sd->m_gds->residualFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, NVECTOR_DATA (sd->use_omp, f), sd->mode);
 #endif
   if (sd->printResid)
@@ -559,7 +603,14 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
       printf ("---------------------------------\n");
 
     }
-
+  if (sd->fileCapture)
+  {
+	  if (!sd->stateFile.empty())
+	  {
+		  writeVector(sd->solveTime, 0, sd->residCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, u), sd->stateFile, (sd->residCallCount != 1));
+		  writeVector(sd->solveTime, 2, sd->residCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, f), sd->stateFile);
+	  }
+  }
   return ret;
 }
 
@@ -620,6 +671,15 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
       sd->jacCallCount++;
       arrayDataToSlsMat (a1.get (), J,sd->svsize);
       sd->nnz = a1->size ();
+	  if (sd->fileCapture)
+	  {
+		  if (!sd->jacFile.empty())
+		  {
+			  long int val = 0;
+			  KINGetNumNonlinSolvIters(sd->solverMem, &val);
+			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, a1.get(), sd->jacFile);
+		  }
+	  }
     }
   else
     {
@@ -627,6 +687,15 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
       arrayDataSundialsSparse a1 (J);
       sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, &a1, 0, sd->mode);
       sd->jacCallCount++;
+	  if (sd->fileCapture)
+	  {
+		  if (!sd->jacFile.empty())
+		  {
+			  long int val = 0;
+			  KINGetNumNonlinSolvIters(sd->solverMem, &val);
+			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, &a1, sd->jacFile);
+		  }
+	  }
     }
   // for (kk = 0; kk<a1->points(); ++kk) {
   //   printf("kk: %d  J->data[kk]: %f  J->rowvals[kk]: %d \n ", kk, J->data[kk], J->rowvals[kk]);

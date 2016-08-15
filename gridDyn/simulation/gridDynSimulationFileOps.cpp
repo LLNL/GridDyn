@@ -740,6 +740,7 @@ void saveStateXML (gridDynSimulation *, const std::string & /*fname*/, const sol
 }
 
 
+
 void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const solverMode &iMode, bool append)
 {
 
@@ -753,44 +754,84 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const so
   double *statedata = sd->state_data ();
   auto dsize = sd->size ();
 
-  std::ofstream  bFile;
+  std::uint32_t index = gds->getInt("residcount");
   if (fname.empty ())
     {
       auto stateFile = gds->getString ("statefile");
-      if (append)
+	  auto s=writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, stateFile,append);
+	  if ((s == FUNCTION_EXECUTION_SUCCESS)&&(hasDifferential(iMode)))
         {
-          bFile.open (stateFile.c_str (), std::ios::out | std::ios::binary | std::ios::app);
+		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), stateFile);
+	  }
+	  
         }
       else
         {
-          bFile.open (stateFile.c_str (), std::ios::out | std::ios::binary);
+	  auto s = writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, fname, append);
+	  if ((s == FUNCTION_EXECUTION_SUCCESS) && (hasDifferential(iMode)))
+	  {
+		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), fname);
         }
-    }
-  else
-    {
-      if (append)
-        {
-          bFile.open (fname.c_str (), std::ios::out | std::ios::binary | std::ios::app);
-        }
-      else
-        {
-          bFile.open (fname.c_str (), std::ios::out | std::ios::binary);
-        }
-    }
-  if (!bFile.is_open ())
-    {
-      gds->log (gds, GD_ERROR_PRINT, "Unable to open file for writing:" + fname);
-      return;
-    }
-  bFile.write ((char *)(&dsize),sizeof(int));
-  bFile.write ((char *)(&(sMode.offsetIndex)),sizeof(int));
-  bFile.write ((char *)statedata, sizeof(double) * dsize);
-  if (isDynamic (sMode))
-    {
-      bFile.write ((char *)(sd->deriv_data ()), sizeof(double) * dsize);
     }
 }
 
+
+int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
+    {
+	std::ofstream  bFile;
+      if (append)
+        {
+		bFile.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::app);
+        }
+      else
+        {
+		bFile.open(filename.c_str(), std::ios::out | std::ios::binary);
+        }
+	if (!bFile.is_open())
+	{
+		return (FUNCTION_EXECUTION_FAILURE);
+	}
+	code &= 0x0000FFFF; //make sure we don't change the data type
+	bFile.write((char *)(&time), sizeof(double));
+	bFile.write((char *)(&code), sizeof(std::uint32_t));
+	bFile.write((char *)(&index), sizeof(std::uint32_t));
+	bFile.write((char *)(&key), sizeof(std::uint32_t));
+	bFile.write((char *)(&numElements), sizeof(std::uint32_t));
+	bFile.write((char *)(data), sizeof(double) * numElements);
+	return FUNCTION_EXECUTION_SUCCESS;
+}
+
+int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, arrayData<double> *a1, const std::string&filename, bool append)
+{
+	std::ofstream  bFile;
+	if (append)
+	{
+		bFile.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::app);
+	}
+	else
+	{
+		bFile.open(filename.c_str(), std::ios::out | std::ios::binary);
+    }
+  if (!bFile.is_open ())
+    {
+		return FUNCTION_EXECUTION_FAILURE;
+    }
+	code &= 0x0000FFFF;
+	code |= 0x00010000;
+	bFile.write((char *)(&time), sizeof(double));
+	bFile.write((char *)(&code), sizeof(std::uint32_t));
+	bFile.write((char *)(&index), sizeof(std::uint32_t));
+	bFile.write((char *)(&key), sizeof(std::uint32_t));
+	std::uint32_t numElements = a1->size();
+	bFile.write((char *)(&numElements), sizeof(std::uint32_t));
+	a1->start();
+	for (size_t nn = 0; nn < numElements; ++nn)
+    {
+		auto el = a1->next();
+		bFile.write((char *)(&el), sizeof(data_triple<double>));
+    }
+	return FUNCTION_EXECUTION_SUCCESS;
+}
 
 void loadState (gridDynSimulation *gds, const std::string &fname, const solverMode &sMode)
 {

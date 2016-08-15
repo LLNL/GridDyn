@@ -1078,7 +1078,6 @@ int gridDynSimulation::residualFunction (double ttime, const double state[], con
   ++residCount;
   stateData sD (ttime, state,dstate_dt,residCount);
 
-
 #if (CHECK_STATE > 0)
   auto dynDataa = getSolverInterface (sMode);
   for (size_t kk = 0; kk < dynDataa->size (); ++kk)

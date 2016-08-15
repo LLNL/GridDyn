@@ -1574,12 +1574,10 @@ void gridArea::guess (double ttime, double state[], double dstate_dt[], const so
       (*cobj)->guess (ttime, state, dstate_dt, sMode);
       ++cobj;
     }
-
   //next do any internal control elements
 
 }
 
-// set algebraic and dynamic variables assume preset to differential
 void gridArea::getVariableType (double sdata[], const solverMode &sMode)
 {
 

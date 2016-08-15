@@ -150,5 +150,51 @@ void loadPowerFlowBinary (gridDynSimulation *gds, const std::string &fname);
 */
 void loadPowerFlowCSV (gridDynSimulation *gds, const std::string &fname);
 
+/** struct containing binary Data information
+*/
+struct dataInfo
+{
+	double time = 0.0;
+	std::uint32_t code = 0;
+	std::uint32_t index = 0;
+	std::uint32_t key = 0;
+	std::uint32_t numElements = 0;
+};
 
+/** @brief write a vector (state, resid, deriv, etc) to a file 
+encodes a header into the file
+time(8 bytes), code(4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
+then write data (NumElements*8 Bytes);
+
+@param[in] time the time associated with the data
+@param[in] index an indexing value associated with the data
+@param[in] code a code describing the type of information
+0 -state information
+1 -derivative information
+2 -residual information
+@param[in] key a code indicating the source of the information (typically the index of the solver data object)
+@param[in] numElements the number of elements
+@param[in] data the data to write to the file
+@param[in] filename the name of the file
+@param[in] append indicator if the file should be appended or overwritten(def true)
+@return (0) is successful  (-1) if unable to open file
+*/
+
+int writeVector(double time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
+
+/** @brief write a array to a file
+encodes a header into the file
+time(8 bytes), code(0x0001|code) for jacobian data (4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
+then write data in triplets (4byte row, 4 byte col, 8 byte double data)
+@param[in] time the time associated with the data
+@param[in] code a code describing the type of information in the array
+@param[in] index an indexing value associated with the data
+@param[in] key a code indicating the source of the information (typically the index of the solver data object)
+@param[in] a1 the jacobian data to write to the file
+@param[in] filename the name of the file
+@param[in] append indicator if the file should be appended or overwritten(def true)
+@return (0) is successful  (-1) if unable to open file
+*/
+
+int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  arrayData<double> *a1, const std::string&filename, bool append = true);
 #endif

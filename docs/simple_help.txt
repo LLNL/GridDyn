@@ -1,0 +1,81 @@
+gridDynMain Options
+allowed options:
+
+command line only:
+  --help                   produce help message
+  --config_file arg        specify a config file to use
+  --config_file_output arg file to store current config options
+  --mpicount               setup for an MPI run
+  --version                print version string
+
+configuration:
+  --powerflow-output arg  file output for the powerflow solution
+  -P [ --param ] arg      override simulation file parameters -param 
+                          ParamName=<val>
+  -D [ --dir ] arg        add search directory for input files
+  --import arg            add import files loaded after the main input file
+  --powerflow-only        set the solver to stop after the power flow solution
+  --state-output arg      file for final output state
+  --save-state-period arg save state every N ms, -1 for saving only at the end
+  --log-file arg          log file output
+  --jac-output arg        powerflow jacobian file output
+  -v [ --verbose ] arg    specify verbosity output 0=verbose,1=normal, 
+                          2=summary,3=none
+  -f [ --flags ] arg      specify flags to feed to the solver eg. flag1,flag2,flag3
+  -w [ --warn ] arg       specify warning level output 0=all, 
+                          1=important,2=none
+						  
+gridDynSimulation Flags and options
+Flags
+autoallocate : automatically adjust the power generation in a power flow solution  (distributed slack bus)
+sparse:  set the solvers to use the sparse solvers in IDA and kinsol
+threads:  (doesn't do anything yet)  turn on multithreading inside griddyn
+ignore_bus_limits:  disable reactive power limits on generators
+no_link_adjustments:  disable adjustable transformers
+dcflow_initialization:  use the dc power solution to initialize the ac power flow solution (not well tested)
+constraints_disabled:  disable all constraint handling (constraints not used yet)
+record_on_halt:  tell all recorders to capture a value on a IDA stop for any reason
+voltage_constraints:  activate voltage constraints for all voltages
+roots_disabled:  disable all root finding
+
+Parameters
+tolerance <val>  set a global relative tolerance level  (this will be updated soon)
+idaprintlevel <val>  set the print levels
+<flagname> <val>  val>0 for setting , val<0 for deactivating any of the above flags
+solution_mode <solution_type>  one of dcflow, powerflow, iteratedpowerflow, contingency, steppedp, stepped, dynamic, dynamiccontingency
+flags <comma separated flagnames>  (no spaces)  -P flags=flag1,flag2,flag3
+recorddirectory <directory>  directory to store the recorder output files
+logfile <logfilename>  file to save the logs to (not really used yet)
+statefile <statefilename>  file to save periodic complete states
+
+timestart <start time>  nominal simulation start time in seconds
+abstime <time>  absolute simulation start time (not well used)
+timestop <time>  nominal simulation stop time in seconds
+printlevel <level>  s_debug_print = 3,s_error_print = 2,s_warn_print = 1,s_no_print = 0
+timestep <time>  the size of the timestep to take for stepped or iterated pflow and other interval based solution methods
+minupdatetime <time>  the minimum resolution on updates and events
+maxupdatetime <time> the maximum timestep for ida
+recordstart <time>  the time to start the recorders
+recordstop  <time> the time to stop the recorders
+
+Outputs API
+get function
+
+gds->get(std::string param, int &val);
+haltcount  number halts
+iterationcount  number of solver iterations (pflow only)
+jacobiancount number of times the jacobian function was called
+rootcount  number of roots found
+statesize  the size of the state vector (automatically interprets mode based on last operation)
+dynstatesize  size of the DAE state vector
+pflowstatesize size of the pflow state vector
+nonzeros -the number of non-zeros in the jacobian
+dynnonzeros- the number of non zeros in the dae solution
+pflownonzeros - the number of nonzeros in the pflow solution
+residcount -- the number of times the residual function was called
+stepcount -- the number of steps taked in ida
+ recordercount --the number of recorders
+ alertcount -- the number of alerts that occurred
+ eventcount -- the number of events used in the system
+buscount, linkcount, areacount, gencount, relaycount, loadcount -- the number of the specfic object in area
+

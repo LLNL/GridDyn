@@ -121,7 +121,9 @@ public:
   void logErrorWeights (int /*logLevel*/) const override
   {
   }
-  double get (const std::string &param) const override;
+  virtual double get (const std::string &param) const override;
+  virtual int set(const std::string &param, const std::string &val) override;
+  virtual int set(const std::string &param, double val) override;
   //wrapper functions used by kinsol and ida to call the internal functions
   friend int kinsolFunc (N_Vector u, N_Vector f, void *user_data);
   friend int kinsolJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
@@ -131,7 +133,7 @@ public:
 #endif
 private:
   int jacCallCount = 0;
-  count_t maxNNZ = 0;
+  count_t maxNNZ = 0;					//!< the maximum number of non-zero elements in the jacobian
   N_Vector state = nullptr;                                                        //!< state vector
 
   N_Vector abstols = nullptr;                                                     //!< tolerance vector
@@ -139,6 +141,9 @@ private:
   N_Vector scale = nullptr;                                                                                           //!< scaling vector
   FILE *m_kinsolInfoFile;                          //!<direct file reference TODO convert to stream vs FILE *
   double solveTime = 0;                                                         //!< storage for the time the solver is called
+  bool fileCapture = false;							//!< flag indicating that the resid and jacobian should be captured to a file
+  std::string jacFile;						//!< the file to write the jacobian to 
+  std::string stateFile;					//!< the file to write the state and residual to
 #if MEASURE_TIMING > 0
   double kinTime = 0;
   double residTime = 0;

@@ -71,6 +71,7 @@ protected:
   count_t rootCount = 0;                                                                        //!< the number of root finding functions
   count_t solverCallCount = 0;                                                          //!< the number of times the solver has been called
   count_t jacCallCount = 0;                                                                     //!< the number of times the jacobian function has been called
+  count_t residCallCount = 0;											//!< the number of times the function evaluation has been called
   count_t max_iterations = 10000;                                                               //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
   double tolerance = 1e-8;                                                       //!<the default solver tolerance

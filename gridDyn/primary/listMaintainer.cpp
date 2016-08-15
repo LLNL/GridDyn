@@ -112,6 +112,7 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		{
 			return;
 		}
+		
 		for (auto &obj : partialLists[sMode.offsetIndex])
 		{
 			obj->residual(sD, resid, sMode);

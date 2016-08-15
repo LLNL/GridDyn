@@ -93,43 +93,18 @@ void arrayDataSundialsSparse::assign (index_t X, index_t Y, double num)
 
   int sti = J->colptrs[Y];
   int stp = J->colptrs[Y + 1];
-  // loc1 = 0;
-  /*	if (stp-sti>10)
-          {
-          auto b = std::lower_bound(J->rowvals + sti, J->rowvals + stp, static_cast<int>(X));
-          if (*b == static_cast<int>(X))
-          {
-                  //loc1 = b - (J->rowvals + sti);
-                  J->data[b- J->rowvals] += num;
-          }
-
-          }
-          else
-          {*/
-  int kk = sti;
   auto st = J->rowvals + sti;
-  while (kk < stp)
+  while (sti < stp)
     {
       if (*st == static_cast<int> (X))
         {
 
-          J->data[kk] += num;
+          J->data[sti] += num;
           break;
         }
       ++st;
-      ++kk;
+      ++sti;
     }
-  /*for (int kk = sti; kk < stp; ++kk)
-  {
-          if (J->rowvals[kk] == static_cast<int>(X))
-          {
-
-                  J->data[kk] += num;
-                  break;
-          }
-  }*/
-  //	}
-
 }
 
 void arrayDataSundialsSparse::setMatrix (SlsMat mat)
@@ -142,7 +117,7 @@ void arrayDataSundialsSparse::setMatrix (SlsMat mat)
 
 count_t arrayDataSundialsSparse::size () const
 {
-  return static_cast<count_t> (J->NNZ);
+  return static_cast<count_t> (J->colptrs[colLim]);
 }
 
 count_t arrayDataSundialsSparse::capacity () const
@@ -157,8 +132,31 @@ index_t arrayDataSundialsSparse::rowIndex (index_t N) const
 
 index_t arrayDataSundialsSparse::colIndex (index_t N) const
 {
-  auto res = std::lower_bound (J->colptrs, &(J->colptrs[J->M]), static_cast<int> (N));
+  auto res = std::lower_bound (J->colptrs, &(J->colptrs[colLim]), static_cast<int> (N));
   return *res - 1;
+}
+
+void arrayDataSundialsSparse::start()
+{
+	cur = 0;
+	ccol = 0;
+}
+
+data_triple<double> arrayDataSundialsSparse::next()
+{
+	data_triple<double> ret{ static_cast<index_t>(J->rowvals[cur]), ccol, J->data[cur] };
+	++cur;
+	if (static_cast<int>(cur) >= J->colptrs[ccol+1])
+	{
+		++ccol;
+		if (ccol > colLim)
+		{
+			--cur;
+			--ccol;
+		}
+	}
+	return ret;
+
 }
 
 double arrayDataSundialsSparse::val (index_t N) const
