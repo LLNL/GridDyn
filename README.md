@@ -22,9 +22,11 @@ We expect there are still many issues so any bug reports or fixes are welcome.
 Documentation
 ----------------
 
-[**Users Guide Undergoing final review for release**](docs/gridDynUsersGuide.pdf) try the presentations for some initial material
+[**Users Guide**](docs/manuals/gridDynUsersGuide.pdf)
 
-also available are a series of presentations
+** API Guide ** --coming soon
+
+Also available are a series of presentations
 	* [Intro] (docs/presentations/Griddyn_intro.pptx)
 	* [Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
 	* [Objects] (docs/presentations/GridDyn_objects.pptx)
