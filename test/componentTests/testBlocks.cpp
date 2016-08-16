@@ -359,6 +359,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
   
 }
 
+#ifdef LOAD_CVODE
 /** test the control block if they can handle differential only jacobians and algebraic only jacobians
 */
 BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
@@ -451,4 +452,5 @@ BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 
 }
 
+#endif
 BOOST_AUTO_TEST_SUITE_END()
