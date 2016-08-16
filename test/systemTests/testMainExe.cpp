@@ -18,7 +18,7 @@
 #include <iostream>
 #include <cstdlib>
 
-static const exeTestRunner mainExeRunner(GRIDDYNMAIN_LOCATION, "gridDynMain");
+static const exeTestRunner mainExeRunner(GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");
 
 static std::string pFlow_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
@@ -27,18 +27,26 @@ BOOST_AUTO_TEST_SUITE(mainexe_tests)
 
 BOOST_AUTO_TEST_CASE(mainexe_test1)
 {
-	BOOST_REQUIRE(mainExeRunner.isActive());
-
+	if (mainExeRunner.isActive())
+	{
 	auto out = mainExeRunner.runCaptureOutput("--version");
 	BOOST_CHECK(out.compare(0, 15, "GridDyn version") == 0);
+}
+	else
+	{
+		std::cout << "Unable to locate main executable:: skipping test\n";
+	}
 }
 
 //test is in development
 BOOST_AUTO_TEST_CASE(cdf_readwrite_test)
 {
+	if (mainExeRunner.isActive())
+	{
 	std::string fname = pFlow_test_directory + "test_powerflow3m9b2.xml";
 	auto out = mainExeRunner.runCaptureOutput(fname+" --powerflow-only --powerflow-output testout.cdf");
 	std::cout << out;
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()

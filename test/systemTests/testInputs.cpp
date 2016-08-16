@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(input_execTest)
 const std::map<std::string, std::array<int, 4>> executionCases{
   { std::string(MATLAB_TEST_DIRECTORY "case4gs.m"), { { 0, 4, 4, 0 } } },
  // { std::string(MATLAB_TEST_DIRECTORY "d_003.m"), { { 0, 3, 3, 0 } } },
-  { std::string(INPUT_TEST_DIRECTORY "test_mat_dyn.xml"), { { 1, 9, 9, 2 } } },
+ // { std::string(INPUT_TEST_DIRECTORY "test_mat_dyn.xml"), { { 1, 9, 9, 2 } } },
   { std::string(INPUT_TEST_DIRECTORY "test_2m4bDyn_inputchange.xml"), { { 1, 0, 0, 0 } } },
   { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic.xml"), { { 1, 39, 0, 0 } } },
 //  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic_relay.xml"), { { 1, 39, 0, 0 } } },

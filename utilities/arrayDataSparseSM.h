@@ -101,6 +101,11 @@ public:
 		//figure out how many elements should be in the first and last buckets
 		index_t extraElements = keyMax - (1 << kShift)*((1<<K)-2);
 		bias = (1 << kShift)-(extraElements>>1);
+		if (extraElements < (1u << (kShift - K)))
+		{
+			bias >>= 1;  //this just evens it out a little more
+		}
+
 	}
 private:
 	int kShift = 0;					//!< the shift factor used for column determination
@@ -334,9 +339,18 @@ public:
 
 	void start() override
 	{
-		cptr = dVec[0].begin();
-		iend = dVec[0].end();
 		ci = 0;
+		while (dVec[ci].empty())
+		{
+			++ci;
+			if (ci == (1 << K))
+			{
+				--ci;
+				break;
+			}
+		}
+		cptr = dVec[ci].begin();
+		iend = dVec[ci].end();
 	}
 
 	data_triple<Y> next() override
@@ -348,6 +362,15 @@ public:
 			++ci;
 			if (ci < (1 << K))
 			{
+				while (dVec[ci].empty())
+				{
+					++ci;
+					if (ci >= (1 << K))
+					{
+						--ci;
+						break;
+					}
+				}
 				cptr = dVec[ci].begin();
 				iend = dVec[ci].end();
 			}

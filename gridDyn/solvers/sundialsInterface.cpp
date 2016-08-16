@@ -183,6 +183,7 @@ void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
   //SlsSetToZero(J);
   int sz = static_cast<int> (ad->size ());
   ad->start ();
+  int zcnt = 0;
   for (int kk = 0; kk < sz; ++kk)
     {
       auto tp = ad->next ();
@@ -192,12 +193,16 @@ void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
           colval++;
           J->colptrs[colval] = kk;
         }
+	  if (tp.col < colval)
+	  {
+		  ++zcnt;
+	  }
       J->data[kk] = tp.data;
       J->rowvals[kk] = tp.row;
     }
   if (colval + 1 != svsize)
     {
-      printf ("svsize=%d, colval+1=%d\n", svsize, colval + 1);
+      printf ("sz=%d, svsize=%d, colval+1=%d zcnt=%d\n", sz, svsize, colval + 1,zcnt);
     }
   assert (colval + 1 == svsize);
   J->colptrs[colval + 1] = sz;

@@ -32,6 +32,17 @@ exeTestRunner::exeTestRunner(const std::string &baseLocation, const std::string 
 	active=findFileLocation(baseLocation, target);
 }
 
+exeTestRunner::exeTestRunner(const std::string &baseLocation, const std::string &baseLocation2, const std::string &target)
+{
+	++counter;
+	outFile = "exeText_" + std::to_string(counter) + ".out";
+	active = findFileLocation(baseLocation, target);
+	if (!active)
+	{
+		active= findFileLocation(baseLocation2, target);
+	}
+}
+
 bool exeTestRunner::findFileLocation(const std::string &baseLocation, const std::string &target)
 {
 	boost::filesystem::path sourcePath(baseLocation);
@@ -78,6 +89,19 @@ bool exeTestRunner::findFileLocation(const std::string &baseLocation, const std:
 		return true;
 	}
 
+	boost::filesystem::path tryPatht1 =target;
+	if (boost::filesystem::exists(tryPatht1))
+	{
+		exeString = tryPatht1.string();
+		return true;
+	}
+
+	boost::filesystem::path tryPatht2 = (target + ".exe");
+	if (boost::filesystem::exists(tryPatht2))
+	{
+		exeString = tryPatht2.string();
+		return true;
+	}
 	return false;
 }
 

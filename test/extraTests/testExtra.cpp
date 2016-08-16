@@ -13,7 +13,7 @@
 
 
 
-#if !_WIN32
+#ifndef _MSC_VER
 #define BOOST_TEST_DYN_LINK
 #endif
 
