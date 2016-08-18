@@ -61,13 +61,14 @@ just provides common functionality to sundials solverInterface objects
 class sundialsInterface : public solverInterface
 {
 protected:
-  int jacCallCount = 0;
   count_t maxNNZ = 0;
   N_Vector state = nullptr;                                                        //!< state vector
 
-  N_Vector dstate_dt = nullptr;                                                                                                 //!< dstate_dt information
+  N_Vector dstate_dt = nullptr;                                                  //!< dstate_dt information
   N_Vector abstols = nullptr;                                                     //!< tolerance vector
   N_Vector consData = nullptr;                                                     //!<constraint type Vector
+  N_Vector scale = nullptr;                                                      //!< scaling vector
+  N_Vector types = nullptr;						//!< type data
 public:
   sundialsInterface ();
   /** @brief constructor loading the solverInterface structure*
@@ -78,25 +79,22 @@ public:
   /** @brief destructor
   */
   ~sundialsInterface ();
+
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   double * state_data () override;
   double * deriv_data () override;
-  int allocate (count_t size, count_t numroots = 0) override;
-  void setMaxNonZeros (count_t size) override;
-  int initialize (double t0) override;
-  int sparseReInit (sparse_reinit_modes mode) override;
-  int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
-  void setConstraints () override;
-
-  void logSolverStats (int logLevel, bool iconly = false) const override;
-  void logErrorWeights (int /*logLevel*/) const override
-  {
-  }
+  const double * state_data() const override;
+  const double * deriv_data() const override;
+  double * type_data() override;
+  const double *type_data() const override;
+  int allocate (count_t size, count_t numroots) override;
+  void setMaxNonZeros(count_t size) override;
   double get (const std::string &param) const override;
 };
 
 /** @brief solverInterface interfacing to the sundials kinsol solver
 */
-class kinsolInterface : public solverInterface
+class kinsolInterface : public sundialsInterface
 {
 public:
   /** @brief constructor*/
@@ -109,9 +107,9 @@ public:
   /** @brief destructor
   */
   ~kinsolInterface ();
-  double * state_data () override;
+
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   int allocate (count_t size, count_t numroots = 0) override;
-  void setMaxNonZeros (count_t size) override;
   int initialize (double t0) override;
   int sparseReInit (sparse_reinit_modes mode) override;
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
@@ -132,13 +130,7 @@ public:
 
 #endif
 private:
-  int jacCallCount = 0;
-  count_t maxNNZ = 0;					//!< the maximum number of non-zero elements in the jacobian
-  N_Vector state = nullptr;                                                        //!< state vector
-
-  N_Vector abstols = nullptr;                                                     //!< tolerance vector
-  N_Vector consData = nullptr;                                                     //!<constraint type Vector
-  N_Vector scale = nullptr;                                                                                           //!< scaling vector
+  
   FILE *m_kinsolInfoFile;                          //!<direct file reference TODO convert to stream vs FILE *
   double solveTime = 0;                                                         //!< storage for the time the solver is called
   bool fileCapture = false;							//!< flag indicating that the resid and jacobian should be captured to a file
@@ -152,20 +144,13 @@ private:
 };
 /** @brief solverInterface interfacing to the sundials ida solver
 */
-class idaInterface : public solverInterface
+class idaInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                                                                           //!< array structure for holding the jacobian information
-  N_Vector state = nullptr;                                                  //!< state vector
-  N_Vector deriv = nullptr;                                                   //!< derivative vector
-  N_Vector abstols = nullptr;                                               //!< tolerance vector
-  N_Vector types = nullptr;                                                 //!< inequalities and state types
-  N_Vector consData = nullptr;                                               //!<constraint type Vector
-  N_Vector scale = nullptr;
-  N_Vector eweight = nullptr;
-  N_Vector ele = nullptr;
+  arrayDataSparse a1;                                                     //!< array structure for holding the jacobian information
+  
   std::vector<double> tempState;                                          //!<temporary holding location for a state vector
 public:
   /** @brief constructor*/
@@ -178,9 +163,7 @@ public:
   /** @brief destructor*/
   ~idaInterface ();
 
-  double * state_data () override;
-  double * deriv_data () override;
-  double * type_data () override;
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
 
   int allocate (count_t size, count_t numroots = 0) override;
   void setMaxNonZeros (count_t size) override;
@@ -211,20 +194,12 @@ protected:
 #ifdef LOAD_CVODE
 /** @brief solverInterface interfacing to the sundials cvode solver
 */
-class cvodeInterface : public solverInterface
+class cvodeInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                                                                           //!< array structure for holding the jacobian information
-  N_Vector state = nullptr;                                                        //!< state vector
-  N_Vector deriv = nullptr;                                                         //!< derivative vector
-  N_Vector abstols = nullptr;                                                     //!< tolerance vector
-  N_Vector types = nullptr;                                                       //!< inequalities and state types
-  N_Vector consData = nullptr;                                                     //!<constraint type Vector
-  N_Vector scale = nullptr;
-  N_Vector eweight = nullptr;
-  N_Vector ele = nullptr;
+  arrayDataSparse a1;                         //!< array structure for holding the jacobian information
   std::vector<double> tempState;                                                //!<temporary holding location for a state vector
   bool use_bdf = false;
   bool use_newton = false;
@@ -239,10 +214,7 @@ public:
   /** @brief destructor*/
   ~cvodeInterface ();
 
-  double * state_data () override;
-  double * deriv_data () override;
-  double * type_data () override;
-
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   int allocate (count_t size, count_t numroots = 0) override;
   int initialize (double t0) override;
   void setMaxNonZeros (count_t size) override;
@@ -274,20 +246,13 @@ protected:
 
 /** @brief solverInterface interfacing to the sundials arkode solver
 */
-class arkodeInterface : public solverInterface
+class arkodeInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
   arrayDataSparse a1;                                                                                                           //!< array structure for holding the jacobian information
-  N_Vector state = nullptr;                                                              //!< state vector
-  N_Vector deriv = nullptr;                                                               //!< derivative vector
-  N_Vector abstols = nullptr;                                                           //!< tolerance vector
-  N_Vector types = nullptr;                                                             //!< inequalities and state types
-  N_Vector consData = nullptr;                                                           //!<constraint type Vector
-  N_Vector scale = nullptr;
-  N_Vector eweight = nullptr;
-  N_Vector ele = nullptr;
+ 
   std::vector<double> tempState;                                                      //!<temporary holding location for a state vector
   bool use_bdf = false;
   bool use_newton = false;
@@ -301,10 +266,8 @@ public:
   arkodeInterface (gridDynSimulation *gds, const solverMode& sMode);
   /** @brief destructor*/
   ~arkodeInterface ();
-  double * state_data () override;
-  double * deriv_data () override;
-  double * type_data () override;
 
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   int allocate (count_t size, count_t numroots = 0) override;
   int initialize (double t0) override;
   void setMaxNonZeros (count_t size) override;

@@ -16,6 +16,7 @@
 #include "gridDyn.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
+#include "core/helperTemplates.h"
 
 #include <cvode/cvode.h>
 #include <cvode/cvode_dense.h>
@@ -46,7 +47,7 @@ cvodeInterface::cvodeInterface ()
 
 }
 
-cvodeInterface::cvodeInterface (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
+cvodeInterface::cvodeInterface (gridDynSimulation *gds, const solverMode& sMode) : sundialsInterface (gds, sMode)
 {
 }
 
@@ -56,116 +57,34 @@ cvodeInterface::~cvodeInterface ()
   // clear variables for CVode to use
   if (initialized)
     {
-      NVECTOR_DESTROY (use_omp,state);
-      NVECTOR_DESTROY (use_omp,abstols);
-      NVECTOR_DESTROY (use_omp,scale);
-      NVECTOR_DESTROY (use_omp, types);
-      NVECTOR_DESTROY (use_omp, consData);
-      NVECTOR_DESTROY (use_omp, deriv);
-      NVECTOR_DESTROY (use_omp, eweight);
-      NVECTOR_DESTROY (use_omp, ele);
       CVodeFree (&solverMem);
     }
 }
 
+std::shared_ptr<solverInterface> cvodeInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBaseStack<cvodeInterface, sundialsInterface, solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
 
-int cvodeInterface::allocate (count_t size, count_t numRoots)
+	rp->use_bdf = use_bdf;
+	rp->use_newton = use_newton;
+	return rp;
+}
+
+int cvodeInterface::allocate (count_t stateCount, count_t numRoots)
 {
   // load the vectors
-  if (size == svsize)
+  if (stateCount == svsize)
     {
       return 0;
     }
   initialized = false;
-  if (state)
-    {
-      NVECTOR_DESTROY (use_omp,state);
-    }
+  a1.setRowLimit (stateCount);
+  a1.setColLimit (stateCount);
 
-  state = NVECTOR_NEW (use_omp,size);
-  if (check_flag ((void *)state, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (scale)
-    {
-      NVECTOR_DESTROY (use_omp,scale);
-    }
-  scale = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)scale, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, scale);
-
-  if (types)
-    {
-      NVECTOR_DESTROY (use_omp,types);
-    }
-  types = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)types, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, types);
-
-
-
-  if (abstols)
-    {
-      NVECTOR_DESTROY (use_omp, abstols);
-    }
-  abstols = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)abstols, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (consData)
-    {
-      NVECTOR_DESTROY (use_omp, consData);
-    }
-  consData = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)consData, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  svsize = size;
-  a1.setRowLimit (size);
-  a1.setColLimit (size);
-
-  if (deriv)
-    {
-      NVECTOR_DESTROY (use_omp, deriv);
-    }
-  deriv = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)deriv, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ZERO, deriv);
-
-  if (eweight)
-    {
-      NVECTOR_DESTROY (use_omp, eweight);
-    }
-  eweight = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)eweight, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (ele)
-    {
-      NVECTOR_DESTROY (use_omp, ele);
-    }
-  ele = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)ele, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
   //update the rootCount
   rootCount = numRoots;
   rootsfound.resize (numRoots);
@@ -181,33 +100,18 @@ int cvodeInterface::allocate (count_t size, count_t numRoots)
       return(1);
     }
 
+  return sundialsInterface::allocate(stateCount, numRoots);
 
-
-  allocated = true;
-
-  return 0;
 }
 
 
-void cvodeInterface::setMaxNonZeros (count_t size)
+void cvodeInterface::setMaxNonZeros (count_t nonZeroCount)
 {
-  a1.reserve (size);
+	maxNNZ = nonZeroCount;
+  a1.reserve (nonZeroCount);
   a1.clear ();
 }
 
-
-double * cvodeInterface::state_data ()
-{
-  return NVECTOR_DATA (use_omp, state);
-}
-double * cvodeInterface::deriv_data ()
-{
-  return NVECTOR_DATA (use_omp, deriv);
-}
-double * cvodeInterface::type_data ()
-{
-  return NVECTOR_DATA (use_omp, types);
-}
 
 int cvodeInterface::set (const std::string &param, const std::string &val)
 {
@@ -268,10 +172,6 @@ double cvodeInterface::get (const std::string &param) const
     {
       //	CVodeGetNumResEvals(solverMem, &val);
     }
-  else if (param == "solvercount")
-    {
-      val = solverCallCount;
-    }
   else if (param == "iccount")
     {
       val = icCount;
@@ -286,7 +186,7 @@ double cvodeInterface::get (const std::string &param) const
     }
   else
     {
-      //CVodeDlsGetNumJacEvals(solverMem, &val);
+	  return sundialsInterface::get(param);
     }
 
   return static_cast<double> (val);
@@ -301,13 +201,12 @@ void cvodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
       return;
     }
   long int nni = 0;
-  int retval, klast, kcur;
+  int klast, kcur;
   long int nst, nre, netf, ncfn, nge;
   realtype tolsfac, hlast, hcur;
 
-  std::string logstr = "";
 
-  retval = CVodeGetNumRhsEvals (solverMem, &nre);
+  int retval = CVodeGetNumRhsEvals (solverMem, &nre);
   check_flag (&retval, "CVodeGetNumRhsEvals", 1);
   retval = CVodeGetNumNonlinSolvIters (solverMem, &nni);
   check_flag (&retval, "CVodeGetNumNonlinSolvIters", 1);
@@ -327,7 +226,7 @@ void cvodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
   CVodeGetLastStep (solverMem, &hlast);
   CVodeGetTolScaleFactor (solverMem, &tolsfac);
 
-  logstr = "CVode Run Statistics: \n";
+  std::string logstr = "CVode Run Statistics: \n";
 
   logstr += "Number of steps                    = " + std::to_string (nst) + '\n';
   logstr += "Number of residual evaluations     = " + std::to_string (nre) + '\n';
@@ -356,10 +255,11 @@ void cvodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
 
 void cvodeInterface::logErrorWeights (int logLevel) const
 {
-  realtype *eldata, *ewdata;
 
-  eldata = NVECTOR_DATA (use_omp,ele);
-  ewdata = NVECTOR_DATA (use_omp,eweight);
+	N_Vector eweight = NVECTOR_NEW(use_omp, svsize);
+	N_Vector ele = NVECTOR_NEW(use_omp, svsize);
+  realtype *eldata = NVECTOR_DATA (use_omp,ele);
+  realtype *ewdata = NVECTOR_DATA (use_omp,eweight);
   int retval = CVodeGetErrWeights (solverMem, eweight);
   check_flag (&retval, "CVodeGetErrWeights", 1);
   retval = CVodeGetEstLocalErrors (solverMem, ele);
@@ -378,6 +278,8 @@ void cvodeInterface::logErrorWeights (int logLevel) const
     {
       printf ("\n%s", logstr.c_str ());
     }
+  NVECTOR_DESTROY(use_omp, eweight);
+  NVECTOR_DESTROY(use_omp, ele);
 }
 
 
@@ -464,7 +366,7 @@ int cvodeInterface::initialize (double t0)
     }
 
   //guess an initial condition
-  m_gds->guess (t0, NVECTOR_DATA (use_omp,state), NVECTOR_DATA (use_omp,deriv), mode);
+  m_gds->guess (t0, state_data(), deriv_data(), mode);
 
   retval = CVodeInit (solverMem, cvodeFunc, t0, state);
   if (check_flag (&retval, "CVodeInit", 1))
@@ -685,23 +587,18 @@ int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_da
 
 int cvodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_data)
 {
-  cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
-  stateData sD;
-  sD.time = ttime;
-  sD.state = NVECTOR_DATA (sd->use_omp, state);
-  sD.dstate_dt = NVECTOR_DATA (sd->use_omp, sd->deriv);
-  sd->m_gds->rootTest (&sD, gout, sd->mode);
+	cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
+	sd->m_gds->rootFindingFunction(ttime, NVECTOR_DATA(sd->use_omp, state), sd->deriv_data(), gout, sd->mode);
 
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
 #define CHECK_JACOBIAN 0
-int cvodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
+int cvodeJacDense (long int /*Neq*/, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
 {
   index_t kk;
   cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
 
-  assert (Neq == static_cast<int> (sd->svsize));
   arrayDataSparse *a1 = &(sd->a1);
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt),a1, 0, sd->mode);
 

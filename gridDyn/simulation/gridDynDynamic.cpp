@@ -43,15 +43,23 @@ int gridDynSimulation::dynInitialize (double tStart)
     {
       offsets.unload (true);
     }
-  const solverMode &sm = (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned) ? *defDynDiffMode : *defDAEMode;
+  const solverMode &tempSm = (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned) ? *defDynDiffMode : *defDAEMode;
 
-  int retval = makeReady (gridState_t::POWERFLOW_COMPLETE,sm);
+  int retval = makeReady (gridState_t::POWERFLOW_COMPLETE,tempSm);
   if (retval != FUNCTION_EXECUTION_SUCCESS)
     {
       return retval;
     }
-  auto dynData = getSolverInterface (sm);
-
+  auto dynData = getSolverInterface (tempSm);
+  const solverMode &sm = dynData->getSolverMode();
+  if (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned)
+  {
+	  defDynDiffMode = &sm;
+  }
+  else
+  {
+	  defDAEMode = &sm;
+  }
 
   if (tStart < startTime)
     {
@@ -173,7 +181,7 @@ void gridDynSimulation::setupDynamicDAE ()
 {
   if (defDAEMode == nullptr)
     {
-      setDefaultMode (solution_modes_t::algebraic_mode, getSolverMode ("dae"));
+      setDefaultMode (solution_modes_t::dae_mode, getSolverMode ("dae"));
       updateSolver (*defDAEMode);
     }
   const solverMode &sMode = *defDAEMode;
@@ -202,6 +210,7 @@ int gridDynSimulation::dynamicDAEStartupConditions (std::shared_ptr<solverInterf
     {
       // do mode 0 IC calculation
       guess (timeCurr, dynData->state_data (), dynData->deriv_data (), sMode);
+	
       retval = dynData->calcIC (timeCurr, probeStepTime, solverInterface::ic_modes::fixed_masked_and_deriv, false);
       if (retval)
         {
@@ -1085,6 +1094,7 @@ int gridDynSimulation::residualFunction (double ttime, const double state[], con
       if (!std::isfinite (state[kk]))
         {
           LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
+		  printStateNames(this,sMode);
           return FUNCTION_EXECUTION_FAILURE;
         }
     }

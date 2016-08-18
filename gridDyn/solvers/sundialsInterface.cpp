@@ -12,7 +12,7 @@
 */
 
 #include "sundialsInterface.h"
-
+#include "core/helperTemplates.h"
 #include <cstdio>
 #include <cassert>
 
@@ -40,15 +40,39 @@ sundialsInterface::~sundialsInterface ()
   // clear variables for IDA to use
   if (initialized)
     {
+	NVECTOR_DESTROY(use_omp, state);
+	  if (dstate_dt)
+	  {
+		  NVECTOR_DESTROY(use_omp, dstate_dt);
+	  }
 
-      NVECTOR_DESTROY (use_omp, state);
-      NVECTOR_DESTROY (use_omp, dstate_dt);
-      NVECTOR_DESTROY (use_omp, abstols);
-      NVECTOR_DESTROY (use_omp, consData);
+     NVECTOR_DESTROY(use_omp, abstols);
+     NVECTOR_DESTROY(use_omp, consData);
+
+      
 
     }
 }
 
+std::shared_ptr<solverInterface> sundialsInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBase<sundialsInterface, solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
+	rp->maxNNZ = maxNNZ;
+	if ((fullCopy)&&(allocated))
+	{
+		auto tols = NVECTOR_DATA(use_omp, abstols);
+		std::copy(tols, tols + svsize, NVECTOR_DATA(use_omp, rp->abstols));
+		auto cons = NVECTOR_DATA(use_omp, consData);
+		std::copy(cons, cons + svsize, NVECTOR_DATA(use_omp, rp->consData));
+		auto sc = NVECTOR_DATA(use_omp, scale);
+		std::copy(sc, sc + svsize, NVECTOR_DATA(use_omp, rp->scale));
+	}
+	return rp;
+}
 
 int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
 {
@@ -67,7 +91,19 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
     {
       return FUNCTION_EXECUTION_FAILURE;
     }
-
+  if (hasDifferential(mode))
+  {
+	  if (dstate_dt)
+	  {
+		  NVECTOR_DESTROY(use_omp, dstate_dt);
+	  }
+	  dstate_dt = NVECTOR_NEW(use_omp, stateCount);
+	  if (check_flag((void *)dstate_dt, "NVECTOR_NEW", 0))
+	  {
+		  return FUNCTION_EXECUTION_FAILURE;
+	  }
+	  N_VConst(ZERO, dstate_dt);
+  }
   if (abstols)
     {
       NVECTOR_DESTROY (use_omp, abstols);
@@ -88,6 +124,32 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
       return FUNCTION_EXECUTION_FAILURE;
     }
 
+  if (scale)
+  {
+	  NVECTOR_DESTROY(use_omp, scale);
+  }
+  scale = NVECTOR_NEW(use_omp, stateCount);
+  if (check_flag((void *)scale, "NVECTOR_NEW", 0))
+  {
+	  return FUNCTION_EXECUTION_FAILURE;
+  }
+  N_VConst(ONE, scale);
+
+  if (isDAE(mode))
+  {
+	  if (types)
+	  {
+		  NVECTOR_DESTROY(use_omp, types);
+	  }
+	  types = NVECTOR_NEW(use_omp, stateCount);
+	  if (check_flag((void *)types, "NVECTOR_NEW", 0))
+	  {
+		  return(1);
+	  }
+	  N_VConst(ONE, types);
+  }
+  
+  
   svsize = stateCount;
 
   allocated = true;
@@ -104,58 +166,46 @@ void sundialsInterface::setMaxNonZeros (count_t nonZeroCount)
 
 double * sundialsInterface::state_data ()
 {
-  return NVECTOR_DATA (use_omp, state);
+  return (state)?NVECTOR_DATA (use_omp, state):nullptr;
 }
 
 double * sundialsInterface::deriv_data ()
 {
-  return NVECTOR_DATA (use_omp, dstate_dt);
+	return (dstate_dt) ? NVECTOR_DATA(use_omp, dstate_dt) : nullptr;
 }
 
+const double * sundialsInterface::state_data() const
+{
+	return (state)?NVECTOR_DATA(use_omp, state):nullptr;
+}
+
+const double * sundialsInterface::deriv_data() const
+{
+	return (dstate_dt) ? NVECTOR_DATA(use_omp, dstate_dt) : nullptr;
+}
 // output solver stats
-void sundialsInterface::logSolverStats (int /*logLevel*/, bool /*iconly*/) const
-{
 
+double * sundialsInterface::type_data()
+{
+	return (types) ? NVECTOR_DATA(use_omp, types) : nullptr;
 }
 
-
-
-int sundialsInterface::initialize (double /*t0*/)
+const double * sundialsInterface::type_data() const
 {
-  return FUNCTION_EXECUTION_FAILURE;
+	return (types) ? NVECTOR_DATA(use_omp, types) : nullptr;
 }
-
-
-int sundialsInterface::sparseReInit (sparse_reinit_modes /*sparseReinitMode*/)
-{
-  return FUNCTION_EXECUTION_FAILURE;
-}
-
 
 double sundialsInterface::get (const std::string &param) const
 {
-  long int val = -1;
-  if (param == "solvercount")
+
+  if (param == "maxnnz")
     {
-      val = solverCallCount;
+	  return static_cast<double>(maxNNZ);
     }
-  else if (param == "jaccallcount")
-    {
-      val = jacCallCount;
-    }
-
-  return static_cast<double> (val);
-}
-
-void sundialsInterface::setConstraints ()
-{
-
-}
-
-
-int sundialsInterface::solve (double /*tStop*/, double & /*tReturn*/, step_mode /*mode*/)
-{
-  return FUNCTION_EXECUTION_FAILURE;
+  else
+  {
+	  return solverInterface::get(param);
+  }
 }
 
 
@@ -183,7 +233,6 @@ void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
   //SlsSetToZero(J);
   int sz = static_cast<int> (ad->size ());
   ad->start ();
-  int zcnt = 0;
   for (int kk = 0; kk < sz; ++kk)
     {
       auto tp = ad->next ();
@@ -193,16 +242,13 @@ void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
           colval++;
           J->colptrs[colval] = kk;
         }
-	  if (tp.col < colval)
-	  {
-		  ++zcnt;
-	  }
+	
       J->data[kk] = tp.data;
       J->rowvals[kk] = tp.row;
     }
   if (colval + 1 != svsize)
     {
-      printf ("sz=%d, svsize=%d, colval+1=%d zcnt=%d\n", sz, svsize, colval + 1,zcnt);
+      printf ("sz=%d, svsize=%d, colval+1=%d\n", sz, svsize, colval + 1);
     }
   assert (colval + 1 == svsize);
   J->colptrs[colval + 1] = sz;

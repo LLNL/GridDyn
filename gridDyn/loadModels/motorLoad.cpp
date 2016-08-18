@@ -291,7 +291,7 @@ void motorLoad::setState (double ttime, const double state[], const double dstat
       m_state[0] = state[offset];
       m_dstate_dt[0] = dstate_dt[offset];
     }
-  else if (!opFlags.test (init_transient))
+  else if (!opFlags[init_transient])
     {
       auto offset = offsets.getAlgOffset (sMode);
       m_state[0] = state[offset];
@@ -303,14 +303,12 @@ void motorLoad::guess (double /*ttime*/, double state[], double dstate_dt[], con
 {
   if (isDynamic (sMode))
     {
-      if (isAlgebraicOnly (sMode))
-        {
-          return;
-        }
-
-      auto offset = offsets.getDiffOffset (sMode);
-      state[offset] = m_state[0];
-      dstate_dt[0] = m_dstate_dt[0];
+	  if (hasDifferential(sMode))
+	  {
+		  auto offset = offsets.getDiffOffset(sMode);
+		  state[offset] = m_state[0];
+		  dstate_dt[offset] = m_dstate_dt[0];
+	  }
     }
   else if (!opFlags[init_transient])
     {
@@ -324,14 +322,12 @@ void motorLoad::residual (const IOdata &args, const stateData *sD, double resid[
 {
   if (isDynamic (sMode))
     {
-      if (isAlgebraicOnly (sMode))
-        {
-          return;
-        }
-
-      auto offset = offsets.getDiffOffset (sMode);
-      derivative (args, sD, resid, sMode);
-      resid[offset] -= sD->dstate_dt[offset];
+	  if (hasDifferential(sMode))
+	  {
+		  derivative(args, sD, resid, sMode);
+		  auto offset = offsets.getDiffOffset(sMode);
+		  resid[offset] -= sD->dstate_dt[offset];
+	  }
     }
   else if (!opFlags[init_transient])
     {
@@ -389,26 +385,24 @@ void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, array
 {
   if  (isDynamic (sMode))
     {
-      if (isAlgebraicOnly (sMode))
-        {
-          return;
-        }
-
-      auto offset = offsets.getDiffOffset (sMode);
-      double slip = sD->state[offset];
-      double V = args[voltageInLocation];
-      if (opFlags[stalled])
-        {
-          ad->assign (offset, offset, -sD->cj);
-        }
-      else
-        {
-          ad->assignCheck (offset, argLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
-          //this is a really ugly looking derivative so I am computing it numerically
-          double test1 = 0.5 / H * (mechPower (slip) - rPower (V, slip));
-          double test2 = 0.5 / H * (mechPower (slip + cSmallDiff) - rPower (V * Vcontrol, slip + cSmallDiff));
-          ad->assign (offset, offset, (test2 - test1) / cSmallDiff - sD->cj);
-        }
+	  if (hasDifferential(sMode))
+	  {
+		  auto offset = offsets.getDiffOffset(sMode);
+		  double slip = sD->state[offset];
+		  double V = args[voltageInLocation];
+		  if (opFlags[stalled])
+		  {
+			  ad->assign(offset, offset, -sD->cj);
+		  }
+		  else
+		  {
+			  ad->assignCheck(offset, argLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
+			  //this is a really ugly looking derivative so I am computing it numerically
+			  double test1 = 0.5 / H * (mechPower(slip) - rPower(V, slip));
+			  double test2 = 0.5 / H * (mechPower(slip + cSmallDiff) - rPower(V * Vcontrol, slip + cSmallDiff));
+			  ad->assign(offset, offset, (test2 - test1) / cSmallDiff - sD->cj);
+		  }
+	  }
     }
   else if (!opFlags[init_transient])
     {
@@ -507,7 +501,7 @@ void motorLoad::rootTrigger (double /*ttime*/, const IOdata &args, const std::ve
     {
       return;
     }
-  if (opFlags.test (stalled))
+  if (opFlags[stalled])
     {
       if (args[voltageInLocation] > 0.5)
         {
@@ -638,25 +632,16 @@ double motorLoad::dmechds (double slip) const
 
 double motorLoad::computeSlip (double Ptarget) const
 {
-  double out1,out2;
   if (gamma == 0)
     {
-      if (beta == 0)
-        {
-          out1 = 0.05;
-        }
-      else
-        {
-          out1 = (Ptarget - alpha) / beta;
-        }
-      return out1;
+	  return (beta == 0) ? 0.05 : (Ptarget - alpha) / beta;
     }
   else
     {
-      out1 = (-beta + std::sqrt (beta * beta - 4 * gamma * (alpha - Ptarget))) / (2 * gamma);
-      out2 = (-beta - std::sqrt (beta * beta - 4 * gamma * (alpha - Ptarget))) / (2 * gamma);
+      double out1 = (-beta + std::sqrt (beta * beta - 4.0 * gamma * (alpha - Ptarget))) / (2.0 * gamma);
+      double out2 = (-beta - std::sqrt (beta * beta - 4.0 * gamma * (alpha - Ptarget))) / (2.0 * gamma);
 
-      if ((out1 >= 0)&&(out1 <= 1))
+      if ((out1 >= 0)&&(out1 <= 1.0))
         {
           return out1;
         }

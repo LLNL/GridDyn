@@ -66,12 +66,12 @@ protected:
   std::string name;       //!< the text name of the object
   index_t id;              //!< a user defined id for the object
   gridCoreObject *parent = nullptr;      //!< a pointer to the parent object
-  double prevTime = -kBigNum;       //!< the last state time of the object
-  double updatePeriod = kBigNum;      //!<the update period
-  double nextUpdateTime = kBigNum;     //!< the next scheduled update
-  double m_lastUpdateTime = -kBigNum;      //!< the last update time
-  double m_bDelay  = -1.0;         //!< the requested delay between updateA and updateB--requested is key here not guaranteed
-  double systemBasePower = 100.0;        //!< the base power of the object
+  double prevTime = -kBigNum;       //!<[s]the last state time of the object
+  double updatePeriod = kBigNum;      //!<[s]the update period
+  double nextUpdateTime = kBigNum;     //!<[s] the next scheduled update
+  double m_lastUpdateTime = -kBigNum;      //!<[s] the last update time
+  double m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
+  double systemBasePower = 100.0;        //!<[MW] the base power of the object
 
 
   std::shared_ptr<gridPositionInfo> pos;  //!< pointer to as of yet undefined position infomation stucture.

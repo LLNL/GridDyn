@@ -19,7 +19,7 @@
 #include <ida/ida.h>
 #include <ida/ida_dense.h>
 #include <sundials/sundials_math.h>
-
+#include "core/helperTemplates.h"
 
 #ifdef KLU_ENABLE
 #include <ida/ida_klu.h>
@@ -46,7 +46,7 @@ idaInterface::idaInterface ()
 
 }
 
-idaInterface::idaInterface (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
+idaInterface::idaInterface (gridDynSimulation *gds, const solverMode& sMode) : sundialsInterface (gds, sMode)
 {
 }
 idaInterface::~idaInterface ()
@@ -54,116 +54,33 @@ idaInterface::~idaInterface ()
   // clear variables for IDA to use
   if (initialized)
     {
-      NVECTOR_DESTROY (use_omp, state);
-      NVECTOR_DESTROY (use_omp, abstols);
-      NVECTOR_DESTROY (use_omp, scale);
-      NVECTOR_DESTROY (use_omp, types);
-      NVECTOR_DESTROY (use_omp, consData);
-      NVECTOR_DESTROY (use_omp, deriv);
-      NVECTOR_DESTROY (use_omp, eweight);
-      NVECTOR_DESTROY (use_omp, ele);
       IDAFree (&solverMem);
     }
 }
 
+std::shared_ptr<solverInterface> idaInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBaseStack<idaInterface, sundialsInterface, solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
+
+	return rp;
+}
 
 int idaInterface::allocate (count_t stateCount, count_t numRoots)
 {
   // load the vectors
   if (stateCount == svsize)
     {
-      return 0;
+      return FUNCTION_EXECUTION_SUCCESS;
     }
   initialized = false;
-  if (state)
-    {
-      NVECTOR_DESTROY (use_omp, state);
-    }
-
-  state = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)state, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (scale)
-    {
-      NVECTOR_DESTROY (use_omp, scale);
-    }
-  scale = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)scale, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, scale);
-
-  if (types)
-    {
-      NVECTOR_DESTROY (use_omp, types);
-    }
-  types = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)types, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, types);
-
-
-
-  if (abstols)
-    {
-      NVECTOR_DESTROY (use_omp, abstols);
-    }
-  abstols = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)abstols, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (consData)
-    {
-      NVECTOR_DESTROY (use_omp, consData);
-    }
-  consData = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)consData, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  svsize = stateCount;
+  
   a1.setRowLimit (stateCount);
   a1.setColLimit (stateCount);
 
-  if (deriv)
-    {
-      NVECTOR_DESTROY (use_omp, deriv);
-    }
-  deriv = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)deriv, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ZERO, deriv);
-
-  if (eweight)
-    {
-      NVECTOR_DESTROY (use_omp, eweight);
-    }
-  eweight = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)eweight, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (ele)
-    {
-      NVECTOR_DESTROY (use_omp, ele);
-    }
-  ele = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)ele, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
   //update the rootCount
   rootCount = numRoots;
   rootsfound.resize (numRoots);
@@ -179,32 +96,18 @@ int idaInterface::allocate (count_t stateCount, count_t numRoots)
       return(1);
     }
 
-
-
-  allocated = true;
-
-  return 0;
+  return sundialsInterface::allocate(stateCount, numRoots);
 }
 
 void idaInterface::setMaxNonZeros (count_t nonZeroCount)
 {
+	maxNNZ = nonZeroCount;
   a1.reserve (nonZeroCount);
   a1.clear ();
 }
 
 
-double * idaInterface::state_data ()
-{
-  return NVECTOR_DATA (use_omp, state);
-}
-double * idaInterface::deriv_data ()
-{
-  return NVECTOR_DATA (use_omp, deriv);
-}
-double * idaInterface::type_data ()
-{
-  return NVECTOR_DATA (use_omp, types);
-}
+
 
 double idaInterface::get (const std::string &param) const
 {
@@ -212,10 +115,6 @@ double idaInterface::get (const std::string &param) const
   if ((param == "resevals")||(param == "iterationcount"))
     {
       IDAGetNumResEvals (solverMem, &val);
-    }
-  else if (param == "solvercount")
-    {
-      val = solverCallCount;
     }
   else if (param == "iccount")
     {
@@ -231,7 +130,7 @@ double idaInterface::get (const std::string &param) const
     }
   else
     {
-      IDADlsGetNumJacEvals (solverMem, &val);
+      return sundialsInterface::get(param);
     }
 
   return static_cast<double> (val);
@@ -246,13 +145,13 @@ void idaInterface::logSolverStats (int logLevel, bool iconly) const
       return;
     }
   long int nni = 0, nje = 0;
-  int retval, klast, kcur;
+  int  klast, kcur;
   long int nst, nre, nreLS, netf, ncfn, nge;
   realtype tolsfac, hlast, hcur;
 
   std::string logstr = "";
 
-  retval = IDAGetNumResEvals (solverMem, &nre);
+  int retval = IDAGetNumResEvals (solverMem, &nre);
   check_flag (&retval, "IDAGetNumResEvals", 1);
   retval = IDADlsGetNumJacEvals (solverMem, &nje);
   check_flag (&retval, "IDADlsGetNumJacEvals", 1);
@@ -313,10 +212,12 @@ void idaInterface::logSolverStats (int logLevel, bool iconly) const
 
 void idaInterface::logErrorWeights (int logLevel) const
 {
-  realtype *eldata, *ewdata;
 
-  eldata = NVECTOR_DATA (use_omp, ele);
-  ewdata = NVECTOR_DATA (use_omp, eweight);
+  N_Vector eweight = NVECTOR_NEW (use_omp, svsize);
+  N_Vector ele = NVECTOR_NEW(use_omp, svsize);
+
+  realtype *eldata = NVECTOR_DATA (use_omp, ele);
+  realtype *ewdata = NVECTOR_DATA (use_omp, eweight);
   IDAGetErrWeights (solverMem, eweight);
   IDAGetEstLocalErrors (solverMem, ele);
   std::string logstr = "Error Weight\tEstimated Local Errors\n";
@@ -333,6 +234,8 @@ void idaInterface::logErrorWeights (int logLevel) const
     {
       printf ("\n%s", logstr.c_str ());
     }
+  NVECTOR_DESTROY(use_omp, eweight);
+  NVECTOR_DESTROY(use_omp, ele);
 }
 
 
@@ -427,9 +330,9 @@ int idaInterface::initialize (double t0)
     }
 
   //guess an initial condition
-  m_gds->guess (t0, NVECTOR_DATA (use_omp, state), NVECTOR_DATA (use_omp, deriv),mode);
+  m_gds->guess (t0, state_data(), deriv_data(),mode);
 
-  retval = IDAInit (solverMem, idaFunc, t0, state, deriv);
+  retval = IDAInit (solverMem, idaFunc, t0, state, dstate_dt);
   if (check_flag (&retval, "IDAInit", 1))
     {
       return(1);
@@ -646,7 +549,7 @@ int idaInterface::calcIC (double t0, double tstep0, ic_modes initCondMode, bool 
     }
   else if (initCondMode == ic_modes::fixed_diff)
     {
-      retval = IDAReInit (solverMem, t0, state, deriv);
+      retval = IDAReInit (solverMem, t0, state, dstate_dt);
 
       if (check_flag (&retval, "IDAReInit", 1))
         {
@@ -687,7 +590,7 @@ int idaInterface::calcIC (double t0, double tstep0, ic_modes initCondMode, bool 
 
 int idaInterface::getCurrentData ()
 {
-  int retval = IDAGetConsistentIC (solverMem, state, deriv);
+  int retval = IDAGetConsistentIC (solverMem, state, dstate_dt);
   if (check_flag (&retval, "IDAGetConsistentIC", 1))
     {
       return(retval);
@@ -700,7 +603,7 @@ int idaInterface::solve (double tStop, double &tReturn, step_mode stepMode)
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
   icCount = 0;
-  int retval = IDASolve (solverMem, tStop, &tReturn, state, deriv, (stepMode == step_mode::normal) ? IDA_NORMAL : IDA_ONE_STEP);
+  int retval = IDASolve (solverMem, tStop, &tReturn, state, dstate_dt, (stepMode == step_mode::normal) ? IDA_NORMAL : IDA_ONE_STEP);
   check_flag (&retval, "IDASolve", 1, false);
   switch (retval)
     {
@@ -803,7 +706,7 @@ int idaFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, N_Vector resid,
 int idaRootFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data)
 {
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
-  sd->m_gds->rootFindingFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), gout, sd->mode);
+  sd->m_gds->rootFindingFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), gout, sd->mode);
 
   return FUNCTION_EXECUTION_SUCCESS;
 }
@@ -816,7 +719,7 @@ int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Ve
 
   assert (Neq == static_cast<int> (sd->svsize));
   arrayDataSparse *a1 = &(sd->a1);
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,cj, sd->mode);
+  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
 
 
   if (sd->useMask)
@@ -851,14 +754,12 @@ int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Ve
 #ifdef KLU_ENABLE
 int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, N_Vector /*resid*/, SlsMat J, void *user_data, N_Vector, N_Vector, N_Vector )
 {
-  count_t kk;
-  count_t colval;
 
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
 
   arrayDataSparse *a1 = &(sd->a1);
 
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,cj, sd->mode);
+  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
   a1->sortIndexCol ();
   if (sd->useMask)
     {
@@ -874,9 +775,9 @@ int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_d
 
   SlsSetToZero (J);
 
-  colval = 0;
+  count_t colval = 0;
   J->colptrs[0] = colval;
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (index_t kk = 0; kk < a1->size (); ++kk)
     {
       //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
       if (a1->colIndex (kk) > colval)

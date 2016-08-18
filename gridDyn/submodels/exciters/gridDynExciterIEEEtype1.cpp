@@ -60,7 +60,9 @@ void gridDynExciterIEEEtype1::objectInitializeB (const IOdata &args, const IOdat
   gs[2] = gs[0] * Kf / Tf;                        // Rf
   vBias = args[voltageInLocation] + gs[1] / Ka - Vref;
   inputSet[1] = Vref;
-
+  m_dstate_dt[0] = 0.0;
+  m_dstate_dt[1] = 0.0;
+  m_dstate_dt[2] = 0.0;
 }
 
 
@@ -69,7 +71,7 @@ void gridDynExciterIEEEtype1::objectInitializeB (const IOdata &args, const IOdat
 // residual
 void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
 {
-  if (isAlgebraicOnly (sMode))
+  if (!hasDifferential(sMode))
     {
       return;
     }
@@ -78,10 +80,9 @@ void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData *sD,
   const double *esp = sD->dstate_dt + offset;
   double *rv = resid + offset;
   rv[0] = (-(Ke + Aex * exp (Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
-
   if (opFlags[outside_vlim])
     {
-      if (opFlags.test (etrigger_high))
+      if (opFlags[etrigger_high])
         {
           rv[1] = esp[1];
         }
@@ -133,39 +134,38 @@ void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const s
                                                 arrayData<double> *ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
-  if  (isAlgebraicOnly (sMode))
+  if  (!hasDifferential (sMode))
     {
       return;
     }
   auto offset = offsets.getDiffOffset (sMode);
-  auto refI = offset;
-  double temp1;
+
 
   // use the ad->assign Macro defined in basicDefs
   // ad->assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
-  temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
-  ad->assign ( refI, refI, temp1);
-  ad->assign ( refI, refI + 1, 1 / Te);
+  double temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
+  ad->assign (offset, offset, temp1);
+  ad->assign (offset, offset + 1, 1 / Te);
   if (opFlags[outside_vlim])
     {
-      ad->assign (refI + 1, refI + 1, sD->cj);
+      ad->assign (offset + 1, offset + 1, sD->cj);
     }
   else
     {
       // Vr
 
-      ad->assignCheckCol (refI + 1, argLocs[voltageInLocation], -Ka / Ta);
-      ad->assign (refI + 1, refI, -Ka * Kf / (Tf * Ta));
-      ad->assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
-      ad->assign (refI + 1, refI + 2, Ka / Ta);
+      ad->assignCheckCol (offset + 1, argLocs[voltageInLocation], -Ka / Ta);
+      ad->assign (offset + 1, offset, -Ka * Kf / (Tf * Ta));
+      ad->assign (offset + 1, offset + 1, -1.0 / Ta - sD->cj);
+      ad->assign (offset + 1, offset + 2, Ka / Ta);
     }
 
 
   // Rf
-  ad->assign ( refI + 2, refI, Kf / (Tf * Tf));
-  ad->assign ( refI + 2, refI + 2, -1.0 / Tf - sD->cj);
+  ad->assign (offset + 2, offset, Kf / (Tf * Tf));
+  ad->assign (offset + 2, offset + 2, -1.0 / Tf - sD->cj);
 
   //printf("%f\n",sD->cj);
 

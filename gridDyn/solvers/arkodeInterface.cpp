@@ -16,6 +16,7 @@
 #include "gridDyn.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
+#include "core/helperTemplates.h"
 
 #include <arkode/arkode.h>
 #include <arkode/arkode_dense.h>
@@ -48,7 +49,7 @@ arkodeInterface::arkodeInterface ()
 }
 
 
-arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
+arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode& sMode) : sundialsInterface (gds, sMode)
 {
 }
 
@@ -57,116 +58,33 @@ arkodeInterface::~arkodeInterface ()
   // clear variables for CVode to use
   if (initialized)
     {
-      NVECTOR_DESTROY (use_omp, state);
-      NVECTOR_DESTROY (use_omp, abstols);
-      NVECTOR_DESTROY (use_omp, scale);
-      NVECTOR_DESTROY (use_omp, types);
-      NVECTOR_DESTROY (use_omp, consData);
-      NVECTOR_DESTROY (use_omp, deriv);
-      NVECTOR_DESTROY (use_omp, eweight);
-      NVECTOR_DESTROY (use_omp, ele);
       ARKodeFree (&solverMem);
     }
 }
 
+std::shared_ptr<solverInterface> arkodeInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBaseStack<arkodeInterface, sundialsInterface, solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
 
-int arkodeInterface::allocate (count_t size, count_t numRoots)
+	return rp;
+}
+
+int arkodeInterface::allocate (count_t stateCount, count_t numRoots)
 {
   // load the vectors
-  if (size == svsize)
+  if (stateCount == svsize)
     {
       return 0;
     }
   initialized = false;
-  if (state)
-    {
-      NVECTOR_DESTROY (use_omp, state);
-    }
+  
+  a1.setRowLimit (stateCount);
+  a1.setColLimit (stateCount);
 
-  state = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)state, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (scale)
-    {
-      NVECTOR_DESTROY (use_omp, scale);
-    }
-  scale = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)scale, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, scale);
-
-  if (types)
-    {
-      NVECTOR_DESTROY (use_omp, types);
-    }
-  types = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)types, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ONE, types);
-
-
-
-  if (abstols)
-    {
-      NVECTOR_DESTROY (use_omp, abstols);
-    }
-  abstols = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)abstols, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (consData)
-    {
-      NVECTOR_DESTROY (use_omp, consData);
-    }
-  consData = NVECTOR_NEW (use_omp, size);
-  if (check_flag ((void *)consData, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  svsize = size;
-  a1.setRowLimit (size);
-  a1.setColLimit (size);
-
-  if (deriv)
-    {
-      NVECTOR_DESTROY (use_omp, deriv);
-    }
-  deriv = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)deriv, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-  N_VConst (ZERO, deriv);
-
-  if (eweight)
-    {
-      NVECTOR_DESTROY (use_omp, eweight);
-    }
-  eweight = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)eweight, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
-
-  if (ele)
-    {
-      NVECTOR_DESTROY (use_omp, ele);
-    }
-  ele = NVECTOR_NEW (use_omp, svsize);
-  if (check_flag ((void *)ele, "NVECTOR_NEW", 0))
-    {
-      return(1);
-    }
   //update the rootCount
   rootCount = numRoots;
   rootsfound.resize (numRoots);
@@ -184,31 +102,19 @@ int arkodeInterface::allocate (count_t size, count_t numRoots)
 
 
 
-  allocated = true;
+  sundialsInterface::allocate(stateCount, numRoots);
 
   return 0;
 }
 
 
-void arkodeInterface::setMaxNonZeros (count_t size)
+void arkodeInterface::setMaxNonZeros (count_t nonZeroCount)
 {
-  a1.reserve (size);
+	maxNNZ = nonZeroCount;
+  a1.reserve (nonZeroCount);
   a1.clear ();
 }
 
-
-double * arkodeInterface::state_data ()
-{
-  return NVECTOR_DATA (use_omp, state);
-}
-double * arkodeInterface::deriv_data ()
-{
-  return NVECTOR_DATA (use_omp, deriv);
-}
-double * arkodeInterface::type_data ()
-{
-  return NVECTOR_DATA (use_omp, types);
-}
 
 int arkodeInterface::set (const std::string &param, const std::string &val)
 {
@@ -242,7 +148,7 @@ int arkodeInterface::set (const std::string &param, const std::string &val)
     }
   else
     {
-      out = solverInterface::set (param, val);
+      out = sundialsInterface::set (param, val);
     }
   return out;
 }
@@ -257,7 +163,7 @@ int arkodeInterface::set (const std::string &param, double val)
     }
   else
     {
-      out = solverInterface::set (param, val);
+      out = sundialsInterface::set (param, val);
     }
   return out;
 }
@@ -268,10 +174,6 @@ double arkodeInterface::get (const std::string &param) const
   if ((param == "resevals") || (param == "iterationcount"))
     {
       //	CVodeGetNumResEvals(solverMem, &val);
-    }
-  else if (param == "solvercount")
-    {
-      val = solverCallCount;
     }
   else if (param == "iccount")
     {
@@ -287,7 +189,7 @@ double arkodeInterface::get (const std::string &param) const
     }
   else
     {
-      //CVodeDlsGetNumJacEvals(solverMem, &val);
+	  return sundialsInterface::get(param);
     }
 
   return static_cast<double> (val);
@@ -302,14 +204,13 @@ void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
       return;
     }
   long int nni = 0;
-  int retval;
   long int nst, nre, nfi, netf, ncfn, nge;
   realtype tolsfac, hlast, hcur;
 
   std::string logstr = "";
 
 
-  retval = ARKodeGetNumRhsEvals (solverMem, &nre,&nfi);
+  int retval = ARKodeGetNumRhsEvals (solverMem, &nre,&nfi);
   check_flag (&retval, "ARKodeGetNumResEvals", 1);
 
   retval = ARKodeGetNumNonlinSolvIters (solverMem, &nni);
@@ -357,10 +258,12 @@ void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
 
 void arkodeInterface::logErrorWeights (int logLevel) const
 {
-  realtype *eldata, *ewdata;
 
-  eldata = NVECTOR_DATA (use_omp, ele);
-  ewdata = NVECTOR_DATA (use_omp, eweight);
+  N_Vector eweight = NVECTOR_NEW(use_omp, svsize);
+  N_Vector ele = NVECTOR_NEW(use_omp, svsize);
+
+  realtype *eldata = NVECTOR_DATA (use_omp, ele);
+  realtype *ewdata = NVECTOR_DATA (use_omp, eweight);
   int retval = ARKodeGetErrWeights (solverMem, eweight);
   check_flag (&retval, "ARKodeGetErrWeights", 1);
   retval = ARKodeGetEstLocalErrors (solverMem, ele);
@@ -379,6 +282,8 @@ void arkodeInterface::logErrorWeights (int logLevel) const
     {
       printf ("\n%s", logstr.c_str ());
     }
+  NVECTOR_DESTROY(use_omp, eweight);
+  NVECTOR_DESTROY(use_omp, ele);
 }
 
 
@@ -453,19 +358,18 @@ int arkodeInterface::initialize (double t0)
       printf ("ERROR,  arkode data not allocated\n");
       return -2;
     }
-  int retval;
   auto jsize = m_gds->jacSize (mode);
 
   // initializeB CVode - Sundials
 
-  retval = ARKodeSetUserData (solverMem, (void *)this);
+  int retval = ARKodeSetUserData (solverMem, (void *)this);
   if (check_flag (&retval, "ARKodeSetUserData", 1))
     {
       return(1);
     }
 
   //guess an initial condition
-  m_gds->guess (t0, NVECTOR_DATA (use_omp, state), NVECTOR_DATA (use_omp, deriv), mode);
+  m_gds->guess (t0, state_data(), deriv_data(), mode);
 
   retval = ARKodeInit (solverMem, arkodeFunc, arkodeFunc,t0, state);
   if (check_flag (&retval, "ARKodeInit", 1))
@@ -677,7 +581,7 @@ int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_d
 {
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
   //printf("time=%f\n", ttime);
-  int ret = sd->m_gds->derivativeFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), sd->mode);
+  int ret = sd->m_gds->derivativeFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
 
 #ifdef CAPTURE_STATE_FILE
   saveStateFile (ttime, sd->svsize, NVECTOR_DATA (state), NVECTOR_DATA (dstate_dt), NVECTOR_DATA (resid), "jac_new_state.dat", true);
@@ -687,25 +591,22 @@ int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_d
 
 int arkodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_data)
 {
-  arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
-  stateData sD;
-  sD.time = ttime;
-  sD.state = NVECTOR_DATA (sd->use_omp, state);
-  sD.dstate_dt = NVECTOR_DATA (sd->use_omp, sd->deriv);
-  sd->m_gds->rootTest (&sD, gout, sd->mode);
 
-  return FUNCTION_EXECUTION_SUCCESS;
+	arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
+	sd->m_gds->rootFindingFunction(ttime, NVECTOR_DATA(sd->use_omp, state), sd->deriv_data(), gout, sd->mode);
+
+	return FUNCTION_EXECUTION_SUCCESS;
+
 }
 
 #define CHECK_JACOBIAN 1
 int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
 {
-  index_t kk;
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
 
   assert (Neq == static_cast<int> (sd->svsize));
   arrayDataSparse *a1 = &(sd->a1);
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,0, sd->mode);
+  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
 
 
   if (sd->useMask)
@@ -719,7 +620,7 @@ int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstat
     }
 
   //assign the elements
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (index_t kk = 0; kk < a1->size (); ++kk)
     {
       DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) = DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) + a1->val (kk);
     }
@@ -739,14 +640,12 @@ int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstat
 #ifdef KLU_ENABLE
 int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector, N_Vector, N_Vector)
 {
-  count_t kk;
-  count_t colval;
 
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
 
   arrayDataSparse *a1 = &(sd->a1);
 
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,0, sd->mode);
+  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
   a1->sortIndexCol ();
   if (sd->useMask)
     {
@@ -762,9 +661,9 @@ int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat 
 
   SlsSetToZero (J);
 
-  colval = 0;
+  count_t colval = 0;
   J->colptrs[0] = colval;
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (index_t kk = 0; kk < a1->size (); ++kk)
     {
       //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
       if (a1->colIndex (kk) > colval)

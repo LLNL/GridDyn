@@ -182,7 +182,7 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		{
 			return false;
 		}
-		return (sMode == sModeLists[sMode.offsetIndex]);
+		return (sModeLists[sMode.offsetIndex].offsetIndex!=kNullLocation);
 	}
 
 	void listMaintainer::invalidate(const solverMode &sMode)

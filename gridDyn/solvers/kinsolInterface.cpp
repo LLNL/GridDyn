@@ -18,7 +18,7 @@
 #include "sundialsArrayData.h"
 //#include "arrayDataBoost.h"
 #include "arrayDataSparseSM.h"
-
+#include "core/helperTemplates.h"
 #include <sundials/sundials_math.h>
 #include <kinsol/kinsol.h>
 #include <kinsol/kinsol_dense.h>
@@ -52,7 +52,7 @@ kinsolInterface::kinsolInterface ()
   tolerance = 1e-8;
 }
 
-kinsolInterface::kinsolInterface (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
+kinsolInterface::kinsolInterface (gridDynSimulation *gds, const solverMode& sMode) : sundialsInterface (gds, sMode)
 {
   tolerance = 1e-8;
 }
@@ -67,14 +67,26 @@ kinsolInterface::~kinsolInterface ()
           fclose (m_kinsolInfoFile);
         }
 
-      NVECTOR_DESTROY (use_omp, state);
-      NVECTOR_DESTROY (use_omp, abstols);
-      NVECTOR_DESTROY (use_omp, consData);
-      NVECTOR_DESTROY (use_omp, scale);
       KINFree (&solverMem);
     }
 }
 
+std::shared_ptr<solverInterface> kinsolInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBaseStack<kinsolInterface, sundialsInterface,solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
+	
+	if (fullCopy)
+	{
+		rp->fileCapture = fileCapture;
+		rp->jacFile = jacFile;
+		rp->stateFile = stateFile;
+	}
+	return rp;
+}
 
 int kinsolInterface::allocate (count_t stateCount, count_t /*numroots*/)
 {
@@ -83,50 +95,7 @@ int kinsolInterface::allocate (count_t stateCount, count_t /*numroots*/)
     {
       return FUNCTION_EXECUTION_SUCCESS;
     }
-  initialized = false;
-  if (state)
-    {
-      NVECTOR_DESTROY (use_omp, state);
-    }
-  state = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)state, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-
-  if (scale)
-    {
-      NVECTOR_DESTROY (use_omp, scale);
-    }
-  scale = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)scale, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-  N_VConst (ONE, scale);
-
-  if (abstols)
-    {
-      NVECTOR_DESTROY (use_omp, abstols);
-    }
-  abstols = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)abstols, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-
-  if (consData)
-    {
-      NVECTOR_DESTROY (use_omp, consData);
-    }
-  consData = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)consData, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-
-  svsize = stateCount;
-
+  
   if (solverMem)
     {
       KINFree (&(solverMem));
@@ -137,21 +106,7 @@ int kinsolInterface::allocate (count_t stateCount, count_t /*numroots*/)
       return FUNCTION_EXECUTION_FAILURE;
     }
 
-  allocated = true;
-  return FUNCTION_EXECUTION_SUCCESS;
-}
-
-
-void kinsolInterface::setMaxNonZeros (count_t nonZeroCount)
-{
-  maxNNZ = nonZeroCount;
-  nnz = nonZeroCount;
-}
-
-
-double * kinsolInterface::state_data ()
-{
-  return NVECTOR_DATA (use_omp, state);
+  return sundialsInterface::allocate(stateCount, 0);
 }
 
 
@@ -163,12 +118,8 @@ void kinsolInterface::logSolverStats (int logLevel, bool /*iconly*/) const
       return;
     }
   long int nni = 0, nfe = 0, nje = 0, nfeD = 0;
-  int flag;
 
-  std::string logstr = "";
-
-
-  flag = KINGetNumNonlinSolvIters (solverMem, &nni);
+  int flag = KINGetNumNonlinSolvIters (solverMem, &nni);
   check_flag (&flag, "KINGetNumNonlinSolvIters", 1);
   flag = KINGetNumFuncEvals (solverMem, &nfe);
   check_flag (&flag, "KINGetNumFuncEvals", 1);
@@ -201,7 +152,7 @@ void kinsolInterface::logSolverStats (int logLevel, bool /*iconly*/) const
   flag = KINDlsGetNumFuncEvals (solverMem, &nfeD);
   check_flag (&flag, "KINDlsGetNumFuncEvals", 1);
 
-  logstr = "Kinsoln Statistics: \n";
+  std::string logstr = "Kinsoln Statistics: \n";
   logstr += "Number of nonlinear iterations    = " + std::to_string (nni) + '\n';
   logstr += "Number of function evaluations    = " + std::to_string (nfe) + '\n';
   logstr += "Number of jacobian evaluations    = " + std::to_string (nje) + '\n';
@@ -219,9 +170,6 @@ void kinsolInterface::logSolverStats (int logLevel, bool /*iconly*/) const
       printf ("\n%s", logstr.c_str ());
     }
 }
-
-
-
 
 static const std::map<int, std::string> kinRetCodes {
   {
@@ -472,19 +420,7 @@ int kinsolInterface::set(const std::string &param, double val)
 double kinsolInterface::get (const std::string &param) const
 {
   long int val = -1;
-  if ((param == "resevals")||(param == "iterationcount"))
-    {
-      KINGetNumNonlinSolvIters (solverMem, &val);
-    }
-  else if (param == "solvercount")
-    {
-      val = solverCallCount;
-    }
-  else if (param == "jaccallcount")
-    {
-      val = jacCallCount;
-    }
-  else if (param == "jac calls")
+ if (param == "jac calls")
     {
       if (dense)
         {
@@ -500,6 +436,10 @@ double kinsolInterface::get (const std::string &param) const
         }
 
     }
+  else
+  {
+	  return sundialsInterface::get(param);
+  }
   return static_cast<double> (val);
 }
 
@@ -578,7 +518,7 @@ void kinsolInterface::setConstraints ()
 int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
-  sd->residCallCount++;
+  sd->funcCallCount++;
 #if MEASURE_TIMINGS > 0
   auto start_t = std::chrono::high_resolution_clock::now ();
 
@@ -607,8 +547,8 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
   {
 	  if (!sd->stateFile.empty())
 	  {
-		  writeVector(sd->solveTime, 0, sd->residCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, u), sd->stateFile, (sd->residCallCount != 1));
-		  writeVector(sd->solveTime, 2, sd->residCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, f), sd->stateFile);
+		  writeVector(sd->solveTime, 0, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, u), sd->stateFile, (sd->funcCallCount != 1));
+		  writeVector(sd->solveTime, 2, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, f), sd->stateFile);
 	  }
   }
   return ret;

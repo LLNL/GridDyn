@@ -19,7 +19,7 @@
 #define GRIDDYN_MAJOR 0
 #define GRIDDYN_MINOR 5
 #define GRIDDYN_PATCH 0
-#define GRIDDYN_DATE "2016-08-12"
+#define GRIDDYN_DATE "2016-08-20"
 
 
 // header files
@@ -164,7 +164,7 @@ protected:
 
   offset_ordering default_ordering = offset_ordering::mixed;    //!< the default_ordering scheme for state variables
   std::string powerFlowFile;                                    //! the power flow outputfile if any
-  std::vector < std::shared_ptr < solverInterface >> sData;          //!< vector of solver data
+  std::vector < std::shared_ptr < solverInterface >> solverInterfaces;          //!< vector of solver data
   std::vector<gridObject *>singleStepObjects;  //!<objects which require a state update after time step
   std::vector<gridBus *> slkBusses;                             //!< vector of slk buses to aid in powerflow adjust
   std::queue<gridDynAction> actionQueue;                //!< queue for actions for Griddyn to execute
@@ -487,9 +487,9 @@ public:
   const solverMode &getCurrentMode (const solverMode &sMode = cEmptySolverMode) const;
 
   /** @brief makes sure the solverInterface object is ready to run solutions
-  @param[in] sData the solverData to check if it is ready
+  @param[in] solverInterfaces the solverData to check if it is ready
   */
-  void getSolverReady (std::shared_ptr<solverInterface> &sData);
+  void getSolverReady (std::shared_ptr<solverInterface> &solverInterfaces);
   /** @brief load a stateData object with extra state information if necessary
   @param[in] sD the stateData object to load
   @param[in] sMode the solverMode of the state Data object

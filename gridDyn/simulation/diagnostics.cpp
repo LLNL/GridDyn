@@ -68,10 +68,10 @@ double checkResid (gridDynSimulation *gds, double time, const std::shared_ptr<so
 }
 
 
-int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jactol, bool useStateNames)
+int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double jactol, bool useStateNames)
 {
 
-  if (isDynamic (sMode))
+  if (isDynamic (queryMode))
     {
       if (gds->currentProcessState () < gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
         {
@@ -83,7 +83,8 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jacto
       return -1;
     }
   int errors = 0;
-  auto sd = gds->getSolverInterface (sMode);
+  auto sd = gds->getSolverInterface (queryMode);
+  const solverMode &sMode = sd->getSolverMode();
   gds->getSolverReady (sd);
   auto nsize = sd->size ();
 
@@ -95,10 +96,9 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jacto
   double *dstate = sd->deriv_data ();
 
   double timeCurr = gds->getCurrentTime ();
-  if (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED)
+  if ((gds->currentProcessState () <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)&&(timeCurr<=gds->getStartTime()))
     {
-      //sMode must be power flow or dc power flow to get here
-      gds->guess (timeCurr, state, nullptr, sMode);
+      gds->guess (timeCurr, state, dstate, sd->getSolverMode());
     }
 
 
@@ -126,7 +126,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jacto
   std::vector<double> resid (nsize);
   std::vector<double> resid2 (nsize);
   stateData sD (timeCurr, nstate.data (), ndstate.data ());
-  if (sMode.pairedOffsetIndex != 0)
+  if (sMode.pairedOffsetIndex != kNullLocation)
     {
       gds->fillExtraStateData (&sD, sMode);
     }

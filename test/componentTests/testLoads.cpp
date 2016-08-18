@@ -397,18 +397,10 @@ BOOST_AUTO_TEST_CASE(motor_test1)
  
  gds->dynInitialize();
  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
- int mmatch=residualCheck(gds,cDaeSolverMode);
- if (mmatch>0)
- {
-  printStateNames(gds,cDaeSolverMode);
-  }
+ int mmatch=runResidualCheck(gds,cDaeSolverMode);
+
  BOOST_REQUIRE_EQUAL(mmatch, 0);
-  mmatch=JacobianCheck(gds,cDaeSolverMode);
-  
-  if (mmatch>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
+  mmatch=runJacobianCheck(gds,cDaeSolverMode);
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->run();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -430,18 +422,12 @@ BOOST_AUTO_TEST_CASE(motor_test3)
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
   
-  int mmatch=JacobianCheck(gds,cPflowSolverMode);
-  if (mmatch>0)
-  {
-    printStateNames(gds,cPflowSolverMode);
-    }
+  int mmatch=runJacobianCheck(gds,cPflowSolverMode);
+ 
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->dynInitialize();
-  mmatch=residualCheck(gds,cDaeSolverMode);
-  if (mmatch>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
+  mmatch=runResidualCheck(gds,cDaeSolverMode);
+
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   mmatch=JacobianCheck(gds,cDaeSolverMode,1e-8);
   if (mmatch>0)
@@ -471,18 +457,12 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
 
-  int mmatch = JacobianCheck(gds,cPflowSolverMode);
-  if (mmatch>0)
-  {
-    printStateNames(gds, cPflowSolverMode);
-  }
+  int mmatch = runJacobianCheck(gds,cPflowSolverMode);
+ 
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->dynInitialize();
-  mmatch = residualCheck(gds,cDaeSolverMode);
-  if (mmatch>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
+  mmatch = runResidualCheck(gds,cDaeSolverMode);
+ 
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   mmatch = JacobianCheck(gds,cDaeSolverMode, 1e-8);
   if (mmatch>0)
@@ -514,11 +494,8 @@ BOOST_AUTO_TEST_CASE(motor_test5)
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
-  int err = JacobianCheck(gds,cPflowSolverMode);
-  if (err>0)
-  {
-    printStateNames(gds, cPflowSolverMode);
-  }
+  int err = runJacobianCheck(gds,cPflowSolverMode);
+ 
   gds->dynInitialize();
   err=residualCheck(gds,cDaeSolverMode);
   if (err>0)
@@ -552,22 +529,14 @@ BOOST_AUTO_TEST_CASE(fdep_test)
 
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
-  auto err = JacobianCheck(gds,cPflowSolverMode);
-  if (err>0)
-  {
-    printStateNames(gds, cPflowSolverMode);
-  }
+  auto err = runJacobianCheck(gds,cPflowSolverMode);
+  BOOST_REQUIRE_EQUAL(err, 0);
   gds->dynInitialize();
-  err=residualCheck(gds,cDaeSolverMode);
-  if (err>0)
-  {
-	  printStateNames(gds, cDaeSolverMode);
-  }
-  err=JacobianCheck(gds,cDaeSolverMode);
-  if (err>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
+  err=runResidualCheck(gds,cDaeSolverMode);
+  BOOST_REQUIRE_EQUAL(err, 0);
+  err=runJacobianCheck(gds,cDaeSolverMode);
+  BOOST_REQUIRE_EQUAL(err, 0);
+  
   gds->run();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 

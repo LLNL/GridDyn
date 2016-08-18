@@ -60,6 +60,7 @@ set(testSystem_sources
 	systemTests/testSolverModes.cpp
 	systemTests/testMainExe.cpp
 	systemTests/testOutputs.cpp
+	systemTests/testCloning.cpp
 	)
 
 set(testExtra_sources

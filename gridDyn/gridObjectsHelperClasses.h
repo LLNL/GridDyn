@@ -397,7 +397,7 @@ public:
   const double *algState = nullptr;     //!< the algebraic state data (for cases where state contains only differential components)
   double cj = 1.0;                      //!< a number used in jacobian calculations if there is a derivative used in the calculations
   count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
-  index_t pairIndex = 0;                                //!< the index of the mode the paired data comes from
+  index_t pairIndex = kNullLocation;                                //!< the index of the mode the paired data comes from
   stateData (double sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
   {
   }

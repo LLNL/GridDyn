@@ -27,12 +27,12 @@ Documentation
 ** API Guide ** --coming soon
 
 Also available are a series of presentations
-	* [Intro] (docs/presentations/Griddyn_intro.pptx)
-	* [Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
-	* [Objects] (docs/presentations/GridDyn_objects.pptx)
-	* [Object Construction and properties] (docs/presentations/GridDyn_object_construction_and_properties.pptx)
-	* [States and offsets] (docs/presentations/stateData_solverModes_solverOffsets.pptx)
-	* [Validation and Performance] (docs/presentations/GridDyn_validation_and_performance.pptx)
+- [Intro] (docs/presentations/Griddyn_intro.pptx)
+- [Execution Flow] (docs/presentations/GridDyn_execution_flow.pptx)
+- [Objects] (docs/presentations/GridDyn_objects.pptx)
+- [Object Construction and properties] (docs/presentations/GridDyn_object_construction_and_properties.pptx)
+- [States and offsets] (docs/presentations/stateData_solverModes_solverOffsets.pptx)
+- [Validation and Performance] (docs/presentations/GridDyn_validation_and_performance.pptx)
 
 Installation
 ------------------------

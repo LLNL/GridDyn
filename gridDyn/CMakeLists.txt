@@ -231,6 +231,7 @@ set (core_headers
 	gridCoreList.h
 	gridCoreTemplates.h
 	solverMode.h
+	core/helperTemplates.h
 	)
 
 set (core_sources

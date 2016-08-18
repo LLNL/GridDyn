@@ -164,7 +164,7 @@ int gridDynSimulation::powerflow ()
                   AdjustmentChanges = change_code::no_change;
                 }
             }
-          while (AdjustmentChanges != change_code::no_change);
+          while ((retval<0)||(AdjustmentChanges != change_code::no_change));
 
           if (controlFlags[power_adjust_enabled])
             {
@@ -314,9 +314,10 @@ int gridDynSimulation::pFlowInitialize (double time0)
   //run any events up to time0
   EvQ->executeEvents (time0 - 0.001);
 
-  const solverMode &sm = *defPowerFlowMode;
-  auto pFlowData = getSolverInterface (sm);
-
+  
+  auto pFlowData = getSolverInterface (*defPowerFlowMode);
+  const solverMode &sm = pFlowData->getSolverMode();
+  defPowerFlowMode = &sm;
   // initializeB
   //this->savePowerFlowXML("testflow.xml");
   //check the network to ensure we have a solvable power flow
@@ -548,11 +549,8 @@ int gridDynSimulation::eventDrivenPowerflow ( double t_end, double t_step)
 int gridDynSimulation::algUpdateFunction (double ttime, const double state[], double update[], const solverMode &sMode, double alpha)
 {
   ++evalCount;
-  stateData sD;
+  stateData sD(ttime,state);
   sD.seqID = (sMode.approx[force_recalc] ? 0 : evalCount);
-  sD.time = ttime;
-  sD.state = state;
-  sD.dstate_dt = nullptr;
 
 #if (CHECK_STATE > 0)
   auto dynDataa = getSolverInterface (sMode);
@@ -568,7 +566,7 @@ int gridDynSimulation::algUpdateFunction (double ttime, const double state[], do
 
   if ((!(isDAE (sMode))) && (isDynamic (sMode)))
     {
-      sD.fullState = sData[3]->state_data ();
+      sD.fullState = solverInterfaces[defDAEMode->offsetIndex]->state_data ();
     }
   //call the area based function to handle the looping
   preEx (&sD, sMode);

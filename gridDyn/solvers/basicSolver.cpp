@@ -14,7 +14,7 @@
 #include "solverInterface.h"
 #include "gridDyn.h"
 #include "stringOps.h"
-
+#include "core/helperTemplates.h"
 #include "vectorOps.hpp"
 
 basicSolver::basicSolver ()
@@ -23,6 +23,18 @@ basicSolver::basicSolver ()
 }
 basicSolver::basicSolver (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
 {
+}
+
+std::shared_ptr<solverInterface> basicSolver::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	auto rp = cloneBase<basicSolver, solverInterface>(this, si, fullCopy);
+	if (!rp)
+	{
+		return si;
+	}
+	rp->algorithm = algorithm;
+	rp->alpha = alpha;
+	return rp;
 }
 double * basicSolver::state_data ()
 {
@@ -35,6 +47,18 @@ double * basicSolver::deriv_data ()
 double * basicSolver::type_data ()
 {
   return type.data ();
+}
+const double * basicSolver::state_data() const
+{
+	return state.data();
+}
+const double * basicSolver::deriv_data() const
+{
+	return nullptr;
+}
+const double * basicSolver::type_data() const
+{
+	return type.data();
 }
 
 int basicSolver::allocate (count_t stateCount, count_t numRoots)

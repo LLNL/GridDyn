@@ -55,7 +55,7 @@ Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode 
       Loc.destDiffLoc = d + Loc.diffOffset;
       Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
     }
-  else if (isAlgebraicOnly (sMode))
+  else if (hasAlgebraic(sMode))
     {
       Loc.time = sD->time;
       if (sD->state)
@@ -67,30 +67,35 @@ Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode 
           Loc.algStateLoc = sD->algState + Loc.algOffset;
         }
       Loc.destLoc = d + Loc.algOffset;
-      if (sD->fullState)
-        {
-          Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else if (sD->diffState)
-        {
-          Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else
-        {
-          Loc.diffStateLoc = obj->m_state.data () + offsetContainer[0].diffOffset;
-        }
-      Loc.destDiffLoc = nullptr;
-      if (sD->dstate_dt)
-        {
-          Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else
-        {
-          Loc.dstateLoc = obj->m_dstate_dt.data () + offsetContainer[0].diffOffset;
-        }
+	  Loc.destDiffLoc = nullptr;
+	  if (isDynamic(sMode))
+	  {
+		  if ((sD->fullState) && (sD->pairIndex != kNullLocation))
+		  {
+			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else if ((sD->diffState) && (sD->pairIndex != kNullLocation))
+		  {
+			  Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else
+		  {
+			  Loc.diffStateLoc = obj->m_state.data() + offsetContainer[0].diffOffset;
+		  }
+
+		  if ((sD->dstate_dt) && (sD->pairIndex != kNullLocation))
+		  {
+			  Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else
+		  {
+			  Loc.dstateLoc = obj->m_dstate_dt.data() + offsetContainer[0].diffOffset;
+		  }
+	  }
+      
 
     }
-  else if (isDifferentialOnly (sMode))
+  else if (hasDifferential (sMode))
     {
       Loc.time = sD->time;
       if (sD->state)
@@ -103,11 +108,11 @@ Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode 
         }
       Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
       Loc.destDiffLoc = d + Loc.diffOffset;
-      if (sD->fullState)
+      if ((sD->fullState) && (sD->pairIndex != kNullLocation))
         {
           Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
         }
-      else if (sD->algState)
+      else if ((sD->algState) && (sD->pairIndex != kNullLocation))
         {
           Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
         }
@@ -178,27 +183,30 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
         {
           Loc.algStateLoc = sD->algState + Loc.algOffset;
         }
-      if (sD->fullState)
-        {
-          Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else if (sD->diffState)
-        {
-          Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else
-        {
-          Loc.diffStateLoc = obj->m_state.data () + offsetContainer[0].diffOffset;
-        }
-      Loc.destDiffLoc = nullptr;
-      if (sD->dstate_dt)
-        {
-          Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
-        }
-      else
-        {
-          Loc.dstateLoc = obj->m_dstate_dt.data () + offsetContainer[0].diffOffset;
-        }
+	  if (isDynamic(sMode))
+	  {
+		  if ((sD->fullState) && (sD->pairIndex != kNullLocation))
+		  {
+			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else if ((sD->diffState) && (sD->pairIndex != kNullLocation))
+		  {
+			  Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else
+		  {
+			  Loc.diffStateLoc = obj->m_state.data() + offsetContainer[0].diffOffset;
+		  }
+		  if ((sD->dstate_dt)&&(sD->pairIndex!=kNullLocation))
+		  {
+			  Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
+		  }
+		  else
+		  {
+			  Loc.dstateLoc = obj->m_dstate_dt.data() + offsetContainer[0].diffOffset;
+		  }
+	  }
+	  Loc.destDiffLoc = nullptr;
 
     }
   else if (hasDifferential (sMode))
@@ -213,11 +221,11 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
           Loc.diffStateLoc = sD->diffState + Loc.diffOffset;
         }
       Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
-      if (sD->fullState)
+      if ((sD->fullState) && (sD->pairIndex != kNullLocation))
         {
           Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
         }
-      else if (sD->algState)
+      else if ((sD->algState) && (sD->pairIndex != kNullLocation))
         {
           Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
         }
@@ -280,18 +288,12 @@ count_t gridObject::stateSize (const solverMode &sMode)
     {
       loadSizes (sMode,false);
     }
-  if (isAlgebraicOnly (sMode))
-    {
-      return so->total.algSize + so->total.vSize + so->total.aSize;
-    }
-  else if (isDifferentialOnly (sMode))
-    {
-      return so->total.diffSize;
-    }
-  else
-    {
-      return so->total.algSize + so->total.vSize + so->total.aSize + so->total.diffSize;
-    }
+  count_t ssize = (hasAlgebraic(sMode)) ? (so->total.algSize + so->total.vSize + so->total.aSize) : 0;
+  if (hasDifferential(sMode))
+  {
+	  ssize+= so->total.diffSize;
+  }
+  return ssize;
 
 }
 
@@ -302,18 +304,12 @@ count_t gridObject::stateSize (const solverMode &sMode) const
     {
       return 0;
     }
-  if (isAlgebraicOnly (sMode))
-    {
-      return so->total.algSize + so->total.vSize + so->total.aSize;
-    }
-  else if (isDifferentialOnly (sMode))
-    {
-      return so->total.diffSize;
-    }
-  else
-    {
-      return so->total.algSize + so->total.vSize + so->total.aSize + so->total.diffSize;
-    }
+  count_t ssize = (hasAlgebraic(sMode)) ? (so->total.algSize + so->total.vSize + so->total.aSize) : 0;
+  if (hasDifferential(sMode))
+  {
+	  ssize += so->total.diffSize;
+  }
+  return ssize;
 
 }
 
@@ -745,112 +741,87 @@ int gridObject::set (const std::string &param, double val, gridUnits::units_t un
 void gridObject::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   prevTime = ttime;
+  auto so = offsets.getOffsets(sMode);
+  stateSizes *localStates = (subObjectList.empty()) ? &(so->total) : &(so->local);
 
-  if (subObjectList.empty ())
-    {
-      auto so = offsets.getOffsets (sMode);
-      if (isDAE (sMode))
-        {
-          if (!m_dstate_dt.empty ())
-            {
-              if (so->total.algSize > 0)
-                {
-                  std::copy (state + so->algOffset, state + so->algOffset + so->total.algSize, m_state.data ());
-                }
-              if (so->total.diffSize > 0)
-                {
-                  std::copy (state + so->diffOffset, state + so->diffOffset + so->total.diffSize, m_state.data () + so->total.algSize);
-                  std::copy (dstate_dt + so->diffOffset, dstate_dt + so->diffOffset + so->total.diffSize, m_dstate_dt.data () + so->total.algSize);
-                }
-            }
-        }
-      else if (isAlgebraicOnly (sMode))
-        {
-          if (!m_state.empty ())
-            {
-              if (so->total.algSize > 0)
-                {
-                  std::copy (state + so->algOffset, state + so->algOffset + so->total.algSize, m_state.data ());
-                }
-            }
-        }
-      else if (isDifferentialOnly (sMode))
-        {
-          if (!m_dstate_dt.empty ())
-            {
-              if (so->total.diffSize > 0)
-                {
-                  std::copy (state + so->diffOffset, state + so->diffOffset + so->total.diffSize, m_state.data () + so->total.algSize);
-                  std::copy (dstate_dt + so->diffOffset, dstate_dt + so->diffOffset + so->total.diffSize, m_dstate_dt.data () + so->total.algSize);
-                }
-            }
-        }
-    }
-  else
-    {
-      for (auto &sub : subObjectList)
-        {
-          sub->setState (ttime, state, dstate_dt, sMode);
-        }
-    }
+  if (hasAlgebraic(sMode))
+  {
+	  if (localStates->algSize > 0)
+	  {
+		  std::copy(state + so->algOffset, state + so->algOffset + localStates->algSize, m_state.data());
+	  }
+  }
+  if (localStates->diffSize > 0)
+  {
+	  if (isDifferentialOnly(sMode))
+	  {
+		  std::copy(state + so->diffOffset, state + so->diffOffset + localStates->diffSize, m_state.data() +algSize(cLocalSolverMode));
+		  std::copy(dstate_dt + so->diffOffset, dstate_dt + so->diffOffset + localStates->diffSize, m_dstate_dt.data() + algSize(cLocalSolverMode));
+	  }
+	  else
+	  {
+		  std::copy(state + so->diffOffset, state + so->diffOffset + localStates->diffSize, m_state.data() + localStates->algSize);
+		  std::copy(dstate_dt + so->diffOffset, dstate_dt + so->diffOffset + localStates->diffSize, m_dstate_dt.data() + localStates->algSize);
+	  }
+  }
+  if (!subObjectList.empty())
+  {
+	  for (auto &sub : subObjectList)
+	  {
+		  sub->setState(ttime, state, dstate_dt, sMode);
+	  }
+  }
 
 }
 //for saving the state
-void gridObject::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void gridObject::guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
-  if (subObjectList.empty ())
-    {
-      auto so = offsets.getOffsets (sMode);
-      count_t stateCount = static_cast<count_t> (m_state.size ());
-      if (isDAE (sMode))
-        {
-          if (so->total.algSize > 0)
-            {
-              assert (so->algOffset != kNullLocation);
-              std::copy (m_state.begin (), m_state.begin () + so->total.algSize, state + so->algOffset);
-            }
-          if (so->total.diffSize > 0)
-            {
-              if (so->diffOffset == kNullLocation)
-                {
-                  printf ("%s::%s in mode %d %d ds=%d, do=%d\n",parent->getName ().c_str (),name.c_str (),isLocal (sMode),isDAE (sMode),static_cast<int> (so->total.diffSize),static_cast<int> (so->diffOffset));
-                  printStackTrace ();
-                }
-              assert (so->diffOffset != kNullLocation);
-              std::copy (m_state.begin () + so->total.algSize, m_state.begin () + stateCount, state + so->diffOffset);
-              std::copy (m_dstate_dt.data () + so->total.algSize, m_dstate_dt.data () + stateCount, dstate_dt + so->diffOffset);
-            }
-        }
-      else if (isAlgebraicOnly (sMode))
-        {
-          if (so->total.algSize > 0)
-            {
-              assert (so->algOffset != kNullLocation);
-              std::copy (m_state.begin (), m_state.begin () + so->total.algSize, state + so->algOffset);
-            }
-        }
-      else if (isDifferentialOnly (sMode))
-        {
-          if (so->total.diffSize > 0)
-            {
-              assert (so->diffOffset != kNullLocation);
-              std::copy (m_state.begin () + algSize (cLocalSolverMode), m_state.begin () + stateCount, state + so->diffOffset);
-              std::copy (m_dstate_dt.data () + algSize (cLocalSolverMode), m_dstate_dt.data () + stateCount, dstate_dt + so->diffOffset);
-            }
-        }
-    }
-  else
-    {
-      for (auto &sub : subObjectList)
-        {
-          sub->guess (ttime, state, dstate_dt, sMode);
-        }
-    }
+	auto so = offsets.getOffsets(sMode);
+	stateSizes *localStates = (subObjectList.empty()) ? &(so->total) : &(so->local);
+
+	if (hasAlgebraic(sMode))
+	{
+		if (localStates->algSize > 0)
+		{
+			assert(so->algOffset != kNullLocation);
+			std::copy(m_state.begin(), m_state.begin() + localStates->algSize, state + so->algOffset);
+		}
+	}
+	if (localStates->diffSize > 0)
+	{
+		if (isDifferentialOnly(sMode))
+		{
+			assert(so->diffOffset != kNullLocation);
+			index_t localAlgSize = algSize(cLocalSolverMode);
+			std::copy(m_state.begin() + localAlgSize, m_state.begin() + localAlgSize + localStates->diffSize, state + so->diffOffset);
+			std::copy(m_dstate_dt.data() + localAlgSize, m_dstate_dt.data() + localAlgSize + localStates->diffSize, dstate_dt + so->diffOffset);
+		}
+		else
+		{
+			if (so->diffOffset == kNullLocation)
+			{
+				printf("%s::%s in mode %d %d ds=%d, do=%d\n", parent->getName().c_str(), name.c_str(), isLocal(sMode), isDAE(sMode), static_cast<int> (so->total.diffSize), static_cast<int> (so->diffOffset));
+				printStackTrace();
+			}
+			assert(so->diffOffset != kNullLocation);
+			count_t stateCount = localStates->algSize + localStates->diffSize;
+			std::copy(m_state.begin() + localStates->algSize, m_state.begin() + stateCount, state + so->diffOffset);
+			std::copy(m_dstate_dt.data() + localStates->algSize, m_dstate_dt.data() + stateCount, dstate_dt + so->diffOffset);
+		}
+	}
+	
+
+	if (!subObjectList.empty())
+	{
+		for (auto &sub : subObjectList)
+		{
+			sub->guess(ttime, state, dstate_dt, sMode);
+		}
+	}
 }
 
 void gridObject::setupPFlowFlags ()
 {
-
 
   auto ss = stateSize (cPflowSolverMode);
   opFlags.set (has_pflow_states,(ss > 0));

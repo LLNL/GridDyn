@@ -71,6 +71,44 @@ gridCoreObject *gridDynSimulation::clone (gridCoreObject *obj) const
   sim->max_Vadjust_iterations = max_Vadjust_iterations;
   sim->max_Padjust_iterations = max_Padjust_iterations;
 
+
+  sim->probeStepTime = probeStepTime;   
+  sim->powerAdjustThreshold = powerAdjustThreshold;  
+  sim->powerFlowStartTime = powerFlowStartTime;     
+  sim->tols = tols;
+
+
+  sim->default_ordering = default_ordering; 
+  sim->powerFlowFile = powerFlowFile; 
+  //std::vector < std::shared_ptr < solverInterface >> solverInterfaces; 
+  //std::vector<gridObject *>singleStepObjects;
+  //now clone the solverInterfaces
+  count_t solverInterfaceCount = static_cast<count_t>(solverInterfaces.size());
+  sim->solverInterfaces.resize(solverInterfaceCount);
+  for (index_t kk=2;kk< solverInterfaceCount;++kk)
+  {
+	  if (solverInterfaces[kk])
+	  {
+		  sim->solverInterfaces[kk] = solverInterfaces[kk]->clone(sim->solverInterfaces[kk], true);
+	  }
+	  
+  }
+  if ((defPowerFlowMode->offsetIndex<solverInterfaceCount)&&(solverInterfaces[defPowerFlowMode->offsetIndex]))
+  {
+	  sim->defPowerFlowMode = &(sim->solverInterfaces[defPowerFlowMode->offsetIndex]->getSolverMode());
+  }
+  if ((defDAEMode->offsetIndex<solverInterfaceCount) && (solverInterfaces[defDAEMode->offsetIndex]))
+  {
+	  sim->defDAEMode = &(sim->solverInterfaces[defDAEMode->offsetIndex]->getSolverMode());
+  }
+  if ((defDynAlgMode->offsetIndex<solverInterfaceCount) && (solverInterfaces[defDynAlgMode->offsetIndex]))
+  {
+	  sim->defDynAlgMode = &(sim->solverInterfaces[defDynAlgMode->offsetIndex]->getSolverMode());
+  }
+  if ((defDynDiffMode->offsetIndex<solverInterfaceCount) && (solverInterfaces[defDynDiffMode->offsetIndex]))
+  {
+	  sim->defDynDiffMode = &(sim->solverInterfaces[defDynDiffMode->offsetIndex]->getSolverMode());
+  }
   return sim;
 }
 
@@ -1303,38 +1341,37 @@ int gridDynSimulation::makeReady (gridState_t desiredState, const solverMode &sM
 
 int gridDynSimulation::countMpiObjects (bool printInfo) const
 {
-  int glabObjects = 0;
+  int gridlabdObjects = 0;
 
   for (auto &bus : m_Buses)
     {
-      glabObjects += searchForGridlabDobject (bus);
+      gridlabdObjects += searchForGridlabDobject (bus);
     }
   for (auto &area : m_Areas)
     {
-      glabObjects += searchForGridlabDobject (area);
+	  gridlabdObjects += searchForGridlabDobject (area);
     }
   //print out the gridlabd objects
   if (printInfo)
     {
-      std::cout << "NumberOfGridLABDInstances = " << glabObjects << '\n';
+      std::cout << "NumberOfGridLABDInstances = " << gridlabdObjects << '\n';
     }
-  return glabObjects;
+  return gridlabdObjects;
 
 }
 
-
 void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t ssize)
 {
-  sData[sMode.offsetIndex]->setMaxNonZeros (ssize);
+  solverInterfaces[sMode.offsetIndex]->setMaxNonZeros (ssize);
 }
 
 std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)
 {
   std::shared_ptr<solverInterface> solveD = nullptr;
-  if (sMode.offsetIndex < sData.size ())
+  if (sMode.offsetIndex < solverInterfaces.size ())
     {
 
-      if (!(solveD = sData[sMode.offsetIndex]))
+      if (!(solveD = solverInterfaces[sMode.offsetIndex]))
         {
           solveD = updateSolver (sMode);
         }
@@ -1349,10 +1386,10 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const so
 const std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode) const
 {
   std::shared_ptr<solverInterface> solveD = nullptr;
-  if (sMode.offsetIndex < sData.size ())
+  if (sMode.offsetIndex < solverInterfaces.size ())
     {
 
-      return sData[sMode.offsetIndex];
+      return solverInterfaces[sMode.offsetIndex];
     }
   else
     {
@@ -1369,7 +1406,7 @@ int gridDynSimulation::add (std::shared_ptr<solverInterface> nSolver)
     {
       if (oI <= nextIndex)
         {
-          if (sData[oI] == nSolver)
+          if (solverInterfaces[oI] == nSolver)
             {
               return OBJECT_ALREADY_MEMBER;
             }
@@ -1383,15 +1420,15 @@ int gridDynSimulation::add (std::shared_ptr<solverInterface> nSolver)
           nextIndex = 4;                             //new modes start at 4
         }
       nSolver->setIndex (static_cast<index_t> (nextIndex));
-      if (nextIndex >= sData.size ())
+      if (nextIndex >= solverInterfaces.size ())
         {
-          sData.resize (nextIndex + 1);
+          solverInterfaces.resize (nextIndex + 1);
         }
     }
 
 
-  sData[nextIndex] = nSolver;
-  sData[nextIndex]->lock ();
+  solverInterfaces[nextIndex] = nSolver;
+  solverInterfaces[nextIndex]->lock ();
   nSolver->setSimulationData (this, nSolver->getSolverMode ());
   updateSolver (nSolver->getSolverMode ());
   return OBJECT_ADD_SUCCESS;
@@ -1418,7 +1455,7 @@ solverMode gridDynSimulation::getSolverMode (const std::string &solverType)
     }
   else
     {
-      for (auto &sd : sData)
+      for (auto &sd : solverInterfaces)
         {
           if (sd)
             {
@@ -1529,9 +1566,9 @@ const solverMode &gridDynSimulation::getCurrentMode (const solverMode &sMode) co
 
 const solverMode &gridDynSimulation::getSolverMode (index_t index) const
 {
-  if (index < sData.size ())
+  if (index < solverInterfaces.size ())
     {
-      return (sData[index]) ? sData[index]->getSolverMode () : cEmptySolverMode;
+      return (solverInterfaces[index]) ? solverInterfaces[index]->getSolverMode () : cEmptySolverMode;
     }
   else
     {
@@ -1561,7 +1598,7 @@ const solverMode *gridDynSimulation::getSolverModePtr (const std::string &solver
     }
   else
     {
-      for (auto &sd : sData)
+      for (auto &sd : solverInterfaces)
         {
           if ((sd)&& (sd->name == solverType))
             {
@@ -1574,9 +1611,9 @@ const solverMode *gridDynSimulation::getSolverModePtr (const std::string &solver
 
 const solverMode *gridDynSimulation::getSolverModePtr (index_t index) const
 {
-  if (index < sData.size ())
+  if (index < solverInterfaces.size ())
     {
-      return (sData[index]) ? &(sData[index]->getSolverMode ()) : nullptr;
+      return (solverInterfaces[index]) ? &(solverInterfaces[index]->getSolverMode ()) : nullptr;
     }
   else
     {
@@ -1586,7 +1623,7 @@ const solverMode *gridDynSimulation::getSolverModePtr (index_t index) const
 
 const std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (index_t index) const
 {
-  return (index < sData.size ()) ? sData[index] : nullptr;
+  return (index < solverInterfaces.size ()) ? solverInterfaces[index] : nullptr;
 }
 
 
@@ -1624,7 +1661,7 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const st
           return nullptr;
         }
     }
-  for (auto &sd : sData)
+  for (auto &sd : solverInterfaces)
     {
       if (sd)
         {
@@ -1642,21 +1679,21 @@ std::shared_ptr<solverInterface> gridDynSimulation::updateSolver (const solverMo
 {
   auto kIndex = sMode.offsetIndex;
   solverMode sm = sMode;
-  if (kIndex >= sData.size ())
+  if (kIndex >= solverInterfaces.size ())
     {
       if (kIndex > 10000)
         {
-          kIndex = static_cast<index_t> (sData.size ());
+          kIndex = static_cast<index_t> (solverInterfaces.size ());
           sm.offsetIndex = kIndex;
         }
-      sData.resize (kIndex + 1);
+      solverInterfaces.resize (kIndex + 1);
     }
-  if (!sData[kIndex])
+  if (!solverInterfaces[kIndex])
     {
-      sData[kIndex] = makeSolver (this, sMode);
+      solverInterfaces[kIndex] = makeSolver (this, sMode);
     }
 
-  auto sd = sData[kIndex];
+  auto sd = solverInterfaces[kIndex];
   if (!sd)
     {
       printf ("index=%d\n",sMode.offsetIndex);
@@ -1722,18 +1759,18 @@ void gridDynSimulation::fillExtraStateData (stateData *sD, const solverMode &sMo
           const solverMode &pSMode = getSolverMode (sMode.pairedOffsetIndex);
           if (isDifferentialOnly (pSMode))
             {
-              sD->diffState = sData[pSMode.offsetIndex]->state_data ();
-              sD->dstate_dt = sData[pSMode.offsetIndex]->deriv_data ();
+              sD->diffState = solverInterfaces[pSMode.offsetIndex]->state_data ();
+              sD->dstate_dt = solverInterfaces[pSMode.offsetIndex]->deriv_data ();
               sD->pairIndex = pSMode.offsetIndex;
             }
           else if (isAlgebraicOnly (pSMode))
             {
-              sD->algState = sData[pSMode.offsetIndex]->state_data ();
+              sD->algState = solverInterfaces[pSMode.offsetIndex]->state_data ();
               sD->pairIndex = pSMode.offsetIndex;
             }
           else if (isDAE (pSMode))
             {
-              sD->fullState = sData[pSMode.offsetIndex]->state_data ();
+              sD->fullState = solverInterfaces[pSMode.offsetIndex]->state_data ();
               sD->pairIndex = pSMode.offsetIndex;
             }
         }

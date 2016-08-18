@@ -26,6 +26,17 @@ build2
 # Editor temporary files
 *~
 *.bak
+*.asv
+
+# latex temporary files
+*.aux
+*.toc
+*.out
+*.log
+*.bbl
+*.blg
+*.TMP
+/docs/manuals/*.gz
 
 # Python Byte-compiled / optimized / DLL files
 __pycache__/

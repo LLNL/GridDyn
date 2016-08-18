@@ -33,23 +33,95 @@ solverInterface::solverInterface (gridDynSimulation *gds, const solverMode& sMod
 solverInterface::~solverInterface ()
 {
 }
+
+
+std::shared_ptr<solverInterface> solverInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
+{
+	si->name = name;
+	si->printResid = printResid;
+	si->solverLogFile = solverLogFile;
+	si->printLevel = printLevel;	
+	si->max_iterations = 10000;
+	auto ind = si->mode.offsetIndex;
+	si->mode = mode;
+	if (ind != kNullLocation)
+	{
+		si->mode.offsetIndex = ind;
+	}
+	si->tolerance = tolerance;
+	si->dense = dense;
+	si->constantJacobian = constantJacobian;
+	si->useMask = useMask;
+	si->parallel = parallel;
+	si->locked = locked;
+	si->use_omp = use_omp;
+
+	if (fullCopy)
+	{
+		si->maskElements = maskElements;
+		si->m_gds = m_gds;
+		si->allocate(svsize, rootCount);
+		if (initialized)
+		{
+			si->initialize(0);
+		}
+		const double *sd = state_data();
+		double *statecopy = si->state_data();
+		if ((sd) && (statecopy))
+		{
+			std::copy(sd, sd + svsize, statecopy);
+		}
+		const double *deriv = deriv_data();
+		double *derivcopy = si->deriv_data();
+		if ((deriv)&&(derivcopy))
+		{
+			std::copy(deriv, deriv + svsize, derivcopy);
+		}
+		const double *td = type_data();
+		double *tcopy = si->type_data();
+		if ((td) && (tcopy))
+		{
+			std::copy(td, td + svsize, tcopy);
+		}
+	}
+	return si;
+}
+
 double * solverInterface::state_data ()
 {
   return nullptr;
 }
+
 double * solverInterface::deriv_data ()
 {
   return nullptr;
 }
+
 double *solverInterface::type_data ()
 {
   return nullptr;
+}
+
+const double * solverInterface::state_data() const
+{
+	return nullptr;
+}
+
+const double * solverInterface::deriv_data() const
+{
+	return nullptr;
+}
+
+const double *solverInterface::type_data() const
+{
+	return nullptr;
 }
 int solverInterface::allocate (count_t /*stateSize*/, count_t numroots)
 {
   rootsfound.resize (numroots);
   return FUNCTION_EXECUTION_SUCCESS;
 }
+
 int solverInterface::initialize (double /*t0*/)
 {
   return -101;
@@ -106,7 +178,23 @@ void solverInterface::setSimulationData (gridDynSimulation *gds)
 double solverInterface::get (const std::string & param) const
 {
   double res = kNullVal;
-  if (param == "approx")
+  if (param == "solvercount")
+  {
+	  res = static_cast<double> (solverCallCount);
+  }
+  else if (param == "jaccallcount")
+  {
+	  res = static_cast<double> (jacCallCount);
+  }
+  else if ((param == "rootcallcount")||(param=="roottestcount"))
+  {
+	  res = static_cast<double> (rootCallCount);
+  }
+  else if (param == "funccallcount")
+  {
+	  res = static_cast<double> (funcCallCount);
+  }
+  else if (param == "approx")
     {
       res = static_cast<double> (getLinkApprox (mode));
     }
@@ -250,7 +338,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
             }
           else
             {
-              out = set ("mode",str);
+              out = solverInterface::set ("mode",str);
             }
         }
     }
@@ -324,7 +412,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
             }
           else
             {
-              out = set ("approx", str);
+              out = solverInterface::set ("approx", str);
             }
         }
     }

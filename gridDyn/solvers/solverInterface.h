@@ -56,9 +56,9 @@ public:
     resize,                                  //!< destroy and completely reinit the sparse calculations
     refactor,                                //!< refactor the sparse matrix
   };
-  std::string name;                                     //!< nickname for the solver
+  std::string name;                        //!< nickname for the solver
   std::vector<int> rootsfound;            //!< mask vector for which roots were found
-  bool printResid = false;                                                //!< flag telling the interface to print the residual values to the screen (used for debugging)
+  bool printResid = false;                 //!< flag telling the interface to print the residual values to the screen (used for debugging)
 protected:
   std::string lastErrorString = "";             //!< string containing the last error
   int lastErrorCode = 0;                        //!< the last error Code
@@ -71,12 +71,13 @@ protected:
   count_t rootCount = 0;                                                                        //!< the number of root finding functions
   count_t solverCallCount = 0;                                                          //!< the number of times the solver has been called
   count_t jacCallCount = 0;                                                                     //!< the number of times the jacobian function has been called
-  count_t residCallCount = 0;											//!< the number of times the function evaluation has been called
-  count_t max_iterations = 10000;                                                               //!< the maximum number of iterations in the solver loop
+  count_t funcCallCount = 0;											//!< the number of times the function evaluation has been called
+  count_t rootCallCount = 0;
+  count_t max_iterations = 10000;                                    //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
-  double tolerance = 1e-8;                                                       //!<the default solver tolerance
-  bool dense = false;                                                                           //!< if the solver should use a dense or sparse version
-  bool constantJacobian = false;                                                        //!< if the solver should just keep a constant jacobian
+  double tolerance = 1e-8;												//!<the default solver tolerance
+  bool dense = false;													//!< if the solver should use a dense or sparse version
+  bool constantJacobian = false;										//!< if the solver should just keep a constant jacobian
   bool useMask = false;                                                                         //!< if the solver should use a mask to filter out specific states
   bool parallel = false;                                                                        //!< if the solver should use a parallel version
   bool locked = false;                                                                          //!< if the solverMode is locked from further updates
@@ -100,7 +101,12 @@ public:
 
   /** @brief destructor*/
   virtual ~solverInterface ();
-
+  /** @brief make a copy of the solver interface
+  @param[in] si a shared ptr to an existing interface that data should be copied to
+  @param[in] fullCopy set to true to initialize and copy over all data to the new object
+  @return a shared ptr to the clones solverInterface
+  */
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si=nullptr, bool fullCopy=false) const;
   /** @brief get a pointer to the state data
   @return a pointer to a double array with the state data
   */
@@ -115,6 +121,21 @@ public:
   @return a pointer to a double array containing the type data
   */
   virtual double * type_data ();
+
+  /** @brief get a pointer to the const state data
+  @return a pointer to a const double array with the state data
+  */
+  virtual const double * state_data() const;
+
+  /** @brief get a pointer to the const state time derivative information
+  @return a pointer to a const double array with the state time derivative information
+  */
+  virtual const double * deriv_data() const;
+
+  /** @brief get a pointer to the const type data
+  @return a pointer to a const double array containing the type data
+  */
+  virtual const double * type_data() const;
 
   /** @brief allocate the memory for the solver
   @param[in] size  the size of the state vector
@@ -323,9 +344,15 @@ public:
   @param[in] sMode the solverMode to solve with
   */
   basicSolver (gridDynSimulation *gds, const solverMode& sMode);
+
+  virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   double * state_data () override;
   double * deriv_data () override;
   double * type_data () override;
+
+  const double * state_data() const override;
+  const double * deriv_data() const override;
+  const double * type_data() const override;
   int allocate (count_t size, count_t numroots = 0) override;
   int initialize (double t0) override;
 

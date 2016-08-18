@@ -182,10 +182,9 @@ double GriddynRunner::Step (double time)
       if (eventMode)
         {
           int retval = m_gds->eventDrivenPowerflow (time);
+          actual = time;
           if (retval < FUNCTION_EXECUTION_SUCCESS)
             {
-              StopRecording ();
-
               std::string error = "GridDyn failed to advance retval = " + std::to_string (retval);
               throw(std::runtime_error (error));
             }
@@ -195,8 +194,6 @@ double GriddynRunner::Step (double time)
           int retval = m_gds->step (time, actual);
           if (retval < FUNCTION_EXECUTION_SUCCESS)
             {
-              StopRecording ();
-
               std::string error = "GridDyn failed to advance retval = " + std::to_string (retval);
               throw(std::runtime_error (error));
             }
