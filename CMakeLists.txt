@@ -164,7 +164,7 @@ ELSE(UNIX)
 ENDIF(UNIX)
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options(-Wsuggest-override)
+	#add_compile_options(-Wsuggest-override)
 ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
