@@ -28,16 +28,16 @@ public:
 
 protected:
   gridBus *controlBus = nullptr;    //!< pointer to the control bus
-  double Qmin = -kBigNum;                       //!< the minimum reactive power
-  double Qmax = kBigNum;                        //!< the maximum reactive power output
-  double Vmin = 0.8;                            //!< the low voltage threshold
-  double Vmax = 1.2;                            //!< the high voltage threshold
+  double Qmin = -kBigNum;                       //!<[puMVA] the minimum reactive power
+  double Qmax = kBigNum;                        //!<[puMVA] the maximum reactive power output
+  double Vmin = 0.8;                            //!<[puV] the low voltage threshold
+  double Vmax = 1.2;                            //!<[puV] the high voltage threshold
 
-  double Qlow = 0;                                      //!< the lowest available Q block level
-  double Qhigh = kBigNum;                       //!< the maximum reactive power block level
+  double Qlow = 0;                              //!<[puMVA] the lowest available Q block level
+  double Qhigh = kBigNum;                       //!<[puMVA] the maximum reactive power block level
   int currentStep = 0;                          //!< the current step level
   int stepCount = 0;                            //!< the total number of steps available
-  std::vector < std::pair < int, double >> Cblocks;     // a vector containing the capacitive blocks (count, size)
+  std::vector < std::pair < int, double >> Cblocks;     // a vector containing the capacitive blocks (count, size[puMW])
 
   double participation = 1.0;    //!< a participation factor
 
@@ -63,6 +63,12 @@ public:
   virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void setControlBus (gridBus *cBus);
+
+  /** add a reactive block to the controller
+  @param[in] steps the number of steps in the block
+  @param[in] Qstep  the size of each step 
+  @param[in] unitType  the units of Qstep
+  */
   void addBlock (int steps, double Qstep, gridUnits::units_t unitType = gridUnits::defUnit);
 
   virtual change_code powerFlowAdjust (const IOdata &args, unsigned long flags, check_level_t level) override;
@@ -83,7 +89,14 @@ public:
   virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 protected:
+	/** get the setting corresponding to a specfic output level
+	@param[in] level the reactive output level desired [puMW] 
+	@return the step number corresponding to that level (best effort)
+	*/
   virtual int checkSetting (double level);
+  /** change the output setting to correspond to a specific step number
+  @param step the step number for the update
+  */
   virtual void updateSetting (int step);
 };
 

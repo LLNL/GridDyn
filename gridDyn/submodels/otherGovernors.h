@@ -21,8 +21,8 @@ class gridDynGovernorIeeeSimple : public gridDynGovernor
 public:
 protected:
   double T3;                  //!< [s]    servo motor time constant
-  double Pup;                 //!< [p.u.] upper ramp limit
-  double Pdown;               //!< [p.u.] lower ramp limit
+  double Pup;                 //!< [pu] upper ramp limit
+  double Pdown;               //!< [pu] lower ramp limit
 public:
   gridDynGovernorIeeeSimple (const std::string &objName = "govIeeeSimple_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;

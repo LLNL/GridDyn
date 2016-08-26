@@ -212,7 +212,7 @@ public:
   functionEventAdapter (std::function<change_code ()> fcal, double period, double startTime = 0.0) : eventAdapter (startTime, period), fptr (fcal)
   {
   }
-  change_code execute (double cTime);
+  virtual change_code execute (double cTime) override;
 
   void setfunction (std::function<change_code ()> nfptr)
   {

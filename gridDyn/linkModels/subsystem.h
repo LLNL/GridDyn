@@ -37,8 +37,8 @@ protected:
 
 
   gridArea subarea;  //!<  a container area
-  std::vector<double> Pout;  //vector of output powers on each of the terminals
-  std::vector<double> Qout;  //vector of output reactive powers on each of the terminals
+  std::vector<double> Pout;  //!<vector of output powers on each of the terminals
+  std::vector<double> Qout;  //!<vector of output reactive powers on each of the terminals
 public:
   /** @brief default constructor
   @param[in] terminals  the number of terminal the subsystem should have*/

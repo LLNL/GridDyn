@@ -17,28 +17,31 @@
 #include "gridRelay.h"
 #include <cstdint>
 
+/** fuse implements a standard power system fuse which can blow on time or using and I^2t calculation
+*/
 class fuse : public gridRelay
 {
 public:
+	/** flags for fuses*/
   enum fuse_flags
   {
-    overlimit_flag = object_flag10,
-    fuse_blown_flag = object_flag11,
-    nonlink_source_flag = object_flag12,
+    overlimit_flag = object_flag10,   //!< flag indicating the current is over the limit
+    fuse_blown_flag = object_flag11,	//!< flag indicting the fuse was blown
+    nonlink_source_flag = object_flag12,	//!< flag indicating the source is a not a link
   };
 protected:
-  index_t m_terminal = 1;  //!< line terminal
-  double limit = kBigNum;         //!< maximum current in puA
-  double mp_I2T = 0.0;         //!< I squared t characteristic of fuse 1 in puA^2*s
-  double minBlowTime = 0.001;   //!< the minimum time required to for the fuse to blow only used if I2T>0;
+  index_t m_terminal = 1;  //!< line terminal  (typically 1 or 2)
+  double limit = kBigNum;         //!<[puA] maximum current
+  double mp_I2T = 0.0;         //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
+  double minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
 private:
   double cI2T;        //!< calculated I2t value for fuse
-  double Vbase = 120;       //!< Voltage base for bus
-  gridBus *bus = nullptr;
-  bool useI2T = false;
+  double Vbase = 120;       //!<[kV] Voltage base for bus
+  gridBus *bus = nullptr;		//!< storage for a bus which the line terminal or other object
+  bool useI2T = false;  //!< internal flag for using the i^2t functionality
 public:
   fuse (const std::string &objName = "fuse_$");
-  gridCoreObject * clone (gridCoreObject *obj) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -47,16 +50,16 @@ public:
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 
   //dynamic functions for evaluation with a limit exceeded
-  double timestep (double ttime, const solverMode &sMode) override;
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
-  void loadSizes (const solverMode &sMode, bool dynOnly) override;
-  void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
+  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+  virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
-  void conditionTriggered (index_t conditionNum, double triggerTime) override;
+	virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
   change_code setupFuseEvaluation ();
 private:
   double I2Tequation (double current);

@@ -54,7 +54,7 @@ public:
 	virtual int set (const std::string &param, const std::string &val) override;
 
 	virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual int add(gridCoreObject *obj) final;
+	virtual int add(gridCoreObject *obj) override final;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 	virtual void dynObjectInitializeA (double time0, unsigned long flags) override;

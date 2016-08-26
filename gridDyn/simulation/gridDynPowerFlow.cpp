@@ -381,7 +381,13 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
 
           if ((bus->enabled) && (bus->getAdjustableCapacityUp () > 0))
             {
-              avail.push_back (bus->getMaxGenReal () * bus->get ("participation"));
+			  double maxGen = bus->getMaxGenReal();
+			  double participation = bus->get("participation");
+			  if (maxGen > kBigNum / 2)
+			  {
+				  maxGen = -(1.0 + participation)*(bus->getGenerationReal());
+			  }
+			  avail.push_back(maxGen);
 
             }
           else
@@ -397,7 +403,13 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
         {
           if ((bus->enabled) && (bus->getAdjustableCapacityDown () > 0))
             {
-              avail.push_back (bus->getMaxGenReal () * bus->get ("participation"));
+			  double maxGen = bus->getMaxGenReal();
+			  double participation = bus->get("participation");
+			  if (maxGen > kBigNum / 2)
+			  {
+				  maxGen = -(1.0 + participation)*(bus->getGenerationReal());
+			  }
+			  avail.push_back(maxGen);
             }
           else
             {

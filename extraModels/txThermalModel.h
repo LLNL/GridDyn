@@ -29,19 +29,19 @@ public:
 		enable_alarms = object_flag12,
 	};
 protected:
-	double Ttor = 1.25*3600.0; //!< oil rise time constant
-	double DThs = 35.0; //!< hot spot rise temp at rated current over top oil
-	double DTtor = 45.0; //!< Oil rise temp at rated current
-	double Tgr = 5.0*60.0; //!< winding time constant
+	double Ttor = 1.25*3600.0; //!<[s] oil rise time constant
+	double DThs = 35.0; //!<[C] hot spot rise temp at rated current over top oil
+	double DTtor = 45.0; //!<[C] Oil rise temp at rated current
+	double Tgr = 5.0*60.0; //!<[s] winding time constant
 	double mp_LR = 6.5; //!< Loss Ratio
 	double mp_n = 1.0; //!<oil exponent
 	double mp_m = 1.0; //!< winding exponent
-	double ambientTemp = 20;  //!< ambient temperature in C
-	double dTempdt = 0.0;  //!< rate of change of ambient temperature
-	double alarmTemp1 = 0; //!< the lower alarm temp
-	double alarmTemp2 = 0;  //!< the level 2 alarm temp
-	double cutoutTemp = 0;  //!< the temp at which the breakers are tripped
-	double alarmDelay = 300;  //!< delay time on the alarms and cutout;
+	double ambientTemp = 20;  //!<[C] ambient temperature in C
+	double dTempdt = 0.0;  //!<[C/s] rate of change of ambient temperature
+	double alarmTemp1 = 0; //!<[C] the lower alarm temp
+	double alarmTemp2 = 0;  //!<[C] the level 2 alarm temp
+	double cutoutTemp = 0;  //!<[C] the temp at which the breakers are tripped
+	double alarmDelay = 300;  //!<[s] delay time on the alarms and cutout;
 private:
 	double rating;  //!< transformer rating
 	double Plossr;  //!<  the losses at rated power
@@ -50,12 +50,12 @@ private:
 public:
 	/** @brief constructor*/
 	txThermalModel(const std::string &objName="txThermal_$");
-	gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
+	virtual gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
 	virtual int setFlag(const std::string &param, bool val=true) override;
 	virtual int set(const std::string &param, const std::string &val) override;
 
 	virtual int set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual int add(gridCoreObject *obj) final;
+	virtual int add(gridCoreObject *obj) final override;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 	virtual void dynObjectInitializeA (double time0, unsigned long flags) override;

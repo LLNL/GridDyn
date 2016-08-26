@@ -16,6 +16,8 @@
 
 #include "gridRelay.h"
 
+/** relay implementing a overcurrent breaker for a transmission line
+*/
 class breaker : public gridRelay
 {
 public:
@@ -27,24 +29,24 @@ public:
     nonlink_source_flag = object_flag11,
   };
 protected:
-  double minClearingTime = 0.0;       //!<minimum clearing time for from bus breaker
-  double recloseTime1 = 1;      //!< first reclose time
-  double recloseTime2 = 5;    //!< second reclose time
+  double minClearingTime = 0.0;   //!<[s] minimum clearing time for from bus breaker
+  double recloseTime1 = 1;      //!<[s] first reclose time
+  double recloseTime2 = 5;    //!<[s] second reclose time
   double recloserTap = 0;       //!< From side tap multiplier
-  double limit = 1.0;         //!< maximum current in puA
-  double lastRecloseTime = -kBigNum;     //!< last reclose time
-  double recloserResetTime = 60;    //!< time the breaker has to be on before the recloser count resets
+  double limit = 1.0;         //!<[puA] maximum current in puA
+  double lastRecloseTime = -kBigNum;     //!<[s] last reclose time
+  double recloserResetTime = 60;    //!<[s] time the breaker has to be on before the recloser count resets
   count_t maxRecloseAttempts = 0;        //!< total number of recloses
   index_t m_terminal = 1;       //!< link terminal
   gridBus *bus = nullptr;
 private:
   count_t recloseAttempts = 0;        //!< reclose attempt counter1
-  double cTI = 0;
+  double cTI = 0;			//!< storage for the current integral
   double Vbase = 120;       //!< Voltage base for bus1
-  bool useCTI = false;
+  bool useCTI = false;		//!< internal flag to use the CTI stuff
 public:
   breaker (const std::string &objName = "breaker_$");
-  gridCoreObject * clone (gridCoreObject *obj) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -54,17 +56,23 @@ public:
   virtual void updateA (double time) override;
 
   //dynamic state functions
-  double timestep (double ttime, const solverMode &sMode) override;
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  void loadSizes (const solverMode &sMode, bool dynOnly) override;
-  void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
+  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+  virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
 protected:
-  void conditionTriggered (index_t conditionNum, double triggeredTime) override;
+  virtual void conditionTriggered (index_t conditionNum, double triggeredTime) override;
+  /** trip the breaker
+  @param[in] time current time
+  */
   void tripBreaker (double time);
+  /** reset the breaker
+  @param[in] time current time
+  */
   void resetBreaker (double time);
 
 };

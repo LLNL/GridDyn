@@ -443,22 +443,37 @@ std::shared_ptr<stateGrabber> customStateGrabber::clone (gridCoreObject *nobj, s
   return cgb;
 }
 
-stateFunctionGrabber::stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func)
+stateFunctionGrabber::stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func): function_name(func)
 {
-  function_name = func;
   if (ggb)
     {
       bgrabber = ggb;
     }
-  opptr = get1ArgFunction (func);
+  opptr = get1ArgFunction (function_name);
   jacCapable = (bgrabber->jacCapable);
   loaded = bgrabber->loaded;
 }
 
 
-int stateFunctionGrabber::setInfo (std::string /*fld*/, gridCoreObject*)
+int stateFunctionGrabber::setInfo (std::string fld, gridCoreObject*obj)
 {
-  return LOADED;
+	if (!fld.empty())
+	{
+		if (isFunctionName(fld, function_type::arg))
+		{
+			function_name = fld;
+			opptr = get1ArgFunction(function_name);
+		}
+		else
+		{
+			return NOT_LOADED;
+		}
+	}
+	if (obj)
+	{
+		updateObject(obj);
+	}
+	return LOADED;
 }
 
 
@@ -537,9 +552,8 @@ void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, arrayD
   ad->merge (&d1);
 }
 
-stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op)
+stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op): op_name(op)
 {
-  op_name = op;
   if (ggb1)
     {
       bgrabber1 = ggb1;
@@ -554,9 +568,27 @@ stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_
 }
 
 
-int stateOpGrabber::setInfo (std::string /*fld*/, gridCoreObject* )
+int stateOpGrabber::setInfo (std::string opName, gridCoreObject *obj )
 {
-  return LOADED;
+	if (!opName.empty())
+	{
+		if (isFunctionName(opName, function_type::arg2))
+		{
+			op_name = opName;
+			opptr = get2ArgFunction(op_name);
+		}
+		else
+		{
+			return NOT_LOADED;
+		}
+	}
+
+	if (obj)
+	{
+		updateObject(obj);
+	}
+
+	return LOADED;
 }
 
 std::shared_ptr<stateGrabber> stateOpGrabber::clone (gridCoreObject *nobj, std::shared_ptr<stateGrabber> ggb) const
@@ -587,11 +619,9 @@ std::shared_ptr<stateGrabber> stateOpGrabber::clone (gridCoreObject *nobj, std::
 
 double stateOpGrabber::grabData (const stateData *sD, const solverMode &sMode)
 {
-  double val;
-
-  double temp1 = bgrabber1->grabData (sD, sMode);
-  double temp2 = bgrabber2->grabData (sD, sMode);
-  val = opptr (temp1, temp2);
+  double grabber1Data = bgrabber1->grabData (sD, sMode);
+  double grabber2Data = bgrabber2->grabData (sD, sMode);
+  double val = opptr (grabber1Data, grabber2Data);
   val = std::fma (val, gain, bias);
   return val;
 }
@@ -635,6 +665,10 @@ gridCoreObject *stateOpGrabber::getObject () const
     {
       return bgrabber1->getObject ();
     }
+  else if (bgrabber2)
+  {
+	  return bgrabber2->getObject();
+  }
   else
     {
       return nullptr;
@@ -653,12 +687,12 @@ void stateOpGrabber::outputPartialDerivatives (const stateData *sD, arrayData<do
   bgrabber1->outputPartialDerivatives (sD, &d1, sMode);
   bgrabber2->outputPartialDerivatives (sD, &d2, sMode);
 
-  double temp1 = bgrabber1->grabData (sD, sMode);
-  double temp2 = bgrabber2->grabData (sD, sMode);
+  double grabber1Data = bgrabber1->grabData (sD, sMode);
+  double grabber2Data = bgrabber2->grabData (sD, sMode);
 
-  double t1 = opptr (temp1,temp2);
-  double t2 = opptr (temp1 + 1e-7,temp2);
-  double t3 = opptr (temp1, temp2 + 1e-7);
+  double t1 = opptr (grabber1Data, grabber2Data);
+  double t2 = opptr (grabber1Data + 1e-7, grabber2Data);
+  double t3 = opptr (grabber1Data, grabber2Data + 1e-7);
   double dodI = (t2 - t1) / 1e-7;
 
   d1.scale (dodI * gain);

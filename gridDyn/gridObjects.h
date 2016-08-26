@@ -64,8 +64,8 @@ protected:
   std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false
   std::vector<double> m_state;              //!<storage location for internal state
   std::vector<double> m_dstate_dt;             //!<storage location for internal state differential
-  std::vector<gridObject *>subObjectList;        //! a vector of all the subObjects;
-  // stringVec stateNames;           //! a vector with the names of the states
+  std::vector<gridObject *>subObjectList;        //!<a vector of all the subObjects;
+  // stringVec stateNames;           //!<a vector with the names of the states
 public:
   /** @brief default constructor*/
   gridObject (const std::string &objName = "");

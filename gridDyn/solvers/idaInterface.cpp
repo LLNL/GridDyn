@@ -718,6 +718,7 @@ int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Ve
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
 
   assert (Neq == static_cast<int> (sd->svsize));
+  _unused(Neq);
   arrayDataSparse *a1 = &(sd->a1);
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
 

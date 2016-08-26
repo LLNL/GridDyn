@@ -39,9 +39,9 @@ public:
     at_angle_limits = object_flag6,
   };
 protected:
-  double machineBasePower = 100;  //!< [p.u.]  the operating base of the generator
-  double Xd = 1.05;            //!< [p.u.] d-axis reactance
-  double Rs = 0.0;            //!< [p.u.] generator resistance
+  double machineBasePower = 100;  //!< [pu]  the operating base of the generator
+  double Xd = 1.05;            //!< [pu] d-axis reactance
+  double Rs = 0.0;            //!< [pu] generator resistance
   gridBus *bus = nullptr;               //!< reference to the connected bus;
 public:
   //!< @brief default constructor
@@ -73,8 +73,8 @@ public:
   */
 
 protected:
-  double H = 5.0;                   //!< [p.u.] inertial constant
-  double D = 0.04;                   //!< [p.u.] damping
+  double H = 5.0;                   //!< [pu] inertial constant
+  double D = 0.04;                   //!< [pu] damping
   double Vd = 0;                              //!<the computed d axis voltage
   double Vq = 0;                              //!< the computed q axis voltage
   double mp_Kw = 13.0;               //!<speed gain for the damping system

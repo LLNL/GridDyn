@@ -55,11 +55,11 @@ protected:
 
   std::vector<gridPrimary *> rootObjects;//!< list of objects with roots
   std::vector<gridPrimary *> pFlowAdjustObjects;  //!< list of objects with Pflow checks
-
+  std::vector<std::shared_ptr<gridPrimary>> objectHolder;  //!< storage location for shared ptrs to an object
   listMaintainer opObjectLists;
   int masterBus = -1;                   //!< the master bus for frequency calculations purposes
   int zone = 1;                                 //!< the zone of the area
-  double fTarget;                 //!< a target frequency
+  double fTarget=1.0;                 //!<[puHz] a target frequency
 public:
   /** @brief the default constructor*/
   gridArea (const std::string &objName = "area_$");

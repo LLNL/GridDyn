@@ -69,8 +69,8 @@ protected:
   double refAngle = 0;                                                                        //!< refernce Angle
 
 
-  double Vmin = 0;                                                                                    //!< [p.u.]    voltage minimum
-  double Vmax = kBigNum;                                                              //!< [p.u.]    voltage maximum
+  double Vmin = 0;                                                                                    //!< [pu]    voltage minimum
+  double Vmax = kBigNum;                                                              //!< [pu]    voltage maximum
   double tieError = 0.0;       //!<tieLine error
   double prevPower = 0.0;                     //!< previuos power level
   double Tw = 0.1;               //!<time constant for the frequency estimator
@@ -232,45 +232,45 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  double getAdjustableCapacityUp (double time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (double time = kBigNum) const override;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  double getAdjustableCapacityDown (double time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (double time = kBigNum) const override;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/
-  double getdPdf () const
+  virtual double getdPdf () const override
   {
     return 0;
   }
   /** @brief get the tie error (may be deprecated in the future)
   * @return the tie error
   **/
-  double getTieError () const override
+  virtual double getTieError () const override
   {
     return tieError;
   }
   /** @brief get the frequency response
   * @return the tie error
   **/
-  double getFreqResp () const override
+  virtual double getFreqResp () const override
   {
     return 0;
   }
   /** @brief get available regulation
   * @return the available regulation
   **/
-  double getRegTotal () const override
+  virtual double getRegTotal () const override
   {
     return 0;
   }
   /** @brief get the scheduled power
   * @return the scheduled power
   **/
-  double getSched () const override
+  virtual double getSched () const override
   {
     return 0;
   }

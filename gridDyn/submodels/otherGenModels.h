@@ -87,10 +87,10 @@ private:
 class gridDynGenModel3 : public gridDynGenModelClassical
 {
 protected:
-  double Xl = 0.0;                                //!< [p.u.] leakage reactance
-  double Xdp = 0.35;                       //!< [p.u.] d-axis transient reactance
+  double Xl = 0.0;                                //!< [pu] leakage reactance
+  double Xdp = 0.35;                       //!< [pu] d-axis transient reactance
   double E = 0;                                         //!< constant Eb' field
-  double Xq = 0.85;                  //!< [p.u.] q-axis reactance
+  double Xq = 0.85;                  //!< [pu] q-axis reactance
   double Tdop = 8.0;                //!< [s]    d-axis time constant
 
 public:
@@ -114,7 +114,7 @@ class gridDynGenModel4 : public gridDynGenModel3
 {
 
 protected:
-  double Xqp = 0.35;               //!< [p.u.] q-axis transient reactance
+  double Xqp = 0.35;               //!< [pu] q-axis transient reactance
   double Tqop = 1.0;                //!< [s]    q-axis time constant
   double S10 = 1.0;           //!< the saturation S (1.0) const
   double S12 = 1.0;                    //!< the saturation S(1.2)

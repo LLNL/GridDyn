@@ -34,20 +34,20 @@ public:
   static int loadCount;      //!<counter for automatic load id's
   double baseVoltage;        //!< base voltage of the load
 protected:
-  gridBus *bus = nullptr;
-  double Pout;
-  double Qout;
-  double Psched = 0.0;
+  gridBus *bus = nullptr;					//!< pointer to the parent bus
+  double Pout;									//!<[puMW] the actual output power
+  double Qout;									//!<[puMVA] the actual output power
+  double Psched = 0.0;							//!<[puMW] the scheduled output power
 
   double dPdf = 0.0;                            //!<factor for determining how sensitive Pout is to frequency
-  double P = 0.0;                                     //!< [p.u.] real component of the load (constant Power)
-  double Q = 0.0;                                     //!< [p.u.] imaginary component of the load (constant Power)
-  double r = kBigNum;                           //!< [p.u.] resistive load (constant impedance)
-  double x = 0.0;                               //!< [p.u.] reactive load (constant impedance)
-  double Ip = 0.0;                              //!< [p.u.] real current; (constant current)
-  double Iq = 0.0;                              //!< [p.u.] imaginary current (constant current)
-  double Yp = 0.0;                              //!< [p.u.] the impedance load in MW
-  double Yq = 0.0;                              //!< [p.u.]  the reactive impedance load in MVar
+  double P = 0.0;                                     //!< [pu] real component of the load (constant Power)
+  double Q = 0.0;                                     //!< [pu] imaginary component of the load (constant Power)
+  double r = kBigNum;                           //!< [pu] resistive load (constant impedance)
+  double x = 0.0;                               //!< [pu] reactive load (constant impedance)
+  double Ip = 0.0;                              //!< [pu] real current; (constant current)
+  double Iq = 0.0;                              //!< [pu] imaginary current (constant current)
+  double Yp = 0.0;                              //!< [pu] the impedance load in MW
+  double Yq = 0.0;                              //!< [pu]  the reactive impedance load in MVar
   double M = 0.0;                               //!<load droop factor
   double H = 0.0;                               //!<load inertia used in computing dPdf
   double pfq = 0.0;                             //!<power factor multiply  sqrt((1-pf*pf)/pf*pf)

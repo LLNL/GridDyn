@@ -67,17 +67,17 @@ public:
   virtual std::shared_ptr<gridEvent> clone (gridCoreObject *newObj);
   virtual ~gridEvent ();
   virtual change_code trigger ();
-  virtual change_code trigger (double time);
+  virtual change_code trigger (double time) override;
 
-  double nextTriggerTime () const
+  virtual double nextTriggerTime() const override
   {
     return triggerTime;
   }
-  bool isArmed () const
+  virtual bool isArmed () const override
   {
     return armed;
   }
-  event_execution_mode executionMode () const
+  event_execution_mode executionMode() const override
   {
     return event_execution_mode::normal;
   }

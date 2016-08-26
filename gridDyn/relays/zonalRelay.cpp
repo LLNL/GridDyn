@@ -364,7 +364,7 @@ void zonalRelay::conditionCleared (index_t conditionNum, double /*triggerTime*/)
           return;
         }
     }
-  if (opFlags.test (use_commLink))
+  if (opFlags[use_commLink])
     {
       auto P = std::make_shared<relayMessage> ();
       if (conditionNum == 0)

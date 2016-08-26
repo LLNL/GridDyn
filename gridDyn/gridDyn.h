@@ -163,7 +163,7 @@ protected:
 
 
   offset_ordering default_ordering = offset_ordering::mixed;    //!< the default_ordering scheme for state variables
-  std::string powerFlowFile;                                    //! the power flow outputfile if any
+  std::string powerFlowFile;                                    //!<the power flow outputfile if any
   std::vector < std::shared_ptr < solverInterface >> solverInterfaces;          //!< vector of solver data
   std::vector<gridObject *>singleStepObjects;  //!<objects which require a state update after time step
   std::vector<gridBus *> slkBusses;                             //!< vector of slk buses to aid in powerflow adjust

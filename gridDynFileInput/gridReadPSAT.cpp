@@ -360,10 +360,10 @@ void loadPSATGenArray (gridCoreObject * /*parentObject*/, const mArray &gens, co
 Column Variable Description Unit
 1 - Bus number int
 2 Sn Power rating MVA
-3 PS0 Forecasted active power p.u.
-4 PSmax Maximum power bid p.u.
-5 PSmin Minimum power bid p.u.
-6 PS Actual active power bid p.u.
+3 PS0 Forecasted active power pu
+4 PSmax Maximum power bid pu
+5 PSmin Minimum power bid pu
+6 PS Actual active power bid pu
 7 CP0 Fixed cost(active power) $ / h
 8 CP1 Proportional cost(active power) $ / MWh
 9 CP2 Quadratic cost(active power) $ / MW2h
@@ -455,14 +455,14 @@ Column Variable Description Unit
 5 fn Frequency rating Hz
 6 - not used -
 7 kT Primary and secondary voltage ratio kV/kV
-8 r Resistance p.u.
-9 x Reactance p.u.
+8 r Resistance pu
+9 x Reactance pu
 10 - not used -
-y 11 a Fixed tap ratio p.u./p.u.
+y 11 a Fixed tap ratio pu/pu
 y 12  Fixed phase shift deg
-y 13 Imax Current limit p.u.
-y 14 Pmax Active power limit p.u.
-y 15 Smax Apparent power limit p.u.
+y 13 Imax Current limit pu
+y 14 Pmax Active power limit pu
+y 15 Smax Apparent power limit pu
 */
 
 void loadPSATLinkArray (gridCoreObject *parentObject, const mArray &lnks, const std::vector<gridBus *> &busList)
@@ -655,14 +655,14 @@ Column Variable Description Unit
 4 Vn Voltage rating kV
 5 fn Frequency rating Hz
 6 kT Nominal tap ratio kV / kV
-7 H Integral deviation p.u.
+7 H Integral deviation pu
 8 K Inverse time constant 1 / s
-9 mmax Max tap ratio p.u. / p.u.
-10 mmin Min tap ratio p.u. / p.u.
-11 m Tap ratio step p.u. / p.u.
-12 Vref(Qref) Reference voltage(power) p.u.
-13 xT Transformer reactance p.u.
-14 rT Transformer resistance p.u.
+9 mmax Max tap ratio pu / pu
+10 mmin Min tap ratio pu / pu
+11 m Tap ratio step pu / pu
+12 Vref(Qref) Reference voltage(power) pu
+13 xT Transformer reactance pu
+14 rT Transformer resistance pu
 15 r Remote control bus number int
 16 - Control
 1 Secondary voltage Vm
@@ -736,12 +736,12 @@ void loadPSATLTCArray (gridCoreObject *parentObject, const mArray &ltc, const st
 7 Tm Measurement time constant s
 8 Kp Proportional gain -
 9 Ki Integral gain -
-10 Pref Reference power p.u.
-11 rT Transformer resistance p.u.
-12 xT Transformer reactance p.u.
+10 Pref Reference power pu
+11 rT Transformer resistance pu
+12 xT Transformer reactance pu
 13 αmax Maximum phase angle rad
 14 αmin Minimum phase angle rad
-15 m Transformer fixed tap ratio p.u. / p.u.
+15 m Transformer fixed tap ratio pu / pu
 16 u Connection status{ 0, 1 }
 */
 void loadPSATPHSArray (gridCoreObject *parentObject, const mArray &phs, const std::vector<gridBus *> &busList)
@@ -781,22 +781,22 @@ void loadPSATPHSArray (gridCoreObject *parentObject, const mArray &phs, const st
 3 Vn Voltage rating kV all
 4 fn Frequency rating Hz all
 5 - Machine model - all
-6 xl Leakage reactance p.u. all
-7 ra Armature resistance p.u. all
-8 xd d-axis synchronous reactance p.u. III, IV, V.1, V.2, V.3, VI, VIII
+6 xl Leakage reactance pu all
+7 ra Armature resistance pu all
+8 xd d-axis synchronous reactance pu III, IV, V.1, V.2, V.3, VI, VIII
 9 x′
-d d-axis transient reactance p.u. II, III, IV, V.1, V.2, V.3, VI, VIII
+d d-axis transient reactance pu II, III, IV, V.1, V.2, V.3, VI, VIII
 10 x′′
-d d-axis subtransient reactance p.u. V.2, VI, VIII
+d d-axis subtransient reactance pu V.2, VI, VIII
 11 T′
 d0 d-axis open circuit transient time constant s III, IV, V.1, V.2, V.3, VI, VIII
 12 T′′
 d0 d-axis open circuit subtransient time constant s V.2, VI, VIII
-13 xq q-axis synchronous reactance p.u. III, IV, V.1, V.2, V.3, VI, VIII
+13 xq q-axis synchronous reactance pu III, IV, V.1, V.2, V.3, VI, VIII
 14 x′
-q q-axis transient reactance p.u. IV, V.1, VI, VIII
+q q-axis transient reactance pu IV, V.1, VI, VIII
 15 x′′
-q q-axis subtransient reactance p.u. V.2, VI, VIII
+q q-axis subtransient reactance pu V.2, VI, VIII
 16 T′
 q0 q-axis open circuit transient time constant s IV, V.1, VI, VIII
 17 T′′
@@ -922,10 +922,10 @@ Table 16.1: Turbine Governor Type I Data Format (Tg.con)
 Column Variable Description Unit
 1 - Generator number int
 2 1 Turbine governor type int
-3 !ref Reference speed p.u.
-4 R Droop p.u./p.u.
-5 Tmax Maximum turbine output p.u.
-6 Tmin Minimum turbine output p.u.
+3 !ref Reference speed pu
+4 R Droop pu/pu
+5 Tmax Maximum turbine output pu
+6 Tmin Minimum turbine output pu
 7 Ts Governor time constant s
 8 Tc Servo time constant s
 9 T3 Transient gain time constant s

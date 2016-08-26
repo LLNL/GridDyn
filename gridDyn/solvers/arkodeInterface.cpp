@@ -604,7 +604,9 @@ int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstat
 {
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
 
-  assert (Neq == static_cast<int> (sd->svsize));
+  assert(Neq == static_cast<int> (sd->svsize));
+  _unused(Neq);
+
   arrayDataSparse *a1 = &(sd->a1);
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
 

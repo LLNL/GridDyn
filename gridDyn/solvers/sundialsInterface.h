@@ -42,6 +42,9 @@
 
 #define MEASURE_TIMINGS 0
 
+
+#define _unused(x) ((void)(x))
+
 void sundialsErrorHandlerFunc (int error_code, const char *module, const char *function, char *msg, void *user_data);
 
 #ifdef KLU_ENABLE

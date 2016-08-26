@@ -806,6 +806,10 @@ bool gridDynSimulation::dynamicCheckAndReset (const solverMode &sMode, change_co
       dynData->sparseReInit (solverInterface::sparse_reinit_modes::resize);
 
     }
+  else if (opFlags[root_change_flag])
+  {
+	  handleRootChange(sMode, dynData);
+  }
   else        //mode ==0
     {
       opFlags &= RESET_CHANGE_FLAG_MASK;

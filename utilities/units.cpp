@@ -356,7 +356,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
           ret = 1 / val * (basePower * 1000000.0 / baseVoltage);
         case puMW:
 		case pu:
-          ret = 1 / val;                       //V^2/R assuming voltage=1.0 p.u.;
+          ret = 1 / val;                       //V^2/R assuming voltage=1.0 pu;
           break;
         case puOhm:                  //this is here due to cascading cases:
           ret = val;

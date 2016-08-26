@@ -266,6 +266,17 @@ double scheduler::getTarget () const
   return (pTarget.empty ()) ? PCurr : (pTarget.front ()).target;
 }
 
+
+double scheduler::getMax(double /*time*/) const
+{
+	return Pmax;
+}
+
+double scheduler::getMin(double /*time*/) const
+{
+	return Pmin;
+}
+
 int scheduler::set (const std::string &param,  const std::string &val)
 {
   int out = PARAMETER_FOUND;
@@ -285,7 +296,7 @@ int scheduler::set (const std::string &param, double val,units_t unitType)
   int out = PARAMETER_FOUND;
   if (param == "min")
     {
-      Pmin = unitConversion (val, unitType, puMW,systemBasePower);
+      Pmin = unitConversion (val, unitType, puMW,m_Base);
       if (PCurr < Pmin)
         {
           PCurr = Pmin;
@@ -293,15 +304,19 @@ int scheduler::set (const std::string &param, double val,units_t unitType)
     }
   else if (param == "max")
     {
-      Pmax = unitConversion (val, unitType, puMW,systemBasePower);
+      Pmax = unitConversion (val, unitType, puMW,m_Base);
       if (PCurr > Pmax)
         {
           PCurr = Pmax;
         }
     }
+  else if (param == "base")
+  {
+	  m_Base = unitConversion(val, unitType, MW, systemBasePower);
+  }
   else if (param == "target")
     {
-      setTarget (val);
+      setTarget (unitConversion(val,unitType,puMW,m_Base));
     }
   else
     {
@@ -315,12 +330,16 @@ double scheduler::get (const std::string &param, units_t unitType) const
   double val = kNullVal;
   if (param == "min")
     {
-      val = unitConversion (Pmin, puMW, unitType,systemBasePower);
+      val = unitConversion (Pmin, puMW, unitType,m_Base);
     }
   else if (param == "max")
     {
-      val = unitConversion (Pmax, puMW, unitType, systemBasePower);
+      val = unitConversion (Pmax, puMW, unitType, m_Base);
     }
+  else
+  {
+	  val = gridSubModel::get(param, unitType);
+  }
   return val;
 }
 
@@ -381,12 +400,15 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
 
 void scheduler::dispatcherLink ()
 {
-
-  auto    dispatch = static_cast<dispatcher *> (find ("dispatcher"));
-  if (dispatch)
-    {
-      dispatch->add (this);
-    }
+	if (parent)
+	{
+		auto    dispatch = static_cast<dispatcher *> (parent->find("dispatcher"));
+		if (dispatch)
+		{
+			dispatch->add(this);
+		}
+	}
+  
 
 }
 

@@ -22,13 +22,14 @@
 class longLine : public subsystem
 {
 protected:
-  double segmentationLength = 50;  //!< the length of each segment
-  double fault = -1.0;
-  double r = 0.0;
-  double x = 0.0;
-  double mp_G = 0.0;
-  double mp_B = 0.0;
-  double length = 0.0;
+
+  double segmentationLength = 50;		//!< [km] the length of each segment
+  double fault = -1.0;					//!< fault location along the line keep at <0 for no fault
+  double r = 0.0;						//!< [puOhm] per unit resistance
+  double x = 0.0;						//!< [puOhm] per unit reactance
+  double mp_G = 0.0;					//!< [puMW] per unit shunt conductance (g/2 on each end of the line)
+  double mp_B = 0.0;					//!< [puMW] per unit shunt capacitance (jb/2 on each end of the line)
+  double length = 0.0;					//!< [km] transmission line length
 private:
   int faultLink = -1;  //!< link number of the fault if one is present
 public:

@@ -35,7 +35,7 @@ protected:
   int autoName = -1;                                    //!< storage for indicator of the type of autoname to use
 public:
   zonalRelay (const std::string &objName = "zonalRelay_$");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -44,10 +44,10 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:
-  void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
-  void conditionTriggered (index_t conditionNum, double triggerTime) override;
-  void conditionCleared (index_t conditionNum, double triggerTime) override;
-  void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, double triggerTime) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
   /** function to automatically generate the comm system names
   @param[in] code  a code value representing the method of generating the name
   @return the generated name

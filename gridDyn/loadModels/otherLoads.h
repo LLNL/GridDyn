@@ -25,14 +25,14 @@ class gridRampLoad : public gridLoad
 {
 
 protected:
-  double dPdt = 0.0;                                          //!< [p.u.] real component of the load (constant Power)
-  double dQdt = 0.0;                                          //!< [p.u.] imaginary component of the load (constant Power)
-  double drdt = 0.0;                                          //!< [p.u.] resistive load (constant impedance)
-  double dxdt = 0.0;                                          //!< [p.u.] reactive load (constant impedance)
-  double dIpdt = 0.0;                                         //!< [p.u.] real current; (constant current)
-  double dIqdt = 0.0;                                         //!< [p.u.] imaginary current (constant current)
-  double dYpdt = 0.0;                                         //!< [p.u.] ramp in real impedance power
-  double dYqdt = 0.0;                                         //!< [p.u.] ramp in imaginary constant impedance power
+  double dPdt = 0.0;                                          //!< [pu] real component of the load (constant Power)
+  double dQdt = 0.0;                                          //!< [pu] imaginary component of the load (constant Power)
+  double drdt = 0.0;                                          //!< [pu] resistive load (constant impedance)
+  double dxdt = 0.0;                                          //!< [pu] reactive load (constant impedance)
+  double dIpdt = 0.0;                                         //!< [pu] real current; (constant current)
+  double dIqdt = 0.0;                                         //!< [pu] imaginary current (constant current)
+  double dYpdt = 0.0;                                         //!< [pu] ramp in real impedance power
+  double dYqdt = 0.0;                                         //!< [pu] ramp in imaginary constant impedance power
 public:
   gridRampLoad (const std::string &objName = "rampLoad_$");
   gridRampLoad (double rP, double rQ, const std::string &objName = "rampLoad_$");
@@ -46,6 +46,14 @@ public:
 
   virtual void loadUpdate (double ttime) override;
   void clearRamp ();
+};
+
+/** @brief a load that uses sources to calculate the values for the each of the load parameters
+eventually will replace most of the shaped loads*/
+class sourceLoad :public gridLoad
+{
+protected:
+
 };
 
 /** @brief a load with period pulses of various shapes*/
@@ -145,15 +153,15 @@ public:
   };
 
 protected:
-  double min_t = 0;
+  double min_t = 0.0;
   double max_t = 100;
-  double min_L = 0;
-  double max_L = 0;
-  double mean_t = 0;
-  double mean_L = 0;
-  double scale_t = 0;
-  double stdev_L = 0;
-  double zbias = 0;
+  double min_L = 0.0;
+  double max_L = 0.0;
+  double mean_t = 0.0;
+  double mean_L = 0.0;
+  double scale_t = 0.0;
+  double stdev_L = 0.0;
+  double zbias = 0.0;
 
   std::unique_ptr<gridRandom> timeGenerator;
   std::unique_ptr<gridRandom> valGenerator;
@@ -208,11 +216,11 @@ public:
     use_step_change_flag = object_flag8,
   };
 protected:
-  std::string fname;
-  timeSeries2 schedLoad;
+  std::string fname;			//!< the name of the file
+  timeSeries2 schedLoad;		//!< time series containing the load information
   gridUnits::units_t inputUnits = gridUnits::defUnit;
-  double scaleFactor = 1.0;
-  index_t currIndex = 0;
+  double scaleFactor = 1.0;			//!< scaling factor on the load
+  index_t currIndex = 0;			//!< the current index on timeSeries
   count_t count = 0;
   double qratio = kNullVal;
   std::vector<int> columnkey;
@@ -243,8 +251,8 @@ class exponentialLoad : public gridLoad
 {
 public:
 protected:
-  double alphaP = 0.0;
-  double alphaQ = 0.0;
+  double alphaP = 0.0;	//!< the voltage exponent parameter for the real power output
+  double alphaQ = 0.0;	//!< the voltage exponent paremeter for the reactive power output
 
 public:
   exponentialLoad (const std::string &objName = "expLoad_$");
@@ -270,8 +278,8 @@ class fDepLoad : public exponentialLoad
 {
 public:
 protected:
-  double betaP = 0.0;
-  double betaQ = 0.0;
+  double betaP = 0.0;   //!< the frequency exponent parameter for the real power output
+  double betaQ = 0.0;	//!< the frequency exponent parameter for the reactive power output
 
 public:
   fDepLoad (const std::string &objName = "fdepLoad_$");

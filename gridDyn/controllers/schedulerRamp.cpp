@@ -274,9 +274,8 @@ int schedulerRamp::set (const std::string &param, double val,gridUnits::units_t 
   double temp;
   if (param == "ramp")
     {
-      temp = gridUnits::unitConversion (val,unitType,gridUnits::puMWps,systemBasePower);
-      rampUp = temp;
-      rampDown = temp;
+      rampUp = gridUnits::unitConversion (val,unitType,gridUnits::puMWps,m_Base);
+      rampDown = rampUp;
     }
   else if (param == "rampup")
     {
@@ -375,8 +374,7 @@ int schedulerRamp::set (const std::string &param, double val,gridUnits::units_t 
 
 int schedulerRamp::setTarget (const std::string &filename)
 {
-  int out;
-  out = scheduler::setTarget (filename);
+  int out = scheduler::setTarget (filename);
   updatePTarget ();
   return out;
 

@@ -1859,12 +1859,12 @@ void gridBus::updateLocalCache ()
 
 double gridBus::getAdjustableCapacityUp (double /*time*/) const
 {
-  return kBigNum;
+  return 0.0;
 }
 
 double gridBus::getAdjustableCapacityDown (double /*time*/) const
 {
-  return kBigNum;
+  return 0.0;
 }
 
 double gridBus::getFreqResp () const

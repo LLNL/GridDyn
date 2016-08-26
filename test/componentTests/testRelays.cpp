@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE (relay_test2)
 
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+
 BOOST_AUTO_TEST_CASE (relay_test_multi)
 {
   //test a bunch of different link parameters to make sure all the solve properly
@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE (relay_test_multi)
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
 
   gds->dynInitialize (0);
-
   int cnt = gds->getInt("relaycount");
   
   BOOST_CHECK_EQUAL (cnt, 12);
@@ -95,7 +94,7 @@ BOOST_AUTO_TEST_CASE (relay_test_multi)
   BOOST_REQUIRE((ps == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE) || (ps == gridDynSimulation::gridState_t::DYNAMIC_PARTIAL));
 
 }
-#endif 
+
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(test_bus_relay)

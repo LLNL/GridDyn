@@ -33,10 +33,10 @@ class busControls
 public:
   acBus *controlledBus;         //!< the bus that is being controlled
 
-  double Qmin = -kBigNum;        //!< [p.u.]    reactive power minimum
-  double Qmax = kBigNum;         //!< [p.u.]    reactive power maximum
-  double Pmin = -kBigNum;        //!< [p.u.]    real power maximum
-  double Pmax = kBigNum;        //!< [p.u.]    real power maximum
+  double Qmin = -kBigNum;        //!< [pu]    reactive power minimum
+  double Qmax = kBigNum;         //!< [pu]    reactive power maximum
+  double Pmin = -kBigNum;        //!< [pu]    real power maximum
+  double Pmax = kBigNum;        //!< [pu]    real power maximum
   double autogenP = kBigNum;       //!< use an automatic generator to local match P load
   double autogenQ = kBigNum;       //!<use an automatic generator to locally match Q load
   double autogenDelay = 0.0;        //!<time constant for automatic generation

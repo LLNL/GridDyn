@@ -360,6 +360,11 @@ int gridSimulation::set (const std::string &param, double val, gridUnits::units_
     {
       stopTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
     }
+  else if (param == "printlevel")
+  {
+	  consolePrintLevel = static_cast<int> (val);
+	  logPrintLevel = consolePrintLevel;
+  }
   else if (param == "consoleprintlevel")
     {
       consolePrintLevel = static_cast<int> (val);

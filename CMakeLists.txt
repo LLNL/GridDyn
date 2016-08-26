@@ -154,16 +154,18 @@ IF(UNIX)
   set(Boost_NO_BOOST_CMAKE ON)
 
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
-  add_definitions(-std=c++11 )
-  add_definitions(-Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
+  add_compile_options(-std=c++11 -Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
 ELSE(UNIX)
   IF(MINGW)
-  add_definitions(-std=c++11)
-  add_definitions(-Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
+  add_compile_options(-std=c++11 -Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
   ELSE(MINGW)
   set(Boost_USE_STATIC_LIBS ON)
   ENDIF(MINGW)
 ENDIF(UNIX)
+
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	add_compile_options(-Wsuggest-override)
+ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
 
@@ -225,7 +227,7 @@ ENDIF(BUILD_SERVERMODE)
 IF(MSVC)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
   ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-  ADD_DEFINITIONS(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800)
+  ADD_DEFINITIONS(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
 ENDIF(MSVC)
 
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)

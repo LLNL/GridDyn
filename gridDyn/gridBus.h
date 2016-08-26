@@ -34,12 +34,12 @@ class gridDynGenerator;
 class busPowers
 {
 public:
-	double linkP = 0.0;						 //!< [p.u.]    reactive power coming from Links
-	 double linkQ = 0.0;                                //!< [p.u.]    reactive power coming from Links
-	 double loadP = 0.0;					//!< [pu] real power coming from the loads
-	 double loadQ = 0.0;                    //!< [p.u.]  reactive  power coming from Loads
-	 double genP = 0.0;						//!< [pu] real power from the generators
-    double  genQ = 0.0;                     //!< [pu]  reactive power from the generators
+	double linkP = 0.0;						 //!< [puMW]    reactive power coming from Links
+	 double linkQ = 0.0;                                //!< [pu]    reactive power coming from Links
+	 double loadP = 0.0;					//!< [puMW] real power coming from the loads
+	 double loadQ = 0.0;                    //!< [puMW]  reactive  power coming from Loads
+	 double genP = 0.0;						//!< [puMW] real power from the generators
+    double  genQ = 0.0;                     //!< [puMW]  reactive power from the generators
   index_t seqID=0;						//!< the sequence id of the latest state from which the powers are computed
   busPowers ()
   {
@@ -86,17 +86,18 @@ protected:
   std::vector<gridLoad *> attachedLoads;                                             //!<  list of all the loads
   std::vector<gridLink *> attachedLinks;                                             //!< list of the attached links
   std::vector<gridDynGenerator *> attachedGens;                              //!< list of the attached generators
+  std::vector<std::shared_ptr<gridSecondary>> objectHolder;  //!< storage location for shared ptrs to secondary objects
 
   double angle = 0.0;                                   //!< [rad]     voltage angle
-  double voltage = 1.0;                                 //!< [p.u.]    per unit voltage magnitude
+  double voltage = 1.0;                                 //!< [puV]    per unit voltage magnitude
   double baseVoltage = 120;                             //!< [kV]    base voltage level
   busType type = busType::PQ;                                   //!< [busType] bus type: PV, PQ, or slack/swing
-  dynBusType dynType = dynBusType::normal;                                                      //!< dynamic bus type
+  dynBusType dynType = dynBusType::normal;                     //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types as for power flow but for dynamic simulations
 
-  busPowers S;                                                          //!< storage for the power computation from the various sources;
-  double Vtol = -1.0;                         //!< voltage tolerance
-  double Atol = -1.0;                         //!< angle tolerance
-  double freq = 1.0;       //!<estimated actual frequency
+  busPowers S;                                //!< storage for the power computation from the various sources;
+  double Vtol = -1.0;                         //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
+  double Atol = -1.0;                         //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
+  double freq = 1.0;       //!<[puHz] estimated actual frequency
   IOdata outputs;   //!< the current output values
   IOlocs outLocs;   //!< the current output locations
 public:
@@ -339,23 +340,23 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  double getAdjustableCapacityUp (double time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (double time = kBigNum) const;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  double getAdjustableCapacityDown (double time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (double time = kBigNum) const;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/
-  double getdPdf () const
+  virtual double getdPdf () const
   {
     return 0;
   }
   /**@brief boolean indicator if the bus has inertial generators or loads*/
   bool hasInertialAngle () const;
-  /** @brief get the tie error (may be deprecated in the future)
+  /** @brief get the tie error (may be deprecated in the future as this should be handled at an area level)
   * @return the tie error
   **/
   virtual double getTieError () const

@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE (test_iterated_pflow)
   gds->set("recorddirectory", pFlow_test_directory);
   gds->run();
 
-  BOOST_REQUIRE (gds->getCurrentTime() >= 23);
+  BOOST_REQUIRE (gds->getCurrentTime() >= 575.0);
 
 }
 

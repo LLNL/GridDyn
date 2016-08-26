@@ -38,13 +38,13 @@ public:
     uses_ramplimits = object_flag8,             //!< indicator that the governor had ramp limits
   };
 protected:
-  double K = 16.667;             //!< [p.u.] droop gain (1/R)
+  double K = 16.667;             //!< [pu] droop gain (1/R)
   double T1 = 0.1;            //!< [s]   droop control time constant 1
   double T2 = 0.0;                        //!< [s]   droop control  time constant 2
   double T3 = 0.0;                              //!< [s]  throttle response
-  double Pmax = kBigNum;        //!< [p.u.] maximum turbine output
-  double Pmin = -kBigNum;        //!< [p.u.] minimum turbine output
-  double Pset = 0.0;          //!< [p.u.] Set point and initial Pm
+  double Pmax = kBigNum;        //!< [pu] maximum turbine output
+  double Pmin = -kBigNum;        //!< [pu] minimum turbine output
+  double Pset = 0.0;          //!< [pu] Set point and initial Pm
   double Wref = -kBigNum;       //!<[rad]  reference frequency
   double deadbandHigh = -kBigNum;      //!<upper threshold on the deadband;
   double deadbandLow = kBigNum;      //!<lower threshold on the deadband;

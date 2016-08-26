@@ -57,7 +57,7 @@ public:
 class rampSource : public gridSource
 {
 protected:
-  double mp_dOdt = 0.0;  //!< the ramp rate of the output
+  double mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output
 public:
   rampSource (const std::string &objName = "rampSource_#",double startVal = 0.0);
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
@@ -85,11 +85,11 @@ public:
   };
   pulse_type_t ptype = pulse_type_t::square;  //!< the type of the pulse
 protected:
-  double period = kBigNum;         //!< pulse period
-  double dutyCycle = 0.5;                       //!< pulse duty cycle
-  double A = 0.0;                                       //!< pulse amplitude
-  double cycleTime = kBigNum;           //!< the start time of the last cycle
-  double baseValue;                                     //!< the base level of the output
+  double period = kBigNum;         //!<{s] pulse period
+  double dutyCycle = 0.5;           //!<[%] pulse duty cycle
+  double A = 0.0;                    //!< pulse amplitude
+  double cycleTime = kBigNum;           //!<[s] the start time of the last cycle
+  double baseValue;                  //!< the base level of the output
   double shift = 0;                 //!< storage for phase shift fraction (should be between 0 and 1)
 
 public:
@@ -115,15 +115,15 @@ public:
 class sineSource : public pulseSource
 {
 public:
-  static const char pulsed_flag = object_flag4;
+  static const char pulsed_flag = object_flag4;			
 protected:
-  double frequency = 0.0;
-  double phase = 0.0;
-  double lastCycle = -kBigNum;
-  double Amp = 0.0;
-  double sinePeriod = kBigNum;
-  double dfdt = 0.0;
-  double dAdt = 0.0;
+  double frequency = 0.0;			//!<[Hz] frequency of an oscillation
+  double phase = 0.0;				//!<[rad]  the offset angle
+  double lastCycle = -kBigNum;		///!< time of the last cycle completion
+  double Amp = 0.0;					//!< the amplitude of the pulse
+  double sinePeriod = kBigNum;		//!< the period of the sinusoid
+  double dfdt = 0.0;				///!<[Hz/s] the rate of change of frequency
+  double dAdt = 0.0;				//!< [1/s] the rate of change of amplitude
 
 public:
   sineSource (const std::string &objName = "sineSource_#",double startVal = 0.0) : pulseSource (objName,startVal)
@@ -143,7 +143,6 @@ public:
 };
 
 /** @brief a source generating a random output*/
-
 class randomSource : public rampSource
 {
 public:

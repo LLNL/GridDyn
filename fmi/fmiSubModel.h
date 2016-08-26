@@ -116,7 +116,7 @@ public:
 
   fmi2ParamMap paramStr; //!<map of parameter names
   fmi2ParamMap inputStr; //!<map of input names
-  fmi2ParamMap outputStr; //!map of output names
+  fmi2ParamMap outputStr; //!<ap of output names
   fmi2ParamMap localStr; //!<map of local names
   fmi2ParamMap stateStr; //!<map of the state names
 

@@ -79,9 +79,9 @@ protected:
   gridDynExciter *ext = nullptr;                    //!< exciter model
   gridDynGovernor *gov = nullptr;                   //!< governor model
   gridDynPSS *pss = nullptr;                        //!< power system stabilizer type
-  double P = 0.0;                    //!< [p.u.] Electrical generation real power output
-  double Q = 0.0;                    //!< [p.u.] Electrical generation reactive power output
-  double Pset = -kBigNum;                    //!< [p.u.] target power set point
+  double P = 0.0;                    //!< [pu] Electrical generation real power output
+  double Q = 0.0;                    //!< [pu] Electrical generation reactive power output
+  double Pset = -kBigNum;                    //!< [pu] target power set point
   double dPdt = 0.0;                                //!< define the power ramp
   double dQdt = 0.0;                                  //!< define the reactive power ramp
   const double *m_stateTemp = nullptr;                       //!< temporary state vector(assumed not writable)

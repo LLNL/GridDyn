@@ -54,9 +54,8 @@ acdcConverter::acdcConverter (double rP, double xP, const std::string &objName) 
   buildSubsystem ();
 }
 
-acdcConverter::acdcConverter (mode_t opType, const std::string &objName) : gridLink (modeToName (opType,objName))
+acdcConverter::acdcConverter (mode_t opType, const std::string &objName) : gridLink (modeToName (opType,objName)),type(opType)
 {
-  type = opType;
   if (opType == mode_t::inverter)
     {
       dirMult = -1.0;

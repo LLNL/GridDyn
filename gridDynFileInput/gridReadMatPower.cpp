@@ -167,7 +167,7 @@ PG 2 real power output (MW)
 QG 3 reactive power output (MVAr)
 QMAX 4 maximum reactive power output (MVAr)
 QMIN 5 minimum reactive power output (MVAr)
-VG 6 voltage magnitude setpoint (p.u.)
+VG 6 voltage magnitude setpoint (pu)
 MBASE 7 total MVA base of machine, defaults to baseMVA
 GEN STATUS 8 machine status,
 > 0 = machine in-service
@@ -372,9 +372,9 @@ void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencou
 /* Branch data
 F BUS 1 \from" bus number
 T BUS 2 \to" bus number
-BR R 3 resistance (p.u.)
-BR X 4 reactance (p.u.)
-BR B 5 total line charging susceptance (p.u.)
+BR R 3 resistance (pu)
+BR X 4 reactance (pu)
+BR B 5 total line charging susceptance (pu)
 RATE A 6 MVA rating A (long term rating)
 RATE B 7 MVA rating B (short term rating)
 RATE C 8 MVA rating C (emergency rating)

@@ -25,7 +25,7 @@ class functionEventAdapter;
 
 enum class change_code;
 
-//helper class for delayed execution of set functions
+/**helper class for delayed execution of set functions*/
 struct delayedControlAction
 {
   std::uint64_t sourceID;
@@ -36,7 +36,8 @@ struct delayedControlAction
   bool measureAction;
 };
 
-
+/** @brief relay with control functionality  ie the ability to control an object through a comm channel
+*/
 class controlRelay : public gridRelay
 {
 public:
@@ -48,18 +49,18 @@ public:
   };
 protected:
   int autoName = -1;
-  double actionDelay = 0.0;
-  double measureDelay = 0.0;
-  count_t instructionCounter = 0;
+  double actionDelay = 0.0;		//!< the delay between comm signal and action
+  double measureDelay = 0.0;	//!< the delay between comm measure request and action measurement extraction
+  count_t instructionCounter = 0;	//!< counter for the number of instructions
 
-  std::vector<delayedControlAction> actions;
-  gridSimulation *rootSim = nullptr;
-  index_t m_terminal;
+  std::vector<delayedControlAction> actions;	//!< queue for delayed control actions
+  gridSimulation *rootSim = nullptr;		//!< pointer to the root object
+  index_t m_terminal;		//!< the terminal of a link device to act upon(if source or sink is a link
 private:
   std::string m_terminal_key;
 public:
   controlRelay (const std::string &objName = "controlRelay_$");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -67,9 +68,9 @@ public:
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:
-  void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
 
-  void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
   std::string generateAutoName (int code);
 
   change_code executeAction (index_t index);

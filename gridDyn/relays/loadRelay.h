@@ -15,22 +15,25 @@
 
 #include "gridRelay.h"
 
+/** class implementing a protective relay for load objects
+the protective systems include underfrequency, undervoltage, and a return time so the load automatically recovers
+*/
 class loadRelay : public gridRelay
 {
 public:
-  enum busrelay_flags
+  enum loadrelay_flags
   {
     nondirectional_flag = object_flag10,
   };
 protected:
-  double cutoutVoltage = 0;
-  double cutoutFrequency = 0;
-  double voltageDelay = 0;
-  double frequencyDelay = 0;
-  double offTime = kBigNum;
+  double cutoutVoltage = 0;			//!<[puV] low voltage trigger for load
+  double cutoutFrequency = 0;		//!<[puHz] low frequency trigger for load
+  double voltageDelay = 0;			//!<[s]  the delay on the voltage trip
+  double frequencyDelay = 0;		//!<[s] the delay on the frequency tripping
+  double offTime = kBigNum;			//!<[s] the time before the load comes back online if the trip cause has been corrected
 public:
   loadRelay (const std::string &objName = "loadRelay_$");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -38,9 +41,9 @@ public:
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:
-  void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
-  void conditionTriggered (index_t conditionNum, double triggerTime) override;
-  void conditionCleared (index_t conditionNum, double triggerTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, double triggerTime) override;
 
 };
 

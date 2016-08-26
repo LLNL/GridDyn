@@ -57,9 +57,9 @@ public:
 		return R*C;
 	};
 	
-	void setRowLimit(index_t /*lim*/) final
+	void setRowLimit(index_t /*lim*/) final override
 	{};
-	void setColLimit(index_t /*lim*/) final
+	void setColLimit(index_t /*lim*/) final override
 	{}
 
 	index_t rowIndex(index_t N) const override

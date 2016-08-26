@@ -16,6 +16,8 @@
 #include "gridRelay.h"
 #include "comms/commMessage.h"
 
+/** relay implementing differential relay protection scheme
+*/
 class differentialRelay : public gridRelay
 {
 public:
@@ -27,12 +29,12 @@ public:
   };
 protected:
   double m_resetMargin = 0.01; //!< the reset margin for clearing a fault
-  double m_delayTime = 0.08; //!< the delay time from first onset to trigger action
+  double m_delayTime = 0.08; //!<[s] the delay time from first onset to trigger action
   double m_max_differential = 0.2; //!< the maximum allowable differential
   double m_minLevel = 0.01; //!< the minimum absolute level to trigger for relative differential mode
 public:
   differentialRelay (const std::string &objName = "diffRelay_$");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual bool getFlag (const std::string &param) const override;
 
@@ -42,11 +44,11 @@ public:
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   virtual void pFlowObjectInitializeA (double time0, unsigned long) override;
 
-  void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 protected:
-  void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
-  void conditionTriggered (index_t conditionNum, double triggerTime) override;
-  void conditionCleared (index_t conditionNum, double triggerTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, double triggerTime) override;
 
 };
 

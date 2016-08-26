@@ -73,7 +73,7 @@ protected:
 public:
   /** @brief default constructor*/
   sensor (const std::string &objName = "sensor_$");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -152,7 +152,7 @@ public:
   virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
 
-  void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 
   /** @brief translate an output name into an output Index
   @param[in] outName the named output to find

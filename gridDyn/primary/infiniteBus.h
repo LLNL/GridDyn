@@ -18,15 +18,15 @@
 
 /** @brief an infinite bus object with fixed voltage and angle
   this type of bus can set a voltage, angle and frequency on the system and maintain it regardless of all other considerations on the model
-it can supply infinite real and reactive power  it also include ramp parameters to change the voltage and frequency( and hence angle) over time
-the class overrides all math operations and does nothing since there are no calculations or states in an infinite bus except to update the parameters
-for the scheduled change in voltage and frequency and hence angle
+it can supply infinite real and reactive power  it also include ramp parameters to change the voltage and frequency( and hence angle) over time.
+The class overrides all math operations and does nothing since there are no calculations or states in an infinite bus except to update the parameters
+for the scheduled change in voltage and frequency and hence angle, objects attached to it are ignored
 */
 class infiniteBus : public gridBus
 {
 protected:
-  double dvdt = 0;        //!<  ramp rate for voltage
-  double dfdt = 0;         //!< ramp rate for frequency
+  double dvdt = 0;        //!< [puV/s] ramp rate for voltage
+  double dfdt = 0;         //!< [puHz/s] ramp rate for frequency
 public:
   infiniteBus (const std::string &objName = "infbus_$");
   infiniteBus (double startVoltage, double startAngle,const std::string &objName = "infbus_$");

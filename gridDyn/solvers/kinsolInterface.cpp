@@ -554,10 +554,11 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
   return ret;
 }
 
-int kinsolJacDense (long int N, N_Vector u, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
+int kinsolJacDense (long int Neq, N_Vector u, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
-  assert (N == static_cast<int> (sd->svsize));
+  assert(Neq == static_cast<int> (sd->svsize));
+  _unused(Neq);
 
   arrayDataSundialsDense a1 (J);
   sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, &a1, 0, sd->mode);

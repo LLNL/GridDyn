@@ -2162,7 +2162,7 @@ Value& CharReaderBuilder::operator[](JSONCPP_STRING key)
 // static
 void CharReaderBuilder::strictMode(Json::Value* settings)
 {
-//! [CharReaderBuilderStrictMode]
+//!<[CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
@@ -2172,12 +2172,12 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
-//! [CharReaderBuilderStrictMode]
+//!<[CharReaderBuilderStrictMode]
 }
 // static
 void CharReaderBuilder::setDefaults(Json::Value* settings)
 {
-//! [CharReaderBuilderDefaults]
+//!<[CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
   (*settings)["allowComments"] = true;
   (*settings)["strictRoot"] = false;
@@ -2188,7 +2188,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
-//! [CharReaderBuilderDefaults]
+//!<[CharReaderBuilderDefaults]
 }
 
 //////////////////////////////////
@@ -5211,14 +5211,14 @@ Value& StreamWriterBuilder::operator[](JSONCPP_STRING key)
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
 {
-  //! [StreamWriterBuilderDefaults]
+  //!<[StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
   (*settings)["precision"] = 17;
-  //! [StreamWriterBuilderDefaults]
+  //!<[StreamWriterBuilderDefaults]
 }
 
 JSONCPP_STRING writeString(StreamWriter::Factory const& builder, Value const& root) {

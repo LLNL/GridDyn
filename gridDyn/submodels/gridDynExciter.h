@@ -35,10 +35,10 @@ public:
     etrigger_high = object_flag4,
   };
 protected:
-  double Vrmin = -5.1;         //!< [p.u.] lower voltage limit
-  double Vrmax = 6;         //!< [p.u.] upper voltage limit
-  double Vref = 1.0;          //!< [p.u.] reference voltage for voltage regulator
-  double Ka = 10;            //!< [p.u.] amplifier gain
+  double Vrmin = -5.1;         //!< [pu] lower voltage limit
+  double Vrmax = 6;         //!< [pu] upper voltage limit
+  double Vref = 1.0;          //!< [pu] reference voltage for voltage regulator
+  double Ka = 10;            //!< [pu] amplifier gain
   double Ta = 0.004;            //!< [s]    amplifier time constant
   double vBias = 0.0;           //!< bias field level for adjusting the field output so the ref can remain at some nominal level
   int limitState = 0;
@@ -79,12 +79,12 @@ protected:
 class gridDynExciterIEEEtype1 : public gridDynExciter
 {
 protected:
-  double Ke = 1.0;            // [p.u.] self-excited field
+  double Ke = 1.0;            // [pu] self-excited field
   double Te = 1.0;            // [s]    exciter time constant
-  double Kf = 0.03;            // [p.u.] stabilizer gain
+  double Kf = 0.03;            // [pu] stabilizer gain
   double Tf = 1.0;            // [s]    stabilizer time constant
-  double Aex = 0.0;           // [p.u.] parameter saturation function
-  double Bex = 0.0;           // [p.u.] parameter saturation function
+  double Aex = 0.0;           // [pu] parameter saturation function
+  double Bex = 0.0;           // [pu] parameter saturation function
 public:
   gridDynExciterIEEEtype1  (const std::string &objName = "exciterIEEEtype1_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;

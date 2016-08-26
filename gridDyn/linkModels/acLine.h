@@ -65,13 +65,13 @@ protected:
   double maxAngle = kPI / 2.0;                      //!<the maximum angle the link can handle--related to rating
 
   double length = 0.0;                    //!< [km] transmission line length
-  double r = 0;                           //!< [p.u.] per unit resistance
-  double x = 0.00000001;                           //!< [p.u.] per unit reactance
-  double mp_B = 0.0;                      //!< [p.u.] per unit shunt capacitance (jb/2 on each end of the line)
-  double mp_G = 0.0;                                  //!< [p.u.] per unit shunt conductance (g/2 on each end of the line)
+  double r = 0;                           //!< [pu] per unit resistance
+  double x = 0.00000001;                           //!< [pu] per unit reactance
+  double mp_B = 0.0;                      //!< [pu] per unit shunt capacitance (jb/2 on each end of the line)
+  double mp_G = 0.0;                                  //!< [pu] per unit shunt conductance (g/2 on each end of the line)
   double fault = -1.0;                        //!< fault location along the line keep at <0 for no fault
-  double g = 0.0;                         //!< [p.u.] per unit conductance
-  double b = 0.0;                         //!< [p.u.] per unit susceptance
+  double g = 0.0;                         //!< [pu] per unit conductance (calculated parameter)
+  double b = 0.0;                         //!< [pu] per unit susceptance (calculated parameter)
   double tap = 1.0;                       //!< tap position, neutral t = 1;
   double tapAngle = 0.0;                  //!< [deg] phase angle for phase shifting transformer
 

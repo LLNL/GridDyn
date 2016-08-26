@@ -53,11 +53,7 @@ gridRelay::gridRelay (const std::string &objName) : gridPrimary (objName)
   // default values
   ++relayCount;
   id = relayCount;
-  if (name.back () == '$')
-    {
-      name.pop_back ();
-      name += std::to_string (id);
-    }
+  updateName();
   opFlags.set (no_pflow_states);
   opFlags.set (no_dyn_states);
 }
@@ -356,15 +352,7 @@ int gridRelay::set (const std::string &param,  const std::string &val)
   int out = PARAMETER_FOUND;
   if (param == "condition")
     {
-      if (m_sourceObject)
-        {
-          add (make_condition (val, m_sourceObject));
-        }
-      else
-        {
-          add (make_condition (val, parent));
-        }
-
+        add (make_condition (val, m_sourceObject?m_sourceObject:parent));
     }
   else if (param == "action")
     {
@@ -381,14 +369,7 @@ int gridRelay::set (const std::string &param,  const std::string &val)
         }
       if (!isAlarm)
         {
-          if (m_sinkObject)
-            {
-              add (make_event (val, m_sinkObject));
-            }
-          else
-            {
-              add (make_event (val, parent));
-            }
+            add (make_event (val, m_sinkObject?m_sinkObject:parent));
         }
 
     }

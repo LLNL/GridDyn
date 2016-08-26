@@ -239,7 +239,7 @@ Columns 25-26   Type (I) *
 2 - Hold voltage within VAR limits (gen, PV)
 3 - Hold voltage and angle (swing, V-Theta) (must always
 have one)
-Columns 28-33   Final voltage, p.u. (F) *
+Columns 28-33   Final voltage, pu (F) *
 Columns 34-40   Final angle, degrees (F) *
 Columns 41-49   Load MW (F) *
 Columns 50-58   Load MVAR (F) *
@@ -760,33 +760,33 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const so
       auto stateFile = gds->getString ("statefile");
 	  auto s=writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, stateFile,append);
 	  if ((s == FUNCTION_EXECUTION_SUCCESS)&&(hasDifferential(iMode)))
-        {
+	  {
 		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), stateFile);
 	  }
 	  
-        }
-      else
-        {
+    }
+  else
+    {
 	  auto s = writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, fname, append);
 	  if ((s == FUNCTION_EXECUTION_SUCCESS) && (hasDifferential(iMode)))
 	  {
 		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), fname);
-        }
+	  }
     }
 }
 
 
 int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
-    {
+{
 	std::ofstream  bFile;
-      if (append)
-        {
+	if (append)
+	{
 		bFile.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::app);
-        }
-      else
-        {
+	}
+	else
+	{
 		bFile.open(filename.c_str(), std::ios::out | std::ios::binary);
-        }
+	}
 	if (!bFile.is_open())
 	{
 		return (FUNCTION_EXECUTION_FAILURE);
@@ -811,11 +811,11 @@ int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_
 	else
 	{
 		bFile.open(filename.c_str(), std::ios::out | std::ios::binary);
-    }
-  if (!bFile.is_open ())
-    {
+	}
+	if (!bFile.is_open())
+	{
 		return FUNCTION_EXECUTION_FAILURE;
-    }
+	}
 	code &= 0x0000FFFF;
 	code |= 0x00010000;
 	bFile.write((char *)(&time), sizeof(double));
@@ -826,10 +826,10 @@ int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_
 	bFile.write((char *)(&numElements), sizeof(std::uint32_t));
 	a1->start();
 	for (size_t nn = 0; nn < numElements; ++nn)
-    {
+	{
 		auto el = a1->next();
 		bFile.write((char *)(&el), sizeof(data_triple<double>));
-    }
+	}
 	return FUNCTION_EXECUTION_SUCCESS;
 }
 

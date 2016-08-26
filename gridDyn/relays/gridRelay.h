@@ -148,17 +148,42 @@ public:
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode)  override;
   virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)  override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level)  override;
-
+  /** message processing function for use with communicators
+  @param[in] sourceID  the source of the comm message
+  @param[in] message the actual message to process
+  */
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message);
-
+  /** send and alarm message
+  @param[in] the code to put in the alarm message
+  @return FUNCTION_EXECUTION_SUCCESS if successful <0 if not
+  */
   int sendAlarm (std::uint32_t code);
+  /** generate an alarm event
+  @param[in] val a string defining the alarm
+  */
   std::shared_ptr<eventAdapter> make_alarm (const std::string &val);
 protected:
+	/** update the number of root finding functions used in the relay
+	@param[in] alertChange true if the function should send alerts to its parent object if the number of roots changes
+	*/
   virtual void updateRootCount (bool alertChange = true);
+  /** do something when an action is taken 
+  @param ActionNum  the index of the action that was executed
+  @param conditionNum the index of the condition that triggered the action
+  @param actionReturn  the return code of the action execution
+  @param actionTime the time at which the action was taken
+  */
   virtual void actionTaken (index_t ActionNum, index_t conditionNum,  change_code actionReturn, double actionTime);
+  /** do something when an condition is triggered
+  @param conditionNum the index of the condition that triggered the action
+  @param timeTriggered the time at which the condition was triggered
+  */
   virtual void conditionTriggered (index_t conditionNum, double timeTriggered);
-  virtual void conditionCleared (index_t conditionNum, double timeTriggered);
-private:
+  /** do something when an condition is cleared
+  @param conditionNum the index of the condition that triggered the action
+  @param timeCleared the time at which the condition was cleared
+  */
+  virtual void conditionCleared (index_t conditionNum, double timeCleared);
 private:
   /** @brief subclass  data container for helping with condition time checks*/
   class condCheckTime
@@ -186,7 +211,7 @@ public:
   typedef struct
   {
     index_t actionNum;                      //!< the related ActionNumber
-    std::vector<index_t> multiConditions;                      //!< identification of the conditions involved
+    std::vector<index_t> multiConditions;   //!< identification of the conditions involved
     double delayTime;                     //!< the delay time all conditions must be true before the action is taken
   } mcondTrig;
   /** enumeration of relay flags*/
@@ -199,7 +224,7 @@ public:
   std::vector<double> conditionTriggerTimes;               //!< the times at which the condition triggered
   std::vector<condCheckTime> condChecks;               //!<a vector of condition action pairs that are in wait and see mode
   std::vector < std::vector < mcondTrig >> multiConditionTriggers;               //!<a vector for action which have multiple triggers
-  std::vector<index_t> conditionsWithRoots;
+  std::vector<index_t> conditionsWithRoots;			//!< indices of the conditions with root finding functions attached to them
 private:
   void clearCondChecks (index_t condNum);
   change_code executeAction (index_t actionNum, index_t conditionNum, double actionTime);

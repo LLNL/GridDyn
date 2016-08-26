@@ -30,13 +30,12 @@ class scheduler : public gridSubModel
 {
 public:
 protected:
-  double Pmax = kBigNum;  //!< maximum set power
-  double Pmin = -kBigNum;  //!< minimum set power
-  double m_Base = 100;    //!< generator base power
-  double PCurr = 0;                     //!< current power output
+  double Pmax = kBigNum;  //!< [puMW] maximum set power
+  double Pmin = -kBigNum;  //!< [puMW] minimum set power
+  double m_Base = 100;    //!< [MW] generator base power
+  double PCurr = 0;            //!<[puMW] current power output
   std::list<tsched> pTarget;  //!< target list
-  double output = 0;            //!< current output
-
+  double output = 0;            //!<[puMW] current output
   std::shared_ptr<gridCommunicator> commLink;       //!<communicator link
   std::string commType;                 //!< communication link type
   std::uint64_t dispatcher_id = 0;  //!< communication id of the dispatcher
@@ -70,16 +69,17 @@ public:
   virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  void setTime (double time) override;
+  virtual void setTime (double time) override;
+  /** tie the scheduler to a dispatcher */
   virtual void dispatcherLink ();
-  virtual double getMax (double /*time*/ = kBigNum) const
-  {
-    return Pmax;
-  }
-  virtual double getMin (double /*time*/ = -kBigNum) const
-  {
-    return Pmin;
-  }
+  /** get the maximum available power withing a specified time window
+  @param[in] time the time window to make the power
+  */
+  virtual double getMax(double time = kBigNum) const;
+  /** get the low power level available withing a specified time window
+  @param[in] time the time window to make the power level
+  */
+  virtual double getMin(double time = kBigNum) const;
 protected:
   virtual void insertTarget (tsched ts);
   void clearSchedule ();
@@ -101,6 +101,7 @@ public:
     interp,
   };
 protected:
+	
   double rampUp = kBigNum;  //!< maximum ramp rate in the up direction
   double rampDown = kBigNum; //!< maximum ramp rate in the down direction
   double rampTime = 20 * 60;  //!< the ramp window
@@ -108,7 +109,7 @@ protected:
   double PRampCurr = 0;         //!< the current scheduled ramp rate
   double lastTargetTime = -kBigNum;  //!< the time of the last scheduled target power level
 
-  double ramp10Up = kBigNum;            //!< The 10 minute maximum up ramp
+  double ramp10Up = kBigNum;            //!<[puMW] The 10 minute maximum up ramp
   double ramp30Up = kBigNum;            //!< the 30 minute maximum up ramp
   double ramp10Down = kBigNum;          //!< the 10 minute maximum down ramp
   double ramp30Down = kBigNum;          //!< the 30 minute maximum down ramp

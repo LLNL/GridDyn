@@ -26,21 +26,21 @@ Vmx=\frac{v1*v2}{tap}
 the seqID is also the index of the state data it was calculated from*/
 typedef struct linkBusInformation
 {
-  double v1 = 0.0;                                                  //!< [p.u.] voltage at bus1
-  double v2 = 0.0;                                                  //!< [p.u.] voltage at bus2
-  double theta1 = 0.0;                                      //!<  angle at bus1
-  double theta2 = 0.0;                                      //!<  angle at bus2
-  index_t  seqID = 0;                                                                           //!< the current sequence id of the local data
+  double v1 = 0.0;                                                  //!< [puV] voltage at bus1
+  double v2 = 0.0;                                                  //!< [puV] voltage at bus2
+  double theta1 = 0.0;                                      //!< [rad] angle at bus1
+  double theta2 = 0.0;                                      //!< [rad] angle at bus2
+  index_t  seqID = 0;                                       //!< the current sequence id of the local data
 } linkI;
 
 /** @brief structure containing information on the flows for the link
         the seqID is also the index of the state data it was calculated from*/
 typedef struct linkPowerTransferInformation
 {
-  double P1 = 0.0;                         //!< [p.u.] power transferred from bus 1
-  double P2 = 0.0;                         //!< [p.u.] power transferred from bus 2
-  double Q1 = 0.0;                         //!< [p.u.] reactive power transferred from bus 1
-  double Q2 = 0.0;                         //!< [p.u.] reactive power transferred from bus 2
+  double P1 = 0.0;                         //!< [puMW] power transferred from bus 1
+  double P2 = 0.0;                         //!< [puMW] power transferred from bus 2
+  double Q1 = 0.0;                         //!< [puMW] reactive power transferred from bus 1
+  double Q2 = 0.0;                         //!< [puMW] reactive power transferred from bus 2
   index_t  seqID = 0;
 } linkF;
 
@@ -64,17 +64,17 @@ public:
   };
   int zone = 1;  //!< publically accessible loss zone indicator not used internally
 protected:
-  double ratingA = -kBigNum;                                  //!< the long term rating of the link
-  double ratingB = -kBigNum;                                  //!< the short term rating of the link
-  double Erating = -kBigNum;                                  //!<the emergency rating of the link
+  double ratingA = -kBigNum;        //!< [puA] the long term rating of the link
+  double ratingB = -kBigNum;        //!< [puA] the short term rating of the link
+  double Erating = -kBigNum;        //!< [puA] the emergency rating of the link
 
   gridBus *B1 = nullptr;                //!< the bus on the from side
   gridBus *B2 = nullptr;                //!< the bus on the to side
-  double Pset = 0;                //!< the scheduled power of the link
-  double lossFraction = 0;                      //!< the fraction of power transferred that is lossed
+  double Pset = 0;                //!< [puMW] the scheduled power of the link
+  double lossFraction = 0;          //!<[%] the fraction of power transferred that is lossed
 
   index_t curcuitNum = 1;       //!< helper field for multicurcuit links
-  linkI linkInfo;                               //!< holder for the latest bus information
+  linkI linkInfo;               //!< holder for the latest bus information
   linkF linkFlows;              //!< holder latest computed power flow information
 public:
   /** @brief default constructor*/

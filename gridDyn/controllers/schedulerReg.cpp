@@ -96,7 +96,6 @@ void schedulerReg::setReg (double regLevel)
 void schedulerReg::updateA (double time)
 {
   double dt = (time - prevTime);
-  double ramp;
 
   if (dt == 0)
     {
@@ -105,7 +104,7 @@ void schedulerReg::updateA (double time)
   double prevOutput = output;
   schedulerRamp::updateA (time);
 
-  ramp = (regTarget - regCurr) / dt + dPdt;
+  double ramp = (regTarget - regCurr) / dt + dPdt;
   if (ramp > regRampUp)
     {
       ramp = regRampUp;
@@ -125,15 +124,13 @@ void schedulerReg::updateA (double time)
 double schedulerReg::predict (double time)
 {
   double dt = (time - prevTime);
-  double ramp;
   if (dt == 0)
     {
       return output;
     }
-  double retout;
   double toutput = schedulerRamp::predict (time);
 
-  ramp = (regTarget - regCurr) / dt + (toutput - output) / dt;
+  double ramp = (regTarget - regCurr) / dt + (toutput - output) / dt;
   if (ramp > regRampUp)
     {
       ramp = regRampUp;
@@ -143,7 +140,7 @@ double schedulerReg::predict (double time)
       ramp = -regRampDown;
     }
 
-  retout = output + ramp * dt;
+  double retout = output + ramp * dt;
   return retout;
 }
 

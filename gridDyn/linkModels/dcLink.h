@@ -15,7 +15,8 @@
 #define GRID_DC_LINK_H_
 
 #include "linkModels/gridLink.h"
-
+/** implementing a DC transmission line model
+*/
 class dcLink : public gridLink
 {
 public:
@@ -24,9 +25,9 @@ public:
     fixed_target_power = object_flag5,
   };*/
 protected:
-  double Idc = 0;
-  double r = 0;
-  double x = 0.0001;
+  double Idc = 0;			//!< [puA] storage for DC current
+  double r = 0;				//!< [puOhm]  the dc resistance
+  double x = 0.0001;		//!< [puOhm]  the dc inductance
 public:
   dcLink (const std::string &objName = "dclink_$");
   dcLink (double rP,double Lp, const std::string &objName = "dclink_$");
@@ -62,10 +63,10 @@ public:
   virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives  (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
 
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   //for computing all the jacobian elements at once
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
   virtual int fixRealPower (double power, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;

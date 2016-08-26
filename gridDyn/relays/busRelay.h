@@ -15,7 +15,9 @@
 #define BUS_RELAY_H_
 
 #include "gridRelay.h"
-
+/** relay object for bus protection can isolate a bus based on voltage or frequency
+with a controllable delay time
+*/
 class busRelay : public gridRelay
 {
 public:
@@ -24,13 +26,13 @@ public:
     nondirectional_flag = object_flag10,
   };
 protected:
-  double cutoutVoltage = 0;
-  double cutoutFrequency = 0;
-  double voltageDelay = 0;
-  double frequencyDelay = 0;
+  double cutoutVoltage = 0.0;		//!<[puV] low voltage limit
+  double cutoutFrequency = 0.0;		//!<[puHz] trip on low frequency
+  double voltageDelay = 0.0;		//!< [s] period of time the voltage must be below limit to activate
+  double frequencyDelay = 0.0;		//!< [s] period of time the frequency must be below limit to activate
 public:
   busRelay (const std::string &objName = "busrelay_$");
-  gridCoreObject * clone (gridCoreObject *obj) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj) const override;
   virtual int setFlag (const std::string &flag, bool val = true) override;
   virtual int set (const std::string &param,  const std::string &val) override;
 
@@ -38,7 +40,7 @@ public:
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:
-  void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
 
 };
 

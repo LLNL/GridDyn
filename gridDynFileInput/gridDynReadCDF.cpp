@@ -187,7 +187,7 @@ Columns 25-26   Type (I) *
 2 - Hold voltage within VAR limits (gen, PV)
 3 - Hold voltage and angle (swing, V-Theta) (must always
 have one)
-Columns 28-33   Final voltage, p.u. (F) *
+Columns 28-33   Final voltage, pu (F) *
 Columns 34-40   Final angle, degrees (F) *
 Columns 41-49   Load MW (F) *
 Columns 50-58   Load MVAR (F) *

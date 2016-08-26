@@ -70,51 +70,53 @@ class with an addition capability of a totally custom function grabber call
 class customStateGrabber : public stateGrabber
 {
 public:
-  virtual std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber > ggb = nullptr) const;
+  virtual std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber > ggb = nullptr) const override;
   void setGrabberFunction (std::function<double(const stateData *sD, const solverMode &sMode)> nfptr);
 };
 
+/** function operation on a state grabber*/
 class stateFunctionGrabber : public stateGrabber
 {
 public:
 protected:
-  std::shared_ptr<stateGrabber> bgrabber;
-  std::string function_name;
-  std::function<double(double val)> opptr;
+  std::shared_ptr<stateGrabber> bgrabber;		//!< the grabber that gets the data that the function operates on
+  std::string function_name;					//!< the name of the function
+  std::function<double(double val)> opptr;		//!< function object
 
 public:
   stateFunctionGrabber ()
   {
   }
   stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func);
-  std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber> ggb = nullptr) const;
-  double grabData (const stateData *sD, const solverMode &sMode);
-  void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
-  void updateObject (gridCoreObject *obj);
-  gridCoreObject * getObject () const;
-  int setInfo (std::string fld, gridCoreObject* obj);
+  virtual std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber> ggb = nullptr) const override;
+  virtual double grabData (const stateData *sD, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void updateObject (gridCoreObject *obj) override;
+  virtual gridCoreObject * getObject () const override;
+  virtual int setInfo (std::string fld, gridCoreObject* obj) override;
 };
 
+/** a state grabber with operation or two argument functions*/
 class stateOpGrabber : public stateGrabber
 {
 protected:
-  std::shared_ptr<stateGrabber> bgrabber1;
-  std::shared_ptr<stateGrabber> bgrabber2;
-  std::string op_name;
-  std::function<double(double val1, double val2)> opptr;
+  std::shared_ptr<stateGrabber> bgrabber1;	//!< grabber 1 as the first argument
+  std::shared_ptr<stateGrabber> bgrabber2;	//!< grabber 2 as the second argument
+  std::string op_name;			//!< the name of the operation
+  std::function<double(double val1, double val2)> opptr;	//!< function pointer for a two argument function
 
 public:
   stateOpGrabber ()
   {
   }
   stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op);
-  std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber> ggb = nullptr) const;
-  double grabData (const stateData *sD, const solverMode &sMode);
-  void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
-  void updateObject (gridCoreObject *obj);
+  virtual std::shared_ptr<stateGrabber> clone (gridCoreObject *nobj = nullptr, std::shared_ptr<stateGrabber> ggb = nullptr) const override;
+  virtual double grabData (const stateData *sD, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void updateObject (gridCoreObject *obj) override;
   void updateObject (gridCoreObject *obj, int num);
-  gridCoreObject * getObject () const;
-  int setInfo (std::string fld, gridCoreObject* obj);
+  virtual gridCoreObject * getObject () const override;
+  virtual int setInfo (std::string fld, gridCoreObject* obj) override;
 };
 
 #endif

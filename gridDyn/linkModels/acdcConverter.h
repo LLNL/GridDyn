@@ -21,8 +21,8 @@ class delayBlock;
 
 typedef struct converterlinkInfo
 {
-  double v1 = 0.0;                                                  //!< [p.u.] voltage at bus1
-  double v2 = 0.0;                                                  //!< [p.u.] voltage at bus2
+  double v1 = 0.0;                                                  //!< [pu] voltage at bus1
+  double v2 = 0.0;                                                  //!< [pu] voltage at bus2
   double P1 = 0.0;
   double P2 = 0.0;
   double Q1 = 0.0;
@@ -30,7 +30,8 @@ typedef struct converterlinkInfo
   index_t  seqID = 0;
 } convLinkInfo;
 
-
+/** class defines an object that converts opertion between dc and ac, can act as a inverter, a rectifier or a bidirectional mode
+*/
 class acdcConverter : public gridLink
 {
 public:
@@ -48,29 +49,29 @@ protected:
   {
     current, power, voltage
   };
-  double r = 0;
-  double x = 0.001;
-  double tap = 1.0;
-  double tapAngle = 0.0;
-  double Idcmax = kBigNum;                //!<max rectifier reference current
-  double Idcmin = -kBigNum;                //!<min rectifier reference current
+  double r = 0.0;							//!< [puOhm] per unit resistance
+  double x = 0.001;							//!< [puOhm] per unit reactance
+  double tap = 1.0;							//!< converter tap
+  double tapAngle = 0.0;					//!< converter tap angle
+  double Idcmax = kBigNum;                //!<[puA] max rectifier reference current
+  double Idcmin = -kBigNum;                //!<[puA] min rectifier reference current
   double mp_Ki = 0.03;                    //!<integral gain angle control
   double mp_Kp = 0.97;                         //!<proportional gain angle control
-  double Idc;
-  mode_t type = mode_t::bidirectional;
-  double vTarget = 1.0;
+  double Idc;								//!< storage for dc current
+  mode_t type = mode_t::bidirectional;			//!< converter type
+  double vTarget = 1.0;							//!< [puV] ac voltage target
   double mp_controlKi = -0.03;                    //!<integral gain angle control
   double mp_controlKp = -0.97;                     //!<proportional gain angle control
-  double tD = 0.01;
-  double baseTap = 1.0;
-  double dirMult = 1.0;
-  double minAngle = kPI / 2.0;
-  double maxAngle = kPI / 2.0;
+  double tD = 0.01;								//!< controller time delay
+  double baseTap = 1.0;							//!< base l evel tap of the converter
+  double dirMult = 1.0;							
+  double minAngle = -kPI / 2.0;					//!< [rad] minimum tap angle
+  double maxAngle = kPI / 2.0;					//!< [rad]  maximum tap angle
   control_mode_t control_mode = control_mode_t::voltage;
   //TODO:: CHANGE this to be direct instantiation?
-  std::shared_ptr<pidBlock> firingAngleControl;   //!block controlling firing angle
-  std::shared_ptr<pidBlock> powerLevelControl;   //!block controlling power
-  std::shared_ptr<delayBlock> controlDelay;   //!delayblock for control of tap
+  std::shared_ptr<pidBlock> firingAngleControl;   //!<block controlling firing angle
+  std::shared_ptr<pidBlock> powerLevelControl;   //!<block controlling power
+  std::shared_ptr<delayBlock> controlDelay;   //!<delayblock for control of tap
 
   convLinkInfo linkInfo;
 
@@ -114,16 +115,17 @@ public:
   virtual void ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
 
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   //for computing all the jacobian elements at once
   virtual int fixRealPower (double power, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
 private:
+	/** build out the components of the converter*/
   void buildSubsystem ();
 };
 

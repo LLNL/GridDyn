@@ -82,16 +82,18 @@ public:
   messageFactory (const std::string & typeName) : name (typeName)
   {
   }
-  virtual std::shared_ptr<commMessage> makeMessage () = 0;
-  virtual std::shared_ptr<commMessage> makeMessage (std::uint32_t) = 0;
-  virtual ~messageFactory ()
+  virtual ~messageFactory()
   {
   }
-  virtual bool inRange (std::uint32_t)
+
+  virtual std::shared_ptr<commMessage> makeMessage () = 0;
+  virtual std::shared_ptr<commMessage> makeMessage (std::uint32_t) = 0;
+  
+  virtual bool inRange (std::uint32_t) const
   {
     return true;
   }
-  virtual std::uint32_t range ()
+  virtual std::uint32_t range () const
   {
     return 0xFFFFFFF0;
   }                                                            //return a very big range but leave a little room for special message codes
@@ -124,6 +126,8 @@ private:
 
 };
 
+/** template for making a specific message from the factory
+*/
 template <class Messagetype, std::uint32_t minCodeValue, std::uint32_t maxCodeValue>
 class dMessageFactory : public messageFactory
 {
@@ -135,19 +139,19 @@ public:
   }
 
 
-  std::shared_ptr<commMessage> makeMessage ()
+  virtual std::shared_ptr<commMessage> makeMessage () override
   {
     std::shared_ptr<commMessage> cm = std::make_shared<Messagetype> ();
     return cm;
   }
 
-  std::shared_ptr<commMessage> makeMessage (std::uint32_t mtype)
+  virtual std::shared_ptr<commMessage> makeMessage (std::uint32_t mtype) override
   {
     std::shared_ptr<commMessage> cm = std::make_shared<Messagetype> (mtype);
     return cm;
   }
 
-  std::shared_ptr<Messagetype> makeTypeMessage ()
+  std::shared_ptr<Messagetype> makeTypeMessage () 
   {
     return(std::make_shared<Messagetype> ());
   }
@@ -156,11 +160,11 @@ public:
     return(std::make_shared<Messagetype> (mtype));
   }
 
-  bool inRange (std::uint32_t code)
+  virtual bool inRange (std::uint32_t code) const override
   {
     return ((code >= minCodeValue) && (code <= maxCodeValue));
   }
-  std::uint32_t range ()
+  virtual std::uint32_t range () const override
   {
     return (maxCodeValue - minCodeValue);
   }

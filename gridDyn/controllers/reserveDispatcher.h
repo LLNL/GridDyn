@@ -22,6 +22,8 @@
 class gridArea;
 class schedulerRamp;
 
+/** in development object to manage the dispatch of reserve generation
+*/
 class reserveDispatcher : public gridCoreObject
 {
 public:
@@ -40,14 +42,14 @@ protected:
 
 public:
   reserveDispatcher (const std::string &objName = "reserveDispatch_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual ~reserveDispatcher ();
 
 
   virtual double initializeA (double time0,double dispatch);
 
   void moveSchedulers (reserveDispatcher *rD);
-  void setTime (double time);
+  void setTime (double time) override;
   virtual double updateP (double time,double pShort);
   virtual double testP (double time,double pShort);
   double getOutput (index_t /*num*/ = 0)
@@ -56,13 +58,13 @@ public:
   }
 
   virtual int add (schedulerRamp *sched);
-  virtual int add (gridCoreObject *obj);
+  virtual int add (gridCoreObject *obj) override;
 
   virtual int remove (schedulerRamp *sched);
-  virtual int remove (gridCoreObject *obj);
+  virtual int remove (gridCoreObject *obj) override;
 
-  virtual int set (const std::string &param,  const std::string &val);
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
+  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   double getAvailable ()
   {
