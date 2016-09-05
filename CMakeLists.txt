@@ -302,8 +302,8 @@ ENDIF(TEST_ENABLE)
 FILE(GLOB efiles "examples/*")
 INSTALL(FILES ${efiles} DESTINATION examples)
 
-SET(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
-INSTALL(PROGRAMS ${binfiles} DESTINATION bin)
+#SET(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
+#INSTALL(PROGRAMS ${binfiles} DESTINATION bin)
 
 
 

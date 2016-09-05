@@ -11,7 +11,7 @@
 	  <load name="load1">
          <P>1.15</P>
          <Q>0.31</Q>
-		 <event>@1>p=1.1</event>
+		 <event>@1|p=1.1</event>
       </load>
    </bus>
    <bus name="bus2">
