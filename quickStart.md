@@ -7,8 +7,8 @@ There are a few test programs compiled with GridDyn In the build directory these
 are testLibrary which tests out functionality in the libraries that GridDyn uses,  testComponents which tests out component models, testSystem which test complete system execution
 there is also testExtra which runs some scaling studies and timing tests and is not primarily used as part of the unit testing system.  
 
-	```
-	$ ./testLibrary
+```
+$ ./testLibrary
 Running 59 test cases...
 unable to open file C:/Users/top1/Documents/codeProjects/GridDyn/test/test_files/element_reader_tests/xmlElementReader_missing_file.xml
 NOTE:: this should have a message about a missing file >>testing bad file input
@@ -40,6 +40,7 @@ The others should produce output with several message and a `*** No errors detec
 
 In the install/bin folder there is an executable named gridDynMain
 there also should be several example files in the install/examples directory
+
 ```
 $ ./griddynMain.exe ../examples/two_bus_example.xml
 area count =0 buses=2 links= 1 gens= 1
@@ -50,6 +51,7 @@ simulation final Power flow statesize= 4, 10 non zero elements in Jacobian
 ```
 
 Running this with an output file produces
+
 ```
 $ ./griddynMain.exe ../examples/two_bus_example.xml --powerflow-output=output.txt
 area count =0 buses=2 links= 1 gens= 1
@@ -58,7 +60,9 @@ area count =0 buses=2 links= 1 gens= 1
 Simulation gridDynSim_103 executed in 0.0130008 seconds
 simulation final Power flow statesize= 4, 10 non zero elements in Jacobian
 ```
+
 and an output file output.txt
+
 ```
 gridDynSim_103 basepower=100.000000
 Simulation 2 buses 1 lines
@@ -85,10 +89,12 @@ area count =0 buses=2 links= 1 gens= 1
 Simulation gridDynSim_103 executed in 0.0110006 seconds
 simulation final Dynamic statesize= 15, 0 non zero elements in Jacobian
 ```
+
 In this example at 1.0 seconds into the simulation the load on bus 1 is decreased by 0.1 pu.  This results in a rise in the simulation frequency as the generator governor decreases power as frequency increases.  
 There is also a small rise in the bus voltages.
 The resulting output file is a CSV file so it can be read in a variety of software packages.  In the Matlab folder of the repo is a Matlab class name timeSeries2 that can read both the csv and binary output
 files from the recorders in GridDyn dynamic simulations
+
 ```
 >>ts=timeSeries2('C:\msys64\home\top1\GridDyn\install\bin\twobusdynout.csv');
 >> ts
@@ -116,8 +122,10 @@ ans =
     'bus1:busloadreal'
     'bus2:busloadreal'
 ```
-The data can plotted using the Matlab utilities
-THe following script does the plotting
+
+The data can plotted using the Matlab utilities.
+The following script does the plotting
+
 ``` matlab
  ts=timeSeries2('C:\msys64\home\top1\GridDyn\install\bin\twobusdynout.csv');
  figure(1)
@@ -146,9 +154,10 @@ THe following script does the plotting
  xlabel('time(s)');
  ylabel('Voltage(pu)');
  ```
+ 
  The results are shown in the next few figures
  ![image](docs/images/dyn_example_bus_generation.png "Bus Generation")
- ![image](docs/images/dyn_example_bus_frequency.png "Bus Frequency Deviation")
+ ![image](docs/images/dyn_examples_bus_frequency.png "Bus Frequency Deviation")
  ![image](docs/images/dyn_example_bus_voltage.png "Bus Voltage")
  
  Some more details on the input files themselves can be found in
