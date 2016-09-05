@@ -3,9 +3,9 @@
 See the [installation guide](installation.md) or the [Users Guide](docs/manuals/GridDynUserManual.pdf) for installation instructions
 
 ## Running the tests
-There are a few test programs compiled with GridDyn In the build directory these are in the test folder of the install directory.  The 4 that exist currently
-are testLibrary which tests out functionality in the libraries that GridDyn uses,  testComponents which tests out component models, testSystem which test complete system execution
-there is also testExtra which runs some scaling studies and timing tests and is not primarily used as part of the unit testing system.  
+There are a few test programs built with GridDyn if enabled. They can be found in the build directory or the installtion directorry in a folder called test.  The 4 that exist currently
+are testLibrary which tests out functionality in the libraries that GridDyn uses,  testComponents which tests out component models, testSystem which test complete system execution.
+There is also testExtra which runs some scaling studies and timing tests and is not used as part of the unit testing system.  
 
 ```
 $ ./testLibrary
@@ -34,7 +34,7 @@ NOTE: this was supposed to have a failed file load to check error recovery
 *** No errors detected
 ```
 
-The others should produce output with several message and a `*** No errors detected` if everything is working properly
+The others should produce output with several message including some labeled warnings and errors and a `*** No errors detected` if everything is working properly.  The error messages that do show up are from the solver and from which GridDyn can often recover.  
 
 ## running some examples 
 
@@ -90,10 +90,10 @@ Simulation gridDynSim_103 executed in 0.0110006 seconds
 simulation final Dynamic statesize= 15, 0 non zero elements in Jacobian
 ```
 
-In this example at 1.0 seconds into the simulation the load on bus 1 is decreased by 0.1 pu.  This results in a rise in the simulation frequency as the generator governor decreases power as frequency increases.  
+In this example, at 1.0 seconds into the simulation the load on Bus1 is decreased by 0.1 pu.  The generator frequency increases from the excess power production, and as the frequency increases the governor decreases the output pwer stabilizing the frequency.  
 There is also a small rise in the bus voltages.
 The resulting output file is a CSV file so it can be read in a variety of software packages.  In the Matlab folder of the repo is a Matlab class name timeSeries2 that can read both the csv and binary output
-files from the recorders in GridDyn dynamic simulations
+files from the recorders in GridDyn dynamic simulations.
 
 ```
 >>ts=timeSeries2('C:\msys64\home\top1\GridDyn\install\bin\twobusdynout.csv');
@@ -160,5 +160,5 @@ The following script does the plotting
  ![image](docs/images/dyn_examples_bus_frequency.png "Bus Frequency Deviation")
  ![image](docs/images/dyn_example_bus_voltage.png "Bus Voltage")
  
- Some more details on the input files themselves can be found in
+ Some more details on the input files themselves and the model described by these examples can be found in
  [Example details] (docs/presentations/GridDyn_execution_flow.pptx) slides 7 through 23.
