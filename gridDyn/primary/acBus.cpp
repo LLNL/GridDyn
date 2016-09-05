@@ -424,6 +424,11 @@ void acBus::pFlowObjectInitializeA (double time0, unsigned long flags)
     {
       busController.updatePowerControls ();
     }
+
+  if (CHECK_CONTROLFLAG(flags, low_voltage_checking))
+  {
+	  opFlags.set(low_voltage_check_flag);
+  }
   updateFlags ();
 }
 

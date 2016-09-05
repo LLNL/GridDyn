@@ -108,4 +108,5 @@
    <timestart>0</timestart>
    <timestop>30</timestop>
    <timestep>0.010</timestep>
+   <flags>low_voltage_check</flags>
 </griddyn>

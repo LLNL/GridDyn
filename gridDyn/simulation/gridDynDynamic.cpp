@@ -774,8 +774,7 @@ bool gridDynSimulation::dynamicCheckAndReset (const solverMode &sMode, change_co
         {
           return true;
         }
-
-
+	  reInitDyn(sMode);
 
     }
   else if ((opFlags[object_change_flag]) || (change == change_code::object_change))     //the object count changed

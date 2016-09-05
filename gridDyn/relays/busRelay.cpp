@@ -16,6 +16,7 @@
 #include "fileReaders.h"
 #include "eventQueue.h"
 #include "gridEvent.h"
+#include "gridCoreTemplates.h"
 
 #include <boost/format.hpp>
 
@@ -27,23 +28,11 @@ busRelay::busRelay (const std::string&objName) : gridRelay (objName)
 
 gridCoreObject *busRelay::clone (gridCoreObject *obj) const
 {
-  busRelay *nobj;
-  if (obj == nullptr)
-    {
-      nobj = new busRelay ();
-    }
-  else
-    {
-      nobj = dynamic_cast<busRelay *> (obj);
+	busRelay *nobj = cloneBase<busRelay, gridRelay>(this, obj);
       if (nobj == nullptr)
         {
-          //if we can't cast the pointer clone at the next lower level
-          gridRelay::clone (obj);
           return obj;
         }
-    }
-  gridRelay::clone (nobj);
-
   nobj->cutoutVoltage = cutoutVoltage;
   nobj->cutoutFrequency = cutoutFrequency;
   nobj->voltageDelay = voltageDelay;
@@ -141,7 +130,7 @@ void busRelay::dynObjectInitializeA (double time0, unsigned long flags)
   auto ge = std::make_shared<gridEvent> ();
 
   ge->field = "status";
-  ge->value = 0;
+  ge->value = 0.0;
   ge->setTarget (m_sinkObject);
 
   add (ge);

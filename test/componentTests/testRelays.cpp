@@ -96,14 +96,12 @@ BOOST_AUTO_TEST_CASE (relay_test_multi)
 }
 
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(test_bus_relay)
 {
   std::string fname = std::string(RELAY_TEST_DIRECTORY "test_bus_relay.xml");
   simpleRunTestXML(fname);
 
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(test_differential_relay)
 {

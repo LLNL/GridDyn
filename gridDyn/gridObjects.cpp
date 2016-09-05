@@ -678,7 +678,7 @@ int gridObject::set (const std::string &param, double val, gridUnits::units_t un
   int out = PARAMETER_FOUND;
   if ((param == "enabled")||(param == "status"))
     {
-      if (val > 0)
+      if (val > 0.1)
         {
           if (!enabled)
             {
