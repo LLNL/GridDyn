@@ -156,6 +156,7 @@ The following script does the plotting
  ```
  
  The results are shown in the next few figures
+ 
  ![image](docs/images/dyn_example_bus_generation.png "Bus Generation")
  ![image](docs/images/dyn_examples_bus_frequency.png "Bus Frequency Deviation")
  ![image](docs/images/dyn_example_bus_voltage.png "Bus Voltage")
