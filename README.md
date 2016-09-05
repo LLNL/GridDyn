@@ -36,7 +36,11 @@ Also available are a series of presentations
 
 Installation
 ------------------------
-[Installation Guide](installation.md) file.
+[Installation Guide](installation.md).
+
+Quick Start
+------------------------
+[quick start guide](quickStart.md).
 
 Get Involved!
 ------------------------
