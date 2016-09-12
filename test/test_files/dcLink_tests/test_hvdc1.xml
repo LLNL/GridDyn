@@ -78,14 +78,12 @@
    </link>
    <link from="bus4" name="bus4rectifier" to="bus4dc">
 	  <type>rectifier</type>
-      <b>0</b>
       <r>0.00</r>
       <x>0.085</x>
 	  <pset>0.3</pset>
    </link>
    <link from="bus5dc" name="bus5inverter" to="bus5">
 	  <type>inverter</type>
-      <b>0</b>
       <r>0.00</r>
       <x>0.085</x>
    </link>

@@ -111,14 +111,10 @@ double gridSource::getOutput (index_t /*num*/) const
 {
   return m_output;
 }
-double gridSource::getOutputLoc (const IOdata & /*args*/, const stateData *sD, const solverMode &, index_t &currentLoc, index_t /*num*/) const
+
+index_t gridSource::getOutputLoc (const solverMode & ,index_t /*num*/) const
 {
-  currentLoc = kNullLocation;
-  if ((sD) && (sD->time != lasttime))
-    {
-      //  sourceUpdate (sD->time);
-    }
-  return m_tempOut;
+	return kNullLocation;
 }
 
 

@@ -116,7 +116,7 @@ public:
 
   fmi2ParamMap paramStr; //!<map of parameter names
   fmi2ParamMap inputStr; //!<map of input names
-  fmi2ParamMap outputStr; //!<ap of output names
+  fmi2ParamMap outputStr; //!<map of output names
   fmi2ParamMap localStr; //!<map of local names
   fmi2ParamMap stateStr; //!<map of the state names
 
@@ -170,7 +170,7 @@ private:
   virtual double getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
 
   virtual double getOutput(index_t num = 0) const override;
-  virtual double getOutputLoc(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num = 0) const override;
+  virtual index_t getOutputLoc( const solverMode &sMode, index_t num = 0) const override;
   //virtual void setTime(double time){prevTime=time;};
 
 

@@ -16,7 +16,7 @@
 
 #include "gridObjects.h"
 #include <queue>
-class gridBus;  //tempory class definition
+class gridBus;  //forward class definition
 
 /** @brief structure containing information on the states of the joining buses
  included the voltages, angles and some common calculations used in calculating the flows
@@ -45,7 +45,7 @@ typedef struct linkPowerTransferInformation
 } linkF;
 
 /** @brief the basic class that links multiple nodes(buses) together
-*  the base class for objects which connect other obects mainly buses
+*  the base class for objects which connect other objects mainly buses
 it implements a trivial transport model Q=0, P1=Pset P2=-(Pset-LossFraction*Pset)
 
 Each link has a disconnect switch at the from bus and the to bus
@@ -61,8 +61,9 @@ public:
     switch1_open_flag = object_flag1, //!<  switch for the from bus
     switch2_open_flag = object_flag2, //!< switch for the to bus
     fixed_target_power = object_flag3,  //!< flag indicating if the power flow was fixed
+	network_connected=object_flag4, //!< indicates if a link ties the buses together in connected network
   };
-  int zone = 1;  //!< publically accessible loss zone indicator not used internally
+  int zone = 1;  //!< publicly accessible loss zone indicator not used internally
 protected:
   double ratingA = -kBigNum;        //!< [puA] the long term rating of the link
   double ratingB = -kBigNum;        //!< [puA] the short term rating of the link
@@ -71,7 +72,7 @@ protected:
   gridBus *B1 = nullptr;                //!< the bus on the from side
   gridBus *B2 = nullptr;                //!< the bus on the to side
   double Pset = 0;                //!< [puMW] the scheduled power of the link
-  double lossFraction = 0;          //!<[%] the fraction of power transferred that is lossed
+  double lossFraction = 0;          //!<[%] the fraction of power transferred that is lost
 
   index_t curcuitNum = 1;       //!< helper field for multicurcuit links
   linkI linkInfo;               //!< holder for the latest bus information
@@ -121,7 +122,7 @@ public:
    performs the calculations necessary to get the power at the mterminal to be a certain value
   @param[in] power  the desired real power flow as measured by mterminal
   @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
-  @param[in] fixedTerminal-the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
+  @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
@@ -131,7 +132,7 @@ public:
   @param[in] rPower  the desired real power flow as measured by mterminal
   @param[in] rPower  the desired reactive power flow as measured by mterminal
   @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
-  @param[in] fixedTerminal-the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
+  @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */

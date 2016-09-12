@@ -126,7 +126,7 @@ public:
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
   virtual double getOutput (const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
-  virtual double getOutputLoc (const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num) const override;
+  virtual index_t getOutputLoc (const solverMode &sMode, index_t num) const override;
   virtual IOdata getOutputs ( const stateData *sD, const solverMode &sMode) override;
 
   /** @brief get the block output from the sensor

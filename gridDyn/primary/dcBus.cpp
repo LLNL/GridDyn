@@ -19,31 +19,30 @@
 #include "dcBus.h"
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
-#include "linkModels/dcLink.h"
-#include "arrayDataSparse.h"
 #include "gridCoreTemplates.h"
+#include "arrayDataCompact.h"
+#include "stringOps.h"
 
 #include <iostream>
-#include <cmath>
-#include <utility>
 
 static typeFactory<dcBus> gbf ("bus", stringVec { "dc" "hvdc" });
 
 using namespace gridUnits;
 
-dcBus::dcBus (const std::string &objName) : acBus (objName)
+dcBus::dcBus (const std::string &objName) : gridBus (objName), busController(this)
 {
 
 }
 
 gridCoreObject *dcBus::clone (gridCoreObject *obj) const
 {
-  dcBus *nobj = cloneBase<dcBus, acBus> (this, obj);
+  dcBus *nobj = cloneBase<dcBus, gridBus> (this, obj);
   if (nobj == nullptr)
     {
       return obj;
     }
-
+  nobj->vTarget = vTarget;
+  nobj->participation = participation;
   return nobj;
 }
 
@@ -62,10 +61,8 @@ int dcBus::add (gridLink *lnk)
     {
       return gridBus::add (lnk);
     }
-  else
-    {
-      return (OBJECT_NOT_RECOGNIZED);
-    }
+
+    return (OBJECT_NOT_RECOGNIZED);
 }
 
 
@@ -79,12 +76,6 @@ void dcBus::pFlowObjectInitializeB ()
 {
   gridBus::pFlowObjectInitializeB ();
 
-  if (opFlags[use_autogen])
-    {
-      busController.autogenQ = 0;
-      busController.autogenQact = 0;
-    }
-  angle = 0;
   propogatePower ();
 }
 
@@ -138,11 +129,11 @@ void dcBus::loadSizes (const solverMode &sMode, bool dynOnly)
         }
       if (dynOnly)
         {
-          so->addRootAndJacobianSizes (ld->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (ld->getOffsets (sMode));
         }
       else
         {
-          so->addSizes (ld->offsets.getOffsets (sMode));
+          so->addSizes (ld->getOffsets (sMode));
         }
     }
   for (auto gen : attachedGens)
@@ -153,11 +144,11 @@ void dcBus::loadSizes (const solverMode &sMode, bool dynOnly)
         }
       if (dynOnly)
         {
-          so->addRootAndJacobianSizes (gen->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (gen->getOffsets (sMode));
         }
       else
         {
-          so->addSizes (gen->offsets.getOffsets (sMode));
+          so->addSizes (gen->getOffsets (sMode));
         }
     }
   if (!dynOnly)
@@ -264,7 +255,7 @@ change_code dcBus::powerFlowAdjust (unsigned long flags, check_level_t level)
   return out;
 
 }
-/*function to check the currect status for any limit violations*/
+/*function to check the current status for any limit violations*/
 void dcBus::pFlowCheck (std::vector<violation> &Violation_vector)
 {
   gridBus::pFlowCheck (Violation_vector);
@@ -282,11 +273,10 @@ void dcBus::dynObjectInitializeA (double time0, unsigned long flags)
 void dcBus::dynObjectInitializeB (IOdata &outputSet)
 {
 
-  gridBus::dynInitializeB (outputSet);
+  gridBus::dynObjectInitializeB (outputSet);
   S.genQ = 0;
   angle = 0;
 
-  busController.autogenQact = 0;
 
 }
 
@@ -299,10 +289,87 @@ double dcBus::timestep (double ttime, const solverMode &sMode)
 
 
 // set properties
-int dcBus::set (const std::string &param,  const std::string &val)
+int dcBus::set (const std::string &param,  const std::string &vali)
 {
   int out = PARAMETER_FOUND;
-  out = gridBus::set (param, val);
+  auto val = convertToLowerCase(vali);
+  if ((param == "type") || (param == "bustype") || (param == "pflowtype"))
+  {
+
+
+      if ((val == "slk") || (val == "swing") || (val == "slack"))
+      {
+          type = busType::SLK;
+          prevType = busType::SLK;
+      }
+      else if (val == "pv")
+      {
+          type = busType::PV;
+          prevType = busType::PV;
+      }
+      else if (val == "pq")
+      {
+          type = busType::PQ;
+          prevType = busType::PQ;
+      }
+      else if ((val == "dynslk") || (val == "inf") || (val == "infinite"))
+      {
+          type = busType::SLK;
+          prevType = busType::SLK;
+          dynType = dynBusType::dynSLK;
+      }
+      else if ((val == "fixedangle") || (val == "fixangle") || (val == "ref"))
+      {
+          dynType = dynBusType::fixAngle;
+      }
+      else if ((val == "fixedvoltage") || (val == "fixvoltage"))
+      {
+          dynType = dynBusType::fixVoltage;
+      }
+      else if (val == "afix")
+      {
+          type = busType::afix;
+          prevType = busType::afix;
+      }
+      else if (val == "normal")
+      {
+          dynType = dynBusType::normal;
+      }
+      else
+      {
+          return INVALID_PARAMETER_VALUE;
+      }
+
+  }
+  else if (param == "dyntype")
+  {
+      if ((val == "dynslk") || (val == "inf") || (val == "slk"))
+      {
+          dynType = dynBusType::dynSLK;
+          type = busType::SLK;
+      }
+      else if ((val == "fixedangle") || (val == "fixangle") || (val == "ref"))
+      {
+          dynType = dynBusType::fixAngle;
+      }
+      else if ((val == "fixedvoltage") || (val == "fixvoltage"))
+      {
+          dynType = dynBusType::fixVoltage;
+      }
+      else if ((val == "normal") || (val == "pq"))
+      {
+          dynType = dynBusType::normal;
+      }
+      else
+      {
+          out = INVALID_PARAMETER_VALUE;
+      }
+  }
+  else
+  {
+      out = gridBus::set(param, val);
+  }
+  
   return out;
 
 }
@@ -323,16 +390,93 @@ int dcBus::set (const std::string &param, double val, units_t unitType)
 
 }
 
+void dcBus::getStateName(stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
+{
+    if (hasAlgebraic(sMode))
+    {
+        auto Voffset = offsets.getVOffset(sMode);
+        
 
+        count_t bst = 0;
+        if (stNames.size() < Voffset + 1)
+        {
+            stNames.resize(Voffset + 1);
+        }
+        if (Voffset != kNullLocation)
+        {
+            stNames[Voffset] = name + ":voltage";
+            ++bst;
+        }
+        
+        if (stateSize(sMode) == bst)
+        {
+            return;
+        }
+    }
+    gridBus::getStateName(stNames, sMode, prefix);
+    
+}
+
+// pass the solution
+void dcBus::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+{
+
+    auto Voffset = offsets.getVOffset(sMode);
+
+
+    if (isDAE(sMode))
+    {
+        if (Voffset != kNullLocation)
+        {
+            voltage = state[Voffset];
+            m_dstate_dt[voltageInLocation] = dstate_dt[Voffset];
+        }
+    }
+    else if (hasAlgebraic(sMode))
+    {
+        if (Voffset != kNullLocation)
+        {
+            if (ttime > prevTime)
+            {
+                //m_dstate_dt[voltageInLocation] = (state[Voffset] - m_state[voltageInLocation]) / (ttime - lastSetTime);
+            }
+            voltage = state[Voffset];
+        }
+        
+    }
+    gridBus::setState(ttime, state, dstate_dt, sMode);
+
+}
+
+void dcBus::guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+{
+
+    auto Voffset = offsets.getVOffset(sMode);
+    
+
+    if (!opFlags[slave_bus])
+    {
+        if (Voffset != kNullLocation)
+        {
+            state[Voffset] = voltage;
+
+            if (hasDifferential(sMode))
+            {
+                dstate_dt[Voffset] = 0.0;
+            }
+        }
+        
+    }
+    gridBus::guess(ttime, state, dstate_dt, sMode);
+    
+
+}
 
 // residual
 void dcBus::residual (const stateData *sD, double resid[], const solverMode &sMode)
 {
-
+  gridBus::residual(sD, resid, sMode);
   auto Voffset = offsets.getVOffset (sMode);
-
-  updateLocalCache (sD, sMode);
-
   // output
 
   if (Voffset != kNullLocation)
@@ -346,26 +490,55 @@ void dcBus::residual (const stateData *sD, double resid[], const solverMode &sMo
           resid[Voffset] = sD->state[Voffset] - voltage;
         }
     }
-
+ 
   //printf("[%d] Bus %d V=%f theta=%f\n", seqID, id, v1,t1);
-  auto args = getOutputs (sD, sMode);
-
-  for (auto &gen : attachedGens)
-    {
-      if ((gen->stateSize (sMode) > 0) && (gen->enabled))
-        {
-          gen->residual (args, sD, resid, sMode);
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->stateSize (sMode) > 0) && (load->enabled))
-        {
-          load->residual (args, sD, resid, sMode);
-        }
-    }
+ 
 
 }
+
+static const IOlocs inLoc{
+    0,1,2
+};
+
+void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
+{
+    arrayDataCompact<2, 3> partDeriv;
+    if (!isConnected())
+    {
+        return;
+    }
+    partDeriv.clear();
+
+    for (auto &link : attachedLinks)
+    {
+        if (link->enabled)
+        {
+            link->updateLocalCache(sD, sMode);
+            link->ioPartialDerivatives(getID(), sD, &partDeriv, inLoc, sMode);
+        }
+    }
+    if (!isExtended(sMode))
+    {
+        for (auto &gen : attachedGens)
+        {
+            if (gen->isConnected())
+            {
+                gen->ioPartialDerivatives(outputs, sD, &partDeriv, inLoc, sMode);
+            }
+        }
+        for (auto &load : attachedLoads)
+        {
+            if (load->isConnected())
+            {
+
+                load->ioPartialDerivatives(outputs, sD, &partDeriv, inLoc, sMode);
+            }
+        }
+    }
+    dVdP = partDeriv.at(PoutLocation, voltageInLocation);
+
+}
+
 // jacobian
 void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
 {
@@ -379,22 +552,25 @@ void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const 
 
   computeDerivatives (sD, sMode);
   auto argLocs = getOutputLocs (sMode);
+ 
   //printf("t=%f,id=%d, dpdt=%f, dpdv=%f, dqdt=%f, dqdv=%f\n", ttime, id, Ptii, Pvii, Qvii, Qtii);
   if (Voffset != kNullLocation)
     {
       if (useVoltage (sMode))
         {
-          ad->assign (Voffset, Voffset, partDeriv.at (PoutLocation, voltageInLocation));
+          ad->assign (Voffset, Voffset, dVdP);
+          argLocs[voltageInLocation] = Voffset;
         }
       else
         {
-          ad->assign (Voffset, Voffset, 1);
+          ad->assign (Voffset, Voffset, 1.0);
+          argLocs[voltageInLocation] = kNullLocation;
         }
     }
 
   //arrayDataSparse od;
   od.setArray (ad);
-  od.setTranslation (QoutLocation, useVoltage (sMode) ? argLocs[voltageInLocation] : kNullLocation);
+  od.setTranslation (PoutLocation, useVoltage (sMode) ? argLocs[voltageInLocation] : kNullLocation);
   for (auto &gen : attachedGens)
     {
       if ((gen->jacSize (sMode) > 0) && (gen->enabled))
@@ -427,9 +603,19 @@ void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const 
         */
 }
 
-double dcBus::getAngle (const stateData *, const solverMode &) const
+
+IOlocs dcBus::getOutputLocs(const solverMode &sMode) const
 {
-  return 0;
+	return{ useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation,kNullLocation,kNullLocation };
+}
+
+index_t dcBus::getOutputLoc(const solverMode &sMode, index_t num) const
+{
+	if (num==voltageInLocation)
+	{
+		return useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation;
+	}
+	return kNullLocation;
 }
 
 //TODO:: PT write this function
@@ -439,7 +625,7 @@ void dcBus::converge (double, double [], double [], const solverMode &, converge
 
 }
 
-int dcBus::getMode (const solverMode &sMode)
+int dcBus::getMode (const solverMode &sMode) const
 {
   if (isDynamic (sMode))
     {
@@ -458,7 +644,37 @@ int dcBus::getMode (const solverMode &sMode)
     }
 }
 
-bool dcBus::useVoltage (const solverMode &sMode)
+
+double dcBus::getVoltage(const double state[], const solverMode &sMode) const
+{
+	if (isLocal(sMode))
+	{
+		return voltage;
+	}
+	if (useVoltage(sMode))
+	{
+		auto Voffset = offsets.getVOffset(sMode);
+		return (Voffset != kNullLocation) ? state[Voffset] : voltage;
+	}
+	return voltage;
+}
+
+double dcBus::getVoltage(const stateData *sD, const solverMode &sMode) const
+{
+	if (isLocal(sMode))
+	{
+		return voltage;
+	}
+	if (useVoltage(sMode))
+	{
+		auto Voffset = offsets.getVOffset(sMode);
+		return (Voffset != kNullLocation) ? sD->state[Voffset] : voltage;
+	}
+	return voltage;
+	
+}
+
+bool dcBus::useVoltage (const solverMode &sMode) const
 {
   bool ret = true;
   if (isDifferentialOnly (sMode))
@@ -467,7 +683,7 @@ bool dcBus::useVoltage (const solverMode &sMode)
     }
   else if (isDynamic (sMode))
     {
-      if (dynType == dynBusType::fixVoltage)
+      if ((dynType == dynBusType::fixVoltage)||(dynType==dynBusType::dynSLK))
         {
           ret = false;
         }
@@ -492,7 +708,7 @@ int dcBus::propogatePower ( bool makeSlack)
       type = busType::SLK;
     }
 
-  updateLocalCache ();
+  computePowerAdjustments();
   int unfixed = 0;
   gridLink *dc1 = nullptr;
   for (auto &lnk:attachedLinks)
@@ -508,4 +724,35 @@ int dcBus::propogatePower ( bool makeSlack)
       ret = dc1->fixRealPower (dc1->getRealPower (getID ()) - (S.sumP ()),getID ());
     }
   return ret;
+}
+
+void dcBus::computePowerAdjustments()
+{
+	//declaring an embedded function
+	auto cid = getID();
+
+	S.reset();
+
+	for (auto &link : attachedLinks)
+	{
+		if ((link->isConnected()) && (!busController.hasAdjustments(link->getID())))
+		{
+			S.linkP += link->getRealPower(cid);
+		}
+
+	}
+	for (auto &load : attachedLoads)
+	{
+		if ((load->isConnected()) && (!busController.hasAdjustments(load->getID())))
+		{
+			S.loadP += load->getRealPower(voltage);
+		}
+	}
+	for (auto &gen : attachedGens)
+	{
+		if ((gen->isConnected()) && (!busController.hasAdjustments(gen->getID())))
+		{
+			S.genP += gen->getRealPower();
+		}
+	}
 }

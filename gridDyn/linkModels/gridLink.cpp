@@ -59,9 +59,6 @@ gridLink::gridLink (const std::string &objName) : gridPrimary (objName)
   id = linkCount;
   updateName ();
 
-  opFlags.set (no_pflow_states);
-  opFlags.set ( no_dyn_states);
-
 
 
 }
@@ -118,9 +115,19 @@ int gridLink::updateBus (gridBus *bus, index_t busnum)
     }
 }
 
-void gridLink::followNetwork (int /*network*/, std::queue<gridBus *> & /*stk*/)
+void gridLink::followNetwork (int network, std::queue<gridBus *> & stk)
 {
-  //not an ac connected link model, no angle relationship
+	if (isConnected()&&opFlags[network_connected])
+	{
+		if (B1->Network != network)
+		{
+			stk.push(B1);
+		}
+		if (B2->Network != network)
+		{
+			stk.push(B2);
+		}
+	}
 }
 
 void gridLink::pFlowCheck (std::vector<violation> &Violation_vector)

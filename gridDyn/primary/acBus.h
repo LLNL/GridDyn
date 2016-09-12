@@ -49,16 +49,16 @@ public:
   enum bus_flags
   {
     use_autogen = object_flag2,              //!< indicator if the bus is using an autogen
-    slave_bus = object_flag3,               //!< inidcator that the bus is a slave Bus
+    slave_bus = object_flag3,               //!< indicator that the bus is a slave Bus
     master_bus = object_flag4,               //!< indicator that a bus is a master bus
     directconnect = object_flag5,               //!< indicator that a bus is direct connected to another bus
     identical_PQ_control_objects = object_flag6,              //!< indicator that the P and Q control are the same units
     compute_frequency = object_flag7,                  //!< indicator that the bus should compute the frequency value
-    ignore_angle = object_flag8,                 //!< indicator that the bus should igore the angle in update functions
+    ignore_angle = object_flag8,                 //!< indicator that the bus should ignore the angle in update functions
     prev_low_voltage_alert = object_flag9,              //!< indicator that the bus has triggered a low voltage alert
   };
 protected:
-  count_t oCount = 0;                                                                         //!< counter for updatess
+  count_t oCount = 0;                                                                         //!< counter for updates
   arrayDataCompact<2, 3> partDeriv;                                 //!< structure containing the partial derivatives
   double aTarget = 0.0;                                                                       //!< an angle Target(for SLK and afix bus types)
   double vTarget = 1.0;                                                                       //!< a target voltage
@@ -66,13 +66,13 @@ protected:
 
   busType prevType = busType::PQ;                                                     //!< previous type container if the type automatically changes
   dynBusType prevDynType = dynBusType::normal;                        //!< previous type container if the type automatically changes
-  double refAngle = 0;                                                                        //!< refernce Angle
+  double refAngle = 0;                                                                        //!< reference Angle
 
 
   double Vmin = 0;                                                                                    //!< [pu]    voltage minimum
   double Vmax = kBigNum;                                                              //!< [pu]    voltage maximum
   double tieError = 0.0;       //!<tieLine error
-  double prevPower = 0.0;                     //!< previuos power level
+  double prevPower = 0.0;                     //!< previous power level
   double Tw = 0.1;               //!<time constant for the frequency estimator
 
 
@@ -163,7 +163,7 @@ public:
   @param[in] mode  the mode of the convergence
   @param[in] tol  the convergence tolerance
   */
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01) override;
   /** @brief  try to shift the local states to something more valid
     called when the current states do not make a consistent condition,  calling converge will attempt to move them to a more valid state
   mode controls how this is done  0- does a single iteration loop
@@ -184,7 +184,7 @@ protected:
   virtual void computePowerAdjustments ();
   /** @brief  compute the partial derivatives based on the given state data
   @param[in] sD  the state Data in question
-  @param[in] the solver mode*/
+  @param[in] sMode the solver mode*/
   virtual void computeDerivatives (const stateData *sD, const solverMode &sMode);
 public:
   double timestep (double ttime, const solverMode &sMode) override;
@@ -276,7 +276,7 @@ public:
   }
 
   virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
-  double getOutputLoc (const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num) const override;
+  virtual index_t getOutputLoc (const solverMode &sMode, index_t num) const override;
 
   virtual IOlocs getOutputLocs (const solverMode &sMode) const override;
   /** @brief get the voltage
@@ -310,25 +310,23 @@ public:
   **/
   virtual double getFreq (const stateData *sD, const solverMode &sMode) const override;
 
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
   /** @brief function used for returning the mode of the bus
    depends on the interaction of the solverInterface and the bus type
   @param[in] sMode the corresponding solvermode to the state
   @return the system mode
   **/
-  virtual int getMode (const solverMode &sMode);
-  /** @brief function to determine there is a state represening the angle
+  virtual int getMode (const solverMode &sMode) const;
+  /** @brief function to determine there is a state representing the angle
   @param[in] sMode the corresponding solvermode to the state
-  @return true if there is an angle state false otherwse
+  @return true if there is an angle state false otherwise
   **/
-  virtual bool useAngle (const solverMode &sMode);
-  /** @brief function to determine there is a state represening the voltage
+  virtual bool useAngle (const solverMode &sMode) const;
+  /** @brief function to determine there is a state representing the voltage
   @param[in] sMode the corresponding solvermode to the state
-  @return true if there is an voltage state false otherwse
+  @return true if there is an voltage state false otherwise
   **/
-  virtual bool useVoltage (const solverMode &sMode);
+  virtual bool useVoltage (const solverMode &sMode) const;
 
   virtual void updateFlags (bool dynOnly = false) override;
   //for registering and removing power control objects

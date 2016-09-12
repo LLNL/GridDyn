@@ -264,6 +264,7 @@ set(primary_sources
 	primary/dcBus.cpp
 	primary/infiniteBus.cpp
 	primary/busControls.cpp
+	primary/dcBusControls.cpp
 	primary/acBus.cpp
 	primary/listMaintainer.cpp
 	)

@@ -430,11 +430,11 @@ void gridDynGenerator::loadSizes (const solverMode &sMode, bool dynOnly)
             }
           if (dynOnly)
             {
-              soff->addRootAndJacobianSizes (so->offsets.getOffsets (sMode));
+              soff->addRootAndJacobianSizes (so->getOffsets (sMode));
             }
           else
             {
-              soff->addSizes (so->offsets.getOffsets (sMode));
+              soff->addSizes (so->getOffsets (sMode));
             }
         }
     }
@@ -1548,7 +1548,7 @@ void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
 {
   if  ((!isDynamic (sMode)) && (opFlags[indirect_voltage_control]))
     { //the bus is managing a remote bus voltage
-      auto Voff = remoteBus->offsets.getVOffset (sMode);
+      auto Voff = remoteBus->getOutputLoc (sMode,voltageInLocation);
       auto offset = offsets.getAlgOffset (sMode);
       if (!opFlags[at_limit])
         {
@@ -1960,7 +1960,7 @@ void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const st
 		{
 			subInputLocs.exciterInputLocs[exciterVoltageInLocation] = argLocs[voltageInLocation];
 			subInputLocs.exciterInputLocs[exciterVsetInLocation] = kNullLocation;
-			ext->getOutputLoc(subInputs.exciterInputs, sD, sMode, subInputLocs.genModelInputLocsAll[genModelEftInLocation], 0);
+			subInputLocs.genModelInputLocsAll[genModelEftInLocation]=ext->getOutputLoc( sMode, 0);
 		}
 		else
 		{
@@ -1978,7 +1978,7 @@ void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const st
 				genModel->getFreq(sD, sMode, &(subInputLocs.governorInputLocs[govOmegaInLocation]));
 			}
 			subInputLocs.governorInputLocs[govpSetInLocation] = kNullLocation;
-			gov->getOutputLoc(subInputs.governorInputs, sD, sMode, subInputLocs.genModelInputLocsAll[genModelPmechInLocation], 0);
+			subInputLocs.genModelInputLocsAll[genModelPmechInLocation]=gov->getOutputLoc(sMode, 0);
 		}
 		else
 		{

@@ -19,18 +19,7 @@
 class pidBlock;
 class delayBlock;
 
-typedef struct converterlinkInfo
-{
-  double v1 = 0.0;                                                  //!< [pu] voltage at bus1
-  double v2 = 0.0;                                                  //!< [pu] voltage at bus2
-  double P1 = 0.0;
-  double P2 = 0.0;
-  double Q1 = 0.0;
-  double Q2 = 0.0;
-  index_t  seqID = 0;
-} convLinkInfo;
-
-/** class defines an object that converts opertion between dc and ac, can act as a inverter, a rectifier or a bidirectional mode
+/** class defines an object that converts operation between dc and ac, can act as a inverter, a rectifier or a bidirectional mode
 */
 class acdcConverter : public gridLink
 {
@@ -52,7 +41,7 @@ protected:
   double r = 0.0;							//!< [puOhm] per unit resistance
   double x = 0.001;							//!< [puOhm] per unit reactance
   double tap = 1.0;							//!< converter tap
-  double tapAngle = 0.0;					//!< converter tap angle
+  double angle = 0.0;					//!< converter firing or extinction angle
   double Idcmax = kBigNum;                //!<[puA] max rectifier reference current
   double Idcmin = -kBigNum;                //!<[puA] min rectifier reference current
   double mp_Ki = 0.03;                    //!<integral gain angle control
@@ -73,7 +62,6 @@ protected:
   std::shared_ptr<pidBlock> powerLevelControl;   //!<block controlling power
   std::shared_ptr<delayBlock> controlDelay;   //!<delayblock for control of tap
 
-  convLinkInfo linkInfo;
 
 public:
   acdcConverter (const std::string &objName = "acdcConveter_$");
@@ -90,7 +78,7 @@ public:
   //virtual void pFlowCheck (std::vector<violation> &Violation_vector);
   //virtual void getVariableType (double sdata[], const solverMode &sMode);      //has no state variables
   virtual int updateBus (gridBus *bus, index_t busnumber) override;
-  virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
+
   virtual void updateLocalCache () override;
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
@@ -119,7 +107,7 @@ public:
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
   virtual int fixRealPower (double power, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
 

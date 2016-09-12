@@ -485,10 +485,9 @@ IOlocs gridPrimary::getOutputLocs (const solverMode &) const
 	return IOlocs(0);
 }
 
-double gridPrimary::getOutputLoc(const stateData *, const solverMode &, index_t &currentLoc, index_t /*num*/) const
+index_t gridPrimary::getOutputLoc(const solverMode &, index_t /*num*/) const
 {
-	currentLoc = kNullLocation;
-	return 0;
+	return kNullLocation;
 }
 
 double gridPrimary::getDoutdt(const stateData *, const solverMode &, index_t /*num*/) const
@@ -510,29 +509,17 @@ gridBus * gridPrimary::getBus(index_t /*num*/) const
 {
 	return nullptr;
 }
-/**
-*@brief get a pointer for a particular Link
-@param[in] the index of the link being requested
-@return a pointer to the requested link or nullptr
-**/
+
 gridLink * gridPrimary::getLink(index_t /*num*/) const
 {
 	return nullptr;
 }
-/**
-*@brief get a pointer for a particular Area
-@param[in]the index of the area being requested
-@return a pointer to the requested area or nullptr
-**/
+
 gridArea * gridPrimary::getArea(index_t /*num*/) const
 {
 	return nullptr;
 }
-/**
-*@brief get a pointer for a particular relay
-@param[in] the index of the relay being requested
-@return a pointer to the requested relay or nullptr
-**/
+
 gridRelay * gridPrimary::getRelay(index_t /*num*/) const
 {
 	return nullptr;

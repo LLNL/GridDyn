@@ -82,7 +82,7 @@ protected:
   linkF constLinkFlows;                                               //!< holder for previous steady state link flows
   linkPart LinkDeriv;                                                 //!< holder for computed derivative information
 
-  //this is the wierdest C++ syntax for a typedef,  but as far as I can tell I need to do it to create a array of member function pointers still not clear how this actually works
+  //this is the weirdest C++ syntax for a typedef,  but as far as I can tell I need to do it to create a array of member function pointers still not clear how this actually works
   typedef void (acLine::*glMP)();
   glMP flowCalc[APPROXIMATION_LEVELS];                //!< function pointers to power flow calculations
   glMP derivCalc[APPROXIMATION_LEVELS];                //!< function objects to the derivative calculations
@@ -121,7 +121,7 @@ public:
    performs the calculations necessary to get the power at the mterminal to be a certain value
   @param[in] power  the desired real power flow as measured by mterminal
   @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
-  @param[in] fixedTerminal-the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
+  @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
@@ -131,17 +131,11 @@ public:
   @param[in] rPower  the desired real power flow as measured by mterminal
   @param[in] rPower  the desired reactive power flow as measured by mterminal
   @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
-  @param[in] fixedTerminal-the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
+  @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
   virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  /** @brief propogate a network number to all connected buses
-   checks if a link actually connects the two buses in an AC sense, then checks if a bus is already part of the specified network and if not it adds it to the queue
-  @param[in] network  the new network number
-  @param[in] bstk a FIFO queue of buses to add to the network
-  */
-  virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
 
   /** @brief check for any violations of link limits or other factors based on power flow results
    checks things like the maximum angle,  power flow /current limits based on ratings and a few other things

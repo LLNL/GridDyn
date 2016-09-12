@@ -275,10 +275,9 @@ IOlocs gridSecondary::getOutputLocs  (const solverMode &) const
   return NullLocVec;
 }
 
-double gridSecondary::getOutputLoc (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t & currentLoc, index_t num)
+index_t gridSecondary::getOutputLoc ( const solverMode &, index_t /*num*/)
 {
-  currentLoc = 0;
-  return getOutput (args, sD, sMode, num);
+	return kNullLocation;
 }
 
 double gridSecondary::getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num)

@@ -26,11 +26,13 @@ using namespace gridUnits;
 dcLink::dcLink (const std::string &objName) : gridLink (objName)
 {
   opFlags.set (dc_only);
+  opFlags.set(network_connected);
 }
 
 dcLink::dcLink (double rP, double Lp, const std::string &objName) : gridLink (objName),r (rP),x (Lp)
 {
   opFlags.set (dc_only);
+  opFlags.set(network_connected);
 }
 
 dcLink::~dcLink ()
@@ -272,7 +274,7 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, array
         }
       else
         {
-          int B1Voffset = B1->offsets.getVOffset (sMode);
+          int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
           ad->assignCheckCol (PoutLocation, B1Voffset, P2V1);
         }
     }
@@ -286,7 +288,7 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, array
         }
       else
         {
-          int B2Voffset = B2->offsets.getVOffset (sMode);
+          int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
           ad->assignCheckCol (PoutLocation, B2Voffset, P1V2);
         }
     }
@@ -299,8 +301,8 @@ void dcLink::jacobianElements (const stateData *sD, arrayData<double> *ad, const
   if (stateSize (sMode) > 0)
     {
 
-      int B1Voffset = B1->offsets.getVOffset (sMode);
-      int B2Voffset = B2->offsets.getVOffset (sMode);
+      int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
+      int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
       updateLocalCache (sD, sMode);
       if (isDynamic (sMode))
         {
@@ -387,6 +389,7 @@ void dcLink::guess (const double /*ttime*/, double state[], double dstate_dt[], 
     }
 }
 
+
 void dcLink::getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
 {
   if (stateSize (sMode) > 0)
@@ -450,10 +453,14 @@ void  dcLink::updateLocalCache ()
     }
 }
 
-int dcLink::fixRealPower (double power,index_t /*mterminal*/,index_t fixedTerminal,gridUnits::units_t unitType)
+int dcLink::fixRealPower (double power,index_t mterminal,index_t fixedTerminal,gridUnits::units_t unitType)
 {
   int ret = 0;
   opFlags.set (fixed_target_power);
+	if (fixedTerminal==0)
+	{
+		fixedTerminal = mterminal;
+	}
   Pset = unitConversion (power,unitType,puMW,systemBasePower);
   if ((fixedTerminal == 2) || (fixedTerminal == B2->getID ()))
     {

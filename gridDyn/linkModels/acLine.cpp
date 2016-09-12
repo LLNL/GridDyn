@@ -42,7 +42,7 @@ acLine::acLine(const std::string &objName) : gridLink(objName)
 {
 	// default values
 	loadApproxFunctions();
-
+	opFlags.set(network_connected);
 
 
 }
@@ -53,6 +53,7 @@ x(xP)
 	// default values
 	setAdmit();
 	loadApproxFunctions();
+	opFlags.set(network_connected);
 	//load up the member function pointer array to point to the correct function
 
 
@@ -86,23 +87,6 @@ gridCoreObject *acLine::clone(gridCoreObject *obj) const
 acLine::~acLine()
 {
 
-}
-
-// timestepP link's buses
-
-void acLine::followNetwork(int network, std::queue<gridBus *> &stk)
-{
-	if (isConnected())
-	{
-		if (B1->Network != network)
-		{
-			stk.push(B1);
-		}
-		if (B2->Network != network)
-		{
-			stk.push(B2);
-		}
-	}
 }
 
 void acLine::pFlowCheck(std::vector<violation> &Violation_vector)
@@ -834,10 +818,10 @@ void acLine::outputPartialDerivatives(index_t busId, const stateData *, arrayDat
 
 	if (!isLocal(sMode))
 	{
-		B1Voffset = B1->offsets.getVOffset(sMode);
-		B2Voffset = B2->offsets.getVOffset(sMode);
-		B1Aoffset = B1->offsets.getAOffset(sMode);
-		B2Aoffset = B2->offsets.getAOffset(sMode);
+		B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
+		B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
+		B1Aoffset = B1->getOutputLoc(sMode, angleInLocation);
+		B2Aoffset = B2->getOutputLoc(sMode, angleInLocation);
 	}
 
 	if ((busId == 2) || (busId == B2->getID()))

@@ -67,13 +67,14 @@ public:
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
   virtual int fixRealPower (double power, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int fixPower (double power, double /*qPower*/, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) final
+  virtual int fixPower(double power, double /*qPower*/, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) final override
   {
     return fixRealPower (power,terminal,fixedTerminal,unitType);
   }
+
 };
 
 

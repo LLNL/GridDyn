@@ -15,24 +15,41 @@
 #define DCBUS_H_
 
 // headers
-#include "acBus.h"
+#include "gridBus.h"
+#include "busControls.h"
+#include "arrayDataTranslate.h"
 
 // forward classes
 
 /** @brief class implements a DC powered bus
  the DC has only one state (voltage) and can only attach to links that are DC capable
 */
-class dcBus : public acBus
+class dcBus : public gridBus
 {
+	friend class dcBusControls;
 public:
+	enum bus_flags
+	{
+		use_autogen = object_flag2,              //!< indicator if the bus is using an autogen
+		slave_bus = object_flag3,               //!< indicator that the bus is a slave Bus
+		master_bus = object_flag4,               //!< indicator that a bus is a master bus
+		directconnect = object_flag5,               //!< indicator that a bus is direct connected to another bus
+	};
 protected:
+	double vTarget = 1.0;                                                                       //!< a target voltage
+	double participation = 1.0;
+	dcBusControls busController;                //!< pointer to the busController object
+	busType prevType = busType::PQ;                                                     //!< previous type container if the type automatically changes
+	dynBusType prevDynType = dynBusType::normal;                        //!< previous type container if the type automatically changes
+	double dVdP = 0.0; //!< storage for the dVdP terms from all the secondary objects
+	arrayDataTranslate<1> od;
 public:
   dcBus (const std::string &objName = "dcBus_$");
   ~dcBus ();
 
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  using acBus::add;
+  using gridBus::add;
   virtual int add (gridLink *lnk) override;  //this add function checks for DC capable links
 
   // initializeB
@@ -54,18 +71,34 @@ public:
   virtual int set (const std::string &param,  const std::string &val) override;
   virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-
+  virtual void guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+
+  void computeDerivatives(const stateData *sD, const solverMode &sMode);
+
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::local_iteration,double tol = 0.01) override;
 
   virtual double timestep (double ttime, const solverMode &sMode) override;
 
-  double getAngle (const stateData *, const solverMode &) const final;  //no angle so no reason to inherit beyond this
-  virtual bool useVoltage (const solverMode &sMode) override;
-  virtual int getMode (const solverMode &sMode) override;
+  virtual double getVoltage(const double state[], const solverMode &sMode) const override;
+
+  virtual double getVoltage(const stateData *sD, const solverMode &sMode) const override;
+
+
+
+  virtual IOlocs getOutputLocs(const solverMode &sMode) const override;
+
+  virtual index_t getOutputLoc(const solverMode &sMode, index_t num = 0) const override;
+
+  virtual bool useVoltage (const solverMode &sMode) const;
+  virtual int getMode (const solverMode &sMode) const;
   virtual int propogatePower (bool makeSlack = false) override;
+
+  virtual void getStateName(stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
+	void computePowerAdjustments();
 };
 
 

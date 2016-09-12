@@ -1758,7 +1758,7 @@ void gridArea::getVoltageStates (double vStates[], const solverMode &sMode) cons
     {
       if (bus->enabled)
         {
-          Voffset = bus->offsets.getVOffset (sMode);
+          Voffset = bus->getOutputLoc(sMode,voltageInLocation);
           if (Voffset != kNullLocation)
             {
               vStates[Voffset] = 2.0;
@@ -1771,7 +1771,8 @@ void gridArea::getVoltageStates (double vStates[], const solverMode &sMode) cons
         {
           if (link->voltageStateCount (sMode) > 0)
             {
-              Voffset = link->offsets.getVOffset (sMode);
+			  auto linkOffsets = link->getOffsets(sMode);
+              Voffset = linkOffsets->vOffset;
               for (size_t kk = 0; kk < link->voltageStateCount (sMode); kk++)
                 {
                   vStates[Voffset + kk] = 2.0;
@@ -1797,7 +1798,7 @@ void gridArea::getAngleStates (double aStates[], const solverMode &sMode) const
     {
       if (bus->enabled)
         {
-          Aoffset = bus->offsets.getAOffset (sMode);
+          Aoffset = bus->getOutputLoc(sMode,angleInLocation);
           if (Aoffset != kNullLocation)
             {
               aStates[Aoffset] = 1.0;
@@ -1810,7 +1811,8 @@ void gridArea::getAngleStates (double aStates[], const solverMode &sMode) const
         {
           if (link->angleStateCount (sMode) > 0)
             {
-              Aoffset = link->offsets.getVOffset (sMode);
+			  auto linkOffsets = link->getOffsets(sMode);
+			  Aoffset = linkOffsets->aOffset;
               for (size_t kk = 0; kk < link->voltageStateCount (sMode); kk++)
                 {
                   aStates[Aoffset + kk] = 1.0;
@@ -1942,7 +1944,7 @@ void gridArea::setOffsets (const solverOffsets &newOffsets, const solverMode &sM
   for (auto &obj : primaryObjects)
     {
       obj->setOffsets (no, sMode);
-      no.increment (obj->offsets.getOffsets (sMode));
+      no.increment (obj->getOffsets (sMode));
     }
 }
 
@@ -2030,7 +2032,7 @@ void gridArea::loadSizes (const solverMode &sMode, bool dynOnly)
             {
               obj->loadSizes (sMode, dynOnly);
             }
-          so->addRootAndJacobianSizes (obj->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (obj->getOffsets (sMode));
         }
 
       so->rjLoaded = true;
@@ -2045,7 +2047,7 @@ void gridArea::loadSizes (const solverMode &sMode, bool dynOnly)
             {
               obj->loadSizes (sMode, dynOnly);
             }
-          so->addSizes (obj->offsets.getOffsets (sMode));
+          so->addSizes (obj->getOffsets (sMode));
         }
 
       so->stateLoaded = true;

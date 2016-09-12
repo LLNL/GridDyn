@@ -14,7 +14,6 @@
 #include "stateGrabber.h"
 #include "gridBus.h"
 #include "linkModels/gridLink.h"
-#include "loadModels/gridLoad.h"
 #include "relays/gridRelay.h"
 #include "relays/sensor.h"
 #include "generators/gridDynGenerator.h"
@@ -129,7 +128,7 @@ void stateGrabber::busLoadInfo (const std::string &fld)
         };
       jacCapable = true;
       jacIfptr = [ = ](const stateData *, arrayData<double> *ad, const solverMode &sMode) {
-          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->offsets.getVOffset (sMode), 1);
+          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->getOutputLoc (sMode,voltageInLocation), 1);
         };
 
     }
@@ -140,7 +139,7 @@ void stateGrabber::busLoadInfo (const std::string &fld)
         };
       jacCapable = true;
       jacIfptr = [ = ](const stateData *, arrayData<double> *ad, const solverMode &sMode) {
-          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->offsets.getVOffset (sMode), 1);
+          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->getOutputLoc (sMode,angleInLocation), 1);
         };
     }
   else if ((fld == "freq") || (fld == "frequency"))

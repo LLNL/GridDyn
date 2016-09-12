@@ -41,7 +41,7 @@ public:
   virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
 
   virtual double getOutput (index_t num = 0) const override;
-  virtual double getOutputLoc (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num = 0) const override;
+  virtual index_t getOutputLoc (const solverMode &sMode,  index_t num = 0) const override;
   /** update the source output
   @param[in] ttime  the time to update to
   */

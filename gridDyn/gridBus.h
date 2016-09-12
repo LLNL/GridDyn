@@ -243,7 +243,7 @@ public:
   * @return a vector of objects with the path information  (NOTE: not necessarily the shortest path)
   **/
   std::vector<gridObject *> getDirectPath (gridObject *target, gridObject *source = nullptr);
-  /** @brief propogate and fix a power level for a bus
+  /** @brief propagate and fix a power level for a bus
   * @param[in] makeSlack boolean indicating if the bus should be made into a slack bus or not
   * @return value indicating success 0 on success -1 on failure
   **/

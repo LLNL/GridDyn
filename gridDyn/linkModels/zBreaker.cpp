@@ -27,6 +27,7 @@ static typeFactory<zBreaker> glf ("link", stringVec { "zbreaker", "zline"});
 
 zBreaker::zBreaker (const std::string &objName) : gridLink (objName)
 {
+	opFlags.set(network_connected);
 }
 
 gridCoreObject * zBreaker::clone (gridCoreObject *obj) const

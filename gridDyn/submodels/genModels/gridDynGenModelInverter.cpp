@@ -184,12 +184,10 @@ double gridDynGenModelInverter::getFreq(const stateData *sD, const solverMode &s
 	//there is no inertia in this gen model so it can't compute a frequency and must use the bus frequency
 	if (FreqOffset)
 	{
-		return bus->getOutputLoc(sD, sMode, *FreqOffset, frequencyInLocation);
+		*FreqOffset = bus->getOutputLoc(sMode, frequencyInLocation);
+		
 	}
-	else
-	{
-		return bus->getFreq(sD, sMode);
-	}
+	return bus->getFreq(sD, sMode);
 
 }
 

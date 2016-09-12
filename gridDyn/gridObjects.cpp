@@ -436,6 +436,11 @@ count_t gridObject::paramSize (const solverMode &sMode)
   return numParams;
 }
 
+const solverOffsets *gridObject::getOffsets(const solverMode &sMode) const
+{
+	return offsets.getOffsets(sMode);
+}
+
 count_t gridObject::paramSize (const solverMode &) const
 {
   return numParams;
@@ -453,8 +458,12 @@ void gridObject::setOffsets (const solverOffsets &newOffsets, const solverMode &
       no.localIncrement (offsets.getOffsets (sMode));
       for (auto &so : subObjectList)
         {
-          so->setOffsets (no, sMode);
-          no.increment (so->offsets.getOffsets (sMode));
+			if (so->enabled)
+			{
+				so->setOffsets(no, sMode);
+				no.increment(so->offsets.getOffsets(sMode));
+			}
+          
         }
     }
 }
@@ -465,8 +474,12 @@ void gridObject::setOffset (index_t newOffset, const solverMode &sMode)
     {
       for (auto &so : subObjectList)
         {
-          so->setOffset (newOffset, sMode);
-          newOffset += so->stateSize (sMode);
+			if (so->enabled)
+			{
+				so->setOffset(newOffset, sMode);
+				newOffset += so->stateSize(sMode);
+			}
+         
         }
     }
   offsets.setOffset (newOffset, sMode);

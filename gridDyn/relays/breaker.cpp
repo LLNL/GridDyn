@@ -13,13 +13,11 @@
 
 #include "breaker.h"
 #include "gridCondition.h"
-#include "fileReaders.h"
-#include "eventQueue.h"
+
 #include "gridEvent.h"
 #include "gridCoreTemplates.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
-#include "gridEvent.h"
 #include "arrayDataSparse.h"
 
 
@@ -325,7 +323,7 @@ void breaker::jacobianElements (const stateData *sD, arrayData<double> *ad, cons
     {
       arrayDataSparse d;
       IOdata out;
-      auto Voffset = bus->offsets.getVOffset (sMode);
+      auto Voffset = bus->getOutputLoc (sMode,voltageInLocation);
       auto args = bus->getOutputs (sD, sMode);
       auto argLocs = bus->getOutputLocs (sMode);
       if (opFlags[nonlink_source_flag])

@@ -30,26 +30,24 @@
 
 #include <iostream>
 #include <cmath>
-#include <utility>
 #include <memory>
 #include <cassert>
 
 
-
+//factory is for the cloning function
 static childTypeFactory<acBus, gridBus> gbfac ("bus", stringVec { "psystem" });
 
 using namespace gridUnits;
 
-acBus::acBus (const std::string &objName) : gridBus (objName)
+acBus::acBus (const std::string &objName) : gridBus (objName),busController(this)
 {
   // default values
-  busController.controlledBus = this;
+
 }
 
-acBus::acBus (double vStart, double angleStart, const std::string &objName) : gridBus (vStart,angleStart,objName), aTarget (angleStart), vTarget (vStart)
+acBus::acBus (double vStart, double angleStart, const std::string &objName) : gridBus (vStart,angleStart,objName), aTarget (angleStart), vTarget (vStart),busController(this)
 {
   // default values
-  busController.controlledBus = this;
 }
 
 gridCoreObject *acBus::clone (gridCoreObject *obj) const
@@ -310,7 +308,7 @@ void acBus::pFlowObjectInitializeA (double time0, unsigned long flags)
             {
               if (activeLink < 2)
                 {
-                  LOG_WARNING ("No load no gen, 1 active line ,bus is irrelevent disconnecting");
+                  LOG_WARNING ("No load no gen, 1 active line ,bus is irrelevant disconnecting");
                   disconnect ();
                 }
             }
@@ -358,7 +356,7 @@ void acBus::pFlowObjectInitializeA (double time0, unsigned long flags)
               if (opFlags[use_autogen] == false)
                 {
 
-                  LOG_WARNING ("No load no gen, 1 line ,bus is irrelevent diabling");
+                  LOG_WARNING ("No load no gen, 1 line ,bus is irrelevant disabling");
                   disconnect ();
                   return;
                 }
@@ -427,7 +425,7 @@ void acBus::pFlowObjectInitializeA (double time0, unsigned long flags)
 
   if (CHECK_CONTROLFLAG(flags, low_voltage_checking))
   {
-	  opFlags.set(low_voltage_check_flag);
+      opFlags.set(low_voltage_check_flag);
   }
   updateFlags ();
 }
@@ -458,6 +456,7 @@ void acBus::pFlowObjectInitializeB ()
     }
 }
 
+//TODO:: transfer these functions to the busController
 void acBus::mergeBus (gridBus *mbus)
 {
   auto acmbus = dynamic_cast<acBus *> (mbus);
@@ -1375,7 +1374,6 @@ int acBus::set (const std::string &param, const std::string &vali)
     }
   else if (param == "status")
     {
-      makeLowerCase (val);
       if ((val == "out") || (val == "off") || (val == "disconnected"))
         {
           if (enabled)
@@ -1606,6 +1604,8 @@ void acBus::setVoltageAngle (double Vnew, double Anew)
     case busType::afix:
       aTarget = angle;
       break;
+	default:
+		break;
     }
 }
 
@@ -1644,8 +1644,11 @@ IOlocs acBus::getOutputLocs (const solverMode &sMode) const
   else
     {
       IOlocs newOutLocs (3);
-      auto Aoffset = offsets.getAOffset (sMode);
-      auto Voffset = offsets.getVOffset (sMode);
+     // auto Aoffset = useAngle(sMode) ? offsets.getAOffset(sMode) : kNullLocation;
+     // auto Voffset = useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation;
+	  auto Aoffset =  offsets.getAOffset(sMode);
+	  auto Voffset =  offsets.getVOffset(sMode);
+	  
       newOutLocs[voltageInLocation] = Voffset;
       newOutLocs[angleInLocation] = Aoffset;
       if (opFlags[compute_frequency])
@@ -1653,7 +1656,7 @@ IOlocs acBus::getOutputLocs (const solverMode &sMode) const
           index_t toff = kNullLocation;
           if (opFlags[compute_frequency])
             {
-              fblock->getOutputLoc (kNullVec, nullptr, sMode, toff);
+              toff=fblock->getOutputLoc (sMode);
             }
           else if (keyGen)
             {
@@ -1670,7 +1673,7 @@ IOlocs acBus::getOutputLocs (const solverMode &sMode) const
     }
 }
 
-double acBus::getOutputLoc (const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num) const
+index_t acBus::getOutputLoc (const solverMode &sMode, index_t num) const
 {
   if (sMode.offsetIndex == lastSmode)
     {
@@ -1688,38 +1691,34 @@ double acBus::getOutputLoc (const stateData *sD, const solverMode &sMode, index_
       switch (num)
         {
         case voltageInLocation:
-          {
-            currentLoc = offsets.getVOffset (sMode);
-            return getVoltage (sD, sMode);
-          }
-          break;
-
+           // return useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation;
+			return offsets.getVOffset(sMode);
         case angleInLocation:
           {
-            currentLoc = offsets.getAOffset (sMode);
-            return getAngle (sD, sMode);
+            //return useAngle(sMode) ? offsets.getAOffset(sMode) : kNullLocation;
+			return offsets.getAOffset(sMode);
           }
           break;
         case frequencyInLocation:
           {
             if (opFlags[compute_frequency])
               {
-                return fblock->getOutputLoc (kNullVec, sD, sMode, currentLoc);
+                return fblock->getOutputLoc (sMode);
               }
             else if (keyGen)
               {
-                return keyGen->getFreq (sD, sMode, &currentLoc);
+				index_t loc;
+                keyGen->getFreq (nullptr, sMode, &loc);
+				return loc;
               }
             else
               {
-                currentLoc = kNullLocation;
-                return kNullVal;
+                return kNullLocation;
               }
           }
           break;
         default:
-          currentLoc = kNullLocation;
-          return kNullVal;
+			return kNullLocation;
         }
     }
 }
@@ -1730,8 +1729,12 @@ double acBus::getVoltage (const double state[], const solverMode &sMode) const
     {
       return voltage;
     }
-  auto Voffset = offsets.getVOffset (sMode);
-  return (Voffset != kNullLocation) ? state[Voffset] : voltage;
+	//if (useVoltage(sMode))
+	{
+		auto Voffset = offsets.getVOffset(sMode);
+		return (Voffset != kNullLocation) ? state[Voffset] : voltage;
+	}
+	//return voltage;
 }
 
 double acBus::getAngle (const double state[], const solverMode &sMode) const
@@ -1740,8 +1743,13 @@ double acBus::getAngle (const double state[], const solverMode &sMode) const
     {
       return angle;
     }
-  auto Aoffset = offsets.getAOffset (sMode);
-  return (Aoffset != kNullLocation) ? state[Aoffset] : angle;
+	//if (useAngle(sMode))
+	{
+		auto Aoffset = offsets.getAOffset(sMode);
+		return (Aoffset != kNullLocation) ? state[Aoffset] : angle;
+	}
+	//return angle;
+  
 }
 
 double acBus::getVoltage (const stateData *sD, const solverMode &sMode) const
@@ -1750,8 +1758,13 @@ double acBus::getVoltage (const stateData *sD, const solverMode &sMode) const
     {
       return voltage;
     }
-  auto Voffset = offsets.getVOffset (sMode);
-  return (Voffset != kNullLocation) ? sD->state[Voffset] : voltage;
+	//if (useVoltage(sMode))
+	{
+		auto Voffset = offsets.getVOffset(sMode);
+		return (Voffset != kNullLocation) ? sD->state[Voffset] : voltage;
+	}
+	//return voltage;
+ 
 }
 
 double acBus::getAngle (const stateData *sD, const solverMode &sMode) const
@@ -1760,8 +1773,12 @@ double acBus::getAngle (const stateData *sD, const solverMode &sMode) const
     {
       return angle;
     }
-  auto Aoffset = offsets.getAOffset (sMode);
-  return (Aoffset != kNullLocation) ? sD->state[Aoffset] : angle;
+//	if (useAngle(sMode))
+	{
+		auto Aoffset = offsets.getAOffset(sMode);
+		return (Aoffset != kNullLocation) ? sD->state[Aoffset] : angle;
+	}
+//	return angle;
 }
 
 
@@ -2869,24 +2886,11 @@ void acBus::getStateName (stringVec &stNames, const solverMode &sMode, const std
           return;
         }
     }
-  std::string prefix2 = prefix + name + "::";
-  for (auto &gen : attachedGens)
-    {
-      if (gen->stateSize (sMode) > 0)
-        {
-          gen->getStateName (stNames, sMode, prefix2);
-        }
-    }
-
-  for (auto &load : attachedLoads)
-    {
-      if (load->stateSize (sMode) > 0)
-        {
-          load->getStateName (stNames, sMode, prefix2);
-        }
-    }
+  
+  gridBus::getStateName(stNames, sMode, prefix);
   if ((fblock) && (isDynamic (sMode)))
     {
+      std::string prefix2 = prefix + name + "::";
       fblock->getStateName (stNames, sMode, prefix2);
     }
 }
@@ -2900,25 +2904,26 @@ void acBus::setOffsets (const solverOffsets &newOffsets, const solverMode &sMode
   for (auto ld : attachedLoads)
     {
       ld->setOffsets (no, sMode);
-      no.increment (ld->offsets.getOffsets (sMode));
+      no.increment (ld->getOffsets (sMode));
     }
   for (auto gen : attachedGens)
     {
       gen->setOffsets (no, sMode);
-      no.increment (gen->offsets.getOffsets (sMode));
+      no.increment (gen->getOffsets (sMode));
     }
   if (opFlags[slave_bus])
     {
       auto so = offsets.getOffsets (sMode);
-      so->vOffset = busController.masterBus->offsets.getVOffset (sMode);
-      so->aOffset = busController.masterBus->offsets.getAOffset (sMode);
+	  auto mboffsets = busController.masterBus->getOffsets(sMode);
+      so->vOffset = mboffsets->vOffset;
+      so->aOffset = mboffsets->aOffset;;
     }
   else
     {
       if ((fblock) && (isDynamic (sMode)))
         {
           fblock->setOffsets (no, sMode);
-          no.increment (fblock->offsets.getOffsets (sMode));
+          no.increment (fblock->getOffsets (sMode));
         }
     }
 }
@@ -2939,8 +2944,9 @@ void acBus::setOffset (index_t offset, const solverMode &sMode)
   if (opFlags[slave_bus])
     {
       auto so = offsets.getOffsets (sMode);
-      so->vOffset = busController.masterBus->offsets.getVOffset (sMode);
-      so->aOffset = busController.masterBus->offsets.getAOffset (sMode);
+	  auto mboffsets = busController.masterBus->getOffsets(sMode);
+      so->vOffset = mboffsets->vOffset;
+      so->aOffset = mboffsets->aOffset;
     }
   else
     {
@@ -2994,7 +3000,7 @@ void acBus::reconnect (gridBus *mapBus)
     }
 
 }
-bool acBus::useAngle (const solverMode &sMode)
+bool acBus::useAngle (const solverMode &sMode) const
 {
   if ((hasAlgebraic (sMode)) && (isConnected ()))
     {
@@ -3013,7 +3019,7 @@ bool acBus::useAngle (const solverMode &sMode)
   return false;
 }
 
-bool acBus::useVoltage (const solverMode &sMode)
+bool acBus::useVoltage (const solverMode &sMode) const
 {
   if ((hasAlgebraic (sMode)) && (isConnected ()) && (!isDC (sMode)))
     {
@@ -3109,11 +3115,11 @@ void acBus::loadSizes (const solverMode &sMode, bool dynOnly)
             }
           if (dynOnly)
             {
-              so->addRootAndJacobianSizes (ld->offsets.getOffsets (sMode));
+              so->addRootAndJacobianSizes (ld->getOffsets (sMode));
             }
           else
             {
-              so->addSizes (ld->offsets.getOffsets (sMode));
+              so->addSizes (ld->getOffsets (sMode));
             }
         }
       for (auto gen : attachedGens)
@@ -3124,11 +3130,11 @@ void acBus::loadSizes (const solverMode &sMode, bool dynOnly)
             }
           if (dynOnly)
             {
-              so->addRootAndJacobianSizes (gen->offsets.getOffsets (sMode));
+              so->addRootAndJacobianSizes (gen->getOffsets (sMode));
             }
           else
             {
-              so->addSizes (gen->offsets.getOffsets (sMode));
+              so->addSizes (gen->getOffsets (sMode));
             }
         }
     }
@@ -3140,11 +3146,11 @@ void acBus::loadSizes (const solverMode &sMode, bool dynOnly)
         }
       if (dynOnly)
         {
-          so->addRootAndJacobianSizes (fblock->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (fblock->getOffsets (sMode));
         }
       else
         {
-          so->addSizes (fblock->offsets.getOffsets (sMode));
+          so->addSizes (fblock->getOffsets (sMode));
         }
     }
   if (!dynOnly)
@@ -3162,7 +3168,7 @@ void acBus::loadSizes (const solverMode &sMode, bool dynOnly)
   }*/
 }
 
-int acBus::getMode (const solverMode &sMode)
+int acBus::getMode (const solverMode &sMode) const
 {
   if (isDynamic (sMode))
     {
@@ -3299,7 +3305,7 @@ void acBus::computeDerivatives (const stateData *sD, const solverMode &sMode)
 // computed power at bus
 void acBus::updateLocalCache (const stateData *sD, const solverMode &sMode)
 {
-	
+    
   if (!S.needsUpdate (sD))
     {
       return;
@@ -3335,11 +3341,11 @@ void acBus::computePowerAdjustments ()
 
   for (auto &link : attachedLinks)
     {
-      if ((link->enabled) && (!busController.hasVoltageAdjustments (link->getID ())))
+      if ((link->isConnected()) && (!busController.hasVoltageAdjustments (link->getID ())))
         {
           S.linkQ += link->getReactivePower (cid);
         }
-      if ((link->enabled) && (!busController.hasPowerAdjustments (link->getID ())))
+      if ((link->isConnected()) && (!busController.hasPowerAdjustments (link->getID ())))
         {
           S.linkP += link->getRealPower (cid);
         }
@@ -3426,8 +3432,8 @@ double acBus::get (const std::string &param, units_t unitType) const
 
 change_code acBus::rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level)
 {
-  auto args = getOutputs (sD, sMode);
-  double vcurr = args[voltageInLocation];
+
+  double vcurr = getVoltage(sD,sMode);
   change_code ret = change_code::no_change;
   if (level == check_level_t::low_voltage_check)
     {
@@ -3435,7 +3441,7 @@ change_code acBus::rootCheck (const stateData *sD, const solverMode &sMode, chec
         {
           return ret;
         }
-      if (voltage < 1e-8)
+      if (vcurr < 1e-8)
         {
           disconnect ();
           ret = change_code::jacobian_change;
@@ -3490,116 +3496,14 @@ change_code acBus::rootCheck (const stateData *sD, const solverMode &sMode, chec
 
     }
   //make sure we are not in a fault condition
-  for (auto &gen : attachedGens)
+  auto iret = gridBus::rootCheck(sD, sMode, level);
+    if (iret>ret)
     {
-      if ((gen->checkFlag (has_alg_roots)) && (gen->enabled))
-        {
-          auto iret = gen->rootCheck (args, sD, sMode, level);
-          if (iret > ret)
-            {
-              ret = iret;
-            }
-        }
+        ret = iret;
     }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->checkFlag (has_alg_roots)) && (load->enabled))
-        {
-          auto iret = load->rootCheck (args, sD, sMode, level);
-          if (iret > ret)
-            {
-              ret = iret;
-            }
-        }
-    }
+  
   return ret;
 }
 
-void acBus::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
-{
-  auto args = getOutputs (sD, sMode);
-  for (auto &gen : attachedGens)
-    {
-      if ((gen->checkFlag (has_roots)) && (gen->enabled))
-        {
-          gen->rootTest (args, sD, roots, sMode);
-
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->checkFlag (has_roots)) && (load->enabled))
-        {
-          load->rootTest (args, sD, roots, sMode);
-        }
-    }
-  if ((fblock) && (fblock->checkFlag (has_roots)))
-    {
-      fblock->rootTest ({ args[angleInLocation] }, sD, roots, sMode);
-    }
-}
 
 
-void acBus::rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)
-{
-  size_t rc = 0;
-  int rootOffset = offsets.getRootOffset (sMode);
-
-  auto RF = vecFindne (rootMask, 0, rootOffset + rc, rootOffset + rootSize (sMode));
-
-  if (RF.size () > 0)
-    {
-      size_t rfi = 0;
-      auto args = getOutputs (nullptr, cLocalSolverMode);
-      auto nR = RF[rfi];
-      for (auto &gen : attachedGens)
-        {
-          if ((gen->checkFlag (has_roots)) && (gen->enabled))
-            {
-              rc += gen->rootSize (sMode);
-              if (nR < rootOffset + rc)
-                {
-                  gen->rootTrigger (ttime, args, rootMask, sMode);
-                  do
-                    {
-                      ++rfi;
-                      if (rfi >= RF.size ())
-                        {
-                          return;
-                        }
-                      nR = RF[rfi];
-                    }
-                  while (nR < rootOffset + rc);
-                }
-
-            }
-        }
-      for (auto &load : attachedLoads)
-        {
-          if ((load->checkFlag (has_roots)) && (load->enabled))
-            {
-
-              rc += load->rootSize (sMode);
-              if (nR < rootOffset + rc)
-                {
-                  load->rootTrigger (ttime, args, rootMask, sMode);
-                  do
-                    {
-                      ++rfi;
-                      if (rfi >= RF.size ())
-                        {
-                          return;
-                        }
-                      nR = RF[rfi];
-                    }
-                  while (nR < rootOffset + rc);
-                }
-            }
-        }
-      if (opFlags[compute_frequency])
-        {
-          fblock->rootTrigger (ttime, { args[angleInLocation] }, rootMask, sMode);
-        }
-    }
-
-}

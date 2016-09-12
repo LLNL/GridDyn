@@ -57,10 +57,11 @@ class violation;
 class gridObject : public gridCoreObject
 {
 public:
-  count_t numParams = 0;       //!< the number of paramaters to store in an archive
+  count_t numParams = 0;       //!< the number of parameters to store in an archive
   double m_baseFreq = kWS;              //!< the base frequency of the system default to 60Hz
-  offsetTable offsets;              //!<a table of offsets for the different solver modes
+  
 protected:
+    offsetTable offsets;              //!<a table of offsets for the different solver modes
   std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false
   std::vector<double> m_state;              //!<storage location for internal state
   std::vector<double> m_dstate_dt;             //!<storage location for internal state differential
@@ -91,13 +92,13 @@ public:
   }
 
   /** @brief set the offsets of an object for a particular optimization mode using a single offset.
-  \param offset the offset index all variables are sequential.
+  \param[in] offset the offset index all variables are sequential.
   \param sMode the solver mode to use.
   */
   virtual void setOffset (index_t offset, const solverMode &sMode);
 
   /** @brief set the offsets of an object for a particular optimization mode using a single offset.
-  \param offset the offset index all variables are sequential.
+  \param newOffsets the offset index all variables are sequential.
   \param sMode the solver mode to use.
   */
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode);
@@ -115,7 +116,7 @@ public:
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode);
 
   /** @brief set the offsets for parameter control
-  \param[in] Roffset the offset index all variables are sequential.
+  \param[in] Poffset the offset index all variables are sequential.
   \param[in] sMode the solver mode to use.
   */
   virtual void setParamOffset (index_t Poffset, const solverMode &sMode);
@@ -127,33 +128,33 @@ public:
   count_t stateSize (const solverMode &sMode);
 
   /** @brief get the total number of Algebraic States algSize+vSize+aSize
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of algebraic states
   */
   count_t totalAlgSize (const solverMode &sMode);
 
   /** @brief get the number of jacobian non-zeros elements (max not necessarily actual)
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of non-zeros in the jacobian
   */
   count_t jacSize (const solverMode &sMode);
   /** @brief get the number of roots
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of roots
   */
   count_t rootSize (const solverMode &sMode);
   /** @brief get the number of algebraic states not including voltage and angle states
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of algebraic states
   */
   count_t algSize (const solverMode &sMode);
   /** @brief get the number of differential states
-   @param[in] solverMode to base the count on
+   @param[in] sMode solverMode to base the count on
   @return the number of differential states
   */
   count_t diffSize (const solverMode &sMode);
   /** @brief get the number of voltage states
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of voltage states
   */
   count_t voltageStateCount (const solverMode &sMode);
@@ -175,33 +176,33 @@ public:
   count_t stateSize (const solverMode &sMode) const;
 
   /** @brief get the total number of Algebraic States algSize+vSize+aSize
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of algebraic states
   */
   count_t totalAlgSize (const solverMode &sMode) const;
 
   /** @brief get the number of jacobian non-zeros elements (max not necessarily actual)
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of non-zeros in the jacobian
   */
   count_t jacSize (const solverMode &sMode) const;
   /** @brief get the number of roots
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of roots
   */
   count_t rootSize (const solverMode &sMode) const;
   /** @brief get the number of algebraic states not including voltage and angle states
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of algebraic states
   */
   count_t algSize (const solverMode &sMode) const;
   /** @brief get the number of differential states
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of differential states
   */
   count_t diffSize (const solverMode &sMode) const;
   /** @brief get the number of voltage states
-  @param[in] solverMode to base the count on
+  @param[in] sMode solverMode to base the count on
   @return the number of voltage states
   */
   count_t voltageStateCount (const solverMode &sMode) const;
@@ -215,6 +216,11 @@ public:
   @return the number of parameters
   */
   count_t paramSize (const solverMode &sMode) const;
+  /** @brief function to get a constant pointer to the object offsets 
+   * @param[in] sMode the mode to get the offsets for
+   * return a const pointer to the solver Offsets
+   */
+  const solverOffsets *getOffsets(const solverMode &sMode) const;
 
   /** @brief checks if the object is loaded
   @param[in] sMode  the solverMode to get the stateSize for
@@ -246,20 +252,20 @@ public:
   virtual void loadSizes (const solverMode &sMode, bool dynOnly = false);
   /** @brief compute the sizes of the subobject and store them in the offsetTables.
   \param sMode the solver mode to use.
-  \param dynOnly set to true if only the dynamic conditions are of concernt
+  \param dynOnly set to true if only the dynamic conditions are of concern
   */
   void loadSizesSub (const solverMode &sMode, bool dynOnly);
   /** @brief transfer a computed state to the objects
   \param ttime -the time the state corresponds to
   \param state -- a double array pointing to the state information
-  \param d_state_dt a double array pointing to the state derivative information (not necessary for states eith no corresponding time derivative
+  \param dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
   \param sMode  -- the solvermode corresponding to the computed state.
   */
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
   /** @brief transfer state information from the objects to a vector
   \param ttime -the time the state corresponds to
   \param[out] state -- a double array pointing to the state information
-  \param[out] d_state_dt a double array pointing to the state derivative information (not necessary for states eith no corresponding time derivative
+  \param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
   \param sMode  -- the solvermode corresponding to the computed state.
   */
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode);
@@ -351,7 +357,7 @@ public:
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
   This function is a wrapper around the dynObjectInitializeB function which does the local object init
   this function handles any global setup and makes sure all the flags are set properly
-  @param[in]  the desired output of the gridPrimary
+  @param[in]  outputSet the desired output of the gridPrimary
   */
   void dynInitializeB (IOdata &outputSet);
 
@@ -428,7 +434,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   */
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
 
-  /** @brief get the residual computation for object requring a delay
+  /** @brief get the residual computation for object requiring a delay
     basically calls the residual calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on
   @param[out] resid the array to store the computed derivative values
@@ -436,7 +442,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   */
   virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode);
 
-  /** @brief get the residual computation for object requring a delay
+  /** @brief get the residual computation for object requiring a delay
     basically calls the derivative calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on
   @param[out] deriv the array to store the computed derivative values
@@ -452,7 +458,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   */
   virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
 
-  /** @brief get the residual computation for object requring a delay
+  /** @brief get the residual computation for object requiring a delay
     basically calls the jacobian calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on
   @param[out] ad the arrayData structure to store the jacobian values
@@ -489,9 +495,9 @@ it is assumed any appropriate data would be cached during this time and not reru
   virtual void rootTest (const stateData *, double roots[], const solverMode &sMode);
 
   /**
-  *@brief a root has occured now take action
+  *@brief a root has occurred now take action
   * @param[in] ttime the simulation time the root evaluation takes place
-  * @param[in] rootmask an integer array the same size as roots where a 1 indicates a root has been found
+  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
   virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode);
@@ -501,7 +507,7 @@ it is assumed any appropriate data would be cached during this time and not reru
    for operation after an initial condition check or timestep
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
-  @param[in]  the level of roots to check can be REVERSIBLE or NON_REVERSIBLE
+  @param[in] level the level of roots to check can be REVERSIBLE or NON_REVERSIBLE
   @return a change code indicating what if any changes in the object took place
   **/
   virtual change_code rootCheck (const stateData *sD, const solverMode & sMode, check_level_t level);
@@ -523,14 +529,14 @@ it is assumed any appropriate data would be cached during this time and not reru
   @pararm[in] ttime  the time of the corresponding states
   @param[in,out]  state the states of the system at present and shifted to match the updates
   @param[in,out] dstate_dt  the derivatives of the state that get updated
-  @param[in] sMode the solvemode matching the states
+  @param[in] sMode the solvermode matching the states
   @param[in] mode  the mode of the convergence
   @param[in] tol  the convergence tolerance
   */
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01);
+  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01);
   /** @brief reset voltages
   * resets the voltage levels and any other parameters changed in power to a base level depending on the level
-  * @param[in] level,  the level of the reset
+  * @param[in] level  the level of the reset
   */
   virtual void reset (reset_levels level = reset_levels::minimal);
 
@@ -558,22 +564,20 @@ it is assumed any appropriate data would be cached during this time and not reru
 
   /**
   *@brief get a vector state indices for the output
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @details used in cases where the state of one object is used int the computation of another for computation of the jacobian
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
   **/
   virtual IOlocs getOutputLocs  (const solverMode &sMode) const;
 
   /**
-  *@brief get a single output and location
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
-   * @param[in] sD the current state data for the simulation
+  *@brief get the state index of an output
+  @details used in cases where the state of one object is used int the computation of another for computation of the jacobian
   * @param[in] sMode the mode the solver is in
-  @param[out]  currentLoca the index of the location
   @param[in] num the number of the state being requested
   @return the value of the state requested
   **/
-  virtual double getOutputLoc (const stateData *sD, const solverMode &sMode, index_t & currentLoc, index_t num = 0) const;
+  virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get the time derivative of a single state
@@ -725,7 +729,7 @@ public:
 
   /** @brief call any objects that need 2 part execution to allow for parallelism
    do any prework for a residual call later in the calculations
-  secondary objects do not allow partial comutation like primary objects can so there is no delayed computation calls
+  secondary objects do not allow partial computation like primary objects can so there is no delayed computation calls
   just the regular call and the primary object will handle delaying action.
   @param[in] args  the input arguments
   @param[in] sD the data representing the current state to operate on
@@ -812,14 +816,11 @@ public:
   /**
   *@brief get a single output and location
   @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
-  @param[out]  currentLoca the index of the location
   @param[in] num the number of the state being requested
-  @return the value of the state requested
+  @return the location of the output state requested
   **/
-  virtual double getOutputLoc (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t & currentLoc, index_t num = 0);
+  virtual index_t getOutputLoc ( const solverMode &sMode, index_t num = 0);
 
   /**
   *@brief get the time derivative of a single state
@@ -860,7 +861,7 @@ public:
 
   /**
   *@brief get the available upwards generating capacity of a system
-  @param[in] the time period within which to do the adjustment
+  @param[in] time the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
   virtual double getAdjustableCapacityUp (double time = kBigNum) const;
@@ -877,7 +878,7 @@ public:
    @param[in] args the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[out] ad  the array to store the information in
-  * @param[in] arglocs the vector of input argument locations
+  * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
   virtual void jacobianElements (const IOdata & args, const stateData *sD, arrayData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
@@ -896,7 +897,7 @@ public:
   @param[in] args the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[out] ad  the array to store the information in
-  * @param[in] arglocs the vector of input argument locations
+  * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
   virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, arrayData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
@@ -904,30 +905,30 @@ public:
   /**
   *evaluate the root functions and return the value
   @param[in] args the inputs for the secondary object
-  * @param[in] the state of the syste
+  * @param[in] sD the state of the system
   * @param[out] roots the memory to store the root evaluation
   * @param[in] sMode the mode the solver is in
   **/
   virtual void rootTest  (const IOdata & args, const stateData *sD, double roots[], const solverMode & sMode);
 
   /**
-  *a root has occured now take action
-  * @param[in] time the simulation time the root evaluation takes place
+  *a root has occurred now take action
+  * @param[in] ttime the simulation time the root evaluation takes place
   @param[in] a vector of ints representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
-  * @param[in] rootmask an integer array the same size as roots where a 1 indicates a root has been found
+  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
   virtual void rootTrigger (double ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
 
   /**
   *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
-  * @param[in] time the simulation time the root evaluation takes place
+  * @param[in] ttime the simulation time the root evaluation takes place
   @param[in] args the inputs for the secondary object
-  * @param[in] the state of the system
+  * @param[in] sD the state of the system
   * @param[in] sMode the mode the solver is in
-  @param[in] the level of root to check for
+  @param[in] level the level of root to check for
   **/
-  virtual change_code rootCheck (const IOdata & args, const stateData *, const solverMode &, check_level_t level);
+  virtual change_code rootCheck (const IOdata & args, const stateData *sD, const solverMode &sMode, check_level_t level);
 
   /** @brief reset power flow parameters
   *  resets the voltage levels and any other parameters changed in power to a base level depending on the level
@@ -936,9 +937,9 @@ public:
   virtual void reset (reset_levels level = reset_levels::minimal);
 
   /** @brief adjust the power flow solution if needed
-  @param[in] the inputs for the secondary object
+  @param[in] args the inputs for the secondary object
   @param[in]  flags for suggesting how the object handle the adjustments
-  * @param[in] level,  the level of the adjustments to perform
+  * @param[in] level  the level of the adjustments to perform
   */
   virtual change_code powerFlowAdjust (const IOdata & args, unsigned long flags, check_level_t level);
 
@@ -999,7 +1000,7 @@ protected:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  virtual void objectInitializeA (double time, unsigned long flags);
+  virtual void objectInitializeA (double time0, unsigned long flags);
   /** @brief initialize local object part B
    see initializeB for more details ,all arguments are pass through from the initializeB function
   @param[in] args  the input arguments
@@ -1031,22 +1032,22 @@ public:
   **/
   virtual void rootTest (const IOdata & args, const stateData *sD, double roots[], const solverMode &sMode);
   /**
-  *a root has occured now take action
-  * @param[in] time the simulation time the root evaluation takes place
+  *a root has occurred now take action
+  * @param[in] ttime the simulation time the root evaluation takes place
   @param[in] a vector of ints representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
-  * @param[in] rootmask an integer array the same size as roots where a 1 indicates a root has been found
+  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
   virtual void rootTrigger (double ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
   /**
   *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
-  * @param[in] time the simulation time the root evaluation takes place
+  * @param[in] ttime the simulation time the root evaluation takes place
   @param[in] args the inputs for the secondary object
   * @param[in] sD the state of the system
   * @param[in] sMode the mode the solver is in
   @param[in] level the level of root to check for
   **/
-  virtual change_code rootCheck (const IOdata & args, const stateData *, const solverMode &, check_level_t level);
+  virtual change_code rootCheck (const IOdata & args, const stateData *sD, const solverMode &sMode, check_level_t level);
   //residual computation
   /** @brief compute the residual for a given state
   @param[in] args  the input arguments
@@ -1075,7 +1076,7 @@ public:
   @param[in] args the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[out] ad  the array to store the information in
-  * @param[in] arglocs the vector of input argument locations
+  * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
   virtual void jacobianElements (const IOdata & args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
@@ -1092,7 +1093,7 @@ public:
   @param[in] args the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[out] ad  the array to store the information in
-  * @param[in] arglocs the vector of input argument locations
+  * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
   virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, arrayData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
@@ -1100,7 +1101,7 @@ public:
   /** @brief adjust the power flow solution if needed
   @param[in] args the inputs for the secondary object
   @param[in] flags for suggesting how the object handle the adjustments
-  * @param[in] level,  the level of the adjustments to perform
+  * @param[in] level  the level of the adjustments to perform
   */
   virtual change_code powerFlowAdjust (const IOdata & args, unsigned long flags, check_level_t level);
 
@@ -1128,7 +1129,6 @@ public:
   virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
   /**
   *@brief get the time derivative of a single state
-  @param[in] args the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
@@ -1153,14 +1153,11 @@ public:
   /**
   *@brief get a single output and location
   @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
-  @param[out]  currentLoca the index of the location
   @param[in] num the number of the state being requested
   @return the value of the state requested
   **/
-  virtual double getOutputLoc (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num = 0) const;
+  virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
   /**
   *@brief get a vector state indices for the output
   @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian

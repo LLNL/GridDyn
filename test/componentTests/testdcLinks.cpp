@@ -24,7 +24,7 @@
 
 BOOST_FIXTURE_TEST_SUITE (hvdc_tests, gridDynSimulationTestFixture)
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+
 BOOST_AUTO_TEST_CASE (hvdc_test1)
 {
   std::string fname = std::string (HVDC_TEST_DIRECTORY "test_hvdc1.xml");
@@ -42,7 +42,6 @@ BOOST_AUTO_TEST_CASE (hvdc_test1)
     printStateNames(gds,cPflowSolverMode);
   }
   BOOST_REQUIRE(mmatch==0);
-
 
 
   gds->powerflow ();
@@ -66,7 +65,7 @@ BOOST_AUTO_TEST_CASE (hvdc_test1)
 
 }
 
-
+#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (hvdc_test2)
 {
   std::string fname = std::string (HVDC_TEST_DIRECTORY "test_hvdc2.xml");

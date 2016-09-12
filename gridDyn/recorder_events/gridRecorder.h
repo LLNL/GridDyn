@@ -26,7 +26,7 @@ public:
   std::string rString;     //!<a string defining the recorder
   int column = -1;      //!< (suggested) which column to stick the data in
   index_t offset = kNullLocation;      //!<the offset to use to numerically pick off the state
-  double gain = 1.0;      //!<a mulitplier factor for the results
+  double gain = 1.0;      //!<a multiplier factor for the results
   double bias = 0.0;       //!< a shift factor of the results
   gridUnits::units_t outputUnits = gridUnits::defUnit;       //!<which units to output the data
 public:
@@ -113,17 +113,9 @@ public:
   }
   const std::vector<double> &getData (size_t col) const
   {
-    if (col < columns)
-      {
-        return dataset.data[col];
-      }
-    else
-      {
-        return dataset.data[0];
-      }
+  
+       return dataset.data[(col < columns)?col:0];
   }
 };
-
-
 
 #endif

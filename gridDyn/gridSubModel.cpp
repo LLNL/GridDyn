@@ -281,78 +281,29 @@ double gridSubModel::getOutput (index_t Num) const
   return getOutput (kNullVec, nullptr, cLocalSolverMode, Num);
 }
 
-double gridSubModel::getOutputLoc (const IOdata & /*args*/, const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t Num) const
+index_t gridSubModel::getOutputLoc (const solverMode &sMode, index_t Num) const
 {
   if (Num > m_outputSize)
     {
-      currentLoc = kNullLocation;
-      return kNullVal;
+      return kNullLocation;
     }
-  if (isLocal (sMode))
-    {
-      currentLoc = kNullLocation;
-      return getOutput (Num);
-    }
-  else if (sD)
-    {
-      Lp Loc = offsets.getLocations (sD, sMode,  this);
-      if (opFlags[differential_output])
-        {
-          if (Loc.diffSize > Num)
-            {
-              currentLoc = Loc.algOffset + Num;
-              return Loc.diffStateLoc[Num];
-            }
-          else
-            {
-              currentLoc = kNullLocation;
-              return (m_state.size () > Num) ? m_state[Num] : m_output;
-            }
-        }
-      else
-        {         //if differential flag was not specified try algebraic state values then differential
+  
+  if (opFlags[differential_output])
+  {
+	  return offsets.getDiffOffset(sMode) + Num;
+  }
 
-          if (Loc.algSize > Num)
-            {
-              currentLoc = Loc.algOffset + Num;
-              return Loc.algStateLoc[Num];
-            }
-          else if (Loc.diffSize + Loc.algSize > Num)
-            {
-              currentLoc = Loc.diffOffset - Loc.algSize + Num;
-              return Loc.diffStateLoc[Num - Loc.algSize];
-            }
-          else
-            {
-              currentLoc = kNullLocation;
-              return (m_state.size () > Num) ? m_state[Num] : m_output;
-            }
-        }
-    }
-  else
-    {
-      if (opFlags[differential_output])
-        {
-          currentLoc = offsets.getDiffOffset (sMode) + Num;
-        }
-      else
-        {
-          auto so = offsets.getOffsets (sMode);
-          if (so->total.algSize > Num)
-            {
-              currentLoc = so->algOffset + Num;
-            }
-          else if (so->total.diffSize + so->total.algSize > Num)
-            {
-              currentLoc = so->diffOffset - so->total.algSize + Num;
-            }
-          else
-            {
-              currentLoc = kNullLocation;
-            }
-        }
-      return getOutput (Num);
-    }
+  auto so = offsets.getOffsets(sMode);
+  if (so->total.algSize > Num)
+  {
+	  return so->algOffset + Num;
+  }
+  if (so->total.diffSize + so->total.algSize > Num)
+  {
+	  return so->diffOffset - so->total.algSize + Num;
+  }
+
+  return kNullLocation;
 }
 
 
@@ -377,7 +328,7 @@ IOlocs gridSubModel::getOutputLocs  (const solverMode &sMode) const
     {
       for (count_t pp = 0; pp < m_outputSize; ++pp)
         {
-          getOutputLoc (kNullVec, nullptr, sMode, (oloc[pp]),pp);
+		  oloc[pp]=getOutputLoc ( sMode,pp);
         }
     }
   else

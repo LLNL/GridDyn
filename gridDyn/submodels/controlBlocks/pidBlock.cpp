@@ -14,6 +14,7 @@
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
 #include "arrayData.h"
+#include "gridCoreTemplates.h"
 
 pidBlock::pidBlock (const std::string &objName) : basicBlock (objName)
 {
@@ -24,6 +25,7 @@ pidBlock::pidBlock (const std::string &objName) : basicBlock (objName)
 pidBlock::pidBlock (double P, double I, double D,const std::string &objName) : basicBlock (objName), m_P (P),m_I (I),m_D (D)
 {
   opFlags.set (use_state);
+  opFlags.set(differential_output);
   if (D != 0)
     {
       no_D = false;
@@ -32,21 +34,11 @@ pidBlock::pidBlock (double P, double I, double D,const std::string &objName) : b
 
 gridCoreObject *pidBlock::clone (gridCoreObject *obj) const
 {
-  pidBlock *nobj;
-  if (obj == nullptr)
+	pidBlock *nobj = cloneBase<pidBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new pidBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<pidBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
   nobj->m_P = m_P;
   nobj->m_I = m_I;
   nobj->m_D = m_D;

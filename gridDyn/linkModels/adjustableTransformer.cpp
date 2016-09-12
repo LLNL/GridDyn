@@ -1201,7 +1201,7 @@ void adjustableTransformer::jacobianElements (const stateData *sD, arrayData<dou
             }
           else if (cMode == control_mode_t::voltage_control)
             {
-              ad->assignCheckCol (offset, controlBus->offsets.getVOffset (sMode), 1);
+              ad->assignCheckCol (offset, controlBus->getOutputLoc(sMode,voltageInLocation), 1);
             }
           else if (cMode == control_mode_t::MVar_control)
             {
@@ -1555,12 +1555,12 @@ void adjustableTransformer::MWJac (const stateData *, arrayData<double> *ad, con
 
 
   auto offset = offsets.getAlgOffset (sMode);
-  int B1Aoffset = B1->offsets.getAOffset (sMode);
-  int B2Aoffset = B2->offsets.getAOffset (sMode);
-  int B1Voffset = B1->offsets.getVOffset (sMode);
-  int B2Voffset = B2->offsets.getVOffset (sMode);
+  int B1Aoffset = B1->getOutputLoc(sMode,angleInLocation);
+  int B2Aoffset = B2->getOutputLoc(sMode, angleInLocation);
+  int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
+  int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
 
-  //compuate the DP1/dta
+  //compute the DP1/dta
   double temp = -tvg * sinTheta1 + tvb * cosTheta1;
   ad->assign (offset, offset, temp);
 
@@ -1606,10 +1606,10 @@ void adjustableTransformer::MVarJac (const stateData *, arrayData<double> *ad, c
   tvb = b / tap * v1 * v2;
 
   auto offset = offsets.getAlgOffset (sMode);
-  int B1Aoffset = B1->offsets.getAOffset (sMode);
-  int B2Aoffset = B2->offsets.getAOffset (sMode);
-  int B1Voffset = B1->offsets.getVOffset (sMode);
-  int B2Voffset = B2->offsets.getVOffset (sMode);
+  int B1Aoffset = B1->getOutputLoc(sMode, angleInLocation);
+  int B2Aoffset = B2->getOutputLoc(sMode, angleInLocation);
+  int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
+  int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
 
   double P1 = (g + 0.5 * mp_G) / (tap * tap) * v1 * v1;
   P1 -= tvg * cosTheta1;
@@ -1620,7 +1620,7 @@ void adjustableTransformer::MVarJac (const stateData *, arrayData<double> *ad, c
   Q1 += tvb * cosTheta1;
 
 
-  //compuate the DQ2/dta
+  //compute the DQ2/dta
   temp = -tvg / tap * sinTheta2 - tvb / tap * cosTheta2;
   ad->assign (offset, offset, temp);
 
@@ -1775,12 +1775,12 @@ change_code adjustableTransformer::voltageControlAdjust ()
 
 change_code adjustableTransformer::MWControlAdjust()
 {
-	auto ret = change_code::no_change;
-	return ret;
+    auto ret = change_code::no_change;
+    return ret;
 }
 
 change_code adjustableTransformer::MVarControlAdjust()
 {
-	auto ret = change_code::no_change;
-	return ret;
+    auto ret = change_code::no_change;
+    return ret;
 }

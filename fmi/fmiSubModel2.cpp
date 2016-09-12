@@ -1252,10 +1252,9 @@ double fmiSubModel2::getOutput(index_t num) const
 	return out;
 }
 
-double fmiSubModel2::getOutputLoc(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num) const
+index_t fmiSubModel2::getOutputLoc(const solverMode &sMode,  index_t num) const
 {
-	currentLoc = kNullLocation;
-	return getOutput(args, sD, sMode, num);
+	return kNullLocation;
 }
 
 void fmiSubModel2::updateInfo(const IOdata &args, const stateData *sD, const solverMode &sMode)

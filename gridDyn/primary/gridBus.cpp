@@ -32,8 +32,6 @@
 
 #include <iostream>
 #include <cmath>
-#include <utility>
-#include <memory>
 #include <cassert>
 
 
@@ -388,7 +386,6 @@ void gridBus::pFlowObjectInitializeA (double time0, unsigned long flags)
     {
       opFlags.set (low_voltage_check_flag);
     }
-  updateFlags ();
 }
 
 void gridBus::pFlowObjectInitializeB ()
@@ -504,7 +501,6 @@ void gridBus::dynObjectInitializeA (double time0, unsigned long flags)
   //check for any roots
   //localRoots = 0;
 
-  updateFlags ();
 }
 
 // initializeB states for dynamic solution part 2  //final clean up
@@ -878,7 +874,6 @@ double gridBus::getOutput (const stateData *sD, const solverMode &sMode, index_t
     {
     case voltageInLocation:
       return getVoltage (sD, sMode);
-      break;
     case angleInLocation:
       return getAngle (sD, sMode);
     case frequencyInLocation:
@@ -1344,7 +1339,7 @@ static const IOlocs kNullLocations {
   kNullLocation,kNullLocation,kNullLocation
 };
 
-// jacobian
+// Jacobian
 void gridBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
 {
   updateLocalCache (sD, sMode);
@@ -1483,12 +1478,12 @@ void gridBus::setOffsets (const solverOffsets &newOffsets, const solverMode &sMo
   for (auto ld : attachedLoads)
     {
       ld->setOffsets (no, sMode);
-      no.increment (ld->offsets.getOffsets (sMode));
+      no.increment (ld->getOffsets (sMode));
     }
   for (auto gen : attachedGens)
     {
       gen->setOffsets (no, sMode);
-      no.increment (gen->offsets.getOffsets (sMode));
+      no.increment (gen->getOffsets (sMode));
     }
 }
 
@@ -1635,11 +1630,11 @@ void gridBus::loadSizes (const solverMode &sMode, bool dynOnly)
         }
       if (dynOnly)
         {
-          so->addRootAndJacobianSizes (ld->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (ld->getOffsets (sMode));
         }
       else
         {
-          so->addSizes (ld->offsets.getOffsets (sMode));
+          so->addSizes (ld->getOffsets (sMode));
         }
     }
   for (auto gen : attachedGens)
@@ -1650,11 +1645,11 @@ void gridBus::loadSizes (const solverMode &sMode, bool dynOnly)
         }
       if (dynOnly)
         {
-          so->addRootAndJacobianSizes (gen->offsets.getOffsets (sMode));
+          so->addRootAndJacobianSizes (gen->getOffsets (sMode));
         }
       else
         {
-          so->addSizes (gen->offsets.getOffsets (sMode));
+          so->addSizes (gen->getOffsets (sMode));
         }
     }
   if (!dynOnly)
@@ -1798,6 +1793,8 @@ bool busPowers::needsUpdate (const stateData *sD)
     }
   return false;
 }
+
+
 
 // computed power at bus
 void gridBus::updateLocalCache ()

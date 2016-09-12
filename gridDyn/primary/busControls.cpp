@@ -17,7 +17,7 @@
 #include "vectorOps.hpp"
 
 
-busControls::busControls()
+busControls::busControls(acBus *busToControl):controlledBus(busToControl)
 {
 
 }

@@ -170,11 +170,12 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 
 
   arrayDataSparse kp;
-  index_t wloc;
-  double out = cb.getOutputLoc (kNullVec, sD, sMode, wloc);
+  index_t wloc = cb.getOutputLoc(sMode);
+  double out = cb.getOutput (kNullVec, sD, sMode);
   dbb.jacElements (out, 0,sD, ad, wloc, sMode);
 
-  out = dbb.getOutputLoc (kNullVec, sD, sMode, wloc);
+  out = dbb.getOutput (kNullVec, sD, sMode);
+  wloc = dbb.getOutputLoc(sMode);
   delay.jacElements (out + args[govpSetInLocation], 0,sD, &kp, 0, sMode);
 
   if (argLocs[govpSetInLocation] != kNullLocation)
@@ -256,15 +257,15 @@ index_t gridDynGovernor::findIndex (const std::string &field, const solverMode &
   index_t ret = kInvalidLocation;
   if (field == "pm")
     {
-      ret = delay.offsets.getAlgOffset (sMode);
+      ret = delay.getOutputLoc (sMode,0);
     }
   else if (field == "dbo")
     {
-      ret = dbb.offsets.getAlgOffset (sMode);
+      ret = dbb.getOutputLoc(sMode, 0);
     }
   else if (field == "w")
     {
-      ret = cb.offsets.getAlgOffset (sMode);
+      ret = cb.getOutputLoc(sMode, 0);
     }
   return ret;
 }

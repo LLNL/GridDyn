@@ -863,11 +863,11 @@ void sensor::loadSizes (const solverMode &sMode, bool dynOnly)
             }
           if (dynOnly)
             {
-              so->addRootAndJacobianSizes (fb->offsets.getOffsets (sMode));
+              so->addRootAndJacobianSizes (fb->getOffsets (sMode));
             }
           else
             {
-              so->addSizes (fb->offsets.getOffsets (sMode));
+              so->addSizes (fb->getOffsets (sMode));
             }
 
         }
@@ -903,7 +903,7 @@ void sensor::setOffsets (const solverOffsets &newOffsets, const solverMode &sMod
       for (auto &so : filterBlocks)
         {
           so->setOffsets (no, sMode);
-          no.increment (so->offsets.getOffsets (sMode));
+          no.increment (so->getOffsets (sMode));
         }
     }
 }
@@ -990,6 +990,8 @@ double sensor::timestep (double ttime, const solverMode &sMode)
         case outputMode_t::direct:
           out = dataSources[outputs[0]]->grabData ();
           break;
+		default:
+			break;
         }
     }
   return out;
@@ -1175,6 +1177,8 @@ IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
               out[pp] = dataSourcesSt[outputs[pp]]->grabData (sD,sMode);
             }
           break;
+		default:
+			break;
         }
     }
   return out;
@@ -1212,33 +1216,29 @@ double sensor::getOutput (const stateData *sD, const solverMode &sMode, index_t 
           out = dataSources[outputs[num]]->grabData ();
         }
       break;
+	default:
+		break;
     }
   return out;
 }
 
-double sensor::getOutputLoc (const stateData *sD, const solverMode &sMode, index_t &currentLoc, index_t num) const
+index_t sensor::getOutputLoc (const solverMode &sMode, index_t num) const
 {
-  double out = kNullVal;
+
   if (num >= outputMode.size ())
     {
-      return out;
+      return kNullLocation;
     }
   switch (outputMode[num])
     {
     case outputMode_t::block:
-      out = filterBlocks[outputs[num]]->getOutputLoc (kNullVec, sD, sMode,currentLoc);
-      break;
+      return filterBlocks[outputs[num]]->getOutputLoc (sMode);
     case outputMode_t::processed:
-      currentLoc = kNullLocation;
-      out = outGrabberSt[num]->grabData (sD, sMode);
-
-      break;
     case outputMode_t::direct:
-      out = dataSourcesSt[outputs[num]]->grabData (sD, sMode);
-      currentLoc = kNullLocation;
-      break;
+	default:
+		return kNullLocation;
+	
     }
-  return out;
 }
 
 //TODO:: PT This is a complicated function still need to work on it
