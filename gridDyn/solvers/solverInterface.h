@@ -14,7 +14,6 @@
 #ifndef _SOLVER_INTERFACE_H_
 #define _SOLVER_INTERFACE_H_
 
-#include "griddyn-config.h"
 #include "gridObjectsHelperClasses.h"
 
 #include <vector>
@@ -60,6 +59,7 @@ public:
   std::vector<int> rootsfound;            //!< mask vector for which roots were found
   bool printResid = false;                 //!< flag telling the interface to print the residual values to the screen (used for debugging)
 protected:
+	
   std::string lastErrorString = "";             //!< string containing the last error
   int lastErrorCode = 0;                        //!< the last error Code
 
@@ -70,14 +70,14 @@ protected:
   solver_print_level printLevel = solver_print_level::s_error_trap;            //!< print_level for solver
   count_t rootCount = 0;                                                                        //!< the number of root finding functions
   count_t solverCallCount = 0;                                                          //!< the number of times the solver has been called
-  count_t jacCallCount = 0;                                                                     //!< the number of times the jacobian function has been called
+  count_t jacCallCount = 0;                                                                     //!< the number of times the Jacobian function has been called
   count_t funcCallCount = 0;											//!< the number of times the function evaluation has been called
   count_t rootCallCount = 0;
   count_t max_iterations = 10000;                                    //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
   double tolerance = 1e-8;												//!<the default solver tolerance
   bool dense = false;													//!< if the solver should use a dense or sparse version
-  bool constantJacobian = false;										//!< if the solver should just keep a constant jacobian
+  bool constantJacobian = false;										//!< if the solver should just keep a constant Jacobian
   bool useMask = false;                                                                         //!< if the solver should use a mask to filter out specific states
   bool parallel = false;                                                                        //!< if the solver should use a parallel version
   bool locked = false;                                                                          //!< if the solverMode is locked from further updates
@@ -88,10 +88,10 @@ protected:
   void *solverMem = nullptr;                                                            //!< the memory used by a specific solver internnally
   gridDynSimulation *m_gds = nullptr;                                           //!< pointer the gridDynSimulation object used
   count_t svsize = 0;                                                                           //!< the state size
-  count_t nnz = 0;                                                                           //!< the actual number of non-zeros in a jacobian
+  count_t nnz = 0;                                                                           //!< the actual number of non-zeros in a Jacobian
 
 public:
-  /** @brief default construtor*/
+  /** @brief default constructor*/
   solverInterface ();
   /** @brief alternate constructor
   @param[in] gds  gridDynSimulation to link with
@@ -159,7 +159,7 @@ public:
   /** @brief load the constraints*/
   virtual void setConstraints ();
 
-  /** @brief perform an initialial condition calculation
+  /** @brief perform an initial condition calculation
   @param[in] t0  the time for the initialization
   @param[in]  tstep0  the size of the first desired step
   @parma[in] mode  the step mode
@@ -180,7 +180,8 @@ public:
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
   virtual int setRootFinding (index_t numRoots);
-  /** @brief get a parameter from the solver
+  
+	/** @brief get a parameter from the solver
   @param[in] param  a string with the desired name of the parameter or result
   @return the value of the requested parameter
   */
@@ -191,20 +192,32 @@ public:
   @return a value indicating success  PARAMETER_FOUND if param was a valid parameter,  PARAMETER_NOT_FOUND if invalid,  INVALID_PARAMETER_VALUE if bad value
   */
   virtual int set (const std::string &param, const std::string &val);
-  /** @brief set a numerical parameter on a solver
+  
+	/** @brief set a numerical parameter on a solver
   @param[in] param  a string with the desired name of the parameter
   @param[in] val the value of the property to set
   @return a value indicating success  PARAMETER_FOUND if param was a valid parameter,  PARAMETER_NOT_FOUND if invalid,  INVALID_PARAMETER_VALUE if bad value
   */
   virtual int set (const std::string &param, double val);
-  /** @brief perform the solver calculations
+  
+	/** get the name of the solver*/
+	const std::string &getName() const
+	{
+		return name;
+	}
+	/** set the name of the solver*/
+	void setName(std::string newName)
+	{
+		name = newName;
+	}
+	/** @brief perform the solver calculations
   @param[in] tStop  the requested return time   not that useful for algebraic solvers
   @param[out]  tReturn  the actual return time
   @parma[in] mode  the step mode
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
   virtual int solve (double tStop, double & tReturn, step_mode stepMode = step_mode::normal);
-  /** @brief resize the storage array for the jacobian
+  /** @brief resize the storage array for the Jacobian
   @param[in] size  the number of elements to potentially store
   */
   virtual void setMaxNonZeros (count_t size);
@@ -216,12 +229,12 @@ public:
     return initialized;
   }
   /** @brief helper function to log specific solver stats
-  @param[in] loglevel  the level of logging to display
+  @param[in] logLevel  the level of logging to display
   @param[in] iconly  flag indicating that the logging should be for the initial condition calculation only
   */
   virtual void logSolverStats (int logLevel, bool iconly = false) const;
   /** @brief helper function to log error weight information
-  @param[in] loglevel  the level of logging to display
+  @param[in] logLevel  the level of logging to display
   */
   virtual void logErrorWeights (int logLevel) const;
 
@@ -240,7 +253,7 @@ public:
     return svsize;
   }
 
-  /** @brief get the actual number of non-zeros in the jacobian
+  /** @brief get the actual number of non-zeros in the Jacobian
   @return the state size
   */
   count_t nonZeros () const
@@ -290,19 +303,19 @@ public:
   virtual int check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError = true) const;
 
   /** @brief load up masks to the states
-    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specfic information in the jacobian calculations and the residual calculations
+    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specific information in the Jacobian calculations and the residual calculations
   @param[in] msk  the indices of the state elements to fix
   */
   void setMaskElements (std::vector<index_t> msk);
 
   /** @brief add an index to the mask
-    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specfic information in the jacobian calculations and the residual calculations
+    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specific information in the Jacobian calculations and the residual calculations
   @param[in] newMaskElement the index of the values to mask
   */
   void addMaskElement (index_t newMaskElement);
 
   /** @brief add several new elements to a mask
-    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specfic information in the jacobian calculations and the residual calculations
+    masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specific information in the Jacobian calculations and the residual calculations
   @param[in] newMsk  a vector of indices to add to an existing mask
   */
   void addMaskElements (std::vector<index_t> newMsk);
@@ -319,7 +332,7 @@ public:
   }
 };
 
-/** @brief class implmenting a guass seidel solver for algebraic variables in a power system
+/** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
 */
 class basicSolver : public solverInterface
 {
@@ -335,7 +348,7 @@ private:
     gauss, gauss_siedel
   };
   mode_t algorithm = mode_t::gauss;  //!< the algorithm to use
-  count_t iterations;   //!< counter for the number of iterations
+  count_t iterations=0;   //!< counter for the number of iterations
 public:
   /** @brief default constructor*/
   basicSolver ();
@@ -361,6 +374,44 @@ public:
   virtual int set (const std::string &param, double val) override;
 
   virtual int solve (double tStop, double & tReturn, step_mode stepMode = step_mode::normal) override;
+};
+
+/** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
+*/
+class basicOdeSolver : public solverInterface
+{
+private:
+	std::vector<double> state; //!< state data/
+	std::vector<double> deriv;  //!< temp state data location 1
+	std::vector<double> state2;  //!< temp state data location 2
+	std::vector<double> type;                     //!< type data
+	double deltaT = 0.005;  //!< the default time step
+	double solveTime = 0; //!< the last solve Time
+public:
+	/** @brief default constructor*/
+	basicOdeSolver();
+	/** alternate constructor to feed to solverInterface
+	@param[in] gds  the gridDynSimulation to link to
+	@param[in] sMode the solverMode to solve with
+	*/
+	basicOdeSolver(gridDynSimulation *gds, const solverMode& sMode);
+
+	virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	double * state_data() override;
+	double * deriv_data() override;
+	double * type_data() override;
+
+	const double * state_data() const override;
+	const double * deriv_data() const override;
+	const double * type_data() const override;
+	int allocate(count_t size, count_t numroots = 0) override;
+	int initialize(double t0) override;
+
+	virtual double get(const std::string & param) const override;
+	virtual int set(const std::string &param, const std::string &val) override;
+	virtual int set(const std::string &param, double val) override;
+
+	virtual int solve(double tStop, double & tReturn, step_mode stepMode = step_mode::normal) override;
 };
 
 /** @brief make a solver from a particular mode

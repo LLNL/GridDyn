@@ -222,7 +222,7 @@ void gridPrimary::converge (double /*ttime*/, double /*state*/[], double /*dstat
 
 }
 
-//jacobian computation
+//Jacobian computation
 void gridPrimary::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode & sMode)
 {
   if (!subObjectList.empty ())

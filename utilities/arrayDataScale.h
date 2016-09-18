@@ -29,11 +29,11 @@ class arrayDataScale : public arrayData<Y>
 public:
 	arrayData<Y> *ad;  //!< the matrix to translate to
 private:
-	Y scale;
+	Y scalingFactor;
 public:
 	/** @brief constructor
 	*/
-	arrayDataScale(arrayData<Y> *input, Y scaleFactor),scale(scaleFactor)
+	arrayDataScale(arrayData<Y> *input, Y scaleFactor):scalingFactor(scaleFactor)
 	{
 		setArray(input);
 	};
@@ -45,7 +45,7 @@ public:
 
 	void assign(index_t row, index_t col, Y num) override
 	{
-		ad->assign(row, col, num*scale);
+		ad->assign(row, col, num*scalingFactor);
 	};
 
 	count_t size() const override

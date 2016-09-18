@@ -272,18 +272,30 @@ std::string characterReplace (const std::string &source, char key, std::string r
 @param[in] str  the string to do the replacement on
 @return the string with the character codes removed and replaced with the appropriate character
 */
-
 std::string xmlCharacterCodeReplace(std::string str);
 
+/** small helper class to map characters to values*/
 class charMapper
 {
 private:
-	std::array<int, 256> key;
+	std::array<int, 256> key; //!< the character map
 public:
+	/** default constructor*/
 	charMapper();
-	charMapper(const std::string &pmap);
-
+	/** @brief the main constructor 
+	 *@param[in] pmap a string containing a description of the map to use*/
+	explicit charMapper(const std::string &pmap);
+	/** get the value assigned to a character
+	 * @param[in] x the character to test or convert
+	 * @return the resulting value,  0 if nothing in particular is specified in a given map
+	 */
 	int getKey(unsigned char x)const;
+	/** get the value assigned to a character by bracket notation
+	* @param[in] x the character to test or convert
+	* @return the resulting value,  0 if nothing in particular is specified in a given map
+	*/
+	int operator[](unsigned char x) const;
+
 };
 
 #endif

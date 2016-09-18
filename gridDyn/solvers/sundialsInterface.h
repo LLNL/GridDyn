@@ -135,9 +135,9 @@ public:
 private:
   
   FILE *m_kinsolInfoFile;                          //!<direct file reference TODO convert to stream vs FILE *
-  double solveTime = 0;                                                         //!< storage for the time the solver is called
-  bool fileCapture = false;							//!< flag indicating that the resid and jacobian should be captured to a file
-  std::string jacFile;						//!< the file to write the jacobian to 
+  double solveTime = 0;                            //!< storage for the time the solver is called
+  bool fileCapture = false;							//!< flag indicating that the resid and Jacobian should be captured to a file
+  std::string jacFile;						//!< the file to write the Jacobian to 
   std::string stateFile;					//!< the file to write the state and residual to
 #if MEASURE_TIMING > 0
   double kinTime = 0;
@@ -152,7 +152,7 @@ class idaInterface : public sundialsInterface
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                     //!< array structure for holding the jacobian information
+  arrayDataSparse a1;                                                     //!< array structure for holding the Jacobian information
   
   std::vector<double> tempState;                                          //!<temporary holding location for a state vector
 public:
@@ -202,7 +202,7 @@ class cvodeInterface : public sundialsInterface
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                         //!< array structure for holding the jacobian information
+  arrayDataSparse a1;                         //!< array structure for holding the Jacobian information
   std::vector<double> tempState;                                                //!<temporary holding location for a state vector
   bool use_bdf = false;
   bool use_newton = false;
@@ -254,7 +254,7 @@ class arkodeInterface : public sundialsInterface
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                                                                           //!< array structure for holding the jacobian information
+  arrayDataSparse a1;                                                                                                           //!< array structure for holding the Jacobian information
  
   std::vector<double> tempState;                                                      //!<temporary holding location for a state vector
   bool use_bdf = false;

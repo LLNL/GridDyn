@@ -20,18 +20,19 @@
 
 class basicBlock;
 
+/** @brief class implementing a control system built from the defined control blocks*/
 class controlSystem : public gridSubModel
 {
 protected:
-  std::vector<basicBlock *> blocks;
-  arrayDataSparse inputMult;
-  arrayDataSparse outputMult;
-  arrayDataSparse connections;
+  std::vector<basicBlock *> blocks; //!< the set of blocks to operate on
+  arrayDataSparse inputMult; //!< multipliers for the input to the blocks
+  arrayDataSparse outputMult;  //!< multipliers for the outputs
+  arrayDataSparse connections; //!< multipliers for the block inputs
 
-  std::vector<double> blockOutputs;
+  std::vector<double> blockOutputs;  //!< current vector of block outputs
 
 public:
-  controlSystem (const std::string &objName = "control_system_#");
+  explicit controlSystem (const std::string &objName = "control_system_#");
   virtual ~controlSystem ();
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;

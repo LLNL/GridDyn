@@ -113,7 +113,7 @@ public:
 
   /** @brief flag all the voltage states
   *@param[out] vStates a vector with a value of 1.0 for all voltage states and 0 otherwise
-  @param[in]  the solvermode to get the voltage state indicators for
+  @param[in]  the solverMode to get the voltage state indicators for
   */
   void getVoltageStates (double vStates[], const solverMode &sMode);
 
@@ -158,7 +158,7 @@ public:
   // initializeB power flow
 
 
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
   virtual void ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
 

@@ -269,7 +269,7 @@ public:
 protected:
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 public:
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
 
   virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
 

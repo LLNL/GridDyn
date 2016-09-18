@@ -23,8 +23,8 @@
 #include "testHelper.h"
 #include <cmath>
 
-#define LOAD_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/load_tests/"
-#define GLAB_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gridlabD_tests/"
+static const std::string load_test_directory(GRIDDYN_TEST_DIRECTORY "/load_tests/");
+static const std::string gridlabd_test_directory(GRIDDYN_TEST_DIRECTORY "/gridLabD_tests/");
 
 BOOST_FIXTURE_TEST_SUITE(load_tests, gridLoadTestFixture)
 
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 	ld1 = new gridFileLoad();
 	gridFileLoad *ldT = static_cast<gridFileLoad *>(ld1);
 	BOOST_REQUIRE(ldT != nullptr);
-	std::string fname = std::string(LOAD_TEST_DIRECTORY "FileLoadInfo.bin");
+	std::string fname = load_test_directory+ "FileLoadInfo.bin";
 	//test P ramp
 	ld1->set("file", fname);
 	ldT->setFlag("step");
@@ -367,7 +367,7 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 
 BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
 {
-	std::string fname = std::string(GLAB_TEST_DIRECTORY "IEEE_13_mod.xml");
+	std::string fname = gridlabd_test_directory+"IEEE_13_mod.xml";
 
 	gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
 
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
 
 BOOST_AUTO_TEST_CASE(motor_test1)
 {
-  std::string fname = std::string(LOAD_TEST_DIRECTORY "motorload_test1.xml");
+  std::string fname = load_test_directory+ "motorload_test1.xml";
 
   gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
 
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(motor_test1)
 
 BOOST_AUTO_TEST_CASE(motor_test3)
 {
-  std::string fname = std::string(LOAD_TEST_DIRECTORY "motorload_test3.xml");
+  std::string fname = load_test_directory+"motorload_test3.xml";
 
   gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
 
@@ -442,11 +442,10 @@ BOOST_AUTO_TEST_CASE(motor_test3)
   delete gds;
 }
 
-#ifdef ENABLE_IN_DEVELOPMENT_CASES
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+/** test case runs a 3rd order motor load to stall and unstall conditions*/
 BOOST_AUTO_TEST_CASE(motor_test3_stall)
 {
-  std::string fname = std::string(LOAD_TEST_DIRECTORY "motorload_test3_stall.xml");
+  std::string fname = load_test_directory+"motorload_test3_stall.xml";
 
   gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
 
@@ -471,13 +470,14 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
   }
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
-  gds->run();
+  gds->run(2.5);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
-
+  BOOST_CHECK(mtld->checkFlag(motorLoad::stalled));
+  gds->run();
+  BOOST_CHECK(!mtld->checkFlag(motorLoad::stalled));
   delete gds;
 }
-#endif
-#endif
+
 
 #ifdef ENABLE_IN_DEVELOPMENT_CASES
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
@@ -506,7 +506,7 @@ BOOST_AUTO_TEST_CASE(motor_test5)
   err=JacobianCheck(gds,cDaeSolverMode);
   if (err>0)
   {
-  printf("error int dae jacobian\n");
+  printf("error int dae Jacobian\n");
   printStateNames(gds, cDaeSolverMode);
   }
   gds->run();
@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(motor_test5)
 
 BOOST_AUTO_TEST_CASE(fdep_test)
 {
-  std::string fname = std::string(LOAD_TEST_DIRECTORY "fdepLoad.xml");
+  std::string fname = load_test_directory+"fdepLoad.xml";
   readerConfig::setPrintMode(1);
   gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
 

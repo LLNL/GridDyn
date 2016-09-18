@@ -152,7 +152,7 @@ protected:
   count_t haltCount = 0;                                                //!< counter for the number of times the solver was halted
   count_t residCount = 0;                                               //!< counter for the number of times the residual function was called
   count_t evalCount = 0;                                                //!< counter for the number of times the algUpdateFunction was called
-  count_t JacobianCount = 0;                                    //!< counter for the number of calls to the jacobian function
+  count_t JacobianCount = 0;                                    //!< counter for the number of calls to the Jacobian function
   count_t rootCount = 0;                                                //!< counter for the number of roots
   count_t busCount = 0;                                                 //!< counter for the number of buses
   count_t linkCount = 0;           //!<counter for the number of links
@@ -326,7 +326,7 @@ public:
 
   /** @brief get the number of non-zeros in the most recent Jacobian calculation
   @param[in] sMode the solverMode to get the number of non-zeros for
-  @return the number of non-zero elements in the jacobian
+  @return the number of non-zero elements in the Jacobian
   */
   count_t nonZeros (const solverMode &sMode) const;
 
@@ -362,12 +362,12 @@ public:
   */
   int algUpdateFunction (double ttime, const double state[], double update[], const solverMode &sMode, double alpha);
 
-  /** @brief compute the jacobian of the residuals
+  /** @brief compute the Jacobian of the residuals
     computes $\frac{\partial r}{\partial x}$ for all components of the residual
   @param[in] ttime,  the simulation time of the evaluation
   @param[in] state  the state information to evaluation
   @parma[in] dstate_dt  the time derivative of the state
-  @param[out] ad the arrayData object to store the jacobian information into
+  @param[out] ad the arrayData object to store the Jacobian information into
   @param[in] cj the constant of integration for use in jacobians using derivatives
   @param[in] the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
@@ -481,7 +481,7 @@ public:
   virtual int solverSet (const std::string &name, const std::string &field, const std::string &val);
 
   /** @brief get the current solverMode from the simulation
-  @param[in] sMode  input solvermode to check
+  @param[in] sMode  input solverMode to check
   @return if sMode is valid it returns that if not it finds the current active mode and returns a reference to that
   */
   const solverMode &getCurrentMode (const solverMode &sMode = cEmptySolverMode) const;
@@ -547,8 +547,8 @@ protected:
   */
   int makeReady (gridState_t desiredState, const solverMode &sMode);
 
-  /** @brief set the maximum number of non-zeros in the jacobian
-  @param[in] sMode the solver mode to set the max number of non-zeros in the jacobian
+  /** @brief set the maximum number of non-zeros in the Jacobian
+  @param[in] sMode the solver mode to set the max number of non-zeros in the Jacobian
   @param[in] ssize the size to set
   */
   void setMaxNonZeros (const solverMode &sMode, count_t ssize);

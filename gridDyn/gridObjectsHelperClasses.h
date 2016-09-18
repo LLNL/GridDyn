@@ -13,7 +13,7 @@
 
 #ifndef GRIDOBJECTHELPERCLASSES_H_
 #define GRIDOBJECTHELPERCLASSES_H_
-#include "basicDefs.h"
+
 #include "gridDynTypes.h"
 #include <bitset>
 
@@ -67,7 +67,7 @@ enum operation_flags
   object_change_flag = 25,  //!< flag indicating that an object has changed activity state
   constraint_change_flag = 26,  //!< flag indicating an change in constrachange_code values
   root_change_flag = 27,        //!< flag indicating a change in the root finding functions
-  jacobian_count_change_flag = 28,  //!< flag indicating a change in the jacobian count
+  jacobian_count_change_flag = 28,  //!< flag indicating a change in the Jacobian count
   slack_bus_change = 29,   //!< flag indicating a change in the slack bus
   voltage_control_change = 30,  //!< flag indicating a change in voltage control on a bus
   connectivity_change_flag = 31,  //!< flag indicating a change in bus connectivity possibly indicating islanding or isolated buses
@@ -140,9 +140,9 @@ enum init_control_flags
   no_governor_limits = 4,  //!< ignore governor limits
   no_limits = 5,  //!< ignore all limits
   ignore_bus_limits = 6,  //!< ignore bus limits
-  no_link_adjustments = 7,  //!< diable all link adjustments
+  no_link_adjustments = 7,  //!< disable all link adjustments
   no_load_adjustments = 8,  //!< disable all load adjustments
-  auto_bus_disconnect = 9,  //!< disable automatic bus disconnection in execptional circumstances
+  auto_bus_disconnect = 9,  //!< disable automatic bus disconnection in exceptional circumstances
   no_auto_autogen = 10,  //!< disable automatic autogeneration for slk/afix/pv buses
   all_loads_to_constant_impedence = 11, //!< convert all loads to constant impedance
   force_constant_pflow_initialization = 12, //!< for some objects that initialize through power flow calculations force it to be constant
@@ -159,7 +159,7 @@ enum init_control_flags
 */
 inline unsigned long lower_flags (unsigned long long flags)
 {
-  return static_cast<unsigned long> (flags & (unsigned long long)(0xFFFFFFFF));
+  return static_cast<unsigned long> (flags & static_cast<unsigned long long>(0xFFFFFFFF));
 }
 
 /** @ brief get the lower 32 bits of 64 bit bitset*
@@ -167,7 +167,7 @@ inline unsigned long lower_flags (unsigned long long flags)
 */
 inline unsigned long lower_flags (std::bitset<64> flags)
 {
-  return static_cast<unsigned long> (flags.to_ullong () & (unsigned long long)(0xFFFFFFFF));
+  return static_cast<unsigned long> (flags.to_ullong () & static_cast<unsigned long long>(0xFFFFFFFF));
 }
 
 #define RESET_CHANGE_FLAG_MASK (0xFFFFFFFF00FFFFFF)  //macro to change flag masks
@@ -178,9 +178,9 @@ inline bool anyChangeFlags (std::bitset<64> flags)
 }
 
 #define MIN_CHANGE_ALERT (500)  //!< the minimum change alert flag
-#define MAX_CHANGE_ALERT (900)  //!< the maximum change alart flag
+#define MAX_CHANGE_ALERT (900)  //!< the maximum change alert flag
 
-#define INVALID_STATE_ALERT (585)  //!< invalid state alart
+#define INVALID_STATE_ALERT (585)  //!< invalid state alert
 #define INTIALIZATION_FAILURE (587)   //!< indication an object failed to initialize
 #define FLAG_CHANGE (605)                       //!< flag change alert
 
@@ -199,9 +199,9 @@ inline bool anyChangeFlags (std::bitset<64> flags)
 #define OBJECT_COUNT_INCREASE (616)             //!< increase in the number of active objects
 #define OBJECT_COUNT_DECREASE (617)             //!< decrease in the number of active objects
 
-#define JAC_COUNT_CHANGE (630)                  //!< change in the number non-zero jacobian entries
-#define JAC_COUNT_INCREASE (631)                //!< increase in the number non-zero jacobian entries
-#define JAC_COUNT_DECREASE (632)                //!< decrease in the number non-zero jacobian entries
+#define JAC_COUNT_CHANGE (630)                  //!< change in the number non-zero Jacobian entries
+#define JAC_COUNT_INCREASE (631)                //!< increase in the number non-zero Jacobian entries
+#define JAC_COUNT_DECREASE (632)                //!< decrease in the number non-zero Jacobian entries
 
 #define SLACK_BUS_CHANGE (655)                  //!< change in the slack bus
 
@@ -263,7 +263,7 @@ public:
   count_t diffRoots = 0;                               //!< number of roots on purely differential states
   count_t algRoots = 0;                                   //!< number of roots based algebraic components
 
-  count_t jacSize = 0;                                 //!<upper bound on number of jacobian entries
+  count_t jacSize = 0;                                 //!<upper bound on number of Jacobian entries
 
   void reset ();
   void stateReset ();
@@ -314,7 +314,7 @@ public:
   */
   void reset ();
 
-  /** @brief reset the solverOffset root and jacobian component
+  /** @brief reset the solverOffset root and Jacobian component
   */
   void rootAndJacobianCountReset ();
 
@@ -395,7 +395,7 @@ public:
   const double *fullState = nullptr;    //!< the full state data (for cases where state contains only differential or algebraic components)
   const double *diffState = nullptr;    //!< the differential state data (for cases where state contains only algebraic components)
   const double *algState = nullptr;     //!< the algebraic state data (for cases where state contains only differential components)
-  double cj = 1.0;                      //!< a number used in jacobian calculations if there is a derivative used in the calculations
+  double cj = 1.0;                      //!< a number used in Jacobian calculations if there is a derivative used in the calculations
   count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
   index_t pairIndex = kNullLocation;                                //!< the index of the mode the paired data comes from
   stateData (double sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
@@ -437,7 +437,7 @@ public:
   *@return a flag (true) if loaded (false) if not
   */
   bool isStateLoaded (const solverMode &sMode) const;
-  /** @brief check whether the root and jacobian information is loaded
+  /** @brief check whether the root and Jacobian information is loaded
   *@param[in] sMode the solverMode we are interested in
   *@return a flag (true) if loaded (false) if not
   */
@@ -449,49 +449,49 @@ public:
   void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode);
 
   /** @brief set the base offset
-  *@param[in] offset the location to set the offset to
+  *@param[in] newOffset the location to set the offset to
   *@param[in] sMode the solverMode we are interested in
   */
   void setOffset (index_t newOffset, const solverMode &sMode);
 
-  /** @brief get the offsets for a solvermode
-  *@param[in] sMode the solvermode we are interested in
+  /** @brief get the offsets for a solverMode
+  *@param[in] sMode the solverMode we are interested in
   *@return a pointer to a solverOffsets object
   */
   solverOffsets * getOffsets (const solverMode &sMode);
 
-  /** @brief get the offsets for a solvermode
-  *@param[in] sMode the solvermode we are interested in
+  /** @brief get the offsets for a solverMode
+  *@param[in] sMode the solverMode we are interested in
   *@return a const pointer to a solverOffsets object
   */
   const solverOffsets * getOffsets (const solverMode &sMode) const;
   /** @brief set the base offset of algebraic variables
-  *@param[in] offset the location to set the offset to
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] newOffset the location to set the offset to
+  *@param[in] sMode the solverMode we are interested in
   */
   void setAlgOffset (index_t newOffset, const solverMode &sMode);
   /** @brief set the root offset
-  *@param[in] offset the location to set the offset to
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] newOffset the location to set the offset to
+  *@param[in] sMode the solverMode we are interested in
   */
   void setRootOffset (index_t newOffset, const solverMode &sMode);
   /** @brief set the differential offset
-  *@param[in] offset the location to set the offset to
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] newOffset the location to set the offset to
+  *@param[in] sMode the solverMode we are interested in
   */
   void setDiffOffset (index_t newOffset, const solverMode &sMode);
   /** @brief set the voltage offset
-  *@param[in] offset the location to set the offset to
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] newOffset the location to set the offset to
+  *@param[in] sMode the solverMode we are interested in
   */
   void setVOffset (index_t newOffset,const solverMode &sMode);
   /** @brief set the angle offset
-  *@param[in] offset the location to set the offset to
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] newOffset the location to set the offset to
+  *@param[in] sMode the solverMode we are interested in
   */
   void setAOffset (index_t newOffset,const solverMode &sMode);
   /** @brief get the base offset
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@return the base offset
   */
   index_t getAlgOffset (const solverMode &sMode) const
@@ -499,15 +499,15 @@ public:
     return offsetContainer[sMode.offsetIndex].algOffset;
   }
   /** @brief get the diff offset
-  *@param[in] sMode the solvermode we are interested in
-  *@return the diffferential offset
+  *@param[in] sMode the solverMode we are interested in
+  *@return the differential offset
   */
   index_t getDiffOffset (const solverMode &sMode) const
   {
     return offsetContainer[sMode.offsetIndex].diffOffset;
   }
   /**@brief get the root offset
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@return the root offset
   */
   index_t getRootOffset (const solverMode &sMode) const
@@ -516,7 +516,7 @@ public:
     return offsetContainer[sMode.offsetIndex].rootOffset;
   }
   /**@brief get the voltage offset
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@return the voltage offset
   */
   index_t getVOffset (const solverMode &sMode) const
@@ -524,7 +524,7 @@ public:
     return offsetContainer[sMode.offsetIndex].vOffset;
   }
   /**@brief get the angle offset
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@return the angle offset
   */
   index_t getAOffset (const solverMode &sMode) const
@@ -532,22 +532,22 @@ public:
     return offsetContainer[sMode.offsetIndex].aOffset;
   }
   /** @brief get the maximum used index
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@return the the maximum used index
   */
   index_t maxIndex (const solverMode &sMode) const;
 
   /** @brief get the locations for the data from a stateData pointer and output array
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@param[in] sD the stateData object to fill the Lp from
-  *@param[in] d tthe destination location for the calculations
+  *@param[in] d the destination location for the calculations
   @param[in] obj  the object to use if local information is required
   @return Lp the Location pointer object to fill
   */
   Lp getLocations (const stateData *sD, double d[], const solverMode &sMode, const gridObject *obj) const;
 
   /** @brief get the locations for the data from a stateData pointer
-  *@param[in] sMode the solvermode we are interested in
+  *@param[in] sMode the solverMode we are interested in
   *@param[in] sD the stateData object to fill the Lp from
   @param[in] obj  the object to use if local information is required
   @return Lp the Location pointer object to fill
@@ -555,31 +555,32 @@ public:
   Lp getLocations (const stateData *sD, const solverMode &sMode, const gridObject *obj) const;
 
   /** @brief get the locations offsets for the data
-  *@param[in] sMode the solvermode we are interested in
-  @param[in] Lp the location pointer to store the data
+  *@param[in] sMode the solverMode we are interested in
+  @param[in] Loc the location pointer to store the data
   *@return the angle offset
   */
   void getLocations (const solverMode &sMode, Lp *Loc) const;
   /** @brief unload all the solverOffset objects
-  *@param[in] dynamic_only only unload the dyanmic solverObjects
+  *@param[in] dynamic_only only unload the dynamic solverObjects
   */
   void unload (bool dynamic_only = false);
   /** @brief unload state information for the solverOffsets
-  *@param[in] dynamic_only only unload the dyanmic solverObjects
+  *@param[in] dynamic_only only unload the dynamic solverObjects
   */
   void stateUnload (bool dynamic_only = false);
-  /** @brief unload the root and jacobian information for the solverOffsets
-  *@param[in] dynamic_only only unload the dyanmic solverObjects
+  /** @brief unload the root and Jacobian information for the solverOffsets
+   *TODO Separate the root and Jacobian information from each other
+  *@param[in] dynamic_only only unload the dynamic solverObjects
   */
   void rjUnload (bool dynamic_only = false);
   /** @brief update all solverOffsets with the local information
-  *@param[in] dynamic_only only unload the dyanmic solverObjects
+  *@param[in] dynamic_only only unload the dynamic solverObjects
   */
   void localUpdateAll (bool dynamic_only = false);
   /** @brief get the size of the solverOffsets
   *@return the size
   */
-  count_t size ()
+  count_t size () const
   {
     return cSize;
   }
@@ -591,15 +592,15 @@ public:
   *@return a solverMode object
   */
   const solverMode &find (const solverMode &tMode) const;
-  /**@brief get the param offset
-  *@return the param offset
+  /**@brief get the parameter offset
+  *@return the parameter offset
   */
-  index_t getParamOffset ()
+  index_t getParamOffset () const
   {
     return paramOffset;
   }
-  /** @brief set the param offset
-  *@param[in] offset the location to set the offset to
+  /** @brief set the parameter offset
+  *@param[in] newPoffset the location to set the offset to
   */
   void setParamOffset (index_t newPoffset)
   {

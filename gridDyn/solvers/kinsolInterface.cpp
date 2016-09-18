@@ -155,10 +155,10 @@ void kinsolInterface::logSolverStats (int logLevel, bool /*iconly*/) const
   std::string logstr = "Kinsoln Statistics: \n";
   logstr += "Number of nonlinear iterations    = " + std::to_string (nni) + '\n';
   logstr += "Number of function evaluations    = " + std::to_string (nfe) + '\n';
-  logstr += "Number of jacobian evaluations    = " + std::to_string (nje) + '\n';
+  logstr += "Number of Jacobian evaluations    = " + std::to_string (nje) + '\n';
   if (nfeD > 0)
     {
-      logstr += "Number of jacobian function calls = " + std::to_string (nfeD) + '\n';
+      logstr += "Number of Jacobian function calls = " + std::to_string (nfeD) + '\n';
     }
 
   if (m_gds)
@@ -460,7 +460,7 @@ int kinsolInterface::solve (double tStop, double &tReturn, step_mode /*mode*/)
   auto stop_t = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double> elapsed_t = stop_t - start_t;
   kinTime += elapsed_t.count ();
-  printf ("total solve time %f, %5.3f%% in resid %5.3f%% in jacobian\n", kinTime, residTime / kinTime * 100.0, jacTime / kinTime * 100);
+  printf ("total solve time %f, %5.3f%% in resid %5.3f%% in Jacobian\n", kinTime, residTime / kinTime * 100.0, jacTime / kinTime * 100);
 #else
   int retval = KINSol (solverMem, state, KIN_NONE, scale, scale);
 #endif

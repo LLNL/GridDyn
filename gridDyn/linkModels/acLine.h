@@ -165,7 +165,7 @@ public:
   {
   }
 
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
 
   virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
@@ -370,7 +370,7 @@ public:
   virtual IOdata getOutputs (index_t  busId, const stateData *sD, const solverMode &sMode) override;
 
   void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  //for computing all the jacobian elements at once
+  //for computing all the Jacobian elements at once
   virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
 
@@ -388,29 +388,29 @@ public:
   virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
 protected:
-  /** @brief compute the jacobian elements based on the MW control
+  /** @brief compute the Jacobian elements based on the MW control
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the jacobian information
+  @param[out] ad the arrayData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
   void MWJac (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
-  /** @brief compute the jacobian elements based on the MVar control
+  /** @brief compute the Jacobian elements based on the MVar control
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the jacobian information
+  @param[out] ad the arrayData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
   void MVarJac (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap angle
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the jacobian information
+  @param[out] ad the arrayData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
   void tapAnglePartial (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap setting
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the jacobian information
+  @param[out] ad the arrayData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
   void tapPartial (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode);

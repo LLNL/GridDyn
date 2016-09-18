@@ -539,7 +539,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
 
 }
 
-// jacobian
+// Jacobian
 void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
 {
 

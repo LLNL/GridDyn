@@ -14,63 +14,18 @@
 
 #include <cmath>
 
-saturation::saturation (int ntype)
+saturation::saturation (satType_t sT) : type (sT)
 {
-  switch (ntype)
-    {
-    case 0:
-      type = satType_t::none;
-      satFunc = [](double){
-          return 0;
-        };
-      dFunc = [](double){
-          return 0;
-        };
-      break;
-    case 1:
-      type = satType_t::quadratic;
-      satFunc = [&](double val){
-          return (B * (val - A) * (val - A));
-        };
-      dFunc = [&](double val){
-          return (2 * B * (val - A));
-        };
-      break;
-    case 2:
-      type = satType_t::scaled_quadratic;
-      satFunc = [&](double val){
-          return (B * (val - A) * (val - A) / val);
-        };
-      dFunc = [&](double val){
-          double v1 = (val - A);
-          return (B * (2 * val * v1 - v1 * v1) / (val * val));
-        };
-      break;
-    case 3:
-      type = satType_t::exponential;
-      satFunc = [&](double val){
-          return (B * pow (val, A));
-        };
-      dFunc = [&](double val){
-          return (A * B * pow (val, A - 1));
-        };
-      break;
-    case 4:
-      type = satType_t::linear;
-      satFunc = [&](double val){
-          return (val <= A) ? 0 : (B * (val - A));
-        };
-      dFunc = [&](double val){
-          return (val <= A) ? 0 : B;
-        };
-      break;
-    }
+	loadFunctions();
+	computeParam();
 
 }
 
-saturation::saturation (satType_t sT) : type (sT)
+saturation::saturation(const std::string &ntype)
 {
-
+	setType(ntype);
+	loadFunctions();
+	computeParam();
 
 }
 
@@ -112,10 +67,7 @@ void saturation::setParam (double V1, double S1, double V2, double S2)
   double ssv;
   switch (type)
     {
-    case satType_t::none:
-      A = 0;
-      B = 0;
-      break;
+   
     case satType_t::quadratic:
       ssv = sqrt (S1 / S2);
       A = -(V2 * ssv - V1) / (V1 - ssv);
@@ -134,36 +86,18 @@ void saturation::setParam (double V1, double S1, double V2, double S2)
       B = (S2 - S1) / (V2 - V1);
       A = V1 - S1 / B;
       break;
+	case satType_t::none:
+	default:
+		A = 0;
+		B = 0;
+		break;
 
     }
   s10 = compute (1.0);
   s12 = compute (1.2);
 }
 
-void saturation::setType (int ntype)
-{
-  switch (ntype)
-    {
-    case 0:
-      type = satType_t::none;
 
-      break;
-    case 1:
-      type = satType_t::quadratic;
-      break;
-    case 2:
-      type = satType_t::scaled_quadratic;
-      break;
-    case 3:
-      type = satType_t::exponential;
-      break;
-    case 4:
-      type = satType_t::linear;
-      break;
-    }
-  loadFunctions ();
-  computeParam ();
-}
 
 void saturation::setType (satType_t sT)
 {
@@ -171,43 +105,53 @@ void saturation::setType (satType_t sT)
   loadFunctions ();
   computeParam ();
 }
-double saturation::operator() (double val)
+
+saturation::satType_t saturation::getType() const
+{
+	return type;
+}
+
+double saturation::operator() (double val) const
 {
   return satFunc (val);
 }
-double saturation::compute (double val)
+double saturation::compute (double val) const
 {
   return satFunc (val);
 }
-double saturation::deriv (double val)
+double saturation::deriv (double val) const
 {
-  return dFunc (val);
+  return derivFunc (val);
 }
-double saturation::inv (double val)
+double saturation::inv (double val) const
 {
-  double ret = 0.5;
-  double temp;
+  
   if (val < 0.00001)
     {
       return 0.5;
     }
+  double ret = 0.5;
   switch (type)
-    {
-    case satType_t::none:
-      break;
-    case satType_t::quadratic:
-      ret = sqrt (val / B) + A;
-      break;
-    case satType_t::scaled_quadratic:
-      temp = (2 * A + val / B);
-      ret = (temp + sqrt (temp - 4 * A * A)) / 2;
-      break;
+  {
+
+  case satType_t::quadratic:
+	  ret = sqrt(val / B) + A;
+	  break;
+  case satType_t::scaled_quadratic:
+		{
+			double temp = (2 * A + val / B);
+			ret = (temp + sqrt(temp - 4 * A * A)) / 2;
+			break;
+		}
     case satType_t::exponential:
       ret = pow (val / B, 1 / A);
       break;
     case satType_t::linear:
       ret = A + val / B;
       break;
+	case satType_t::none:
+	default:
+		break;
 
     }
   return ret;
@@ -215,23 +159,23 @@ double saturation::inv (double val)
 
 void saturation::computeParam ()
 {
-  double ssv;
   switch (type)
     {
-    case satType_t::none:
-      A = 0;
-      B = 0;
-      break;
+   
     case satType_t::quadratic:
-      ssv = sqrt (s10 / s12);
-      A = -(1.2 * ssv - 1.0) / (1.0 - ssv);
-      B = s10 / ((1.0 - A) * (1.0 - A));
-      break;
+	{
+		double ssv = sqrt(s10 / s12);
+		A = -(1.2 * ssv - 1.0) / (1.0 - ssv);
+		B = s10 / ((1.0 - A) * (1.0 - A));
+		break;
+	}
     case satType_t::scaled_quadratic:
-      ssv = sqrt ((s10 * 1.0) / (s12 * 1.2));
-      A = -(1.2 * ssv - 1.0) / (1.0 - ssv);
-      B = s10 / ((1.0 - A) * (1.0 - A));
-      break;
+	{
+		double ssv = sqrt((s10 * 1.0) / (s12 * 1.2));
+		A = -(1.2 * ssv - 1.0) / (1.0 - ssv);
+		B = s10 / ((1.0 - A) * (1.0 - A));
+		break;
+	}
     case satType_t::exponential:
       A = -log (s10 / s12) / log (1.2);
       B = s10;
@@ -240,7 +184,11 @@ void saturation::computeParam ()
       B = (s12 - s10) / 0.2;
       A = 1.0 - s10 / B;
       break;
-
+	case satType_t::none:
+	default:
+		A = 0;
+		B = 0;
+		break;
     }
 }
 
@@ -248,46 +196,48 @@ void saturation::loadFunctions ()
 {
   switch (type)
     {
-    case satType_t::none:
-      satFunc = [](double){
-          return 0;
-        };
-      dFunc = [](double){
-          return 0;
-        };
-      break;
+    
     case satType_t::quadratic:
-      satFunc = [&](double val){
+      satFunc = [this](double val){
           return (B * (val - A) * (val - A));
         };
-      dFunc = [&](double val){
+      derivFunc = [this](double val){
           return (2 * B * (val - A));
         };
       break;
     case satType_t::scaled_quadratic:
-      satFunc = [&](double val){
+      satFunc = [this](double val){
           return (B * (val - A) * (val - A) / val);
         };
-      dFunc = [&](double val){
+      derivFunc = [this](double val){
           double v1 = (val - A);
           return (B * (2 * val * v1 - v1 * v1) / (val * val));
         };
       break;
     case satType_t::exponential:
-      satFunc = [&](double val){
+      satFunc = [this](double val){
           return (B * pow (val, A));
         };
-      dFunc = [&](double val){
+      derivFunc = [this](double val){
           return (A * B * pow (val, A - 1));
         };
       break;
     case satType_t::linear:
-      satFunc = [&](double val){
+      satFunc = [this](double val){
           return (val <= A) ? 0 : (B * (val - A));
         };
-      dFunc = [&](double val){
+      derivFunc = [this](double val){
           return (val <= A) ? 0 : B;
         };
       break;
+	case satType_t::none:
+	default:
+		satFunc = [](double) {
+			return 0;
+		};
+		derivFunc = [](double) {
+			return 0;
+		};
+		break;
     }
 }

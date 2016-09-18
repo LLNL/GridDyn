@@ -169,12 +169,12 @@ public:
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
   //virtual void setTime(double time){prevTime=time;};
 protected:
-  /** @brief the jacobian entries for the limiter
+  /** @brief the Jacobian entries for the limiter
   @param[in] V the voltage
   @param[in] Vloc the location of the voltage
   @param[in] refloc  the location of the reference
   @param[in] cj  the differental scale variable
-  @parma[out] ad the array structure to store the jacobian data in
+  @parma[out] ad the array structure to store the Jacobian data in
   */
   virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, arrayData<double> *ad);
 

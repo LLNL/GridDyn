@@ -701,7 +701,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
         {
           saveState (this, (cmd.string2.empty ()) ? stateFile : cmd.string2);
         }
-      else if (cmd.string1 == "jacobian")
+      else if (cmd.string1 == "Jacobian")
         {
           saveJacobian (this, (cmd.string2.empty ()) ? "jacobian_" + name + ".bin" : cmd.string2);
         }
@@ -1459,7 +1459,7 @@ solverMode gridDynSimulation::getSolverMode (const std::string &solverType)
         {
           if (sd)
             {
-              if (sd->name == solverType)
+              if (sd->getName() == solverType)
                 {
                   return sd->getSolverMode ();
                 }
@@ -1600,7 +1600,7 @@ const solverMode *gridDynSimulation::getSolverModePtr (const std::string &solver
     {
       for (auto &sd : solverInterfaces)
         {
-          if ((sd)&& (sd->name == solverType))
+          if ((sd)&& (sd->getName() == solverType))
             {
               return &(sd->getSolverMode ());
             }
@@ -1665,7 +1665,7 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const st
     {
       if (sd)
         {
-          if (sd->name == solverName)
+          if (sd->getName() == solverName)
             {
               return sd;
             }

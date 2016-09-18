@@ -113,7 +113,7 @@ void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData *s
 
 // compute the bus element contributions
 
-// jacobian
+// Jacobian
 void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const stateData *sD,
                                                 arrayData<double> *ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)

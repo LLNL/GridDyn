@@ -58,7 +58,7 @@ public:
 };
 
 /** @brief basic node in a power systems
-  This Bus class is primarily a base Class for other types of buses, but it can be instantiated it provides the basic management of subobjects
+  This Bus class is primarily a base Class for other types of buses, but it can be instantiated it provides the basic management of subObjects
 and defines the interface.  It has no states and fixes the voltage and angle at whatever it gets set to
 
 */
@@ -70,12 +70,12 @@ public:
   static count_t busCount; //!<  counter for the buses
   static const int low_voltage_check_flag = object_flag1;
   //afix is a fixed angle bus for power flow
-  /* @brief enumeration to define potential bustypes for power flow*/
+  /* @brief enumeration to define potential busTypes for power flow*/
   enum class busType
   {
     PQ = 0, afix = 1, PV = 2,SLK = 3
   };
-  /* @brief enumeration to define potential bustypes for dynamic calculations*/
+  /* @brief enumeration to define potential busTypes for dynamic calculations*/
   enum class dynBusType
   {
     normal = 0,fixAngle = 1,fixVoltage = 2,dynSLK = 3
@@ -86,7 +86,7 @@ protected:
   std::vector<gridLoad *> attachedLoads;                                             //!<  list of all the loads
   std::vector<gridLink *> attachedLinks;                                             //!< list of the attached links
   std::vector<gridDynGenerator *> attachedGens;                              //!< list of the attached generators
-  std::vector<std::shared_ptr<gridSecondary>> objectHolder;  //!< storage location for shared ptrs to secondary objects
+  std::vector<std::shared_ptr<gridSecondary>> objectHolder;  //!< storage location for shared_ptrs to secondary objects
 
   double angle = 0.0;                                   //!< [rad]     voltage angle
   double voltage = 1.0;                                 //!< [puV]    per unit voltage magnitude
@@ -98,6 +98,7 @@ protected:
   double Vtol = -1.0;                         //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
   double Atol = -1.0;                         //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
   double freq = 1.0;       //!<[puHz] estimated actual frequency
+  gridDyn_time lowVtime = -kBigNum;	//!< the last time a low voltage alert was triggered
   IOdata outputs;   //!< the current output values
   IOlocs outLocs;   //!< the current output locations
 public:
@@ -388,31 +389,31 @@ public:
   virtual double getOutput (const stateData *sD, const solverMode &sMode, index_t outNum = 0) const override;
   /** @brief get the voltage
   * @param[in] state the system state
-  @param[in] sMode the corresponding solvermode to the state
+  @param[in] sMode the corresponding solverMode to the state
 @return the sbus voltage
   **/
   virtual double getVoltage (const double state[], const solverMode &sMode) const;
   /** @brief get the angle
   * @param[in] state the system state
-  @param[in] sMode the corresponding solvermode to the state
+  @param[in] sMode the corresponding solverMode to the state
   @return the bus angle
   **/
   virtual double getAngle (const double state[], const solverMode &sMode) const;
   /** @brief get the voltage
   * @param[in] sD the system state data
-  @param[in] sMode the corresponding solvermode to the state data
+  @param[in] sMode the corresponding solverMode to the state data
   @return the bus voltage
   **/
   virtual double getVoltage (const stateData *sD, const solverMode &sMode) const;
   /** @brief get the angle
   * @param[in] sD the system state data
-  @param[in] sMode the corresponding solvermode to the state
+  @param[in] sMode the corresponding solverMode to the state
   @return the bus angle
   **/
   virtual double getAngle (const stateData *sD, const solverMode &sMode) const;
   /** @brief get the bus frequency
   * @param[in] sD the system state data
-  @param[in] sMode the corresponding solvermode to the state
+  @param[in] sMode the corresponding solverMode to the state
   @return the bus frequency
   **/
   virtual double getFreq (const stateData *sD, const solverMode &sMode) const;

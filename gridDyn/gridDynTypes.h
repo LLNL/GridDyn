@@ -28,16 +28,19 @@ typedef std::uint32_t index_t;
 typedef std::uint32_t count_t;
 #endif
 
-const index_t kNullLocation ((index_t)(-1));
-const index_t kInvalidLocation ((index_t)(-2));
-const count_t kInvalidCount ((count_t)(-1));
+//at some point gridDyn may move to a different type for the time representation
+typedef double gridDyn_time;
 
-const double kBigNum (1e49);  //!< what Griddyn uses for infinity
-const int kBigINT (0x7EDCBA98);  //!< a big integer
+const index_t kNullLocation (static_cast<index_t>(-1));
+const index_t kInvalidLocation (static_cast<index_t>(-2));
+const count_t kInvalidCount (static_cast<count_t>(-1));
 
-const double kHalfBigNum (5e48);  //!< half of a very big num
+const double kBigNum (1e49);  //!< what GridDyn uses for infinity
+const int kBigINT (0x7EDCBA98);  //!< a big arbitrary integer
 
-const double kNullVal (-1.456e47);  //!< what Griddyn will use as a null value for many return functions
+const double kHalfBigNum (kBigNum/2);  //!< half of a very big number
+
+const double kNullVal (-1.456e47);  //!< what GridDyn will use as a null value for many return functions
 
 /** @brief enumeration of object changes that can occur throughout the simulation */
 enum class change_code
@@ -45,11 +48,11 @@ enum class change_code
   not_triggered = -2,                           //!< no potential change was triggered
   execution_failure = -1,               //!< the execution has failed
   no_change = 0,                                //!< there was no change
-  non_state_change = 1,                 //!< a change occured that cannot affect the states
-  parameter_change = 2,                 //!< a parameter change occured
-  jacobian_change = 3,                  //!< a change to the number of non-zeros occured
-  object_change = 4,                            //!< a change in the number of number of objects occured
-  state_count_change = 5,               //!< a change in the number of states occured
+  non_state_change = 1,                 //!< a change occurred that cannot affect the states
+  parameter_change = 2,                 //!< a parameter change occurred
+  jacobian_change = 3,                  //!< a change to the number of non-zeros occurred
+  object_change = 4,                            //!< a change in the number of number of objects occurred
+  state_count_change = 5,               //!< a change in the number of states occurred
 };
 
 #endif

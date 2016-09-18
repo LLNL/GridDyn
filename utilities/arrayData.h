@@ -36,7 +36,7 @@ typedef std::uint32_t count_t;
 		X data;  //!< value
 	};
 	
-/** @brief class implementing a matrix entry class for handling jacobian entries
+/** @brief class implementing a matrix entry class for handling Jacobian entries
   this is a purely virtual interface a specific instantiation is required
  */
 template <class X=double>
@@ -61,13 +61,13 @@ public:
   virtual void clear() = 0;
 
   /**
-  * @brief add a new jacobian element
+  * @brief add a new Jacobian element
   * @param[in] row,col the row  and column of the element
   * @param[in] num the value of the element
   */
   virtual void assign(index_t row, index_t col, X num) = 0;
   /** @brief assign with a check on the row
-  *  add a new jacobian element if the arguments are valid (row<rowNum)
+  *  add a new Jacobian element if the arguments are valid (row<rowNum)
   * @param[in] row,col the row and column of the element
   * @param[in] num the value of the element
   */
@@ -80,7 +80,7 @@ public:
   }
 
   /** @brief assign with a check on the col
-  *  add a new jacobian element if the arguments are valid (col<colLim)
+  *  add a new Jacobian element if the arguments are valid (col<colLim)
   * @param[in] row,col the row  and column of the element
   * @param[in] num the value of the element
   */
@@ -94,7 +94,7 @@ public:
 
 
   /** @brief assign with a check on the row and column
-  *  add a new jacobian element if the arguments are valid (X<rowLim) &&(Y<colLim)
+  *  add a new Jacobian element if the arguments are valid (X<rowLim) &&(Y<colLim)
   * @param[in] X,Y the row (X) and column(Y) of the element
   * @param[in] num the value of the element
   */

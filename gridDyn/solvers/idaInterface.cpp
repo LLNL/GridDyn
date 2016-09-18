@@ -568,7 +568,7 @@ int idaInterface::calcIC (double t0, double tstep0, ic_modes initCondMode, bool 
           auto mvec = findMissing (&a1);
           if (mvec.size () > 0)
             {
-              printf ("missing rows in jacobian from calcIC mode 1\n");
+              printf ("missing rows in Jacobian from calcIC mode 1\n");
             }
 #endif
           switch (retval)

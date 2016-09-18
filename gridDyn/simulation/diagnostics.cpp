@@ -188,7 +188,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
             }
         }
       nstate[kk] -= delta2;
-      //find the jacobian elements depenendent on the derivatives
+      //find the Jacobian elements depenendent on the derivatives
       if (isDAE (sMode))
         {
           ndstate[kk] += delta;

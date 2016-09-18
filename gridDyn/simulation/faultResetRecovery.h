@@ -61,7 +61,7 @@ public:
   @return the number of attempts
   */
   int attempts () const;
-  bool hasMoreFixes ();
+  bool hasMoreFixes () const;
 protected:
   int attempt_number = 0;        //!< the current attempt number
   gridDynSimulation *sim;        //!< the gridDynsimulation to work from

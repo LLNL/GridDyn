@@ -208,7 +208,7 @@ public:
   */
   virtual void derivative (const optimData *oD, double deriv[], const optimMode &oMode);
 
-  /** compute the jacobian entries for the objective value
+  /** compute the Jacobian entries for the objective value
   \param val  the current object variable values
   \param arrayData the structure for storing \frac{dC_i}{dO_j}
   \param oMode the optimization mode to use.
@@ -229,9 +229,9 @@ public:
   \param oMode the optimization mode to use.
   */
   virtual void constraintValue (const optimData *oD, double cVals[], const optimMode &oMode);
-  /** get the jacobian array of the constraints
+  /** get the Jacobian array of the constraints
   \param val  the current object variable values
-  \param arrayData the structure for the constraint jacobian entries
+  \param arrayData the structure for the constraint Jacobian entries
   \param oMode the optimization mode to use.
   */
   virtual void constraintJacobianElements (const optimData *oD, arrayData<double> *, const optimMode &);

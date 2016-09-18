@@ -78,7 +78,7 @@ public:
   @param[in] input  the block input
   @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise ignored
   @param[in] sD the state data
-  @param[out] resid the location to store the jacobian elemnets
+  @param[out] resid the location to store the Jacobian elemnets
   @param[in] sMode the solverMode that corresponds to the state data
   */
   virtual void residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode);
@@ -106,11 +106,11 @@ public:
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode);
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
-  /** @brief simplifying function in place of jacobian elements since block have only one input/output
+  /** @brief simplifying function in place of Jacobian elements since block have only one input/output
   @param[in] input  the block input
   @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise ignored
   @param[in] sD the state data
-  @param[out] ad the location to store the jacobian elemnets
+  @param[out] ad the location to store the Jacobian elemnets
   @param[in] argLoc the index location of the input
   @param[in] sMode the solverMode that corresponds to the state data
   */

@@ -145,7 +145,7 @@ int basicSolver::set (const std::string &param, double val)
 
 void cleanOscillations (const std::vector<double> &s1, const std::vector<double> &s2, std::vector<double> &s3, double conv);
 
-int basicSolver::solve (double tStop, double & /*tReturn*/, step_mode /*mode*/)
+int basicSolver::solve (double tStop, double & /*tReturn*/, step_mode /*stepMode*/)
 {
   double md = 1.0;
   iterations = 0;

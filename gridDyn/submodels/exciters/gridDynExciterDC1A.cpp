@@ -116,7 +116,7 @@ void gridDynExciterDC1A::derivative (const IOdata &args, const stateData *sD, do
 }
 
 
-// jacobian
+// Jacobian
 void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *sD,
                                            arrayData<double> *ad,
                                            const IOlocs &argLocs, const solverMode &sMode)

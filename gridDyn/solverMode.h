@@ -80,10 +80,10 @@ public:
   std::bitset<32> approx = 0;         //!<  a bitset containing the approximation assumptions the solver wishes to be made (request not obligation)
   index_t offsetIndex = kNullLocation;        //!< index into an array of solverOffsets
   index_t pairedOffsetIndex = kNullLocation;        //!< the index of a paired solverMode --namely one containing state information not calculated by this mode
-  /**@brief solvermode constructor
+  /**@brief solverMode constructor
 @param[in] the index to put in offsetIndex*/
   explicit solverMode (index_t index);
-  /**@brief solvermode default constructor*/
+  /**@brief solverMode default constructor*/
   solverMode ()
   {
   }

@@ -129,7 +129,7 @@ void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData *s
   d[2] = (-es[2] + es[0] * Kf / Tf) / Tf;
 }
 
-// jacobian
+// Jacobian
 void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const stateData *sD,
                                                 arrayData<double> *ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)

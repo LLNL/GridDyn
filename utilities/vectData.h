@@ -14,6 +14,9 @@
 #ifndef _VECT_DATA_H_
 #define _VECT_DATA_H_
 
+
+//TODO make this into a template
+
 #include <cstdint>
 #ifdef ENABLE_64_BIT_INDEXING
 typedef std::uint64_t index_t;
@@ -30,12 +33,12 @@ typedef std::pair<index_t, double> vLoc;
 
 bool compareLocVectData (vLoc A, vLoc B);
 /**
-* class for storing data from the jacobian computation
+* class for storing data from the Jacobian computation
 */
 class vectData
 {
 private:
-  std::vector<vLoc> dVec;         //!< the vector of tuples containing the data
+  std::vector<vLoc> dVec;         //!< the vector of pairs containing the data
 public:
   vectData ()
   {
@@ -49,13 +52,13 @@ public:
   }
   count_t svsize = 1000000000;
   /**
-  * add a new jacobian element
+  * add a new Jacobian element
   * @param[in] X,Y the row (X) and column(Y) of the element
   * @param[in] num the value of the element
   */
   void assign(index_t X, double num);
   /** assign with a check
-  * add a new jacobian element if the arguments are valid (X>=0) &&(Y>=0)
+  * add a new Jacobian element if the arguments are valid (X>=0) &&(Y>=0)
   * @param[in] X,Y the row (X) and column(Y) of the element
   * @param[in] num the value of the element
   */
@@ -72,7 +75,7 @@ public:
   * get the number of points
   * @return the number of points
   */
-  count_t points ()
+  count_t points () const
   {
     return static_cast<count_t> (dVec.size ());
   }
@@ -80,7 +83,7 @@ public:
   * get the maximum number of points the vector can hold
   * @return the number of points
   */
-  count_t capacity ()
+  count_t capacity () const
   {
     return static_cast<count_t> (dVec.capacity ());
   }

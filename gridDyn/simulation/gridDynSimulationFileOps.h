@@ -69,14 +69,14 @@ void loadStateBinary (gridDynSimulation *gds, const std::string &fname, const so
 */
 void loadStateXML (gridDynSimulation *gds, const std::string &fname, const solverMode &sMode = cEmptySolverMode);
 
-/** @brief capture a jacobian and a state to a file
+/** @brief capture a Jacobian and a state to a file
 @param[in] gds  the gridDynSimulation object to operate from
 @param[in] fname the name of the file for storage
 @param[in] sMode the solverMode to get the state from
 */
 void captureJacState (gridDynSimulation *gds, const std::string &fname, const solverMode &sMode = cEmptySolverMode);
 
-/** @brief capture the jacobian data to a file
+/** @brief capture the Jacobian data to a file
 @param[in] gds  the gridDynSimulation object to operate from
 @param[in] fname the name of the file for storage
 @param[in] sMode the solverMode to get the state from
@@ -184,13 +184,13 @@ int writeVector(double time,  std::uint32_t code, std::uint32_t index, std::uint
 
 /** @brief write a array to a file
 encodes a header into the file
-time(8 bytes), code(0x0001|code) for jacobian data (4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
+time(8 bytes), code(0x0001|code) for Jacobian data (4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
 then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @param[in] time the time associated with the data
 @param[in] code a code describing the type of information in the array
 @param[in] index an indexing value associated with the data
 @param[in] key a code indicating the source of the information (typically the index of the solver data object)
-@param[in] a1 the jacobian data to write to the file
+@param[in] a1 the Jacobian data to write to the file
 @param[in] filename the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)
 @return (0) is successful  (-1) if unable to open file

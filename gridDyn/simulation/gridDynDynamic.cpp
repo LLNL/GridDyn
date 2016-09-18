@@ -803,6 +803,7 @@ bool gridDynSimulation::dynamicCheckAndReset (const solverMode &sMode, change_co
       dynData->setMaxNonZeros (jacSize (sMode));
       // Allow for the fact that the new size of Jacobian now also has a different number of nonzeros
       dynData->sparseReInit (solverInterface::sparse_reinit_modes::resize);
+		
 
     }
   else if (opFlags[root_change_flag])
@@ -878,7 +879,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
     {
       retval = checkAlgebraicRoots (dynData);
     }
-  //if we still havent fixed it call the recovery object and let it try to deal with it
+  //if we still haven't fixed it call the recovery object and let it try to deal with it
   if (retval < FUNCTION_EXECUTION_SUCCESS)
     {
       dynamicInitialConditionRecovery dicr (this, dynData);
@@ -1006,6 +1007,13 @@ void gridDynSimulation::handleRootChange (const solverMode &sMode, std::shared_p
         }
       opFlags.reset (root_change_flag);
     }
+  else if (rootSize(sMode)>0)
+  {
+	  if (offsets.getRootOffset(sMode) == kNullLocation)
+	  {
+		  setRootOffset(0, sMode);
+	  }
+  }
 }
 
 
@@ -1247,7 +1255,7 @@ int gridDynSimulation::derivativeFunction (double ttime, const double state[], d
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-// jacobian computation
+// Jacobian computation
 int gridDynSimulation::jacobianFunction (double ttime, const double state[], const double dstate_dt[], arrayData<double> *ad, double cj, const solverMode &sMode)
 {
   ++JacobianCount;
@@ -1255,7 +1263,7 @@ int gridDynSimulation::jacobianFunction (double ttime, const double state[], con
   stateData sD (ttime,state,dstate_dt,residCount);
   sD.cj = cj;
   fillExtraStateData (&sD, sMode);
-  //the area function to evaluate the jacobian elements
+  //the area function to evaluate the Jacobian elements
   preEx (&sD, sMode);
   ad->clear ();
   jacobianElements (&sD, ad, sMode);

@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 		{
 			BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault");
 			auto mmatch = runJacobianCheck(gds, cDaeSolverMode);
-			BOOST_CHECK_MESSAGE(mmatch==0, "Model " << gname << " jacobian failure after fault");
+			BOOST_CHECK_MESSAGE(mmatch==0, "Model " << gname << " Jacobian failure after fault");
 		}
 		else
 		{
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 			BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault clear");
 			auto mmatch = runJacobianCheck(gds, cDaeSolverMode);
 			
-			BOOST_CHECK_MESSAGE(mmatch==0, "Model " << gname << " jacobian failure");
+			BOOST_CHECK_MESSAGE(mmatch==0, "Model " << gname << " Jacobian failure");
 		
 		gds->run();
 		BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE,"Model "<<gname<<" failed to run to completion");
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(fault_test2)
 		
 			BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault");
 			auto mmatch = runJacobianCheck(gds, cDaeSolverMode);
-			BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " jacobian failure after fault");
+			BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian failure after fault");
 		
 
 		//run till just after the fault clears
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(fault_test2)
 			BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault clear");
 			mmatch = runJacobianCheck(gds, cDaeSolverMode);
 
-			BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " jacobian failure");
+			BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian failure");
 	
 
 		gds->run();
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 
 		BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault");
 		auto mmatch = runJacobianCheck(gds, cDaeSolverMode);
-		BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " jacobian failure after fault");
+		BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian failure after fault");
 
 
 		//run till just after the fault clears
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 		BOOST_CHECK_MESSAGE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE, "Model " << gname << " failed to run past fault clear");
 		mmatch = runJacobianCheck(gds, cDaeSolverMode);
 
-		BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " jacobian failure");
+		BOOST_CHECK_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian failure");
 
 
 		gds->run();

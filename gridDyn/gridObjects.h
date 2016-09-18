@@ -133,9 +133,9 @@ public:
   */
   count_t totalAlgSize (const solverMode &sMode);
 
-  /** @brief get the number of jacobian non-zeros elements (max not necessarily actual)
+  /** @brief get the number of Jacobian non-zeros elements (max not necessarily actual)
   @param[in] sMode solverMode to base the count on
-  @return the number of non-zeros in the jacobian
+  @return the number of non-zeros in the Jacobian
   */
   count_t jacSize (const solverMode &sMode);
   /** @brief get the number of roots
@@ -181,9 +181,9 @@ public:
   */
   count_t totalAlgSize (const solverMode &sMode) const;
 
-  /** @brief get the number of jacobian non-zeros elements (max not necessarily actual)
+  /** @brief get the number of Jacobian non-zeros elements (max not necessarily actual)
   @param[in] sMode solverMode to base the count on
-  @return the number of non-zeros in the jacobian
+  @return the number of non-zeros in the Jacobian
   */
   count_t jacSize (const solverMode &sMode) const;
   /** @brief get the number of roots
@@ -259,24 +259,24 @@ public:
   \param ttime -the time the state corresponds to
   \param state -- a double array pointing to the state information
   \param dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
-  \param sMode  -- the solvermode corresponding to the computed state.
+  \param sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
   /** @brief transfer state information from the objects to a vector
   \param ttime -the time the state corresponds to
   \param[out] state -- a double array pointing to the state information
   \param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
-  \param sMode  -- the solvermode corresponding to the computed state.
+  \param sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode);
   /** @brief load tolerance information from the objects
   \param[out] tols -- a double array with the state tolerance information
-  \param[in] sMode  -- the solvermode corresponding to the computed state.
+  \param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getTols (double tols[], const solverMode &sMode);
   /** @brief load variable information 1 for algebraic state 0 for differential state
   \param[out] sdata -- a double array with the state tolerance information
-  \param[in] sMode  -- the solvermode corresponding to the computed state.
+  \param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getVariableType (double sdata[], const solverMode &sMode);
   /** @brief load constraint information
@@ -286,7 +286,7 @@ public:
   2 for >=0
   -2 for <=0
   \param[out] constraints -- a double array with the constraint
-  \param[in] sMode  -- the solvermode corresponding to the computed state.
+  \param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getConstraints (double constraints[], const solverMode &sMode);
   /** @brief update cascading flag information
@@ -295,7 +295,7 @@ public:
   virtual void updateFlags (bool dynamics = true);
   /** @brief get the names for all the states
   \param[out] stNames -- the output state names
-  \param[in] sMode  -- the solvermode corresponding to the computed state.
+  \param[in] sMode  -- the solverMode corresponding to the computed state.
   \param[in] prefix  a string prefix to put before the state names of the object-- intended for cascading calls
   */
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const;
@@ -388,17 +388,17 @@ protected:
   virtual void dynObjectInitializeB (IOdata &outputSet);
 public:
   /** @brief call any objects that needs 2 part execution to allow for parallelism
- do any prework for the calculation calls (residual, derivative, jacobian, algebraicUpdate) later in the calculations
+ do any prework for the calculation calls (residual, derivative, Jacobian, algebraicUpdate) later in the calculations
 it is assumed any appropriate data would be cached during this time and not rerun if called multiple times
 @param[in] sD the data representing the current state to operate on
 @param[in] sMode the solverMode which is being solved for
 */
   virtual void preEx (const stateData *sD, const solverMode &sMode);
 
-  //jacobian computation
-  /** @brief compute the jacobian for a given state
+  //Jacobian computation
+  /** @brief compute the Jacobian for a given state
   @param[in] sD the data representing the current state to operate on
-  @param[out] ad the arrayData structure to store the jacobian values
+  @param[out] ad the arrayData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
   virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
@@ -459,9 +459,9 @@ it is assumed any appropriate data would be cached during this time and not reru
   virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
 
   /** @brief get the residual computation for object requiring a delay
-    basically calls the jacobian calculation on the delayed objects
+    basically calls the Jacobian calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on
-  @param[out] ad the arrayData structure to store the jacobian values
+  @param[out] ad the arrayData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
   virtual void delayedJacobian (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
@@ -529,7 +529,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @pararm[in] ttime  the time of the corresponding states
   @param[in,out]  state the states of the system at present and shifted to match the updates
   @param[in,out] dstate_dt  the derivatives of the state that get updated
-  @param[in] sMode the solvermode matching the states
+  @param[in] sMode the solverMode matching the states
   @param[in] mode  the mode of the convergence
   @param[in] tol  the convergence tolerance
   */
@@ -564,7 +564,7 @@ it is assumed any appropriate data would be cached during this time and not reru
 
   /**
   *@brief get a vector state indices for the output
-  @details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
   **/
@@ -572,7 +572,7 @@ it is assumed any appropriate data would be cached during this time and not reru
 
   /**
   *@brief get the state index of an output
-  @details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
   @return the value of the state requested
@@ -807,7 +807,7 @@ public:
 
   /**
   *@brief get a vector state indices for the output
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
   **/
@@ -815,7 +815,7 @@ public:
 
   /**
   *@brief get a single output and location
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
   @return the location of the output state requested
@@ -945,7 +945,7 @@ public:
 
   /** @brief locate a state index based on field name
   @param[in] the name of the field to search for
-  @param[in]  the solvermode to find the location for
+  @param[in]  the solverMode to find the location for
   @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not initialized yet(try again later)
   */
   virtual index_t findIndex (const std::string & field, const solverMode & sMode) const;
@@ -1152,7 +1152,7 @@ public:
   virtual double getOutput (index_t num = 0) const;
   /**
   *@brief get a single output and location
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
   @return the value of the state requested
@@ -1160,14 +1160,14 @@ public:
   virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
   /**
   *@brief get a vector state indices for the output
-  @ details used in cases where the state of one object is used int the computation of another for computation of the jacobian
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
   **/
   virtual IOlocs getOutputLocs  (const solverMode &sMode) const;
   /** @brief locate a state index based on field name
   @param[in] field the name of the field to search for
-  @param[in] sMode the solvermode to find the location for
+  @param[in] sMode the solverMode to find the location for
   @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not initialized yet(try again later)
   */
   virtual index_t findIndex (const std::string & field, const solverMode & sMode) const;

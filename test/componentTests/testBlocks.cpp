@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
   if (mmatch > 0)
   {
     printStateNames(gds, cDaeSolverMode);
-	printf(" mismatching jacobian in %s\n", plist.first.c_str());
+	printf(" mismatching Jacobian in %s\n", plist.first.c_str());
   }
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   mmatch = residualCheck(gds,cDaeSolverMode);
@@ -444,9 +444,9 @@ BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 		mmatch = runAlgebraicCheck(gds, cDaeSolverMode);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Block " << plist.first << " algebraic issue");
 		mmatch = runJacobianCheck(gds, cDynDiffSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Block " << plist.first << " jacobian dynDiff issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Block " << plist.first << " Jacobian dynDiff issue");
 		mmatch = runJacobianCheck(gds, cDynAlgSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Block " << plist.first << " jacobian dynAlg issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Block " << plist.first << " Jacobian dynAlg issue");
 
 	}
 

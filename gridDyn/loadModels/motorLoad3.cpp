@@ -346,9 +346,7 @@ void motorLoad3::getStateName (stringVec &stNames, const solverMode &sMode, cons
 
 double motorLoad3::timestep (double ttime, const IOdata &args, const solverMode &)
 {
-  stateData sD;
-  sD.time = ttime;
-  sD.state = m_state.data ();
+  stateData sD(ttime,m_state.data());
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[2] += dt * m_dstate_dt[2];
@@ -390,7 +388,7 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
   //}
 
   // slip
-  if (opFlags.test (stalled))
+  if (opFlags[stalled])
     {
       dv[0] = 0;
     }
@@ -435,10 +433,9 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, arra
   double theta = args[angleInLocation];
   auto VLoc = argLocs[voltageInLocation];
   auto TLoc = argLocs[angleInLocation];
-  double Vr, Vm;
 
-  Vr = -V *Vcontrol* sin (theta);
-  Vm = V * Vcontrol * cos (theta);
+  double Vr = -V *Vcontrol* sin (theta);
+  double Vm = V * Vcontrol * cos (theta);
 
 
 
@@ -568,10 +565,10 @@ void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, 
   //P=vr*m_state[0] + vm*m_state[1];
 
   //Q=vm*m_state[0] - vr*m_state[1];
-  ad->assignCheck (PoutLocation, argLocs[angleInLocation], -ir * vm + vr * im);
-  ad->assignCheck (PoutLocation, argLocs[voltageInLocation], ir * vr / V + vm * im / V);
-  ad->assignCheck (QoutLocation, argLocs[angleInLocation], vr * ir + vm * im);
-  ad->assignCheck (QoutLocation, argLocs[voltageInLocation], vm * ir / V - vr * im / V);
+  ad->assignCheckCol (PoutLocation, argLocs[angleInLocation], -ir * vm + vr * im);
+  ad->assignCheckCol (PoutLocation, argLocs[voltageInLocation], ir * vr / V + vm * im / V);
+  ad->assignCheckCol (QoutLocation, argLocs[angleInLocation], vr * ir + vm * im);
+  ad->assignCheckCol (QoutLocation, argLocs[voltageInLocation], vm * ir / V - vr * im / V);
 
 }
 
@@ -652,7 +649,7 @@ void motorLoad3::rootTest (const IOdata & /*args*/, const stateData *sD, double 
     {
       double Te = Loc.diffStateLoc[1] * Loc.algStateLoc[0] + Loc.diffStateLoc[2] * Loc.algStateLoc[1];
       roots[ro] = Te - mechPower (1.0);
-      //printf ("[%f]look power =%f\n",sD->time,roots[ro]);
+     // printf ("[%f]look power =%f\n",sD->time,roots[ro]);
     }
   else
     {
@@ -668,7 +665,7 @@ void motorLoad3::rootTrigger (double /*ttime*/, const IOdata &args, const std::v
     {
       return;
     }
-  if (opFlags.test (stalled))
+  if (opFlags[stalled])
     {
       if (args[voltageInLocation] > 0.5)
         {
@@ -681,13 +678,17 @@ void motorLoad3::rootTrigger (double /*ttime*/, const IOdata &args, const std::v
     {
       opFlags.set (stalled);
       alert (this, JAC_COUNT_DECREASE);
+		if (args[voltageInLocation]<0.25)
+		{
+			alert(this, POTENTIAL_FAULT_CHANGE);
+		}
       m_state[2] = 1.0;
     }
 }
 
 change_code motorLoad3::rootCheck (const IOdata & /*args*/, const stateData *sD, const solverMode &sMode, check_level_t /*level*/)
 {
-  if (opFlags.test (stalled))
+  if (opFlags[stalled])
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
       const double Te = Loc.diffStateLoc[1] * Loc.algStateLoc[0] + Loc.diffStateLoc[2] * Loc.algStateLoc[1];

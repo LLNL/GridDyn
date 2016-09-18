@@ -15,7 +15,6 @@
 #include "solvers/solverInterface.h"
 #include "faultResetRecovery.h"
 #include "diagnostics.h"
-#include <algorithm>
 
 bool checkResetVoltages(const std::vector<double> &prev, const std::vector<double> &curr);
 
@@ -28,7 +27,7 @@ faultResetRecovery::~faultResetRecovery()
 }
 
 
-bool faultResetRecovery::hasMoreFixes()
+bool faultResetRecovery::hasMoreFixes() const
 {
 	return (attempt_number < 7);
 }

@@ -1672,7 +1672,7 @@ void gridArea::rootTrigger (double ttime, const std::vector<int> &rootMask, cons
   auto obend = rootObjects.end ();
   auto ors = (*currentRootObject)->rootSize (sMode);
   opFlags.set (disable_flag_updates); //root triggers can cause a flag change and the flag update currently checks the root object
-  //May be wise at some point to revisit that
+  //TODO::May be wise at some point to revisit the combination of the flags and root object checking
   for (auto rc : RF)
     {
       if (rc < rootOffset + cloc)
@@ -1895,7 +1895,7 @@ void gridArea::derivative ( const stateData *sD, double deriv[], const solverMod
   //next do any internal states
 }
 
-// jacobian
+// Jacobian
 void gridArea::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
 {
   opObjectLists.jacobianElements (sD, ad, sMode);

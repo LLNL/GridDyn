@@ -23,14 +23,14 @@ class solverInterface;
 
 const double resid_check_tol = 1e-5;
 const double jac_check_tol = 1e-5;
-/** @brief function check on the jacobian
-  function does a comparison between the computed jacobian via the jacobianElements function call and a numerically calculated
-version from the residual,  It will not check jacobian elements dependent on other state derivatives
+/** @brief function check on the Jacobian
+  function does a comparison between the computed Jacobian via the jacobianElements function call and a numerically calculated
+version from the residual,  It will not check Jacobian elements dependent on other state derivatives
 This function is mostly useful for diagnosing problems and is used throughout the test suite
 @param[in] gds the gridDynSimulation object to test
-@param[in] sMode the solverMode to check the jacobian for
+@param[in] sMode the solverMode to check the Jacobian for
 @param[in] jacTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the Jacobian check
 @return the number of mismatches
 */
 int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jacTol = jac_check_tol, bool useStateNames = false);
@@ -40,7 +40,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &sMode, double jacTo
 @param[in] gds the griddynSimulation object to test
 @param[in] sMode the solverMode to check the residual
 @param[in] residTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the Jacobian check
 @return the number of mismatches
 */
 int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
@@ -50,7 +50,7 @@ int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double resid
 @param[in] time the time to check the residual
 @param[in] sMode the solverMode to check the residual
 @param[in] residTol  the tolerance to check matches
-@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the jacobian check
+@param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the Jacobian check
 @return the number of mismatches
 */
 int residualCheck (gridDynSimulation *gds, double time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);

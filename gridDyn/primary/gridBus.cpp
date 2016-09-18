@@ -25,8 +25,6 @@
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
 
-#include "simulation/contingency.h"
-
 #include "stringOps.h"
 
 
@@ -79,6 +77,7 @@ gridCoreObject *gridBus::clone (gridCoreObject *obj) const
   nobj->Atol = Atol;
   nobj->Network = Network;
   nobj->zone = zone;
+  nobj->lowVtime = lowVtime;
   //now clone all the loads and generators
   //cloning the links from this component would be bad
   //clone the generators and loads
@@ -681,6 +680,13 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
 
   if ((param == "voltage") || (param == "vol"))
     {
+		if (voltage<0.25)
+		{
+			if (opFlags[dyn_initialized])
+			{
+				parent->alert(this, POTENTIAL_FAULT_CHANGE);
+			}
+		}
       voltage = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
     }
   else if ((param == "angle") || (param == "ang"))
@@ -785,15 +791,14 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
         {
           if (val != 0.0)
             {
-              add (new gridLoad ());
+              add (new gridLoad ());  //TODO :: use the object factory instead
             }
           else
             {
               return out;
             }
         }
-      std::string b;
-      b.push_back (param.back ());
+      std::string b{param.back()};
       out = attachedLoads[0]->set (b, val, unitType);
     }
   else if ((param == "shunt b") || (param == "b"))
@@ -1288,6 +1293,7 @@ void gridBus::residual (const stateData *sD, double resid[], const solverMode &s
     {
       alert (this,INVALID_STATE_ALERT);
       alert (this, VERY_LOW_VOLTAGE_ALERT);
+	  lowVtime = (sD) ? sD->time : prevTime;
       return;
     }
   for (auto &gen : attachedGens)
@@ -1524,11 +1530,7 @@ void gridBus::setRootOffset (index_t Roffset, const solverMode &sMode)
 
 void gridBus::disconnect ()
 {
-  if (opFlags[disconnected])
-    {
-      return;
-    }
-  else
+  if (!opFlags[disconnected])
     {
       opFlags.set (disconnected);
       outLocs[voltageInLocation] = kNullLocation;
@@ -1564,11 +1566,6 @@ void gridBus::reconnect (gridBus *mapBus)
           lnk->reconnect ();
         }
     }
-  else
-    {
-      return;
-
-    }
 
 }
 
@@ -1586,12 +1583,6 @@ void gridBus::reconnect ()
           lnk->reconnect ();
         }
     }
-  else
-    {
-      return;
-
-    }
-
 }
 
 
@@ -2309,25 +2300,22 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool /*cmpBus*/, bool printDiff)
 
 gridBus * getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec)
 {
-  gridBus *B2 = nullptr;
+  
   if (bus->getParent () == nullptr)
     {
       return nullptr;
     }
   if (bus->getParent ()->getID () == src->getID ())                //if this is true then things are easy
     {
-      B2 = sec->getBus (bus->locIndex);
+      return sec->getBus (bus->locIndex);
     }
-  else
-    {
-      gridPrimary *par;
-      std::vector<index_t> lkind;
-      par = dynamic_cast<gridPrimary *> (bus->getParent ());
+  
+      auto par = dynamic_cast<gridPrimary *> (bus->getParent ());
       if (par == nullptr)
         {
           return nullptr;
         }
-      lkind.push_back (bus->locIndex);
+	  std::vector<index_t> lkind={ bus->locIndex };
       while (par->getID () != src->getID ())
         {
           lkind.push_back (par->locIndex);
@@ -2343,8 +2331,6 @@ gridBus * getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec
         {
           par = dynamic_cast<gridPrimary *> (par->getArea (lkind[kk]));
         }
-      B2 = par->getBus (lkind[0]);
+      return par->getBus (lkind[0]);
 
-    }
-  return B2;
 }

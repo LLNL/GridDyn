@@ -13,6 +13,7 @@
 
 #include "sundialsInterface.h"
 #include "core/helperTemplates.h"
+#include "basicDefs.h"
 #include <cstdio>
 #include <cassert>
 

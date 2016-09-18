@@ -201,6 +201,7 @@ set(solver_sources
 	solvers/basicSolver.cpp
 	solvers/sundialsArrayData.cpp
 	solvers/sundialsInterface.cpp
+	solvers/basicOdeSolver.cpp
 	)
 	
 IF (LOAD_CVODE)

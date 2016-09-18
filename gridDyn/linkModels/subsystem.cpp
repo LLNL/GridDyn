@@ -694,7 +694,7 @@ double subsystem::getMaxTransfer () const
 // initializeB power flow
 
 
-//for computing all the jacobian elements at once
+//for computing all the Jacobian elements at once
 void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (busId <= 0)

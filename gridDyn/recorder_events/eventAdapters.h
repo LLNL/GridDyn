@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include <cstdint>
+#include <algorithm>
 
 /** @brief class for managing events of many types
  class is a wrapper around a number of different kinds of discrete events
@@ -143,7 +144,7 @@ public:
     while (m_nextTime <= cTime)
       {
         auto ret = m_eventObj->trigger (cTime);
-        retval = std::max (ret, retval);
+        retval = (std::max) (ret, retval);
         if (!(m_eventObj->isArmed ()))
           {
             m_remove_event = true;

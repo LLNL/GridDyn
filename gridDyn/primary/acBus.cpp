@@ -1633,7 +1633,7 @@ static const IOlocs kNullLocations {
 
 IOlocs acBus::getOutputLocs (const solverMode &sMode) const
 {
-  if (!hasAlgebraic (sMode))
+  if ((!hasAlgebraic (sMode))||(!isConnected()))
     {
       return kNullLocations;
     }
@@ -2204,7 +2204,7 @@ void acBus::derivative (const stateData *sD, double deriv[], const solverMode &s
     }
 }
 
-// jacobian
+// Jacobian
 void acBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
 {
   gridBus::jacobianElements (sD, ad, sMode);
@@ -2222,7 +2222,7 @@ void acBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const 
       return;
     }
 
-  //compute the bus jacobian elements themselves
+  //compute the bus Jacobian elements themselves
   //printf("t=%f,id=%d, dpdt=%f, dpdv=%f, dqdt=%f, dqdv=%f\n", ttime, id, Ptii, Pvii, Qvii, Qtii);
 
   auto Voffset = offsets.getVOffset (sMode);
@@ -2340,6 +2340,7 @@ void acBus::voltageUpdate (const stateData *sD, double update[], const solverMod
   if (v1 < Vtol)
     {
       alert (this, VERY_LOW_VOLTAGE_ALERT);
+	  lowVtime = sD ->time;
       return;
     }
   if (!((useVoltage (sMode)) && (Voffset != kNullLocation)))
@@ -3449,10 +3450,18 @@ change_code acBus::rootCheck (const stateData *sD, const solverMode &sMode, chec
         }
       if (opFlags[prev_low_voltage_alert])
         {
-          disconnect ();
-          opFlags.reset (prev_low_voltage_alert);
-          ret = change_code::jacobian_change;
-          LOG_DEBUG ("Bus low voltage disconnect");
+			if (sD->time<=lowVtime)
+			{
+				disconnect();
+				opFlags.reset(prev_low_voltage_alert);
+				ret = change_code::jacobian_change;
+				LOG_DEBUG("Bus low voltage disconnect");
+			}
+			else
+			{
+				opFlags.reset(prev_low_voltage_alert);
+			}
+         
         }
       return ret;
     }

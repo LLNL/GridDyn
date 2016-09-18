@@ -60,7 +60,7 @@ void loadParentInfo (std::shared_ptr<readerElement> &element, X *mobj, readerInf
 template<class X>
 gridCoreObject * updateSearchObject (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject)
 {
-  gridCoreObject *alternateObject = getParent (element, ri, parentObject, parentSearchComponent ((X*)(nullptr)));
+  gridCoreObject *alternateObject = getParent (element, ri, parentObject, parentSearchComponent (static_cast<X*>(nullptr)));
 
   return (alternateObject) ? alternateObject : parentObject;
 }
@@ -73,7 +73,7 @@ template<class X>
 X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
 {
   using namespace readerConfig;
-  gridCoreObject *obj = nullptr;
+  gridCoreObject *obj;
   //try to locate the object if it exists already
   std::string ename = getElementField (element, "name", defMatchType);
   if (!ename.empty ())
@@ -91,7 +91,7 @@ X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::
     {
       //check if the object can be found in the current search object
       double val = interpretString (ename, ri);
-      auto index = static_cast<index_t> (val) - 1;           //get subobject is 0 based so subtract 1
+      auto index = static_cast<index_t> (val) - 1;           //get subObject is 0 based so subtract 1
       if ((obj = searchObject->getSubObject (componentName, index)) != nullptr)
         {
           return dynamic_cast<X *> (obj);
@@ -283,13 +283,10 @@ void setAttributes (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &elem
   using namespace readerConfig;
   auto att = element->getFirstAttribute ();
 
-  std::string fname;
-  std::string strVal;
-  double val;
   int ret;
   while (att.isValid ())
     {
-      fname = convertToLowerCase (att.getName ());
+	  std::string fname = convertToLowerCase (att.getName ());
 
       auto ifind = ignoreList.find (fname);
       if (ifind != ignoreList.end ())
@@ -298,47 +295,47 @@ void setAttributes (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &elem
           continue;
         }
 
-      else if (fname.find ("file") != std::string::npos)
+      if (fname.find ("file") != std::string::npos)
         {
-          strVal = att.getText ();
+		  std::string strVal = att.getText ();
           ri->checkFileParam (strVal);
           LEVELPRINT (READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
           ret = obj->set (fname, strVal);
         }
-      else
-        {
-          val = att.getValue ();
-          if (val != kNullVal)
-            {
-              LEVELPRINT (READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << val);
-              ret = obj->set (fname, val);
-            }
-          else
-            {
-              strVal = att.getText ();
-              gridParameter po (fname, strVal);
-              paramStringProcess (&po, ri);
-              if (po.stringType == true)
-                {
-                  ret = obj->set (po.field, po.strVal);
-                  LEVELPRINT (READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
-                }
-              else
-                {
-                  ret = obj->set (po.field, po.value);
-                  LEVELPRINT (READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.value);
-                }
-            }
+	  else
+	  {
+		  double val = att.getValue();
+		  if (val != kNullVal)
+		  {
+			  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << val);
+			  ret = obj->set(fname, val);
+		  }
+		  else
+		  {
+			  std::string strVal = att.getText();
+			  gridParameter po(fname, strVal);
+			  paramStringProcess(&po, ri);
+			  if (po.stringType == true)
+			  {
+				  ret = obj->set(po.field, po.strVal);
+				  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
+			  }
+			  else
+			  {
+				  ret = obj->set(po.field, po.value);
+				  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.value);
+			  }
+		  }
+	  }
 
-          if (ret == PARAMETER_NOT_FOUND)
-            {
-              WARNPRINT (READER_WARN_ALL, "unknown " << componentName << " parameter " << fname);
-            }
-          else if (ret == INVALID_PARAMETER_VALUE)
-            {
-              WARNPRINT (READER_WARN_ALL, "value for solver parameter " << fname << " (" << strVal << ") is invalid");
-            }
-        }
+	  if (ret == PARAMETER_NOT_FOUND)
+	  {
+		  WARNPRINT(READER_WARN_ALL, "unknown " << componentName << " parameter " << fname);
+	  }
+	  else if (ret == INVALID_PARAMETER_VALUE)
+	  {
+		  WARNPRINT(READER_WARN_ALL, "value for solver parameter " << fname << " (" << att.getText() << ") is invalid");
+	  }
       att = element->getNextAttribute ();
     }
 

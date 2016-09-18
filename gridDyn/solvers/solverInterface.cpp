@@ -16,8 +16,6 @@
 #include "gridDyn.h"
 #include "stringOps.h"
 
-#include <cstdio>
-#include <algorithm>
 #include <string>
 #include <iostream>
 
@@ -639,11 +637,11 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
       sd = std::make_shared<kinsolInterface> (gds, sMode);
       if (sMode.offsetIndex == 2)
         {
-          sd->name = "powerflow";
+          sd->setName("powerflow");
         }
       else if (sMode.offsetIndex == 4)
         {
-          sd->name = "algebraic";
+          sd->setName("algebraic");
         }
     }
   else if (isDAE (sMode))
@@ -651,7 +649,7 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
       sd = std::make_shared<idaInterface> (gds, sMode);
       if (sMode.offsetIndex == 3)
         {
-          sd->name = "dynamic";
+          sd->setName("dynamic");
         }
     }
   else if (isDifferentialOnly (sMode))
@@ -660,7 +658,7 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
       sd = std::make_shared<cvodeInterface> (gds, sMode);
       if (sMode.offsetIndex == 5)
         {
-          sd->name = "differential";
+          sd->setName("differential");
         }
 #endif
 
@@ -706,6 +704,10 @@ std::shared_ptr<solverInterface> makeSolver (const std::string &type)
       sd = nullptr;
 #endif
     }
+  else if ((type=="basicode")||(type=="euler"))
+  {
+	  sd = std::make_shared<basicOdeSolver>();
+  }
   else
     {
       sd = nullptr;

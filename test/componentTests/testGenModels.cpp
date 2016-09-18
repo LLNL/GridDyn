@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE (model_test1)
 
 }
 
-BOOST_AUTO_TEST_CASE (model_test2)  //jacobian code check
+BOOST_AUTO_TEST_CASE (model_test2)  //Jacobian code check
 {
   std::string fname = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE (model_test2)  //jacobian code check
       auto mmatch = runResidualCheck (gds,cDaeSolverMode);
       BOOST_REQUIRE_MESSAGE (mmatch==0,"Model "<<gname<<" residual issue");
       mmatch = runJacobianCheck (gds,cDaeSolverMode);
-      BOOST_REQUIRE_MESSAGE(mmatch==0,"Model "<<gname<<" jacobian issue");
+      BOOST_REQUIRE_MESSAGE(mmatch==0,"Model "<<gname<<" Jacobian issue");
 	  mmatch = runDerivativeCheck(gds, cDaeSolverMode);
 	  BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " derivative issue");
 	  mmatch = runAlgebraicCheck(gds, cDaeSolverMode);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE (model_test2)  //jacobian code check
 
 }
 
-BOOST_AUTO_TEST_CASE(model_test2_withr)  //jacobian code check
+BOOST_AUTO_TEST_CASE(model_test2_withr)  //Jacobian code check
 {
 	std::string fname = std::string(GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(model_test2_withr)  //jacobian code check
 		auto mmatch = runResidualCheck(gds, cDaeSolverMode);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " residual r issue");
 		mmatch = runJacobianCheck(gds, cDaeSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " jacobian r issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian r issue");
 	}
 
 }
@@ -134,6 +134,7 @@ BOOST_AUTO_TEST_CASE(model_test2_alg_diff_tests)  //test the algebraic updates a
 
 	for (auto &gname : genlist)
 	{
+
 		obj = cof->createObject("genmodel", gname);
 		BOOST_CHECK(obj != nullptr);
 		//just set the resistance to make sure the models can handle that parameter
@@ -151,15 +152,15 @@ BOOST_AUTO_TEST_CASE(model_test2_alg_diff_tests)  //test the algebraic updates a
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " algebraic issue");
 
 		mmatch = runJacobianCheck(gds, cDynDiffSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " jacobian dynDiff issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian dynDiff issue");
 		mmatch = runJacobianCheck(gds, cDynAlgSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " jacobian dynAlg issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian dynAlg issue");
 	}
 
 }
 #endif
 
-BOOST_AUTO_TEST_CASE (model_test3)  //jacobian code check
+BOOST_AUTO_TEST_CASE (model_test3)  //Jacobian code check
 {
   std::string fname = std::string (GENMODEL_TEST_DIRECTORY "test_model2.xml");
 

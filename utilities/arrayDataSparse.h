@@ -22,7 +22,7 @@
 typedef std::tuple<index_t, index_t, double> cLoc;
 
 /**
-* class for storing data from the jacobian computation
+* class for storing data from the Jacobian computation
 */
 
 const int adRow = 0;

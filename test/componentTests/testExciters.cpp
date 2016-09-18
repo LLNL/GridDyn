@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 
 		BOOST_REQUIRE_MESSAGE(badresid == 0,"exciter type "<<excname<<"resid issue\n");
 		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
-		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "exciter type " << excname << "jacobian issue\n");
+		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "exciter type " << excname << "Jacobian issue\n");
 
 		std::vector<double> volt1;
 		gds->getVoltage(volt1);
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 		BOOST_REQUIRE_MESSAGE(badresid == 0, "Exciter " << excname << " residual issue");
 		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
 
-		BOOST_REQUIRE_MESSAGE(badjacobian == 0,"Exciter "<<excname<<" jacobian issue");
+		BOOST_REQUIRE_MESSAGE(badjacobian == 0,"Exciter "<<excname<<" Jacobian issue");
 
 		std::vector<double> volt1;
 		gds->getVoltage(volt1);
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 		BOOST_REQUIRE_MESSAGE(badresid == 0, "Exciter " << excname << " residual issue");
 		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
 
-		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "Exciter " << excname << " jacobian issue");
+		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "Exciter " << excname << " Jacobian issue");
 
 		std::vector<double> volt1;
 		gds->getVoltage(volt1);
@@ -431,9 +431,9 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 
 		BOOST_CHECK_EQUAL(retval, 0);
 		auto mmatch = runJacobianCheck(gds, cDynDiffSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " jacobian dynDiff issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " Jacobian dynDiff issue");
 		mmatch = runJacobianCheck(gds, cDynAlgSolverMode);
-		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " jacobian dynAlg issue");
+		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " Jacobian dynAlg issue");
 	}
 
 }
