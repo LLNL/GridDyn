@@ -16,20 +16,16 @@
 #include "eventQueue.h"
 #include "loadModels/gridLabDLoad.h"
 #include "gridBus.h"
-#include "gridRecorder.h"
 #include "objectFactoryTemplates.h"
 #include "griddyn-tracer.h"
 #include "objectInterpreter.h"
 #include "solvers/solverInterface.h"
 #include "stringOps.h"
-#include "arrayDataSparse.h"
 #include "gridDynSimulationFileOps.h"
 #include "gridCoreTemplates.h"
 
 #include <cstdio>
-#include <fstream>
 #include <iostream>
-#include <cmath>
 #include <map>
 #include <queue>
 #include <cassert>
@@ -396,7 +392,7 @@ grouped = 1,  //!< all similar variables are grouped together (angles, then volt
 algebraic_grouped = 2, //!< all the algebraic variables are grouped, then the differential
 voltage_first = 3, //!< grouped with the voltage coming first
 angle_first = 4,  //!< grouped with the angle coming first
-differential_first = 5, //!< differential and algebraic groupd with differential first
+differential_first = 5, //!< differential and algebraic grouped with differential first
 */
 
 void gridDynSimulation::setupOffsets (const solverMode &sMode, offset_ordering offsetOrdering)
@@ -405,6 +401,7 @@ void gridDynSimulation::setupOffsets (const solverMode &sMode, offset_ordering o
   switch (offsetOrdering)
     {
     case offset_ordering::mixed:
+	default:
       b.algOffset = 0;
       break;
     case offset_ordering::grouped:
@@ -483,6 +480,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
   switch (cmd.command)
     {
     case gridDynAction::gd_action_t::ignore:
+	default:
       break;
     case gridDynAction::gd_action_t::set:
       obi.LoadInfo (cmd.string1, this);
@@ -645,6 +643,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
                   switch (defaultDynamicSolverMethod)
                     {
                     case dynamic_solver_methods::dae:
+					default:
                       out2 = dynamicDAE (t_end);
                       break;
                     case dynamic_solver_methods::partitioned:
@@ -926,7 +925,7 @@ int gridDynSimulation::setDefaultMode (solution_modes_t mode, const solverMode &
             {
               if (sd->isInitialized ())
                 {
-                  reInitDyn ((sd->getSolverMode ()));
+                  reInitDyn (sd->getSolverMode ());
                 }
             }
           defDynDiffMode = &(sd->getSolverMode ());
@@ -1370,8 +1369,8 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const so
   std::shared_ptr<solverInterface> solveD = nullptr;
   if (sMode.offsetIndex < solverInterfaces.size ())
     {
-
-      if (!(solveD = solverInterfaces[sMode.offsetIndex]))
+	  solveD = solverInterfaces[sMode.offsetIndex];
+      if (!solveD)
         {
           solveD = updateSolver (sMode);
         }

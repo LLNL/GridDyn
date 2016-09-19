@@ -111,7 +111,14 @@ BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part)
 	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoadChange1_partitioned.xml");
 	simpleRunTestXML(fname);
 }
+
+
 #endif 
+BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part2)
+{
+	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoadChange2_partitioned.xml");
+	simpleRunTestXML(fname);
+}
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(dyn_test_pulseLoadChange_part)

@@ -460,7 +460,7 @@ int gridDynSimulation::dynamicPartitioned (double tStop, double tStep)
 
 
       if (nextStopTime - timeCurr < tols.timeTol)                   //if the interval is too small just advance the clock a little
-        {                  //the most likely cause of this is a tiny numerical instabily in recorders and events
+        {                  //the most likely cause of this is a tiny numerical instability in recorders and events
           timeReturn = nextStopTime;
         }
       else
@@ -669,7 +669,7 @@ int gridDynSimulation::step (double nextStep, double &timeActual)
 
       nextStopTime = nextStep;
       if (tStop - timeCurr < tols.timeTol)         //if the interval is too small just advance the clock a little
-        {          //the most likely cause of this is numerical instabily in recorders and events
+        {          //the most likely cause of this is numerical instability in recorders and events
           timeReturn = tStop;
         }
       else
@@ -801,7 +801,7 @@ bool gridDynSimulation::dynamicCheckAndReset (const solverMode &sMode, change_co
         }
       handleRootChange (sMode, dynData);
       dynData->setMaxNonZeros (jacSize (sMode));
-      // Allow for the fact that the new size of Jacobian now also has a different number of nonzeros
+      // Allow for the fact that the new size of Jacobian now also has a different number of non-zeros
       dynData->sparseReInit (solverInterface::sparse_reinit_modes::resize);
 		
 
@@ -1259,7 +1259,7 @@ int gridDynSimulation::derivativeFunction (double ttime, const double state[], d
 int gridDynSimulation::jacobianFunction (double ttime, const double state[], const double dstate_dt[], arrayData<double> *ad, double cj, const solverMode &sMode)
 {
   ++JacobianCount;
-  //assuming it is the same data as the preceeding residual call  (it is for IDA but not sure if this assumption will be generally valid)
+  //assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption will be generally valid)
   stateData sD (ttime,state,dstate_dt,residCount);
   sD.cj = cj;
   fillExtraStateData (&sD, sMode);
