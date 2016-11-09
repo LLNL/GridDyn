@@ -171,7 +171,7 @@ public:
 
   // solver functions
   virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
@@ -446,7 +446,7 @@ public:
 
 protected:
   /** @brief
-  @param[in] sD, stateData the statedata to compute the Error for
+  @param[in] sD the stateData to compute the Error for
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */
@@ -459,12 +459,12 @@ private:
 
 
 
-/** @brief compare 2 buses
+/** @brief compare 2 buses for differences
   check a number of bus parameters to see if they match, probably not that useful of function any more ,but it was useful during development
 @param[in] bus1  bus1
 @param[in] bus2 bus2
 @param[in] cmpLink  whether to compare links or not  (deep comparison of links)
-@param[in] printDiff  true if the diffs are to be printed
+@param[in] printDiff  true if the differences are to be printed
 @return true if match
 */
 bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink = false,bool printDiff = false);
