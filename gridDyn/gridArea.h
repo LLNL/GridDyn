@@ -40,7 +40,7 @@ public:
     reverse_converge = object_flag1,           //!< flag indicating that the area should do a convergence/algebraic loop in reverse
     direction_oscillate = object_flag2,           //!< flag indicating that the direction of iteration for convergence functions should flip every time the function is called
   };
-  static count_t areaCount;  //!< basic counter for the areas to compute an id
+  
 
 protected:
   std::vector<gridBus *> m_Buses;              //!< list of buses contained in a the area
@@ -62,55 +62,55 @@ protected:
   double fTarget=1.0;                 //!<[puHz] a target frequency
 public:
   /** @brief the default constructor*/
-  gridArea (const std::string &objName = "area_$");
+  explicit gridArea (const std::string &objName = "area_$");
   /** @brief the default destructor*/
   virtual ~gridArea ();
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   /** @brief add a bus to the area
   @param[in] bus  the bus to add
   @return success indicator  OBJECT_ADD_SUCCESS(0) const on success
   */
-  virtual int add (gridBus *bus);
+  virtual void add (gridBus *bus);
   /** @brief add a link to the area
   @param[in] lnk  the link to add
   @return success indicator  OBJECT_ADD_SUCCESS(0) on success
   */
-  virtual int add (gridLink *lnk);
+  virtual void add (gridLink *lnk);
   /** @brief add an area to the area
   @param[in] area  the area to add
   @return success indicator  OBJECT_ADD_SUCCESS(0) on success
   */
-  virtual int add (gridArea *area);
+  virtual void add (gridArea *area);
   /** @brief add a relay to the area
   @param[in] relay  the relay to add
   @return success indicator  OBJECT_ADD_SUCCESS(0) on success
   */
-  virtual int add (gridRelay *relay);
+  virtual void add (gridRelay *relay);
   // remove components
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (gridCoreObject *obj) override;
   /** @brief remove a bus from the area
   @param[in] bus  the bus to remove
   @return success indicator  OBJECT_REMOVE_SUCCESS(0) const on success
   */
-  virtual int remove (gridBus *bus);
+  virtual void remove (gridBus *bus);
   /** @brief remove a link from the area
   @param[in] lnk  the link to remove
   @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
   */
-  virtual int remove (gridLink *lnk);
+  virtual void remove (gridLink *lnk);
   /** @brief remove an area from the area
   @param[in] area  the area to remove
   @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
   */
-  virtual int remove (gridArea *area);
+  virtual void remove (gridArea *area);
   /** @brief remove a relay from the area
   @param[in] relay  the relay to remove
   @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
   */
-  virtual int remove (gridRelay *relay);
+  virtual void remove (gridRelay *relay);
 
   //get component models
   virtual gridBus * getBus (index_t x) const override;
@@ -142,18 +142,18 @@ protected:
 public:
   virtual void setTime (double time) override;
 
-  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
 
   //TODO:: Pt make this do something
   /** @brief update the angles may be deprecated
   @param[in] time the time to update to
   */
-  virtual void updateTheta (double /*time*/);
+  virtual void updateTheta (double time);
 
   // parameter set functions
-  virtual int setFlag (const std::string &flag, bool val) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
   void setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
@@ -173,14 +173,14 @@ public:
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
   virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
   virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void delayedJacobian (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
 
@@ -197,11 +197,12 @@ public:
   /** @brief try to do a local converge on the solution
    to be replaced by the algebraic update function soon
   @param[in] ttime the time
-  @param[in/out]  the system state
-  @param[in/out]  the system state derivative
-  @param[in] sMode  the solverMode corresponding ot the state
-  @param[in] tol  the tolerance to converge to
+  @param[in/out] state the system state
+  @param[in/out] dstate_dt the system state derivative
+  @param[in] sMode  the solverMode corresponding to the state
   @param[in]  mode the mode to do the convergence
+  @param[in] tol  the tolerance to converge to
+  
   */
   virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
   virtual void updateLocalCache () override;
@@ -223,21 +224,29 @@ public:
   /** @brief get a vector of voltage from the attached buses
   @param[out] V the vector to put the bus  voltages
   @param[in] state  the system state
-  @parma[in] sMode the solverMode corresponding to the states
+  @param[in] sMode the solverMode corresponding to the states
   @param[in] start  the index into the vector V to start the voltage states from this area
   @return an index where the last value was placed
   */
   count_t getVoltage (std::vector<double> &V, const double state[], const solverMode &sMode, index_t start = 0) const;
   /** @brief get a vector of angles from the attached buses
-  @param[out] V the vector to put the bus  angles
+  @param[out] A the vector to put the bus  angles
   @param[in] start  the index into the vector V to start the angle states from this area
   @return an index where the last value was placed
   */
-  count_t getAngle (std::vector<double> &V, index_t start = 0) const;
+  count_t getAngle (std::vector<double> &A, index_t start = 0) const;
+  
+  /** @brief get a vector of frequencies from the attached buses
+  @param[out] F the vector to put the bus  angles
+  @param[in] start  the index into the vector V to start the angle states from this area
+  @return an index where the last value was placed
+  */
+  count_t getFreq(std::vector<double> &F, index_t start = 0) const;
+
   /** @brief get a vector of angles from the attached buses
   @param[out] V the vector to put the bus  angles
   @param[in] state  the system state
-  @parma[in] sMode the solverMode corresponding to the states
+  @param[in] sMode the solverMode corresponding to the states
   @param[in] start  the index into the vector V to start the angle states from this area
   @return an index where the last value was placed
   */
@@ -325,7 +334,7 @@ public:
   */
   double getGenerationReal () const;
   /** @brief get the total area reactive generation
-  @return the total area lreactive Generation
+  @return the total area reactive Generation
   */
   double getGenerationReactive () const;
   /** @brief get the total area real load power
@@ -341,11 +350,18 @@ public:
   */
   double getAvgAngle () const;
   /** @brief get the average angle for the area
-  @param[in] the state data
-  @param[in] the solverMode corresponding to the state data
+  @param[in] sD the state data
+  @param[in] sMode the solverMode corresponding to the state data
   @return the average angle
   */
   double getAvgAngle (const stateData *sD, const solverMode &sMode) const;
+  
+
+  /** @brief get the average frequency for the area
+  @return the average frequency
+  */
+  double getAvgFreq() const;
+  
   /** @brief get the total tie line flows into/out of the area
   @return the total tie line flows
   */
@@ -362,15 +378,25 @@ public:
   /** @brief  get a vector of buses of the area
   @param[out] busList  a vector of buses
   @param[in] start  the index to start placing the bus pointers
-  @return the the total number of buses placed start+busCount
+  @return the total number of buses placed start+busCount
   */
   count_t getBusVector (std::vector<gridBus *> &busList, index_t start = 0) const;
+
+  /** @brief  get a vector of links of the area
+  @param[out] linkList  a vector of buses
+  @param[in] start  the index to start placing the link pointers
+  @return the total number of links placed start+busCount
+  */
+  count_t getLinkVector(std::vector<gridLink *> &linkList, index_t start = 0) const;
 private:
-  template<class X>
-  friend int addObject (gridArea *area, X* obj, std::vector<X *> &objVector);
+
+  static std::atomic<count_t> areaCount;  //!< basic counter for the areas to compute an id
 
   template<class X>
-  friend int removeObject (gridArea *area, X* obj, std::vector<X *> &objVector);
+  friend void addObject (gridArea *area, X* obj, std::vector<X *> &objVector);
+
+  template<class X>
+  friend void removeObject (gridArea *area, X* obj, std::vector<X *> &objVector);
 
 
 };

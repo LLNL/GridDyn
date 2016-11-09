@@ -53,13 +53,13 @@ public:
     return totalDispatch;
   }
 
-  virtual int add (gridCoreObject *obj) override;
-  virtual int add (scheduler *sched);
-  virtual int remove (gridCoreObject *obj) override;
-  virtual int remove (scheduler *sched);
+  virtual void add (gridCoreObject *obj) override;
+  virtual void add (scheduler *sched);
+  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (scheduler *sched);
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void checkGen ();
 protected:

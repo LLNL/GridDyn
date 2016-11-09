@@ -140,25 +140,23 @@ void gridSineLoad::loadUpdateForward (double ttime)
   lastTime = ttime;
   prevTime = ttime;
 }
-int gridSineLoad::set (const std::string &param,  const std::string &val)
+void gridSineLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
 //	makeLowerCase(param);
 
-  out = gridPulseLoad::set (param, val);
-  return out;
+  gridPulseLoad::set (param, val);
 }
 
 
-int gridSineLoad::set (const std::string &param, double val, units_t unitType)
+void gridSineLoad::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "a") || (param == "amplitude")||(param == "amp"))
     {
       Amp = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
     }
-  else if ((param == "frequency")||(param == "freq"))
+  else if ((param == "frequency")||(param == "freq")||(param=="f"))
     {
       frequency = unitConversion (val, unitType, Hz, m_baseFreq);
       sinePeriod = 1.0 / frequency;
@@ -197,9 +195,9 @@ int gridSineLoad::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridPulseLoad::set (param, val, unitType);
+      gridPulseLoad::set (param, val, unitType);
     }
-  return out;
+
 }
 
 

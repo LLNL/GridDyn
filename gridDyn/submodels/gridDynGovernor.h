@@ -54,24 +54,24 @@ protected:
   delayBlock delay;                     //!< block managing the throttle filter
 public:
   /** @brief constructor*/
-  gridDynGovernor (const std::string &objName = "gov_#");
+  explicit gridDynGovernor (const std::string &objName = "gov_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   /** @brief destructor*/
   virtual ~gridDynGovernor ();
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual double timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
 

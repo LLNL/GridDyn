@@ -16,24 +16,35 @@
 
 #include "gridDynTypes.h"
 
+/** class defining different ways an event can be run*/
 enum class event_execution_mode
 {
-  normal = 0,
-  delayed = 1,
-  two_part_execution = 2,
+  normal = 0, //!< run immediately
+  delayed = 1,	//!< delay the execution until after normal events have executed
+  two_part_execution = 2,	//!< event has two parts one running with the normal events and one running with the delayed events
 };
 
-
-
+/** @brief defining a very basic virtual interface for all objects which work with events and triggers
+*/
 class eventInterface
 {
 public:
   virtual ~eventInterface ()
   {
   }
+  /** get the next trigger time */
   virtual double nextTriggerTime () const = 0;
+  /** get the events execution mode
+  normal mean it run immediately
+  delayed means it should run after other normal events
+  two_part_execution means it has two components to it
+  */
   virtual event_execution_mode executionMode () const = 0;
+  /** run the event if time >triggerTime
+  @return a change code corresponding to what the event did
+  */
   virtual change_code trigger (double ctime) = 0;
+  /** answer the question if the event is ready to triggered*/
   virtual bool isArmed () const
   {
     return true;

@@ -31,12 +31,12 @@ public:
   hvdc (const std::string &objName = "hvdc_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // parameter set functions
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual int updateBus (gridBus *bus, index_t busnumber) override;
+  virtual void updateBus (gridBus *bus, index_t busnumber) override;
 protected:
   static const int forward = 0;  //!< constant defining forward
   static const int reverse = 1;  //!< constant defining reverse

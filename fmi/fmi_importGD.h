@@ -15,13 +15,5 @@
 #ifndef FMI_IMPORT_GD_H_
 #define FMI_IMPORT_GD_H_
 
-#include <fmilib.h>
-
-int fmi1_test(fmi_import_context_t* context, const char* dirPath);
-
-int fmi2_test(fmi_import_context_t* context, const char* dirPath);
-
-#define CTEST_RETURN_FAIL (-1)
-#define CTEST_RETURN_SUCCESS (0)
 
 #endif

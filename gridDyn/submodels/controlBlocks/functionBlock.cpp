@@ -13,7 +13,7 @@
 
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "functionInterpreter.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
@@ -91,7 +91,7 @@ void functionBlock::algElements (double input, const stateData *sD, double updat
 
 
 
-void functionBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void functionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
@@ -138,9 +138,8 @@ double functionBlock::step (double ttime, double input)
 }
 
 // set parameters
-int functionBlock::set (const std::string &param,  const std::string &val)
+void functionBlock::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "function")||(param == "func"))
     {
@@ -149,14 +148,12 @@ int functionBlock::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = basicBlock::set (param, val);
+      basicBlock::set (param, val);
     }
-  return out;
 }
 
-int functionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void functionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "gain")
     {
@@ -168,9 +165,9 @@ int functionBlock::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
-  return out;
+
 }
 
 

@@ -15,7 +15,7 @@
 #define CONTINUATION_H_
 
 #include "gridEvent.h"
-#include "gridRecorder.h"
+#include "collector.h"
 #include <string>
 #include <vector>
 

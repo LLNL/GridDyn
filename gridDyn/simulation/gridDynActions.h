@@ -16,7 +16,6 @@
 
 
 #include "gridDynTypes.h"
-#include "basicDefs.h"
 #include <string>
 
 
@@ -65,7 +64,7 @@ public:
 
   /** @brief constructor with action string
   @param[in] operation  a string containing the information for a specific action*/
-  gridDynAction (const std::string &operation);
+  explicit gridDynAction (const std::string &operation);
 
   /** @brief fill an actions parameters based on a string
   @param[in] operation  a string containing the information for a specific action*/

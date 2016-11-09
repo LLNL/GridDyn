@@ -11,7 +11,7 @@
  * LLNS Copyright End
 */
 
-#include "gridSource.h"
+#include "sourceTypes.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
 
@@ -119,9 +119,9 @@ double pulseSource::getDoutdt (const stateData *sD, const solverMode &, index_t 
   return ((o2 - o1) / 0.0001);
 }
 
-int pulseSource::set (const std::string &param,  const std::string &val)
+void pulseSource::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "type") || (param == "pulsetype"))
     {
       auto vtype = convertToLowerCase (val);
@@ -158,15 +158,20 @@ int pulseSource::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridSource::set (param, val);
+      gridSource::set (param, val);
     }
-  return out;
+
 }
 
-
-int pulseSource::set (const std::string &param, double val, units_t unitType)
+void pulseSource::setLevel(double val)
 {
-  int out = PARAMETER_FOUND;
+	baseValue = val;
+	m_output = m_tempOut = val;
+	cycleTime = cycleTime - period;
+}
+
+void pulseSource::set (const std::string &param, double val, units_t unitType)
+{
 
   if ((param == "a")|| (param == "amplitude"))
     {
@@ -192,12 +197,6 @@ int pulseSource::set (const std::string &param, double val, units_t unitType)
       baseValue = val;
       cycleTime = cycleTime - period;
     }
-  else if ((param == "set") || (param == "output"))
-    {
-      baseValue = val;
-      m_output = m_tempOut = val;
-      cycleTime = cycleTime - period;
-    }
   else if (param == "invert")
     {
       if (val > 0)
@@ -212,9 +211,9 @@ int pulseSource::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridSource::set (param, val, unitType);
+      gridSource::set (param, val, unitType);
     }
-  return out;
+
 }
 
 double pulseSource::pulseCalc (double td)

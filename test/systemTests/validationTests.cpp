@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 
 }
 
-//test cases with gauss-siedel solver
+//test cases with Gauss-Seidel solver
 BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 {
 	/* *INDENT-OFF* */
@@ -172,8 +172,8 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		{ "case4gs.m","case4gs_res.m" },
 		{ "case5.m","case5_res.m" },
 		{ "case6ww.m","case6ww_res.m" },
-		{ "case9.m","case9_res.m" },
-		{ "case9Q.m","case9Q_res.m" },
+		//{ "case9.m","case9_res.m" },
+		//{ "case9Q.m","case9Q_res.m" },
 		//{ "case9target.m","case9target_res.m" },
 		{ "case14.m","case14_res.m" },
 		{ "case24_ieee_rts.m","case24_ieee_rts_res.m" },
@@ -182,10 +182,10 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		{ "case30Q.m","case30Q_res.m" },
 		{ "case_ieee30.m","case_ieee30_res.m" },
 		{ "case39.m","case39_res.m" },
-		{ "case57.m","case57_res.m" },
-		{ "case89pegase.m","case89pegase_res.m" },
-		{ "case118.m","case118_res.m" },
-		{ "case300.m","case300_res.m" },
+		//{ "case57.m","case57_res.m" },
+		//{ "case89pegase.m","case89pegase_res.m" },
+		//{ "case118.m","case118_res.m" },
+		//{ "case300.m","case300_res.m" },
 		/*{ "case1354pegase.m","case1354pegase_res.m" },
 		{ "case2383wp.m","case2383wp_res.m" },
 		{ "case2736sp.m","case2736sp_res.m" },
@@ -204,10 +204,6 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 	std::vector<double> ang1;
 	std::vector<double> volts2;
 	std::vector<double> ang2;
-
-#if (COMPUTE_TIMES>0)
-	std::chrono::duration<double> elapsed_time;
-#endif
 
 	for (const auto &mp : compare_cases)
 	{
@@ -231,7 +227,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		auto start_t = std::chrono::high_resolution_clock::now();
 		gds->powerflow();
 		auto stop_t = std::chrono::high_resolution_clock::now();
-		elapsed_time = stop_t - start_t;
+		std::chrono::duration<double> elapsed_time = stop_t - start_t;
 		printf("%s completed in %f\n", mp.first.c_str(), elapsed_time.count());
 #else
 		gds->powerflow();

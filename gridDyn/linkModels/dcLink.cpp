@@ -17,6 +17,7 @@
 #include "vectorOps.hpp"
 #include "primary/dcBus.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 
 #include <cmath>
 #include <cstring>
@@ -53,12 +54,12 @@ gridCoreObject *dcLink::clone (gridCoreObject *obj) const
 }
 
 
-double  dcLink::timestep (double /*ttime*/, const solverMode & /*sMode*/)
+void  dcLink::timestep (double /*ttime*/, const solverMode & /*sMode*/)
 {
 
   if (!enabled)
     {
-      return 0;
+      return;
 
     }
   updateLocalCache ();
@@ -67,19 +68,19 @@ double  dcLink::timestep (double /*ttime*/, const solverMode & /*sMode*/)
   {
   Psched=sched->timestepP(time);
   }*/
-  return linkFlows.P1;
+
 }
 
 
-int dcLink::updateBus (gridBus *bus, index_t busnumber)
+void dcLink::updateBus (gridBus *bus, index_t busnumber)
 {
   if (dynamic_cast<dcBus *> (bus))
     {
-      return gridLink::updateBus (bus, busnumber);
+      gridLink::updateBus (bus, busnumber);
     }
   else
     {
-      return (OBJECT_NOT_RECOGNIZED);
+	  throw(invalidObjectException(this));
     }
 }
 
@@ -107,15 +108,14 @@ double dcLink::getMaxTransfer () const
     }
 }
 // set properties
-int  dcLink::set (const std::string &param,  const std::string &val)
+void  dcLink::set (const std::string &param,  const std::string &val)
 {
 
   return gridLink::set (param, val);
 }
 
-int  dcLink::set (const std::string &param, double val, units_t unitType)
+void  dcLink::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "r")||(param == "rdc"))
     {
@@ -128,9 +128,9 @@ int  dcLink::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridLink::set (param, val, unitType);
+      gridLink::set (param, val, unitType);
     }
-  return out;
+  
 }
 
 void dcLink::pFlowObjectInitializeA (double time0, unsigned long flags)
@@ -215,7 +215,7 @@ void dcLink::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 
-void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   // check if line is enabled
   updateLocalCache  (sD,sMode);
@@ -234,7 +234,7 @@ void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData
     }
 }
 
-void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -296,7 +296,7 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, array
 }
 
 
-void dcLink::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void dcLink::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {

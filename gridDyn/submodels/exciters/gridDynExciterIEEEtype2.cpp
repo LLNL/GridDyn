@@ -14,7 +14,7 @@
 #include "submodels/gridDynExciter.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <cmath>
 
@@ -115,7 +115,7 @@ void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData *s
 
 // Jacobian
 void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                                arrayData<double> *ad,
+                                                matrixData<double> *ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
@@ -247,15 +247,14 @@ change_code gridDynExciterIEEEtype2::rootCheck ( const IOdata &args, const state
   return ret;
 }
 
-int gridDynExciterIEEEtype2::set (const std::string &param,  const std::string &val)
+void gridDynExciterIEEEtype2::set (const std::string &param,  const std::string &val)
 {
   return gridDynExciterIEEEtype1::set (param, val);
 }
 
 // set parameters
-int gridDynExciterIEEEtype2::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynExciterIEEEtype2::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
 
   if (param == "tf1")
@@ -268,8 +267,8 @@ int gridDynExciterIEEEtype2::set (const std::string &param, double val, gridUnit
     }
   else
     {
-      out = gridDynExciterIEEEtype1::set (param, val, unitType);
+      gridDynExciterIEEEtype1::set (param, val, unitType);
     }
 
-  return out;
+  
 }

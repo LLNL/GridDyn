@@ -12,18 +12,17 @@
 */
 
 #include "gridCore.h"
-
+#include "core/gridDynExceptions.h"  //This needs to be renamed
 
 //set up the global object count
 
 //start at 100 since there are some objects that use low numbers as a check for interface number and the id as secondary
-count_t gridCoreObject::s_obcnt = 100;
+std::atomic<count_t> gridCoreObject::s_obcnt(100);
 
 gridCoreObject::gridCoreObject (const std::string &objName) : name (objName)
 {
 
-  s_obcnt++;
-  m_oid = s_obcnt;
+  m_oid = ++s_obcnt;
   //not using updateName since in many cases the id has not been set yet
   if (name.back () == '#')
     {
@@ -43,7 +42,7 @@ gridCoreObject *gridCoreObject::clone (gridCoreObject *obj) const
 {
   if (obj == nullptr)
     {
-      obj = new gridCoreObject ();
+      obj = new gridCoreObject (name);
     }
   obj->enabled = enabled;
   obj->updatePeriod = updatePeriod;
@@ -51,6 +50,7 @@ gridCoreObject *gridCoreObject::clone (gridCoreObject *obj) const
   obj->m_lastUpdateTime = m_lastUpdateTime;
   obj->prevTime = prevTime;
   obj->description = description;
+  obj->id = id;
   return obj;
 }
 
@@ -68,22 +68,19 @@ void gridCoreObject::updateName ()
     }
 }
 
-int gridCoreObject::add (gridCoreObject * /*obj*/)
+void gridCoreObject::add (gridCoreObject * /*obj*/)
 {
-  return (OBJECT_ADD_FAILURE);
+	throw(objectAddFailure(this));
 }
 
-int gridCoreObject::remove (gridCoreObject * /*obj*/)
+void gridCoreObject::remove (gridCoreObject * /*obj*/)
 {
-  return (OBJECT_REMOVE_FAILURE);
+	throw(objectRemoveFailure(this));
 }
 
-int gridCoreObject::addsp (std::shared_ptr<gridCoreObject> obj)
+void gridCoreObject::addsp (std::shared_ptr<gridCoreObject> /*obj*/)
 {
-  //NOTE::PT may need to rethink this since we are not storing the shared ptr here,  The object could easily get deleted
-  //we may need to make this return OBJECT_NOT_ADDED and do nothing with it.  Let children classes deal with it appropriately if they want to.
-  obj->setOwner (nullptr, obj.get ());      //change the ownership to fit the regular model
-  return add (obj.get ());
+	throw(objectAddFailure(this));
 }
 
 bool gridCoreObject::setOwner (gridCoreObject *currentOwner, gridCoreObject *newOwner)
@@ -148,9 +145,9 @@ void gridCoreObject::setTime (double time)
   prevTime = time;
 }
 
-int gridCoreObject::set (const std::string &param,  const std::string &val)
+void gridCoreObject::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+ 
   if ((param == "name") || (param == "rename")||(param == "id"))
     {
       setName (val);
@@ -166,10 +163,9 @@ int gridCoreObject::set (const std::string &param,  const std::string &val)
   else
     {
       LOG_DEBUG ("parameter " + param + " not found");
-      out = PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
 
-  return out;
 }
 
 void gridCoreObject::setName (std::string newName)
@@ -201,10 +197,10 @@ void gridCoreObject::setParent (gridCoreObject *parentObj)
   parent = parentObj;
 }
 
-int gridCoreObject::setFlag (const std::string &flag, bool val)
+void gridCoreObject::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
-  if ((flag == "enable")||(flag == "status"))
+ 
+  if ((flag == "enable")||(flag == "status")||(flag=="enabled"))
     {
       if (enabled != val)
         {
@@ -238,9 +234,9 @@ int gridCoreObject::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
-  return out;
+
 }
 
 bool gridCoreObject::getFlag (const std::string &param) const
@@ -269,16 +265,11 @@ double gridCoreObject::get (const std::string & param, gridUnits::units_t unitTy
     {
       val = nextUpdateTime;
     }
-  else if (param == "basepower")
-    {
-      val = gridUnits::unitConversion (systemBasePower, gridUnits::MW, unitType);
-    }
   return val;
 }
 
-int gridCoreObject::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridCoreObject::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "updateperiod") || (param == "period"))
     {
@@ -300,27 +291,6 @@ int gridCoreObject::set (const std::string &param, double val, gridUnits::units_
     {
       nextUpdateTime = gridUnits::unitConversion (val, unitType, gridUnits::sec);
     }
-  else if (param == "basepower")
-    {
-      systemBasePower = gridUnits::unitConversion (val, unitType, gridUnits::MW);
-    }
-  else if (param == "enabled")
-    {
-      if (val > 0)
-        {
-          if (!enabled)
-            {
-              enable ();
-            }
-        }
-      else
-        {
-          if (enabled)
-            {
-              disable ();
-            }
-        }
-    }
   else if ((param == "number") || (param == "renumber") || (param == "id"))
     {
       setUserID (static_cast<index_t> (val));
@@ -331,11 +301,10 @@ int gridCoreObject::set (const std::string &param, double val, gridUnits::units_
     }
   else
     {
-      LOG_DEBUG ("parameter " + param + " not found");
-      out = PARAMETER_NOT_FOUND;
+	  setFlag(param, (val > 0.1));
+	 
     }
 
-  return out;
 }
 
 
@@ -416,8 +385,7 @@ void gridCoreObject::log (gridCoreObject *object, int level, const std::string &
 
 void gridCoreObject::makeNewOID ()
 {
-  s_obcnt++;
-  m_oid = s_obcnt;
+  m_oid = ++s_obcnt;
 }
 //NOTE: there is some potential for recursion here if the parent object searches in lower objects
 //But in some cases you search up, and others you want to search down so we will rely on intelligence on the part of the implementer

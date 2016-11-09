@@ -24,6 +24,7 @@
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 
 #include <cmath>
 #include <utility>
@@ -214,7 +215,7 @@ void gridBusOpt::valueBounds (double ttime, double upperLimit[], double lowerLim
     }
 }
 
-void gridBusOpt::linearObj (const optimData *oD, vectData *linObj, const optimMode &oMode)
+void gridBusOpt::linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -225,7 +226,7 @@ void gridBusOpt::linearObj (const optimData *oD, vectData *linObj, const optimMo
       gen->linearObj (oD, linObj, oMode);
     }
 }
-void gridBusOpt::quadraticObj (const optimData *oD, vectData *linObj, vectData *quadObj, const optimMode &oMode)
+void gridBusOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -251,18 +252,18 @@ double gridBusOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridBusOpt::derivative (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridBusOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
-      ld->derivative (oD, deriv, oMode);
+      ld->gradient (oD, deriv, oMode);
     }
   for (auto gen : genList)
     {
-      gen->derivative (oD, deriv, oMode);
+      gen->gradient (oD, deriv, oMode);
     }
 }
-void gridBusOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode)
+void gridBusOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -273,7 +274,7 @@ void gridBusOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, c
       gen->jacobianElements (oD, ad, oMode);
     }
 }
-void gridBusOpt::getConstraints (const optimData *oD, arrayData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
+void gridBusOpt::getConstraints (const optimData *oD, matrixData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -297,7 +298,7 @@ void gridBusOpt::constraintValue (const optimData *oD, double cVals[], const opt
     }
 }
 
-void gridBusOpt::constraintJacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode)
+void gridBusOpt::constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -388,7 +389,7 @@ gridBusOpt::~gridBusOpt ()
     }
 }
 
-int gridBusOpt::add (gridCoreObject *obj)
+void gridBusOpt::add (gridCoreObject *obj)
 {
   auto ld = dynamic_cast<gridLoadOpt *> (obj);
   if (ld)
@@ -416,14 +417,15 @@ int gridBusOpt::add (gridCoreObject *obj)
           name = bus->getName ();
         }
       id = bus->getUserID ();
-      return OBJECT_ADD_SUCCESS;
     }
-
-  return OBJECT_NOT_RECOGNIZED;
+  else
+  {
+	  throw(invalidObjectException(this));
+  }
 }
 
 // add load
-int gridBusOpt::add (gridLoadOpt *ld)
+void gridBusOpt::add (gridLoadOpt *ld)
 {
   gridCoreObject *obj = find (ld->getName ());
   if (obj == nullptr)
@@ -431,17 +433,15 @@ int gridBusOpt::add (gridLoadOpt *ld)
       ld->locIndex = static_cast<index_t> (loadList.size ());
       loadList.push_back (ld);
       ld->setParent (this);
-      return OBJECT_ADD_SUCCESS;
     }
-  else if (ld->getID () == obj->getID ())
+  else if (ld->getID () != obj->getID ())
     {
-      return OBJECT_ALREADY_MEMBER;
+	  throw(objectAddFailure(this));
     }
-  return OBJECT_ADD_FAILURE;
 }
 
 // add generator
-int gridBusOpt::add (gridGenOpt *gen)
+void gridBusOpt::add (gridGenOpt *gen)
 {
   gridCoreObject *obj = find (gen->getName ());
   if (obj == nullptr)
@@ -449,30 +449,27 @@ int gridBusOpt::add (gridGenOpt *gen)
       gen->locIndex = static_cast<index_t> (genList.size ());
       genList.push_back (gen);
       gen->setParent (this);
-      return OBJECT_ADD_SUCCESS;
     }
-  else if (gen->getID () == obj->getID ())
+  else if (gen->getID () != obj->getID ())
     {
-      return OBJECT_ALREADY_MEMBER;
+	  throw(objectAddFailure(this));
     }
-  return (-2);
 }
 
 // add link
-int gridBusOpt::add (gridLinkOpt *lnk)
+void gridBusOpt::add (gridLinkOpt *lnk)
 {
   for (auto &links : linkList)
     {
       if (links->getID () == lnk->getID ())
         {
-          return OBJECT_ALREADY_MEMBER;
+          return;
         }
     }
   linkList.push_back (lnk);
-  return OBJECT_ADD_SUCCESS;
 }
 
-int gridBusOpt::remove (gridCoreObject *obj)
+void gridBusOpt::remove (gridCoreObject *obj)
 {
   gridLoadOpt *ld = dynamic_cast<gridLoadOpt *> (obj);
   if (ld)
@@ -491,60 +488,47 @@ int gridBusOpt::remove (gridCoreObject *obj)
     {
       return(remove (lnk));
     }
-  return OBJECT_REMOVE_SUCCESS;
 }
 
 // remove load
-int gridBusOpt::remove (gridLoadOpt *ld)
+void gridBusOpt::remove (gridLoadOpt *ld)
 {
-  size_t kk;
-  int out = OBJECT_REMOVE_FAILURE;
-  for (kk = 0; kk < loadList.size (); ++kk)
+  for (size_t kk = 0; kk < loadList.size (); ++kk)
     {
       if (ld == loadList[kk])
         {
           loadList[kk]->setParent (nullptr);
           loadList.erase (loadList.begin () + kk);
-          out = OBJECT_REMOVE_SUCCESS;
           break;
         }
     }
-  return out;
 }
 
 // remove generator
-int gridBusOpt::remove (gridGenOpt *gen)
+void gridBusOpt::remove (gridGenOpt *gen)
 {
-  size_t kk;
-  int out = OBJECT_REMOVE_FAILURE;
-  for (kk = 0; kk < genList.size (); ++kk)
+  for (size_t kk = 0; kk < genList.size (); ++kk)
     {
       if (gen == genList[kk])
         {
           genList[kk]->setParent (nullptr);
           genList.erase (genList.begin () + kk);
-          out = OBJECT_REMOVE_SUCCESS;
           break;
         }
     }
-  return out;
 }
 
 // remove link
-int gridBusOpt::remove (gridLinkOpt *lnk)
+void gridBusOpt::remove (gridLinkOpt *lnk)
 {
-  size_t kk;
-  int out = OBJECT_REMOVE_FAILURE;
-  for (kk = 0; kk < linkList.size (); ++kk)
+  for (size_t kk = 0; kk < linkList.size (); ++kk)
     {
       if (lnk == linkList[kk])
         {
           linkList.erase (linkList.begin () + kk);
-          out = OBJECT_REMOVE_SUCCESS;
           break;
         }
     }
-  return out;
 }
 
 
@@ -572,9 +556,8 @@ void gridBusOpt::setAll (const std::string &type, std::string param, double val,
 }
 
 // set properties
-int gridBusOpt::set (const std::string &param,  const std::string &val)
+void gridBusOpt::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "status")
     {
       auto v2 = convertToLowerCase (val);
@@ -595,19 +578,18 @@ int gridBusOpt::set (const std::string &param,  const std::string &val)
         }
       else
         {
-          out = gridOptObject::set (param, val);
+          gridOptObject::set (param, val);
         }
     }
   else
     {
-      out = gridOptObject::set (param, val);
+      gridOptObject::set (param, val);
     }
-  return out;
 }
 
-int gridBusOpt::set (const std::string &param, double val, units_t unitType)
+void gridBusOpt::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+  
 
   if ((param == "voltagetolerance")||(param == "vtol"))
     {
@@ -619,11 +601,9 @@ int gridBusOpt::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridOptObject::set (param, val, unitType);
+      gridOptObject::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 

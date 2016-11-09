@@ -11,39 +11,46 @@
 #project name
 
 set(utilities_sources
-	fileReaders.cpp
+	timeSeries.cpp
 	gridRandom.cpp
 	saturation.cpp
 	stackInfo.cpp
 	stringOps.cpp
 	units.cpp
 	vectorOps.cpp
-	vectData.cpp
-	arrayDataSparse.cpp
 	functionInterpreter.cpp
 	charMapper.cpp
+	workQueue.cpp
+	zipUtilities.cpp
+	base64.cpp
 	)
 	
 set(utilities_headers
 	units.h
-	fileReaders.h
+	timeSeries.h
 	vectorOps.hpp
 	stringOps.h
 	gridRandom.h
 	saturation.h
 	stackInfo.h
 	vectData.h
-	arrayData.h
-	arrayDataCompact.h
-	arrayDataSparse.h
-	arrayDataBoost.h
-	arrayDataSparseSM.h
-	arrayDataTranslate.h
-	arrayDataScale.h
+	matrixData.h
+	matrixDataCompact.h
+	matrixDataSparse.h
+	matrixDataBoost.h
+	matrixDataSparseSM.h
+	matrixDataTranslate.h
+	matrixDataScale.h
+	matrixDataOrdered.h
 	functionInterpreter.h
+	workQueue.h
+	zipUtilities.h
+	base64.h
 	)
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
+
+target_link_libraries(utilities minizip)
 
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
@@ -57,4 +64,4 @@ INSTALL(TARGETS utilities
        LIBRARY DESTINATION lib
        ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${utilities_headers} DESTINATION include/griddyn)
+INSTALL(FILES ${utilities_headers} DESTINATION include/gridDyn)

@@ -13,11 +13,12 @@
 
 #include "gridArea.h"
 
+void fillList(const solverMode &sMode, std::vector<gridPrimary *> &list, std::vector<gridPrimary *> &partlist, const std::vector<gridPrimary *> &possObj);
+
 listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 {
 
 }
-
 
 	void listMaintainer::makeList(const solverMode &sMode, const std::vector<gridPrimary *> &possObjs)
 	{
@@ -50,7 +51,7 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		fillList(sMode, objectLists[sMode.offsetIndex], partialLists[sMode.offsetIndex], possObjs);
 	}
 
-	void listMaintainer::fillList(const solverMode &sMode, std::vector<gridPrimary *> &list, std::vector<gridPrimary *> &partlist,const std::vector<gridPrimary *> &possObjs)
+	void fillList(const solverMode &sMode, std::vector<gridPrimary *> &list, std::vector<gridPrimary *> &partlist,const std::vector<gridPrimary *> &possObjs)
 	{
 		for (auto &obj : possObjs)
 		{
@@ -94,7 +95,7 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		}
 	}
 
-	void listMaintainer::jacobianElements(const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+	void listMaintainer::jacobianElements(const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 	{
 		if (!isListValid(sMode))
 		{
@@ -113,10 +114,22 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 			return;
 		}
 		
+		
 		for (auto &obj : partialLists[sMode.offsetIndex])
 		{
 			obj->residual(sD, resid, sMode);
 		}
+		
+		
+		/*
+		auto &vz = partialLists[sMode.offsetIndex];
+		int sz = static_cast<int>(vz.size());
+		#pragma omp parallel for
+		for (int kk = 0; kk < sz; ++kk)
+		{
+			vz[kk]->residual(sD, resid, sMode);
+		}
+		*/
 	}
 
 	void listMaintainer::algebraicUpdate(const stateData *sD, double update[], const solverMode &sMode, double alpha)
@@ -160,7 +173,7 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		}
 	}
 
-	void listMaintainer::delayedJacobian(const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+	void listMaintainer::delayedJacobian(const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 	{
 		for (auto &obj : preExObjs)
 		{

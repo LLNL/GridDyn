@@ -19,6 +19,7 @@
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "relays/gridRelay.h"
+#include "core/gridDynExceptions.h"
 #include <cmath>
 #include <utility>
 
@@ -74,7 +75,7 @@ gridCoreObject *gridRelayOpt::clone (gridCoreObject *obj) const
 }
 
 
-int gridRelayOpt::add (gridCoreObject *obj)
+void gridRelayOpt::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridRelay *> (obj))
     {
@@ -84,9 +85,11 @@ int gridRelayOpt::add (gridCoreObject *obj)
           name = relay->getName ();
         }
       id = relay->getUserID ();
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_NOT_RECOGNIZED;
+  else
+  {
+	  throw(invalidObjectException(this));
+  }
 }
 
 count_t gridRelayOpt::objSize (const optimMode &)
@@ -132,10 +135,9 @@ void gridRelayOpt::objectInitializeA (unsigned long /*flags*/)
 
 
 
-int gridRelayOpt::remove (gridCoreObject *)
+void gridRelayOpt::remove (gridCoreObject *)
 {
 
-  return OBJECT_REMOVE_FAILURE;
 }
 
 void gridRelayOpt::setValues (const optimData *, const optimMode &)
@@ -162,11 +164,11 @@ void gridRelayOpt::valueBounds (double /*ttime*/, double /*upperLimit*/[], doubl
 
 }
 
-void gridRelayOpt::linearObj (const optimData *, vectData * /*linObj*/, const optimMode &)
+void gridRelayOpt::linearObj (const optimData *, vectData<double> * /*linObj*/, const optimMode &)
 {
 
 }
-void gridRelayOpt::quadraticObj (const optimData *, vectData * /*linObj*/, vectData * /*quadObj*/, const optimMode &)
+void gridRelayOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/, vectData<double> * /*quadObj*/, const optimMode &)
 {
 
 }
@@ -174,7 +176,7 @@ void gridRelayOpt::quadraticObj (const optimData *, vectData * /*linObj*/, vectD
 void gridRelayOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
 {
 }
-void gridRelayOpt::constraintJacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridRelayOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 }
 
@@ -185,15 +187,15 @@ double gridRelayOpt::objValue (const optimData *, const optimMode &)
   return cost;
 }
 
-void gridRelayOpt::derivative (const optimData *, double /*deriv*/[], const optimMode &)
+void gridRelayOpt::gradient (const optimData *, double /*deriv*/[], const optimMode &)
 {
 
 }
-void gridRelayOpt::jacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridRelayOpt::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 
 }
-void gridRelayOpt::getConstraints ( const optimData *, arrayData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridRelayOpt::getConstraints ( const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
@@ -226,24 +228,20 @@ gridRelayOpt::~gridRelayOpt ()
 
 
 // set properties
-int gridRelayOpt::set (const std::string &param,  const std::string &val)
+void gridRelayOpt::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
   if (param == "#")
     {
 
     }
   else
     {
-      out = gridOptObject::set (param, val);
+      gridOptObject::set (param, val);
     }
-  return out;
 }
 
-int gridRelayOpt::set (const std::string &param, double val, units_t unitType)
+void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "voltagetolerance") || (param == "vtol"))
     {
@@ -255,11 +253,9 @@ int gridRelayOpt::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridOptObject::set (param, val, unitType);
+      gridOptObject::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 

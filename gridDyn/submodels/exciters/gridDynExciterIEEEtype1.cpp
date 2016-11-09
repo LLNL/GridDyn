@@ -14,7 +14,7 @@
 #include "submodels/gridDynExciter.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <cmath>
 
@@ -100,7 +100,7 @@ void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData *sD,
 
 }
 
-double gridDynExciterIEEEtype1::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynExciterIEEEtype1::timestep (double ttime, const IOdata &args, const solverMode &)
 {
 
   derivative ( args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
@@ -109,7 +109,6 @@ double gridDynExciterIEEEtype1::timestep (double ttime, const IOdata &args, cons
   m_state[1] += dt * m_dstate_dt[1];
   m_state[2] += dt * m_dstate_dt[2];
   prevTime = ttime;
-  return m_state[0];
 }
 
 void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
@@ -125,13 +124,14 @@ void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData *s
   else
     {
       d[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf + Ka * (Vref + vBias - args[voltageInLocation])) / Ta;
+		
     }
   d[2] = (-es[2] + es[0] * Kf / Tf) / Tf;
 }
 
 // Jacobian
 void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                                arrayData<double> *ad,
+                                                matrixData<double> *ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (!hasDifferential (sMode))
@@ -271,15 +271,14 @@ stringVec gridDynExciterIEEEtype1::localStateNames () const
 }
 
 
-int gridDynExciterIEEEtype1::set (const std::string &param,  const std::string &val)
+void gridDynExciterIEEEtype1::set (const std::string &param,  const std::string &val)
 {
   return gridDynExciter::set (param, val);
 }
 
 // set parameters
-int gridDynExciterIEEEtype1::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynExciterIEEEtype1::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "ke")
     {
@@ -307,8 +306,7 @@ int gridDynExciterIEEEtype1::set (const std::string &param, double val, gridUnit
     }
   else
     {
-      out = gridDynExciter::set (param, val, unitType);
+      gridDynExciter::set (param, val, unitType);
     }
 
-  return out;
 }

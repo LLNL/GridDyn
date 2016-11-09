@@ -118,7 +118,8 @@ using boost::multi_index_container;
 struct name {};
 struct id {};
 struct uid {};
-
+//define a multiindex container based on the object id, which should be unique, and the name which also should be unique, and the user id,
+// which isn't necessarily unique.  
 typedef multi_index_container<
     gridCoreObject *,
     indexed_by<
@@ -129,12 +130,12 @@ typedef multi_index_container<
     > objectIndex;
 
 /** @brief list class that facilitates adding or searching for pointers to gridCoreObjects by name or id
-* a list class that stores a list of the objects contained in an unordered map to faciliate searching for objects
+* a list class that stores a list of the objects contained in an unordered map to facilitate searching for objects
 */
 class gridCoreList
 {
 private:
-  objectIndex m_objects;                  //!<the object map structur
+  objectIndex m_objects;                  //!<the object map structure
 public:
   /** @brief default constructor*/
   gridCoreList ();
@@ -186,7 +187,7 @@ public:
   void deleteAll (gridCoreObject *parent);
 
   /** @brief get the size of the list
-  @param[in] the parent object which is doing the deleting
+ 
   * @return the size of the list
   */
   count_t size () const

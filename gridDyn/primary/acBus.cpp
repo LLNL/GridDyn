@@ -24,7 +24,8 @@
 #include "vectorOps.hpp"
 #include "submodels/gridControlBlocks.h"
 #include "simulation/contingency.h"
-//#include "arrayDataSparse.h"
+#include "core/gridDynExceptions.h"
+//#include "matrixDataSparse.h"
 #include "stringOps.h"
 
 
@@ -131,7 +132,7 @@ acBus::~acBus ()
 
 }
 
-int acBus::add (gridCoreObject *obj)
+void acBus::add (gridCoreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -155,12 +156,12 @@ int acBus::add (gridCoreObject *obj)
     {
       return add (bus);
     }
-  return (OBJECT_NOT_RECOGNIZED);
+  throw (invalidObjectException(this));
 }
 
 
 
-int acBus::add (acBus *bus)
+void acBus::add (acBus *bus)
 {
   bus->busController.directBus = this;
   bus->opFlags.set (directconnect);
@@ -169,9 +170,10 @@ int acBus::add (acBus *bus)
       bus->makeNewOID ();                   //update the ID to make it higher
     }
   mergeBus (bus);            //load into the merge controls
-  return parent->add (bus);            //now add the bus to the parent object since buses can't directly contain other buses
+  parent->add (bus);            //now add the bus to the parent object since buses can't directly contain other buses
 }
-int acBus::remove (gridCoreObject *obj)
+
+void acBus::remove (gridCoreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -195,10 +197,10 @@ int acBus::remove (gridCoreObject *obj)
     {
       return (remove (bus));
     }
-  return OBJECT_NOT_RECOGNIZED;
+  throw(invalidObjectException(this));
 }
 
-int acBus::remove (acBus *bus)
+void acBus::remove (acBus *bus)
 {
   if (bus->busController.masterBus->getID () == getID ())
     {
@@ -208,9 +210,7 @@ int acBus::remove (acBus *bus)
           bus->busController.directBus = nullptr;
         }
       unmergeBus (bus);
-      return OBJECT_REMOVE_SUCCESS;
     }
-  return OBJECT_NOT_FOUND;
 }
 
 
@@ -1222,7 +1222,7 @@ void acBus::powerAdjust (double adjustment)
 
 }
 
-double acBus::timestep (double ttime, const solverMode &sMode)
+void acBus::timestep (double ttime, const solverMode &sMode)
 {
   double dt = ttime - prevTime;
   if (dt < 1.0)
@@ -1251,7 +1251,6 @@ double acBus::timestep (double ttime, const solverMode &sMode)
       fblock->step (ttime, angle);
     }
   prevTime = ttime;
-  return 0.0;
 }
 
 
@@ -1271,9 +1270,8 @@ void acBus::getParameterStrings (stringVec &pstr, paramStringType pstype) const
   getParamString<acBus, gridBus> (this, pstr, locNumStrings, locStrStrings, flagStrings, pstype);
 }
 
-int acBus::setFlag (const std::string &flag, bool val)
+void acBus::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "compute_frequency")
     {
       if (!opFlags[dyn_initialized])
@@ -1289,16 +1287,14 @@ int acBus::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridPrimary::setFlag (flag, val);
+      gridPrimary::setFlag (flag, val);
     }
 
-  return out;
 }
 
 // set properties
-int acBus::set (const std::string &param, const std::string &vali)
+void acBus::set (const std::string &param, const std::string &vali)
 {
-  int out = PARAMETER_FOUND;
   auto val = convertToLowerCase (vali);
   if ((param == "type") || (param == "bustype") || (param == "pflowtype"))
     {
@@ -1344,7 +1340,7 @@ int acBus::set (const std::string &param, const std::string &vali)
         }
       else
         {
-          return INVALID_PARAMETER_VALUE;
+          throw(invalidParameterValue());
         }
 
     }
@@ -1369,7 +1365,7 @@ int acBus::set (const std::string &param, const std::string &vali)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else if (param == "status")
@@ -1395,20 +1391,18 @@ int acBus::set (const std::string &param, const std::string &vali)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else
     {
-      out = gridPrimary::set (param, vali);
+      gridPrimary::set (param, vali);
     }
-  return out;
+
 }
 
-int acBus::set (const std::string &param, double val, units_t unitType)
+void acBus::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
   if ((param == "voltage") || (param == "vol"))
     {
       voltage = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
@@ -1466,7 +1460,7 @@ int acBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
         }
       else
@@ -1486,7 +1480,7 @@ int acBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
         }
       else
@@ -1504,7 +1498,7 @@ int acBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
         }
       else
@@ -1523,7 +1517,7 @@ int acBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
         }
       else
@@ -1562,6 +1556,10 @@ int acBus::set (const std::string &param, double val, units_t unitType)
     {
       Atol = val;
     }
+  else if (param == "participation")
+  {
+	  participation = val;
+  }
   else if (param == "tw")
     {
       Tw = val;
@@ -1579,11 +1577,9 @@ int acBus::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridBus::set (param, val, unitType);
+      gridBus::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 void acBus::setVoltageAngle (double Vnew, double Anew)
@@ -1758,13 +1754,22 @@ double acBus::getVoltage (const stateData *sD, const solverMode &sMode) const
     {
       return voltage;
     }
-	//if (useVoltage(sMode))
+	if (hasAlgebraic(sMode))
 	{
 		auto Voffset = offsets.getVOffset(sMode);
 		return (Voffset != kNullLocation) ? sD->state[Voffset] : voltage;
 	}
-	//return voltage;
- 
+	if (sD->algState)
+	{
+		auto Voffset = offsets.getVOffset(offsets.getSolverMode(sMode.pairedOffsetIndex));
+		return (Voffset != kNullLocation) ? sD->algState[Voffset] : voltage;
+	}
+	if (sD->fullState)
+	{
+		auto Voffset = offsets.getVOffset(offsets.getSolverMode(sMode.pairedOffsetIndex));
+		return (Voffset != kNullLocation) ? sD->fullState[Voffset] : voltage;
+	}
+	return voltage;
 }
 
 double acBus::getAngle (const stateData *sD, const solverMode &sMode) const
@@ -1773,12 +1778,22 @@ double acBus::getAngle (const stateData *sD, const solverMode &sMode) const
     {
       return angle;
     }
-//	if (useAngle(sMode))
+	if (hasAlgebraic(sMode))
 	{
 		auto Aoffset = offsets.getAOffset(sMode);
 		return (Aoffset != kNullLocation) ? sD->state[Aoffset] : angle;
 	}
-//	return angle;
+	if (sD->algState)
+	{
+		auto Aoffset = offsets.getAOffset(offsets.getSolverMode(sMode.pairedOffsetIndex));
+		return (Aoffset != kNullLocation) ? sD->algState[Aoffset] : angle;
+	}
+	if (sD->fullState)
+	{
+		auto Aoffset = offsets.getAOffset(offsets.getSolverMode(sMode.pairedOffsetIndex));
+		return (Aoffset != kNullLocation) ? sD->fullState[Aoffset] : angle;
+	}
+	return angle;
 }
 
 
@@ -2205,7 +2220,7 @@ void acBus::derivative (const stateData *sD, double deriv[], const solverMode &s
 }
 
 // Jacobian
-void acBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void acBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   gridBus::jacobianElements (sD, ad, sMode);
 
@@ -2382,7 +2397,7 @@ void acBus::algebraicUpdate (const stateData *sD, double update[], const solverM
   bool uV = (useVoltage (sMode)) && (Voffset != kNullLocation);
   bool uA = (!(opFlags[ignore_angle])) && (useAngle (sMode)) && (Aoffset != kNullLocation);
 
-  if (uV & uA)
+  if (uV && uA)
     {
 
       updateLocalCache (sD, sMode);
@@ -2611,17 +2626,13 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
       return;
     }
 
-
-  double dV;
   auto Voffset = offsets.getVOffset (sMode);
   auto Aoffset = offsets.getAOffset (sMode);
 
   bool uV = useVoltage (sMode) & (Voffset != kNullLocation);
   bool uA = useAngle (sMode) & (Aoffset != kNullLocation);
-  stateData sD;
-  sD.state = state;
-  sD.dstate_dt = dstate_dt;
-  sD.time = ttime;
+  stateData sD(ttime,state,dstate_dt);
+;
   double v1 = uV ? state[Voffset] : voltage;
   double t1 = uA ? state[Aoffset] : angle;
   double v2 = voltage, t2 = angle;
@@ -2643,7 +2654,7 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
       currentModeVlimit = (attachedGens.size () > 0) ? 0.4 : 0.05;
       currentModeVlimit *= vTarget;
     }
-  if (v1 < currentModeVlimit)
+  if ((v1 < currentModeVlimit)&&(mode!=converge_mode::force_voltage_only))
     {
       mode = converge_mode::voltage_only;
     }
@@ -2690,13 +2701,14 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
       break;
     case converge_mode::local_iteration:
     case converge_mode::strong_iteration:
+	case converge_mode::force_strong_iteration:
       while (err > tol)
         {
           v1 = uV ? state[Voffset] : voltage;
           t1 = uA ? state[Aoffset] : angle;
-          if (v1 < currentModeVlimit)
+          if ((v1 < currentModeVlimit)&&(mode!=converge_mode::force_strong_iteration))
             {
-              mode = converge_mode::voltage_only;
+              mode = converge_mode::force_voltage_only;
               converge (ttime, state, dstate_dt, sMode, mode, tol);
               break;
             }
@@ -2715,6 +2727,7 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
         }
       break;
     case converge_mode::voltage_only:
+	case converge_mode::force_voltage_only:
       {
         bool not_converged = true;
         if (v1 > 0.6)
@@ -2728,9 +2741,9 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
             if (iteration > 1)
               {
                 v1 = uV ? state[Voffset] : voltage;
-                if (v1 > vTarget * 1.1)
+				if ((v1 > vTarget * 1.1) && (mode != converge_mode::force_voltage_only))
                   {
-                    converge (ttime, state, dstate_dt, sMode, converge_mode::strong_iteration, tol);
+                    converge (ttime, state, dstate_dt, sMode, converge_mode::force_strong_iteration, tol);
                     break;
                   }
 
@@ -2748,6 +2761,7 @@ void acBus::converge (double ttime, double state[], double dstate_dt[], const so
               }
             double Pvii = partDeriv.at (PoutLocation, voltageInLocation);
             double Qvii = partDeriv.at (QoutLocation, voltageInLocation);
+			double dV;
             if (std::abs (cerr1) + std::abs (cerr2) > tol)
               {
                 dV = 0.0;
@@ -2856,6 +2870,8 @@ double acBus::computeError (const stateData *sD, const solverMode &sMode)
     case 1:         //fixA
       err = std::abs (S.sumQ ());
       break;
+	default:
+		break;
     }
   return err;
 }

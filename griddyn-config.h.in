@@ -31,4 +31,6 @@
 
 #cmakedefine TRACE_LOG_ENABLE
 
+#cmakedefine DISABLE_MULTITHREADING
+
 #endif

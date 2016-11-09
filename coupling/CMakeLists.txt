@@ -34,7 +34,7 @@ INSTALL(TARGETS coupling_static_lib
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${shared_headers} DESTINATION include/griddyn)
+INSTALL(FILES ${shared_headers} DESTINATION include/gridDyn)
 
 
 

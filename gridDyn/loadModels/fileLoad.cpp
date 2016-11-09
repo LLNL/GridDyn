@@ -199,7 +199,7 @@ void gridFileLoad::updateA (double time)
   nextUpdateTime = (currIndex == count - 1) ? kBigNum : schedLoad.time[currIndex + 1];
 }
 
-double gridFileLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
+void gridFileLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -207,7 +207,6 @@ double gridFileLoad::timestep (double ttime, const IOdata &args,const solverMode
     }
 
   gridRampLoad::timestep (ttime, args, sMode);
-  return Pout;
 }
 
 
@@ -228,9 +227,9 @@ void gridFileLoad::setTime (double time)
 
 }
 
-int gridFileLoad::setFlag (const std::string &param, bool val)
+void gridFileLoad::setFlag (const std::string &param, bool val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "absolute")
     {
       opFlags.set (use_absolute_time_flag, val);
@@ -251,12 +250,12 @@ int gridFileLoad::setFlag (const std::string &param, bool val)
     {
       gridLoad::setFlag (param, val);
     }
-  return out;
+
 }
 
-int gridFileLoad::set (const std::string &param,  const std::string &val)
+void gridFileLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "filename") || (param == "file"))
     {
       fname = val;
@@ -314,20 +313,20 @@ int gridFileLoad::set (const std::string &param,  const std::string &val)
     }
   else if ((param == "mode")||(param == "timemode"))
     {
-      out = setFlag (param, true);
+      setFlag (val, true);
     }
 
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
 
-int gridFileLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridFileLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+ 
   if ((param == "scalefactor") || (param == "scaling"))
     {
       scaleFactor = val;
@@ -338,9 +337,8 @@ int gridFileLoad::set (const std::string &param, double val, gridUnits::units_t 
     }
   else
     {
-      out = gridLoad::set (param,val,unitType);
+      gridLoad::set (param,val,unitType);
     }
-  return out;
 }
 
 count_t gridFileLoad::loadFile ()

@@ -23,11 +23,15 @@ using namespace gridUnits;
 variableGenerator::variableGenerator (const std::string &objName) : gridDynGenerator (objName)
 {
   opFlags[variable_generation] = true;
+  opFlags.reset(adjustable_P);
+  opFlags.reset(local_power_control);
 }
 
 variableGenerator::variableGenerator (dynModel_t dynModel, const std::string &objName) : gridDynGenerator (dynModel,objName)
 {
   opFlags[variable_generation] = true;
+  opFlags.reset(adjustable_P);
+  opFlags.reset(local_power_control);
 }
 
 gridCoreObject *variableGenerator::clone (gridCoreObject *obj) const
@@ -72,20 +76,20 @@ void variableGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &
 
 }
 
-int variableGenerator::add (gridCoreObject *obj)
+void variableGenerator::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridSubModel *> (obj))
     {
-      return add (static_cast<gridSubModel *> (obj));
+      add (static_cast<gridSubModel *> (obj));
     }
   else
     {
-      return OBJECT_ADD_FAILURE;
+	  gridDynGenerator::add(obj);
     }
 }
 
 
-int variableGenerator::add (gridSubModel *obj)
+void variableGenerator::add (gridSubModel *obj)
 {
   if (dynamic_cast<gridSource *> (obj))
     {
@@ -93,7 +97,7 @@ int variableGenerator::add (gridSubModel *obj)
         {
           if (obj->getID () == m_source->getID ())
             {
-              return OBJECT_ALREADY_MEMBER;
+			  return;
             }
           else
             {
@@ -112,7 +116,7 @@ int variableGenerator::add (gridSubModel *obj)
       obj->setParent (this);
       m_source->locIndex = source_loc;
       obj->set ("basepower", machineBasePower);
-      obj->m_baseFreq = m_baseFreq;
+      obj->set ("basefreq",m_baseFreq);
       subObjectList.push_back (obj);
     }
   else if (dynamic_cast<basicBlock *> (obj))
@@ -121,7 +125,7 @@ int variableGenerator::add (gridSubModel *obj)
         {
           if (obj->getID () == m_cBlock->getID ())
             {
-              return OBJECT_ALREADY_MEMBER;
+              return;
             }
           else
             {
@@ -141,29 +145,27 @@ int variableGenerator::add (gridSubModel *obj)
       obj->setParent (this);
       m_cBlock->locIndex = control_block_loc;
       obj->set ("basepower", machineBasePower);
-      obj->m_baseFreq = m_baseFreq;
+      obj->set("basefreq",m_baseFreq);
       subObjectList.push_back (obj);
     }
   else
     {
-      return gridDynGenerator::add (obj);
+      gridDynGenerator::add (obj);
     }
-  return OBJECT_ADD_FAILURE;
 
 }
 
 // set properties
-int variableGenerator::set (const std::string &param,  const std::string &val)
+void variableGenerator::set (const std::string &param,  const std::string &val)
 {
-  int out = gridDynGenerator::set (param, val);
+  gridDynGenerator::set (param, val);
 
-  return out;
+  
 }
 
 
-int variableGenerator::set (const std::string &param, double val, units_t unitType)
+void variableGenerator::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if (param == "vcutout")
     {
       mp_Vcutout = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
@@ -175,10 +177,9 @@ int variableGenerator::set (const std::string &param, double val, units_t unitTy
   else
 
     {
-      out = gridDynGenerator::set (param, val, unitType);
+      gridDynGenerator::set (param, val, unitType);
     }
 
-  return out;
 }
 
 
@@ -192,12 +193,13 @@ void variableGenerator::residual (const IOdata &args, const stateData *sD, doubl
     }
   if ((m_cBlock) && (m_cBlock->enabled))
     {
-      m_cBlock->residual ( args, sD, resid,  sMode);
+	  //TODO:: this needs to be tied to the source
+      m_cBlock->residElements(Pset,dPdt,sD, resid,  sMode);
     }
 
 }
 void variableGenerator::jacobianElements (const IOdata &args, const stateData *sD,
-                                          arrayData<double> *ad,
+                                          matrixData<double> *ad,
                                           const IOlocs &argLocs,const solverMode &sMode)
 {
   gridDynGenerator::jacobianElements  (args,sD, ad, argLocs,sMode);
@@ -238,4 +240,30 @@ gridCoreObject *variableGenerator::getSubObject (const std::string &typeName, in
     }
   return out;
 
+}
+
+
+double variableGenerator::pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode)
+{
+	if ((m_cBlock) && (m_cBlock->enabled))
+	{
+		return m_cBlock->getOutput();
+	}
+	else
+	{
+		return gridDynGenerator::pSetControlUpdate(args, sD, sMode);
+	}
+}
+
+index_t variableGenerator::pSetLocation(const solverMode &sMode)
+{
+	
+	if ((m_cBlock) && (m_cBlock->enabled))
+	{
+		return m_cBlock->getOutputLoc(sMode);
+	}
+	else
+	{
+		return gridDynGenerator::pSetLocation(sMode);
+	}
 }

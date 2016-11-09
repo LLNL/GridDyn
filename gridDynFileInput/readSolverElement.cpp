@@ -17,7 +17,6 @@
 #include "gridDynFileInput.h"
 #include "solvers/solverInterface.h"
 #include "gridDyn.h"
-#include <cstdio>
 
 
 using namespace readerConfig;
@@ -62,9 +61,9 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo *ri,
     {
       if (sd)
         {
-          if (sd->getSolverMode ().offsetIndex > 1)                               //don't allow overridding the names on solverMode index 0 and 1
+          if (sd->getSolverMode ().offsetIndex > 1)                               //don't allow overriding the names on solvermode index 0 and 1
             {
-              sd->set ("name", name);
+              sd->setName(name);
             }
         }
       else

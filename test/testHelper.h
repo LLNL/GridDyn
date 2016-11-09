@@ -32,6 +32,11 @@
 #define GRIDDYN_TEST_DIRECTORY "./test_files/"
 #endif
 
+#include "boost/version.hpp"
+#if BOOST_VERSION / 100 % 1000 >= 60
+#define ALLOW_DATA_TEST_CASES
+#endif
+
 
 #define IEEE_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/IEEE_test_cases/"
 #define MATLAB_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/matlab_test_files/"
@@ -59,9 +64,9 @@ struct gridDynSimulationTestFixture
   gridDynSimulation *gds2=nullptr;
 
   void simpleRunTestXML(const std::string &fileName);
-  void detailedStageCheck(const std::string fileName, gridDynSimulation::gridState_t finalState);
-  void simpleStageCheck(const std::string fileName, gridDynSimulation::gridState_t finalState);
-  void dynamicInitializationCheck(const std::string fileName);
+  void detailedStageCheck(const std::string &fileName, gridDynSimulation::gridState_t finalState);
+  void simpleStageCheck(const std::string &fileName, gridDynSimulation::gridState_t finalState);
+  void dynamicInitializationCheck(const std::string &fileName);
 };
 
 struct gridLoadTestFixture
@@ -84,6 +89,8 @@ struct glbconfig
 };
 
 int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode);
+
+int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode, double tol);
 
 int runResidualCheck(gridDynSimulation *gds, const solverMode &sMode);
 

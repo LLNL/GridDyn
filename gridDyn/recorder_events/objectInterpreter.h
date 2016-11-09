@@ -16,11 +16,10 @@
 
 #include "gridCore.h"
 #include "units.h"
-#include <string>
 #include <functional>
 
 /** @brief class for constructing some info about an object
- generall used for interpreting an object string with object and field references and possibly units as well
+ generally used for interpreting an object string with object and field references and possibly units as well
 */
 class objInfo
 {
@@ -31,34 +30,39 @@ public:
 
   /** @brief default constructor*/
   objInfo ();
-  /** @brief constuctor with the string to interpret and a base object to begin the search process for
+  /** @brief constructor with the string to interpret and a base object to begin the search process for
   @param[in] Istring the input string containing the object and field reference
   @param[in] obj the object used as the basis for the search if needed
   */
-  objInfo (std::string Istring, gridCoreObject *obj);
+  objInfo (const std::string &Istring, gridCoreObject *obj);
 
   /** @brief load a string similar to the constructor except with an existing object
    the string should be of the form objA::subObject:field(units) const
   @param[in] Istring the input string containing the object and field reference
           @param[in] obj the object used as the basis for the search if needed
           */
-  void LoadInfo (std::string Istring, gridCoreObject *obj);
+  void LoadInfo (const std::string &Istring, gridCoreObject *obj);
 };
 
 /** @brief locate a specific object by name
- the string should be of the form obj::subobj:field  field is optional but "::" defines parent child relationships along
+ the string should be of the form obj::subobj:field, or /obj/subobj?field,  field is optional but "::" or "/" defines parent child relationships along
 the search path
 obj and subobj descriptions can take a number of forms
 either the name or specific description if a parent can only contain 1 of that type of object
 or type#N  where type is the type of subobject and N is the index number starting from 0
 or type$ID  where type is the type of subobject and ID is the user ID of the object
-@param[in] Istring the string containing the the object name
+@param[in] Istring the string containing the object name
 @param[in] rootObj the object where the search is started
 @param[in] rootSearch is set to true and the object can't be located from rootObj then the function will attempt to locate a root object and start the search over from there.
 */
 gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj, bool rootSearch = true);
 
-
+/** @brief locate a matching object in a new tree
+meant to target cloning operations where pointers need to be mapped to a new hierarchy
+@param[in] obj the existing object
+@param[in] root the root of the new tree to locate a corresponding object
+*/
+gridCoreObject * findMatchingObject(gridCoreObject *obj, gridCoreObject *root);
 
 
 

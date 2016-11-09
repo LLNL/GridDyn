@@ -25,6 +25,8 @@ const int exciterVsetInLocation = 1;
 const int exciterPmechInLocation = 2;
 const int exciterOmegaInLocation = 3;
 
+/** class defining the interface for an exciter as well a trivial implementation of such
+*/
 class gridDynExciter : public gridSubModel
 {
 
@@ -44,7 +46,7 @@ protected:
   int limitState = 0;
 public:
   /** @brief constructor*/
-  gridDynExciter (const std::string &objName = "exciter_#");
+  explicit gridDynExciter (const std::string &objName = "exciter_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   /** @brief destructor*/
   virtual ~gridDynExciter ()
@@ -53,15 +55,15 @@ public:
 
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual stringVec localStateNames () const override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   //handle the rootfinding functions
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -74,7 +76,7 @@ protected:
 };
 
 
-/** @brief Ieee Type 1 exciter
+/** @brief IEEE Type 1 exciter
 */
 class gridDynExciterIEEEtype1 : public gridDynExciter
 {
@@ -86,22 +88,22 @@ protected:
   double Aex = 0.0;           // [pu] parameter saturation function
   double Bex = 0.0;           // [pu] parameter saturation function
 public:
-  gridDynExciterIEEEtype1  (const std::string &objName = "exciterIEEEtype1_#");
+  explicit gridDynExciterIEEEtype1  (const std::string &objName = "exciterIEEEtype1_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual stringVec localStateNames () const override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -110,27 +112,27 @@ public:
 };
 
 
-/** @brief Ieee Type 2 exciter
+/** @brief IEEE Type 2 exciter
 */
 class gridDynExciterIEEEtype2 : public gridDynExciterIEEEtype1
 {
 protected:
   double Tf2 = 1.0;           // [s]    stabilizer time constant
 public:
-  gridDynExciterIEEEtype2 (const std::string &objName = "exciterIEEEtype2_#");
+  explicit gridDynExciterIEEEtype2 (const std::string &objName = "exciterIEEEtype2_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual stringVec localStateNames () const override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -148,21 +150,21 @@ protected:
   double Tc = 0.0;
   double Tb = 1.0;
 public:
-  gridDynExciterDC1A (const std::string &objName = "exciterDC1A_#");
+  explicit gridDynExciterDC1A (const std::string &objName = "exciterDC1A_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual stringVec localStateNames () const override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -173,10 +175,10 @@ protected:
   @param[in] V the voltage
   @param[in] Vloc the location of the voltage
   @param[in] refloc  the location of the reference
-  @param[in] cj  the differental scale variable
-  @parma[out] ad the array structure to store the Jacobian data in
+  @param[in] cj  the differential scale variable
+  @param[out] ad the array structure to store the Jacobian data in
   */
-  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, arrayData<double> *ad);
+  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> *ad);
 
 };
 
@@ -186,15 +188,15 @@ class gridDynExciterDC2A : public gridDynExciterDC1A
 {
 protected:
 public:
-  gridDynExciterDC2A (const std::string &objName = "exciterDC2A_#");
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  explicit gridDynExciterDC2A (const std::string &objName = "exciterDC2A_#");
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void rootTest (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 protected:
-  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, arrayData<double> *ad) override;
+  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> *ad) override;
 };
 
 

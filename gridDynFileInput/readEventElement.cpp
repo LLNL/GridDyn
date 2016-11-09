@@ -15,46 +15,63 @@
 #include "readerHelper.h"
 #include "readerElement.h"
 #include "elementReaderTemplates.hpp"
-#include "readerElement.h"
 
 #include "recorder_events/gridEvent.h"
 #include "units.h"
 #include "stringOps.h"
-#include <cstdio>
 #include <iostream>
 
 using namespace readerConfig;
 
-void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo *ri)
+void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo *ri,gridCoreObject *obj)
 {
 
   //get the event strings that may be present
-  gdEI.eString = aP->getMultiText (", ");
+auto eventString = aP->getMultiText (", ");
+	if (!eventString.empty())
+	{
+		gdEI.loadString(eventString, obj);
+	}
+
+	//check for the field attributes
+	std::string name = getElementField(aP, "name", defMatchType);
+	if (!name.empty())
+	{
+		name = ri->checkDefines(name);
+		gdEI.name = name;
+	}
+
+	//check for the field attributes
+	std::string type = getElementField(aP, "type", defMatchType);
+	if (!type.empty())
+	{
+		gdEI.type = ri->checkDefines(type);
+	}
 
   //check for the field attributes
-  std::string name = getElementField (aP, "target", defMatchType);
-  if (!name.empty ())
+  auto targetList = getElementFieldMultiple (aP, "target", defMatchType);
+  for (auto &ss:targetList)
     {
-      name = ri->checkDefines (name);
-      gdEI.name = name;
+      ss = ri->checkDefines (ss);
+	  gdEI.targetObjs.push_back(locateObject(ss, obj));
     }
 
-  std::string field = getElementField (aP, "field", defMatchType);
-  if (!field.empty ())
-    {
-      field = ri->checkDefines (field);
-      gdEI.field = field;
-    }
-  field = getElementField (aP, "units", defMatchType);
-  if (!field.empty ())
-    {
-      field = ri->checkDefines (field);
-      gdEI.unitType = gridUnits::getUnits (field);
-    }
-
+  auto fieldList = getElementFieldMultiple (aP, "field", defMatchType);
+  for (auto &ss : fieldList)
+  {
+	  ss = ri->checkDefines(ss);
+	  gdEI.fieldList.push_back(ss);
+  }
+  auto unitList = getElementFieldMultiple(aP, "units", defMatchType);
+  for (auto &ss : unitList)
+  {
+	  ss = ri->checkDefines(ss);
+	  gdEI.units.push_back(gridUnits::getUnits(ss));
+  }
+ 
   gdEI.description = getElementField (aP, "description", defMatchType);
 
-  field = getElementField (aP, "period", defMatchType);
+  std::string field = getElementField (aP, "period", defMatchType);
   if (!field.empty ())
     {
       gdEI.period = interpretString (field,ri);
@@ -82,7 +99,7 @@ void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, 
   field = getElementField (aP, "column", defMatchType);
   if (!field.empty ())
     {
-      gdEI.column = static_cast<int> (interpretString (field, ri));
+      gdEI.columns.push_back(static_cast<int> (interpretString (field, ri)));
     }
 
 
@@ -96,7 +113,7 @@ int loadEventElement (std::shared_ptr<readerElement> &element, gridCoreObject *o
   int ret = FUNCTION_EXECUTION_SUCCESS;
   element->bookmark ();
   gridEventInfo gdEI;
-  readEventElement (element,gdEI,ri);
+  readEventElement (element,gdEI,ri,obj);
   std::shared_ptr<gridEvent> gdE = make_event (&gdEI, obj);
 
   if ((gdE)&&(!(gdE->isArmed ())))

@@ -127,14 +127,15 @@ BOOST_AUTO_TEST_CASE(test_control_relay)
 	gds->dynInitialize();
 
 	auto comm = makeCommunicator("","control",0);
+	comm->initialize();
 
 	auto cm = std::make_shared<controlMessage>(controlMessage::SET);
 	cm->m_field = "P";
 	cm->m_value = 1.3;
 
-	int ret=comm->transmit("cld4", cm);
-	BOOST_REQUIRE(ret == 0);
-	BOOST_CHECK(comm->queuedMessages());
+	comm->transmit("cld4", cm);
+
+	BOOST_CHECK(comm->messagesAvailable());
 	std::uint64_t src;
 	auto rep = std::dynamic_pointer_cast<controlMessage>(comm->getMessage(src));
 	BOOST_REQUIRE((rep));

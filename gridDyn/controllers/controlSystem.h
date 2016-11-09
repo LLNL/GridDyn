@@ -16,7 +16,7 @@
 
 #include "gridObjects.h"
 
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
 
 class basicBlock;
 
@@ -25,9 +25,9 @@ class controlSystem : public gridSubModel
 {
 protected:
   std::vector<basicBlock *> blocks; //!< the set of blocks to operate on
-  arrayDataSparse inputMult; //!< multipliers for the input to the blocks
-  arrayDataSparse outputMult;  //!< multipliers for the outputs
-  arrayDataSparse connections; //!< multipliers for the block inputs
+  matrixDataSparse<double> inputMult; //!< multipliers for the input to the blocks
+  matrixDataSparse<double> outputMult;  //!< multipliers for the outputs
+  matrixDataSparse<double> connections; //!< multipliers for the block inputs
 
   std::vector<double> blockOutputs;  //!< current vector of block outputs
 
@@ -39,20 +39,20 @@ public:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int add (gridCoreObject *obj) override;
-  virtual int add (basicBlock *blk);
+  virtual void add (gridCoreObject *obj) override;
+  virtual void add (basicBlock *blk);
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
 
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual double timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;

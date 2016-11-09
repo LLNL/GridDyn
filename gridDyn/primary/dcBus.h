@@ -17,7 +17,7 @@
 // headers
 #include "gridBus.h"
 #include "busControls.h"
-#include "arrayDataTranslate.h"
+#include "matrixDataTranslate.h"
 
 // forward classes
 
@@ -42,7 +42,7 @@ protected:
 	busType prevType = busType::PQ;                                                     //!< previous type container if the type automatically changes
 	dynBusType prevDynType = dynBusType::normal;                        //!< previous type container if the type automatically changes
 	double dVdP = 0.0; //!< storage for the dVdP terms from all the secondary objects
-	arrayDataTranslate<1> od;
+	matrixDataTranslate<1> od;
 public:
   dcBus (const std::string &objName = "dcBus_$");
   ~dcBus ();
@@ -50,7 +50,7 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
   using gridBus::add;
-  virtual int add (gridLink *lnk) override;  //this add function checks for DC capable links
+  virtual void add (gridLink *lnk) override;  //this add function checks for DC capable links
 
   // initializeB
 
@@ -60,7 +60,7 @@ protected:
   virtual  void pFlowObjectInitializeB () override;
 public:
   virtual  change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;      //only applicable in pFlow
-  //ual  void powerAdjust(double adjustment);
+  //virtual  void powerAdjust(double adjustment);
   virtual  void pFlowCheck (std::vector<violation> &Violation_vector) override;
   //initializeB dynamics
 protected:
@@ -68,19 +68,19 @@ protected:
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
 public:
   // parameter set functions
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   void computeDerivatives(const stateData *sD, const solverMode &sMode);
 
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::local_iteration,double tol = 0.01) override;
 
-  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
 
   virtual double getVoltage(const double state[], const solverMode &sMode) const override;
 

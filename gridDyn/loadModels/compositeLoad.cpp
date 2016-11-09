@@ -15,6 +15,7 @@
 #include "gridCoreTemplates.h"
 #include "gridBus.h"
 #include "objectFactoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <cmath>
@@ -46,7 +47,7 @@ gridCoreObject * compositeLoad::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int compositeLoad::add (gridLoad *ld)
+void compositeLoad::add (gridLoad *ld)
 {
   if (ld->locIndex != kNullLocation)
     {
@@ -67,10 +68,9 @@ int compositeLoad::add (gridLoad *ld)
       ld->setParent (this);
       ld->locIndex = static_cast<index_t> (subLoads.size ()) - 1;
     }
-  return OBJECT_ADD_SUCCESS;
 }
 
-int compositeLoad::add (gridCoreObject *obj)
+void compositeLoad::add (gridCoreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -79,7 +79,7 @@ int compositeLoad::add (gridCoreObject *obj)
     }
   else
     {
-      return OBJECT_NOT_RECOGNIZED;
+	  throw(invalidObjectException(this));
     }
 }
 
@@ -201,9 +201,9 @@ void compositeLoad::dynObjectInitializeB (const IOdata &args, const IOdata &outp
 }
 
 
-int compositeLoad::set (const std::string &param,  const std::string &val)
+void compositeLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   std::string iparam;
   int num = trailingStringInt (param, iparam,-1);
   double frac = -1.0;
@@ -280,14 +280,14 @@ int compositeLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridLoad::set (param,val);
+      gridLoad::set (param,val);
     }
-  return out;
+  
 }
-int compositeLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void compositeLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
 
-  int out = PARAMETER_FOUND;
+  
   std::string iparam;
   int num = trailingStringInt (param, iparam, -1);
   bool reallocate = true;
@@ -305,7 +305,7 @@ int compositeLoad::set (const std::string &param, double val, gridUnits::units_t
       if (num >= static_cast<int> (fraction.size ()))
         {
           LOG_WARNING ("fraction specification count exceeds load count");
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -314,7 +314,7 @@ int compositeLoad::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      out = gridLoad::set (param, val,unitType);
+      gridLoad::set (param, val,unitType);
     }
   if ((reallocate)&&(opFlags[pFlow_initialized]))
     {
@@ -328,7 +328,7 @@ int compositeLoad::set (const std::string &param, double val, gridUnits::units_t
           subLoads[nn]->set ("yq", Yq * fraction[nn]);
         }
     }
-  return out;
+
 }
 
 void compositeLoad::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
@@ -353,7 +353,7 @@ void compositeLoad::derivative (const IOdata &args, const stateData *sD, double 
     }
 }
 
-void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
@@ -364,7 +364,7 @@ void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateDat
     }
 }
 
-void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
@@ -372,7 +372,7 @@ void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *s
     }
 }
 
-void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
@@ -383,14 +383,12 @@ void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, a
     }
 }
 
-double compositeLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void compositeLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
 {
-  double rp = 0.0;
   for (auto &ld : subLoads)
     {
-      rp += ld->timestep (ttime,args, sMode);
+      ld->timestep (ttime,args, sMode);
     }
-  return rp;
 }
 
 double compositeLoad::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)

@@ -45,7 +45,7 @@ public:
   {
   }
   void reset ();
-  bool needsUpdate (const stateData *sD);
+  bool needsUpdate (const stateData *sD) const;
   double sumP () const
   {
     return (linkP + loadP + genP);
@@ -67,7 +67,7 @@ class gridBus : public gridPrimary
 public:
   /** @brief flags for the buses*/
 
-  static count_t busCount; //!<  counter for the buses
+  static std::atomic<count_t> busCount; //!<  counter for the buses
   static const int low_voltage_check_flag = object_flag1;
   //afix is a fixed angle bus for power flow
   /* @brief enumeration to define potential busTypes for power flow*/
@@ -103,7 +103,7 @@ protected:
   IOlocs outLocs;   //!< the current output locations
 public:
   /** @brief default constructor*/
-  gridBus (const std::string &objName = "bus_$");
+  explicit gridBus (const std::string &objName = "bus_$");
   /** @brief alternate constructor to specify voltage and angle
   @param[in] voltage  the initial voltage
   @param[in] angle the initial angle
@@ -114,22 +114,22 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   /** @brief  add a gridLoad object*/
-  virtual int add (gridLoad *pl);
+  virtual void add (gridLoad *pl);
   /** @brief  add a gridGenerator object*/
-  virtual int add (gridDynGenerator *gen);
+  virtual void add (gridDynGenerator *gen);
   /** @brief  add a gridLink object*/
-  virtual int add (gridLink *lnk);
+  virtual void add (gridLink *lnk);
 
   // remove components
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (gridCoreObject *obj) override;
   /** @brief  remove a gridLoad object*/
-  virtual int remove (gridLoad *pl);
+  virtual void remove (gridLoad *pl);
   /** @brief  remove a gridDynGenerator object*/
-  virtual int remove (gridDynGenerator *gen);
+  virtual void remove (gridDynGenerator *gen);
   /** @brief  remove a gridLink object*/
-  virtual int remove (gridLink *lnk);
+  virtual void remove (gridLink *lnk);
   //deal with control alerts
   virtual void alert (gridCoreObject *, int code) override;
 
@@ -163,9 +163,9 @@ public:
   // parameter set functions
   virtual void setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
-  virtual int setFlag (const std::string &flag, bool val) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
@@ -188,7 +188,7 @@ public:
 
 public:
   void setTime (double time) override;
-  double timestep (double ttime, const solverMode &sMode) override;
+  void timestep (double ttime, const solverMode &sMode) override;
 
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   /** @brief a faster function to set the voltage and angle of a bus*
@@ -222,13 +222,13 @@ public:
   gridLink * getLink (index_t x) const override;
   /**
   *@brief get a pointer for a particular Load
-  @param[in]the index of the load being requested
+  @param[in] x the index of the load being requested
   @return a pointer to the requested load or nullptr
   **/
   gridLoad * getLoad (index_t x = 0) const;
   /**
   *@brief get a pointer for a particular generator
-  @param[in]the index of the generator being requested
+  @param[in] x the index of the generator being requested
   @return a pointer to the requested generator or nullptr
   **/
   gridDynGenerator * getGen (index_t x = 0) const;
@@ -299,14 +299,14 @@ public:
     return S.genQ;
   }
 
-  double getMaxGenReal () const
+  virtual double getMaxGenReal () const
   {
     return kBigNum;
   }
   /** @brief get the maximum reactive power generation
   * @return the maximum reactive power generation
   **/
-  double getMaxGenReactive () const
+  virtual double getMaxGenReactive () const
   {
     return kBigNum;
   }
@@ -446,25 +446,25 @@ public:
 
 protected:
   /** @brief
-  @param[in] sD the stateData to compute the Error for
+  @param[in] sD  the statedata to compute the Error for
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */
-  double computeError (const stateData *sD, const solverMode &sMode);
+  virtual double computeError (const stateData *sD, const solverMode &sMode);
 private:
   template<class X>
-  friend int addObject (gridBus *bus, X* obj, std::vector<X *> &objVector);
+  friend void addObject (gridBus *bus, X* obj, std::vector<X *> &objVector);
 };
 
 
 
 
-/** @brief compare 2 buses for differences
+/** @brief compare 2 buses
   check a number of bus parameters to see if they match, probably not that useful of function any more ,but it was useful during development
 @param[in] bus1  bus1
 @param[in] bus2 bus2
 @param[in] cmpLink  whether to compare links or not  (deep comparison of links)
-@param[in] printDiff  true if the differences are to be printed
+@param[in] printDiff  true if the diffs are to be printed
 @return true if match
 */
 bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink = false,bool printDiff = false);

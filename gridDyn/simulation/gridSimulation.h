@@ -37,7 +37,7 @@ class gridBus;
 
 //define PRINT LEVELS
 
-class gridRecorder;
+class collector;
 class gridEvent;
 class gridRelay;
 class eventQueue;
@@ -45,7 +45,7 @@ class eventAdapter;
 class functionEventAdapter;
 /** @brief Grid simulation object
  GridSimulation is a base simulation class its intention is to handle some of the basic
-simulation bookkeeping tasks that would be common to all simulations in Griddyn including things like
+simulation bookkeeping tasks that would be common to all simulations in GridDyn including things like
 logging, errors,  recording, and a few other topics.  Doesn't really do anything much as far as simulating goes
 the class isn't abstract but it is intended to be built upon
 */
@@ -53,14 +53,14 @@ class gridSimulation : public gridArea
 {
 public:
   std::string sourceFile;                                            //!<main source file name
-  /** @brief enumeration describing the state of the griddyn simulation*/
+  /** @brief enumeration describing the state of the GridDyn simulation*/
   enum class gridState_t : int
   {
     HALTED = -2,             //!< the system is halted for some reason
     GD_ERROR = -1,                      //!< the system has an error
     STARTUP = 0,                        //!< the system is starting up either loaded or unloaded
     INITIALIZED = 1,                    //!< the system has completed a power flow initialization step and is ready to proceed to power flow calculations
-    POWERFLOW_COMPLETE = 2,             //!< the sytem has completed a power flow calculation successfully
+    POWERFLOW_COMPLETE = 2,             //!< the system has completed a power flow calculation successfully
     DYNAMIC_INITIALIZED = 3,                    //!< the system has completed a dynamic initialization step
     DYNAMIC_COMPLETE = 4,               //!< the system has completed a dynamic system calculation and advanced to the desired time successfully
     DYNAMIC_PARTIAL = 5,             //!< the system has completed a dynamic system calculation but has not reached the desired time
@@ -90,7 +90,7 @@ protected:
 
   double startTime = 0.0;                                           //!< [s]  start time
   double stopTime = 0.0;                                            //!< [s]  end time
-  double timeCurr = kNullVal;                                       //!< [s]  current time
+  double currentTime = kNullVal;                                       //!< [s]  current time
   double stepTime = 0.05;                                           //!< [s]  time step
   double timeReturn = 0.0;                                          //!< [s]  time returned by the solver
   double nextStopTime = -kBigNum;                                   //!< next time to stop the dynamic Simulation
@@ -103,8 +103,7 @@ protected:
   // ---------------- recorders ----------------
   double recordStart = -kBigNum;                                         //!< [s]  recorder start time
   double recordStop = kBigNum;                                          //!< [s]  recorder stop time
-  std::vector < std::shared_ptr < gridRecorder >> recordList;               //!< vector storing recorder objects
-  count_t recordCount = 0;                                   //!< number of recorders
+  std::vector < std::shared_ptr < collector >> collectorList;               //!< vector storing recorder objects
   double nextRecordTime = kBigNum;                             //!<time for the next set of recorders
 
   double lastStateRecordTime = -kBigNum;                      //!<last time the full state was recorded
@@ -119,12 +118,12 @@ protected:
   std::vector<std::shared_ptr<gridCoreObject> > extraObjects;
 public:
   /** @brief constructor*/
-  gridSimulation (const std::string &objName = "sim_#");
+  explicit gridSimulation (const std::string &objName = "sim_#");
 
   /** @brief destructor
   */
   ~gridSimulation ();
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   /** @brief get the current state of the simulation
   @return the current state
@@ -134,7 +133,7 @@ public:
     return pState;
   }
   /** @brief set the error code,  also sets the state to GD_ERROR
-  @param[in] the error code
+  @param[in] ecode the error code
   */
   void setErrorCode (int ecode);
   /** @brief get the current error code
@@ -147,31 +146,32 @@ public:
 
   // add components
   using gridArea::add;       //use the add function of gridArea
-  virtual int addsp (std::shared_ptr<gridCoreObject> obj) override;
-  /** @brief function to add recorders to the system
-  @param[in] rec the recorder to add into the simulation
+  virtual void addsp (std::shared_ptr<gridCoreObject> obj) override;
+  /** @brief function to add collectors to the system
+  @param[in] col the collector to add into the simulation
   */
-  virtual int add (std::shared_ptr<gridRecorder> rec);
+  virtual void add (std::shared_ptr<collector> col);
   /** @brief function to add events to the system
   @param[in] evnt the event to add into the simulation
   */
-  virtual int add (std::shared_ptr<gridEvent> evnt);
+  virtual void add (std::shared_ptr<gridEvent> evnt);
   /** @brief function to add a list of events to the system
   @param[in] elist a list of events to add in
   */
-  virtual int add (std::list < std::shared_ptr < gridEvent >> elist);
-  /** @brief function to add an event Adpater to the event Queue
+  virtual void add (std::list < std::shared_ptr < gridEvent >> elist);
+  /** @brief function to add an event Adapter to the event Queue
   @param[in] eA the eventAdpater to add
   */
-  virtual int add (std::shared_ptr<eventAdapter> eA);
+  virtual void add (std::shared_ptr<eventAdapter> eA);
 
+	//TODO::PT recheck if I really need this function
   /** @brief reset all object counters to 0*/
   static void resetObjectCounters ();
 
-  /** @brief function to find a specific recorder by name
-  @param[in] recordname  the name of the recorder to find
+  /** @brief function to find a specific collector by name
+  @param[in] collectorName  the name of the recorder to find
   @return a shared_ptr to the recorder that was found or an empty shared ptr*/
-  std::shared_ptr<gridRecorder> findRecorder (const std::string recordname);
+  std::shared_ptr<collector> findCollector (const std::string &collectorName);
 
 /** @brief run the simulator
 @param[in] finishTime  the time to run to
@@ -183,8 +183,8 @@ public:
   */
   virtual int step ();
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual std::string getString (const std::string &param) const override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
@@ -203,7 +203,7 @@ public:
    */
   double getCurrentTime () const
   {
-    return timeCurr;
+    return currentTime;
   }
 
   /**
@@ -217,7 +217,7 @@ public:
 
   /**
   * \brief gets the next event time.
-  * \return a double representing the next scheduled event in Griddyn.
+  * \return a double representing the next scheduled event in GridDyn.
   */
   double getEventTime () const;
 };

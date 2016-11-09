@@ -17,6 +17,7 @@
 #include "submodels/otherBlocks.h"
 #include "scheduler.h"
 #include "objectFactoryTemplates.h"
+#include "core/gridDynExceptions.h"
 /*
 class AGControl
 {
@@ -59,8 +60,8 @@ public:
         double currentValue();
 
         double addGen(scheduler *sched);
-        int set (const std::string &param, double val,units_t unitType=defUnit);
-        int set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val, unitType);};
+        void set (const std::string &param, double val,units_t unitType=defUnit);
+        void set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val, unitType);};
 
         void regChange();
 protected:
@@ -160,17 +161,20 @@ void AGControl::updateA (double /*time*/)
 
 }
 
-double AGControl::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void AGControl::timestep (double ttime, const IOdata &args, const solverMode &)
 {
-  size_t kk;
   prevTime = ttime;
 
   ACE = (args[1]) - 10 * beta * args[0];
-  fACE = filt1->timestep (ttime,{ACE},sMode);
-  reg = reg + pid->timestep (ttime,{fACE - reg},sMode);
-  reg = db->timestep (ttime,{reg},sMode);
-  freg = filt2->timestep (ttime,{reg},sMode);
-  for (kk = 0; kk < schedCount; kk++)
+  fACE=filt1->step(ttime, ACE);
+  
+  reg+=pid->step(ttime,  fACE - reg );
+ 
+  reg=db->step(ttime, reg );
+
+  freg=filt2->step (ttime,reg);
+
+  for (size_t kk = 0; kk < schedCount; kk++)
     {
       if (freg >= 0)
         {
@@ -197,22 +201,21 @@ double AGControl::timestep (double ttime, const IOdata &args, const solverMode &
             }
         }
     }
-  return reg;
 }
 
-int AGControl::add (gridCoreObject *obj)
+void AGControl::add (gridCoreObject *obj)
 {
   if (dynamic_cast<schedulerReg *> (obj))
     {
-      return add (static_cast<schedulerReg *> (obj));
+      add (static_cast<schedulerReg *> (obj));
     }
   else
     {
-      return OBJECT_NOT_RECOGNIZED;
+	  throw(invalidObjectException(this));
     }
 }
 
-int AGControl::add (schedulerReg *sched)
+void AGControl::add (schedulerReg *sched)
 {
   schedCount++;
   schedList.push_back (sched);
@@ -220,14 +223,12 @@ int AGControl::add (schedulerReg *sched)
   upRat.resize (schedCount);
   downRat.resize (schedCount);
   regChange ();
-  return 0;
 }
 
 
-int AGControl::remove (gridCoreObject *sched)
+void AGControl::remove (gridCoreObject *sched)
 {
-  size_t kk;
-  for (kk = 0; kk < schedCount; kk++)
+  for (size_t kk = 0; kk < schedCount; kk++)
     {
       if (schedList[kk]->getID () == sched->getID ())
         {
@@ -236,23 +237,20 @@ int AGControl::remove (gridCoreObject *sched)
           upRat.resize (schedCount);
           downRat.resize (schedCount);
           regChange ();
-          return 0;
+		  break;
         }
     }
-  return OBJECT_NOT_RECOGNIZED;
+
 }
 
-int AGControl::set (const std::string &param,  const std::string &val)
+void AGControl::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
-  out = gridCoreObject::set (param, val);
-  return out;
+  gridCoreObject::set (param, val);
 }
 
-int AGControl::set (const std::string &param, double val,gridUnits::units_t unitType)
+void AGControl::set (const std::string &param, double val,gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "deadband")
     {
       deadband = val;
@@ -285,9 +283,9 @@ int AGControl::set (const std::string &param, double val,gridUnits::units_t unit
     }
   else
     {
-      out = gridCoreObject::set (param,val,unitType);
+      gridCoreObject::set (param,val,unitType);
     }
-  return out;
+
 }
 
 

@@ -15,6 +15,8 @@
 #define GRIDDYN_RELAY_H_
 
 #include "gridObjects.h"
+#include "core/objectOperatorInterface.h"
+#include "comms/commManager.h"
 
 class stateGrabber;
 class gridGrabber;
@@ -23,19 +25,20 @@ class gridCommunicator;
 class eventAdapter;
 class gridEvent;
 class commMessage;
+class propertyBuffer;
 
-enum class change_code;
+enum class change_code; //forward declare change_code enumeration
 
 /**
 *@brief relay class:
  relay's are sensors and actuators.  They can read data from gridCoreObjects and then take actions on other
 * objects on a regular schedule or on a functional basis.
 **/
-class gridRelay : public gridPrimary
+class gridRelay : public gridPrimary, objectOperatorInterface
 {
 public:
-  static count_t relayCount;  //!< counter for the number of relays
-  /** @brief enumeration fo the relay condition states*/
+  static std::atomic<count_t> relayCount;  //!< counter for the number of relays
+  /** @brief enumeration of the relay condition states*/
   enum class condition_states
   {
     active, //!< the relay condition is active
@@ -44,7 +47,7 @@ public:
   };
 
 protected:
-  count_t numAlgRoots;        //!< counter for the number of root finding operations related to the condition checking
+  count_t numAlgRoots=0;        //!< counter for the number of root finding operations related to the condition checking
   enum relay_flags
   {
     continuous_flag = object_flag1,             //!< flag indicating the relay has some continuous checks
@@ -61,43 +64,40 @@ protected:
   count_t actionsTakenCount = 0;        //!< count of the number of actions taken
 
   // comm fields
-  std::string commName;        //!< The name to use on the commlink
-  std::uint64_t commId = 0;        //!< the id to use on the commlink
-  std::string commType;       //!< the type of comms to construct
-  std::string commDestName;       //!< the default communication destination as a string
-  std::uint64_t commDestId = 0;       //!< the default communication destination id
+  commManager cManager;    //!< structure object to store the communicator information
+  
   std::shared_ptr<gridCommunicator> commLink;             //!<communicator link
 
   double m_nextSampleTime = 0.0;        //!< the next time to sample the conditions
 
 public:
-  gridRelay (const std::string &objName = "relay_$");
+  explicit gridRelay (const std::string &objName = "relay_$");
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual ~gridRelay ();
 
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
 
   /**
   *@brief add a gridEvent to the system
   **/
-  virtual int add (std::shared_ptr<gridEvent> ge);
+  virtual void add (std::shared_ptr<gridEvent> ge);
   /**
   *@brief add an EventAdapter to the system
   **/
-  virtual int add (std::shared_ptr<eventAdapter> geA);
+  virtual void add (std::shared_ptr<eventAdapter> geA);
   /**
   * @brief add an condition to the system
   **/
-  virtual int add (std::shared_ptr<gridCondition> gc);
+  virtual void add (std::shared_ptr<gridCondition> gc);
 
   /**
   *@brief update a specific action
   **/
   virtual int updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber);
   /**
-  *@brief update a specfic action
+  *@brief update a specific action
   **/
   virtual int updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber);
   /**
@@ -111,7 +111,7 @@ public:
   **/
   void resetRelay ();
   /**
-  * @briefset the relay source object
+  * @brief set the relay source object
   */
   void setSource (gridCoreObject *obj);
   /**
@@ -135,15 +135,14 @@ public:
   virtual void setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, double delayTime = 0.0);
 
   void setResetMargin (index_t conditionNumber, double margin);
-  virtual int setFlag (const std::string &flag, bool val = true)  override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true)  override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit)  override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit)  override;
 
   virtual void updateA (double time)  override;
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags)  override;
-
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode)  override;
   virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)  override;
@@ -154,7 +153,7 @@ public:
   */
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message);
   /** send and alarm message
-  @param[in] the code to put in the alarm message
+  @param[in] code the code to put in the alarm message
   @return FUNCTION_EXECUTION_SUCCESS if successful <0 if not
   */
   int sendAlarm (std::uint32_t code);
@@ -162,6 +161,11 @@ public:
   @param[in] val a string defining the alarm
   */
   std::shared_ptr<eventAdapter> make_alarm (const std::string &val);
+  //Object operator interface functions
+
+  virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  virtual gridCoreObject * getObject() const override;
+  virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
 protected:
 	/** update the number of root finding functions used in the relay
 	@param[in] alertChange true if the function should send alerts to its parent object if the number of roots changes
@@ -192,28 +196,29 @@ public:
     index_t conditionNum;                      //!< the condition Number
     index_t actionNum;                     //!< the action number
     double testTime;                      //!< the time the test should be performed
-    bool multiCondition = false;                      //!< flag if the condition is part of a multicondition
+    bool multiCondition = false;                      //!< flag if the condition is part of a multiCondition
 
-    condCheckTime ()
-    {
-    }
     /** @brief constructor with all the data
     @param[in] cNum the conditionNumber
     @param[in] aNum the actionNumber
     @param[in] ttime the time to conduct a test
-    @param[in] mcond  the value of the multicondition flag
+    @param[in] mcond  the value of the multiCondition flag
     */
-    condCheckTime (index_t cNum, index_t aNum, double ttime, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
+    condCheckTime (index_t cNum=0, index_t aNum=0, double ttime=kBigNum, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
     {
     }
   };
   /** @brief data type declaration for a multiCondition trigger*/
-  typedef struct
+ class mcondTrig
   {
-    index_t actionNum;                      //!< the related ActionNumber
+  public:
+	 index_t actionNum=kInvalidLocation;                      //!< the related ActionNumber
     std::vector<index_t> multiConditions;   //!< identification of the conditions involved
-    double delayTime;                     //!< the delay time all conditions must be true before the action is taken
-  } mcondTrig;
+    double delayTime=0.0;                     //!< the delay time all conditions must be true before the action is taken TODO:PT account for this delay
+	mcondTrig() {};
+	mcondTrig(index_t actNum, const std::vector<index_t> &conds, double delTime = 0.0) :actionNum(actNum), multiConditions(conds), delayTime(delTime)
+	{};
+ };
   /** enumeration of relay flags*/
 
   std::vector < std::shared_ptr < gridCondition >> conditions;                //!<state conditionals for the system

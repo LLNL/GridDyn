@@ -60,7 +60,7 @@ class gridDynOptimization : public gridDynSimulation
 {
 public:
 protected:
-  //storageSpace for sundials solverInterface
+  //storageSpace for SUNDIALS solverInterface
   std::vector<std::shared_ptr<optimizerInterface>> oData;
   gridAreaOpt *areaOpt = nullptr;
   std::string defaultOptMode;
@@ -84,13 +84,13 @@ public:
         optimization_mode = omode;
       }
   }
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  int setFlag (const std::string &flag, bool val = true) override;
-  int setFlags (size_t param, int val);
+  void setFlag (const std::string &flag, bool val = true) override;
+  void setFlags (size_t param, int val);
   //void get(std::string param,int &val);
   //void get(std::string param, double &val);
 

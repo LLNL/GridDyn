@@ -12,50 +12,103 @@
 */
 
 #include "gridEvent.h"
-#include "fileReaders.h"
 #include "gridDyn.h"
 #include "units.h"
 #include "objectInterpreter.h"
+#include "core/factoryTemplates.h"
+#include "core/gridDynExceptions.h"
+#include "gridDynTypes.h"
 #include "stringOps.h"
 
 #include <sstream>
 
 #include <string>
 
-bool compareEvent (const std::shared_ptr<gridEvent> s1, const std::shared_ptr<gridEvent> s2)
+static classFactory<gridEvent> evntFac(std::vector<std::string>{ "event", "simple","single" },"event");
+static childClassFactory<gridEvent, gridPlayer> playerFac(std::vector<std::string>{ "player","timeseries","file" });
+
+static childClassFactory<gridEvent, compoundEvent> cmpdEvnt(std::vector<std::string>{ "multi", "compound" });
+
+static childClassFactory<gridEvent, compoundEventPlayer> cmpdEvntPlay(std::vector<std::string>{ "compoundplayer", "multifile", "multiplayer" });
+
+std::atomic<count_t> gridEvent::eventCount(0);
+
+
+
+gridEvent::gridEvent(const std::string &objName):name(objName),triggerTime(kBigNum)
 {
-  return ((s1->nextTriggerTime () < s2->nextTriggerTime ()) ? true : false);
+	eventId=++eventCount;
 }
 
-gridEvent::gridEvent (double time0,double ResetPeriod)
+gridEvent::gridEvent (double time0): triggerTime(time0)
 {
-  triggerTime = time0;
-  period = ResetPeriod;
+	eventId=++eventCount;
 }
 
-std::shared_ptr<gridEvent> gridEvent::clone ()
+gridEvent::gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject):description(gdEI->description), name(gdEI->name)
 {
-  auto nE = std::make_shared<gridEvent> ();
-  nE->triggerTime = triggerTime;
-  nE->period = period;
+	if (!gdEI->value.empty())
+	{
+		value = gdEI->value[0];
+	}
+	gridCoreObject *searchObj = rootObject;
+	
+	if (!gdEI->targetObjs.empty())
+	{
+		searchObj = gdEI->targetObjs[0];
+	}
+	if (!gdEI->units.empty())
+	{
+		unitType = gdEI->units[0];
+	}
+	if (!gdEI->fieldList.empty())
+	{
+		loadField(searchObj, gdEI->fieldList[0]);
+	}
+	else
+	{
+		m_obj = searchObj;
+	}
+	triggerTime = gdEI->time[0];
+	armed = true;
+	
+}
+
+void gridEvent::loadField(gridCoreObject *searchObj, const std::string newfield)
+{
+	objInfo fdata(newfield, searchObj);
+	field = fdata.m_field;
+	if (fdata.m_unitType != gridUnits::units_t::defUnit)
+	{
+		unitType = fdata.m_unitType;
+	}
+	if (fdata.m_obj!=m_obj)
+	{
+		m_obj = fdata.m_obj;
+		name = m_obj->getName();
+	}
+	
+}
+
+std::shared_ptr<gridEvent> gridEvent::clone(std::shared_ptr<gridEvent> ggb) const
+{
+
+	auto nE = ggb;
+	if (!nE)
+	{
+		nE = std::make_shared<gridEvent>(triggerTime);
+		
+	}
   nE->name =  name;
   nE->value = value;
   nE->field = field;
   nE->description = description;
-  nE->ts = ts;
-  nE->currIndex = currIndex;
-
   nE->armed = armed;
   nE->m_obj = m_obj;
-
+  nE->resettable = resettable;
+  nE->reversable = reversable;
   nE->unitType = unitType;
-  return nE;
-}
-
-std::shared_ptr<gridEvent>gridEvent::clone (gridCoreObject *newObj)
-{
-  auto nE = clone ();
-  nE->setTarget (newObj);
+ 
   return nE;
 }
 
@@ -64,147 +117,109 @@ gridEvent::~gridEvent ()
 }
 
 
+void gridEvent::set(const std::string &param, double val)
+{
+	if (param == "value")
+	{
+		value = val;
+	}
+	else if (param == "time")
+	{
+		triggerTime = val;
+	}
+	else if (param == "armed")
+	{
+		armed = (val > 0.1);
+	}
+	else
+	{
+		throw(unrecognizedParameter());
+	}
+}
+
+void gridEvent::set(const std::string &param, const std::string &val)
+{
+
+	if (param == "field")
+	{
+		loadField(m_obj, val);
+	}
+	else if (param == "units")
+	{
+		auto newUnits = gridUnits::getUnits(val);
+		if (newUnits == gridUnits::defUnit)
+		{
+			throw (invalidParameterValue());
+		}
+		else
+		{
+			unitType = newUnits;
+		}
+	}
+	else if (param == "name")
+	{
+		name = val;
+	}
+	else if (param == "description")
+	{
+		description = val;
+	}
+	else
+	{
+		throw(unrecognizedParameter());
+	}
+}
+
 void gridEvent::setTime (double time)
 {
   triggerTime = time;
 }
 
-void gridEvent::setTimeValue (double time, double val)
+void gridEvent::setValue (double val, gridUnits::units_t newUnits)
 {
-  triggerTime = time;
   value = val;
+  if (unitType != gridUnits::defUnit)
+  {
+	  unitType = newUnits;
+  }
 }
 
-void gridEvent::setTimeValue (const std::vector<double> &time, const std::vector<double> &val)
+
+std::string gridEvent::toString()
 {
-  ts = std::make_shared<timeSeries> ();
-  ts->reserve (static_cast<fsize_t> (time.size ()));
-
-  if (ts->addData (time, val))
-    {
-      triggerTime = time[0];
-      value = val[0];
-      currIndex = 0;
-    }
-  else               //the vectors were not of valid lengths
-    {
-
-    }
-
-}
-
-void gridEvent::updateTrigger (double time)
-{
-  if (currIndex != kNullLocation)             //we have a file operation
-    {
-      currIndex++;
-      if (static_cast<size_t> (currIndex) >= ts->count)
-        {
-          if (period > 0)                     //if we have a period loop the time series
-            {
-              if (time - ts->time[currIndex] > period)
-                {
-                  for (size_t kk = 0; kk < ts->count; ++kk)
-                    {
-                      ts->time[kk] += period + triggerTime;
-                    }
-                }
-              else
-                {
-                  for (size_t kk = 0; kk < ts->count; ++kk)
-                    {
-                      ts->time[kk] += period;
-                    }
-                }
-
-              currIndex = 0;
-              triggerTime = ts->time[currIndex];
-              value = ts->data[currIndex];
-            }
-          else
-            {
-              armed = false;
-            }
-        }
-      else                   //just proceed to the next trigger and Value
-        {
-          triggerTime = ts->time[currIndex];
-          value = ts->data[currIndex];
-        }
-    }
-  else                //no file so loop if there is a period otherwise disarm
-    {
-      if (period > 0)
-        {
-          do
-            {
-              triggerTime = triggerTime + period;
-            }
-          while (time >= triggerTime);
-        }
-      else
-        {
-          armed = false;
-        }
-    }
-}
-
-std::string gridEvent::toString ()
-{
-  // @time1[,time2,time3,... |+ period] >[rootobj::obj:]field(units) = val1,[val2,val3,...]
-  std::stringstream ss;
-  if (eFile.empty ())
-    {
-      ss << '@' << triggerTime;
-      if (period > 0)
-        {
-          ss << '+' << period << '|';
-        }
-      else if ((ts) && (ts->count > 0))
-        {
-          for (size_t nn = currIndex + 1; nn < ts->count; ++nn)
-            {
-              ss << ", " << ts->time[nn];
-            }
-          ss << "| ";
-        }
-      else
-        {
-          ss << " | ";
-        }
+	// @time1 |[rootobj::obj:]field(units) = val1
+	std::stringstream ss;
+	if (triggerTime >(-kDayLength))
+	{
+		ss << '@' << triggerTime;
+	ss << " | ";
+	}
       ss << fullObjectName (m_obj) << ':' << field;
       if (unitType != gridUnits::defUnit)
         {
           ss << '(' << gridUnits::to_string (unitType) << ')';
         }
       ss << " = " << value;
-      if ((ts) && (ts->count > 0))
-        {
-          for (size_t nn = currIndex + 1; nn < ts->count; ++nn)
-            {
-              ss << ", " << ts->data[nn];
-            }
-        }
-    }
-  else
-    {
-      ss << fullObjectName (m_obj) << ':' << field;
-      if (unitType != gridUnits::defUnit)
-        {
-          ss << '(' << gridUnits::to_string (unitType) << ')';
-        }
-      ss << " = <" << eFile;
-      if (eColumn > 0)
-        {
-          ss << '#' << eColumn;
-        }
-      ss << '>';
-    }
-  return ss.str ();
+	return ss.str ();
 }
+
 change_code gridEvent::trigger ()
 {
-  return (m_obj->set (field, value, unitType)) ? change_code::execution_failure : change_code::parameter_change;
+	if (!m_obj)
+	{
+		armed = false;
+		return change_code::execution_failure;
+	}
+	try
+	{
+		m_obj->set(field, value, unitType);
+		return change_code::parameter_change;
+	}
+	catch(const gridDynException &)
+	{
+		return change_code::execution_failure;
+	}
+
 }
 
 change_code gridEvent::trigger (double time)
@@ -212,65 +227,171 @@ change_code gridEvent::trigger (double time)
   change_code ret = change_code::not_triggered;
   if (time >= triggerTime)
     {
-      if (m_obj->set (field, value, unitType) != PARAMETER_FOUND)
-        {
-          ret = change_code::execution_failure;
-        }
-      else
-        {
-          ret = change_code::parameter_change;
-        }
-      updateTrigger (time);
+	  if (!m_obj)
+	  {
+		  armed = false;
+		  return change_code::execution_failure;
+	  }
+	  try
+	  {
+		  m_obj->set(field, value, unitType);
+		  ret = change_code::parameter_change;
+	  }
+	  catch (gridDynException &)
+	  {
+		  ret = change_code::execution_failure;
+	  }
+	  armed = false;
     }
   return ret;
 }
 
-bool gridEvent::setTarget ( gridCoreObject *gdo,const std::string var)
+void gridEvent::updateObject(gridCoreObject *gco, object_update_mode mode)
 {
+	if (mode == object_update_mode::direct)
+	{
+		setTarget(gco);
+	}
+	else
+	{
+		if (m_obj)
+		{
+			auto newTarget = findMatchingObject(m_obj, gco);
+			if (newTarget)
+			{
+				setTarget(newTarget);
+			}
+			else
+			{
+				throw(objectUpdateFailException());
+			}		
+			
+		}
+		else
+		{
+			setTarget(gco);
+		}
+		
+	}
+}
+
+gridCoreObject * gridEvent::getObject() const
+{
+	return m_obj;
+}
+
+void gridEvent::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	objects.push_back(getObject());
+}
+
+bool gridEvent::setTarget ( gridCoreObject *gdo,const std::string &var)
+{
+	if (gdo)
+	{
+		m_obj = gdo;
+		name = m_obj->getName();
+	}
   if (!var.empty ())
     {
-      field = var;
+	  loadField(m_obj, var);
     }
-  m_obj = gdo;
 
   if (m_obj)
     {
-      name = m_obj->getName ();
       armed = true;
     }
+  else
+  {
+	  armed = false;
+  }
   return armed;
 }
 
-void gridEvent::EventFile (const std::string &fname,unsigned int column)
+enum class event_types
 {
-  eFile = fname;
-  eColumn = column;
-  ts = std::make_shared<timeSeries> ();
-  int ret = ts->loadBinaryFile (eFile, column);
-  if (ret != FILE_LOAD_SUCCESS)
-    {
-      ts.reset ();
-    }
-  else
-    {
-      currIndex = 0;
-      triggerTime = ts->time[0];
-      value = ts->data[0];
-    }
+	basic,
+	compound,
+	player,
+	compoundplayer,
+	toggle,
+	interpolating,
+	reversible,
+};
+
+
+event_types findEventType(gridEventInfo *gdEI)
+{
+	if (!gdEI->type.empty())
+	{
+		if ((gdEI->type == "basic") || (gdEI->type == "simple"))
+		{
+			return event_types::basic;
+		}
+		if (gdEI->type == "player")
+		{
+			return event_types::player;
+		}
+		if (gdEI->type == "compound")
+		{
+			return event_types::compound;
+		}
+		if (gdEI->type == "compoundplayer")
+		{
+			return event_types::compoundplayer;
+		}
+		if (gdEI->type == "toggle")
+		{
+			return event_types::toggle;
+		}
+		if (gdEI->type=="reversible")
+		{
+			return event_types::reversible;
+		}
+		if (gdEI->type=="interpolating")
+		{
+			return event_types::interpolating;
+		}
+	}
+	if (!gdEI->file.empty())
+	{
+		return event_types::player;
+	}
+	if (gdEI->period > 0)
+	{
+		return event_types::player;
+	}
+	if (gdEI->time.size() > 1)
+	{
+		return event_types::player;
+	}
+	else if (gdEI->value.size() > 1)
+	{
+		return event_types::compound;
+	}
+	else if (gdEI->fieldList.size()>1)
+	{
+		return event_types::compound;
+	}
+	else
+	{
+		return event_types::basic;
+	}
 }
 
 
+gridEventInfo::gridEventInfo(const std::string &eventString, gridCoreObject *rootObj)
+{
+	loadString(eventString, rootObj);
+}
 
-std::shared_ptr<gridEvent> make_event (const std::string &eventString, gridCoreObject *rootObject)
+// @time1[,time2,time3,... + period] |[rootobj::obj1:]field(units) const = val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or
+// [rootobj::obj:]field(units) = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
+void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *rootObj)
 {
 
-  // @time1[,time2,time3,... + period] |[rootobj::obj:]field(units) const = val1,[val2,val3,...]  or
-  // [rootobj::obj:]field(units) = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
   std::string objString;
 
-  auto ev = std::make_shared<gridEvent> ();
-  std::vector<double> times;
-  std::vector<double> vals;
   auto posA = eventString.find_first_of ("@");
   if (posA == std::string::npos)
     {
@@ -288,27 +409,21 @@ std::shared_ptr<gridEvent> make_event (const std::string &eventString, gridCoreO
           if (cstr == std::string::npos)
             {
 
-              times.push_back (std::stod (tstring));
+              time.push_back (std::stod (tstring));
             }
           else
             {
-              times.push_back (std::stod (tstring.substr (0, cstr - 1)));
-              ev->period = std::stod (tstring.substr (cstr + 1, std::string::npos));
+              time.push_back (std::stod (tstring.substr (0, cstr - 1)));
+              period = std::stod (tstring.substr (cstr + 1, std::string::npos));
             }
 
         }
       else
         {
-          times = str2vector (tstring,-1,",");
+          time = str2vector (tstring,-1,",");
         }
-      if (posA > 2)
-        {
-          objString = eventString.substr (0, posA - 1);
-        }
-      else
-        {
-          objString = eventString.substr (posT + 1, std::string::npos);
-        }
+	  objString = (posA > 2) ? eventString.substr(0, posA - 1) : eventString.substr(posT + 1, std::string::npos);
+
     }
 
 
@@ -318,58 +433,38 @@ std::shared_ptr<gridEvent> make_event (const std::string &eventString, gridCoreO
   trimString (vstring);
   objString = objString.substr (0, posE);
   //break down the object specification
-  objInfo fdata (objString, rootObject);
+  objInfo fdata (objString, rootObj);
 
-  ev->setTarget (fdata.m_obj);
-  ev->unitType = fdata.m_unitType;
-  ev->field = fdata.m_field;
+  targetObjs.push_back(fdata.m_obj);
+  units.push_back(fdata.m_unitType);
+  fieldList.push_back(fdata.m_field);
 
-  posE = vstring.find_first_of ('<');
-  if (posE != std::string::npos)
+  auto posFile = vstring.find_first_of ('{');
+  if (posFile != std::string::npos)
     { //now we get into file based event
-      auto fstr = vstring.substr (posE + 1);
-      fstr.pop_back ();     //get rid of the tailing ">"
-      int col = trailingStringInt (fstr, fstr, 0);
-      ev->EventFile (fstr, col);
+	  auto posEndFile = vstring.find_first_of('}', posFile);
+      file = vstring.substr (posE + 1,posEndFile-posFile-1);
+      
+      int col = trailingStringInt (file, file, 0);
+	  columns.push_back(col);
+	  auto posPlus= vstring.find_first_of('+',posEndFile);
+	  if (posPlus != std::string::npos)
+	  {
+		  period = std::stod(vstring.substr(posPlus + 1, std::string::npos));
+	  }
     }
   else
-    {
-
-
-      auto cstr = vstring.find_first_of (',');
-      if (cstr == std::string::npos)
-        {
-          vals.push_back (std::stod (vstring));
-        }
-      else
-        {
-          vals = str2vector (vstring, -1, ",");
-        }
-
-
-
-      if (times.size () > 1)
-        {
-          if (vals.size () == times.size ())
-            {
-              ev->setTimeValue (times, vals);
-            }
-          else
-            {
-              for (auto tv : times)
-                {
-                  ev->ts->addData (tv, vals[0]);
-                }
-              ev->triggerTime = times[0];
-              ev->value = vals[0];
-            }
-        }
-      else
-        {
-          ev->setTimeValue (times[0], vals[0]);
-        }
-    }
-  return ev;
+  {
+	  auto cstr = vstring.find_first_of(',');
+	  if (cstr == std::string::npos)
+	  {
+		  value.push_back(std::stod(vstring));
+	  }
+	  else
+	  {
+		  value = str2vector(vstring, -1, ",");
+	  }
+  }
 }
 
 
@@ -377,108 +472,51 @@ std::shared_ptr<gridEvent> make_event (const std::string &field, double val, dou
 {
   auto ev = std::make_shared<gridEvent> (eventTime);
   objInfo fdata (field, rootObject);
-  ev->setTarget (fdata.m_obj);
-  ev->unitType = fdata.m_unitType;
-  ev->field = fdata.m_field;
-  ev->value = val;
+  ev->setTarget (fdata.m_obj, fdata.m_field);
+  ev->setValue(val, fdata.m_unitType);
   return ev;
 }
 
+std::shared_ptr<gridEvent> make_event(const std::string &eventString, gridCoreObject *rootObject)
+{
+	gridEventInfo gdEI(eventString, rootObject);
+	return make_event(&gdEI, rootObject);
+}
 
 std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *rootObject)
 {
-
-  auto ev = gdEI->eString.empty () ? (std::make_shared<gridEvent> ()) : make_event (gdEI->eString,rootObject);
-
-  ev->period = gdEI->period;
-
-  ev->description = gdEI->description;
-  objInfo fdata;
-  gridCoreObject *obj = nullptr;
-  if (!(gdEI->name.empty ()))
-    {
-      size_t rlc = gdEI->name.find_last_of (':');
-      if (rlc != std::string::npos)
-        {
-          if (gdEI->name[rlc - 1] == ':')
-            {
-              obj = locateObject (gdEI->name, rootObject);
-            }
-          else
-            {
-              fdata.LoadInfo (gdEI->name, rootObject);
-              obj = fdata.m_obj;
-            }
-        }
-      else
-        {
-          obj = locateObject (gdEI->name, rootObject);
-        }
-
-    }
-
-  if (!(gdEI->field.empty ()))
-    {
-      fdata.LoadInfo (gdEI->field, (obj) ? (obj) : rootObject);
-    }
-
-  if (fdata.m_obj)
-    {
-      ev->setTarget (fdata.m_obj);
-      ev->name = fdata.m_obj->getName ();
-    }
-  if (!fdata.m_field.empty ())
-    {
-      ev->field = fdata.m_field;
-    }
-  if (fdata.m_unitType != gridUnits::defUnit)
-    {
-      ev->unitType = fdata.m_unitType;
-    }
-
-
-
-  if (gdEI->time.size () > 1)
-    {
-      ev->setTimeValue (gdEI->time, gdEI->value);
-    }
-  else if (gdEI->time.size () == 1)
-    {
-      if (gdEI->value.size () > 1)
-        {
-          ev->triggerTime = gdEI->time[0];
-          double ttime = ev->triggerTime;
-          ev->ts = std::make_shared<timeSeries> ();
-          ev->ts->reserve (static_cast<fsize_t> (gdEI->value.size ()));
-          for (auto v : gdEI->value)
-            {
-              ev->ts->addData (ttime, v);
-              ttime = ttime + ev->period;
-            }
-          ev->currIndex = 0;
-        }
-      else if (!(gdEI->value.empty ()))
-        {
-          ev->ts.reset ();
-          ev->triggerTime = gdEI->time[0];
-          ev->value = gdEI->value[0];
-        }
-
-    }
-  else if (!(gdEI->value.empty ()))
-    {
-      ev->triggerTime = 0.0;
-      ev->value = gdEI->value[0];
-    }
-  if (gdEI->unitType != gridUnits::defUnit)
-    {
-      ev->unitType = gdEI->unitType;
-    }
-  makeLowerCase (ev->field);
-  if (gdEI->file.length () > 3)
-    {
-      ev->EventFile (gdEI->file, gdEI->column);
-    }
-
+	std::shared_ptr<gridEvent> ev;
+	if (!gdEI->type.empty())
+	{
+		ev = coreClassFactory<gridEvent>::instance()->createObject(gdEI->type);
+		if (ev)
+		{
+			return ev;
+		}
+	}
+	auto evType = findEventType(gdEI);
+	
+	switch (evType)
+	{
+	case event_types::basic:
+		ev = std::make_shared<gridEvent>(gdEI, rootObject);
+		break;
+	case event_types::compound:
+		ev = std::make_shared<compoundEvent>(gdEI, rootObject);
+		break;
+	case event_types::player:
+		ev = std::make_shared<gridPlayer>(gdEI, rootObject);
+		break;
+	case event_types::compoundplayer:
+		ev = std::make_shared<compoundEventPlayer>(gdEI, rootObject);
+		break;
+	case event_types::interpolating:
+	case event_types::reversible:
+	case event_types::toggle:
+		break;
+	default:
+		break;
+	}
+ 
   return ev;
 }

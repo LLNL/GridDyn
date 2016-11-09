@@ -22,7 +22,7 @@
 #include "readerElement.h"
 #include "readElement.h"
 #include "stringOps.h"
-
+#include "core/gridDynExceptions.h"
 
 const IgnoreListType emptyIgnoreList {};
 
@@ -99,6 +99,7 @@ X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::
     }
 
   ename = getElementField (element, "id", defMatchType);
+  if (!ename.empty())
   {
     //check if the object can be found in the current search object
     double val = interpretString (ename, ri);
@@ -188,7 +189,7 @@ X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::str
               searchObject->remove (mobj);
               mobj->setParent (nullptr);
               condDelete (mobj, mobj);                                               //do a conditional delete here just in case
-              searchObject->add (rtObj);                                    //add the new object back into the searchobject
+              searchObject->add (rtObj);                                    //add the new object back into the searchObject
               mobj = rtObj;
             }
         }
@@ -283,7 +284,6 @@ void setAttributes (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &elem
   using namespace readerConfig;
   auto att = element->getFirstAttribute ();
 
-  int ret;
   while (att.isValid ())
     {
 	  std::string fname = convertToLowerCase (att.getName ());
@@ -294,48 +294,50 @@ void setAttributes (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &elem
           att = element->getNextAttribute ();
           continue;
         }
-
-      if (fname.find ("file") != std::string::npos)
-        {
-		  std::string strVal = att.getText ();
-          ri->checkFileParam (strVal);
-          LEVELPRINT (READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
-          ret = obj->set (fname, strVal);
-        }
-	  else
+	  try
 	  {
-		  double val = att.getValue();
-		  if (val != kNullVal)
+		  if (fname.find("file") != std::string::npos)
 		  {
-			  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << val);
-			  ret = obj->set(fname, val);
+			  std::string strVal = att.getText();
+			  ri->checkFileParam(strVal);
+			  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
+			  obj->set(fname, strVal);
 		  }
 		  else
 		  {
-			  std::string strVal = att.getText();
-			  gridParameter po(fname, strVal);
-			  paramStringProcess(&po, ri);
-			  if (po.stringType == true)
+			  double val = att.getValue();
+			  if (val != kNullVal)
 			  {
-				  ret = obj->set(po.field, po.strVal);
-				  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
+				  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << val);
+				  obj->set(fname, val);
 			  }
 			  else
 			  {
-				  ret = obj->set(po.field, po.value);
-				  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.value);
+				  std::string strVal = att.getText();
+				  gridParameter po(fname, strVal);
+				  paramStringProcess(&po, ri);
+				  if (po.stringType == true)
+				  {
+					  obj->set(po.field, po.strVal);
+					  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
+				  }
+				  else
+				  {
+					  obj->set(po.field, po.value);
+					  LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.value);
+				  }
 			  }
 		  }
 	  }
-
-	  if (ret == PARAMETER_NOT_FOUND)
+	  catch (const unrecognizedParameter &)
 	  {
 		  WARNPRINT(READER_WARN_ALL, "unknown " << componentName << " parameter " << fname);
 	  }
-	  else if (ret == INVALID_PARAMETER_VALUE)
+	  catch (const invalidParameterValue &)
 	  {
-		  WARNPRINT(READER_WARN_ALL, "value for solver parameter " << fname << " (" << att.getText() << ") is invalid");
+		  WARNPRINT(READER_WARN_ALL, "value for parameter " << fname << " (" << att.getText() << ") is invalid");
 	  }
+	 
       att = element->getNextAttribute ();
     }
 
@@ -346,7 +348,6 @@ void setParams (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &element,
 {
   using namespace readerConfig;
 
-  int ret;
   gridParameter param;
 
   element->moveToFirstChild ();
@@ -364,50 +365,53 @@ void setParams (std::shared_ptr<X> obj, std::shared_ptr<readerElement> &element,
       getElementParam (element, &param);
       if (param.valid)
         {
-          if (param.stringType == true)
-            {
-              if (param.field.find ("file") != std::string::npos)
-                {
-                  ri->checkFileParam (param.strVal);
-                  LEVELPRINT (READER_VERBOSE_PRINT, typeName << ":setting " << obj->name << " file to " << param.strVal);
-                  ret = obj->set (param.field, param.strVal);
-                }
-              else
-                {
+		  try
+		  {
+			  if (param.stringType == true)
+			  {
+				  if (param.field.find("file") != std::string::npos)
+				  {
+					  ri->checkFileParam(param.strVal);
+					  LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " file to " << param.strVal);
+					  obj->set(param.field, param.strVal);
+				  }
+				  else
+				  {
 
-                  paramStringProcess (&param, ri);
-                  if (param.stringType == true)
-                    {
-                      LEVELPRINT (READER_VERBOSE_PRINT, typeName << ":setting " << obj->name << " " << param.field << " to " << param.strVal);
-                      ret = obj->set (param.field, param.strVal);
-                    }
-                  else
-                    {
-                      LEVELPRINT (READER_VERBOSE_PRINT, typeName << ":setting " << obj->name << " " << param.field << " to " << param.value);
-                      ret = obj->set (param.field, param.value);
-                    }
-                }
-            }
-          else
-            {
-              LEVELPRINT (READER_VERBOSE_PRINT, typeName << ":setting " << obj->name << " " << param.field << " to " << param.value);
-              ret = obj->set (param.field, param.value);
-            }
-          if (ret == PARAMETER_NOT_FOUND)
-            {
-              WARNPRINT (READER_WARN_ALL, "unknown " << typeName << " parameter " << param.field);
-            }
-          else if (ret == INVALID_PARAMETER_VALUE)
-            {
-              if (param.stringType == true)
-                {
-                  WARNPRINT (READER_WARN_ALL, "value for " << typeName << " parameter " << param.field << " (" << param.strVal << ") is invalid");
-                }
-              else
-                {
-                  WARNPRINT (READER_WARN_ALL, "value for solver parameter " << param.field << " (" << param.value << ") is invalid");
-                }
-            }
+					  paramStringProcess(&param, ri);
+					  if (param.stringType == true)
+					  {
+						  LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.strVal);
+						  obj->set(param.field, param.strVal);
+					  }
+					  else
+					  {
+						  LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.value);
+						  obj->set(param.field, param.value);
+					  }
+				  }
+			  }
+			  else
+			  {
+				  LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.value);
+				  obj->set(param.field, param.value);
+			  }
+		  }
+		  catch (const unrecognizedParameter &)
+		  {
+			  WARNPRINT(READER_WARN_ALL, "unknown " << typeName << " parameter " << param.field);
+		  }
+		  catch (const invalidParameterValue &)
+		  {
+			  if (param.stringType == true)
+			  {
+				  WARNPRINT(READER_WARN_ALL, "value for " << typeName << " parameter " << param.field << " (" << param.strVal << ") is invalid");
+			  }
+			  else
+			  {
+				  WARNPRINT(READER_WARN_ALL, "value for solver parameter " << param.field << " (" << param.value << ") is invalid");
+			  }
+		  }
         }
       element->moveToNextSibling ();
     }

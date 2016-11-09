@@ -24,7 +24,7 @@
 #include "dcBus.h"
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
-
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 
@@ -33,7 +33,7 @@
 #include <cassert>
 
 
-count_t gridBus::busCount = 0;
+std::atomic<count_t> gridBus::busCount(0);
 static typeFactory<gridBus> gbf ("bus", stringVec { "basic" });
 static childTypeFactory<acBus,gridBus> gbfac ("bus", stringVec {"ac","pq","pv","slk","slack","afix","ref"}, "ac");
 static childTypeFactory<dcBus,gridBus> gbfdc ("bus", stringVec { "dc", "hvdc" });
@@ -44,8 +44,7 @@ using namespace gridUnits;
 gridBus::gridBus (const std::string &objName) : gridPrimary (objName),outputs (3),outLocs (3)
 {
   // default values
-  ++busCount;
-  id = busCount;
+  id = ++busCount;
   updateName ();
 
 
@@ -54,8 +53,7 @@ gridBus::gridBus (const std::string &objName) : gridPrimary (objName),outputs (3
 gridBus::gridBus (double vStart, double angleStart,const std::string &objName) : gridPrimary (objName),angle (angleStart), voltage (vStart)
 {
   // default values
-  ++busCount;
-  id = busCount;
+  id = ++busCount;
   updateName ();
 
 }
@@ -166,7 +164,7 @@ gridBus::~gridBus ()
     }
 }
 
-int gridBus::add (gridCoreObject *obj)
+void gridBus::add (gridCoreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -185,11 +183,11 @@ int gridBus::add (gridCoreObject *obj)
     {
       return add (lnk);
     }
-  return (OBJECT_NOT_RECOGNIZED);
+  throw(invalidObjectException(this));
 }
 
 template<class X>
-int addObject (gridBus *bus, X* obj, std::vector<X *> &objVector)
+void addObject (gridBus *bus, X* obj, std::vector<X *> &objVector)
 {
   gridCoreObject *foundObj = bus->find (obj->getName ());
   if (foundObj == nullptr)
@@ -204,43 +202,40 @@ int addObject (gridBus *bus, X* obj, std::vector<X *> &objVector)
         {
           bus->alert (bus, OBJECT_COUNT_INCREASE);
         }
-      return OBJECT_ADD_SUCCESS;
     }
-  else if (obj->getID () == foundObj->getID ())
+  else if (obj->getID () != foundObj->getID ())
     {
-      return OBJECT_ALREADY_MEMBER;
+	  throw(objectAddFailure(bus));
     }
-  return OBJECT_ADD_FAILURE;
 }
 
 // add load
-int gridBus::add (gridLoad *ld)
+void gridBus::add (gridLoad *ld)
 {
-  return addObject (this, ld, attachedLoads);
+  addObject (this, ld, attachedLoads);
 }
 
 // add generator
-int gridBus::add (gridDynGenerator *gen)
+void gridBus::add (gridDynGenerator *gen)
 {
-  return addObject (this, gen, attachedGens);
+  addObject (this, gen, attachedGens);
 }
 
 // add link
-int gridBus::add (gridLink *lnk)
+void gridBus::add (gridLink *lnk)
 {
   for (auto &links : attachedLinks)
     {
       if (links->getID () == lnk->getID ())
         {
-          return OBJECT_ALREADY_MEMBER;
+          return;
         }
     }
   attachedLinks.push_back (lnk);
-  return OBJECT_ADD_SUCCESS;
 }
 
 
-int gridBus::remove (gridCoreObject *obj)
+void gridBus::remove (gridCoreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -260,16 +255,15 @@ int gridBus::remove (gridCoreObject *obj)
       return(remove (lnk));
     }
 
-  return OBJECT_NOT_RECOGNIZED;
+  throw(invalidObjectException(this));
 }
 
 template<class X>
-int removeObject (X* obj, std::vector<X *> &objVector)
+void removeObject (X* obj, std::vector<X *> &objVector)
 {
-  int out = OBJECT_NOT_FOUND;
   if (obj->locIndex > objVector.size ())
     {
-      return OBJECT_NOT_FOUND;
+	  return;
     }
   if (obj->getID () == objVector[obj->locIndex]->getID ())
     {
@@ -285,35 +279,32 @@ int removeObject (X* obj, std::vector<X *> &objVector)
 
       objVector[obj->locIndex]->setParent (nullptr);
       objVector.erase (objVector.begin () + obj->locIndex);
-      out = OBJECT_REMOVE_SUCCESS;
     }
-  return out;
 }
 
 // remove load
-int gridBus::remove (gridLoad *ld)
+void gridBus::remove (gridLoad *ld)
 {
-  return removeObject (ld, attachedLoads);
+  removeObject (ld, attachedLoads);
 }
 
 // remove generator
-int gridBus::remove (gridDynGenerator *gen)
+void gridBus::remove (gridDynGenerator *gen)
 {
-  return removeObject (gen, attachedGens);
+  removeObject (gen, attachedGens);
 }
 
 // remove link
-int gridBus::remove (gridLink *lnk)
+void gridBus::remove (gridLink *lnk)
 {
   for (size_t kk = 0; kk < attachedLinks.size (); ++kk)
     {
       if (lnk->getID () == attachedLinks[kk]->getID ())
         {
           attachedLinks.erase (attachedLinks.begin () + kk);
-          return OBJECT_REMOVE_SUCCESS;
+		  return;
         }
     }
-  return OBJECT_NOT_FOUND;
 }
 
 
@@ -551,7 +542,7 @@ void gridBus::powerAdjust (double /*adjustment*/)
 
 }
 
-double gridBus::timestep (double ttime, const solverMode &sMode)
+void gridBus::timestep (double ttime, const solverMode &sMode)
 {
 
   auto args = getOutputs (nullptr,sMode);
@@ -566,7 +557,6 @@ double gridBus::timestep (double ttime, const solverMode &sMode)
   //localConverge (sMode, 0);
   //updateLocalCache ();
   prevTime = ttime;
-  return 0.0;
 }
 
 
@@ -606,9 +596,8 @@ void gridBus::getParameterStrings (stringVec &pstr, paramStringType pstype) cons
   getParamString<gridBus, gridObject> (this, pstr, locNumStrings, locStrStrings, flagStrings, pstype);
 }
 
-int gridBus::setFlag (const std::string &flag, bool val)
+void gridBus::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "connected")
     {
       if (val)
@@ -628,16 +617,14 @@ int gridBus::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridPrimary::setFlag (flag, val);
+      gridPrimary::setFlag (flag, val);
     }
 
-  return out;
 }
 
 // set properties
-int gridBus::set (const std::string &param, const std::string &vali)
+void gridBus::set (const std::string &param, const std::string &vali)
 {
-  int out = PARAMETER_FOUND;
   auto val = convertToLowerCase (vali);
 
   if (param == "status")
@@ -664,19 +651,17 @@ int gridBus::set (const std::string &param, const std::string &vali)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else
     {
-      out = gridPrimary::set (param, vali);
+      gridPrimary::set (param, vali);
     }
-  return out;
 }
 
-int gridBus::set (const std::string &param, double val, units_t unitType)
+void gridBus::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "voltage") || (param == "vol"))
     {
@@ -761,7 +746,7 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              return out;
+              return;
             }
         }
     }
@@ -781,7 +766,7 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              return out;
+              return;
             }
         }
     }
@@ -795,11 +780,11 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              return out;
+              return;
             }
         }
       std::string b{param.back()};
-      out = attachedLoads[0]->set (b, val, unitType);
+      attachedLoads[0]->set (b, val, unitType);
     }
   else if ((param == "shunt b") || (param == "b"))
     {
@@ -811,22 +796,25 @@ int gridBus::set (const std::string &param, double val, units_t unitType)
             }
           else
             {
-              return out;
+              return;
             }
         }
       attachedLoads[0]->set ("b", -val, unitType);
     }
-  else if (param == "zone")
+  else if ((param == "zone")||(param=="zone number"))
     {
       zone = static_cast<int> (val);
     }
+  else if ((param=="area")||(param == "area number"))
+  {
+	  //Here to catch a specific issue while the area controls are being developed
+  }
   else
     {
-      out = gridPrimary::set (param, val, unitType);
+      gridPrimary::set (param, val, unitType);
     }
 
 
-  return out;
 }
 
 void gridBus::setVoltageAngle (double Vnew, double Anew)
@@ -1146,7 +1134,7 @@ int gridBus::propogatePower (bool /*makeSlack*/)
     {
       if ((adjPSecondary == 0) && (adjQSecondary == 0))
         {
-          ret = unfixed_line->fixPower (-Pexp, -Qexp, getID (), getID ());
+          unfixed_line->fixPower (-Pexp, -Qexp, getID (), getID ());
         }
     }
   else         //no lines so adjust the generators and load
@@ -1346,7 +1334,7 @@ static const IOlocs kNullLocations {
 };
 
 // Jacobian
-void gridBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   updateLocalCache (sD, sMode);
   // import bus values (current theta and voltage)
@@ -1530,18 +1518,17 @@ void gridBus::setRootOffset (index_t Roffset, const solverMode &sMode)
 
 void gridBus::disconnect ()
 {
-  if (!opFlags[disconnected])
-    {
-      opFlags.set (disconnected);
-      outLocs[voltageInLocation] = kNullLocation;
-      outLocs[angleInLocation] = kNullLocation;
-      outLocs[frequencyInLocation] = kNullLocation;
-      alert (this, JAC_COUNT_DECREASE);
-      LOG_DEBUG ("disconnecting bus");
-      voltage = 0;
-      angle = 0;
-    }
-
+	if (!opFlags[disconnected])
+	{
+		opFlags.set(disconnected);
+		outLocs[voltageInLocation] = kNullLocation;
+		outLocs[angleInLocation] = kNullLocation;
+		outLocs[frequencyInLocation] = kNullLocation;
+		alert(this, JAC_COUNT_DECREASE);
+		LOG_DEBUG("disconnecting bus");
+		voltage = 0;
+		angle = 0;
+	}
 }
 
 void gridBus::reconnect (gridBus *mapBus)
@@ -1768,7 +1755,7 @@ void busPowers::reset ()
   loadQ = 0;
 }
 
-bool busPowers::needsUpdate (const stateData *sD)
+bool busPowers::needsUpdate (const stateData *sD) const
 {
   if (!sD)
     {
@@ -2042,7 +2029,7 @@ void gridBus::removePowerControl (gridObject *)
 
 double gridBus::get (const std::string &param, units_t unitType) const
 {
-  double val = kNullVal;
+  double val;
   if (param == "voltage")
     {
       val = unitConversionPower (voltage, puV, unitType, systemBasePower, baseVoltage);

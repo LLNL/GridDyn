@@ -57,14 +57,14 @@ public:
     return currDispatch;
   }
 
-  virtual int add (schedulerRamp *sched);
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (schedulerRamp *sched);
+  virtual void add (gridCoreObject *obj) override;
 
-  virtual int remove (schedulerRamp *sched);
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (schedulerRamp *sched);
+  virtual void remove (gridCoreObject *obj) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   double getAvailable ()
   {

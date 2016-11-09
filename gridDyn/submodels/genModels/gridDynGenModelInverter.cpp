@@ -14,9 +14,10 @@
 
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include "vectorOps.hpp"
 
@@ -115,11 +116,28 @@ void gridDynGenModelInverter::algebraicUpdate (const IOdata &args, const stateDa
           double gamma = std::atan ( b / (2.0 * g)) - kPI / 2;
           double Vloss1 = V * V * g;
           double Vloss3 = Eft * Eft * g;
-          update[offset] = std::asin ((Pmt - Vloss1 - Vloss3) / (Eft * V * R)) + gamma;
+		  double powerRatio = (Pmt - Vloss1 - Vloss3) / (Eft * V * R);
+		  if (std::abs(powerRatio) >= 1.0)
+		  {
+			  update[offset] = (powerRatio >= 1.0) ? kPI / 2.0 : -kPI / 2.0;
+		  }
+		  else
+		  {
+			  update[offset] = std::asin(powerRatio)+gamma;
+		  }
         }
       else
         {
-          update[offset] = std::asin (Pmt / (Eft * V * b));
+		  double powerRatio = Pmt / (Eft * V * b);
+		  if (std::abs(powerRatio) >=1.0)
+			{
+			  update[offset] = (powerRatio >= 1.0) ? kPI / 2.0 : -kPI / 2.0;
+			}
+		  else
+		  {
+			  update[offset] = std::asin(powerRatio);
+		  }
+          
         }
     }
 
@@ -138,18 +156,18 @@ void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, 
 	}
 	Lp Loc = offsets.getLocations(sD, resid, sMode, this);
 
-	const double *gm = Loc.algStateLoc;
-
+	double angle = *Loc.algStateLoc;
+	//printf("time=%f, angle=%f\n", sD->time, angle);
 	double Pmt = args[genModelPmechInLocation];
 	if (opFlags[at_angle_limits])
 	{
 		if (Pmt > 0)
 		{
-			Loc.destLoc[0] = maxAngle - gm[0];
+			Loc.destLoc[0] = maxAngle - angle;
 		}
 		else
 		{
-			Loc.destLoc[0] = minAngle - gm[0];
+			Loc.destLoc[0] = minAngle - angle;
 		}
 	}
 	else
@@ -159,10 +177,10 @@ void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, 
 
 		double V = args[voltageInLocation];
 
-		double PnoR = Eft*V*b*sin(gm[0]);
+		double PnoR = Eft*V*b*sin(angle);
 		if (Rs != 0.0)
 		{
-			double cosA = cos(gm[0]);
+			double cosA = cos(angle);
 			double Vloss1 = V*V*g;
 			double Vloss2 = 2.0*V*g*Eft*cosA;
 			double Vloss3 = Eft*Eft*g;
@@ -253,7 +271,7 @@ double gridDynGenModelInverter::getOutput(const IOdata &args, const stateData *s
 }
 
 
-void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 
@@ -283,7 +301,7 @@ void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const sta
 
 
 void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateData *sD,
-	arrayData<double> *ad,
+	matrixData<double> *ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
@@ -317,7 +335,7 @@ void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateDa
 
 }
 
-void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
 	{
@@ -348,14 +366,13 @@ stringVec gridDynGenModelInverter::localStateNames() const
 }
 
 // set parameters
-int gridDynGenModelInverter::set(const std::string &param, const std::string &val)
+void gridDynGenModelInverter::set(const std::string &param, const std::string &val)
 {
 	return gridSubModel::set(param, val);
 }
 
-int gridDynGenModelInverter::set(const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModelInverter::set(const std::string &param, double val, gridUnits::units_t unitType)
 {
-	int out = PARAMETER_FOUND;
 
 	if (param.length() == 1)
 	{
@@ -368,12 +385,13 @@ int gridDynGenModelInverter::set(const std::string &param, double val, gridUnits
 		case 'r':
 			Rs = val;
 			reCalcImpedences();
+			break;
 		default:
-			return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
 
 		}
 
-		return out;
+		return;
 	}
 
 	if ((param == "xd") || (param == "xs"))
@@ -396,10 +414,9 @@ int gridDynGenModelInverter::set(const std::string &param, double val, gridUnits
 	}
 	else
 	{
-		out = gridDynGenModel::set(param, val, unitType);
+		gridDynGenModel::set(param, val, unitType);
 	}
 
-	return out;
 }
 
 

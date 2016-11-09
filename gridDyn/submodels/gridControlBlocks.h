@@ -17,7 +17,7 @@
 #include "gridObjects.h"
 /** @brief class implementing basic control system block
  the basic block class takes a single input X  the output is then \f$K*(X+bias)\f$
-optionally implementing limiters Omax and Omin  the limiters have a reset levelspecified by resetLevel
+optionally implementing limiters Omax and Omin  the limiters have a reset level specified by resetLevel
 once the object is initialized the determination of whether to use the ramps is fixed and cannot be changed
 unless the object is reinitialized directly
 
@@ -57,8 +57,8 @@ protected:
   int limiter_diff = 0;         //!< the number of diff states used by the limiters
 public:
   /** @brief default constructor*/
-  basicBlock (const std::string &objName = "block_#");
-  /** @brief alternate constructure
+  explicit basicBlock (const std::string &objName = "block_#");
+  /** @brief alternate constructor
   @param[in] gain  the desired gain of the block
   */
   basicBlock (double gain, const std::string &objName = "block_#");
@@ -67,9 +67,9 @@ protected:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
-  virtual int setFlag (const std::string &flag, bool val) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
   //virtual void derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode);
@@ -78,7 +78,7 @@ public:
   @param[in] input  the block input
   @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise ignored
   @param[in] sD the state data
-  @param[out] resid the location to store the Jacobian elemnets
+  @param[out] resid the location to store the Jacobian elements
   @param[in] sMode the solverMode that corresponds to the state data
   */
   virtual void residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode);
@@ -89,7 +89,7 @@ public:
   @param[in] input  the block input
   @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise ignored
   @param[in] sD the state data
-  @param[out] deriv the location to store the derivative elemnets
+  @param[out] deriv the location to store the derivative elements
   @param[in] sMode the solverMode that corresponds to the state data
   @return the output
   */
@@ -99,7 +99,7 @@ public:
   /** @brief simplifying function in place of algebraicUpdate call since block have only one input/output
   @param[in] input  the block input
   @param[in] sD the state data
-  @param[out] deriv the location to store the derivative elemnets
+  @param[out] deriv the location to store the derivative elements
   @param[in] sMode the solverMode that corresponds to the state data
   @return the output
   */
@@ -110,17 +110,17 @@ public:
   @param[in] input  the block input
   @param[in] didt the input derivative used if the differential input flag is set and it is needed otherwise ignored
   @param[in] sD the state data
-  @param[out] ad the location to store the Jacobian elemnets
+  @param[out] ad the location to store the Jacobian elements
   @param[in] argLoc the index location of the input
   @param[in] sMode the solverMode that corresponds to the state data
   */
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode);
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode);
 
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 arrayData<double> *ad,
+                                 matrixData<double> *ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual double timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
   /** @brief simplifying function in place of timestep since block have only one input/output
   @param[in] time  the time to step to
   @param[in] input  the input argument
@@ -147,7 +147,7 @@ protected:
   double iv = 0.0;  //!< the initial value(current value) of the integral
 public:
   //!< default constructor
-  integralBlock (const std::string &objName = "integralBlock_#");
+  explicit integralBlock (const std::string &objName = "integralBlock_#");
   /** alternate constructor to add in the gain
   @param[in] gain  the multiplication factor of the block
   */
@@ -156,16 +156,16 @@ public:
 
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
-  // virtual double timestep(double ttime, const IOdata &args, const solverMode &sMode);
+  // virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode);
   //virtual void setTime(double time){prevTime=time;};
 };
 
@@ -181,7 +181,7 @@ protected:
   double m_T1 = 0.1;  //!< the time constant
 public:
   //!< default constructor
-  delayBlock (const std::string &objName = "delayBlock_#");
+  explicit delayBlock (const std::string &objName = "delayBlock_#");
   /** alternate constructor to add in the time constant
   @param[in] t1  the time constant
   @param[in] objName the name of the block
@@ -198,13 +198,13 @@ protected:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   //virtual void setTime(double time){prevTime=time;};
 };
@@ -220,7 +220,7 @@ protected:
   double m_T1 = 0.1; //!< delay time constant for the derivative filtering operation
 public:
   //!< default constructor
-  derivativeBlock (const std::string &objName = "derivBlock_#");
+  explicit derivativeBlock (const std::string &objName = "derivBlock_#");
   /** alternate constructor to add in the time constant
   @param[in] t1  the time constant
   */
@@ -230,14 +230,14 @@ protected:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
 
   virtual stringVec localStateNames () const override;
@@ -246,7 +246,7 @@ public:
 
 /** @brief class implementing a control block
  block implementing \f$H(S)=\frac{K(1+T_2 s}{1+T_1 s}\f$
-default is \f$T_2 =0\f$ for beahvior equivalent to a delay block
+default is \f$T_2 =0\f$ for behavior equivalent to a delay block
 if T1 is 0 it behaves like the basic block
 */
 class controlBlock : public basicBlock
@@ -258,7 +258,7 @@ protected:
   double m_T2 = 0.0;  //!< upper time constant
 public:
   //!< default constructor
-  controlBlock (const std::string &objName = "controlBlock_#");
+  explicit controlBlock (const std::string &objName = "controlBlock_#");
   /** alternate constructor to add in the time constant
   @param[in] t1  the time constant
   @param[in] objName the name of the block
@@ -274,14 +274,14 @@ public:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   //virtual void setTime(double time){prevTime=time;};
   virtual stringVec localStateNames () const override;
@@ -318,7 +318,7 @@ protected:
 
 public:
   /** @brief the default constructor*/
-  deadbandBlock (const std::string &objName = "deadband_#");
+  explicit deadbandBlock (const std::string &objName = "deadband_#");
   /** @brief alternate constructor with a deadband argument
   @param[in] db the size of the deadband
   */
@@ -327,16 +327,16 @@ public:
   virtual void objectInitializeA (double time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-  virtual int setFlag (const std::string &flag, bool val) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
   //virtual void derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode);
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
 
-  virtual void jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;

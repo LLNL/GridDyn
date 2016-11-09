@@ -124,22 +124,22 @@ public:
   */
   void increment ();
   /** increment the offsets using the contained sizes in another optimOffset Object
-  /param offsets the optimOffset object to use as the sizes
+  @param offsets the optimOffset object to use as the sizes
   */
   void increment (optimOffsets *offsets);
   /** merge the sizes of two optimOffsets
-  /param offsets the optimOffset object to use as the sizes
+  @param offsets the optimOffset object to use as the sizes
   */
   void addSizes (optimOffsets *offsets);
   /** load the local variables to the sizes
   */
   void localLoad (bool finishedLoading = false);
   /** set the offsets from another optimOffset object
-  /param newOffsets the optimOffset object to use as the sizes
+  @param newOffsets the optimOffset object to use as the sizes
   */
   void setOffsets (const optimOffsets &newOffsets);
   /** set the offsets from a single index
-  /param newOffset the index of the new offset
+  @param newOffset the index of the new offset
   */
   void setOffset (index_t newOffset);
 };

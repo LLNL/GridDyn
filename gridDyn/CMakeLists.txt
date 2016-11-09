@@ -40,12 +40,16 @@ set (generator_sources
 
 set(gridSource_sources
 	sourceModels/gridSource.h
+	sourceModels/otherSources.h
+	sourceModels/sourceTypes.h
 	sourceModels/gridSource.cpp
 	sourceModels/rampSource.cpp
 	sourceModels/fileSource.cpp
 	sourceModels/randomSource.cpp
 	sourceModels/pulseSource.cpp
 	sourceModels/sineSource.cpp
+	sourceModels/functionSource.cpp
+	sourceModels/commSource.cpp
 	)
 
 set(exciter_sources
@@ -130,6 +134,7 @@ set(load_sources
 	loadModels/gridLabDLoad.cpp
 	loadModels/exponentialLoad.cpp
 	loadModels/compositeLoad.cpp
+	loadModels/sourceLoad.cpp
 	loadModels/svd.cpp
 	)
 
@@ -174,7 +179,7 @@ set(simulation_sources
 	${simulation_headers}
     simulation/gridDynContinuation.cpp
 	simulation/gridDynSimulation.cpp	
-	simulation/gridDynContingency.cpp
+	simulation/contingency.cpp
 	simulation/gridDynPowerFlow.cpp
 	simulation/gridDynDynamic.cpp
 	simulation/gridSimulation.cpp
@@ -184,13 +189,15 @@ set(simulation_sources
 	simulation/powerFlowErrorRecovery.cpp
 	simulation/dynamicInitialConditionRecovery.cpp
 	simulation/faultResetRecovery.cpp
+	simulation/gridDynContingency.cpp
 	
 	)
 
 set(solver_headers
 	solvers/solverInterface.h
 	solvers/sundialsInterface.h
-	solvers/sundialsArrayData.h
+	solvers/sundialsMatrixData.h
+	solvers/solverMode.h
 	)
 	
 set(solver_sources
@@ -199,7 +206,7 @@ set(solver_sources
 	solvers/kinsolInterface.cpp
 	solvers/solverInterface.cpp
 	solvers/basicSolver.cpp
-	solvers/sundialsArrayData.cpp
+	solvers/sundialsMatrixData.cpp
 	solvers/sundialsInterface.cpp
 	solvers/basicOdeSolver.cpp
 	)
@@ -223,6 +230,7 @@ ENDIF(LOAD_ARKODE)
 set (core_headers
 	basicDefs.h
 	gridDynTypes.h
+	gridDynVectorTypes.h
 	gridCore.h
 	gridObjects.h
 	parameterOperator.hpp
@@ -231,8 +239,11 @@ set (core_headers
 	objectFactoryTemplates.h
 	gridCoreList.h
 	gridCoreTemplates.h
-	solverMode.h
+	core/objectOperatorInterface.h
 	core/helperTemplates.h
+	core/factoryTemplates.h
+	core/propertyBuffer.h
+	core/gridDynExceptions.h
 	)
 
 set (core_sources
@@ -245,6 +256,8 @@ set (core_sources
 	gridObjectsHelperClasses.cpp
 	objectFactory.cpp
 	gridCoreList.cpp
+	core/propertyBuffer.cpp
+	core/gridDynExceptions.cpp
 	)
 
 set(primary_headers
@@ -272,7 +285,8 @@ set(primary_sources
 
 set(re_headers
 	recorder_events/gridGrabbers.h
-	recorder_events/gridRecorder.h
+	recorder_events/objectGrabbers.h
+	recorder_events/collector.h
 	recorder_events/gridEvent.h
 	recorder_events/stateGrabber.h
 	recorder_events/eventAdapters.h
@@ -294,6 +308,12 @@ set(re_sources
 	recorder_events/eventQueue.cpp
 	recorder_events/gridCondition.cpp
 	recorder_events/objectInterpreter.cpp
+	recorder_events/gridPlayer.cpp
+	recorder_events/compoundEvent.cpp
+	recorder_events/compoundEventPlayer.cpp
+	recorder_events/objectGrabbers.cpp
+	recorder_events/compoundCondition.cpp
+	recorder_events/collector.cpp
 	)	
 
 set (comm_headers
@@ -303,6 +323,7 @@ set (comm_headers
 	comms/relayMessage.h
 	comms/schedulerMessage.h
 	comms/controlMessage.h
+	comms/commManager.h
 	)
 	
 set (comm_sources
@@ -313,6 +334,7 @@ set (comm_sources
 	comms/relayMessage.cpp
 	comms/schedulerMessage.cpp
 	comms/controlMessage.cpp
+	comms/commManager.cpp
 	)
 	
 set(relay_headers
@@ -440,7 +462,7 @@ source_group("solvers" FILES ${solver_sources})
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
@@ -463,5 +485,12 @@ INSTALL(TARGETS gridDyn
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${PROJECT_BINARY_DIR}/griddyn-config.h DESTINATION include/griddyn)
-INSTALL(FILES ${header_files} DESTINATION include/griddyn)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/griddyn-config.h DESTINATION include/gridDyn)
+#INSTALL(FILES ${header_files} DESTINATION include/gridDyn)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/gridDyn
+  FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include
+  FILES_MATCHING PATTERN "*.h")

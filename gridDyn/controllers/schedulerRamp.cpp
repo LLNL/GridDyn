@@ -14,7 +14,7 @@
 #include "scheduler.h"
 #include "AGControl.h"
 #include "reserveDispatcher.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "comms/schedulerMessage.h"
 #include "gridCoreTemplates.h"
 #include "stringOps.h"
@@ -59,16 +59,14 @@ gridCoreObject *schedulerRamp::clone (gridCoreObject *obj) const
 
 void schedulerRamp::setTarget (double target)
 {
-  tsched ts = tsched (prevTime,target);
-  insertTarget (ts);
+  insertTarget (tsched(prevTime, target));
 }
 
 
 void schedulerRamp::setTarget (double time, double target)
 {
 
-  tsched ts = tsched (time,target);
-  insertTarget (ts);
+  insertTarget (tsched(time, target));
   if (time == nextUpdateTime)
     {
       updatePTarget ();
@@ -92,7 +90,7 @@ void schedulerRamp::updateA (double time)
       dt = nextUpdateTime - prevTime;
       PCurr = PCurr + PRampCurr * dt;
       dPdt = getRamp ();
-      output = output + dPdt * dt;
+      m_output = m_output + dPdt * dt;
       prevTime = nextUpdateTime;
 
       updatePTarget ();
@@ -102,8 +100,8 @@ void schedulerRamp::updateA (double time)
 
   PCurr = PCurr + PRampCurr * dt;
   dPdt = getRamp ();
-  output = output + dPdt * dt;
-  reserveAct = output - PCurr;
+  m_output = m_output + dPdt * dt;
+  reserveAct = m_output - PCurr;
   prevTime = time;
 
 }
@@ -111,16 +109,13 @@ void schedulerRamp::updateA (double time)
 double schedulerRamp::predict (double time)
 {
   double dt = (time - prevTime);
-  double ramp;
-  double ret;
   if (dt == 0)
     {
-      return output;
+      return m_output;
     }
-  ramp = getRamp ();
-  ret = output + ramp * dt;
+  double ramp = getRamp ();
+  return (m_output + ramp * dt);
 
-  return ret;
 }
 
 
@@ -228,10 +223,9 @@ void schedulerRamp::setReserveTarget (double target)
     }
 }
 
-int schedulerRamp::set (const std::string &param,  const std::string &val)
+void schedulerRamp::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   if (param == "rampmode")
     {
       auto v2 = convertToLowerCase (val);
@@ -258,9 +252,9 @@ int schedulerRamp::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = scheduler::set (param, val);
+      scheduler::set (param, val);
     }
-  return out;
+
 }
 
 void schedulerRamp::dispatcherLink ()
@@ -268,9 +262,8 @@ void schedulerRamp::dispatcherLink ()
 
 }
 
-int schedulerRamp::set (const std::string &param, double val,gridUnits::units_t unitType)
+void schedulerRamp::set (const std::string &param, double val,gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   double temp;
   if (param == "ramp")
     {
@@ -366,17 +359,16 @@ int schedulerRamp::set (const std::string &param, double val,gridUnits::units_t 
     }
   else
     {
-      out = scheduler::set (param,val);
+      scheduler::set (param,val);
     }
   updatePTarget ();
-  return out;
+
 }
 
-int schedulerRamp::setTarget (const std::string &filename)
+void schedulerRamp::setTarget (const std::string &filename)
 {
-  int out = scheduler::setTarget (filename);
+  scheduler::setTarget (filename);
   updatePTarget ();
-  return out;
 
 }
 

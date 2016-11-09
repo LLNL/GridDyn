@@ -12,6 +12,8 @@
 */
 
 #include "gridSource.h"
+#include "sourceTypes.h"
+#include "otherSources.h"
 #include "gridCoreTemplates.h"
 #include "objectFactoryTemplates.h"
 
@@ -45,37 +47,40 @@ gridCoreObject *gridSource::clone (gridCoreObject *obj) const
 }
 
 
-int gridSource::set (const std::string &param,  const std::string &val)
+void gridSource::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-  if ((param == "type")||(param == "sourcetype"))
+
+  if (param == "purpose")
     {
-      m_type = val;
+      m_purpose = val;
     }
   else
     {
-      out = gridCoreObject::set (param, val);
+      gridSubModel::set (param, val);
     }
-  return out;
+
 }
 
-int gridSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridSource::setLevel(double newLevel)
 {
-  int out = PARAMETER_FOUND;
+	m_tempOut = m_output = newLevel;
+}
 
-  if ((param == "val") || (param == "setval")||(param == "level")||(param == "value"))
+void gridSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+{
+
+  if ((param == "val") || (param == "setval")||(param == "level")||(param == "value")||(param=="output"))
     {
-      m_tempOut = m_output = val;
+	  setLevel(val);
     }
   else
     {
-      out = gridCoreObject::set (param, val, unitType);
+      gridSubModel::set (param, val, unitType);
     }
 
-  return out;
 }
 
-double gridSource::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
+void gridSource::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
 {
   if (ttime != prevTime)
     {
@@ -83,7 +88,6 @@ double gridSource::timestep (double ttime, const IOdata & /*args*/, const solver
     }
 
   prevTime = ttime;
-  return m_output;
 
 }
 
@@ -102,7 +106,7 @@ double gridSource::getOutput (const IOdata & /*args*/, const stateData *sD, cons
 {
   if ((sD) && (sD->time != lasttime))
     {
-      //  sourceUpdate (sD->time);
+        //sourceUpdate (sD->time);
     }
   return m_tempOut;
 }

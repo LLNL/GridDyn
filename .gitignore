@@ -56,3 +56,5 @@ fmus
 /ThirdParty/CoinMP2
 /docs/html
 /docs/latex
+/test/test_files/fmi_tests/test_fmus/Rectifier
+/test/test_files/zip_tests/rectifier/sources

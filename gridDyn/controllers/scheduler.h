@@ -15,8 +15,9 @@
 #define SCHEDULER_H_
 
 
-#include "gridObjects.h"
+#include "sourceModels/gridSource.h"
 #include "schedulerInfo.h"
+#include "comms/commManager.h"
 #include <utility>
 #include <list>
 
@@ -26,7 +27,7 @@ class gridCommunicator;
 class commMessage;
 /** object to manage scheduling for devices
 */
-class scheduler : public gridSubModel
+class scheduler : public gridSource
 {
 public:
 protected:
@@ -35,26 +36,21 @@ protected:
   double m_Base = 100;    //!< [MW] generator base power
   double PCurr = 0;            //!<[puMW] current power output
   std::list<tsched> pTarget;  //!< target list
-  double output = 0;            //!<[puMW] current output
   std::shared_ptr<gridCommunicator> commLink;       //!<communicator link
-  std::string commType;                 //!< communication link type
+  commManager cManager;
   std::uint64_t dispatcher_id = 0;  //!< communication id of the dispatcher
 public:
-  scheduler (const std::string &objName = "scheduler_#");
-  scheduler (double initialValue, const std::string &objName = "scheduler_#");
+  scheduler (const std::string &objName = "scheduler_#", double initialValue=0.0);
+  scheduler(double initialValue, const std::string &objName = "scheduler_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual ~scheduler ();
 
   virtual void updateA (double time) override;
   virtual double predict (double time);
-  virtual double getOutput (index_t /*num*/ = 0) const override
-  {
-    return output;
-  }
 
   virtual void setTarget (double time, double target);
   virtual void setTarget (double target);
-  virtual int setTarget (const std::string &filename);
+  virtual void setTarget (const std::string &filename);
   virtual void setTarget (std::vector<double> &time, std::vector<double> &target);
   virtual double getTarget () const;
   double getEnergy ()
@@ -65,9 +61,9 @@ protected:
   virtual void objectInitializeA (double time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag(const std::string &flag, bool val=true) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void setTime (double time) override;
   /** tie the scheduler to a dispatcher */
@@ -132,7 +128,7 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   void setTarget (double time, double target) override;
   void setTarget (double target) override;
-  int setTarget (const std::string &filename) override;
+  void setTarget (const std::string &filename) override;
 
   virtual void updateA (double time) override;
   virtual double predict (double time) override;
@@ -142,8 +138,8 @@ public:
 
   virtual double getRamp (double *tRem) const;
   virtual double getRamp () const;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
@@ -170,7 +166,7 @@ protected:
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 };
 
-/** @brief scheduler targetted at handling regulation management
+/** @brief scheduler targeted at handling regulation management
 */
 class schedulerReg : public schedulerRamp
 {
@@ -231,8 +227,8 @@ public:
 
   void regSettings (bool active, double upFrac = -1.0,double downFrac = -1.0);
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dispatcherLink () override;

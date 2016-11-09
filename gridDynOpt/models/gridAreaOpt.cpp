@@ -21,11 +21,10 @@
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "linkModels/gridLink.h"
+#include "core/gridDynExceptions.h"
 #include "gridBus.h"
 #include "stringOps.h"
 
-#include <cmath>
-#include <utility>
 
 using namespace gridUnits;
 
@@ -244,6 +243,8 @@ void gridAreaOpt::loadSizes (const optimMode &oMode)
   switch (oMode.flowMode)
     {
     case flowModel_t::none:
+	default:
+		break;
     case flowModel_t::transport:
       break;
     case flowModel_t::dc:
@@ -306,7 +307,7 @@ void gridAreaOpt::valueBounds (double ttime, double upperLimit[], double lowerLi
 
 }
 
-void gridAreaOpt::linearObj (const optimData *oD, vectData *linObj, const optimMode &oMode)
+void gridAreaOpt::linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -314,7 +315,7 @@ void gridAreaOpt::linearObj (const optimData *oD, vectData *linObj, const optimM
     }
 
 }
-void gridAreaOpt::quadraticObj (const optimData *oD, vectData *linObj, vectData *quadObj, const optimMode &oMode)
+void gridAreaOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -334,15 +335,15 @@ double gridAreaOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridAreaOpt::derivative (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridAreaOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
-      obj->derivative (oD, deriv, oMode);
+      obj->gradient (oD, deriv, oMode);
     }
 
 }
-void gridAreaOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode)
+void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -350,7 +351,7 @@ void gridAreaOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, 
     }
 
 }
-void gridAreaOpt::getConstraints (const optimData *oD, arrayData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
+void gridAreaOpt::getConstraints (const optimData *oD, matrixData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -369,7 +370,7 @@ void gridAreaOpt::constraintValue (const optimData *oD, double cVals[], const op
 
 }
 
-void gridAreaOpt::constraintJacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode)
+void gridAreaOpt::constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -460,7 +461,7 @@ void gridAreaOpt::setOffset (index_t offset, index_t constraintOffset, const opt
 }
 
 
-int gridAreaOpt::add (gridCoreObject *obj)
+void gridAreaOpt::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridArea *> (obj))
     {
@@ -470,7 +471,7 @@ int gridAreaOpt::add (gridCoreObject *obj)
           name = area->getName ();
         }
       id = area->getUserID ();
-      return OBJECT_ADD_SUCCESS;
+      return;
     }
   gridAreaOpt *sa = dynamic_cast<gridAreaOpt *> (obj);
   if (sa)
@@ -494,10 +495,10 @@ int gridAreaOpt::add (gridCoreObject *obj)
     {
       return add (relay);
     }
-  return OBJECT_NOT_RECOGNIZED;
+  throw(invalidObjectException(this));
 }
 
-int gridAreaOpt::remove (gridCoreObject *obj)
+void gridAreaOpt::remove (gridCoreObject *obj)
 {
   gridAreaOpt *sa = dynamic_cast<gridAreaOpt *> (obj);
   if (sa)
@@ -521,10 +522,11 @@ int gridAreaOpt::remove (gridCoreObject *obj)
     {
       return remove (relay);
     }
-  return (-1);
+  throw(invalidObjectException(this));
 }
 
-int gridAreaOpt::add (gridBusOpt *bus)
+//TODO:: make this work like gridArea
+void gridAreaOpt::add (gridBusOpt *bus)
 {
   if (!isMember (bus))
     {
@@ -532,14 +534,12 @@ int gridAreaOpt::add (gridBusOpt *bus)
       bus->setParent (this);
       bus->locIndex = static_cast<index_t> (busList.size ()) - 1;
       optObList.insert (bus);
-      bus->set ("basepower", systemBasePower);
       objectList.push_back (bus);
-      return (0);
     }
-  return (-2);
+
 }
 
-int gridAreaOpt::add (gridAreaOpt *newArea)
+void gridAreaOpt::add (gridAreaOpt *newArea)
 {
   if (!isMember (newArea))
     {
@@ -547,15 +547,12 @@ int gridAreaOpt::add (gridAreaOpt *newArea)
       newArea->parent = this;
       newArea->locIndex = static_cast<index_t> (areaList.size ()) - 1;
       optObList.insert (newArea);
-      newArea->set ("basepower", systemBasePower);
       objectList.push_back (newArea);
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_ALREADY_MEMBER;
 }
 
 // add link
-int gridAreaOpt::add (gridLinkOpt *lnk)
+void gridAreaOpt::add (gridLinkOpt *lnk)
 {
   if (!isMember (lnk))
     {
@@ -563,16 +560,13 @@ int gridAreaOpt::add (gridLinkOpt *lnk)
       lnk->setParent (this);
       lnk->locIndex = static_cast<index_t> (linkList.size ()) - 1;
       optObList.insert (lnk);
-      lnk->set ("basepower", systemBasePower);
       objectList.push_back (lnk);
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_ALREADY_MEMBER;
 }
 
 
 // add link
-int gridAreaOpt::add (gridRelayOpt *relay)
+void gridAreaOpt::add (gridRelayOpt *relay)
 {
   if (!isMember (relay))
     {
@@ -580,23 +574,19 @@ int gridAreaOpt::add (gridRelayOpt *relay)
       relay->setParent (this);
       relay->locIndex = static_cast<index_t> (relayList.size ()) - 1;
       optObList.insert (relay);
-      relay->set ("basepower", systemBasePower);
       objectList.push_back (relay);
-      return OBJECT_ADD_SUCCESS;
+
     }
-  return OBJECT_ALREADY_MEMBER;
 }
 
 // --------------- remove components ---------------
 // remove bus
-int gridAreaOpt::remove (gridBusOpt *bus)
+void gridAreaOpt::remove (gridBusOpt *bus)
 {
-  int out = OBJECT_REMOVE_FAILURE;
   if (busList[bus->locIndex]->getID () == bus->getID ())
     {
       busList[bus->locIndex]->setParent (nullptr);
       busList.erase (busList.begin () + bus->locIndex);
-      out = OBJECT_REMOVE_SUCCESS;
       for (auto kk = bus->locIndex; kk < busList.size (); ++kk)
         {
           busList[kk]->locIndex = kk;
@@ -614,18 +604,16 @@ int gridAreaOpt::remove (gridBusOpt *bus)
         }
     }
 
-  return out;
 }
 
 // remove link
-int gridAreaOpt::remove (gridLinkOpt *lnk)
+void gridAreaOpt::remove (gridLinkOpt *lnk)
 {
-  int out = OBJECT_REMOVE_FAILURE;
   if (linkList[lnk->locIndex]->getID () == lnk->getID ())
     {
       linkList[lnk->locIndex]->setParent (nullptr);
       linkList.erase (linkList.begin () + lnk->locIndex);
-      out = 0;
+
       for (auto kk = lnk->locIndex; kk < linkList.size (); ++kk)
         {
           linkList[kk]->locIndex = kk;
@@ -642,18 +630,15 @@ int gridAreaOpt::remove (gridLinkOpt *lnk)
           break;
         }
     }
-  return out;
 }
 
 // remove area
-int gridAreaOpt::remove (gridAreaOpt *rarea)
+void gridAreaOpt::remove (gridAreaOpt *rarea)
 {
-  int out = OBJECT_REMOVE_FAILURE;
   if (areaList[rarea->locIndex]->getID () == rarea->getID ())
     {
       areaList[rarea->locIndex]->parent = nullptr;
       areaList.erase (areaList.begin () + rarea->locIndex);
-      out = OBJECT_REMOVE_SUCCESS;
       for (auto kk = rarea->locIndex; kk < areaList.size (); ++kk)
         {
           areaList[kk]->locIndex = kk;
@@ -671,19 +656,15 @@ int gridAreaOpt::remove (gridAreaOpt *rarea)
         }
     }
 
-  return out;
-
 }
 
 // remove area
-int gridAreaOpt::remove (gridRelayOpt *relay)
+void gridAreaOpt::remove (gridRelayOpt *relay)
 {
-  int out = OBJECT_REMOVE_FAILURE;
   if (relayList[relay->locIndex]->getID () == relay->getID ())
     {
       relayList[relay->locIndex]->setParent (nullptr);
       relayList.erase (relayList.begin () + relay->locIndex);
-      out = OBJECT_REMOVE_SUCCESS;
       for (auto kk = relay->locIndex; kk < relayList.size (); ++kk)
         {
           relayList[kk]->locIndex = kk;
@@ -700,9 +681,6 @@ int gridAreaOpt::remove (gridRelayOpt *relay)
           break;
         }
     }
-
-  return out;
-
 }
 
 
@@ -756,9 +734,8 @@ void gridAreaOpt::setAll (const std::string &type, std::string param, double val
 }
 
 // set properties
-int gridAreaOpt::set (const std::string &param,  const std::string &val)
+void gridAreaOpt::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "status")
     {
       auto v2 = convertToLowerCase (val);
@@ -780,15 +757,13 @@ int gridAreaOpt::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridOptObject::set (param, val);
+      gridOptObject::set (param, val);
     }
-  return out;
 }
 
-int gridAreaOpt::set (const std::string &param, double val, units_t unitType)
+void gridAreaOpt::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   if ((param == "voltagetolerance") || (param == "vtol"))
     {
 
@@ -799,11 +774,9 @@ int gridAreaOpt::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridOptObject::set (param, val, unitType);
+      gridOptObject::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 
@@ -997,20 +970,19 @@ double gridAreaOpt::get (const std::string &param, gridUnits::units_t unitType) 
 
 gridAreaOpt * getMatchingArea (gridAreaOpt *area, gridOptObject *src, gridOptObject *sec)
 {
-  gridAreaOpt *A2 = nullptr;
   if (area->getParent () == nullptr)
     {
       return nullptr;
     }
+  gridAreaOpt *A2;
   if (area->getParent ()->getID () == src->getID ())    //if this is true then things are easy
     {
       A2 = static_cast<gridAreaOpt *> (sec->getArea (area->locIndex));
     }
   else
     {
-      gridOptObject *par;
       std::vector<int> lkind;
-      par = dynamic_cast<gridOptObject *> (area->getParent ());
+	  gridOptObject *par = dynamic_cast<gridOptObject *> (area->getParent ());
       if (par == nullptr)
         {
           return nullptr;

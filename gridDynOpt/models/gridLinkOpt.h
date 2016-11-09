@@ -50,10 +50,10 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
 
   // remove components
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (gridCoreObject *obj) override;
 
   virtual void objectInitializeA (unsigned long flags) override;
   virtual void loadSizes (const optimMode &oMode) override;
@@ -66,15 +66,15 @@ public:
 
   virtual void valueBounds (double ttime, double upLimit[], double lowerLimit[], const optimMode &oMode) override;
 
-  virtual void linearObj (const optimData *oD, vectData *linObj, const optimMode &oMode) override;
-  virtual void quadraticObj (const optimData *oD, vectData *linObj, vectData *quadObj, const optimMode &oMode) override;
+  virtual void linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode) override;
+  virtual void quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode) override;
 
   virtual double objValue (const optimData *oD, const optimMode &oMode) override;
-  virtual void derivative (const optimData *oD, double deriv[], const optimMode &oMode) override;
-  virtual void jacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode) override;
-  virtual void getConstraints (const optimData *oD, arrayData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
+  virtual void gradient (const optimData *oD, double deriv[], const optimMode &oMode) override;
+  virtual void jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode) override;
+  virtual void getConstraints (const optimData *oD, matrixData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
   virtual void constraintValue (const optimData *oD, double cVals[], const optimMode &oMode) override;
-  virtual void constraintJacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode) override;
+  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode) override;
   virtual void getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix = "") override;
 
 
@@ -83,8 +83,8 @@ public:
 
   virtual void setOffsets (const optimOffsets &newOffsets, const optimMode &oMode) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 

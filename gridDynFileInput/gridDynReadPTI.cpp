@@ -19,6 +19,7 @@
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
 #include "objectFactoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <fstream>
@@ -143,17 +144,14 @@ void loadPTI (gridCoreObject *parentObject, const std::string &filename,const ba
               busList[index - 1] = busfactory->makeTypeObject ();
               busList[index - 1]->setUserID (index);
               ptiReadBus (busList[index - 1], line, opt);
-              parentObject->add (busList[index - 1]);
-              if (busList[index - 1]->getParent () != parentObject)
-                {
-
-                  busList[index - 1]->setName (busList[index - 1]->getName () + "BUS-" + std::to_string (index));
-                  parentObject->add (busList[index - 1]);
-                  if (busList[index - 1]->getParent () != parentObject)
-                    {
-                      std::cerr << "Unable to add bus " << index << '\n';
-                    }
-                }
+			  try
+			  {
+				  parentObject->add(busList[index - 1]);
+			  }
+			  catch (const objectAddFailure &)
+			  {
+				  addToParentRename(busList[index - 1], parentObject);
+			  }
             }
           else
             {

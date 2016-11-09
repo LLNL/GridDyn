@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "objectFactory.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 using namespace gridUnits;
@@ -141,7 +141,7 @@ void gridDynGovernorReheat::derivative (const IOdata &args, const stateData *sD,
 
 
 
-void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset  (sMode);
   if (isAlgebraicOnly (sMode))
@@ -234,15 +234,14 @@ index_t gridDynGovernorReheat::findIndex (const std::string &field, const solver
 }
 
 // set parameters
-int gridDynGovernorReheat::set (const std::string &param,  const std::string &val)
+void gridDynGovernorReheat::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  gridDynGovernor::set (param, val);
 }
 
-int gridDynGovernorReheat::set (const std::string &param, double val, units_t unitType)
+void gridDynGovernorReheat::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   //param   = gridDynSimulation::toLower(param);
   if ((param == "ts") || (param == "t1"))
     {
@@ -266,10 +265,10 @@ int gridDynGovernorReheat::set (const std::string &param, double val, units_t un
     }
   else
     {
-      out = gridDynGovernor::set (param, val, unitType);
+      gridDynGovernor::set (param, val, unitType);
     }
 
-  return out;
+  
 }
 
 

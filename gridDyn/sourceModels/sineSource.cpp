@@ -11,9 +11,9 @@
  * LLNS Copyright End
 */
 
-#include "gridSource.h"
+#include "sourceTypes.h"
 
-
+#include "gridCoreTemplates.h"
 #include <cmath>
 
 /*
@@ -25,26 +25,18 @@ double duty_cylce;
 double A;
 double nextCycleTime;*/
 
+sineSource::sineSource(const std::string &objName, double startVal) : pulseSource(objName, startVal)
+{
 
+}
 
 gridCoreObject *sineSource::clone (gridCoreObject *obj) const
 {
-  sineSource *nobj;
-  if (obj == nullptr)
+	sineSource *nobj = cloneBase<sineSource, pulseSource>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new sineSource ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<sineSource *> (obj);
-      if (nobj == nullptr)
-        {
-          //if we can't cast the pointer clone at the next lower level
-          pulseSource::clone (obj);
-          return obj;
-        }
-    }
-  pulseSource::clone (nobj);
   nobj->Amp = Amp;
   nobj->frequency = frequency;
   nobj->phase = phase;
@@ -152,19 +144,14 @@ double sineSource::getDoutdt (const stateData *sD, const solverMode &, index_t /
   return ((o2 - o1) / 0.0001);
 }
 
-int sineSource::set (const std::string &param,  const std::string &val)
+void sineSource::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-//	makeLowerCase(param);
-
-  out = pulseSource::set (param, val);
-  return out;
+  pulseSource::set (param, val);
 }
 
 
-int sineSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void sineSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "a") || (param == "amplitude")||(param == "amp"))
     {
@@ -204,8 +191,8 @@ int sineSource::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = pulseSource::set (param, val, unitType);
+      pulseSource::set (param, val, unitType);
     }
-  return out;
+
 }
 

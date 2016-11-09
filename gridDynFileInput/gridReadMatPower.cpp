@@ -303,12 +303,9 @@ of the end/break-points of the piecewise linear cost
 n + 1 coecients of n-th order polynomial cost, starting with
 highest order, where cost is f(p) = cnpn +    + c1p + c0
 */
-
+#ifdef OPTIMIZATION_ENABLE
 void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencount)
 {
-  #ifndef OPTIMIZATION_ENABLE
-  return;
-  #else
 
   gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->find ("root"));
   if (!(gdo))        //return if the core object doesn't support optimization
@@ -366,9 +363,13 @@ void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencou
           go->set ("piecewise linear cost",1);
         }
     }
-  #endif
+  
 }
-
+#else
+void loadGenCostArray(gridCoreObject *, mArray & /*genCost*/, int /*gencount*/)
+{
+}
+#endif
 /* Branch data
 F BUS 1 \from" bus number
 T BUS 2 \to" bus number

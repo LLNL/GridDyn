@@ -14,7 +14,6 @@
 #include "readElement.h"
 #include "readerElement.h"
 #include "readerHelper.h"
-#include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
 #include "objectInterpreter.h"
 
@@ -25,7 +24,6 @@
 #include "optObjectFactory.h"
 #include "stringOps.h"
 
-#include <cstdio>
 
 using namespace readerConfig;
 // aP is the link element

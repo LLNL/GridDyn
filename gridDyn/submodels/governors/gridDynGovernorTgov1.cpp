@@ -15,7 +15,7 @@
 #include "gridCoreTemplates.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 
 using namespace gridUnits;
 
@@ -104,7 +104,7 @@ void gridDynGovernorTgov1::derivative (const IOdata &args, const stateData *sD, 
   Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
 }
 
-double gridDynGovernorTgov1::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynGovernorTgov1::timestep (double ttime, const IOdata &args, const solverMode &)
 {
   gridDynGovernorTgov1::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
@@ -115,10 +115,10 @@ double gridDynGovernorTgov1::timestep (double ttime, const IOdata &args, const s
   m_state[0] =  m_state[1] - Dt * (omega - 1.0);
 
   prevTime = ttime;
-  return m_state[0];
+
 }
 
-void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD,nullptr, sMode,  this);
@@ -281,15 +281,14 @@ index_t gridDynGovernorTgov1::findIndex (const std::string &field, const solverM
 }
 
 // set parameters
-int gridDynGovernorTgov1::set (const std::string &param,  const std::string &val)
+void gridDynGovernorTgov1::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  gridDynGovernorIeeeSimple::set (param, val);
 }
 
-int gridDynGovernorTgov1::set (const std::string &param, double val, units_t unitType)
+void gridDynGovernorTgov1::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   //param   = gridDynSimulation::toLower(param);
   if (param == "dt")
     {
@@ -297,10 +296,10 @@ int gridDynGovernorTgov1::set (const std::string &param, double val, units_t uni
     }
   else
     {
-      out = gridDynGovernorIeeeSimple::set (param, val, unitType);
+      gridDynGovernorIeeeSimple::set (param, val, unitType);
     }
 
-  return out;
+ 
 }
 
 

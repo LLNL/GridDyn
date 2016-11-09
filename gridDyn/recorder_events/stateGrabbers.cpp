@@ -16,11 +16,14 @@
 #include "linkModels/gridLink.h"
 #include "relays/gridRelay.h"
 #include "relays/sensor.h"
+#include "gridArea.h"
 #include "generators/gridDynGenerator.h"
 #include "grabberInterpreter.hpp"
 #include "gridCondition.h"
-#include "arrayDataSparse.h"
-
+#include "matrixDataScale.h"
+#include "matrixDataSparse.h"
+#include "core/helperTemplates.h"
+#include <map>
 
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber> sgInterpret ([](const std::string &fld, gridCoreObject *obj){
   return std::make_shared<stateGrabber> (fld, obj);
@@ -28,15 +31,13 @@ static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber> sg
 
 std::vector < std::shared_ptr < stateGrabber >> makeStateGrabbers (const std::string & command, gridCoreObject * obj)
 {
-  size_t rlc;
-  std::shared_ptr<stateGrabber> sgb;
   std::vector < std::shared_ptr < stateGrabber >> v;
   auto gsplit = splitlineBracketTrim (command,",;");
   for (auto &cmd:gsplit)
     {
-      if ((rlc = cmd.find_first_of (":(+-/*\\^")) != std::string::npos)
+      if (cmd.find_first_of (":(+-/*\\^?") != std::string::npos)
         {
-          sgb = sgInterpret.interpretGrabberBlock (cmd, obj);
+          auto sgb = sgInterpret.interpretGrabberBlock (cmd, obj);
           if ((sgb)&&(sgb->loaded))
             {
               v.push_back (sgb);
@@ -44,7 +45,7 @@ std::vector < std::shared_ptr < stateGrabber >> makeStateGrabbers (const std::st
         }
       else
         {
-          sgb = std::make_shared<stateGrabber> (cmd, obj);
+          auto sgb = std::make_shared<stateGrabber> (cmd, obj);
           if ((sgb) && (sgb->loaded))
             {
               v.push_back (sgb);
@@ -55,12 +56,17 @@ std::vector < std::shared_ptr < stateGrabber >> makeStateGrabbers (const std::st
 
 }
 
-stateGrabber::stateGrabber (std::string fld, gridCoreObject* obj)
+stateGrabber::stateGrabber( gridCoreObject* obj):cobj(obj)
 {
-  setInfo (fld, obj);
+
 }
 
-std::shared_ptr<stateGrabber> stateGrabber::clone (gridCoreObject *nobj, std::shared_ptr<stateGrabber> ggb) const
+stateGrabber::stateGrabber (std::string fld, gridCoreObject* obj):cobj(obj)
+{
+	stateGrabber::updateField(fld);
+}
+
+std::shared_ptr<stateGrabber> stateGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
 {
   if (ggb == nullptr)
     {
@@ -76,39 +82,30 @@ std::shared_ptr<stateGrabber> stateGrabber::clone (gridCoreObject *nobj, std::sh
   ggb->offset = offset;
   ggb->jacCapable = jacCapable;
   ggb->prevIndex = prevIndex;
-
-  if (nobj)
-    {
-      ggb->updateObject (nobj);
-    }
-  else
-    {
-      ggb->updateObject (cobj);
-    }
+  ggb->cobj = cobj;
+  
   return ggb;
 }
 
-int stateGrabber::setInfo (std::string fld, gridCoreObject* obj)
+int stateGrabber::updateField (std::string fld)
 {
   field = fld;
-  cobj = obj;
   makeLowerCase (fld);
   loaded = true;
-  if (dynamic_cast<gridBus *> (obj))
+  if (dynamic_cast<gridBus *> (cobj))
     {
       busLoadInfo (fld);
     }
-  else if (dynamic_cast<gridLink *> (obj))
+  else if (dynamic_cast<gridLink *> (cobj))
     {
       linkLoadInfo (fld);
     }
-  else if (dynamic_cast<gridSecondary *> (obj))
+  else if (dynamic_cast<gridSecondary *> (cobj))
     {
       secondaryLoadInfo (fld);
     }
-  else if (dynamic_cast<gridRelay *> (obj))
+  else if (dynamic_cast<gridRelay *> (cobj))
     {
-
       relayLoadInfo (fld);
     }
   else
@@ -119,39 +116,223 @@ int stateGrabber::setInfo (std::string fld, gridCoreObject* obj)
 
 }
 
+using namespace gridUnits;
+
+/** map of all the alternate strings that can be used*/
+/* *INDENT-OFF* */
+static const std::map<std::string, std::string> stringTranslate
+{
+	{ "voltage","v" },
+	{ "vol","v" },
+	{ "link","linkreal" },
+	{ "linkp","linkreal" },
+	{ "loadq","loadreactive" },
+	{ "loadreactivepower","loadreactive" },
+	{ "load","loadreal" },
+	{ "loadp","loadreal" },
+	{ "reactivegen","genreactive" },
+	{ "genq","genreactive" },
+	{ "gen","genreal" },
+	{ "generation","genreal" },
+	{ "genp","genreal" },
+	{ "realgen","genreal" },
+	{ "f","freq" },
+	{ "frequency","freq" },
+	{ "omega","freq" },
+	{ "a","angle" },
+	{ "phase","angle" },
+	{ "busgenerationreal","busgenreal" },
+	{ "busp","busgenreal" },
+	{ "busgen","busgenreal" },
+	{ "busgenerationreactive","busgenreactive" },
+	{ "busq","busgenreactive" },
+	{ "linkrealpower","linkreal" },
+	{ "linkp1","linkreal" },
+	{ "linkq","linkreactive" },
+	{ "linkreactivepower","linkreactive" },
+	{ "linkrealpower1","linkreal" },
+	{ "linkq1","linkreactive" },
+	{ "linkreactivepower1","linkreactive" },
+	{ "linkreal1","linkreal" },
+	{ "linkreactive1","linkreactive" },
+	{ "linkrealpower2","linkreal2" },
+	{ "linkq2","linkreactive2" },
+	{ "linkreactivepower2","linkreactive2" },
+	{ "linkp2","linkreal2" },
+	{ "p","real" },
+	{ "q","reactive" },
+	{ "impedance","z" },
+	{ "admittance","y" },
+	{ "impedance1","z" },
+	{ "admittance1","y" },
+	{ "z1","z" },
+	{ "y1","y" },
+	{ "impedance2","z2" },
+	{ "admittance2","y2" },
+	{ "status","connected" },
+	{ "breaker","switch" },
+	{ "breaker1","switch" },
+	{ "switch1","switch" },
+	{ "breaker2","switch2" },
+	{ "i","current" },
+	{ "i1","current" },
+	{ "current1","current" },
+	{ "i2","current2" },
+	{ "imagcurrent1","imagcurrent" },
+	{ "realcurrent1","realcurrent" },
+	{ "lossreal","loss" },
+	{ "angle1","angle" },
+	{ "absangle1","absangle" },
+	{ "voltage1","voltage" },
+	{ "v1","voltage" },
+	{ "v2","voltage2" },
+};
+
+#define FUNCTION_SIGNATURE [](gridCoreObject *obj, const stateData *sD, const solverMode &sMode)
+#define FUNCTION_SIGNATURE_OBJ_ONLY [](gridCoreObject *obj, const stateData *, const solverMode &)
+
+#define JAC_FUNCTION_SIGNATURE [](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+#define JAC_FUNCTION_SIGNATURE_NO_STATE [](gridCoreObject *obj, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+
+static const std::map<std::string, fstateobjectPair> objectFunctions
+{
+	{ "connected",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double>(static_cast<gridObject *>(obj)->isConnected()); },defUnit } },
+	{ "enabled",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double>(static_cast<gridObject *>(obj)->enabled); },defUnit } },
+	{ "armed",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double>(static_cast<gridObject *>(obj)->isArmed()); },defUnit } },
+
+};
+
+static const std::map<std::string, fstateobjectPair> busFunctions
+{
+	{ "v",{ FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getVoltage(sD, sMode); }, puV } },
+	{ "angle",{ FUNCTION_SIGNATURE{return static_cast<gridBus *>(obj)->getAngle(sD, sMode); }, rad } },
+	{ "freq",{ FUNCTION_SIGNATURE{return static_cast<gridBus *>(obj)->getFreq(sD, sMode); },puHz } },
+	{ "genreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getGenerationReal(); }, puMW } },
+	{ "genreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getGenerationReactive(); }, puMW } },
+	{ "loadreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getLoadReal(); }, puMW } },
+	{ "loadreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getLoadReactive(); }, puMW } },
+	{ "linkreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getLinkReal(); }, puMW } },
+	{ "linkreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *>(obj)->getLinkReactive(); }, puMW } },
+};
+
+static const std::map<std::string, objJacFunction> busJacFunctions
+{
+	{ "v",JAC_FUNCTION_SIGNATURE_NO_STATE{ ad->assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,voltageInLocation), 1.0); }  },
+	{ "angle", JAC_FUNCTION_SIGNATURE_NO_STATE{ ad->assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,angleInLocation), 1.0); } },
+};
+
+static const std::map<std::string, fstateobjectPair> areaFunctions
+{
+	{ "avgfreq",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getAvgFreq(); },puHz } },
+	{ "genreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getGenerationReal(); }, puMW } },
+	{ "genreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getGenerationReactive(); }, puMW } },
+	{ "loadreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getLoadReal(); }, puMW } },
+	{ "loadreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getLoadReactive(); }, puMW } },
+	{ "loss",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getLoss(); }, puMW } },
+	{ "tieflow",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridArea *>(obj)->getTieFlowReal(); }, puMW } },
+};
+
+
+static const IOdata kNullVec;
+static const  std::function<double(gridCoreObject *, const stateData *, const solverMode &)> rpower = FUNCTION_SIGNATURE{ return static_cast<gridSecondary *> (obj)->getRealPower(kNullVec, sD, sMode); };
+static const  std::function<double(gridCoreObject *, const stateData *, const solverMode &)> qpower = FUNCTION_SIGNATURE{ return static_cast<gridSecondary *> (obj)->getReactivePower(kNullVec, sD, sMode); };
+
+static const std::map<std::string, fstateobjectPair> loadFunctions
+{
+	{ "real",{rpower, puMW } },
+	{ "reactive",{qpower, puMW } },
+	{ "loadreal",{ rpower,puMW } },
+	{ "loadreactive",{qpower, puMW } }
+};
+
+static const std::map<std::string, fstateobjectPair> genFunctions
+{
+	{ "real",{ rpower, puMW } },
+	{ "reactive",{ qpower, puMW } },
+	{ "genreal",{ rpower,puMW } },
+	{ "genreactive",{qpower, puMW } },
+	{ "pset",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getPset(); },puMW } },
+	{ "adjup",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityUp(); },puMW } },
+	{ "adjdown",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityDown(); },puMW } },
+	{ "pmax",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getPmax(); },puMW } },
+	{ "pmin",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getPmin(); },puMW } },
+	{ "qmax",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getQmax(); },puMW } },
+	{ "qmin",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getQmin(); },puMW } },
+	{ "freq",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getFreq(nullptr,cLocalSolverMode); },puHz } },
+	{ "angle",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridDynGenerator *>(obj)->getAngle(nullptr,cLocalSolverMode); },rad } },
+};
+
+static const std::map<std::string, fstateobjectPair> linkFunctions
+{
+	{ "real",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealPower(1); }, puMW } },
+	{ "reactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
+	{ "linkreal",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealPower(1); },puMW } },
+	{ "linkreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
+	{ "z",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getTotalImpedance(1); },puOhm } },
+	{ "y",{ FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<gridLink *>(obj)->getTotalImpedance(1)); }, puOhm } },
+	{ "r",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealImpedance(1); },puOhm } },
+	{ "x",{ FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(1)); }, puOhm } },
+	{ "current",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getCurrent(1)); }, puA } },
+	{ "realcurrent",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getRealCurrent(1)); }, puA } },
+	{ "imagcurrent",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getImagCurrent(1)); }, puA } },
+	{ "voltage",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getVoltage(1)); }, puV } },
+	{ "absangle",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getAbsAngle(1)); }, rad } },
+	//functions for to side
+	{ "real2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealPower(2); }, puMW } },
+	{ "reactive2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
+	{ "linkreal2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealPower(2); },puMW } },
+	{ "linkreactive2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
+	{ "z2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getTotalImpedance(2); },puOhm } },
+	{ "y2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<gridLink *>(obj)->getTotalImpedance(2)); }, puOhm } },
+	{ "r2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridLink *>(obj)->getRealImpedance(2); },puOhm } },
+	{ "x2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(2)); }, puOhm } },
+	{ "current2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getCurrent(2)); }, puA } },
+	{ "realcurrent2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getRealCurrent(2)); }, puA } },
+	{ "imagcurrent2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getImagCurrent(2)); }, puA } },
+	{ "voltage2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getVoltage(2)); }, puV } },
+	{ "absangle2",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getAbsAngle(2)); }, rad } },
+
+	//non numbered fields
+	{ "angle",{ FUNCTION_SIGNATURE{return static_cast<gridLink *> (obj)->getAngle(sD->state, sMode);}, rad } },
+	{ "loss",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getLoss()); }, puMW } },
+	{ "lossreactive",{ FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<gridLink *>(obj)->getReactiveLoss()); }, puMW } },
+	{ "attached",{ FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (((!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch1_open_flag)) || (!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch2_open_flag))) && (static_cast<gridLink *>(obj)->enabled)); }, defUnit } },
+};
+
+/* *INDENT-ON* */
+
 void stateGrabber::busLoadInfo (const std::string &fld)
 {
-  if (fld == "voltage")
-    {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridBus *> (cobj)->getVoltage (sD, sMode);
-        };
-      jacCapable = true;
-      jacIfptr = [ = ](const stateData *, arrayData<double> *ad, const solverMode &sMode) {
-          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->getOutputLoc (sMode,voltageInLocation), 1);
-        };
+	auto fnd = stringTranslate.find(fld);
+	std::string nfstr = (fnd == stringTranslate.end()) ? field : fnd->second;
 
-    }
-  else if (fld == "angle")
-    {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridBus *> (cobj)->getAngle (sD->state, sMode);
-        };
-      jacCapable = true;
-      jacIfptr = [ = ](const stateData *, arrayData<double> *ad, const solverMode &sMode) {
-          ad->assignCheckCol (0, static_cast<gridBus *> (cobj)->getOutputLoc (sMode,angleInLocation), 1);
-        };
-    }
-  else if ((fld == "freq") || (fld == "frequency"))
-    {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridBus *> (cobj)->getFreq (sD, sMode);
-        };
-    }
-  else
-    {
-      loaded = false;
-    }
+	auto funcfind = busFunctions.find(nfstr);
+	if (funcfind != busFunctions.end())
+	{
+		fptr=funcfind->second.first;
+		inputUnits = funcfind->second.second;
+		loaded = true;
+		auto jacfind = busJacFunctions.find(nfstr);
+		if (jacfind != busJacFunctions.end())
+		{
+			jacIfptr = jacfind->second;
+			jacCapable = true;
+		}
+	}
+	else
+	{
+		funcfind = objectFunctions.find(nfstr);
+		if (funcfind != objectFunctions.end())
+		{
+			fptr= funcfind->second.first;
+		}
+		else
+		{
+			fptr = nullptr;
+			loaded = false;
+		}
+	}
+  
 }
 
 void stateGrabber::linkLoadInfo (const std::string &fld)
@@ -160,24 +341,24 @@ void stateGrabber::linkLoadInfo (const std::string &fld)
   int num = trailingStringInt (fld, fieldStr, 1);
   if (fieldStr == "angle")
     {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridLink *> (cobj)->getAngle (sD->state, sMode);
+      fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+          return static_cast<gridLink *> (obj)->getAngle (sD->state, sMode);
         };
     }
   else if ((fieldStr == "impedance") || (fieldStr == "z"))
     {
       if (num == 1)
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return static_cast<gridLink *> (cobj)->getTotalImpedance (1);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return static_cast<gridLink *> (obj)->getTotalImpedance (1);
             };
         }
       else
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return static_cast<gridLink *> (cobj)->getTotalImpedance (2);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return static_cast<gridLink *> (obj)->getTotalImpedance (2);
             };
         }
 
@@ -186,16 +367,16 @@ void stateGrabber::linkLoadInfo (const std::string &fld)
     {
       if (num == 1)
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return 1.0 / static_cast<gridLink *> (cobj)->getTotalImpedance (1);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return 1.0 / static_cast<gridLink *> (obj)->getTotalImpedance (1);
             };
         }
       else
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return 1.0 / static_cast<gridLink *> (cobj)->getTotalImpedance (2);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return 1.0 / static_cast<gridLink *> (obj)->getTotalImpedance (2);
             };
         }
 
@@ -204,16 +385,16 @@ void stateGrabber::linkLoadInfo (const std::string &fld)
     {
       if (num == 1)
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return static_cast<gridLink *> (cobj)->getCurrent (1);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return static_cast<gridLink *> (obj)->getCurrent (1);
             };
         }
       else
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              static_cast<gridLink *> (cobj)->updateLocalCache (sD, sMode);
-              return static_cast<gridLink *> (cobj)->getCurrent (2);
+          fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              static_cast<gridLink *> (obj)->updateLocalCache (sD, sMode);
+              return static_cast<gridLink *> (obj)->getCurrent (2);
             };
         }
 
@@ -230,16 +411,16 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
   if ((fieldStr == "value") || (fieldStr == "output") || (fieldStr == "o"))
     {
       //dgptr = &gridLink::getAngle;
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridRelay *> (cobj)->getOutput (sD, sMode, static_cast<index_t> (num));
+      fptr = [num ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+          return static_cast<gridRelay *> (obj)->getOutput (sD, sMode, static_cast<index_t> (num));
         };
     }
   else if ((fieldStr == "block") || (fieldStr == "b"))
     {
       if (dynamic_cast<sensor *> (cobj))
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              return static_cast<sensor *> (cobj)->getBlockOutput (sD, sMode, num);
+          fptr = [ num ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              return static_cast<sensor *> (obj)->getBlockOutput (sD, sMode, num);
             };
         }
       else
@@ -251,8 +432,8 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
     {
       if (dynamic_cast<sensor *> (cobj))
         {
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-              return static_cast<sensor *> (cobj)->getInput (sD, sMode, num);
+          fptr = [ num ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+              return static_cast<sensor *> (obj)->getInput (sD, sMode, num);
             };
         }
       else
@@ -263,8 +444,8 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
   else if ((fieldStr == "condition") || (fieldStr == "c"))
     {
       //dgptr = &gridLink::getAngle;
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return (static_cast<gridRelay *> (cobj))->getCondition (num)->getVal (1, sD, sMode);
+      fptr = [ num ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+          return (static_cast<gridRelay *> (obj))->getCondition (num)->getVal (1, sD, sMode);
         };
     }
   else
@@ -275,8 +456,8 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
           index_t outIndex = static_cast<sensor *> (cobj)->lookupOutput (fld);
           if (outIndex != kNullLocation)
             {
-              fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-                  return static_cast<sensor *> (cobj)->getOutput (sD, sMode, outIndex);
+              fptr = [ outIndex ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+                  return static_cast<sensor *> (obj)->getOutput (sD, sMode, outIndex);
                 };
             }
           else
@@ -288,14 +469,14 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
         {
           if (fld == "freq")
             {
-              fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-                  return static_cast<gridDynGenerator *> (cobj)->getFreq (sD, sMode);
+              fptr = [ = ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+                  return static_cast<gridDynGenerator *> (obj)->getFreq (sD, sMode);
                 };
             }
           else if (fld == "angle")
             {
-              fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-                  return static_cast<gridDynGenerator *> (cobj)->getAngle (sD, sMode);
+              fptr = [ = ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+                  return static_cast<gridDynGenerator *> (obj)->getAngle (sD, sMode);
                 };
             }
           else
@@ -311,30 +492,30 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
     }
 }
 
-static IOdata kNullVec;
+
 void stateGrabber::secondaryLoadInfo (const std::string &fld)
 {
   if ((fld == "realpower") || (fld == "power") || (fld == "p"))
     {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridSecondary *> (cobj)->getRealPower (kNullVec, sD, sMode);
+      fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+          return static_cast<gridSecondary *> (obj)->getRealPower (kNullVec, sD, sMode);
         };
       jacCapable = true;
-      jacIfptr = [ = ](const stateData *sD, arrayData<double> *ad, const solverMode &sMode) {
-          arrayDataSparse b;
-          static_cast<gridSecondary *> (cobj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
+      jacIfptr = [ ](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) {
+          matrixDataSparse<double> b;
+          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
           ad->copyTranslateRow (&b, 0, 0);
         };
     }
   else if ((fld == "reactivepower") || (fld == "reactive") || (fld == "q"))
     {
-      fptr = [ = ](const stateData *sD, const solverMode &sMode) {
-          return static_cast<gridSecondary *> (cobj)->getReactivePower (kNullVec, sD, sMode);
+      fptr = [ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
+          return static_cast<gridSecondary *> (obj)->getReactivePower (kNullVec, sD, sMode);
         };
       jacCapable = true;
-      jacIfptr = [ = ](const stateData *sD, arrayData<double> *ad, const solverMode &sMode) {
-          arrayDataSparse b;
-          static_cast<gridSecondary *> (cobj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
+      jacIfptr = [  ](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) {
+          matrixDataSparse<double> b;
+          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
           ad->copyTranslateRow (&b, 1, 0);
         };
     }
@@ -344,16 +525,16 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
       if (offset != kInvalidLocation)
         {
           prevIndex = 1;
-          fptr = [ = ](const stateData *sD, const solverMode &sMode) {
+          fptr = [ =](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) {
               if (sMode.offsetIndex != prevIndex)
                 {
-                  offset = static_cast<gridSecondary *> (cobj)->findIndex (field, sMode);
+                  offset = static_cast<gridSecondary *> (obj)->findIndex (field, sMode);
                   prevIndex = sMode.offsetIndex;
                 }
               return (offset != kNullLocation) ? sD->state[offset] : -kBigNum;
             };
           jacCapable = true;
-          jacIfptr = [ = ](const stateData *, arrayData<double> *ad, const solverMode &) {
+          jacIfptr = [ =](gridCoreObject *,const stateData *, matrixData<double> *ad, const solverMode &) {
               ad->assignCheckCol (0, offset, 1.0);
             };
         }
@@ -373,7 +554,7 @@ double stateGrabber::grabData (const stateData *sD, const solverMode &sMode)
 {
   if (loaded)
     {
-      double val = fptr (sD, sMode);
+      double val = fptr (cobj,sD, sMode);
       val = std::fma (val, gain, bias);
       return val;
     }
@@ -384,13 +565,29 @@ double stateGrabber::grabData (const stateData *sD, const solverMode &sMode)
 
 }
 
-void stateGrabber::updateObject (gridCoreObject *obj)
+void stateGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
 {
-  setInfo (field, obj);
+	if (mode == object_update_mode::direct)
+	{
+		cobj = obj;
+	}
+	else if (mode == object_update_mode::match)
+	{
+		cobj=findMatchingObject(cobj, obj);
+	}
 }
 
+gridCoreObject * stateGrabber::getObject() const
+{
+	return cobj;
+}
 
-void stateGrabber::outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void stateGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	objects.push_back(getObject());
+}
+
+void stateGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (!jacCapable)
     {
@@ -398,47 +595,41 @@ void stateGrabber::outputPartialDerivatives (const stateData *sD, arrayData<doub
     }
   if (gain != 1.0)
     {
-      arrayDataSparse bd;
-
-      jacIfptr (sD, &bd, sMode);
-      bd.scale (gain);
-      ad->merge (&bd);
+      matrixDataScale<double> bd(ad,gain); 
+      jacIfptr (cobj,sD, &bd, sMode);
     }
   else
     {
-      jacIfptr (sD, ad, sMode);
+      jacIfptr (cobj,sD, ad, sMode);
     }
 
 }
 
+customStateGrabber::customStateGrabber(gridCoreObject *obj) :stateGrabber(obj)
+{
 
-void customStateGrabber::setGrabberFunction (std::function<double(const stateData *sD, const solverMode &sMode)> nfptr)
+}
+
+void customStateGrabber::setGrabberFunction (objStateGrabberFunction nfptr)
 {
   fptr = nfptr;
   loaded = true;
 }
 
-std::shared_ptr<stateGrabber> customStateGrabber::clone (gridCoreObject *nobj, std::shared_ptr<stateGrabber > ggb) const
-{
-  std::shared_ptr<customStateGrabber> cgb;
-  if (ggb == nullptr)
-    {
-      cgb = std::make_shared<customStateGrabber> ();
-    }
-  else
-    {
-      if (std::dynamic_pointer_cast<customStateGrabber> (ggb))
-        {
-          cgb = std::dynamic_pointer_cast<customStateGrabber> (ggb);
-        }
-      else
-        {
-          return stateGrabber::clone (nobj, ggb);
-        }
-    }
-  stateGrabber::clone (nobj, cgb);
-  cgb->fptr = fptr;
 
+void customStateGrabber::setGrabberJacFunction(objJacFunction nJfptr)
+{
+	jacIfptr = nJfptr;
+	jacCapable = (jacIfptr)?true:false;
+}
+
+std::shared_ptr<stateGrabber> customStateGrabber::clone (std::shared_ptr<stateGrabber > ggb) const
+{
+	auto cgb = cloneBase<customStateGrabber, stateGrabber>(this, ggb);
+  if (cgb == nullptr)
+    {
+	  return ggb;
+    }
   return cgb;
 }
 
@@ -454,7 +645,7 @@ stateFunctionGrabber::stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, s
 }
 
 
-int stateFunctionGrabber::setInfo (std::string fld, gridCoreObject*obj)
+int stateFunctionGrabber::updateField (std::string fld)
 {
 	if (!fld.empty())
 	{
@@ -468,57 +659,50 @@ int stateFunctionGrabber::setInfo (std::string fld, gridCoreObject*obj)
 			return NOT_LOADED;
 		}
 	}
-	if (obj)
-	{
-		updateObject(obj);
-	}
+	
 	return LOADED;
 }
 
 
 
-std::shared_ptr<stateGrabber> stateFunctionGrabber::clone (gridCoreObject *nobj, std::shared_ptr<stateGrabber> ggb) const
+std::shared_ptr<stateGrabber> stateFunctionGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
 {
-  std::shared_ptr<stateFunctionGrabber> fgb;
-  if (ggb == nullptr)
+	auto fgb = cloneBase<stateFunctionGrabber, stateGrabber>(this, ggb);
+  if (fgb == nullptr)
     {
-      fgb = std::make_shared<stateFunctionGrabber> ();
+	  if (bgrabber)
+	  {
+		  return bgrabber->clone(ggb);
+	  }
+	  else
+	  {
+		  return ggb;
+	  }
     }
-  else
-    {
-      if (std::dynamic_pointer_cast<stateFunctionGrabber> (ggb))
-        {
-          fgb = std::dynamic_pointer_cast<stateFunctionGrabber> (ggb);
-        }
-      else
-        {
-          return stateGrabber::clone (nobj, ggb);
-        }
-    }
-  fgb->bgrabber = bgrabber->clone (nobj, nullptr);
+  if (bgrabber)
+  {
+	  fgb->bgrabber = bgrabber->clone(fgb->bgrabber);
+  }
   fgb->function_name = function_name;
   fgb->opptr = opptr;
-  stateGrabber::clone (nobj, fgb);
   return fgb;
 }
 
 double stateFunctionGrabber::grabData (const stateData *sD, const solverMode &sMode)
 {
-  double val;
-
-  double temp = bgrabber->grabData (sD, sMode);
-  val = opptr (temp);
+  double val = opptr (bgrabber->grabData(sD, sMode));
   val = std::fma (val, gain, bias);
   return val;
 }
 
 
-void stateFunctionGrabber::updateObject (gridCoreObject *obj)
+void stateFunctionGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
 {
   if (bgrabber)
     {
-      bgrabber->updateObject (obj);
+      bgrabber->updateObject (obj,mode);
     }
+
 }
 
 gridCoreObject *stateFunctionGrabber::getObject () const
@@ -533,22 +717,21 @@ gridCoreObject *stateFunctionGrabber::getObject () const
     }
 }
 
-void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 
   if (!jacCapable)
     {
       return;
     }
-  arrayDataSparse d1;
-  bgrabber->outputPartialDerivatives (sD, &d1, sMode);
 
   double temp = bgrabber->grabData (sD, sMode);
   double t1 = opptr (temp);
   double t2 = opptr (temp + 1e-7);
   double dodI = (t2 - t1) / 1e-7;
-  d1.scale (dodI * gain);
-  ad->merge (&d1);
+
+  matrixDataScale<double> d1(ad, dodI * gain);
+  bgrabber->outputPartialDerivatives(sD, &d1, sMode);
 }
 
 stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op): op_name(op)
@@ -567,7 +750,7 @@ stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_
 }
 
 
-int stateOpGrabber::setInfo (std::string opName, gridCoreObject *obj )
+int stateOpGrabber::updateField (std::string opName)
 {
 	if (!opName.empty())
 	{
@@ -582,37 +765,31 @@ int stateOpGrabber::setInfo (std::string opName, gridCoreObject *obj )
 		}
 	}
 
-	if (obj)
-	{
-		updateObject(obj);
-	}
-
 	return LOADED;
 }
 
-std::shared_ptr<stateGrabber> stateOpGrabber::clone (gridCoreObject *nobj, std::shared_ptr<stateGrabber> ggb) const
+std::shared_ptr<stateGrabber> stateOpGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
 {
-  std::shared_ptr<stateOpGrabber> ogb;
-  if (ggb == nullptr)
+	auto ogb = cloneBase<stateOpGrabber, stateGrabber>(this, ggb);
+  if (ogb == nullptr)
     {
-      ogb = std::make_shared<stateOpGrabber> ();
+	  if (bgrabber1)
+	  {
+		  bgrabber1->clone(ggb); 
+	  }
+	  return ggb;
     }
-  else
-    {
-      if (std::dynamic_pointer_cast<stateOpGrabber> (ggb))
-        {
-          ogb = std::dynamic_pointer_cast<stateOpGrabber> (ggb);
-        }
-      else
-        {
-          return stateGrabber::clone (nobj, ggb);
-        }
-    }
-  ogb->bgrabber1 = bgrabber1->clone (nobj, nullptr);
-  ogb->bgrabber2 = bgrabber2->clone (nobj, nullptr);
+  if (bgrabber1)
+  {
+	  ogb->bgrabber1 = bgrabber1->clone(ogb->bgrabber1);
+ }
+  if (bgrabber2)
+  {
+	  ogb->bgrabber2 = bgrabber2->clone(ogb->bgrabber2);
+  }
+  
   ogb->op_name = op_name;
   ogb->opptr = opptr;
-  stateGrabber::clone (nobj, ogb);
   return ogb;
 }
 
@@ -627,16 +804,17 @@ double stateOpGrabber::grabData (const stateData *sD, const solverMode &sMode)
 
 
 
-void stateOpGrabber::updateObject (gridCoreObject *obj)
+void stateOpGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
 {
   if (bgrabber1)
     {
-      bgrabber1->updateObject (obj);
+      bgrabber1->updateObject (obj,mode);
     }
   if (bgrabber2)
     {
-      bgrabber2->updateObject (obj);
+      bgrabber2->updateObject (obj,mode);
     }
+
 }
 
 void stateOpGrabber::updateObject (gridCoreObject *obj, int num)
@@ -674,30 +852,29 @@ gridCoreObject *stateOpGrabber::getObject () const
     }
 }
 
-void stateOpGrabber::outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void stateOpGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 
   if (!jacCapable)
     {
       return;
     }
-  arrayDataSparse d1;
-  arrayDataSparse d2;
-  bgrabber1->outputPartialDerivatives (sD, &d1, sMode);
-  bgrabber2->outputPartialDerivatives (sD, &d2, sMode);
+ 
 
   double grabber1Data = bgrabber1->grabData (sD, sMode);
   double grabber2Data = bgrabber2->grabData (sD, sMode);
 
   double t1 = opptr (grabber1Data, grabber2Data);
   double t2 = opptr (grabber1Data + 1e-7, grabber2Data);
-  double t3 = opptr (grabber1Data, grabber2Data + 1e-7);
+  
   double dodI = (t2 - t1) / 1e-7;
 
-  d1.scale (dodI * gain);
-  dodI = (t3 - t1) / 1e-7;
-  d2.scale (dodI * gain);
+  matrixDataScale<double> d1(ad, dodI * gain);
+  bgrabber1->outputPartialDerivatives(sD, &d1, sMode);
 
-  ad->merge (&d1);
-  ad->merge (&d2);
+  double t3 = opptr(grabber1Data, grabber2Data + 1e-7);
+  dodI = (t3 - t1) / 1e-7;
+  d1.setScale(dodI * gain);
+  bgrabber2->outputPartialDerivatives(sD, &d1, sMode);
+
 }

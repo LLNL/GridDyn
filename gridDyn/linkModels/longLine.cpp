@@ -14,6 +14,7 @@
 #include "linkModels/longLine.h"
 #include "gridCoreTemplates.h"
 #include "primary/acBus.h"
+#include "core/gridDynExceptions.h"
 
 #include <cmath>
 
@@ -37,14 +38,14 @@ gridCoreObject * longLine::clone (gridCoreObject *obj) const
   return line;
 }
 // add components
-int longLine::add (gridCoreObject * /*obj*/)
+void longLine::add (gridCoreObject * /*obj*/)
 {
-  return OBJECT_ADD_FAILURE;
+	return throw(invalidObjectException(this));
 }
 // remove components
-int longLine::remove (gridCoreObject * /*obj*/)
+void longLine::remove (gridCoreObject * /*obj*/)
 {
-  return OBJECT_REMOVE_FAILURE;
+
 }
 
 void longLine::pFlowObjectInitializeA (double time0, unsigned long flags)
@@ -53,12 +54,12 @@ void longLine::pFlowObjectInitializeA (double time0, unsigned long flags)
   return subsystem::pFlowObjectInitializeA (time0, flags);
 }
 
-int longLine::set (const std::string &param,  const std::string &val)
+void longLine::set (const std::string &param,  const std::string &val)
 {
   return gridLink::set (param, val);
 }
 
-int longLine::set (const std::string &param, double val, gridUnits::units_t unitType)
+void longLine::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
   if (param.length () == 1)
     {
@@ -78,13 +79,12 @@ int longLine::set (const std::string &param, double val, gridUnits::units_t unit
           break;
 
         default:
-          return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
         }
-      return PARAMETER_FOUND;
+	  return;
     }
 
 
-  int ret = PARAMETER_FOUND;
   if ((param == "segmentationlength") || (param == "segmentlength"))
     {
       segmentationLength = gridUnits::unitConversionDistance (val, unitType, gridUnits::km);
@@ -141,9 +141,8 @@ int longLine::set (const std::string &param, double val, gridUnits::units_t unit
     }
   else
     {
-      ret = gridLink::set (param, val, unitType);           //bypass subsystem set function
+      gridLink::set (param, val, unitType);           //bypass subsystem set function
     }
-  return ret;
 }
 
 double longLine::get (const std::string &param, gridUnits::units_t unitType) const

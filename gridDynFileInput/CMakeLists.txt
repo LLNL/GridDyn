@@ -15,18 +15,11 @@ set (reader_sources
 	readerHelper.cpp
 	gridDynFileInput.cpp
 	gridDynRunner.cpp
-	readerElement.cpp
 	gridParameter.cpp
 	readerInfo.cpp
 	)
 
 	set (xml_sources
-	tinyxmlReaderElement.cpp
-	tinyxmlReaderElement.h
-	jsonReaderElement.cpp
-	jsonReaderElement.h
-	tinyxml2ReaderElement.cpp
-	tinyxml2ReaderElement.h
 	readXMLfile.cpp
 	)
 
@@ -35,7 +28,7 @@ set(elementReader_sources
 	readBusElement.cpp
 	readEventElement.cpp
 	readLinkElement.cpp
-	readRecorderElement.cpp
+	readCollectorElement.cpp
 	readEconElement.cpp
 	readLibraryElement.cpp
 	readAreaElement.cpp
@@ -62,6 +55,7 @@ set(otherfileInput_sources
 	readMatDyn.cpp
 	gridDynReadCSV.cpp
 	readMatlabData.cpp
+	loadGDZ.cpp
 	)
 	
 set(fileInput_headers
@@ -70,7 +64,6 @@ set(fileInput_headers
 	gridDynFileInput.h
 	gridDynRunner.h
 	elementReaderTemplates.hpp
-	readerElement.h
 	readerInfo.h
 	gridParameter.h
 	readElementFile.h
@@ -93,7 +86,7 @@ source_group("general" FILES ${reader_sources})
 
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
@@ -117,4 +110,4 @@ INSTALL(TARGETS gridDynFileInput
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${fileInput_headers} DESTINATION include/griddyn)
+INSTALL(FILES ${fileInput_headers} DESTINATION include/gridDyn)

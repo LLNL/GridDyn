@@ -12,8 +12,9 @@
 */
 
 #include "submodels/otherBlocks.h"
+#include "core/gridDynExceptions.h"
 #include "objectFactory.h"
-#include "arrayData.h"
+#include "matrixData.h"
 
 #include <cmath>
 #include <algorithm>
@@ -147,7 +148,7 @@ void filteredDerivativeBlock::derivElements (double input, double /*didt*/, cons
   deriv[offset] = (sD->dstate_dt[offset + 1] - sD->state[offset]) / m_T2;
 }
 
-void filteredDerivativeBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void filteredDerivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   if (!hasDifferential (sMode))
     {
@@ -170,16 +171,13 @@ void filteredDerivativeBlock::jacElements (double input, double didt, const stat
 
 
 // set parameters
-int filteredDerivativeBlock::set (const std::string &param, const std::string &val)
+void filteredDerivativeBlock::set (const std::string &param, const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  basicBlock::set (param, val);
 }
 
-int filteredDerivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void filteredDerivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
-  //param   = gridDynSimulation::toLower(param);
 
   if (param == "t1")
     {
@@ -189,7 +187,7 @@ int filteredDerivativeBlock::set (const std::string &param, double val, gridUnit
     {
       if (std::abs (val) < kMin_Res)
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -198,10 +196,9 @@ int filteredDerivativeBlock::set (const std::string &param, double val, gridUnit
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
 }
 
 stringVec filteredDerivativeBlock::localStateNames () const
@@ -225,7 +222,7 @@ stringVec filteredDerivativeBlock::localStateNames () const
                    "ramp_limited", "deriv","filter"
           };
         }
-    default:      //should be 0, 1 or 2 so this shoudl run with 2
+    default:      //should be 0, 1 or 2 so this should run with 2
       return {
                "limited","ramp_limited", "deriv","filter"
       };

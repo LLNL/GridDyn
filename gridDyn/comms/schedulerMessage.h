@@ -58,7 +58,7 @@ public:
   std::vector<double> m_time;
   std::vector<double> m_target;
 
-  virtual std::string toString () override;
+  virtual std::string toString (int modifiers=comm_modifiers::none) const override;
   virtual void loadString (const std::string &fromString) override;
 
 private:
@@ -89,7 +89,7 @@ private:
 
   }
 
-  std::string makeTargetString (size_t cnt);
+  std::string makeTargetString (size_t cnt) const;
 };
 
 //BOOST_CLASS_EXPORT_GUID(schedulerMessage, "schedulerMessage");

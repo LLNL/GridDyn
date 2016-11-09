@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(cloning_test2)
 }
 
 /* clone test 3 has an approximation in the solver that should get cloned over to powerflow 2*/
-BOOST_AUTO_TEST_CASE(cloning_test3)
+BOOST_AUTO_TEST_CASE(cloning_test_solver_approx)
 {
 
 	std::string fname = clone_test_directory + "clone_test3.xml";
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(cloning_test3)
 	gds2 = static_cast<gridDynSimulation *>(gds->clone());
 	gds->powerflow();
 	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-
+	BOOST_CHECK(gds2->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 	gds2->powerflow();
 	BOOST_REQUIRE(gds2->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	std::vector<double> V1;
@@ -90,6 +90,38 @@ BOOST_AUTO_TEST_CASE(cloning_test3)
 	gds2->getVoltage(V2);
 	auto diffc = countDiffs(V1, V2, 0.0000001);
 	BOOST_CHECK(diffc == 0);
+
+	auto obj = gds2->find("bus3::load3");
+
+	auto obj2 = gds->find("bus3::load3");
+	BOOST_CHECK(obj->getID() != obj2->getID());
+	obj->set("q+", 0.4);
+
+	gds->powerflow();
+	gds2->powerflow();
+
+	gds2->getVoltage(V1);
+	diffc = countDiffs(V1, V2, 0.0000001);
+	BOOST_CHECK(diffc > 0);
+
+	gds->getVoltage(V2);
+	diffc = countDiffs(V1, V2, 0.0000001);
+	BOOST_CHECK(diffc > 0);
+
+	obj->set("q+", -0.3);
+	//ensure there is no connection with the previous simulation object
+	delete gds;
+	gds = nullptr;
+	auto ret=gds2->powerflow();
+	BOOST_CHECK(ret == FUNCTION_EXECUTION_SUCCESS);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(cloning_test4)
+{
+	
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

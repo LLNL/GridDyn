@@ -13,7 +13,7 @@
 
 #include "GhostSwingBusManager.h"
 
-#include "griddyn-tracer.h"
+#include "GridDyn-tracer.h"
 
 #include <iostream>
 #include <cstddef>
@@ -225,7 +225,7 @@ void GhostSwingBusManager::getCurrent (int taskId, cvec &current)
   {
     MPI_Status status;
 
-    GRIDDYN_TRACER ("griddyn::GhostSwingBusManager::getCurrent-wait");
+    GRIDDYN_TRACER ("GridDyn::GhostSwingBusManager::getCurrent-wait");
 
     // Make sure async Send has completed.
     MPI_Wait (&m_mpiSendRequests[taskId], &status);
@@ -282,5 +282,3 @@ void GhostSwingBusManager::endSimulation ()
   //clear the shared_ptr, the object will probably get deleted at this point and will be unable to be called
   m_pInstance.reset ();
 }
-
-

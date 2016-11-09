@@ -16,7 +16,6 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "fileReaders.h"
 #include "GhostSwingBusManager.h"
 #include "loadModels/gridLabDLoad.h"
 #include <cstdio>

@@ -17,7 +17,10 @@
 #include "units.h"
 #include <string>
 #include <vector>
-/** @brief helper class for representing a parameter of various types*/
+/** @brief helper class for representing a parameter of various types
+ * @details data class to extract some parameter information from a string
+ */
+
 class gridParameter
 {
 public:
@@ -33,7 +36,7 @@ public:
   /** @brief alternate constructor
   @param[in] str  call the from string constructor
   */
-  gridParameter (const std::string &str);
+  explicit gridParameter (const std::string &str);
   /** @brief alternate constructor
   @param[in] fld  the field of the parameter
   @param[in] val  the value of the parameter

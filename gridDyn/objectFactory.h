@@ -21,8 +21,6 @@
 #include <type_traits>
 
 
-//!< typedef for convenience
-typedef std::vector<std::string> stringVec;
 
 /** @brief class definitions for the object factories that can create the objects
  cFactory is a virtual base class for object Construction functions
@@ -72,7 +70,7 @@ public:
 
 typedef std::map<std::string, objectFactory *> cMap;
 
-/** @brief a componentfactory containing a mapping of specific object factories for a specific component
+/** @brief a factory containing a mapping of specific object factories for a specific component
 */
 class componentFactory
 {
@@ -81,7 +79,7 @@ public:
   componentFactory ()
   {
   }
-  componentFactory (const std::string componentName);
+  explicit componentFactory (const std::string componentName);
   ~componentFactory ();
   stringVec getTypeNames ();
   gridCoreObject * makeObject (const std::string &type,const std::string &objectName);
@@ -100,7 +98,7 @@ protected:
 
 //create a high level object factory for the coreObject class
 typedef std::map<std::string, std::shared_ptr<componentFactory> > fMap;
-/** @brief central location for builing objects and storing factories for making all the gridDyn component
+/** @brief central location for building objects and storing factories for making all the gridDyn component
  core object Factory class  intended to be a singleton it contains a map from strings to typeFactories
 */
 class coreObjectFactory
@@ -108,7 +106,7 @@ class coreObjectFactory
 public:
   ~coreObjectFactory ();
 
-  /** @brief get a ahared pointer to the core object factory*/
+  /** @brief get a shared pointer to the core object factory*/
   static std::shared_ptr<coreObjectFactory> instance ();
 
   /** @brief register a type factory with the coreObjectFactory
@@ -129,43 +127,48 @@ public:
   /** @brief get a listing of the type names available for a given factory*/
   stringVec getTypeNames (const std::string &fname);
 
+  /** @brief create the default object from a given component
+  @param[in] componentName  the name of the category of objects
+  @return the created gridCoreObject */
+  gridCoreObject * createObject(const std::string &componentName);
+
   /** @brief create an object from a given objectType and typeName
-  @param[in] obType  the name of the category of objects
+  @param[in] componentName  the name of the category of objects
   @param[in] typeName  the specific type to create
   @return the created gridCoreObject */
   gridCoreObject * createObject (const std::string &componentName, const std::string &typeName);
 
   /** @brief create an object from a given objectType and typeName
-  @param[in] obType  the name of the category of objects
+  @param[in] componentName  the name of the category of objects
   @param[in] typeName  the specific type to create
   @param[in] objName  the name of the object to create
   @return the created gridCoreObject */
   gridCoreObject * createObject (const std::string &componentName, const std::string &typeName, const std::string &objName);
 
   /** @brief get a specific type factory
-  @param[in] fname the name of the typeFactory to get
-  @return a shared pointer to a specfic type Factory
+  @param[in] componentName the name of the typeFactory to get
+  @return a shared pointer to a specific type Factory
   */
   std::shared_ptr<componentFactory> getFactory (const std::string &componentName);
 
   /** @brief check if a specific object category is valid*/
-  bool isValidObject (const std::string &componentType);
+  bool isValidObject (const std::string &componentName);
 
-  /** @brief check if a specific type name is valid for a specific category of objects*/
+  /** @brief check if a specific component name is valid for a specific category of objects*/
   bool isValidType (const std::string &component, const std::string &typeName);
 
   /** @brief prepare a number of objects for use later so they can all be constructed at once
-  @param[in] obType the category of Object to create
+  @param[in] component the category of Object to create
   @param[in] typeName the specific type of object in reference
   @param[in] numObjects  the number of objects to preallocate
-  @param[in] obj the object to reference as the owner responsbile for deleting the container
+  @param[in] obj the object to reference as the owner responsible for deleting the container
   */
   void prepObjects (const std::string &component, const std::string &typeName, count_t numObjects, gridCoreObject *obj);
 
   /** @brief prepare a number of objects for use later so they can all be constructed at once of the default type for a given container
-  @param[in] obType the category of Object to create
+  @param[in] component the category of Object to create
   @param[in] numObjects  the number of objects to preallocate
-  @param[in] obj the object to reference as the owner responsbile for deleting the container
+  @param[in] obj the object to reference as the owner responsible for deleting the container
   */
   void prepObjects (const std::string &component, count_t numObjects, gridCoreObject *obj);
 private:

@@ -13,8 +13,17 @@
 
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "stringOps.h"
+#include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
+
+
+transferFunctionBlock::transferFunctionBlock(const std::string &newName) : basicBlock(newName), a(2, 1), b(2, 0)
+{
+	b[0] = 1;
+	opFlags.set(use_state);
+}
 
 transferFunctionBlock::transferFunctionBlock (int order) : a (order + 1,1),b (order + 1,0)
 {
@@ -36,21 +45,11 @@ transferFunctionBlock::transferFunctionBlock (std::vector<double> Acoef, std::ve
 
 gridCoreObject *transferFunctionBlock::clone (gridCoreObject *obj) const
 {
-  transferFunctionBlock *nobj;
-  if (obj == nullptr)
+	transferFunctionBlock *nobj = cloneBase<transferFunctionBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new transferFunctionBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<transferFunctionBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
 
   nobj->a = a;
   nobj->b = b;
@@ -137,7 +136,7 @@ void transferFunctionBlock::derivElements (double input, double didt, const stat
 }
 
 
-void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   ad->assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
@@ -223,9 +222,9 @@ index_t transferFunctionBlock::findIndex (const std::string &field, const solver
 }
 
 // set parameters
-int transferFunctionBlock::set (const std::string &param, const std::string &val)
+void transferFunctionBlock::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "a")
     {
       a = str2vector (val,0);
@@ -236,14 +235,13 @@ int transferFunctionBlock::set (const std::string &param, const std::string &val
     }
   else
     {
-      out = basicBlock::set (param, val);
+      basicBlock::set (param, val);
     }
-  return out;
+ 
 }
 
-int transferFunctionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void transferFunctionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   //param   = gridDynSimulation::toLower(param);
   std::string pstr;
@@ -267,7 +265,7 @@ int transferFunctionBlock::set (const std::string &param, double val, gridUnits:
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
           break;
         case 'b':
@@ -282,28 +280,27 @@ int transferFunctionBlock::set (const std::string &param, double val, gridUnits:
             }
           else
             {
-              out = PARAMETER_NOT_FOUND;
+			  throw(unrecognizedParameter());
             }
           break;
         case 'k':
           K = val;
           break;
         default:
-          out = PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
         }
-      return out;
+
     }
 
-  if (param == "#")
+  if (param[0] == '#')
     {
       //m_T1 = val;
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
 }
 
 static stringVec stNames {

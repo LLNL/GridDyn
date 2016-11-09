@@ -20,8 +20,8 @@
 #include "objectInterpreter.h"
 
 #include "linkModels/gridLink.h"
+#include "core/gridDynExceptions.h"
 #include "gridBus.h"
-#include <cstdio>
 
 using namespace readerConfig;
 
@@ -55,7 +55,11 @@ gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo 
       auto bus = dynamic_cast<gridBus *> (obj);
       if (bus)
         {
-          if (lnk->updateBus (bus, 1))
+		  try
+		  {
+			  lnk->updateBus(bus, 1);
+		  }
+          catch(const objectAddFailure &oaf)
             {
               WARNPRINT (READER_WARN_IMPORTANT, "unable to load 'from' bus " << busname);
             }
@@ -83,10 +87,14 @@ gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo 
       auto bus = dynamic_cast<gridBus *> (obj);
       if (bus)
         {
-          if (lnk->updateBus (bus, 2))
-            {
-              WARNPRINT (READER_WARN_IMPORTANT, "unable to load 'to' bus " << busname);
-            }
+		  try
+		  {
+			  lnk->updateBus(bus, 2);
+		  }
+		  catch (const objectAddFailure &oaf)
+		  {
+			  WARNPRINT(READER_WARN_IMPORTANT, "unable to load 'to' bus " << busname);
+		  }
         }
       else if (warnlink)
         {

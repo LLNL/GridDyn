@@ -14,9 +14,10 @@
 #include "loadModels/gridLoad.h"
 #include "loadModels/otherLoads.h"
 #include "objectFactoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "gridBus.h"
 #include "gridCoreTemplates.h"
-#include "arrayData.h"
+#include "matrixData.h"
 
 #include <iostream>
 #include <cmath>
@@ -37,7 +38,7 @@ static childTypeFactory<exponentialLoad,gridLoad> glexp ("load", "exponential");
 static childTypeFactory<fDepLoad,gridLoad> glfd ("load", "fdep");
 
 
-int gridLoad::loadCount = 0;
+std::atomic<count_t> gridLoad::loadCount(0);
 gridLoad::gridLoad (const std::string &objName) : gridSecondary (objName),bus (&defBus)
 {
   constructionHelper ();
@@ -158,13 +159,13 @@ void gridLoad::setState (double ttime, const double /*state*/[], const double /*
     }
 }
 
-double gridLoad::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridLoad::timestep (double ttime, const IOdata &args, const solverMode &)
 {
   if (!enabled)
     {
       Pout = 0;
       dPdf = 0;
-      return Pout;
+      return;
     }
   if (ttime != prevTime)
     {
@@ -185,7 +186,6 @@ double gridLoad::timestep (double ttime, const IOdata &args, const solverMode &)
   std::cout << "SGS : " << prevTime << " : " << name << " gridLoad::timestep realPower = " << getRealPower () << " reactive power = " << getReactivePower () << '\n';
 #endif
   prevTime = ttime;
-  return Pout;
 }
 
 
@@ -206,9 +206,8 @@ void gridLoad::getParameterStrings (stringVec &pstr, paramStringType pstype) con
   getParamString<gridLoad, gridObject> (this, pstr, locNumStrings, locStrStrings, flagStrings, pstype);
 }
 
-int gridLoad::setFlag (const std::string &flag, bool val)
+void gridLoad::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "usepowerfactor")
     {
       if (val)
@@ -247,24 +246,23 @@ int gridLoad::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridSecondary::setFlag (flag, val);
+      gridSecondary::setFlag (flag, val);
     }
-  return out;
+ 
 }
 
 // set properties
-int gridLoad::set (const std::string &param,  const std::string &val)
+void gridLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
     }
   else
     {
-      out = gridSecondary::set (param, val);
+      gridSecondary::set (param, val);
     }
 
-  return out;
 }
 
 double gridLoad::get (const std::string &param, units_t unitType) const
@@ -293,6 +291,8 @@ double gridLoad::get (const std::string &param, units_t unitType) const
         case 'g':
           val = 1 / r;
           break;
+		default:
+			break;
         }
       return val;
     }
@@ -323,9 +323,8 @@ double gridLoad::get (const std::string &param, units_t unitType) const
   return val;
 }
 
-int gridLoad::set (const std::string &param, double val, units_t unitType)
+void gridLoad::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if (param.length () == 1)
     {
       switch (param[0])
@@ -335,7 +334,7 @@ int gridLoad::set (const std::string &param, double val, units_t unitType)
           P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
           if (opFlags[use_power_factor_flag])
             {
-              if (pfq > 1000.0)                          //if the pfq is screwy then recalculate otherwise leave it the same.
+              if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
                 {
                   if (P != 0)
                     {
@@ -401,13 +400,163 @@ int gridLoad::set (const std::string &param, double val, units_t unitType)
           M = val;
           break;
         default:
-          return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
         }
       checkFaultChange ();
-      return out;
-    }
+	  return;
 
-  if (param == "load p")
+    }
+  if (param.back()=='+') //load increments
+  {
+	  //load increments  allows a delta on the load through the set functions
+	  if (param == "p+")
+	  {
+		  P += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+		  if (opFlags[use_power_factor_flag])
+		  {
+			  if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
+			  {
+				  if (P != 0)
+				  {
+					  pfq = Q / P;
+				  }
+
+			  }
+		  }
+	  }
+	  else if (param == "q+")
+	  {
+		  Q += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+		  if (opFlags[use_power_factor_flag])
+		  {
+			  if (P != 0)
+			  {
+				  pfq = Q / P;
+
+			  }
+			  else
+			  {
+				  pfq = kBigNum;
+			  }
+		  }
+	  }
+	  else if ((param == "yp+") || (param == "zr+"))
+	  {
+		  Yp += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+		  if (Yp != 0)
+		  {
+			  r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
+		  }
+		  else
+		  {
+			  r = kBigNum;
+		  }
+		  checkFaultChange();
+	  }
+	  else if ((param == "yq+") || (param == "zq+"))
+	  {
+		  Yq += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+		  if (Yq != 0)
+		  {
+			  x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+		  }
+		  else
+		  {
+			  x = 0.0;
+		  }
+		  checkFaultChange();
+	  }
+	  else if ((param == "ir+") || (param == "ip+"))
+	  {
+		  Ip += unitConversion(val, unitType, puA, systemBasePower, baseVoltage);
+		  checkFaultChange();
+	  }
+	  else if (param == "iq+")
+	  {
+		  Iq += unitConversion(val, unitType, puA, systemBasePower, baseVoltage);
+		  checkFaultChange();
+	  }
+	  else
+	  {
+		  gridSecondary::set(param, val, unitType);
+	  }
+  }
+  else if (param.back() == '*')
+  {
+	  //load increments  allows a delta on the load through the set functions
+	  if (param == "p*")
+	  {
+		  P *= val;
+		  if (opFlags[use_power_factor_flag])
+		  {
+			  if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
+			  {
+				  if (P != 0)
+				  {
+					  pfq = Q / P;
+				  }
+
+			  }
+		  }
+	  }
+	  else if (param == "q*")
+	  {
+		  Q *= val;
+		  if (opFlags[use_power_factor_flag])
+		  {
+			  if (P != 0)
+			  {
+				  pfq = Q / P;
+
+			  }
+			  else
+			  {
+				  pfq = kBigNum;
+			  }
+		  }
+	  }
+	  else if ((param == "yp*") || (param == "zr*"))
+	  {
+		  Yp *= val;
+		  if (Yp != 0)
+		  {
+			  r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
+		  }
+		  else
+		  {
+			  r = kBigNum;
+		  }
+		  checkFaultChange();
+	  }
+	  else if ((param == "yq*") || (param == "zq*"))
+	  {
+		  Yq *= val;
+		  if (Yq != 0)
+		  {
+			  x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+		  }
+		  else
+		  {
+			  x = 0.0;
+		  }
+		  checkFaultChange();
+	  }
+	  else if ((param == "ir*") || (param == "ip*"))
+	  {
+		  Ip *= val;
+		  checkFaultChange();
+	  }
+	  else if (param == "iq*")
+	  {
+		  Iq *= val;
+		  checkFaultChange();
+	  }
+	  else
+	  {
+		  gridSecondary::set(param, val, unitType);
+	  }
+  }
+  else if (param == "load p")
     {
       P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
       if (opFlags[use_power_factor_flag])
@@ -502,33 +651,6 @@ int gridLoad::set (const std::string &param, double val, units_t unitType)
       pfq = val;
       opFlags.set (use_power_factor_flag);
     }
-  else if (param == "usepowerfactor")
-    { //TODO::PT move to setFlags function
-      if (val > 0.1)
-        {
-          if (!(opFlags[use_power_factor_flag]))
-            {
-              opFlags.set (use_power_factor_flag);
-              if (P != 0)
-                {
-                  pfq = Q / P;
-                }
-              else
-                {
-                  pfq = kBigNum;
-                }
-            }
-
-        }
-      else
-        {
-          opFlags.reset (use_power_factor_flag);
-        }
-    }
-  else if (param == "converttoimpedance")
-    {
-      opFlags.set (convert_to_constant_impedance, (val > 0.1));
-    }
   else if (param == "vpqmin")
     {
 
@@ -551,7 +673,7 @@ int gridLoad::set (const std::string &param, double val, units_t unitType)
   else if (param == "pqlowvlimit")       //this is mostly a convenience flag for adaptive solving
     {
 
-      if (val > 0.1)
+      if (val > 0.1) //not a flag
         {
           if (Vpqmin < 0.5)
             {
@@ -568,16 +690,10 @@ int gridLoad::set (const std::string &param, double val, units_t unitType)
     {
       baseVoltage = val;
     }
-  // SGS added to set the base voltage 2015-01-30
-  else if ((param == "basepower") || (param == "base pow"))
-    {
-      systemBasePower = val;
-    }
   else
     {
-      out = gridSecondary::set (param, val, unitType);
+      gridSecondary::set (param, val, unitType);
     }
-  return out;
 }
 
 void gridLoad::checkFaultChange ()
@@ -780,7 +896,7 @@ IOdata gridLoad::getOutputs (const IOdata &args, const stateData *sD, const solv
   return output;
 }
 
-void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (args.empty ())  //we only have output derivatives if the input arguments are not counted
     {
@@ -790,7 +906,7 @@ void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD
     }
 }
 
-void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
 {
   if  ((sD)&&(sD->time != lastTime))
     {

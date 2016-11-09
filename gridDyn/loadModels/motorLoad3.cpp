@@ -15,7 +15,7 @@
 #include "gridBus.h"
 #include "objectFactory.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <iostream>
 
@@ -193,23 +193,22 @@ void motorLoad3::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 // set properties
-int motorLoad3::set (const std::string &param,  const std::string &val)
+void motorLoad3::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
-int motorLoad3::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad3::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "rs")
     {
@@ -217,10 +216,10 @@ int motorLoad3::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = motorLoad::set (param, val, unitType);
+      motorLoad::set (param, val, unitType);
     }
 
-  return out;
+
 }
 
 void motorLoad3::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
@@ -344,7 +343,7 @@ void motorLoad3::getStateName (stringVec &stNames, const solverMode &sMode, cons
 }
 
 
-double motorLoad3::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad3::timestep (double ttime, const IOdata &args, const solverMode &)
 {
   stateData sD(ttime,m_state.data());
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
@@ -354,7 +353,6 @@ double motorLoad3::timestep (double ttime, const IOdata &args, const solverMode 
   m_state[4] += dt * m_dstate_dt[4];
   prevTime = ttime;
   updateCurrents (args, &sD, cLocalSolverMode);
-  return getRealPower ();
 }
 
 void motorLoad3::updateCurrents (const IOdata &args, const stateData *sD, const solverMode &sMode)
@@ -405,7 +403,7 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
 }
 
 
-void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   index_t refAlg,refDiff;
   const double *gm,*dst;
@@ -519,7 +517,7 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, arra
 
 }
 
-void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
 
 
@@ -546,7 +544,7 @@ void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *
 
 }
 
-void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);

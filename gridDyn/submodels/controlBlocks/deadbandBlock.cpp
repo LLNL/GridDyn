@@ -13,7 +13,7 @@
 
 #include "submodels/gridControlBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "stringOps.h"
 
 deadbandBlock::deadbandBlock (const std::string &objName) : basicBlock (objName)
@@ -277,7 +277,7 @@ void deadbandBlock::algElements (double input, const stateData *sD, double updat
 }
 
 
-void deadbandBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void deadbandBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   if ((!opFlags[differential_input])&& (hasAlgebraic (sMode)))
     {
@@ -627,9 +627,8 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
   return ret;
 }
 
-int deadbandBlock::setFlag (const std::string &flag, bool val)
+void deadbandBlock::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "shifted")
     {
       opFlags.set (uses_shiftedoutput,val);
@@ -645,32 +644,28 @@ int deadbandBlock::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = PARAMETER_NOT_FOUND;
+	  basicBlock::setFlag(flag, val);
     }
-  return out;
+
 }
 // set parameters
-int deadbandBlock::set (const std::string &param,  const std::string &val)
+void deadbandBlock::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
-  //param   = gridDynSimulation::toLower(param);
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = basicBlock::set (param, val);
+      basicBlock::set (param, val);
     }
-  return out;
+
 }
 
-int deadbandBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void deadbandBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
-  //param   = gridDynSimulation::toLower(param);
   if ((param == "level") || (param == "dblevel")||(param == "deadbandlevel"))
     {
       deadbandLevel = val;
@@ -732,8 +727,8 @@ int deadbandBlock::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
+
 }

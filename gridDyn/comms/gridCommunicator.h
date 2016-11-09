@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 #include <queue>
+#include <atomic>
 
 class commMessage;
 
@@ -33,25 +34,31 @@ class gridCommunicator
 public:
   bool autoPingEnabled = true;       //!< control for automatic ping enable
   gridCommunicator ();
-  gridCommunicator (std::string name);
+  explicit gridCommunicator (std::string name);
   gridCommunicator (std::string name, std::uint64_t id);
-  gridCommunicator (std::uint64_t id);
+  explicit gridCommunicator (std::uint64_t id);
 
   virtual ~gridCommunicator ()
   {
   }
-  /** transmit a commmessage somewhere
+  /** function to clone the communicator
+  @param[in] obj an object to copy data to
+  @return a shared ptr to a new communicator
+  */
+  virtual std::shared_ptr<gridCommunicator> clone(std::shared_ptr<gridCommunicator> obj = nullptr) const;
+
+  /** transmit a commMessage somewhere
   * transmits a data block to somewhere Else
-  * @param[in] destName the identifier of the receiving location specificed as a string
+  * @param[in] destName the identifier of the receiving location specified as a string
   * @param[in] message  the message to send
   */
-  virtual int transmit (const std::string &destName, std::shared_ptr<commMessage> message);
-  /** transmit a commmessage somewhere
+  virtual void transmit (const std::string &destName, std::shared_ptr<commMessage> message);
+  /** transmit a commMessage somewhere
   * transmits a data block to somewhere Else
-  * @param[in] destID the identifier of the receiving location specificed as a id code
+  * @param[in] destID the identifier of the receiving location specified as a id code
   * @param[in] message  the message to send
   */
-  virtual int transmit (std::uint64_t destID, std::shared_ptr<commMessage> message);
+  virtual void transmit (std::uint64_t destID, std::shared_ptr<commMessage> message);
   /** receive data
   * received a data block and takes the appropriate action
   * @param[in] sourceID the identifier of the transmit location
@@ -62,7 +69,7 @@ public:
   /** receive data
   * received a data block and takes the appropriate action
   * @param[in] sourceID the identifier of the transmit location
-  * @param[in] destName the identifier of the receiving location specificed as a string
+  * @param[in] destName the identifier of the receiving location specified as a string
   * @param[in] message  the message to send
   */
   virtual void receive (std::uint64_t sourceID, const std::string &destName, std::shared_ptr<commMessage> message);
@@ -81,7 +88,7 @@ public:
     m_id = newID;
   }
 
-  std::string getName () const
+  const std::string &getName () const
   {
     return m_commName;
   }
@@ -89,18 +96,25 @@ public:
   {
     return m_id;
   }
-  typedef std::function<void (std::uint64_t, std::shared_ptr<commMessage>)> actionTypeMessage_t;
-  void registerActionMessage (actionTypeMessage_t newAction)
+  typedef std::function<void (std::uint64_t, std::shared_ptr<commMessage>)> rxMessageCallback_t;
+  void registerReceiveCallback (rxMessageCallback_t newAction)
   {
     m_rxCallbackMessage = newAction;
   }
-  bool queuedMessages ();
+  bool messagesAvailable () const;
   std::shared_ptr<commMessage> getMessage (std::uint64_t &source);
+
+  virtual void initialize();
+
+  virtual void disconnect();
+  virtual void set(const std::string &param, const std::string &val);
+  virtual void set(const std::string &param, double val);
+  virtual void setFlag(const std::string &param, bool val);
 private:
-  static std::uint64_t g_counterId;       //!< id counter
+  static std::atomic<std::uint64_t> g_counterId;       //!< id counter
   std::uint64_t m_id;           //!< individual comm id
   std::string m_commName;       //!< name for a string
-  actionTypeMessage_t m_rxCallbackMessage;       //!< call back action from parent object
+  rxMessageCallback_t m_rxCallbackMessage;       //!< call back action from parent object
   double lastPingSend = 0;
   double lastReplyRX = 0;
   std::queue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;

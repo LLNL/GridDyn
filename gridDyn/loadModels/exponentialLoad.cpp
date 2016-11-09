@@ -14,7 +14,7 @@
 #include "loadModels/otherLoads.h"
 #include "gridBus.h"
 #include "stringOps.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <cmath>
 
@@ -43,14 +43,13 @@ gridCoreObject *exponentialLoad::clone (gridCoreObject *obj) const
 
 
 // set properties
-int exponentialLoad::set (const std::string &param,  const std::string &val)
+void exponentialLoad::set (const std::string &param,  const std::string &val)
 {
-  return gridLoad::set (param, val);
+  gridLoad::set (param, val);
 }
 
-int exponentialLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void exponentialLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "alphap")||(param == "ap"))
     {
@@ -66,15 +65,15 @@ int exponentialLoad::set (const std::string &param, double val, gridUnits::units
     }
   else
     {
-      out = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
-  return out;
+ 
 }
 
 
 
 
-void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData *, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   // power vs voltage
@@ -218,13 +217,13 @@ gridCoreObject *fDepLoad::clone (gridCoreObject *obj) const
 
 
 // set properties
-int fDepLoad::set (const std::string &param,  const std::string &val)
+void fDepLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "loadtype")
     {
       auto vtype = convertToLowerCase (val);
-      if (vtype == "flourescent")
+      if (vtype == "fluorescent")
         {
           alphaP = 1.2;
           alphaQ = 3.0;
@@ -277,14 +276,13 @@ int fDepLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = exponentialLoad::set (param, val);
+      exponentialLoad::set (param, val);
     }
-  return out;
+
 }
 
-int fDepLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fDepLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "betap")
     {
@@ -300,17 +298,17 @@ int fDepLoad::set (const std::string &param, double val, gridUnits::units_t unit
     }
   else
     {
-      out = exponentialLoad::set (param, val, unitType);
+      exponentialLoad::set (param, val, unitType);
     }
   if ((betaP) || (betaQ))
     {
       opFlags.set (uses_bus_frequency);
     }
-  return out;
+ 
 }
 
 
-void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   double freq = args[frequencyInLocation];

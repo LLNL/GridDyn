@@ -30,10 +30,10 @@ public:
   */
   enum sensor_flags
   {
-    direct_IO = object_flag6,  //!< indication that the sensor is directly outputing all input as outputs with no processing
+    direct_IO = object_flag6,  //!< indication that the sensor is directly listing all input as outputs with no processing
     link_type_source = object_flag7, //!< indication that the source is a link
     link_type_sink = object_flag8, //!< indicator that the sink is a link object
-    no_message_reply = object_flag9, //!< indicator that the sensor should not send message replys
+    no_message_reply = object_flag9, //!< indicator that the sensor should not send message replies
 
   };
   /** @brief define the possible operation modes for a processing sequence*/
@@ -72,47 +72,47 @@ protected:
 
 public:
   /** @brief default constructor*/
-  sensor (const std::string &objName = "sensor_$");
+  explicit sensor (const std::string &objName = "sensor_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
   using gridRelay::add;
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   /** @brief add a filter block to the relay
   @param[in] blk a pointer to a filter block
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
   */
-  virtual int add (basicBlock *blk);
+  virtual void add (basicBlock *blk);
   /** @brief add a shared pointer to a filter block to the relay
   @param[in] blk a shared pointer to a filter block
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
   */
-  virtual int add (std::shared_ptr<basicBlock> blk);
+  virtual void add (std::shared_ptr<basicBlock> blk);
   /** @brief add a shared pointer to a grabber/state Grabber pair
    the stateGrabber may be nullptr if only sampled operation is supported
-  @param[in] dGR a shared pointer to gridGrabber Object
-  @paramin] dGrst  a shared pointer to a stateGrabber Object
+  @param[in] dGr a shared pointer to gridGrabber Object
+  @param[in] dGrst  a shared pointer to a stateGrabber Object
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
   */
-  virtual int add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber> dGrst = nullptr);
+  virtual void add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber> dGrst = nullptr);
   /** @brief add a shared pointer to gridObject,  must be a basic Block otherwise OBJECT_NOT_RECOGNIZED is returned
   @param[in] obj a shared pointer to a filter block
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
   */
-  virtual int addsp (std::shared_ptr<gridCoreObject> obj) override;
+  virtual void addsp (std::shared_ptr<gridCoreObject> obj) override;
 
 
 
   //dynamic functions for evaluation with a limit exceeded
-  virtual double timestep (double ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
@@ -146,7 +146,7 @@ public:
   double getInput (const stateData *sD, const solverMode &sMode, index_t inputNumber = 0) const;
   virtual void updateA (double time) override;
   virtual void updateFlags (bool dynOnly = false) override;
-  virtual void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
@@ -159,6 +159,9 @@ public:
   @return an index for the output number so it can be used with the getOutput function
   */
   index_t lookupOutput (const std::string &outName);
+
+  virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
 protected:
   /** @brief generate the input grabbers
    used in the initialize function

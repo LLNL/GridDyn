@@ -20,8 +20,10 @@
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGovernor.h"
 #include "loadModels/otherLoads.h"
+#include "core/gridDynExceptions.h"
 #include "testHelper.h"
 #include "objectFactory.h"
+
 //test case for gridCoreObject object
 
 using namespace gridUnits;
@@ -30,16 +32,15 @@ BOOST_AUTO_TEST_SUITE(core_tests)
 
 BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 {
-  gridCoreObject::setCounter (0);
+
   gridCoreObject *obj1 = new gridCoreObject ();
   gridCoreObject *obj2 = new gridCoreObject ();
 
-  BOOST_CHECK_EQUAL (obj1->getName().compare ("object_1"),0);
-  BOOST_CHECK_EQUAL (obj1->getID(),static_cast<index_t>(1));
+  BOOST_CHECK_EQUAL (obj1->getName().compare ("object_"+std::to_string(obj1->getID())),0);
 
   //check to make sure the object m_oid counter is working
-  BOOST_CHECK_EQUAL (obj2->getName().compare ("object_2"),0);
-  BOOST_CHECK_EQUAL (obj2->getID(), static_cast<index_t>(2));
+ 
+  BOOST_CHECK (obj2->getID()>obj1->getID());
   //check if the name setting is working
   std::string name1 = "test_object";
   obj1->set ("name",name1);
@@ -60,16 +61,24 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 
   //check the copy constructor
   BOOST_CHECK_EQUAL (obj3->getNextUpdateTime(),ntime);
-  BOOST_CHECK_EQUAL(obj3->getName().compare ("object_3"),0);
+  BOOST_CHECK_EQUAL(obj3->getName().compare ("test_object"),0);
   BOOST_CHECK (obj3->getParent() == nullptr);
 
   ntime = 3;
   obj1->set ("nextupdatetime",ntime);
   obj3 = obj1->clone (obj3);
   BOOST_CHECK_EQUAL (obj3->getNextUpdateTime(),ntime);
-  BOOST_CHECK (obj3->getName().compare ("test_object")!=0);
+  BOOST_CHECK (obj3->getName().compare ("test_object")==0);
   //check the parameter not found function
-  BOOST_CHECK (obj3->set ("bob",0.5) == PARAMETER_NOT_FOUND);
+  try
+  {
+	  obj3->set("bob", 0.5);//this should throw and exception
+	  BOOST_CHECK(false);
+  }
+  catch (unrecognizedParameter &)
+  {
+
+  }
   delete(obj1);
   delete(obj2);
   delete(obj3);
@@ -79,9 +88,10 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
 {
 
-  gridCoreObject::setCounter (5);
+  
   gridDynGenModel *gm = new gridDynGenModel4 ();
-  BOOST_CHECK_EQUAL (gm->getName().compare ("genModel4_6"),0);
+  auto id = gm->getID();
+  BOOST_CHECK_EQUAL (gm->getName().compare ("genModel4_"+std::to_string(id)),0);
   std::string temp1 = "gen_model 5";
   gm->set ("name",temp1);
   BOOST_CHECK_EQUAL (gm->getName().compare (temp1),0);
@@ -90,7 +100,7 @@ BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
   BOOST_CHECK_EQUAL(gm->getName().compare("namebbghs"), 0);
   gm->initializeA(0, 0);
   BOOST_CHECK_EQUAL(gm->stateSize(cLocalSolverMode), 6u);
-  BOOST_CHECK (gm->set ("h",4.5) == PARAMETER_FOUND);
+  gm->set ("h",4.5);
   gm->setOffset (0, cLocalSolverMode);
   BOOST_CHECK_EQUAL (gm->findIndex ("freq", cLocalSolverMode), static_cast<index_t>(3));
   delete(gm);
@@ -105,7 +115,7 @@ BOOST_AUTO_TEST_CASE (gridDynExciter_test)
   BOOST_CHECK_EQUAL (ex->getName().compare (temp1),0);
   ex->initializeA(0.0, 0);
   BOOST_CHECK_EQUAL(ex->stateSize(cLocalSolverMode), 3u);
-  BOOST_CHECK (ex->set ("tf",4.5) == PARAMETER_FOUND);
+  ex->set ("tf",4.5) ;
   ex->setOffset (0, cLocalSolverMode);
   BOOST_CHECK_EQUAL (ex->findIndex ("vr",cLocalSolverMode), static_cast<index_t>(1));
   delete(ex);
@@ -121,7 +131,7 @@ BOOST_AUTO_TEST_CASE (gridDynGovernor_test)
   BOOST_CHECK_EQUAL (gov->getName().compare (temp1),0);
   gov->initializeA(0, 0);
   BOOST_CHECK_EQUAL (gov->stateSize (cLocalSolverMode), 4u);
-  BOOST_CHECK (gov->set ("t1",4.5) == PARAMETER_FOUND);
+  gov->set ("t1",4.5);
   gov->setOffset(0, cLocalSolverMode);
   BOOST_CHECK_EQUAL (gov->findIndex ("pm", cLocalSolverMode), static_cast<index_t>(0));
   delete(gov);
@@ -169,6 +179,10 @@ BOOST_AUTO_TEST_CASE (object_factory_test)
   gridSineLoad *gsL = dynamic_cast<gridSineLoad *> (cof->createObject ("load", "sine"));
   BOOST_CHECK (gsL != nullptr);
   delete gsL;
+
+  obj = cof->createObject("load");
+  ld = dynamic_cast<gridLoad *> (obj);
+  BOOST_CHECK(ld != nullptr);
 
 
 }

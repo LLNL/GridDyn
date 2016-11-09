@@ -19,7 +19,7 @@
 #include "recorder_events/gridGrabbers.h"
 #include "recorder_events/gridCondition.h"
 #include "recorder_events/gridEvent.h"
-
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <cmath>
@@ -57,9 +57,8 @@ gridCoreObject * txThermalModel::clone(gridCoreObject *obj) const
 	return nobj;
 }
 
-int txThermalModel::setFlag(const std::string &flag, bool val)
+void txThermalModel::setFlag(const std::string &flag, bool val)
 {
-	int out = PARAMETER_FOUND;
 	if (flag == "auto")
 	{
 		opFlags.set(auto_parameter_load, val);
@@ -74,14 +73,12 @@ int txThermalModel::setFlag(const std::string &flag, bool val)
 	}
 	else
 	{
-		out = sensor::setFlag(flag, val);
+		sensor::setFlag(flag, val);
 	}
-	return out;
 }
 
-int txThermalModel::set (const std::string &param, const std::string &val)
+void txThermalModel::set (const std::string &param, const std::string &val)
 {
-	int out = PARAMETER_FOUND;
 	if ((param == "txtype") || (param == "cooling"))
 	{
 		auto v2 = convertToLowerCase(val);
@@ -143,16 +140,14 @@ int txThermalModel::set (const std::string &param, const std::string &val)
 	}
 	else
 	{
-		out= sensor::set(param, val);
+		sensor::set(param, val);
 	}
-	return out;
 }
 
 using namespace gridUnits;
 
-int txThermalModel::set (const std::string &param, double val, units_t unitType)
+void txThermalModel::set (const std::string &param, double val, units_t unitType)
 {
-	int out = PARAMETER_FOUND;
 	if ((param == "ambient") || (param == "ambienttemp"))
 	{
 		ambientTemp = unitConversionTemperature(val, unitType, C);
@@ -182,7 +177,7 @@ int txThermalModel::set (const std::string &param, double val, units_t unitType)
 		alarmTemp1= unitConversionTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
-			getCondition(0)->setLevel(alarmTemp1);
+			getCondition(0)->setConditionRHS(alarmTemp1);
 			setConditionState(0, (alarmTemp1 > 0.1) ? condition_states::active : condition_states::disabled);
 		}
 	}
@@ -191,7 +186,7 @@ int txThermalModel::set (const std::string &param, double val, units_t unitType)
 		alarmTemp2 = unitConversionTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
-			getCondition(1)->setLevel(alarmTemp1);
+			getCondition(1)->setConditionRHS(alarmTemp1);
 			setConditionState(1, (alarmTemp1 > 0.1) ? condition_states::active : condition_states::disabled);
 		}
 	}
@@ -200,7 +195,7 @@ int txThermalModel::set (const std::string &param, double val, units_t unitType)
 		cutoutTemp = unitConversionTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
-			getCondition(2)->setLevel(alarmTemp1);
+			getCondition(2)->setConditionRHS(alarmTemp1);
 			setConditionState(2, (alarmTemp1 > 0.1) ? condition_states::active : condition_states::disabled);
 		}
 	}
@@ -230,9 +225,8 @@ int txThermalModel::set (const std::string &param, double val, units_t unitType)
 	
 	else
 	{
-		out= gridPrimary::set(param, val, unitType);
+		gridPrimary::set(param, val, unitType);
 	}
-	return out;
 }
 
 double txThermalModel::get(const std::string & param, gridUnits::units_t unitType) const
@@ -241,9 +235,9 @@ double txThermalModel::get(const std::string & param, gridUnits::units_t unitTyp
 	return sensor::get(param, unitType);
 }
 
-int txThermalModel::add(gridCoreObject * /*obj*/)
+void txThermalModel::add(gridCoreObject * /*obj*/)
 {
-	return OBJECT_ADD_FAILURE;
+	throw(invalidObjectException(this));
 }
 
 void txThermalModel::dynObjectInitializeA (double time0, unsigned long flags)
@@ -317,7 +311,7 @@ void txThermalModel::dynObjectInitializeA (double time0, unsigned long flags)
 			sensor::add(b1);
 			sensor::add(b2);
 			auto g1 = std::make_shared<customGrabber>();
-			g1->setGrabberFunction("ambient", [this]()->double {return ambientTemp; });
+			g1->setGrabberFunction("ambient", [this](gridCoreObject *)->double {return ambientTemp; });
 			sensor::add(g1, nullptr);
 
 			outputSize = (outputSize > 3) ? outputSize : 3;
@@ -342,17 +336,14 @@ void txThermalModel::dynObjectInitializeA (double time0, unsigned long flags)
 			gridRelay::set("action", "alarm temperature_alarm1");
 			gridRelay::set("action", "alarm temperature_alarm2");
 			auto ge = std::make_shared<gridEvent>();
-
-			ge->field = "switch1";
-			ge->value = 1;
-			ge->setTarget(m_sinkObject);
+			ge->setTarget(m_sinkObject,"switch1");
+			ge->setValue(1.0);
 
 			gridRelay::add(ge);
 			ge = std::make_shared<gridEvent>();
 
-			ge->field = "switch2";
-			ge->value = 1;
-			ge->setTarget(m_sinkObject);
+			ge->setTarget(m_sinkObject, "switch2");
+			ge->setValue(1.0);
 
 			gridRelay::add(ge);
 			//add the triggers
@@ -455,8 +446,7 @@ void txThermalModel::updateA(double time)
 	gridRelay::updateA(time);
 }
 
-double txThermalModel::timestep(double ttime, const solverMode &sMode)
+void txThermalModel::timestep(double ttime, const solverMode &)
 {
 	updateA(ttime);
-	return getOutput(nullptr, sMode, 2);
 }

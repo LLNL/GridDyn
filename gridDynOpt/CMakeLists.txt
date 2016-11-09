@@ -72,14 +72,6 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
 
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 
-IF (FMI_ENABLE)
-	INCLUDE_DIRECTORIES(${FMI_INCLUDE_DIR})
-ENDIF(FMI_ENABLE)
-
-
-IF (CMAKE_COMPILER_IS_GNUCXX)
-		add_definitions(-std=c++11)
-endif(CMAKE_COMPILER_IS_GNUCXX)
 
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
@@ -88,4 +80,10 @@ INSTALL(TARGETS gridDynOpt
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${header_files} DESTINATION include/griddyn)
+INSTALL(FILES ${header_files} DESTINATION include/GridDyn)
+
+list(APPEND griddyn_optional_libraries gridDynOpt)
+list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/gridDynOpt)
+
+set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
+set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)

@@ -19,7 +19,6 @@
 #include "objectInterpreter.h"
 #include "functionInterpreter.h"
 #include <memory>
-#include <string>
 #include <functional>
 #include <type_traits>
 #include <cmath>
@@ -39,53 +38,51 @@ public:
   }
   std::shared_ptr<baseX> interpretGrabberBlock (const std::string &command, gridCoreObject *obj)
   {
-    size_t rlc, rlcp;
+    
     std::shared_ptr<baseX> ggb = nullptr;
     std::shared_ptr<baseX> ggbA = nullptr;
 
     //check for functions
-    size_t rlcps = command.find_first_of ('(', 0);
-    if (rlcps != std::string::npos)
+    size_t endParenthesisLocation = std::string::npos;
+    size_t firstParenthesisLocation = command.find_first_of ('(', 0);
+    
+    if (firstParenthesisLocation != std::string::npos)
       {
-        rlcp = pChunckEnd (command, rlcps + 1);
-        if (rlcp == std::string::npos)
+        endParenthesisLocation = pChunckEnd (command, firstParenthesisLocation + 1);
+        if (endParenthesisLocation == std::string::npos)
           {
-            rlcp = command.length ();
+            endParenthesisLocation = command.length ();
           }
       }
-    else             //no parenthesis
+    size_t operatorLocation;
+    if ((firstParenthesisLocation == 0) && (endParenthesisLocation == command.length () - 1))
       {
-        rlcp = 0;
+        ggb = interpretGrabberBlock (command.substr (1, endParenthesisLocation - 1), obj);
       }
-    if ((rlcps == 0) && (rlcp == command.length () - 1))
+    else if (((operatorLocation = command.find_first_of ("+-", 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
       {
-        ggb = interpretGrabberBlock (command.substr (1, rlcp - 1), obj);
+        ggb = addSubGrabberBlocks (command, obj, operatorLocation);
       }
-    else if (((rlc = command.find_first_of ("+-", 1)) != std::string::npos) && (rlc < rlcps))
+    else if (((operatorLocation = command.find_first_of ("*/^", 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
       {
-        ggb = addSubGrabberBlocks (command, obj, rlc);
+        ggb = multDivGrabberBlocks (command, obj, operatorLocation);
       }
-    else if (((rlc = command.find_first_of ("*/^", 1)) != std::string::npos) && (rlc < rlcps))
+    else if ((operatorLocation = command.find_first_of ("+-", endParenthesisLocation + 1)) != std::string::npos)
       {
-        ggb = multDivGrabberBlocks (command, obj, rlc);
+        ggb = addSubGrabberBlocks (command, obj, operatorLocation);
       }
-    else if ((rlc = command.find_first_of ("+-", rlcp + 1)) != std::string::npos)
+    else if ((operatorLocation = command.find_first_of ("*/^", endParenthesisLocation + 1)) != std::string::npos)
       {
-        ggb = addSubGrabberBlocks (command, obj, rlc);
-      }
-    else if ((rlc = command.find_first_of ("*/^", rlcp + 1)) != std::string::npos)
-      {
-        ggb = multDivGrabberBlocks (command, obj, rlc);
+        ggb = multDivGrabberBlocks (command, obj, operatorLocation);
       }
     else
       {
-        if (rlcps != std::string::npos)
+        if (firstParenthesisLocation != std::string::npos)
           {
-            std::string cmdBlock = command.substr (0, rlcps);
+            std::string cmdBlock = command.substr (0, firstParenthesisLocation);
             if (isFunctionName (cmdBlock))
               {
-                std::string fcallstr = command.substr (rlcps + 1, rlcp - rlcps - 1);
-                trimString (fcallstr);
+                std::string fcallstr = trim(command.substr (firstParenthesisLocation + 1, endParenthesisLocation - firstParenthesisLocation - 1));
                 ggbA = interpretGrabberBlock (fcallstr, obj);
                 if (ggbA)
                   {
@@ -111,33 +108,29 @@ private:
   std::shared_ptr<baseX> singleBlockInterpreter (const std::string &command, gridCoreObject *obj)
   {
     std::shared_ptr<baseX> ggb;
-    gridCoreObject *mobj;
-    std::string field;
+    gridCoreObject *mobj = obj;
+    std::string field(command);
     gridUnits::units_t outUnit = gridUnits::defUnit;
     //get the object which to grab from
-    size_t rlc = command.find_last_of (':');
-    if (rlc != std::string::npos)
+    size_t fieldSeperatorLocation = command.find_last_of (":?");
+    if (fieldSeperatorLocation != std::string::npos)
       {
         mobj = locateObject (command, obj);
         if (!(mobj))
           {
             return nullptr;
           }
-        field = command.substr (rlc + 1, std::string::npos);
-      }
-    else
-      {
-        mobj = obj;
-        field = command;
+        field = command.substr (fieldSeperatorLocation + 1, std::string::npos);
       }
 
-    rlc = field.find_first_of ('(');
-    if (rlc != std::string::npos)
+
+    size_t openParenthesisLocation = field.find_first_of ('(');
+    if (openParenthesisLocation != std::string::npos)
       {
-        size_t rlc2 = field.find_first_of (')',rlc);
-        std::string unitName = field.substr (rlc + 1, rlc2 - rlc - 1);
+        size_t closeParenthesisLocation = field.find_first_of (')', openParenthesisLocation);
+        std::string unitName = field.substr (openParenthesisLocation + 1, closeParenthesisLocation - openParenthesisLocation - 1);
         outUnit = gridUnits::getUnits (unitName);
-        field = field.substr (0, rlc);
+        field = field.substr (0, openParenthesisLocation);
       }
     ggb = createX (field, mobj);
     ggb->outputUnits = outUnit;
@@ -153,14 +146,14 @@ private:
     char op = command[rlc];
     std::string Bblock = command.substr (rlc + 1, std::string::npos);
     trimString (Bblock);
-    //check if either Ablock or Bclock is a constant
+    //check if either Ablock or Bblock is a constant
     double valA = doubleReadComplete (Ablock,kNullVal);
     std::shared_ptr<baseX> ggbA = (valA == kNullVal) ? interpretGrabberBlock (Ablock, obj) : nullptr;
 
     double valB = doubleReadComplete (Bblock, kNullVal);
     std::shared_ptr<baseX> ggbB = (valB == kNullVal) ? interpretGrabberBlock (Bblock, obj) : nullptr;
 
-    if (ggbA)             //we know Ablock isstd::make_shared<grabber
+    if (ggbA)             //we know Ablock is std::make_shared<grabber>
       {
         if (ggbB)                  //both are grabber blocks
           {
@@ -197,8 +190,7 @@ private:
           }
         else if (valB != kNullVal)                //both are numeric
           {
-            ggb = std::make_shared<baseX> ();
-            ggb->setInfo ("constant", obj);
+            ggb = std::make_shared<baseX> ("constant", obj);
             if (op == '+')
               {
                 ggb->bias = valA + valB;
@@ -230,14 +222,14 @@ private:
     char op = command[rlc];
     std::string Bblock = command.substr (rlc + 1, std::string::npos);
     trimString (Bblock);
-    //check if either Ablock or Bclock is a constant
+    //check if either Ablock or Bblock is a constant
     double valA = doubleReadComplete (Ablock, kNullVal);
     std::shared_ptr<baseX> ggbA = (valA == kNullVal) ? interpretGrabberBlock (Ablock, obj) : nullptr;
 
     double valB = doubleReadComplete (Bblock, kNullVal);
     std::shared_ptr<baseX> ggbB = (valB == kNullVal) ? interpretGrabberBlock (Bblock, obj) : nullptr;
 
-    if (ggbA)             //we know Ablock isstd::make_shared<grabber
+    if (ggbA)             //we know Ablock is std::make_shared<grabber
       {
         if (ggbB)                  //both are grabber blocks
           {
@@ -258,8 +250,7 @@ private:
             else
               {
                 //set up power function
-                ggbB = std::make_shared<baseX> ();
-                ggbB->setInfo ("constant", obj);
+                ggbB = std::make_shared<baseX> ("constant", obj);
                 ggbB->bias = valB;
                 ggb = std::make_shared<opX> (ggbA, ggbB, command.substr (rlc, 1));
               }
@@ -281,16 +272,14 @@ private:
             else
               {
                 //set up division by the grabber not a constant
-                ggbA = std::make_shared<baseX> ();
-                ggbA->setInfo ("constant", obj);
+                ggbA = std::make_shared<baseX> ("constant",obj);
                 ggbA->bias = valA;
                 ggb = std::make_shared<opX> (ggbA, ggbB, command.substr (rlc, 1));
               }
           }
         else if (valB != kNullVal)                //both are numeric
           {
-            ggb = std::make_shared<baseX> ();
-            ggb->setInfo ("constant", obj);
+            ggb = std::make_shared<baseX> ("constant",obj);
             if (op == '*')
               {
                 ggb->bias = valA * valB;
@@ -324,12 +313,12 @@ private:
     return ggb;
   }
 
-
+  //TODO: merge this function with a version in the stringOps library
   size_t pChunckEnd (const std::string &cmd, size_t start)
   {
     int open = 1;
     size_t rlc = start;
-    while (open)
+    while (open>0)
       {
         rlc = cmd.find_first_of ("()", rlc + 1);
         if (rlc == std::string::npos)

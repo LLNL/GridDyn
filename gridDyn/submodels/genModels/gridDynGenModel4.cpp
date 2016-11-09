@@ -14,7 +14,7 @@
 #include "submodels/otherGenModels.h"
 #include "gridBus.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 #include <cmath>
@@ -108,7 +108,7 @@ void gridDynGenModel4::residual (const IOdata &args, const stateData *sD, double
   //   }
 }
 
-double gridDynGenModel4::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynGenModel4::timestep (double ttime, const IOdata &args, const solverMode &)
 {
   stateData sD (ttime,m_state.data ());
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
@@ -119,7 +119,6 @@ double gridDynGenModel4::timestep (double ttime, const IOdata &args, const solve
   m_state[5] += dt * m_dstate_dt[5];
   prevTime = ttime;
   algebraicUpdate (args, &sD, m_state.data (), cLocalSolverMode,1.0);
-  return m_output;
 }
 
 void gridDynGenModel4::algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double /*alpha*/)
@@ -155,7 +154,7 @@ void gridDynGenModel4::derivative (const IOdata &args, const stateData *sD, doub
 }
 
 void gridDynGenModel4::jacobianElements (const IOdata &args, const stateData *sD,
-                                         arrayData<double> *ad,
+                                         matrixData<double> *ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -261,10 +260,8 @@ stringVec gridDynGenModel4::localStateNames () const
 }
 
 // set parameters
-int gridDynGenModel4::set (const std::string &param,  const std::string &val)
+void gridDynGenModel4::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
 
   if (param == "saturation_type")
     {
@@ -272,15 +269,13 @@ int gridDynGenModel4::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridDynGenModel3::set (param, val);
+      gridDynGenModel3::set (param, val);
     }
-  return out;
+
 }
 
-int gridDynGenModel4::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModel4::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
 
   if (param == "xd")
     {
@@ -313,9 +308,8 @@ int gridDynGenModel4::set (const std::string &param, double val, gridUnits::unit
     }
   else
     {
-      out = gridDynGenModel3::set (param, val, unitType);
+      gridDynGenModel3::set (param, val, unitType);
     }
 
-  return out;
 }
 

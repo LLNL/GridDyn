@@ -12,8 +12,7 @@
 */
 
 #include "sensor.h"
-#include "fileReaders.h"
-#include "eventQueue.h"
+#include "timeSeries.h"
 #include "gridEvent.h"
 #include "submodels/gridControlBlocks.h"
 #include "gridGrabbers.h"
@@ -23,7 +22,8 @@
 #include "comms/gridCommunicator.h"
 #include "comms/controlMessage.h"
 #include "gridCoreTemplates.h"
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <boost/format.hpp>
@@ -49,28 +49,138 @@ gridCoreObject *sensor::clone (gridCoreObject *obj) const
   nobj->outputSize = outputSize;
   nobj->inputStrings = inputStrings;
   nobj->outputNames = outputNames;
-  for (auto &fb : filterBlocks)
-    {
-      nobj->add (fb->clone (nullptr));
-    }
-  //TODO:: PT this isn't complete yet but is good enough for right now
+  //clone the filter blocks
+  for (index_t kk = 0; kk < filterBlocks.size(); ++kk)
+  {
+      if (nobj->filterBlocks.size() > kk)
+      {
+          nobj->add(filterBlocks[kk]->clone());
+      }
+      else if (!nobj->filterBlocks[kk])
+      {
+          auto fbclone = filterBlocks[kk]->clone();
+          fbclone->locIndex = kk;
+          nobj->add(fbclone);
+      }
+      else
+      {
+          filterBlocks[kk]->clone(nobj->filterBlocks[kk].get());
+      }
+  }
+ //clone the dataSources
+  
+  for (index_t kk = 0; kk < dataSources.size(); ++kk)
+  {
+      if (dataSources[kk])
+      {
+          if (nobj->dataSources.size() > kk)
+          {
+              nobj->dataSources[kk] = dataSources[kk]->clone(nobj->dataSources[kk]);
+          }
+          else
+          {
+              nobj->dataSources.push_back(dataSources[kk]->clone());
+          }
+      }
+      else
+      {
+          if (nobj->dataSources.size() <= kk)
+          {
+              nobj->dataSources.push_back(nullptr);
+          }
+      }
+     
+  }
+  for (index_t kk = 0; kk < dataSourcesSt.size(); ++kk)
+  {
+      if (dataSourcesSt[kk])
+      {
+          if (nobj->dataSourcesSt.size() > kk)
+          {
+              nobj->dataSourcesSt[kk] = dataSourcesSt[kk]->clone(nobj->dataSourcesSt[kk]);
+          }
+          else
+          {
+              nobj->dataSourcesSt.push_back(dataSourcesSt[kk]->clone());
+          }
+      }
+      else
+      {
+          if (nobj->dataSourcesSt.size() <= kk)
+          {
+              nobj->dataSourcesSt.push_back(nullptr);
+          }
+      }
+
+  }
+
+  for (index_t kk = 0; kk < outGrabber.size(); ++kk)
+  {
+      if (outGrabber[kk])
+      {
+          if (nobj->outGrabber.size() > kk)
+          {
+              nobj->outGrabber[kk] = outGrabber[kk]->clone(nobj->outGrabber[kk]);
+              nobj->outGrabber[kk]->updateObject(nobj);
+          }
+          else
+          {
+              nobj->outGrabber.push_back(outGrabber[kk]->clone());
+              nobj->outGrabber[kk]->updateObject(nobj);
+          }
+      }
+      else
+      {
+          if (nobj->outGrabber.size() <= kk)
+          {
+              nobj->outGrabber.push_back(nullptr);
+          }
+      }
+
+  }
+  for (index_t kk = 0; kk < outGrabberSt.size(); ++kk)
+  {
+      if (outGrabberSt[kk])
+      {
+          if (nobj->outGrabberSt.size() > kk)
+          {
+              nobj->outGrabberSt[kk] = outGrabberSt[kk]->clone(nobj->outGrabberSt[kk]);
+              nobj->outGrabberSt[kk]->updateObject(nobj);
+          }
+          else
+          {
+              nobj->outGrabberSt.push_back(outGrabberSt[kk]->clone());
+              nobj->outGrabberSt[kk]->updateObject(nobj);
+          }
+      }
+      else
+      {
+          if (nobj->outGrabberSt.size() <= kk)
+          {
+              nobj->outGrabberSt.push_back(nullptr);
+          }
+      }
+
+  }
+ 
+  //now clone the output Grabbers
   return nobj;
 }
 
-int sensor::add (gridCoreObject *obj)
+void sensor::add (gridCoreObject *obj)
 {
   if (dynamic_cast<basicBlock *> (obj))
     {
-      return add (static_cast<basicBlock *> (obj));
+        add (static_cast<basicBlock *> (obj));
     }
   else
     {
-      return gridRelay::add (obj);
+        gridRelay::add (obj);
     }
 
 }
 
-int sensor::add (basicBlock *blk)
+void sensor::add (basicBlock *blk)
 {
   blk->setParent (this);
   if (blk->locIndex != kNullLocation)
@@ -85,10 +195,9 @@ int sensor::add (basicBlock *blk)
     {
       filterBlocks.push_back (std::shared_ptr<basicBlock> (blk));
     }
-  return OBJECT_ADD_SUCCESS;
 }
 
-int sensor::add (std::shared_ptr<basicBlock> blk)
+void sensor::add (std::shared_ptr<basicBlock> blk)
 {
   blk->setParent (this);
   if (blk->locIndex != kNullLocation)
@@ -103,10 +212,9 @@ int sensor::add (std::shared_ptr<basicBlock> blk)
     {
       filterBlocks.push_back (blk);
     }
-  return OBJECT_ADD_SUCCESS;
 }
 
-int sensor::add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber> dGrst)
+void sensor::add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber> dGrst)
 {
   auto cnum = inputStrings.size ();
   dataSources.resize (cnum + 1);
@@ -118,24 +226,22 @@ int sensor::add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber>
     {
       opFlags.set (continuous_flag, false);
     }
-  return OBJECT_ADD_SUCCESS;
 }
 
-int sensor::addsp (std::shared_ptr<gridCoreObject> obj)
+void sensor::addsp (std::shared_ptr<gridCoreObject> obj)
 {
   if (std::dynamic_pointer_cast<basicBlock> (obj))
     {
-      return add (std::dynamic_pointer_cast<basicBlock> (obj));
+      add (std::dynamic_pointer_cast<basicBlock> (obj));
     }
   else
     {
-      return OBJECT_NOT_RECOGNIZED;
+	  return throw(invalidObjectException(this));
     }
 }
 
-int sensor::setFlag (const std::string &flag, bool val)
+void sensor::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
 
   if ((flag == "direct_io")||(flag == "direct"))
     {
@@ -143,14 +249,13 @@ int sensor::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 
-int sensor::set (const std::string &param,  const std::string &val)
+void sensor::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   std::string iparam;
   int num = trailingStringInt (param,iparam);
   if (iparam == "input")
@@ -223,7 +328,7 @@ int sensor::set (const std::string &param,  const std::string &val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
 
     }
@@ -390,14 +495,14 @@ int sensor::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
-int sensor::set (const std::string &param, double val, gridUnits::units_t unitType)
+void sensor::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   std::string iparam;
   int num = trailingStringInt (param, iparam,-1);
   if (param == "terminal")
@@ -412,8 +517,7 @@ int sensor::set (const std::string &param, double val, gridUnits::units_t unitTy
     {
       if (static_cast<int> (val) < 0)
         {
-          out = INVALID_PARAMETER_VALUE;
-          return out;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -432,9 +536,9 @@ int sensor::set (const std::string &param, double val, gridUnits::units_t unitTy
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+ 
 }
 
 
@@ -471,6 +575,9 @@ double sensor::get (const std::string & param, gridUnits::units_t unitType) cons
                   ret = dataSources[outputs[num]]->grabData ();
                 }
               break;
+            default:
+                ret = kNullVal;
+                break;
             }
         }
 
@@ -504,6 +611,9 @@ double sensor::get (const std::string & param, gridUnits::units_t unitType) cons
                           ret = dataSources[outputs[kk]]->grabData ();
                         }
                       break;
+                    default:
+                        ret = kNullVal;
+                        break;
                     }
                 }
               return ret;
@@ -522,21 +632,63 @@ double sensor::get (const std::string & param, gridUnits::units_t unitType) cons
   return ret;
 }
 
+void sensor::updateObject(gridCoreObject *obj, object_update_mode mode)
+{
+    for (auto &ds : dataSources)
+    {
+        if (ds)
+        {
+            ds->updateObject(obj, mode);
+        }
+        
+    }
+    for (auto &dsst : dataSourcesSt)
+    {
+        if (dsst)
+        {
+            dsst->updateObject(obj, mode);
+        }
+    }
+    gridRelay::updateObject(obj, mode);
+}
+
+void sensor::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+    for (auto &ds : dataSources)
+    {
+        if (ds)
+        {
+            ds->getObjects(objects);
+        }
+        
+    }
+    for (auto &dsst : dataSourcesSt)
+    {
+        if (dsst)
+        {
+            dsst->getObjects(objects);
+        }
+
+    }
+    gridRelay::getObjects(objects);
+}
+
+
 void sensor::generateInputGrabbers ()
 {
-  int num = -1;
-  dataSourcesSt.resize (inputStrings.size ());
-  dataSources.resize (inputStrings.size ());
+    auto iSize = inputStrings.size();
+  dataSourcesSt.resize (iSize);
+  dataSources.resize (iSize);
   int dct = 0;
-  for (size_t ii = 0; ii < inputStrings.size (); ++ii)
+  for (size_t ii = 0; ii < iSize; ++ii)
     {
       if (inputStrings[ii][0] == '#')            //escape hatch for previously loaded grabbers
         {
           dct = static_cast<int> (ii + 1);
           continue;
         }
-      std::string istr = inputStrings[ii];
-
+      auto istr = inputStrings[ii];
+      int num;
       if (istr.back () == '_')
         {
           istr.pop_back ();
@@ -567,7 +719,7 @@ void sensor::generateInputGrabbers ()
       auto mg = makeGrabbers (istr, target_obj);
       if (mg.empty ())
         {
-          LOG_WARNING (istr + " is an incorrectly specfied input ");
+          LOG_WARNING (istr + " is an incorrectly specified input ");
           continue;
         }
       if (num >= 0)
@@ -628,31 +780,33 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
   std::shared_ptr<controlMessage> m = std::dynamic_pointer_cast<controlMessage> (msg);
 
   std::shared_ptr<controlMessage> reply;
-  int ret;
   double val;
 
   switch (m->getMessageType ())
     {
     case controlMessage::SET:
       //only local set
-
-      ret = set (convertToLowerCase (m->m_field), m->m_value, gridUnits::getUnits (m->m_units));
-      if (!opFlags[no_message_reply])           //unless told not to respond return with the
-        {
-          if (ret != PARAMETER_FOUND)
-            {
-              auto gres = std::make_shared<controlMessage> (controlMessage::SET_FAIL);
-              gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
-              commLink->transmit (sourceID, gres);
-            }
-          else
-            {
-              auto gres = std::make_shared<controlMessage> (controlMessage::SET_SUCCESS);
-              gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
-              commLink->transmit (sourceID, gres);
-            }
-        }
-      break;
+		try
+		{
+			set(convertToLowerCase(m->m_field), m->m_value, gridUnits::getUnits(m->m_units));
+			if (!opFlags[no_message_reply])           //unless told not to respond return with the
+			{
+				auto gres = std::make_shared<controlMessage>(controlMessage::SET_SUCCESS);
+				gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+				commLink->transmit(sourceID, gres);
+			}
+		}
+		catch (const gridDynException &)
+		{
+			if (!opFlags[no_message_reply])           //unless told not to respond return with the
+			{
+				auto gres = std::make_shared<controlMessage>(controlMessage::SET_FAIL);
+				gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+				commLink->transmit(sourceID, gres);
+			}
+		}
+      
+		break;
     case controlMessage::GET:
       val = get (convertToLowerCase (m->m_field), gridUnits::getUnits (m->m_units));
       reply = std::make_shared<controlMessage> (controlMessage::GET_RESULT);
@@ -688,7 +842,8 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
       break;
     case controlMessage::GET_PERIODIC:
       break;
-
+    default:
+        break;
     }
 
 }
@@ -963,7 +1118,7 @@ void sensor::updateA (double time)
 
 
 
-double sensor::timestep (double ttime, const solverMode &sMode)
+void sensor::timestep (double ttime, const solverMode &sMode)
 {
   for (auto &ps : processSequence)
     {
@@ -976,32 +1131,13 @@ double sensor::timestep (double ttime, const solverMode &sMode)
         }
     }
   gridRelay::timestep (ttime,sMode);
-  double out = kNullVal;
-  if (outputSize > 0)
-    {
-      switch (outputMode[0])
-        {
-        case outputMode_t::block:
-          out = filterBlocks[outputs[0]]->getOutput ();
-          break;
-        case outputMode_t::processed:
-          out = outGrabber[0]->grabData ();
-          break;
-        case outputMode_t::direct:
-          out = dataSources[outputs[0]]->grabData ();
-          break;
-		default:
-			break;
-        }
-    }
-  return out;
 }
 
-void sensor::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void sensor::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
-      arrayDataSparse d2,dp;
+      matrixDataSparse<double> d2,dp;
       index_t currentLoc = 0;
       for (auto &ps : processSequence)
         {
@@ -1177,8 +1313,9 @@ IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
               out[pp] = dataSourcesSt[outputs[pp]]->grabData (sD,sMode);
             }
           break;
-		default:
-			break;
+        default:
+            out[pp] = kNullVal;
+            break;
         }
     }
   return out;
@@ -1216,8 +1353,8 @@ double sensor::getOutput (const stateData *sD, const solverMode &sMode, index_t 
           out = dataSources[outputs[num]]->grabData ();
         }
       break;
-	default:
-		break;
+    default:
+        break;
     }
   return out;
 }
@@ -1235,14 +1372,14 @@ index_t sensor::getOutputLoc (const solverMode &sMode, index_t num) const
       return filterBlocks[outputs[num]]->getOutputLoc (sMode);
     case outputMode_t::processed:
     case outputMode_t::direct:
-	default:
-		return kNullLocation;
-	
+    default:
+        return kNullLocation;
+    
     }
 }
 
 //TODO:: PT This is a complicated function still need to work on it
-void sensor::outputPartialDerivatives (const stateData * /*sD*/, arrayData<double> * /*ad*/, const solverMode & /*sMode*/)
+void sensor::outputPartialDerivatives (const stateData * /*sD*/, matrixData<double> * /*ad*/, const solverMode & /*sMode*/)
 {
 
 }
@@ -1291,7 +1428,6 @@ void sensor::rootTrigger (double ttime, const std::vector<int> &rootMask, const 
 change_code sensor::rootCheck ( const stateData *sD, const solverMode &sMode, check_level_t level)
 {
   change_code ret = gridRelay::rootCheck (sD,sMode,level);
-  change_code iret;
   if (stateSize (sMode) > 0)
     {
       IOdata args (1);
@@ -1302,7 +1438,7 @@ change_code sensor::rootCheck ( const stateData *sD, const solverMode &sMode, ch
 
           for (size_t psb = 1; psb < ps.size (); ++psb)
             {
-              iret = filterBlocks[ps[psb]]->rootCheck (args, sD, sMode,level);
+              auto iret = filterBlocks[ps[psb]]->rootCheck (args, sD, sMode,level);
               ret = std::max (ret,iret);
               args[0] = filterBlocks[ps[psb]]->getOutput (args, sD, sMode);
             }

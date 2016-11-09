@@ -16,8 +16,6 @@
 #include "gridDynFileInput.h"
 
 #include <cmath>
-#include <functional>
-#include <utility>
 #include <cctype>
 
 double interpretStringBlock (const std::string &command, readerInfo *ri);
@@ -49,7 +47,7 @@ double interpretString (std::string command, readerInfo *ri)
     }
   double val = 0;
   if ((rlcps == 0) && (rlcp == command.length () - 1))
-    {             //just remove outer perenthesis and call again
+    {             //just remove outer parenthesis and call again
       val = interpretString (command.substr (1, rlcp - 1), ri);
     }
   else if (((rlc = command.find_first_of ("+-", 1)) != std::string::npos) && (rlc < rlcps))
@@ -184,7 +182,7 @@ double multDivStringBlocks (const std::string &command, readerInfo *ri, size_t r
   std::string Bblock = trim (command.substr (rlc + 1, std::string::npos));
   double valB = stringBlocktoDouble (Bblock, ri);
 
-  double val = 0.0;
+  double val;
   switch (op)
     {
     case '*':
@@ -227,7 +225,7 @@ size_t pChunckEnd (const std::string &cmd, size_t start)
 
 double InterpretFunction (const std::string &cmdString, readerInfo *ri)
 {
-  double fval = evalFunction (cmdString);
+  auto fval = evalFunction (cmdString);
 
   //if we still didn't find any function check if there is a redefinition
   if ((std::isnan (fval)) && (ri))
@@ -244,7 +242,7 @@ double InterpretFunction (const std::string &cmdString, readerInfo *ri)
 
 double InterpretFunction (const std::string &cmdString, double val, readerInfo *ri)
 {
-  double fval = evalFunction (cmdString, val);
+  auto fval = evalFunction (cmdString, val);
 
   //if we still didn't find any function check if there is a redefinition
   if ((std::isnan (fval)) && (ri))
@@ -260,7 +258,7 @@ double InterpretFunction (const std::string &cmdString, double val, readerInfo *
 
 double InterpretFunction (const std::string &cmdString, double val1, double val2, readerInfo *ri)
 {
-  double fval = evalFunction (cmdString, val1, val2);
+  auto fval = evalFunction (cmdString, val1, val2);
 
   //if we still didn't find any function check if there is a redefinition
   if ((std::isnan (fval)) && (ri))

@@ -32,33 +32,33 @@ void schedulerMessage::loadMessage (std::uint32_t nType, std::vector<double> tim
 
 
 
-std::string schedulerMessage::toString ()
+std::string schedulerMessage::toString (int modifiers) const
 {
+	std::string typeString = (modifiers == comm_modifiers::with_type) ? encodeTypeInString() : "";
   auto tsize = m_time.size ();
-  //lamba function to print targets
 
   switch (getMessageType ())
     {
     case CLEAR_TARGETS:
-      return "CLEAR TARGETS";
+      return typeString+"CLEAR TARGETS";
     case SHUTDOWN:
-      return "SHUTDOWN @" + std::to_string (m_time[0]);
+      return typeString + "SHUTDOWN @" + std::to_string (m_time[0]);
     case STARTUP:
-      return "STARTUP @:" + std::to_string (m_time[0]);
+      return typeString + "STARTUP @:" + std::to_string (m_time[0]);
     case ADD_TARGETS:
-      return "ADD TARGETS:" + makeTargetString (tsize);
+      return typeString + "ADD TARGETS:" + makeTargetString (tsize);
     case UPDATE_TARGETS:
-      return "UPDATE TARGETS:" + makeTargetString (tsize);
+      return typeString + "UPDATE TARGETS:" + makeTargetString (tsize);
     case UPDATE_RESERVES:
-      return "UPDATE RESERVES:" + makeTargetString (tsize);
+      return typeString + "UPDATE RESERVES:" + makeTargetString (tsize);
     case UPDATE_REGULATION_RESERVE:
-      return "UPDATE REGULATION RESERVE:" + makeTargetString (tsize);
+      return typeString + "UPDATE REGULATION RESERVE:" + makeTargetString (tsize);
     case USE_RESERVE:
-      return "USE RESERVE:" + makeTargetString (tsize);
+      return typeString + "USE RESERVE:" + makeTargetString (tsize);
     case UPDATE_REGULATION_TARGET:
-      return "UPDATE REGULATION TARGET:" + makeTargetString (tsize);
+      return typeString + "UPDATE REGULATION TARGET:" + makeTargetString (tsize);
     }
-  return "<UNKNOWN>";
+  return typeString + "<UNKNOWN>";
 }
 
 void schedulerMessage::loadString (const std::string &fromString)
@@ -133,7 +133,7 @@ void schedulerMessage::loadString (const std::string &fromString)
 
 }
 
-std::string schedulerMessage::makeTargetString(size_t cnt)
+std::string schedulerMessage::makeTargetString(size_t cnt) const
 {
 	std::string targetString;
 	for (size_t kk = 0; kk < cnt; ++kk)

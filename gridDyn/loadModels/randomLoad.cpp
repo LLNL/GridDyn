@@ -16,6 +16,7 @@
 #include "gridRandom.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 #include <iostream>
 #include <cassert>
 
@@ -67,9 +68,9 @@ gridRandomLoad::~gridRandomLoad ()
 
 
 // set properties
-int gridRandomLoad::set (const std::string &param,  const std::string &val)
+void gridRandomLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "trigger_dist")|| (param == "time_dist"))
     {
       auto v2 = convertToLowerCase (val);
@@ -82,14 +83,14 @@ int gridRandomLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
-int gridRandomLoad::setFlag (const std::string &flag, bool val)
+void gridRandomLoad::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
+
 
   /*
   independent_flag=object_flag3,
@@ -123,18 +124,18 @@ int gridRandomLoad::setFlag (const std::string &flag, bool val)
     {
       gridLoad::setFlag (flag, val);
     }
-  return out;
+ 
 }
 
-int gridRandomLoad::set (const std::string &param, double val, units_t unitType)
+void gridRandomLoad::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "min_t")
     {
       if (val <= 0)
         {
           LOG_WARNING ("min_t parameter must be > 0");
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -159,7 +160,7 @@ int gridRandomLoad::set (const std::string &param, double val, units_t unitType)
       if (val <= 0)
         {
           LOG_WARNING ( "mean_t parameter must be > 0" );
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -175,7 +176,7 @@ int gridRandomLoad::set (const std::string &param, double val, units_t unitType)
       if (val <= 0)
         {
           LOG_WARNING ("scale_t parameter must be > 0" );
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -211,9 +212,9 @@ int gridRandomLoad::set (const std::string &param, double val, units_t unitType)
   else
     {
       //I am purposely skipping over the rampLoad the functionality is needed but the access is not
-      out = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
-  return out;
+  
 }
 
 void gridRandomLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
@@ -513,7 +514,7 @@ void gridRandomLoad::setTime (double time)
 }
 
 
-double gridRandomLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
+void gridRandomLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -555,11 +556,10 @@ double gridRandomLoad::timestep (double ttime, const IOdata &args,const solverMo
             }
           gridRampLoad::timestep (ttime, args, sMode);
         }
-      return Pout;
     }
   else
     {
-      return gridRampLoad::timestep (ttime, args, sMode);
+      gridRampLoad::timestep (ttime, args, sMode);
     }
 }
 

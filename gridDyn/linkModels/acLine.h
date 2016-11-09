@@ -89,7 +89,7 @@ protected:
 
 public:
   /** @brief default constructor*/
-  acLine (const std::string &objName = "acline_$");
+  explicit acLine (const std::string &objName = "acline_$");
   /** @brief constructor specifying the real and imaginary part of the impedance
   @param[in] rP  the real impedance in pu ohm
   @param[in] xP  the reactance in pu Ohm
@@ -142,10 +142,11 @@ public:
   @param[out] Violation_vector --a list of all the violations any new violations get added to the result
   */
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
+  virtual void pFlowObjectInitializeB() override;
   virtual void updateLocalCache () override;
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
 
-  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -156,8 +157,8 @@ public:
 
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   /** @brief check if two buses should be merged and the line effects ignored
   */
@@ -167,10 +168,10 @@ public:
 
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   virtual double getMaxTransfer () const override;
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
@@ -324,7 +325,7 @@ protected:
   double tap0;              //!< baseline tap position used for continuous tap settings
   double tapAngle0;        //!< baseline tapAngle position used for continuous tap settings
   double stepDelay = 30;        //!< step control for adjusting the quantity or the time constant for continuous system
-  double mp_Tm = 0.05;                //!< time constant for continous tap settings
+  double mp_Tm = 0.05;                //!< time constant for continuous tap settings
   double dTapdt = 0;       //!< rate of change of the tap
   double dTapAdt = 0;       //!< rate of change of the tapAngle
 private:
@@ -336,7 +337,7 @@ private:
   double prevValue;
   //double baseValue;
 public:
-  adjustableTransformer (const std::string &objName = "adjTX_$");
+  explicit adjustableTransformer (const std::string &objName = "adjTX_$");
   /** @brief default constructor
   @param[in] rP  resistance of the link
   @param[in] xP  reactance of the link forwarded to the gridLink constructor
@@ -349,8 +350,8 @@ public:
   gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
-  int set (const std::string &param, const std::string &val) override;
-  int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  void set (const std::string &param, const std::string &val) override;
+  void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   //adjuster specific functions
   /**@ brief set the control bus to a specified bus pointer
@@ -369,10 +370,10 @@ public:
 
   virtual IOdata getOutputs (index_t  busId, const stateData *sD, const solverMode &sMode) override;
 
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
@@ -390,30 +391,30 @@ public:
 protected:
   /** @brief compute the Jacobian elements based on the MW control
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the Jacobian information
+  @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MWJac (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void MWJac (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   /** @brief compute the Jacobian elements based on the MVar control
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the Jacobian information
+  @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MVarJac (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void MVarJac (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap angle
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the Jacobian information
+  @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapAnglePartial (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void tapAnglePartial (index_t  busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap setting
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
-  @param[out] ad the arrayData object to store the Jacobian information
+  @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapPartial (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void tapPartial (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   /** @brief do any stepped adjustments  based on voltage control from the power flow calculations
   @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
   */

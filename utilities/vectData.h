@@ -11,8 +11,8 @@
 * LLNS Copyright End
 */
 
-#ifndef _VECT_DATA_H_
-#define _VECT_DATA_H_
+#ifndef _SPARSE_VECTOR_DATA_H_
+#define _SPARSE_VECTOR_DATA_H_
 
 
 //TODO make this into a template
@@ -28,17 +28,26 @@ typedef std::uint32_t count_t;
 
 #include <vector>
 #include <utility>
+#include <algorithm>
+#include <cmath>
+#include <cassert>
 
-typedef std::pair<index_t, double> vLoc;
 
-bool compareLocVectData (vLoc A, vLoc B);
 /**
 * class for storing data from the Jacobian computation
 */
+template <class Y = double>
 class vectData
 {
+public:
+	typedef std::pair<index_t, Y> vLoc;
 private:
+	static bool compareLocVectData(vLoc A, vLoc B)
+	{
+		return (A.first < B.first);
+	}
   std::vector<vLoc> dVec;         //!< the vector of pairs containing the data
+  count_t maxRowCount = kNullLocation;	//!< the maximum row number
 public:
   vectData ()
   {
@@ -50,21 +59,33 @@ public:
   {
     dVec.resize (0);
   }
-  count_t svsize = 1000000000;
+  
   /**
   * add a new Jacobian element
-  * @param[in] X,Y the row (X) and column(Y) of the element
+  * @param[in] X the row (X) and column(Y) of the element
   * @param[in] num the value of the element
   */
-  void assign(index_t X, double num);
+  void assign(index_t X, Y num)
+  {
+	  assert(!std::isnan(num));
+	  assert(X < maxRowCount);
+	  dVec.emplace_back(X, num);
+  }
   /** assign with a check
   * add a new Jacobian element if the arguments are valid (X>=0) &&(Y>=0)
-  * @param[in] X,Y the row (X) and column(Y) of the element
+  * @param[in] X the row (X) of the element
   * @param[in] num the value of the element
   */
-  void assignCheck(index_t X, double num);
+  void assignCheck(index_t X, Y num)
+  {
+	  if (X < maxRowCount)
+	  {
+		  assert(!std::isnan(num));
+		  dVec.emplace_back(X, num);
+	  }
+  }
   /**
-  * reserve space for the cound of the jacobians
+  * reserve space for the count of the Jacobian
   * @param[in] size the amount of space to reserve
   */
   void reserve (count_t size)
@@ -90,11 +111,40 @@ public:
   /**
   * sort the index based first on row number than column number
   */
-  void sortIndex();
+  void sortIndex()
+  {
+	  std::sort(dVec.begin(), dVec.end(), compareLocVectData);
+  }
   /**
   * compact the index merging values with the same row and column number together
   */
-  void compact ();
+  void compact ()
+  {
+	  if (dVec.empty())
+	  {
+		  return;
+	  }
+
+	  auto dvb = dVec.begin();
+	  auto dv2 = dvb;
+	  ++dv2;
+	  auto dvend = dVec.end();
+	  while (dv2 != dvend)
+	  {
+		  if (dv2->first == dvb->first)
+		  {
+			  dvb->second += dv2->second;
+
+		  }
+		  else
+		  {
+			  ++dvb;
+			  *dvb = *dv2;
+		  }
+		  ++dv2;
+	  }
+	  dVec.resize(++dvb - dVec.begin());
+  }
   /**
   * get the row value
   * @param[in] N the element number to return
@@ -110,7 +160,7 @@ public:
   * @return the column of the corresponding index
   */
 
-  double val (index_t N)
+  Y val (index_t N)
   {
     return dVec[N].second;
   }
@@ -119,8 +169,37 @@ public:
   * @return a vector of ints with the column counts
   */
 
-  double find (index_t rowN);
-  void scale (double factor, index_t start = 0, count_t count = 0x0FFFFFFFF);
+  Y find (index_t rowN)
+  {  //NOTE: function assumes vectdata is sorted and compacted
+	  auto res = std::lower_bound(dVec.begin(), dVec.end(), vLoc(rowN, Y(0.0)), compareLocVectData);
+	  if (res == dVec.end())
+	  {
+		  return Y(0.0);
+	  }
+	  if (res->first == rowN)
+	  {
+		  return res->second;
+	  }
+	  else
+	  {
+		  return Y(0.0);
+	  }
+  }
+  void scale (Y factor, index_t start = 0, count_t count = 0x0FFFFFFFF)
+  {
+	  if (start >= dVec.size())
+	  {
+		  return;
+	  }
+	  auto res = dVec.begin() + start;
+	  auto term = dVec.begin() + std::min(start + count, static_cast<count_t> (dVec.size()));
+
+	  while (res != term)
+	  {
+		  res->second *= factor;
+		  ++res;
+	  }
+  }
 };
 
 

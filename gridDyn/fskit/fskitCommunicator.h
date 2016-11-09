@@ -65,7 +65,8 @@ private:
   virtual int transmit (std::uint64_t destID, std::shared_ptr<commMessage> message) override;
 
   void ProcessEventMessage (const fskit::EventMessage& eventMessage);
-  void Register (void); //!< XXX: Must be called by client
+  virtual void initialize () override; //!< XXX: Must be called by client
+  virtual void disconnect() override
 private:
   void doTransmit (std::shared_ptr<commMessage> message);
 };

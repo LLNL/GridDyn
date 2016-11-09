@@ -21,6 +21,7 @@
 #include "relays/gridRelay.h"
 #include "objectInterpreter.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 #include <cmath>
 #include <complex>
 
@@ -80,18 +81,18 @@ subsystem::~subsystem ()
 
 }
 
-int subsystem::add (gridCoreObject *obj)
+void subsystem::add (gridCoreObject *obj)
 {
-  return subarea.add (obj);
+  subarea.add (obj);
 }
 
 
 
 // --------------- remove components ---------------
 
-int subsystem::remove (gridCoreObject *obj)
+void subsystem::remove (gridCoreObject *obj)
 {
-  return subarea.remove (obj);
+  subarea.remove (obj);
 }
 
 
@@ -214,16 +215,15 @@ void subsystem::resize (count_t count)
 }
 
 // set properties
-int subsystem::set (const std::string &param,  const std::string &val)
+void subsystem::set (const std::string &param,  const std::string &val)
 
 {
-  int out = PARAMETER_FOUND;
+
   std::string iparam;
   int num = trailingStringInt (param, iparam, -1);
   if (iparam == "bus")
     {
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = INVALID_PARAMETER_VALUE;
       if (bus)
         {
           if (num > static_cast<int> (m_terminals))
@@ -244,29 +244,36 @@ int subsystem::set (const std::string &param,  const std::string &val)
                 }
             }
           updateBus (bus, num);
-          out = PARAMETER_FOUND;
-
         }
+		else
+		{
+			throw(invalidParameterValue());
+		}
     }
   else if (param == "from")
     {
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = INVALID_PARAMETER_VALUE;
       if (bus)
         {
           updateBus (bus, 1);
-          out = PARAMETER_FOUND;
+          
         }
+	  else
+	  {
+		  throw(invalidParameterValue());
+	  }
     }
   else if (param == "to")
     {
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = INVALID_PARAMETER_VALUE;
       if (bus)
         {
           updateBus (bus, 2);
-          out = PARAMETER_FOUND;
         }
+	  else
+	  {
+		  throw(invalidParameterValue());
+	  }
     }
   else if (iparam == "connection")
     {
@@ -277,7 +284,6 @@ int subsystem::set (const std::string &param,  const std::string &val)
           term1 = indexRead (val.substr (pos1 + 1),0);
         }
       gridLink *lnk = dynamic_cast<gridLink *> (locateObject (val, this,false));
-      out = INVALID_PARAMETER_VALUE;
       if (lnk)
         {
           if (num > static_cast<int> (m_terminals))
@@ -317,27 +323,30 @@ int subsystem::set (const std::string &param,  const std::string &val)
                     }
                 }
             }
-          if (cterm[num] > 0)
+          if (cterm[num] == 0)
             {
-              out = PARAMETER_FOUND;
+			  throw(invalidParameterValue());
             }
 
         }
     }
   else
     {
-      out = gridPrimary::set (param, val);
-      if (out != PARAMETER_FOUND)
-        {
-          out = subarea.set (param, val);
-        }
+	  try
+	  {
+		  gridPrimary::set(param, val);
+	  }
+	  catch (const unrecognizedParameter &)
+	  {
+		  subarea.set(param, val);
+	  }
+      
     }
-  return out;
+
 }
 
-int subsystem::set (const std::string &param, double val, units_t unitType)
+void subsystem::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "basepower")
     {
@@ -362,13 +371,17 @@ int subsystem::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridPrimary::set (param, val, unitType);  //skipping gridLink set function
-      if (out != PARAMETER_FOUND)
-        {
-          out = subarea.set (param, val, unitType);
-        }
+	  try
+	  {
+		  gridPrimary::set(param, val, unitType);  //skipping gridLink set function
+	  }
+	  catch(const unrecognizedParameter &)
+	  {
+		  subarea.set(param, val, unitType);
+	  }
+     
     }
-  return out;
+
 }
 
 
@@ -384,12 +397,11 @@ double subsystem::get (const std::string &param, units_t unitType) const
 
 
 
-double subsystem::timestep (const double ttime, const solverMode &sMode)
+void subsystem::timestep (const double ttime, const solverMode &sMode)
 {
 
   subarea.timestep (ttime, sMode);
   prevTime = ttime;
-  return 0;
 }
 
 count_t subsystem::getBusVector (std::vector<gridBus *> &busVector, index_t start)
@@ -487,26 +499,22 @@ void subsystem::followNetwork (int network, std::queue<gridBus *> &stk)
   terminalLink[0]->followNetwork (network,stk);
 }
 
-int subsystem::updateBus (gridBus *bus, index_t busnumber)
+void subsystem::updateBus (gridBus *bus, index_t busnumber)
 {
   if (busnumber <= m_terminals)
     {
-      int ret = terminalLink[busnumber - 1]->updateBus (bus,cterm[busnumber - 1]);
-      if (ret != OBJECT_ADD_FAILURE)
-        {
-          terminalBus[busnumber - 1] = bus;
-        }
-      return ret;
+      terminalLink[busnumber - 1]->updateBus (bus,cterm[busnumber - 1]);
+      terminalBus[busnumber - 1] = bus;
     }
   else
     {
-      if (opFlags.test (direct_connection))
+      if (opFlags[direct_connection])
         {
-          return gridLink::updateBus (bus, busnumber);
+          gridLink::updateBus (bus, busnumber);
         }
       else
         {
-          return OBJECT_ADD_FAILURE;
+		  throw(objectAddFailure(this));
         }
 
     }
@@ -695,7 +703,7 @@ double subsystem::getMaxTransfer () const
 
 
 //for computing all the Jacobian elements at once
-void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (busId <= 0)
     {
@@ -711,7 +719,7 @@ void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, arrayD
     }
 }
 
-void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (busId <= 0)
     {

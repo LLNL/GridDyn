@@ -19,7 +19,6 @@
 //test case for gridCoreObject object
 
 #include "testHelper.h"
-#include "gridDynTypes.h"
 #include "jsonReaderElement.h"
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -47,7 +46,7 @@ BOOST_AUTO_TEST_CASE(jsonElementReader_test1)
 	BOOST_CHECK(att1.getText() == "25");
 	auto att2 = firstChild->getNextAttribute();
 	BOOST_CHECK(att2.getName() == "firstName");
-	BOOST_CHECK(att2.getValue() == kNullVal);
+	BOOST_CHECK(att2.getValue() == readerNullVal);
 	BOOST_CHECK(att2.getText() == "John");
 	att2 = firstChild->getNextAttribute();
 	BOOST_CHECK(att2.getName() == "isAlive");

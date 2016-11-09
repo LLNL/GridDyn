@@ -20,11 +20,7 @@
 #include "simulation/gridSimulation.h"
 #include "vectorOps.hpp"
 #include "grabberInterpreter.hpp"
-
-
-#include <cmath>
-#include <algorithm>
-#include <unordered_set>
+#include "objectGrabbers.h"
 
 using namespace gridUnits;
 
@@ -38,21 +34,19 @@ static grabberInterpreter<gridGrabber, opGrabber, functionGrabber> gInterpret ([
 std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string & command, gridCoreObject * obj)
 {
   std::vector < std::shared_ptr < gridGrabber >> v;
-  size_t rlc;
-  std::shared_ptr<gridGrabber> ggb;
   auto gstr = splitlineBracketTrim (command);
   for (const auto &cmd:gstr)
     {
-      if ((rlc = cmd.find_first_of (":(+-/*\\^")) != std::string::npos)
+      if (cmd.find_first_of (":(+-/*\\^?") != std::string::npos)
         {
-          ggb = gInterpret.interpretGrabberBlock (cmd, obj);
+          auto ggb = gInterpret.interpretGrabberBlock (cmd, obj);
           if (ggb)
             {
               if (ggb->loaded)
                 {
                   v.push_back (ggb);
                 }
-              else if (ggb->field.substr (0, 3) == "all")
+              else if (ggb->field.compare (0, 3,"all")==0)
                 {
                   allGrabbers (cmd, ggb->getObject (), v);
                 }
@@ -69,17 +63,18 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
         }
       else
         {
-          if (cmd.substr (0, 3) == "all")
+		  std::string cmdlc = convertToLowerCase(cmd);
+          if (cmdlc.compare(0, 3,"all") == 0)
             {
               allGrabbers (cmd, obj, v);
             }
-          else if (command == "auto")
+          else if (cmdlc == "auto")
             {
               autoGrabbers (obj, v);
             }
           else
             {     //create a single grabber
-              ggb = createGrabber (cmd, obj);
+              auto ggb = createGrabber (cmdlc, obj);
               if (ggb)
                 {
                   v.push_back (ggb);
@@ -95,20 +90,20 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
 
 void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber> > &v)
 {
-  std::shared_ptr<gridGrabber> ggb = nullptr;
+  std::shared_ptr<gridGrabber> ggb;
 
   gridBus *bus = dynamic_cast<gridBus *> (obj);
   if (bus != nullptr)
     {
-      ggb = std::make_shared<gridBusGrabber> ("voltage", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("voltage", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("angle", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("angle", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("gen", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("gen", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("load", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("load", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("freq", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("freq", bus);
       v.push_back (ggb);
       return;
     }
@@ -116,9 +111,9 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld != nullptr)
     {
-      ggb = std::make_shared<gridLoadGrabber> ("p", ld);
+      ggb = std::make_shared<objectGrabber<gridLoad>> ("p", ld);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLoadGrabber> ("q", ld);
+      ggb = std::make_shared<objectGrabber<gridLoad>> ("q", ld);
       v.push_back (ggb);
       return;
     }
@@ -126,9 +121,9 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
   gridDynGenerator *gen = dynamic_cast<gridDynGenerator *> (obj);
   if (gen != nullptr)
     {
-      ggb = std::make_shared<gridDynGenGrabber> ("p", gen);
+      ggb = std::make_shared<objectGrabber<gridDynGenerator>> ("p", gen);
       v.push_back (ggb);
-      ggb = std::make_shared<gridDynGenGrabber> ("q", gen);
+      ggb = std::make_shared<objectGrabber<gridDynGenerator>> ("q", gen);
       v.push_back (ggb);
 
       return;
@@ -137,11 +132,11 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
   gridLink *lnk = dynamic_cast<gridLink *> (obj);
   if (lnk != nullptr)
     {
-      ggb = std::make_shared<gridLinkGrabber> ("p1", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("p1", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("q1", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("q1", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("loss", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("loss", lnk);
       v.push_back (ggb);
       return;
     }
@@ -150,13 +145,13 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
   gridSimulation *gds = dynamic_cast<gridSimulation *> (obj);
   if (gds)
     {
-      ggb = std::make_shared<gridAreaGrabber> ("voltage", gds);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("voltage", gds);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("angle", gds);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("angle", gds);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("busgenerationreal", gds);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("busgenerationreal", gds);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("busloadreal", gds);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("busloadreal", gds);
       v.push_back (ggb);
       return;
     }
@@ -164,17 +159,17 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
   gridArea *area = dynamic_cast<gridArea *> (obj);
   if (area)
     {
-      ggb = std::make_shared<gridAreaGrabber> ("generationreal", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("generationreal", area);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("generationreactive", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("generationreactive", area);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("loadreal", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("loadreal", area);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("loadreactive", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("loadreactive", area);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("loss", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("loss", area);
       v.push_back (ggb);
-      ggb = std::make_shared<gridAreaGrabber> ("tieflowreal", area);
+      ggb = std::make_shared<objectGrabber<gridArea>> ("tieflowreal", area);
       v.push_back (ggb);
       return;
     }
@@ -189,15 +184,15 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
   gridBus *bus = dynamic_cast<gridBus *> (obj);
   if (bus)
     {
-      ggb = std::make_shared<gridBusGrabber> ("voltage", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("voltage", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("angle", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("angle", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("gen", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("gen", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("load", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("load", bus);
       v.push_back (ggb);
-      ggb = std::make_shared<gridBusGrabber> ("freq", bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> ("freq", bus);
       v.push_back (ggb);
       return;
     }
@@ -205,9 +200,9 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
     {
-      ggb = std::make_shared<gridLoadGrabber> ("p", ld);
+      ggb = std::make_shared<objectGrabber<gridLoad>> ("p", ld);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLoadGrabber> ("q", ld);
+      ggb = std::make_shared<objectGrabber<gridLoad>> ("q", ld);
       v.push_back (ggb);
       return;
     }
@@ -217,9 +212,9 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
     {
       if ((mode.empty ()) || (mode == "all"))
         {
-          ggb = std::make_shared<gridDynGenGrabber> ("p", gen);
+          ggb = std::make_shared<objectOffsetGrabber<gridDynGenerator>> ("p", gen);
           v.push_back (ggb);
-          ggb = std::make_shared<gridDynGenGrabber> ("q", gen);
+          ggb = std::make_shared<objectOffsetGrabber<gridDynGenerator>> ("q", gen);
           v.push_back (ggb);
         }
       else if (mode == "all_state")
@@ -227,7 +222,7 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
           auto scount = gen->stateSize (cLocalSolverMode);
           for (index_t kk = 0; kk < scount; ++kk)
             {
-              ggb = std::make_shared<gridDynGenGrabber> (kk, gen);
+              ggb = std::make_shared<objectOffsetGrabber<gridDynGenerator>> (kk, gen);
               v.push_back (ggb);
             }
         }
@@ -276,17 +271,17 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
   if (lnk)
     {
 
-      ggb = std::make_shared<gridLinkGrabber> ("angle", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("angle", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("p1", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("p1", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("p2", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("p2", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("q1", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("q1", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("q2", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("q2", lnk);
       v.push_back (ggb);
-      ggb = std::make_shared<gridLinkGrabber> ("loss", lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> ("loss", lnk);
       v.push_back (ggb);
       return;
 
@@ -300,35 +295,35 @@ void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std:
     {
       if ((mode.empty ()) || (mode == "all"))
         {
-          ggb = std::make_shared<gridAreaGrabber> ("generationreal", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("generationreal", area);
           v.push_back (ggb);
-          ggb = std::make_shared<gridAreaGrabber> ("generationreactive", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("generationreactive", area);
           v.push_back (ggb);
-          ggb = std::make_shared<gridAreaGrabber> ("loadreal", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("loadreal", area);
           v.push_back (ggb);
-          ggb = std::make_shared<gridAreaGrabber> ("loadreactive", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("loadreactive", area);
           v.push_back (ggb);
-          ggb = std::make_shared<gridAreaGrabber> ("loss", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("loss", area);
           v.push_back (ggb);
-          ggb = std::make_shared<gridAreaGrabber> ("tieflowreal", area);
+          ggb = std::make_shared<objectGrabber<gridArea>> ("tieflowreal", area);
           v.push_back (ggb);
-          return;
+		  return;
         }
       else if (mode.substr (0, 8) == "all_gen_")
         {
-          std::string gfield = mode.substr (8);
-          count_t genCount = static_cast<count_t> (area->get ("gencount"));
+          auto gfield = mode.substr (8);
+          auto genCount = static_cast<count_t> (area->get ("gencount"));
           gridDynGenerator *ngen = nullptr;
           for (index_t pp = 0; pp < genCount; pp++)
             {
               ngen = static_cast<gridDynGenerator *> (area->findByUserID ("gen", pp + 1));
               if (ngen)
                 {
-                  ggb = std::make_shared<gridDynGenGrabber> (gfield, ngen);
+                  ggb = std::make_shared<objectGrabber<gridDynGenerator>> (gfield, ngen);
                   v.push_back (ggb);
                 }
             }
-          return;
+		  return;
         }
     }
 

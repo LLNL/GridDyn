@@ -13,9 +13,11 @@
 
 #include "sundialsInterface.h"
 #include "core/helperTemplates.h"
+#include "core/factoryTemplates.h"
 #include "basicDefs.h"
 #include <cstdio>
 #include <cassert>
+#include "stringOps.h"
 
 
 //int kinsolFunc (N_Vector u, N_Vector f, void *user_data);
@@ -26,7 +28,17 @@
 //int kinsolAlgFunc (N_Vector u, N_Vector f, void *user_data);
 //int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 
-sundialsInterface::sundialsInterface ()
+static childClassFactory<solverInterface, kinsolInterface> kinFactory(stringVec{ "kinsol","algebraic" });
+static childClassFactory<solverInterface, idaInterface> idaFactory(stringVec{ "ida","dae","dynamic" });
+#ifdef LOAD_CVODE
+static childClassFactory<solverInterface, cvodeInterface> cvodeFactory(stringVec{ "cvode","dyndiff","differential" });
+#endif
+
+#ifdef LOAD_ARKODE
+static childClassFactory<solverInterface, arkodeInterface> arkodeFactory(stringVec{ "arkode" });
+#endif
+
+sundialsInterface::sundialsInterface (const std::string &objName):solverInterface(objName)
 {
   tolerance = 1e-8;
 }
@@ -39,20 +51,23 @@ sundialsInterface::sundialsInterface (gridDynSimulation *gds, const solverMode& 
 sundialsInterface::~sundialsInterface ()
 {
   // clear variables for IDA to use
-  if (initialized)
-    {
-	NVECTOR_DESTROY(use_omp, state);
+	if (state)
+	{
+		NVECTOR_DESTROY(use_omp, state);
+	}
 	  if (dstate_dt)
 	  {
 		  NVECTOR_DESTROY(use_omp, dstate_dt);
 	  }
+	  if (abstols)
+	  {
+		  NVECTOR_DESTROY(use_omp, abstols);
+	  }
+	  if (consData)
+	  {
+		  NVECTOR_DESTROY(use_omp, consData);
+	  }
 
-     NVECTOR_DESTROY(use_omp, abstols);
-     NVECTOR_DESTROY(use_omp, consData);
-
-      
-
-    }
 }
 
 std::shared_ptr<solverInterface> sundialsInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
@@ -75,12 +90,12 @@ std::shared_ptr<solverInterface> sundialsInterface::clone(std::shared_ptr<solver
 	return rp;
 }
 
-int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
+void sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
 {
   // load the vectors
   if (stateCount == svsize)
     {
-      return FUNCTION_EXECUTION_SUCCESS;
+      return;
     }
   initialized = false;
   if (state)
@@ -88,10 +103,8 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
       NVECTOR_DESTROY (use_omp, state);
     }
   state = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)state, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
+  check_flag((void *)state, "NVECTOR_NEW", 0);
+	
   if (hasDifferential(mode))
   {
 	  if (dstate_dt)
@@ -99,10 +112,7 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
 		  NVECTOR_DESTROY(use_omp, dstate_dt);
 	  }
 	  dstate_dt = NVECTOR_NEW(use_omp, stateCount);
-	  if (check_flag((void *)dstate_dt, "NVECTOR_NEW", 0))
-	  {
-		  return FUNCTION_EXECUTION_FAILURE;
-	  }
+	  check_flag((void *)dstate_dt, "NVECTOR_NEW", 0);
 	  N_VConst(ZERO, dstate_dt);
   }
   if (abstols)
@@ -110,30 +120,23 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
       NVECTOR_DESTROY (use_omp, abstols);
     }
   abstols = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)abstols, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-
+  check_flag((void *)abstols, "NVECTOR_NEW", 0);
+    
   if (consData)
     {
       NVECTOR_DESTROY (use_omp, consData);
     }
   consData = NVECTOR_NEW (use_omp, stateCount);
-  if (check_flag ((void *)consData, "NVECTOR_NEW", 0))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
+  check_flag((void *)consData, "NVECTOR_NEW", 0);
+  
 
   if (scale)
   {
 	  NVECTOR_DESTROY(use_omp, scale);
   }
   scale = NVECTOR_NEW(use_omp, stateCount);
-  if (check_flag((void *)scale, "NVECTOR_NEW", 0))
-  {
-	  return FUNCTION_EXECUTION_FAILURE;
-  }
+  check_flag((void *)scale, "NVECTOR_NEW", 0);
+ 
   N_VConst(ONE, scale);
 
   if (isDAE(mode))
@@ -143,10 +146,8 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
 		  NVECTOR_DESTROY(use_omp, types);
 	  }
 	  types = NVECTOR_NEW(use_omp, stateCount);
-	  if (check_flag((void *)types, "NVECTOR_NEW", 0))
-	  {
-		  return(1);
-	  }
+	  check_flag((void *)types, "NVECTOR_NEW", 0);
+	 
 	  N_VConst(ONE, types);
   }
   
@@ -154,7 +155,6 @@ int sundialsInterface::allocate (count_t stateCount, count_t /*numroots*/)
   svsize = stateCount;
 
   allocated = true;
-  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 
@@ -167,7 +167,7 @@ void sundialsInterface::setMaxNonZeros (count_t nonZeroCount)
 
 double * sundialsInterface::state_data ()
 {
-  return (state)?NVECTOR_DATA (use_omp, state):nullptr;
+  return (state)? NVECTOR_DATA (use_omp, state):nullptr;
 }
 
 double * sundialsInterface::deriv_data ()
@@ -177,7 +177,7 @@ double * sundialsInterface::deriv_data ()
 
 const double * sundialsInterface::state_data() const
 {
-	return (state)?NVECTOR_DATA(use_omp, state):nullptr;
+	return (state) ?  NVECTOR_DATA(use_omp, state) : nullptr;
 }
 
 const double * sundialsInterface::deriv_data() const
@@ -224,15 +224,34 @@ bool isSlsMatSetup (SlsMat J)
   return true;
 }
 
-void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
+void matrixDataToSlsMat (matrixData<double> *ad, SlsMat J,count_t svsize)
 {
   count_t colval = 0;
   J->colptrs[0] = colval;
 
   ad->compact ();
 
+  int sz = static_cast<int> (ad->size());
+	/*
+  auto itel = ad->begin();
+  for (int kk = 0; kk < sz; ++kk)
+  {
+	  auto tp = *itel;
+	  //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
+	  if (tp.col > colval)
+	  {
+		  colval++;
+		  J->colptrs[colval] = kk;
+	  }
+
+	  J->data[kk] = tp.data;
+	  J->rowvals[kk] = tp.row;
+	  ++itel;
+  }
+*/
   //SlsSetToZero(J);
-  int sz = static_cast<int> (ad->size ());
+	
+
   ad->start ();
   for (int kk = 0; kk < sz; ++kk)
     {
@@ -247,6 +266,7 @@ void arrayDataToSlsMat (arrayData<double> *ad, SlsMat J,count_t svsize)
       J->data[kk] = tp.data;
       J->rowvals[kk] = tp.row;
     }
+	
   if (colval + 1 != svsize)
     {
       printf ("sz=%d, svsize=%d, colval+1=%d\n", sz, svsize, colval + 1);

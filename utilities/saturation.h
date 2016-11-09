@@ -18,7 +18,7 @@
 #include <string>
 
 /** @brief class implementing a saturation model 
- *@details 4 mathematical models are available including: quadratic, scaled_quadratic, exponential, and and linear
+ *@details 4 mathematical models are available including: quadratic, scaled_quadratic, exponential, and linear
  */
 class saturation
 { 

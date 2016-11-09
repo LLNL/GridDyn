@@ -13,7 +13,8 @@
 
 #include "submodels/gridControlBlocks.h"
 #include "objectFactory.h"
-#include "arrayData.h"
+#include "core/gridDynExceptions.h"
+#include "matrixData.h"
 
 #include <cmath>
 
@@ -151,7 +152,7 @@ void derivativeBlock::derivElements (double input, double /*didt*/, const stateD
   deriv[offset] = (K * (input + bias) - sD->state[offset]) / m_T1;
 }
 
-void derivativeBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void derivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   if (hasDifferential (sMode))
@@ -179,14 +180,13 @@ void derivativeBlock::jacElements (double input, double didt, const stateData *s
 
 
 // set parameters
-int derivativeBlock::set (const std::string &param,  const std::string &val)
+void derivativeBlock::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  basicBlock::set (param, val);
 }
 
-int derivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void derivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   //param   = gridDynSimulation::toLower(param);
 
@@ -194,7 +194,7 @@ int derivativeBlock::set (const std::string &param, double val, gridUnits::units
     {
       if (std::abs (val) < kMin_Res)
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -203,10 +203,9 @@ int derivativeBlock::set (const std::string &param, double val, gridUnits::units
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
 }
 
 stringVec derivativeBlock::localStateNames () const

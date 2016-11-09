@@ -53,7 +53,7 @@ public:
   virtual ~relayMessage ()
   {
   }
-  virtual std::string toString () override;
+  virtual std::string toString (int modifiers=comm_modifiers::none) const override;
   virtual void loadString (const std::string &fromString) override;
 private:
   //boost serialization stuff
@@ -75,7 +75,8 @@ enum alarmCode
   UNDERVOLTAGE_ALARM = 112,
   TEMPERATURE_ALARM1 = 201,
   TEMPERATURE_ALARM2 = 202,
-
+  UNDERFREQUENCY_ALARM = 301,
+  OVERFREQUENCY_ALARM = 303,
 
 };
 

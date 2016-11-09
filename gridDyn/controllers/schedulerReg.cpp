@@ -101,7 +101,7 @@ void schedulerReg::updateA (double time)
     {
       return;
     }
-  double prevOutput = output;
+  double prevOutput = m_output;
   schedulerRamp::updateA (time);
 
   double ramp = (regTarget - regCurr) / dt + dPdt;
@@ -114,10 +114,10 @@ void schedulerReg::updateA (double time)
       ramp = -regRampDown;
     }
 
-  output = prevOutput + ramp * dt;
+  m_output = prevOutput + ramp * dt;
 
   dPdt = ramp;
-  regCurr = output - PCurr - reserveAct;
+  regCurr = m_output - PCurr - reserveAct;
 
 }
 
@@ -126,11 +126,11 @@ double schedulerReg::predict (double time)
   double dt = (time - prevTime);
   if (dt == 0)
     {
-      return output;
+      return m_output;
     }
   double toutput = schedulerRamp::predict (time);
 
-  double ramp = (regTarget - regCurr) / dt + (toutput - output) / dt;
+  double ramp = (regTarget - regCurr) / dt + (toutput - m_output) / dt;
   if (ramp > regRampUp)
     {
       ramp = regRampUp;
@@ -140,7 +140,7 @@ double schedulerReg::predict (double time)
       ramp = -regRampDown;
     }
 
-  double retout = output + ramp * dt;
+  double retout = m_output + ramp * dt;
   return retout;
 }
 
@@ -175,7 +175,7 @@ void schedulerReg::objectInitializeB (const IOdata &args, const IOdata &outputSe
       regCurr = AGClevel;
     }
 
-  output = regCurr + PCurr + reserveAct;
+  m_output = regCurr + PCurr + reserveAct;
 
 }
 
@@ -281,17 +281,16 @@ void schedulerReg::regSettings (bool active, double upFrac,double downFrac)
 }
 
 
-int schedulerReg::set (const std::string &param,  const std::string &val)
+void schedulerReg::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
-  out = schedulerRamp::set (param, val);
-  return out;
+  schedulerRamp::set (param, val);
+
 }
 
-int schedulerReg::set (const std::string &param, double val,gridUnits::units_t unitType)
+void schedulerReg::set (const std::string &param, double val,gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+ 
   double temp;
   if (param == "max")
     {
@@ -384,7 +383,7 @@ int schedulerReg::set (const std::string &param, double val,gridUnits::units_t u
     }
   else
     {
-      out = schedulerRamp::set (param,val,unitType);
+      schedulerRamp::set (param,val,unitType);
     }
   if (regEnabled)
     {
@@ -402,7 +401,7 @@ int schedulerReg::set (const std::string &param, double val,gridUnits::units_t u
       Pmin = regMin;
     }
   updatePTarget ();
-  return out;
+
 }
 
 

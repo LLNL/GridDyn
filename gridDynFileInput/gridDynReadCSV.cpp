@@ -16,7 +16,7 @@
 #include "objectFactory.h"
 #include "stringOps.h"
 #include "objectInterpreter.h"
-
+#include "core/gridDynExceptions.h"
 #include "gridBus.h"
 #include "linkModels/gridLink.h"
 #include "relays/gridRelay.h"
@@ -147,7 +147,7 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
                     {
                       std::string uname = tk.substr (p + 1, tk.length () - 2 - p);
                       units[nn] = getUnits (uname);
-                      tk = tk.substr (0, p - 1);
+                      tk = trim(tk.substr (0, p));
                     }
                 }
               ++nn;
@@ -340,30 +340,29 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
                 {
                   str = lineTokens[kk];
                   ri->checkFileParam (str);
-                  ret = obj->set (field, str);
-                  if (ret != PARAMETER_FOUND)
-                    {
-                      WARNPRINT (READER_WARN_ALL, "line " << lineNumber << ":: unrecognied parameter " << field);
-                    }
+				  gridParameter po(field, str);
+
+				  objectParameterSet(std::to_string(lineNumber), obj, po);
                 }
               else if (field == "workdir")
                 {
                   str = lineTokens[kk];
                   ri->checkDirectoryParam (str);
-                  ret = obj->set (field, str);
-                  if (ret != PARAMETER_FOUND)
-                    {
-                      WARNPRINT (READER_WARN_ALL, "line " << lineNumber << ":: unrecognied parameter " << field);
-                    }
+				  gridParameter po(field, str);
+				  
+				  objectParameterSet(std::to_string(lineNumber), obj, po);
                 }
               else
                 {
                   str = lineTokens[kk];
                   str = ri->checkDefines (str);
                   val = doubleRead (str, kBigNum);
+				  
                   if (val < kHalfBigNum)
                     {
-                      ret = obj->set (field, val, units[kk]);
+					  gridParameter po(field, val);
+					  po.paramUnits = units[kk];
+					  objectParameterSet(std::to_string(lineNumber), obj, po);
 
                     }
                   else
@@ -375,21 +374,10 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
                         }
                       gridParameter po (field, str);
                       paramStringProcess (&po, ri);
-                      if (po.stringType == true)
+					  ret=objectParameterSet(std::to_string(lineNumber), obj, po);
+                      
+                      if (ret != 0)
                         {
-                          ret = obj->set (po.field, po.strVal);
-                        }
-                      else
-                        {
-                          ret = obj->set (po.field, po.value, units[kk]);
-                        }
-                      if (ret != PARAMETER_FOUND)
-                        {
-                          if (skipToken[kk] == 0)
-                            {
-                              WARNPRINT (READER_WARN_ALL, "line " << lineNumber << ":: unrecognied parameter " << field);
-
-                            }
                           skipToken[kk] += 1;
                         }
                     }
@@ -403,11 +391,15 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
                 {
                   obj->setName (ri->prefix + '_' + obj->getName ());
                 }
-              ret = parentObject->add (obj);
-              if (ret != 0)
-                {
-                  WARNPRINT (READER_WARN_ALL, "line " << lineNumber << ":: unable to add object " << obj->getName ());
-                }
+			  try
+			  {
+				  parentObject->add(obj);
+			  }
+			  catch (const coreObjectException &uroe)
+			  {
+				  WARNPRINT(READER_WARN_ALL, "line " << lineNumber << ":: "<<uroe.what()<<" "<< uroe.who());
+			  }
+			
             }
 
         }

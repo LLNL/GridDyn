@@ -37,21 +37,21 @@ public:
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual int add (gridLoad *ld);
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridLoad *ld);
+  virtual void add (gridCoreObject *obj) override;
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
 
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;    //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual double getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;

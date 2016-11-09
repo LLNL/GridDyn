@@ -49,9 +49,9 @@ public:
   virtual ~subsystem ();
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   // remove components
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (gridCoreObject *obj) override;
 
 
   //get component models
@@ -68,7 +68,7 @@ public:
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
   virtual void setTime (double time) override;
 
-  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
 
   /** @brief relic of something not used to my knowledge*/
   virtual void updateTheta (double /*time*/)
@@ -76,8 +76,8 @@ public:
   }
 
   // parameter set functions
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   void setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
@@ -97,8 +97,8 @@ public:
    a wrapper around the area->converge function
   @param[in] ttime the time
   @param[in] state the system state
-  @param[in] the time derivative of the state
-  @param[in] the solverMode corresponding to the state
+  @param[in] dstate_dt the time derivative of the state
+  @param[in] sMode the solverMode corresponding to the state
   @param[in] tol  the tolerance to do the convergence
   @param[in] mode the mode of convergence
   */
@@ -113,7 +113,7 @@ public:
 
   /** @brief flag all the voltage states
   *@param[out] vStates a vector with a value of 1.0 for all voltage states and 0 otherwise
-  @param[in]  the solverMode to get the voltage state indicators for
+  @param[in] sMode the solverMode to get the voltage state indicators for
   */
   void getVoltageStates (double vStates[], const solverMode &sMode);
 
@@ -129,7 +129,7 @@ public:
   virtual int fixPower (double rPower, double qPower, index_t mterminal, index_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void followNetwork (int network,std::queue<gridBus *> &stk) override;
-  virtual int updateBus (gridBus *bus, index_t busnumber) override;
+  virtual void updateBus (gridBus *bus, index_t busnumber) override;
 
   virtual double quickupdateP () override;
 
@@ -159,8 +159,8 @@ public:
 
 
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
   virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;

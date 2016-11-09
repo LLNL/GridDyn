@@ -13,11 +13,7 @@
 
 #include "gridObjectsHelperClasses.h"
 #include "gridObjects.h"
-#include <cstdio>
-#include <iostream>
-#include <cstdlib>
 #include <cstring>
-
 
 static const solverOffsets nullOffsets;
 
@@ -344,8 +340,8 @@ offsetTable::offsetTable () : offsetContainer (6),cSize (6)
 {
   //most simulations use the first 2 and powerflow(3) and likely dynamic DAE(4)  and often 5 and 6 for dynamic partitioned
   local = offsetContainer.data ();
-  offsetContainer[0].sMode = &cLocalSolverMode;
-  offsetContainer[1].sMode = &cLocalbSolverMode;
+  offsetContainer[0].sMode = cLocalSolverMode;
+  offsetContainer[1].sMode = cLocalbSolverMode;
 }
 
 offsetTable::offsetTable (const offsetTable &oTable) : offsetContainer (oTable.offsetContainer), cSize (oTable.cSize)
@@ -384,7 +380,7 @@ solverOffsets * offsetTable::getOffsets (const solverMode &sMode)
   if (sMode.offsetIndex >= cSize)
     {
       offsetContainer.resize (sMode.offsetIndex + 1);
-      offsetContainer[sMode.offsetIndex].sMode = &sMode;
+      offsetContainer[sMode.offsetIndex].sMode = sMode;
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
@@ -408,7 +404,7 @@ void offsetTable::setOffsets (const solverOffsets &newOffsets, const solverMode 
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].setOffsets (newOffsets);
 }
 
@@ -421,7 +417,7 @@ void offsetTable::setOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].setOffset (newOffset);
 }
 
@@ -434,7 +430,7 @@ void offsetTable::setAlgOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].algOffset = newOffset;
 }
 
@@ -447,7 +443,7 @@ void offsetTable::setDiffOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].diffOffset = newOffset;
 }
 
@@ -460,7 +456,7 @@ void offsetTable::setVOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].vOffset = newOffset;
 }
 
@@ -472,7 +468,7 @@ void offsetTable::setAOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].aOffset = newOffset;
 }
 
@@ -485,7 +481,7 @@ void offsetTable::setRootOffset (index_t newOffset, const solverMode &sMode)
       cSize = sMode.offsetIndex + 1;
       local = offsetContainer.data ();
     }
-  offsetContainer[sMode.offsetIndex].sMode = &sMode;
+  offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].rootOffset = newOffset;
 
 }
@@ -534,7 +530,7 @@ void offsetTable::unload (bool dynamic_only)
     {
       for (auto &so : offsetContainer)
         {
-          if (isDynamic (*so.sMode))
+          if (isDynamic (so.sMode))
             {
               so.stateLoaded = false;
               so.rjLoaded = false;
@@ -561,7 +557,7 @@ void offsetTable::stateUnload (bool dynamic_only)
     {
       for (auto &so : offsetContainer)
         {
-          if (isDynamic (*so.sMode))
+          if (isDynamic (so.sMode))
             {
               so.stateLoaded = false;
               so.diffOffset = kNullLocation;
@@ -586,7 +582,7 @@ void offsetTable::rjUnload (bool dynamic_only)
     {
       for (auto &so : offsetContainer)
         {
-          if (isDynamic (*so.sMode))
+          if (isDynamic (so.sMode))
             {
               so.rjLoaded = false;
             }
@@ -608,7 +604,7 @@ void offsetTable::localUpdateAll (bool dynOnly)
     {
       for (auto &so : offsetContainer)
         {
-          if (isDynamic (*so.sMode))
+          if (isDynamic (so.sMode))
             {
               so.total.algRoots = so.local.algRoots = local->local.algRoots;
               so.total.diffRoots = so.local.diffRoots = local->local.diffRoots;
@@ -630,7 +626,7 @@ const solverMode &offsetTable::getSolverMode (index_t index) const
 {
   if (index < cSize)
     {
-      return *offsetContainer[index].sMode;
+      return offsetContainer[index].sMode;
     }
   else
     {
@@ -643,32 +639,32 @@ const solverMode &offsetTable::find (const solverMode &tMode) const
   for (auto &so:offsetContainer)
     {
 
-      if (so.sMode->dynamic != tMode.dynamic)
+      if (so.sMode.dynamic != tMode.dynamic)
         {
           continue;
         }
-      if (so.sMode->local != tMode.local)
+      if (so.sMode.local != tMode.local)
         {
           continue;
         }
-      if (so.sMode->algebraic != tMode.algebraic)
+      if (so.sMode.algebraic != tMode.algebraic)
         {
           continue;
         }
-      if (so.sMode->differential != tMode.differential)
+      if (so.sMode.differential != tMode.differential)
         {
           continue;
         }
 
-      if (so.sMode->extended_state != tMode.extended_state)
+      if (so.sMode.extended_state != tMode.extended_state)
         {
           continue;
         }
-      if (so.sMode->approx != tMode.approx)
+      if (so.sMode.approx != tMode.approx)
         {
           continue;
         }
-      return *so.sMode;
+      return so.sMode;
     }
   return cEmptySolverMode;
 }

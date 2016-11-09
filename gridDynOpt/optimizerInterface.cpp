@@ -12,14 +12,19 @@
 */
 
 #include "optimizerInterface.h"
-
+#include "core/factoryTemplates.h"
 #include "gridDynOpt.h"
 
-#include <cstdio>
-#include <algorithm>
+
 #include <string>
 
 
+static childClassFactory<optimizerInterface, basicOptimizer> basicFac(stringVec{ "basic","pricestack" });
+
+optimizerInterface::optimizerInterface(const std::string &optName):name(optName)
+{
+	
+}
 
 optimizerInterface::optimizerInterface (gridDynOptimization *gdo, const optimMode &oMode) : mode (oMode),m_gdo (gdo)
 {
@@ -37,10 +42,9 @@ void optimizerInterface::setOptimizationData (gridDynOptimization *gdo, const op
     }
 }
 
-void optimizerInterface::initializeJacArray (count_t size)
+void optimizerInterface::initializeJacArray (count_t /*size*/)
 {
-  a1.reserve (size);
-  a1.clear ();
+
 }
 
 double optimizerInterface::get (const std::string & /*param*/) const
@@ -87,6 +91,13 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
   return 0;
 }
 
+basicOptimizer::basicOptimizer(const std::string &optName):optimizerInterface(optName)
+{
+}
+
+basicOptimizer::basicOptimizer(gridDynOptimization *gdo, const optimMode &oMode) : optimizerInterface(gdo, oMode)
+{
+}
 
 int basicOptimizer::allocate (count_t size)
 {
@@ -118,6 +129,7 @@ std::shared_ptr<optimizerInterface> makeOptimizer (gridDynOptimization *gdo, con
   switch (oMode.flowMode)
     {
     case flowModel_t::none:
+	default:
       od = std::make_shared<basicOptimizer> (gdo, oMode);
       break;
     case flowModel_t::transport:
@@ -128,32 +140,8 @@ std::shared_ptr<optimizerInterface> makeOptimizer (gridDynOptimization *gdo, con
   return od;
 }
 
+
 std::shared_ptr<optimizerInterface> makeOptimizer (const std::string &type)
 {
-  std::shared_ptr<optimizerInterface> od;
-  if (type == "basic")
-    {
-      od = std::make_shared<basicOptimizer> ();
-    }
-  else if (type == "kinsol")
-    {
-      od = nullptr;
-    }
-  else if (type == "ida")
-    {
-      od = nullptr;
-    }
-  else if (type == "cvode")
-    {
-      od = nullptr;
-    }
-  else if (type == "arkode")
-    {
-      od = nullptr;
-    }
-  else
-    {
-      od = nullptr;
-    }
-  return od;
+  return coreClassFactory<optimizerInterface>::instance()->createObject(type);
 }

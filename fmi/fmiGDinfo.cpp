@@ -26,76 +26,21 @@ You should have received a copy of the FMILIB_License.txt file
 along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 */
 
+
+#include <boost/dll/alias.hpp> // for BOOST_DLL_ALIAS   
+#include "../plugins/gridDynPluginApi.h"
+
 #include "fmi_importGD.h"
 
 #include "objectFactoryTemplates.h"
-#include "fmiLoad.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstdarg>
-
-#include <fmilib.h>
-#include <JM/jm_portability.h>
-
-#define BUFFER 1000
-
-/* Logger function used by the FMU internally */
-static void fmi1logger(fmi1_component_t c, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ...)
-{
-  int len;
-  char msg[BUFFER];
-  va_list argp;
-  va_start(argp, message);
-  len = vsnprintf(msg, BUFFER, message, argp);
-  printf("fmiStatus = %d;  %s (%s): %s\n", status, instanceName, category, message);
-}
+#include "fmi_models/fmiLoad.h"
+#include <memory>
 
 
-int fmi1_test(fmi_import_context_t* context, const char* dirPath)
-{
-  fmi1_callback_functions_t callBackFunctions;
-  const char* modelIdentifier;
-  const char* modelName;
-  const char*  GUID;
-  jm_status_enu_t status;
-
-  fmi1_import_t* fmu;
-
-  callBackFunctions.logger = fmi1logger;
-  callBackFunctions.allocateMemory = calloc;
-  callBackFunctions.freeMemory = free;
-
-  fmu = fmi1_import_parse_xml(context, dirPath);
-
-  if (!fmu)
-  {
-    printf("Error parsing XML, exiting\n");
-    return (CTEST_RETURN_FAIL);
-  }
-  modelIdentifier = fmi1_import_get_model_identifier(fmu);
-  modelName = fmi1_import_get_model_name(fmu);
-  GUID = fmi1_import_get_GUID(fmu);
-
-  printf("Model name: %s\n", modelName);
-  printf("Model identifier: %s\n", modelIdentifier);
-  printf("Model GUID: %s\n", GUID);
-
-  status = fmi1_import_create_dllfmu(fmu, callBackFunctions, 0);
-  if (status == jm_status_error)
-  {
-    printf("Could not create the DLL loading mechanism(C-API).\n");
-    return(CTEST_RETURN_FAIL);
-  }
-
-  printf("Version returned from FMU:   %s\n", fmi1_import_get_version(fmu));
-
-  fmi1_import_destroy_dllfmu(fmu);
-
-  fmi1_import_free(fmu);
-
-  return (CTEST_RETURN_SUCCESS);
-}
 //create the component factories
+
+
+
 
 static typeFactory<fmiLoad> fmild("load", stringVec{ "fmiload", "fmi" });
 
@@ -108,3 +53,42 @@ void loadFmiLibrary()
 		loaded = 1;
 	}
 }
+
+//Someday I will get plugins to work 
+namespace fmi_plugin_namespace 
+{
+
+	class fmiPlugin : public gridDynPlugInApi 
+	{
+		static std::vector<std::shared_ptr<objectFactory>> fmiFactories;
+		fmiPlugin() {};
+
+	public:
+		std::string name() const override {
+			return "fmi";
+		}
+
+		void load() override {
+			auto b = std::make_shared<childTypeFactory<fmiLoad, gridLoad>>("load", stringVec{ "fmiload", "fmi" });
+			fmiFactories.push_back(b);
+
+		}
+
+		void load(const std::string & /*section*/)
+		{
+			load();
+		}
+		// Factory method
+		static std::shared_ptr<fmiPlugin> create() 
+		{
+			return std::shared_ptr<fmiPlugin>(new fmiPlugin());
+		}
+	};
+
+
+	/*BOOST_DLL_ALIAS(
+		fmi_plugin_namespace::fmiPlugin::create, // <-- this function is exported with...
+		load_plugin                               // <-- ...this alias name
+	)*/
+
+} // namespace my_namespace

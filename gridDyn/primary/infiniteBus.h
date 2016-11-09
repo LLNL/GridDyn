@@ -28,15 +28,23 @@ protected:
   double dvdt = 0;        //!< [puV/s] ramp rate for voltage
   double dfdt = 0;         //!< [puHz/s] ramp rate for frequency
 public:
-  infiniteBus (const std::string &objName = "infbus_$");
+	/** @brief default constructor
+	 *@param[in] objName  the name of the infinite bus object
+	 */
+  explicit infiniteBus (const std::string &objName = "infbus_$");
+  /** @brief default constructor
+   *@param[in] startVoltage  the initial voltage of the bus
+   *@param[in] startAngle  the initial angle of the bus
+  *@param[in] objName  the name of the infinite bus object
+  */
   infiniteBus (double startVoltage, double startAngle,const std::string &objName = "infbus_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  double timestep (double ttime, const solverMode &sMode) override;
+  void timestep (double ttime, const solverMode &sMode) override;
   void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   //for identifying which variables are algebraic vs differential
   virtual bool checkCapable () override;
 

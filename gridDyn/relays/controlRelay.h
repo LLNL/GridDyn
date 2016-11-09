@@ -19,7 +19,6 @@
 class commMessage;
 class controlMessage;
 
-class gridEvent;
 class gridSimulation;
 class functionEventAdapter;
 
@@ -29,9 +28,12 @@ enum class change_code;
 struct delayedControlAction
 {
   std::uint64_t sourceID;
-  std::shared_ptr<gridEvent> sEvent;
   std::uint64_t actionID;
+  std::string field;
+  double triggerTime;
+  double val;
   double executionTime;
+  gridUnits::units_t unitType = gridUnits::defUnit;
   bool executed;
   bool measureAction;
 };
@@ -59,12 +61,12 @@ protected:
 private:
   std::string m_terminal_key;
 public:
-  controlRelay (const std::string &objName = "controlRelay_$");
+  explicit controlRelay (const std::string &objName = "controlRelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:

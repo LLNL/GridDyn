@@ -21,14 +21,15 @@
 
 
 
-
+template <class Y>
 class vectData;
+
 class consData;
 
 template <class Y>
-class arrayData;
+class matrixData;
 
-/** base object for gridDynSimulations
+/** base object for gridDynOptimizations
 * the basic object for creating a power system encapsulating some common functions and data that is needed by all objects in the simulation
 * and defining some common methods for use by all objects.  This object is not really intended to be instantiated directly and is mostly a
 * common interface to inheriting objects gridPrimary, gridSecondary, and gridSubModel as it encapsulated common functionality between those objects
@@ -37,15 +38,15 @@ class gridOptObject : public gridCoreObject
 {
 public:
   std::bitset<32> optFlags;        //!< operational flags these flags are designed to be normal false
-  count_t numParams = 0; //!< the number of paramaters to store in an archive
+  count_t numParams = 0; //!< the number of parameters to store in an archive
   optOffsetTable offsets;        //!<a table of offsets for the different solver modes
 protected:
 public:
   gridOptObject (const std::string &objName = "optObject_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   /** set the offsets of an object for a particular optimization mode.
   \param newOffsets the offset set to use.
   \param oMode the optimization mode to use.
@@ -88,7 +89,7 @@ public:
   \param oMode the optimization mode to use.
   */
   count_t aSize (const optimMode &oMode);
-  /** get the number of constaints.
+  /** get the number of constraints.
   \param oMode the optimization mode to use.
   */
   count_t constraintSize (const optimMode &oMode);
@@ -121,27 +122,27 @@ public:
   \param oMode the optimization mode to use.
   */
   count_t aSize (const optimMode &oMode) const;
-  /** get the number of constaints.
+  /** get the number of constraints.
   \param oMode the optimization mode to use.
   */
   count_t constraintSize (const optimMode &oMode) const;
 
-  /** intitialize the object.
+  /** initialize the object.
   \param flags the optimization mode to use.
   */
   virtual void objectInitializeA (unsigned long flags);
 
-  /** intitialize the object.
+  /** initialize the object.
   \param flags the optimization mode to use.
   */
   void initializeA (unsigned long flags);
 
-  /** intitialize the object.
+  /** initialize the object.
   \param flags the optimization mode to use.
   */
   virtual void objectInitializeB (unsigned long flags);
 
-  /** intitialize the object.
+  /** initialize the object.
   \param flags the optimization mode to use.
   */
   void initializeB (unsigned long flags);
@@ -151,7 +152,7 @@ public:
   virtual void loadSizes (const optimMode &oMode);
 
   /** set the objective variable values to the objects.
-  \param val  the output objective variable values
+  \param oD  the output objective variable values
   \param oMode the optimization mode to use.
   */
   virtual void setValues (const optimData *oD, const optimMode &oMode);
@@ -178,21 +179,21 @@ public:
   \param lowerLimit  the lower limit
   \param oMode the optimization mode to use.
   */
-  virtual void valueBounds (double ttime, double upLimit[], double lowerLimit[], const optimMode &);
+  virtual void valueBounds (double ttime, double upLimit[], double lowerLimit[], const optimMode &oMode);
 
   /** load the linear objective parameters
-  \param val  the current object variable values
+  \param oD  the current object variable values
   \param linObj the structure to store the objective parameters
   \param oMode the optimization mode to use.
   */
-  virtual void linearObj (const optimData *oD, vectData * linObj, const optimMode &oMode);
+  virtual void linearObj (const optimData *oD, vectData<double> * linObj, const optimMode &oMode);
   /** load the quadrative objective parameters
-  \param val  the current object variable values
+  \param oD  the current object variable values
   \param linObj the structure to store the linear objective parameters
   \param quadObj the structure to store the 2nd order objective parameters
   \param oMode the optimization mode to use.
   */
-  virtual void quadraticObj (const optimData *oD, vectData * linObj, vectData * quadObj, const optimMode &oMode);
+  virtual void quadraticObj (const optimData *oD, vectData<double> * linObj, vectData<double> * quadObj, const optimMode &oMode);
 
   /** compute the objective value
   \param val  the current object variable values
@@ -201,40 +202,50 @@ public:
   */
   virtual double objValue (const optimData *oD, const optimMode &oMode);
 
-  /** compute the objective value partial derivatives
-  \param val  the current object variable values
-  \param deriv the vector containting all \frac{dC}{dO_i}
+  /** compute the gradients of the objective function
+  \param oD  the current object variable values
+  \param grad the vector containting all \frac{dC}{dO_i}
   \param oMode the optimization mode to use.
   */
-  virtual void derivative (const optimData *oD, double deriv[], const optimMode &oMode);
+  virtual void gradient (const optimData *oD, double grad[], const optimMode &oMode);
 
   /** compute the Jacobian entries for the objective value
-  \param val  the current object variable values
-  \param arrayData the structure for storing \frac{dC_i}{dO_j}
+  \param oD  the current object variable values
+  \param ad the structure for storing \frac{dC_i}{dO_j}
   \param oMode the optimization mode to use.
   */
-  virtual void jacobianElements (const optimData *oD, arrayData<double> *, const optimMode &oMode);
+  virtual void jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
 
   //constraint functions
   /** get the linear constraint operations
-  \param val  the current object variable values
-  \param consData the structure for the constraint parameters storing the coefficients, the upper and lower limit
-  \param oMode the optimization mode to use.
+  \param[in] oD  the current object variable values
+  \param[out] cons the structure for the constraint parameters storing the coefficients, the upper and lower limit
+  \param[out] upperLimit value for the upper bound on the constraint function
+  \param[out] lowerLimit value for the lower bound on the constraint function
+  \param[in] oMode the optimization mode to use.
   */
-  virtual void getConstraints (const optimData *oD, arrayData<double> * cons, double upperLimit[], double lowerLimit[], const optimMode &oMode);
+  virtual void getConstraints (const optimData *oD, matrixData<double> * cons, double upperLimit[], double lowerLimit[], const optimMode &oMode);
 
   /** get the linear constraint operations
-  \param val  the current object variable values
+  \param oD  the current object variable values
   \param cVals the computed value of the constraint
   \param oMode the optimization mode to use.
   */
   virtual void constraintValue (const optimData *oD, double cVals[], const optimMode &oMode);
   /** get the Jacobian array of the constraints
-  \param val  the current object variable values
-  \param arrayData the structure for the constraint Jacobian entries
+  \param oD  the current object variable values
+  \param ad the structure for the constraint Jacobian entries
   \param oMode the optimization mode to use.
   */
-  virtual void constraintJacobianElements (const optimData *oD, arrayData<double> *, const optimMode &);
+  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
+
+  /** get the Hessian array for the objective function
+  \param oD  the current object variable values
+  \param ad the structure for the constraint Jacobian entries
+  \param oMode the optimization mode to use.
+  */
+  virtual void hessianElements(const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
+
   /** get the names of the objective variables
   \param objNames  the location to store the names
   \param oMode the optimization mode to use.

@@ -64,7 +64,7 @@ protected:
 
 
 public:
-  acdcConverter (const std::string &objName = "acdcConveter_$");
+  explicit acdcConverter (const std::string &objName = "acdcConveter_$");
   //name will be based on opType
   acdcConverter (mode_t opType, const std::string &objName = "");
   acdcConverter (double rP, double xP, const std::string &objName = "acdcConveter_$");
@@ -77,7 +77,7 @@ public:
 
   //virtual void pFlowCheck (std::vector<violation> &Violation_vector);
   //virtual void getVariableType (double sdata[], const solverMode &sMode);      //has no state variables
-  virtual int updateBus (gridBus *bus, index_t busnumber) override;
+  virtual void updateBus (gridBus *bus, index_t busnumber) override;
 
   virtual void updateLocalCache () override;
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
@@ -87,23 +87,23 @@ public:
 
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual double timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
 
   virtual double quickupdateP () override
   {
     return 0;
   }
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   //initializeB dynamics
   //virtual void dynObjectInitializeA (double time0, unsigned long flags);
 
-  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;

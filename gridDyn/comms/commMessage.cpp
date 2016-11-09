@@ -12,24 +12,27 @@
 */
 
 #include "commMessage.h"
+#include "stringOps.h"
 
 static dMessageFactory<commMessage,0,0xFFFFFFF0> dmf ("message");
 
 
-std::string commMessage::toString ()
+std::string commMessage::toString (int modifiers) const
 {
+	std::string message = (modifiers==comm_modifiers::with_type) ? encodeTypeInString() : "";
   if (m_messageType == pingMessageType)
     {
-      return "ping";
+      message+="ping";
     }
   else if (m_messageType == replyMessageType)
     {
-      return "reply";
+      message+="reply";
     }
-  else
-    {
-      return std::to_string (m_messageType);
-    }
+  else if (modifiers == comm_modifiers::none)
+  {
+	  message = encodeTypeInString();
+  }
+  return message;
 
 }
 void commMessage::loadString (const std::string &fromString)
@@ -49,6 +52,22 @@ void commMessage::loadString (const std::string &fromString)
 
 }
 
+std::string commMessage::encodeTypeInString() const
+{
+	return "[" + std::to_string(m_messageType) + "]";
+}
+
+std::uint32_t commMessage::extractMessageType(const std::string &messageString)
+{
+	auto b1 = messageString.find_first_of('[');
+	if ((b1 == std::string::npos)||(b1>7))
+	{
+		return static_cast<std::uint32_t>(unknownMessageType);
+	}
+	auto b2 = messageString.find_first_of(']', b1);
+	std::uint32_t val = intReadComplete(messageString.substr(b1 + 1, b2 - b1 - 1),0xFFFFFFFF);
+	return val;
+}
 
 std::shared_ptr<coreMessageFactory> coreMessageFactory::instance ()
 {
@@ -108,9 +127,9 @@ messageFactory *coreMessageFactory::getFactory (std::uint32_t type)
   return cfact;
 }
 
-stringVec coreMessageFactory::getMessageTypeNames ()
+std::vector<std::string> coreMessageFactory::getMessageTypeNames ()
 {
-  stringVec fnames;
+  std::vector<std::string> fnames;
   fnames.reserve (m_factoryMap.size ());
   for (auto fname : m_factoryMap)
     {

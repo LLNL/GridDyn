@@ -17,13 +17,12 @@
 #include "gridDynFileInput.h"
 #include "elementReaderTemplates.hpp"
 
-#include "gridArea.h"
 #include "gridBus.h"
 #include "stringOps.h"
 #include "objectInterpreter.h"
 
 #include "objectFactory.h"
-#include <cstdio>
+
 
 using namespace readerConfig;
 
@@ -54,21 +53,31 @@ gridBus * readBusElement (std::shared_ptr<readerElement> &element, readerInfo *r
           std::string B = valType.substr (cloc + 1);
           trimString (A);
           trimString (B);
-          int ret = bus->set ("type", A);
-          if (ret != PARAMETER_FOUND)
+		  try
+		  {
+			  bus->set("type", A);
+		  }
+          catch (const gridDynException &)
             {
               WARNPRINT (READER_WARN_IMPORTANT, "Bus type parameter not found " << A);
             }
-          ret = bus->set ("type", B);
-          if (ret != PARAMETER_FOUND)
+		  try
+		  {
+			  bus->set("type", B);
+		  }
+		  catch (const gridDynException &)
             {
               WARNPRINT (READER_WARN_IMPORTANT, "Bus type parameter not found " << B);
             }
         }
       else
         {
-          int ret = bus->set ("type", valType);
-          if (ret != PARAMETER_FOUND)
+		  try
+		  {
+			  
+			  bus->set("type", valType);
+		  }
+		  catch (const gridDynException &) //either invalidParameterValue or unrecognizedParameter depending on the actual model used
             {
               if (!(coreObjectFactory::instance ()->isValidType (busComponentName, valType)))
                 {

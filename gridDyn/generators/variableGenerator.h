@@ -47,17 +47,17 @@ protected:
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 public:
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
 
-  virtual int add (gridSubModel *obj) override;
+  virtual void add (gridSubModel *obj) override;
 
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual double getAdjustableCapacityUp  (double /*time*/ = kBigNum) const override
   {
@@ -72,7 +72,9 @@ public:
   }
   virtual gridCoreObject * find (const std::string &object) const override;
   virtual gridCoreObject * getSubObject (const std::string &type, index_t num) const override;
-
+protected:
+	virtual double pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+	virtual index_t pSetLocation(const solverMode &sMode) override;
 };
 
 #endif

@@ -26,7 +26,7 @@ dynamicInitialConditionRecovery::~dynamicInitialConditionRecovery ()
 {
 }
 
-bool dynamicInitialConditionRecovery::hasMoreFixes ()
+bool dynamicInitialConditionRecovery::hasMoreFixes () const
 {
   return (attempt_number < 6);
 }

@@ -12,7 +12,8 @@
 */
 
 #include "submodels/gridControlBlocks.h"
-#include "arrayData.h"
+#include "core/gridDynExceptions.h"
+#include "matrixData.h"
 
 #include <cmath>
 
@@ -159,7 +160,7 @@ void delayBlock::derivElements (double input, double didt, const stateData *sD, 
 }
 
 
-void delayBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void delayBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   if ((isAlgebraicOnly (sMode))||(opFlags[simplified]))
     {
@@ -174,14 +175,13 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ar
 
 
 // set parameters
-int delayBlock::set (const std::string &param,  const std::string &val)
+void delayBlock::set (const std::string &param,  const std::string &val)
 {
   return gridCoreObject::set (param, val);
 }
 
-int delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   //param   = gridDynSimulation::toLower(param);
 
@@ -197,7 +197,7 @@ int delayBlock::set (const std::string &param, double val, gridUnits::units_t un
             {
               if (std::abs (val) < kMin_Res)
                 {
-                  out = INVALID_PARAMETER_VALUE;
+				  throw(invalidParameterValue());
                 }
               else
                 {
@@ -212,9 +212,9 @@ int delayBlock::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
+ 
 }
 

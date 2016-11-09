@@ -12,17 +12,10 @@
 */
 
 #include "readElement.h"
-#include "ticpp.h"
-#include <boost/filesystem.hpp>
+
 #include "gridDyn.h"
 #include "readerHelper.h"
 #include "elementReaderTemplates.hpp"
-#include "tinyxmlReaderElement.h"
-
-#include <locale>
-#include <sstream>
-#include <cstdio>
-#include <utility>
 
 using namespace readerConfig;
 
@@ -35,7 +28,7 @@ static const IgnoreListType simIgnoreFields {
 
 bool isMasterObject (const gridCoreObject *searchObject, const gridSimulation *gs);
 
-// read xml file
+// read XML file
 //gridCoreObject * readSimXMLFile(const std::string &filename, gridCoreObject *gco, const std::string  prefix, readerInfo *ri) const
 gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject, gridSimulation *gs)
 {
@@ -110,17 +103,17 @@ gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element,
       LEVELPRINT (READER_NORMAL_PRINT, "loaded Power simulation " << simulation->getName ());
       LEVELPRINT (READER_SUMMARY_PRINT, "Summary: " << busCount << " buses Loaded ");
       LEVELPRINT (READER_SUMMARY_PRINT, "Summary: " << linkCount << " links Loaded ");
-      if (ri->recorders.size () > 0)
+      if (ri->collectors.size () > 0)
         {
-          LEVELPRINT (READER_SUMMARY_PRINT, "Summary: " << ri->recorders.size () << " recorders Loaded ");
+          LEVELPRINT (READER_SUMMARY_PRINT, "Summary: " << ri->collectors.size () << " collectors Loaded ");
         }
       if (ri->events.size () > 0)
         {
           LEVELPRINT (READER_SUMMARY_PRINT, "Summary: " << ri->events.size () << " events Loaded ");
         }
-      for (auto gr : ri->recorders)
+      for (auto col : ri->collectors)
         {
-          simulation->add (gr);
+          simulation->add (col);
         }
       //add the events
       simulation->add (ri->events);

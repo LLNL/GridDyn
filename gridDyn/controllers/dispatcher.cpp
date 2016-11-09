@@ -14,6 +14,7 @@
 
 
 #include "dispatcher.h"
+#include "core/gridDynExceptions.h"
 
 
 dispatcher::dispatcher (const std::string &objName) : gridCoreObject (objName)
@@ -51,28 +52,28 @@ double dispatcher::testP (double /*time*/, double /*required*/, double /*targetT
 }
 
 
-int dispatcher::add (gridCoreObject * /*obj*/)
+void dispatcher::add (gridCoreObject * /*obj*/)
 {
-  return OBJECT_ADD_FAILURE;
+	throw(objectAddFailure(this));
 }
-int dispatcher::add (scheduler * /*sched*/)
+void dispatcher::add (scheduler * /*sched*/)
 {
-  return OBJECT_ADD_FAILURE;
+	throw(objectAddFailure(this));
 }
-int dispatcher::remove (gridCoreObject * /*obj*/)
+void dispatcher::remove (gridCoreObject * /*obj*/)
 {
-  return OBJECT_REMOVE_SUCCESS;
+
 }
-int dispatcher::remove (scheduler * /*sched*/)
+void dispatcher::remove (scheduler * /*sched*/)
 {
-  return OBJECT_REMOVE_SUCCESS;
+
 }
 
-int dispatcher::set (const std::string &param, const std::string &val)
+void dispatcher::set (const std::string &param, const std::string &val)
 {
   return gridCoreObject::set (param, val);
 }
-int dispatcher::set (const std::string &param, double val, gridUnits::units_t unitType)
+void dispatcher::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
   return gridCoreObject::set (param, val, unitType);
 }

@@ -31,7 +31,7 @@ public:
     convert_to_constant_impedance = object_flag2,
     no_pqvoltage_limit = object_flag3,
   };
-  static int loadCount;      //!<counter for automatic load id's
+  static std::atomic<count_t> loadCount;      //!<counter for automatic load id's
   double baseVoltage;        //!< base voltage of the load
 protected:
   gridBus *bus = nullptr;					//!< pointer to the parent bus
@@ -59,7 +59,7 @@ private:
   double trigVVlow = 1.0 / (0.7 * 0.7);       //!< constant for conversion of PQ loads to constant impedance loads
   double trigVVhigh = 1.0 / (1.3 * 1.3);       //!< constant for conversion of PQ loads to constant impedance loads
 public:
-  gridLoad (const std::string &objName = "load_$");
+  explicit gridLoad (const std::string &objName = "load_$");
   gridLoad (double rP, double rQ, const std::string &objName = "load_$");
 
   virtual ~gridLoad ();
@@ -68,13 +68,13 @@ public:
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void setTime (double time) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
@@ -94,8 +94,8 @@ public:
   }
   virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
 
   virtual double getschedPower () const
   {
@@ -110,7 +110,7 @@ public:
 
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;                                                                                                                                //for saving the state
 
-  double getdPdf ()
+  double getdPdf () const
   {
     return dPdf;
   }

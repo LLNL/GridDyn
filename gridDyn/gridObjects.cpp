@@ -13,6 +13,7 @@
 
 #include "gridObjects.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "stackInfo.h"
 #include "stringOps.h"
 #include <cstdio>
@@ -24,120 +25,32 @@
 //this functions is here since it depends on gridObject information
 Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode &sMode, const gridObject *obj) const
 {
-  Lp Loc;
-  Loc.algOffset = offsetContainer[sMode.offsetIndex].algOffset;
-  Loc.diffOffset = offsetContainer[sMode.offsetIndex].diffOffset;
-  Loc.diffSize = offsetContainer[sMode.offsetIndex].total.diffSize;
-  Loc.algSize = offsetContainer[sMode.offsetIndex].total.algSize;
+	Lp Loc = getLocations(sD, sMode, obj);
   if ((sMode.local)||(!(sD)))
     {
-      Loc.time = obj->prevTime;
-      Loc.algStateLoc = obj->m_state.data ();
       Loc.destLoc = d;
-      Loc.diffStateLoc = obj->m_state.data () + Loc.algSize;
       Loc.destDiffLoc = d + Loc.algSize;
-      Loc.dstateLoc = obj->m_dstate_dt.data () + Loc.algSize;
-      if (Loc.algOffset == kNullLocation)
-        {
-          Loc.algOffset = 0;
-        }
-      if (Loc.diffOffset == kNullLocation)
-        {
-          Loc.diffOffset = Loc.algSize;
-        }
     }
   else if (isDAE (sMode))
     {
-      Loc.time = sD->time;
-      Loc.algStateLoc = sD->state + Loc.algOffset;
       Loc.destLoc = d + Loc.algOffset;
-      Loc.diffStateLoc = sD->state + Loc.diffOffset;
       Loc.destDiffLoc = d + Loc.diffOffset;
-      Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
     }
   else if (hasAlgebraic(sMode))
     {
-      Loc.time = sD->time;
-      if (sD->state)
-        {
-          Loc.algStateLoc = sD->state + Loc.algOffset;
-        }
-      else
-        {
-          Loc.algStateLoc = sD->algState + Loc.algOffset;
-        }
       Loc.destLoc = d + Loc.algOffset;
 	  Loc.destDiffLoc = nullptr;
-	  if (isDynamic(sMode))
-	  {
-		  if ((sD->fullState) && (sD->pairIndex != kNullLocation))
-		  {
-			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
-		  }
-		  else if ((sD->diffState) && (sD->pairIndex != kNullLocation))
-		  {
-			  Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
-		  }
-		  else
-		  {
-			  Loc.diffStateLoc = obj->m_state.data() + offsetContainer[0].diffOffset;
-		  }
-
-		  if ((sD->dstate_dt) && (sD->pairIndex != kNullLocation))
-		  {
-			  Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
-		  }
-		  else
-		  {
-			  Loc.dstateLoc = obj->m_dstate_dt.data() + offsetContainer[0].diffOffset;
-		  }
-	  }
-      
-
     }
   else if (hasDifferential (sMode))
     {
-      Loc.time = sD->time;
-      if (sD->state)
-        {
-          Loc.diffStateLoc = sD->state + Loc.diffOffset;
-        }
-      else
-        {
-          Loc.diffStateLoc = sD->diffState + Loc.diffOffset;
-        }
-      Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
+     
       Loc.destDiffLoc = d + Loc.diffOffset;
-      if ((sD->fullState) && (sD->pairIndex != kNullLocation))
-        {
-          Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
-        }
-      else if ((sD->algState) && (sD->pairIndex != kNullLocation))
-        {
-          Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
-        }
-      else
-        {
-          Loc.algStateLoc = obj->m_state.data () + offsetContainer[0].algOffset;
-        }
       Loc.destLoc = nullptr;
     }
   else
     {
-      Loc.time = obj->prevTime;
-      Loc.algStateLoc = obj->m_state.data ();
       Loc.destLoc = d;
-      Loc.diffStateLoc = obj->m_state.data () + Loc.algSize;
       Loc.destDiffLoc = d + Loc.algSize;
-      Loc.dstateLoc = obj->m_dstate_dt.data () + Loc.algSize;
-      if (Loc.algOffset == kNullLocation)
-        {
-          Loc.algOffset = 0;
-        }
-      if (Loc.diffOffset == kNullLocation)
-        {
-          Loc.diffOffset = Loc.algSize;
-        }
     }
   return Loc;
 }
@@ -183,28 +96,26 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
         {
           Loc.algStateLoc = sD->algState + Loc.algOffset;
         }
-	  if (isDynamic(sMode))
+	  if ((isDynamic(sMode)) && (sD->pairIndex != kNullLocation))
 	  {
-		  if ((sD->fullState) && (sD->pairIndex != kNullLocation))
-		  {
-			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
-		  }
-		  else if ((sD->diffState) && (sD->pairIndex != kNullLocation))
+		  if (sD->diffState)
 		  {
 			  Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
 		  }
-		  else
+		  else if (sD->fullState)
 		  {
-			  Loc.diffStateLoc = obj->m_state.data() + offsetContainer[0].diffOffset;
+			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
 		  }
-		  if ((sD->dstate_dt)&&(sD->pairIndex!=kNullLocation))
+		 
+		  if (sD->dstate_dt)
 		  {
 			  Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
 		  }
-		  else
-		  {
-			  Loc.dstateLoc = obj->m_dstate_dt.data() + offsetContainer[0].diffOffset;
-		  }
+	  }
+	  else
+	  {
+		  Loc.diffStateLoc = obj->m_state.data() + offsetContainer[0].diffOffset;
+		  Loc.dstateLoc = obj->m_dstate_dt.data() + offsetContainer[0].diffOffset;
 	  }
 	  Loc.destDiffLoc = nullptr;
 
@@ -221,14 +132,17 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
           Loc.diffStateLoc = sD->diffState + Loc.diffOffset;
         }
       Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
-      if ((sD->fullState) && (sD->pairIndex != kNullLocation))
-        {
-          Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
-        }
-      else if ((sD->algState) && (sD->pairIndex != kNullLocation))
-        {
-          Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
-        }
+		if (sD->pairIndex != kNullLocation)
+		{
+			if (sD->algState)
+			{
+				Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
+			}
+			else if (sD->fullState)
+			{
+				Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
+			}
+		}
       else
         {
           Loc.algStateLoc = obj->m_state.data () + offsetContainer[0].algOffset;
@@ -275,6 +189,7 @@ gridCoreObject *gridObject::clone (gridCoreObject *obj) const
     }
   nobj->opFlags = opFlags;
   nobj->m_baseFreq = m_baseFreq;
+  nobj->systemBasePower = systemBasePower;
   return nobj;
 }
 
@@ -492,9 +407,8 @@ bool gridObject::isLoaded (const solverMode &sMode,bool dynOnly) const
 
 //there isn't that many flags that we want to be user settable, most are controlled by the model so allowing them to be set by an external function
 // might not be the best thing
-int gridObject::setFlag (const std::string &flag, bool val)
+void gridObject::setFlag (const std::string &flag, bool val)
 {
-  int out = FLAG_FOUND;
   if (flag == "error")
     {
       opFlags.set (error_flag, val);
@@ -509,9 +423,8 @@ int gridObject::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridCoreObject::setFlag (flag,val);
+      gridCoreObject::setFlag (flag,val);
     }
-  return out;
 }
 
 /* *INDENT-OFF* */
@@ -527,7 +440,7 @@ static std::map<std::string, operation_flags> flagmap
   {"pflow_states", has_pflow_states},
   {"dyn_states", has_dyn_states},
   {"differential_states", has_differential_states},
-  {"extra_cascade", extra_cascading_flag},
+  {"not_cloneable", not_cloneable},
   {"remote_voltage_control", remote_voltage_control},
   {"local_voltage_control", local_voltage_control},
   {"indirect_voltage_control", indirect_voltage_control},
@@ -566,7 +479,7 @@ static std::map<std::string, operation_flags> flagmap
   {"flag_update_required", flag_update_required},
   { "differential_output", differential_output },
   {"multipart_calculation_capable", multipart_calculation_capable},
-  {"pflow_constant_initialization", pflow_constant_initialization},
+  {"pflow_init_required", pflow_init_required},
   {"dc_only", dc_only},
   {"dc_capable", dc_capable},
   {"dc_terminal2", dc_terminal2},
@@ -616,7 +529,7 @@ void gridObject::disconnect ()
 }
 
 static stringVec locNumStrings {
-  "status", "basefrequency"
+  "status", "basefrequency","basepower"
 };
 static const stringVec locStrStrings {
   "status"
@@ -627,13 +540,13 @@ void gridObject::getParameterStrings (stringVec &pstr, paramStringType pstype) c
   getParamString<gridObject,gridCoreObject> (this,pstr,locNumStrings,locStrStrings,{},pstype);
 }
 
-int gridObject::set (const std::string &param,  const std::string &val)
+void gridObject::set (const std::string &param,  const std::string &val)
 {
   if (opFlags[no_gridobject_set])
     {
-      return PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
-  int out = PARAMETER_FOUND;
+
   if (param == "status")
     {
       auto v2 = convertToLowerCase (val);
@@ -664,31 +577,26 @@ int gridObject::set (const std::string &param,  const std::string &val)
   else if (param == "flags")
     {
       auto v = splitlineTrim (val);
-      int ot;
       for (auto &temp : v)
         {
           makeLowerCase (temp);              //make the flags lower case
-          ot = setFlag (temp, true);
-          if (ot != PARAMETER_FOUND)
-            {
-              LOG_NORMAL ("flag " + temp + " not found");
-            }
+          setFlag (temp, true);
         }
     }
   else
     {
-      out = gridCoreObject::set (param, val);
+      gridCoreObject::set (param, val);
     }
-  return out;
+  
 }
 
-int gridObject::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridObject::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  if (opFlags[no_gridobject_set])
-    {
-      return PARAMETER_NOT_FOUND;
-    }
-  int out = PARAMETER_FOUND;
+	if (opFlags[no_gridobject_set])
+	{
+		throw(unrecognizedParameter());
+	}
+
   if ((param == "enabled")||(param == "status"))
     {
       if (val > 0.1)
@@ -742,13 +650,29 @@ int gridObject::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = gridCoreObject::set (param, val, unitType);
+      gridCoreObject::set (param, val, unitType);
     }
 
-  return out;
 }
 
-
+double gridObject::get(const std::string &param, gridUnits::units_t unitType) const
+{
+	
+	double out = kNullVal;
+	if (param=="basefrequency")
+	{
+		out = gridUnits::unitConversionFreq(m_baseFreq,gridUnits::rps,unitType);
+	}
+	else if (param=="basepower")
+	{
+		out = gridUnits::unitConversion(systemBasePower, gridUnits::MVAR, unitType,systemBasePower);
+	}
+	else
+	{
+		out = gridCoreObject::get(param, unitType);
+	}
+	return out;
+}
 
 
 void gridObject::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)

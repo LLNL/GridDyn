@@ -18,8 +18,9 @@
 #include "optObjectFactory.h"
 #include "vectorOps.hpp"
 #include "vectData.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 
 
 
@@ -65,21 +66,24 @@ gridCoreObject *gridGenOpt::clone (gridCoreObject *obj) const
   nobj->m_forecast = m_forecast;
   nobj->m_Pmax = m_Pmax;
   nobj->m_Pmin = m_Pmin;
-
+  nobj->systemBasePower = systemBasePower;
+  nobj->mBase = mBase;
 
   return nobj;
 }
 
-int gridGenOpt::add (gridCoreObject *obj)
+void gridGenOpt::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridDynGenerator *> (obj))
     {
       gen = static_cast<gridDynGenerator *> (obj);
       name = gen->getName ();
       id = gen->getUserID ();
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_NOT_RECOGNIZED;
+  else
+  {
+	  throw(invalidObjectException(this));
+  }
 }
 
 void gridGenOpt::objectInitializeA (unsigned long /*flags*/)
@@ -171,7 +175,7 @@ void gridGenOpt::valueBounds (double ttime, double upperLimit[], double lowerLim
 
 }
 
-void gridGenOpt::linearObj (const optimData *, vectData *linObj, const optimMode &oMode)
+void gridGenOpt::linearObj (const optimData *, vectData<double> *linObj, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   if (optFlags.test (piecewise_linear_cost))
@@ -189,7 +193,7 @@ void gridGenOpt::linearObj (const optimData *, vectData *linObj, const optimMode
         }
     }
 }
-void gridGenOpt::quadraticObj (const optimData *, vectData *linObj, vectData * quadObj, const optimMode &oMode)
+void gridGenOpt::quadraticObj (const optimData *, vectData<double> *linObj, vectData<double> * quadObj, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   if (optFlags[piecewise_linear_cost])
@@ -267,7 +271,7 @@ double gridGenOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridGenOpt::derivative (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridGenOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   double P = oD->val[oo->gOffset];
@@ -313,7 +317,7 @@ void gridGenOpt::derivative (const optimData *oD, double deriv[], const optimMod
         }
     }
 }
-void gridGenOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, const optimMode &oMode)
+void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   double P = oD->val[oo->gOffset];
@@ -366,7 +370,7 @@ void gridGenOpt::jacobianElements (const optimData *oD, arrayData<double> *ad, c
     }
 }
 
-void gridGenOpt::getConstraints (const optimData *, arrayData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridGenOpt::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
@@ -376,7 +380,7 @@ void gridGenOpt::constraintValue (const optimData *, double /*cVals*/ [], const 
 
 }
 
-void gridGenOpt::constraintJacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridGenOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 
 }
@@ -401,23 +405,21 @@ gridGenOpt::~gridGenOpt ()
 
 
 // set properties
-int gridGenOpt::set (const std::string &param,  const std::string &val)
+void gridGenOpt::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "#")
     {
 
     }
   else
     {
-      out = gridOptObject::set (param, val);
+      gridOptObject::set (param, val);
     }
-  return out;
+
 }
 
-int gridGenOpt::set (const std::string &param, double val, units_t unitType)
+void gridGenOpt::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   unsigned long num = 0;
 
   if (param[0] == 'p')
@@ -430,7 +432,7 @@ int gridGenOpt::set (const std::string &param, double val, units_t unitType)
               Pcoeff.resize (num + 1);
             }
           Pcoeff[num] = val;
-          return out;
+          return;
         }
       catch (std::invalid_argument)
         {
@@ -449,7 +451,7 @@ int gridGenOpt::set (const std::string &param, double val, units_t unitType)
               Qcoeff.resize (num + 1);
             }
           Qcoeff[num] = val;
-          return out;
+          return;
         }
       catch (std::invalid_argument)
         {
@@ -534,11 +536,8 @@ int gridGenOpt::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridOptObject::set (param, val, unitType);
+      gridOptObject::set (param, val, unitType);
     }
-
-
-  return out;
 }
 
 

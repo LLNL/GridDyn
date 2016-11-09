@@ -22,7 +22,6 @@
 #include "controlRelay.h"
 #include "objectFactoryTemplates.h"
 #include "gridCondition.h"
-#include "gridGrabbers.h"
 #include "stateGrabber.h"
 #include "eventAdapters.h"
 #include "gridEvent.h"
@@ -30,6 +29,8 @@
 #include "comms/relayMessage.h"
 #include "gridCoreTemplates.h"
 #include "stringOps.h"
+#include "core/propertyBuffer.h"
+#include "core/gridDynExceptions.h"
 
 #include <boost/format.hpp>
 
@@ -46,13 +47,12 @@ static typeFactory<breaker> brkr ("relay","breaker");
 static typeFactory<sensor> snsr ("relay", "sensor");
 static typeFactory<controlRelay> cntrl ("relay", "control");
 
-count_t gridRelay::relayCount = 0;
+std::atomic<count_t> gridRelay::relayCount(0);
 
 gridRelay::gridRelay (const std::string &objName) : gridPrimary (objName)
 {
   // default values
-  ++relayCount;
-  id = relayCount;
+  id = ++relayCount;
   updateName();
   opFlags.set (no_pflow_states);
   opFlags.set (no_dyn_states);
@@ -66,37 +66,59 @@ gridCoreObject * gridRelay::clone (gridCoreObject *obj) const
       return obj;
     }
 
+ 
+  //clone the conditions
+  for (index_t kk = 0; kk <conditions.size(); ++kk)
+  {
+	  if (nobj->conditions.size() <= kk)
+	  {
+		  //the other things which depend on this are being duplicated later so just use push_back
+		  nobj->conditions.push_back(conditions[kk]->clone());
+	  }
+	  else
+	  {
+		  conditions[kk]->clone(nobj->conditions[kk]);
+	  }
+  }
+  //clone the actions
+  for (index_t kk = 0; kk < actions.size(); ++kk)
+  {
+	  if (nobj->actions.size() <= kk)
+	  {
+		  //the other things which depend on this are being duplicated later so just use push_back
+		  nobj->actions.push_back(actions[kk]->clone());
+	  }
+	  else
+	  {
+		  actions[kk]->clone(nobj->actions[kk]);
+	  }
+  }
+  //clone everything else
   nobj->triggerTime = triggerTime;
-  //TODO::PT I need to fix this but it requres conditions and eventAdapters be clonable which they are not currently
-  //It works for now since all uses of relays come from child class which set these up in initialization not construction
-  //std::vector<std::shared_ptr<gridCondition>> conditions;
-  //std::vector<std::shared_ptr<eventAdapter>> actions;
   nobj->actionTriggers = actionTriggers;
   nobj->actionDelays = actionDelays;
   nobj->cStates = cStates;
   nobj->conditionTriggerTimes = conditionTriggerTimes;
   nobj->condChecks = condChecks;
+  nobj->multiConditionTriggers = multiConditionTriggers;
 
-  nobj->commName = commName;
-  nobj->commId = commId;
-  nobj->commType = commType;
-  nobj->commDestId = commDestId;
-  nobj->commDestName = commDestName;
+  nobj->cManager = cManager;  //TODO:: this isn't correct yet
+ 
   return nobj;
 }
 
 gridRelay::~gridRelay ()
 {
+	
 }
 
-int gridRelay::add (gridCoreObject *obj)
+void gridRelay::add (gridCoreObject *obj)
 {
   m_sourceObject = obj;
   m_sinkObject = obj;
-  return OBJECT_ADD_SUCCESS;
 }
 
-int gridRelay::add (std::shared_ptr<gridCondition> gc)
+void gridRelay::add (std::shared_ptr<gridCondition> gc)
 {
   conditions.push_back (gc);
   actionTriggers.resize (conditions.size ());
@@ -104,21 +126,18 @@ int gridRelay::add (std::shared_ptr<gridCondition> gc)
   cStates.resize (conditions.size (),condition_states::active); //!< a vector of states for the conditions
   conditionTriggerTimes.resize (conditions.size ()); //!< the times at which the condition triggered
   multiConditionTriggers.resize (conditions.size ());
-  return OBJECT_ADD_SUCCESS;
 }
 
-int gridRelay::add (std::shared_ptr<gridEvent> ge)
+void gridRelay::add (std::shared_ptr<gridEvent> ge)
 {
   actions.push_back (std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (ge));
-  return OBJECT_ADD_SUCCESS;
 }
 /**
 *add an EventAdapter to the system
 **/
-int gridRelay::add (std::shared_ptr<eventAdapter> geA)
+void gridRelay::add (std::shared_ptr<eventAdapter> geA)
 {
   actions.push_back (geA);
-  return OBJECT_ADD_SUCCESS;
 }
 
 
@@ -165,12 +184,9 @@ void gridRelay::setActionMultiTrigger (std::vector<index_t> multi_conditions, in
     {
       return;
     }
-  mcondTrig tup {
-    actionNumber, multi_conditions, delayTime
-  };
   for (auto &cnum : multi_conditions)
     {
-      multiConditionTriggers[cnum].push_back (tup);
+      multiConditionTriggers[cnum].emplace_back (actionNumber,multi_conditions,delayTime);
     }
 }
 
@@ -236,7 +252,7 @@ void gridRelay::setConditionLevel (index_t conditionNumber, double levelVal)
 {
   if (conditionNumber < conditions.size ())
     {
-      conditions[conditionNumber]->setLevel (levelVal);
+      conditions[conditionNumber]->setConditionRHS (levelVal);
     }
 }
 
@@ -282,26 +298,20 @@ void gridRelay::removeAction (index_t actionNumber)
 
 std::shared_ptr<gridCondition> gridRelay::getCondition (index_t conditionNumber)
 {
-  if (conditionNumber <= conditions.size ())
+  if (conditionNumber < conditions.size ())
     {
       return conditions[conditionNumber];
     }
-  else
-    {
-      return nullptr;
-    }
+    return nullptr;
 }
 
 std::shared_ptr<eventAdapter> gridRelay::getAction (index_t actionNumber)
 {
-  if (actionNumber <= actions.size ())
+  if (actionNumber < actions.size ())
     {
       return actions[actionNumber];
     }
-  else
-    {
-      return nullptr;
-    }
+     return nullptr;
 }
 
 
@@ -347,9 +357,8 @@ void gridRelay::resetRelay ()
 {
 }
 
-int gridRelay::set (const std::string &param,  const std::string &val)
+void gridRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "condition")
     {
         add (make_condition (val, m_sourceObject?m_sourceObject:parent));
@@ -381,64 +390,41 @@ int gridRelay::set (const std::string &param,  const std::string &val)
           setFlag (flg, true);
         }
     }
-  else if (param == "commname")
-    {
-      commName = val;
-      opFlags.set (use_commLink);
-    }
-  else if (param == "commtype")
-    {
-      commType = val;
-      opFlags.set (use_commLink);
-    }
-  else if ((param == "commdest") || (param == "destination"))
-    {
-      if (val.front () == '#')
-        {
-          commDestId = std::stoull (val.substr (1, std::string::npos));
-        }
-      else
-        {
-          commDestName = val;
-        }
-    }
   else
     {
-      out = gridPrimary::set (param, val);
+	  if (cManager.set(param, val))
+	  {
+		  opFlags.set(use_commLink);
+	  }
+	  else
+	  {
+		  gridPrimary::set(param, val);
+	  }
     }
-  return out;
 }
 
-int gridRelay::set (const std::string &param, double val, units_t unitType)
+void gridRelay::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "samplingrate")||(param == "ts"))
     {
       gridCoreObject::set ("period", val, unitType);
     }
-  else if (param == "commid")
-    {
-      commId = static_cast<std::uint64_t> (val);
-      opFlags.set (use_commLink);
-    }
-  else if (param == "commdestid")
-    {
-      commDestId = static_cast<uint64_t> (val);
-    }
   else
     {
-      out = setFlag (param, (val > 0.1));
-      if (out == PARAMETER_NOT_FOUND)
-        {
-          out = gridPrimary::set (param, val, unitType);
-        }
+	  if (cManager.set(param, val))
+	  {
+		  opFlags.set(use_commLink);
+	  }
+	  else
+	  {
+		  gridPrimary::set(param, val, unitType);
+	  }
     }
-  return out;
 }
 
-int gridRelay::setFlag (const std::string &flag, bool val)
+void gridRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "continuous")
     {
       opFlags.set (continuous_flag, val);
@@ -461,9 +447,16 @@ int gridRelay::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridPrimary::setFlag (flag,val);
+	  if (cManager.setFlag(flag, val))
+	  {
+		  opFlags.set(use_commLink);
+	  }
+	  else
+	  {
+		  gridPrimary::setFlag(flag, val);
+	  }
+      
     }
-  return out;
 }
 
 void gridRelay::updateA (double time)
@@ -537,16 +530,18 @@ void gridRelay::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
 {
   if ((opFlags[use_commLink]) && (!(commLink)))
     {
-      commLink = makeCommunicator (commType, commName, commId);
+	  commLink = cManager.build();
+	  
       if (commLink)
         {
-          commLink->registerActionMessage ([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
+		  commLink->initialize();
+          commLink->registerReceiveCallback ([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
         receiveMessage (sourceID, message);
       });
         }
       else
         {
-          LOG_WARNING ("unrecognized commLink type " + commType);
+          LOG_WARNING ("unrecognized commLink type ");
           opFlags.reset (use_commLink);
         }
     }
@@ -557,6 +552,7 @@ void gridRelay::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
           if (cs == condition_states::active)
             {
               opFlags.set (has_powerflow_adjustments);
+			  break;
             }
         }
     }
@@ -582,6 +578,19 @@ void gridRelay::dynObjectInitializeA (double time0, unsigned long /*flags*/)
         }
       m_nextSampleTime = nextUpdateTime = time0 + updatePeriod;
     }
+
+  //*update the flag for future power flow check  BUG noticed by Colin Ponce 10/21/16
+  if (opFlags[power_flow_checks_flag])
+  {
+	  for (auto &cs : cStates)
+	  {
+		  if (cs == condition_states::active)
+		  {
+			  opFlags.set(has_powerflow_adjustments);
+			  break;
+		  }
+	  }
+  }
 }
 
 change_code gridRelay::triggerAction (index_t actionNumber)
@@ -769,18 +778,8 @@ int gridRelay::sendAlarm (std::uint32_t code)
   if (commLink)
     {
       auto m = std::make_shared<relayMessage> (relayMessage::ALARM_TRIGGER_EVENT, code);
-      if (commDestId != 0)
-        {
-          commLink->transmit (commDestId, m);
-        }
-      else if (!commDestName.empty ())
-        {
-          commLink->transmit (commDestName, m);
-        }
-      else
-        {
-          commLink->transmit (0, m);
-        }
+	  cManager.send(m);
+      
       return FUNCTION_EXECUTION_SUCCESS;
     }
   return FUNCTION_EXECUTION_FAILURE;
@@ -842,7 +841,7 @@ change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, d
 change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, double conditionTriggerTime, double ignoreDelayTime)
 {
   change_code eventReturn = change_code::no_change;
-  //now check the multicondition triggers
+  //now check the multiCondition triggers
   for (auto &mct : multiConditionTriggers[conditionNum])
     {
       bool all_triggered = false;
@@ -891,7 +890,7 @@ change_code gridRelay::evaluateCondCheck (condCheckTime &cond, double checkTime)
                   eventReturn = iret;
                 }
             }
-          else               //it was a multicondition trigger
+          else               //it was a multiCondition trigger
             {
               bool all_triggered = true;
               double trigDelay = multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
@@ -987,3 +986,64 @@ void gridRelay::conditionCleared (index_t /*conditionNum*/, double /*timeTrigger
 
 }
 #endif
+
+
+void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
+{
+	if (mode == object_update_mode::direct)
+	{
+		setSource(obj);
+	}
+	else if (mode==object_update_mode::match)
+	{
+		if (m_sourceObject)
+		{
+			setSource(findMatchingObject(m_sourceObject, obj));
+		}
+		if (m_sinkObject)
+		{
+			setSink(findMatchingObject(m_sourceObject, obj));
+		}
+		for (auto &cond : conditions)
+		{
+			cond->updateObject(obj, mode);
+		}
+		for (auto &act : actions)
+		{
+			act->updateObject(obj, mode);
+		}
+	}
+}
+
+gridCoreObject * gridRelay::getObject() const
+{
+	if (m_sourceObject)
+	{
+		return m_sourceObject;
+	}
+	else if (m_sinkObject)
+	{
+		return m_sinkObject;
+	}
+	return nullptr;
+}
+
+void gridRelay::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	if (m_sourceObject)
+	{
+		objects.push_back(m_sourceObject);
+	}
+	if ((m_sinkObject)&&(m_sourceObject!=m_sinkObject))
+	{
+		objects.push_back(m_sinkObject);
+	}
+	for (auto &cond : conditions)
+	{
+		cond->getObjects(objects);
+	}
+	//for (auto &act : actions)
+	//{
+		//act->getObjects(objects);
+	//}
+}

@@ -18,6 +18,7 @@
 #include "loadModels/gridLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <fstream>
@@ -124,23 +125,14 @@ void loadPSP (gridCoreObject *parentObject, const std::string &filename, const b
                     {
                       busList[index - 1] = new acBus ();
                       pspReadBus (busList[index - 1], line, base, bri);
-                      parentObject->add (busList[index - 1]);
-                      if (busList[index - 1]->getParent () != parentObject)
-                        {
-                          if (bri.prefix.empty ())
-                            {
-                              busList[index - 1]->setName ("BUS-" + std::to_string (index));
-                            }
-                          else
-                            {
-                              busList[index - 1]->setName (bri.prefix + "_BUS-" + std::to_string (index));
-                            }
-                          parentObject->add (busList[index - 1]);
-                          if (busList[index - 1]->getParent () != parentObject)
-                            {
-                              std::cerr << "Unable to add bus " << index << '\n';
-                            }
-                        }
+					  try
+					  {
+						  parentObject->add(busList[index - 1]);
+					  }
+					  catch (const objectAddFailure &)
+					  {
+						  addToParentRename(busList[index - 1], parentObject);
+					  }
                     }
                   else
                     {
@@ -478,15 +470,15 @@ Second Line Card (follows 'C' in first card)
 void pspReadBranch (gridCoreObject *parentObject, std::string line, std::string line2, double base, std::vector<gridBus *> busList, const basicReaderInfo &bri)
 {
 
-  std::string temp, temp2;
   gridBus *bus1, *bus2;
   gridLink *lnk;
   int ind1, ind2;
   double R, X;
   double val;
   bool istransformer = false;
-  temp = line.substr (0, 4);
+  std::string temp = line.substr (0, 4);
   ind1 = std::stoi (temp);
+  std::string temp2;
   if (!bri.prefix.empty ())
     {
       temp2 = bri.prefix + '_' + temp + "_to_";
@@ -529,20 +521,44 @@ void pspReadBranch (gridCoreObject *parentObject, std::string line, std::string 
     }
   lnk->updateBus (bus1, 1);
   lnk->updateBus (bus2, 2);
+  //get the circuit number
+  if (line[13] != ' ')
+  {
+	  if (line[13] != '1')
+	  {
+		  temp2.push_back('_');
+		  temp2.push_back(line[13]);
+	  }
+	  
+  }
   lnk->setName (temp2);
-  parentObject->add (lnk);
-  if (lnk->getParent () == nullptr)
-    {
-      //must be a parallel branch
-      std::string sub = lnk->getName ();
-      char m = 'a';
-      while (lnk->getParent () == nullptr)
-        {
-          lnk->setName (sub + '_' + m);
-          m = m + 1;
-          parentObject->add (lnk);
-        }
-    }
+  try
+  {
+	  parentObject->add(lnk);
+  }
+  catch (const objectAddFailure &)
+  {
+	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
+	  std::string sub = lnk->getName();
+	  char m = 'a';
+	  while (lnk->getParent() == nullptr)
+	  {
+		  lnk->setName(sub + '_' + m);
+		  m = m + 1;
+		  try
+		  {
+			  parentObject->add(lnk);
+		  }
+		  catch (const objectAddFailure &e)
+		  {
+			  if (m > 'z')
+			  {
+				  throw(e);
+			  }
+		  }
+	  }
+  }
+ 
   //skip the load flow area and loss zone and circuit for now
 
   //get the branch type

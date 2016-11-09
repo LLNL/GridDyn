@@ -22,25 +22,40 @@ int exeTestRunner::counter = 1;
 exeTestRunner::exeTestRunner()
 {
 	++counter;
-	outFile = "exeText_" + std::to_string(counter) + ".out";
+	buildOutFile();
 }
 
 exeTestRunner::exeTestRunner(const std::string &baseLocation, const std::string &target)
 {
 	++counter;
-	outFile = "exeText_" + std::to_string(counter) + ".out";
+	buildOutFile();
 	active=findFileLocation(baseLocation, target);
+	if (!(system(NULL)))
+	{
+	    active=false;
+	}
 }
 
 exeTestRunner::exeTestRunner(const std::string &baseLocation, const std::string &baseLocation2, const std::string &target)
 {
 	++counter;
-	outFile = "exeText_" + std::to_string(counter) + ".out";
+	buildOutFile();
 	active = findFileLocation(baseLocation, target);
 	if (!active)
 	{
 		active= findFileLocation(baseLocation2, target);
 	}
+	if (!(system(NULL)))
+	{
+	    active=false;
+	}
+}
+
+void exeTestRunner::buildOutFile()
+{
+    auto pth=boost::filesystem::temp_directory_path();
+    pth /= ("exeText_" + std::to_string(counter) + ".out");
+    outFile=pth.string();
 }
 
 bool exeTestRunner::findFileLocation(const std::string &baseLocation, const std::string &target)
@@ -122,9 +137,10 @@ std::string exeTestRunner::runCaptureOutput(const std::string &args) const
 		return "invalid executable";
 	}
 	std::string rstr = exeString + " " + args+" > "+outFile;
+	printf("string %s\n",rstr.c_str()); 
 	system(rstr.c_str());
 
-
+    printf(" after system call string %s\n",rstr.c_str()); 
 	std::ifstream t(outFile);
 	std::string str((std::istreambuf_iterator<char>(t)),
 		std::istreambuf_iterator<char>());

@@ -23,8 +23,8 @@
 class gridCommunicator;
 class commMessage;
 
-typedef std::map<std::string, std::shared_ptr<gridCommunicator> > commMapString;
-typedef std::map<std::uint64_t, std::shared_ptr<gridCommunicator> > commMapID;
+typedef std::map<std::string, gridCommunicator *> commMapString;
+typedef std::map<std::uint64_t, gridCommunicator * > commMapID;
 
 #define SEND_SUCCESS (0)
 #define DESTINATION_NOT_FOUND (-1);
@@ -33,7 +33,8 @@ class communicationsCore
 {
 public:
   static std::shared_ptr<communicationsCore> instance ();
-  int registerCommunicator (std::shared_ptr<gridCommunicator> comm);
+  int registerCommunicator (gridCommunicator *comm);
+  int unregisterCommunicator(gridCommunicator *comm);
   int send (std::uint64_t, const std::string &dest, std::shared_ptr<commMessage> message);
   int send (std::uint64_t, std::uint64_t, std::shared_ptr<commMessage> message);
   double getTime ()

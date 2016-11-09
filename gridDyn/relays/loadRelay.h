@@ -30,14 +30,14 @@ protected:
   double cutoutFrequency = 0;		//!<[puHz] low frequency trigger for load
   double voltageDelay = 0;			//!<[s]  the delay on the voltage trip
   double frequencyDelay = 0;		//!<[s] the delay on the frequency tripping
-  double offTime = kBigNum;			//!<[s] the time before the load comes back online if the trip cause has been corrected
+  double offTime = kBigNum;			//!<[s] the time before the load comes back on line if the trip cause has been corrected
 public:
   loadRelay (const std::string &objName = "loadRelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:

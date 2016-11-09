@@ -1,0 +1,194 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
+/*
+ * LLNS Copyright Start
+ * Copyright (c) 2016, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+*/
+
+#ifndef GRIDDYN_COLLECTOR_H_
+#define GRIDDYN_COLLECTOR_H_
+
+#include "timeSeries.h"
+#include "eventInterface.h"
+
+#include "units.h"
+#include "core/objectOperatorInterface.h"
+#include <memory>
+
+class gridGrabberInfo
+{
+public:
+  std::string  m_target;        //!< name of the object to target
+  std::string field;        //!<the field to record
+  std::string rString;     //!<a string defining the recorder
+  int column = -1;      //!< (suggestion) which column to stick the data in
+  index_t offset = kNullLocation;      //!<the offset to use to numerically pick off the state
+  double gain = 1.0;      //!<a multiplier factor for the results
+  double bias = 0.0;       //!< a shift factor of the results
+  gridUnits::units_t outputUnits = gridUnits::defUnit;       //!<which units to output the data
+public:
+  gridGrabberInfo ()
+  {
+  }
+};
+
+class gridGrabber;
+class stateGrabber;
+
+/** class for capturing and storing data from a grid simulation */
+class collector : public eventInterface, objectOperatorInterface
+{
+public:
+	std::string description; //!< description
+protected:
+	std::string  name;  //!< name of the collector
+	double timePeriod; //!< the actual period of the collector
+	double reqPeriod; //!< the requested period of the collector
+	double startTime = -kBigNum; //!< the time to start collecting
+	double stopTime = kBigNum;  //!< the time to stop collecting
+	double triggerTime = -kBigNum; //!< the next trigger time for the collector
+	std::vector<double> data;
+	count_t columns = 0; //!< the length of the data vector
+	/** data structure to capture the grabbers and location for a specific grabber*/
+	typedef struct
+	{
+		std::shared_ptr<gridGrabber> dataGrabber; //!< the grabber for the data from the object directly
+		std::shared_ptr<stateGrabber> dataGrabberSt;  //!< the grabber for the data from the object state
+		int column; //!< the starting column for the data
+		std::string colname;   //!< the name for the data collected
+	} collectorPoint;
+	std::vector<collectorPoint> points;        //!<the data grabbers
+
+	bool recheck = false;	//!< flag indicating that the recorder should recheck all the fields
+	bool armed = true;	//!< flag indicating if the recorder is armed and ready to go
+	bool delayProcess = true;          //!< wait to process recorders until other events have executed
+
+public:
+	collector(double time0 = 0, double period = 1.0);
+	explicit collector(const std::string &name);
+	virtual ~collector();
+
+	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const;
+
+	virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+	virtual change_code trigger(double time) override;
+	void recheckColumns();
+	double nextTriggerTime() const override
+	{
+		return triggerTime;
+	}
+	event_execution_mode executionMode() const override
+	{
+		return (delayProcess) ? event_execution_mode::delayed : event_execution_mode::normal;
+	}
+
+	virtual void add(std::shared_ptr<gridGrabber> ggb, int column = -1);
+	virtual void add(std::shared_ptr<stateGrabber> sst, int column = -1);
+	virtual void add(gridGrabberInfo *gdRI, gridCoreObject *obj);
+	virtual void add(const std::string &field, gridCoreObject *obj);
+	virtual void add(std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrabber> sst, int column);
+
+	bool isArmed() const override
+	{
+		return armed;
+	}
+
+	virtual void set(const std::string &param, double val);
+	virtual void set(const std::string &param, const std::string &val);
+
+	
+	virtual void setTime(double time);
+
+
+	virtual gridCoreObject * getObject() const override;
+
+	virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+
+	const std::string &getName() const
+	{
+		return name;
+	}
+	void setName(const std::string &newName)
+	{
+		name = newName;
+	}
+	virtual int flush();
+	virtual const std::string &getSinkName() const;
+
+	virtual std::vector<std::string> getColumnDescriptions() const;
+protected:
+	int getColumn(int requestedColumn);
+
+	void updateColumns(int requestedColumn);
+};
+
+/** class to store and save data from the grid, based on a collector */
+class gridRecorder : public collector
+{
+protected:
+  
+  double lastSaveTime = -kBigNum; //!< the last time the recorder saved to file
+  timeSeries2 dataset;  //!< the actual time series data
+  std::string filename; //!< the filename to store the data
+  std::string directory; //!< the directory to generate the specified file 
+  
+  bool binaryFile = true;	//!< flag indicating if the file is binary
+  bool firstTrigger = true; //!< flag indicating that the recorder has not been triggered yet
+  int precision = -1;                //!< precision for writing text files.
+  count_t autosave = 0;			//!< flag indicating the recorder should autosave after the given number of points
+public:
+  gridRecorder (double time0 = 0,double period = 1.0);
+  explicit gridRecorder(const std::string &name);
+  ~gridRecorder ();
+
+  virtual std::shared_ptr<collector> clone (std::shared_ptr<collector> gr=nullptr) const override;
+
+  virtual change_code trigger (double time) override;
+
+  
+  int saveFile (const std::string &fileName = "");
+
+  void setSpace (double span);
+  void addSpace (double span);
+ 
+  void set (const std::string &param, double val) override;
+  void set (const std::string &param, const std::string &val) override;
+
+  virtual int flush() override;
+  virtual const std::string &getSinkName() const override;
+
+  const std::string &getFileName () const
+  {
+    return filename;
+  }
+  const std::string &getDirectory () const
+  {
+    return directory;
+  }
+  
+  void reset ();
+
+  const timeSeries2 * getData () const
+  {
+    return &(dataset);
+  }
+  const std::vector<double> &getTime () const
+  {
+    return dataset.time;
+  }
+  const std::vector<double> &getData (size_t col) const
+  {
+  
+       return dataset.data[(col < columns)?col:0];
+  }
+private:
+	void fillDatasetFields();
+};
+
+#endif

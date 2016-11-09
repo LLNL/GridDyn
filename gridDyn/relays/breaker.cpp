@@ -18,7 +18,7 @@
 #include "gridCoreTemplates.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
 
 
 #include <boost/format.hpp>
@@ -58,42 +58,40 @@ gridCoreObject *breaker::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int breaker::setFlag (const std::string &flag, bool val)
+void breaker::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   if (flag == "nondirectional")
     {
       opFlags.set (nondirectional_flag,val);
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 /*
 std::string commDestName;
 std::uint64_t commDestId=0;
 std::string commType;
 */
-int breaker::set (const std::string &param,  const std::string &val)
+void breaker::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "#")
     {
 
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
 }
 
-int breaker::set (const std::string &param, double val, gridUnits::units_t unitType)
+void breaker::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
 
   if (param == "reclosetime")
     {
@@ -134,9 +132,8 @@ int breaker::set (const std::string &param, double val, gridUnits::units_t unitT
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
 }
 
 void breaker::dynObjectInitializeA (double time0, unsigned long flags)
@@ -147,13 +144,11 @@ void breaker::dynObjectInitializeA (double time0, unsigned long flags)
   if (dynamic_cast<gridLink *> (m_sourceObject))
     {
       add (make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject));
-      ge->field = "switch" + std::to_string (m_terminal);
-      ge->value = 1;
-      ge->setTarget (m_sinkObject);
+      ge->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
+	  ge->setValue(1.0);
       //action 2 to reclose switch
-      ge2->field = "switch" + std::to_string (m_terminal);
-      ge2->value = 0;
-      ge2->setTarget (m_sinkObject);
+      ge2->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
+	  ge2->setValue(0.0);
       bus = static_cast<gridLink *> (m_sourceObject)->getBus (m_terminal);
 
     }
@@ -161,42 +156,38 @@ void breaker::dynObjectInitializeA (double time0, unsigned long flags)
     {
       add (make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject));
       opFlags.set (nonlink_source_flag);
-      ge->field = "status";
-      ge->value = 0;
-      ge->setTarget (m_sinkObject);
+      ge->setTarget (m_sinkObject,"status");
+	  ge->setValue(0.0);
       //action 2 to reenable object
-      ge2->field = "status";
-      ge2->value = 0;
-      ge2->setTarget (m_sinkObject);
+      ge2->setTarget (m_sinkObject,"status");
+	  ge2->setValue(0.0);
       bus = static_cast<gridBus *> (m_sourceObject->find ("bus"));
     }
 
   add (ge);
   add (ge2);
-  //now make the gridCondition for the I2T condtion
+  //now make the gridCondition for the I2T condition
   auto gc = std::make_shared<gridCondition> ();
   auto gc2 = std::make_shared<gridCondition> ();
 
   auto cg = std::make_shared<customGrabber> ();
-  cg->setGrabberFunction ("I2T", [ = ](){
+  cg->setGrabberFunction ("I2T", [this](gridCoreObject *){
     return cTI;
   });
 
-  auto cgst = std::make_shared<customStateGrabber> ();
-  cgst->setGrabberFunction ([ = ](const stateData *sD, const solverMode &sMode) -> double {
-    return sD->state[offsets.getDiffOffset (sMode)];
+  auto cgst = std::make_shared<customStateGrabber> (this);
+  cgst->setGrabberFunction ([ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) -> double {
+    return sD->state[static_cast<breaker *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
-  gc->conditionA = cg;
-  gc->conditionAst = cgst;
+  gc->setConditionLHS(cg, cgst);
 
-  gc2->conditionA = cg;
-  gc2->conditionAst = cgst;
+  gc2->setConditionLHS(cg, cgst);
 
-  gc->setLevel (1.0);
-  gc2->setLevel (-0.5);
-  gc->setComparison (gridCondition::comparison_type::gt);
-  gc2->setComparison (gridCondition::comparison_type::lt);
+  gc->setConditionRHS (1.0);
+  gc2->setConditionRHS (-0.5);
+  gc->setComparison (comparison_type::gt);
+  gc2->setComparison (comparison_type::lt);
 
   add (gc);
   add (gc2);
@@ -204,7 +195,7 @@ void breaker::dynObjectInitializeA (double time0, unsigned long flags)
   setConditionState (2, condition_states::disabled);
 
 
-  return gridRelay::dynObjectInitializeA (time0, flags);
+  gridRelay::dynObjectInitializeA (time0, flags);
 }
 
 
@@ -299,7 +290,7 @@ void breaker::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-double breaker::timestep (double ttime, const solverMode &)
+void breaker::timestep (double ttime, const solverMode &)
 {
   prevTime = ttime;
   if (limit < kBigNum / 2)
@@ -310,18 +301,16 @@ double breaker::timestep (double ttime, const solverMode &)
           opFlags.set (breaker_tripped_flag);
           disable ();
           alert (this, BREAKER_TRIP_CURRENT);
-          return 0.0;
         }
     }
 
-  return (0.0);
 }
 
-void breaker::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void breaker::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (useCTI)
     {
-      arrayDataSparse d;
+      matrixDataSparse<double> d;
       IOdata out;
       auto Voffset = bus->getOutputLoc (sMode,voltageInLocation);
       auto args = bus->getOutputs (sD, sMode);

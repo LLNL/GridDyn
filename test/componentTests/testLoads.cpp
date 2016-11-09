@@ -24,7 +24,7 @@
 #include <cmath>
 
 static const std::string load_test_directory(GRIDDYN_TEST_DIRECTORY "/load_tests/");
-static const std::string gridlabd_test_directory(GRIDDYN_TEST_DIRECTORY "/gridLabD_tests/");
+static const std::string gridlabd_test_directory(GRIDDYN_TEST_DIRECTORY "/gridlabD_tests/");
 
 BOOST_FIXTURE_TEST_SUITE(load_tests, gridLoadTestFixture)
 

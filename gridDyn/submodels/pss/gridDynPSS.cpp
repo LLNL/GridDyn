@@ -69,26 +69,23 @@ index_t gridDynPSS::findIndex (const std::string & /*field*/, const solverMode &
   return kInvalidLocation;
 }
 
-int gridDynPSS::set (const std::string &param,  const std::string &val)
+void gridDynPSS::set (const std::string &param,  const std::string &val)
 {
   return gridCoreObject::set (param, val);
 }
 
 // set parameters
-int gridDynPSS::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynPSS::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
 
   {
-    out = gridCoreObject::set (param,val,unitType);
+    gridCoreObject::set (param,val,unitType);
   }
 
-  return out;
 }
 
 void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
-                                   arrayData<double> *,
+                                   matrixData<double> *,
                                    const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))

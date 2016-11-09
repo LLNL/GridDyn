@@ -22,12 +22,12 @@
 #include "gridCoreTemplates.h"
 #include "gridCoreList.h"
 #include "objectInterpreter.h"
+#include "core/gridDynExceptions.h"
 
-#include <cmath>
 
 using namespace gridUnits;
 
-count_t gridArea::areaCount = 0;
+std::atomic<count_t> gridArea::areaCount(0);
 
 static typeFactory<gridArea> gf ("area", stringVec { "basic","simple"}, "basic");
 
@@ -36,8 +36,7 @@ static std::vector<double> kNullVec;
 gridArea::gridArea (const std::string &objName) : gridPrimary (objName), obList (new gridCoreList ())
 {
   // default values
-  ++areaCount;
-  id = areaCount;
+  id = ++areaCount;
   updateName ();
   opFlags.set (multipart_calculation_capable);
 }
@@ -70,6 +69,7 @@ gridCoreObject *gridArea::clone (gridCoreObject *obj) const
         {
           gridBus *bus = static_cast<gridBus *> (m_Buses[kk]->clone ());
           area->add (bus);
+		 
         }
       else
         {
@@ -89,6 +89,7 @@ gridCoreObject *gridArea::clone (gridCoreObject *obj) const
         {
           m_Relays[kk]->clone (area->m_Relays[kk]);
         }
+        
     }
 
   //clone all the links
@@ -98,18 +99,30 @@ gridCoreObject *gridArea::clone (gridCoreObject *obj) const
         {
           gridLink *lnk = static_cast<gridLink *> (m_Links[kk]->clone ());
           //now we need to make sure the links are mapped properly
-          gridBus *bus = getMatchingBus (m_Links[kk]->getBus (1), this, area);
-          lnk->updateBus (bus, 1);
-          bus = getMatchingBus (m_Links[kk]->getBus (2), this, area);
-          lnk->updateBus (bus, 2);
+          for (index_t tt = 0; tt < lnk->terminalCount(); ++tt)
+          {
+              gridBus *bus=static_cast<gridBus *>(findMatchingObject(m_Links[kk]->getBus(tt + 1), area));
+            
+              assert(bus != nullptr);
+              lnk->updateBus(bus, tt+1);
+          }
           area->add (lnk);
         }
       else
         {
           m_Links[kk]->clone (area->m_Links[kk]);
+          for (index_t tt = 0; tt < area->m_Links[kk]->terminalCount(); ++tt)
+          {
+              gridBus *bus = static_cast<gridBus *>(findMatchingObject(m_Links[kk]->getBus(tt + 1), area));
+              area->m_Links[kk]->updateBus(bus, tt + 1);
+          }
         }
     }
-
+    //Now make sure to update all the objects in the relays to the new area
+  for (auto &rel:area->m_Relays)
+  {
+      rel->updateObject(area, object_update_mode::match);
+  }
   return area;
 }
 
@@ -122,7 +135,7 @@ gridArea::~gridArea ()
     }
 }
 
-int gridArea::add (gridCoreObject *obj)
+void gridArea::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridBus *> (obj))
     {
@@ -140,21 +153,23 @@ int gridArea::add (gridCoreObject *obj)
     {
       return add (static_cast<gridRelay *> (obj));
     }
-  else
-    {
-      return OBJECT_NOT_RECOGNIZED;
-    }
+  throw (invalidObjectException(this));
 }
 
 template<class X>
-int addObject (gridArea *area, X* obj, std::vector<X *> &objVector)
+void addObject (gridArea *area, X* obj, std::vector<X *> &objVector)
 {
   if (!area->isMember (obj))
     {
+	  auto insertRes=area->obList->insert(obj);
+	  if (insertRes==false)
+	  {
+		  throw(objectAddFailure(area));
+	  }
       objVector.push_back (obj);
       obj->setParent (area);
       obj->locIndex = static_cast<index_t> (objVector.size ()) - 1;
-      area->obList->insert (obj);
+      
       obj->set ("basepower", area->systemBasePower);
       obj->set ("basefreq", area->m_baseFreq);
       area->primaryObjects.push_back (obj);
@@ -163,36 +178,34 @@ int addObject (gridArea *area, X* obj, std::vector<X *> &objVector)
         {
           area->alert (area, OBJECT_COUNT_INCREASE);
         }
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_ALREADY_MEMBER;
 }
 
-int gridArea::add (gridBus *bus)
+void gridArea::add (gridBus *bus)
 {
-  return addObject (this,bus, m_Buses);
+  addObject (this,bus, m_Buses);
 }
 
-int gridArea::add (gridArea *area)
+void gridArea::add (gridArea *area)
 {
-  return addObject (this, area, m_Areas);
+  addObject (this, area, m_Areas);
 }
 
 // add link
-int gridArea::add (gridLink *lnk)
+void gridArea::add (gridLink *lnk)
 {
-  return addObject (this, lnk, m_Links);
+  addObject (this, lnk, m_Links);
 }
 
 
 // add link
-int gridArea::add (gridRelay *relay)
+void gridArea::add (gridRelay *relay)
 {
-  return addObject (this, relay, m_Relays);
+  addObject (this, relay, m_Relays);
 }
 
 // --------------- remove components ---------------
-int gridArea::remove (gridCoreObject *obj)
+void gridArea::remove (gridCoreObject *obj)
 {
   if (dynamic_cast<gridBus *> (obj))
     {
@@ -210,18 +223,15 @@ int gridArea::remove (gridCoreObject *obj)
     {
       return remove (static_cast<gridRelay *> (obj));
     }
-  else
-    {
-      return OBJECT_NOT_RECOGNIZED;
-    }
+  throw(invalidObjectException(this));
 }
 
 template<class X>
-int removeObject (gridArea *area, X* obj, std::vector<X *> &objVector)
+void removeObject (gridArea *area, X* obj, std::vector<X *> &objVector)
 {
   if ((obj->locIndex >= objVector.size ())||(objVector[obj->locIndex]->getID () != obj->getID ()))
     {
-      return OBJECT_REMOVE_FAILURE;
+	  throw(objectRemoveFailure(area));
     }
 
   objVector[obj->locIndex]->setParent (nullptr);
@@ -249,31 +259,30 @@ int removeObject (gridArea *area, X* obj, std::vector<X *> &objVector)
       area->obList->remove (obj);
 
     }
-  return OBJECT_REMOVE_SUCCESS;
 }
 
 // remove bus
-int gridArea::remove (gridBus *bus)
+void gridArea::remove (gridBus *bus)
 {
-  return removeObject (this, bus, m_Buses);
+  removeObject (this, bus, m_Buses);
 }
 
 // remove link
-int gridArea::remove (gridLink *lnk)
+void gridArea::remove (gridLink *lnk)
 {
-  return removeObject (this, lnk, m_Links);
+  removeObject (this, lnk, m_Links);
 }
 
 // remove area
-int gridArea::remove (gridArea *area)
+void gridArea::remove (gridArea *area)
 {
-  return removeObject (this, area, m_Areas);
+  removeObject (this, area, m_Areas);
 }
 
 // remove area
-int gridArea::remove (gridRelay *relay)
+void gridArea::remove (gridRelay *relay)
 {
-  return removeObject (this, relay, m_Relays);
+  removeObject (this, relay, m_Relays);
 }
 
 
@@ -351,7 +360,7 @@ gridDynGenerator *gridArea::getGen (index_t x)
 
 gridCoreObject *gridArea::find (const std::string &objname) const
 {
-  gridCoreObject *obj = nullptr;
+  
   if (objname == "root")
     {
       if (parent)
@@ -363,6 +372,8 @@ gridCoreObject *gridArea::find (const std::string &objname) const
           return const_cast<gridArea *> (this);
         }
     }
+
+  gridCoreObject *obj;
   auto rlc = objname.find_first_of (":/?");
   if (rlc != std::string::npos)
     {
@@ -456,7 +467,6 @@ void gridArea::setAll (const std::string &type, std::string param, double val, g
 gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t searchID) const
 {
 
-  gridCoreObject *obj = nullptr;
   if ((typeName == "area")&&(searchID == id))
     {
       return const_cast<gridArea *> (this);
@@ -466,7 +476,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
       //this is potentially painful, wouldn't recommend doing this search in a big system
       for (auto &bus : m_Buses)
         {
-          obj = bus->findByUserID (typeName, searchID);
+          gridCoreObject *obj = bus->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -474,7 +484,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
         }
       for (auto &area : m_Areas)
         {
-          obj = area->findByUserID (typeName, searchID);
+          gridCoreObject *obj = area->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -487,7 +497,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
     {
       for (auto &area : m_Areas)
         {
-          obj = area->findByUserID (typeName, searchID);
+          gridCoreObject *obj = area->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -547,10 +557,10 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
             }
         }
     }
-  //if we have't found something try the subareas
+  //if we haven't found something try the subareas
   for (auto &area : m_Areas)
     {
-      obj = area->findByUserID (typeName, searchID);
+      gridCoreObject *obj = area->findByUserID (typeName, searchID);
       if (obj)
         {
           return obj;
@@ -894,7 +904,7 @@ void gridArea::converge (double ttime, double state[], double dstate_dt[], const
 
 }
 
-int gridArea::setFlag (const std::string &flag, bool val)
+void gridArea::setFlag (const std::string &flag, bool val)
 {
   if (flag == "reverse_converge")
     {
@@ -906,22 +916,17 @@ int gridArea::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      return gridPrimary::setFlag (flag, val);
+      gridPrimary::setFlag (flag, val);
     }
-  return PARAMETER_FOUND;
 }
 
 // set properties
-int gridArea::set (const std::string &param,  const std::string &val)
+void gridArea::set (const std::string &param,  const std::string &val)
 
 {
-  int out = PARAMETER_FOUND;
-  //makeLowerCase(param);
 
+  gridPrimary::set (param, val);
 
-  out = gridPrimary::set (param, val);
-
-  return out;
 }
 
 static stringVec locNumStrings {};
@@ -933,9 +938,8 @@ void gridArea::getParameterStrings (stringVec &pstr, paramStringType pstype) con
   getParamString<gridArea, gridObject> (this, pstr, locNumStrings, locStrStrings, flagStrings, pstype);
 }
 
-int gridArea::set (const std::string &param, double val, units_t unitType)
+void gridArea::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if (param == "basepower")
     {
       systemBasePower = unitConversion (val,unitType,MW);
@@ -961,14 +965,13 @@ int gridArea::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridPrimary::set (param, val, unitType);
+      gridPrimary::set (param, val, unitType);
     }
-  return out;
 }
 
 double gridArea::get (const std::string &param, units_t unitType) const
 {
-  double val = kNullVal;
+  double val;
   if (param == "buscount")
     {
       val = m_Buses.size ();
@@ -1043,14 +1046,14 @@ double gridArea::get (const std::string &param, units_t unitType) const
     }
   else
     {
-      return gridCoreObject::get (param, unitType);
+      return gridPrimary::get (param, unitType);
     }
   return val;
 }
 
 
 
-double gridArea::timestep (double ttime, const solverMode &sMode)
+void gridArea::timestep (double ttime, const solverMode &sMode)
 {
 
   //updateP the tie lines
@@ -1086,7 +1089,6 @@ double gridArea::timestep (double ttime, const solverMode &sMode)
         }
 
     }
-  return 0;
 }
 
 count_t gridArea::getBusVector (std::vector<gridBus *> &busVector, index_t start) const
@@ -1106,6 +1108,25 @@ count_t gridArea::getBusVector (std::vector<gridBus *> &busVector, index_t start
       cnt += area->getBusVector (busVector, start + cnt);
     }
   return cnt;
+}
+
+count_t gridArea::getLinkVector(std::vector<gridLink *> &linkVector, index_t start) const
+{
+    count_t cnt = static_cast<count_t> (m_Links.size());
+    if (cnt > 0)
+    {
+        if (linkVector.size() < start + cnt)
+        {
+            linkVector.resize(start + cnt);
+        }
+
+        std::copy(m_Links.begin(), m_Links.end(), linkVector.begin() + start);
+    }
+    for (auto &area : m_Areas)
+    {
+        cnt += area->getLinkVector(linkVector, start + cnt);
+    }
+    return cnt;
 }
 
 count_t gridArea::getVoltage (std::vector<double> &V, index_t start) const
@@ -1185,6 +1206,46 @@ count_t gridArea::getAngle (std::vector<double> &V, const double state[], const 
   cnt += static_cast<count_t> (m_Buses.size ());
   return cnt;
 }
+
+count_t gridArea::getFreq(std::vector<double> &F, index_t start) const
+{
+    count_t cnt = 0;
+    for (auto &area : m_Areas)
+    {
+        cnt += area->getFreq(F, start + cnt);
+    }
+    if (F.size() < start + m_Buses.size())
+    {
+        F.resize(start + m_Buses.size());
+    }
+    for (size_t kk = 0; kk < m_Buses.size(); ++kk)
+    {
+        F[start + cnt + kk] = m_Buses[kk]->getFreq();
+    }
+    cnt += static_cast<count_t> (m_Buses.size());
+    return cnt;
+}
+
+/*
+count_t gridArea::getFreq(std::vector<double> &F, const double state[], const solverMode &sMode, index_t start) const
+{
+    count_t cnt = 0;
+    for (auto &area : m_Areas)
+    {
+        cnt += area->getFreq(F, state, sMode, start + cnt);
+    }
+    if (F.size() < start + m_Buses.size())
+    {
+        F.resize(start + m_Buses.size());
+    }
+    for (size_t kk = 0; kk < m_Buses.size(); ++kk)
+    {
+        F[start + cnt + kk] = m_Buses[kk]->getFreq(state, sMode);
+    }
+    cnt += static_cast<count_t> (m_Buses.size());
+    return cnt;
+}
+*/
 
 count_t gridArea::getLinkRealPower (std::vector<double> &A, index_t start, int bus) const
 {
@@ -1562,6 +1623,22 @@ double gridArea::getAvgAngle (const stateData *sD, const solverMode &sMode) cons
 
   return (a / cnt);
 }
+
+double gridArea::getAvgFreq() const
+{
+    double a = 0;
+    double cnt = 0.0;
+    for (auto &bus : m_Buses)
+    {
+        if (bus->hasInertialAngle())
+        {
+            a += bus->getFreq();
+            cnt += 1.0;
+        }
+    }
+    return (a / cnt);
+}
+
 // -------------------- Power Flow --------------------
 
 //guess the solution
@@ -1771,7 +1848,7 @@ void gridArea::getVoltageStates (double vStates[], const solverMode &sMode) cons
         {
           if (link->voltageStateCount (sMode) > 0)
             {
-			  auto linkOffsets = link->getOffsets(sMode);
+              auto linkOffsets = link->getOffsets(sMode);
               Voffset = linkOffsets->vOffset;
               for (size_t kk = 0; kk < link->voltageStateCount (sMode); kk++)
                 {
@@ -1811,8 +1888,8 @@ void gridArea::getAngleStates (double aStates[], const solverMode &sMode) const
         {
           if (link->angleStateCount (sMode) > 0)
             {
-			  auto linkOffsets = link->getOffsets(sMode);
-			  Aoffset = linkOffsets->aOffset;
+              auto linkOffsets = link->getOffsets(sMode);
+              Aoffset = linkOffsets->aOffset;
               for (size_t kk = 0; kk < link->voltageStateCount (sMode); kk++)
                 {
                   aStates[Aoffset + kk] = 1.0;
@@ -1878,7 +1955,7 @@ void gridArea::delayedDerivative (const stateData *sD, double deriv[], const sol
   opObjectLists.delayedDerivative (sD, deriv, sMode);
 }
 
-void gridArea::delayedJacobian (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridArea::delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   opObjectLists.delayedJacobian (sD, ad, sMode);
 }
@@ -1896,7 +1973,7 @@ void gridArea::derivative ( const stateData *sD, double deriv[], const solverMod
 }
 
 // Jacobian
-void gridArea::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridArea::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   opObjectLists.jacobianElements (sD, ad, sMode);
   //next do any internal control elements
@@ -2060,11 +2137,12 @@ void gridArea::loadSizes (const solverMode &sMode, bool dynOnly)
 
 gridArea * getMatchingArea (gridArea *area, gridPrimary *src, gridPrimary *sec)
 {
-  gridArea *A2 = nullptr;
+  
   if (area->getParent () == nullptr)
     {
       return nullptr;
     }
+  gridArea *A2;
   if (area->getParent ()->getID () == src->getID ())    //if this is true then things are easy
     {
       A2 = sec->getArea (area->locIndex);

@@ -13,7 +13,6 @@
 
 #include "busRelay.h"
 #include "gridCondition.h"
-#include "fileReaders.h"
 #include "eventQueue.h"
 #include "gridEvent.h"
 #include "gridCoreTemplates.h"
@@ -29,10 +28,10 @@ busRelay::busRelay (const std::string&objName) : gridRelay (objName)
 gridCoreObject *busRelay::clone (gridCoreObject *obj) const
 {
 	busRelay *nobj = cloneBase<busRelay, gridRelay>(this, obj);
-      if (nobj == nullptr)
-        {
-          return obj;
-        }
+	if (nobj == nullptr)
+	{
+		return obj;
+	}
   nobj->cutoutVoltage = cutoutVoltage;
   nobj->cutoutFrequency = cutoutFrequency;
   nobj->voltageDelay = voltageDelay;
@@ -40,41 +39,40 @@ gridCoreObject *busRelay::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int busRelay::setFlag (const std::string &flag, bool val)
+void busRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag[0] == '#')
     {
 
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 /*
 std::string commDestName;
 std::uint64_t commDestId=0;
 std::string commType;
 */
-int busRelay::set (const std::string &param,  const std::string &val)
+void busRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
-int busRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void busRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "cutoutvoltage") || (param == "voltagelimit"))
     {
       cutoutVoltage = gridUnits::unitConversion (val,unitType,gridUnits::puV,systemBasePower);
@@ -119,19 +117,18 @@ int busRelay::set (const std::string &param, double val, gridUnits::units_t unit
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void busRelay::dynObjectInitializeA (double time0, unsigned long flags)
 {
 
-  auto ge = std::make_shared<gridEvent> ();
+  auto ge = std::make_shared<gridEvent> (0.0);
 
-  ge->field = "status";
-  ge->value = 0.0;
-  ge->setTarget (m_sinkObject);
+  ge->setValue(0.0);
+  ge->setTarget (m_sinkObject,"status");
 
   add (ge);
 
@@ -149,7 +146,7 @@ void busRelay::dynObjectInitializeA (double time0, unsigned long flags)
     }
 
 
-  return gridRelay::dynObjectInitializeA (time0,flags);
+  gridRelay::dynObjectInitializeA (time0,flags);
 
 }
 

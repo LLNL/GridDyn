@@ -19,7 +19,6 @@
 #include "loadModels/gridLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "gridArea.h"
-#include <cstdio>
 
 using namespace readerConfig;
 static const IgnoreListType relayIgnoreElements {

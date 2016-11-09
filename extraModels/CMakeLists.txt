@@ -35,5 +35,16 @@ INSTALL(TARGETS extraModelLibrary
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${extra_headers} DESTINATION include/griddyn)
+INSTALL(FILES ${extra_headers} DESTINATION include/gridDyn)
 
+list(APPEND griddyn_optional_libraries extraModelLibrary)
+list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/extraModels)
+
+set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
+set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
+
+list (APPEND optional_library_key_headers extraModels.h)
+list (APPEND optional_library_functions loadExtraModels)
+
+set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
+set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)

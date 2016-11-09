@@ -81,7 +81,14 @@ void gridSecondary::pFlowObjectInitializeA (double time0, unsigned long flags)
     {
       for (auto &subobj : subObjectList)
         {
-          if (dynamic_cast<gridSecondary *> (subobj))
+		  if (dynamic_cast<gridSubModel *>(subobj))
+		  {
+			  if (subobj->checkFlag(pflow_init_required))
+			  {
+				  static_cast<gridSubModel *> (subobj)->initializeA(time0, flags);
+			  }
+		  }
+		  else if (dynamic_cast<gridSecondary *> (subobj))
             {
               static_cast<gridSecondary *> (subobj)->pFlowInitializeA (time0, flags);
             }
@@ -100,7 +107,7 @@ void gridSecondary::pFlowObjectInitializeB ()
     {
       for (auto &subobj : subObjectList)
         {
-          if (dynamic_cast<gridSecondary *> (subobj))
+		  if (dynamic_cast<gridSecondary *> (subobj))
             {
               static_cast<gridSecondary *> (subobj)->pFlowInitializeB ();
             }
@@ -175,18 +182,18 @@ void gridSecondary::derivative (const IOdata & /*args*/, const stateData *, doub
 
 double gridSecondary::getRealPower (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/)
 {
-  return 0;
+  return 0.0;
 }
 
 double gridSecondary::getReactivePower (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/)
 {
-  return 0;
+  return 0.0;
 }
 
 
 double gridSecondary::getRealPower () const
 {
-  return 0;
+  return 0.0;
 }
 
 double gridSecondary::getReactivePower () const
@@ -195,7 +202,7 @@ double gridSecondary::getReactivePower () const
 }
 
 
-double gridSecondary::timestep (double ttime, const IOdata & args, const solverMode & sMode)
+void gridSecondary::timestep (double ttime, const IOdata & args, const solverMode & sMode)
 {
   prevTime = ttime;
   if (!subObjectList.empty ())
@@ -212,7 +219,6 @@ double gridSecondary::timestep (double ttime, const IOdata & args, const solverM
             }
         }
     }
-  return getRealPower ();
 }
 
 double gridSecondary::getAdjustableCapacityUp (double /*time*/) const
@@ -225,15 +231,15 @@ double gridSecondary::getAdjustableCapacityDown (double /*time*/) const
   return 0;
 }
 
-void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData *, arrayData<double> *, const solverMode & /*sMode*/)
+void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> *, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 

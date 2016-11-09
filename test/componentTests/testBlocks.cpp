@@ -19,7 +19,7 @@
 #include "submodels/gridControlBlocks.h"
 #include "relays/gridRelay.h"
 #include "vectorOps.hpp"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "objectFactory.h"
 #include "simulation/diagnostics.h"
 #include <cstdio>
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(deadband_block_test)
   BOOST_CHECK_EQUAL(ret, 0);
 }
 
-
+//TODO;: PT  make into a data test case
 BOOST_AUTO_TEST_CASE(compare_block_test)
 {
   /* *INDENT-OFF* */
@@ -287,10 +287,8 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
   BOOST_REQUIRE(bb2 != nullptr);
   for (const auto &pp:plist.second)
   {
-    int ret=bb1->set(pp.first,pp.second);
-	BOOST_CHECK(ret == PARAMETER_FOUND);
-    ret=bb2->set(pp.first,pp.second);
-	BOOST_CHECK(ret == PARAMETER_FOUND);
+    bb1->set(pp.first,pp.second);
+    bb2->set(pp.first,pp.second);
   }
 
   auto kfind = blockparamMapSt.find(plist.first);
@@ -299,10 +297,9 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
     auto bps=blockparamMapSt.at(plist.first);
     for (const auto &pp:bps)
     {
-      int ret=bb1->set(pp.first, pp.second);
-	  BOOST_CHECK(ret == PARAMETER_FOUND);
-      ret=bb2->set(pp.first, pp.second);
-	  BOOST_CHECK(ret == PARAMETER_FOUND);
+      bb1->set(pp.first, pp.second);
+
+      bb2->set(pp.first, pp.second);
     }
   }
   rel1->add(bb1);
@@ -360,7 +357,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
 }
 
 #ifdef LOAD_CVODE
-/** test the control block if they can handle differential only jacobians and algebraic only jacobians
+/** test the control block if they can handle differential only Jacobians and algebraic only Jacobians
 */
 BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 {
@@ -414,10 +411,10 @@ BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 		BOOST_REQUIRE(bb2 != nullptr);
 		for (const auto &pp : plist.second)
 		{
-			int ret = bb1->set(pp.first, pp.second);
-			BOOST_CHECK(ret == PARAMETER_FOUND);
-			ret = bb2->set(pp.first, pp.second);
-			BOOST_CHECK(ret == PARAMETER_FOUND);
+			bb1->set(pp.first, pp.second);
+	
+			bb2->set(pp.first, pp.second);
+
 		}
 
 		auto kfind = blockparamMapSt.find(plist.first);
@@ -426,10 +423,10 @@ BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 			auto bps = blockparamMapSt.at(plist.first);
 			for (const auto &pp : bps)
 			{
-				int ret = bb1->set(pp.first, pp.second);
-				BOOST_CHECK(ret == PARAMETER_FOUND);
-				ret = bb2->set(pp.first, pp.second);
-				BOOST_CHECK(ret == PARAMETER_FOUND);
+				bb1->set(pp.first, pp.second);
+		
+				bb2->set(pp.first, pp.second);
+				
 			}
 		}
 		rel1->add(bb1);

@@ -14,8 +14,6 @@
 #include "readElement.h"
 #include "stringOps.h"
 #include "readerElement.h"
-#include "gridBus.h"
-#include "gridArea.h"
 
 using namespace readerConfig;
 std::string findElementName (std::shared_ptr<readerElement> &el, const std::string &ename, readerConfig::match_type matching)
@@ -28,8 +26,7 @@ std::string findElementName (std::shared_ptr<readerElement> &el, const std::stri
     }
   switch (matching)
     {
-    case match_type::strict_case_match:
-      break;
+    
     case match_type::capital_case_match:
 
       //check lower case
@@ -61,6 +58,9 @@ std::string findElementName (std::shared_ptr<readerElement> &el, const std::stri
         }
       el->moveToParent ();
       break;
+	case match_type::strict_case_match:
+	default:
+		break;
     }
   return emptyString;
 }
@@ -71,36 +71,40 @@ std::string getElementAttribute (std::shared_ptr<readerElement> &el, const std::
     {
       return el->getAttributeText (ename);
     }
-  std::string tempName;
   switch (matching)
     {
-    case match_type::strict_case_match:
-      break;
     case match_type::capital_case_match:
-      tempName = convertToLowerCase (ename);
-      if (el->hasAttribute (tempName))
-        {
-          return el->getAttributeText (tempName);
-        }
-      makeUpperCase (tempName);
-      if (el->hasAttribute (tempName))
-        {
-          return el->getAttributeText (tempName);
-        }
+	{
+		auto tempName = convertToLowerCase(ename);
+		if (el->hasAttribute(tempName))
+		{
+			return el->getAttributeText(tempName);
+		}
+		makeUpperCase(tempName);
+		if (el->hasAttribute(tempName))
+		{
+			return el->getAttributeText(tempName);
+		}
+	}
       break;
     case match_type::any_case_match:
-      tempName = convertToLowerCase (ename);
-      auto att = el->getFirstAttribute ();
-      while (att.isValid ())
-        {
-          std::string fname = convertToLowerCase (att.getName ());
-          if (tempName == fname)
-            {
-              return att.getText ();
-            }
-          att = el->getNextAttribute ();
-        }
+	{
+		auto tempName = convertToLowerCase(ename);
+		auto att = el->getFirstAttribute();
+		while (att.isValid())
+		{
+			auto fname = convertToLowerCase(att.getName());
+			if (tempName == fname)
+			{
+				return att.getText();
+			}
+			att = el->getNextAttribute();
+		}
+	}
       break;
+	case match_type::strict_case_match:
+	default:
+		break;
     }
   return emptyString;
 }

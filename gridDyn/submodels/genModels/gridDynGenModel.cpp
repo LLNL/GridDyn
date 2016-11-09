@@ -14,9 +14,10 @@
 #include "submodels/gridDynGenModel.h"
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "objectFactoryTemplates.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include "vectorOps.hpp"
 
@@ -173,7 +174,7 @@ double gridDynGenModel::getOutput (const IOdata &args, const stateData *, const 
 }
 
 
-void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData *, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
 {
 
   double V = args[voltageInLocation];
@@ -208,14 +209,13 @@ void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData 
 
 
 // set parameters
-int gridDynGenModel::set (const std::string &param,  const std::string &val)
+void gridDynGenModel::set (const std::string &param,  const std::string &val)
 {
   return gridSubModel::set (param, val);
 }
 
-int gridDynGenModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModel::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param.length () == 1)
     {
@@ -226,12 +226,12 @@ int gridDynGenModel::set (const std::string &param, double val, gridUnits::units
           break;
         case 'r':
           Rs = val;
+		  break;
         default:
-          return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
 
         }
-
-      return out;
+	  return;
     }
 
   if ((param == "xd")||(param == "xs"))
@@ -249,10 +249,10 @@ int gridDynGenModel::set (const std::string &param, double val, gridUnits::units
     }
   else
     {
-      out = gridSubModel::set (param,val,unitType);
+      gridSubModel::set (param,val,unitType);
     }
 
-  return out;
+
 }
 
 

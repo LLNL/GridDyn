@@ -12,7 +12,8 @@
 */
 
 #include "controlRelay.h"
-#include "fileReaders.h"
+#include "core/gridDynExceptions.h"
+#include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/controlMessage.h"
 #include "simulation/gridSimulation.h"
@@ -43,40 +44,40 @@ gridCoreObject *controlRelay::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int controlRelay::setFlag (const std::string &flag, bool val)
+void controlRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
+
   if (flag == "noreply")
     {
       opFlags.set (no_message_reply, val);
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 /*
 std::string commDestName;
 std::uint64_t commDestId=0;
 std::string commType;
 */
-int controlRelay::set (const std::string &param,  const std::string &val)
+void controlRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
-int controlRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "autoname")
     {
       autoName = static_cast<int> (val);
@@ -93,9 +94,9 @@ int controlRelay::set (const std::string &param, double val, gridUnits::units_t 
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void controlRelay::dynObjectInitializeA (double time0, unsigned long flags)
@@ -214,7 +215,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
 
       if (actnum != kNullLocation)
         {
-          if ((actions[actnum].executed == false) && (actions[actnum].sEvent->nextTriggerTime () > actionDelay))
+          if ((actions[actnum].executed == false) && (actions[actnum].triggerTime > actionDelay))
             {            //cannot cancel actions closer than the inherent actionDelay
               actions[actnum].executed = true;
               auto gres = std::make_shared<controlMessage> (controlMessage::CANCEL_SUCCESS);
@@ -274,9 +275,9 @@ change_code controlRelay::executeAction (index_t index)
 
       if (cact.measureAction)
         {
-          double val = m_sourceObject->get (cact.sEvent->field, cact.sEvent->unitType);
+          double val = m_sourceObject->get (cact.field, cact.unitType);
           auto gres = std::make_shared<controlMessage> (controlMessage::GET_RESULT);
-          gres->m_field = cact.sEvent->field;
+          gres->m_field = cact.field;
           gres->m_value = val;
           gres->m_time = prevTime;
           commLink->transmit (cact.sourceID, gres);
@@ -284,24 +285,28 @@ change_code controlRelay::executeAction (index_t index)
         }
       else
         {
-          int ret = m_sinkObject->set (cact.sEvent->field, cact.sEvent->value, cact.sEvent->unitType);
-          auto eventReturn = (ret == PARAMETER_FOUND) ? change_code::parameter_change : change_code::execution_failure;
-          if (!opFlags.test (no_message_reply))               //unless told not to respond return with the
-            {
-              if (eventReturn == change_code::execution_failure)
-                {
-                  auto gres = std::make_shared<controlMessage> (controlMessage::SET_FAIL);
-                  gres->m_actionID = cact.actionID;
-                  commLink->transmit (cact.sourceID, gres);
-                }
-              else
-                {
-                  auto gres = std::make_shared<controlMessage> (controlMessage::SET_SUCCESS);
-                  gres->m_actionID = cact.actionID;
-                  commLink->transmit (cact.sourceID, gres);
-                }
-            }
-          return eventReturn;
+		  try
+		  {
+			  m_sinkObject->set(cact.field, cact.val, cact.unitType);
+			  if (!opFlags.test(no_message_reply))               //unless told not to respond return with the
+			  {
+				  auto gres = std::make_shared<controlMessage>(controlMessage::SET_SUCCESS);
+				  gres->m_actionID = cact.actionID;
+				  commLink->transmit(cact.sourceID, gres);
+			  }
+			  return change_code::parameter_change;
+		  }
+		  catch (const gridDynException &)
+		  {
+			  if (!opFlags.test(no_message_reply))               //unless told not to respond return with the
+			  {
+				  auto gres = std::make_shared<controlMessage>(controlMessage::SET_FAIL);
+				  gres->m_actionID = cact.actionID;
+				  commLink->transmit(cact.sourceID, gres);
+			  }
+			  return change_code::execution_failure;
+		 }
+        
         }
     }
   return change_code::not_triggered;
@@ -310,70 +315,71 @@ change_code controlRelay::executeAction (index_t index)
 
 std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (double eventTime, std::uint64_t sourceID,std::shared_ptr<controlMessage> m)
 {
-  auto ge = std::make_shared<gridEvent> (eventTime);
-  makeLowerCase (m->m_field);
-  if (opFlags.test (link_type_source))
-    {
-
-      ge->field = m->m_field + m_terminal_key;
-
-    }
-  else
-    {
-      ge->field = m->m_field;
-    }
-  if (!(m->m_units.empty ()))
-    {
-      ge->unitType = gridUnits::getUnits (m->m_units);
-    }
+  
   auto act = getFreeAction ();
   actions[act].actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
   actions[act].executed = false;
   actions[act].measureAction = true;
   actions[act].sourceID = sourceID;
-  actions[act].sEvent = ge;
+  actions[act].triggerTime = eventTime;
+  makeLowerCase(m->m_field);
+  if (opFlags[link_type_source])
+  {
+
+	  actions[act].field = m->m_field + m_terminal_key;
+
+  }
+  else
+  {
+	  actions[act].field = m->m_field;
+  }
+  if (!(m->m_units.empty()))
+  {
+	  actions[act].unitType = gridUnits::getUnits(m->m_units);
+  }
   auto fea = std::make_shared<functionEventAdapter> ([act, this]() {
     return executeAction (act);
-  });
+  },eventTime);
   return fea;
 }
 
 
 std::shared_ptr<functionEventAdapter> controlRelay::generateSetEvent (double eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> m)
 {
-  auto ge = std::make_shared<gridEvent> (eventTime);
+	auto act = getFreeAction();
+	actions[act].actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+	actions[act].executed = false;
+	actions[act].measureAction = false;
+	actions[act].sourceID = sourceID;
+	actions[act].triggerTime = eventTime;
   makeLowerCase (m->m_field);
-  if (opFlags.test (link_type_sink))
+  if (opFlags[link_type_sink])
     {
 
       if ((m->m_field == "breaker") || (m->m_field == "switch")||(m->m_field == "breaker_open"))
         {
-          ge->field = m->m_field + m_terminal_key;
+		  actions[act].field = m->m_field + m_terminal_key;
         }
       else
         {
-          ge->field = m->m_field;
+		  actions[act].field = m->m_field;
         }
 
     }
   else
     {
-      ge->field = m->m_field;
+	  actions[act].field = m->m_field;
     }
-  ge->value = m->m_value;
-  if (!(m->m_units.empty ()))
-    {
-      ge->unitType = gridUnits::getUnits (m->m_units);
-    }
-  auto act = getFreeAction ();
-  actions[act].actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
-  actions[act].executed = false;
-  actions[act].measureAction = false;
-  actions[act].sourceID = sourceID;
-  actions[act].sEvent = ge;
+  actions[act].val = m->m_value;
+ 
+  if (!m->m_units.empty())
+  {
+	  actions[act].unitType = gridUnits::getUnits(m->m_units);
+  }
+ 
   auto fea = std::make_shared<functionEventAdapter> ([act, this]() {
     return executeAction (act);
-  });
+  },eventTime);
   return fea;
 }
 

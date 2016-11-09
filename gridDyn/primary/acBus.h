@@ -17,10 +17,11 @@
 // headers
 #include "gridBus.h"
 #include "gridObjects.h"
-#include "arrayDataCompact.h"
+#include "matrixDataCompact.h"
 
-#include "arrayDataTranslate.h"
+#include "matrixDataTranslate.h"
 #include "primary/busControls.h"
+
 class basicBlock;
 
 
@@ -57,7 +58,7 @@ public:
   };
 protected:
   count_t oCount = 0;                                                                         //!< counter for updates
-  arrayDataCompact<2, 3> partDeriv;                                 //!< structure containing the partial derivatives
+  matrixDataCompact<2, 3> partDeriv;                                 //!< structure containing the partial derivatives
   double aTarget = 0.0;                                                                       //!< an angle Target(for SLK and afix bus types)
   double vTarget = 1.0;                                                                       //!< a target voltage
   double participation = 1.0;                                                         //!< overall participation factor in power regulation for an area
@@ -79,7 +80,7 @@ protected:
 
   busControls busController;                //!< pointer to the eControls object
   //extra blocks and object for remote controlled buses and bus merging
-  arrayDataTranslate<4> od;
+  matrixDataTranslate<4> od;
   index_t lastSmode = kInvalidLocation;
   
 public:
@@ -96,14 +97,14 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
   using gridBus::add;
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   /** @brief  add a gridBus object for merging buses*/
-  virtual int add (acBus *bus);
+  virtual void add (acBus *bus);
   // remove components
   using gridBus::remove;
-  virtual int remove (gridCoreObject *obj) override;
+  virtual void remove (gridCoreObject *obj) override;
 
-  virtual int remove (acBus *bus);
+  virtual void remove (acBus *bus);
   //deal with control alerts
   virtual void alert (gridCoreObject *, int code) override;
 
@@ -134,14 +135,14 @@ public:
   virtual void reconnect (gridBus *mapBus = nullptr) override;
   // parameter set functions
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
-  virtual int setFlag (const std::string &flag, bool val) override;
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &flag, bool val) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // solver functions
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
@@ -169,7 +170,7 @@ public:
   mode=1 tries to iterate until convergence based on tol
   mode=2  tries harder
   mode=3 does it with voltage only
-  @param[in] sMode the solvemode matching the states
+  @param[in] sMode the solver mode matching the states
   @param[in] mode  the mode of the convergence
   @param[in] tol  the tolerance to converge to
   */
@@ -186,7 +187,7 @@ protected:
   @param[in] sMode the solver mode*/
   virtual void computeDerivatives (const stateData *sD, const solverMode &sMode);
 public:
-  double timestep (double ttime, const solverMode &sMode) override;
+  void timestep (double ttime, const solverMode &sMode) override;
 
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   /** @brief a faster function to set the voltage and angle of a bus*
@@ -204,8 +205,9 @@ public:
   */
   virtual bool checkCapable () override;
   // find components
+
   /** @brief find a link based on the bus desiring to be connected to
-  @param[in] bs  the bus we want to check for a connecting link
+  @param[in] makeSlack  flag indicating that the bus should be made a slack bus after propagating the power
   @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr if none exists
   */
   virtual int propogatePower (bool makeSlack = false) override;
@@ -214,14 +216,14 @@ public:
   /** @brief get the maximum real power generation
   * @return the maximum real power generation
   **/
-  double getMaxGenReal () const
+  virtual double getMaxGenReal () const override
   {
     return busController.Pmax;
   }
   /** @brief get the maximum reactive power generation
   * @return the maximum reactive power generation
   **/
-  double getMaxGenReactive () const
+  virtual double getMaxGenReactive () const override
   {
     return busController.Qmax;
   }
@@ -353,7 +355,7 @@ protected:
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */
-  double computeError (const stateData *sD, const solverMode &sMode);
+  virtual double computeError (const stateData *sD, const solverMode &sMode) override;
 private:
   double getAverageAngle ();
   gridDynGenerator *keyGen = nullptr;

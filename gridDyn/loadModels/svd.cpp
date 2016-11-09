@@ -227,9 +227,8 @@ void svd::getVariableType (double /*sdata*/[], const solverMode & /*sMode*/)
 {
 }
 
-int svd::set (const std::string &param,  const std::string &val)
+void svd::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if ((param == "blocks")||(param == "block"))
     {
       auto bin = splitline (val);
@@ -271,14 +270,14 @@ int svd::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridLoad::set (param,val);
+      gridLoad::set (param,val);
     }
-  return out;
+
 
 }
-int svd::set (const std::string &param, double val, units_t unitType)
+void svd::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
 
   if (param == "qlow")
     {
@@ -363,10 +362,10 @@ int svd::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
 
-  return out;
+
 }
 
 void svd::addBlock (int steps, double Qstep, gridUnits::units_t unitType)
@@ -385,11 +384,11 @@ void svd::derivative (const IOdata & /*args*/, const stateData *, double /*deriv
 {
 }
 
-void svd::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, arrayData<double> *, const solverMode &)
+void svd::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *, const solverMode &)
 {
 }
 
-void svd::jacobianElements (const IOdata & /*args*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode &)
+void svd::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode &)
 {
 }
 void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std::string & /*prefix*/) const
@@ -397,9 +396,9 @@ void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std:
 
 }
 
-double svd::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode &)
+void svd::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode &)
 {
-  return P;
+  
 }
 
 void svd::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode &)

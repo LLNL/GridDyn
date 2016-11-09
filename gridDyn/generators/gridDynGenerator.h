@@ -64,7 +64,7 @@ public:
   {
     genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4
   };
-  static count_t genCount;                                      //!< generator cound
+  static std::atomic<count_t> genCount;                                      //!< generator count
   double baseVoltage = 120;             //!< [V] base voltage
 protected:
   double Qmax = kBigNum;                                             //!< [pu mbase] max steady state reactive power values for Power flow analysis
@@ -93,7 +93,7 @@ protected:
   double m_Pmech = 0;                                           //!< place to store a constant power output
   double m_Vtarget = -1;                               //!< voltage target for the generator at the control bus
   double m_Rs = 0.0;                            //!< the real part of the generator impedance
-  double m_Xs = 1.0;   //!< generatore impedence defined on Mbase;
+  double m_Xs = 1.0;   //!< generator impedance defined on Mbase;
   gridBus *remoteBus = nullptr;  //!< the bus for remote control
   scheduler *sched = nullptr;                   //!< pointer to a scheduler
   std::vector<double> PC;                       //!< power control point for the capability curve
@@ -105,7 +105,7 @@ public:
   /** @brief default constructor
   @param[in] dynModel  a string with the dynmodel description*/
   gridDynGenerator (dynModel_t dynModel, const std::string &objName = "gen_$");
-  gridDynGenerator (const std::string &objName = "gen_$");
+  explicit gridDynGenerator (const std::string &objName = "gen_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   /** @brief destructor*/
@@ -118,16 +118,16 @@ public:
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;       //for saving the state
   virtual void guess (double ttime, double state[],double dstate_dt[], const solverMode &sMode) override;               //for initial setting of the state
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
 
-  virtual int add (gridCoreObject *obj) override;
+  virtual void add (gridCoreObject *obj) override;
   /** @brief additional add function specific to subModels
   @param[in] a submodel to add
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE if not*/
-  virtual int add (gridSubModel *obj);
+  virtual void add (gridSubModel *obj);
 
   void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
@@ -138,12 +138,12 @@ public:
 
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
@@ -209,6 +209,11 @@ public:
   virtual double getAngle (const stateData *sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const;
 protected:
   virtual void updateFlags (bool dynOnly = false) override;
+  virtual double pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual double vSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual index_t pSetLocation(const solverMode &sMode);
+  virtual index_t vSetLocation(const solverMode &sMode);
+
 private:
   class subModelInputs
   {
@@ -242,6 +247,7 @@ public:
   void setRemoteBus (gridCoreObject *newRemoteBus);
 
   void buildDynModel (dynModel_t dynModel);
+  
 
 };
 

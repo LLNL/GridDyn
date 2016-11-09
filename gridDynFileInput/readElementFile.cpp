@@ -20,8 +20,6 @@
 
 #include <boost/filesystem.hpp>
 #include <sstream>
-#include <cstdio>
-#include <utility>
 
 using namespace readerConfig;
 
@@ -112,6 +110,46 @@ void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridC
   element->restore ();
 }
 
+static const std::string unitString1("units");
+static const std::string unitString2("unit");
+
+gridUnits::units_t readUnits(const std::shared_ptr<readerElement> &element, const std::string &field)
+{
+	std::string uname = element->getAttributeText(unitString1);
+	//actually specifying a "unit" attribute takes precedence
+	if (uname.empty())
+	{
+		uname = element->getAttributeText(unitString2);
+	}
+	if (!uname.empty())
+	{
+		auto retUnits = gridUnits::getUnits(uname);
+		if (retUnits == gridUnits::defUnit)
+		{
+			WARNPRINT(READER_WARN_ALL, "unknown unit " << uname);
+		}
+		return retUnits;
+	}
+	if (field.back() == ')')
+	{
+		auto p = field.find_last_of('(');
+		
+		if (p != std::string::npos)
+		{
+			uname = field.substr(p + 1, field.length() - 2 - p);
+			auto retUnits= gridUnits::getUnits(uname);
+			if (retUnits == gridUnits::defUnit)
+			{
+				WARNPRINT(READER_WARN_ALL, "unknown unit " << uname);
+			}
+			return retUnits;
+		}
+	}
+	return gridUnits::defUnit;
+}
+
+static const std::string valueString("value");
+
 gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, gridParameter *param)
 {
   gridParameter *ret;
@@ -141,25 +179,23 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
           ret->fromString (element->getText ());
           return ret;
         }
-
+	  ret->paramUnits = readUnits(element,pname);
       if (pname.back () == ')')
         {
           auto p = pname.find_last_of ('(');
           if (p != std::string::npos)
             {
-              std::string ustring = pname.substr (p + 1, pname.length () - 2 - p);
-              ret->paramUnits = gridUnits::getUnits (ustring);
-              pname = pname.substr (0, p);
+			  pname.erase(p);
             }
         }
       ret->field = convertToLowerCase (pname);
-      if (element->hasAttribute ("value"))
+      if (element->hasAttribute (valueString))
         {
-          ret->value = element->getAttributeValue ("value");
-          if (ret->value == kNullVal)
+          ret->value = element->getAttributeValue (valueString);
+          if (ret->value == readerNullVal)
             {
               ret->stringType = true;
-              ret->strVal = element->getAttributeText ("value");
+              ret->strVal = element->getAttributeText (valueString);
             }
           else
             {
@@ -170,7 +206,7 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
       else
         {
           ret->value = element->getValue ();
-          if (ret->value == kNullVal)
+          if (ret->value == readerNullVal)
             {
               ret->stringType = true;
               ret->strVal = element->getText ();
@@ -181,37 +217,25 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
             }
 
         }
-      std::string uname = element->getAttributeText ("units");
-      if (uname.empty ())
-        {
-          uname = element->getAttributeText ("unit");
-        }
-      if (!uname.empty ())
-        {
-          ret->paramUnits = gridUnits::getUnits (uname);
-          if (ret->paramUnits == gridUnits::defUnit)
-            {
-              WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
-            }
-        }
+	  
+	  
 
     }
   // all other properties
   else
     {
+	  ret->paramUnits = readUnits(element,fname);
       if (fname.back () == ')')
         {
-          auto p = fname.find_last_of ('(');
-          if (p != std::string::npos)
-            {
-              std::string ustring = fname.substr (p + 1, fname.length () - 2 - p);
-              ret->paramUnits = gridUnits::getUnits (ustring);
-              fname = fname.substr (0, p - 1);
-            }
+		  auto p = fname.find_last_of('(');
+		  if (p != std::string::npos)
+		  {
+			  fname.erase(p);
+		  }
         }
       ret->field = fname;
       ret->value = element->getValue ();
-      if (ret->value == kNullVal)
+      if (ret->value == readerNullVal)
         {
           ret->stringType = true;
           ret->strVal = element->getText ();
@@ -221,19 +245,7 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
           ret->stringType = false;
         }
 
-      std::string uname = element->getAttributeText ("units");
-      if (uname.empty ())
-        {
-          uname = element->getAttributeText ("unit");
-        }
-      if (!uname.empty ())
-        {
-          ret->paramUnits = gridUnits::getUnits (uname);
-          if (ret->paramUnits == gridUnits::defUnit)
-            {
-              WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
-            }
-        }
+	  
 
     }
   ret->valid = true;
@@ -248,6 +260,7 @@ static const IgnoreListType keywords {
 
 void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
 {
+
   auto att = aP->getFirstAttribute ();
   while (att.isValid ())
     {
@@ -281,15 +294,15 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
         {
           std::string strVal = att.getText ();
           ri->checkFileParam (strVal);
-          LEVELPRINT (READER_VERBOSE_PRINT, typeName << ": setting " << fname << " to " << strVal);
-          obj->set (fname, strVal);
+		  gridParameter po(fname, strVal);
+		  objectParameterSet(typeName, obj, po);
         }
       else if ((fname.find ("workdir") != std::string::npos) || (fname.find ("directory") != std::string::npos))
         {
           std::string strVal = att.getText ();
           ri->checkDirectoryParam (strVal);
-          LEVELPRINT (READER_VERBOSE_PRINT, typeName << ": setting " << fname << " to " << strVal);
-          obj->set (fname, strVal);
+		  gridParameter po(fname, strVal);
+		  objectParameterSet(typeName, obj, po);
         }
       else if ((fname == "flag") || (fname == "flags"))     //read the flags parameter
         {
@@ -299,28 +312,26 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
           for (auto &temp : v)
             {
               makeLowerCase (temp);                         //make the flags lower case
-              int ot = obj->setFlag (temp, true);
-              if (ot != PARAMETER_FOUND)
-                {
-                  WARNPRINT (READER_WARN_ALL, "flag " << temp << " not found");
-                }
+			  try
+			  {
+				  obj->setFlag(temp, true);
+			  }
+			  catch (const unrecognizedParameter &)
+			  {
+				  WARNPRINT(READER_WARN_ALL, "flag " << temp << " not found");
+			  }
+             
             }
         }
       else
         {
           double val = att.getValue ();
-          if (val != kNullVal)
+          if (val != readerNullVal)
             {
-              LEVELPRINT (READER_VERBOSE_PRINT, typeName << ": setting " << fname << " to " << val);
-              int ret = obj->set (fname, val,unitType);
-              if (ret == PARAMETER_NOT_FOUND)
-                {
-                  WARNPRINT (READER_WARN_ALL, "unknown " << typeName << " parameter " << fname);
-                }
-              else if (ret == INVALID_PARAMETER_VALUE)
-                {
-                  WARNPRINT (READER_WARN_ALL, "value for parameter " << fname << " (" << val << ") is invalid");
-                }
+			  gridParameter po(fname, val);
+			  po.paramUnits = unitType;
+			  objectParameterSet(typeName, obj, po);
+              
             }
           else
             {
@@ -338,8 +349,6 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
 
 void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
 {
-
-  int ret = PARAMETER_NOT_FOUND;
 
   gridParameter param;
 
@@ -365,15 +374,15 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
           aP->moveToNextSibling ();
           continue;
         }
-
+	  //TODO:: PT move the event and recorder loading to a separate function
       if (fname == "recorder")
         {
-          ret = loadRecorderElement (aP, obj, ri);
+          loadRecorderElement (aP, obj, ri);
         }
       // event
       else if (fname == "event")
         {
-          ret = loadEventElement (aP, obj, ri);
+          loadEventElement (aP, obj, ri);
         }
       else           //get all the parameter fields
         {
@@ -399,13 +408,15 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
                       for (auto &temp : v)
                         {
                           makeLowerCase (temp);                                     //make the flags lower case
-                          ret = obj->setFlag (temp, true);
-                          if (ret != PARAMETER_FOUND)
+						  try
+						  {
+							  obj->setFlag(temp, true);
+						  }
+                          catch (const unrecognizedParameter &)
                             {
                               WARNPRINT (READER_WARN_ALL, "flag " << temp << " not found");
                             }
                         }
-                      ret = PARAMETER_FOUND;
                     }
                   else
                     {

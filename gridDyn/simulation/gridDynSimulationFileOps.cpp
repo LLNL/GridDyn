@@ -18,9 +18,10 @@
 #include "solvers/solverInterface.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
-#include "ticpp.h"
-#include "arrayDataSparse.h"
+#include "ticpp/ticpp.h"
+#include "matrixDataSparse.h"
 #include "units.h"
+#include "contingency.h"
 #include <boost/filesystem.hpp>
 
 #include <fstream>
@@ -801,7 +802,7 @@ int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint3
 	return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, arrayData<double> *a1, const std::string&filename, bool append)
+int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> *a1, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -828,7 +829,7 @@ int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_
 	for (size_t nn = 0; nn < numElements; ++nn)
 	{
 		auto el = a1->next();
-		bFile.write((char *)(&el), sizeof(data_triple<double>));
+		bFile.write((char *)(&el), sizeof(matrixElement<double>));
 	}
 	return FUNCTION_EXECUTION_SUCCESS;
 }
@@ -1034,7 +1035,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 //writing the state vector
   const solverMode &sMode = gds->getCurrentMode (iMode);
   auto sd = gds->getSolverInterface (sMode);
-  arrayDataSparse ad;
+  matrixDataSparse<double> ad;
   stateData sD (gds->getCurrentTime (), sd->state_data (), sd->deriv_data ());
 
   sD.cj = 10000;
@@ -1088,7 +1089,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
   const solverMode &sMode = gds->getCurrentMode (iMode);
   auto sd = gds->getSolverInterface (sMode);
 
-  arrayDataSparse ad;
+  matrixDataSparse<double> ad;
 
   stateData sD (gds->getCurrentTime (), sd->state_data (), sd->deriv_data ());
 
@@ -1120,4 +1121,17 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
       bFile.write ((char *)(&c), sizeof(index_t));
       bFile.write ((char *)(&val), sizeof(double));
     }
+}
+
+
+void saveContingencyOutput(const std::vector<std::shared_ptr<contingency>> &contList, const std::string &filename)
+{
+	std::ofstream  bFile(filename.c_str(), std::ios::out);
+
+	bFile << contList[0]->generateHeader() << "\n";
+	for (auto &cont : contList)
+	{
+		bFile << cont->generateFullOutputLine() << "\n";
+	}
+
 }

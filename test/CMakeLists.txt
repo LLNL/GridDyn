@@ -26,10 +26,13 @@ set(testComponent_sources
 	componentTests/testArea.cpp
 	componentTests/testSource.cpp
 	componentTests/simulationTests.cpp
-	componentTests/faultTests.cpp
+	componentTests/testEvents.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 	)
+
+
+	list(APPEND testComponent_sources ${optional_component_test_files})
 
 set (testLibrary_sources
 	libraryTests/testCore.cpp
@@ -43,7 +46,9 @@ set (testLibrary_sources
 	libraryTests/testGridParameter.cpp
 	libraryTests/testJsonReader.cpp
 	libraryTests/testReaderInfo.cpp
-	libraryTests/testArrayData.cpp
+	libraryTests/testMatrixData.cpp
+	libraryTests/testWorkQueue.cpp
+	libraryTests/testZipUtilities.cpp
 	)
 
 set(testSystem_sources
@@ -61,11 +66,16 @@ set(testSystem_sources
 	systemTests/testMainExe.cpp
 	systemTests/testOutputs.cpp
 	systemTests/testCloning.cpp
+	systemTests/faultTests.cpp
+	systemTests/testContingency.cpp
 	)
+
+	list(APPEND testSystem_sources ${optional_system_test_files})
 
 set(testExtra_sources
 extraTests/testExtra.cpp
 extraTests/performanceTests.cpp
+extraTests/largeContingencyTests.cpp
 testHelperFunctions.cpp
 exeTestHelper.cpp
 )	
@@ -76,30 +86,7 @@ set(testMain_headers
 	
 	)
 
-link_directories(${SUNDIALS_LIBRARY_DIR})
-
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-set(external_library_list
-	${SUNDIALS_LIBRARIES}
-	${Boost_LIBRARIES}
-	)
-	
-
-if(KLU_ENABLE)
- link_directories(${KLU_LIBRARY_DIR})
- list(APPEND external_library_list ${KLU_LIBRARIES})
-endif(KLU_ENABLE)
-
-IF (FMI_ENABLE)
- link_directories(${FMI_LIBRARY_DIRS})
- list(APPEND external_library_list ${FMI_LIBRARIES})
- list(APPEND testSystem systemTests/testFMI.cpp)
-ENDIF(FMI_ENABLE)
-
-IF(FSKIT_ENABLE)
-list(APPEND external_library_list ${FSKIT_LIBRARIES})
-ENDIF(FSKIT_ENABLE)
+link_directories(${external_link_directories})
 
 add_executable(testLibrary ${testLibrary_sources} ${testMain_headers})
 add_executable(testComponents ${testComponent_sources} ${testMain_headers})
@@ -108,20 +95,14 @@ add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynFileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)
 
-IF(OPTIMIZATION_ENABLE)
-  INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynOpt)
-ENDIF(OPTIMIZATION_ENABLE)
-
-IF (FMI_ENABLE)
- INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/fmi)
- INCLUDE_DIRECTORIES(${FMI_INCLUDE_DIR})
-ENDIF(FMI_ENABLE)
+INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
@@ -142,30 +123,12 @@ ADD_DEFINITIONS(-DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}")
 ADD_DEFINITIONS(-DGRIDDYNSERVER_LOCATION="${GRIDYNSERVER_BINARY_LOC}")
 ADD_DEFINITIONS(-DGRIDDYNINSTALL_LOCATION="${CMAKE_INSTALL_PREFIX}")
 
-set(gd_library_list
-gridDynFileInput
-gridDyn
-coupling_static_lib
-utilities
-tinyxml
-)
 
-IF(OPTIMIZATION_ENABLE)
-list(INSERT gd_library_list 1 gridDynOpt)
-ENDIF(OPTIMIZATION_ENABLE)
 
-IF(LOAD_EXTRA_MODELS)
-list(INSERT gd_library_list 0 extraModelLibrary)
-ENDIF(LOAD_EXTRA_MODELS)
-
-IF(FMI_ENABLE)
-list(INSERT gd_library_list 0 fmiGDLibrary)
-ENDIF(FMI_ENABLE)
-
-target_link_libraries(testLibrary ${gd_library_list} ${external_library_list})
-target_link_libraries(testComponents ${gd_library_list} ${external_library_list})
-target_link_libraries(testSystem ${gd_library_list} ${external_library_list})
-target_link_libraries(testExtra ${gd_library_list} ${external_library_list})
+target_link_libraries(testLibrary gridDynCombined)
+target_link_libraries(testComponents gridDynCombined)
+target_link_libraries(testSystem gridDynCombined)
+target_link_libraries(testExtra gridDynCombined)
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 install(DIRECTORY DESTINATION bin/test/)

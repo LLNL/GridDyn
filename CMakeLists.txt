@@ -9,14 +9,15 @@
 # LLNS Copyright End
 
 #project name
-project(gridDyn)
+project(GridDyn)
 
-#states that Cmake version > 2.8
-cmake_minimum_required(VERSION 2.8)
+#states that Cmake version > 3.3
+cmake_minimum_required(VERSION 3.3)
+cmake_policy(VERSION 3.3)
 
 #version number
 set(GridDyn_VERSION_MAJOR 0)
-set(GridDyn_VERSION_MINOR 4)
+set(GridDyn_VERSION_MINOR 6)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
@@ -31,7 +32,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # list of cached variables various variables and/or options 
 # that depend on other options.
 # Note that once a variable is modified, it will preserve its
-# value (hidding it merely makes it internal)
+# value (hiding it merely makes it internal)
 
 MACRO(HIDE_VARIABLE var)
   IF(DEFINED ${var})
@@ -55,6 +56,8 @@ ENDIF()
 
 
 
+#include(mergestaticlibs)
+
 # -------------------------------------------------------------
 # Sundials
 # -------------------------------------------------------------
@@ -66,9 +69,19 @@ OPTION(LOAD_CVODE "Enable CVODE Support" OFF)
 OPTION(LOAD_ARKODE "Enable ARKODE support" OFF)
 
 SHOW_VARIABLE(SUNDIALS_INSTALL_DIR PATH
-  "sundials library directory" "${SUNDIALS_INSTALL_DIR}")
-find_package(sundials)
+  "SUNDIALS library directory" "${SUNDIALS_LIBRARY_DIR}")
+find_package(SUNDIALS)
 
+set(external_library_list
+	${SUNDIALS_LIBRARIES}
+	)
+	
+set(external_link_directories ${SUNDIALS_LIBRARY_DIR})
+
+set(optional_component_test_files)
+set(optional_system_test_files)
+
+set(griddyn_optional_libraries )
 # -------------------------------------------------------------
 # Find (and test) the KLU libraries
 # -------------------------------------------------------------
@@ -86,6 +99,8 @@ if(KLU_ENABLE)
 
   if(KLU_FOUND) 
   INCLUDE_DIRECTORIES(SYSTEM ${KLU_INCLUDE_DIR})
+  list(APPEND external_library_list ${KLU_LIBRARIES})
+  list(APPEND external_link_directories ${KLU_LIBRARY_DIR})
   else(KLU_FOUND)
 	message( FATAL_ERROR "KLU not functional - support will not be provided")
 	message( "Double check spelling specified libraries (search is case sensitive)")
@@ -94,6 +109,8 @@ if(KLU_ENABLE)
 endif(KLU_ENABLE)
 
 
+set (optional_library_key_headers )
+set (optional_library_functions )
 # -------------------------------------------------------------
 # FSKIT
 # -------------------------------------------------------------
@@ -142,10 +159,10 @@ ELSE(OPENMP_ENABLE)
 ENDIF(OPENMP_ENABLE)
 
 IF (OPENMP_ENABLE)
-	OPTION(SUNDIALS_OPENMP "Enable sundials NVector openMP implementation" ON)
-	OPTION(GRIDDYN_OPENMP "Enable openmp internal to griddyn--not used yet" OFF)
+	OPTION(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
+	OPTION(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
 ENDIF(OPENMP_ENABLE)
-OPTION(THREAD_ENABLE "Enable multithreading support--not used yet" OFF)
+OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
 
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
@@ -154,18 +171,38 @@ IF(UNIX)
   set(Boost_NO_BOOST_CMAKE ON)
 
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
-  add_compile_options(-std=c++11 -Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
 ELSE(UNIX)
   IF(MINGW)
-  add_compile_options(-std=c++11 -Wall -Wextra -Wshadow -pedantic -Wstrict-aliasing -Wunreachable-code)
+ add_compile_options(-Wall -pedantic)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
   ELSE(MINGW)
   set(Boost_USE_STATIC_LIBS ON)
   ENDIF(MINGW)
 ENDIF(UNIX)
 
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	#add_compile_options(-Wsuggest-override)
-ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+# -------------------------------------------------------------
+# Extra definitions for visual studio
+# -------------------------------------------------------------
+IF(MSVC)
+  ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+  ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
+  add_compile_options(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
+ENDIF(MSVC)
+
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>)
+ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1)
 
 SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
 
@@ -178,7 +215,8 @@ ENDIF(FSKIT_ENABLE)
 message("Using Boost include files : ${Boost_INCLUDE_DIR}")
 message("Using Boost libraries ${Boost_LIBRARY_DIRS}")
 
-
+list(APPEND external_library_list ${Boost_LIBRARIES})
+  list(APPEND external_link_directories ${Boost_LIBRARY_DIRS})
 
 # -------------------------------------------------------------
 # Enable FMI support?
@@ -188,13 +226,69 @@ OPTION(FMI_ENABLE "Enable FMI support" OFF)
 # If FMI is enabled try to locate the libraries
 # link against them.
 
-if (FMI_ENABLE)
-	set(FMI_ROOT ${PROJECT_SOURCE_DIR}/ThirdParty/FMILibrary-2.0.1/install)
-	OPTION(USE_FMI_SHARED_LIBRARY "Use FMI shared library" ON)
-	find_package(FMI)
+IF (FMI_ENABLE)
+	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+		set(FMI_ENABLE OFF)
+		message("FMI support requires BOOST 1.61 or higher")
+	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 	add_subdirectory(fmi)
+	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(FMI_ENABLE)
 
+
+# -------------------------------------------------------------
+# Enable ZMQ interfacing
+# -------------------------------------------------------------
+
+OPTION(ZMQ_ENABLE "Enable ZMQ networking library" OFF)
+# If ZMQ library is enabled try to locate it and link against it
+
+IF (ZMQ_ENABLE)
+
+SHOW_VARIABLE(ZMQ_LIBRARY_PATH PATH
+  "path to the zmq libraries" "${ZMQ_LIBRARY_PATH}")
+  
+SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
+  "path to the zmq headers" "${ZMQ_INCLUDE_PATH}")
+find_package(ZMQ)
+
+# ZMQ_INCLUDE_DIR, where to find zmq.h
+# ZMQ_LIBRARY, the library needed to use ZMQ
+# ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
+	if (ZMQ_FOUND)
+		add_subdirectory(zmqInterface)
+	else(ZMQ_FOUND)
+		message("unable to locate zmq library")
+	endif(ZMQ_FOUND)
+ENDIF(ZMQ_ENABLE)
+
+# -------------------------------------------------------------
+# Enable FNCS executable
+# -------------------------------------------------------------
+
+OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
+# If FNCS_EXECUTABLE is load the fncs directory
+# link against them.
+
+IF (FNCS_EXECUTABLE)
+	add_subdirectory(fncs)
+ENDIF(FNCS_EXECUTABLE)
+
+
+# -------------------------------------------------------------
+# Enable support for Plugins
+# -------------------------------------------------------------
+
+OPTION(ENABLE_PLUGINS "Enable support for plugin modules" ON)
+
+IF (ENABLE_PLUGINS)
+	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+		set(ENABLE_PLUGINS OFF)
+		message("Plugin support requires BOOST 1.61 or higher")
+	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+		add_subdirectory(plugins)
+	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+ENDIF(ENABLE_PLUGINS)
 
 # -------------------------------------------------------------
 # Enable compilation of extraModels?
@@ -216,19 +310,12 @@ if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
   OPTION(ENABLE_64_BIT_INDEXING "set all indexing and count variables to 64 bit unsigned (Usually not required)" OFF)
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
  
-#OPTION(BUILD_SERVERMODE "Build Griddyn Server" OFF)
+#OPTION(BUILD_SERVERMODE "Build GridDyn Server" OFF)
 IF (BUILD_SERVERMODE)
  #add_subdirectory(gridDynServer)
 ENDIF(BUILD_SERVERMODE)
 
-# -------------------------------------------------------------
-# Extra definitions
-# -------------------------------------------------------------
-IF(MSVC)
-  ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-  ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-  ADD_DEFINITIONS(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
-ENDIF(MSVC)
+
 
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)
 # ------------------------------------------------------------
@@ -242,13 +329,13 @@ OPTION(TRACE_LOG_ENABLE "enable trace logging messages(Note: logging is still co
 ENDIF(LOG_ENABLE)
 
 
-option (GRIDDYN_GENERATE_DOXYGEN_DOC "Generate doxygen doc target" OFF)
+option (GRIDDYN_GENERATE_DOXYGEN_DOC "Generate Doxygen doc target" OFF)
 
 IF (GRIDDYN_GENERATE_DOXYGEN_DOC)
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
 
-	SHOW_VARIABLE(DOXYGEN_OUTPUT_DIR PATH "location to put doxygen docs" "${CMAKE_CURRENT_SOURCE_DIR}/docs")
+	SHOW_VARIABLE(DOXYGEN_OUTPUT_DIR PATH "location to put Doxygen docs" "${CMAKE_CURRENT_SOURCE_DIR}/docs")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 	add_custom_target(doc
 	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
@@ -264,11 +351,13 @@ endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 # load the subdirectories
 # -------------------------------------------------------------
 
-add_subdirectory(ThirdParty/tinyxml)
+add_subdirectory(formatInterpreters)
 
 add_subdirectory(core)
 
 add_subdirectory(utilities)
+#minizup is used as part of the utilities
+add_subdirectory(ThirdParty/Minizip)
 
 add_subdirectory(gridDyn)
 
@@ -281,6 +370,8 @@ ENDIF(OPTIMIZATION_ENABLE)
 
 
 add_subdirectory(gridDynFileInput)
+
+add_subdirectory(gridDynCombined)
 
 add_subdirectory(gridDynMain)
 

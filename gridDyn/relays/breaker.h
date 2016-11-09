@@ -45,19 +45,19 @@ private:
   double Vbase = 120;       //!< Voltage base for bus1
   bool useCTI = false;		//!< internal flag to use the CTI stuff
 public:
-  breaker (const std::string &objName = "breaker_$");
+  explicit breaker (const std::string &objName = "breaker_$");
   virtual gridCoreObject * clone (gridCoreObject *obj) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
   virtual void updateA (double time) override;
 
   //dynamic state functions
-  virtual double timestep (double ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;

@@ -18,6 +18,7 @@
 #include "loadModels/gridLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 #include <fstream>
 #include <cstdlib>
@@ -116,19 +117,16 @@ Column  46-73   Case identification (A) */
                       busList[index - 1]->set ("basepower", base);                          //set the basepower for the bus
                       busList[index - 1]->setUserID (index);
                       cdfReadBusLine (busList[index - 1],line,base,bri);
-                      parentObject->add (busList[index - 1]);
-                      if (busList[index - 1]->getParent () != parentObject)
-                        {
-
-                          busList[index - 1]->setName (busList[index - 1]->getName () + "_BUS-" + std::to_string (index));
-
-                          parentObject->add (busList[index - 1]);
-                          if (busList[index - 1]->getParent () != parentObject)
-                            {
-                              std::cerr << "Unable to add bus " << index << '\n';
-                            }
-                        }
-
+					  try
+					  {
+						  parentObject->add(busList[index - 1]);
+					  }
+					  catch (const objectAddFailure &)
+					  {
+						  addToParentRename(busList[index - 1], parentObject);
+						  
+					  }
+                      
                     }
                   else
                     {
@@ -546,20 +544,32 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
   lnk->updateBus (bus1,1);
   lnk->updateBus (bus2,2);
   lnk->set ("name",temp2);
-
-  parentObject->add (lnk);
-  if (lnk->getParent () == nullptr)
-    {
-      //must be a parallel branch
-      std::string sub = lnk->getName ();
-      char m = 'a';
-      while (lnk->getParent () == nullptr)
-        {
-          lnk->setName (sub + '_' + m);
-          m = m + 1;
-          parentObject->add (lnk);
-        }
-    }
+  try
+  {
+	  parentObject->add(lnk);
+  }
+  catch (const objectAddFailure &)
+  {
+	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
+	  std::string sub = lnk->getName();
+	  char m = 'a';
+	  while (lnk->getParent() == nullptr)
+	  {
+		  lnk->setName(sub + '_' + m);
+		  m = m + 1;
+		  try
+		  {
+			  parentObject->add(lnk);
+		  }
+		  catch (const objectAddFailure &e)
+		  {
+			  if (m > 'z')
+			  {
+				  throw(e);
+			  }
+		  }
+	  }
+  }
   //skip the load flow area and loss zone and circuit for now TODO:: PT Fix this when area controls are put in place
 
 

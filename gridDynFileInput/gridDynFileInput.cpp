@@ -18,14 +18,14 @@
 #include "readElement.h"
 
 #include "tinyxmlReaderElement.h"
-#include "tinyxml2ReaderElement.h"
+//#include "tinyxml2ReaderElement.h"
 #include "jsonReaderElement.h"
 #include "readElementFile.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time.hpp>
 
 #include "gridDyn.h"
 #include "gridCore.h"
@@ -124,34 +124,43 @@ void setDefaultMatchType (const std::string &matchType)
 
 using namespace readerConfig;
 
-void objectParameterSet (const std::string &label,gridCoreObject *obj, gridParameter &param)
+int objectParameterSet (const std::string &label,gridCoreObject *obj, gridParameter &param) noexcept
 {
-  int ret;
-  if (param.stringType == true)
-    {
-      LEVELPRINT (READER_VERBOSE_PRINT, label << ":setting " << obj->getName () << ' ' << param.field << " to " << param.strVal);
-      ret = obj->set (param.field, param.strVal);
-    }
-  else
-    {
-      LEVELPRINT (READER_VERBOSE_PRINT, label << ":setting " << obj->getName () << ' ' << param.field << " to " << param.value);
-      ret = obj->set (param.field, param.value, param.paramUnits);
-    }
-  if (ret == PARAMETER_NOT_FOUND)
-    {
-      WARNPRINT (READER_WARN_ALL, "unrecognized " << label << "  parameter " << param.field);
-    }
-  else if (ret == INVALID_PARAMETER_VALUE)
-    {
-      if (param.stringType == true)
-        {
-          WARNPRINT (READER_WARN_ALL, "value for parameter " << param.field << " (" << param.strVal << ") is invalid");
-        }
-      else
-        {
-          WARNPRINT (READER_WARN_ALL, "value for parameter " << param.field << " (" << param.value << ") is invalid");
-        }
-    }
+	try
+	{
+		if (param.stringType == true)
+		{
+			LEVELPRINT(READER_VERBOSE_PRINT, label << ":setting " << obj->getName() << ' ' << param.field << " to " << param.strVal);
+			obj->set(param.field, param.strVal);
+		}
+		else
+		{
+			LEVELPRINT(READER_VERBOSE_PRINT, label << ":setting " << obj->getName() << ' ' << param.field << " to " << param.value);
+			obj->set(param.field, param.value, param.paramUnits);
+		}
+		return 0;
+	}
+	catch (const unrecognizedParameter &)
+	{
+		WARNPRINT(READER_WARN_ALL, "unrecognized " << label << "  parameter " << param.field);
+	}
+	catch (const invalidParameterValue &)
+	{
+		if (param.stringType == true)
+		{
+			WARNPRINT(READER_WARN_ALL, "value for parameter " << param.field << " (" << param.strVal << ") is invalid");
+		}
+		else
+		{
+			WARNPRINT(READER_WARN_ALL, "value for parameter " << param.field << " (" << param.value << ") is invalid");
+		}
+	}
+	catch (...)
+	{
+		WARNPRINT(READER_WARN_ALL, "unknown error when setting " << param.field);
+	}
+	return (-1);
+  
 }
 
 uint32_t addflags (uint32_t iflags, const std::string &flags)
@@ -166,6 +175,7 @@ uint32_t addflags (uint32_t iflags, const std::string &flags)
           oflags |= (1 << ignore_step_up_transformer);
         }
     }
+  //MORE will likely be added later
   return oflags;
 }
 
@@ -204,15 +214,15 @@ void loadFile (gridCoreObject *parentObject, const std::string &filename, reader
     }
   else if (ext == "raw")
     {
-      loadRAW (parentObject, filename, ri);
+      loadRAW (parentObject, filename, *ri);
     }
   else if (ext == "dyr")
     {
-      loadDYR (parentObject, filename, ri);
+      loadDYR (parentObject, filename, *ri);
     }
   else if ((ext == "cdf")||(ext == "txt"))
     {
-      loadCDF (parentObject, filename, ri);
+      loadCDF (parentObject, filename, *ri);
     }
   else if (ext == "uct")
     {
@@ -220,24 +230,28 @@ void loadFile (gridCoreObject *parentObject, const std::string &filename, reader
     }
   else if (ext == "m")
     {
-      loadMFile (parentObject, filename, ri);
+      loadMFile (parentObject, filename, *ri);
     }
   else if (ext == "psp")
     {
-      loadPSP (parentObject, filename, ri);
+      loadPSP (parentObject, filename, *ri);
     }
   else if (ext == "epc")
     {
-      loadEPC (parentObject, filename, ri);
+      loadEPC (parentObject, filename, *ri);
     }
   else if (ext == "pti")
     {
-      loadRAW (parentObject, filename, ri);
+      loadRAW (parentObject, filename, *ri);
     }
   else if (ext == "json")
     {
       loadElementFile<jsonReaderElement> (parentObject, filename, ri);
     }
+  else if (ext=="gdz")  //gridDyn Zipped file
+  {
+	  loadGDZ(parentObject, filename, ri);
+  }
   if (delri)
     {
       delete ri;
@@ -246,21 +260,31 @@ void loadFile (gridCoreObject *parentObject, const std::string &filename, reader
 
 void addToParent (gridCoreObject *objectToAdd, gridCoreObject *parentObject)
 {
-  int ret = parentObject->add (objectToAdd);
-  if (ret)
-    {
-      if (ret == OBJECT_NOT_RECOGNIZED)
-        {
-          WARNPRINT (READER_WARN_IMPORTANT, "Object " << objectToAdd->getName () << " not recognized by " << parentObject->getName ());
-        }
-      else if (ret == OBJECT_ADD_FAILURE)
-        {
-          WARNPRINT (READER_WARN_IMPORTANT, "Failure to add " << objectToAdd->getName () << " to " << parentObject->getName ());
-        }
-      else
-        {
-          WARNPRINT (READER_WARN_IMPORTANT, "Unknown error(" << ret << ") in adding " << objectToAdd->getName () << " to " << parentObject->getName ());
-        }
-    }
+	try
+	{
+		parentObject->add(objectToAdd);
+	}
+	catch (const invalidObjectException &)
+	{
+		WARNPRINT(READER_WARN_IMPORTANT, "Object " << objectToAdd->getName() << " not recognized by " << parentObject->getName());
+	}
+	catch (const objectAddFailure &)
+	{
+		WARNPRINT(READER_WARN_IMPORTANT, "Failure to add " << objectToAdd->getName() << " to " << parentObject->getName());
+	}
 }
 
+
+void addToParentRename(gridCoreObject *objectToAdd, gridCoreObject *parentObject)
+{
+	std::string bname = objectToAdd->getName();
+	int cnt = 2;
+	auto fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
+	while (fndObject!=nullptr)
+	{
+		++cnt;
+		fndObject = parentObject->find(bname + '-' + std::to_string(cnt));
+	}
+	objectToAdd->setName(bname + '-' + std::to_string(cnt));
+	addToParent(objectToAdd, parentObject);
+}

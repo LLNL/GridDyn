@@ -13,6 +13,7 @@
 
 #include "gridCondition.h"
 #include "grabberInterpreter.hpp"
+#include <map>
 
 std::shared_ptr<gridCondition> make_condition(const std::string &condString, gridCoreObject *rootObject)
 {
@@ -30,118 +31,205 @@ std::shared_ptr<gridCondition> make_condition(const std::string &condString, gri
 	
 	char A = cString[pos];
 	char B = cString[pos + 1];
-	std::string BlockA = cString.substr(0, pos - 1);
+	std::string BlockA = trim(cString.substr(0, pos - 1));
 	std::string BlockB = (B == '=') ? cString.substr(pos + 2) : cString.substr(pos + 1);
 		
-	trimString(BlockA);
 	trimString(BlockB);
 	auto gc = std::make_shared<gridCondition>();
 
 	//get the state grabbers part
-	auto v = makeStateGrabbers(BlockA, rootObject);
-	gc->conditionAst = v[0];
-	v = makeStateGrabbers(BlockB, rootObject);
-	gc->conditionBst = v[0];
-	//get the regular grabbers parts
-	auto v2 = makeGrabbers(BlockA, rootObject);
-	gc->conditionA = v2[0];
-	v2 = makeGrabbers(BlockB, rootObject);
-	gc->conditionB = v2[0];
+	auto stGrabber = makeStateGrabbers(BlockA, rootObject);
+	auto grabber = makeGrabbers(BlockA, rootObject);
+	gc->setConditionLHS(grabber[0], stGrabber[0]);
 
-	if (A == '>')
+	stGrabber = makeStateGrabbers(BlockB, rootObject);
+	grabber = makeGrabbers(BlockB, rootObject);
+	gc->setConditionRHS(grabber[0], stGrabber[0]);
+	
+	std::string condstr;
+	condstr.push_back(A);
+	if (B == '=')
 	{
-		if (B == '=')
-		{
-			gc->setComparison(gridCondition::comparison_type::ge);
-		}
-		else
-		{
-			gc->setComparison(gridCondition::comparison_type::gt);
-		}
-		
+		condstr.push_back(B);
 	}
-	else if (A == '<')
-	{
-		if (B == '=')
-		{
-			gc->setComparison(gridCondition::comparison_type::le);
-		}
-		else
-		{
-			gc->setComparison(gridCondition::comparison_type::lt);
-		}
-	}
-	else if (A == '=')
-	{
-		gc->setComparison(gridCondition::comparison_type::eq);
-	}
-	else
-	{
-		gc->setComparison(gridCondition::comparison_type::ne);
-	}
+
+	gc->setComparison(comparisonFromString(condstr));
 
 	return gc;
 }
 
+static const std::map<std::string, comparison_type> compStrMap
+{
+	{">", comparison_type::gt},{ "gt", comparison_type::gt },
+	{ ">=", comparison_type::ge },{ "ge", comparison_type::ge },
+	{ "<", comparison_type::lt },{ "lt", comparison_type::lt },
+	{ "<=", comparison_type::le },{ "le", comparison_type::le },
+	{ "=", comparison_type::eq },{ "eq", comparison_type::eq },
+	{ "==", comparison_type::eq },
+	{ "!=", comparison_type::ne },{ "ne", comparison_type::ne },
+	{ "~=", comparison_type::ne },{ "<>",comparison_type::ne },
+	{ "===", comparison_type::eq },
+	{"??",comparison_type::null},
+};
+
+comparison_type comparisonFromString(const std::string &compStr)
+{
+	auto cfind = compStrMap.find(compStr);
+	if (cfind != compStrMap.end())
+	{
+		return cfind->second;
+	}
+	else
+	{
+		return comparison_type::null;
+	}
+	
+}
+
+std::string fromString(comparison_type comp)
+{
+	switch (comp)
+	{
+	case comparison_type::gt:
+		return ">";
+	case comparison_type::ge:
+		return ">=";
+	case comparison_type::lt:
+		return "<";
+	case comparison_type::le:
+		return "<=";
+	case comparison_type::eq:
+		return "==";
+	case comparison_type::ne:
+		return "!=";
+	case comparison_type::null:
+		return "??";
+	default:
+		return "??";
+	}
+}
 
 std::shared_ptr<gridCondition> make_condition(const std::string &field, const std::string &compare, double level, gridCoreObject *rootObject)
 {
-	
-	
-	
-
 	//get the state grabbers part
-	auto gc = std::make_shared<gridCondition>();
-	auto v = makeStateGrabbers(field, rootObject);
-	if (!v.empty())
-	{
-		gc->conditionAst = v[0];
-	}
-	else
+	
+	auto stGrabber = makeStateGrabbers(field, rootObject);
+	
+	if (stGrabber.empty())
 	{
 		rootObject->log(rootObject, GD_WARNING_PRINT, "unable to generate state grabber from " + field + '\n');
 		return nullptr;
 	}
 	
 	//get the regular grabbers parts
-	auto v2 = makeGrabbers(field, rootObject);
-	if (!v2.empty())
-	{
-		gc->conditionA = v2[0];
-	}
-	else
+	auto grabber = makeGrabbers(field, rootObject);
+	if (grabber.empty())
 	{
 		rootObject->log(rootObject, GD_WARNING_PRINT, "unable to generate grabber from " + field + '\n');
 		return nullptr;
 	}
-	gc->setLevel(level);
+	auto gc = std::make_shared<gridCondition>(grabber[0], stGrabber[0]);
+	gc->setConditionRHS(level);
 
-	if (compare == ">")
-	{
-		gc->setComparison(gridCondition::comparison_type::gt);
-	}
-	else if (compare == ">=")
-	{
-		gc->setComparison(gridCondition::comparison_type::ge);
-	}
-	else if (compare == "<")
-	{
-		gc->setComparison(gridCondition::comparison_type::lt);
-	}
-	else if (compare == "<=")
-	{
-		gc->setComparison(gridCondition::comparison_type::le);
-	}
-	else if (compare == "==")
-	{
-		gc->setComparison(gridCondition::comparison_type::eq);
-	}
-	else if (compare == "!=")
-	{
-		gc->setComparison(gridCondition::comparison_type::ne);
-	}
-
+	gc->setComparison(comparisonFromString(compare));
+	
 	return gc;
+}
+
+gridCondition::gridCondition(std::shared_ptr<gridGrabber> valGrabber, std::shared_ptr<stateGrabber> valGrabberSt):conditionA(valGrabber),conditionAst(valGrabberSt)
+{
+
+}
+
+
+std::shared_ptr<gridCondition> gridCondition::clone(std::shared_ptr<gridCondition> gc) const
+{
+	auto ngc = gc;
+	if (!ngc)
+	{
+		ngc = std::make_shared<gridCondition>();
+	}
+	ngc->m_constant = m_constant;
+	ngc->m_margin = m_margin;
+	ngc->m_constB = m_constB;
+	ngc->m_curr_margin = m_curr_margin;
+	ngc->use_margin = use_margin;
+
+	if (conditionA)
+	{
+		ngc->conditionA = conditionA->clone(ngc->conditionA);
+	}
+
+	if (conditionAst)
+	{
+		ngc->conditionAst = conditionAst->clone(ngc->conditionAst);
+	}
+	if (!m_constB)
+	{
+		if (conditionB)
+		{
+			ngc->conditionB = conditionB->clone(ngc->conditionB);
+		}
+
+		if (conditionBst)
+		{
+			ngc->conditionBst = conditionBst->clone(ngc->conditionBst);
+		}
+	}
+	return ngc;
+}
+
+void gridCondition::setConditionLHS(std::shared_ptr<gridGrabber> valGrabber, std::shared_ptr<stateGrabber> valGrabberSt)
+{
+	if (valGrabber)
+	{
+		conditionA = valGrabber;
+	}
+	if (valGrabberSt)
+	{
+		conditionAst = valGrabberSt;
+	}
+	
+}
+
+void gridCondition::setConditionRHS(std::shared_ptr<gridGrabber> valGrabber, std::shared_ptr<stateGrabber> valGrabberSt)
+{
+	if (valGrabber)
+	{
+		conditionB = valGrabber;
+		m_constB = false;
+	}
+	if (valGrabberSt)
+	{
+		conditionBst = valGrabberSt;
+	}
+}
+
+void gridCondition::updateObject(gridCoreObject *obj, object_update_mode mode)
+{
+	//TODO:: This function could potentially leave stuff in an unstable state
+	//Practically speaking it is very likely that if condition A update doesn't throw an error the others won't either and in that codition
+	//everything is still good.  Not sure how to do a rollback yet  (need to think)
+	if (conditionA)
+	{
+		conditionA->updateObject(obj, mode);
+	}
+	if (conditionAst)
+	{
+		conditionAst->updateObject(obj, mode);
+	}
+	if (conditionB)
+	{
+		conditionB->updateObject(obj,mode);
+	}
+	if (conditionBst)
+	{
+		conditionBst->updateObject(obj,mode);
+	}
+}
+void gridCondition::setComparison(const std::string &compStr)
+{
+	setComparison(comparisonFromString(compStr));
 }
 
 void gridCondition::setComparison(comparison_type ct)
@@ -161,7 +249,9 @@ void gridCondition::setComparison(comparison_type ct)
 	case comparison_type::ne:
 		evalf = [](double p1, double p2,double margin){return -std::abs(p1 - p2)+margin; };
 		break;
-
+	default:
+		evalf = [](double, double, double) {return kNullVal; };
+		break;
 	}
 }
 
@@ -183,33 +273,17 @@ double gridCondition::evalCondition(const stateData *sD, const solverMode &sMode
 
 double gridCondition::getVal(int side) const
 {
-double v;
-if (side==2)
-{
-  v = (m_constB) ? m_constant : conditionB->grabData();
-}
-else
-{
-  v = conditionA->grabData();
-}
+  double v = (side==2)?((m_constB) ? m_constant : conditionB->grabData()): conditionA->grabData();
 return v;
 }
 
 double gridCondition::getVal(int side,const stateData *sD, const solverMode &sMode) const
 {
-  double v;
-  if (side == 2)
-  {
-    v = (m_constB) ? m_constant : conditionBst->grabData(sD, sMode);
-  }
-  else
-  {
-    v = conditionAst->grabData(sD, sMode);
-  }
+  double v = (side == 2) ? ((m_constB) ? m_constant : conditionBst->grabData(sD, sMode)) : conditionAst->grabData(sD, sMode);
   return v;
 }
 
-bool gridCondition::checkCondition()
+bool gridCondition::checkCondition() const
 {
 	double v1 = conditionA->grabData();
 	double v2 = (m_constB) ? m_constant : conditionB->grabData();
@@ -225,8 +299,12 @@ bool gridCondition::checkCondition()
 
 }
 
-bool gridCondition::checkCondition(const stateData *sD, const solverMode &sMode)
+bool gridCondition::checkCondition(const stateData *sD, const solverMode &sMode) const
 {
+	if (!conditionAst)
+	{
+		return checkCondition();
+	}
 	double v1 = conditionAst->grabData(sD, sMode);
 	double v2 = (m_constB) ? m_constant : conditionBst->grabData(sD, sMode);
 
@@ -250,4 +328,41 @@ void gridCondition::setMargin(double val)
   {
     m_curr_margin = m_margin;
   }
+}
+
+gridCoreObject * gridCondition::getObject() const
+{
+	if (conditionA)
+	{
+		return conditionA->getObject();
+	}
+	else if (conditionAst)
+	{
+		return conditionAst->getObject();
+	}
+	return nullptr;
+}
+
+void gridCondition::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	if (conditionA)
+	{
+		conditionA->getObjects(objects);
+	}
+	else if (conditionAst)
+	{
+		return conditionAst->getObjects(objects);
+	}
+	if (!m_constB)
+	{
+		if (conditionB)
+		{
+			conditionB->getObjects(objects);
+		}
+		else if (conditionBst)
+		{
+			return conditionBst->getObjects(objects);
+		}
+	}
+	
 }

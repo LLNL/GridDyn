@@ -20,6 +20,7 @@
 #include "recorder_events/gridGrabbers.h"
 #include "recorder_events/gridEvent.h"
 #include "recorder_events/gridCondition.h"
+#include "core/gridDynExceptions.h"
 #include <cmath>
 
 txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
@@ -43,9 +44,8 @@ gridCoreObject * txLifeSpan::clone(gridCoreObject *obj) const
 	return nobj;
 }
 
-int txLifeSpan::setFlag(const std::string &flag, bool val)
+void txLifeSpan::setFlag(const std::string &flag, bool val)
 {
-	int out = PARAMETER_FOUND;
 	if ((flag == "useiec") || (flag == "iec"))
 	{
 		opFlags.set(useIECmethod,val);
@@ -60,14 +60,13 @@ int txLifeSpan::setFlag(const std::string &flag, bool val)
 	}
 	else
 	{
-		out = sensor::setFlag(flag, val);
+		sensor::setFlag(flag, val);
 	}
-	return out;
 }
 
-int txLifeSpan::set (const std::string &param, const std::string &val)
+void txLifeSpan::set (const std::string &param, const std::string &val)
 {
-	int out = PARAMETER_FOUND;
+
 	if (param[0] == '#')
 	{
 	}
@@ -77,16 +76,14 @@ int txLifeSpan::set (const std::string &param, const std::string &val)
 	}
 	else
 	{
-		out= gridRelay::set(param, val);
+		gridRelay::set(param, val);
 	}
-	return out;
 }
 
 using namespace gridUnits;
 
-int txLifeSpan::set (const std::string &param, double val, units_t unitType)
+void txLifeSpan::set (const std::string &param, double val, units_t unitType)
 {
-	int out = PARAMETER_FOUND;
 	if ((param == "initial") || (param == "initiallife"))
 	{
 		initialLife = unitConversionTime(val, unitType, hour);
@@ -101,9 +98,8 @@ int txLifeSpan::set (const std::string &param, double val, units_t unitType)
 	}
 	else
 	{
-		out= gridPrimary::set(param, val, unitType);
+		gridPrimary::set(param, val, unitType);
 	}
-	return out;
 }
 
 double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) const
@@ -112,9 +108,9 @@ double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) c
 	return sensor::get(param, unitType);
 }
 
-int txLifeSpan::add(gridCoreObject * /*obj*/)
+void txLifeSpan::add(gridCoreObject * /*obj*/)
 {
-	return OBJECT_ADD_FAILURE;
+	throw(invalidObjectException(this));
 }
 
 void txLifeSpan::dynObjectInitializeA (double time0, unsigned long flags)
@@ -153,7 +149,7 @@ void txLifeSpan::dynObjectInitializeA (double time0, unsigned long flags)
 		sensor::set("output1", "block0");
 
 		auto g1 = std::make_shared<customGrabber>();
-		g1->setGrabberFunction("rate", [this]()->double {return Faa; });
+		g1->setGrabberFunction("rate", [this](gridCoreObject *)->double {return Faa; });
 		sensor::add(g1, nullptr);
 		
 		sensor::set("output2", "input1");
@@ -161,17 +157,17 @@ void txLifeSpan::dynObjectInitializeA (double time0, unsigned long flags)
 		{
 			auto ge = std::make_shared<gridEvent>();
 			ge->setTarget(m_sinkObject, "g");
-			ge->value = 100;
+			ge->setValue(100.0);
 			gridRelay::add(ge);
 
 			ge = std::make_shared<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch1");
-			ge->value = 1;
+			ge->setValue(1.0);
 			gridRelay::add(ge);
 
 			ge = std::make_shared<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch2");
-			ge->value = 1;
+			ge->setValue(1.0);
 			gridRelay::add(ge);
 
 			auto cond = make_condition("output0", "<", 0, this);
@@ -192,7 +188,7 @@ void txLifeSpan::dynObjectInitializeB(IOdata &outputSet)
 {
 	IOdata iset{0.0};
 	filterBlocks[0]->initializeB(iset, iset, iset);
-	return gridRelay::dynObjectInitializeB(outputSet);//skip over sensor::dynInitializeB since we we are initializing the blocks here
+	gridRelay::dynObjectInitializeB(outputSet);//skip over sensor::dynInitializeB since we are initializing the blocks here
 }
 
 
@@ -210,14 +206,13 @@ void txLifeSpan::updateA(double time)
 	}
 
 
-	filterBlocks[0]->timestep(time, { Faa }, cLocalSolverMode);
+	filterBlocks[0]->step(time,  Faa);
 	gridRelay::updateA(time);
 }
 
-double txLifeSpan::timestep(double ttime, const solverMode &sMode)
+void txLifeSpan::timestep(double ttime, const solverMode &)
 {
 	updateA(ttime);
-	return getOutput(nullptr, sMode, 1);
 }
 
 void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, double /*actionTime*/)

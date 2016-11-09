@@ -23,17 +23,25 @@
 #include "vectorOps.hpp"
 #include "grabberInterpreter.hpp"
 #include "functionInterpreter.h"
-
+#include "objectGrabbers.h"
+#include "core/helperTemplates.h"
 #include <cmath>
 #include <algorithm>
+#include <map>
 
 using namespace gridUnits;
+gridGrabber::gridGrabber(const std::string &fld)
+{
+	gridGrabber::updateField(fld);
+}
 
+gridGrabber::gridGrabber(const std::string &fld, gridCoreObject *obj)
+{
+	gridGrabber::updateObject(obj);
+	gridGrabber::updateField(fld);
+}
 
-
-
-
-std::shared_ptr<gridGrabber> gridGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ggb) const
+std::shared_ptr<gridGrabber> gridGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
 {
   if (ggb == nullptr)
     {
@@ -50,71 +58,63 @@ std::shared_ptr<gridGrabber> gridGrabber::clone (gridCoreObject *nobj, std::shar
   ggb->outputUnits = outputUnits;
   ggb->vectorGrab = vectorGrab;
   ggb->loaded = loaded;
-  if (nobj)
-    {
-      ggb->updateObject (nobj);
-    }
-  else
-    {
-      ggb->cobj = nobj;
-    }
+  ggb->useVoltage = useVoltage;
+  ggb->cobj = cobj;
   return ggb;
 }
 
-int gridGrabber::setInfo (std::string fld, gridCoreObject* obj)
+/* *INDENT-OFF* */
+static const std::map<std::string, std::function<double(gridCoreObject *)>> coreFunctions 
+{
+{ "nextupdatetime", [](gridCoreObject *obj){return obj->getNextUpdateTime(); } },
+{ "lastupdatetime", [](gridCoreObject *obj) {return obj->get("lastupdatetime"); } },
+{"constant", [](gridCoreObject *) {return 0.0; } },
+};
+
+/* *INDENT-OFF* */
+
+int gridGrabber::updateField (std::string fld)
 {
   if (fld == "null")        //this is an escape hatch for the clone function
     {
       loaded = false;
       return 0;
     }
-  int ret = LOADED;
   field = fld;
-  if (fld == "nextupdatetime")
-    {
-      fptr = [ = ](){
-          return cobj->getNextUpdateTime ();
-        };
-    }
-  else if (fld == "lastupdateTime")
-    {
-      fptr = [ = ](){
-          return cobj->get ("lastupdatetime");
-        };
-    }
-  else if (fld == "constant")
-    {
-      fptr = [](){
-          return 0.0;
-        };
-    }
-  else
-    {
-      double testval = obj->get (fld);
-      if (testval != kNullVal)
-        {
+  auto fnd = coreFunctions.find(field);
+  if (fnd != coreFunctions.end())
+  {
+	  fptr = fnd->second;
 
-        }
-      else
-        {
-          loaded = false;
-          ret = NOT_LOADED;
-        }
-    }
-  if (ret == LOADED)
-    {
-      cobj = obj;
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
+  }
+  loaded = checkIfLoaded();
+  if (loaded)
+  {
+	  makeDescription();
+	  return LOADED;
+  }
+  else
+  {
+	  desc = "";
+	  return NOT_LOADED;
+  }
+ 
+}
+
+std::string gridGrabber::getDesc()
+{
+	if (desc.empty()&&loaded)
+	{
+		makeDescription();
+	}
+	return desc;
 }
 
 void gridGrabber::getDesc (std::vector<std::string > &desc_list) const
 {
   if (vectorGrab)
     {
-      fptrN (desc_list);
+      fptrN (cobj,desc_list);
       for (auto &dl : desc_list)
         {
           dl += ':' + field;
@@ -129,42 +129,38 @@ void gridGrabber::getDesc (std::vector<std::string > &desc_list) const
 
 double gridGrabber::grabData ()
 {
-  double val;
-  if (loaded)
-    {
-      if (fptr)
-        {
-          val = fptr ();
-          if (outputUnits != defUnit)
-            {
-              val = unitConversion (val, inputUnits, outputUnits, cobj->getBasePower (), m_baseVoltage);
-            }
-        }
-      else
-        {
-          val = cobj->get (field, outputUnits);
-        }
-      //val = val * gain + bias;
-      val = std::fma (val, gain, bias);
-    }
-  else
-    {
-      val = kNullVal;
-    }
-
-  return val;
+	if (!loaded)
+	{
+		return kNullVal;
+	}
+	double val;
+	if (fptr)
+	{
+		val = fptr(cobj);
+		if (outputUnits != defUnit)
+		{
+			val = unitConversion(val, inputUnits, outputUnits, cobj->get("basepower"), m_baseVoltage);
+		}
+	}
+	else
+	{
+		val = cobj->get(field, outputUnits);
+	}
+	//val = val * gain + bias;
+	val = std::fma(val, gain, bias);
+	return val;
 }
 
 void gridGrabber::grabData (std::vector<double> &vals)
 {
   if (loaded)
     {
-      fptrV (vals);
+      fptrV (cobj,vals);
       if (outputUnits != defUnit)
         {
           for (auto &v : vals)
             {
-              v = unitConversion (v, inputUnits, outputUnits, cobj->getBasePower (),m_baseVoltage);
+              v = unitConversion (v, inputUnits, outputUnits, cobj->get("basepower"),m_baseVoltage);
             }
         }
     }
@@ -174,26 +170,94 @@ void gridGrabber::grabData (std::vector<double> &vals)
     }
 }
 
-void gridGrabber::updateObject (gridCoreObject *obj)
+void gridGrabber::updateObject (gridCoreObject *obj,object_update_mode mode)
 {
   if (obj)
     {
-      cobj = obj;
-      makeDescription ();
+	  if (mode == object_update_mode::direct)
+	  {
+		  cobj = obj;
+	  }
+	  else
+	  {
+		  cobj = findMatchingObject(cobj, obj);
+		  if (!cobj)
+		  {
+			  throw(objectUpdateFailException());
+		  }
+	  }
+	  if (cobj)
+	  {
+		  if (useVoltage)
+		  {
+			  m_baseVoltage = cobj->get("basevoltage");
+			  makeDescription();
+		  }
+	  }
     }
   else
-    {
-      loaded = false;
-    }
+  {
+	  cobj = obj;
+  }
+  loaded = checkIfLoaded();
+  if (loaded)
+  {
+	  makeDescription();
+  }
+  else
+  {
+	  desc = "";
+  }
 }
 
 void gridGrabber::makeDescription ()
 {
-  desc = cobj->getName () + ':' + field;
+
+  desc = (cobj)?(cobj->getName() + ':' + field):field;
+  
   if (outputUnits != defUnit)
     {
-      desc + '(' + to_string (outputUnits) + ')';
+      desc += '(' + to_string (outputUnits) + ')';
     }
+}
+
+gridCoreObject * gridGrabber::getObject() const
+{
+	return cobj;
+}
+
+void gridGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	objects.push_back(getObject());
+}
+
+bool gridGrabber::checkIfLoaded()
+{
+	if (cobj)
+	{
+		if ((fptr) || (fptrV))
+		{
+			return true;
+		}
+		else if (!field.empty())
+		{
+			double testval = cobj->get(field);
+			if (testval != kNullVal)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			return false;
+		}
+			
+	}
+	else if (field == "constant")
+	{
+		return true;
+	}
+	return false;
 }
 
 std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, gridCoreObject *obj)
@@ -203,14 +267,14 @@ std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, gridCoreObje
   gridBus *bus = dynamic_cast<gridBus *> (obj);
   if (bus)
     {
-      ggb = std::make_shared<gridBusGrabber> (fld, bus);
+      ggb = std::make_shared<objectGrabber<gridBus>> (fld, bus);
       return ggb;
     }
 
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
     {
-      ggb = std::make_shared<gridLoadGrabber> (fld, ld);
+      ggb = std::make_shared<objectOffsetGrabber<gridLoad>> (fld, ld);
       return ggb;
     }
 
@@ -218,35 +282,35 @@ std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, gridCoreObje
   if (gen)
     {
 
-      ggb = std::make_shared<gridDynGenGrabber> (fld, gen);
+      ggb = std::make_shared<objectOffsetGrabber<gridDynGenerator>> (fld, gen);
       return ggb;
     }
 
   gridLink *lnk = dynamic_cast<gridLink *> (obj);
   if (lnk)
     {
-      ggb = std::make_shared<gridLinkGrabber> (fld, lnk);
+      ggb = std::make_shared<objectGrabber<gridLink>> (fld, lnk);
       return ggb;
     }
 
   gridArea *area = dynamic_cast<gridArea *> (obj);
   if (area)
     {
-      ggb = std::make_shared<gridAreaGrabber> (fld, area);
+      ggb = std::make_shared<objectGrabber<gridArea>> (fld, area);
       return ggb;
     }
 
   gridRelay *rel = dynamic_cast<gridRelay *> (obj);
   if (rel)
     {
-      ggb = std::make_shared<gridRelayGrabber> (fld, rel);
+      ggb = std::make_shared<objectGrabber<gridRelay>> (fld, rel);
       return ggb;
     }
 
   gridSubModel *sub = dynamic_cast<gridSubModel *> (obj);
   if (sub)
     {
-      ggb = std::make_shared<subModelGrabber> (fld, sub);
+      ggb = std::make_shared<objectOffsetGrabber<gridSubModel>> (fld, sub);
       return ggb;
     }
   return ggb;
@@ -260,19 +324,21 @@ std::shared_ptr<gridGrabber> createGrabber (int noffset, gridCoreObject *obj)
   gridDynGenerator *gen = dynamic_cast<gridDynGenerator *> (obj);
   if (gen)
     {
-      if (noffset > 0)
-        {
-          ggb = std::make_shared<gridDynGenGrabber> (noffset, gen);
-        }
+      ggb = std::make_shared<objectOffsetGrabber<gridDynGenerator>> (noffset, gen);
       return ggb;
     }
-
+  gridLoad *ld = dynamic_cast<gridLoad *> (obj);
+  if (ld)
+  {
+	  ggb = std::make_shared<objectOffsetGrabber<gridLoad>>(noffset, ld);
+	  return ggb;
+  }
   return ggb;
 
 }
 
 
-void customGrabber::setGrabberFunction (std::string fld, std::function<double ()> nfptr)
+void customGrabber::setGrabberFunction (std::string fld, std::function<double (gridCoreObject *)> nfptr)
 {
   fptr = nfptr;
   loaded = true;
@@ -280,1030 +346,24 @@ void customGrabber::setGrabberFunction (std::string fld, std::function<double ()
   field = fld;
 }
 
-gridAreaGrabber::gridAreaGrabber (std::string fld, gridArea *gdA)
+void customGrabber::setGrabberFunction(std::function<void(gridCoreObject *, std::vector<double> &)> nVptr)
 {
-  setInfo (fld, gdA);
+	vectorGrab = true;
+	fptrV = nVptr;
+	loaded = true;
 }
 
-std::shared_ptr<gridGrabber> gridAreaGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ggb) const
+bool customGrabber::checkIfLoaded()
 {
-  std::shared_ptr<gridAreaGrabber> agb;
-  if (ggb)
-    {
-    }
-  else
-    {
-      agb = std::make_shared<gridAreaGrabber> (std::string ("null"), nullptr);
-    }
-  agb->area = area;
-  gridGrabber::clone (nobj, agb);
-  return ggb;
+	if ((fptr) || (fptrV))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
-
-void gridAreaGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridArea *> (obj))
-    {
-      area = static_cast<gridArea *> (obj);
-      gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int gridAreaGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")      //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  field = fld;
-  cobj = gdO;
-  area = dynamic_cast<gridArea *> (gdO);
-
-  makeLowerCase (field);
-  if (field == "voltage")
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getVoltage (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = puV;
-      vectorGrab = true;
-    }
-  else if (field == "angle")
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getAngle (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = rad;
-      vectorGrab = true;
-    }
-  else if ((field == "busgenerationreal") || (field == "busgen") || (field == "busp")||(field == "busgenreal"))
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getBusGenerationReal (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if ((field == "busgenerationreactive") || (field == "busq") || (field == "busgenreactive"))
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getBusGenerationReactive (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if ((field == "busloadreal") || (field == "busload"))
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getBusLoadReal (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if (field == "busloadreactive")
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getBusLoadReactive (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getBusName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if ((field == "linkreal") || (field == "linkrealpower") || (field == "linkp"))
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getLinkRealPower (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getLinkName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if ((field == "linkreactive") || (field == "linkreactivepower") || (field == "linkq"))
-    {
-
-      fptrV = [ = ](std::vector<double> &v){
-          area->getLinkReactivePower (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getLinkName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if (field == "linkloss")
-    {
-      fptrV = [ = ](std::vector<double> &v){
-          area->getLinkLoss (v);
-        };
-      fptrN = [ = ](stringVec &N){
-          area->getLinkName (N);
-        };
-      inputUnits = puMW;
-      vectorGrab = true;
-    }
-  else if ((field == "load") || (field == "loadreal") || (field == "loadp"))
-    {
-      fptr = [ = ](){
-          return area->getLoadReal ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "loadreactive") || (field == "loadq"))
-    {
-      fptr = [ = ](){
-          return area->getLoadReactive ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "gen") || (field == "generationreal") || (field == "genp"))
-    {
-      fptr = [ = ](){
-          return area->getGenerationReal ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "generationreactive") || (field == "genq"))
-    {
-      fptr = [ = ](){
-          return area->getGenerationReactive ();
-        };
-      inputUnits = puMW;
-    }
-  else if (field == "loss")
-    {
-      fptr = [ = ](){
-          return area->getLoss ();
-        };
-      inputUnits = puMW;
-    }
-  else if (field == "tieflow")
-    {
-      fptr = [ = ](){
-          return area->getTieFlowReal ();
-        };
-      inputUnits = puMW;
-    }
-  else
-    {
-      ret = gridGrabber::setInfo (field, gdO);
-    }
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
-gridBusGrabber::gridBusGrabber (std::string fld, gridBus *gdB)
-{
-  setInfo (fld, gdB);
-}
-
-std::shared_ptr<gridGrabber> gridBusGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ggb) const
-{
-  std::shared_ptr<gridBusGrabber> bgb;
-  if (ggb)
-    {
-    }
-  else
-    {
-      bgb = std::make_shared<gridBusGrabber> (std::string ("null"), nullptr);
-    }
-  bgb->bus = bus;
-  gridGrabber::clone (nobj, bgb);
-  return bgb;
-}
-
-void gridBusGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridBus *> (obj))
-    {
-      bus = static_cast<gridBus *> (obj), gridGrabber::updateObject (obj);
-      m_baseVoltage = bus->get ("basevoltage");
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int gridBusGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")        //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  field = fld;
-
-  bus = dynamic_cast<gridBus *> (gdO);
-  cobj = bus;
-  makeLowerCase (field);
-  if ((field == "voltage")||(field == "v"))
-    {
-
-      fptr = [ = ](){
-          return bus->getVoltage ();
-        };
-      inputUnits = puV;
-    }
-  else if ((field == "phase") || (field == "angle")||(field == "a"))
-    {
-
-      fptr = [ = ](){
-          return bus->getAngle ();
-        };
-      inputUnits = rad;
-    }
-  else if ((field == "freq") || (field == "f"))
-    {
-      //lambda expression
-      fptr = [ = ](){
-          return bus->getFreq ();
-        };
-      inputUnits = rps;
-    }
-  else if ((field == "gen")|| (field == "generation")||(field == "genp")||(field == "genreal"))
-    {
-      fptr = [ = ](){
-          return bus->getGenerationReal ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "genq")|| (field == "reactivegen")||(field == "genreactive"))
-    {
-      fptr = [ = ](){
-          return bus->getGenerationReactive ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "load") || (field == "loadreal")||(field == "loadp"))
-    {
-      fptr = [ = ](){
-          return bus->getLoadReal ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "loadq")||(field == "loadreactive"))
-    {
-      fptr = [ = ](){
-          return bus->getLoadReactive ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "link") || (field == "linkp"))
-    {
-
-      fptr = [ = ](){
-          return bus->getLinkReal ();
-        };
-      inputUnits = puMW;
-    }
-  else if (field == "linkq")
-    {
-
-      fptr = [ = ](){
-          return bus->getLinkReactive ();
-        };
-      inputUnits = puMW;
-    }
-  else
-    {
-      ret = gridGrabber::setInfo (fld, gdO);
-    }
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-
-  return ret;
-}
-
-gridDynGenGrabber::gridDynGenGrabber (std::string fld, gridDynGenerator *gdG)
-{
-  setInfo (fld, gdG);
-}
-
-gridDynGenGrabber::gridDynGenGrabber (index_t nOffset, gridDynGenerator *gdG)
-{
-  setInfo (nOffset, gdG);
-}
-
-std::shared_ptr<gridGrabber> gridDynGenGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber>) const
-{
-  std::shared_ptr<gridDynGenGrabber> ggb = std::make_shared<gridDynGenGrabber> (std::string ("null"), nullptr);
-  gridGrabber::clone (nobj, ggb);
-  ggb->offset = offset;
-  return ggb;
-}
-
-void gridDynGenGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridDynGenerator *> (obj))
-    {
-      gen = static_cast<gridDynGenerator *> (obj), gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int gridDynGenGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")       //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  field = fld;
-  gen = dynamic_cast<gridDynGenerator *> (gdO);
-  cobj = gdO;
-  if (gen == nullptr)
-    {
-      ret = NOT_LOADED;
-      loaded = false;
-      return ret;
-    }
-  makeLowerCase (field);
-  if ((field == "power") || (field == "p"))
-    {
-
-      fptr = [ = ](){
-          return gen->getRealPower ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "reactive") || (field == "q"))
-    {
-      fptr = [ = ](){
-          return gen->getReactivePower ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "pm")|| (field == "pset"))
-    {
-      fptr = [ = ](){
-          return gen->getPset ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "freq") || (field == "omega"))
-    {
-      fptr = [ = ]() {
-          return gen->getFreq (nullptr,cLocalSolverMode);
-        };
-      inputUnits = puHz;
-    }
-  else if (field == "angle")
-    {
-      fptr = [ = ]() {
-          return gen->getAngle (nullptr, cLocalSolverMode);
-        };
-      inputUnits = rad;
-    }
-  else
-    {
-      offset = gen->findIndex (field, cLocalbSolverMode);
-      if (offset == kInvalidLocation)
-        {
-          ret = gridGrabber::setInfo (fld, gdO);
-        }
-      inputUnits = defUnit;
-    }
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
-int gridDynGenGrabber::setInfo (index_t nOffset, gridCoreObject *gdO)
-{
-  int ret = LOADED;
-  gen = dynamic_cast<gridDynGenerator *> (gdO);
-  cobj = gdO;
-  if (gen == nullptr)
-    {
-      ret = NOT_LOADED;
-      loaded = false;
-      return ret;
-    }
-  if (offset < gen->stateSize (cLocalSolverMode))
-    {
-      offset = nOffset;
-    }
-  else
-    {
-      loaded = false;
-      ret = NOT_LOADED;
-    }
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  desc = gen->getName () + ':' + std::to_string (nOffset);
-  return ret;
-}
-
-double gridDynGenGrabber::grabData ()
-{
-  double val;
-  if (loaded)
-    {
-      if (offset != kInvalidLocation)
-        {
-          if (offset == kNullLocation)
-            {
-              offset = gen->findIndex (field,cLocalbSolverMode);
-            }
-          if (offset != kNullLocation)
-            {
-              val = gen->getState (offset);
-            }
-          else
-            {
-              val = kNullVal;
-            }
-          val = val * gain + bias;
-        }
-      else
-        {
-          val = gridGrabber::grabData ();
-        }
-    }
-  else
-    {
-      val = kNullVal;
-    }
-  return val;
-}
-
-subModelGrabber::subModelGrabber (std::string fld, gridSubModel*gdG)
-{
-  setInfo (fld, gdG);
-}
-
-subModelGrabber::subModelGrabber (index_t nOffset, gridSubModel *gdG)
-{
-  setInfo (nOffset, gdG);
-}
-
-std::shared_ptr<gridGrabber> subModelGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber>) const
-{
-  std::shared_ptr<subModelGrabber> ggb = std::make_shared<subModelGrabber> (std::string ("null"), nullptr);
-  gridGrabber::clone (nobj, ggb);
-  ggb->offset = offset;
-  return ggb;
-}
-
-void subModelGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridSubModel *> (obj))
-    {
-      sub = static_cast<gridSubModel *> (obj), gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int subModelGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")             //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  sub = dynamic_cast<gridSubModel *> (gdO);
-  cobj = gdO;
-  if (sub == nullptr)
-    {
-      ret = NOT_LOADED;
-      loaded = false;
-      return ret;
-    }
-
-  field = convertToLowerCase (fld);
-  offset = sub->findIndex (field, cLocalbSolverMode);
-  if (offset == kInvalidLocation)
-    {
-      ret = gridGrabber::setInfo (fld, gdO);
-    }
-  inputUnits = defUnit;
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
-int subModelGrabber::setInfo (index_t nOffset, gridCoreObject *gdO)
-{
-  int ret = LOADED;
-  sub = dynamic_cast<gridSubModel *> (gdO);
-  cobj = gdO;
-  if (sub == nullptr)
-    {
-      ret = NOT_LOADED;
-      loaded = false;
-      return ret;
-    }
-  if (offset < sub->stateSize (cLocalSolverMode))
-    {
-      offset = nOffset;
-    }
-  else
-    {
-      loaded = false;
-      ret = NOT_LOADED;
-    }
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  desc = sub->getName () + ':' + std::to_string (nOffset);
-  return ret;
-}
-
-double subModelGrabber::grabData ()
-{
-  double val;
-  if (loaded)
-    {
-      if (offset != kInvalidLocation)
-        {
-          if (offset == kNullLocation)
-            {
-              offset = sub->findIndex (field, cLocalbSolverMode);
-            }
-          if (offset != kNullLocation)
-            {
-              val = sub->getState (offset);
-            }
-          else
-            {
-              val = kNullVal;
-            }
-          //val = val * gain + bias;
-          val = std::fma (val, gain, bias);
-        }
-      else
-        {
-          val = gridGrabber::grabData ();
-        }
-
-
-    }
-  else
-    {
-      val = kNullVal;
-    }
-  return val;
-}
-
-gridLoadGrabber::gridLoadGrabber (std::string fld, gridLoad *gdL)
-{
-  setInfo (fld, gdL);
-}
-
-std::shared_ptr<gridGrabber> gridLoadGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ) const
-{
-  std::shared_ptr<gridLoadGrabber> ggb = std::make_shared<gridLoadGrabber> (std::string ("null"), nullptr);
-  gridGrabber::clone (nobj, ggb);
-  return ggb;
-}
-
-void gridLoadGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridLoad *> (obj))
-    {
-      load = static_cast<gridLoad *> (obj), gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-double gridLoadGrabber::grabData ()
-{
-  double val;
-  if (loaded)
-    {
-      if (offset != kInvalidLocation)
-        {
-          if (offset == kNullLocation)
-            {
-              offset = load->findIndex (field, cLocalSolverMode);
-            }
-          if (offset != kNullLocation)
-            {
-              val = load->getState (offset);
-            }
-          else
-            {
-              val = kNullVal;
-            }
-          val = std::fma (val, gain, bias);
-        }
-      else
-        {
-          val = gridGrabber::grabData ();
-        }
-
-    }
-  else
-    {
-      val = kNullVal;
-    }
-  return val;
-}
-
-
-int gridLoadGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")        //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  field = fld;
-  load = dynamic_cast<gridLoad *> (gdO);
-  cobj = gdO;
-  makeLowerCase (fld);
-  if ((field == "power")|| (field == "p"))
-    {
-      //dgptr = &gridLoad::getRealPower;
-      fptr = [ = ](){
-          return load->getRealPower ();
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "q") || (field == "mvar"))
-    {
-      //dgptr = &gridLoad::getReactivePower;
-      fptr = [ = ](){
-          return load->getReactivePower ();
-        };
-      inputUnits = puMW;
-    }
-  else
-    {
-      offset = load->findIndex (field, cLocalSolverMode);
-      if (offset == kInvalidLocation)
-        {
-          ret = gridGrabber::setInfo (fld, gdO);
-        }
-      inputUnits = defUnit;
-    }
-
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
-
-gridLinkGrabber::gridLinkGrabber (std::string fld, gridLink *gdL)
-{
-  setInfo (fld, gdL);
-}
-
-std::shared_ptr<gridGrabber> gridLinkGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ) const
-{
-  std::shared_ptr<gridLinkGrabber> ggb = std::make_shared<gridLinkGrabber> (std::string ("null"), nullptr);
-  gridGrabber::clone (nobj, ggb);
-  return ggb;
-}
-
-void gridLinkGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridLink *> (obj))
-    {
-      link = static_cast<gridLink *> (obj), gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int gridLinkGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")        //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return 0;
-    }
-  int ret = LOADED;
-  field = fld;
-  link = dynamic_cast<gridLink *> (gdO);
-  cobj = gdO;
-  makeLowerCase (fld);
-  int num = trailingStringInt (fld, field,1);
-  if (field == "angle")
-    {
-      //dgptr = &gridLink::getAngle;
-      fptr = [ = ](){
-          return link->getAngle ();
-        };
-      inputUnits = rad;
-    }
-  else if ((field == "power") || (field == "p")||(field == "realpower"))
-    {
-      //dgptr = &gridLink::getAngle;
-
-      fptr = [ = ](){
-          return link->getRealPower (num);
-        };
-
-      inputUnits = puMW;
-    }
-  else if ((field == "q")||(field == "reactivepower"))
-    {
-      //dgptr = &gridLink::getAngle;
-
-      fptr = [ = ](){
-          return link->getReactivePower (num);
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "impedance") ||(field == "z"))
-    {
-      fptr = [ = ](){
-          return link->getTotalImpedance (num);
-        };
-      inputUnits = puOhm;
-    }
-  else if ((field == "admittance") || (field == "y"))
-    {
-      fptr = [ = ](){
-          return 1.0 / link->getTotalImpedance (num);
-        };
-      inputUnits = puMW;
-    }
-  else if ((field == "switch") || (field == "breaker"))
-    {
-
-      fptr = [ = ]() {
-          return static_cast<double> (link->switchTest (num));
-        };
-
-    }
-  else if (field == "connected")
-    {
-
-      fptr = [ = ]() {
-          return static_cast<double> (link->isConnected ());
-        };
-
-    }
-  else if (field == "attached")
-    {
-
-      fptr = [&]() {
-          return static_cast<double> (((!link->checkFlag (gridLink::switch1_open_flag))|| (!link->checkFlag (gridLink::switch2_open_flag)))&&(link->enabled));
-        };
-
-    }
-  else if ((field == "realimpedance") || (field == "r"))
-    {
-      fptr = [ = ](){
-          return link->getRealImpedance (num);
-        };
-      inputUnits = puOhm;
-    }
-  else if ((field == "imagimpedance") || (field == "x"))
-    {
-
-      fptr = [ = ](){
-          return link->getImagImpedance (num);
-        };
-      inputUnits = puOhm;
-    }
-  else if ((field == "current") || (field == "i"))
-    {
-      fptr = [ = ](){
-          return link->getCurrent (num);
-        };
-
-      inputUnits = puA;
-    }
-  else if (field == "realcurrent")
-    {
-
-      fptr = [ = ](){
-          return link->getRealCurrent (num);
-        };
-      inputUnits = puA;
-    }
-  else if (field == "voltage")
-    {
-
-      fptr = [ = ](){
-          return link->getVoltage (num);
-        };
-      inputUnits = puA;
-    }
-  else if (field == "imagcurrent")
-    {
-
-      fptr = [ = ](){
-          return link->getImagCurrent (num);
-        };
-
-      inputUnits = puA;
-    }
-  else if ((field == "loss") || (field == "lossreal"))
-    {
-      //dgptr = &gridLink::getLoss;
-      fptr = [ = ](){
-          return link->getLoss ();
-        };
-      inputUnits = puMW;
-    }
-  else if (field == "lossreactive")
-    {
-      //dgptr = &gridLink::getLoss;
-      fptr = [ = ](){
-          return link->getReactiveLoss ();
-        };
-      inputUnits = puMW;
-    }
-  else
-    {
-      ret = gridGrabber::setInfo (fld, gdO);
-    }
-
-  if (ret == LOADED)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
-gridRelayGrabber::gridRelayGrabber (std::string fld, gridRelay *gdR)
-{
-  setInfo (fld, gdR);
-}
-
-std::shared_ptr<gridGrabber> gridRelayGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber>) const
-{
-  std::shared_ptr<gridRelayGrabber> ggb = std::make_shared<gridRelayGrabber> (std::string ("null"), nullptr);
-  gridGrabber::clone (nobj, ggb);
-  return ggb;
-}
-
-void gridRelayGrabber::updateObject (gridCoreObject *obj)
-{
-  if (dynamic_cast<gridLink *> (obj))
-    {
-      rel = static_cast<gridRelay *> (obj), gridGrabber::updateObject (obj);
-    }
-  else
-    {
-      loaded = false;
-    }
-}
-
-int gridRelayGrabber::setInfo (std::string fld, gridCoreObject *gdO)
-{
-  if (fld == "null")       //this is an escape hatch for the clone function
-    {
-      loaded = false;
-      return FUNCTION_EXECUTION_SUCCESS;
-    }
-  int ret = FUNCTION_EXECUTION_SUCCESS;
-  field = fld;
-  rel = dynamic_cast<gridRelay *> (gdO);
-  if (!(rel))
-    {
-      return FUNCTION_EXECUTION_FAILURE;
-    }
-  cobj = gdO;
-  makeLowerCase (fld);
-  int num = trailingStringInt (fld, field,0);
-  if ((fld == "cv")||(fld == "currentvalue")||(fld == "value")||(fld == "output"))
-    {
-      //dgptr = &gridLink::getAngle;
-      fptr = [ = ](){
-          return rel->getOutput (nullptr,cLocalSolverMode,0);
-        };
-    }
-  else if (field == "status")
-    {
-      fptr = [ = ](){
-          return static_cast<double> (rel->getConditionStatus (num - 1));
-        };
-    }
-  else if ((field == "output")||(field == "o"))
-    {
-      fptr = [ = ](){
-          return rel->getOutput (nullptr, cLocalSolverMode,num);
-        };
-    }
-  else if ((field == "block")||(field == "b"))
-    {
-      if (dynamic_cast<sensor *> (rel))
-        {
-          fptr = [ = ](){
-              return static_cast<sensor *> (rel)->getBlockOutput (nullptr,cLocalSolverMode,num);
-            };
-        }
-      else
-        {
-          ret = gridGrabber::setInfo (fld, gdO);
-        }
-    }
-  else if ((field == "condition") || (field == "c"))
-    {
-      fptr = [ = ]() {
-          return rel->getConditionValue (num);
-        };
-    }
-  else if ((field == "input")||(field == "i"))
-    {
-      if (dynamic_cast<sensor *> (rel))
-        {
-          fptr = [ = ](){
-              return static_cast<sensor *> (rel)->getInput (nullptr, cLocalSolverMode, num);
-            };
-        }
-      else
-        {
-          ret = gridGrabber::setInfo (fld, gdO);
-        }
-    }
-  else
-    {
-      if (dynamic_cast<sensor *> (rel))
-        {
-          //try to lookup named output for sensors
-          index_t outIndex = static_cast<sensor *> (rel)->lookupOutput (fld);
-          if (outIndex != kNullLocation)
-            {
-              fptr = [ = ]() {
-                  return rel->getOutput (nullptr, cLocalSolverMode, outIndex);
-                };
-            }
-          else
-            {
-              ret = gridGrabber::setInfo (fld, gdO);
-            }
-        }
-      else
-        {
-          ret = gridGrabber::setInfo (fld, gdO);
-        }
-
-    }
-
-  if (ret == FUNCTION_EXECUTION_SUCCESS)
-    {
-      loaded = true;
-    }
-  makeDescription ();
-  return ret;
-}
-
 
 functionGrabber::functionGrabber ()
 {
@@ -1337,32 +397,25 @@ functionGrabber::functionGrabber (std::shared_ptr<gridGrabber> ggb, std::string 
 }
 
 
-int functionGrabber::setInfo (std::string fld, gridCoreObject* obj)
+int functionGrabber::updateField (std::string fld)
 {
   function_name = fld;
 
-  if (obj)
-    {
-      bgrabber->updateObject (obj);
-    }
   if (isFunctionName (function_name, function_type::arg))
     {
       opptr = get1ArgFunction (function_name);
       vectorGrab = bgrabber->vectorGrab;
-      if (bgrabber->loaded)
-        {
-          loaded = true;
-        }
     }
   else if (isFunctionName (function_name, function_type::vect_arg))
     {
       opptrV = getArrayFunction (function_name);
       vectorGrab = false;
-      if (bgrabber->loaded)
-        {
-          loaded = true;
-        }
     }
+  loaded = checkIfLoaded();
+  if (loaded)
+  {
+	  makeDescription();
+  }
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
@@ -1387,30 +440,18 @@ void functionGrabber::getDesc (std::vector<std::string > &desc_list) const
     }
 }
 
-std::shared_ptr<gridGrabber> functionGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ggb) const
+std::shared_ptr<gridGrabber> functionGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
 {
 
-  std::shared_ptr<functionGrabber> fgb;
-  if (ggb == nullptr)
+	std::shared_ptr<functionGrabber> fgb = cloneBase<functionGrabber, gridGrabber>(this, ggb);
+  if (!fgb)
     {
-      fgb = std::make_shared<functionGrabber> ();
+	  return ggb;
     }
-  else
-    {
-      if (std::dynamic_pointer_cast<functionGrabber> (ggb))
-        {
-          fgb = std::dynamic_pointer_cast<functionGrabber> (ggb);
-        }
-      else
-        {
-          return gridGrabber::clone (nobj, ggb);
-        }
-    }
-  fgb->bgrabber = bgrabber->clone (nobj, nullptr);
+  fgb->bgrabber = bgrabber->clone ();
   fgb->function_name = function_name;
   fgb->opptr = opptr;
   fgb->opptrV = opptrV;
-  gridGrabber::clone (nobj, fgb);
   return fgb;
 }
 
@@ -1444,12 +485,29 @@ void functionGrabber::grabData (std::vector<double> &vdata)
 
 
 
-void functionGrabber::updateObject (gridCoreObject *obj)
+void functionGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
 {
   if (bgrabber)
     {
-      bgrabber->updateObject (obj);
+      bgrabber->updateObject (obj,mode);
     }
+  loaded = checkIfLoaded();
+  if (loaded)
+  {
+	  makeDescription();
+  }
+}
+
+bool functionGrabber::checkIfLoaded()
+{
+	if (bgrabber->loaded)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 gridCoreObject *functionGrabber::getObject () const
@@ -1462,6 +520,15 @@ gridCoreObject *functionGrabber::getObject () const
     {
       return nullptr;
     }
+}
+
+
+void functionGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	if (bgrabber)
+	{
+		bgrabber->getObjects(objects);
+	}
 }
 
 //operatorGrabber
@@ -1493,23 +560,20 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
     {
       opptrV = get2ArrayFunction (op);
       vectorGrab = false;
-      if ((bgrabber1->loaded) && (bgrabber2->loaded))
-        {
-          loaded = true;
-        }
+     
     }
+  loaded = opGrabber::checkIfLoaded();
+  if (loaded)
+  {
+	  opGrabber::makeDescription();
+  }
 }
 
 
-int opGrabber::setInfo (std::string fld, gridCoreObject* obj)
+int opGrabber::updateField (std::string fld)
 {
   op_name = fld;
 
-  if (obj)
-    {
-      bgrabber1->updateObject (obj);
-      bgrabber2->updateObject (obj);
-    }
   if (isFunctionName (op_name, function_type::arg2))
     {
       opptr = get2ArgFunction (op_name);
@@ -1529,6 +593,16 @@ int opGrabber::setInfo (std::string fld, gridCoreObject* obj)
         }
     }
   return LOADED;
+}
+
+bool opGrabber::checkIfLoaded()
+{
+	if ((bgrabber1->loaded) && (bgrabber2->loaded))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void opGrabber::getDesc (stringVec &desc_list) const
@@ -1554,38 +628,26 @@ void opGrabber::getDesc (stringVec &desc_list) const
     }
 }
 
-std::shared_ptr<gridGrabber> opGrabber::clone (gridCoreObject *nobj, std::shared_ptr<gridGrabber> ggb) const
+std::shared_ptr<gridGrabber> opGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
 {
 
-  std::shared_ptr<opGrabber> ogb;
-  if (ggb == nullptr)
+	std::shared_ptr<opGrabber> ogb = cloneBase<opGrabber, gridGrabber>(this, ggb);
+  if (!ogb)
     {
-      ogb = std::make_shared<opGrabber> ();
+	  return ggb;
     }
-  else
-    {
-      if (std::dynamic_pointer_cast<opGrabber> (ggb))
-        {
-          ogb = std::dynamic_pointer_cast<opGrabber> (ggb);
-        }
-      else
-        {
-          return gridGrabber::clone (nobj,ggb);
-        }
-    }
-  ogb->bgrabber1 = bgrabber1->clone (nobj,nullptr);
-  ogb->bgrabber2 = bgrabber2->clone (nobj,nullptr);
+  
+  ogb->bgrabber1 = bgrabber1->clone (nullptr);
+  ogb->bgrabber2 = bgrabber2->clone (nullptr);
   ogb->op_name = op_name;
   ogb->opptr = opptr;
   ogb->opptrV = opptrV;
-  gridGrabber::clone (nobj,ogb);
   return ogb;
 }
 
 double opGrabber::grabData ()
 {
   double val;
-  double temp1,temp2;
   if (bgrabber1->vectorGrab)
     {
       bgrabber1->grabData (tempArray1);
@@ -1594,8 +656,8 @@ double opGrabber::grabData ()
     }
   else
     {
-      temp1 = bgrabber1->grabData ();
-      temp2 = bgrabber2->grabData ();
+      double temp1 = bgrabber1->grabData ();
+      double temp2 = bgrabber2->grabData ();
       val = opptr (temp1,temp2);
     }
   val = std::fma (val, gain, bias);
@@ -1615,15 +677,15 @@ void opGrabber::grabData (std::vector<double> &vdata)
 }
 
 
-void opGrabber::updateObject (gridCoreObject *obj)
+void opGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
 {
   if (bgrabber1)
     {
-      bgrabber1->updateObject (obj);
+      bgrabber1->updateObject (obj,mode);
     }
   if (bgrabber2)
     {
-      bgrabber2->updateObject (obj);
+      bgrabber2->updateObject (obj,mode);
     }
 }
 
@@ -1652,8 +714,18 @@ gridCoreObject *opGrabber::getObject () const
     {
       return bgrabber1->getObject ();
     }
-  else
-    {
-      return nullptr;
-    }
+    return nullptr;
+}
+
+
+void opGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+{
+	if (bgrabber1)
+	{
+		bgrabber1->getObjects(objects);
+	}
+	if (bgrabber2)
+	{
+		bgrabber2->getObjects(objects);
+	}
 }

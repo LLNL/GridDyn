@@ -17,12 +17,18 @@
 #include "core/helperTemplates.h"
 #include "vectorOps.hpp"
 
-basicSolver::basicSolver ()
+basicSolver::basicSolver(mode_t alg) :algorithm(alg)
+{
+	mode.algebraic = true;
+}
+basicSolver::basicSolver (const std::string &objName,mode_t alg ) : solverInterface(objName),algorithm(alg)
 {
   mode.algebraic = true;
 }
-basicSolver::basicSolver (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode)
+
+basicSolver::basicSolver (gridDynSimulation *gds, const solverMode& sMode) : solverInterface (gds, sMode),algorithm(mode_t::gauss)
 {
+	mode.algebraic = true;
 }
 
 std::shared_ptr<solverInterface> basicSolver::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
@@ -61,32 +67,29 @@ const double * basicSolver::type_data() const
 	return type.data();
 }
 
-int basicSolver::allocate (count_t stateCount, count_t numRoots)
+void basicSolver::allocate (count_t stateCount, count_t numRoots)
 {
   // load the vectors
-  if (stateCount == svsize)
-    {
-      return FUNCTION_EXECUTION_SUCCESS;
-    }
-  state.resize (stateCount);
-  tempState1.resize (stateCount);
-  tempState2.resize (stateCount);
-  svsize = stateCount;
-  initialized = false;
-  allocated = true;
-  rootsfound.resize (numRoots);
-  return FUNCTION_EXECUTION_SUCCESS;
+	if (stateCount != svsize)
+	{
+		state.resize(stateCount);
+		tempState1.resize(stateCount);
+		tempState2.resize(stateCount);
+		svsize = stateCount;
+		initialized = false;
+		allocated = true;
+		rootsfound.resize(numRoots);
+	}
 }
 
-int basicSolver::initialize (double /*t0*/)
+void basicSolver::initialize (double /*t0*/)
 {
   if (!allocated)
     {
-      return (-2);
+	  throw(InvalidSolverOperation(-2));
     }
   initialized = true;
   solverCallCount = 0;
-  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 double basicSolver::get (const std::string & param) const
@@ -105,9 +108,9 @@ double basicSolver::get (const std::string & param) const
     }
 
 }
-int basicSolver::set (const std::string &param, const std::string &val)
+void basicSolver::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+ 
   if (param == "algorithm")
     {
       auto lcs = convertToLowerCase (val);
@@ -118,28 +121,28 @@ int basicSolver::set (const std::string &param, const std::string &val)
         }
       else if (lcs == "gauss-seidel")
         {
-          algorithm = mode_t::gauss_siedel;
+          algorithm = mode_t::gauss_seidel;
           mode.approx[force_recalc] = true;
         }
     }
   else
     {
-      out = solverInterface::set (param, val);
+      solverInterface::set (param, val);
     }
-  return out;
+
 }
-int basicSolver::set (const std::string &param, double val)
+void basicSolver::set (const std::string &param, double val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "alpha")
     {
       alpha = val;
     }
   else
     {
-      out = solverInterface::set (param, val);
+      solverInterface::set (param, val);
     }
-  return out;
+
 }
 
 
@@ -186,7 +189,7 @@ int basicSolver::solve (double tStop, double & /*tReturn*/, step_mode /*stepMode
         }
       printf ("Iteration %d max change=%f\n", iterations, md);
     }
-  else if (algorithm == mode_t::gauss_siedel)
+  else if (algorithm == mode_t::gauss_seidel)
     {
       alpha = 1.2;
       while (md > tolerance)
@@ -226,7 +229,14 @@ int basicSolver::solve (double tStop, double & /*tReturn*/, step_mode /*stepMode
         }
       printf ("Iteration %d max change=%f\n", iterations, md);
     }
-  return FUNCTION_EXECUTION_SUCCESS;
+  if (iterations < max_iterations)
+  {
+	  return FUNCTION_EXECUTION_SUCCESS;
+ }
+  else
+  {
+	  return SOLVER_CONVERGENCE_ERROR;
+  }
 }
 
 

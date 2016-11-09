@@ -14,10 +14,11 @@
 #include "submodels/gridDynGenModel.h"
 
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "gridCoreTemplates.h"
 #include "objectFactory.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 
 #include "vectorOps.hpp"
 
@@ -318,7 +319,7 @@ double gridDynGenModelClassical::getOutput (const IOdata &args, const stateData 
 }
 
 
-void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
 
@@ -342,7 +343,7 @@ void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const s
 
 
 void gridDynGenModelClassical::jacobianElements (const IOdata &args, const stateData *sD,
-                                                 arrayData<double> *ad,
+                                                 matrixData<double> *ad,
                                                  const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, sMode, this);
@@ -425,7 +426,7 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
 
 }
 
-void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   auto refAlg = Loc.algOffset;
@@ -466,14 +467,13 @@ stringVec gridDynGenModelClassical::localStateNames () const
 
 
 // set parameters
-int gridDynGenModelClassical::set (const std::string &param, const std::string &val)
+void gridDynGenModelClassical::set (const std::string &param, const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  gridCoreObject::set (param, val);
 }
 
-int gridDynGenModelClassical::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModelClassical::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param.length () == 1)
     {
@@ -496,32 +496,19 @@ int gridDynGenModelClassical::set (const std::string &param, double val, gridUni
           break;
 
         default:
-          return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
 
         }
-      return out;
+	  return;
     }
 
-  if (param == "xd")
-    {
-      Xd = val;
-    }
-  else if (param == "rs")
-    {
-      Rs = val;
-    }
-  else if (param == "base")
-    {
-      machineBasePower = val;
-    }
-  else if (param == "kw")
+ if (param == "kw")
     {
       mp_Kw = val;
     }
   else
     {
-      out = gridSubModel::set (param, val, unitType);
+      gridDynGenModel::set (param, val, unitType);
     }
 
-  return out;
 }

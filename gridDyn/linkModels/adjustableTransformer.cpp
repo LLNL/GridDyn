@@ -18,7 +18,8 @@
 #include "objectInterpreter.h"
 #include "gridCoreTemplates.h"
 #include "stringOps.h"
-#include "arrayData.h"
+#include "matrixData.h"
+#include "core/gridDynExceptions.h"
 
 #include <iostream>
 #include <cmath>
@@ -93,9 +94,8 @@ void adjustableTransformer::getParameterStrings (stringVec &pstr, paramStringTyp
 
 
 // set properties
-int adjustableTransformer::set (const std::string &param,  const std::string &val)
+void adjustableTransformer::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "controlmode") || (param == "mode") || (param == "control_mode"))
     {
@@ -120,7 +120,7 @@ int adjustableTransformer::set (const std::string &param,  const std::string &va
         }
       else
         {
-          out = PARAMETER_NOT_FOUND;
+		  throw(invalidParameterValue());
         }
     }
   else if ((param == "change") || (param == "change_mode")|| (param == "changemode")||(param == "stepmode"))
@@ -136,7 +136,7 @@ int adjustableTransformer::set (const std::string &param,  const std::string &va
         }
       else
         {
-          out = PARAMETER_NOT_FOUND;
+		  throw(invalidParameterValue());
         }
     }
   else if ((param == "center") || (param == "center_mode") || (param == "centermode"))
@@ -152,17 +152,16 @@ int adjustableTransformer::set (const std::string &param,  const std::string &va
         }
       else
         {
-          out = PARAMETER_NOT_FOUND;
+		  throw(invalidParameterValue());
         }
     }
   else if ((param == "bus")|| (param == "controlbus"))
     {
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = PARAMETER_NOT_FOUND;
+
       if (bus)
         {
           controlBus = bus;
-          out = PARAMETER_FOUND;
         }
       else
         {
@@ -171,14 +170,13 @@ int adjustableTransformer::set (const std::string &param,  const std::string &va
     }
   else
     {
-      out = acLine::set (param, val);
+      acLine::set (param, val);
     }
-  return out;
+
 }
 
-int adjustableTransformer::set (const std::string &param, double val, units_t unitType)
+void adjustableTransformer::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "tap")
     {
@@ -369,9 +367,10 @@ int adjustableTransformer::set (const std::string &param, double val, units_t un
     }
   else if (param == "fault")
     {
-      out = PARAMETER_NOT_FOUND;
+
       //not faults not allowed on adjustable transformoers change shunt conductance  or impedance to simulate a fault
       LOG_ERROR ("faults not allowed on adjustable transformers change shunt conductance  or impedance to simulate a fault");
+	  throw(unrecognizedParameter());
     }
   else if (param == "maxtapangle")
     {
@@ -419,9 +418,9 @@ int adjustableTransformer::set (const std::string &param, double val, units_t un
     }
   else
     {
-      out = acLine::set (param, val, unitType);
+      acLine::set (param, val, unitType);
     }
-  return out;
+
 }
 
 double adjustableTransformer::get (const std::string &param, gridUnits::units_t unitType) const
@@ -1131,7 +1130,7 @@ IOdata adjustableTransformer::getOutputs (index_t busId, const stateData *sD, co
   return acLine::getOutputs (busId,sD, sMode);
 }
 
-void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
@@ -1152,7 +1151,7 @@ void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData
   return acLine::ioPartialDerivatives (busId,sD,ad,argLocs,sMode);
 }
 
-void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
@@ -1175,7 +1174,7 @@ void adjustableTransformer::outputPartialDerivatives (index_t busId, const state
   return acLine::outputPartialDerivatives (busId, sD, ad, sMode);
 }
 
-void adjustableTransformer::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1442,7 +1441,7 @@ void adjustableTransformer::rootTrigger (double /*ttime*/, const std::vector<int
 }
 
 
-void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -1484,7 +1483,7 @@ void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, 
 
 }
 
-void  adjustableTransformer::tapPartial (index_t busId, const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
 
 
@@ -1537,7 +1536,7 @@ void  adjustableTransformer::tapPartial (index_t busId, const stateData *, array
 }
 
 
-void adjustableTransformer::MWJac (const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::MWJac (const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -1582,7 +1581,7 @@ void adjustableTransformer::MWJac (const stateData *, arrayData<double> *ad, con
 
 }
 
-void adjustableTransformer::MVarJac (const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::MVarJac (const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
   double v1, v2;
   double sinTheta1, cosTheta1, sinTheta2, cosTheta2;

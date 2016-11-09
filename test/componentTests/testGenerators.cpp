@@ -17,12 +17,12 @@
 #include "generators/gridDynGenerator.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "simulation/diagnostics.h"
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 
 BOOST_FIXTURE_TEST_SUITE (gen_tests, gridDynSimulationTestFixture)
 
+//TODO convert to a BOOST_DATA_TEST
 BOOST_AUTO_TEST_CASE(gen_test_remote)
 {
 

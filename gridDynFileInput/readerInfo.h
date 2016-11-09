@@ -31,7 +31,7 @@ class gridGrabberInfo;
 #include <memory>
 #include <tuple>
 
-class gridRecorder;
+class collector;
 class gridEvent;
 class gridCoreObject;
 
@@ -49,7 +49,7 @@ public:
 
   /** @brief construct a basicReaderInfo object from another one
   @param[in] a pointer to another basicReaderInfo object*/
-  basicReaderInfo (const basicReaderInfo *bri);
+  explicit basicReaderInfo (const basicReaderInfo *bri);
 
   /** @brief virtual destructor*/
   virtual ~basicReaderInfo ();
@@ -62,7 +62,7 @@ const basicReaderInfo defInfo = basicReaderInfo ();
 class readerInfo : public basicReaderInfo
 {
 public:
-  std::vector < std::shared_ptr < gridRecorder >> recorders;         //!<stores the active recorders
+  std::vector < std::shared_ptr < collector >> collectors;         //!<stores the active recorders
   std::list < std::shared_ptr < gridEvent >> events;          //!< store the captured events
   bool keepdefines = false;
   typedef std::uint64_t scopeID;
@@ -84,7 +84,7 @@ public:
   /** @brief construct a reader info object from a basic readerInfo object
   @param[in] bri  a basic reader info object
   */
-  readerInfo (const basicReaderInfo *bri);
+  explicit readerInfo (const basicReaderInfo *bri);
   /**@brief destructor*/
   ~readerInfo ();
   /** @brief add an object to the library
@@ -105,12 +105,12 @@ public:
   */
   gridCoreObject * findLibraryObject (const std::string &ename) const;
 
-  /** @brief  find a recorder stored in the readerInfo either by recorder name or by output file name
-  *@param[in] name  the name of the recorder to find
-  @param[in] fname  the file name of the recorder to find by file name
-  @return a shared pointer to the recorder or nullptr if not found
+  /** @brief  find a collector stored in the readerInfo either by name or by sink location
+  *@param[in] name  the name of the collector to find
+  @param[in] fname  the sink name of the collector to find by file name
+  @return a shared pointer to the collector or nullptr if not found
   */
-  std::shared_ptr<gridRecorder> findRecorder (const std::string &name, const std::string &fname);
+  std::shared_ptr<collector> findCollector (const std::string &name, const std::string &fname);
 
   /** @brief change the scope for definitions and translations
   @return the new scopeID for closing the scope later */
@@ -131,7 +131,6 @@ public:
     the definition will only be added or updated if there is no locked definition of the same name
   @param[in] def the string that has a translation
   @param[in] replacement  the string to replace def with
-  @param[in] locked if locked is set to true the definition will be added to the locked definitions and not allowed to be changed
   */
   void addLockedDefinition (std::string def, std::string replacement);
 
@@ -168,7 +167,8 @@ public:
    unlike library objects a pointer to the actual XML code is stored and reread to create an object allowing for creation of complex
   XML structures as a library
   @param[in] name the name of the custom object
-  @param[in] nobj  a pointer to the xml element with the object creation information
+  @param[in] element  a pointer to the xml element with the object creation information
+	@param[in] nargs the number of arguments the custom element has
   */
   void addCustomElement (std::string name, const std::shared_ptr<readerElement> &element, int nargs);
 
@@ -203,13 +203,13 @@ public:
 
   /** @brief check that a file parameter is valid
   @param[in,out] strVal  the file to check and output an updated file location
-  @param[in] extra_find if the file canot be found on the first check, ignore the path information and check again for just the filename in known locations
+  @param[in] extra_find if the file cannot be found on the first check, ignore the path information and check again for just the filename in known locations
   @return true if the file was changed false otherwise
   */
   bool checkFileParam (std::string &strVal, bool extra_find = false);
 
   /** @brief check if a directory is valid
-  @param[in,out] strVal  the directory to check and output an updated location location
+  @param[in,out] strVal  the directory to check and output an updated location
   @return true if the file was changed false otherwise
   */
   bool checkDirectoryParam (std::string &strVal);

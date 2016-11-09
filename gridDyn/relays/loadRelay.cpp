@@ -13,8 +13,6 @@
 
 #include "loadRelay.h"
 #include "gridCondition.h"
-#include "fileReaders.h"
-#include "eventQueue.h"
 #include "gridEvent.h"
 #include "gridCoreTemplates.h"
 
@@ -38,9 +36,8 @@ gridCoreObject *loadRelay::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int loadRelay::setFlag (const std::string &flag, bool val)
+void loadRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
 
   if (flag == "nondirectional")
     {
@@ -48,32 +45,31 @@ int loadRelay::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
 }
 /*
 std::string commDestName;
 std::uint64_t commDestId=0;
 std::string commType;
 */
-int loadRelay::set (const std::string &param,  const std::string &val)
+void loadRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-  if (param == "#")
+
+  if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
-int loadRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void loadRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "cutoutvoltage") || (param == "voltagelimit"))
     {
       cutoutVoltage = gridUnits::unitConversion (val, unitType, gridUnits::puV, systemBasePower);
@@ -101,9 +97,9 @@ int loadRelay::set (const std::string &param, double val, gridUnits::units_t uni
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void loadRelay::dynObjectInitializeA (double time0, unsigned long flags)
@@ -111,9 +107,8 @@ void loadRelay::dynObjectInitializeA (double time0, unsigned long flags)
 
   auto ge = std::make_shared<gridEvent> ();
 
-  ge->field = "status";
-  ge->value = 0;
-  ge->setTarget (m_sinkObject);
+  ge->setTarget (m_sinkObject, "status");
+  ge->setValue(0.0);
 
   add (ge);
 
@@ -128,7 +123,7 @@ void loadRelay::dynObjectInitializeA (double time0, unsigned long flags)
       setActionTrigger (1, 0, frequencyDelay);
     }
 
-  return gridRelay::dynObjectInitializeA (time0, flags);
+  gridRelay::dynObjectInitializeA (time0, flags);
 }
 
 

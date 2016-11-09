@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <cmath>
 
-basicOdeSolver::basicOdeSolver()
+basicOdeSolver::basicOdeSolver(const std::string &objName) : solverInterface(objName)
 {
 	mode.dynamic = true;
 	mode.differential = true;
@@ -63,32 +63,30 @@ const double * basicOdeSolver::type_data() const
 	return type.data();
 }
 
-int basicOdeSolver::allocate(count_t stateCount, count_t numRoots)
+void basicOdeSolver::allocate(count_t stateCount, count_t numRoots)
 {
 	// load the vectors
-	if (stateCount == svsize)
+	if (stateCount != svsize)
 	{
-		return FUNCTION_EXECUTION_SUCCESS;
+		state.resize(stateCount);
+		deriv.resize(stateCount);
+		state2.resize(stateCount);
+		svsize = stateCount;
+		initialized = false;
+		allocated = true;
+		rootsfound.resize(numRoots);
 	}
-	state.resize(stateCount);
-	deriv.resize(stateCount);
-	state2.resize(stateCount);
-	svsize = stateCount;
-	initialized = false;
-	allocated = true;
-	rootsfound.resize(numRoots);
-	return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int basicOdeSolver::initialize(double /*t0*/)
+void basicOdeSolver::initialize(gridDyn_time t0)
 {
 	if (!allocated)
 	{
-		return (-2);
+		throw(InvalidSolverOperation(-2));
 	}
 	initialized = true;
 	solverCallCount = 0;
-	return FUNCTION_EXECUTION_SUCCESS;
+	solveTime = t0;
 }
 
 double basicOdeSolver::get(const std::string & param) const
@@ -103,31 +101,31 @@ double basicOdeSolver::get(const std::string & param) const
 	}
 
 }
-int basicOdeSolver::set(const std::string &param, const std::string &val)
+void basicOdeSolver::set(const std::string &param, const std::string &val)
 {
-	int out = PARAMETER_FOUND;
+
 	if (param[0] == '#')
 	{
 		
 	}
 	else
 	{
-		out = solverInterface::set(param, val);
+		solverInterface::set(param, val);
 	}
-	return out;
+
 }
-int basicOdeSolver::set(const std::string &param, double val)
+void basicOdeSolver::set(const std::string &param, double val)
 {
-	int out = PARAMETER_FOUND;
-	if ((param == "delta")||(param=="deltat"))
+
+	if ((param == "delta")||(param=="deltat")||(param=="step")||(param=="steptime"))
 	{
 		deltaT = val;
 	}
 	else
 	{
-		out = solverInterface::set(param, val);
+		solverInterface::set(param, val);
 	}
-	return out;
+
 }
 
 int basicOdeSolver::solve(double tStop, double &tReturn, step_mode stepMode)
@@ -138,14 +136,31 @@ int basicOdeSolver::solve(double tStop, double &tReturn, step_mode stepMode)
 		return FUNCTION_EXECUTION_SUCCESS;
 	}
 	double Tstep = (std::min)(deltaT, tStop - solveTime);
+	if (mode.pairedOffsetIndex != kNullLocation)
+	{
+		int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
+		if (ret<FUNCTION_EXECUTION_SUCCESS)
+		{
+			return ret;
+		}
+	}
 	m_gds->derivativeFunction(solveTime, state.data(), deriv.data(), mode);
 	std::transform(state.begin(), state.end(), deriv.begin(), state.begin(), [Tstep](double a, double b) {return fma(Tstep, b, a); });
 	solveTime += Tstep;
+	//if we are in single step mode don't go into the loop
 	if( stepMode==step_mode::normal)
 	{
 		while (solveTime < tStop)
 		{
 			Tstep = (std::min)(deltaT, tStop - solveTime);
+			if (mode.pairedOffsetIndex != kNullLocation)
+			{
+				int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
+				if (ret<FUNCTION_EXECUTION_SUCCESS)
+				{
+					return ret;
+				}
+			}
 			m_gds->derivativeFunction(solveTime, state.data(), deriv.data(), mode);
 			std::transform(state.begin(), state.end(), deriv.begin(), state.begin(), [Tstep](double a, double b) {return fma(Tstep, b, a); });
 			solveTime += Tstep;

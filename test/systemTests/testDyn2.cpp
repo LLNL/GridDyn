@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleEvent)
 
   std::string fname = std::string (DYN2_TEST_DIRECTORY "test_2m4bDyn.xml");
 
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
   gds->consolePrintLevel = 2;
   gds->powerflow ();
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleChunked)
 
 
   fname = std::string (DYN2_TEST_DIRECTORY "test_2m4bDyn.xml");
-  gds2 = (gridDynSimulation *)readSimXMLFile (fname);
+  gds2 = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
   gds2->consolePrintLevel = 2;
   gds2->run (1.5);
   gds2->run (3.7);
@@ -106,19 +106,37 @@ BOOST_AUTO_TEST_CASE (dyn_test_pulseLoadChange2)
 }
 
 #ifdef LOAD_CVODE
-BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part)
-{
-	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoadChange1_partitioned.xml");
+BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part_cvode)
+{ //using cvode
+	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoad_partitioned1.xml");
 	simpleRunTestXML(fname);
 }
 
 
 #endif 
-BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part2)
-{
-	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoadChange2_partitioned.xml");
+BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part_basic_ode)
+{ //using basicode
+	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoad_partitioned2.xml");
 	simpleRunTestXML(fname);
 }
+
+#ifdef LOAD_ARKODE
+BOOST_AUTO_TEST_CASE(dyn_test_sinLoadChange_part_arkode)
+{ //using arkode
+	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoad_partitioned3.xml");
+	simpleRunTestXML(fname);
+}
+
+
+#endif 
+
+//now check if all the different solvers all produce the same results
+BOOST_AUTO_TEST_CASE(dyn_test_compare_ode)
+{
+	std::string fname = std::string(DYN2_TEST_DIRECTORY "test_sineLoadChange.xml");
+
+}
+
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(dyn_test_pulseLoadChange_part)

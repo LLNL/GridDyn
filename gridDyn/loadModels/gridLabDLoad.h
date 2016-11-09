@@ -42,16 +42,16 @@ public:
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void preEx (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
   virtual void updateA (double time) override;
   virtual double updateB () override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int add (gridCoreObject *obj) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void add (gridCoreObject *obj) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;

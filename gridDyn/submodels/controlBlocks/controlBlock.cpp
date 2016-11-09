@@ -13,7 +13,7 @@
 
 #include "submodels/gridControlBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 
 
 controlBlock::controlBlock (const std::string &objName) : basicBlock (objName)
@@ -127,7 +127,7 @@ void controlBlock::derivElements (double input, double didt, const stateData *sD
 }
 
 
-void controlBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void controlBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -227,15 +227,13 @@ index_t controlBlock::findIndex (const std::string &field, const solverMode &sMo
 }
 
 // set parameters
-int controlBlock::set (const std::string &param,  const std::string &val)
+void controlBlock::set (const std::string &param,  const std::string &val)
 {
-  return basicBlock::set (param, val);
+  basicBlock::set (param, val);
 }
 
-int controlBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
   //param   = gridDynSimulation::toLower(param);
 
   if ((param == "t1") || (param == "t"))
@@ -248,10 +246,9 @@ int controlBlock::set (const std::string &param, double val, gridUnits::units_t 
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
 }
 
 stringVec controlBlock::localStateNames () const

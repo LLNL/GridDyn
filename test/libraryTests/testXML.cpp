@@ -423,7 +423,7 @@ BOOST_AUTO_TEST_CASE (xml_test8)
   loadFile(gds, fname, &ri);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
   BOOST_CHECK_EQUAL (readerConfig::warnCount, 0);
-  BOOST_CHECK_EQUAL (ri.recorders.size (), 1u);
+  BOOST_CHECK_EQUAL (ri.collectors.size (), 1u);
 
 }
 
@@ -488,66 +488,66 @@ BOOST_AUTO_TEST_CASE (test_function_constants)
 //Test case for testing the various means of setting parameters
 BOOST_AUTO_TEST_CASE(test_param_specs)
 {
-	//test the define functionality
-	std::string fname = xmlTestDirectory + "test_param_setting.xml";
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    //test the define functionality
+    std::string fname = xmlTestDirectory + "test_param_setting.xml";
+    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 
-	
-	auto bus = gds->getBus(0);
-	BOOST_REQUIRE(bus != nullptr);
-	auto ld1 = bus->getLoad(0);
-	BOOST_REQUIRE(ld1 != nullptr);
-	auto ld2 = bus->getLoad(1);
-	BOOST_REQUIRE(ld2 != nullptr);
-	
-	BOOST_CHECK_CLOSE(ld1->get("p"), 0.4, 0.0001);
-	BOOST_CHECK_CLOSE(ld1->get("q"), 0.3, 0.0001);
-	BOOST_CHECK_CLOSE(ld1->get("ip"), 0.55, 0.0001);
-	BOOST_CHECK_CLOSE(ld1->get("iq"), 0.32, 0.0001);
-	BOOST_CHECK_CLOSE(ld1->get("yp"),0.5, 0.0001);
-	BOOST_CHECK_CLOSE(ld1->get("yq"), 0.11, 0.0001);
+    
+    auto bus = gds->getBus(0);
+    BOOST_REQUIRE(bus != nullptr);
+    auto ld1 = bus->getLoad(0);
+    BOOST_REQUIRE(ld1 != nullptr);
+    auto ld2 = bus->getLoad(1);
+    BOOST_REQUIRE(ld2 != nullptr);
+    
+    BOOST_CHECK_CLOSE(ld1->get("p"), 0.4, 0.0001);
+    BOOST_CHECK_CLOSE(ld1->get("q"), 0.3, 0.0001);
+    BOOST_CHECK_CLOSE(ld1->get("ip"), 0.55, 0.0001);
+    BOOST_CHECK_CLOSE(ld1->get("iq"), 0.32, 0.0001);
+    BOOST_CHECK_CLOSE(ld1->get("yp"),0.5, 0.0001);
+    BOOST_CHECK_CLOSE(ld1->get("yq"), 0.11, 0.0001);
 
-	BOOST_CHECK_CLOSE(ld2->get("p"), 0.31, 0.0001);
-	BOOST_CHECK_CLOSE(ld2->get("q",gridUnits::MVAR), 14.8, 0.0001);
-	BOOST_CHECK_CLOSE(ld2->get("yp"), 1.27, 0.0001);
-	BOOST_CHECK_CLOSE(ld2->get("yq"), 0.74, 0.0001);
-	//TODO:: PT this capability is not enabled yet
-	//BOOST_CHECK_CLOSE(ld2->get("ip"), 0.145, 0.0001);
-	//BOOST_CHECK_CLOSE(ld2->get("iq"), 0.064, 0.0001);
+    BOOST_CHECK_CLOSE(ld2->get("p"), 0.31, 0.0001);
+    BOOST_CHECK_CLOSE(ld2->get("q",gridUnits::MVAR), 14.8, 0.0001);
+    BOOST_CHECK_CLOSE(ld2->get("yp"), 1.27, 0.0001);
+    BOOST_CHECK_CLOSE(ld2->get("yq"), 0.74, 0.0001);
+    //TODO:: PT this capability is not enabled yet
+    //BOOST_CHECK_CLOSE(ld2->get("ip"), 0.145, 0.0001);
+    //BOOST_CHECK_CLOSE(ld2->get("iq"), 0.064, 0.0001);
 }
 
 
 //Test case for testing the various means of setting parameters
 BOOST_AUTO_TEST_CASE(test_custom_element1)
 {
-	//test the define functionality
-	std::string fname = xmlTestDirectory + "test_custom_element1.xml";
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    //test the define functionality
+    std::string fname = xmlTestDirectory + "test_custom_element1.xml";
+    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 
-	int bc = gds->getInt("buscount");
-	BOOST_CHECK(bc == 10);
-	std::vector<double> V;
-	gds->getVoltage(V);
-	double mxv = *std::max_element(V.begin(), V.end());
-	double mnv = *std::min_element(V.begin(), V.end());
-	BOOST_CHECK(mnv < mxv);
-	
+    int bc = gds->getInt("buscount");
+    BOOST_CHECK(bc == 10);
+    std::vector<double> V;
+    gds->getVoltage(V);
+    double mxv = *std::max_element(V.begin(), V.end());
+    double mnv = *std::min_element(V.begin(), V.end());
+    BOOST_CHECK(mnv < mxv);
+    
 }
 
 //Test case for testing the various means of setting parameters
 BOOST_AUTO_TEST_CASE(test_custom_element2)
 {
-	//test the define functionality
-	std::string fname = xmlTestDirectory + "test_custom_element2.xml";
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    //test the define functionality
+    std::string fname = xmlTestDirectory + "test_custom_element2.xml";
+    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 
-	int bc = gds->getInt("buscount");
-	BOOST_CHECK(bc == 7);
-	std::vector<double> V;
-	gds->getVoltage(V);
-	double mxv = *std::max_element(V.begin(), V.end());
-	double mnv = *std::min_element(V.begin(), V.end());
-	BOOST_CHECK(mnv < mxv);
+    int bc = gds->getInt("buscount");
+    BOOST_CHECK(bc == 7);
+    std::vector<double> V;
+    gds->getVoltage(V);
+    double mxv = *std::max_element(V.begin(), V.end());
+    double mnv = *std::min_element(V.begin(), V.end());
+    BOOST_CHECK(mnv < mxv);
 
 }
 

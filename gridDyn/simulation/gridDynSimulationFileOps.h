@@ -161,6 +161,9 @@ struct dataInfo
 	std::uint32_t numElements = 0;
 };
 
+#define STATE_INFORMATION (0)
+#define DERIVATIVE_INFORMATION (1)
+#define RESIDUAL_INFORMATION (2)
 /** @brief write a vector (state, resid, deriv, etc) to a file 
 encodes a header into the file
 time(8 bytes), code(4 bytes), index(4 bytes), key(4 bytes), length(4 bytes),
@@ -196,5 +199,13 @@ then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @return (0) is successful  (-1) if unable to open file
 */
 
-int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  arrayData<double> *a1, const std::string&filename, bool append = true);
+int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> *a1, const std::string&filename, bool append = true);
+
+class contingency;
+
+/** write a contingency list to a text based file output
+@param[in] contList the vector of contingencies that have been run
+@param[in] filename the name of the file to save
+*/
+void saveContingencyOutput(const std::vector<std::shared_ptr<contingency>> &contList, const std::string &filename);
 #endif

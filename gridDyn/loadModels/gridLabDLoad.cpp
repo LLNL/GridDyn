@@ -18,6 +18,7 @@
 #include "objectFactoryTemplates.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 
 #include <cmath>
 #include <iostream>
@@ -140,7 +141,7 @@ gridCoreObject *gridLabDLoad::clone (gridCoreObject *obj) const
   return ld;
 }
 
-int gridLabDLoad::add (gridCoreObject *obj)
+void gridLabDLoad::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridLoad *> (obj))
     {
@@ -171,9 +172,8 @@ int gridLabDLoad::add (gridCoreObject *obj)
     }
   else
     {
-      return OBJECT_NOT_RECOGNIZED;
+	  throw(invalidObjectException(this));
     }
-  return OBJECT_ADD_SUCCESS;
 }
 
 void gridLabDLoad::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
@@ -239,7 +239,7 @@ void gridLabDLoad::dynObjectInitializeB (const IOdata & /*args*/, const IOdata &
 
 
 
-double gridLabDLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void gridLabDLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
 {
 
 
@@ -287,7 +287,6 @@ double gridLabDLoad::timestep (double ttime, const IOdata &args, const solverMod
   Vprev = V;
   Thprev = th;
   prevTime = ttime;
-  return Pout;
 }
 
 void gridLabDLoad::updateA (double ttime)
@@ -992,9 +991,9 @@ std::cout << "SGS : gridLabDLoad::run3GridLabB retP[0] = " << retP[0] << " [1] =
 return retP;
 }
 
-int gridLabDLoad::set (const std::string &param,  const std::string &val)
+void gridLabDLoad::set (const std::string &param,  const std::string &val)
 {
-  int ret = PARAMETER_FOUND;
+
   std::string numstr;
   int num;
 
@@ -1118,14 +1117,13 @@ int gridLabDLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      ret = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return ret;
+
 }
 
-int gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int ret = PARAMETER_FOUND;
   //TODO:: PT convert some to a setFlags function
   if ((param == "spread") || (param == "band"))
     {
@@ -1135,7 +1133,7 @@ int gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t 
         }
       else
         {
-          ret = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else if ((param == "bounds")  || (param == "usebounds"))
@@ -1176,9 +1174,9 @@ int gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t 
     }
   else
     {
-      ret = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
-  return ret;
+
 }
 
 //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
@@ -1259,7 +1257,7 @@ void gridLabDLoad::run_dummy_load (index_t kk, VoltageMessage* vm, CurrentMessag
       rQ = dummy_load[kk]->getReactivePower ( { vtest / baseVoltage / 1000 }, nullptr, cLocalSolverMode);
       vcom = std::complex<double> (vtest, 0);
       power = std::complex<double> (rP, rQ) / 3.0;
-      ctest = power * (dummy_load[kk]->getBasePower ()) * 1000000.0 / vcom;
+      ctest = power * (dummy_load[kk]->get("basepower")) * 1000000.0 / vcom;
       for (int pp = 0; pp < 3; pp++)
         {
           c2 = ctest * vcom / std::complex<double> (vm->voltage[ii].real[pp], vm->voltage[ii].imag[pp]);
@@ -1290,7 +1288,7 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage* vm, Curre
       rQ = dummy_load_forward[kk]->getReactivePower ({ vtest / baseVoltage / 1000 }, nullptr, cLocalSolverMode);
       vcom = std::complex<double> (vtest, 0);
       power = std::complex<double> (rP, rQ) / 3.0;
-      ctest = power * (dummy_load_forward[kk]->getBasePower ()) * 1000000.0 / vcom;
+      ctest = power * (dummy_load_forward[kk]->get("basepower")) * 1000000.0 / vcom;
       for (int pp = 0; pp < 3; pp++)
         {
           c2 = ctest * vcom / std::complex<double> (vm->voltage[ii].real[pp], vm->voltage[ii].imag[pp]);

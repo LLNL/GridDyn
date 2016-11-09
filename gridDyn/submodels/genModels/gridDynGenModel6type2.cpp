@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <cmath>
 
@@ -163,7 +163,7 @@ void gridDynGenModel6type2::residual (const IOdata &args, const stateData *sD, d
 
 
 void gridDynGenModel6type2::jacobianElements (const IOdata &args, const stateData *sD,
-                                              arrayData<double> *ad,
+                                              matrixData<double> *ad,
                                               const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);

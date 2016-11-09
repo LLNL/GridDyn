@@ -17,7 +17,8 @@
 #include "primary/dcBus.h"
 #include "submodels/otherBlocks.h"
 #include "gridCoreTemplates.h"
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
+#include "core/gridDynExceptions.h"
 
 
 #include <cmath>
@@ -121,12 +122,12 @@ gridCoreObject *acdcConverter::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-double  acdcConverter::timestep (double ttime, const solverMode &)
+void  acdcConverter::timestep (double ttime, const solverMode &)
 {
-
+	//TODO: this function is incorrect
   if (!enabled)
     {
-      return 0;
+      return;
 
     }
   updateLocalCache ();
@@ -136,19 +137,18 @@ double  acdcConverter::timestep (double ttime, const solverMode &)
   Psched=sched->timestepP(time);
   }*/
   prevTime = ttime;
-  return linkFlows.P1;
 }
 
 //it may make more sense to have the dc bus as bus 1 but then the equations wouldn't be symmetric with the the rectifier
-int acdcConverter::updateBus (gridBus *bus, index_t /*busnumber*/)
+void acdcConverter::updateBus (gridBus *bus, index_t /*busnumber*/)
 {
   if (dynamic_cast<dcBus *> (bus))
     {
-      return gridLink::updateBus (bus, 2); //bus 2 must be the dc bus
+      gridLink::updateBus (bus, 2); //bus 2 must be the dc bus
     }
   else
     {
-      return gridLink::updateBus (bus, 1);
+      gridLink::updateBus (bus, 1);
     }
 }
 
@@ -166,10 +166,9 @@ double acdcConverter::getMaxTransfer () const
 }
 
 // set properties
-int  acdcConverter::set (const std::string &param,  const std::string &val)
+void  acdcConverter::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
+  
   if (param == "mode")
     {
       if (val == "rectifier")
@@ -204,19 +203,18 @@ int  acdcConverter::set (const std::string &param,  const std::string &val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else
     {
-      out = gridLink::set (param, val);
+      gridLink::set (param, val);
     }
-  return out;
+ 
 }
 
-int  acdcConverter::set (const std::string &param, double val, units_t unitType)
+void  acdcConverter::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "r")
     {
@@ -312,9 +310,9 @@ int  acdcConverter::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridLink::set (param, val, unitType);
+      gridLink::set (param, val, unitType);
     }
-  return out;
+
 }
 
 
@@ -394,7 +392,7 @@ void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
 }
 
 
-void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (!(enabled))
     {
@@ -461,7 +459,7 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, ar
     }
 }
 
-void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -542,7 +540,7 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
 }
 
 
-void acdcConverter::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 	auto B1Loc=B1->getOutputLocs(sMode);
   auto B1Voffset = B1Loc[voltageInLocation];
@@ -561,7 +559,7 @@ void acdcConverter::jacobianElements (const stateData *sD, arrayData<double> *ad
       };
       double I0;
       index_t refLoc;
-      arrayDataSparse tad1,tad2;
+      matrixDataSparse<double> tad1,tad2;
 
       if  (refAlg != kNullLocation)
         {

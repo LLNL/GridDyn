@@ -15,6 +15,7 @@
 #include "infiniteBus.h"
 #include "linkModels/gridLink.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 
 using namespace gridUnits;
 
@@ -52,11 +53,10 @@ void infiniteBus::updateVoltageAngle (double ttime)
   voltage += dvdt * dt;
 }
 
-double infiniteBus::timestep (double ttime, const solverMode &sMode)
+void infiniteBus::timestep (double ttime, const solverMode &sMode)
 {
   updateVoltageAngle (ttime);
   gridBus::timestep (ttime, sMode);
-  return voltage;
 }
 
 void infiniteBus::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
@@ -67,25 +67,25 @@ void infiniteBus::setState (double ttime, const double state[], const double dst
 
 
 // set properties
-int infiniteBus::set (const std::string &param,  const std::string &val)
+void infiniteBus::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
-  if (param[0] == '#')
+  if (param == "type")
     {
-
+	  if (val != "infinite")
+	  {
+		  throw(invalidParameterValue());
+	  }
 
     }
   else
     {
-      out = gridBus::set (param, val);
+      gridBus::set (param, val);
     }
-  return out;
 }
 
-int infiniteBus::set (const std::string &param, double val, units_t unitType)
+void infiniteBus::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "dvdt")
     {
@@ -97,11 +97,9 @@ int infiniteBus::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridBus::set (param, val, unitType);
+      gridBus::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 double infiniteBus::getVoltage (const double /*state*/[], const solverMode &) const

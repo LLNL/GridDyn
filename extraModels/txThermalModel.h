@@ -51,17 +51,17 @@ public:
 	/** @brief constructor*/
 	txThermalModel(const std::string &objName="txThermal_$");
 	virtual gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
-	virtual int setFlag(const std::string &param, bool val=true) override;
-	virtual int set(const std::string &param, const std::string &val) override;
+	virtual void setFlag(const std::string &param, bool val=true) override;
+	virtual void set(const std::string &param, const std::string &val) override;
 
-	virtual int set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual int add(gridCoreObject *obj) final override;
+	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void add(gridCoreObject *obj) final override;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 	virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 	virtual void dynObjectInitializeB (IOdata &outputSet) override;
 
-	virtual double timestep(double ttime, const solverMode &sMode) override;
+	virtual void timestep(double ttime, const solverMode &sMode) override;
 	virtual void updateA(double time) override;
 };
 

@@ -14,7 +14,7 @@
 #include "readerInfo.h"
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
-#include "recorder_events/gridRecorder.h"
+#include "recorder_events/collector.h"
 #include "readerElement.h"
 #include "gridCore.h"
 
@@ -268,6 +268,7 @@ bool readerInfo::addLibraryObject (gridCoreObject *obj, std::vector<gridParamete
   if (retval == library.end ())
     {
       library[obj->getName ()] = std::make_pair (obj, pobjs);
+	  obj->setName(obj->getName() + "_$"); //make sure all cloned object have a unique name
       return true;
     }
   else
@@ -348,15 +349,15 @@ void readerInfo::addDirectory (const std::string &directory)
 }
 
 
-std::shared_ptr<gridRecorder> readerInfo::findRecorder (const std::string &name, const std::string &fname)
+std::shared_ptr<collector> readerInfo::findCollector (const std::string &name, const std::string &fname)
 {
-  for (auto &rec : recorders)
+  for (auto &col : collectors)
     {
-      if ((name.empty ()) || (rec->name == name))
+      if ((name.empty ()) || (col->getName() == name))
         {
-          if ((fname.empty ())||(rec->getFileName ().empty ())||(rec->getFileName () == fname))
+          if ((fname.empty ())||(col->getSinkName ().empty ())||(col->getSinkName () == fname))
             {
-              return rec;
+              return col;
             }
         }
     }

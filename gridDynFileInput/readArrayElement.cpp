@@ -16,8 +16,6 @@
 #include "gridDynFileInput.h"
 #include "elementReaderTemplates.hpp"
 #include "readerElement.h"
-#include <cstdio>
-#include <iterator>
 #include <numeric>
 
 using namespace readerConfig;

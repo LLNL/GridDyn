@@ -14,7 +14,7 @@
 #include "submodels/otherGovernors.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 
 
 gridDynGovernorSteamNR::gridDynGovernorSteamNR (const std::string &objName) : gridDynGovernorIeeeSimple (objName)
@@ -90,7 +90,7 @@ void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData 
 }
 
 
-void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData *sD, arrayData<double> *ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -139,14 +139,13 @@ index_t gridDynGovernorSteamNR::findIndex (const std::string &field, const solve
 }
 
 // set parameters
-int gridDynGovernorSteamNR::set (const std::string &param,  const std::string &val)
+void gridDynGovernorSteamNR::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  gridCoreObject::set (param, val);
 }
 
-int gridDynGovernorSteamNR::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGovernorSteamNR::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   //param   = gridDynSimulation::toLower(param);
 
@@ -184,10 +183,10 @@ int gridDynGovernorSteamNR::set (const std::string &param, double val, gridUnits
     }
   else
     {
-      out = gridDynGovernor::set (param,val,unitType);
+       gridDynGovernor::set (param,val,unitType);
     }
 
-  return out;
+ 
 }
 
 

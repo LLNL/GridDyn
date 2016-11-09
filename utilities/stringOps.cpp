@@ -34,9 +34,9 @@
 #define TRIM(X) boost::algorithm::trim (X)
 #endif
 
-stringVec splitlineTrim (const std::string &line, const std::string &delimiters,delimiter_compression compression)
+stringVector splitlineTrim (const std::string &line, const std::string &delimiters,delimiter_compression compression)
 {
-  stringVec strVec;
+  stringVector strVec;
   auto comp = (compression==delimiter_compression::on) ? boost::token_compress_on : boost::token_compress_off;
   boost::algorithm::split (strVec, line, boost::is_any_of (delimiters), comp);
   for (auto &str : strVec)
@@ -46,9 +46,9 @@ stringVec splitlineTrim (const std::string &line, const std::string &delimiters,
   return strVec;
 }
 
-stringVec splitlineTrim(const std::string &line, char del)
+stringVector splitlineTrim(const std::string &line, char del)
 {
-	stringVec strVec;
+	stringVector strVec;
 	boost::algorithm::split(strVec, line, boost::is_from_range(del, del));
 	for (auto &str : strVec)
 	{
@@ -57,7 +57,7 @@ stringVec splitlineTrim(const std::string &line, char del)
 	return strVec;
 }
 
-void splitlineTrim(const std::string &line, stringVec &strVec, const std::string &delimiters, delimiter_compression compression)
+void splitlineTrim(const std::string &line, stringVector &strVec, const std::string &delimiters, delimiter_compression compression)
 {
 	auto comp = (compression == delimiter_compression::on) ? boost::token_compress_on : boost::token_compress_off;
 	boost::algorithm::split(strVec, line, boost::is_any_of(delimiters), comp);
@@ -67,7 +67,7 @@ void splitlineTrim(const std::string &line, stringVec &strVec, const std::string
 	}
 }
 
-void splitlineTrim(const std::string &line, stringVec &strVec, char del)
+void splitlineTrim(const std::string &line, stringVector &strVec, char del)
 {
 	boost::algorithm::split(strVec, line, boost::is_from_range(del, del));
 	for (auto &str : strVec)
@@ -76,34 +76,34 @@ void splitlineTrim(const std::string &line, stringVec &strVec, char del)
 	}
 }
 
-stringVec splitline(const std::string &line, const std::string &delimiters, delimiter_compression compression)
+stringVector splitline(const std::string &line, const std::string &delimiters, delimiter_compression compression)
 {
-	stringVec strVec;
+	stringVector strVec;
 	auto comp = (compression == delimiter_compression::on) ? boost::token_compress_on : boost::token_compress_off;
 	boost::algorithm::split(strVec, line, boost::is_any_of(delimiters), comp);
 	return strVec;
 }
 
-stringVec splitline(const std::string &line, char del)
+stringVector splitline(const std::string &line, char del)
 {
-	stringVec strVec;
+	stringVector strVec;
 	boost::algorithm::split(strVec, line, boost::is_from_range(del, del));
 	return strVec;
 }
 
-void splitline(const std::string &line, stringVec &strVec, const std::string &delimiters, delimiter_compression compression)
+void splitline(const std::string &line, stringVector &strVec, const std::string &delimiters, delimiter_compression compression)
 {
 	auto comp = (compression == delimiter_compression::on) ? boost::token_compress_on : boost::token_compress_off;
 	boost::algorithm::split(strVec, line, boost::is_any_of(delimiters), comp);
 }
 
-void splitline(const std::string &line, stringVec &strVec, char del)
+void splitline(const std::string &line, stringVector &strVec, char del)
 {
 	boost::algorithm::split(strVec, line, boost::is_from_range(del, del));
 }
 
 
-stringVec splitlineBracket (const std::string &line, const std::string &delimiters, delimiter_compression compression)
+stringVector splitlineBracket (const std::string &line, const std::string &delimiters, delimiter_compression compression)
 {
   size_t qloc = line.find_first_of ("\"\'{[(<");
  
@@ -111,11 +111,11 @@ stringVec splitlineBracket (const std::string &line, const std::string &delimite
     {
       return splitline (line, delimiters,compression);
     }
-  stringVec strVec;
+  stringVector strVec;
   qloc = line.find_first_of ("\"\'");
   if (qloc != std::string::npos)
     {
-      stringVec astring;
+      stringVector astring;
 	  auto comp = (compression == delimiter_compression::on) ? boost::token_compress_on : boost::token_compress_off;
       boost::algorithm::split (astring, line, boost::is_any_of (delimiters), comp);
       bool inquote = false;
@@ -204,8 +204,8 @@ stringVec splitlineBracket (const std::string &line, const std::string &delimite
   //now look for the brackets
   bool inbracket = false;
   std::string tstring;
-  stringVec bstrings;
-  stringVec tpairs = {"()","{}","[]","<>"};
+  stringVector bstrings;
+  stringVector tpairs = {"()","{}","[]","<>"};
   //test for matching parenthesis
   for (auto &tp : tpairs)
     {
@@ -247,7 +247,7 @@ stringVec splitlineBracket (const std::string &line, const std::string &delimite
 
 }
 
-stringVec splitlineBracketTrim(const std::string &line, const std::string &delimiters, delimiter_compression compression)
+stringVector splitlineBracketTrim(const std::string &line, const std::string &delimiters, delimiter_compression compression)
 {
 	auto strVec = splitlineBracket(line, delimiters,compression);
 	for (auto &str : strVec)
@@ -393,7 +393,7 @@ std::vector<int> str2vectorInt (const std::string &line, int defValue, const std
   return av;
 }
 
-std::vector<double> str2vector(const stringVec &tokens, double defValue)
+std::vector<double> str2vector(const stringVector &tokens, double defValue)
 {
 	std::vector<double> av;
 	av.reserve(tokens.size());
@@ -512,6 +512,34 @@ double  doubleReadComplete(const std::string &V, double def)
 	}
 }
 
+long long  longlongReadComplete(const std::string &V, long long def)
+{
+	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	{
+		return def;
+	}
+	try
+	{
+		size_t rem;
+		long long res = std::stoll(V, &rem);
+		while (rem < V.length())
+		{
+			if (!(isspace(V[rem])))
+			{
+				res = def;
+				break;
+			}
+			++rem;
+		}
+		return res;
+
+	}
+	catch (std::invalid_argument)
+	{
+		return def;
+	}
+}
+
 void removeQuotes(std::string &str)
 {
 	trimString(str);
@@ -534,11 +562,11 @@ std::string getTailString(const std::string &input, char sep)
 	return ret;
 }
 
-int findCloseStringMatch(const stringVec &testStrings, const stringVec &iStrings, string_match_type_t smatch)
+int findCloseStringMatch(const stringVector &testStrings, const stringVector &iStrings, string_match_type_t smatch)
 {
 	std::string lct; //lower case test string
 	std::string lcis;//lower case input string
-	stringVec lciStrings = iStrings;
+	stringVector lciStrings = iStrings;
 	//make all the input strings lower case
 	for (auto &st : lciStrings)
 	{

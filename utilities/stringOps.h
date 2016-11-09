@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <array>
 //!< typedef for convenience
-typedef std::vector<std::string> stringVec;
+typedef std::vector<std::string> stringVector;
 
 /** @brief convert a string to lower case as a new string
 @param[in] input  the string to convert
@@ -75,14 +75,14 @@ enum class delimiter_compression
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 @return a vector of strings separated by the delimiters characters
 */
-stringVec splitline(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression=delimiter_compression::off);
+stringVector splitline(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression=delimiter_compression::off);
 
 /** @brief split a line into a vector of strings
 @param[in] line  the string to spit
 @param[in] del the delimiter character
 @return a vector of strings separated by the delimiters characters
 */
-stringVec splitline(const std::string &line, char del);
+stringVector splitline(const std::string &line, char del);
 
 /** @brief split a line into a vector of strings
 @param[in] line  the string to spit
@@ -90,7 +90,7 @@ stringVec splitline(const std::string &line, char del);
 @param[in] del the delimiter character
 
 */
-void splitline(const std::string &line, stringVec &strVec, char del );
+void splitline(const std::string &line, stringVector &strVec, char del );
 
 /** @brief split a line into a vector of strings
 @param[in] line  the string to spit
@@ -98,7 +98,7 @@ void splitline(const std::string &line, stringVec &strVec, char del );
 @param[in]  delimiters a string containing the valid delimiter characters
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 */
-void splitline(const std::string &line, stringVec &strVec, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
+void splitline(const std::string &line, stringVector &strVec, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
 /** @brief split a line into a vector of strings and include a trim operation on the substrings
 @param[in] line  the string to spit
@@ -106,14 +106,14 @@ void splitline(const std::string &line, stringVec &strVec, const std::string &de
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 @return a vector of strings separated by the delimiters characters
 */
-stringVec splitlineTrim(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
+stringVector splitlineTrim(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
 /** @brief split a line into a vector of strings and include a trim operation on the substrings
 @param[in] line  the string to spit
 @param[in] del the delimiter character
 @return a vector of strings separated by the delimiters characters
 */
-stringVec splitlineTrim(const std::string &line, char del);
+stringVector splitlineTrim(const std::string &line, char del);
 
 /** @brief split a line into a vector of strings and include a trim operation on the substrings
 @param[in] line  the string to spit
@@ -121,7 +121,7 @@ stringVec splitlineTrim(const std::string &line, char del);
 @param[in] del the delimiter character
 
 */
-void splitlineTrim(const std::string &line, stringVec &strVec, char del);
+void splitlineTrim(const std::string &line, stringVector &strVec, char del);
 
 /** @brief split a line into a vector of strings and include a trim operation on the substrings
 @param[in] line  the string to spit
@@ -129,7 +129,7 @@ void splitlineTrim(const std::string &line, stringVec &strVec, char del);
 @param[in]  delimiters a string containing the valid delimiter characters
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 */
-void splitlineTrim(const std::string &line, stringVec &strVec, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
+void splitlineTrim(const std::string &line, stringVector &strVec, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
 
 /** @brief split a line into a vector of strings taking into account bracketing characters
@@ -140,7 +140,7 @@ the delimiter characters are allowed inside the brackets and the resulting vecto
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 @return a vector of strings separated by the delimiters characters accounting for bracketing characters
 */
-stringVec splitlineBracket (const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
+stringVector splitlineBracket (const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
 /** @brief split a line into a vector of strings taking into account bracketing characters and Trim the resulting strings for whitespace
  bracket characters include "()","{}","[]","<>" as well as quote characters ' and "
@@ -150,7 +150,7 @@ the delimiter characters are allowed inside the brackets and the resulting vecto
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters together
 @return a vector of strings separated by the delimiters characters accounting for bracketing characters
 */
-stringVec splitlineBracketTrim(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
+stringVector splitlineBracketTrim(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
 /** @brief  convert a string into a vector of double precision numbers
 @param[in] line the string to convert
@@ -164,7 +164,7 @@ std::vector<double> str2vector(const std::string &line, double defValue, const s
 @param[in] defValue  the default numerical return value if conversion fails
 @return a vector of double precision numbers converted from the string
 */
-std::vector<double> str2vector(const stringVec &tokens, double defValue);
+std::vector<double> str2vector(const stringVector &tokens, double defValue);
 
 /** @brief  convert a string into a vector of integers 
 @param[in] line the string to convert
@@ -172,7 +172,7 @@ std::vector<double> str2vector(const stringVec &tokens, double defValue);
 @param[in] delimiters  the delimiters to use to separate the numbers
 @return a vector of integers converted from the string
 */
-std::vector<int> str2vectorInt(const std::string &line, int defValue, const std::string &delimiters = ";,");
+std::vector<int> str2vectorInt(const std::string &line, int defValue, const std::string &delimiters = ";, ");
 
 /** @brief convert a string to an integer
 @param[in] V  the string to convert
@@ -222,6 +222,13 @@ int intReadComplete (const std::string &V, int def = 0);
 */
 double  doubleReadComplete (const std::string &V, double def = 0);
 
+/** @brief convert a string to a long long making sure the complete string was converted
+@param[in] V  the string to convert
+@param[in] def  the default value to return if the conversion fails
+@return the numerical result of the conversion or the def value
+*/
+long long  longlongReadComplete(const std::string &V, long long def = 0);
+
 /**@brief enumeration for string close matches
 */
 enum string_match_type_t
@@ -237,7 +244,7 @@ the index into the istrings vector
 @param[in] smatch the matching type
 @return the index of the match or -1 if no match is found
 */
-int findCloseStringMatch (const stringVec &testStrings, const stringVec &istrings, string_match_type_t smatch = string_match_close);
+int findCloseStringMatch (const stringVector &testStrings, const stringVector &istrings, string_match_type_t smatch = string_match_close);
 
 /** @brief remove a set of characters from a string
 @param[in] source  the original string

@@ -117,10 +117,10 @@ BOOST_AUTO_TEST_CASE(link_test1_dynamic)
 	//this tests events as much as links here
 	auto obj = gds->find("load5");
 	g1->setTarget(obj, "p");
-	g1->value = 1.35;
+	g1->setValue(1.35);
 
 	auto g2 = g1->clone(); //fullcopy clone
-	g2->value = 1.25;
+	g2->setValue(1.25);
 
 	g1->setTime(1.0);
 	g2->setTime(3.4);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(link_test_fixPower)
  double v2=1.02;
  double a2=-0.12;
  gridBus *b1=new gridBus(v1,a1);
- b1->set("type","slk");
+
  gridBus *b2= new gridBus(v2,a2);
  a->updateBus(b1,1);
  a->updateBus(b2,2);

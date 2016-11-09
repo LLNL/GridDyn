@@ -16,7 +16,8 @@
 #include "gridEvent.h"
 #include "relays/gridRelay.h"
 #include "gridCore.h"
-#include "gridRecorder.h"
+#include "collector.h"
+#include "core/gridDynExceptions.h"
 
 #include <typeinfo>
 
@@ -46,6 +47,34 @@ void eventQueue::nullEventTime (double time, double period)
 double eventQueue::getNullEventTime () const
 {
   return nullEvent->m_nextTime;
+}
+
+
+std::shared_ptr<eventQueue> eventQueue::clone(std::shared_ptr<eventQueue> eQ) const
+{
+	auto newQueue = eQ;
+	if (!newQueue)
+	{
+		newQueue = std::make_shared<eventQueue>();
+	}
+	nullEvent->clone(newQueue->nullEvent);
+	for (auto ev : events)
+	{
+		if (ev == nullEvent) //we dealt with the nullEvent separately
+		{
+			continue;
+		}
+		newQueue->insert(ev->clone());
+	}
+	return newQueue;
+}
+
+void eventQueue::mapObjectsOnto(gridCoreObject *newRootObject)
+{
+	for (auto ev : events)
+	{
+		ev->updateObject(newRootObject, object_update_mode::match);
+	}
 }
 
 change_code eventQueue::executeEvents (double cTime)
@@ -177,7 +206,7 @@ void eventQueue::recheck ()
   events.sort (compareEventAdapters);
 }
 
-int eventQueue::remove (std::uint64_t eventID)
+void eventQueue::remove (std::uint64_t eventID)
 {
   auto nextEvent = events.begin ();
   auto endEvent = events.end ();
@@ -186,11 +215,10 @@ int eventQueue::remove (std::uint64_t eventID)
       if (eventID == (*nextEvent)->eventID)
         {
           events.erase (nextEvent);
-          return OBJECT_REMOVE_SUCCESS;
+          return;
         }
       ++nextEvent;
     }
-  return OBJECT_REMOVE_FAILURE;
 }
 
 void eventQueue::sort ()
@@ -216,7 +244,7 @@ void eventQueue::checkDuplicates ()
                   auto bp = dynamic_cast<eventTypeAdapter<gridCoreObject> *> ((*nextEvent).get ());
                   if (bp)
                     {
-                      if (ap->targetObject->getID () == bp->targetObject->getID ())
+                      if (ap->getTarget()->getID () == bp->getTarget()->getID ())
                         {
                           events.erase (nextEvent);
                           break;
@@ -234,9 +262,8 @@ void eventQueue::checkDuplicates ()
 
 
 
-int eventQueue::set (const std::string &param, double val)
+void eventQueue::set (const std::string &param, double val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "timetol")
     {
       if (val > 0)
@@ -245,7 +272,7 @@ int eventQueue::set (const std::string &param, double val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else if (param == "nulleventperiod")
@@ -259,9 +286,8 @@ int eventQueue::set (const std::string &param, double val)
     }
   else
     {
-      out = PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
-  return out;
 }
 
 

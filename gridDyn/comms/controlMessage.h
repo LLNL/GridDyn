@@ -43,16 +43,16 @@ public:
     CANCEL_FAIL = BASE_CONTROL_MESSAGE_NUMBER + 15
   };
   std::string m_field;
-  double m_value;
-  double m_time = -1;
-  size_t m_actionID;
+  double m_value=0.0;
+  double m_time = -1.0;
+  size_t m_actionID=0;
   std::vector<std::string> multiFields;
   std::vector<double> multiValues;
   std::string m_units;
   controlMessage ()
   {
   }
-  controlMessage (std::uint32_t type) : commMessage (type)
+  controlMessage(std::uint32_t type) : commMessage(type)
   {
   }
   controlMessage (std::uint32_t type, std::string fld, double val, double time) : commMessage (type), m_field (fld), m_value (val), m_time (time)
@@ -62,7 +62,7 @@ public:
   {
   }
 
-  virtual std::string toString () override;
+  virtual std::string toString (int modifiers=comm_modifiers::none) const override;
   virtual void loadString (const std::string &fromString) override;
 private:
   friend class boost::serialization::access;

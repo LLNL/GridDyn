@@ -21,7 +21,8 @@
 #include "gridCoreTemplates.h"
 #include "simulation/contingency.h"
 #include "stringOps.h"
-#include "arrayDataCompact.h"
+#include "matrixDataCompact.h"
+#include "core/gridDynExceptions.h"
 
 #include <complex>
 #include <cmath>
@@ -87,6 +88,11 @@ gridCoreObject *acLine::clone(gridCoreObject *obj) const
 acLine::~acLine()
 {
 
+}
+
+void acLine::pFlowObjectInitializeB()
+{
+	updateLocalCache();
 }
 
 void acLine::pFlowCheck(std::vector<violation> &Violation_vector)
@@ -160,12 +166,12 @@ double acLine::quickupdateP()
 }
 
 
-double acLine::timestep(const double ttime, const solverMode &)
+void acLine::timestep(const double ttime, const solverMode &)
 {
 
 	if (!enabled)
 	{
-		return 0;
+		return;
 
 	}
 
@@ -175,7 +181,6 @@ double acLine::timestep(const double ttime, const solverMode &)
 	{
 	Psched=sched->timestepP(time);
 	}*/
-	return linkFlows.P1;
 }
 
 
@@ -193,9 +198,9 @@ void acLine::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 }
 
 // set properties
-int acLine::set(const std::string &param, const std::string &val)
+void acLine::set(const std::string &param, const std::string &val)
 {
-	int out = PARAMETER_FOUND;
+
 	if (param == "approximation")
 	{
 		if (val == "auto")
@@ -277,12 +282,12 @@ int acLine::set(const std::string &param, const std::string &val)
 	}
 	else
 	{
-		out = gridLink::set(param, val);
+		gridLink::set(param, val);
 	}
-	return out;
+
 }
 
-int acLine::set(const std::string &param, double val, units_t unitType)
+void acLine::set(const std::string &param, double val, units_t unitType)
 {
 
 	if (param.length() == 1)
@@ -310,11 +315,10 @@ int acLine::set(const std::string &param, double val, units_t unitType)
 			opFlags.set(fixed_target_power);
 			break;
 		default:
-			return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
 		}
-		return PARAMETER_FOUND;
+		return;
 	}
-	int out = PARAMETER_FOUND;
 
 	if (param == "length")
 	{
@@ -369,9 +373,9 @@ int acLine::set(const std::string &param, double val, units_t unitType)
 	}
 	else
 	{
-		out = gridLink::set(param, val, unitType);
+		gridLink::set(param, val, unitType);
 	}
-	return out;
+
 }
 
 
@@ -399,6 +403,8 @@ double  acLine::get(const std::string &param, units_t unitType) const
 			break;
 		case 'i':
 			val = getCurrent();
+			break;
+		default:
 			break;
 		}
 		return val;
@@ -569,7 +575,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	double err = (mterminal == 1) ? (std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq)) : (std::abs(linkFlows.P2 - valp) + std::abs(linkFlows.Q2 - valq));
 	double pErr = err;
 
-	arrayDataCompact<2, 2> ad;
+	matrixDataCompact<2, 2> ad;
 	double dP, dQ;
 	double dA, dV;
 	double Pvii, Ptii, Qvii, Qtii;
@@ -720,7 +726,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 }
 
 
-void acLine::ioPartialDerivatives(index_t busId, const stateData *, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	// check if line is enabled
 
@@ -785,13 +791,13 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData *, arrayData<do
 
 }
 
-void acLine::outputPartialDerivatives(const stateData *, arrayData<double> *, const solverMode &)
+void acLine::outputPartialDerivatives(const stateData *, matrixData<double> *, const solverMode &)
 {
 	//there are theoretically 4 output for a standard ac line,  but no internal states therefore if this function is called from an external
 	//entity there are no output partial derivatives
 }
 
-void acLine::outputPartialDerivatives(index_t busId, const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
 
 	if (!isConnected())
@@ -916,6 +922,7 @@ void acLine::setState(double ttime, const double state[], const double dstate_dt
 		constLinkInfo = linkInfo;      //update the constant linkInfo
 		constLinkComp = linkComp;
 		linkInfo.seqID = 0;
+		//update the cache twice to get the correct values with the decoupled mode
 		updateLocalCache(&sD, sMode);
 	}
 	else if (sMode.approx[linear])
@@ -1071,11 +1078,13 @@ void acLine::loadLinkInfo()
 	linkComp.sinTheta1 = sin(linkInfo.theta1);
 	linkComp.cosTheta1 = cos(linkInfo.theta1);
 	linkComp.sinTheta2 = -linkComp.sinTheta1;
-	linkComp.cosTheta2 = linkComp.cosTheta2;
+	linkComp.cosTheta2 = linkComp.cosTheta1;
 
 
 	linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
 	linkInfo.seqID = 0;
+	constLinkInfo = linkInfo;      //update the constant linkInfo
+	constLinkComp = linkComp;
 }
 
 void acLine::loadLinkInfo(const stateData *sD, const solverMode &sMode)

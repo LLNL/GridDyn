@@ -37,7 +37,6 @@ objectFactory::~objectFactory ()
 
 componentFactory::componentFactory (const std::string typeName) : name (typeName)
 {
-  m_defaultType = "";
 }
 
 componentFactory::~componentFactory ()
@@ -47,8 +46,9 @@ componentFactory::~componentFactory ()
 
 void componentFactory::registerFactory (std::string typeName, objectFactory *oFac)
 {
-  auto ret = m_factoryMap.insert (std::pair<std::string, objectFactory *> (typeName, oFac));
-  if (ret.second == false)
+  //auto ret = m_factoryMap.insert (std::pair<std::string, objectFactory *> (typeName, oFac));
+	auto ret = m_factoryMap.emplace(typeName, oFac);
+	if (ret.second == false)
     {
       ret.first->second = oFac;
     }
@@ -77,10 +77,7 @@ gridCoreObject *componentFactory::makeObject ()
       gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject ();
       return obj;
     }
-  else
-    {
-      return nullptr;
-    }
+    return nullptr;
 }
 
 bool componentFactory::isValidType (const std::string &typeName) const
@@ -92,48 +89,38 @@ bool componentFactory::isValidType (const std::string &typeName) const
 gridCoreObject *componentFactory::makeObject (const std::string &type)
 {
   auto mfind = m_factoryMap.find (type);
-  if (mfind != m_factoryMap.end ())
-    {
-      gridCoreObject *obj = m_factoryMap[type]->makeObject ();
-      return obj;
-    }
-  else
-    {
-      if (!m_defaultType.empty ())
-        {
-          gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject ();
-          return obj;
-        }
-      else
-        {
-          return nullptr;
-        }
+  if (mfind != m_factoryMap.end())
+  {
+	  gridCoreObject *obj = m_factoryMap[type]->makeObject();
+	  return obj;
+  }
 
-    }
+  if (!m_defaultType.empty())
+  {
+	  gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject();
+	  return obj;
+  }
+
+  return nullptr;
 }
 
 gridCoreObject *componentFactory::makeObject (const std::string &type, const std::string &objName)
 {
 
-  auto mfind = m_factoryMap.find (type);
-  if (mfind != m_factoryMap.end ())
-    {
-      gridCoreObject *obj = m_factoryMap[type]->makeObject (objName);
-      return obj;
-    }
-  else
-    {
-      if (!m_defaultType.empty ())
-        {
-          gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject (objName);
-          return obj;
-        }
-      else
-        {
-          return nullptr;
-        }
+	auto mfind = m_factoryMap.find(type);
+	if (mfind != m_factoryMap.end())
+	{
+		gridCoreObject *obj = m_factoryMap[type]->makeObject(objName);
+		return obj;
+	}
 
-    }
+	if (!m_defaultType.empty())
+	{
+		gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject(objName);
+		return obj;
+	}
+
+	return nullptr;
 }
 
 void componentFactory::setDefault (const std::string &type)
@@ -142,7 +129,7 @@ void componentFactory::setDefault (const std::string &type)
     {
       return;
     }
-  cMap::iterator mfind = m_factoryMap.find (type);
+  auto mfind = m_factoryMap.find (type);
   if (mfind != m_factoryMap.end ())
     {
       m_defaultType = type;
@@ -156,18 +143,13 @@ objectFactory *componentFactory::getFactory (const std::string &typeName)
     {
       return m_factoryMap[m_defaultType];
     }
-  else
-    {
-      auto mfind = m_factoryMap.find (typeName);
-      if (mfind != m_factoryMap.end ())
-        {
-          return m_factoryMap[typeName];
-        }
-      else
-        {
-          return nullptr;
-        }
-    }
+
+    auto mfind = m_factoryMap.find (typeName);
+   if (mfind != m_factoryMap.end ())
+   {
+      return m_factoryMap[typeName];
+   }
+   return nullptr;
 }
 
 //create a high level object factory for the coreObject class
@@ -225,32 +207,37 @@ stringVec coreObjectFactory::getTypeNames (const std::string &componentName)
     }
 }
 
-gridCoreObject *coreObjectFactory::createObject (const std::string &obType, const std::string &typeName)
+gridCoreObject *coreObjectFactory::createObject(const std::string &componentType)
 {
-  auto mfind = m_factoryMap.find (obType);
-  if (mfind != m_factoryMap.end ())
-    {
-      gridCoreObject *obj = m_factoryMap[obType]->makeObject (typeName);
-      return obj;
-    }
-  else
-    {
-      return nullptr;
-    }
+	auto mfind = m_factoryMap.find(componentType);
+	if (mfind != m_factoryMap.end())
+	{
+		gridCoreObject *obj = m_factoryMap[componentType]->makeObject();
+		return obj;
+	}
+	return nullptr;
 }
 
-gridCoreObject *coreObjectFactory::createObject (const std::string &obType, const std::string &typeName, const std::string &objName)
+gridCoreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName)
 {
-  auto mfind = m_factoryMap.find (obType);
+  auto mfind = m_factoryMap.find (componentType);
   if (mfind != m_factoryMap.end ())
     {
-      gridCoreObject *obj = m_factoryMap[obType]->makeObject (typeName, objName);
+      gridCoreObject *obj = m_factoryMap[componentType]->makeObject (typeName);
       return obj;
     }
-  else
+    return nullptr;
+}
+
+gridCoreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName, const std::string &objName)
+{
+  auto mfind = m_factoryMap.find (componentType);
+  if (mfind != m_factoryMap.end ())
     {
-      return nullptr;
+      gridCoreObject *obj = m_factoryMap[componentType]->makeObject (typeName, objName);
+      return obj;
     }
+    return nullptr;
 }
 
 std::shared_ptr<componentFactory> coreObjectFactory::getFactory (const std::string &componentName)
@@ -262,8 +249,7 @@ std::shared_ptr<componentFactory> coreObjectFactory::getFactory (const std::stri
     }
   else       //make a new factory
     {
-      auto tf = std::make_shared<componentFactory> ();
-      tf->name = componentName;
+      auto tf = std::make_shared<componentFactory> (componentName);
       m_factoryMap.insert (std::pair < std::string, std::shared_ptr < componentFactory >> (componentName, tf));
       return tf;
     }
@@ -283,10 +269,7 @@ bool coreObjectFactory::isValidType (const std::string &componentName, const std
     {
       return mfind->second->isValidType (typeName);
     }
-  else
-    {
-      return false;
-    }
+    return false;
 }
 
 

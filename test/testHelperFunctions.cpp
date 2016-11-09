@@ -47,7 +47,7 @@ void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 }
 
 
-void gridDynSimulationTestFixture::simpleStageCheck(const std::string fileName, gridDynSimulation::gridState_t finalState)
+void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName, gridDynSimulation::gridState_t finalState)
 {
 	readerConfig::setPrintMode(0);
 	int retval = 0;
@@ -80,7 +80,7 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string fileName, 
 	}
 }
 
-void gridDynSimulationTestFixture::detailedStageCheck(const std::string fileName, gridDynSimulation::gridState_t finalState)
+void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileName, gridDynSimulation::gridState_t finalState)
 {
 	readerConfig::setPrintMode(0);
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
@@ -125,7 +125,7 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string fileName
 	}
 }
 
-void gridDynSimulationTestFixture::dynamicInitializationCheck(const std::string fileName)
+void gridDynSimulationTestFixture::dynamicInitializationCheck(const std::string &fileName)
 {
 	readerConfig::setPrintMode(0);
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
@@ -172,6 +172,7 @@ glbconfig::glbconfig()
 {
 
 }
+
 glbconfig::~glbconfig()
 {
 #ifdef _CRTDBG_MAP_ALLOC
@@ -183,6 +184,16 @@ glbconfig::~glbconfig()
 int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode)
 {
 	int mmatch = JacobianCheck(gds, sMode);
+	if (mmatch > 0)
+	{
+		printStateNames(gds, sMode);
+	}
+	return mmatch;
+}
+
+int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode, double tol)
+{
+	int mmatch = JacobianCheck(gds, sMode,tol);
 	if (mmatch > 0)
 	{
 		printStateNames(gds, sMode);

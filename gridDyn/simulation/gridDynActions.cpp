@@ -12,6 +12,7 @@
 */
 
 #include "gridDynActions.h"
+#include "basicDefs.h"
 #include "stringOps.h"
 
 gridDynAction::gridDynAction()
@@ -100,7 +101,7 @@ int gridDynAction::process(const std::string &operation)
 		if (sz >= 3)
 		{
 			string1 = ssep[1];
-			val_int = intRead(ssep[2], -435);
+			val_int = intRead(ssep[2], -435);//-435 is some random number with no meaning outside this call
 			if (val_int == -435)
 			{
 				string1 = ssep[2];
@@ -386,9 +387,14 @@ int gridDynAction::process(const std::string &operation)
 		}
 	}
 
-	else if (cmd == "contingency") //TODO:: PT define these two commands
+	else if (cmd == "contingency") // contingency mode|filename output_file|method 
 	{
-
+		command = gd_action_t::contingency;
+		string1 = ssep[1];
+		if (sz > 2)
+		{
+			string2 = ssep[2];
+		}
 	}
 	else if (cmd == "continuation")
 	{

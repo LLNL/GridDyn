@@ -21,27 +21,26 @@ objInfo::objInfo ()
 {
 }
 
-objInfo::objInfo (std::string Istring, gridCoreObject *obj)
+objInfo::objInfo (const std::string &Istring, gridCoreObject *obj)
 {
   LoadInfo (Istring, obj);
 }
 
 
-void objInfo::LoadInfo (std::string Istring, gridCoreObject *obj)
+void objInfo::LoadInfo (const std::string &Istring, gridCoreObject *obj)
 {
   //get the object which to grab from
   size_t rlc = Istring.find_last_of (":?");
   if (rlc != std::string::npos)
     {
-      std::string mname = Istring.substr (0, rlc);
-      m_obj = locateObject (mname, obj);
+      m_obj = locateObject (Istring.substr(0, rlc), obj);
 
-      m_field = Istring.substr (rlc + 2, std::string::npos);
+      m_field = convertToLowerCase(Istring.substr (rlc + 2, std::string::npos));
     }
   else
     {
       m_obj = obj;
-      m_field = Istring;
+      m_field = convertToLowerCase(Istring);
     }
 
   rlc = m_field.find_first_of ('(');
@@ -49,7 +48,7 @@ void objInfo::LoadInfo (std::string Istring, gridCoreObject *obj)
     {
       size_t rlc2 = m_field.find_last_of (')');
       m_unitType = gridUnits::getUnits (m_field.substr (rlc + 1, rlc2 - rlc - 1));
-      m_field = m_field.substr (0, rlc);
+      m_field = convertToLowerCase(m_field.substr (0, rlc));
     }
 }
 
@@ -109,6 +108,8 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
                     case '!':
                       obj = rootObj->getSubObject (type, onum);
                       break;
+					default:
+						break;
                     }
                 }
             }
@@ -127,4 +128,38 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
 }
 
 
-
+gridCoreObject * findMatchingObject(gridCoreObject *obj, gridCoreObject *root)
+{
+	gridCoreObject *par = obj;
+	
+	stringVec stackNames;
+	while (par->getName() != root->getName())
+	{
+		stackNames.push_back(par->getName());
+		par = par->getParent();
+		if (!par)
+		{
+			break;
+		}
+		
+	}
+	//now trace back through the new root object
+	gridCoreObject *matchObj = root;
+	while (!stackNames.empty())
+	{
+		matchObj=matchObj->find(stackNames.back());
+		stackNames.pop_back();
+		if (!matchObj)
+		{
+			break;
+		}
+	}
+	if (matchObj)
+	{
+		if (matchObj->getName() == obj->getName())
+		{
+			return matchObj;
+		}
+	}
+	return nullptr;
+}

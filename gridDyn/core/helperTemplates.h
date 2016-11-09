@@ -23,8 +23,8 @@
 * @param[in] obj pointer of an object to clone to or a null pointer if a new object needs to be created
 * @return pointer to the cloned object
 */
-template<class A, class B>
-std::shared_ptr<A> cloneBase(const A *originalObject, std::shared_ptr<B> obj, bool fullCopy)
+template<class A, class B, typename... Args>
+std::shared_ptr<A> cloneBase(const A *originalObject, std::shared_ptr<B> obj, Args ...args)
 {
 	static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
 	
@@ -39,18 +39,18 @@ std::shared_ptr<A> cloneBase(const A *originalObject, std::shared_ptr<B> obj, bo
 		if (!clonedObject)
 		{
 			//if we can't cast the pointer clone at the next lower level
-			originalObject->B::clone(obj,fullCopy);
+			originalObject->B::clone(obj, args...);
 			return nullptr;
 		}
 	}
 	//clone everything in the parent object and above
-	originalObject->B::clone(clonedObject,fullCopy);
+	originalObject->B::clone(clonedObject,  args...);
 	return clonedObject;
 }
 
 
-template<class A, class B, class C>
-std::shared_ptr<A> cloneBaseStack(const A *originalObject, std::shared_ptr<C> obj, bool fullCopy)
+template<class A, class B, class C, typename... Args>
+std::shared_ptr<A> cloneBaseStack(const A *originalObject, std::shared_ptr<C> obj, Args ...args)
 {
 	static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
 	static_assert (std::is_base_of<C, B>::value, "classes B and C must have parent child relationship");
@@ -65,12 +65,13 @@ std::shared_ptr<A> cloneBaseStack(const A *originalObject, std::shared_ptr<C> ob
 		if (!clonedObject)
 		{
 			//if we can't cast the pointer clone at the next lower level
-			originalObject->B::clone(obj, fullCopy);
+			originalObject->B::clone(obj, args...);
 			return nullptr;
 		}
 	}
 	//clone everything in the parent object and above
-	originalObject->B::clone(clonedObject, fullCopy);
+	originalObject->B::clone(clonedObject, args...);
 	return clonedObject;
 }
+
 #endif

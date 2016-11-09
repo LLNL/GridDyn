@@ -15,8 +15,8 @@
 #define _SUNDIALS_SOLVER_INTERFACE_H_
 
 #include "solverInterface.h"
-#include "arrayDataSparse.h"
-//sundials libraries
+#include "matrixDataSparse.h"
+//SUNDIALS libraries
 #include "nvector/nvector_serial.h"
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -48,32 +48,36 @@
 void sundialsErrorHandlerFunc (int error_code, const char *module, const char *function, char *msg, void *user_data);
 
 #ifdef KLU_ENABLE
-
+/** @brief check if the matrix is setup already
+ *@param[in] J the matrix to check
+ *@return true if the matrix has been loaded already false otherwise
+ */
 bool isSlsMatSetup (SlsMat J);
 
-/** @brief make a solver from a string
-@param[in] type the type of solverInterface to create
-@return a shared_ptr to a solverInterface object
+/** @brief convert an array data object to a SUNDIALS sparse matrix
+@param[in] ad the matrix data to convert
+@param[out] J the SUNDIALS matrix to store the data
+@param[in] svsize the number of states representing the matrix
 */
-void arrayDataToSlsMat (arrayData<double> *at, SlsMat J,count_t svsize);
+void matrixDataToSlsMat (matrixData<double> *ad, SlsMat J,count_t svsize);
 
 #endif
-/** brief abstract base class for sundials based solverInterface objects doesn't really do anything on its own
-just provides common functionality to sundials solverInterface objects
+/** brief abstract base class for SUNDIALS based solverInterface objects doesn't really do anything on its own
+just provides common functionality to SUNDIALS solverInterface objects
 */
 class sundialsInterface : public solverInterface
 {
 protected:
-  count_t maxNNZ = 0;
-  N_Vector state = nullptr;                                                        //!< state vector
+	count_t maxNNZ = 0;															//!< the maximum number of non-zeros that might be needed
 
+  N_Vector state = nullptr;                                                        //!< state vector
   N_Vector dstate_dt = nullptr;                                                  //!< dstate_dt information
   N_Vector abstols = nullptr;                                                     //!< tolerance vector
   N_Vector consData = nullptr;                                                     //!<constraint type Vector
   N_Vector scale = nullptr;                                                      //!< scaling vector
   N_Vector types = nullptr;						//!< type data
 public:
-  sundialsInterface ();
+  explicit sundialsInterface (const std::string &objName = "sundials");
   /** @brief constructor loading the solverInterface structure*
   @param[in] gds  the gridDynSimulation to link with
   @param[in] sMode the solverMode for the solver
@@ -84,24 +88,24 @@ public:
   ~sundialsInterface ();
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
-  double * state_data () override;
-  double * deriv_data () override;
-  const double * state_data() const override;
-  const double * deriv_data() const override;
-  double * type_data() override;
-  const double *type_data() const override;
-  int allocate (count_t size, count_t numroots) override;
-  void setMaxNonZeros(count_t size) override;
-  double get (const std::string &param) const override;
+  virtual double * state_data () override;
+  virtual double * deriv_data () override;
+  virtual const double * state_data() const override;
+  virtual const double * deriv_data() const override;
+  virtual double * type_data() override;
+  virtual const double *type_data() const override;
+  virtual void allocate (count_t size, count_t numroots) override;
+  virtual void setMaxNonZeros(count_t size) override;
+  virtual double get (const std::string &param) const override;
 };
 
-/** @brief solverInterface interfacing to the sundials kinsol solver
+/** @brief solverInterface interfacing to the SUNDIALS kinsol solver
 */
 class kinsolInterface : public sundialsInterface
 {
 public:
   /** @brief constructor*/
-  kinsolInterface ();
+  explicit kinsolInterface (const std::string &objName = "kinsol");
   /** @brief constructor loading the solverInterface structure*
   @param[in] gds  the gridDynSimulation to link with
   @param[in] sMode the solverMode for the solver
@@ -112,9 +116,9 @@ public:
   ~kinsolInterface ();
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
-  int allocate (count_t size, count_t numroots = 0) override;
-  int initialize (double t0) override;
-  int sparseReInit (sparse_reinit_modes mode) override;
+  virtual void allocate (count_t size, count_t numroots = 0) override;
+  virtual void initialize (double t0) override;
+  virtual void sparseReInit (sparse_reinit_modes mode) override;
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
   void setConstraints () override;
 
@@ -123,8 +127,8 @@ public:
   {
   }
   virtual double get (const std::string &param) const override;
-  virtual int set(const std::string &param, const std::string &val) override;
-  virtual int set(const std::string &param, double val) override;
+  virtual void set(const std::string &param, const std::string &val) override;
+  virtual void set(const std::string &param, double val) override;
   //wrapper functions used by kinsol and ida to call the internal functions
   friend int kinsolFunc (N_Vector u, N_Vector f, void *user_data);
   friend int kinsolJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
@@ -133,31 +137,30 @@ public:
 
 #endif
 private:
-  
-  FILE *m_kinsolInfoFile;                          //!<direct file reference TODO convert to stream vs FILE *
-  double solveTime = 0;                            //!< storage for the time the solver is called
-  bool fileCapture = false;							//!< flag indicating that the resid and Jacobian should be captured to a file
-  std::string jacFile;						//!< the file to write the Jacobian to 
-  std::string stateFile;					//!< the file to write the state and residual to
-#if MEASURE_TIMING > 0
+
+  FILE *m_kinsolInfoFile=nullptr;                          //!<direct file reference TODO convert to stream vs FILE *
+
+#if MEASURE_TIMINGS > 0
   double kinTime = 0;
   double residTime = 0;
   double jacTime = 0;
+  double jac1Time = 0;
+  double kinsol1Time = 0;
 #endif
 };
-/** @brief solverInterface interfacing to the sundials ida solver
+/** @brief solverInterface interfacing to the SUNDIALS IDA solver
 */
 class idaInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                     //!< array structure for holding the Jacobian information
-  
+  matrixDataSparse<double> a1;                                                     //!< array structure for holding the Jacobian information
+
   std::vector<double> tempState;                                          //!<temporary holding location for a state vector
 public:
   /** @brief constructor*/
-  idaInterface ();
+  idaInterface (const std::string &objName = "ida");
   /** @brief alternate constructor
   @param[in] gds  the gridDynSimulation object to connect to
   @param[in] sMode the solverMode to solve For
@@ -168,15 +171,15 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
 
-  int allocate (count_t size, count_t numroots = 0) override;
+  virtual void allocate (count_t size, count_t numroots = 0) override;
   void setMaxNonZeros (count_t size) override;
-  int initialize (double t0) override;
-  int sparseReInit (sparse_reinit_modes mode) override;
+  virtual void initialize (gridDyn_time t0) override;
+  virtual void sparseReInit (sparse_reinit_modes mode) override;
   int calcIC (double t0, double tstep0, ic_modes mode, bool constraints) override;
-  int getCurrentData () override;
+  virtual void getCurrentData () override;
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
-  int getRoots () override;
-  int setRootFinding (count_t numRoots) override;
+  virtual void getRoots () override;
+  virtual void setRootFinding (count_t numRoots) override;
 
   void logSolverStats (int logLevel, bool iconly = false) const override;
   void logErrorWeights (int logLevel) const override;
@@ -195,20 +198,23 @@ protected:
 };
 
 #ifdef LOAD_CVODE
-/** @brief solverInterface interfacing to the sundials cvode solver
+/** @brief solverInterface interfacing to the SUNDIALS cvode solver
 */
 class cvodeInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                         //!< array structure for holding the Jacobian information
+  matrixDataSparse<double> a1;                         //!< array structure for holding the Jacobian information
   std::vector<double> tempState;                                                //!<temporary holding location for a state vector
   bool use_bdf = false;
   bool use_newton = false;
+  double maxStep = -1.0;
+  double minStep = -1.0;
+  double step = 0.0;
 public:
   /** @brief constructor*/
-  cvodeInterface ();
+  explicit cvodeInterface (const std::string &objName = "cvode");
   /** @brief alternate constructor
   @param[in] gds  the gridDynSimulation object to connect to
   @param[in] sMode the solverMode to solve For
@@ -218,19 +224,19 @@ public:
   ~cvodeInterface ();
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
-  int allocate (count_t size, count_t numroots = 0) override;
-  int initialize (double t0) override;
+  virtual void allocate (count_t size, count_t numroots = 0) override;
+  virtual void initialize (double t0) override;
   void setMaxNonZeros (count_t size) override;
-  int sparseReInit (sparse_reinit_modes mode) override;
-  int getCurrentData () override;
+  virtual void sparseReInit (sparse_reinit_modes mode) override;
+  virtual void getCurrentData () override;
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
-  int getRoots () override;
-  int setRootFinding (count_t numRoots) override;
+  virtual void getRoots () override;
+  virtual void setRootFinding (count_t numRoots) override;
 
   void logSolverStats (int logLevel, bool iconly = false) const override;
   void logErrorWeights (int logLevel) const override;
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val) override;
   double get (const std::string &param) const override;
   // declare friend some helper functions
   friend int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_data);
@@ -247,21 +253,24 @@ protected:
 
 #ifdef LOAD_ARKODE
 
-/** @brief solverInterface interfacing to the sundials arkode solver
+/** @brief solverInterface interfacing to the SUNDIALS arkode solver
 */
 class arkodeInterface : public sundialsInterface
 {
 public:
   count_t icCount = 0;
 private:
-  arrayDataSparse a1;                                                                                                           //!< array structure for holding the Jacobian information
- 
+  matrixDataSparse<double> a1;                                                                                                           //!< array structure for holding the Jacobian information
+
   std::vector<double> tempState;                                                      //!<temporary holding location for a state vector
   bool use_bdf = false;
   bool use_newton = false;
+  double maxStep = -1.0;
+  double minStep = -1.0;
+  double step = 0.0;
 public:
   /** @brief constructor*/
-  arkodeInterface ();
+  explicit arkodeInterface (const std::string &objName = "arkode");
   /** @brief alternate constructor
   @param[in] gds  the gridDynSimulation object to connect to
   @param[in] sMode the solverMode to solve For
@@ -271,19 +280,19 @@ public:
   ~arkodeInterface ();
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
-  int allocate (count_t size, count_t numroots = 0) override;
-  int initialize (double t0) override;
+  virtual void allocate (count_t size, count_t numroots = 0) override;
+  virtual void initialize (double t0) override;
   void setMaxNonZeros (count_t size) override;
-  int sparseReInit (sparse_reinit_modes sparseReinitMode) override;
-  int getCurrentData () override;
+  virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;
+  virtual void getCurrentData () override;
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
-  int getRoots () override;
-  int setRootFinding (count_t numRoots) override;
+  virtual void getRoots () override;
+  virtual void setRootFinding (count_t numRoots) override;
 
   void logSolverStats (int logLevel, bool iconly = false) const override;
   void logErrorWeights (int logLevel) const override;
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val) override;
   double get (const std::string &param) const override;
   // declare friend some helper functions
   friend int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_data);
@@ -302,5 +311,3 @@ protected:
 
 
 #endif
-
-

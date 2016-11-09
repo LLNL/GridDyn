@@ -13,7 +13,7 @@
 
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 pidBlock::pidBlock (const std::string &objName) : basicBlock (objName)
@@ -120,7 +120,7 @@ void pidBlock::derivElements (double input, double didt, const stateData *sD, do
 }
 
 
-void pidBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void pidBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, nullptr, sMode,this);
   //adjust the offset to account for the limiter states;
@@ -228,16 +228,13 @@ index_t pidBlock::findIndex (const std::string &field, const solverMode &sMode) 
 }
 
 // set parameters
-int pidBlock::set (const std::string &param,  const std::string &val)
+void pidBlock::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  basicBlock::set (param, val);
 }
 
-int pidBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void pidBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
-  //param   = gridDynSimulation::toLower(param);
 
   if ((param == "p") || (param == "proportional"))
     {
@@ -263,10 +260,10 @@ int pidBlock::set (const std::string &param, double val, gridUnits::units_t unit
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
 
-  return out;
+ 
 }
 
 stringVec pidBlock::localStateNames () const

@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "objectFactory.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 using namespace gridUnits;
@@ -111,7 +111,7 @@ void gridDynGovernorIeeeSimple::derivative (const IOdata &args, const stateData 
   Loc.destDiffLoc[1] = (-gs[1] + (1 - T2 / T1) * (omega - 1.0)) / T1;
 }
 
-double gridDynGovernorIeeeSimple::timestep (double ttime,  const IOdata &args, const solverMode &)
+void gridDynGovernorIeeeSimple::timestep (double ttime,  const IOdata &args, const solverMode &)
 {
 
 
@@ -135,10 +135,9 @@ double gridDynGovernorIeeeSimple::timestep (double ttime,  const IOdata &args, c
 
 
   prevTime = ttime;
-  return m_state[0];
 }
 
-void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -275,14 +274,13 @@ void gridDynGovernorIeeeSimple::rootTrigger (double /*ttime*/, const IOdata &arg
 
 
 // set parameters
-int gridDynGovernorIeeeSimple::set (const std::string &param,  const std::string &val)
+void gridDynGovernorIeeeSimple::set (const std::string &param,  const std::string &val)
 {
-  return gridDynGovernor::set (param, val);
+  gridDynGovernor::set (param, val);
 }
 
-int gridDynGovernorIeeeSimple::set (const std::string &param, double val, units_t unitType)
+void gridDynGovernorIeeeSimple::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   //param   = gridDynSimulation::toLower(param);
   if (param == "t3")
@@ -304,10 +302,10 @@ int gridDynGovernorIeeeSimple::set (const std::string &param, double val, units_
     }
   else
     {
-      out = gridDynGovernor::set (param, val, unitType);
+      gridDynGovernor::set (param, val, unitType);
     }
 
-  return out;
+
 }
 
 

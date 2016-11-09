@@ -73,17 +73,17 @@ public:
   void setTime (double time) override;
   virtual void updateA (double time) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   double getOutput (index_t /*num*/ = 0) const override
   {
     return reg;
   }
-  virtual int add (gridCoreObject *obj) override;
-  virtual int add (schedulerReg *sched);
-  virtual int remove (gridCoreObject *obj) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void add (gridCoreObject *obj) override;
+  virtual void add (schedulerReg *sched);
+  virtual void remove (gridCoreObject *obj) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   double getACE ()
   {
@@ -129,8 +129,8 @@ public:
 
         virtual void addGen(schedulerReg *sched);
         virtual void removeSched(schedulerReg *sched);
-        virtual int set (const std::string &param, std::string val);
-        virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
+        virtual void set (const std::string &param, std::string val);
+        virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
 
         virtual void regChange();
 protected:

@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <vectorOps.hpp>
 #include <map>
-#include<array>
+#include <array>
 #include <utility>
 #include <iostream>
 #include <functional>
@@ -33,7 +33,7 @@ BOOST_FIXTURE_TEST_SUITE (input_tests, gridDynSimulationTestFixture)
 
 
 
-
+//TODO:: convert to a DATA TEST CASE
 BOOST_AUTO_TEST_CASE(test_power_flow_inputs)
 {
   /* *INDENT-OFF* */
@@ -213,7 +213,7 @@ for (const auto &mp : baseCDFcase)
 
 
 
-
+//TODO:: convert to a DATA TEST CASE
 BOOST_AUTO_TEST_CASE(compare_cases)
 {
   /* *INDENT-OFF* */
@@ -319,7 +319,7 @@ for (const auto &mp : compareCases)
   }
 
 
-
+  //TODO:: convert to a DATA TEST CASE
 BOOST_AUTO_TEST_CASE(input_execTest)
 {
   /* *INDENT-OFF* */
@@ -330,13 +330,13 @@ const std::map<std::string, std::array<int, 4>> executionCases{
   { std::string(INPUT_TEST_DIRECTORY "test_2m4bDyn_inputchange.xml"), { { 1, 0, 0, 0 } } },
   { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic.xml"), { { 1, 39, 0, 0 } } },
 //  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic_relay.xml"), { { 1, 39, 0, 0 } } },
+  //{ std::string(INPUT_TEST_DIRECTORY "180busdyn_test.xml"),{ { 1, 179, 0, 1 } } },
   };
 /* *INDENT-ON* */
-std::string fname;
 int count;
 for (const auto &mp : executionCases)
   {
-  fname = mp.first;
+  auto fname = mp.first;
 
   gds = new gridDynSimulation();
 

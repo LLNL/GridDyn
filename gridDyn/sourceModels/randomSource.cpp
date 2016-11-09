@@ -11,9 +11,10 @@
  * LLNS Copyright End
 */
 
-#include "gridSource.h"
+#include "sourceTypes.h"
 #include "gridRandom.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 #include <iostream>
 #include <cassert>
 
@@ -62,9 +63,9 @@ gridCoreObject *randomSource::clone (gridCoreObject *obj) const
 }
 
 // set properties
-int randomSource::set (const std::string &param,  const std::string &val)
+void randomSource::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "trigger_dist")|| (param == "time_dist"))
     {
       auto v2 = convertToLowerCase (val);
@@ -77,14 +78,13 @@ int randomSource::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridSource::set (param, val);
+      gridSource::set (param, val);
     }
-  return out;
+
 }
 
-int randomSource::setFlag (const std::string &flag, bool val)
+void randomSource::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
 
   /*
   independent_flag=object_flag3,
@@ -112,20 +112,19 @@ int randomSource::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridSource::setFlag (flag,val);
+      gridSource::setFlag (flag,val);
     }
-  return out;
+ 
 }
 
-int randomSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void randomSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "min_t")
     {
       if (val <= 0)
         {
-          std::cerr << "min_t parameter must be > 0\n";
-          out = PARAMETER_NOT_FOUND;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -150,7 +149,7 @@ int randomSource::set (const std::string &param, double val, gridUnits::units_t 
       if (val <= 0)
         {
           LOG_WARNING ("mean_t parameter must be > 0");
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -166,7 +165,7 @@ int randomSource::set (const std::string &param, double val, gridUnits::units_t 
       if (val <= 0)
         {
           LOG_WARNING ("scale_t parameter must be > 0");
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       else
         {
@@ -197,9 +196,9 @@ int randomSource::set (const std::string &param, double val, gridUnits::units_t 
   else
     {
       //I am purposely skipping over the rampLoad the functionality is needed but the access is not
-      out = gridSource::set (param, val, unitType);
+      gridSource::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void randomSource::reset ()
@@ -365,7 +364,7 @@ void randomSource::setTime (double time)
 }
 
 
-double randomSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void randomSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -407,10 +406,9 @@ double randomSource::timestep (double ttime, const IOdata &args, const solverMod
             }
           rampSource::timestep (ttime, args,sMode);
         }
-      return m_output;
     }
   else
     {
-      return rampSource::timestep (ttime,  args,sMode);
+      rampSource::timestep (ttime,  args,sMode);
     }
 }

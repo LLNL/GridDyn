@@ -16,15 +16,16 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "gridRecorder.h"
+#include "collector.h"
 #include "gridEvent.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include <cstdio>
 #include <cmath>
 
 //test case for gridCoreObject object
 
 #define RECORDER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/recorder_tests/"
+static const std::string recorder_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/recorder_tests/");
 
 BOOST_FIXTURE_TEST_SUITE (recorder_tests, gridDynSimulationTestFixture)
 
@@ -62,12 +63,9 @@ BOOST_AUTO_TEST_CASE (ts2_tests)
 
 BOOST_AUTO_TEST_CASE (file_save_tests)
 {
-  timeSeries2 ts2;
-  ts2.setCols (1);
-  int kk;
-  int ret;
+  timeSeries2 ts2(1);
   double t = 0.0;
-  for (kk = 0; kk < 10; ++kk)
+  for (int kk = 0; kk < 10; ++kk)
     {
       ts2.addData (t, 4.5);
       t = t + 1.0;
@@ -78,7 +76,7 @@ BOOST_AUTO_TEST_CASE (file_save_tests)
 
   timeSeries2 ts3;
 
-  ret = ts3.loadBinaryFile (fname);
+  int ret = ts3.loadBinaryFile (fname);
   BOOST_CHECK_EQUAL (ret, 0);
   BOOST_CHECK_EQUAL (ts3.cols, 1u);
   BOOST_CHECK_EQUAL (ts3.count, 10u);
@@ -91,16 +89,13 @@ BOOST_AUTO_TEST_CASE (file_save_tests)
 BOOST_AUTO_TEST_CASE (file_save_tests2)
 {
   timeSeries2 ts2;
-  ts2.setCols (4);
-  int kk;
-  int ret;
+  ts2.setCols (4); //test the set cols method
+  BOOST_CHECK(ts2.cols == 4);
+
+  std::vector<double> vt {4.5,5.5,6.5,7.5};
+
   double t = 0.0;
-  std::vector<double> vt (4);
-  vt[0] = 4.5;
-  vt[1] = 5.5;
-  vt[2] = 6.5;
-  vt[3] = 7.5;
-  for (kk = 0; kk < 30; ++kk)
+  for (int kk = 0; kk < 30; ++kk)
     {
       ts2.addData (t, vt);
       t = t + 1.0;
@@ -109,10 +104,8 @@ BOOST_AUTO_TEST_CASE (file_save_tests2)
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "ts_test2.dat");
   ts2.writeBinaryFile (fname);
 
-  timeSeries2 ts3;
+  timeSeries2 ts3(fname);
 
-  ret = ts3.loadBinaryFile (fname);
-  BOOST_CHECK_EQUAL (ret, 0);
   BOOST_CHECK_EQUAL (ts3.cols, 4u);
   BOOST_CHECK_EQUAL (ts3.count, 30u);
   BOOST_CHECK_SMALL (compare (&ts2, &ts3), 0.00001);
@@ -121,7 +114,7 @@ BOOST_AUTO_TEST_CASE (file_save_tests2)
   double diff = compare (&ts2, &ts3);
   BOOST_CHECK_CLOSE (diff, 0.5, 0.001);
   BOOST_CHECK_EQUAL (ts3.count, ts3.data[3].size ());
-  ret = remove (fname.c_str ());
+  int ret = remove (fname.c_str ());
 
   BOOST_CHECK_EQUAL (ret, 0);
 }
@@ -129,47 +122,45 @@ BOOST_AUTO_TEST_CASE (file_save_tests2)
 BOOST_AUTO_TEST_CASE (recorder_test1)
 {
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "recorder_test.xml");
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
   gds->consolePrintLevel = 5;
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 1);
-  val = gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
-  BOOST_CHECK_EQUAL (val, PARAMETER_FOUND);
+  gds->set ("recorddirectory", recorder_test_directory);
+ 
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "loadrec.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile (recname);
-  BOOST_CHECK_EQUAL (ret, 0);
-
+  timeSeries2 ts3(recname);
+  BOOST_CHECK(ts3.fields[0] == "load3:power");
   BOOST_CHECK_EQUAL (ts3.count, 31u);
-  ret = remove (recname.c_str ());
+  int ret = remove (recname.c_str ());
+  BOOST_CHECK_EQUAL(ret, 0);
+  
 
-  BOOST_CHECK_EQUAL (ret, 0);
+  
 
 }
 
 BOOST_AUTO_TEST_CASE (recorder_test2)
 {
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "recorder_test2.xml");
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 1);
-  val = gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
-  BOOST_CHECK_EQUAL (val, PARAMETER_FOUND);
+  gds->set ("recorddirectory", recorder_test_directory);
+  
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "genrec.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile (recname);
-  BOOST_CHECK_EQUAL (ret, 0);
+  timeSeries2 ts3(recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 31u);
   BOOST_CHECK_EQUAL (ts3.cols, 2u);
-  ret = remove (recname.c_str ());
+  int ret = remove (recname.c_str ());
 
   BOOST_CHECK_EQUAL (ret, 0);
 
@@ -178,24 +169,22 @@ BOOST_AUTO_TEST_CASE (recorder_test2)
 BOOST_AUTO_TEST_CASE (recorder_test3)
 {
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "recorder_test3.xml");
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
   BOOST_CHECK_EQUAL (readerConfig::warnCount, 0);
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 3);
-  val = gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
-  BOOST_CHECK_EQUAL (val, PARAMETER_FOUND);
+  gds->set ("recorddirectory", recorder_test_directory);
+  
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "genrec.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile (recname);
-  BOOST_CHECK_EQUAL (ret, 0);
+  timeSeries2 ts3(recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 121u);
   BOOST_CHECK_EQUAL (ts3.cols, 4u);
-  //ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL (ret, 0);
 
@@ -221,7 +210,7 @@ BOOST_AUTO_TEST_CASE (recorder_test3)
 
 }
 
-//testing the recorder as subobject and recorder found via link
+//testing the recorder as subObject and recorder found via link
 BOOST_AUTO_TEST_CASE (recorder_test4)
 {
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "recorder_test4.xml");
@@ -231,7 +220,7 @@ BOOST_AUTO_TEST_CASE (recorder_test4)
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 2);
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -261,7 +250,7 @@ BOOST_AUTO_TEST_CASE (recorder_test4)
 }
 
 
-//testing the vector recorcders of the simulation object
+//testing the vector recorders of the simulation object
 BOOST_AUTO_TEST_CASE (recorder_test5)
 {
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "recorder_test5.xml");
@@ -271,7 +260,7 @@ BOOST_AUTO_TEST_CASE (recorder_test5)
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 2);
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -280,6 +269,7 @@ BOOST_AUTO_TEST_CASE (recorder_test5)
   int ret = ts3.loadBinaryFile (recname);
   BOOST_CHECK_EQUAL (ret, 0);
 
+  BOOST_CHECK_EQUAL(ts3.fields[2], "bus3:voltage");
   BOOST_CHECK_EQUAL (ts3.count, 61u);
   BOOST_CHECK_EQUAL (ts3.cols, 4u);
   ret = remove (recname.c_str ());
@@ -309,7 +299,7 @@ BOOST_AUTO_TEST_CASE (recorder_test6)
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 2);
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -349,7 +339,7 @@ BOOST_AUTO_TEST_CASE (recorder_test7)
   gds->solverSet("dynamic", "printlevel", 0);
   int val=gds->getInt ("recordercount");
   BOOST_CHECK_EQUAL (val, 2);
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -388,7 +378,7 @@ BOOST_AUTO_TEST_CASE (recorder_test8)
   gds->solverSet("dynamic", "printlevel", 0);
   int val = gds->getInt("recordercount");
   BOOST_CHECK_EQUAL (val, 2);
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -428,7 +418,7 @@ BOOST_AUTO_TEST_CASE (recorder_test9)
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
 
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -456,7 +446,7 @@ BOOST_AUTO_TEST_CASE (recorder_test10)
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
 
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -483,7 +473,7 @@ BOOST_AUTO_TEST_CASE (recorder_test11)
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
 
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -511,7 +501,7 @@ BOOST_AUTO_TEST_CASE (recorder_test12)
   gds->consolePrintLevel = 0;
   gds->solverSet("dynamic", "printlevel", 0);
 
-  gds->set ("recorddirectory", RECORDER_TEST_DIRECTORY);
+  gds->set ("recorddirectory", recorder_test_directory);
 
   gds->run ();
 
@@ -528,6 +518,50 @@ BOOST_AUTO_TEST_CASE (recorder_test12)
   BOOST_CHECK_CLOSE (sin (ts2.data[0][2] - ts2.data[1][2]), ts2.data[2][2], 0.0001);
   BOOST_CHECK_CLOSE (sin (ts2.data[0][8] - ts2.data[1][8]), ts2.data[2][8], 0.0001);
 
+}
+
+//testing if the recorders have any material impact on the results
+BOOST_AUTO_TEST_CASE(recorder_test_period)
+{
+	std::string fname = recorder_test_directory+"recorder_test_sineA.xml";
+	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	BOOST_CHECK_EQUAL(readerConfig::warnCount, 0);
+	gds->consolePrintLevel = 0;
+	gds->solverSet("dynamic", "printlevel", 0);
+
+	gds->set("recorddirectory", recorder_test_directory);
+
+	gds->run();
+
+	std::string recname = std::string(RECORDER_TEST_DIRECTORY "recorder_dataA.dat");
+	timeSeries2 tsA(recname);
+
+	std::string fname2 = recorder_test_directory + "recorder_test_sineB.xml";
+	gds2 = static_cast<gridDynSimulation *> (readSimXMLFile(fname2));
+	BOOST_CHECK_EQUAL(readerConfig::warnCount, 0);
+	gds2->consolePrintLevel = 0;
+	gds2->solverSet("dynamic", "printlevel", 0);
+
+	gds2->set("recorddirectory", recorder_test_directory);
+
+	gds2->run();
+
+	std::string recname2 = std::string(RECORDER_TEST_DIRECTORY "recorder_dataB.dat");
+	timeSeries2 tsB(recname2);
+
+	size_t diffc = 0;
+	BOOST_REQUIRE((tsA.count - 1) * 4 == (tsB.count - 1));
+	for (decltype(tsA.count) ii=1;ii<tsA.count;++ii)
+	{
+		for (decltype(tsA.cols) jj = 0; jj<tsA.cols; ++jj)
+		if (std::abs(tsA.data[jj][ii]-tsB.data[jj][4*ii])>1e-4) //TODO:: this is still small but bigger than it really should be
+		{
+			++diffc;
+		}
+	}
+	BOOST_CHECK(diffc == 0);
+	remove(recname.c_str());
+	remove(recname2.c_str());
 }
 
 BOOST_AUTO_TEST_SUITE_END ()

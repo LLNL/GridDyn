@@ -26,6 +26,7 @@ enum class function_type
 	no_args, //!< functions with no arguments
 	arg,   //!< function with 1 argument
 	arg2, //!< functions with 2 arguments
+	arg3, //1< functions with 3 arguments
 	vect_arg,  //!< function with a vector arguments
 	vect_arg2  //!< functions with 2 vector arguments
 };
@@ -74,31 +75,31 @@ double evalFunction(const std::string &ftest, std::vector<double> arr1, std::vec
 bool isFunctionName(const std::string &ftest, function_type ftype = function_type::all);
 
 /** @brief find a no argument function and return the corresponding lambda function
-@param[in] the function name
+@param[in] funcName the function name
 @return a std::Function with the appropriate function
 */
 std::function<double()> get0ArgFunction(const std::string &funcName);
 
 /** @brief find a single argument function and return the corresponding lambda function
-@param[in] the function name
+@param[in] funcName the function name
 @return a std::Function with the appropriate function
 */
 std::function<double(double)> get1ArgFunction(const std::string &funcName);
 
 /** @brief find a two argument function and return the corresponding lambda function
-@param[in] the function name
+@param[in] funcName the function name
 @return a std::Function with the appropriate function
 */
 std::function<double(double, double)> get2ArgFunction(const std::string &funcName);
 
-/** @brief find a function with a single array as an argment and return the corresponding lambda function
-@param[in] the function name
+/** @brief find a function with a single array as an argument and return the corresponding lambda function
+@param[in] funcName the function name
 @return a std::Function implementing the appropriate function
 */
 std::function<double(std::vector<double>)> getArrayFunction(const std::string &funcName);
 
-/** @brief find a function with a two arrays as argments and return the corresponding lambda function
-@param[in] the function name
+/** @brief find a function with a two arrays as arguments and return the corresponding lambda function
+@param[in] funcName the function name
 @return a std::Function implementing the appropriate function
 */
 std::function<double(std::vector<double>, std::vector<double>)> get2ArrayFunction(const std::string &funcName);

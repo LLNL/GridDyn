@@ -13,13 +13,27 @@
 
 #include "solverInterface.h"
 #include "sundialsInterface.h"
+#include "core/factoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "gridDyn.h"
 #include "stringOps.h"
 
 #include <string>
 #include <iostream>
+#include <new>
 
-solverInterface::solverInterface ()
+
+static childClassFactoryArg<solverInterface, basicSolver,basicSolver::mode_t> basicFactoryG(stringVec{ "basic","gauss" },basicSolver::mode_t::gauss);
+static childClassFactoryArg<solverInterface, basicSolver, basicSolver::mode_t> basicFactoryGS(stringVec{ "gs","gauss-seidel" }, basicSolver::mode_t::gauss_seidel);
+#ifdef LOAD_CVODE
+static childClassFactory<solverInterface, basicOdeSolver> basicOdeFactory(stringVec{ "basicode","euler" });
+#else
+// if cvode is not available this becomes the default differential solver
+static childClassFactory<solverInterface, basicOdeSolver> basicOdeFactory(stringVec{ "basicode","dyndiff", "differential" });
+
+#endif
+
+solverInterface::solverInterface(const std::string &objName) :name(objName)
 {
 }
 
@@ -35,7 +49,15 @@ solverInterface::~solverInterface ()
 
 std::shared_ptr<solverInterface> solverInterface::clone(std::shared_ptr<solverInterface> si, bool fullCopy) const
 {
-	si->name = name;
+	if (!si)
+	{
+		si = std::make_shared<solverInterface>(name);
+	}
+	else
+	{
+		si->name = name;
+	}
+	
 	si->printResid = printResid;
 	si->solverLogFile = solverLogFile;
 	si->printLevel = printLevel;	
@@ -63,24 +85,32 @@ std::shared_ptr<solverInterface> solverInterface::clone(std::shared_ptr<solverIn
 		{
 			si->initialize(0);
 		}
+		//copy the state data
 		const double *sd = state_data();
 		double *statecopy = si->state_data();
 		if ((sd) && (statecopy))
 		{
 			std::copy(sd, sd + svsize, statecopy);
 		}
+
+		//copy the derivative data
 		const double *deriv = deriv_data();
 		double *derivcopy = si->deriv_data();
 		if ((deriv)&&(derivcopy))
 		{
 			std::copy(deriv, deriv + svsize, derivcopy);
 		}
+		//copy the type data
 		const double *td = type_data();
 		double *tcopy = si->type_data();
 		if ((td) && (tcopy))
 		{
 			std::copy(td, td + svsize, tcopy);
 		}
+		si->fileCapture = fileCapture;
+		si->jacFile = jacFile;
+		si->stateFile = stateFile;
+
 	}
 	return si;
 }
@@ -89,6 +119,8 @@ double * solverInterface::state_data ()
 {
   return nullptr;
 }
+
+
 
 double * solverInterface::deriv_data ()
 {
@@ -105,6 +137,8 @@ const double * solverInterface::state_data() const
 	return nullptr;
 }
 
+
+
 const double * solverInterface::deriv_data() const
 {
 	return nullptr;
@@ -114,38 +148,37 @@ const double *solverInterface::type_data() const
 {
 	return nullptr;
 }
-int solverInterface::allocate (count_t /*stateSize*/, count_t numroots)
+void solverInterface::allocate (count_t /*stateSize*/, count_t numroots)
 {
   rootsfound.resize (numroots);
-  return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int solverInterface::initialize (double /*t0*/)
+void solverInterface::initialize (gridDyn_time t0)
 {
-  return -101;
+	solveTime = t0;
 }
-int solverInterface::sparseReInit (sparse_reinit_modes /*mode*/)
+void solverInterface::sparseReInit (sparse_reinit_modes /*mode*/)
 {
-  return -101;
 }
 void solverInterface::setConstraints ()
 {
 }
-int solverInterface::calcIC (double /*t0*/, double /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
+int solverInterface::calcIC (gridDyn_time /*t0*/, double /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
 {
   return -101;
 }
-int solverInterface::getCurrentData ()
+void solverInterface::getCurrentData ()
 {
-  return -101;
+  
 }
-int solverInterface::getRoots ()
+void solverInterface::getRoots ()
 {
-  return -101;
+  
 }
-int solverInterface::setRootFinding (index_t /*numRoots*/)
+
+void solverInterface::setRootFinding (index_t /*numRoots*/)
 {
-  return -101;
+  
 }
 
 void solverInterface::setSimulationData (const solverMode& sMode)
@@ -207,9 +240,9 @@ double solverInterface::get (const std::string & param) const
   return res;
 }
 
-int solverInterface::set (const std::string &param, const std::string &val)
+void solverInterface::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
 
@@ -270,7 +303,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else if (param == "printlevel")
@@ -290,7 +323,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else if (param == "flags")
@@ -336,7 +369,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
             }
           else
             {
-              out = solverInterface::set ("mode",str);
+              solverInterface::set ("mode",str);
             }
         }
     }
@@ -410,7 +443,7 @@ int solverInterface::set (const std::string &param, const std::string &val)
             }
           else
             {
-              out = solverInterface::set ("approx", str);
+              solverInterface::set ("approx", str);
             }
         }
     }
@@ -420,19 +453,32 @@ int solverInterface::set (const std::string &param, const std::string &val)
     }
   else if (param == "name")
     {
-      name = val;
+      setName(val);
     }
+	else if (param == "jacfile")
+	{
+		jacFile = val;
+	}
+	else if (param == "statefile")
+	{
+		stateFile = val;
+	}
+	else if (param == "capturefile")
+	{
+		jacFile = val;
+		stateFile = val;
+	}
   else
     {
-      out = PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
-  return out;
+ 
 }
 
-int solverInterface::set (const std::string &param, double val)
+void solverInterface::set (const std::string &param, double val)
 {
   auto pstr = convertToLowerCase (param);
-  int out = PARAMETER_FOUND;
+  
   if ((pstr == "pair")||(pstr == "pairedmode"))
     {
       mode.pairedOffsetIndex = static_cast<index_t> (val);
@@ -451,9 +497,13 @@ int solverInterface::set (const std::string &param, double val)
           printLevel = solver_print_level::s_debug_print;
           break;
         default:
-          out = INVALID_PARAMETER_VALUE;
+			throw(invalidParameterValue());
         }
     }
+  else if (param == "filecapture")
+  {
+	  fileCapture = (val >= 0.1);
+  }
   else if (pstr == "dense")
     {
       dense = (val > 0);
@@ -492,9 +542,9 @@ int solverInterface::set (const std::string &param, double val)
     }
   else
     {
-      out = PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
-  return out;
+ 
 }
 
 
@@ -551,7 +601,7 @@ void solverInterface::printStates (bool stateNames)
 
 }
 
-int solverInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError) const
+void solverInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError) const
 {
   int *errflag;
   // Check if SUNDIALS function returned nullptr pointer - no memory allocated
@@ -561,7 +611,7 @@ int solverInterface::check_flag (void *flagvalue, const std::string &funcname, i
         {
           m_gds->log (m_gds,GD_ERROR_PRINT, funcname + " failed - returned nullptr pointer");
         }
-      return(1);
+	  throw(std::bad_alloc());
     }
   else if (opt == 1)
     {
@@ -573,20 +623,10 @@ int solverInterface::check_flag (void *flagvalue, const std::string &funcname, i
             {
               m_gds->log (m_gds, GD_ERROR_PRINT, funcname + " failed with flag = " + std::to_string (*errflag));
             }
-          return(1);
+		  throw(solverException(*errflag));
         }
-    }
-  else if (opt == 2 && flagvalue == nullptr)
-    {
-      // Check if function returned nullptr pointer - no memory allocated
-      if (printError)
-        {
-          m_gds->log (m_gds, GD_ERROR_PRINT, funcname + " failed MEMORY_ERROR- returned nullptr pointer");
-        }
-      return(1);
     }
 
-  return 0;
 }
 
 int solverInterface::solve (double /*tStop*/, double & /*tReturn*/, step_mode)
@@ -654,13 +694,12 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     }
   else if (isDifferentialOnly (sMode))
     {
-#ifdef LOAD_CVODE
-      sd = std::make_shared<cvodeInterface> (gds, sMode);
+	  sd = coreClassFactory<solverInterface>::instance()->createObject("differential");
+	  sd->setSimulationData(gds, sMode);
       if (sMode.offsetIndex == 5)
         {
           sd->setName("differential");
         }
-#endif
 
     }
 
@@ -669,48 +708,6 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
 
 std::shared_ptr<solverInterface> makeSolver (const std::string &type)
 {
-  std::shared_ptr<solverInterface> sd;
-  if ((type == "kinsol") || (type == "algebraic"))
-    {
-      sd = std::make_shared<kinsolInterface> ();
-    }
-  else if ((type == "ida") || (type == "dae"))
-    {
-      sd = std::make_shared<idaInterface> ();
-    }
-  else if ((type == "basic")||(type == "gauss"))
-    {
-      sd = std::make_shared<basicSolver> ();
-      sd->set ("algorithm", "gauss");
-    }
-  else if ((type == "gs")||(type == "gauss-seidel"))
-    {
-      sd = std::make_shared<basicSolver> ();
-      sd->set ("algorithm", "gauss-seidel");
-    }
-  else if ((type == "cvode") || (type == "differential"))
-    {
-                #ifdef LOAD_CVODE
-      sd = std::make_shared<cvodeInterface> ();
-#else
-      sd = nullptr;
-#endif
-    }
-  else if (type == "arkode")
-    {
-#ifdef LOAD_ARKODE
-      sd = std::make_shared<arkodeInterface> ();
-#else
-      sd = nullptr;
-#endif
-    }
-  else if ((type=="basicode")||(type=="euler"))
-  {
-	  sd = std::make_shared<basicOdeSolver>();
-  }
-  else
-    {
-      sd = nullptr;
-    }
-  return sd;
+	return coreClassFactory<solverInterface>::instance()->createObject(type);
+  
 }

@@ -13,10 +13,11 @@
 
 #include "submodels/otherGovernors.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "objectFactoryTemplates.h"
 #include "gridCoreTemplates.h"
 #include "gridBus.h"
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
 
 
 //Create the component factories for the various governors
@@ -144,13 +145,13 @@ void gridDynGovernor::residual (const IOdata &args, const stateData *sD, double 
 
 }
 
-double gridDynGovernor::timestep (double ttime,  const IOdata &args,const solverMode &)
+void gridDynGovernor::timestep (double ttime,  const IOdata &args,const solverMode &)
 {
   double out = cb.step (ttime, args[govOmegaInLocation]);
 
   out = dbb.step (ttime, out);
-  out = delay.step (ttime, out + args[govpSetInLocation]);
-  return out;
+  delay.step (ttime, out + args[govpSetInLocation]);
+
 }
 
 void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
@@ -164,12 +165,12 @@ void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, doubl
 }
 
 
-void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   cb.jacElements  (args[govOmegaInLocation], 0,sD, ad, argLocs[govOmegaInLocation], sMode);
 
 
-  arrayDataSparse kp;
+  matrixDataSparse<double> kp;
   index_t wloc = cb.getOutputLoc(sMode);
   double out = cb.getOutput (kNullVec, sD, sMode);
   dbb.jacElements (out, 0,sD, ad, wloc, sMode);
@@ -211,7 +212,7 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 
 
   /*
-  copyReplicate(arrayDataSparse *a2, index_t origCol, std::vector<index_t> newIndices, std::vector<double> mult)
+  copyReplicate(matrixDataSparse *a2, index_t origCol, std::vector<index_t> newIndices, std::vector<double> mult)
   auto res = a2->dVec.begin();
         auto term = a2->dVec.end();
 
@@ -270,31 +271,36 @@ index_t gridDynGovernor::findIndex (const std::string &field, const solverMode &
   return ret;
 }
 
-int gridDynGovernor::setFlag (const std::string &flag, bool val)
+void gridDynGovernor::setFlag (const std::string &flag, bool val)
 {
-  int out = gridSubModel::setFlag (flag, val);
-  if (out == PARAMETER_NOT_FOUND)
-    {
-      out = dbb.setFlag (flag, val);
-    }
-  return out;
+	try
+	{
+		gridSubModel::setFlag(flag, val);
+	}
+	catch (const unrecognizedParameter &)
+	{
+		dbb.setFlag(flag, val);
+	}
+  
 }
 // set parameters
-int gridDynGovernor::set (const std::string &param,  const std::string &val)
+void gridDynGovernor::set (const std::string &param,  const std::string &val)
 {
-  int out = gridSubModel::set (param, val);
-  if (out == PARAMETER_NOT_FOUND)
-    {
-      out = dbb.set (param, val);
+	try
+	{
+		gridSubModel::set(param, val);
+	}
+	catch (const unrecognizedParameter &)
+	{
+      dbb.set (param, val);
     }
-  return out;
+
 }
 
-int gridDynGovernor::set (const std::string &param, double val, units_t unitType)
+void gridDynGovernor::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
-  //param   = gridDynSimulation::toLower(param);
+
   if (param == "k")
     {
       K = val;
@@ -369,10 +375,9 @@ int gridDynGovernor::set (const std::string &param, double val, units_t unitType
     }
   else
     {
-      out = gridSubModel::set (param, val, unitType);
+      gridSubModel::set (param, val, unitType);
     }
 
-  return out;
 }
 
 double gridDynGovernor::get (const std::string &param, gridUnits::units_t unitType) const

@@ -35,7 +35,7 @@ A * cloneBase (const A *originalObject, gridCoreObject *obj)
   A *clonedObject;
   if (obj == nullptr)
     {
-      clonedObject = new A ();
+      clonedObject = new A (originalObject->getName());
     }
   else
     {

@@ -85,9 +85,8 @@ gridCoreObject *hvdc::clone (gridCoreObject *obj) const
 
 
 // set properties
-int hvdc::set (const std::string &param, const std::string &val)
+void hvdc::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "from")
     {
       subsystem::set ("bus1",val);
@@ -100,14 +99,14 @@ int hvdc::set (const std::string &param, const std::string &val)
     }
   else
     {
-      out = subsystem::set (param,val);
+      subsystem::set (param,val);
     }
-  return out;
+
 }
 
-int hvdc::set (const std::string &param, double val, units_t unitType)
+void hvdc::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "r")
   {
     getLink(0)->set("r",val,unitType);
@@ -144,9 +143,9 @@ int hvdc::set (const std::string &param, double val, units_t unitType)
   }
   else 
   {
-    out=subsystem::set(param,val,unitType);
+    subsystem::set(param,val,unitType);
   }
-  return out;
+
 }
 
 
@@ -164,21 +163,21 @@ double val=kNullVal;
   return val;
 }
 
-int hvdc::updateBus(gridBus *bus, index_t busnumber)
+void hvdc::updateBus(gridBus *bus, index_t busnumber)
 {
   if (busnumber==1)
   {
     subsystem::updateBus(bus,1);
-    return subsystem::updateBus(bus,3);
+    subsystem::updateBus(bus,3);
   }
   else if (busnumber==2)
   {
     subsystem::updateBus(bus, 2);
-    return subsystem::updateBus(bus, 4);
+    subsystem::updateBus(bus, 4);
   }
   else
   {
-    return subsystem::updateBus(bus,busnumber);
+    subsystem::updateBus(bus,busnumber);
   }
 }
 

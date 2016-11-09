@@ -12,7 +12,7 @@
  */
 
 #include "scheduler.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "dispatcher.h"
 #include "comms/gridCommunicator.h"
 #include "comms/schedulerMessage.h"
@@ -69,20 +69,23 @@ bool operator!= (const tsched &td1, const double &timeC)
 {
   return (td1.time != timeC);
 }
-scheduler::scheduler (const std::string &objName) : gridSubModel (objName)
-{
-  prevTime = -kBigNum;           //override default setting
-}
 
-scheduler::scheduler (double initialValue, const std::string &objName) : gridSubModel (objName),PCurr (initialValue),output (initialValue)
+scheduler::scheduler(const std::string &objName, double initialValue) : gridSource(objName, initialValue), PCurr(initialValue)
 {
-  prevTime = -kBigNum;     //override default setting
+	prevTime = -kBigNum;     //override default setting
 
 }
+
+scheduler::scheduler (double initialValue, const std::string &objName) : scheduler(objName,initialValue)
+{
+  
+}
+
+
 
 gridCoreObject *scheduler::clone (gridCoreObject *obj) const
 {
-  scheduler *nobj = cloneBase<scheduler, gridSubModel> (this, obj);
+  scheduler *nobj = cloneBase<scheduler, gridSource> (this, obj);
   if (nobj == nullptr)
     {
       return obj;
@@ -123,7 +126,8 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
   std::list<tsched> flist;
   while ((tm != tme)&&(tg != tge))
     {
-      pTarget.push_back (tsched (*tm, *tg));
+      //pTarget.push_back (tsched (*tm, *tg));
+	  pTarget.emplace_back(*tm, *tg);
       ++tm;
       ++tg;
     }
@@ -135,14 +139,11 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
     }
 }
 
-int scheduler::setTarget (const std::string &filename)
+void scheduler::setTarget (const std::string &filename)
 {
   timeSeries targets;
-  int out = targets.loadBinaryFile (filename);
-  if (out < 0)
-    {
-      return out;
-    }
+  targets.loadBinaryFile (filename);
+  
   std::list<tsched> flist;
   for (index_t kk = 0; kk < targets.count; ++kk)
     {
@@ -156,7 +157,7 @@ int scheduler::setTarget (const std::string &filename)
       nextUpdateTime = (pTarget.front ()).time;
       parent->alert (this, UPDATE_TIME_CHANGE);
     }
-  return out;
+
 }
 
 void scheduler::setTime (double time)
@@ -203,14 +204,14 @@ void scheduler::updateA (double time)
           nextUpdateTime = (pTarget.front ()).time;
         }
     }
-  output = PCurr;
+  m_output = PCurr;
   prevTime = time;
   m_lastUpdateTime = time;
 }
 
 double scheduler::predict (double time)
 {
-  double out = output;
+  double out = m_output;
   if (time >= nextUpdateTime)
     {
       out = (pTarget.front ()).target;
@@ -229,12 +230,9 @@ double scheduler::predict (double time)
 
 void scheduler::objectInitializeA (double time0, unsigned long /*flags*/)
 {
-  if (!commLink)
-    {
-      commLink = makeCommunicator (commType, name, 0);
-    }
+	commLink = cManager.build();
 
-  commLink->registerActionMessage ([&](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
+  commLink->registerReceiveCallback ([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
     receiveMessage (sourceID, message);
   });
   prevTime = time0;
@@ -256,7 +254,7 @@ void scheduler::objectInitializeB (const IOdata & /*args*/, const IOdata &output
   //try to register to a dispatcher
 
   PCurr = outputSet[0];
-  output = PCurr;
+  m_output = PCurr;
 }
 
 
@@ -277,23 +275,24 @@ double scheduler::getMin(double /*time*/) const
 	return Pmin;
 }
 
-int scheduler::set (const std::string &param,  const std::string &val)
+void scheduler::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-  if (param == "commtype")
+	if (param[0] == '#')
     {
-      commType = val;
+      
     }
   else
     {
-      out = gridCoreObject::set (param, val);
+	  if (!cManager.set(param, val))
+	  {
+		  gridSource::set(param, val);
+	  }
     }
-  return out;
+
 }
 
-int scheduler::set (const std::string &param, double val,units_t unitType)
+void scheduler::set (const std::string &param, double val,units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if (param == "min")
     {
       Pmin = unitConversion (val, unitType, puMW,m_Base);
@@ -320,9 +319,20 @@ int scheduler::set (const std::string &param, double val,units_t unitType)
     }
   else
     {
-      out = gridSubModel::set (param,val,unitType);
+	  if (!cManager.set(param, val))
+	  {
+		  gridSource::set(param, val, unitType);
+	  }
     }
-  return out;
+
+}
+
+void scheduler::setFlag(const std::string &flag, bool val)
+{
+	if (!cManager.setFlag(flag, val))
+	{
+		gridSource::setFlag(flag, val);
+	}
 }
 
 double scheduler::get (const std::string &param, units_t unitType) const
@@ -338,7 +348,7 @@ double scheduler::get (const std::string &param, units_t unitType) const
     }
   else
   {
-	  val = gridSubModel::get(param, unitType);
+	  val = gridSource::get(param, unitType);
   }
   return val;
 }
@@ -351,7 +361,7 @@ void scheduler::clearSchedule ()
     {
       pTarget.resize (0);
       nextUpdateTime = kBigNum;
-      parent->alert (this, UPDATE_TIME_CHANGE);
+      alert (this, UPDATE_TIME_CHANGE);
     }
 }
 
@@ -363,7 +373,7 @@ void scheduler::insertTarget (tsched ts)
     {
       pTarget.push_front (ts);
       nextUpdateTime = ts.time;
-      parent->alert (this, UPDATE_TIME_CHANGE);
+      alert (this, UPDATE_TIME_CHANGE);
     }
   else
     {

@@ -77,12 +77,12 @@ enum units_t
   Cph = 801,                //!< cost per hour
   CpMWh = 802,               //!< cost per MWh
   CpMW2h = 803,               //!< cost per MWh^2
-  CppuMWh = 804,               //!< cost per per unit MWh
-  CppuMW2h = 805,               //!< cost per per unit MWh^2
+  CppuMWh = 804,               //!< cost per puMWh
+  CppuMW2h = 805,               //!< cost per puMWh^2
   CpMVARh = 806,                //!< cost per MVARh
   CpMVAR2h = 807,               //!< cost per MVARh^2
-  CppuMVARh = 808,               //!< cost per per unit MVARh
-  CppuMVAR2h = 809,               //!< cost per per unit MVARh^2
+  CppuMVARh = 808,               //!< cost per puMVARh
+  CppuMVAR2h = 809,               //!< cost per puMVARh^2
 
   // temperature units
   F = 1001,
@@ -103,15 +103,17 @@ enum units_type_t
   temperature,
   deftype,
 };
+
 /** @brief convert a units_t into a string 
  should work in a cycle with getUnits function
 @param[in] unitType  the unit to convert to a string
 @return a string representing the units*/
 std::string to_string (units_t unitType);
+
 /** @brief convert a string into a units_t
  should work in a cycle with to_string function
 @param[in] unitName  the string containing a representation of the units
-@param[in] the default unit to use if the string conversion doesn't succeed
+@param[in] defValue the default unit to use if the string conversion doesn't succeed
 @return a unit*/
 units_t getUnits (const std::string &unitName, units_t defValue = defUnit);
 
@@ -120,7 +122,7 @@ units_t getUnits (const std::string &unitName, units_t defValue = defUnit);
 @param[in] in the units of val
 @param[in] out the units of the desired result
 @param[in] basePower  the basePower when converting from pu values
-@param[in] baseVoltage  the base Voltage to use when converterting to and from pu values 
+@param[in] baseVoltage  the base Voltage to use when converting to and from pu values 
 @return the numerical value of the property in output units,  badConversion if unable to convert between the specified units
 */
 double unitConversion (double val, const units_t in, const units_t out, double basePower = 100, double baseVoltage = 100);
@@ -138,7 +140,7 @@ double unitConversionTime (double val, const units_t in, const units_t out);
 @param[in] in the units of val
 @param[in] out the units of the desired result
 @param[in] basePower  the basePower when converting from pu values
-@param[in] baseVoltage  the base Voltage to use when converterting to and from pu values
+@param[in] baseVoltage  the base Voltage to use when converting to and from pu values
 @return the numerical value of the property in output units,  badConversion if unable to convert between the specified units
 */
 

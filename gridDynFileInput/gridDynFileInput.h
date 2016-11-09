@@ -15,13 +15,13 @@
 #define GRIDDYNINPUT_H_
 
 #include "readerInfo.h"
+#include "gridDynVectorTypes.h"
 
 class gridEvent;
 class gridRecorder;
 class gridCoreObject;
 class gridDynSimulation;
-//!< typedef for convenience
-typedef std::vector<std::string> stringVec;
+
 
 #define READER_VERBOSE_PRINT 3
 #define READER_NORMAL_PRINT 2
@@ -72,6 +72,8 @@ std::uint32_t addflags (std::uint32_t iflags, const std::string &flags);
 
 void loadFile (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri = nullptr, std::string ext = "");
 
+void loadGDZ(gridCoreObject *parentObject, const std::string &fileName, readerInfo *ri = nullptr);
+
 void loadCDF (gridCoreObject *parentObject,const std::string &filename, const basicReaderInfo &bri = defInfo);
 
 void loadPSP (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
@@ -87,8 +89,15 @@ void loadMFile (gridCoreObject *parentObject, const std::string &filename, const
 
 void loadCSV (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri, const std::string &oname = "");
 
-void objectParameterSet (const std::string &label, gridCoreObject *obj, gridParameter &param);
+/** function sets a parameter in an object
+@param[in] label the name to be printed if there is a problem
+@param[in] obj  the object to change the parameter of
+@param[in] param a gridParameter definition
+@return 0 if successful (-1) if the setting failed
+*/
+int objectParameterSet (const std::string &label, gridCoreObject *obj, gridParameter &param) noexcept;
 
 void addToParent (gridCoreObject *objectToAdd, gridCoreObject *parentObject);
-
+/** @brief attempt to add to a parent object with renaming sequence*/
+void addToParentRename(gridCoreObject *objectToAdd, gridCoreObject *parentObject);
 #endif

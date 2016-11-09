@@ -18,6 +18,7 @@
 #include "optObjectFactory.h"
 #include "vectorOps.hpp"
 #include "vectData.h"
+#include "core/gridDynExceptions.h"
 
 #include <cmath>
 #include <utility>
@@ -73,7 +74,7 @@ gridCoreObject *gridLoadOpt::clone (gridCoreObject *obj) const
 }
 
 
-int gridLoadOpt::add (gridCoreObject *obj)
+void gridLoadOpt::add (gridCoreObject *obj)
 {
   if (dynamic_cast<gridLoad *> (obj))
     {
@@ -83,9 +84,11 @@ int gridLoadOpt::add (gridCoreObject *obj)
           name = load->getName ();
         }
       id = load->getUserID ();
-      return OBJECT_ADD_SUCCESS;
     }
-  return OBJECT_NOT_RECOGNIZED;
+  else
+  {
+	  throw(invalidObjectException(this));
+  }
 }
 
 count_t gridLoadOpt::objSize (const optimMode &)
@@ -154,11 +157,11 @@ void gridLoadOpt::valueBounds (double /*ttime*/, double /*upperLimit*/[], double
 
 }
 
-void gridLoadOpt::linearObj (const optimData *, vectData * /*linObj*/, const optimMode &)
+void gridLoadOpt::linearObj (const optimData *, vectData<double> * /*linObj*/, const optimMode &)
 {
 
 }
-void gridLoadOpt::quadraticObj (const optimData *, vectData * /*linObj*/, vectData * /*quadObj*/, const optimMode &)
+void gridLoadOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/, vectData<double> * /*quadObj*/, const optimMode &)
 {
 
 }
@@ -166,7 +169,7 @@ void gridLoadOpt::quadraticObj (const optimData *, vectData * /*linObj*/, vectDa
 void gridLoadOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
 {
 }
-void gridLoadOpt::constraintJacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridLoadOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 }
 
@@ -177,15 +180,15 @@ double gridLoadOpt::objValue (const optimData *, const optimMode &)
   return cost;
 }
 
-void gridLoadOpt::derivative (const optimData *, double /*deriv*/[], const optimMode &)
+void gridLoadOpt::gradient (const optimData *, double /*deriv*/[], const optimMode &)
 {
 
 }
-void gridLoadOpt::jacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridLoadOpt::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 
 }
-void gridLoadOpt::getConstraints (const optimData *, arrayData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridLoadOpt::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
@@ -205,9 +208,8 @@ gridLoadOpt::~gridLoadOpt ()
 
 
 // set properties
-int gridLoadOpt::set (const std::string &param,  const std::string &val)
+void gridLoadOpt::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
   if (param[0] == '#')
     {
@@ -215,26 +217,21 @@ int gridLoadOpt::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridOptObject::set (param, val);
+      gridOptObject::set (param, val);
     }
-  return out;
 }
 
-int gridLoadOpt::set (const std::string &param, double val, units_t unitType)
+void gridLoadOpt::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridOptObject::set (param, val, unitType);
+      gridOptObject::set (param, val, unitType);
     }
 
-
-  return out;
 }
 
 

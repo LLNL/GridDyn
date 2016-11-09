@@ -45,7 +45,7 @@ public:
   {
     return kNullVal;
   }
-  virtual int set (gridCoreObject *, double, gridUnits::units_t)
+  virtual void set (gridCoreObject *, double, gridUnits::units_t)
   {
   }
   virtual const stringVec &setNames () const
@@ -87,7 +87,7 @@ public:
   {
     return true;
   }
-  virtual int set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
+  virtual void set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
   {
     static_cast<A *> (obj)->*param = val;
     return 0;
@@ -137,7 +137,7 @@ public:
     return true;
   }
 
-  virtual int set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
+  virtual void set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
   {
 
     if (defUnits != gridUnits::defUnit)

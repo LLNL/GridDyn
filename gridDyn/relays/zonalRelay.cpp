@@ -13,13 +13,13 @@
 
 #include "zonalRelay.h"
 #include "gridCondition.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
-#include "eventQueue.h"
 #include "gridEvent.h"
 #include "gridCoreTemplates.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 
 
 #include <boost/format.hpp>
@@ -48,27 +48,24 @@ gridCoreObject *zonalRelay::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int zonalRelay::setFlag (const std::string &flag, bool val)
+void zonalRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
   if (flag == "nondirectional")
     {
       opFlags.set (nondirectional_flag,val);
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
 }
 /*
 std::string commDestName;
 std::uint64_t commDestId=0;
 std::string commType;
 */
-int zonalRelay::set (const std::string &param,  const std::string &val)
+void zonalRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "levels")
     {
       auto dvals = splitline (val);
@@ -85,7 +82,7 @@ int zonalRelay::set (const std::string &param,  const std::string &val)
       auto dvals = splitline (val);
       if (dvals.size () != m_zoneDelays.size ())
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
       auto zL = m_zoneDelays.begin ();
       for (auto ld : dvals)
@@ -96,15 +93,14 @@ int zonalRelay::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
-int zonalRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void zonalRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-  index_t zn = 0;
+  index_t zn;
   if (param == "zones")
     {
       m_zones = static_cast<count_t> (val);
@@ -191,15 +187,15 @@ int zonalRelay::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+  
 }
 
 
 double zonalRelay::get (const std::string &param, gridUnits::units_t unitType) const
 {
-  double val = kNullVal;
+  double val;
   if (param == "condition")
     {
       val = kNullVal;
@@ -224,7 +220,7 @@ void zonalRelay::dynObjectInitializeA (double time0, unsigned long flags)
               alert (this, OBJECT_NAME_CHANGE);
             }
         }
-      commName = name;
+	  cManager.set("name", name);
     }
 
   double baseImpedance = m_sourceObject->get ("impedance");
@@ -243,10 +239,8 @@ void zonalRelay::dynObjectInitializeA (double time0, unsigned long flags)
     }
 
   auto ge = std::make_shared<gridEvent> ();
-
-  ge->field = "switch" + std::to_string (m_terminal);
-  ge->value = 1;
-  ge->setTarget (m_sinkObject);
+  ge->setTarget (m_sinkObject,"switch" + std::to_string(m_terminal));
+  ge->setValue(1.0);
 
   add (ge);
   for (index_t kk = 0; kk < m_zones; ++kk)
@@ -258,14 +252,14 @@ void zonalRelay::dynObjectInitializeA (double time0, unsigned long flags)
   if (opFlags[use_commLink])
     {
 
-      if (commDestName.substr (0, 4) == "auto")
+      if (cManager.destName().compare(0,4,"auto")==0)
         {
-          if (commDestName.length () == 6)
+          if (cManager.destName().length () == 6)
             {
-              int code = 0;
+              int code;
               try
                 {
-                  code = std::stoi (commDestName.substr (5, 1));
+                  code = std::stoi (cManager.destName().substr (5, 1));
                 }
               catch (std::invalid_argument)
                 {
@@ -275,7 +269,7 @@ void zonalRelay::dynObjectInitializeA (double time0, unsigned long flags)
               std::string newName = generateAutoName (code);
               if (!newName.empty ())
                 {
-                  commDestName = newName;
+				  cManager.set("commdestname", newName);
                 }
             }
         }
@@ -293,14 +287,7 @@ void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_co
       auto P = std::make_shared<relayMessage> (relayMessage::BREAKER_TRIP_EVENT);
       if (ActionNum == 0)
         {
-          if (commDestName.empty ())
-            {
-              commLink->transmit (commDestId, P);
-            }
-          else
-            {
-              commLink->transmit (commDestName, P);
-            }
+		  cManager.send(P);
         }
     }
   for (index_t kk = conditionNum + 1; kk < m_zones; ++kk)
@@ -338,14 +325,8 @@ void zonalRelay::conditionTriggered (index_t conditionNum, double /*triggerTime*
           //std::cout << "GridDyn setting relay message type to REMOTE_FAULT_EVENT" << '\n';
           P->setMessageType (relayMessage::REMOTE_FAULT_EVENT);
         }
-      if (commDestName.empty ())
-        {
-          commLink->transmit (commDestId, P);
-        }
-      else
-        {
-          commLink->transmit (commDestName, P);
-        }
+	  cManager.send(P);
+      
     }
 
 }
@@ -375,14 +356,7 @@ void zonalRelay::conditionCleared (index_t conditionNum, double /*triggerTime*/)
         {
           P->setMessageType (relayMessage::REMOTE_FAULT_CLEARED);
         }
-      if (commDestName.empty ())
-        {
-          commLink->transmit (commDestId, P);
-        }
-      else
-        {
-          commLink->transmit (commDestName, P);
-        }
+	  cManager.send(P);
     }
 }
 

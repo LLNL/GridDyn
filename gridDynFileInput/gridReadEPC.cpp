@@ -18,6 +18,7 @@
 #include "loadModels/gridLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <fstream>
@@ -186,28 +187,14 @@ void loadEPC (gridCoreObject *parentObject, const std::string &filename, const b
                   busList[index - 1] = new acBus ();
                   busList[index - 1]->set ("basepower", base);
                   epcReadBus (busList[index - 1], line, base, bri);
-                  parentObject->add (busList[index - 1]);
-                  if (busList[index - 1]->getParent () != parentObject)
-                    {
-                      std::string bname = busList[index - 1]->getName ();
-                      int bcnt = 2;
-                      do
-                        {
-                          busList[index - 1]->setName ( bname + '_' + std::to_string (bcnt));
-                          parentObject->add (busList[index - 1]);
-                          ++bcnt;
-                          if (bcnt > 50)
-                            {
-                              break;
-                            }
-
-                        }
-                      while ((busList[index - 1]->getParent () != parentObject));
-                      if (busList[index - 1]->getParent () != parentObject)
-                        {
-                          std::cerr << "Unable to add bus " << index << '\n';
-                        }
-                    }
+				  try
+				  {
+					  parentObject->add(busList[index - 1]);
+				  }
+				  catch (const objectAddFailure &)
+				  {
+					  addToParentRename(busList[index - 1], parentObject);
+				  }
                 }
               else
                 {

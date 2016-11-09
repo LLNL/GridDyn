@@ -12,28 +12,27 @@
 */
 #include "griddyn-config.h"
 
-#ifdef GRIDDYN_HAVE_FSKIT
-#include "fskit/fskitCommunicator.h"
-#endif
-
 #include "gridCommunicator.h"
 
 #include "communicationsCore.h"
 #include "commMessage.h"
+#include "core/factoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include <string>
-std::uint64_t gridCommunicator::g_counterId = 0;
+
+std::atomic<std::uint64_t> gridCommunicator::g_counterId(0);
+
+static classFactory<gridCommunicator> commFac(std::vector<std::string>{ "comm", "simple", "basic" }, "basic");
 
 gridCommunicator::gridCommunicator ()
 {
-  ++g_counterId;
-  m_id = g_counterId;
+  m_id = ++g_counterId;
   m_commName = "comm_" + std::to_string (m_id);
 }
 
 gridCommunicator::gridCommunicator (std::string name) : m_commName (name)
 {
-  ++g_counterId;
-  m_id = g_counterId;
+	m_id=++g_counterId;
 }
 
 gridCommunicator::gridCommunicator (std::string name, std::uint64_t id) : m_id (id),m_commName (name)
@@ -47,20 +46,32 @@ gridCommunicator::gridCommunicator (std::uint64_t id) : m_id (id)
   m_commName = "comm_" + std::to_string (m_id);
 }
 
-
-int gridCommunicator::transmit (std::uint64_t destID, std::shared_ptr<commMessage> message)
+std::shared_ptr<gridCommunicator> gridCommunicator::clone(std::shared_ptr<gridCommunicator> comm) const
 {
-  return communicationsCore::instance ()->send (m_id, destID, message);
+	if (!comm)
+	{
+		comm = std::make_shared<gridCommunicator>(m_commName);
+	}
+	else
+	{
+		comm->m_commName = m_commName;
+	}
+	return comm;
 }
 
-int gridCommunicator::transmit (const std::string &destName, std::shared_ptr<commMessage> message)
+void gridCommunicator::transmit (std::uint64_t destID, std::shared_ptr<commMessage> message)
 {
-  return communicationsCore::instance ()->send (m_id, destName, message);
+  communicationsCore::instance ()->send (m_id, destID, message);
+}
+
+void gridCommunicator::transmit (const std::string &destName, std::shared_ptr<commMessage> message)
+{
+  communicationsCore::instance ()->send (m_id, destName, message);
 }
 
 void gridCommunicator::receive (std::uint64_t sourceID, std::uint64_t destID, std::shared_ptr<commMessage> message)
 {
-  if (destID == m_id)
+  if ((destID == m_id)||(destID==0))
     {
       if (autoPingEnabled)
         {
@@ -113,7 +124,7 @@ void gridCommunicator::receive (std::uint64_t sourceID, const std::string &destN
 }
 
 
-bool gridCommunicator::queuedMessages ()
+bool gridCommunicator::messagesAvailable () const
 {
   return !(messageQueue.empty ());
 }
@@ -154,41 +165,57 @@ double gridCommunicator::getLastPingTime () const
   return lastReplyRX - lastPingSend;
 }
 
+
+void gridCommunicator::set(const std::string &param, const std::string &val)
+{
+	if ((param == "id")||(param=="name"))
+	{
+		setName(val);
+	}
+	else
+	{
+		throw(unrecognizedParameter());
+	}
+
+}
+void gridCommunicator::set(const std::string &param, double val)
+{
+	if ((param == "id") || (param == "name"))
+	{
+		setID(static_cast<uint64_t>(val));
+	}
+	else
+	{
+		throw(unrecognizedParameter());
+	}
+
+}
+
+
+void gridCommunicator::setFlag(const std::string & /*param*/, bool /*val*/)
+{
+	throw(unrecognizedParameter());
+}
+
+void gridCommunicator::initialize()
+{
+	communicationsCore::instance()->registerCommunicator(this);
+}
+
+
+void gridCommunicator::disconnect()
+{
+	communicationsCore::instance()->unregisterCommunicator(this);
+}
+
 std::shared_ptr<gridCommunicator> makeCommunicator (const std::string &commType,const std::string &commName, const std::uint64_t id)
 {
-  std::shared_ptr<gridCommunicator> ret = nullptr;
-  if ((commType.empty ()) || (commType == "basic"))
-    {
-      if (id == 0)
-        {
-          ret = std::make_shared<gridCommunicator> (commName);
-        }
-      else
-        {
-          ret = std::make_shared<gridCommunicator> (commName, id);
-        }
-      communicationsCore::instance ()->registerCommunicator (ret);
-    }
-#ifdef GRIDDYN_HAVE_FSKIT
-  else if (commType == "fskit")
-    {
-      // std::cout << "GridDyn Registering LP " << commName <<'\n';
+	std::shared_ptr<gridCommunicator> ret = coreClassFactory<gridCommunicator>::instance()->createObject(commType, commName);
 
-      if (id == 0)
-        {
-          auto p = std::make_shared<FskitCommunicator> (commName);
-          p->Register ();
-          ret = p;
+	if (id != 0)
+	{
+		ret->setID(id);
+	}
 
-        }
-      else
-        {
-          auto p = std::make_shared<FskitCommunicator> (commName,id);
-          p->Register ();
-          ret = p;
-        }
-      // return std::make_shared<FskitCommunicator>(commName);
-    }
-#endif
-  return ret;
+	return ret;
 }

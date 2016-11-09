@@ -31,12 +31,12 @@ protected:
   double voltageDelay = 0.0;		//!< [s] period of time the voltage must be below limit to activate
   double frequencyDelay = 0.0;		//!< [s] period of time the frequency must be below limit to activate
 public:
-  busRelay (const std::string &objName = "busrelay_$");
+  explicit busRelay (const std::string &objName = "busrelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 protected:

@@ -373,12 +373,13 @@ Column Variable Description Unit
 13 u Commitment variable boolean
 14 kTB Tie breaking cost $ / MWh
 */
-
+#ifndef OPTIMIZATION_ENABLE
+void loadPsatSupplyArray(gridCoreObject * /*parentObject*/, const mArray & /*genCost*/, const std::vector<gridBus *> & /*busList*/)
+{
+}
+#else
 void loadPsatSupplyArray (gridCoreObject *parentObject, const mArray &genCost, const std::vector<gridBus *> &busList)
 {
-#ifndef OPTIMIZATION_ENABLE
-  return;
-#else
   gridGenOpt *go;
   gridOptObject *oo;
 //  gridCoreObject *obj;
@@ -443,8 +444,9 @@ void loadPsatSupplyArray (gridCoreObject *parentObject, const mArray &genCost, c
           go->set ("penalty", genLine[13], CpMWh);
         }
     }
+ }
 #endif
-}
+
 
 /* Branch data
 Column Variable Description Unit
@@ -608,27 +610,21 @@ void loadPSATLinkArrayB (gridCoreObject *parentObject, const mArray &lnks, const
 
 void loadPSATShuntArray (gridCoreObject * /*parentObject*/, const mArray &shunts, const std::vector<gridBus *> &busList)
 {
-  std::vector<double>::size_type kk;
-  gridLoad *ld;
-  gridBus *bus1;
-  size_t ind1;
-  double g,b,temp;
 
-  for (kk = 0; kk < shunts.size (); ++kk)
+  for (size_t kk = 0; kk < shunts.size (); ++kk)
     {
-      temp = shunts[kk][0];
-      ind1 = static_cast<size_t> (temp);
-      bus1 = busList[ind1 - 1];
+     auto ind1 = static_cast<size_t> (shunts[kk][0]);
+     auto bus1 = busList[ind1 - 1];
 
-      ld = bus1->getLoad ();
+     auto ld = bus1->getLoad ();
       if (ld == nullptr)
         {
           ld = new gridLoad ();
           bus1->add (ld);
         }
 
-      g = shunts[kk][4];
-      b = shunts[kk][5];
+      double g = shunts[kk][4];
+      double b = shunts[kk][5];
       if (g != 0)
         {
           ld->set ("yp", g);
@@ -1045,9 +1041,9 @@ void loadPsatFaultArray (gridCoreObject *parentObject, const mArray &fault, cons
           evnt1 = std::make_shared<gridEvent> (flt[4]);
           evnt2 = std::make_shared<gridEvent> (flt[5]);
           evnt1->setTarget (ld, "r");
-          evnt1->value = flt[6];
+          evnt1->setValue(flt[6]);
           evnt2->setTarget (ld, "r");
-          evnt2->value = 0;
+          evnt2->setValue(0.0);
           gds->add (evnt1);
           gds->add (evnt2);
         }
@@ -1057,9 +1053,9 @@ void loadPsatFaultArray (gridCoreObject *parentObject, const mArray &fault, cons
           evnt1 = std::make_shared<gridEvent> (flt[4]);
           evnt2 = std::make_shared<gridEvent> (flt[5]);
           evnt1->setTarget (ld, "x");
-          evnt1->value = flt[7];
+          evnt1->setValue(flt[7]);
           evnt2->setTarget (ld, "x");
-          evnt2->value = 0;
+          evnt2->setValue(0.0);
           gds->add (evnt1);
           gds->add (evnt2);
         }
@@ -1092,9 +1088,9 @@ void loadPsatBreakerArray (gridCoreObject *parentObject, const mArray &brkr, con
       evnt1 = std::make_shared<gridEvent> (brk[6]);
       evnt2 = std::make_shared<gridEvent> (brk[7]);
       evnt1->setTarget (lnk, "enabled");
-      evnt1->value = (status < 0.1) ? 1.0 : 0.0;
+      evnt1->setValue((status < 0.1) ? 1.0 : 0.0);
       evnt2->setTarget (lnk, "enabled");
-      evnt2->value = status;
+      evnt2->setValue(status);
       gds->add (evnt1);
       gds->add (evnt2);
 

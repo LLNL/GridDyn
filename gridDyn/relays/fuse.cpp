@@ -18,7 +18,8 @@
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
 #include "gridCoreTemplates.h"
-#include "arrayDataSparse.h"
+#include "matrixDataSparse.h"
+#include "core/gridDynExceptions.h"
 
 
 #include <boost/format.hpp>
@@ -48,37 +49,36 @@ gridCoreObject *fuse::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int fuse::setFlag (const std::string &flag, bool val)
+void fuse::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
+
   if (flag[0] == '#')
     {
 
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 
-int fuse::set (const std::string &param,  const std::string &val)
+void fuse::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "#")
     {
 
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
 }
 
-int fuse::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fuse::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "limit")
     {
       limit = unitConversion (val, unitType, puA, systemBasePower, Vbase);
@@ -101,14 +101,14 @@ int fuse::set (const std::string &param, double val, gridUnits::units_t unitType
       else
         {
           LOG_WARNING ("minimum blow time must be greater or equal to 0.001");
-          return INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void fuse::dynObjectInitializeA (double time0, unsigned long flags)
@@ -120,10 +120,8 @@ void fuse::dynObjectInitializeA (double time0, unsigned long flags)
   if (dynamic_cast<gridLink *> (m_sourceObject))
     {
       add (make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject));
-      ge->field = "switch" + std::to_string (m_terminal);
-      ge->value = 1;
-      ge->setTarget (m_sinkObject);
-
+      ge->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
+	  ge->setValue(1.0);
       bus = static_cast<gridLink *> (m_sourceObject)->getBus (m_terminal);
 
     }
@@ -131,9 +129,8 @@ void fuse::dynObjectInitializeA (double time0, unsigned long flags)
     {
       add (make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject));
       opFlags.set (nonlink_source_flag);
-      ge->field = "status";
-      ge->value = 0;
-      ge->setTarget (m_sinkObject);
+      ge->setTarget (m_sinkObject,"status");
+	  ge->setValue(0.0);
       bus = static_cast<gridBus *> (m_sourceObject->find ("bus"));
     }
 
@@ -143,25 +140,24 @@ void fuse::dynObjectInitializeA (double time0, unsigned long flags)
   auto gc2 = std::make_shared<gridCondition> ();
 
   auto cg = std::make_shared<customGrabber> ();
-  cg->setGrabberFunction ("I2T", [ = ](){
+  cg->setGrabberFunction ("I2T", [ this ](gridCoreObject *){
     return cI2T;
   });
 
-  auto cgst = std::make_shared<customStateGrabber> ();
-  cgst->setGrabberFunction ([ = ](const stateData *sD,const solverMode &sMode) -> double {
-    return sD->state[offsets.getDiffOffset (sMode)];
+  auto cgst = std::make_shared<customStateGrabber> (this);
+  cgst->setGrabberFunction ([ ](gridCoreObject *obj, const stateData *sD,const solverMode &sMode) -> double {
+    return sD->state[static_cast<fuse *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
-  gc->conditionA = cg;
-  gc->conditionAst = cgst;
 
-  gc2->conditionA = cg;
-  gc2->conditionAst = cgst;
+  gc->setConditionLHS(cg, cgst);
 
-  gc->setLevel (mp_I2T);
-  gc2->setLevel (-mp_I2T / 2.0);
-  gc->setComparison (gridCondition::comparison_type::gt);
-  gc2->setComparison (gridCondition::comparison_type::lt);
+  gc2->setConditionLHS(cg, cgst);
+  gc->setConditionRHS(mp_I2T);
+  gc2->setConditionRHS(-mp_I2T / 2.0);
+
+  gc->setComparison (comparison_type::gt);
+  gc2->setComparison (comparison_type::lt);
 
   add (gc);
   add (gc2);
@@ -191,7 +187,7 @@ void fuse::dynObjectInitializeA (double time0, unsigned long flags)
   add (ge3);
   setActionTrigger (1, 2, 0.0);
 
-  return gridRelay::dynObjectInitializeA (time0, flags);
+  gridRelay::dynObjectInitializeA (time0, flags);
 }
 
 
@@ -271,7 +267,7 @@ void fuse::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-double fuse::timestep (double ttime, const solverMode &)
+void fuse::timestep (double ttime, const solverMode &)
 {
 
   if (limit < kBigNum / 2)
@@ -282,11 +278,9 @@ double fuse::timestep (double ttime, const solverMode &)
           opFlags.set (fuse_blown_flag);
           disable ();
           alert (this, FUSE1_BLOWN_CURRENT);
-          return 0.0;
         }
     }
   prevTime = ttime;
-  return (0.0);
 }
 
 void fuse::converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode, double /*tol*/)
@@ -294,12 +288,12 @@ void fuse::converge (double ttime, double state[], double dstate_dt[], const sol
   guess (ttime, state, dstate_dt, sMode);
 }
 
-void fuse::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void fuse::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 
   if (useI2T)
     {
-      arrayDataSparse d;
+      matrixDataSparse<double> d;
       IOdata out;
       auto Voffset = bus->getOutputLoc(sMode,voltageInLocation);
       auto args = bus->getOutputs (sD,sMode);

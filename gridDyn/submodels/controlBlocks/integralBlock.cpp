@@ -13,7 +13,7 @@
 
 #include "submodels/gridControlBlocks.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 integralBlock::integralBlock (const std::string &objName) : basicBlock (objName)
@@ -86,7 +86,7 @@ void integralBlock::derivElements (double input, double didt, const stateData *s
 }
 
 
-void integralBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void integralBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -123,14 +123,13 @@ double integralBlock::step (double ttime, double inputA)
 }
 
 // set parameters
-int integralBlock::set (const std::string &param,  const std::string &val)
+void integralBlock::set (const std::string &param,  const std::string &val)
 {
-  return basicBlock::set (param, val);
+  basicBlock::set (param, val);
 }
 
-int integralBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void integralBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if ((param == "iv") || (param == "initial_value"))
     {
       iv = val;
@@ -144,8 +143,7 @@ int integralBlock::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
-  return out;
 }
 

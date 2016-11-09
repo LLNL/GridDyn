@@ -26,7 +26,7 @@ private:
   count_t next = 0;
   count_t objCount = 0;
 public:
-  gridObjectHolder (count_t objs) : gridCoreObject ("holder_#"),objArray (objs), objCount (objs)
+  explicit gridObjectHolder (count_t objs) : gridCoreObject ("holder_#"),objArray (objs), objCount (objs)
   {
     for (auto &so : objArray)
       {
@@ -104,7 +104,7 @@ public:
         tF->registerFactory (tname, this);
       }
   }
-  typeFactory (const std::string &componentName, const stringVec &typeNames, const std::string defType) : objectFactory (componentName, typeNames)
+  typeFactory (const std::string &componentName, const stringVec &typeNames, const std::string &defType) : objectFactory (componentName, typeNames)
   {
     auto tF = coreObjectFactory::instance ()->getFactory (componentName);
     for (auto tname : typeNames)
@@ -240,7 +240,7 @@ public:
   }
 };
 
-/** @brief class for templating inherited object factorys to cascade correctly*/
+/** @brief class for templating inherited object factories to cascade correctly*/
 template <class Ntype, class Btype>
 class childTypeFactory : public typeFactory<Btype>
 {
@@ -259,7 +259,7 @@ public:
   {
 
   }
-  childTypeFactory (const std::string &componentName, const stringVec &typeNames, const std::string defType) : typeFactory<Btype> (componentName, typeNames, defType)
+  childTypeFactory (const std::string &componentName, const stringVec &typeNames, const std::string &defType) : typeFactory<Btype> (componentName, typeNames, defType)
   {
 
   }
@@ -455,7 +455,7 @@ A * cloneBaseFactory (const A *bobj, gridCoreObject *obj, objectFactory *cfact)
   A *nobj;
   if (obj == nullptr)
     {
-      nobj = static_cast<A *> (cfact->makeObject ());
+      nobj = static_cast<A *> (cfact->makeObject (bobj->getName()));
     }
   else
     {

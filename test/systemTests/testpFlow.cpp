@@ -2,8 +2,8 @@
 /*
    * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department 
- * of Energy by Lawrence Livermore National Laboratory in part under 
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
  * Produced at the Lawrence Livermore National Laboratory.
  * All rights reserved.
@@ -11,17 +11,21 @@
  * LLNS Copyright End
 */
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "solvers/solverInterface.h"
-#include "simulation/diagnostics.h"
 #include "vectorOps.hpp"
+#include "core/gridDynExceptions.h"
+
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#ifdef ALLOW_DATA_TEST_CASES
+#include <boost/test/data/test_case.hpp>
+#endif
 #include <cstdio>
 #include <iostream>
-
 
 static std::string pFlow_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
@@ -39,7 +43,7 @@ BOOST_AUTO_TEST_CASE (pFlow_test1)
   BOOST_REQUIRE (gds->currentProcessState ()==gridDynSimulation::gridState_t::INITIALIZED);
 
   int count=gds->getInt("totalbuscount");
-  
+
   BOOST_CHECK_EQUAL (count,9);
   //check the linkcount
   count=gds->getInt ("totallinkcount");
@@ -76,7 +80,7 @@ BOOST_AUTO_TEST_CASE (pFlow_test2)
   //check the bus voltages and angles
   auto vdiff = countDiffs(volts1,volts2,0.0001);
   auto adiff = countDiffs(ang1, ang2, 0.0001);
-  
+
   BOOST_CHECK(vdiff == 0);
   BOOST_CHECK(adiff == 0);
 }
@@ -156,7 +160,7 @@ BOOST_AUTO_TEST_CASE (pflow_test30_no_shunt)
 
   auto vdiff = countDiffs(volts1, volts2, 0.001);
   auto adiff = countDiffs(ang1, ang2, 0.001);
- 
+
   if ((vdiff > 0) || (adiff > 0))
   {
 	  printBusResultDeviations(volts1, volts2, ang1, ang2);
@@ -180,7 +184,7 @@ BOOST_AUTO_TEST_CASE (pflow_test30_no_shunt)
   gds->getAngle (ang1);
   auto vdiff2 = countDiffs(volts1,volts2,0.0005);
   auto adiff2 = countDiffs(volts1, volts2, 0.0009);
-  
+
   BOOST_CHECK_EQUAL(vdiff2, 0);
   BOOST_CHECK_EQUAL(adiff2, 0);
 
@@ -250,7 +254,7 @@ BOOST_AUTO_TEST_CASE (pflow_test30_no_limit)
 }
 
 
-//testcase for power flow automatic adjustsment
+//test case for power flow automatic adjustment
 BOOST_AUTO_TEST_CASE (test_pFlow_padjust)
 {
 
@@ -272,17 +276,9 @@ BOOST_AUTO_TEST_CASE (test_pFlow_padjust)
   BOOST_CHECK(wc == 0);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
   gds->getBusGenerationReal (P2);
-
-  double dk = P2[0] - P1[0];
-  double diff;
-  for (size_t kk = 1; kk < P2.size (); kk++)
-    {
-      if (P1[kk] > 0)
-        {
-          diff = std::abs (P2[kk] - P1[kk] - dk);
-          BOOST_CHECK_SMALL (diff, 0.0002);
-        }
-    }
+	//there should be 2 generators that had their real power levels adjusted instead of just the swing bus
+  auto cnt = countDiffs(P2, P1, 0.0002);
+  BOOST_CHECK(cnt == 2);
 
 
 }
@@ -311,7 +307,7 @@ BOOST_AUTO_TEST_CASE (pflow_test_dcflow)
   gds->getAngle (ang1);
 
   auto ns= makeSolver("kinsol");
-  ns->set("name", "dcflow");
+  ns->setName("dcflow");
   ns->set("mode", "dc, algebraic");
   gds->add(ns);
 
@@ -321,7 +317,7 @@ BOOST_AUTO_TEST_CASE (pflow_test_dcflow)
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
 
   BOOST_CHECK_EQUAL(runJacobianCheck(gds, smode), 0);
- 
+
   gds->powerflow();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
@@ -339,10 +335,9 @@ BOOST_AUTO_TEST_CASE (test_iterated_pflow)
   gds = dynamic_cast<gridDynSimulation *> (readSimXMLFile(fname));
   BOOST_REQUIRE(gds != nullptr);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
-
+  gds->consolePrintLevel = 0;
   gds->set("recorddirectory", pFlow_test_directory);
   gds->run();
-
   BOOST_REQUIRE (gds->getCurrentTime() >= 575.0);
 
 }
@@ -355,24 +350,25 @@ BOOST_AUTO_TEST_CASE(pFlow_test_floating_bus)
 
   std::string fname = pFlow_test_directory + "test_powerflow3m9b_float.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-  
+
   gds->pFlowInitialize();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
 
   BOOST_CHECK_EQUAL(runJacobianCheck(gds, cPflowSolverMode), 0);
-  
+
   gds->powerflow();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 }
-
-
+/*
+//TODO figure out how to use the DATASET test cases
 BOOST_AUTO_TEST_CASE(pflow_test_line_modes)
 {
 	gds = new gridDynSimulation();
 	std::string fname = ieee_test_directory+"ieee30_no_limit.cdf";
 
 	loadCDF(gds, fname);
+
 	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
 
 
@@ -408,20 +404,86 @@ BOOST_AUTO_TEST_CASE(pflow_test_line_modes)
 		gds->pFlowInitialize(0);
 		BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
 		int errors = runJacobianCheck(gds, smode);
-		BOOST_CHECK_EQUAL(errors, 0);
-		if (errors > 0)
-		{
-			std::cout << "Errors in " << am << " mode" << '\n';
-		}
-		else
-		{
-			gds->powerflow();
-			BOOST_CHECK(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-		}
-		
+		BOOST_REQUIRE_MESSAGE(errors==0, "Errors in " << am << " mode");
+
+		gds->powerflow();
+		BOOST_CHECK(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+
 	}
 
 
 }
+*/
+
+
+//  static stringVec approx_modes{ "normal","simple","decoupled","fast_decoupled","simplified_decoupled","small_angle","small_angle_decoupled","small_angle_simplified","linear", };
+
+static stringVec approx_modes{ "small_angle_decoupled" };
+#ifdef ALLOW_DATA_TEST_CASES
+namespace data = boost::unit_test::data;
+
+//this test case should be moved towards requiring fixture support withe _F version but I don't want to mandate boost 1.61 yet
+BOOST_DATA_TEST_CASE(pflow_test_line_modes, data::make(approx_modes),approx)
+{
+	auto gdsb = new gridDynSimulation();
+	std::string fname = ieee_test_directory+"ieee30_no_limit.cdf";
+
+	loadCDF(gdsb, fname);
+
+	BOOST_REQUIRE (gdsb->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+
+
+	int count = gdsb->getInt("totalbuscount");
+	BOOST_CHECK_EQUAL(count, 30);
+	//check the linkcount
+	count = gdsb->getInt("totallinkcount");
+	BOOST_CHECK_EQUAL(count, 41);
+	std::vector<double> volts1;
+	std::vector<double> ang1;
+	std::vector<double> volts2;
+	std::vector<double> ang2;
+
+	gdsb->getVoltage(volts1);
+	gdsb->getAngle(ang1);
+
+		auto ns = makeSolver("kinsol");
+		ns->set("name", approx);
+		try
+		{
+			ns->set("approx", approx);
+		}
+		catch (const invalidParameterValue &)
+		{
+			BOOST_CHECK_MESSAGE(false, "unrecognized approx mode " << approx);
+		}
+
+		
+		gdsb->add(ns);
+		auto smode = gdsb->getSolverMode(approx);
+		gdsb->set("defpowerflow", approx);
+		gdsb->pFlowInitialize(0);
+		BOOST_REQUIRE (gdsb->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+		int errors;
+			if (approx == "small_angle_decoupled")
+			{
+				/*there is an initialization difference in this approximation due to the combination of decoupling
+				and the small angle approximation.  In decoupled modes the values from the voltages and angles are fixed
+				for the calculation of the decoupled quantities but are saved with the full trig calculation.  in the small angle
+				approximation this is not done so there is a small error when evaluating the Jacobian right after the power flow initialization
+				since the approximation has not yet been made.  All other modes and times do not have this issue*/
+				errors = runJacobianCheck(gdsb, smode,0.05);
+			}
+			else
+			{
+				errors=runJacobianCheck(gdsb, smode);
+			}
+		BOOST_REQUIRE_MESSAGE(errors==0, "Errors in " << approx << " mode");
+
+		gdsb->powerflow();
+		BOOST_CHECK(gdsb->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+
+		delete gdsb;
+}
+#endif 
 
 BOOST_AUTO_TEST_SUITE_END ()

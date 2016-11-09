@@ -14,7 +14,7 @@
 #include "submodels/gridDynExciter.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include <cmath>
 
@@ -102,7 +102,7 @@ void gridDynExciterDC2A::derivative (const IOdata &args, const stateData *sD, do
 }
 
 
-void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, double cj, arrayData<double> *ad)
+void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, double cj, matrixData<double> *ad)
 {
   ad->assign (refLoc, refLoc, 1);
   if (opFlags.test (etrigger_high))

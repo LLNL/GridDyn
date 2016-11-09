@@ -14,7 +14,7 @@
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include "vectorOps.hpp"
 
@@ -149,7 +149,7 @@ void gridDynGenModel5::derivative (const IOdata &args, const stateData *sD, doub
 }
 
 void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD,
-                                         arrayData<double> *ad,
+                                         matrixData<double> *ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
   // ad->assign (arrayIndex, RowIndex, ColIndex, value) const
@@ -266,14 +266,13 @@ stringVec gridDynGenModel5::localStateNames () const
 }
 
 // set parameters
-int gridDynGenModel5::set (const std::string &param,  const std::string &val)
+void gridDynGenModel5::set (const std::string &param,  const std::string &val)
 {
   return gridDynGenModel4::set (param, val);
 }
 
-int gridDynGenModel5::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModel5::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "tqopp") || (param == "tq0pp"))
     {
@@ -302,8 +301,7 @@ int gridDynGenModel5::set (const std::string &param, double val, gridUnits::unit
     }
   else
     {
-      out = gridDynGenModel4::set (param, val, unitType);
+      gridDynGenModel4::set (param, val, unitType);
     }
 
-  return out;
 }

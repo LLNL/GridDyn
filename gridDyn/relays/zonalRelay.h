@@ -15,8 +15,8 @@
 
 #include "gridRelay.h"
 /** class building off of gridRelay to define a zonal relays
- the number of zones is arbritrary and it works by checking the impedences of the associated link and comparing to specific thresholds.
-This zonal relays runs off a single impededence number
+ the number of zones is arbitrary and it works by checking the impedances of the associated link and comparing to specific thresholds.
+This zonal relays runs off a single impedance number
 */
 class zonalRelay : public gridRelay
 {
@@ -29,17 +29,17 @@ protected:
   count_t m_zones = 2;       //!< the number of zones for the relay
   index_t m_terminal = 1;        //!< the side of the line to connect 1=from side 2=to side, 3+ for multiterminal devices
   double m_resetMargin = 0.01; //!<! the reset margin for clearing a fault
-  std::vector<double> m_zoneLevels;        //!< the level of impedence to trigger
+  std::vector<double> m_zoneLevels;        //!< the level of impedance to trigger
   std::vector<double> m_zoneDelays;       //!< the delay upon which to act for the relay
   count_t m_condition_level = kInvalidCount;    //!< the level of condition that has been triggered
   int autoName = -1;                                    //!< storage for indicator of the type of autoname to use
 public:
-  zonalRelay (const std::string &objName = "zonalRelay_$");
+  explicit zonalRelay (const std::string &objName = "zonalRelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;

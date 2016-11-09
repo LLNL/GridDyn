@@ -20,7 +20,7 @@
 #include "linkModels/gridLink.h"
 #include "loadModels/gridLoad.h"
 #include "generators/gridDynGenerator.h"
-#include "gridRecorder.h"
+#include "collector.h"
 #include "gridEvent.h"
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGovernor.h"

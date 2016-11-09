@@ -13,17 +13,12 @@
 
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
-#include "stringOps.h"
 
 #include <boost/filesystem.hpp>
 
-//common libraries in all code
-#include <vector>
 
 //library for printf debug statements
-#include <cstdio>
-#include <fstream>
-#include <iostream>
+
 #include <cmath>
 
 using namespace readerConfig;

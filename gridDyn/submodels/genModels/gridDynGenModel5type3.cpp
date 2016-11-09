@@ -14,7 +14,7 @@
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 #include <cmath>
@@ -135,7 +135,7 @@ void gridDynGenModel5type3::residual (const IOdata &args, const stateData *sD, d
 
 
 void gridDynGenModel5type3::jacobianElements (const IOdata &args, const stateData *sD,
-                                              arrayData<double> *ad,
+                                              matrixData<double> *ad,
                                               const IOlocs &argLocs, const solverMode &sMode)
 {
   //use the ad->assign Macro defined in basicDefs

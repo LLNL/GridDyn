@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "simulation/diagnostics.h"
 #include <cstdio>
 

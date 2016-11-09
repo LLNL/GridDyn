@@ -14,7 +14,7 @@
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 #include "vectorOps.hpp"
 #include <cmath>
@@ -148,7 +148,7 @@ void gridDynGenModel3::residual (const IOdata &args, const stateData *sD, double
 
 
 void gridDynGenModel3::jacobianElements (const IOdata &args, const stateData *sD,
-                                         arrayData<double> *ad,
+                                         matrixData<double> *ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
 
@@ -246,15 +246,13 @@ stringVec gridDynGenModel3::localStateNames () const
 }
 
 // set parameters
-int gridDynGenModel3::set (const std::string &param,  const std::string &val)
+void gridDynGenModel3::set (const std::string &param,  const std::string &val)
 {
   return gridDynGenModelClassical::set (param, val);
 }
 
-int gridDynGenModel3::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynGenModel3::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
 
   if (param == "x")
     {
@@ -283,9 +281,8 @@ int gridDynGenModel3::set (const std::string &param, double val, gridUnits::unit
     }
   else
     {
-      out = gridDynGenModelClassical::set (param, val, unitType);
+      gridDynGenModelClassical::set (param, val, unitType);
     }
 
-  return out;
 }
 

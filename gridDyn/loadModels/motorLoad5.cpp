@@ -15,7 +15,7 @@
 #include "gridBus.h"
 #include "objectFactory.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 #include <iostream>
@@ -211,23 +211,22 @@ void motorLoad5::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 // set properties
-int motorLoad5::set (const std::string &param,  const std::string &val)
+void motorLoad5::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "#")
     {
 
     }
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
-int motorLoad5::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad5::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "r2")
     {
@@ -239,10 +238,9 @@ int motorLoad5::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = motorLoad::set (param, val, unitType);
+      motorLoad::set (param, val, unitType);
     }
 
-  return out;
 }
 
 
@@ -361,11 +359,10 @@ void motorLoad5::getStateName (stringVec &stNames, const solverMode &sMode, cons
     }
 
 }
-double motorLoad5::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad5::timestep (double ttime, const IOdata &args, const solverMode &)
 {
-  stateData sD;
-  sD.time = ttime;
-  sD.state = m_state.data ();
+  stateData sD(ttime, m_state.data());
+
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[2] += dt * m_dstate_dt[2];
@@ -375,7 +372,6 @@ double motorLoad5::timestep (double ttime, const IOdata &args, const solverMode 
   m_state[6] += dt * m_dstate_dt[6];
   prevTime = ttime;
   updateCurrents (args, &sD, cLocalSolverMode);
-  return getRealPower ();
 }
 
 void motorLoad5::updateCurrents (const IOdata &args, const stateData *sD, const solverMode &sMode)
@@ -428,7 +424,7 @@ void motorLoad5::derivative (const IOdata & /*args*/, const stateData *sD, doubl
 }
 
 
-void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   index_t refAlg, refDiff;
   const double *gm, *dst;

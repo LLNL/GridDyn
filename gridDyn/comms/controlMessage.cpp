@@ -16,19 +16,19 @@
 
 static dMessageFactory<controlMessage, BASE_CONTROL_MESSAGE_NUMBER, BASE_CONTROL_MESSAGE_NUMBER+16> dmf("control");
 
-std::string controlMessage::toString()
+std::string controlMessage::toString(int modifiers) const
 {
-	std::string temp;
+	std::string temp = (modifiers == comm_modifiers::with_type) ? encodeTypeInString() : "";
 	switch (getMessageType())
 	{
 	case SET:
 		if (m_actionID > 0)
 		{
-			temp = "SET(" + std::to_string(m_actionID)+"):" + m_field;
+			temp += "SET(" + std::to_string(m_actionID)+"):" + m_field;
 		}
 		else
 		{
-			temp = "SET:" + m_field;
+			temp += "SET:" + m_field;
 		}
 		if (!m_units.empty())
 		{
@@ -37,14 +37,14 @@ std::string controlMessage::toString()
 		temp+=" = " + std::to_string(m_value) + '@' + std::to_string(m_time);
 		break;
 	case GET:
-		temp= "GET:" + m_field;
+		temp+= "GET:" + m_field;
 		if (!m_units.empty())
 		{
 			temp += '(' + m_units + ')';
 		}
 		break;
 	case GET_MULTIPLE:
-		temp = "GET_MULTIPLE:";
+		temp += "GET_MULTIPLE:";
 		for (auto &fld : multiFields)
 			{
 				temp += ' ' + fld + ',';
@@ -52,7 +52,7 @@ std::string controlMessage::toString()
 		temp.pop_back();  //get rid of the last comma
 		break;
 	case GET_PERIODIC:
-		temp = "GET_PERIODIC:" +m_field;
+		temp += "GET_PERIODIC:" +m_field;
 		if (!m_units.empty())
 		{
 			temp += '(' + m_units + ')';
@@ -60,7 +60,7 @@ std::string controlMessage::toString()
 		temp += " @" + std::to_string(m_time);
 		break;
 	case GET_RESULT_MULTIPLE:
-		temp = "GET_RESULT_MULTIPLE:";
+		temp += "GET_RESULT_MULTIPLE:";
 		for (size_t ii = 0; ii < multiFields.size();++ii)
 		{
 			temp += ' ' + multiFields[ii] + '='+std::to_string(m_value)+',';
@@ -70,25 +70,25 @@ std::string controlMessage::toString()
 	case SET_SUCCESS:
 		if (m_actionID > 0)
 		{
-			temp = "SET SUCCESS:" + std::to_string(m_actionID);
+			temp += "SET SUCCESS:" + std::to_string(m_actionID);
 		}
 		else
 		{
-			temp = "SET SUCCESS";
+			temp += "SET SUCCESS";
 		}
 		break;
 	case SET_FAIL:
 		if (m_actionID > 0)
 		{
-			temp = "SET FAIL:" + std::to_string(m_actionID);
+			temp += "SET FAIL:" + std::to_string(m_actionID);
 		}
 		else
 		{
-			temp = "SET FAIL";
+			temp += "SET FAIL";
 		}
 		break;
 	case GET_RESULT:
-		temp = "GET RESULT: " + m_field;
+		temp += "GET RESULT: " + m_field;
 		if (!m_units.empty())
 		{
 			temp += '(' + m_units + ')';
@@ -96,22 +96,22 @@ std::string controlMessage::toString()
 		temp += " = " + std::to_string(m_value) + '@' + std::to_string(m_time);
 		break;
 	case SET_SCHEDULED:
-		temp = "SET SCHEDULED:" + std::to_string(m_actionID);
+		temp += "SET SCHEDULED:" + std::to_string(m_actionID);
 		break;
 	case GET_SCHEDULED:
-		temp = "GET SCHEDULED:" + std::to_string(m_actionID);
+		temp += "GET SCHEDULED:" + std::to_string(m_actionID);
 		break;
 	case CANCEL:
-		temp = "CANCEL:" + std::to_string(m_actionID);
+		temp += "CANCEL:" + std::to_string(m_actionID);
 		break;
 	case CANCEL_SUCCESS:
-		temp = "CANCEL SUCCESS:" + std::to_string(m_actionID);
+		temp += "CANCEL SUCCESS:" + std::to_string(m_actionID);
 		break;
 	case CANCEL_FAIL:
-		temp = "CANCEL FAIL:" + std::to_string(m_actionID);
+		temp += "CANCEL FAIL:" + std::to_string(m_actionID);
 		break;
 	default:
-		temp = "<UNKNOWN>";
+		temp += "<UNKNOWN>";
 	}
 	return temp;
 }

@@ -25,19 +25,34 @@ std::shared_ptr<communicationsCore> communicationsCore::instance ()
   return m_pInstance;
 }
 
-int communicationsCore::registerCommunicator (std::shared_ptr<gridCommunicator> comm)
+int communicationsCore::registerCommunicator (gridCommunicator *comm)
 {
-  auto ret = m_stringMap.insert (std::pair < std::string, std::shared_ptr < gridCommunicator >> (comm->getName (), comm));
+  auto ret = m_stringMap.emplace(comm->getName(), comm);
   if (ret.second == false)
     {
       return -1;
     }
-  auto ret2 = m_idMap.insert (std::pair < std::uint64_t, std::shared_ptr < gridCommunicator >> (comm->getID (), comm));
+  auto ret2 = m_idMap.emplace(comm->getID(), comm);
   if (ret2.second == false)
     {
       return -1;
     }
   return 0;
+}
+
+int communicationsCore::unregisterCommunicator(gridCommunicator *comm)
+{
+	auto resName = m_stringMap.find(comm->getName());
+	if (resName != m_stringMap.end())
+	{
+		m_stringMap.erase(resName);
+	}
+	auto resID = m_idMap.find(comm->getID());
+	if (resID != m_idMap.end())
+	{
+		m_idMap.erase(resID);
+	}
+	return 0;
 }
 
 int communicationsCore::send (std::uint64_t source, const std::string &dest, std::shared_ptr<commMessage> message)

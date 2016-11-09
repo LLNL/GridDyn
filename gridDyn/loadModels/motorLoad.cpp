@@ -15,7 +15,8 @@
 #include "gridBus.h"
 #include "objectFactoryTemplates.h"
 #include "gridCoreTemplates.h"
-#include "arrayData.h"
+#include "matrixData.h"
+#include "core/gridDynExceptions.h"
 
 #include <iostream>
 #include <cmath>
@@ -160,9 +161,9 @@ void motorLoad::loadSizes (const solverMode &sMode, bool dynOnly)
 }
 
 // set properties
-int motorLoad::set (const std::string &param,  const std::string &val)
+void motorLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
 
   if (param[0] == '#')
     {
@@ -170,14 +171,14 @@ int motorLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
-int motorLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   bool slipCheck = false;
 
   if (param.size () == 1)
@@ -215,7 +216,7 @@ int motorLoad::set (const std::string &param, double val, gridUnits::units_t uni
           slipCheck = true;
           break;
         default:
-          return PARAMETER_NOT_FOUND;
+			throw(unrecognizedParameter());
 
         }
     }
@@ -264,7 +265,7 @@ int motorLoad::set (const std::string &param, double val, gridUnits::units_t uni
         }
       else
         {
-          out = gridLoad::set (param, val, unitType);
+          gridLoad::set (param, val, unitType);
         }
     }
 
@@ -275,7 +276,7 @@ int motorLoad::set (const std::string &param, double val, gridUnits::units_t uni
           rootCheck (bus->getOutputs (nullptr,cLocalSolverMode),nullptr,cLocalSolverMode, check_level_t::reversable_only);
         }
     }
-  return out;
+
 }
 
 void motorLoad::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
@@ -362,12 +363,11 @@ void motorLoad::getStateName (stringVec &stNames, const solverMode &sMode, const
     }
 
 }
-double motorLoad::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad::timestep (double ttime, const IOdata &args, const solverMode &)
 {
   double dt = ttime - prevTime;
   motorLoad::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
   m_state[0] += dt * m_dstate_dt[0];
-  return m_state[0];
 }
 
 void motorLoad::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
@@ -381,7 +381,7 @@ void motorLoad::derivative (const IOdata &args, const stateData *sD, double deri
 
 }
 
-void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isDynamic (sMode))
     {
@@ -420,7 +420,7 @@ void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, array
     }
 }
 
-void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -447,7 +447,7 @@ void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *s
     }
 }
 
-void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (argLocs[voltageInLocation] != kNullLocation)
     {

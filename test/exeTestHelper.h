@@ -34,6 +34,12 @@ public:
 	int run(const std::string &args) const;
 
 	std::string runCaptureOutput(const std::string &args) const;
+    const std::string &getExeString() const
+    {
+        return exeString;
+    }
+private:
+   void buildOutFile();
 };
 
 

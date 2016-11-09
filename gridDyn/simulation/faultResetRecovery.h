@@ -46,7 +46,7 @@ public:
 
   /** @brief attempt the various fixes in order
   @return recovery_return_codes::more_options if attemptFix can be called again without reset
-  recovery_return_codes::out_of_options if no more fix attemps are available
+  recovery_return_codes::out_of_options if no more fix attempts are available
   */
   virtual int attemptFix ();
 

@@ -18,9 +18,6 @@
 #include "readerElement.h"
 
 
-
-#include <cstdio>
-#include <iterator>
 #include <map>
 #include <functional>
 #include <cassert>
@@ -39,12 +36,13 @@ using namespace std::placeholders;
 #include "controllers/scheduler.h"
 #include "controllers/reserveDispatcher.h"
 #include "sourceModels/gridSource.h"
-#include "gridBus.h"
-#include "gridArea.h"
-#include "linkModels/gridLink.h"
 #include "loadModels/gridLoad.h"
 #include "generators/gridDynGenerator.h"
+#include "gridBus.h"
 #include "relays/gridRelay.h"
+#include "gridArea.h"
+#include "linkModels/gridLink.h"
+
 
 static const std::map < std::string, std::function < gridCoreObject *(std::shared_ptr<readerElement> &, readerInfo *)>> loadFunctionMap
 {
@@ -67,6 +65,8 @@ static const std::map < std::string, std::function < gridCoreObject *(std::share
 	  { "reservedispatcher", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (reserveDispatcher *)(nullptr), "reserveDispatcher", ri, nullptr); }},
   /* *INDENT-ON* */
 };
+
+
 
 void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri)
 {
@@ -137,7 +137,7 @@ void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
     }
   std::string def;
   std::string rep;
-  bool locked = false;
+  
   //loop through all define elements
   element->moveToFirstChild (defineString);
   while (element->isValid ())
@@ -167,18 +167,14 @@ void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
       else
         {
           rep = element->getText ();
-          continue;
         }
-
+	  bool locked = false;
       if (element->hasAttribute ("locked"))
         {
           auto lockstr = element->getAttributeText ("locked");
           locked = ((lockstr == "true")||(lockstr == "1")) ? true : false;
         }
-      else
-        {
-          locked = false;
-        }
+
       auto kcheck = ri->checkDefines (rep);
       if (def == kcheck)
         {

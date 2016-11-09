@@ -15,7 +15,7 @@
 #include "gridBus.h"
 #include "vectorOps.hpp"
 #include "gridCoreTemplates.h"
-
+#include "core/gridDynExceptions.h"
 
 #include <ctime>
 
@@ -55,14 +55,13 @@ gridRampLoad::~gridRampLoad ()
 
 
 // set properties
-int gridRampLoad::set (const std::string &param,  const std::string &val)
+void gridRampLoad::set (const std::string &param,  const std::string &val)
 {
-  return gridLoad::set (param, val);
+  gridLoad::set (param, val);
 }
 
-int gridRampLoad::set (const std::string &param, double val, units_t unitType)
+void gridRampLoad::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
   if (param.length () == 4)
     {
       if ((param[0] == 'd') && (param[2] == 'd') && (param[3] == 't'))
@@ -89,13 +88,13 @@ int gridRampLoad::set (const std::string &param, double val, units_t unitType)
               dYpdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
               break;
             default:
-              out = PARAMETER_NOT_FOUND;
+				throw(unrecognizedParameter());
 
             }
         }
       else
         {
-          out = gridLoad::set (param, val, unitType);
+          gridLoad::set (param, val, unitType);
         }
     }
   else if (param.length () == 5)
@@ -116,7 +115,7 @@ int gridRampLoad::set (const std::string &param, double val, units_t unitType)
                   dYpdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
                   break;
                 default:
-                  out = PARAMETER_NOT_FOUND;
+					throw(unrecognizedParameter());
                 }
               break;
             case 'q':
@@ -130,24 +129,24 @@ int gridRampLoad::set (const std::string &param, double val, units_t unitType)
                   dYqdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
                   break;
                 default:
-                  out = PARAMETER_NOT_FOUND;
+					throw(unrecognizedParameter());
                 }
               break;
             default:
-              out = PARAMETER_NOT_FOUND;
+				throw(unrecognizedParameter());
             }
         }
       else
         {
-          out = gridLoad::set (param, val, unitType);
+          gridLoad::set (param, val, unitType);
         }
     }
 
   else
     {
-      out = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
-  return out;
+
 }
 
 

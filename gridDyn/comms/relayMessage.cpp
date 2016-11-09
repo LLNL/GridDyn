@@ -17,45 +17,47 @@
 
 static dMessageFactory<relayMessage, BASE_RELAY_MESSAGE_NUMBER, BASE_RELAY_MESSAGE_NUMBER + 12> dmf ("relay");
 
-std::string relayMessage::toString ()
+std::string relayMessage::toString (int modifiers) const
 {
+	std::string typeString = (modifiers == comm_modifiers::with_type) ? encodeTypeInString() : "";
+
   switch (getMessageType ())
     {
     case NO_EVENT:
-      return "NO EVENT";
+      return typeString+"NO EVENT";
       break;
     case LOCAL_FAULT_EVENT:
-      return "LOCAL FAULT:" + std::to_string (m_code);
+      return typeString + "LOCAL FAULT:" + std::to_string (m_code);
       break;
     case REMOTE_FAULT_EVENT:
-      return "REMOTE FAULT:" + std::to_string (m_code);
+      return typeString + "REMOTE FAULT:" + std::to_string (m_code);
       break;
     case BREAKER_TRIP_EVENT:
-      return "BREAKER TRIP:" + std::to_string (m_code);
+      return typeString + "BREAKER TRIP:" + std::to_string (m_code);
       break;
     case BREAKER_CLOSE_EVENT:
-      return "BREAKER CLOSE:" + std::to_string (m_code);
+      return typeString + "BREAKER CLOSE:" + std::to_string (m_code);
       break;
     case LOCAL_FAULT_CLEARED:
-      return "LOCAL FAULT CLEARED:" + std::to_string (m_code);
+      return typeString + "LOCAL FAULT CLEARED:" + std::to_string (m_code);
       break;
     case REMOTE_FAULT_CLEARED:
-      return "REMOTE FAULT CLEARED:" + std::to_string (m_code);
+      return typeString + "REMOTE FAULT CLEARED:" + std::to_string (m_code);
       break;
     case BREAKER_TRIP_COMMAND:
-      return "TRIP BREAKER:" + std::to_string (m_code);
+      return typeString + "TRIP BREAKER:" + std::to_string (m_code);
       break;
     case BREAKER_CLOSE_COMMAND:
-      return "CLOSE BREAKER:" + std::to_string (m_code);
+      return typeString + "CLOSE BREAKER:" + std::to_string (m_code);
       break;
     case BREAKER_OOS_COMMAND:
-      return "BREAKER OOS:" + std::to_string (m_code);
+      return typeString + "BREAKER OOS:" + std::to_string (m_code);
       break;
     case ALARM_TRIGGER_EVENT:
-      return "ALARM TRIGGER:" + std::to_string (m_code);
+      return typeString + "ALARM TRIGGER:" + std::to_string (m_code);
       break;
     case ALARM_CLEARED_EVENT:
-      return "ALARM CLEARED:" + std::to_string (m_code);
+      return typeString + "ALARM CLEARED:" + std::to_string (m_code);
       break;
     }
   return "<UNKNOWN>";

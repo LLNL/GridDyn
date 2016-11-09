@@ -23,11 +23,11 @@
 #include "gridCoreTemplates.h"
 #include "simulation/contingency.h"
 #include "stringOps.h"
-#include "arrayDataCompact.h"
+#include "matrixDataCompact.h"
+#include "core/gridDynExceptions.h"
 
 #include <complex>
 #include <cmath>
-#include <cstring>
 
 using namespace gridUnits;
 
@@ -45,7 +45,7 @@ static typeFactoryArg<acdcConverter,acdcConverter::mode_t> dcrect ("link", strin
 static typeFactoryArg<acdcConverter, acdcConverter::mode_t> dcinv ("link", stringVec { "inverter", "inv" },acdcConverter::mode_t::inverter);
 static childTypeFactory<acdcConverter, gridLink> acdc ("link", stringVec { "acdc", "acdcconverter", "dcconverter" });
 
-count_t gridLink::linkCount = 0;
+std::atomic<count_t> gridLink::linkCount(0);
 //helper defines to have things make more sense
 #define DEFAULTPOWERCOMP (this->*(flowCalc[0]))
 #define MODEPOWERCOMP (this->*(flowCalc[getLinkApprox (sMode)]))
@@ -55,8 +55,7 @@ count_t gridLink::linkCount = 0;
 gridLink::gridLink (const std::string &objName) : gridPrimary (objName)
 {
   // default values
-  ++linkCount;
-  id = linkCount;
+  id = ++linkCount;
   updateName ();
 
 
@@ -88,7 +87,7 @@ gridLink::~gridLink ()
 }
 
 // timestepP link's buses
-int gridLink::updateBus (gridBus *bus, index_t busnum)
+void gridLink::updateBus (gridBus *bus, index_t busnum)
 {
   if (busnum == 1)
     {
@@ -97,7 +96,7 @@ int gridLink::updateBus (gridBus *bus, index_t busnum)
           B1->remove (this);
         }
       B1 = bus;
-      return (B1) ? B1->add (this) : 0;
+      B1->add (this);
 
     }
   else if (busnum == 2)
@@ -107,11 +106,11 @@ int gridLink::updateBus (gridBus *bus, index_t busnum)
           B2->remove (this);
         }
       B2 = bus;
-      return (B2) ? B2->add (this) : 0;
+      B2->add (this);
     }
   else
     {
-      return OBJECT_ADD_FAILURE;
+	  throw(objectAddFailure(this));
     }
 }
 
@@ -167,12 +166,12 @@ double gridLink::quickupdateP ()
 }
 
 
-double gridLink::timestep (const double ttime, const solverMode &)
+void gridLink::timestep (const double ttime, const solverMode &)
 {
 
   if (!enabled)
     {
-      return 0;
+      return;
 
     }
 
@@ -182,7 +181,7 @@ double gridLink::timestep (const double ttime, const solverMode &)
   {
   Psched=sched->timestepP(time);
   }*/
-  return getRealPower (0);
+
 }
 
 
@@ -200,29 +199,34 @@ void gridLink::getParameterStrings (stringVec &pstr, paramStringType pstype) con
 }
 
 // set properties
-int gridLink::set (const std::string &param,  const std::string &val)
+void gridLink::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "bus1")||(param == "from"))
     {
 
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = INVALID_PARAMETER_VALUE;
+      
       if (bus)
         {
           updateBus (bus, 1);
-          out = PARAMETER_FOUND;
         }
+	  else
+	  {
+		  throw(invalidParameterValue());
+	  }
     }
   else if ((param == "bus2")||(param == "to"))
     {
       gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
-      out = INVALID_PARAMETER_VALUE;
       if (bus)
         {
           updateBus (bus, 2);
-          out = PARAMETER_FOUND;
         }
+	  else
+	  {
+		  throw(invalidParameterValue());
+	  }
     }
   else if (param == "status")
     {
@@ -238,9 +242,8 @@ int gridLink::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridPrimary::set (param, val);
+      gridPrimary::set (param, val);
     }
-  return out;
 }
 
 
@@ -382,11 +385,8 @@ void gridLink::reconnect ()
     }
 }
 
-int gridLink::set (const std::string &param, double val, units_t unitType)
+void gridLink::set (const std::string &param, double val, units_t unitType)
 {
-
-
-  int out = PARAMETER_FOUND;
 
   if ((param == "state") || (param == "switch") || (param == "switch1")||(param == "breaker")||(param == "breaker_open")||(param == "breaker1")||(param == "breaker_open1"))
     {
@@ -429,9 +429,8 @@ int gridLink::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridPrimary::set (param, val, unitType);
+      gridPrimary::set (param, val, unitType);
     }
-  return out;
 }
 
 
@@ -582,18 +581,18 @@ void gridLink::computePowers ()
 
 }
 
-void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 
 }
 
-void gridLink::outputPartialDerivatives (const stateData *, arrayData<double> *, const solverMode &)
+void gridLink::outputPartialDerivatives (const stateData *, matrixData<double> *, const solverMode &)
 {
 
 }
 
-void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, arrayData<double> *, const solverMode &)
+void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> *, const solverMode &)
 {
 
 

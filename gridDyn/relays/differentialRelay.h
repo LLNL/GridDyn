@@ -35,12 +35,12 @@ protected:
 public:
   differentialRelay (const std::string &objName = "diffRelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual int setFlag (const std::string &flag, bool val = true) override;
+  virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual bool getFlag (const std::string &param) const override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
 
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   virtual void pFlowObjectInitializeA (double time0, unsigned long) override;
 

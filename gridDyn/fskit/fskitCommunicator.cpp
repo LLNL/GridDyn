@@ -65,13 +65,18 @@ FskitCommunicator::FskitCommunicator (std::string name, std::uint64_t id)  : gri
 
 
 void
-FskitCommunicator::Register ()
+FskitCommunicator::initialize ()
 {
   assert (GriddynFederatedScheduler::GetScheduler () != 0);
   // XXX: This assumes that clients are using this class instance
   // as a shared_ptr.
   GriddynFederatedScheduler::GetScheduler ()->RegisterLogicalProcess (
     shared_from_this ());
+}
+
+void FskitCommunicator::disconnect()
+{
+
 }
 
 // TODO RARS - This method needs to be refactored

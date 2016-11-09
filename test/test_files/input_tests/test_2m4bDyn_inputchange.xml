@@ -86,22 +86,22 @@
          <P>1.500</P>
          <Q>0</Q>
 		 <event>
-		 <field>P</field>
+		 <field>p</field>
 		 <value>1.25</value>
 		 <time>1</time>
 		 </event>
 		 <event>
-		 <field>P</field>
+		 <field>p</field>
 		 <value>1.5</value>
 		 <time>1.5</time>
 		 </event>
 		  <event>
-		 <field>P</field>
+		 <field>p</field>
 		 <value>1.75</value>
 		 <time>2.0</time>
 		 </event>
 		 <event>
-		 <field>P</field>
+		 <field>p</field>
 		 <value>1.5</value>
 		 <time>2.5</time>
 		 </event>

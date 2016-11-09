@@ -14,7 +14,7 @@
 #include "gridObjects.h"
 #include <cstdio>
 #include <iostream>
-#include "arrayData.h"
+#include "matrixData.h"
 #include "stringOps.h"
 
 
@@ -114,10 +114,9 @@ void gridSubModel::objectInitializeB (const IOdata &args, const IOdata &outputSe
     }
 }
 
-double gridSubModel::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
+void gridSubModel::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
 {
   prevTime = ttime;
-  return m_output;
 }
 
 void gridSubModel::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode &)
@@ -196,12 +195,14 @@ void gridSubModel::algebraicUpdate (const IOdata & /*args*/, const stateData *, 
 
 }
 
-void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
+
 }
 
-void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
+
 }
 
 change_code gridSubModel::powerFlowAdjust (const IOdata & args, unsigned long flags, check_level_t level)
@@ -357,7 +358,7 @@ double gridSubModel::getDoutdt (const stateData *sD, const solverMode &sMode, in
     {
       if (Loc.algSize > Num)
         {
-          return 0;
+          return 0.0;
         }
       else if (Loc.diffSize + Loc.algSize > Num)
         {
@@ -365,28 +366,28 @@ double gridSubModel::getDoutdt (const stateData *sD, const solverMode &sMode, in
         }
       else
         {
-          return 0;
+          return 0.0;
         }
     }
 
 }
 
-void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, arrayData<double> *ad, const solverMode &sMode)
+void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *ad, const solverMode &sMode)
 {
   auto so = offsets.getOffsets (sMode);
   if (opFlags[differential_output])
     {
-      ad->assignCheck (0, so->diffOffset, 1);
+      ad->assignCheckCol (0, so->diffOffset, 1.0);
     }
   else
     {
       if (so->total.algSize > 0)
         {
-          ad->assignCheck (0, so->algOffset, 1);
+          ad->assignCheckCol (0, so->algOffset, 1.0);
         }
       else if (so->total.diffSize > 0)
         {
-          ad->assignCheck (0, so->diffOffset, 1);
+          ad->assignCheckCol (0, so->diffOffset, 1);
         }
     }
 

@@ -25,7 +25,6 @@
 #include "gridDyn.h"
 #include "stringOps.h"
 
-#include <fstream>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -241,17 +240,14 @@ void loadGenDynArray (gridCoreObject * /*parentObject*/, mArray &Gen, std::vecto
 void loadGenExcArray (gridCoreObject * /*parentObject*/, mArray &excData, std::vector<gridDynGenerator *> &genList)
 {
 
-  gridDynGenerator *gen = nullptr;
-  gridDynExciter *exc;
-
   /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
   for (const auto &excLine : excData)
     {
-      exc = nullptr;
+	  gridDynExciter *exc = nullptr;
       index_t ind1 = static_cast<index_t> (excLine[0]);
       if (ind1 <= genList.size ())
         {
-          gen = genList[ind1 - 1];
+		  gridDynGenerator *gen = genList[ind1 - 1];
           exc = static_cast<gridDynExciter *> (gen->getSubObject ("exciter", 0));
         }
       if (!exc)
@@ -320,7 +316,7 @@ void loadGenGovArray(gridCoreObject * /*parentObject*/, mArray &govData, std::ve
 //read matdyn Event files
 void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
 {
-	std::string tstr;
+	
 	mArray::size_type kk;
 	std::shared_ptr<gridEvent> evnt;
 	gridBus *bus;
@@ -328,18 +324,17 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 	gridLink *lnk;
 	int ind;
 	mArray event1,M1;
-	size_t A, B,C;
 	gridSimulation *gds = dynamic_cast<gridSimulation *>(parentObject->find("root"));
 	if (gds == nullptr)
 	{ //cant make events if we don't have access to the simulation
 		return;
 	}
 	//read the frequency
-	A = filetext.find_first_of('[', 0);
-	B = filetext.find_first_of(']', 0);
-	tstr = filetext.substr(A + 1, B - A - 1);
+	size_t A = filetext.find_first_of('[', 0);
+	size_t B = filetext.find_first_of(']', 0);
+	std::string tstr = filetext.substr(A + 1, B - A - 1);
 	auto Tline=splitline(tstr,  "\t ,");
-	C = B;
+	size_t C = B;
 	A = filetext.find(Tline[0],C);//event
 	if (A != std::string::npos)
 	{
@@ -368,23 +363,21 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 			{
 			case 3://P
 				evnt->setTarget(ld, "p");
-				evnt->unitType = MW;
-				evnt->value = M1[kk][3];
+				evnt->setValue(M1[kk][3], MW);
 				break;
 			case 4: //Q
 				evnt->setTarget(ld, "q");
-				evnt->unitType = MVAR;
-				evnt->value = M1[kk][3];
+				evnt->setValue(M1[kk][3], MVAR);
 				break;
 			case 5: //GS
 				evnt->setTarget(ld, "yp");
-				evnt->unitType = MW;
-				evnt->value = M1[kk][3];
+				evnt->setValue(M1[kk][3], MW);
 				break;
 			case 6: //BS
 				evnt->setTarget(ld, "yq");
-				evnt->unitType = MW;
-				evnt->value = -M1[kk][3];
+				evnt->setValue(-M1[kk][3], MW);
+				break;
+			default:
 				break;
 			}
 			gds->add(evnt);
@@ -407,29 +400,29 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 			{
 			case 3://r
 				evnt->setTarget(lnk, "r");
-				evnt->value = lc[3];
+				evnt->setValue(lc[3]);
 				break;
 			case 4: //X
 				evnt->setTarget(lnk, "x");
-				evnt->value = lc[3];
+				evnt->setValue(lc[3]);
 				break;
 			case 5: //B
 				evnt->setTarget(lnk, "b");
-				evnt->unitType = MW;
-				evnt->value = lc[3];
+				evnt->setValue(lc[3],MW);
 				break;
 			case 9: //tap
 				evnt->setTarget(lnk, "tap");
-				evnt->value = lc[3];
+				evnt->setValue(lc[3]);
 				break;
 			case 10: //BS
 				evnt->setTarget(lnk, "tapangle");
-				evnt->unitType = deg;
-				evnt->value = lc[3];
+				evnt->setValue(lc[3], deg);
 				break;
 			case 11: //BS
 				evnt->setTarget(lnk, "enable");
-				evnt->value = lc[3];
+				evnt->setValue(lc[3]);
+				break;
+			default:
 				break;
 			}
 			gds->add(evnt);

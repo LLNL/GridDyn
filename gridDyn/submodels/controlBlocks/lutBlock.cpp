@@ -13,8 +13,8 @@
 
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
-#include "fileReaders.h"
-#include "arrayData.h"
+#include "timeSeries.h"
+#include "matrixData.h"
 #include "stringOps.h"
 #include <utility>
 
@@ -79,7 +79,7 @@ void lutBlock::algElements (double input, const stateData *sD, double update[], 
     }
 }
 
-void lutBlock::jacElements (double input, double didt, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void lutBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
@@ -96,9 +96,8 @@ void lutBlock::jacElements (double input, double didt, const stateData *sD, arra
 
 
 // set parameters
-int lutBlock::set (const std::string &param,  const std::string &val)
+void lutBlock::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "lut")
     {
@@ -129,10 +128,7 @@ int lutBlock::set (const std::string &param,  const std::string &val)
     {
       std::string temp = val;
       timeSeries ts (temp);
-      if (ts.count == 0)
-        {
-          return INVALID_PARAMETER_VALUE;
-        }
+     
       lut.clear ();
       lut.push_back (std::make_pair (-kBigNum, 0.0));
       lut.push_back (std::make_pair (kBigNum, 0.0));
@@ -146,23 +142,23 @@ int lutBlock::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = basicBlock::set (param, val);
+      basicBlock::set (param, val);
     }
-  return out;
+ 
 }
 
-int lutBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void lutBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = basicBlock::set (param, val, unitType);
+      basicBlock::set (param, val, unitType);
     }
-  return out;
+
 }
 
 double lutBlock::step (double ttime, double input)

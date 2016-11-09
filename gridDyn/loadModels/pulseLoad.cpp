@@ -116,9 +116,8 @@ void gridPulseLoad::loadUpdateForward (double ttime)
   prevTime = ttime;
 }
 
-int gridPulseLoad::set (const std::string &param,  const std::string &val)
+void gridPulseLoad::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if ((param == "type") || (param == "pulsetype"))
     {
       if (val == "square")
@@ -158,15 +157,14 @@ int gridPulseLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridLoad::set (param, val);
+      gridLoad::set (param, val);
     }
-  return out;
+
 }
 
 
-int gridPulseLoad::set (const std::string &param, double val, units_t unitType)
+void gridPulseLoad::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "a") || (param == "amplitude"))
     {
@@ -272,10 +270,10 @@ int gridPulseLoad::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridLoad::set (param, val, unitType);
+      gridLoad::set (param, val, unitType);
     }
 
-  return out;
+
 }
 
 //TODO:PT should convert this to a function map

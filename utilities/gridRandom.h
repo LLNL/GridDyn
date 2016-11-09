@@ -32,8 +32,8 @@ public:
   {
     constant, uniform, exponential, normal,lognormal
   };
-  gridRandom (dist_type_t dist = dist_type_t::normal);
-  gridRandom (std::string &dist_name);
+  explicit gridRandom (dist_type_t dist = dist_type_t::normal);
+  explicit gridRandom (std::string &dist_name);
 
   void setDistribution (dist_type_t dist);
   dist_type_t getDistribution ()

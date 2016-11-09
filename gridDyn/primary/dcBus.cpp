@@ -20,7 +20,8 @@
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
 #include "gridCoreTemplates.h"
-#include "arrayDataCompact.h"
+#include "matrixDataCompact.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 #include <iostream>
@@ -55,14 +56,14 @@ dcBus::~dcBus ()
 
 
 // add link
-int dcBus::add (gridLink *lnk)
+void dcBus::add (gridLink *lnk)
 {
   if ((lnk->checkFlag (dc_only))||(lnk->checkFlag (dc_capable)))
     {
       return gridBus::add (lnk);
     }
 
-    return (OBJECT_NOT_RECOGNIZED);
+  throw(invalidObjectException(this));
 }
 
 
@@ -280,18 +281,16 @@ void dcBus::dynObjectInitializeB (IOdata &outputSet)
 
 }
 
-double dcBus::timestep (double ttime, const solverMode &sMode)
+void dcBus::timestep (double ttime, const solverMode &sMode)
 {
   gridBus::timestep (ttime, sMode);
 
-  return 0.0;
 }
 
 
 // set properties
-int dcBus::set (const std::string &param,  const std::string &vali)
+void dcBus::set (const std::string &param,  const std::string &vali)
 {
-  int out = PARAMETER_FOUND;
   auto val = convertToLowerCase(vali);
   if ((param == "type") || (param == "bustype") || (param == "pflowtype"))
   {
@@ -337,7 +336,7 @@ int dcBus::set (const std::string &param,  const std::string &vali)
       }
       else
       {
-          return INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
       }
 
   }
@@ -362,21 +361,19 @@ int dcBus::set (const std::string &param,  const std::string &vali)
       }
       else
       {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
       }
   }
   else
   {
-      out = gridBus::set(param, val);
+      gridBus::set(param, val);
   }
   
-  return out;
 
 }
 
-int dcBus::set (const std::string &param, double val, units_t unitType)
+void dcBus::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param[0] == '#')
     {
@@ -384,9 +381,8 @@ int dcBus::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      out = gridBus::set (param, val, unitType);
+      gridBus::set (param, val, unitType);
     }
-  return out;
 
 }
 
@@ -502,7 +498,7 @@ static const IOlocs inLoc{
 
 void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
 {
-    arrayDataCompact<2, 3> partDeriv;
+    matrixDataCompact<2, 3> partDeriv;
     if (!isConnected())
     {
         return;
@@ -538,9 +534,8 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
     dVdP = partDeriv.at(PoutLocation, voltageInLocation);
 
 }
-
 // Jacobian
-void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode)
+void dcBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
 {
 
   auto args = getOutputs (sD, sMode);
@@ -568,7 +563,7 @@ void dcBus::jacobianElements (const stateData *sD, arrayData<double> *ad, const 
         }
     }
 
-  //arrayDataSparse od;
+  //matrixDataSparse od;
   od.setArray (ad);
   od.setTranslation (PoutLocation, useVoltage (sMode) ? argLocs[voltageInLocation] : kNullLocation);
   for (auto &gen : attachedGens)

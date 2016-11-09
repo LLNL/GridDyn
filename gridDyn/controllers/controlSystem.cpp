@@ -15,6 +15,7 @@
 #include "controlSystem.h"
 #include "submodels/gridControlBlocks.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 
 controlSystem::controlSystem (const std::string &objName) : gridSubModel (objName)
 {
@@ -37,26 +38,25 @@ gridCoreObject * controlSystem::clone (gridCoreObject *obj) const
 }
 
 
-int controlSystem::add (gridCoreObject *obj)
+void controlSystem::add (gridCoreObject *obj)
 {
   if (dynamic_cast<basicBlock *> (obj))
     {
-      return add (static_cast<basicBlock *> (obj));
+      add (static_cast<basicBlock *> (obj));
     }
   else
     {
-      return OBJECT_NOT_RECOGNIZED;
+	  throw(invalidObjectException(this));
     }
 }
 
-int controlSystem::add (basicBlock *blk)
+void controlSystem::add (basicBlock *blk)
 {
   blk->setParent (this);
   blk->set ("basepower", systemBasePower);
   blocks.push_back (blk);
   blk->locIndex = static_cast<index_t> (blocks.size ()) - 1;
   subObjectList.push_back (blk);
-  return OBJECT_ADD_SUCCESS;
 }
 
 void controlSystem::objectInitializeA (double time0, unsigned long flags)
@@ -71,32 +71,30 @@ void controlSystem::objectInitializeB (const IOdata & /*args*/, const IOdata & /
 
 }
 
-int controlSystem::set (const std::string &param, const std::string &val)
+void controlSystem::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridSubModel::set (param, val);
+      gridSubModel::set (param, val);
     }
-  return out;
 }
 
-int controlSystem::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlSystem::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param[0] == '#')
     {
 
     }
   else
     {
-      out = gridSubModel::set (param, val,unitType);
+      gridSubModel::set (param, val,unitType);
     }
-  return out;
+
 }
 
 index_t controlSystem::findIndex (const std::string & /*field*/, const solverMode &) const
@@ -110,15 +108,15 @@ void controlSystem::residual (const IOdata & /*args*/, const stateData *, double
 }
 
 void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData *,
-                                      arrayData<double> *,
+                                      matrixData<double> *,
                                       const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 }
 
-double controlSystem::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode & /*sMode*/)
+void controlSystem::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode & /*sMode*/)
 {
-  return 0.0;
+  
 }
 
 void controlSystem::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode & /*sMode*/)

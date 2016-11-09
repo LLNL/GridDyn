@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "objectFactoryTemplates.h"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "gridCoreTemplates.h"
 
 #include <cmath>
@@ -135,7 +135,7 @@ void gridDynExciter::derivative (const IOdata &args, const stateData *sD, double
 
 // Jacobian
 void gridDynExciter::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                       arrayData<double> *ad,
+                                       matrixData<double> *ad,
                                        const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
@@ -278,15 +278,14 @@ stringVec gridDynExciter::localStateNames () const
 }
 
 
-int gridDynExciter::set (const std::string &param,  const std::string &val)
+void gridDynExciter::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  gridCoreObject::set (param, val);
 }
 
 // set parameters
-int gridDynExciter::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynExciter::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "vref")
     {
@@ -314,8 +313,7 @@ int gridDynExciter::set (const std::string &param, double val, gridUnits::units_
     }
   else
     {
-      out = gridSubModel::set (param, val, unitType);
+      gridSubModel::set (param, val, unitType);
     }
 
-  return out;
 }

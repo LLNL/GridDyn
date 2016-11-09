@@ -16,6 +16,7 @@
 #include "gridArea.h"
 #include "reserveDispatcher.h"
 #include "scheduler.h"
+#include "core/gridDynExceptions.h"
 /*
 
 class reserveDispatcher
@@ -52,8 +53,8 @@ public:
 
         virtual void addGen(scheduler *sched);
         virtual void removeSched(scheduler *sched);
-        virtual int set (const std::string &param, double val,units_t unitType=defUnit);
-        virtual int set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val, unitType);};
+        virtual void set (const std::string &param, double val,units_t unitType=defUnit);
+        virtual void set (const std::string &param, double val,units_t unitType=defUnit){return set(param,&val, unitType);};
 
         double getAvailable(){return sum(&resAvailable)-sum(&resUsed);};
 
@@ -199,7 +200,7 @@ double reserveDispatcher::testP (double time,double pShort)
   return output;
 }
 
-int reserveDispatcher::remove (schedulerRamp *sched)
+void reserveDispatcher::remove (schedulerRamp *sched)
 {
   size_t kk;
   for (kk = 0; kk < schedCount; kk++)
@@ -210,22 +211,23 @@ int reserveDispatcher::remove (schedulerRamp *sched)
           schedCount--;
 
           checkGen ();
-          return OBJECT_REMOVE_SUCCESS;
         }
     }
-  return OBJECT_REMOVE_FAILURE;
 }
 
-int reserveDispatcher::add (gridCoreObject *obj)
+void reserveDispatcher::add (gridCoreObject *obj)
 {
   if (dynamic_cast<schedulerRamp *> (obj))
     {
-      return(add (static_cast<schedulerRamp *> (obj)));
+      add (static_cast<schedulerRamp *> (obj));
     }
-  return OBJECT_NOT_RECOGNIZED;
+  else
+  {
+	  throw(invalidObjectException(this));
+  }
 }
 
-int reserveDispatcher::add (schedulerRamp *sched)
+void reserveDispatcher::add (schedulerRamp *sched)
 {
   schedCount++;
   schedList.push_back (sched);
@@ -233,29 +235,28 @@ int reserveDispatcher::add (schedulerRamp *sched)
   resAvailable.resize (schedCount);
   //	sched->reserveDispatcherLink(this);
   checkGen ();
-  return OBJECT_ADD_SUCCESS;
+
 }
 
-int reserveDispatcher::remove (gridCoreObject *obj)
+void reserveDispatcher::remove (gridCoreObject *obj)
 {
   if (dynamic_cast<schedulerRamp *> (obj))
     {
-      return( remove (static_cast<schedulerRamp *> (obj)));
+      remove (static_cast<schedulerRamp *> (obj));
     }
-  return OBJECT_NOT_RECOGNIZED;
 }
 
 
-int reserveDispatcher::set (const std::string &param,  const std::string &val)
+void reserveDispatcher::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-  out = gridCoreObject::set (param, val);
-  return out;
+
+  gridCoreObject::set (param, val);
+
 }
 
-int reserveDispatcher::set (const std::string &param, double val,gridUnits::units_t unitType)
+void reserveDispatcher::set (const std::string &param, double val,gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if ((param == "threshold")||(param == "thresholdstart"))
     {
       thresholdStart = val;
@@ -274,9 +275,8 @@ int reserveDispatcher::set (const std::string &param, double val,gridUnits::unit
     }
   else
     {
-      out = gridCoreObject::set (param,val,unitType);
+      gridCoreObject::set (param,val,unitType);
     }
-  return out;
 }
 
 void reserveDispatcher::schedChange ()

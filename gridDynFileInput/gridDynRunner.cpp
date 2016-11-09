@@ -23,9 +23,11 @@
 #include "objectInterpreter.h"
 #include "gridDynFederatedScheduler.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "griddyn-tracer.h"
-#include "gridRecorder.h"
+#include "GridDyn-tracer.h"
+#include "collector.h"
 #include "stringOps.h"
+#include "workQueue.h"
+#include "core/gridDynExceptions.h"
 
 #ifdef GRIDDYN_HAVE_FSKIT
 #include "fskit/ptrace.h"
@@ -50,11 +52,11 @@
 extern "C" {
 
 /*
- * This is a C interface for running griddyn.
+ * This is a C interface for running GridDyn.
  */
 int griddyn_runner_main (int argc, char *argv[])
 {
-  GRIDDYN_TRACER ("griddyn::griddyn_runner_main");
+  GRIDDYN_TRACER ("GridDyn::griddyn_runner_main");
 
 #ifdef GRIDDYN_HAVE_ETRACE
   std::stringstream program_trace_filename;
@@ -64,19 +66,19 @@ int griddyn_runner_main (int argc, char *argv[])
 
 #endif
 
-  std::shared_ptr<GriddynRunner> griddyn = std::shared_ptr<GriddynRunner> (new GriddynRunner ());
+  auto GridDyn = std::make_shared<GriddynRunner> ();
 
 #ifdef GRIDDYN_HAVE_FSKIT
   // Not running with FSKIT.
   std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler (nullptr);
-  griddyn->Initialize (argc, argv, scheduler);
+  GridDyn->Initialize (argc, argv, scheduler);
 #else
-  griddyn->Initialize (argc, argv);
+  GridDyn->Initialize (argc, argv);
 #endif
 
-  griddyn->Run ();
+  GridDyn->Run ();
 
-  griddyn->Finalize ();
+  GridDyn->Finalize ();
 
   return 0;
 }
@@ -98,7 +100,7 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 {
 #endif
 
-  GRIDDYN_TRACER ("griddyn::GriddynRunner::Initialize");
+  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Initialize");
 #ifdef FMI_ENABLE
   loadFmiLibrary ();
 #endif
@@ -169,7 +171,7 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 
 void GriddynRunner::Run (void)
 {
-  GRIDDYN_TRACER ("griddyn::GriddynRunner::Run");
+  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Run");
 
   m_gds->run ();
 }
@@ -220,7 +222,7 @@ void GriddynRunner::StopRecording ()
 
 void GriddynRunner::Finalize (void)
 {
-  GRIDDYN_TRACER ("griddyn::GriddynRunner::Finalize");
+  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Finalize");
 
   StopRecording ();
 
@@ -232,7 +234,6 @@ void GriddynRunner::Finalize (void)
 
 int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo *ri, po::variables_map &vm)
 {
-  int temp;
 
   if (vm.count ("quiet"))
     {
@@ -241,18 +242,18 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
     }
   if (vm.count ("verbose"))
     {
-      temp = vm["verbose"].as<int> ();
+      int temp = vm["verbose"].as<int> ();
       readerConfig::setPrintMode (temp);        //set the gridDynXML reader print mode
       //default is normal mode
     }
 
   if (vm.count ("warn"))
     {
-      temp = vm["warn"].as<int> ();
+      int temp = vm["warn"].as<int> ();
       readerConfig::setWarnMode (temp);        //set the gridDynXML reader warn mode
       //default is warn all
     }
-  if (vm.count ("mpicount"))     //if we are in mpi mode don't print anything
+  if (vm.count ("mpicount"))     //if we are in mpi mode don't prvoid anything
     {
       readerConfig::setPrintMode (READER_NO_PRINT);
       readerConfig::setWarnMode (READER_WARN_NONE);
@@ -274,8 +275,12 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
           ri->flags = addflags (ri->flags, str);
         }
     }
-  std::string grid_file;
-  grid_file = vm["input"].as<std::string> ();
+	if (vm.count("threads"))
+	{
+		//initiate the work queue with the requested number of threads
+		workQueue::instance(vm["threads"].as<int>());
+	}
+   std::string grid_file = vm["input"].as<std::string> ();
 
   loadFile (gds.get (), grid_file, ri);
   if (vm.count ("import"))
@@ -317,8 +322,11 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
           for (auto &flag : fstr)
             {
               makeLowerCase (flag);
-              temp = gds->setFlag (flag, true);
-              if (temp != PARAMETER_FOUND)
+			  try
+			  {
+				  gds->setFlag(flag, true);
+			  }
+              catch (const unrecognizedParameter &)
                 {
                   std::cout << "flag " << str << " not recognized\n";
                 }
@@ -338,19 +346,21 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
           if (p.valid)
             {
               objInfo oi (p.field, gds.get ());
-              if (p.stringType)
-                {
-                  temp = oi.m_obj->set (oi.m_field, p.strVal);
-                }
-              else
-                {
-                  temp = oi.m_obj->set (oi.m_field, p.value, p.paramUnits);
-                }
-
-              if (temp != PARAMETER_FOUND)
-                {
+			  try
+			  {
+				  if (p.stringType)
+				  {
+					  oi.m_obj->set(oi.m_field, p.strVal);
+				  }
+				  else
+				  {
+					  oi.m_obj->set(oi.m_field, p.value, p.paramUnits);
+				  }
+			  }
+              catch (const unrecognizedParameter &)
+			  {
                   std::cout << "param " << str << " not able to be processed\n";
-                }
+               }
             }
         }
     }
@@ -416,26 +426,27 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
     ("mpicount", "setup for an MPI run")
     ("version", "print version string");
 
-  config.add_options ()
-    ("powerflow-output,o", po::value<std::string> (), "file output for the powerflow solution")
-    ("param,P", po::value < std::vector < std::string >> (), "override simulation file parameters --param ParamName=<val>")
-    ("dir", po::value < std::vector < std::string >> (), "add search directory for input files")
-    ("import,i", po::value < std::vector < std::string >> (), "add import files loaded after the main input file")
-    ("powerflow_only", "set the solver to stop after the power flow solution")
-    ("powerflow-only", "set the solver to stop after the power flow solution")
-    ("state-output", po::value<std::string> (), "file for final output state")
-    ("auto-capture",po::value<std::string> (),"file for automatic recording")
-    ("auto-capture-period",po::value<double> (),"period to capture the automatic recording")
-    ("save-state-period", po::value<int> (), "save state every N ms, -1 for saving only at the end")
-    ("log-file", po::value<std::string> (), "log file output")
-    ("quiet,q", "set verbosity to 0 (ie only error output)")
-    ("jac-output", po::value<std::string> (), "powerflow Jacobian file output")
-    ("verbose,v", po::value<int> (), "specify verbosity output 0=verbose,1=normal, 2=summary,3=none")
-    ("flags,f", po::value < std::vector < std::string >> (), "specify flags to feed to griddyn")
-    ("file-flags", po::value < std::vector < std::string >> (), "specify flags to feed to the file reader")
-    ("define,D", po::value < std::vector < std::string >> (), "definition strings for the element file readers")
-    ("translate,T", po::value < std::vector < std::string >> (), "translation strings for the element file readers")
-    ("warn,w", po::value<int> (), "specify warning level output 0=all, 1=important,2=none");
+  config.add_options()
+	  ("powerflow-output,o", po::value<std::string>(), "file output for the powerflow solution")
+	  ("param,P", po::value < std::vector < std::string >>(), "override simulation file parameters --param ParamName=<val>")
+	  ("dir", po::value < std::vector < std::string >>(), "add search directory for input files")
+	  ("import,i", po::value < std::vector < std::string >>(), "add import files loaded after the main input file")
+	  ("powerflow_only", "set the solver to stop after the power flow solution")
+	  ("powerflow-only", "set the solver to stop after the power flow solution")
+	  ("state-output", po::value<std::string>(), "file for final output state")
+	  ("auto-capture", po::value<std::string>(), "file for automatic recording")
+	  ("auto-capture-period", po::value<double>(), "period to capture the automatic recording")
+	  ("save-state-period", po::value<int>(), "save state every N ms, -1 for saving only at the end")
+	  ("log-file", po::value<std::string>(), "log file output")
+	  ("quiet,q", "set verbosity to 0 (ie only error output)")
+	  ("jac-output", po::value<std::string>(), "powerflow Jacobian file output")
+	  ("verbose,v", po::value<int>(), "specify verbosity output 0=verbose,1=normal, 2=summary,3=none")
+	  ("flags,f", po::value < std::vector < std::string >>(), "specify flags to feed to GridDyn")
+	  ("file-flags", po::value < std::vector < std::string >>(), "specify flags to feed to the file reader")
+	  ("define,D", po::value < std::vector < std::string >>(), "definition strings for the element file readers")
+	  ("translate,T", po::value < std::vector < std::string >>(), "translation strings for the element file readers")
+	  ("warn,w", po::value<int>(), "specify warning level output 0=all, 1=important,2=none")
+	  ("threads", po::value<int>(), "specify the number of worker threads to use if multithreading is enabled");
 
   hidden.add_options ()
     ("input", po::value<std::string> (), "input file");

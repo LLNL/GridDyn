@@ -14,7 +14,7 @@
 #ifndef GRIDOBJECTHELPERCLASSES_H_
 #define GRIDOBJECTHELPERCLASSES_H_
 
-#include "gridDynTypes.h"
+#include "gridDynVectorTypes.h"
 #include <bitset>
 
 const static std::uint64_t flagMask = 0x3FE;  //!< general flag mask for convenience to mask out flags that typically cascade to parents
@@ -35,32 +35,32 @@ enum operation_flags
   has_constraints = 1,        //!<flag indicating if an object uses constraints
   has_roots = 2,        //!<flag indicating if an object uses root finding
   has_alg_roots = 3,         //!< flag indicated the object has states to solve for
-  has_powerflow_adjustments = 4,        //!<flag indicating if an object has voltage adjustements for power flow
-  preEx_requested = 5,        //!<flag indicating if an object requests preexecution
+  has_powerflow_adjustments = 4,        //!<flag indicating if an object has voltage adjustments for power flow
+  preEx_requested = 5,        //!<flag indicating if an object requests pre-execution
   uses_bus_frequency = 6,        //!<flag indicating if an object uses bus frequency calculation
   has_pflow_states = 7,           //!< indicator if the object has pflow states if in question
   has_dyn_states = 8,             //!< indicator if the object has dynamic states if in question
   has_differential_states = 9,       //!< indicator if the object has differential states
-  extra_cascading_flag = 10,
+  not_cloneable = 10,				//!< flag indicating that an object should not be cloned
   // end of typically cascading flags
 
   //for handling remote voltage control capabilities
   remote_voltage_control = 11,   //!< indicator that the object controls a remote bus voltage at a specific level
   local_voltage_control = 12,     //!<indicator that the object controls the local bus voltage at a specific level
   indirect_voltage_control = 13,  //!< flag indicating the object must use indirect means to control the voltage
+  adjustable_Q = 14,   //!< flag indicating that an object has controllable reactive power for power flow
   //for handling remote power control capabilities
-  remote_power_control = 14,   //!< indicator that the object controls a remote bus voltage at a specific level
-  local_power_control = 15,     //!<indicator that the object controls the local bus voltage at a specific level
-  indirect_power_control = 16,  //!< flag indicating the object must use indirect means to control the voltage
-
-  //some indicator flags for local objects
-  pFlow_initialized = 17,       //!< indicator that pflow initialize has been completed
-  dyn_initialized = 18,      //!<  indicator that dyn Initialize has been completed
-  object_armed_flag = 19,        //!<basically an extra object flag if the obect has a trigger mechanism of some sort
-  late_b_initialize = 20,         //!< flag indicating the object would like to initialized after most other objects only acknowledged by areas and then only within the area
-  adjustable_P = 21,        //!< flag indicating that the object has adjustable power setting and can be used by slk bus for control of angle
-  adjustable_Q = 22,        //!< flag indicating that an object has controllable reactive power for power flow
-  error_flag = 23,
+  remote_power_control = 15,   //!< indicator that the object controls a remote bus voltage at a specific level
+  local_power_control = 16,     //!<indicator that the object controls the local bus voltage at a specific level
+  indirect_power_control = 17,  //!< flag indicating the object must use indirect means to control the voltage
+  adjustable_P = 18,        //!< flag indicating that the object has adjustable power setting and can be used by slack bus for control of angle
+  
+		//some indicator flags for local objects
+  pFlow_initialized = 19,       //!< indicator that powerFlow initialization has been completed
+  dyn_initialized = 20,      //!<  indicator that dynamic Initialization has been completed
+  object_armed_flag = 21,        //!<basically an extra object flag if the object has a trigger mechanism of some sort
+  late_b_initialize = 22,         //!< flag indicating the object would like to initialized after most other objects only acknowledged by areas and then only within the area      
+  error_flag = 23,    //!< flag indicating the object has an error
 
   //flags  24- 31 indicating some sort of condition change
   state_change_flag = 24,   //!< flag indicating that the state size or nature has changed
@@ -90,25 +90,25 @@ enum operation_flags
   no_pflow_states = 44,   //!< flag indicating there is not nor will ever there be power flow states
   no_dyn_states = 45,//!< flag indicating there is not nor will ever there be dynamic states
 
-  disable_flag_updates = 46, //flag to temporarilly disable flag updates from the alert function
+  disable_flag_updates = 46, //flag to temporarily disable flag updates from the alert function
   flag_update_required = 47, //!< flag indicated that a flag update is required
-  pflow_constant_initialization = 48, //!< flag indicating that an object is using pflow initialization for dynamic elements
+  pflow_init_required = 48, //!< flag indicating that an object is using pflow initialization for dynamic elements
 
   //Various informative flags that can be used in some situations
   disconnected = 49, //!< flag indicating that the object is disconnected
   differential_output = 50, //!< flag that the model has a differential state variable that is the primary output
-  no_gridobject_set = 51,  //!< flag indicating skipping of the gridCoreObject set function for parent setting
+  no_gridobject_set = 51,  //!< flag indicating skipping of the gridCoreObject set function for parent setting without fault
   being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some large objects with components allocated in larger fashion so we skip over some steps in object removal
 
   /*flags 53-63 are intended for object capabilities*/
 
-  multipart_calculation_capable = 53,
+  multipart_calculation_capable = 53,  //!< flag indicating the object is capable of using pre and post execution functions
   extra_capability_flag1 = 54,
   extra_capability_flag2 = 55,
   extra_capability_flag3 = 56,
-  dc_only = 57,                       //!<flag indicating the object must be attached to a dc bus
-  dc_capable = 58,                    //!<flag indicating the object can be attached to a dc bus
-  dc_terminal2 = 59,                      //!<flag indicating the terminal 2 must be a dc bus
+  dc_only = 57,                       //!<flag indicating the object must be attached to a DC bus
+  dc_capable = 58,                    //!<flag indicating the object can be attached to a DC bus
+  dc_terminal2 = 59,                      //!<flag indicating the terminal 2 must be a DC bus
   three_phase_only = 61,              //!<flag indicating the object must be attached to a 3 phase bus
   three_phase_capable = 62,           //!<flag indicating the object can be attached to a 3 phase bus
   three_phase_terminal2 = 63,           //!<flag indicating the terminal 2 must be attached to a 3 phase bus
@@ -124,8 +124,10 @@ enum class converge_mode
   voltage_only,         //!< only iterate on the voltage
   high_error_only,        //!< only iterate on high error states
   local_iteration,         //!< do a simple iteration to tolerance
-  block_iteration,                      //!< do an interation loop at higher level
+  block_iteration,                      //!< do an iteration loop at higher level
   strong_iteration,        //!< do a stronger iteration to tolerance
+  force_strong_iteration,   //!< no jumping to alternate convergence with strong iteration
+  force_voltage_only,		//!< no jumping to alternate convergence mechanics
 };
 
 //for the controlFlags bitset used for initialization and powerFlowAdjustments
@@ -205,7 +207,7 @@ inline bool anyChangeFlags (std::bitset<64> flags)
 
 #define SLACK_BUS_CHANGE (655)                  //!< change in the slack bus
 
-#define CONSTRAINT_COUNT_CHANGE (670)           //!< change in the contraint count
+#define CONSTRAINT_COUNT_CHANGE (670)           //!< change in the constraint count
 #define CONSTRAINT_COUNT_INCREASE (671)         //!< increase in the number of constraints
 #define CONSTRAINT_COUNT_DECREASE (672)         //!< decrease in the number of constraints
 
@@ -249,7 +251,7 @@ enum class check_level_t
 };
 
 #include <vector>
-#include "solverMode.h"
+#include "solvers/solverMode.h"
 /** @brief helper struct for containing sizes to group the data*/
 class stateSizes
 {
@@ -265,12 +267,21 @@ public:
 
   count_t jacSize = 0;                                 //!<upper bound on number of Jacobian entries
 
+  /** reset the sizes to all zeros*/
   void reset ();
+  /** reset just the sizes related to states to 0*/
   void stateReset ();
+  /** reset the root counter and and Jacobian sizes to 0*/
   void rootAndJacobianReset ();
-
+  /** add another stateSizes object to this one
+  @param[in] arg the stateSizes object to combine*/
   void add (const stateSizes &arg);
+  /** add just the actual state counts ignore the root and Jacobian counts
+  @param[in] arg the update to add to the calling object
+  */
   void addStateSizes (const stateSizes &arg);
+  /** add just the root and Jacobian information
+  @param[in] arg the update to add to the calling object*/
   void addRootAndJacobianSizes (const stateSizes &arg);
 };
 
@@ -282,7 +293,7 @@ class solverOffsets
 {
 
 public:
-  const solverMode *sMode = &cLocalSolverMode;         //!<pointer to the reference sMode
+  solverMode sMode = cLocalSolverMode;         //!<pointer to the reference sMode
   index_t aOffset = kNullLocation;     //!< Location for the voltage offset
   index_t vOffset = kNullLocation;     //!< Location for the Angle offset
   index_t algOffset = kNullLocation;      //!< location for generic offsets
@@ -298,7 +309,7 @@ public:
   //total object sizes
 
   bool stateLoaded = false;       //!<flag indicating the state sizes have been loaded
-  bool rjLoaded = false;          //!< flag indicated that roots and jac size is loaded
+  bool rjLoaded = false;          //!< flag indicated that roots and Jacobian size is loaded
   bool offetLoaded = false;       //!<flag indicating that offsets have been loaded
 public:
   /** @brief  default constructor*/
@@ -306,7 +317,7 @@ public:
   {
   }
   /** @brief  copy constructor from pointer*/
-  solverOffsets (const solverOffsets *);
+  explicit solverOffsets (const solverOffsets *nOffsets);
   /** @brief  copy constructor*/
   solverOffsets (const solverOffsets &nOffsets);
 
@@ -327,22 +338,22 @@ public:
   void increment ();
 
   /** @brief increment the offsets using the contained sizes in another solverOffset Object
-  /param offsets the solverOffset object to use as the sizes
+  @param offsets the solverOffset object to use as the sizes
   */
   void increment (const solverOffsets *offsets);
 
   /** @brief increment the offsets using the contained local sizes in another solverOffset Object
-  /param offsets the solverOffset object to use as the sizes
+  @param offsets the solverOffset object to use as the sizes
   */
   void localIncrement (const solverOffsets *offsets);
 
   /** @brief merge the sizes of two solverOffsets
-  /param offsets the solverOffset object to use as the sizes
+  @param offsets the solverOffset object to use as the sizes
   */
   void addSizes (const solverOffsets *offsets);
 
   /** @brief merge the sizes of two solverOffsets state Sizes
-    / param offsets the solverOffset object to use as the sizes
+    @param offsets the solverOffset object to use as the sizes
     */
   void addStateSizes (const solverOffsets *offsets);
 
@@ -355,12 +366,12 @@ public:
   void localLoad (bool finishedLoading = false);
 
   /** @brief set the offsets from another solverOffset object
-  /param newOffsets the solverOffset object to use as the sizes
+  @param newOffsets the solverOffset object to use as the sizes
   */
   void setOffsets (const solverOffsets &newOffsets);
 
   /** @brief set the offsets from a single index
-  /param newOffset the index of the new offset
+  @param newOffset the index of the new offset
   */
   void setOffset (index_t newOffset);
 };
@@ -372,7 +383,7 @@ public:
 class Lp
 {
 public:
-  double time = 0;                                              //!< time
+  gridDyn_time time = 0;                                              //!< time
   count_t algOffset = kNullLocation;    //!< data offset for algebraic components
   count_t diffOffset = kNullLocation;   //!< data offset for differential components
   const double *algStateLoc = nullptr;  //!< location of algebraic state variables
@@ -389,16 +400,17 @@ public:
 class stateData
 {
 public:
-  double time = 0.0;                    //!< time corresponding to the state data
+  gridDyn_time time = 0.0;                    //!< time corresponding to the state data
   const double *state = nullptr;        //!< the current state guess
   const double *dstate_dt = nullptr;    //!< the state time derivative array
   const double *fullState = nullptr;    //!< the full state data (for cases where state contains only differential or algebraic components)
   const double *diffState = nullptr;    //!< the differential state data (for cases where state contains only algebraic components)
   const double *algState = nullptr;     //!< the algebraic state data (for cases where state contains only differential components)
   double cj = 1.0;                      //!< a number used in Jacobian calculations if there is a derivative used in the calculations
-  count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
+  gridDyn_time altTime = 0.0;			//!< the time corresponding to the other part of the state
+	count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
   index_t pairIndex = kNullLocation;                                //!< the index of the mode the paired data comes from
-  stateData (double sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
+  stateData (gridDyn_time sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
   {
   }
 };
@@ -413,7 +425,7 @@ class offsetTable
 {
 private:
   std::vector<solverOffsets> offsetContainer;       //!< a vector of containers for offsets corresponding to the different solver modes
-  index_t paramOffset = kNullLocation; //!<offset for storing parameters in an array
+  index_t paramOffset = kNullLocation; //!<offset for storing parameters in an array //TODO this should be part of the offset container
   count_t cSize;                    //!< the current size of the offsetContainer
 public:
   solverOffsets *local;  //!< a pointer to local state information for code simplification usually points to the first element in offsetContainer
@@ -498,7 +510,7 @@ public:
   {
     return offsetContainer[sMode.offsetIndex].algOffset;
   }
-  /** @brief get the diff offset
+  /** @brief get the differential state offset
   *@param[in] sMode the solverMode we are interested in
   *@return the differential offset
   */

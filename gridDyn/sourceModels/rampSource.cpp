@@ -11,7 +11,7 @@
  * LLNS Copyright End
 */
 
-#include "gridSource.h"
+#include "sourceTypes.h"
 #include "vectorOps.hpp"
 
 #include <ctime>
@@ -45,14 +45,13 @@ gridCoreObject *rampSource::clone (gridCoreObject *obj) const
 
 
 // set properties
-int rampSource::set (const std::string &param,  const std::string &val)
+void rampSource::set (const std::string &param,  const std::string &val)
 {
-  return gridSource::set (param, val);
+  gridSource::set (param, val);
 }
 
-int rampSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void rampSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if ((param == "dodt") || (param == "ramp")||(param == "rate"))
     {
@@ -60,9 +59,9 @@ int rampSource::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = gridSource::set (param, val, unitType);
+      gridSource::set (param, val, unitType);
     }
-  return out;
+
 }
 
 

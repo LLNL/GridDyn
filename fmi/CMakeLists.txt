@@ -8,53 +8,88 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(fmiProcess_sources
-	fmiProcess.cpp
-	fmi_import1.cpp
-	fmi_import2.cpp
+set(fmiImport_sources
+	fmi_import/fmiImport.cpp
+	fmi_import/fmiInfo.cpp
+	fmi_import/fmi2Object.cpp
+	fmi_import/fmi2ME.cpp
+	fmi_import/fmi2CoSim.cpp
+	fmi_import/fmiVariableSet.cpp
+	fmi_import/fmiEnumDefinitions.cpp
+	
 	)
 
 set(fmiGD_sources
 	fmiGDinfo.cpp
-	fmiSubModel.cpp
-	fmiSubModel2.cpp
-	fmiLoad.cpp
-	fmiExciter.cpp
+	fmi_models/fmiMESubModel.cpp
+	fmi_models/fmiCoSimSubModel.cpp
+	fmi_models/fmiLoad.cpp
+	fmi_models/fmiExciter.cpp
+	fmi_models/outputEstimator.cpp
+	fmi_import/fmiLibraryManager.cpp
+	
 	)
 	
 set(fmiGD_headers
+	fmi_models/fmiMESubModel.h
+	fmi_models/fmiCoSimSubModel.h 
+	fmi_models/fmiLoad.h
+	fmi_models/fmiExciter.h
+	fmi_models/outputEstimator.h
+	fmi_models/fmiSupport.h
+	fmi_import/fmiLibraryManager.h
 	fmiGDinfo.h
-	fmiSubModel.h
-	fmiLoad.h
-	fmiExciter.h
 	)	
-set(fmiProcess_headers
-	fmi_importGD.h
+set(fmiImport_headers
+	fmi_import/fmiInfo.h
+	fmi_import/fmiImport.h
+	fmi_import/fmiObjects.h
+	
 	)
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
-link_directories(${FMI_LIBRARY_DIRS})
+IF(UNIX)
+  add_compile_options(-fvisibility=hidden)
+ELSE(UNIX)
+  IF(MINGW)
+ add_compile_options(-fvisibility=hidden)
+  ENDIF(MINGW)
+ENDIF(UNIX)
 
 
-add_executable(fmiProcess ${fmiProcess_sources} ${fmiProcess_headers})
 
-add_library(fmiGDLibrary ${fmiGD_sources} ${fmiGD_headers})
+add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
+
+
+source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
+source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
-INCLUDE_DIRECTORIES(${FMI_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/plugins)
 
-set(external_library_list
-	${FMI_LIBRARIES}
-	${Boost_LIBRARIES}
-	)
 
-target_link_libraries(fmiProcess fmiGDLibrary ${external_library_list} )
+list(APPEND griddyn_optional_libraries fmiGDLibrary)
+list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/fmi)
 
-INSTALL(TARGETS fmiProcess RUNTIME DESTINATION bin)
+set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
+set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
+
+
+list (APPEND optional_library_key_headers fmiGDinfo.h)
+list (APPEND optional_library_functions loadFmiLibrary)
+
+set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
+set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
+
+
+list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/test/componentTests/testFMI.cpp)
+set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
+

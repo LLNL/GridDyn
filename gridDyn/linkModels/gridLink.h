@@ -53,7 +53,7 @@ Each link has a disconnect switch at the from bus and the to bus
 class gridLink : public gridPrimary
 {
 public:
-  static count_t linkCount;               //!<static variable counting the number of created lines used for automatic user ID creation
+  static std::atomic<count_t> linkCount;               //!<static variable counting the number of created lines used for automatic user ID creation
   //it can be edited as it does not impact link operations just for user convenience
   /** @brief define some basic flag locations for gridLink*/
   enum gridLink_flags
@@ -65,9 +65,9 @@ public:
   };
   int zone = 1;  //!< publicly accessible loss zone indicator not used internally
 protected:
-  double ratingA = -kBigNum;        //!< [puA] the long term rating of the link
-  double ratingB = -kBigNum;        //!< [puA] the short term rating of the link
-  double Erating = -kBigNum;        //!< [puA] the emergency rating of the link
+  double ratingA = kBigNum;        //!< [puA] the long term rating of the link
+  double ratingB = kBigNum;        //!< [puA] the short term rating of the link
+  double Erating = kBigNum;        //!< [puA] the emergency rating of the link
 
   gridBus *B1 = nullptr;                //!< the bus on the from side
   gridBus *B2 = nullptr;                //!< the bus on the to side
@@ -79,7 +79,7 @@ protected:
   linkF linkFlows;              //!< holder latest computed power flow information
 public:
   /** @brief default constructor*/
-  gridLink (const std::string &objName = "link_$");
+  explicit gridLink (const std::string &objName = "link_$");
 
   /** @brief virtual destructor*/
   virtual ~gridLink ();
@@ -137,7 +137,7 @@ public:
   @return 0 for success, some other number for failure
   */
   virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit);
-  /** @brief propogate a network number to all connected buses
+  /** @brief propagate a network number to all connected buses
    checks if a link actually connects the two buses in an AC sense, then checks if a bus is already part of the specified network and if not it adds it to the queue
   @param[in] network  the new network number
   @param[in] bstk a FIFO queue of buses to add to the network
@@ -146,16 +146,15 @@ public:
   /** @brief update one of the link terminals with a new bus
   @param[in] bus  the new bus to connect to
   @param[in] busnumber  1 for from,  2 for "to"
-  @return 0 for success, some other number for failure
   */
-  virtual int updateBus (gridBus *bus,index_t busnumber);
+  virtual void updateBus (gridBus *bus,index_t busnumber);
   /** @brief check for any violations of link limits or other factors based on power flow results
    checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
   @param[out] Violation_vector --a list of all the violations any new violations get added to the result
   */
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
 
-  virtual double timestep (double ttime,const solverMode &sMode) override;
+  virtual void timestep (double ttime,const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -248,8 +247,8 @@ public:
 
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   gridBus * getBus (index_t busInd)  const override;
 
@@ -271,10 +270,10 @@ protected:
 public:
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
+  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
 
-  virtual void outputPartialDerivatives (const stateData *sD, arrayData<double> *ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
 
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
   virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
@@ -293,7 +292,7 @@ private:
 };
 /** @brief find the matching link in a different tree
   searches a cloned object tree to find the corresponding link
-@param[in] bus  the link to search for
+@param[in] lnk  the link to search for
 @param[in] src  the existing parent object
 @param[in] sec  the desired parent object tree
 @return a pointer to a link on the second tree that matches the calling link based on name and location

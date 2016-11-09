@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include "gridDynTypes.h"
 
 class gridDynSimulation;
 class solverMode;
@@ -53,17 +54,17 @@ int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double resid
 @param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the Jacobian check
 @return the number of mismatches
 */
-int residualCheck (gridDynSimulation *gds, double time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
+int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
 
-double checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> sd, int *loc = nullptr);
+double checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd, int *loc = nullptr);
 
-double checkResid (gridDynSimulation *gds, double time, const std::shared_ptr<solverInterface> sd, int *loc = nullptr);
+double checkResid (gridDynSimulation *gds, gridDyn_time time, const std::shared_ptr<solverInterface> &sd, int *loc = nullptr);
 
-double checkResid (gridDynSimulation *gds, double time, const solverMode &sMode, int *loc = nullptr);
+double checkResid (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, int *loc = nullptr);
 
-int algebraicCheck (gridDynSimulation *gds, double time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
+int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
 
-int derivativeCheck (gridDynSimulation *gds, double time, const solverMode &sMode, double derivTol = resid_check_tol, bool useStateNames = false);
+int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double derivTol = resid_check_tol, bool useStateNames = false);
 
 /** @brief do a convergence test on the solver
 */

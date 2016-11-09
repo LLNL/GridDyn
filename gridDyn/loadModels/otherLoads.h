@@ -16,7 +16,8 @@
 
 #include "gridLoad.h"
 
-#include "fileReaders.h"
+#include "timeSeries.h"
+#include <array>
 
 class gridBus;
 
@@ -34,27 +35,21 @@ protected:
   double dYpdt = 0.0;                                         //!< [pu] ramp in real impedance power
   double dYqdt = 0.0;                                         //!< [pu] ramp in imaginary constant impedance power
 public:
-  gridRampLoad (const std::string &objName = "rampLoad_$");
+  explicit gridRampLoad (const std::string &objName = "rampLoad_$");
   gridRampLoad (double rP, double rQ, const std::string &objName = "rampLoad_$");
 
   virtual ~gridRampLoad ();
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void loadUpdate (double ttime) override;
   void clearRamp ();
 };
 
-/** @brief a load that uses sources to calculate the values for the each of the load parameters
-eventually will replace most of the shaped loads*/
-class sourceLoad :public gridLoad
-{
-protected:
 
-};
 
 /** @brief a load with period pulses of various shapes*/
 class gridPulseLoad : public gridLoad
@@ -80,7 +75,7 @@ protected:
   double Qfrac = 0.0;
   double nextToggleTime = 0;
 public:
-  gridPulseLoad (const std::string &objName = "pulseLoad_$");
+  explicit gridPulseLoad (const std::string &objName = "pulseLoad_$");
   gridPulseLoad (double rP, double rQ, const std::string &objName = "pulseLoad_$");
 
   virtual ~gridPulseLoad ()
@@ -89,8 +84,8 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
@@ -101,13 +96,54 @@ public:
 protected:
 };
 
+class gridSource;
+/** @brief a load that uses sources to calculate the values for the each of the load parameters
+eventually will replace most of the shaped loads*/
+class sourceLoad : public gridLoad
+{
+public:
+	enum sourceLoc
+	{
+		p_source = 0,
+		q_source = 1,
+		yp_source = 2,
+		yq_source = 3,
+		ip_source = 4,
+		iq_source = 5,
+		r_source = 6,
+		x_source = 7,
+	};
+private:
+	
+	std::vector<gridSource *> sources;
+	std::array<int, 8> sourceLink; //source lookups for the values
+public:
+	explicit sourceLoad(const std::string &objName = "sourceLoad_$");
+
+	virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+
+	virtual void add(gridCoreObject *obj) override;
+	virtual void add(gridSource *obj);
+
+	virtual void set(const std::string &param, const std::string &val) override;
+	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+
+	virtual void pFlowObjectInitializeA(double time0, unsigned long flags) override;
+	virtual void dynObjectInitializeA(double time0, unsigned long flags) override;
+
+	virtual void loadUpdate(double ttime) override;
+	virtual void loadUpdateForward(double ttime) override;
+private:
+	void getSourceLoads();
+};
+
 /** @brief a load with sinusoidal variations, can incorporate pulses*/
 class gridSineLoad : public gridPulseLoad
 {
 public:
   static const char pulsed_flag = object_flag6;
 protected:
-  double frequency = 0.0;
+  double frequency = kBigNum;
   double phase = 0.0;
   double lastCycle = -kBigNum;
   double Amp = 0.0;
@@ -116,7 +152,7 @@ protected:
   double dAdt = 0.0;
 
 public:
-  gridSineLoad (const std::string &objName = "sineLoad_$");
+  explicit gridSineLoad (const std::string &objName = "sineLoad_$");
   gridSineLoad (double rP, double rQ, const std::string &objName = "sineLoad_$");
 
   virtual ~gridSineLoad ()
@@ -125,8 +161,8 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
@@ -171,7 +207,7 @@ protected:
   double keyTime = 0;
 
 public:
-  gridRandomLoad (const std::string &objName = "randomLoad_$");
+  explicit gridRandomLoad (const std::string &objName = "randomLoad_$");
   gridRandomLoad (double rP, double rQ, const std::string &objName = "randomLoad_$");
 
   virtual ~gridRandomLoad ();
@@ -183,7 +219,7 @@ public:
 
   virtual void updateA (double time) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   bool isTriggered ()
   {
@@ -194,10 +230,10 @@ public:
     opFlags.reset (triggered_flag), opFlags.reset (armed_flag), offset = 0;
   }
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  int setFlag (const std::string &flag, bool val = true) override;
+  void setFlag (const std::string &flag, bool val = true) override;
 
   void setTime (double time) override;
 protected:
@@ -225,7 +261,7 @@ protected:
   double qratio = kNullVal;
   std::vector<int> columnkey;
 public:
-  gridFileLoad (const std::string &objName = "fileLoad_$");
+  explicit gridFileLoad (const std::string &objName = "fileLoad_$");
 
   ~gridFileLoad ()
   {
@@ -235,12 +271,12 @@ public:
 
   virtual void updateA (double time) override;
 
-  virtual double timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 
   void setTime (double time) override;
-  virtual int setFlag (const std::string &param, bool val = true) override;
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void setFlag (const std::string &param, bool val = true) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 private:
   count_t loadFile ();
   int columnCode (const std::string &ldc);
@@ -252,18 +288,18 @@ class exponentialLoad : public gridLoad
 public:
 protected:
   double alphaP = 0.0;	//!< the voltage exponent parameter for the real power output
-  double alphaQ = 0.0;	//!< the voltage exponent paremeter for the reactive power output
+  double alphaQ = 0.0;	//!< the voltage exponent parameter for the reactive power output
 
 public:
-  exponentialLoad (const std::string &objName = "expLoad_$");
+  explicit exponentialLoad (const std::string &objName = "expLoad_$");
   exponentialLoad (double rP, double rQ, const std::string &objName = "expLoad_$");
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual double getRealPower  (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getRealPower (double V) const override;
@@ -282,17 +318,17 @@ protected:
   double betaQ = 0.0;	//!< the frequency exponent parameter for the reactive power output
 
 public:
-  fDepLoad (const std::string &objName = "fdepLoad_$");
+  explicit fDepLoad (const std::string &objName = "fdepLoad_$");
   fDepLoad (double rP, double rQ, const std::string &objName = "fdepLoad_$");
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
 
-  virtual int set (const std::string &param, const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual double getRealPower  (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getRealPower (double V) const override;

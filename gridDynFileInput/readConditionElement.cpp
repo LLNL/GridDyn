@@ -16,9 +16,6 @@
 #include "readerHelper.h"
 #include "elementReaderTemplates.hpp"
 
-#include <cstdio>
-#include <iterator>
-#include <numeric>
 #include <cmath>
 
 using namespace readerConfig;

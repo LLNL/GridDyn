@@ -17,8 +17,8 @@
 #include "griddyn-config.h"
 #include "optHelperClasses.h"
 
-#include "arrayDataSparse.h"
 #include "vectData.h"
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -28,8 +28,7 @@ class gridDynOptimization;
 class optimizerInterface
 {
 public:
-  arrayDataSparse a1;
-  vectData v1;
+  vectData<double> v1;
   // solver outputs
   std::vector<double> values;                                             //!< mask vector for which roots were found
 
@@ -39,15 +38,15 @@ public:
   bool sparse = false;
   bool constantJacobian = false;
 protected:
+	std::string name;
   void *solverMem = nullptr;
   bool allocated = false;
   bool initialized = false;                                                 //!< flag indicating if these vectors have been initialized
   gridDynOptimization *m_gdo = nullptr;
   count_t svsize = 0;
 public:
-  optimizerInterface ()
-  {
-  }
+	optimizerInterface(const std::string &optName = "optim");
+
   optimizerInterface (gridDynOptimization *gdo, const optimMode &oMode);
   virtual ~optimizerInterface ()
   {
@@ -73,7 +72,7 @@ public:
     return -101;
   }
   void initializeJacArray (count_t size);
-  bool isInitialized ()
+  bool isInitialized () const
   {
     return initialized;
   }
@@ -91,18 +90,24 @@ public:
   }
   virtual void setOptimizationData (gridDynOptimization *gdo, const optimMode &oMode);
   virtual int check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError = true);
+	void setName(std::string newName)
+	{
+		name = newName;
+	}
+	const std::string &getName() const
+	{
+		return name;
+	}
 };
 
 class basicOptimizer : public optimizerInterface
 {
 private:
 public:
-  basicOptimizer ()
-  {
-  }
-  basicOptimizer (gridDynOptimization *gdo, const optimMode &oMode) : optimizerInterface (gdo, oMode)
-  {
-  }
+	explicit basicOptimizer(const std::string &optName = "basic");
+
+	basicOptimizer(gridDynOptimization *gdo, const optimMode &oMode); 
+
 
   int allocate (count_t size) override;
   void objectInitializeA (double t0) override;

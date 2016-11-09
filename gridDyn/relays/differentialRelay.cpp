@@ -13,7 +13,7 @@
 
 #include "differentialRelay.h"
 #include "gridCondition.h"
-#include "fileReaders.h"
+#include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
 #include "eventQueue.h"
@@ -42,10 +42,9 @@ gridCoreObject *differentialRelay::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-int differentialRelay::setFlag (const std::string &flag, bool val)
+void differentialRelay::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
-
+  
   if (flag == "relative")
     {
       opFlags.set (relative_differential_flag,val);
@@ -56,9 +55,9 @@ int differentialRelay::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridRelay::setFlag (flag, val);
+      gridRelay::setFlag (flag, val);
     }
-  return out;
+
 }
 
 bool differentialRelay::getFlag (const std::string &param) const
@@ -73,9 +72,8 @@ bool differentialRelay::getFlag (const std::string &param) const
     }
 }
 
-int differentialRelay::set (const std::string &param,  const std::string &val)
+void differentialRelay::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
 
   if (param[0] == '#')
     {
@@ -83,9 +81,9 @@ int differentialRelay::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridRelay::set (param, val);
+      gridRelay::set (param, val);
     }
-  return out;
+
 }
 
 
@@ -104,9 +102,8 @@ void differentialRelay::getParameterStrings (stringVec &pstr, paramStringType ps
   getParamString<differentialRelay, gridRelay> (this, pstr, locNumStrings, locStrStrings, {}, pstype);
 }
 
-int differentialRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void differentialRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "delay")
     {
@@ -126,9 +123,9 @@ int differentialRelay::set (const std::string &param, double val, gridUnits::uni
     }
   else
     {
-      out = gridRelay::set (param, val, unitType);
+      gridRelay::set (param, val, unitType);
     }
-  return out;
+
 }
 
 void differentialRelay::pFlowObjectInitializeA (double time0, unsigned long flags)
@@ -181,9 +178,8 @@ void differentialRelay::pFlowObjectInitializeA (double time0, unsigned long flag
 
 
   auto ge = std::make_shared<gridEvent> ();
-  ge->field = "connected";
-  ge->value = 0;
-  ge->setTarget (m_sinkObject);
+  ge->setTarget (m_sinkObject,"connected");
+  ge->setValue(0.0);
   //action 2 to reenable object
 
   add (ge);
@@ -196,26 +192,19 @@ void differentialRelay::pFlowObjectInitializeA (double time0, unsigned long flag
       setActionTrigger (0, 0, m_delayTime);
     }
 
-  return gridRelay::pFlowObjectInitializeA (time0, flags);
+  gridRelay::pFlowObjectInitializeA (time0, flags);
 }
 
 void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, double /*actionTime*/)
 {
   LOG_NORMAL ("Relay Tripped");
 
-  if (opFlags.test (use_commLink))
+  if (opFlags[use_commLink])
     {
       auto P = std::make_shared<relayMessage> (relayMessage::BREAKER_TRIP_EVENT);
       if (ActionNum == 0)
         {
-          if (commDestName.empty ())
-            {
-              commLink->transmit (commDestId, P);
-            }
-          else
-            {
-              commLink->transmit (commDestName, P);
-            }
+		  cManager.send(P);
         }
     }
 
@@ -228,15 +217,7 @@ void differentialRelay::conditionTriggered (index_t /*conditionNum*/, double /*t
     {
       //std::cout << "GridDyn conditionTriggered(), conditionNum = " << conditionNum << '\n';
       auto P = std::make_shared<relayMessage> (relayMessage::LOCAL_FAULT_EVENT);
-
-      if (commDestName.empty ())
-        {
-          commLink->transmit (commDestId, P);
-        }
-      else
-        {
-          commLink->transmit (commDestName, P);
-        }
+	  cManager.send(P);
     }
 
 }
@@ -248,15 +229,7 @@ void differentialRelay::conditionCleared (index_t /*conditionNum*/, double /*tri
   if (opFlags.test (use_commLink))
     {
       auto P = std::make_shared<relayMessage> (relayMessage::LOCAL_FAULT_CLEARED);
-      if (commDestName.empty ())
-        {
-
-          commLink->transmit (commDestId, P);
-        }
-      else
-        {
-          commLink->transmit (commDestName, P);
-        }
+	  cManager.send(P);
     }
 }
 

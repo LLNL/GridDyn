@@ -16,7 +16,7 @@
 
 
 #include "linkModels/gridLink.h"
-/** @brief class that acts as a zero impedence tie
+/** @brief class that acts as a zero impedance tie
 used for implementing a bus-breaker model of a power system as well as creating slave buses and a few other types of linkages
 */
 class zBreaker : public gridLink
@@ -28,8 +28,8 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // parameter set functions
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
   virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
@@ -40,10 +40,10 @@ public:
   virtual double quickupdateP () override;
 
 
-  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData *, arrayData<double> *, const IOlocs & /*argLocs*/, const solverMode &) override
+  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode &) override
   {
   }
-  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData *, arrayData<double> *, const solverMode &) override
+  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData *, matrixData<double> *, const solverMode &) override
   {
   }
 

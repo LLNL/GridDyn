@@ -14,7 +14,7 @@
 #include "submodels/otherBlocks.h"
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
-#include "arrayData.h"
+#include "matrixData.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
 
@@ -244,9 +244,9 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
 }
 
 
-double basicBlock::timestep (double ttime, const IOdata &args, const solverMode &)
+void basicBlock::timestep (double ttime, const IOdata &args, const solverMode &)
 {
-  return step (ttime, args[0]);
+  step (ttime, args[0]);
 }
 
 static IOdata kNullVec;
@@ -460,7 +460,7 @@ void basicBlock::derivative (const IOdata &args, const stateData *sD, double der
 }
 
 
-void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData *sD, arrayData<double> *ad, index_t argLoc, const solverMode &sMode)
+void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
 {
 
   if ((opFlags[differential_output]) && (hasDifferential (sMode)))
@@ -516,7 +516,7 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
 }
 
 
-void basicBlock::jacobianElements (const IOdata & args, const stateData *sD, arrayData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void basicBlock::jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   jacElements  (args[0], (args.size () > 1) ? args[1] : 0.0,sD, ad, argLocs[0], sMode);
 
@@ -747,9 +747,9 @@ index_t basicBlock::findIndex (const std::string &field, const solverMode &sMode
   return ret;
 }
 
-int basicBlock::setFlag (const std::string &flag, bool val)
+void basicBlock::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
+
   if (flag == "use_limits")
     {
       if (!opFlags[dyn_initialized])
@@ -793,20 +793,19 @@ int basicBlock::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridSubModel::setFlag (flag, val);
+      gridSubModel::setFlag (flag, val);
     }
-  return out;
+
 }
 // set parameters
-int basicBlock::set (const std::string &param,  const std::string &val)
+void basicBlock::set (const std::string &param,  const std::string &val)
 {
-  return gridSubModel::set (param, val);
+  gridSubModel::set (param, val);
 }
 
-int basicBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void basicBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
+ 
   //param   = gridDynSimulation::toLower(param);
 
   if ((param == "k")||(param == "gain"))
@@ -874,10 +873,9 @@ int basicBlock::set (const std::string &param, double val, gridUnits::units_t un
     }
   else
     {
-      out = gridSubModel::set (param, val, unitType);
+      gridSubModel::set (param, val, unitType);
     }
 
-  return out;
 }
 
 

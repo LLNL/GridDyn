@@ -11,7 +11,7 @@
  * LLNS Copyright End
 */
 
-#include "gridSource.h"
+#include "sourceTypes.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
 
@@ -116,7 +116,7 @@ void fileSource::updateA (double time)
     }
 }
 
-double fileSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void fileSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -124,7 +124,6 @@ double fileSource::timestep (double ttime, const IOdata &args, const solverMode 
     }
 
   rampSource::timestep (ttime, args, sMode);
-  return m_output;
 }
 
 
@@ -145,9 +144,9 @@ void fileSource::setTime (double time)
 
 }
 
-int fileSource::set (const std::string &param,  const std::string &val)
+void fileSource::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+ 
   if ((param == "filename") || (param == "file"))
     {
       setFile (val,0);
@@ -185,19 +184,19 @@ int fileSource::set (const std::string &param,  const std::string &val)
 
   else
     {
-      out = gridSource::set (param, val);
+      gridSource::set (param, val);
     }
-  return out;
+
 }
 
 
-int fileSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fileSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+ 
   {
-    out = gridSource::set (param,val,unitType);
+    gridSource::set (param,val,unitType);
   }
-  return out;
+
 }
 
 int fileSource::loadFile ()

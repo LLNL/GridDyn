@@ -17,10 +17,11 @@
 #include "vectorOps.hpp"
 #include "stringOps.h"
 #include "core/helperTemplates.h"
+#include "simulation/gridDynSimulationFileOps.h"
+#include "core/gridDynExceptions.h"
 
 #include <arkode/arkode.h>
 #include <arkode/arkode_dense.h>
-#include <sundials/sundials_math.h>
 
 
 #ifdef KLU_ENABLE
@@ -28,8 +29,6 @@
 #include <arkode/arkode_sparse.h>
 #endif
 
-#include <cstdio>
-#include <algorithm>
 #include <string>
 #include <map>
 #include <cassert>
@@ -43,14 +42,19 @@ int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat 
 int arkodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_data);
 
 
-arkodeInterface::arkodeInterface ()
+arkodeInterface::arkodeInterface(const std::string &objName) : sundialsInterface(objName)
 {
-
+	mode.dynamic = true;
+	mode.differential = true;
+	mode.algebraic = false;
 }
 
 
 arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode& sMode) : sundialsInterface (gds, sMode)
 {
+	mode.dynamic = true;
+	mode.differential = true;
+	mode.algebraic = false;
 }
 
 arkodeInterface::~arkodeInterface ()
@@ -73,12 +77,12 @@ std::shared_ptr<solverInterface> arkodeInterface::clone(std::shared_ptr<solverIn
 	return rp;
 }
 
-int arkodeInterface::allocate (count_t stateCount, count_t numRoots)
+void arkodeInterface::allocate (count_t stateCount, count_t numRoots)
 {
   // load the vectors
   if (stateCount == svsize)
     {
-      return 0;
+      return;
     }
   initialized = false;
   
@@ -95,16 +99,10 @@ int arkodeInterface::allocate (count_t stateCount, count_t numRoots)
       ARKodeFree (&(solverMem));
     }
   solverMem = ARKodeCreate ();
-  if (check_flag (solverMem, "ARKodeCVodeCreate", 0))
-    {
-      return(1);
-    }
-
-
+  check_flag(solverMem, "ARKodeCVodeCreate", 0);
 
   sundialsInterface::allocate(stateCount, numRoots);
 
-  return 0;
 }
 
 
@@ -116,9 +114,9 @@ void arkodeInterface::setMaxNonZeros (count_t nonZeroCount)
 }
 
 
-int arkodeInterface::set (const std::string &param, const std::string &val)
+void arkodeInterface::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "mode")
     {
       auto v2 = splitlineTrim (convertToLowerCase (val));
@@ -142,30 +140,58 @@ int arkodeInterface::set (const std::string &param, const std::string &val)
             }
           else
             {
-              out = INVALID_PARAMETER_VALUE;
+			  throw(invalidParameterValue());
             }
         }
     }
   else
     {
-      out = sundialsInterface::set (param, val);
+      sundialsInterface::set (param, val);
     }
-  return out;
 }
 
 
-int arkodeInterface::set (const std::string &param, double val)
+void arkodeInterface::set (const std::string &param, double val)
 {
-  int out = PARAMETER_FOUND;
-  if (param[0] == '#')
-    {
 
-    }
+  bool checkStepUpdate = false;
+  if (param == "step")
+  {
+
+	  if ((maxStep<0) || (maxStep == step))
+	  {
+		  maxStep = val;
+	  }
+	  if ((minStep<0) || (minStep == step))
+	  {
+		  minStep = val;
+	  }
+	  step = val;
+	  checkStepUpdate = true;
+  }
+  else if (param == "maxstep")
+  {
+	  maxStep = val;
+	  checkStepUpdate = true;
+  }
+  else if (param == "minstep")
+  {
+	  minStep = val;
+	  checkStepUpdate = true;
+  }
   else
-    {
-      out = sundialsInterface::set (param, val);
-    }
-  return out;
+  {
+	  solverInterface::set(param, val);
+  }
+  if (checkStepUpdate)
+  {
+	  if (initialized)
+	  {
+		  ARKodeSetMaxStep(solverMem, maxStep);
+		  ARKodeSetMinStep(solverMem, minStep);
+		  ARKodeSetInitStep(solverMem, step);
+	  }
+  }
 }
 
 double arkodeInterface::get (const std::string &param) const
@@ -184,7 +210,7 @@ double arkodeInterface::get (const std::string &param) const
 #ifdef KLU_ENABLE
       //	CVodeCVodeSlsGetNumJacEvals(solverMem, &val);
 #else
-      CVodeDlsGetNumJacEvals (solverMem, &val);
+      ARKodeDlsGetNumJacEvals (solverMem, &val);
 #endif
     }
   else
@@ -207,7 +233,6 @@ void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
   long int nst, nre, nfi, netf, ncfn, nge;
   realtype tolsfac, hlast, hcur;
 
-  std::string logstr = "";
 
 
   int retval = ARKodeGetNumRhsEvals (solverMem, &nre,&nfi);
@@ -230,7 +255,7 @@ void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
   ARKodeGetLastStep (solverMem, &hlast);
   ARKodeGetTolScaleFactor (solverMem, &tolsfac);
 
-  logstr = "Arkode Run Statistics: \n";
+  std::string logstr = "Arkode Run Statistics: \n";
 
   logstr += "Number of steps                    = " + std::to_string (nst) + '\n';
   logstr += "Number of rhs evaluations     = " + std::to_string (nre) + std::to_string (nfi) + '\n';
@@ -286,20 +311,12 @@ void arkodeInterface::logErrorWeights (int logLevel) const
   NVECTOR_DESTROY(use_omp, ele);
 }
 
-
+/* *INDENT-OFF* */
 static const std::map<int, std::string> arkodeRetCodes {
-  {
-    ARK_MEM_NULL, "The solver memory argument was NULL"
-  },
-  {
-    ARK_ILL_INPUT, "One of the function inputs is illegal"
-  },
-  {
-    ARK_NO_MALLOC, "The solver memory was not allocated by a call to CVodeMalloc"
-  },
-  {
-    ARK_TOO_MUCH_WORK, "The solver took mxstep internal steps but could not reach tout"
-  },
+  {ARK_MEM_NULL, "The solver memory argument was NULL"},
+  {ARK_ILL_INPUT, "One of the function inputs is illegal"},
+  {ARK_NO_MALLOC, "The solver memory was not allocated by a call to CVodeMalloc"},
+  {ARK_TOO_MUCH_WORK, "The solver took mxstep internal steps but could not reach tout"},
   {
     ARK_TOO_MUCH_ACC, "The solver could not satisfy the accuracy demanded by the user for some internal step"
   },
@@ -350,98 +367,76 @@ static const std::map<int, std::string> arkodeRetCodes {
     ARK_BAD_DKY, "Bad DKY"
   },
 };
+/* *INDENT-ON* */
 
-int arkodeInterface::initialize (double t0)
+void arkodeInterface::initialize (double t0)
 {
   if (!allocated)
     {
-      printf ("ERROR,  arkode data not allocated\n");
-      return -2;
+	  throw(InvalidSolverOperation());
     }
   auto jsize = m_gds->jacSize (mode);
 
   // initializeB CVode - Sundials
 
   int retval = ARKodeSetUserData (solverMem, (void *)this);
-  if (check_flag (&retval, "ARKodeSetUserData", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeSetUserData", 1);
+
 
   //guess an initial condition
   m_gds->guess (t0, state_data(), deriv_data(), mode);
 
   retval = ARKodeInit (solverMem, arkodeFunc, arkodeFunc,t0, state);
-  if (check_flag (&retval, "ARKodeInit", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeInit", 1);
+
 
   if (rootCount > 0)
     {
       rootsfound.resize (rootCount);
       retval = ARKodeRootInit (solverMem, rootCount, arkodeRootFunc);
-      if (check_flag (&retval, "ARKodeRootInit", 1))
-        {
-          return(1);
-        }
+	  check_flag(&retval, "ARKodeRootInit", 1);
+
     }
 
   N_VConst (tolerance, abstols);
 
   retval = ARKodeSVtolerances (solverMem, tolerance / 100, abstols);
-  if (check_flag (&retval, "ARKodeSVtolerances", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeSVtolerances", 1);
+ 
 
   retval = ARKodeSetMaxNumSteps (solverMem, 1500);
-  if (check_flag (&retval, "ARKodeSetMaxNumSteps", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeSetMaxNumSteps", 1);
+
 #ifdef KLU_ENABLE
   if (dense)
     {
       retval = ARKDense (solverMem, svsize);
-      if (check_flag (&retval, "ARKDense", 1))
-        {
-          return(1);
-        }
+	  check_flag(&retval, "ARKDense", 1);
+
 
       retval = ARKDlsSetDenseJacFn (solverMem, arkodeJacDense);
-      if (check_flag (&retval, "ARKDlsSetDenseJacFn", 1))
-        {
-          return(1);
-        }
+	  check_flag(&retval, "ARKDlsSetDenseJacFn", 1);
+
     }
   else
     {
 
       retval = ARKKLU (solverMem, svsize, jsize);
-      if (check_flag (&retval, "ARKodeKLU", 1))
-        {
-          return(1);
-        }
+	  check_flag(&retval, "ARKodeKLU", 1);
+
 
       retval = ARKSlsSetSparseJacFn (solverMem, arkodeJacSparse);
-      if (check_flag (&retval, "ARKSlsSetSparseJacFn", 1))
-        {
-          return(1);
-        }
+	  check_flag(&retval, "ARKSlsSetSparseJacFn", 1);
+
     }
 #else
   retval = ARKDense (solverMem, svsize);
-  if (check_flag (&retval, "ARKDense", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKDense", 1);
+ 
 
   retval = ARKDlsSetDenseJacFn (solverMem, arkodeJacDense);
-  if (check_flag (&retval, "ARKDlsSetDenseJacFn", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKDlsSetDenseJacFn", 1);
+
 #endif
 
 
@@ -449,40 +444,50 @@ int arkodeInterface::initialize (double t0)
 
 
   retval = ARKodeSetMaxNonlinIters (solverMem, 20);
-  if (check_flag (&retval, "ARKodeSetMaxNonlinIters", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeSetMaxNonlinIters", 1);
+
 
 
   retval = ARKodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, (void *)this);
-  if (check_flag (&retval, "ARKodeSetErrHandlerFn", 1))
-    {
-      return(1);
-    }
+  check_flag(&retval, "ARKodeSetErrHandlerFn", 1);
 
+
+  if (maxStep > 0.0)
+  {
+	  retval = ARKodeSetMaxStep(solverMem, maxStep);
+	  check_flag(&retval, "ARKodeSetMaxStep", 1);
+
+  }
+  if (minStep > 0.0)
+  {
+	  retval = ARKodeSetMinStep(solverMem, minStep);
+	  check_flag(&retval, "ARKodeSetMinStep", 1);
+
+  }
+  if (step > 0.0)
+  {
+	  retval = ARKodeSetInitStep(solverMem, step);
+	  check_flag(&retval, "ARKodeSetInitStep", 1);
+
+  }
   setConstraints ();
 
   initialized = true;
-  return FUNCTION_EXECUTION_SUCCESS;
 
 }
 
-int arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
+void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
 #ifdef KLU_ENABLE
   int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
   int retval = ARKKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
-  if (check_flag (&retval, "ARKKLUReInit", 1))
-    {
-      return(FUNCTION_EXECUTION_FAILURE);
-    }
+  check_flag(&retval, "ARKKLUReInit", 1);
+
 #endif
-  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 
-int arkodeInterface::setRootFinding (count_t numRoots)
+void arkodeInterface::setRootFinding (count_t numRoots)
 {
   if (numRoots != rootsfound.size ())
     {
@@ -490,14 +495,11 @@ int arkodeInterface::setRootFinding (count_t numRoots)
     }
   rootCount = numRoots;
   int retval = ARKodeRootInit (solverMem, numRoots, arkodeRootFunc);
-  if (check_flag (&retval, "ARKodeRootInit", 1))
-    {
-      return(retval);
-    }
-  return FUNCTION_EXECUTION_SUCCESS;
+  check_flag(&retval, "ARKodeRootInit", 1);
+
 }
 
-int arkodeInterface::getCurrentData ()
+void arkodeInterface::getCurrentData ()
 {
   /*
   int retval = CVodeGetConsistentIC(solverMem, state, deriv);
@@ -506,7 +508,7 @@ int arkodeInterface::getCurrentData ()
   return(retval);
   }
   */
-  return FUNCTION_EXECUTION_SUCCESS;
+ 
 }
 
 int arkodeInterface::solve (double tStop, double &tReturn, step_mode stepMode)
@@ -524,14 +526,10 @@ int arkodeInterface::solve (double tStop, double &tReturn, step_mode stepMode)
   return retval;
 }
 
-int arkodeInterface::getRoots ()
+void arkodeInterface::getRoots ()
 {
   int ret = ARKodeGetRootInfo (solverMem, rootsfound.data ());
-  if (!check_flag (&ret, "ARKodeGetRootInfo", 1))
-    {
-      return ret;
-    }
-  return ret;
+  check_flag(&ret, "ARKodeGetRootInfo", 1);
 }
 
 
@@ -550,42 +548,32 @@ void arkodeInterface::loadMaskElements ()
 }
 
 
-//#define CAPTURE_STATE_FILE
 
-#ifdef CAPTURE_STATE_FILE
-void saveStateFile (double time, count_t size, double *state, double *dstate, double *resid, std::string fname, bool append)
-{
-  std::ofstream  bFile;
-
-  if (append)
-    {
-      bFile.open (fname.c_str (), std::ios::out | std::ios::binary | std::ios::app);
-    }
-  else
-    {
-      bFile.open (fname.c_str (), std::ios::out | std::ios::binary);
-    }
-  bFile.write ((char *)(&time), sizeof(double));
-  bFile.write ((char *)(&size), sizeof(count_t));
-
-  bFile.write ((char *)(state), sizeof(double) * size);
-  bFile.write ((char *)(dstate), sizeof(double) * size);
-  bFile.write ((char *)(resid), sizeof(double) * size);
-
-  bFile.close ();
-}
-#endif
 
 // CVode C Functions
 int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_data)
 {
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
-  //printf("time=%f\n", ttime);
-  int ret = sd->m_gds->derivativeFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
+  sd->funcCallCount++;
+  if (sd->mode.pairedOffsetIndex != kNullLocation)
+  {
+	  int ret = sd->m_gds->dynAlgebraicSolve(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
+	  if (ret < FUNCTION_EXECUTION_SUCCESS)
+	  {
+		  return ret;
+	  }
 
-#ifdef CAPTURE_STATE_FILE
-  saveStateFile (ttime, sd->svsize, NVECTOR_DATA (state), NVECTOR_DATA (dstate_dt), NVECTOR_DATA (resid), "jac_new_state.dat", true);
-#endif
+	}
+  int ret = sd->m_gds->derivativeFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
+
+  if (sd->fileCapture)
+  {
+	  if (!sd->stateFile.empty())
+	  {
+		  writeVector(ttime, STATE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, state), sd->stateFile, (sd->funcCallCount != 1));
+		  writeVector(ttime, DERIVATIVE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, dstate_dt), sd->stateFile);
+	  }
+  }
   return ret;
 }
 
@@ -607,7 +595,7 @@ int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstat
   assert(Neq == static_cast<int> (sd->svsize));
   _unused(Neq);
 
-  arrayDataSparse *a1 = &(sd->a1);
+  matrixDataSparse<double> *a1 = &(sd->a1);
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
 
 
@@ -645,7 +633,7 @@ int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat 
 
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
 
-  arrayDataSparse *a1 = &(sd->a1);
+  matrixDataSparse<double> *a1 = &(sd->a1);
 
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
   a1->sortIndexCol ();

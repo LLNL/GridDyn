@@ -16,18 +16,17 @@
 
 
 #include <vector>
-#include "gridDynTypes.h"
 
 class gridPrimary;
 class stateData;
-
+/** @brief helper class for areas to maintain lists of objects used for execution of each mode*/
 class listMaintainer
 {
 private:
   std::vector<gridPrimary *> preExObjs;          //!< lists of all the objects that request preexecution
   std::vector< std::vector<gridPrimary *>> objectLists;        //!< lists of all the objects with states in a certain mode
   std::vector< std::vector<gridPrimary *>> partialLists;        //!< list of all the non preex object with states in a certain mode
-  std::vector< solverMode > sModeLists;
+  std::vector< solverMode > sModeLists;			//!< the list of solverModes relevent to each list
 
 public:
   listMaintainer ();
@@ -38,7 +37,7 @@ public:
 
   //void listOperation(const solverMode &sMode);  //A work in progress
 
-  void jacobianElements (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   void preEx (const stateData *sD, const solverMode &sMode);
   void residual (const stateData *sD, double resid[], const solverMode &sMode);
   void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
@@ -46,7 +45,7 @@ public:
 
   void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode);
   void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode);
-  void delayedJacobian (const stateData *sD, arrayData<double> *ad, const solverMode &sMode);
+  void delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
   void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
 
   bool isListValid (const solverMode &sMode) const;
@@ -61,8 +60,7 @@ public:
 
   decltype(objectLists[0].rbegin ())rbegin (const solverMode &sMode);
   decltype(objectLists[0].rbegin ())rend (const solverMode &sMode);
-private:
-  void fillList (const solverMode &sMode, std::vector<gridPrimary *> &list, std::vector<gridPrimary *> &partlist, const std::vector<gridPrimary *> &possObj);
+  
 };
 
 

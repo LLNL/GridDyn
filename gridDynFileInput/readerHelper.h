@@ -13,8 +13,8 @@
 
 #ifndef READERHELPER_H_
 #define READERHELPER_H_
-#include <string>
-#include <vector>
+
+#include "gridDynVectorTypes.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -33,7 +33,6 @@ class readerInfo;
 class gridCoreObject;
 class basicReaderInfo;
 
-typedef std::vector<std::string> stringVec;
 
 void paramStringProcess (gridParameter *param, readerInfo *ri);
 

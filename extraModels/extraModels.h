@@ -18,7 +18,7 @@
 #include <string>
 /** @brief load the extra models specified by the subset indicator into the object factory
 @param[in] subset specify a subset of the models to load
-"all" or use default for for all models
+"all" or use default for all models
 others will be added as the library grows
 */
 void loadExtraModels(const std::string &subset="");

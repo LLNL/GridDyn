@@ -19,7 +19,6 @@
 //test case for element readers
 
 #include "testHelper.h"
-#include "gridDynTypes.h"
 #include "tinyxmlReaderElement.h"
 #include "tinyxml2ReaderElement.h"
 #include <boost/test/unit_test.hpp>
@@ -113,7 +112,7 @@ BOOST_AUTO_TEST_CASE(tinyxmlElementReader_test2)
 	att = sub->getNextAttribute();
 	BOOST_CHECK_CLOSE(att.getValue(), 21.345,0.000001);
 	att = sub->getNextAttribute();
-	BOOST_CHECK(att.getValue()==kNullVal);
+	BOOST_CHECK(att.getValue()==readerNullVal);
 	BOOST_CHECK(att.getText() == "happy");
 	att = sub->getNextAttribute();
 	BOOST_CHECK(att.isValid() == false);
@@ -180,7 +179,7 @@ BOOST_AUTO_TEST_CASE(tinyxmlElementReader_testParse)
 {
 	std::string XMLtestString = R"xml(<?xml version="1.0" encoding="utf - 8"?>
 <!--xml file to test the xml - reader functions--> 
-		<griddyn name = "test1" version = "0.0.1">
+		<GridDyn name = "test1" version = "0.0.1">
 		<bus name = "bus1">
 		<type>SLK</type>
 		<angle>0</angle>
@@ -189,7 +188,7 @@ BOOST_AUTO_TEST_CASE(tinyxmlElementReader_testParse)
 		<P>0.7160</P>
 		</generator>
 		</bus>
-		</griddyn>)xml";
+		</GridDyn>)xml";
 
 	tinyxmlReaderElement reader;
 	reader.parse(XMLtestString);
@@ -197,7 +196,7 @@ BOOST_AUTO_TEST_CASE(tinyxmlElementReader_testParse)
 
 	auto firstChild = reader.clone();
 	BOOST_CHECK(firstChild != nullptr);
-	BOOST_CHECK(firstChild->getName() == "griddyn");
+	BOOST_CHECK(firstChild->getName() == "GridDyn");
 	//There is only one child
 	auto sibling = firstChild->nextSibling();
 	BOOST_CHECK(sibling == nullptr);
@@ -262,11 +261,11 @@ BOOST_AUTO_TEST_CASE(tinyxmlElementReader_test4)
 	main->moveToFirstChild();
 	//att1 is 23t"  should return as not a value
 	double val = main->getAttributeValue("att1");
-	BOOST_CHECK(val == kNullVal);
+	BOOST_CHECK(val == readerNullVal);
 	main->moveToFirstChild();
 
 	val = main->getValue();
-	BOOST_CHECK(val == kNullVal);
+	BOOST_CHECK(val == readerNullVal);
 	BOOST_CHECK(main->getText() == "45.3echo");
 	main->restore();
 	BOOST_CHECK(main->getName() == "main_element");
@@ -365,7 +364,7 @@ BOOST_AUTO_TEST_CASE(tinyxml2ElementReader_test2)
 	att = sub->getNextAttribute();
 	BOOST_CHECK_CLOSE(att.getValue(), 21.345, 0.000001);
 	att = sub->getNextAttribute();
-	BOOST_CHECK(att.getValue() == kNullVal);
+	BOOST_CHECK(att.getValue() == readerNullVal);
 	BOOST_CHECK(att.getText() == "happy");
 	att = sub->getNextAttribute();
 	BOOST_CHECK(att.isValid() == false);
@@ -432,7 +431,7 @@ BOOST_AUTO_TEST_CASE(tinyxml2ElementReader_testParse)
 {
 	std::string XMLtestString = R"xml(<?xml version="1.0" encoding="utf - 8"?>
 <!--xml file to test the xml - reader functions--> 
-		<griddyn name = "test1" version = "0.0.1">
+		<GridDyn name = "test1" version = "0.0.1">
 		<bus name = "bus1">
 		<type>SLK</type>
 		<angle>0</angle>
@@ -441,7 +440,7 @@ BOOST_AUTO_TEST_CASE(tinyxml2ElementReader_testParse)
 		<P>0.7160</P>
 		</generator>
 		</bus>
-		</griddyn>)xml";
+		</GridDyn>)xml";
 
 	tinyxml2ReaderElement reader;
 	reader.parse(XMLtestString);
@@ -449,7 +448,7 @@ BOOST_AUTO_TEST_CASE(tinyxml2ElementReader_testParse)
 	BOOST_REQUIRE(reader.isValid());
 	auto firstChild = reader.clone();
 	BOOST_CHECK(firstChild != nullptr);
-	BOOST_CHECK(firstChild->getName() == "griddyn");
+	BOOST_CHECK(firstChild->getName() == "GridDyn");
 	//There is only one child
 	auto sibling = firstChild->nextSibling();
 	BOOST_CHECK(sibling == nullptr);
@@ -514,11 +513,11 @@ BOOST_AUTO_TEST_CASE(tinyxml2ElementReader_test4)
 	main->moveToFirstChild();
 	//att1 is 23t"  should return as not a value
 	double val = main->getAttributeValue("att1");
-	BOOST_CHECK(val == kNullVal);
+	BOOST_CHECK(val == readerNullVal);
 	main->moveToFirstChild();
 
 	val = main->getValue();
-	BOOST_CHECK(val == kNullVal);
+	BOOST_CHECK(val == readerNullVal);
 	BOOST_CHECK(main->getText() == "45.3echo");
 	main->restore();
 	BOOST_CHECK(main->getName() == "main_element");

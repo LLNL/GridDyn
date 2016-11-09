@@ -19,7 +19,7 @@
 #include <list>
 #include <cstdint>
 
-
+class gridCoreObject;
 
 /** @brief class implementing a discrete event queue for a continuous time simulation
  the time check on events includes a tolerance to allow for numerical error in the execution of events
@@ -32,7 +32,7 @@ class eventQueue
 protected:
   double timeTols = kSmallTime;  //!< the temporal tolerance on events
   std::list<std::shared_ptr<eventAdapter>> events; //!< storage location for events
-  std::vector <std::shared_ptr<eventAdapter>> partB_list;  //!< container for immediate events awating part B execution
+  std::vector <std::shared_ptr<eventAdapter>> partB_list;  //!< container for immediate events awaiting part B execution
   std::shared_ptr<eventAdapter> nullEvent; //!< nullEvent operation for scheduling of the null event
 public:
   /** @brief constructor*/
@@ -92,6 +92,14 @@ public:
         */
   virtual double getNextTime () const;
 
+  /** @brief clone the entire queue to a new queue
+  @param[in] eQ the eventQueue to clone to
+  @return a shared_ptr to the updated Queue
+  */
+  virtual std::shared_ptr<eventQueue> clone(std::shared_ptr<eventQueue> eQ = nullptr) const;
+  /** @brief map all objects used in the events to a new root object
+ */
+  virtual void mapObjectsOnto(gridCoreObject *newRootObject);
   /** @brief Execute the events up to the given time
   @param[in] cTime the current Time
   @return code describing the effect of the executed events
@@ -118,7 +126,7 @@ public:
   @param[in] eventID the id of the event to remove
   @return OBJECT_REMOVE_SUCCESS if the event is successfully removed
   */
-  virtual int remove (std::uint64_t eventID);
+  virtual void remove (std::uint64_t eventID);
 
   /** @brief recheck all the time of the events for events that may have changed times and resort if required*/
   virtual void recheck ();
@@ -134,7 +142,7 @@ public:
   @param[in] val the value to set the parameter to
   @return PARAMETER_FOUND if the given parameter was set valid
   */
-  virtual int set (const std::string &param, double val);
+  virtual void set (const std::string &param, double val);
 
   /** @brief set the null event time
    the null event is an event that does nothing setting this time is a way to mark events that can't be described by an event Adapter

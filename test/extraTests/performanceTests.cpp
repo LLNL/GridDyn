@@ -19,6 +19,7 @@
 #include "testHelper.h"
 #include "simulation/diagnostics.h"
 #include "gridBus.h"
+#include "solvers/solverInterface.h"
 
 #include <vectorOps.hpp>
 #include <map>
@@ -91,61 +92,124 @@ BOOST_AUTO_TEST_CASE(performance_tests1)
 
 BOOST_AUTO_TEST_CASE(performance_tests_scaling_pFlow)
 {
-	std::string testFile= std::string(GRIDDYN_TEST_DIRECTORY "/performance_tests/block_grid2.xml");
+	std::string testFile= std::string(GRIDDYN_TEST_DIRECTORY "/performance_tests/block_grid3_motor.xml");
 	
-	std::vector<int> elements = { 3,4,5,6,7,8,9,10,11,12,14,16,18,20,24,28,32,36,40,45,50,56,60,66,70,74,80,84,86,88,90,92,100,110,120,132,136,140,148,156 };
-	//std::vector<int> elements = {212,240,260};
-	//std::vector<int> elements{ 800 };
-	std::chrono::duration<double> pflow_time(0);
-	std::chrono::duration<double> load_time(0);
-
-	std::vector<double> ldtime(elements.size());
-	std::vector<double> pftime(elements.size());
-	int ii = 0;
-	for (auto gsize : elements)
+	std::vector<int> elements = { 3,4,5,6,7,8,9,10,11,12,14,16,18,20,24,28,32,36,40,45,50,56,60,66,70,74,80,84,86,88,90,92,100,110,120,132,136,140,148,156,164,
+		168,172,180,188,196,204,212,218,220,224,230,240,244,250,260,270,318,340,360,400,450,500,550,600,/*720,800*/
+	};
+	int numLoops = 1;
+	for (int rr = 0; rr < numLoops; ++rr)
 	{
-		gds = new gridDynSimulation();
-		readerInfo ri;
-		ri.addLockedDefinition("garraySize", std::to_string(gsize));
-		gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
-		auto start_t = std::chrono::high_resolution_clock::now();
-		loadFile(gds, testFile,&ri);
-		gds->setFlag("no_powerflow_adjustments");
-		auto stop_t = std::chrono::high_resolution_clock::now();
-		load_time = (stop_t - start_t);
-		ldtime[ii] = load_time.count();
+		//std::vector<int> elements = {212,240,260};
+		//std::vector<int> elements{ 800 };
+		std::chrono::duration<double> pflow_time(0);
+		std::chrono::duration<double> load_time(0);
 
-		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
+		std::vector<double> ldtime(elements.size());
+		std::vector<double> pftime(elements.size());
+		std::string outstring = "block3_motor_timing_kin1_" + std::to_string(rr) + ".csv";
+		std::ofstream outfile(outstring);
+		outfile << "N, buses, states, nnz, resid calls, jac call, load time, powerflow time,  solve time, resid time, jac time, jac1 time, kin1time\n";
+		int ii = 0;
+		for (auto gsize : elements)
+		{
+			gds = new gridDynSimulation();
 
-		start_t = std::chrono::high_resolution_clock::now();
-		gds->powerflow();
-		stop_t = std::chrono::high_resolution_clock::now();
-		gds->updateLocalCache();
-		pflow_time = (stop_t - start_t);
-		pftime[ii] =pflow_time.count();
-		int ss=gds->getInt("statesize");
-        int nnz=gds->getInt("nonzeros");
-        int rcount=gds->getInt("residcount");
-        int jcount=gds->getInt("jaccount");
-		printf("%d size=%d, nnz=%d,ld time=%f, pflow time=%f\n", gsize,ss, nnz,load_time.count(), pflow_time.count());
-printf("%d residual calls, %d Jacobian call\n",rcount,jcount);
-		auto bus = static_cast<gridBus *>(gds->findByUserID("bus", 10000000));
-		printf("slack bus gen p=%f, gen q =%f\n", bus->getGenerationReal(), bus->getGenerationReactive());
-		
-		std::vector<double> v;
-		int cnt=gds->getVoltage(v);
-		int locMin;
-		double minV=minLoc(v,locMin);
-		int locMax;
-		double maxV=maxLoc(v,locMax);
-		printf("cnt=%d vmin=%f at %d, vmax=%f at %d \n",cnt, minV,locMin,maxV,locMax);
-		//savePowerFlowCSV(gds,"bigCSV.csv");
-		delete gds;
-		gds = nullptr;
+			readerInfo ri;
+			ri.addLockedDefinition("garraySize", std::to_string(gsize));
+			gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
+			auto start_t = std::chrono::high_resolution_clock::now();
+			loadFile(gds, testFile, &ri);
+			gds->setFlag("no_powerflow_adjustments");
+			auto stop_t = std::chrono::high_resolution_clock::now();
+			load_time = (stop_t - start_t);
+			ldtime[ii] = load_time.count();
+
+			BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
+
+			start_t = std::chrono::high_resolution_clock::now();
+			gds->powerflow();
+			stop_t = std::chrono::high_resolution_clock::now();
+			gds->updateLocalCache();
+			pflow_time = (stop_t - start_t);
+			pftime[ii] = pflow_time.count();
+			int ss = gds->getInt("statesize");
+			int nnz = gds->getInt("nonzeros");
+			int rcount = gds->getInt("residcount");
+			int jcount = gds->getInt("jaccount");
+			printf("%d size=%d, nnz=%d,ld time=%f, pflow time=%f\n", gsize, ss, nnz, load_time.count(), pflow_time.count());
+			printf("%d residual calls, %d Jacobian call\n", rcount, jcount);
+			auto bus = static_cast<gridBus *>(gds->findByUserID("bus", 10000000));
+			printf("slack bus gen p=%f, gen q =%f\n", bus->getGenerationReal(), bus->getGenerationReactive());
+			outfile << gsize << ", " << gsize*gsize << ", " << ss << ", " << nnz << ", ";
+			outfile << rcount << ", " << jcount << ", ";
+			outfile << load_time.count() << ", " << pflow_time.count();
+			auto sc = gds->getSolverInterface("powerflow");
+			outfile << ", " << sc->get("kintime") << ", " << sc->get("residtime") << ", " << sc->get("jactime");
+			outfile << ", " << sc->get("jac1time") << ", " << sc->get("kin1time") << "\n";
+			std::vector<double> v;
+			int cnt = gds->getVoltage(v);
+			int locMin;
+			double minV = minLoc(v, locMin);
+			int locMax;
+			double maxV = maxLoc(v, locMax);
+			printf("cnt=%d vmin=%f at %d, vmax=%f at %d \n", cnt, minV, locMin, maxV, locMax);
+			//savePowerFlowCSV(gds,"bigCSV.csv");
+			delete gds;
+			gds = nullptr;
+		}
 	}
-
 }
 
+
+BOOST_AUTO_TEST_CASE(dynamic_scalable_test)
+{
+	std::string testFile = std::string(GRIDDYN_TEST_DIRECTORY "/performance_tests/block_grid2_dynamic.xml");
+
+	
+		//std::vector<int> elements = {212,240,260};
+		//std::vector<int> elements{ 800 };
+		std::chrono::duration<double> pflow_time(0);
+		std::chrono::duration<double> load_time(0);
+
+		int gsize = 50;
+		int ii = 0;
+		
+			gds = new gridDynSimulation();
+
+			readerInfo ri;
+			ri.addLockedDefinition("garraySize", std::to_string(gsize));
+			gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
+			auto start_t = std::chrono::high_resolution_clock::now();
+			loadFile(gds, testFile, &ri);
+			gds->setFlag("no_powerflow_adjustments");
+			auto stop_t = std::chrono::high_resolution_clock::now();
+			load_time = (stop_t - start_t);
+			
+
+			BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
+
+			start_t = std::chrono::high_resolution_clock::now();
+			gds->powerflow();
+			stop_t = std::chrono::high_resolution_clock::now();
+			gds->updateLocalCache();
+			pflow_time = (stop_t - start_t);
+			
+			int ss = gds->getInt("statesize");
+			int nnz = gds->getInt("nonzeros");
+			int rcount = gds->getInt("residcount");
+			int jcount = gds->getInt("jaccount");
+			printf("%d size=%d, nnz=%d,ld time=%f, pflow time=%f\n", gsize, ss, nnz, load_time.count(), pflow_time.count());
+			printf("%d residual calls, %d Jacobian call\n", rcount, jcount);
+			auto bus = static_cast<gridBus *>(gds->findByUserID("bus", 10000000));
+			printf("slack bus gen p=%f, gen q =%f\n", bus->getGenerationReal(), bus->getGenerationReactive());
+			
+			gds->run();
+			
+			
+			//savePowerFlowCSV(gds,"bigCSV.csv");
+
+}
 
 #ifdef ENABLE_IN_DEVELOPMENT_CASES
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES

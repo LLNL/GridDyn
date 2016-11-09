@@ -16,22 +16,40 @@
 #include "gridEvent.h"
 #include "relays/gridRelay.h"
 #include "gridCore.h"
-#include "gridRecorder.h"
 
 #include <typeinfo>
 #include <cmath>
 
-count_t eventAdapter::eventCounter = 1;
+std::atomic<count_t> eventAdapter::eventCounter(0);
 
 eventAdapter::eventAdapter (double nextTime, double period) : m_period (period),m_nextTime (nextTime)
 {
-  eventCounter++;
-  eventID = eventCounter;
+  eventID = ++eventCounter;
 }
 
 
 eventAdapter::~eventAdapter ()
 {
+}
+
+std::shared_ptr<eventAdapter> eventAdapter::clone(std::shared_ptr<eventAdapter> eA) const
+{
+	auto newAdapter = eA;
+	if (!newAdapter)
+	{
+		newAdapter = std::make_shared<eventAdapter>(m_nextTime, m_period);
+	}
+	newAdapter->m_remove_event = m_remove_event;
+	newAdapter->partBdelay = partBdelay;
+	newAdapter->two_part_execute = two_part_execute;
+	newAdapter->partB_turn = partB_turn;
+	newAdapter->partB_only = partB_only;
+	return newAdapter;
+}
+
+void eventAdapter::updateObject(gridCoreObject * /*newObject*/, object_update_mode /*mode*/)
+{
+	
 }
 
 void eventAdapter::executeA (double /*cTime*/)

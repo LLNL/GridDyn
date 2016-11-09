@@ -16,6 +16,7 @@
 #include "gridCoreTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
+#include "core/gridDynExceptions.h"
 
 #include "objectFactoryTemplates.h"
 
@@ -41,10 +42,8 @@ gridCoreObject * zBreaker::clone (gridCoreObject *obj) const
 }
 // parameter set functions
 
-int zBreaker::set (const std::string &param, const std::string &val)
+void zBreaker::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-
 
   if (param == "status")
     {
@@ -59,28 +58,27 @@ int zBreaker::set (const std::string &param, const std::string &val)
         }
       else
         {
-          out = INVALID_PARAMETER_VALUE;
+		  throw(invalidParameterValue());
         }
     }
   else
     {
-      out = gridLink::set (param,val);
+      gridLink::set (param,val);
     }
-  return out;
 }
 
-int zBreaker::set (const std::string &param, double val, units_t unitType)
+void zBreaker::set (const std::string &param, double val, units_t unitType)
 {
-  int out = PARAMETER_FOUND;
+
   if (param == "status")
     {
       switchMode (0, (val > 0.1));
     }
   else
     {
-      out = gridLink::set (param,val,unitType);
+      gridLink::set (param,val,unitType);
     }
-  return out;
+
 }
 
 void zBreaker::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/)

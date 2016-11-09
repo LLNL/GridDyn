@@ -18,6 +18,7 @@
 #include "gridOptObjects.h"
 #include "stringOps.h"
 #include "gridCoreTemplates.h"
+#include "core/gridDynExceptions.h"
 //system headers
 
 
@@ -82,21 +83,15 @@ void gridDynOptimization::setupOptOffsets (const optimMode &oMode, int setupMode
 
 
 // --------------- set properties ---------------
-int gridDynOptimization::set (const std::string &param,  const std::string &val)
+void gridDynOptimization::set (const std::string &param,  const std::string &val)
 {
-  int out = PARAMETER_FOUND;
-  std::string temp;
+
   if (param == "flags")
     {
       auto v = splitline (val);
-      int ot;
       for (auto &flagstr : v)
         {
-          ot = setFlag (flagstr, true);
-          if (ot != PARAMETER_FOUND)
-            {
-              std::cout << "Flag " << flagstr << " not found\n";
-            }
+          setFlag (flagstr, true);
         }
     }
   else if ((param == "defaultoptmode") || (param == "defaultopt"))
@@ -115,8 +110,7 @@ int gridDynOptimization::set (const std::string &param,  const std::string &val)
       /*default_solution,
   dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
   steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
-      temp = val;
-      makeLowerCase (temp);
+      auto temp = convertToLowerCase(val);
       if ((temp == "dcopf") || (temp == "opf"))
         {
           optimization_mode = DCOPF;
@@ -136,16 +130,14 @@ int gridDynOptimization::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      out = gridDynSimulation::set (param, val);
+      gridDynSimulation::set (param, val);
     }
 
-
-  return out;
 }
 
-int gridDynOptimization::setFlag (const std::string &flag, bool val)
+void gridDynOptimization::setFlag (const std::string &flag, bool val)
 {
-  int out = PARAMETER_FOUND;
+  
   //int nval = static_cast<int> (val);
   /*
   constraints_disabled = 1,
@@ -160,26 +152,23 @@ int gridDynOptimization::setFlag (const std::string &flag, bool val)
     }
   else
     {
-      out = gridDynSimulation::setFlag (flag, val);
+      gridDynSimulation::setFlag (flag, val);
     }
-  return out;
 }
-int gridDynOptimization::setFlags (size_t param, int val)
+
+void gridDynOptimization::setFlags (size_t param, int val)
 {
   if (param > 32)
     {
-      return PARAMETER_NOT_FOUND;
+	  throw(unrecognizedParameter());
     }
 
   controlFlags.set (param, (val > 0));
-  return PARAMETER_FOUND;
 
 }
 
-int gridDynOptimization::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridDynOptimization::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
-
   if (param == "optimtol")
     {
       tols.rtol = val;
@@ -188,14 +177,15 @@ int gridDynOptimization::set (const std::string &param, double val, gridUnits::u
   else
     {
       //out = setFlags (param, val);
-      out = gridDynSimulation::set (param, val, unitType);
-      if (out == PARAMETER_NOT_FOUND)
-        {
-          out = setFlag (param, (val > 0.1));
-        }
-
+	  try
+	  {
+		  gridDynSimulation::set(param, val, unitType);
+	  }
+	  catch (const unrecognizedParameter &)
+	  {
+		  setFlag(param, (val > 0.1));
+	  }
     }
-  return out;
 }
 
 

@@ -246,9 +246,8 @@ void gridOptObject::setOffset (index_t offset, index_t constraintOffset, const o
   offsets.setConstraintOffset (constraintOffset, oMode);
 }
 
-int gridOptObject::set (const std::string &param, const std::string &val)
+void gridOptObject::set (const std::string &param, const std::string &val)
 {
-  int out = PARAMETER_FOUND;
   if (param == "status")
     {
       auto v2 = convertToLowerCase (val);
@@ -269,29 +268,26 @@ int gridOptObject::set (const std::string &param, const std::string &val)
         }
       else
         {
-          out = gridCoreObject::set (param, val);
+          gridCoreObject::set (param, val);
         }
     }
   else
     {
-      out = gridCoreObject::set (param, val);
+      gridCoreObject::set (param, val);
     }
-  return out;
 }
 
-int gridOptObject::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridOptObject::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  int out = PARAMETER_FOUND;
 
   if (param == "#")
     {
     }
   else
     {
-      out = gridCoreObject::set (param, val, unitType);
+      gridCoreObject::set (param, val, unitType);
     }
 
-  return out;
 }
 
 
@@ -310,14 +306,13 @@ void gridOptObject::getVariableType (double sdata[], const optimMode &oMode)
 
 void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, const std::string &prefix)
 {
-  size_t bb;
   auto os = offsets.getOffsets (oMode);
   //angle variables
   if (stNames.size () < os->total.aSize + os->aOffset + 1)
     {
       stNames.resize (os->total.aSize + os->aOffset + 1);
     }
-  for (bb = 0; bb < os->total.aSize; ++bb)
+  for (size_t bb = 0; bb < os->total.aSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -333,7 +328,7 @@ void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, cons
     {
       stNames.resize (os->total.vSize + os->vOffset + 1);
     }
-  for (bb = 0; bb < os->total.vSize; ++bb)
+  for (size_t bb = 0; bb < os->total.vSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -349,7 +344,7 @@ void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, cons
     {
       stNames.resize (os->total.genSize + os->gOffset + 1);
     }
-  for (bb = 0; bb < os->total.genSize; ++bb)
+  for (size_t bb = 0; bb < os->total.genSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -365,7 +360,7 @@ void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, cons
     {
       stNames.resize (os->total.qSize + os->qOffset + 1);
     }
-  for (bb = 0; bb < os->total.qSize; ++bb)
+  for (size_t bb = 0; bb < os->total.qSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -381,7 +376,7 @@ void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, cons
     {
       stNames.resize (os->total.contSize + os->contOffset + 1);
     }
-  for (bb = 0; bb < os->total.contSize; ++bb)
+  for (size_t bb = 0; bb < os->total.contSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -397,7 +392,7 @@ void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, cons
     {
       stNames.resize (os->total.intSize + os->intOffset + 1);
     }
-  for (bb = 0; bb < os->total.intSize; ++bb)
+  for (size_t bb = 0; bb < os->total.intSize; ++bb)
     {
       if (prefix.empty ())
         {
@@ -441,11 +436,11 @@ void gridOptObject::valueBounds (double /*ttime*/, double /*upLimit*/[], double 
 {
 }
 
-void gridOptObject::linearObj (const optimData *, vectData * /*linObj*/, const optimMode &)
+void gridOptObject::linearObj (const optimData *, vectData<double> * /*linObj*/, const optimMode &)
 {
 }
 
-void gridOptObject::quadraticObj (const optimData *, vectData * /*linObj*/, vectData * /*quadObj*/, const optimMode &)
+void gridOptObject::quadraticObj (const optimData *, vectData<double> * /*linObj*/, vectData<double> * /*quadObj*/, const optimMode &)
 {
 }
 
@@ -454,15 +449,15 @@ double gridOptObject::objValue (const optimData *, const optimMode &)
   return 0;
 }
 
-void gridOptObject::derivative (const optimData *, double /*deriv*/[], const optimMode &)
+void gridOptObject::gradient (const optimData *, double /*grad*/[], const optimMode &)
 {
 }
 
-void gridOptObject::jacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridOptObject::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 }
 
-void gridOptObject::getConstraints (const optimData *, arrayData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridOptObject::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 }
 
@@ -470,10 +465,14 @@ void gridOptObject::constraintValue (const optimData *, double /*cVals*/[], cons
 {
 }
 
-void gridOptObject::constraintJacobianElements (const optimData *, arrayData<double> *, const optimMode &)
+void gridOptObject::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
 {
 }
 
+void gridOptObject::hessianElements(const optimData *, matrixData<double> *, const optimMode &)
+{
+
+}
 
 gridOptObject * gridOptObject::getBus (index_t /*index*/) const
 {

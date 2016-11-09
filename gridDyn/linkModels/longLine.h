@@ -37,14 +37,14 @@ public:
   longLine (const std::string &objName = "longLine_$" );
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  virtual int add (gridCoreObject *obj) final override;  //there shouldn't be any additional adds
+  virtual void add (gridCoreObject *obj) final override;  //there shouldn't be any additional adds
   // remove components
-  virtual int remove (gridCoreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
+  virtual void remove (gridCoreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
 
   virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
 
-  virtual int set (const std::string &param,  const std::string &val) override;
-  virtual int set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param,  const std::string &val) override;
+  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 private:

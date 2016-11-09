@@ -38,7 +38,7 @@ class variables_map;
 
 
 /**
- * Build and run a Griddyn simulation.
+ * Build and run a GridDyn simulation.
  */
 class GriddynRunner
 {
@@ -67,7 +67,7 @@ public:
   double Step (double time);
 
   /**
-   * Get the next Griddyn Event time
+   * Get the next GridDyn Event time
    *
    * @return the next event time
    */
@@ -77,7 +77,7 @@ public:
 
 private:
   /**
-   * Get the next Griddyn Event time
+   * Get the next GridDyn Event time
    *
    * @return the next event time
    */

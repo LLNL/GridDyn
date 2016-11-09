@@ -31,11 +31,12 @@
 class commMessage
 {
 public:
-  enum comm_message_type_t
-  {
-    ignoreMessageType = 0,
-    pingMessageType = 1,
-    replyMessageType = 2,
+	enum comm_message_type_t
+	{
+		ignoreMessageType = 0,
+		pingMessageType = 1,
+		replyMessageType = 2,
+		unknownMessageType = 0xFFFFFFFF,
   };
   commMessage ()
   {
@@ -47,16 +48,25 @@ public:
   {
   }
 
-  std::uint32_t getMessageType (void)
+  std::uint32_t getMessageType(void) const
   {
-    return m_messageType;
+	  return m_messageType;
   }
   virtual void setMessageType (std::uint32_t nType)
   {
     m_messageType = nType;
   }
-  virtual std::string toString ();
+  enum comm_modifiers
+  {
+	  none = 0,
+	  with_type=1,
+  };
+  virtual std::string toString (int modifiers=comm_modifiers::none) const;
   virtual void loadString (const std::string &fromString);
+
+  static std::uint32_t extractMessageType(const std::string &messageString);
+protected:
+	std::string encodeTypeInString() const;
 private:
   std::uint32_t m_messageType = ignoreMessageType;
 
@@ -69,9 +79,6 @@ private:
   }
 };
 
-
-//!< typedef for convenience
-typedef std::vector<std::string> stringVec;
 
 // class definitions for the message factories that can create the message
 //cFactory is a virtual base class for message Construction functions
@@ -101,7 +108,7 @@ public:
 //component factory is a template class that inherits from cFactory to actually to the construction of a specific object
 
 
-
+//TODO:: merge with the coreTypeFactory and other templates
 //create a high level object factory for the coreObject class
 typedef std::map<std::string, messageFactory*> mfMap;
 
@@ -112,7 +119,7 @@ public:
   static std::shared_ptr<coreMessageFactory> instance ();
   void registerFactory (const std::string  name, messageFactory *tf);
   void registerFactory (messageFactory *tf);
-  stringVec getMessageTypeNames ();
+  std::vector<std::string> getMessageTypeNames ();
   std::shared_ptr<commMessage> createMessage (const std::string &messageType);
   std::shared_ptr<commMessage> createMessage (const std::string &messageType, std::uint32_t type);
   std::shared_ptr<commMessage> createMessage (std::uint32_t type);

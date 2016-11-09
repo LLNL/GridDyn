@@ -112,6 +112,6 @@
    <timestop>60</timestop>
    <timestep>0.02</timestep>
    <solver name="ida">
-   <printlevel>3</printlevel>
+   <printlevel>1</printlevel>
    </solver>
 </griddyn>

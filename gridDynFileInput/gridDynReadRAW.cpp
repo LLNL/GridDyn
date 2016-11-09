@@ -20,6 +20,7 @@
 #include "gridBus.h"
 #include "generators/gridDynGenerator.h"
 #include "objectFactoryTemplates.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 #include "gridDyn.h"
 
@@ -206,29 +207,16 @@ Column  46-73   Case identification (A) */
               busList[index - 1] = busfactory->makeTypeObject ();
               busList[index - 1]->set ("basepower", opt.base);
               busList[index - 1]->setUserID (index);
-              rawReadBus (busList[index - 1], line, opt);
-              parentObject->add (busList[index - 1]);
-              if (busList[index - 1]->getParent () != parentObject)
-                {
-                  std::string bname = busList[index - 1]->getName ();
-                  int bcnt = 2;
-                  do
-                    {
-                      busList[index - 1]->setName (bname + '_' + std::to_string (bcnt));
-                      parentObject->add (busList[index - 1]);
-                      ++bcnt;
-                      if (bcnt > 50)
-                        {
-                          break;
-                        }
-
-                    }
-                  while ((busList[index - 1]->getParent () != parentObject));
-                  if (busList[index - 1]->getParent () != parentObject)
-                    {
-                      std::cerr << "Unable to add bus " << index << '\n';
-                    }
-                }
+			 
+			  rawReadBus(busList[index - 1], line, opt);
+			  try
+			  {
+				  parentObject->add(busList[index - 1]);
+			  }
+			  catch (const objectAddFailure &)
+			  {
+				  addToParentRename(busList[index - 1], parentObject);
+			  }
             }
           else
             {
@@ -247,11 +235,10 @@ Column  46-73   Case identification (A) */
   int tline = 5;
 
   bool moreSections = true;
-  sections currSection = unknown;
 
   while (moreSections)
     {
-      currSection = findSectionType (line);
+      sections currSection = findSectionType (line);
       moreData = 1;
       switch (currSection)
         {
@@ -468,22 +455,22 @@ int getPSSversion (const std::string &line)
 /* *INDENT-OFF* */
 static const std::map<std::string, sections> sectionNames
 {
-	{"BEGIN FIXED SHUNT",fixedShunt},
-	{ "BEGIN SWITCHED SHUNT DATA",switchedShunt},
-	{ "BEGIN AREA INTERCHANGE DATA",unknown},
-	{ "BEGIN TWO-TERMINAL DC LINE DATA",unknown},
-	{ "BEGIN TRANSFORMER IMPEDNCE CORRECTION DATA",unknown},
-	{ "BEGIN MULTI-TERMINAL DC LINE DATA", unknown},
-	{ "BEGIN MULTI-SECTION LINE GROUP DATA", unknown},
-	{ "BEGIN ZONE DATA", unknown},
-	{ "BEGIN INTER-AREA TRANSFER DATA", unknown},
-	{ "BEGIN OWNER DATA", unknown},
-	{ "BEGIN FACTS CONTROL DEVICE DATA", unknown},
-	{ "BEGIN LOAD DATA", load},
-	{ "BEGIN GENERATOR DATA", generator},
-	{ "BEGIN BRANCH DATA", branch},
-	{ "BEGIN TRANSFORMER ADJUSTMENT DATA", txadj},
-	{ "BEGIN TRANSFORMER DATA", tx},
+    {"BEGIN FIXED SHUNT",fixedShunt},
+    { "BEGIN SWITCHED SHUNT DATA",switchedShunt},
+    { "BEGIN AREA INTERCHANGE DATA",unknown},
+    { "BEGIN TWO-TERMINAL DC LINE DATA",unknown},
+    { "BEGIN TRANSFORMER IMPEDNCE CORRECTION DATA",unknown},
+    { "BEGIN MULTI-TERMINAL DC LINE DATA", unknown},
+    { "BEGIN MULTI-SECTION LINE GROUP DATA", unknown},
+    { "BEGIN ZONE DATA", unknown},
+    { "BEGIN INTER-AREA TRANSFER DATA", unknown},
+    { "BEGIN OWNER DATA", unknown},
+    { "BEGIN FACTS CONTROL DEVICE DATA", unknown},
+    { "BEGIN LOAD DATA", load},
+    { "BEGIN GENERATOR DATA", generator},
+    { "BEGIN BRANCH DATA", branch},
+    { "BEGIN TRANSFORMER ADJUSTMENT DATA", txadj},
+    { "BEGIN TRANSFORMER DATA", tx},
 };
 
 /* *INDENT-ON* */
@@ -570,6 +557,9 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
     case 4:
       bus->enabled = false;
       temp = "PQ";
+	  break;
+	default:
+		bus->enabled = false;
     }
   bus->set ("type",temp);
 
@@ -892,7 +882,7 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
   int ind2 = std::stoi (temp);
 
   // SGS 2015/02/25
-  // SGS check with Phillip.
+  // SGS check with Philip.
   // Swap to/from buses if toBus is negative.  toBus is the metered end.
   // Or should this just take ind2 = abs(ind2).  Min email suggested swapping the end points.
   if (ind2 < 0)
@@ -930,20 +920,33 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
 
   //check for circuit identifier
 
-
-  parentObject->add (lnk);
-  if (lnk->getParent () == nullptr)
-    {
-      //must be a parallel branch
-      std::string sub = lnk->getName ();
-      char m = 'a';
-      while (lnk->getParent () == nullptr)
-        {
-          lnk->setName (sub + '_' + m);
-          m = m + 1;
-          parentObject->add (lnk);
-        }
-    }
+  try
+  {
+	  parentObject->add(lnk);
+  }
+  catch (const objectAddFailure &)
+  {
+	  //must be a parallel branch
+	  std::string sub = lnk->getName();
+	  char m = 'a';
+	  while (lnk->getParent() == nullptr)
+	  {
+		  lnk->setName(sub + '_' + m);
+		  m = m + 1;
+		  try
+		  {
+			  parentObject->add(lnk);
+		  }
+		  catch (const objectAddFailure &e)
+		  {
+			  if (m > 'z')
+			  {
+				  throw(e);
+			  }
+		  }
+	  }
+  }
+  
 
   double R = doubleRead (strvec[3]);
   double X = doubleRead (strvec[4]);
@@ -1253,7 +1256,7 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
         }
     }
 
-  temp2 = temp2 + strvec[1];
+  temp2 = temp2 + trim(strvec[1]);
   bus1 = busList[ind1 - 1];
   bus2 = busList[ind2 - 1];
   code = std::stoi (strvec3[6]);
@@ -1285,8 +1288,32 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   lnk->updateBus (bus1, 1);
   lnk->updateBus (bus2, 2);
   lnk->setName (temp2);
-
-  parentObject->add (lnk);
+  try
+  {
+	  parentObject->add(lnk);
+  }
+  catch (const objectAddFailure &)
+  {
+	  //must be a parallel branch
+	  std::string sub = lnk->getName();
+	  char m = 'a';
+	  while (lnk->getParent() == nullptr)
+	  {
+		  lnk->setName(sub + '_' + m);
+		  m = m + 1;
+		  try
+		  {
+			  parentObject->add(lnk);
+		  }
+		  catch (const objectAddFailure &e)
+		  {
+			  if (m > 'z')
+			  {
+				  throw(e);
+			  }
+		  }
+	  }
+  }
 
   //skip the load flow area and loss zone and circuit for now
 

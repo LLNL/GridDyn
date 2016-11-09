@@ -14,6 +14,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "gridDyn.h"
+#include "gridBus.h"
+#include "linkModels/gridLink.h"
+#include "core/gridDynExceptions.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "vectorOps.hpp"
@@ -29,7 +32,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
 {
   std::string fname = std::string (AREA_TEST_DIRECTORY "area_test1.xml");
 
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = static_cast<gridDynSimulation *>(readSimXMLFile (fname));
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
 
   gds->pFlowInitialize ();
@@ -55,7 +58,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
   fname = std::string (AREA_TEST_DIRECTORY "area_test0.xml");
 
 
-  gds2 = (gridDynSimulation *)readSimXMLFile (fname);
+  gds2 = static_cast<gridDynSimulation *>(readSimXMLFile (fname));
 
 
   gds2->powerflow ();
@@ -66,6 +69,48 @@ BOOST_AUTO_TEST_CASE (area_test1)
   auto diffs = countDiffs(st, st2, 0.00001);
   BOOST_CHECK(diffs == 0);
  
+}
+
+BOOST_AUTO_TEST_CASE(area_test_add)
+{
+	auto area = new gridArea("area1");
+
+	auto bus1 = new gridBus("bus1");
+	try
+	{
+		area->add(bus1);
+		area->add(bus1);
+	}
+	catch (...)
+	{
+		BOOST_CHECK(false);
+	}
+	
+	auto bus2 = bus1->clone();
+	try
+	{
+		area->add(bus2);
+		//this is testing failure
+		BOOST_CHECK(false);
+	}
+	catch (const objectAddFailure &oaf)
+	{
+		BOOST_CHECK(oaf.who() == "area1");
+	}
+	bus2->setName("bus2");
+	try
+	{
+		area->add(bus2);
+		BOOST_CHECK(bus2->getParent()->getID() == area->getID());
+	}
+	catch (...)
+	{
+		BOOST_CHECK(false);
+	}
+	
+
+	delete area;
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
