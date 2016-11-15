@@ -90,20 +90,23 @@ OPTION(KLU_ENABLE "Enable KLU support" ON)
 SHOW_VARIABLE(KLU_INSTALL_DIR PATH
   "KLU library directory" "${KLU_INSTALL_DIR}")
 
-set(KLU_FOUND NO)
+set(SuiteSparse_FOUND NO)
 
 if(KLU_ENABLE)
+IF(MSVC)
+set(SuiteSparse_USE_LAPACK_BLAS ON)
+ENDIF(MSVC)
+set(SuiteSparse_VERBOSE ON)
+  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
 
-  find_package(KLU)
-
-  if(KLU_FOUND) 
-  INCLUDE_DIRECTORIES(SYSTEM ${KLU_INCLUDE_DIR})
-  list(APPEND external_library_list ${KLU_LIBRARIES})
-  list(APPEND external_link_directories ${KLU_LIBRARY_DIR})
-  else(KLU_FOUND)
+  if(SuiteSparse_FOUND) 
+  INCLUDE_DIRECTORIES(SYSTEM ${SuiteSparse_INCLUDE_DIR})
+  list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+  #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
+  else(SuiteSparse_FOUND)
 	message( FATAL_ERROR "KLU not functional - support will not be provided")
 	message( "Double check spelling specified libraries (search is case sensitive)")
-  endif(KLU_FOUND)
+  endif(SuiteSparse_FOUND)
 
 endif(KLU_ENABLE)
 
