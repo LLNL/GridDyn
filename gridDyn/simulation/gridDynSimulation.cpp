@@ -18,7 +18,7 @@
 #include "gridBus.h"
 
 #include "objectFactoryTemplates.h"
-#include "GridDyn-tracer.h"
+#include "griddyn-tracer.h"
 #include "objectInterpreter.h"
 #include "solvers/solverInterface.h"
 #include "stringOps.h"

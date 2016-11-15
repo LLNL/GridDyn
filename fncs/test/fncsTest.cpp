@@ -34,6 +34,7 @@ bool timeConversionCheck()
 
 }
 //test complex number conversions to strings
+#ifdef USE_DUMMY_FNCS
 bool testComplexConversion()
 {
 	fncs::clear();
@@ -252,6 +253,8 @@ bool testFNCSCollector()
 	}
 	return true;
 }
+
+#endif
 
 bool runFNCStests()
 {

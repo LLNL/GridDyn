@@ -14,7 +14,7 @@
 #ifndef FMI_LOADMODEL_H_
 #define FMI_LOADMODEL_H_
 
-#include "loadModels\gridLoad.h"
+#include "loadModels/gridLoad.h"
 
 class fmiMESubModel;
 

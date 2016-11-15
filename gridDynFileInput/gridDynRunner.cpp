@@ -23,7 +23,7 @@
 #include "objectInterpreter.h"
 #include "gridDynFederatedScheduler.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "GridDyn-tracer.h"
+#include "griddyn-tracer.h"
 #include "collector.h"
 #include "stringOps.h"
 #include "workQueue.h"

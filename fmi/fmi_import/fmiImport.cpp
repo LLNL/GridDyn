@@ -290,8 +290,10 @@ path fmiLibrary::findSoPath(fmutype_t type)
 	sopath/=identifier + ".dll";
 #else 
 #ifdef MACOS
+        sopath /= "darwin64";
+	sopath/= identifier + ".so";
 #else
-	sopath /= "linux64"
+	sopath /= "linux64";
 	sopath/= identifier + ".so";
 #endif
 #endif
@@ -307,9 +309,11 @@ path fmiLibrary::findSoPath(fmutype_t type)
 	sopath /=identifier + ".dll";
 #else 
 #ifdef MACOS
+        sopath /= "darwin32";
+	sopath /=identifier + ".so";
 #else
 	sopath /= "linux32";
-	sopath /= +identifier + ".so";
+	sopath /= identifier + ".so";
 #endif
 #endif
 	if (exists(sopath))

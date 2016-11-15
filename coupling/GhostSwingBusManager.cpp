@@ -13,7 +13,7 @@
 
 #include "GhostSwingBusManager.h"
 
-#include "GridDyn-tracer.h"
+#include "griddyn-tracer.h"
 
 #include <iostream>
 #include <cstddef>

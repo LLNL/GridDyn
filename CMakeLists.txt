@@ -166,6 +166,12 @@ IF (OPENMP_ENABLE)
 ENDIF(OPENMP_ENABLE)
 OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
 
+IF (NOT DISABLE_MULTITHREADING)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+list(APPEND external_library_list Threads::Threads)
+ENDIF(NOT DISABLE_MULTITHREADING)
+
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
