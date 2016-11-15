@@ -140,6 +140,7 @@ void loadDefaultObjectTranslations (readerInfo *ri)
   ri->addTranslate ("busmodify", "bus");
   ri->addTranslate ("areamodify", "area");
   ri->addTranslate ("linkmodify", "link");
+  ri->addTranslate ("gov", "governor");
 }
 
 

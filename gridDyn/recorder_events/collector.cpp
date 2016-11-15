@@ -25,14 +25,14 @@
 
 static classFactory<collector> collFac("collector");
 
-static childClassFactory<collector, gridRecorder> grFac(std::vector<std::string> {"recorder", "rec", "file"}, "recorder");
+static childClassFactory<gridRecorder,collector> grFac(std::vector<std::string> {"recorder", "rec", "file"}, "recorder");
 
 collector::collector(double time0, double period) : timePeriod(period), reqPeriod(period), triggerTime(time0)
 {
 
 }
 
-collector::collector(const std::string &objName) : name(objName), timePeriod(1.0), reqPeriod(1.0), triggerTime(0.0)
+collector::collector(const std::string &collectorName) : name(collectorName), timePeriod(1.0), reqPeriod(1.0), triggerTime(0.0)
 {
 
 }
@@ -336,6 +336,7 @@ void collector::updateColumns(int requestedColumn)
 	}
 }
 
+//TODO:: a lot of repeated code here try to merge them
 void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
 {
 
@@ -347,7 +348,20 @@ void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
 	}
 
 	updateColumns(newColumn);
-	points.push_back({ ggb,nullptr,newColumn });
+	points.emplace_back( ggb,nullptr,newColumn);
+	dataPointAdded(points.back());
+	if (!ggb->loaded)
+	{
+		if (ggb->getObject())
+		{
+			addWarning("grabber not loaded invalid field:"+ggb->field);
+		}
+		else
+		{
+			addWarning("grabber object not valid");
+		}
+		
+	}
 
 	
 }
@@ -355,13 +369,22 @@ void collector::add(std::shared_ptr<gridGrabber> ggb, int requestedColumn)
 void collector::add(std::shared_ptr<stateGrabber> sst, int requestedColumn)
 {
 
-
 	int newColumn = getColumn(requestedColumn);
 	updateColumns(newColumn);
 
-
-	points.push_back({ nullptr, sst, newColumn });
-	
+	points.emplace_back(nullptr, sst, newColumn);
+	dataPointAdded(points.back());
+	if (!sst->loaded)
+	{
+		if (sst->getObject())
+		{
+			addWarning("grabber not loaded invalid field:" + sst->field);
+		}
+		else
+		{
+			addWarning("grabber object not valid");
+		}
+	}
 }
 
 void collector::add(std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrabber> sst, int requestedColumn)
@@ -371,7 +394,18 @@ void collector::add(std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrabb
 	int newColumn = getColumn(requestedColumn);
 	updateColumns(newColumn);
 
-	points.push_back({ ggb, sst, newColumn });
+	points.emplace_back( ggb, sst, newColumn);
+	dataPointAdded(points.back());
+	if ((!ggb->loaded)&& (!sst->loaded))
+	{
+		addWarning("grabber not loaded");
+	}
+}
+
+
+void collector::dataPointAdded(const collectorPoint& )
+{
+
 }
 
 void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
@@ -395,7 +429,8 @@ void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
 		}
 		else
 		{
-			obj->log(obj, GD_WARNING_PRINT, "unable to create collector no field or offset specified");
+			obj->log(obj, print_level::warning, "unable to create collector no field or offset specified");
+			addWarning("unable to create collector no field or offset specified");
 		}
 	}
 	else
@@ -430,7 +465,7 @@ void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
 				{
 					fldGrabbers[0]->outputUnits = gdRI->outputUnits;
 				}
-				
+				//TODO:: PT incorporate state grabbers properly
 				add(fldGrabbers[0], gdRI->column);
 			}
 			else
@@ -450,7 +485,8 @@ void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
 			}
 			if (fldGrabbers.empty())
 			{
-				obj->log(obj, GD_WARNING_PRINT, "no grabbers created from " + gdRI->field);
+				obj->log(obj, print_level::warning, "no grabbers created from " + gdRI->field);
+				addWarning("no grabbers created from " + gdRI->field);
 				throw(addFailureException());
 			}
 		}
@@ -478,7 +514,8 @@ void collector::add(const std::string &field, gridCoreObject *obj)
 		}
 		if (fldGrabbers.empty())
 		{
-			obj->log(obj, GD_WARNING_PRINT, "no grabbers created from " + field);
+			obj->log(obj, print_level::warning, "no grabbers created from " + field);
+			addWarning("no grabbers created from " + field);
 			throw(addFailureException());
 		}
 	}
@@ -486,13 +523,27 @@ void collector::add(const std::string &field, gridCoreObject *obj)
 
 
 
-int collector::flush()
+void collector::flush()
 {
-	return FUNCTION_EXECUTION_SUCCESS;
+
 }
 
 static const std::string emptyString;
 const std::string &collector::getSinkName() const
 {
 	return emptyString;
+}
+
+
+std::shared_ptr<collector> makeCollector(const std::string &type, const std::string &name)
+{
+	if (name.empty())
+	{
+		return coreClassFactory<collector>::instance()->createObject(type);
+	}
+	else
+	{
+		return coreClassFactory<collector>::instance()->createObject(type,name);
+	}
+	
 }

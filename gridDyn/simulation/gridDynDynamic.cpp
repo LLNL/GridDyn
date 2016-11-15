@@ -356,10 +356,10 @@ int gridDynSimulation::dynamicDAE ( double tStop)
         }
       nextStopTime = EvQ->getNextTime ();
     }
-  if ((consolePrintLevel >= GD_TRACE_PRINT)||(logPrintLevel >= GD_TRACE_PRINT))
+  if ((consolePrintLevel >= print_level::trace)||(logPrintLevel >= print_level::trace))
     {
-      dynData->logSolverStats (GD_TRACE_PRINT);
-      dynData->logErrorWeights (GD_TRACE_PRINT);
+      dynData->logSolverStats (print_level::trace);
+      dynData->logErrorWeights (print_level::trace);
     }
 
 
@@ -547,10 +547,10 @@ int gridDynSimulation::dynamicPartitioned (double tStop, double tStep)
         }
   
     }
-  if ((consolePrintLevel >= GD_TRACE_PRINT) || (logPrintLevel >= GD_TRACE_PRINT))
+  if ((consolePrintLevel >= print_level::trace) || (logPrintLevel >= print_level::trace))
     {
-      dynDataDiff->logSolverStats (GD_TRACE_PRINT);
-      dynDataDiff->logErrorWeights (GD_TRACE_PRINT);
+      dynDataDiff->logSolverStats (print_level::trace);
+      dynDataDiff->logErrorWeights (print_level::trace);
     }
 
 
@@ -838,7 +838,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
   // double cr2;
   if (std::abs (maxResid) > 0.5)
     {
-      if ((logPrintLevel >= GD_DEBUG_PRINT) || (consolePrintLevel >= GD_DEBUG_PRINT))
+      if ((logPrintLevel >= print_level::debug) || (consolePrintLevel >= print_level::debug))
         {
           stringVec snames;
           getStateName (snames, sMode);
@@ -878,9 +878,9 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
         }
     }
 
-  if ((consolePrintLevel >= GD_TRACE_PRINT) || (logPrintLevel >= GD_TRACE_PRINT))
+  if ((consolePrintLevel >= print_level::trace) || (logPrintLevel >= print_level::trace))
     {
-      dynData->logSolverStats (GD_TRACE_PRINT, true);
+      dynData->logSolverStats (print_level::trace, true);
     }
   return retval;
 }

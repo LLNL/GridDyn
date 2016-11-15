@@ -1045,7 +1045,7 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
 
   if (!lnk)
     {
-      parentObject->log (parentObject,GD_ERROR_PRINT,"unable to locate link " + temp2);
+      parentObject->log (parentObject,print_level::error,"unable to locate link " + temp2);
       return;
     }
 
@@ -1188,7 +1188,7 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
   paramRead (strvec[9],cind);
   if (cind != 0)
     {
-      parentObject->log (parentObject, GD_WARNING_PRINT, "tranformer impedance tables not implmented yet ");
+      parentObject->log (parentObject, print_level::warning, "tranformer impedance tables not implmented yet ");
     }
   paramRead (strvec[10],cind);
   {
@@ -1201,7 +1201,7 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
   paramRead (strvec[12], mn);
   if ((mx != 0)||(mn != 0))
     {
-      parentObject->log (parentObject, GD_WARNING_PRINT, "load drop compensation not implmented yet ");
+      parentObject->log (parentObject, print_level::warning, "load drop compensation not implmented yet ");
     }
 
 }

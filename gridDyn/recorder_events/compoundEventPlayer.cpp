@@ -50,12 +50,12 @@ std::shared_ptr<gridEvent> compoundEventPlayer::clone(std::shared_ptr<gridEvent>
 }
 
 
-void compoundEventPlayer::setTime(double time)
+void compoundEventPlayer::setTime(gridDyn_time time)
 {
 	triggerTime = time;
 }
 
-void compoundEventPlayer::setTimeValue(double time, double val)
+void compoundEventPlayer::setTimeValue(gridDyn_time time, double val)
 {
 	triggerTime = time;
 	value = val;
@@ -91,7 +91,7 @@ void compoundEventPlayer::set(const std::string &param, const std::string &val)
 		compoundEvent::set(param, val);
 	}
 }
-void compoundEventPlayer::updateTrigger(double time)
+void compoundEventPlayer::updateTrigger(gridDyn_time time)
 {
 	if (currIndex != kNullLocation)             //we have a file operation
 	{
@@ -210,7 +210,7 @@ change_code compoundEventPlayer::trigger()
 	}
 }
 
-change_code compoundEventPlayer::trigger(double time)
+change_code compoundEventPlayer::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
 	if (time >= triggerTime)
@@ -240,20 +240,23 @@ bool compoundEventPlayer::setTarget(gridCoreObject *gdo, const std::string &var)
 	if (m_obj)
 	{
 		name = m_obj->getName();
-		armed = true;
+		
 	}
+	armed = checkArmed();
 	return armed;
 }
 
 void compoundEventPlayer::loadEventFile(const std::string &fname)
 {
 	eFile = fname;
-	int ret = ts.loadFile(eFile);
-	if (ret == FUNCTION_EXECUTION_SUCCESS)
+	ts.loadFile(eFile);
+	
+	currIndex = 0;
+	if (ts.count > 0)
 	{
-		currIndex = 0;
 		triggerTime = ts.time[0];
 	}
+		
 		
 	
 }

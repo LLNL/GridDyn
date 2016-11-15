@@ -40,7 +40,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   if (!(file.is_open()))
   {
-    parentObject->log(parentObject,GD_ERROR_PRINT, "Unable to open file " + filename );
+    parentObject->log(parentObject,print_level::error, "Unable to open file " + filename );
     //	return;
   }
   while (std::getline(file, line))

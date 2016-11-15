@@ -309,6 +309,7 @@ set(re_sources
 	recorder_events/gridCondition.cpp
 	recorder_events/objectInterpreter.cpp
 	recorder_events/gridPlayer.cpp
+	recorder_events/interpolatingPlayer.cpp
 	recorder_events/compoundEvent.cpp
 	recorder_events/compoundEventPlayer.cpp
 	recorder_events/objectGrabbers.cpp

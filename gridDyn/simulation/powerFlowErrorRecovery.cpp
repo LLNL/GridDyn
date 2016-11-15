@@ -140,7 +140,7 @@ bool powerFlowErrorRecovery::powerFlowFix3 ()
           sim->setAll ("load", "pqlowvlimit", 1.0);
           sim->controlFlags.set (voltage_constraints_flag);
           sim->opFlags.set (prev_setall_pqvlimit);
-          sim->log (sim, GD_DEBUG_PRINT, "pq adjust on load");
+          sim->log (sim, print_level::debug, "pq adjust on load");
         }
       sim->updateLocalCache ();
       sim->powerFlowAdjust (lower_flags (sim->controlFlags), check_level_t::reversable_only);

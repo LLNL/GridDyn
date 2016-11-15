@@ -333,7 +333,7 @@ void busControls::updatePowerControls()
 			}
 			else
 			{
-				controlledBus->log(controlledBus,GD_WARNING_PRINT,"Generator " + pco->getName() + " on indirect path for power control to bus " + controlledBus->getName());
+				controlledBus->log(controlledBus,print_level::warning,"Generator " + pco->getName() + " on indirect path for power control to bus " + controlledBus->getName());
 			}
 		}
 	}

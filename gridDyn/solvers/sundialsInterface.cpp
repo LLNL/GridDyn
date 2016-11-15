@@ -20,22 +20,14 @@
 #include "stringOps.h"
 
 
-//int kinsolFunc (N_Vector u, N_Vector f, void *user_data);
-//int kinsolJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
-//#ifdef KLU_ENABLE
-//int kinsolJacSparse (N_Vector u, N_Vector f, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
-//#endif
-//int kinsolAlgFunc (N_Vector u, N_Vector f, void *user_data);
-//int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
-
-static childClassFactory<solverInterface, kinsolInterface> kinFactory(stringVec{ "kinsol","algebraic" });
-static childClassFactory<solverInterface, idaInterface> idaFactory(stringVec{ "ida","dae","dynamic" });
+static childClassFactory<kinsolInterface, solverInterface> kinFactory(stringVec{ "kinsol","algebraic" });
+static childClassFactory<idaInterface, solverInterface> idaFactory(stringVec{ "ida","dae","dynamic" });
 #ifdef LOAD_CVODE
-static childClassFactory<solverInterface, cvodeInterface> cvodeFactory(stringVec{ "cvode","dyndiff","differential" });
+static childClassFactory<cvodeInterface, solverInterface > cvodeFactory(stringVec{ "cvode","dyndiff","differential" });
 #endif
 
 #ifdef LOAD_ARKODE
-static childClassFactory<solverInterface, arkodeInterface> arkodeFactory(stringVec{ "arkode" });
+static childClassFactory<arkodeInterface, solverInterface> arkodeFactory(stringVec{ "arkode" });
 #endif
 
 sundialsInterface::sundialsInterface (const std::string &objName):solverInterface(objName)

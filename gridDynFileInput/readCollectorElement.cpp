@@ -26,12 +26,12 @@ using namespace readerConfig;
 static const std::string nameString("name");
 
 static const IgnoreListType collectorIgnoreStrings {
-   "file","name", "column", "offset", "units", "gain", "bias", "field", "target"
+   "file","name", "column", "offset", "units", "gain", "bias", "field", "target", "type"
 };
 
 static const std::string collectorNameString ("collector");
 
-int loadRecorderElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri)
+int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri)
 {
   int ret = FUNCTION_EXECUTION_SUCCESS;
   std::string name = ri->checkDefines (getElementField (element, nameString, defMatchType));
@@ -48,19 +48,8 @@ int loadRecorderElement (std::shared_ptr<readerElement> &element, gridCoreObject
   
   if (!(col))
     {
-	  
-		
-      col = std::make_shared<gridRecorder> ();
-      
-		
-      if (!name.empty ())
-        {
-		  col = coreClassFactory<collector>::instance()->createObject(type, name);
-        }
-	  else
-	  {
-		  col = coreClassFactory<collector>::instance()->createObject(type);
-	  }
+	  col = makeCollector(type, name);
+     
       if (!fname.empty ())
         {
           col->set ("file",fname);
@@ -129,54 +118,41 @@ int loadRecorderElement (std::shared_ptr<readerElement> &element, gridCoreObject
 
   setAttributes (col, element, collectorNameString, ri, collectorIgnoreStrings);
   setParams (col, element, collectorNameString, ri, collectorIgnoreStrings);
+  gridCoreObject *targetObj = obj;
 
-  if ((gdRI.m_target.empty ())||(gdRI.m_target == obj->getName ()))
-    {
+  if (!((gdRI.m_target.empty()) || (gdRI.m_target == obj->getName())))
+  {
+	  targetObj=locateObject(gdRI.m_target, obj);
+  }
+    if (targetObj)
+	{
 	  try
 	  {
-		  col->add(&gdRI, obj);
+		  col->add(&gdRI, targetObj);
 		  if (col->getName().empty())
 		  {
-			  col->setName(obj->getName() + "_collector");
+			  col->setName(targetObj->getName() + "_"+type);
 		  }
 	  }
 	  catch (const addFailureException &)
 	  {
-		  WARNPRINT(READER_WARN_IMPORTANT, "collector for " << obj->getName() << "cannot find field " << gdRI.field);
+		  WARNPRINT(READER_WARN_IMPORTANT, type<<" for " << obj->getName() << "cannot find field " << gdRI.field);
 	  }
      
 
     }
   else
     {
-      auto oj2 = locateObject (gdRI.m_target, obj);
-      if (oj2)
-        {
-		  try
-		  {
-			  col->add(&gdRI, oj2);
-			  if (col->getName().empty())
-			  {
-				  col->setName(oj2->getName() + "_recorder");
-			  }
-		  }
-		  catch (const addFailureException &)
-		  {
-			  WARNPRINT(READER_WARN_IMPORTANT, type << " for " << gdRI.m_target << "cannot find field " << gdRI.field);
-		  }
-          
-        }
-      else
-        {
-          ret = OBJECT_ADD_FAILURE;
-        }
+	  WARNPRINT(READER_WARN_IMPORTANT, type<<" for " << gdRI.m_target << "cannot find field " << gdRI.field);
     }
 
-  if (ret == OBJECT_ADD_FAILURE)
-    {
 
-      WARNPRINT (READER_WARN_IMPORTANT, "recorder for " << gdRI.m_target << "cannot find field " << gdRI.field);
-    }
-
+  if (col->getWarningCount() > 0)
+  {
+	  for (const auto &warning : col->getWarnings())
+	  {
+		  WARNPRINT(READER_WARN_IMPORTANT, "recorder "<<col->getName()<<" "<<warning );
+	  }
+  }
   return ret;
 }

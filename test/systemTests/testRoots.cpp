@@ -64,13 +64,13 @@ BOOST_AUTO_TEST_CASE(test_governor_roots)
   std::string fname = std::string(ROOTS_TEST_DIRECTORY "test_gov_limit3.xml");
   gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->set("recorddirectory", ROOTS_TEST_DIRECTORY);
   gds->run();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   
   std::string recname = std::string(ROOTS_TEST_DIRECTORY "rootDisplay.dat");
-  timeSeries2 ts3;
+  timeSeriesMulti ts3;
   int ret = ts3.loadBinaryFile(recname);
   BOOST_CHECK_EQUAL(ret, 0);
 

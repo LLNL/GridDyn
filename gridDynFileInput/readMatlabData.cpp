@@ -35,8 +35,14 @@ void loadMFile(gridCoreObject *parentObject, const std::string &filename, const 
 	}
 	removeMatlabComments(filetext);
 	size_t func = filetext.find("function");
-	if (func != std::string::npos)
+
+	size_t mpc = filetext.find("mpc");
+	if ((func != std::string::npos)||(mpc!=std::string::npos))
 	{
+		if (func == std::string::npos)
+		{
+			func = 0;
+		}
 		size_t A = filetext.find_first_of('=', func + 9);
 		std::string bname = trim(filetext.substr(func + 9, A - func - 9));
 		

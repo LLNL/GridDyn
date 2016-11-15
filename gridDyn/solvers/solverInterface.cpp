@@ -23,13 +23,13 @@
 #include <new>
 
 
-static childClassFactoryArg<solverInterface, basicSolver,basicSolver::mode_t> basicFactoryG(stringVec{ "basic","gauss" },basicSolver::mode_t::gauss);
-static childClassFactoryArg<solverInterface, basicSolver, basicSolver::mode_t> basicFactoryGS(stringVec{ "gs","gauss-seidel" }, basicSolver::mode_t::gauss_seidel);
+static childClassFactoryArg<basicSolver, solverInterface, basicSolver::mode_t> basicFactoryG(stringVec{ "basic","gauss" },basicSolver::mode_t::gauss);
+static childClassFactoryArg<basicSolver, solverInterface,  basicSolver::mode_t> basicFactoryGS(stringVec{ "gs","gauss-seidel" }, basicSolver::mode_t::gauss_seidel);
 #ifdef LOAD_CVODE
-static childClassFactory<solverInterface, basicOdeSolver> basicOdeFactory(stringVec{ "basicode","euler" });
+static childClassFactory<basicOdeSolver,solverInterface> basicOdeFactory(stringVec{ "basicode","euler" });
 #else
 // if cvode is not available this becomes the default differential solver
-static childClassFactory<solverInterface, basicOdeSolver> basicOdeFactory(stringVec{ "basicode","dyndiff", "differential" });
+static childClassFactory<basicOdeSolver,solverInterface> basicOdeFactory(stringVec{ "basicode","dyndiff", "differential" });
 
 #endif
 
@@ -609,7 +609,7 @@ void solverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     {
       if (printError)
         {
-          m_gds->log (m_gds,GD_ERROR_PRINT, funcname + " failed - returned nullptr pointer");
+          m_gds->log (m_gds,print_level::error, funcname + " failed - returned nullptr pointer");
         }
 	  throw(std::bad_alloc());
     }
@@ -621,7 +621,7 @@ void solverInterface::check_flag (void *flagvalue, const std::string &funcname, 
         {
           if (printError)
             {
-              m_gds->log (m_gds, GD_ERROR_PRINT, funcname + " failed with flag = " + std::to_string (*errflag));
+              m_gds->log (m_gds, print_level::error, funcname + " failed with flag = " + std::to_string (*errflag));
             }
 		  throw(solverException(*errflag));
         }
@@ -635,10 +635,11 @@ int solverInterface::solve (double /*tStop*/, double & /*tReturn*/, step_mode)
 }
 
 
-void solverInterface::logSolverStats (int /*logLevel*/, bool /*iconly*/) const
+void solverInterface::logSolverStats (print_level /*logLevel*/, bool /*iconly*/) const
 {
 }
-void solverInterface::logErrorWeights (int /*logLevel*/) const
+
+void solverInterface::logErrorWeights (print_level /*logLevel*/) const
 {
 
 }
@@ -647,7 +648,7 @@ void solverInterface::logMessage (int errorCode, std::string message)
 {
   if ((errorCode > 0)&&(printLevel == solver_print_level::s_debug_print))
     {
-      m_gds->log (m_gds, GD_DEBUG_PRINT, message);
+      m_gds->log (m_gds, print_level::debug, message);
     }
   if (errorCode != 0)
     {
@@ -655,7 +656,7 @@ void solverInterface::logMessage (int errorCode, std::string message)
       lastErrorString = message;
       if (printLevel == solver_print_level::s_error_log)
         {
-          m_gds->log (m_gds, GD_WARNING_PRINT, message);
+          m_gds->log (m_gds, print_level::warning, message);
         }
     }
 }
@@ -705,7 +706,7 @@ std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
 
   return sd;
 }
-
+//TODO:: add Name option
 std::shared_ptr<solverInterface> makeSolver (const std::string &type)
 {
 	return coreClassFactory<solverInterface>::instance()->createObject(type);

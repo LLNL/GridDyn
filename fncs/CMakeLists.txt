@@ -7,19 +7,35 @@
 # All rights reserved.
 # For details, see the LICENSE file.
 # LLNS Copyright End
+# All rights reserved.
+# For details, see the LICENSE file.
+# LLNS Copyright End
 
 set(griddynFNCS_sources
 	gridDynFNCS.cpp
+	fncsSource.cpp
+	fncsCollector.cpp
+	fncsLoad.cpp
+	fncsLibrary.cpp
+	fncsSupport.cpp
+	test/fncsTest.cpp
 	)
 	
 set(griddynFNCS_headers
+	fncsLibrary.h
+	fncsSource.h
+	fncsCollector.h
+	fncsLoad.h
+	fncsSupport.h
+	test/fncsTest.h
 	)
 
-link_directories(${SUNDIALS_LIBRARY_DIR})
+IF(USE_DUMMY_FNCS)
+	list(APPEND griddynFNCS_headers stub/fncs.hpp)
+	list (APPEND griddynFNCS_sources stub/fncs.cpp)
+ENDIF(USE_DUMMY_FNCS)
 
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-
+link_directories(${external_link_directories})
 
 add_executable(griddynFNCS ${griddynFNCS_sources} ${griddynFNCS_headers})
 
@@ -33,13 +49,27 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)
 
-set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-
+IF(USE_DUMMY_FNCS)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/fncs/stub)
+ADD_DEFINITIONS(-DUSE_DUMMY_FNCS )
+ENDIF(USE_DUMMY_FNCS)
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 
+FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
 
+IF(WIN32)
+#there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4
+# to get the regex to work and I need two for visual studio to actually print it.
+# thus to it looks like this to replace '\' with '\\' 
+#this will probably fail on macs yet
+
+STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
+ENDIF(WIN32)
+#message(${test_dir})
+
+ADD_DEFINITIONS(-DFNCS_TEST_DIRECTORY="${test_dir}" )
 
 target_link_libraries(griddynFNCS gridDynCombined)
 

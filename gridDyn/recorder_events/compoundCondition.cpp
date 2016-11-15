@@ -13,7 +13,6 @@
 
 #include "gridCondition.h"
 #include "grabberInterpreter.hpp"
-
 	/*
 	enum class compound_mode
 	{
@@ -45,12 +44,13 @@
 		return false;
 	}
 
-	int compoundCondition::add(std::shared_ptr<gridCondition> gc)
+	void compoundCondition::add(std::shared_ptr<gridCondition> gc)
 	{
-		if (gc)
+		if (!gc)
 		{
-			conditions.push_back(gc);
-			return OBJECT_ADD_SUCCESS;
+			throw(addFailureException());
 		}
-		return OBJECT_ADD_FAILURE;
+	
+		conditions.push_back(gc);
+			
 	}

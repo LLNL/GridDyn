@@ -223,7 +223,7 @@ double arkodeInterface::get (const std::string &param) const
 
 
 // output solver stats
-void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
+void arkodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
   if (!initialized)
     {
@@ -281,7 +281,7 @@ void arkodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
 }
 
 
-void arkodeInterface::logErrorWeights (int logLevel) const
+void arkodeInterface::logErrorWeights (print_level logLevel) const
 {
 
   N_Vector eweight = NVECTOR_NEW(use_omp, svsize);

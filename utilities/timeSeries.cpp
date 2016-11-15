@@ -26,7 +26,7 @@ timeSeries::timeSeries ()
 
 timeSeries::timeSeries (const std::string &fname)
 {
-  loadBinaryFile (fname);
+  loadFile (fname);
 }
 
 bool timeSeries::addData (double t, double point)
@@ -81,28 +81,26 @@ void timeSeries::clear ()
   data.clear ();
 }
 
-int timeSeries::loadFile(const std::string &filename, unsigned int column)
+void timeSeries::loadFile(const std::string &filename, unsigned int column)
 {
 	std::string ext = filename.substr(filename.length() - 3);
-	int ret;
 	if ((ext == "csv") || (ext == "txt"))
 	{
-		ret = loadTextFile(filename, column);
+		loadTextFile(filename, column);
 	}
 	else
 	{
-		ret = loadBinaryFile(filename, column);
+		loadBinaryFile(filename, column);
 	}
-	return ret;
 }
 
 
-int timeSeries::loadBinaryFile (const std::string &filename,unsigned int column)
+void timeSeries::loadBinaryFile (const std::string &filename,unsigned int column)
 {
   std::ifstream fio (filename.c_str (), std::ios::in | std::ios::binary);
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   fsize_t nc;
   //double *buf;
@@ -152,13 +150,10 @@ int timeSeries::loadBinaryFile (const std::string &filename,unsigned int column)
   //buf = new double[nc];
   fio.read ((char *)(time.data ()), nc * sizeof(double));
 
-  //time = std::vector<double>(buf, buf + nc);
-
   if (rcount < 2)
     {
       fio.close ();
-      //delete [] buf;
-      return FILE_INCOMPLETE;
+	  throw(fileIncomplete());
     }
   for (cc = 0; cc < cols; cc++)
     {
@@ -204,17 +199,16 @@ int timeSeries::loadBinaryFile (const std::string &filename,unsigned int column)
   fio.close ();
   //delete [] buf;
 
-  return FILE_LOAD_SUCCESS;
 
 }
 
 
-int timeSeries::loadTextFile (const std::string &filename,unsigned int column)
+void timeSeries::loadTextFile (const std::string &filename,unsigned int column)
 {
   std::ifstream fio (filename.c_str (), std::ios::in);
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   std::string line, line2;
   std::getline (fio, line);
@@ -230,7 +224,7 @@ int timeSeries::loadTextFile (const std::string &filename,unsigned int column)
   if (cols.size () <= column + 1)
     {
       fio.close ();
-      return FILE_LOAD_FAILURE;
+	  throw(fileLoadFailure());
     }
   if (line.size () > 2)
     {
@@ -248,16 +242,16 @@ int timeSeries::loadTextFile (const std::string &filename,unsigned int column)
         }
     }
   fio.close ();
-  return FILE_LOAD_SUCCESS;
+
 }
 
-int timeSeries::writeBinaryFile (const std::string &filename,bool append)
+void timeSeries::writeBinaryFile (const std::string &filename,bool append)
 {
   int temp;
   std::ofstream fio (filename.c_str (), std::ios::out | std::ios::binary | ((append) ? (std::ios::app): (std::ios::trunc)));
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   //write a bit ordering integer
   if (!append)
@@ -306,15 +300,15 @@ int timeSeries::writeBinaryFile (const std::string &filename,bool append)
 
   fio.close ();
 
-  return FILE_LOAD_SUCCESS;
+
 }
 
-int timeSeries::writeTextFile (const std::string &filename,int precision, bool append)
+void timeSeries::writeTextFile (const std::string &filename,int precision, bool append)
 {
   std::ofstream fio (filename.c_str (), std::ios::out | ((append) ? (std::ios::app) : (std::ios::trunc)));
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   if (!append)
     {
@@ -330,7 +324,7 @@ int timeSeries::writeTextFile (const std::string &filename,int precision, bool a
       fio << std::setprecision (5) << time[rr] << ',' << std::setprecision (precision) << data[rr] << '\n';
     }
   fio.close ();
-  return FILE_LOAD_SUCCESS;
+
 }
 
 
@@ -350,23 +344,23 @@ std::vector<std::vector<double>> data2;
                 int writeBinaryFile(const std::string filename);
                 int writeTextFile(const std::string filename);
                 double compare(timeSeries *ts2, int stream=1, int cnt=-1);
-                double compare(timeSeries2 *ts2, int stream=1,int cnt=-1){return compare(ts2,stream,stream,cnt);};
-                double compare(timeSeries2 *ts2, int stream1=1,int stream2=1,int cnt=-1);
+                double compare(timeSeriesMulti *ts2, int stream=1,int cnt=-1){return compare(ts2,stream,stream,cnt);};
+                double compare(timeSeriesMulti *ts2, int stream1=1,int stream2=1,int cnt=-1);
                 */
 
-timeSeries2::timeSeries2 ()
+timeSeriesMulti::timeSeriesMulti ()
 {
   data.resize (1);
   fields.resize (1);
 }
-timeSeries2::timeSeries2 (fsize_t numCols)
+timeSeriesMulti::timeSeriesMulti (fsize_t numCols)
 {
   cols = 1;
   count = 0;
   data.resize (1);
   setCols (numCols);
 }
-timeSeries2::timeSeries2 (fsize_t numCols, fsize_t numRows)
+timeSeriesMulti::timeSeriesMulti (fsize_t numCols, fsize_t numRows)
 {
   cols = 1;
   count = numRows;
@@ -374,12 +368,12 @@ timeSeries2::timeSeries2 (fsize_t numCols, fsize_t numRows)
   resize (numRows);
 }
 
-timeSeries2::timeSeries2 (const std::string &fname)
+timeSeriesMulti::timeSeriesMulti (const std::string &fname)
 {
-  loadBinaryFile (fname);
+  loadFile (fname);
 }
 
-bool timeSeries2::addData (double t, double point,unsigned int column)
+bool timeSeriesMulti::addData (double t, double point,unsigned int column)
 {
   if (column >= cols)
     {
@@ -404,7 +398,7 @@ bool timeSeries2::addData (double t, double point,unsigned int column)
 
 }
 
-bool timeSeries2::addData (double t, std::vector<double> &ndata,unsigned int column)
+bool timeSeriesMulti::addData (double t, std::vector<double> &ndata,unsigned int column)
 {
   if (ndata.size () + column > cols)
     {
@@ -433,7 +427,7 @@ bool timeSeries2::addData (double t, std::vector<double> &ndata,unsigned int col
   return true;
 }
 
-bool timeSeries2::addData (std::vector<double> &ndata, unsigned int column)
+bool timeSeriesMulti::addData (std::vector<double> &ndata, unsigned int column)
 {
   if (ndata.size () != count)
     {
@@ -446,7 +440,7 @@ bool timeSeries2::addData (std::vector<double> &ndata, unsigned int column)
   data[column] = ndata;
   return true;
 }
-bool timeSeries2::addData (std::vector<double> &ntime, std::vector<double> &ndata, unsigned int column)
+bool timeSeriesMulti::addData (std::vector<double> &ntime, std::vector<double> &ndata, unsigned int column)
 {
   if (ntime.size () != ndata.size ())
     {
@@ -464,7 +458,7 @@ bool timeSeries2::addData (std::vector<double> &ntime, std::vector<double> &ndat
 
 }
 
-void timeSeries2::setCols (fsize_t newCols)
+void timeSeriesMulti::setCols (fsize_t newCols)
 {
 
   fields.resize (newCols);
@@ -477,7 +471,7 @@ void timeSeries2::setCols (fsize_t newCols)
   cols = newCols;
 }
 
-void timeSeries2::resize (fsize_t newSize)
+void timeSeriesMulti::resize (fsize_t newSize)
 {
   time.resize (newSize,0);
   for (auto &dk : data)
@@ -487,7 +481,7 @@ void timeSeries2::resize (fsize_t newSize)
   count = newSize;
 }
 
-void timeSeries2::reserve (fsize_t newSize)
+void timeSeriesMulti::reserve (fsize_t newSize)
 {
   time.reserve (newSize);
   capacity = newSize;
@@ -498,7 +492,7 @@ void timeSeries2::reserve (fsize_t newSize)
 }
 
 
-void timeSeries2::clear ()
+void timeSeriesMulti::clear ()
 {
   time.clear ();
   for (auto &dk : data)
@@ -509,27 +503,25 @@ void timeSeries2::clear ()
 }
 
 
-int timeSeries2::loadFile(const std::string &filename)
+void timeSeriesMulti::loadFile(const std::string &filename)
 {
 	std::string ext = filename.substr(filename.length() - 3);
-	int ret;
 	if ((ext == "csv") || (ext == "txt"))
 	{
-		ret = loadTextFile(filename);
+		loadTextFile(filename);
 	}
 	else
 	{
-		ret = loadBinaryFile(filename);
+		loadBinaryFile(filename);
 	}
-	return ret;
 }
 
-int timeSeries2::loadBinaryFile (const std::string &filename)
+void timeSeriesMulti::loadBinaryFile (const std::string &filename)
 {
   std::ifstream fio (filename.c_str (), std::ios::in | std::ios::binary);
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   fsize_t nc;
   //double *buf;
@@ -582,7 +574,7 @@ int timeSeries2::loadBinaryFile (const std::string &filename)
     {
       fio.close ();
       //delete [] buf;
-      return FILE_INCOMPLETE;
+	  throw(fileIncomplete());
     }
   for (cc = 0; cc < cols; cc++)
     {
@@ -614,17 +606,16 @@ int timeSeries2::loadBinaryFile (const std::string &filename)
   fio.close ();
   //delete [] buf;
 
-  return FILE_LOAD_SUCCESS;
 
 }
 
-int timeSeries2::loadTextFile (const std::string &filename)
+void timeSeriesMulti::loadTextFile (const std::string &filename)
 {
   std::ifstream fio (filename.c_str (), std::ios::in);
   unsigned int kk;
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   std::string line;
   std::getline (fio, line);
@@ -662,16 +653,17 @@ int timeSeries2::loadTextFile (const std::string &filename)
         }
     }
   fio.close ();
-  return FILE_LOAD_SUCCESS;
+
 }
-int timeSeries2::writeBinaryFile (const std::string &filename,bool append)
+
+void timeSeriesMulti::writeBinaryFile (const std::string &filename,bool append)
 {
   fsize_t temp;
   fsize_t cc;
   std::ofstream fio (filename.c_str (), std::ios::out | std::ios::binary | ((append) ? (std::ios::app) : (std::ios::trunc)));
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   if (!append)
     {
@@ -727,16 +719,15 @@ int timeSeries2::writeBinaryFile (const std::string &filename,bool append)
 
   fio.close ();
 
-  return FILE_LOAD_SUCCESS;
 }
 
-int timeSeries2::writeTextFile (const std::string &filename,int precision, bool append)
+void timeSeriesMulti::writeTextFile (const std::string &filename,int precision, bool append)
 {
 
   std::ofstream fio (filename.c_str (), std::ios::out | ((append) ? (std::ios::app) : (std::ios::trunc)));
   if (!fio)
     {
-      return FILE_NOT_FOUND;
+	  throw(fileNotFoundError());
     }
   std::string ndes = characterReplace (description,'\n',"\n#");
 
@@ -763,51 +754,42 @@ int timeSeries2::writeTextFile (const std::string &filename,int precision, bool 
       fio << '\n';
     }
   fio.close ();
-  return FILE_LOAD_SUCCESS;
+ 
 }
 
 //large series of comparison functions
 double compare (timeSeries *ts1, timeSeries *ts2)
 {
-  double diff;
 
-  diff = compareVec (ts1->data, ts2->data);
+  return compareVec (ts1->data, ts2->data);
 
-  return diff;
 }
 
 double compare (timeSeries *ts1, timeSeries *ts2, int cnt)
 {
-  double diff;
-
-  diff = compareVec (ts1->data, ts2->data,cnt);
-
-  return diff;
+  return compareVec (ts1->data, ts2->data,cnt);
 }
 
 
 
-double compare (timeSeries2 *ts1, timeSeries *ts2, int stream)
+double compare (timeSeriesMulti *ts1, timeSeries *ts2, int stream)
 {
-  double diff;
-  diff = compareVec (ts1->data[stream], ts2->data);
-  return diff;
+
+  return compareVec (ts1->data[stream], ts2->data);
 }
 
-double compare (timeSeries2 *ts1, timeSeries *ts2, int stream, int cnt)
+double compare (timeSeriesMulti *ts1, timeSeries *ts2, int stream, int cnt)
 {
-  double diff;
-  diff = compareVec (ts1->data[stream], ts2->data,cnt);
-  return diff;
+
+  return compareVec (ts1->data[stream], ts2->data,cnt);
 }
 
-double compare (timeSeries2 *ts1, timeSeries2 *ts2)
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2)
 {
-  double diff;
-  int kk;
+	double diff = 0;
   int cnt = std::min (ts1->cols, ts2->cols);
-  diff = 0;
-  for (kk = 0; kk < cnt; ++kk)
+
+  for (int kk = 0; kk < cnt; ++kk)
     {
       diff += compareVec (ts1->data[kk], ts2->data[kk]);
     }
@@ -815,23 +797,20 @@ double compare (timeSeries2 *ts1, timeSeries2 *ts2)
   return diff;
 }
 
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream)
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream)
 {
-  double diff;
-  diff = compareVec (ts1->data[stream], ts2->data[stream]);
-  return diff;
+
+  return compareVec (ts1->data[stream], ts2->data[stream]);
 }
 
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream1, int stream2)
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream1, int stream2)
 {
-  double diff;
-  diff = compareVec (ts1->data[stream1], ts2->data[stream2]);
-  return diff;
+
+  return compareVec (ts1->data[stream1], ts2->data[stream2]);
 }
 
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream1, int stream2, int cnt)
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream1, int stream2, int cnt)
 {
-  double diff;
-  diff = compareVec (ts1->data[stream1], ts2->data[stream2],cnt);
-  return diff;
+
+  return compareVec (ts1->data[stream1], ts2->data[stream2],cnt);
 }

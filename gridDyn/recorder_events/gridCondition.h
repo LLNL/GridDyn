@@ -160,7 +160,7 @@ public:
   double evalCondition (const stateData *sD, const solverMode &sMode) override;
   bool checkCondition () const override;
   bool checkCondition (const stateData *sD, const solverMode &sMode) const override;
-  int add (std::shared_ptr<gridCondition> gc);
+  void add (std::shared_ptr<gridCondition> gc);
   void setMode (compound_mode md)
   {
     mode = md;

@@ -40,5 +40,7 @@ typedef std::vector<double> IOdata;
 typedef std::vector<index_t> IOlocs;
 #endif
 
+const IOdata emptyArguments{};
+
 #endif
 

@@ -20,15 +20,15 @@ class gridDynExciter;
 class gridDynGovernor;
 class gridDynGenModel;
 class gridDynPSS;
-
+class gridSource;
 class scheduler;
-
 class gridBus;
 
 /**
 @ brief class describing a generator unit
- a generator is a power production unit in Griddyn.  the base generator class implements methods set forth in the gridSecondary class and inherits from that class
+ a generator is a power production unit in GridDyn.  the base generator class implements methods set forth in the gridSecondary class and inherits from that class
 it has mechanics and interfaces for handling any and all of 4 different components, namely and exciter, governor, generator model, and a power system stabilizer.
+as well as control for the power set point and voltage set point
 */
 class gridDynGenerator : public gridSecondary
 {
@@ -62,7 +62,7 @@ public:
   /** @brief enum indicating submodel locations in the subObject structure*/
   enum submodel_locations
   {
-    genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4
+    genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4, pset_loc=5, vset_loc=6 
   };
   static std::atomic<count_t> genCount;                                      //!< generator count
   double baseVoltage = 120;             //!< [V] base voltage
@@ -79,6 +79,9 @@ protected:
   gridDynExciter *ext = nullptr;                    //!< exciter model
   gridDynGovernor *gov = nullptr;                   //!< governor model
   gridDynPSS *pss = nullptr;                        //!< power system stabilizer type
+  gridSource *pSetControl = nullptr;				//!< source for throttle control
+  gridSource *vSetControl = nullptr;				//!< source for voltage level control
+  scheduler *sched = nullptr;			//!< alias to pSetControl if pSetControl is a scheduler
   double P = 0.0;                    //!< [pu] Electrical generation real power output
   double Q = 0.0;                    //!< [pu] Electrical generation reactive power output
   double Pset = -kBigNum;                    //!< [pu] target power set point
@@ -95,7 +98,6 @@ protected:
   double m_Rs = 0.0;                            //!< the real part of the generator impedance
   double m_Xs = 1.0;   //!< generator impedance defined on Mbase;
   gridBus *remoteBus = nullptr;  //!< the bus for remote control
-  scheduler *sched = nullptr;                   //!< pointer to a scheduler
   std::vector<double> PC;                       //!< power control point for the capability curve
   std::vector<double> minQPC;           //!< min reactive power corresponding to the PC point
   std::vector<double> maxQPC;           //!< max reactive power corresponding to the PC points
@@ -125,8 +127,8 @@ public:
 
   virtual void add (gridCoreObject *obj) override;
   /** @brief additional add function specific to subModels
-  @param[in] a submodel to add
-  @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE if not*/
+  @param[in] a submodel to add 
+  @throw unrecognizedObjectError is object is not valid*/
   virtual void add (gridSubModel *obj);
 
   void loadSizes (const solverMode &sMode, bool dynOnly) override;

@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE (xml_test_dynLib)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->run ();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE (xml_test_dynLib)
 
   fname = xmlTestDirectory + "test_2m4bDyn_lib.xml";
   gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds2->consolePrintLevel = 0;
+  gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE (xml_test_maingen)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->run ();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE (xml_test_maingen)
 
   fname = xmlTestDirectory + "test_2m4bDyn_mgen.xml";
   gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds2->consolePrintLevel = 0;
+  gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();
@@ -367,7 +367,7 @@ BOOST_AUTO_TEST_CASE (xml_test_rload)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->run ();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
@@ -375,7 +375,7 @@ BOOST_AUTO_TEST_CASE (xml_test_rload)
 
   fname = xmlTestDirectory + "test_2m4bDyn_rload.xml";
   gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds2->consolePrintLevel = 0;
+  gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE (xml_test_source1)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->run ();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE (xml_test_source1)
 
   fname = xmlTestDirectory + "test_2m4bDyn_sep.xml";
   gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds2->consolePrintLevel = 0;
+  gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();
@@ -432,7 +432,7 @@ BOOST_AUTO_TEST_CASE (xml_test9)
   //test the define functionality
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->run ();
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE (xml_test9)
   fname = xmlTestDirectory + "test_xmltest9.xml";
 
   gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds2->consolePrintLevel = 0;
+  gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();

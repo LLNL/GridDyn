@@ -206,7 +206,7 @@ void scheduler::updateA (double time)
     }
   m_output = PCurr;
   prevTime = time;
-  m_lastUpdateTime = time;
+  lastUpdateTime = time;
 }
 
 double scheduler::predict (double time)

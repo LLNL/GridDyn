@@ -120,7 +120,11 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
             }
         }
     }
-  if (((sep == '/')||(secName[0] == ':')) && (obj))  //we have a double colon so go deeper in the object using the found object as the base
+  if ((sep == '/') && (obj))  //we have a '/' so go into the sub model
+  {
+	  obj = locateObject(secName, obj, false);
+  }
+  else if ((secName[0] == ':') && (obj))  //we have a double colon so go deeper in the object using the found object as the base
     {
       obj = locateObject (secName.substr (1), obj, false);
     }

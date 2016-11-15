@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 	for (auto &gname : genlist)
 	{
 		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-		gds->consolePrintLevel = 0;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
 
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(fault_test2)
 	{
 		
 		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		auto obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
 
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 	{
 		
 		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		auto obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(geco_fault_case)
 	std::string fname = fault_test_directory + "geco_fault_uncoupled.xml";
 
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_DEBUG_PRINT;
+	gds->consolePrintLevel = print_level::debug;
 	int  retval = gds->dynInitialize();
 
 	BOOST_CHECK_EQUAL(retval, 0);
@@ -235,8 +235,8 @@ BOOST_AUTO_TEST_CASE(link_test_fault_dynamic)
 	std::string fname = fault_test_directory + "link_fault2.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_TRACE_PRINT;
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::trace;
+	gds->consolePrintLevel = print_level::warning;
 
 	gds->run();
 
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse)
 	std::string fname = fault_test_directory + "link_fault_fuse.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<fuse *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse2)
 	std::string fname = fault_test_directory + "link_fault_fuse2.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_DEBUG_PRINT;
+	gds->consolePrintLevel = print_level::debug;
 	auto obj = dynamic_cast<gridLink *>(gds->find("bus8_to_bus9"));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();
@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse3)
 	std::string fname = fault_test_directory + "link_fault_fuse3.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_DEBUG_PRINT;
+	gds->consolePrintLevel = print_level::debug;
 	//auto obj = dynamic_cast<gridLink *>(gds->find("bus2_to_bus3"));
 	gds->dynInitialize();
 	int mmatch = JacobianCheck(gds, cDaeSolverMode);
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker)
 	std::string fname = fault_test_directory + "link_fault_breaker.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();
@@ -354,7 +354,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker2)
 	std::string fname = fault_test_directory + "link_fault_breaker2.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker3)
 	std::string fname = fault_test_directory + "link_fault_breaker3.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker4)
 	std::string fname = fault_test_directory + "link_fault_breaker4.xml";
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = GD_WARNING_PRINT;
+	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
 	gds->run();

@@ -35,13 +35,26 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
 {
   std::vector < std::shared_ptr < gridGrabber >> v;
   auto gstr = splitlineBracketTrim (command);
-  for (const auto &cmd:gstr)
+  for (auto &cmd:gstr)
     {
+	  auto renameloc = cmd.find(" as ");//spaces are important
+	  //extract out a rename
+	  std::string rname = "";
+	  if (renameloc != std::string::npos)
+	  {
+		  rname = trim(cmd.substr(renameloc + 4));
+		  cmd.erase(renameloc, std::string::npos);
+	  }
       if (cmd.find_first_of (":(+-/*\\^?") != std::string::npos)
         {
           auto ggb = gInterpret.interpretGrabberBlock (cmd, obj);
           if (ggb)
             {
+			  if (!rname.empty())
+			  {
+				  ggb->setDescription(rname);
+			  }
+			  
               if (ggb->loaded)
                 {
                   v.push_back (ggb);
@@ -56,7 +69,7 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
                 }
               else
                 {
-                  obj->log (obj,GD_WARNING_PRINT,"Unable to load recorder " + command);
+                  obj->log (obj,print_level::warning,"Unable to load recorder " + command);
                 }
             }
 
@@ -77,6 +90,10 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
               auto ggb = createGrabber (cmdlc, obj);
               if (ggb)
                 {
+				  if (!rname.empty())
+				  {
+					  ggb->setDescription(rname);
+				  }
                   v.push_back (ggb);
                 }
             }

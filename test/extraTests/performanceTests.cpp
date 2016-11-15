@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(performance_tests1)
 		for (int kk = 0; kk < 10; ++kk)  //Do this 10 time
 		{
 			gds = new gridDynSimulation();
-			gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
+			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
 			loadFile(gds, fname);
 			gds->setFlag("no_powerflow_adjustments");
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(performance_tests_scaling_pFlow)
 
 			readerInfo ri;
 			ri.addLockedDefinition("garraySize", std::to_string(gsize));
-			gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
+			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
 			loadFile(gds, testFile, &ri);
 			gds->setFlag("no_powerflow_adjustments");
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(dynamic_scalable_test)
 
 			readerInfo ri;
 			ri.addLockedDefinition("garraySize", std::to_string(gsize));
-			gds->set("consoleprintlevel", GD_SUMMARY_PRINT);
+			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
 			loadFile(gds, testFile, &ri);
 			gds->setFlag("no_powerflow_adjustments");

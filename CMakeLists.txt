@@ -26,7 +26,6 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # -------------------------------------------------------------
 # MACRO definitions
 # -------------------------------------------------------------
-
 # Macros to hide/show cached variables.
 # These two macros can be used to "hide" or "show" in the
 # list of cached variables various variables and/or options 
@@ -171,7 +170,6 @@ IF(UNIX)
   set(Boost_NO_BOOST_CMAKE ON)
 
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
@@ -181,16 +179,12 @@ IF(UNIX)
 ELSE(UNIX)
   IF(MINGW)
  add_compile_options(-Wall -pedantic)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
   ELSE(MINGW)
   set(Boost_USE_STATIC_LIBS ON)
-  ENDIF(MINGW)
-ENDIF(UNIX)
-
 # -------------------------------------------------------------
 # Extra definitions for visual studio
 # -------------------------------------------------------------
@@ -199,6 +193,16 @@ IF(MSVC)
   ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
   add_compile_options(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
 ENDIF(MSVC)
+  ENDIF(MINGW)
+ENDIF(UNIX)
+
+#check for clang 3.4 and the fact that CMAKE_CXX_STANDARD doesn't work yet for that compiler
+
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
+	add_compile_options(-std=c++1y)
+ELSE ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
+set(CMAKE_CXX_STANDARD 14)
+ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1)
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>)
@@ -271,7 +275,18 @@ OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
 # link against them.
 
 IF (FNCS_EXECUTABLE)
+	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
+	IF(USE_DUMMY_FNCS)
+		HIDE_VARIABLE(FNCS_INSTALL_PATH)
+	ELSE(USE_DUMMY_FNCS)
+		SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
+  
+		find_package(FNCS)
+	ENDIF(USE_DUMMY_FNCS)
 	add_subdirectory(fncs)
+ELSE(FNCS_EXECUTABLE)
+	HIDE_VARIABLE(FNCS_INSTALL_PATH)
+	HIDE_VARIABLE(USE_DUMMY_FNCS)
 ENDIF(FNCS_EXECUTABLE)
 
 

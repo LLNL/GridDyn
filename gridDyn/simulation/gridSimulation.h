@@ -65,8 +65,8 @@ public:
     DYNAMIC_COMPLETE = 4,               //!< the system has completed a dynamic system calculation and advanced to the desired time successfully
     DYNAMIC_PARTIAL = 5,             //!< the system has completed a dynamic system calculation but has not reached the desired time
   };
-  int consolePrintLevel = GD_SUMMARY_PRINT;       //!< logging level for printing to the console
-  int logPrintLevel = GD_SUMMARY_PRINT;           //!< logging level for saving to a file (if a file was specified)
+  print_level consolePrintLevel = print_level::summary;       //!< logging level for printing to the console
+  print_level logPrintLevel = print_level::summary;           //!< logging level for saving to a file (if a file was specified)
 protected:
   std::string logFile;                                          //!< log file name
 
@@ -190,7 +190,7 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   void alert (gridCoreObject *object, int code) override;
-  virtual void log (gridCoreObject *object,int level, const std::string &message) override;
+  virtual void log (gridCoreObject *object, print_level level, const std::string &message) override;
 
   /** @brief save all the recorder data to files
    all the recorders have files associated with them that get automatically saved at certain points this function forces them

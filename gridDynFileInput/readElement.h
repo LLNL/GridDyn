@@ -75,7 +75,7 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &elem
 void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList);
 
 int loadEventElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri);
-int loadRecorderElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri);
+int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri);
 
 gridParameter * getElementParam (const std::shared_ptr<readerElement> &element,gridParameter *param = nullptr);
 

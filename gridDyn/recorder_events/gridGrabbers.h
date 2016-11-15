@@ -36,17 +36,19 @@ class gridGrabber: public objectOperatorInterface
 {
 public:
   std::string field; //!< the target field that is being grabbed
+  //TODO:: convert to a bitset
   bool loaded = false;	//!< flag if the grabber is loaded
   bool vectorGrab = false;  //!< flag if the grabber is meant to grab a vector of data
   bool useVoltage = false; //!< flag indicating use of the baseVoltage for unit conversion
   bool cloneable = true;  //!< flag indicating if the grabber is cloneable
+  bool customDesc = false;	//!< flag indicating the grabber uses a custom description
   gridUnits::units_t outputUnits = gridUnits::defUnit; //!< the desired input units of the grabber
   gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< the units of the actual grabbed data
   double gain = 1.0;	//!< gain multiplier on the output data
   double bias = 0.0;	//!< bias shift on the output
   double m_baseVoltage = 100; //!< the base voltage on the grabber if needed
 protected:
-	std::string desc;  //!< a description of the grabber
+  std::string desc;  //!< a description of the grabber
   gridCoreObject *cobj = nullptr; //!< the target core object to grab the data from
   std::function<double (gridCoreObject *)> fptr; //!< operation function to grab a single data element
   std::function<void(gridCoreObject *, std::vector<double> &)> fptrV; //!< operation function to grab a vector of data
@@ -83,6 +85,11 @@ public:
 	  return desc;
   }
   virtual std::string getDesc();
+  void setDescription(const std::string &newDesc)
+  {
+	  desc = newDesc;
+	  customDesc = true;
+  }
   virtual void updateObject (gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual gridCoreObject * getObject() const override;
   virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;

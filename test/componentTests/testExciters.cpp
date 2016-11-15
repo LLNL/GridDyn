@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 	{
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 		}
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test4)
 		}
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 
 		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
 		gridDynGenerator *gen = gds->getGen(0);
-		gds->consolePrintLevel = GD_NO_PRINT;
+		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);

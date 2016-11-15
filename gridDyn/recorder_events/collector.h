@@ -47,6 +47,8 @@ class collector : public eventInterface, objectOperatorInterface
 public:
 	std::string description; //!< description
 protected:
+	int warningCount = 0;  //!< counter for the number of warnings
+	std::vector<std::string> warnList;  //!< listing for the number of warnings
 	std::string  name;  //!< name of the collector
 	double timePeriod; //!< the actual period of the collector
 	double reqPeriod; //!< the requested period of the collector
@@ -56,13 +58,19 @@ protected:
 	std::vector<double> data;
 	count_t columns = 0; //!< the length of the data vector
 	/** data structure to capture the grabbers and location for a specific grabber*/
-	typedef struct
+	class collectorPoint
 	{
+	public:
 		std::shared_ptr<gridGrabber> dataGrabber; //!< the grabber for the data from the object directly
 		std::shared_ptr<stateGrabber> dataGrabberSt;  //!< the grabber for the data from the object state
-		int column; //!< the starting column for the data
+		int column=-1; //!< the starting column for the data
+		int columnCount=1;  //!< the number of columns associated with the point
 		std::string colname;   //!< the name for the data collected
-	} collectorPoint;
+		collectorPoint(std::shared_ptr<gridGrabber> dg, std::shared_ptr<stateGrabber> sg, int ncol = -1, int ccnt = 1, std::string cname = "")
+			:dataGrabber(dg), dataGrabberSt(sg), column(ncol), columnCount(ccnt), colname(cname)
+		{};
+	};
+
 	std::vector<collectorPoint> points;        //!<the data grabbers
 
 	bool recheck = false;	//!< flag indicating that the recorder should recheck all the fields
@@ -118,15 +126,48 @@ public:
 	{
 		name = newName;
 	}
-	virtual int flush();
+	virtual void flush();
 	virtual const std::string &getSinkName() const;
 
 	virtual std::vector<std::string> getColumnDescriptions() const;
+	/** get the current warning count*/
+	int getWarningCount() const
+	{
+		return warningCount;
+	}
+	const std::vector<std::string> &getWarnings() const
+	{
+		return warnList;
+	}
+
+	void clearWarnings()
+	{
+		warnList.clear();
+		warningCount = 0;
+	}
 protected:
+	virtual void dataPointAdded(const collectorPoint& cp);
 	int getColumn(int requestedColumn);
 
 	void updateColumns(int requestedColumn);
+	void addWarning(const std::string &warnMessage)
+	{
+		warnList.push_back(warnMessage);
+		++warningCount;
+	}
+	void addWarning(std::string &&warnMessage)
+	{
+		warnList.push_back(warnMessage);
+		++warningCount;
+	}
 };
+
+
+/** @brief make a collector from a string
+@param[in] type the type of collector to create
+@return a shared_ptr to a collector object
+*/
+std::shared_ptr<collector> makeCollector(const std::string &type,const std::string &name="");
 
 /** class to store and save data from the grid, based on a collector */
 class gridRecorder : public collector
@@ -134,7 +175,7 @@ class gridRecorder : public collector
 protected:
   
   double lastSaveTime = -kBigNum; //!< the last time the recorder saved to file
-  timeSeries2 dataset;  //!< the actual time series data
+  timeSeriesMulti dataset;  //!< the actual time series data
   std::string filename; //!< the filename to store the data
   std::string directory; //!< the directory to generate the specified file 
   
@@ -152,7 +193,7 @@ public:
   virtual change_code trigger (double time) override;
 
   
-  int saveFile (const std::string &fileName = "");
+  void saveFile (const std::string &fileName = "");
 
   void setSpace (double span);
   void addSpace (double span);
@@ -160,7 +201,7 @@ public:
   void set (const std::string &param, double val) override;
   void set (const std::string &param, const std::string &val) override;
 
-  virtual int flush() override;
+  virtual void flush() override;
   virtual const std::string &getSinkName() const override;
 
   const std::string &getFileName () const
@@ -174,7 +215,7 @@ public:
   
   void reset ();
 
-  const timeSeries2 * getData () const
+  const timeSeriesMulti * getData () const
   {
     return &(dataset);
   }

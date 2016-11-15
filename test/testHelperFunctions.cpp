@@ -41,7 +41,7 @@ gridDynSimulationTestFixture::~gridDynSimulationTestFixture()
 void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 {
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
-	gds->consolePrintLevel = GD_NO_PRINT;
+	gds->consolePrintLevel = print_level::no_print;
 	gds->run();
 	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }

@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE (constraint_test1)
   gds = (gridDynSimulation *)readSimXMLFile (fname);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
 
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
 
   gds->powerflow ();
   printf ("completed power flow\n");

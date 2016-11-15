@@ -17,13 +17,37 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <exception>
 
-#define FILE_LOAD_SUCCESS 0
-#define FILE_NOT_FOUND (-1)
-#define FILE_INCOMPLETE (-2);
-#define FILE_LOAD_FAILURE (-3);
+class fileNotFoundError :public std::exception
+{
+public:
+	virtual const char *what() const noexcept override
+	{
+		return "file not found";
+	}
+};
+
+class fileLoadFailure :public std::exception
+{
+public:
+	virtual const char *what() const noexcept override
+	{
+		return "file load failure";
+	}
+};
+
+class fileIncomplete :public std::exception
+{
+public:
+	virtual const char *what() const noexcept override
+	{
+		return "file incomplete";
+	}
+};
 
 typedef std::uint32_t fsize_t;
+
 
 //TODO::PT add iterators
 //TODO:: PT make some of the data private
@@ -65,38 +89,33 @@ public:
   automatically detect the file type based on extension
   @param[in] filename  the file to load
   @param[in] column  the column of data in the file to load into the time series
-  @return the number of points that were loaded
   */
-  int loadFile(const std::string &filename, unsigned int column = 0);
+  void loadFile(const std::string &filename, unsigned int column = 0);
   /** @brief load a binary file into the time series
   @param[in] filename  the file to load
   @param[in] column  the column of data in the file to load into the time series
-  @return the number of points that were loaded
   */
-  int loadBinaryFile (const std::string &filename,unsigned int column = 0);
+  void loadBinaryFile (const std::string &filename,unsigned int column = 0);
   /** @brief load a text file into the time series
   @param[in] filename  the file to load
   @param[in] column  the column of data in the file to load into the time series
-  @return the number of points that were loaded
   */
-  int loadTextFile (const std::string &filename, unsigned int column = 0);
+  void loadTextFile (const std::string &filename, unsigned int column = 0);
   /** @brief write a binary file from the data in the time series
   @param[in] filename  the file to write
   @param[in] append  flag indicating that if the file exists it should be appended rather than overwritten
-  @return the number of points that were written
   */
-  int writeBinaryFile (const std::string &filename,bool append = false);
+  void writeBinaryFile (const std::string &filename,bool append = false);
   /** @brief write a csv file from the data in the time series
   @param[in] filename  the file to write
   @param[in] precision  the number of digits that should be included for non-integer data in the file
   @param[in] append  flag indicating that if the file exists it should be appended rather than overwritten
-  @return the number of points that were written
   */
-  int writeTextFile (const std::string &filename,int precision = 8, bool append = false);
+  void writeTextFile (const std::string &filename,int precision = 8, bool append = false);
 };
 
 /** @brief class holding multiple time series associated with a single time*/
-class timeSeries2
+class timeSeriesMulti
 {
 public:
   std::string description;  //!< a description of the time series
@@ -107,10 +126,10 @@ public:
   fsize_t capacity = 0;	//!< the total capacity of the time series
   std::vector<std::string> fields;	//!< container for all the strings associated with the different columns
 public:
-  timeSeries2 ();
-  explicit timeSeries2 (fsize_t numCols);
-  timeSeries2 (fsize_t numCols, fsize_t numRows);
-  explicit timeSeries2 (const std::string &fname);
+  timeSeriesMulti ();
+  explicit timeSeriesMulti (fsize_t numCols);
+  timeSeriesMulti (fsize_t numCols, fsize_t numRows);
+  explicit timeSeriesMulti (const std::string &fname);
   /** add a data point to the time series
   @param[in] t the time
   @param[in] point the value
@@ -149,24 +168,24 @@ public:
   @param[in] filename  the file to load
   @return the number of points that were loaded
   */
-  int loadFile(const std::string &filename);
+  void loadFile(const std::string &filename);
 
-  int loadBinaryFile (const std::string &filename);
-  int loadTextFile (const std::string &filename);
-  int writeBinaryFile (const std::string &filename, bool append = false);
-  int writeTextFile (const std::string &filename, int precision = 8, bool append = false);
+  void loadBinaryFile (const std::string &filename);
+  void loadTextFile (const std::string &filename);
+  void writeBinaryFile (const std::string &filename, bool append = false);
+  void writeTextFile (const std::string &filename, int precision = 8, bool append = false);
 private:
 };
 
 //comparison functions
 double compare (timeSeries *ts1, timeSeries *ts2);
 double compare (timeSeries *ts1, timeSeries *ts2, int cnt);
-double compare (timeSeries2 *ts1, timeSeries *ts2, int stream);
-double compare (timeSeries2 *ts1, timeSeries *ts2, int stream, int cnt);
-double compare (timeSeries2 *ts1, timeSeries2 *ts2);
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream);
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream1, int stream2);
-double compare (timeSeries2 *ts1, timeSeries2 *ts2, int stream1, int stream2, int cnt);
+double compare (timeSeriesMulti *ts1, timeSeries *ts2, int stream);
+double compare (timeSeriesMulti *ts1, timeSeries *ts2, int stream, int cnt);
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2);
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream);
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream1, int stream2);
+double compare (timeSeriesMulti *ts1, timeSeriesMulti *ts2, int stream1, int stream2, int cnt);
 
 
 #endif

@@ -69,6 +69,8 @@ const stringVec NumandIndexNames {
   "number","index"
 };
 
+const stringVec typeandRetype{ "type","retype" };
+
 template<class X>
 X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
 {
@@ -91,7 +93,7 @@ X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::
     {
       //check if the object can be found in the current search object
       double val = interpretString (ename, ri);
-      auto index = static_cast<index_t> (val) - 1;           //get subObject is 0 based so subtract 1
+      auto index = static_cast<index_t> (val);
       if ((obj = searchObject->getSubObject (componentName, index)) != nullptr)
         {
           return dynamic_cast<X *> (obj);
@@ -119,10 +121,11 @@ X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::str
   auto cof = coreObjectFactory::instance ();
   auto tf = cof->getFactory (componentName);
   auto objectName = getObjectName (element, ri);
+  bool preexist = (mobj != nullptr);
   if (mobj == nullptr)
     {
       //check if type is explicit
-      std::string valType = getElementField (element, "type", defMatchType);
+      std::string valType = getElementFieldOptions (element, typeandRetype, defMatchType);
       if (!valType.empty ())
         {
           valType = ri->checkDefines (valType);
@@ -194,33 +197,37 @@ X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::str
             }
         }
     }
-  //check for library references
-  std::string ename = getElementField (element, "ref", defMatchType);
-  if (!ename.empty ())
-    {
-      ename = ri->checkDefines (ename);
-      auto obj = ri->makeLibraryObject (ename, mobj);
-      if (obj == nullptr)
-        {
-          WARNPRINT (READER_WARN_IMPORTANT, "unable to locate reference object " << ename << " in library");
-        }
-      else
-        {
-          mobj = dynamic_cast<X *> (obj);
-          if (mobj == nullptr)
-            {
-              WARNPRINT (READER_WARN_IMPORTANT, "Invalid reference object " << ename << ": wrong type");
-              condDelete (obj, obj);
-            }
-          else
-            {
-              if (!objectName.empty ())
-                {
-                  mobj->setName (objectName);
-                }
-            }
-        }
-    }
+  
+  if (!preexist)
+  {//check for library references if the object didn't exist before
+	  std::string ename = getElementField(element, "ref", defMatchType);
+	  if (!ename.empty())
+	  {
+		  ename = ri->checkDefines(ename);
+		  auto obj = ri->makeLibraryObject(ename, mobj);
+		  if (obj == nullptr)
+		  {
+			  WARNPRINT(READER_WARN_IMPORTANT, "unable to locate reference object " << ename << " in library");
+		  }
+		  else
+		  {
+			  mobj = dynamic_cast<X *> (obj);
+			  if (mobj == nullptr)
+			  {
+				  WARNPRINT(READER_WARN_IMPORTANT, "Invalid reference object " << ename << ": wrong type");
+				  condDelete(obj, obj);
+			  }
+			  else
+			  {
+				  if (!objectName.empty())
+				  {
+					  mobj->setName(objectName);
+				  }
+			  }
+		  }
+	  }
+  }
+ 
   //make the default object of componentName
   if (mobj == nullptr)
     {
@@ -234,7 +241,7 @@ X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::str
         }
       if (mobj == nullptr)
         {
-          WARNPRINT (READER_WARN_IMPORTANT, "Unable to create object " << ename);
+          WARNPRINT (READER_WARN_IMPORTANT, "Unable to create object " << componentName);
           return nullptr;
         }
     }

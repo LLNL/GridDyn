@@ -13,7 +13,7 @@
 
 #ifndef _SOLVER_INTERFACE_H_
 #define _SOLVER_INTERFACE_H_
-
+#include "basicDefs.h"
 #include "gridObjectsHelperClasses.h"
 
 #include <vector>
@@ -277,11 +277,11 @@ public:
   @param[in] logLevel  the level of logging to display
   @param[in] iconly  flag indicating that the logging should be for the initial condition calculation only
   */
-  virtual void logSolverStats (int logLevel, bool iconly = false) const;
+  virtual void logSolverStats (print_level logLevel, bool iconly = false) const;
   /** @brief helper function to log error weight information
   @param[in] logLevel  the level of logging to display
   */
-  virtual void logErrorWeights (int logLevel) const;
+  virtual void logErrorWeights (print_level logLevel) const;
 
   /** @brief get the dedicated memory space of the solver
   @return a void pointer to the memory location of the solver specific memory
@@ -455,7 +455,7 @@ public:
 	const double * deriv_data() const override;
 	const double * type_data() const override;
 	virtual void allocate(count_t size, count_t numroots = 0) override;
-	virtual void initialize(double t0) override;
+	virtual void initialize(gridDyn_time t0) override;
 
 	virtual double get(const std::string & param) const override;
 	virtual void set(const std::string &param, const std::string &val) override;

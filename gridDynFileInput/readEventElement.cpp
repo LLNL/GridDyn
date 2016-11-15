@@ -23,6 +23,13 @@
 
 using namespace readerConfig;
 
+static const std::string eventNameString("event");
+
+static const IgnoreListType eventIgnoreStrings{
+	"file","name", "column","value","va", "units","description","period",
+	"time","t","offset", "units", "gain", "bias", "field", "target", "type"
+};
+
 void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo *ri,gridCoreObject *obj)
 {
 
@@ -115,6 +122,9 @@ int loadEventElement (std::shared_ptr<readerElement> &element, gridCoreObject *o
   gridEventInfo gdEI;
   readEventElement (element,gdEI,ri,obj);
   std::shared_ptr<gridEvent> gdE = make_event (&gdEI, obj);
+
+  setAttributes(gdE, element, eventNameString, ri, eventIgnoreStrings);
+  setParams(gdE, element, eventNameString, ri, eventIgnoreStrings);
 
   if ((gdE)&&(!(gdE->isArmed ())))
     {

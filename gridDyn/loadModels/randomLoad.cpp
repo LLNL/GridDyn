@@ -268,9 +268,9 @@ void gridRandomLoad::updateA (double time)
     }
 
 
-  m_lastUpdateTime = nextUpdateTime;
+  lastUpdateTime = nextUpdateTime;
   opFlags.set (triggered_flag);
-  double triggerTime = m_lastUpdateTime + ntime ();
+  double triggerTime = lastUpdateTime + ntime ();
   if (opFlags.test (interpolate_flag))
     {
       gridRampLoad::setState (nextUpdateTime, nullptr,nullptr,cLocalSolverMode);
@@ -506,10 +506,10 @@ void gridRandomLoad::nextStep (double triggerTime)
 
 void gridRandomLoad::setTime (double time)
 {
-  double in = prevTime - m_lastUpdateTime;
+  double in = prevTime - lastUpdateTime;
 
   nextUpdateTime = time + (nextUpdateTime - prevTime);
-  m_lastUpdateTime = time - in;
+  lastUpdateTime = time - in;
   prevTime = time;
 }
 
@@ -518,9 +518,9 @@ void gridRandomLoad::timestep (double ttime, const IOdata &args,const solverMode
 {
   if (ttime > nextUpdateTime)
     {
-      m_lastUpdateTime = nextUpdateTime;
+      lastUpdateTime = nextUpdateTime;
       opFlags.set (triggered_flag);
-      double triggerTime = m_lastUpdateTime + ntime ();
+      double triggerTime = lastUpdateTime + ntime ();
       if (opFlags.test (interpolate_flag))
         {
           gridRampLoad::timestep (prevTime, args,sMode);

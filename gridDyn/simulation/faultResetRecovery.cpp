@@ -69,7 +69,7 @@ int faultResetRecovery::attemptFix()
 				sim->getVoltage(nVolts, solver->state_data(), solver->getSolverMode());
 				if (!checkResetVoltages(initVolts, nVolts))
 				{
-					sim->log(sim, GD_SUMMARY_PRINT, "bad voltage reset");
+					sim->log(sim, print_level::summary, "bad voltage reset");
 					retval = -47;
 				}
 		}
@@ -160,7 +160,7 @@ int faultResetRecovery::faultResetFix3()
 	for (double rv1 = 0.1; rv1 < 1.0; rv1 += 0.1)
 	{
 		kk = 0;
-		sim->log(sim, GD_DEBUG_PRINT, "increment voltage by " + std::to_string(rv1));
+		sim->log(sim, print_level::debug, "increment voltage by " + std::to_string(rv1));
 		for (size_t pp = 0; pp < solver->size(); ++pp)
 		{
 			if (vstates[pp])
@@ -178,7 +178,7 @@ int faultResetRecovery::faultResetFix3()
 			sim->getVoltage(nVolts, solver->state_data(), solver->getSolverMode());
 			if (!checkResetVoltages(initVolts, nVolts))
 			{
-				sim->log(sim, GD_SUMMARY_PRINT, "bad voltage reset");
+				sim->log(sim, print_level::summary, "bad voltage reset");
 				retval = -47;
 			}
 		}
@@ -195,7 +195,7 @@ int faultResetRecovery::faultResetFix3()
 				if (!checkResetVoltages(initVolts, nVolts))
 				{
 					
-					sim->log(sim, GD_NORMAL_PRINT, "bad voltage reset");
+					sim->log(sim, print_level::normal, "bad voltage reset");
 					retval = -47;
 				}
 				else

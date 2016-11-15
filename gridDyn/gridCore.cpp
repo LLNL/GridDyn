@@ -47,7 +47,7 @@ gridCoreObject *gridCoreObject::clone (gridCoreObject *obj) const
   obj->enabled = enabled;
   obj->updatePeriod = updatePeriod;
   obj->nextUpdateTime = nextUpdateTime;
-  obj->m_lastUpdateTime = m_lastUpdateTime;
+  obj->lastUpdateTime = lastUpdateTime;
   obj->prevTime = prevTime;
   obj->description = description;
   obj->id = id;
@@ -346,12 +346,20 @@ gridCoreObject * gridCoreObject::findByUserID (const std::string & /*typeName*/,
     }
 }
 
-void gridCoreObject::updateA (double /*time*/)
+void gridCoreObject::updateA (double time)
 {
+	prevTime = time;
 }
 
 double gridCoreObject::updateB ()
 {
+	if (nextUpdateTime != kNullVal)
+	{
+		while (prevTime >= nextUpdateTime)
+		{
+			nextUpdateTime += updatePeriod;
+		}
+	}
   return nextUpdateTime;
 }
 
@@ -374,7 +382,7 @@ void gridCoreObject::alert (gridCoreObject *object, int code)
     }
 }
 
-void gridCoreObject::log (gridCoreObject *object, int level, const std::string &message)
+void gridCoreObject::log (gridCoreObject *object, print_level level, const std::string &message)
 {
   if (parent)
     {
@@ -477,5 +485,36 @@ void condDelete (gridCoreObject *obj, gridCoreObject *Pobject)
     }
 }
 
+#include <map>
 
+static const std::map<std::string, print_level> printLevelsMap
+{
+	{"none",print_level::no_print},
+	{ "error",print_level::error },
+	{ "warning",print_level::warning },
+	{ "normal",print_level::normal },
+	{ "summary",print_level::summary },
+	{ "debug",print_level::debug },
+	{ "trace",print_level::trace },
+	{ "no_print",print_level::no_print },
+	{ "error_print",print_level::error },
+	{ "warning_print",print_level::warning },
+	{ "normal_print",print_level::normal },
+	{ "summary_print",print_level::summary },
+	{ "debug_print",print_level::debug },
+	{ "trace_print",print_level::trace },
+};
+
+print_level stringToPrintLevel(const std::string &level)
+{
+	auto fnd = printLevelsMap.find(level);
+	if (fnd != printLevelsMap.end())
+	{
+		return fnd->second;
+	}
+	else
+	{
+		throw(invalidParameterValue());
+	}
+}
 

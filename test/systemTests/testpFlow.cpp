@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE (test_iterated_pflow)
   gds = dynamic_cast<gridDynSimulation *> (readSimXMLFile(fname));
   BOOST_REQUIRE(gds != nullptr);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
-  gds->consolePrintLevel = 0;
+  gds->consolePrintLevel = print_level::no_print;
   gds->set("recorddirectory", pFlow_test_directory);
   gds->run();
   BOOST_REQUIRE (gds->getCurrentTime() >= 575.0);

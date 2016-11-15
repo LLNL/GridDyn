@@ -28,7 +28,7 @@ gridPlayer::gridPlayer(const std::string &eventName):gridEvent(eventName)
 	
 }
 
-gridPlayer::gridPlayer(double time0,double loopPeriod) : gridEvent(time0), period(loopPeriod)
+gridPlayer::gridPlayer(gridDyn_time time0,double loopPeriod) : gridEvent(time0), period(loopPeriod)
 {
 
 }
@@ -49,6 +49,23 @@ gridPlayer::gridPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject) : gridEv
 		loadEventFile(gdEI->file);
 	}
 	
+}
+
+void gridPlayer::updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
+{
+	if (gdEI->file.empty())
+	{
+		setTimeValue(gdEI->time, gdEI->value);
+	}
+	else
+	{
+		if (!gdEI->columns.empty())
+		{
+			column = gdEI->columns[0];
+		}
+		loadEventFile(gdEI->file);
+	}
+	gridEvent::updateEvent(gdEI, rootObject);
 }
 
 std::shared_ptr<gridEvent> gridPlayer::clone(std::shared_ptr<gridEvent> gE) const
@@ -95,27 +112,26 @@ void gridPlayer::set(const std::string &param, const std::string &val)
 	}
 }
 
-void gridPlayer::setTime(double time)
+void gridPlayer::setTime(gridDyn_time time)
 {
 	triggerTime = time;
 }
 
-void gridPlayer::setTimeValue(double time, double val)
+void gridPlayer::setTimeValue(gridDyn_time time, double val)
 {
 	triggerTime = time;
 	value = val;
 }
 
-void gridPlayer::setTimeValue(const std::vector<double> &time, const std::vector<double> &val)
+void gridPlayer::setTimeValue(const std::vector<gridDyn_time> &time, const std::vector<double> &val)
 {
 	
 	ts.reserve(static_cast<fsize_t> (time.size()));
 
 	if (ts.addData(time, val))
 	{
-		triggerTime = time[0];
-		value = val[0];
 		currIndex = 0;
+		setNextValue();
 	}
 	else               //the vectors were not of valid lengths
 	{
@@ -124,9 +140,24 @@ void gridPlayer::setTimeValue(const std::vector<double> &time, const std::vector
 
 }
 
-void gridPlayer::updateTrigger(double time)
+void gridPlayer::setNextValue()
 {
-		currIndex++;
+	if (static_cast<size_t> (currIndex) < ts.count)
+	{
+		triggerTime = ts.time[currIndex];
+		value = ts.data[currIndex];
+	}
+}
+
+void gridPlayer::updateTrigger(gridDyn_time time)
+{
+	if (time > triggerTime)
+	{
+		if (time > ts.time[currIndex])
+		{
+			++currIndex;
+		}
+	}
 		if (static_cast<size_t> (currIndex) >= ts.count)
 		{
 			if (period > 0)                     //if we have a period loop the time series
@@ -147,8 +178,7 @@ void gridPlayer::updateTrigger(double time)
 				}
 
 				currIndex = 0;
-				triggerTime = ts.time[currIndex];
-				value = ts.data[currIndex];
+				setNextValue();
 			}
 			else
 			{
@@ -157,8 +187,7 @@ void gridPlayer::updateTrigger(double time)
 		}
 		else                   //just proceed to the next trigger and Value
 		{
-			triggerTime = ts.time[currIndex];
-			value = ts.data[currIndex];
+			setNextValue();
 		}
 }
 
@@ -233,7 +262,7 @@ change_code gridPlayer::trigger()
 	}
 }
 
-change_code gridPlayer::trigger(double time)
+change_code gridPlayer::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
 	if (time >= triggerTime)
@@ -271,12 +300,8 @@ bool gridPlayer::setTarget(gridCoreObject *gdo, const std::string &var)
 void gridPlayer::loadEventFile(const std::string &fname)
 {
 	eFile = fname;
-	int ret = ts.loadFile(eFile, column);
-	
-	if (ret > 0)
-	{
-		currIndex = 0;
-		triggerTime = ts.time[0];
-		value = ts.data[0];
-	}
+	ts.loadFile(eFile, column);
+
+	currIndex = 0;
+	setNextValue();
 }

@@ -19,7 +19,7 @@
 #include <string>
 
 
-static childClassFactory<optimizerInterface, basicOptimizer> basicFac(stringVec{ "basic","pricestack" });
+static childClassFactory<basicOptimizer, optimizerInterface> basicFac(stringVec{ "basic","pricestack" });
 
 optimizerInterface::optimizerInterface(const std::string &optName):name(optName)
 {
@@ -61,7 +61,7 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
     {
       if (printError)
         {
-          m_gdo->log (m_gdo,GD_ERROR_PRINT, funcname + " failed - returned nullptr pointer");
+          m_gdo->log (m_gdo,print_level::error, funcname + " failed - returned nullptr pointer");
         }
       return(1);
     }
@@ -73,7 +73,7 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
         {
           if (printError)
             {
-              m_gdo->log (m_gdo, GD_ERROR_PRINT, funcname + " failed with flag = " + std::to_string (*errflag));
+              m_gdo->log (m_gdo, print_level::error, funcname + " failed with flag = " + std::to_string (*errflag));
             }
           return(1);
         }
@@ -83,7 +83,7 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
       // Check if function returned nullptr pointer - no memory allocated
       if (printError)
         {
-          m_gdo->log (m_gdo, GD_ERROR_PRINT, funcname + " failed MEMORY_ERROR- returned nullptr pointer");
+          m_gdo->log (m_gdo, print_level::error, funcname + " failed MEMORY_ERROR- returned nullptr pointer");
         }
       return(1);
     }

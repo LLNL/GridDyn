@@ -111,13 +111,11 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
   std::vector<double> v;
   int retval = -10;
   sim->getVoltage (v, solver->state_data (), solver->getSolverMode ());
-  if (std::any_of (v.begin (), v.end (), [](double a) {
-    return (a < 0.7);
-  }))
+  if (std::any_of (v.begin (), v.end (), [](double a) {return (a < 0.7); }))
     {
       if (!sim->opFlags[prev_setall_pqvlimit])
         {
-          sim->log (sim,GD_DEBUG_PRINT,"setting all load to PQ at V=0.9");
+          sim->log (sim,print_level::debug,"setting all load to PQ at V=0.9");
           sim->opFlags.set (disable_flag_updates);
           sim->setAll ("load", "pqlowvlimit", 0.9);
           sim->controlFlags.set (voltage_constraints_flag);
@@ -185,7 +183,7 @@ int dynamicInitialConditionRecovery::dynamicFix3 ()
   /*if (retval == 4)
   {
           double cr = checkResid(sim, timeCurr + 0.001, solver->getSolverMode());
-          sim->log(sim, GD_DEBUG_PRINT, "algebraic solver attempted");
+          sim->log(sim, print_level::debug, "algebraic solver attempted");
           retval = sim->algebraicSolve(timeCurr + 0.001);
           if (retval == 0)
           {

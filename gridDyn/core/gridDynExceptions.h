@@ -109,5 +109,15 @@ public:
 	}
 };
 
+
+class invalidFileName : public gridDynException
+{
+public:
+	invalidFileName() {};
+	virtual const char *what() const noexcept override
+	{
+		return "file name is invalid";
+	}
+};
 #endif
 

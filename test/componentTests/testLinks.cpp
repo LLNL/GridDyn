@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(link_test1_dynamic)
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel=GD_WARNING_PRINT;
+	gds->consolePrintLevel=print_level::warning;
 	auto g1 = std::make_shared<gridEvent>();
 
 	//this tests events as much as links here
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow)
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-  gds->consolePrintLevel = GD_WARNING_PRINT;
+  gds->consolePrintLevel = print_level::warning;
 	gds->powerflow();
 
 	std::vector<double> v;
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow2)
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-  gds->consolePrintLevel = GD_WARNING_PRINT;
+  gds->consolePrintLevel = print_level::warning;
 	gds->powerflow();
   
 	std::vector<double> v;

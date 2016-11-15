@@ -13,6 +13,7 @@
 
 #include "gridDynActions.h"
 #include "basicDefs.h"
+#include "core/gridDynExceptions.h"
 #include "stringOps.h"
 
 gridDynAction::gridDynAction()
@@ -36,7 +37,7 @@ void gridDynAction::reset()
 	val_int = -1;
 }
 
-int gridDynAction::process(const std::string &operation)
+void gridDynAction::process(const std::string &operation)
 {
 	/* (s) string,  (d) double,  (i) int, (X)* optional, (s|d|i), string or double or int*/
 	auto ssep = splitline(operation, " ",delimiter_compression::on); 
@@ -51,20 +52,19 @@ int gridDynAction::process(const std::string &operation)
 	reset();
 	if (sz==0)  //check if there was no command
 	{
-		return OBJECT_ADD_SUCCESS;
+		return;
 	}
 	std::string cmd = convertToLowerCase(ssep[0]);
 	
-	int out = OBJECT_ADD_SUCCESS;
 	if (cmd == "ignore") //ignore XXXXXX
 	{
 		command = gd_action_t::ignore;
 	}
 	else if (cmd == "set")  //set parameter(s) value(d)
 	{
-		command = gd_action_t::set;
 		if (sz >= 3)
 		{
+			command = gd_action_t::set;
 			string1 = ssep[1];
 			val_double = doubleRead(ssep[2], kNullVal);
 			if (val_double == kNullVal)
@@ -74,7 +74,7 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
 	}
 	else if (cmd == "setall")//setall  objecttype(s) parameter(s) value(d)
@@ -82,17 +82,18 @@ int gridDynAction::process(const std::string &operation)
 		command = gd_action_t::setall;
 		if (sz >= 4)
 		{
+			double test = doubleRead(ssep[3], kNullVal);
+			if (test == kNullVal)
+			{
+				throw(invalidParameterValue());
+			}
 			string1 = ssep[1];
 			string2 = ssep[2];
-			val_double = doubleRead(ssep[3], kNullVal);
-			if (val_double == kNullVal)
-			{
-				out = OBJECT_ADD_FAILURE;
-			}
+			val_double = test;
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
 	}
 	else if (cmd == "setsolver")  //setsolver mode solver
@@ -109,7 +110,7 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
 	}
 	else if (cmd == "settime") //settime newtime(d)
@@ -117,15 +118,16 @@ int gridDynAction::process(const std::string &operation)
 		command = gd_action_t::settime;
 		if (sz >= 2)
 		{
-			val_double = doubleRead(ssep[1], kNullVal);
-			if (val_double == kNullVal)
+			double test = doubleRead(ssep[1], kNullVal);
+			if (test == kNullVal)
 			{
-				out = OBJECT_ADD_FAILURE;
+				throw(invalidParameterValue());
 			}
+			val_double = test;
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
 
 	}
@@ -139,7 +141,7 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
 	}
 	else if (cmd == "powerflow") //powerflow
@@ -213,16 +215,17 @@ int gridDynAction::process(const std::string &operation)
 			}
 			else
 			{
-				command = gd_action_t::dynamicDAE;
-				val_double=doubleRead(ssep[2], kNullVal);
-				if (val_double == kNullVal)
+				double test=doubleRead(ssep[2], kNullVal);
+				if (test == kNullVal)
 				{
-					out = OBJECT_ADD_FAILURE;
+					throw(invalidParameterValue());
 				}
 				else if (sz > 2)
 				{
+					val_double = test;
 					val_double2 = doubleRead(ssep[3], kNullVal);
 				}
+				command = gd_action_t::dynamicDAE;
 			}
 			
 		}
@@ -267,19 +270,20 @@ int gridDynAction::process(const std::string &operation)
 	}
 	else if (cmd == "reset") //reset level(i)
 	{
-		command = gd_action_t::reset;
 		if (sz > 1)
 		{
-			val_int = intRead(ssep[1], -435);
-			if (val_int == -435)
+			int test_int = intRead(ssep[1], -435);
+			if (test_int == -435)
 			{
-				out = OBJECT_ADD_FAILURE;
+				throw(invalidParameterValue());
 			}
+			val_int = test_int;
 		}
 		else
 		{
 			val_int = 0;
 		}
+		command = gd_action_t::reset;
 	}
 	else if (cmd == "iterate") //iterate interval(d)* stoptime(d)*
 	{
@@ -297,23 +301,25 @@ int gridDynAction::process(const std::string &operation)
 	}
 	else if (cmd == "run") //run time(d)*
 	{
-		command = gd_action_t::run;
+		
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[1], kNullVal);
-			if (val_double == kNullVal)
+			double test = doubleRead(ssep[1], kNullVal);
+			if (test == kNullVal)
 			{
-				out = OBJECT_ADD_FAILURE;
+				throw(invalidParameterValue());
 			}
+			val_double = test;
 		}
 		else
 		{
 			val_double = kNullVal;
 		}
+		command = gd_action_t::run;
 	}
 	else if (cmd == "save") //save subject(s) file(s)
 	{
-		command = gd_action_t::save;
+		
 		if (sz > 2)
 		{
 			string1 = ssep[1];
@@ -321,12 +327,13 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
+		command = gd_action_t::save;
 	}
 	else if (cmd == "load") //load subect(s) file(s)
 	{
-		command = gd_action_t::load;
+		
 		if (sz > 2)
 		{
 			string1 = ssep[1];
@@ -334,12 +341,13 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
+		command = gd_action_t::load;
 	}
 	else if (cmd == "add") // add addstring(s)
 	{
-		command = gd_action_t::add;
+		
 		if (sz > 1)
 		{
 			string1 = ssep[1];
@@ -350,8 +358,9 @@ int gridDynAction::process(const std::string &operation)
 		}
 		else
 		{
-			out = OBJECT_ADD_FAILURE;
+			throw(invalidParameterValue());
 		}
+		command = gd_action_t::add;
 	}
 	else if (cmd == "rollback") //rollback point(s|d)
 	{
@@ -400,5 +409,9 @@ int gridDynAction::process(const std::string &operation)
 	{
 
 	}
-	return out;
+	else
+	{
+		throw(unrecognizedParameter());
+	}
+
 }

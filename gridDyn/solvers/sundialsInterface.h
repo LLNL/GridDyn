@@ -122,8 +122,8 @@ public:
   int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
   void setConstraints () override;
 
-  void logSolverStats (int logLevel, bool iconly = false) const override;
-  void logErrorWeights (int /*logLevel*/) const override
+  void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  void logErrorWeights (print_level /*logLevel*/) const override
   {
   }
   virtual double get (const std::string &param) const override;
@@ -181,8 +181,8 @@ public:
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
-  void logSolverStats (int logLevel, bool iconly = false) const override;
-  void logErrorWeights (int logLevel) const override;
+  void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  void logErrorWeights (print_level logLevel) const override;
   double get (const std::string &param) const override;
 
   void setConstraints () override;
@@ -233,8 +233,8 @@ public:
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
-  void logSolverStats (int logLevel, bool iconly = false) const override;
-  void logErrorWeights (int logLevel) const override;
+  void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  void logErrorWeights (print_level logLevel) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
   double get (const std::string &param) const override;
@@ -289,8 +289,8 @@ public:
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
-  void logSolverStats (int logLevel, bool iconly = false) const override;
-  void logErrorWeights (int logLevel) const override;
+  void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  void logErrorWeights (print_level logLevel) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
   double get (const std::string &param) const override;

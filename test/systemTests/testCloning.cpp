@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(cloning_test1)
 
 	std::string fname =clone_test_directory+ "clone_test1.xml";
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = 0;
+	gds->consolePrintLevel = print_level::no_print;
 
 	gds2 = static_cast<gridDynSimulation *>(gds->clone());
 	gds->powerflow();
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(cloning_test2)
 
 	std::string fname = clone_test_directory + "clone_test2.xml";
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = 0;
+	gds->consolePrintLevel = print_level::no_print;
 
 	gds2 = static_cast<gridDynSimulation *>(gds->clone());
 	gds->powerflow();
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(cloning_test_solver_approx)
 
 	std::string fname = clone_test_directory + "clone_test3.xml";
 	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
-	gds->consolePrintLevel = 0;
+	gds->consolePrintLevel = print_level::no_print;
 
 	gds2 = static_cast<gridDynSimulation *>(gds->clone());
 	gds->powerflow();

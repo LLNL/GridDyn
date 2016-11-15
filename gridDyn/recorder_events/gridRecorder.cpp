@@ -16,7 +16,7 @@
 #include "stringOps.h"
 #include "objectInterpreter.h"
 #include "core/helperTemplates.h"
-
+#include "core/gridDynExceptions.h"
 #include <boost/filesystem.hpp>
 
 
@@ -107,7 +107,7 @@ void gridRecorder::set (const std::string &param, const std::string &val)
 
 }
 
-int gridRecorder::saveFile (const std::string &fname)
+void gridRecorder::saveFile (const std::string &fname)
 {
   
 
@@ -131,7 +131,7 @@ int gridRecorder::saveFile (const std::string &fname)
     {
       if (triggerTime == lastSaveTime)
         {
-          return (-2); //TODO:: file error code
+		  return;  //no work todo
         }
 
     }
@@ -166,19 +166,19 @@ int gridRecorder::saveFile (const std::string &fname)
       //create the file based on extension
       if (bFile)
         {
-          ret = dataset.writeBinaryFile (savefileName.string (),append);
+          dataset.writeBinaryFile (savefileName.string (),append);
         }
       else
         {
-          ret = dataset.writeTextFile (savefileName.string (),precision,append);
+          dataset.writeTextFile (savefileName.string (),precision,append);
         }
       lastSaveTime = triggerTime;
     }
   else
     {
-      ret = FUNCTION_EXECUTION_FAILURE;
+	  throw(invalidFileName());
     }
-  return ret;
+
 }
 
 void gridRecorder::reset ()
@@ -222,9 +222,9 @@ change_code gridRecorder::trigger (double time)
 }
 
 
-int gridRecorder::flush()
+void gridRecorder::flush()
 {
-	return saveFile();
+	saveFile();
 }
 
 const std::string &gridRecorder::getSinkName() const

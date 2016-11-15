@@ -231,8 +231,11 @@ public:
 			if (offset < tobject->stateSize(cLocalSolverMode))
 			{
 				loaded = true;
+				if (!customDesc)
+				{
+					desc = tobject->getName() + ':' + std::to_string(nOffset);
+				}
 				
-				desc = tobject->getName() + ':' + std::to_string(nOffset);
 				return LOADED;
 			}
 		}
@@ -271,14 +274,19 @@ public:
 
 	void makeDescription() override
 	{
-		if ((loaded) && (field.empty()))
+		if (!customDesc)
 		{
-			desc = tobject->getName() + ':' + std::to_string(offset);
+			if ((loaded) && (field.empty()))
+			{
+				desc = tobject->getName() + ':' + std::to_string(offset);
+			}
+			else
+			{
+				gridGrabber::makeDescription();
+			}
+
 		}
-		else
-		{
-			gridGrabber::makeDescription();
-		}
+		
 	}
 
 	bool checkIfLoaded() override

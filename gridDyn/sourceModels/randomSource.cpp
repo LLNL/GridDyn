@@ -249,9 +249,9 @@ void randomSource::updateA (double time)
     }
 
 
-  m_lastUpdateTime = nextUpdateTime;
+  lastUpdateTime = nextUpdateTime;
   opFlags.set (triggered_flag);
-  double triggerTime = m_lastUpdateTime + ntime ();
+  double triggerTime = lastUpdateTime + ntime ();
   if (opFlags.test (interpolate_flag))
     {
       rampSource::setState (nextUpdateTime, nullptr,nullptr,cLocalSolverMode);
@@ -356,10 +356,10 @@ void randomSource::nextStep (double triggerTime)
 
 void randomSource::setTime (double time)
 {
-  double in = prevTime - m_lastUpdateTime;
+  double in = prevTime - lastUpdateTime;
 
   nextUpdateTime = time + (nextUpdateTime - prevTime);
-  m_lastUpdateTime = time - in;
+  lastUpdateTime = time - in;
   prevTime = time;
 }
 
@@ -368,9 +368,9 @@ void randomSource::timestep (double ttime, const IOdata &args, const solverMode 
 {
   if (ttime > nextUpdateTime)
     {
-      m_lastUpdateTime = nextUpdateTime;
+      lastUpdateTime = nextUpdateTime;
       opFlags.set (triggered_flag);
-      double triggerTime = m_lastUpdateTime + ntime ();
+      double triggerTime = lastUpdateTime + ntime ();
       if (opFlags.test (interpolate_flag))
         {
           rampSource::timestep (nextUpdateTime,args,sMode);

@@ -226,7 +226,7 @@ double cvodeInterface::get (const std::string &param) const
 
 
 // output solver stats
-void cvodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
+void cvodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
   if (!initialized)
     {
@@ -290,7 +290,7 @@ void cvodeInterface::logSolverStats (int logLevel, bool /*iconly*/) const
 }
 
 
-void cvodeInterface::logErrorWeights (int logLevel) const
+void cvodeInterface::logErrorWeights (print_level logLevel) const
 {
 
     N_Vector eweight = NVECTOR_NEW(use_omp, svsize);

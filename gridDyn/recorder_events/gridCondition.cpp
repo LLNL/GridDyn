@@ -117,7 +117,7 @@ std::shared_ptr<gridCondition> make_condition(const std::string &field, const st
 	
 	if (stGrabber.empty())
 	{
-		rootObject->log(rootObject, GD_WARNING_PRINT, "unable to generate state grabber from " + field + '\n');
+		rootObject->log(rootObject, print_level::warning, "unable to generate state grabber from " + field + '\n');
 		return nullptr;
 	}
 	
@@ -125,7 +125,7 @@ std::shared_ptr<gridCondition> make_condition(const std::string &field, const st
 	auto grabber = makeGrabbers(field, rootObject);
 	if (grabber.empty())
 	{
-		rootObject->log(rootObject, GD_WARNING_PRINT, "unable to generate grabber from " + field + '\n');
+		rootObject->log(rootObject, print_level::warning, "unable to generate grabber from " + field + '\n');
 		return nullptr;
 	}
 	auto gc = std::make_shared<gridCondition>(grabber[0], stGrabber[0]);

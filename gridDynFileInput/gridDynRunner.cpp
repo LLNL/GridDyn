@@ -29,19 +29,14 @@
 #include "workQueue.h"
 #include "core/gridDynExceptions.h"
 
+#include "libraryLoader.h"
+
 #ifdef GRIDDYN_HAVE_FSKIT
 #include "fskit/ptrace.h"
 #endif
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
-
-#ifdef FMI_ENABLE
-#include "fmiGDinfo.h"
-#endif
-#ifdef LOAD_EXTRA_MODELS
-#include "extraModels.h"
-#endif
 
 #include <chrono>
 #include <cstdio>
@@ -57,7 +52,7 @@ extern "C" {
 int griddyn_runner_main (int argc, char *argv[])
 {
   GRIDDYN_TRACER ("GridDyn::griddyn_runner_main");
-
+  
 #ifdef GRIDDYN_HAVE_ETRACE
   std::stringstream program_trace_filename;
   program_trace_filename << "etrace/" << "program_trace."
@@ -101,13 +96,7 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 #endif
 
   GRIDDYN_TRACER ("GridDyn::GriddynRunner::Initialize");
-#ifdef FMI_ENABLE
-  loadFmiLibrary ();
-#endif
-
-#ifdef LOAD_EXTRA_MODELS
-  loadExtraModels ("");
-#endif
+  loadLibraries();
   m_startTime = std::chrono::high_resolution_clock::now ();
 
   m_gds = std::make_shared<gridDynSimulation> ();
@@ -154,10 +143,10 @@ int GriddynRunner::Initialize (int argc, char *argv[])
     {
       return 0;
     }
-  m_gds->log (nullptr,GD_SUMMARY_PRINT, griddyn_version_string);
+  m_gds->log (nullptr, print_level::summary, griddyn_version_string);
   m_stopTime = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
-  m_gds->log (m_gds.get (),GD_NORMAL_PRINT,"\nInitialization " + m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
+  m_gds->log (m_gds.get (), print_level::normal,"\nInitialization " + m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
 
   m_startTime = std::chrono::high_resolution_clock::now ();
 
@@ -213,11 +202,11 @@ double GriddynRunner::getNextEvent () const
 
 void GriddynRunner::StopRecording ()
 {
-  m_gds->log (m_gds.get (),GD_NORMAL_PRINT,"Saving recorders...");
+  m_gds->log (m_gds.get (),print_level::normal,"Saving recorders...");
   m_gds->saveRecorders ();
   m_stopTime = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
-  m_gds->log (m_gds.get (), GD_NORMAL_PRINT,"\nSimulation " + m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
+  m_gds->log (m_gds.get (), print_level::normal,"\nSimulation " + m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
 }
 
 void GriddynRunner::Finalize (void)
@@ -406,7 +395,7 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
     }
   else if (vm.count ("auto-capture"))
     {
-      gds->log (gds.get (), GD_WARNING_PRINT, "auto-capture file specified without auto-capture-period");
+      gds->log (gds.get (), print_level::warning, "auto-capture file specified without auto-capture-period");
     }
   return 0;
 }
@@ -419,12 +408,14 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
   po::options_description hidden ("hidden");
 
   //input boost controls
-  cmd_only.add_options ()
-    ("help,h", "produce help message")
-    ("config-file", po::value<std::string> (), "specify a config file to use")
-    ("config-file-output", po::value<std::string> (), "file to store current config options")
-    ("mpicount", "setup for an MPI run")
-    ("version", "print version string");
+  cmd_only.add_options()
+	  ("help,h", "produce help message")
+	  ("config-file", po::value<std::string>(), "specify a config file to use")
+	  ("config-file-output", po::value<std::string>(), "file to store current config options")
+	  ("mpicount", "setup for an MPI run")
+	  ("version", "print version string")
+	  ("test", "run a test program[ignored in many cases]");
+
 
   config.add_options()
 	  ("powerflow-output,o", po::value<std::string>(), "file output for the powerflow solution")

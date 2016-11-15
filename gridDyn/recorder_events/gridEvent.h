@@ -59,7 +59,7 @@ protected:
 		std::string field;		//!< event trigger field
 		index_t eventId;		//!< a unique Identifier code for the event
         double value=0.0;			//!< new value
-        double triggerTime;		//!< the time the event is scheduled to be triggered
+		gridDyn_time triggerTime;		//!< the time the event is scheduled to be triggered
         gridCoreObject *m_obj = nullptr;		//!< the target object of the event
 		gridUnits::units_t unitType = gridUnits::defUnit; //!< units of the event
         bool armed = false;		//!< flag indicating if the event is armed or not
@@ -69,12 +69,15 @@ private:
 	static std::atomic<count_t> eventCount;
 public:
 	explicit gridEvent(const std::string &newName);
-	explicit gridEvent(double time0 = kNullVal);
+	explicit gridEvent(gridDyn_time time0 = kNullVal);
 	gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
+
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const;
         virtual ~gridEvent();
+
+		virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
         virtual change_code trigger();
-        virtual change_code trigger(double time) override;
+        virtual change_code trigger(gridDyn_time time) override;
 
         virtual double nextTriggerTime() const override
         {
@@ -90,7 +93,7 @@ public:
 		}
 		virtual void set(const std::string &param, double val);
 		virtual void set(const std::string &param, const std::string &val);
-        virtual void setTime(double time);
+        virtual void setTime(gridDyn_time time);
         virtual void setValue(double val, gridUnits::units_t unitType=gridUnits::defUnit);
         virtual std::string toString();
 
@@ -110,6 +113,7 @@ public:
 		}
 protected:
 	void loadField(gridCoreObject *gdo, const std::string field);
+	virtual bool checkArmed();
 };
 
 /** single event allowing multiple changes in multiple events at a single time point */
@@ -122,11 +126,13 @@ protected:
         std::vector<gridCoreObject *> targetObjects;
 public:
 	explicit compoundEvent(const std::string &newName);
-	explicit compoundEvent(double time0 = 0.0);
+	explicit compoundEvent(gridDyn_time time0 = 0.0);
 	compoundEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
 	virtual std::shared_ptr<gridEvent> clone( std::shared_ptr<gridEvent> ggb = nullptr) const override;
+	
+	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
 	virtual change_code trigger() override;
-	virtual change_code trigger(double time) override;
+	virtual change_code trigger(gridDyn_time time) override;
 
 	virtual void set(const std::string &param, double val) override;
 	virtual void set(const std::string &param, const std::string &val) override;
@@ -152,18 +158,19 @@ protected:
 		index_t column = 0;
 public:
 	explicit gridPlayer(const std::string &newName);
-        gridPlayer(double time0 = 0.0, double loopPeriod = 0.0);
+        gridPlayer(gridDyn_time time0 = 0.0, double loopPeriod = 0.0);
 		gridPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
 		virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
+		virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
 		virtual change_code trigger() override;
-		virtual change_code trigger(double time) override;
+		virtual change_code trigger(gridDyn_time time) override;
 
 		virtual void set(const std::string &param, double val) override;
 		virtual void set(const std::string &param, const std::string &val) override;
-        void setTime(double time) override;
-        void setTimeValue(double time, double val);
-        void setTimeValue(const std::vector<double> &time, const std::vector<double> &val);
+        void setTime(gridDyn_time time) override;
+        void setTimeValue(gridDyn_time time, double val);
+        void setTimeValue(const std::vector<gridDyn_time> &time, const std::vector<double> &val);
         void loadEventFile(const std::string &fname);
         virtual std::string toString() override;
 
@@ -171,7 +178,8 @@ public:
 
         //friendly helper functions for sorting
 protected:
-        void updateTrigger(double time);
+        virtual void updateTrigger(gridDyn_time time);
+		virtual void setNextValue();
 };
 
 /** event type allowing multiple changes on multiple object at a set of given time points*/
@@ -179,7 +187,7 @@ class compoundEventPlayer : public compoundEvent
 {
 protected:
 	double period = kBigNum;  //!< period of the player
-	timeSeries2 ts;	//!< the time series containing the data for the player 
+	timeSeriesMulti ts;	//!< the time series containing the data for the player 
 	index_t currIndex = kNullLocation;	//!< the current index of the player
 	std::string eFile;		//!< the file name
 	std::vector<index_t> columns;
@@ -189,26 +197,55 @@ public:
 	compoundEventPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
+	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+
 	virtual change_code trigger() override;
-	virtual change_code trigger(double time) override;
+	virtual change_code trigger(gridDyn_time time) override;
 
 	virtual void set(const std::string &param, double val) override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	void setTime(double time) override;
-	void setTimeValue(double time, double val);
-	void setTimeValue(const std::vector<double> &time, const std::vector<double> &val);
+	void setTime(gridDyn_time time) override;
+	void setTimeValue(gridDyn_time time, double val);
+	void setTimeValue(const std::vector<gridDyn_time> &time, const std::vector<double> &val);
 	void loadEventFile(const std::string &fname);
 	virtual std::string toString() override;
 
 	virtual bool setTarget(gridCoreObject *gdo, const std::string &var = "") override;
 
 protected:
-	void updateTrigger(double time);
+	virtual void updateTrigger(gridDyn_time time);
 
 };
 
+/** event player allowing a timeSeries of events to occur over numerous time points on a single object and field*/
+class interpolatingPlayer : public gridPlayer
+{
+protected:
+	std::string slopeField;
+	bool useSlopeField = false;
+	double samplePeriod = kBigNum;
+	double slope;
+public:
+	explicit interpolatingPlayer(const std::string &newName);
+	interpolatingPlayer(gridDyn_time time0 = 0.0, double loopPeriod = 0.0);
+	interpolatingPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
+	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
-std::shared_ptr<gridEvent> make_event (const std::string &field, double val, double eventTime, gridCoreObject *rootObject);
+	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+	virtual change_code trigger() override;
+	virtual change_code trigger(gridDyn_time time) override;
+
+	virtual void set(const std::string &param, double val) override;
+	virtual void set(const std::string &param, const std::string &val) override;
+	
+	virtual std::string toString() override;
+
+	//friendly helper functions for sorting
+protected:
+	virtual void setNextValue() override;
+};
+
+std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, gridCoreObject *rootObject);
 std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *rootObject);
 std::shared_ptr<gridEvent> make_event(const std::string &field, gridCoreObject *rootObject);
 #endif

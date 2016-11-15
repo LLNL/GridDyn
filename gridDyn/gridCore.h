@@ -68,7 +68,7 @@ protected:
   double prevTime = -kBigNum;       //!<[s]the last state time of the object
   double updatePeriod = kBigNum;      //!<[s]the update period
   double nextUpdateTime = kBigNum;     //!<[s] the next scheduled update
-  double m_lastUpdateTime = -kBigNum;      //!<[s] the last update time
+  double lastUpdateTime = -kBigNum;      //!<[s] the last update time
   double m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
   
 
@@ -107,7 +107,7 @@ public:
   * @param[in] level the level of the log message
   * @param[in] message the log message
   */
-  virtual void log (gridCoreObject *object, int level, const std::string &message);
+  virtual void log (gridCoreObject *object, print_level level, const std::string &message);
   /**
   * @brief sets the object time used primarily for shifting the clock to a different basis
   * @param[in] time the time to set the object clock to.
@@ -332,23 +332,30 @@ void condDelete (gridCoreObject *objToDelete, gridCoreObject *parentObject);
 */
 std::string fullObjectName (gridCoreObject *obj);
 
+/**
+* @brief convert a string to a print level
+* @param[in] level the level name as a string
+@throw invalidParameterValue() if level is not recognized
+*/
+print_level stringToPrintLevel(const std::string &level);
+
 //logging Macros
 
-#define LOG_ERROR(message) log (this,GD_ERROR_PRINT,message);
-#define LOG_WARNING(message) log (this,GD_WARNING_PRINT,message);
+#define LOG_ERROR(message) log (this,print_level::error,message);
+#define LOG_WARNING(message) log (this,print_level::warning,message);
 
 #ifdef LOG_ENABLE
-#define LOG_SUMMARY(message) log (this,GD_SUMMARY_PRINT,message);
-#define LOG_NORMAL(message) log (this,GD_NORMAL_PRINT,message);
+#define LOG_SUMMARY(message) log (this,print_level::summary,message);
+#define LOG_NORMAL(message) log (this,print_level::normal,message);
 
 #ifdef DEBUG_LOG_ENABLE
-#define LOG_DEBUG(message) log (this,GD_DEBUG_PRINT,message);
+#define LOG_DEBUG(message) log (this,print_level::debug,message);
 #else
 #define LOG_DEBUG(message)
 #endif
 
 #ifdef TRACE_LOG_ENABLE
-#define LOG_TRACE(message) log (this,GD_TRACE_PRINT,message);
+#define LOG_TRACE(message) log (this,print_level::trace,message);
 #else
 #define LOG_TRACE(message)
 #endif

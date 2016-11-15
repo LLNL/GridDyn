@@ -147,7 +147,7 @@ public:
                 obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
                 if (!obptr)
                   {
-                    root->log (root, GD_WARNING_PRINT, "unable to create container object");
+                    root->log (root, print_level::warning, "unable to create container object");
                     useBlock = false;
                   }
                 else
@@ -213,7 +213,7 @@ public:
               {
                 if (!obptr)
                   {
-                    root->log (root, GD_WARNING_PRINT, "unable to create container object");
+                    root->log (root, print_level::warning, "unable to create container object");
                     useBlock = false;
                   }
                 else
@@ -298,7 +298,7 @@ public:
                 obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
                 if (!obptr)
                   {
-                    root->log (root, GD_WARNING_PRINT, "unable to create container object");
+                    root->log (root, print_level::warning, "unable to create container object");
                     useBlock = false;
                   }
                 else
@@ -366,7 +366,7 @@ public:
               {
                 if (!obptr)
                   {
-                    root->log (root, GD_WARNING_PRINT, "unable to create container object");
+                    root->log (root, print_level::warning, "unable to create container object");
                     useBlock = false;
                   }
                 else

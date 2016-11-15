@@ -105,7 +105,7 @@ void kinsolInterface::allocate (count_t stateCount, count_t /*numroots*/)
 
 
 // output solver stats
-void kinsolInterface::logSolverStats (int logLevel, bool /*iconly*/) const
+void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
   if (!initialized)
     {

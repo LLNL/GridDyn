@@ -116,7 +116,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fname)
       ++nn;
       bus = gds->getBus (nn);
     }
-  gds->log (gds, GD_NORMAL_PRINT, "saving csv powerflow to " + fname);
+  gds->log (gds, print_level::normal, "saving csv powerflow to " + fname);
   fclose (fp);
 }
 
@@ -222,7 +222,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fname)
   fprintf (fp, "%d\t\t\"%-20s\"\t %7.2f\t %7.2f\t %7.2f\t %7.2f\t %7.2f\t %7.2f\n",
            1, gds->getName ().c_str (), gds->getGenerationReal () * basePower, gds->getGenerationReactive () * basePower,
            gds->getLoadReal () * basePower, gds->getLoadReactive () * basePower, gds->getLoss () * basePower, -99999.0);
-  gds->log (gds, GD_NORMAL_PRINT, "saving txt powerflow to " + fname);
+  gds->log (gds, print_level::normal, "saving txt powerflow to " + fname);
   fclose (fp);
 }
 
@@ -897,7 +897,7 @@ void loadStateBinary (gridDynSimulation *gds, const std::string &fname, const so
     }
   if (!bFile.is_open ())
     {
-      gds->log (gds, GD_ERROR_PRINT, "Unable to open file for writing:" + fname);
+      gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
       return;
     }
   unsigned int dsize;
@@ -910,7 +910,7 @@ void loadStateBinary (gridDynSimulation *gds, const std::string &fname, const so
         }
       else
         {
-          gds->log (gds, GD_ERROR_PRINT, "statefile does not match solverMode in size");
+          gds->log (gds, print_level::error, "statefile does not match solverMode in size");
           return;
         }
     }
@@ -1030,7 +1030,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
   std::ofstream  bFile (fname.c_str (), std::ios::out | std::ios::binary);
   if (!bFile.is_open ())
     {
-      gds->log (gds, GD_ERROR_PRINT, "Unable to open file for writing:" + fname);
+      gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
     }
 //writing the state vector
   const solverMode &sMode = gds->getCurrentMode (iMode);
@@ -1083,7 +1083,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
   std::ofstream  bFile (fname.c_str (), std::ios::out | std::ios::binary);
   if (!bFile.is_open ())
     {
-      gds->log (gds, GD_ERROR_PRINT, "Unable to open file for writing:" + fname);
+      gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
     }
   //writing the state vector
   const solverMode &sMode = gds->getCurrentMode (iMode);

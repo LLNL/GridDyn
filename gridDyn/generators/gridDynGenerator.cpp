@@ -640,7 +640,30 @@ void gridDynGenerator::add (gridSubModel *obj)
     {
       pss = static_cast<gridDynPSS *> (replaceSubObject (obj, pss, pss_loc));
     }
-
+  else if (dynamic_cast<gridSource *>(obj))
+  {
+	  gridSource *src = static_cast<gridSource *>(obj);
+	  if ((src->m_purpose == "power")|| (src->m_purpose == "pset"))
+	  {
+		  pSetControl = static_cast<gridSource *> (replaceSubObject(obj, pSetControl, pset_loc));
+		  if (dynamic_cast<scheduler *>(pSetControl))
+		  {
+			  sched = static_cast<scheduler *>(pSetControl);
+		  }
+	  }
+	  else if ((src->m_purpose == "voltage") || (src->m_purpose == "vset"))
+	  {
+		  vSetControl = static_cast<gridSource *> (replaceSubObject(obj, vSetControl, vset_loc));
+	  }
+	  else if ((pSetControl == nullptr) && (src->m_purpose.empty()))
+	  {
+		  pSetControl = static_cast<gridSource *> (replaceSubObject(obj, pSetControl, pset_loc));
+	  }
+	  else
+	  {
+		  throw(objectAddFailure(this));
+	  }
+  }
   else
     {
 	  throw(invalidObjectException(this));
@@ -1220,6 +1243,10 @@ void gridDynGenerator::set (const std::string &param, double val,units_t unitTyp
   else if (param == "pmax")
     {
       Pmax  = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+	  if (machineBasePower < 0)
+	  {
+		  machineBasePower = unitConversionPower(Pmax, puMW, MW, systemBasePower);
+	  }
       if (gov)
         {
           gov->set (param, Pmax * systemBasePower / machineBasePower);
@@ -1509,6 +1536,14 @@ void gridDynGenerator::residual (const IOdata &args, const stateData *sD, double
         {
           pss->residual (subInputs.pssInputs, sD, resid, sMode);
         }
+	  if ((pSetControl) && (pSetControl->enabled))
+	  {
+		  pSetControl->residual(subInputs.pssInputs, sD, resid, sMode);
+	  }
+	  if ((vSetControl) && (vSetControl->enabled))
+	  {
+		  vSetControl->residual(subInputs.pssInputs, sD, resid, sMode);
+	  }
     }
 }
 
@@ -1527,14 +1562,22 @@ void gridDynGenerator::derivative (const IOdata &args, const stateData *sD, doub
 
   if ((gov) && (gov->enabled))
     {
-      gov->residual ( subInputs.governorInputs, sD, deriv, sMode);
+      gov->derivative ( subInputs.governorInputs, sD, deriv, sMode);
     }
 
 
   if ((pss) && (pss->enabled))
     {
-      pss->residual (subInputs.pssInputs, sD, deriv, sMode);
+      pss->derivative (subInputs.pssInputs, sD, deriv, sMode);
     }
+  if ((pSetControl) && (pSetControl->enabled))
+  {
+	  pSetControl->derivative(subInputs.pssInputs, sD, deriv, sMode);
+  }
+  if ((vSetControl) && (vSetControl->enabled))
+  {
+	  vSetControl->derivative(subInputs.pssInputs, sD, deriv, sMode);
+  }
 }
 
 void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
@@ -1580,6 +1623,14 @@ void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
     {
       pss->jacobianElements ( subInputs.pssInputs, sD, ad,  subInputLocs.pssInputLocs, sMode);
     }
+  if ((pSetControl) && (pSetControl->enabled))
+  {
+	  pSetControl->jacobianElements(subInputs.pssInputs, sD, ad, subInputLocs.pssInputLocs, sMode);
+  }
+  if ((vSetControl) && (vSetControl->enabled))
+  {
+	  vSetControl->jacobianElements(subInputs.pssInputs, sD, ad, subInputLocs.pssInputLocs, sMode);
+  }
 }
 
 void gridDynGenerator::getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
@@ -1622,6 +1673,14 @@ void gridDynGenerator::rootTest (const IOdata &args, const stateData *sD, double
     {
       pss->rootTest (subInputs.pssInputs, sD, root, sMode);
     }
+  if ((pSetControl) && (pSetControl->checkFlag(has_roots)))
+  {
+	  pSetControl->rootTest(subInputs.pssInputs, sD, root, sMode);
+  }
+  if ((vSetControl) && (vSetControl->checkFlag(has_roots)))
+  {
+	  vSetControl->rootTest(subInputs.pssInputs, sD, root, sMode);
+  }
 }
 
 change_code gridDynGenerator::rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level)
@@ -1664,6 +1723,24 @@ change_code gridDynGenerator::rootCheck ( const IOdata &args, const stateData *s
           ret = ret2;
         }
     }
+
+  if ((pSetControl) && (pSetControl->checkFlag(has_alg_roots)))
+  {
+	  auto ret2 = pSetControl->rootCheck(subInputs.pssInputs, sD, sMode, level);
+	  if (ret2 > ret)
+	  {
+		  ret = ret2;
+	  }
+  }
+ 
+  if ((vSetControl) && (vSetControl->checkFlag(has_alg_roots)))
+  {
+	  auto ret2 = vSetControl->rootCheck(subInputs.pssInputs, sD, sMode, level);
+	  if (ret2 > ret)
+	  {
+		  ret = ret2;
+	  }
+  }
   return ret;
 }
 void gridDynGenerator::rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
@@ -1687,6 +1764,16 @@ void gridDynGenerator::rootTrigger (double ttime, const IOdata &args, const std:
       pss->rootTrigger (ttime, args, rootMask, sMode);
 
     }
+  if ((pSetControl) && (pSetControl->checkFlag(has_roots)))
+  {
+	  pSetControl->rootTrigger(ttime, args, rootMask, sMode);
+
+  }
+  if ((vSetControl) && (vSetControl->checkFlag(has_roots)))
+  {
+	  vSetControl->rootTrigger(ttime, args, rootMask, sMode);
+
+  }
 }
 
 
@@ -1725,11 +1812,22 @@ gridCoreObject *gridDynGenerator::find (const std::string &object) const
     {
       return ext;
     }
+  if (object == "pset")
+  {
+	  return pSetControl;
+  }
+  if (object == "vset")
+  {
+	  return vSetControl;
+  }
   if (object == "governor")
     {
       return gov;
     }
-
+  if (object == "sched")
+  {
+	  return sched;
+  }
   if (object == "pss")
     {
       return pss;
@@ -1984,22 +2082,43 @@ void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const st
 		subInputs.seqID = sD->seqID;
 }
 
-double gridDynGenerator::pSetControlUpdate(const IOdata & /*args*/, const stateData *sD, const solverMode &)
+double gridDynGenerator::pSetControlUpdate(const IOdata & args, const stateData *sD, const solverMode &sMode)
 {
-	double val = (sD) ? (Pset + dPdt * (sD->time - prevTime)) : Pset;
+	double val;
+	if (pSetControl)
+	{
+		val = pSetControl->getOutput(args, sD, sMode);
+	}
+	else
+	{
+		val = (sD) ? (Pset + dPdt * (sD->time - prevTime)) : Pset;
+	}
 	return val;
 }
 
-double gridDynGenerator::vSetControlUpdate(const IOdata & /*args*/, const stateData *, const solverMode &)
+double gridDynGenerator::vSetControlUpdate(const IOdata & args, const stateData *sD, const solverMode &sMode)
 {
-	return 1.0;
+	double val = 1.0;
+	if (vSetControl)
+	{
+		val = pSetControl->getOutput(args, sD, sMode);
+	}
+	return val;
 }
 
-index_t gridDynGenerator::pSetLocation(const solverMode &)
+index_t gridDynGenerator::pSetLocation(const solverMode &sMode)
 {
+	if (pSetControl)
+	{
+		return pSetControl->getOutputLoc(sMode);
+	}
 	return kNullLocation;
 }
-index_t gridDynGenerator::vSetLocation(const solverMode &)
+index_t gridDynGenerator::vSetLocation(const solverMode &sMode)
 {
+	if (vSetControl)
+	{
+		return vSetControl->getOutputLoc(sMode);
+	}
 	return kNullLocation;
 }

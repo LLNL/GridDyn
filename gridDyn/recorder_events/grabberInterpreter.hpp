@@ -24,6 +24,9 @@
 #include <cmath>
 
 
+const std::string mdiv1String = "*/^";
+const std::string mdiv2String = "*%^";
+const std::string psubString = "+-";
 
 template <class baseX, class opX, class funcX>
 class grabberInterpreter
@@ -38,7 +41,9 @@ public:
   }
   std::shared_ptr<baseX> interpretGrabberBlock (const std::string &command, gridCoreObject *obj)
   {
-    
+    //this is to resolve an issue with URI specified parameters and the division operator but still allow
+	  //normal division operator in most cases  for URI specified the % must be used for division or the function form
+	 const std::string &mdivstr = (command.find_last_of('?') == std::string::npos) ? mdiv1String : mdiv2String;
     std::shared_ptr<baseX> ggb = nullptr;
     std::shared_ptr<baseX> ggbA = nullptr;
 
@@ -59,19 +64,19 @@ public:
       {
         ggb = interpretGrabberBlock (command.substr (1, endParenthesisLocation - 1), obj);
       }
-    else if (((operatorLocation = command.find_first_of ("+-", 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
+    else if (((operatorLocation = command.find_first_of (psubString, 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
       {
         ggb = addSubGrabberBlocks (command, obj, operatorLocation);
       }
-    else if (((operatorLocation = command.find_first_of ("*/^", 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
+    else if (((operatorLocation = command.find_first_of (mdivstr, 1)) != std::string::npos) && (operatorLocation < firstParenthesisLocation))
       {
         ggb = multDivGrabberBlocks (command, obj, operatorLocation);
       }
-    else if ((operatorLocation = command.find_first_of ("+-", endParenthesisLocation + 1)) != std::string::npos)
+    else if ((operatorLocation = command.find_first_of (psubString, endParenthesisLocation + 1)) != std::string::npos)
       {
         ggb = addSubGrabberBlocks (command, obj, operatorLocation);
       }
-    else if ((operatorLocation = command.find_first_of ("*/^", endParenthesisLocation + 1)) != std::string::npos)
+    else if ((operatorLocation = command.find_first_of (mdivstr, endParenthesisLocation + 1)) != std::string::npos)
       {
         ggb = multDivGrabberBlocks (command, obj, operatorLocation);
       }
@@ -242,10 +247,10 @@ private:
                 ggb = ggbA;
                 ggb->gain = valB;
               }
-            else if (op == '/')
+            else if ((op == '/')||(op=='%'))
               {
                 ggb = ggbA;
-                ggb->gain = 1 / valB;
+                ggb->gain = 1.0 / valB;
               }
             else
               {
@@ -284,7 +289,7 @@ private:
               {
                 ggb->bias = valA * valB;
               }
-            else if (op == '/')
+            else if ((op == '/')||(op=='%'))
               {
                 if (valB != 0)
                   {

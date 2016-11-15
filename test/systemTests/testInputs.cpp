@@ -154,7 +154,7 @@ for (const auto &mp : baseCDFcase)
     gds->reset(reset_levels::voltage_angle);
 
     //do a manual reset of the voltages
-	//gds->consolePrintLevel = GD_TRACE_PRINT;
+	//gds->consolePrintLevel = print_level::trace;
     for (int ii = 0; ii < 300; ++ii)
       {
 		gridBus *bus = gds->getBus(ii);

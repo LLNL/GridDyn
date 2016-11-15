@@ -43,13 +43,12 @@ BOOST_AUTO_TEST_CASE(block_test1)
    
     
     std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeries2 ts3;
-    int ret = ts3.loadBinaryFile(recname);
-    BOOST_CHECK_EQUAL(ret, 0);
+    timeSeriesMulti ts3;
+    ts3.loadBinaryFile(recname);
 	BOOST_REQUIRE(ts3.count >= 15);
     BOOST_CHECK_CLOSE(ts3.data[0][5]*5,ts3.data[1][5],0.000001);
     BOOST_CHECK_CLOSE(ts3.data[0][15] * 5, ts3.data[1][15], 0.000001);
-    ret = remove(recname.c_str());
+    int ret = remove(recname.c_str());
 
     BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -66,13 +65,11 @@ BOOST_AUTO_TEST_CASE(block_test2)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3(recname);
 
   BOOST_CHECK_CLOSE(ts3.data[0][5] * 5, ts3.data[1][5], 0.001);
   BOOST_CHECK_CLOSE(ts3.data[0][280] * 5, ts3.data[1][280], 0.001);
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -89,13 +86,13 @@ BOOST_AUTO_TEST_CASE(block_test3)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3(recname);
+  //ts3.loadBinaryFile(recname);
+
 
   BOOST_CHECK_SMALL(ts3.data[1][5], 0.00001);
   BOOST_CHECK_SMALL(ts3.data[1][280], 0.001);
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -113,9 +110,8 @@ BOOST_AUTO_TEST_CASE(block_test4)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3;
+  ts3.loadBinaryFile(recname);
 
   BOOST_CHECK_CLOSE(ts3.data[1][5], -0.5, 0.01);
   double iv=-0.5;
@@ -125,7 +121,7 @@ BOOST_AUTO_TEST_CASE(block_test4)
     iv+=100*ts3.data[0][pp]*0.01;
   }
   BOOST_CHECK_CLOSE(ts3.data[1][pp-1], iv, 1);
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -142,15 +138,15 @@ BOOST_AUTO_TEST_CASE(block_test5)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3;
+  ts3.loadBinaryFile(recname);
+  
 
   BOOST_CHECK_SMALL(ts3.data[1][5], 0.0001);
   auto vm = absMax(ts3.data[0]);
   auto vm2=absMax(ts3.data[1]);
   BOOST_CHECK_CLOSE(vm2, vm*5, 1);
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -168,23 +164,23 @@ BOOST_AUTO_TEST_CASE(block_test6)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3;
+  ts3.loadBinaryFile(recname);
+ 
 
   BOOST_CHECK_CLOSE(ts3.data[1][5],1.0, 0.01);
 
   BOOST_CHECK_CLOSE(ts3.data[1][2000], 1.0, 0.01);
-  ret = remove(recname.c_str());
+  remove(recname.c_str());
 
   recname = std::string(BLOCK_TEST_DIRECTORY "blocktest2.dat");
- ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+   ts3.loadBinaryFile(recname);
+ 
 
   BOOST_CHECK_CLOSE(ts3.data[1][5], 1.0, 0.01);
 
   BOOST_CHECK_CLOSE(ts3.data[1][200], 1.0, 0.01);
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -221,15 +217,15 @@ BOOST_AUTO_TEST_CASE(deadband_block_test)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3;
+  ts3.loadBinaryFile(recname);
+  
 
   auto mx=std::any_of(ts3.data[1].begin(),ts3.data[1].end(),[](double a){return ((a>0.400001)&&(a<0.4999999));});
   BOOST_CHECK(mx==false);
 
 
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   BOOST_CHECK_EQUAL(ret, 0);
 }
@@ -275,7 +271,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
   gds->solverSet("powerflow", "printlevel", 0);
   gds->solverSet("dynamic", "printlevel", 0);
   gds->set("recorddirectory", BLOCK_TEST_DIRECTORY);
-  gds->consolePrintLevel = GD_WARNING_PRINT;
+  gds->consolePrintLevel = print_level::warning;
   auto rel1=gds->getRelay(0);
   auto rel2=gds->getRelay(1);
 
@@ -336,15 +332,14 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeries2 ts3;
-  int ret = ts3.loadBinaryFile(recname);
-  BOOST_CHECK_EQUAL(ret, 0);
+  timeSeriesMulti ts3;
+  ts3.loadBinaryFile(recname);
   std::vector<double> df(ts3.count);
   compareVec(ts3.data[1], ts3.data[2], df);
   auto mx = absMax(df);
   auto adf=mean(df);
   BOOST_CHECK((mx<1e-2)||(adf<2e-3));
-  ret = remove(recname.c_str());
+  int ret = remove(recname.c_str());
 
   if ((mx > 1e-2) && (adf > 2e-3))
   {
@@ -399,7 +394,7 @@ BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 		gds->solverSet("powerflow", "printlevel", 0);
 		gds->solverSet("dynamic", "printlevel", 0);
 		gds->set("recorddirectory", BLOCK_TEST_DIRECTORY);
-		gds->consolePrintLevel = GD_WARNING_PRINT;
+		gds->consolePrintLevel = print_level::warning;
 		auto rel1 = gds->getRelay(0);
 		auto rel2 = gds->getRelay(1);
 

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_differential_relay)
 {
   std::string fname = std::string(RELAY_TEST_DIRECTORY "test_differential_relay.xml");
   gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-  gds->consolePrintLevel = 3;
+  gds->consolePrintLevel = print_level::summary;
   gds->run();
   auto obj = gds->find("bus1_to_bus3");
   BOOST_CHECK_EQUAL(static_cast<gridObject *>(obj)->isConnected(),false);
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_control_relay)
 {
 	std::string fname = std::string(RELAY_TEST_DIRECTORY "test_control_relay.xml");
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-	//gds->consolePrintLevel = 0;
+	//gds->consolePrintLevel = print_level::no_print;
 	auto obj = gds->find("bus4::load4");
 	auto cr = dynamic_cast<controlRelay *>(gds->getRelay(0));
 	BOOST_REQUIRE((cr != nullptr));
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_relay_comms)
 {
 	std::string fname = std::string(RELAY_TEST_DIRECTORY "test_relay_comms.xml");
 	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-	//gds->consolePrintLevel = 0;
+	//gds->consolePrintLevel = print_level::no_print;
 	gds->dynInitialize();
 	auto obj = gds->find("sensor1");
 	BOOST_REQUIRE(obj != nullptr);

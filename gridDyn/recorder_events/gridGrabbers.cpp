@@ -25,6 +25,7 @@
 #include "functionInterpreter.h"
 #include "objectGrabbers.h"
 #include "core/helperTemplates.h"
+#include "core/gridDynExceptions.h"
 #include <cmath>
 #include <algorithm>
 #include <map>
@@ -87,6 +88,7 @@ int gridGrabber::updateField (std::string fld)
 	  fptr = fnd->second;
 
   }
+
   loaded = checkIfLoaded();
   if (loaded)
   {
@@ -95,7 +97,11 @@ int gridGrabber::updateField (std::string fld)
   }
   else
   {
-	  desc = "";
+	  if (!customDesc)
+	  {
+		  desc = "";
+	  }
+	  
 	  return NOT_LOADED;
   }
  
@@ -204,7 +210,7 @@ void gridGrabber::updateObject (gridCoreObject *obj,object_update_mode mode)
   {
 	  makeDescription();
   }
-  else
+  else if (!customDesc)
   {
 	  desc = "";
   }
@@ -212,13 +218,16 @@ void gridGrabber::updateObject (gridCoreObject *obj,object_update_mode mode)
 
 void gridGrabber::makeDescription ()
 {
+	if (!customDesc)
+	{
+		desc = (cobj) ? (cobj->getName() + ':' + field) : field;
 
-  desc = (cobj)?(cobj->getName() + ':' + field):field;
+		if (outputUnits != defUnit)
+		{
+			desc += '(' + to_string(outputUnits) + ')';
+		}
+	}
   
-  if (outputUnits != defUnit)
-    {
-      desc += '(' + to_string (outputUnits) + ')';
-    }
 }
 
 gridCoreObject * gridGrabber::getObject() const
@@ -241,10 +250,17 @@ bool gridGrabber::checkIfLoaded()
 		}
 		else if (!field.empty())
 		{
-			double testval = cobj->get(field);
-			if (testval != kNullVal)
+			try
 			{
-				return true;
+				double testval = cobj->get(field);
+				if (testval != kNullVal)
+				{
+					return true;
+				}
+			}
+			catch (const unrecognizedParameter &)
+			{
+				return false;
 			}
 		}
 		else

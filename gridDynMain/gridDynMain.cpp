@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
     {
       return 0;
     }
-  gds->log (nullptr, GD_SUMMARY_PRINT, griddyn_version_string);
+  gds->log (nullptr, print_level::summary, griddyn_version_string);
   auto start_t = std::chrono::high_resolution_clock::now ();
 
   gds->run ();

@@ -149,18 +149,17 @@ int gridSimulation::step ()
 
 void gridSimulation::saveRecorders ()
 {
-  int ret;
   //save the recorder files
   for (auto col : collectorList)
     {
-      ret = col->flush ();
-      if (ret == FILE_NOT_FOUND)
+	  try
+	  {
+		  col->flush();
+		  LOG_SUMMARY("collector successfully flushed to :" + col->getSinkName());
+	  }
+      catch(const invalidFileName &)
         {
           LOG_ERROR ("unable to open file for writing " + col->getSinkName ());
-        }
-      else
-        {
-          LOG_SUMMARY ("collector successfully flushed to :" + col->getSinkName ());
         }
     }
 }
@@ -179,119 +178,20 @@ void gridSimulation::set (const std::string &param,  const std::string &val)
   else if (param == "logprintlevel")
     {
       temp = convertToLowerCase (val);
-
-      if (temp == "trace")
-        {
-          logPrintLevel = GD_TRACE_PRINT;
-        }
-      else if (temp == "debug")
-        {
-          logPrintLevel = GD_DEBUG_PRINT;
-        }
-      else if (temp == "normal")
-        {
-          logPrintLevel = GD_NORMAL_PRINT;
-        }
-      else if (temp == "summary")
-        {
-          logPrintLevel = GD_SUMMARY_PRINT;
-        }
-      else if (temp == "warning")
-        {
-          logPrintLevel = GD_WARNING_PRINT;
-        }
-      else if (temp == "error")
-        {
-          logPrintLevel = GD_ERROR_PRINT;
-        }
-      else if (temp == "none")
-        {
-          logPrintLevel = GD_NO_PRINT;
-        }
-      else
-        {
-		  throw(invalidParameterValue());
-        }
-
+	  logPrintLevel = stringToPrintLevel(temp);
+     
     }
   else if (param == "consoleprintlevel")
     {
       temp = convertToLowerCase (val);
-      if (temp == "trace")
-        {
-          consolePrintLevel = GD_TRACE_PRINT;
-        }
-      else if (temp == "debug")
-        {
-          consolePrintLevel = GD_DEBUG_PRINT;
-        }
-      else if (temp == "normal")
-        {
-          consolePrintLevel = GD_NORMAL_PRINT;
-        }
-      else if (temp == "summary")
-        {
-          consolePrintLevel = GD_SUMMARY_PRINT;
-        }
-      else if (temp == "warning")
-        {
-          consolePrintLevel = GD_WARNING_PRINT;
-        }
-      else if (temp == "error")
-        {
-          consolePrintLevel = GD_ERROR_PRINT;
-        }
-      else if (temp == "none")
-        {
-          consolePrintLevel = GD_NO_PRINT;
-        }
-      else
-        {
-		  throw(invalidParameterValue());
-        }
+	  consolePrintLevel = stringToPrintLevel(temp);
     }
   else if (param == "printlevel")
     {
       temp = convertToLowerCase (val);
-      if (temp == "trace")
-        {
-          consolePrintLevel = GD_TRACE_PRINT;
-          logPrintLevel = GD_TRACE_PRINT;
-        }
-      else if (temp == "debug")
-        {
-          consolePrintLevel = GD_DEBUG_PRINT;
-          logPrintLevel = GD_DEBUG_PRINT;
-        }
-      else if (temp == "normal")
-        {
-          consolePrintLevel = GD_NORMAL_PRINT;
-          logPrintLevel = GD_NORMAL_PRINT;
-        }
-      else if (temp == "summary")
-        {
-          consolePrintLevel = GD_SUMMARY_PRINT;
-          logPrintLevel = GD_SUMMARY_PRINT;
-        }
-      else if (temp == "warning")
-        {
-          consolePrintLevel = GD_WARNING_PRINT;
-          logPrintLevel = GD_WARNING_PRINT;
-        }
-      else if (temp == "error")
-        {
-          consolePrintLevel = GD_ERROR_PRINT;
-          logPrintLevel = GD_ERROR_PRINT;
-        }
-      else if (temp == "none")
-        {
-          consolePrintLevel = GD_NO_PRINT;
-          logPrintLevel = GD_NO_PRINT;
-        }
-      else
-        {
-		  throw(invalidParameterValue());
-        }
+	  consolePrintLevel = stringToPrintLevel(temp);
+	  logPrintLevel = consolePrintLevel;
+
     }
   else if (param == "logfile")
     {
@@ -352,16 +252,31 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     }
   else if (param == "printlevel")
   {
-	  consolePrintLevel = static_cast<int> (val);
-	  logPrintLevel = consolePrintLevel;
+	   auto testLevel= static_cast<print_level> (static_cast<int>(val));
+	   if ((testLevel > print_level::trace) || (testLevel < print_level::no_print))
+	   {
+		   throw(invalidParameterValue());
+	   }
+	   consolePrintLevel = testLevel;
+	  logPrintLevel = testLevel;
   }
   else if (param == "consoleprintlevel")
     {
-      consolePrintLevel = static_cast<int> (val);
+	  auto testLevel = static_cast<print_level> (static_cast<int>(val));
+	  if ((testLevel > print_level::trace) || (testLevel < print_level::no_print))
+	  {
+		  throw(invalidParameterValue());
+	  }
+	  consolePrintLevel = testLevel;
     }
   else if (param == "logprintlevel")
     {
-      logPrintLevel = static_cast<int> (val);
+	  auto testLevel = static_cast<print_level> (static_cast<int>(val));
+	  if ((testLevel > print_level::trace) || (testLevel < print_level::no_print))
+	  {
+		  throw(invalidParameterValue());
+	  }
+	  logPrintLevel = testLevel;
     }
   else if ((param == "steptime") || (param == "step") || (param == "timestep"))
     {
@@ -425,7 +340,7 @@ std::shared_ptr<collector> gridSimulation::findCollector (const std::string &col
   return nullptr;
 }
 
-void gridSimulation::log (gridCoreObject *object, int level, const std::string &message)
+void gridSimulation::log (gridCoreObject *object, print_level level, const std::string &message)
 {
   if ((level > consolePrintLevel) && (level > logPrintLevel))
     {
@@ -438,12 +353,12 @@ void gridSimulation::log (gridCoreObject *object, int level, const std::string &
   std::string cname = '[' + ((object->getID () == getID ()) ? "sim" : (fullObjectName (object) + '(' + std::to_string (object->getUserID ()) + ')')) + ']';
   std::string simtime = ((currentTime > kNullVal / 2) ? '(' + std::to_string (currentTime) + ')' : std::string ("(PRESTART)"));
   std::string key;
-  if (level == GD_WARNING_PRINT)
+  if (level == print_level::warning)
     {
       key = "||WARNING||";
       ++warnCount;
     }
-  else if (level == GD_ERROR_PRINT)
+  else if (level == print_level::error)
     {
       key = "||ERROR||";
       ++errorCount;
@@ -535,12 +450,12 @@ void gridSimulation::alert (gridCoreObject *object, int code)
       if (res != alertStrings.end ())
         {
           astr = res->second;
-          log (object, GD_SUMMARY_PRINT, astr);
+          log (object, print_level::summary, astr);
         }
       else
         {
           std::string message = "Unrecognized alert code (" + std::to_string (code) + ')';
-          log (object, GD_SUMMARY_PRINT, message);
+          log (object, print_level::summary, message);
         }
 
     }
@@ -574,11 +489,11 @@ double gridSimulation::get (const std::string &param, gridUnits::units_t unitTyp
     }
   else if (param == "logprintlevel")
     {
-      ival = logPrintLevel;
+      ival = static_cast<int>(logPrintLevel);
     }
   else if ((param == "consoleprintlevel") || (param == "printlevel"))
     {
-      ival = consolePrintLevel;
+      ival = static_cast<int>(consolePrintLevel);
     }
   else if ((param == "stepsize")||(param == "steptime"))
     {

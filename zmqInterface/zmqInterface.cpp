@@ -18,14 +18,14 @@
 
 #include "core/factoryTemplates.h"
 #include "objectFactory.h"
-#include "core/factoryTemplates.h"
 
 
-static childClassFactory<collector, dimeCollector> dimeFac(std::vector<std::string> {"dime"});
 
-static childClassFactory<gridCommunicator, zmqCommunicator> zmqComm(std::vector<std::string>{"zmq"});
+static childClassFactory<dimeCollector,collector> dimeFac(std::vector<std::string> {"dime"});
 
-static childClassFactory<gridCommunicator, dimeCommunicator> dimeComm(std::vector<std::string>{"dime"});
+static childClassFactory<zmqCommunicator,gridCommunicator> zmqComm(std::vector<std::string>{"zmq"});
+
+static childClassFactory<dimeCommunicator, gridCommunicator> dimeComm(std::vector<std::string>{"dime"});
 
 void loadZMQLibrary()
 {

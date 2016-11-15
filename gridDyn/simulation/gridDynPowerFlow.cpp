@@ -192,9 +192,9 @@ int gridDynSimulation::powerflow ()
       while (powerAdjust);
       // solver stats
 // SGS Kinsol Log file info here sometime Woodard
-      if ((consolePrintLevel >= GD_TRACE_PRINT)||(logPrintLevel >= GD_TRACE_PRINT))
+      if ((consolePrintLevel >= print_level::trace)||(logPrintLevel >= print_level::trace))
         {
-          pFlowData->logSolverStats (GD_TRACE_PRINT);
+          pFlowData->logSolverStats (print_level::trace);
         }
 
     }

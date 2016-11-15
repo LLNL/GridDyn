@@ -21,15 +21,15 @@
 #include <type_traits>
 
 /**create a factory for a specific type of helper component*/
-template <class X>
+template <class parentClass>
 class classFactory;
 
 /** @brief factory for building types of various components that interact with GridDyn
 */
-template<class X>
+template<class parentClass>
 class coreClassFactory
 {
-	typedef std::map<std::string, classFactory<X> *> fMap;
+	typedef std::map<std::string, classFactory<parentClass> *> fMap;
 	std::string m_defaultType;
 	public:
 	~coreClassFactory()
@@ -48,7 +48,7 @@ class coreClassFactory
 	@param[in] name the string identifier to the factory
 	@param[in] tf the type factory to place in the map
 	*/
-	void registerFactory(const std::string  name, classFactory<X> *tf)
+	void registerFactory(const std::string  name, classFactory<parentClass> *tf)
 	{
 		auto ret = m_factoryMap.emplace(name, tf);
 		if (ret.second == false)
@@ -61,7 +61,7 @@ class coreClassFactory
 	gets the name to use in the mapping from the type factory itself
 	@param[in] tf the type factory to place in the map
 	*/
-	void registerFactory(classFactory<X> *tf)
+	void registerFactory(classFactory<parentClass> *tf)
 	{
 		registerFactory(tf->name, tf);
 	}
@@ -95,7 +95,7 @@ class coreClassFactory
 	/** @brief create an object from a given objectType and typeName
 	@param[in] typeName  the specific type to create
 	@return the created gridCoreObject */
-	std::shared_ptr<X> createObject(const std::string &typeName)
+	std::shared_ptr<parentClass> createObject(const std::string &typeName)
 	{
 		auto mfind = m_factoryMap.find(typeName);
 		if (mfind != m_factoryMap.end())
@@ -114,7 +114,7 @@ class coreClassFactory
 	@param[in] typeName  the specific type to create
 	@param[in] objName  the name of the object to create
 	@return the created gridCoreObject */
-	std::shared_ptr<X> createObject(const std::string &typeName, const std::string &objName)
+	std::shared_ptr<parentClass> createObject(const std::string &typeName, const std::string &objName)
 	{
 		auto mfind = m_factoryMap.find(typeName);
 		if (mfind != m_factoryMap.end())
@@ -133,7 +133,7 @@ class coreClassFactory
 	@param[in] typeName the name of the typeFactory to get
 	@return a shared pointer to a specific type Factory
 	*/
-	classFactory<X> *getFactory(const std::string &typeName)
+	classFactory<parentClass> *getFactory(const std::string &typeName)
 	{
 		if (typeName.empty())
 		{
@@ -166,7 +166,7 @@ private:
 
 };
 
-template <class X>
+template <class parentClass>
 class classFactory
 {
 public:
@@ -174,11 +174,11 @@ public:
 
 	classFactory(const std::string &keyName) :name(keyName)
 	{
-		coreClassFactory<X>::instance()->registerFactory(keyName, this);
+		coreClassFactory<parentClass>::instance()->registerFactory(keyName, this);
 	}
 	classFactory(const std::vector<std::string> &names) :name(names[0])
 	{
-		auto cfac = coreClassFactory<X>::instance();
+		auto cfac = coreClassFactory<parentClass>::instance();
 		for (auto &nn:names)
 		{
 			cfac->registerFactory(nn, this);
@@ -186,7 +186,7 @@ public:
 	}
 	classFactory(const std::vector<std::string> &names, const std::string &defType) :name(names[0])
 	{
-		auto cfac = coreClassFactory<X>::instance();
+		auto cfac = coreClassFactory<parentClass>::instance();
 		for (auto &nn : names)
 		{
 			cfac->registerFactory(nn, this);
@@ -195,83 +195,83 @@ public:
 	}
 	virtual ~classFactory()
 	{}
-	virtual std::shared_ptr<X> makeObject()
+	virtual std::shared_ptr<parentClass> makeObject()
 	{
-		return std::make_shared<X>();
+		return std::make_shared<parentClass>();
 	}
-	virtual std::shared_ptr<X> makeObject(const std::string &newObjectName)
+	virtual std::shared_ptr<parentClass> makeObject(const std::string &newObjectName)
 	{
-		return std::make_shared<X>(newObjectName);
+		return std::make_shared<parentClass>(newObjectName);
 	}
 
 };
 
-template <class X, class Y>
-class childClassFactory :public classFactory<X> 
+template <class childClass, class parentClass>
+class childClassFactory :public classFactory<parentClass> 
 {
-	static_assert (std::is_base_of<X, Y>::value, "factory classes must have parent child class relationship");
+	static_assert (std::is_base_of<parentClass, childClass>::value, "factory classes must have parent child class relationship");
 public:
 
-	childClassFactory(const std::string &keyName) :classFactory<X>(keyName)
+	childClassFactory(const std::string &keyName) :classFactory<parentClass>(keyName)
 	{
 		
 	}
-	childClassFactory(const std::vector<std::string> &names) :classFactory<X>(names)
+	childClassFactory(const std::vector<std::string> &names) :classFactory<parentClass>(names)
 	{
 
 	}
-	childClassFactory(const std::vector<std::string> &names, const std::string &defType) :classFactory<X>(names,defType)
+	childClassFactory(const std::vector<std::string> &names, const std::string &defType) :classFactory<parentClass>(names,defType)
 	{
 		
 	}
-	virtual std::shared_ptr<X> makeObject() override
+	virtual std::shared_ptr<parentClass> makeObject() override
 	{
-		return std::make_shared<Y>();
+		return std::make_shared<childClass>();
 	}
-	virtual std::shared_ptr<X> makeObject(const std::string &newObjectName) override
+	virtual std::shared_ptr<parentClass> makeObject(const std::string &newObjectName) override
 	{
-		return std::make_shared<Y>(newObjectName);
+		return std::make_shared<childClass>(newObjectName);
 	}
 
-	std::shared_ptr<Y> makeClassObject()
+	std::shared_ptr<childClass> makeClassObject()
 	{
-		return std::make_shared<Y>();
+		return std::make_shared<childClass>();
 	}
 };
 
-template <class X, class Y, class argType>
-class childClassFactoryArg :public classFactory<X>
+template <class childClass, class parentClass, class argType>
+class childClassFactoryArg :public classFactory<parentClass>
 {
-	static_assert (std::is_base_of<X, Y>::value, "factory classes must have parent child class relationship");
+	static_assert (std::is_base_of<parentClass, childClass>::value, "factory classes must have parent child class relationship");
 	static_assert (!std::is_same<argType, std::string>::value, "arg type cannot be a std::string");
 private:
 	argType argVal;
 public:
 	
 
-	childClassFactoryArg(const std::string &keyName, argType iArg) :classFactory<X>(keyName), argVal(iArg)
+	childClassFactoryArg(const std::string &keyName, argType iArg) :classFactory<parentClass>(keyName), argVal(iArg)
 	{
 
 	}
-	childClassFactoryArg(const std::vector<std::string> &names, argType iArg) :classFactory<X>(names), argVal(iArg)
+	childClassFactoryArg(const std::vector<std::string> &names, argType iArg) :classFactory<parentClass>(names), argVal(iArg)
 	{
 
 	}
-	childClassFactoryArg(const std::vector<std::string> &names, const std::string &defType, argType iArg) :classFactory<X>(names, defType), argVal(iArg)
+	childClassFactoryArg(const std::vector<std::string> &names, const std::string &defType, argType iArg) :classFactory<parentClass>(names, defType), argVal(iArg)
 	{
 
 	}
-	std::shared_ptr<X> makeObject() override
+	std::shared_ptr<parentClass> makeObject() override
 	{
-		return std::make_shared<Y>(argVal);
+		return std::make_shared<childClass>(argVal);
 	}
-	std::shared_ptr<X> makeObject(const std::string &newObjectName) override
+	std::shared_ptr<parentClass> makeObject(const std::string &newObjectName) override
 	{
-		return std::make_shared<Y>(newObjectName,argVal);
+		return std::make_shared<childClass>(newObjectName,argVal);
 	}
-	std::shared_ptr<Y> makeClassObject()
+	std::shared_ptr<childClass> makeClassObject()
 	{
-		return std::make_shared<Y>(argVal);
+		return std::make_shared<childClass>(argVal);
 	}
 };
 #endif

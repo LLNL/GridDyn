@@ -135,7 +135,7 @@ double idaInterface::get (const std::string &param) const
 
 
 // output solver stats
-void idaInterface::logSolverStats (int logLevel, bool iconly) const
+void idaInterface::logSolverStats (print_level logLevel, bool iconly) const
 {
   if (!initialized)
     {
@@ -211,7 +211,7 @@ void idaInterface::logSolverStats (int logLevel, bool iconly) const
 }
 
 
-void idaInterface::logErrorWeights (int logLevel) const
+void idaInterface::logErrorWeights (print_level logLevel) const
 {
 
   N_Vector eweight = NVECTOR_NEW (use_omp, svsize);

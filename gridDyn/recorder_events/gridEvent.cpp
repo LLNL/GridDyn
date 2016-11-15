@@ -25,11 +25,13 @@
 #include <string>
 
 static classFactory<gridEvent> evntFac(std::vector<std::string>{ "event", "simple","single" },"event");
-static childClassFactory<gridEvent, gridPlayer> playerFac(std::vector<std::string>{ "player","timeseries","file" });
+static childClassFactory<gridPlayer, gridEvent> playerFac(std::vector<std::string>{ "player","timeseries","file" });
 
-static childClassFactory<gridEvent, compoundEvent> cmpdEvnt(std::vector<std::string>{ "multi", "compound" });
+static childClassFactory<compoundEvent,gridEvent> cmpdEvnt(std::vector<std::string>{ "multi", "compound" });
 
-static childClassFactory<gridEvent, compoundEventPlayer> cmpdEvntPlay(std::vector<std::string>{ "compoundplayer", "multifile", "multiplayer" });
+static childClassFactory<compoundEventPlayer,gridEvent > cmpdEvntPlay(std::vector<std::string>{ "compoundplayer", "multifile", "multiplayer" });
+
+static childClassFactory<interpolatingPlayer,gridEvent> interpPlay(std::vector<std::string>{ "interpolating", "interp","interpolated"});
 
 std::atomic<count_t> gridEvent::eventCount(0);
 
@@ -40,19 +42,36 @@ gridEvent::gridEvent(const std::string &objName):name(objName),triggerTime(kBigN
 	eventId=++eventCount;
 }
 
-gridEvent::gridEvent (double time0): triggerTime(time0)
+gridEvent::gridEvent (gridDyn_time time0): triggerTime(time0)
 {
 	eventId=++eventCount;
 }
 
-gridEvent::gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject):description(gdEI->description), name(gdEI->name)
+gridEvent::gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
 {
+	gridEvent::updateEvent(gdEI, rootObject);
+}
+
+void gridEvent::updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
+{
+	if (!gdEI->description.empty())
+	{
+		description = gdEI->description;
+	}
+	if (!gdEI->name.empty())
+	{
+		name = gdEI->name;
+	}
 	if (!gdEI->value.empty())
 	{
 		value = gdEI->value[0];
 	}
+	if (!gdEI->time.empty())
+	{
+		triggerTime = gdEI->time[0];
+	}
 	gridCoreObject *searchObj = rootObject;
-	
+
 	if (!gdEI->targetObjs.empty())
 	{
 		searchObj = gdEI->targetObjs[0];
@@ -69,9 +88,21 @@ gridEvent::gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject):descriptio
 	{
 		m_obj = searchObj;
 	}
-	triggerTime = gdEI->time[0];
-	armed = true;
 	
+	
+	armed = checkArmed();
+}
+
+bool gridEvent::checkArmed()
+{
+	if (m_obj)
+	{
+		if (!field.empty())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void gridEvent::loadField(gridCoreObject *searchObj, const std::string newfield)
@@ -87,7 +118,7 @@ void gridEvent::loadField(gridCoreObject *searchObj, const std::string newfield)
 		m_obj = fdata.m_obj;
 		name = m_obj->getName();
 	}
-	
+	armed = checkArmed();
 }
 
 std::shared_ptr<gridEvent> gridEvent::clone(std::shared_ptr<gridEvent> ggb) const
@@ -170,7 +201,7 @@ void gridEvent::set(const std::string &param, const std::string &val)
 	}
 }
 
-void gridEvent::setTime (double time)
+void gridEvent::setTime (gridDyn_time time)
 {
   triggerTime = time;
 }
@@ -222,7 +253,7 @@ change_code gridEvent::trigger ()
 
 }
 
-change_code gridEvent::trigger (double time)
+change_code gridEvent::trigger (gridDyn_time time)
 {
   change_code ret = change_code::not_triggered;
   if (time >= triggerTime)
@@ -297,14 +328,7 @@ bool gridEvent::setTarget ( gridCoreObject *gdo,const std::string &var)
 	  loadField(m_obj, var);
     }
 
-  if (m_obj)
-    {
-      armed = true;
-    }
-  else
-  {
-	  armed = false;
-  }
+  armed = checkArmed();
   return armed;
 }
 
@@ -348,7 +372,7 @@ event_types findEventType(gridEventInfo *gdEI)
 		{
 			return event_types::reversible;
 		}
-		if (gdEI->type=="interpolating")
+		if ((gdEI->type=="interpolating")||(gdEI->type == "interpolated"))
 		{
 			return event_types::interpolating;
 		}
@@ -468,7 +492,7 @@ void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *r
 }
 
 
-std::shared_ptr<gridEvent> make_event (const std::string &field, double val, double eventTime, gridCoreObject *rootObject)
+std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, gridCoreObject *rootObject)
 {
   auto ev = std::make_shared<gridEvent> (eventTime);
   objInfo fdata (field, rootObject);
@@ -491,6 +515,7 @@ std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *root
 		ev = coreClassFactory<gridEvent>::instance()->createObject(gdEI->type);
 		if (ev)
 		{
+			ev->updateEvent(gdEI, rootObject);
 			return ev;
 		}
 	}
@@ -511,6 +536,8 @@ std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *root
 		ev = std::make_shared<compoundEventPlayer>(gdEI, rootObject);
 		break;
 	case event_types::interpolating:
+		ev = std::make_shared<interpolatingPlayer>(gdEI, rootObject);
+		break;
 	case event_types::reversible:
 	case event_types::toggle:
 		break;

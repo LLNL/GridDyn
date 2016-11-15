@@ -34,14 +34,6 @@ const double kMin_Res (1e-7);
 #define LOADED (0)
 #define NOT_LOADED (-1)
 
-#define OBJECT_ALREADY_MEMBER (1)
-#define OBJECT_ADD_SUCCESS (0)
-#define OBJECT_NOT_MEMBER (1)
-#define OBJECT_REMOVE_SUCCESS (0)
-#define OBJECT_ADD_FAILURE (-1)
-#define OBJECT_NOT_RECOGNIZED (-2)
-#define OBJECT_NOT_FOUND (-3)
-#define OBJECT_REMOVE_FAILURE (-1)
 
 #define FUNCTION_EXECUTION_SUCCESS (0)
 #define FUNCTION_EXECUTION_FAILURE (-1)
@@ -99,13 +91,16 @@ const double kMin_Res (1e-7);
 #define OBJECT_ID_CHANGE (1446)
 #define OBJECT_IS_SEARCHABLE (1455)
 
-//logging codes
-#define GD_TRACE_PRINT 6
-#define GD_DEBUG_PRINT 5
-#define GD_NORMAL_PRINT 4
-#define GD_SUMMARY_PRINT 3
-#define GD_WARNING_PRINT 2
-#define GD_ERROR_PRINT 1
-#define GD_NO_PRINT 0
+
+enum class print_level
+{
+	no_print = 0,
+	error=1,
+	warning=2,
+	summary=3,
+	normal=4,
+	debug=5,
+	trace=6,
+};
 
 #endif

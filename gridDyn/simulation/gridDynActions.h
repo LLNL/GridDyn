@@ -68,7 +68,7 @@ public:
 
   /** @brief fill an actions parameters based on a string
   @param[in] operation  a string containing the information for a specific action*/
-  int process (const std::string &operation);
+  void process (const std::string &operation);
 
   /** @brief reset the action to base state*/
   void reset ();

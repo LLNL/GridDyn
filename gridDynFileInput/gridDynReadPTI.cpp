@@ -726,7 +726,7 @@ int ptiReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
       lnk->set ("mode", "mw");
       break;
     default:
-      parentObject->log (parentObject,GD_WARNING_PRINT,"Unrecognized link code assuming transformer" + std::to_string (code));
+      parentObject->log (parentObject,print_level::warning,"Unrecognized link code assuming transformer" + std::to_string (code));
       lnk = linkfactory->makeTypeObject ();
       lnk->set ("type", "transformer");
       break;

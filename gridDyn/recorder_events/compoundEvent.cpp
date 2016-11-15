@@ -23,7 +23,7 @@
 #include <string>
 
 
-compoundEvent::compoundEvent(double time0) : gridEvent(time0)
+compoundEvent::compoundEvent(gridDyn_time time0) : gridEvent(time0)
 {
 
 }
@@ -174,7 +174,7 @@ change_code compoundEvent::trigger()
 	}
 }
 
-change_code compoundEvent::trigger(double time)
+change_code compoundEvent::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
 	if (time >= triggerTime)
