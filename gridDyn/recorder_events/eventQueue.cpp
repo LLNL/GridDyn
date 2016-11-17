@@ -178,7 +178,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
     }
   if (remove_events)
   {
-	  auto nextEvent = events.begin();
+	  nextEvent = events.begin();
 	  while ((*nextEvent)->m_nextTime <= cTime + timeTols)
 	  {
 		  if (((*nextEvent)->m_remove_event))
