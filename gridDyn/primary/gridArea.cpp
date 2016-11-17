@@ -1955,7 +1955,7 @@ void gridArea::delayedDerivative (const stateData *sD, double deriv[], const sol
   opObjectLists.delayedDerivative (sD, deriv, sMode);
 }
 
-void gridArea::delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridArea::delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   opObjectLists.delayedJacobian (sD, ad, sMode);
 }
@@ -1973,7 +1973,7 @@ void gridArea::derivative ( const stateData *sD, double deriv[], const solverMod
 }
 
 // Jacobian
-void gridArea::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridArea::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   opObjectLists.jacobianElements (sD, ad, sMode);
   //next do any internal control elements

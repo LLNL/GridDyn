@@ -199,7 +199,7 @@ void variableGenerator::residual (const IOdata &args, const stateData *sD, doubl
 
 }
 void variableGenerator::jacobianElements (const IOdata &args, const stateData *sD,
-                                          matrixData<double> *ad,
+                                          matrixData<double> &ad,
                                           const IOlocs &argLocs,const solverMode &sMode)
 {
   gridDynGenerator::jacobianElements  (args,sD, ad, argLocs,sMode);

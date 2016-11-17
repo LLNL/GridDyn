@@ -114,6 +114,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
   auto ret = change_code::no_change;
   auto eret = change_code::no_change;
 
+  bool remove_events = false;
   while ((*nextEvent)->m_nextTime <= cTime + timeTols)
     {
       currentEvent = nextEvent;
@@ -129,7 +130,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
                 }
               if ((*currentEvent)->m_remove_event)
                 {
-                  events.erase (currentEvent);
+				  remove_events = true;
                 }
               (*currentEvent)->partB_turn = false;
             }
@@ -164,7 +165,8 @@ change_code eventQueue::executeEventsAonly (double cTime)
             }
           if ((*currentEvent)->m_remove_event)
             {
-              events.erase (currentEvent);
+			  remove_events = true;
+              
             }
         }
 
@@ -174,6 +176,26 @@ change_code eventQueue::executeEventsAonly (double cTime)
           break;
         }
     }
+  if (remove_events)
+  {
+	  auto nextEvent = events.begin();
+	  while ((*nextEvent)->m_nextTime <= cTime + timeTols)
+	  {
+		  if (((*nextEvent)->m_remove_event))
+		  {
+			  nextEvent = events.erase(nextEvent);
+		  }
+		  else
+		  {
+			  ++nextEvent;
+		  }
+		  if (nextEvent == events.end())
+		  {
+			  break;
+		  }
+		  
+	  }
+  }
   return ret;
 }
 

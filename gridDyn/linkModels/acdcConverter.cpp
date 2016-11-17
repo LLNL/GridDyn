@@ -392,7 +392,7 @@ void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
 }
 
 
-void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (!(enabled))
     {
@@ -417,11 +417,11 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, ma
     {
       if (busId == B2->getID ())
         {
-          ad->assign (PoutLocation, vLoc, -dirMult * Idc);
+          ad.assign (PoutLocation, vLoc, -dirMult * Idc);
         }
       else
         {
-          ad->assign (QoutLocation, vLoc, -Idc * k3sq2sq * linkInfo.v1 / std::sqrt (k3sq2sq * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2));
+          ad.assign (QoutLocation, vLoc, -Idc * k3sq2sq * linkInfo.v1 / std::sqrt (k3sq2sq * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2));
         }
     }
   else
@@ -440,7 +440,7 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, ma
         {
           if (!opFlags[fixed_target_power])
             {
-              ad->assign (PoutLocation, vLoc, dirMult * linkInfo.v1 / tap);
+              ad.assign (PoutLocation, vLoc, dirMult * linkInfo.v1 / tap);
             }
         }
       else
@@ -448,18 +448,18 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, ma
           double temp = std::sqrt (k3sq2sq * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2);
           if (opFlags[fixed_target_power])
             {
-              ad->assign (QoutLocation, vLoc, -k3sq2sq * Pset * linkInfo.v1 / (linkInfo.v2 * temp));
+              ad.assign (QoutLocation, vLoc, -k3sq2sq * Pset * linkInfo.v1 / (linkInfo.v2 * temp));
             }
           else
             {
-              ad->assign (PoutLocation, vLoc, -dirMult * linkInfo.v2 / tap);
-              ad->assign (QoutLocation, vLoc, -1.0 / tap * temp - linkInfo.v1 * linkInfo.v1 / (tap * temp) * k3sq2sq);
+              ad.assign (PoutLocation, vLoc, -dirMult * linkInfo.v2 / tap);
+              ad.assign (QoutLocation, vLoc, -1.0 / tap * temp - linkInfo.v1 * linkInfo.v1 / (tap * temp) * k3sq2sq);
             }
         }
     }
 }
 
-void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -477,8 +477,8 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
 
 
 
-  //	ad->assign(B1Voffset, B2Voffset, Q1V2);
-  //	ad->assign(B2Voffset, B1Voffset, Q2V1);
+  //	ad.assign(B1Voffset, B2Voffset, Q1V2);
+  //	ad.assign(B2Voffset, B1Voffset, Q2V1);
   if (isDynamic (sMode))
     {
       /*
@@ -490,14 +490,14 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
         */
       if (busId == B2->getID ())
         {
-          ad->assignCheckCol (PoutLocation, algOffset, -dirMult * linkInfo.v2);
+          ad.assignCheckCol (PoutLocation, algOffset, -dirMult * linkInfo.v2);
         }
       else
         {
-          ad->assignCheckCol (PoutLocation, B2Voffset, dirMult * Idc);
-          ad->assign (PoutLocation, algOffset, dirMult * linkInfo.v2);
-          ad->assignCheckCol (QoutLocation, B2Voffset, -1 * (-Idc * linkInfo.v2 / std::sqrt (k3sq2 * k3sq2 * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2)));
-          ad->assign (QoutLocation, algOffset, linkFlows.Q1 / Idc);
+          ad.assignCheckCol (PoutLocation, B2Voffset, dirMult * Idc);
+          ad.assign (PoutLocation, algOffset, dirMult * linkInfo.v2);
+          ad.assignCheckCol (QoutLocation, B2Voffset, -1 * (-Idc * linkInfo.v2 / std::sqrt (k3sq2 * k3sq2 * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2)));
+          ad.assign (QoutLocation, algOffset, linkFlows.Q1 / Idc);
         }
     }
   else
@@ -516,7 +516,7 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
         {
           if (!opFlags.test (fixed_target_power))
             {
-              ad->assignCheckCol (PoutLocation, B1Voffset, dirMult * linkInfo.v2 / tap);
+              ad.assignCheckCol (PoutLocation, B1Voffset, dirMult * linkInfo.v2 / tap);
             }
         }
       else
@@ -526,12 +526,12 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
               double temp = std::sqrt (k3sq2sq * linkInfo.v1 * linkInfo.v1 - linkInfo.v2 * linkInfo.v2);
               if (opFlags[fixed_target_power])
                 {
-                  ad->assignCheckCol (QoutLocation, B2Voffset, Pset / temp + Pset * temp / (linkInfo.v2 * linkInfo.v2));
+                  ad.assignCheckCol (QoutLocation, B2Voffset, Pset / temp + Pset * temp / (linkInfo.v2 * linkInfo.v2));
                 }
               else
                 {
-                  ad->assignCheckCol (PoutLocation, B2Voffset, -dirMult * linkInfo.v1 / tap);
-                  ad->assignCheckCol (QoutLocation, B2Voffset, linkInfo.v1 / tap * linkInfo.v2 / temp);
+                  ad.assignCheckCol (PoutLocation, B2Voffset, -dirMult * linkInfo.v1 / tap);
+                  ad.assignCheckCol (QoutLocation, B2Voffset, linkInfo.v1 / tap * linkInfo.v2 / temp);
                 }
             }
 
@@ -540,7 +540,7 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
 }
 
 
-void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	auto B1Loc=B1->getOutputLocs(sMode);
   auto B1Voffset = B1Loc[voltageInLocation];
@@ -584,20 +584,20 @@ void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> *a
           a1[0] = Loc.algStateLoc[0] - I0;
           double cA = firingAngleControl->getOutput (a1, sD, sMode);
 		  refLoc = firingAngleControl->getOutputLoc(sMode);
-          ad->assignCheckCol (refAlg, B1Voffset, k3sq2 * cA);
-          ad->assignCheckCol (refAlg, B2Voffset, -1);
-          ad->assign (refAlg, refAlg, -3 / kPI * x);
-          ad->assign (refAlg, refLoc, k3sq2 * linkInfo.v1);
+          ad.assignCheckCol (refAlg, B1Voffset, k3sq2 * cA);
+          ad.assignCheckCol (refAlg, B2Voffset, -1);
+          ad.assign (refAlg, refAlg, -3 / kPI * x);
+          ad.assign (refAlg, refLoc, k3sq2 * linkInfo.v1);
 
           tad2.assign (0, refAlg, 1);
         }
       //manage the input for the
       argL[0] = 0;
-      firingAngleControl->jacobianElements (a1, sD, &tad1, argL, sMode);
+      firingAngleControl->jacobianElements (a1, sD, tad1, argL, sMode);
 
       tad2.assign (0, B1Voffset, -(1.0 / tap));
-      tad1.cascade (&tad2, 0);
-      ad->merge (&tad1);
+      tad1.cascade (tad2, 0);
+      ad.merge (tad1);
 
       if (control_mode == control_mode_t::voltage)
         {
@@ -621,16 +621,16 @@ void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> *a
 
       //resid[offset] = k3sq2*linkInfo.v1*sD->state[offset] - 3 / kPI*x*Idc - linkInfo.v2;
 
-      ad->assign (offset, offset, k3sq2 * linkInfo.v1);
+      ad.assign (offset, offset, k3sq2 * linkInfo.v1);
       if (opFlags[fixed_target_power])
         {
-          ad->assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset]);
-          ad->assignCheckCol (offset, B2Voffset, 3.0 / kPI * x * Pset / (linkInfo.v2 * linkInfo.v2) - 1.0);
+          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset]);
+          ad.assignCheckCol (offset, B2Voffset, 3.0 / kPI * x * Pset / (linkInfo.v2 * linkInfo.v2) - 1.0);
         }
       else
         {
-          ad->assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset] - 3 / kPI * x / tap);
-          ad->assignCheckCol (offset, B2Voffset, -1);
+          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset] - 3 / kPI * x / tap);
+          ad.assignCheckCol (offset, B2Voffset, -1);
         }
     }
 }

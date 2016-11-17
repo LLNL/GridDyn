@@ -355,7 +355,7 @@ double gridCoreObject::updateB ()
 {
 	if (nextUpdateTime != kNullVal)
 	{
-		while (prevTime >= nextUpdateTime)
+		while (prevTime+kSmallTime >= nextUpdateTime)
 		{
 			nextUpdateTime += updatePeriod;
 		}

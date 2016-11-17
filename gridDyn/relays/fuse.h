@@ -51,7 +51,7 @@ public:
 
   //dynamic functions for evaluation with a limit exceeded
   virtual void timestep (double ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;

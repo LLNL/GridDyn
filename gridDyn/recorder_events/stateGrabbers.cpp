@@ -191,8 +191,8 @@ static const std::map<std::string, std::string> stringTranslate
 #define FUNCTION_SIGNATURE [](gridCoreObject *obj, const stateData *sD, const solverMode &sMode)
 #define FUNCTION_SIGNATURE_OBJ_ONLY [](gridCoreObject *obj, const stateData *, const solverMode &)
 
-#define JAC_FUNCTION_SIGNATURE [](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
-#define JAC_FUNCTION_SIGNATURE_NO_STATE [](gridCoreObject *obj, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+#define JAC_FUNCTION_SIGNATURE [](gridCoreObject *obj, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+#define JAC_FUNCTION_SIGNATURE_NO_STATE [](gridCoreObject *obj, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 
 static const std::map<std::string, fstateobjectPair> objectFunctions
 {
@@ -217,8 +217,8 @@ static const std::map<std::string, fstateobjectPair> busFunctions
 
 static const std::map<std::string, objJacFunction> busJacFunctions
 {
-	{ "v",JAC_FUNCTION_SIGNATURE_NO_STATE{ ad->assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,voltageInLocation), 1.0); }  },
-	{ "angle", JAC_FUNCTION_SIGNATURE_NO_STATE{ ad->assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,angleInLocation), 1.0); } },
+	{ "v",JAC_FUNCTION_SIGNATURE_NO_STATE{ ad.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,voltageInLocation), 1.0); }  },
+	{ "angle", JAC_FUNCTION_SIGNATURE_NO_STATE{ ad.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode,angleInLocation), 1.0); } },
 };
 
 static const std::map<std::string, fstateobjectPair> areaFunctions
@@ -501,10 +501,10 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
           return static_cast<gridSecondary *> (obj)->getRealPower (kNullVec, sD, sMode);
         };
       jacCapable = true;
-      jacIfptr = [ ](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) {
+      jacIfptr = [ ](gridCoreObject *obj, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) {
           matrixDataSparse<double> b;
-          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
-          ad->copyTranslateRow (&b, 0, 0);
+          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, b, sMode);
+          ad.copyTranslateRow (b, 0, 0);
         };
     }
   else if ((fld == "reactivepower") || (fld == "reactive") || (fld == "q"))
@@ -513,10 +513,10 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
           return static_cast<gridSecondary *> (obj)->getReactivePower (kNullVec, sD, sMode);
         };
       jacCapable = true;
-      jacIfptr = [  ](gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) {
+      jacIfptr = [  ](gridCoreObject *obj, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) {
           matrixDataSparse<double> b;
-          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, &b, sMode);
-          ad->copyTranslateRow (&b, 1, 0);
+          static_cast<gridSecondary *> (obj)->outputPartialDerivatives (kNullVec, sD, b, sMode);
+          ad.copyTranslateRow (b, 1, 0);
         };
     }
   else
@@ -534,8 +534,8 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
               return (offset != kNullLocation) ? sD->state[offset] : -kBigNum;
             };
           jacCapable = true;
-          jacIfptr = [ =](gridCoreObject *,const stateData *, matrixData<double> *ad, const solverMode &) {
-              ad->assignCheckCol (0, offset, 1.0);
+          jacIfptr = [ =](gridCoreObject *,const stateData *, matrixData<double> &ad, const solverMode &) {
+              ad.assignCheckCol (0, offset, 1.0);
             };
         }
       else
@@ -587,7 +587,7 @@ void stateGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
 	objects.push_back(getObject());
 }
 
-void stateGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void stateGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!jacCapable)
     {
@@ -596,7 +596,7 @@ void stateGrabber::outputPartialDerivatives (const stateData *sD, matrixData<dou
   if (gain != 1.0)
     {
       matrixDataScale<double> bd(ad,gain); 
-      jacIfptr (cobj,sD, &bd, sMode);
+      jacIfptr (cobj,sD, bd, sMode);
     }
   else
     {
@@ -717,7 +717,7 @@ gridCoreObject *stateFunctionGrabber::getObject () const
     }
 }
 
-void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   if (!jacCapable)
@@ -731,7 +731,7 @@ void stateFunctionGrabber::outputPartialDerivatives (const stateData *sD, matrix
   double dodI = (t2 - t1) / 1e-7;
 
   matrixDataScale<double> d1(ad, dodI * gain);
-  bgrabber->outputPartialDerivatives(sD, &d1, sMode);
+  bgrabber->outputPartialDerivatives(sD, d1, sMode);
 }
 
 stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op): op_name(op)
@@ -852,7 +852,7 @@ gridCoreObject *stateOpGrabber::getObject () const
     }
 }
 
-void stateOpGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void stateOpGrabber::outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   if (!jacCapable)
@@ -870,11 +870,11 @@ void stateOpGrabber::outputPartialDerivatives (const stateData *sD, matrixData<d
   double dodI = (t2 - t1) / 1e-7;
 
   matrixDataScale<double> d1(ad, dodI * gain);
-  bgrabber1->outputPartialDerivatives(sD, &d1, sMode);
+  bgrabber1->outputPartialDerivatives(sD, d1, sMode);
 
   double t3 = opptr(grabber1Data, grabber2Data + 1e-7);
   dodI = (t3 - t1) / 1e-7;
   d1.setScale(dodI * gain);
-  bgrabber2->outputPartialDerivatives(sD, &d1, sMode);
+  bgrabber2->outputPartialDerivatives(sD, d1, sMode);
 
 }

@@ -288,7 +288,7 @@ void fuse::converge (double ttime, double state[], double dstate_dt[], const sol
   guess (ttime, state, dstate_dt, sMode);
 }
 
-void fuse::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void fuse::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   if (useI2T)
@@ -302,8 +302,8 @@ void fuse::jacobianElements (const stateData *sD, matrixData<double> *ad, const 
         {
           gridSecondary *gs = static_cast<gridSecondary *> (m_sourceObject);
           out = gs->getOutputs (args,sD,sMode);
-          gs->outputPartialDerivatives (args,sD,&d,sMode);
-          gs->ioPartialDerivatives (args,sD,&d,argLocs,sMode);
+          gs->outputPartialDerivatives (args,sD,d,sMode);
+          gs->ioPartialDerivatives (args,sD,d,argLocs,sMode);
         }
       else
         {
@@ -311,8 +311,8 @@ void fuse::jacobianElements (const stateData *sD, matrixData<double> *ad, const 
           int bid = bus->getID ();
           lnk->updateLocalCache (sD, sMode);
           out = lnk->getOutputs (bid, sD, sMode);
-          lnk->outputPartialDerivatives (bid, sD, &d, sMode);
-          lnk->ioPartialDerivatives (bid,sD,&d,argLocs,sMode);
+          lnk->outputPartialDerivatives (bid, sD, d, sMode);
+          lnk->ioPartialDerivatives (bid,sD,d,argLocs,sMode);
         }
 
 
@@ -335,16 +335,16 @@ void fuse::jacobianElements (const stateData *sD, matrixData<double> *ad, const 
 
       d.scaleRow (offset,2 * I);
 
-      ad->merge (&d);
+      ad.merge (d);
 
 
-      ad->assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD->cj);
 
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      ad->assign (offset,offset,-sD->cj);
+      ad.assign (offset,offset,-sD->cj);
     }
 
 }

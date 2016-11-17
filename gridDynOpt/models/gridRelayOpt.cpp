@@ -176,7 +176,7 @@ void gridRelayOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*
 void gridRelayOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
 {
 }
-void gridRelayOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridRelayOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 }
 
@@ -191,11 +191,11 @@ void gridRelayOpt::gradient (const optimData *, double /*deriv*/[], const optimM
 {
 
 }
-void gridRelayOpt::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridRelayOpt::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 
 }
-void gridRelayOpt::getConstraints ( const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridRelayOpt::getConstraints ( const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }

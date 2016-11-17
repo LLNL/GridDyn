@@ -94,8 +94,8 @@ public:
   }
   virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   virtual double getschedPower () const
   {

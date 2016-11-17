@@ -46,9 +46,9 @@ public:
 	virtual void derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)override;    //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
 	virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)override;
-	virtual void outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)override;
-	virtual void ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)override;
-	virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+	virtual void outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)override;
+	virtual void ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)override;
+	virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
 	virtual void rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)override;
 	virtual void rootTrigger(double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)override;

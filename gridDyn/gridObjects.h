@@ -384,7 +384,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] ad the matrixData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
@@ -392,7 +392,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
 
   //residual computation
   /** @brief compute the residual for a given state
@@ -447,7 +447,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] ad the matrixData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
 
   //for the stepwise dynamic system
   /** @brief move the object forward in time using local calculations
@@ -862,7 +862,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
@@ -871,7 +871,7 @@ public:
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> *ad, const solverMode & sMode);
+  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> &ad, const solverMode & sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to inputs
@@ -881,7 +881,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /**
   *evaluate the root functions and return the value
@@ -1059,7 +1059,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
+  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
   @param[in] args the inputs for the secondary object
@@ -1067,7 +1067,7 @@ public:
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
   /**
   *@brief compute the partial derivatives of the output states with respect to inputs
   @param[in] args the inputs for the secondary object
@@ -1076,7 +1076,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /** @brief adjust the power flow solution if needed
   @param[in] args the inputs for the secondary object

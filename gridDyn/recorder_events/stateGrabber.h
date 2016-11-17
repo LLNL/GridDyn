@@ -20,7 +20,7 @@
 #include "core/objectOperatorInterface.h"
 #include <functional>
 
-typedef std::function<void(gridCoreObject *obj, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)> objJacFunction;
+typedef std::function<void(gridCoreObject *obj, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)> objJacFunction;
 typedef std::function<double(gridCoreObject *obj, const stateData *sD, const solverMode &sMode)> objStateGrabberFunction;
 /**class for grabbing a subset of fields directly from the state vector for performing certain calculations
 */
@@ -54,7 +54,7 @@ public:
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const;
   virtual int updateField (std::string fld);
   virtual double grabData (const stateData *sD, const solverMode &sMode);
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
   virtual void updateObject (gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual gridCoreObject * getObject() const override;
   virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
@@ -99,7 +99,7 @@ public:
   stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
   virtual double grabData (const stateData *sD, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void updateObject (gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual gridCoreObject * getObject () const override;
   virtual int updateField (std::string fld) override;
@@ -121,7 +121,7 @@ public:
   stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
   virtual double grabData (const stateData *sD, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void updateObject (gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   void updateObject (gridCoreObject *obj, int num);
   virtual gridCoreObject * getObject () const override;

@@ -485,7 +485,7 @@ int kinsolJacDense (long int Neq, N_Vector u, N_Vector /*f*/, DlsMat J, void *us
   _unused(Neq);
 
   matrixDataSundialsDense a1 (J);
-  sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, &a1, 0, sd->mode);
+  sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, a1, 0, sd->mode);
   sd->jacCallCount++;
   return 0;
 }
@@ -530,11 +530,11 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
       a1->setRowLimit (sd->svsize);
       a1->setColLimit (sd->svsize);
 
-      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, a1.get (), 0, sd->mode);
+      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, *(a1.get ()), 0, sd->mode);
 
 
       sd->jacCallCount++;
-      matrixDataToSlsMat (a1.get (), J,sd->svsize);
+      matrixDataToSlsMat (*(a1.get ()), J,sd->svsize);
       sd->nnz = a1->size ();
 	  if (sd->fileCapture)
 	  {
@@ -542,7 +542,7 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
 		  {
 			  long int val = 0;
 			  KINGetNumNonlinSolvIters(sd->solverMem, &val);
-			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, a1.get(), sd->jacFile);
+			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, *(a1.get()), sd->jacFile);
 		  }
 	  }
     }
@@ -550,7 +550,7 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
     {
       //if it isn't the first we can use the SUNDIALS arraySparse object
       matrixDataSundialsSparse a1 (J);
-      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, &a1, 0, sd->mode);
+      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, a1, 0, sd->mode);
       sd->jacCallCount++;
 	  if (sd->fileCapture)
 	  {
@@ -558,7 +558,7 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
 		  {
 			  long int val = 0;
 			  KINGetNumNonlinSolvIters(sd->solverMem, &val);
-			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, &a1, sd->jacFile);
+			  writeArray(sd->solveTime,1, val, sd->mode.offsetIndex, a1, sd->jacFile);
 		  }
 	  }
     }

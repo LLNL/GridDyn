@@ -1130,7 +1130,7 @@ IOdata adjustableTransformer::getOutputs (index_t busId, const stateData *sD, co
   return acLine::getOutputs (busId,sD, sMode);
 }
 
-void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
@@ -1151,7 +1151,7 @@ void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData
   return acLine::ioPartialDerivatives (busId,sD,ad,argLocs,sMode);
 }
 
-void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
@@ -1174,7 +1174,7 @@ void adjustableTransformer::outputPartialDerivatives (index_t busId, const state
   return acLine::outputPartialDerivatives (busId, sD, ad, sMode);
 }
 
-void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1190,7 +1190,7 @@ void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<do
         }
       if (opFlags[at_limit])
         {
-          ad->assign (offset, offset, 1);
+          ad.assign (offset, offset, 1);
         }
       else
         {
@@ -1200,7 +1200,7 @@ void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<do
             }
           else if (cMode == control_mode_t::voltage_control)
             {
-              ad->assignCheckCol (offset, controlBus->getOutputLoc(sMode,voltageInLocation), 1);
+              ad.assignCheckCol (offset, controlBus->getOutputLoc(sMode,voltageInLocation), 1);
             }
           else if (cMode == control_mode_t::MVar_control)
             {
@@ -1441,7 +1441,7 @@ void adjustableTransformer::rootTrigger (double /*ttime*/, const std::vector<int
 }
 
 
-void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -1466,24 +1466,24 @@ void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, 
     {
       //dP2/dta
       double temp = tvg * sinTheta2 - tvb * cosTheta2;
-      ad->assign (PoutLocation, offset, temp);
+      ad.assign (PoutLocation, offset, temp);
       //dQ2/dta
       temp = -tvg * cosTheta2 - tvb * sinTheta2;
-      ad->assign (QoutLocation, offset, temp);
+      ad.assign (QoutLocation, offset, temp);
     }
   else
     {
       //dP1/dta
       double temp = -tvg * sinTheta1 + tvb * cosTheta1;
-      ad->assign (PoutLocation, offset, temp);
+      ad.assign (PoutLocation, offset, temp);
       //dQ1/dta
       temp = tvg * cosTheta1 - tvb * sinTheta1;
-      ad->assign (QoutLocation, offset, temp);
+      ad.assign (QoutLocation, offset, temp);
     }
 
 }
 
-void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
 
 
@@ -1518,25 +1518,25 @@ void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matri
     {
       //dP2/dtap
       double temp = tvg / tap * cosTheta2 + tvb / tap * sinTheta2;
-      ad->assign (PoutLocation, offset, temp);
+      ad.assign (PoutLocation, offset, temp);
       //dQ2/dtap
       temp = -tvg / tap * sinTheta2 - tvb / tap * cosTheta2;
-      ad->assign (QoutLocation, offset, temp);
+      ad.assign (QoutLocation, offset, temp);
     }
   else
     {
       //dP1/dtap
       double temp = -P1 / tap - (g + 0.5 * mp_G) / (tap * tap * tap) * v1 * v1;
-      ad->assign (PoutLocation, offset, temp);
+      ad.assign (PoutLocation, offset, temp);
       //dQ1/dtap
       temp = -Q1 / tap + (b + 0.5 * mp_B) / (tap * tap * tap) * v1 * v1;
-      ad->assign (QoutLocation, offset, temp);
+      ad.assign (QoutLocation, offset, temp);
     }
 
 }
 
 
-void adjustableTransformer::MWJac (const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::MWJac (const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -1561,27 +1561,27 @@ void adjustableTransformer::MWJac (const stateData *, matrixData<double> *ad, co
 
   //compute the DP1/dta
   double temp = -tvg * sinTheta1 + tvb * cosTheta1;
-  ad->assign (offset, offset, temp);
+  ad.assign (offset, offset, temp);
 
 
   temp = tvg * sinTheta1 - tvb * cosTheta1;
-  ad->assignCheckCol (offset, B1Aoffset, temp);
+  ad.assignCheckCol (offset, B1Aoffset, temp);
 
   //dP1/dV1
   temp = -v2 * (g * cosTheta1 + b * sinTheta1) / tap + 2 * (g + mp_G * 0.5) / (tap * tap) * v1;
-  ad->assignCheckCol (offset, B1Voffset, temp);
+  ad.assignCheckCol (offset, B1Voffset, temp);
 
   //dP1/dA2
   temp = -tvg * sinTheta1 - tvb * cosTheta1;
-  ad->assignCheckCol (offset, B2Aoffset, temp);
+  ad.assignCheckCol (offset, B2Aoffset, temp);
 
   //dP1/dV2
   temp = -v1 * (g * cosTheta1 + b * sinTheta1) / tap;
-  ad->assignCheckCol (offset, B2Voffset, temp);
+  ad.assignCheckCol (offset, B2Voffset, temp);
 
 }
 
-void adjustableTransformer::MVarJac (const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void adjustableTransformer::MVarJac (const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
   double v1, v2;
   double sinTheta1, cosTheta1, sinTheta2, cosTheta2;
@@ -1621,24 +1621,24 @@ void adjustableTransformer::MVarJac (const stateData *, matrixData<double> *ad, 
 
   //compute the DQ2/dta
   temp = -tvg / tap * sinTheta2 - tvb / tap * cosTheta2;
-  ad->assign (offset, offset, temp);
+  ad.assign (offset, offset, temp);
 
 
   //dQ2/dA1
   temp = tvg * cosTheta2 + tvb * sinTheta2;
-  ad->assignCheckCol (offset, B1Aoffset, temp);
+  ad.assignCheckCol (offset, B1Aoffset, temp);
 
   //dQ2/dV1
   temp = -v2 * (g * sinTheta2 - b * cosTheta2) / tap;
-  ad->assignCheckCol (offset, B1Voffset, temp);
+  ad.assignCheckCol (offset, B1Voffset, temp);
 
   //dQ2/dA2
   temp = -tvg * cosTheta2 - tvb * sinTheta2;
-  ad->assignCheckCol (offset, B2Aoffset, temp);
+  ad.assignCheckCol (offset, B2Aoffset, temp);
 
   //dQ2/dV2
   temp = -2.0 * (b + 0.5 * mp_B) * v2 - g * v1 / tap * sinTheta2 + b * v1 / tap * cosTheta2;
-  ad->assignCheckCol (offset, B2Voffset, temp);
+  ad.assignCheckCol (offset, B2Voffset, temp);
 
 }
 

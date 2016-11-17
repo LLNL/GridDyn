@@ -384,11 +384,11 @@ void svd::derivative (const IOdata & /*args*/, const stateData *, double /*deriv
 {
 }
 
-void svd::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *, const solverMode &)
+void svd::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &, const solverMode &)
 {
 }
 
-void svd::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode &)
+void svd::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode &)
 {
 }
 void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std::string & /*prefix*/) const

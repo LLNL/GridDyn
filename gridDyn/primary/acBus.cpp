@@ -2220,7 +2220,7 @@ void acBus::derivative (const stateData *sD, double deriv[], const solverMode &s
 }
 
 // Jacobian
-void acBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void acBus::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   gridBus::jacobianElements (sD, ad, sMode);
 
@@ -2246,32 +2246,32 @@ void acBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
     {
       if (useVoltage (sMode))
         {
-          ad->assignCheckCol (Voffset, Aoffset, partDeriv.at (QoutLocation, angleInLocation));
-          ad->assign (Voffset, Voffset, partDeriv.at (QoutLocation, voltageInLocation));
+          ad.assignCheckCol (Voffset, Aoffset, partDeriv.at (QoutLocation, angleInLocation));
+          ad.assign (Voffset, Voffset, partDeriv.at (QoutLocation, voltageInLocation));
           if (opFlags[uses_bus_frequency])
             {
-              ad->assignCheckCol (Voffset, outLocs[frequencyInLocation], partDeriv.at (QoutLocation, frequencyInLocation));
+              ad.assignCheckCol (Voffset, outLocs[frequencyInLocation], partDeriv.at (QoutLocation, frequencyInLocation));
             }
         }
       else
         {
-          ad->assign (Voffset, Voffset, 1);
+          ad.assign (Voffset, Voffset, 1);
         }
     }
   if (Aoffset != kNullLocation)
     {
       if (useAngle (sMode))
         {
-          ad->assign (Aoffset, Aoffset, partDeriv.at (PoutLocation, angleInLocation));
-          ad->assignCheckCol (Aoffset, Voffset, partDeriv.at (PoutLocation, voltageInLocation));
+          ad.assign (Aoffset, Aoffset, partDeriv.at (PoutLocation, angleInLocation));
+          ad.assignCheckCol (Aoffset, Voffset, partDeriv.at (PoutLocation, voltageInLocation));
           if (opFlags[uses_bus_frequency])
             {
-              ad->assignCheckCol (Aoffset, outLocs[frequencyInLocation], partDeriv.at (PoutLocation, frequencyInLocation));
+              ad.assignCheckCol (Aoffset, outLocs[frequencyInLocation], partDeriv.at (PoutLocation, frequencyInLocation));
             }
         }
       else
         {
-          ad->assign (Aoffset, Aoffset, 1);
+          ad.assign (Aoffset, Aoffset, 1);
         }
     }
 
@@ -2291,14 +2291,14 @@ void acBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
           if (gen->jacSize (sMode) > 0)
             {
 
-              gen->outputPartialDerivatives (outputs, sD, &od, sMode);
+              gen->outputPartialDerivatives (outputs, sD, od, sMode);
             }
         }
       for (auto &load : attachedLoads)
         {
           if (load->jacSize (sMode) > 0)
             {
-              load->outputPartialDerivatives (outputs, sD, &od, sMode);
+              load->outputPartialDerivatives (outputs, sD, od, sMode);
             }
 
         }
@@ -2312,7 +2312,7 @@ void acBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
   int gid = getID ();
   for (auto &link : attachedLinks)
     {
-      link->outputPartialDerivatives (gid, sD, &od, sMode);
+      link->outputPartialDerivatives (gid, sD, od, sMode);
     }
 
 }
@@ -3295,7 +3295,7 @@ void acBus::computeDerivatives (const stateData *sD, const solverMode &sMode)
       if (link->enabled)
         {
           link->updateLocalCache (sD, sMode);
-          link->ioPartialDerivatives (getID (), sD, &partDeriv, inLoc, sMode);
+          link->ioPartialDerivatives (getID (), sD, partDeriv, inLoc, sMode);
         }
     }
   if (!isExtended (sMode))
@@ -3304,7 +3304,7 @@ void acBus::computeDerivatives (const stateData *sD, const solverMode &sMode)
         {
           if (gen->isConnected ())
             {
-              gen->ioPartialDerivatives (outputs, sD, &partDeriv, inLoc, sMode);
+              gen->ioPartialDerivatives (outputs, sD, partDeriv, inLoc, sMode);
             }
         }
       for (auto &load : attachedLoads)
@@ -3312,7 +3312,7 @@ void acBus::computeDerivatives (const stateData *sD, const solverMode &sMode)
           if (load->isConnected ())
             {
 
-              load->ioPartialDerivatives (outputs, sD, &partDeriv, inLoc, sMode);
+              load->ioPartialDerivatives (outputs, sD, partDeriv, inLoc, sMode);
             }
         }
     }

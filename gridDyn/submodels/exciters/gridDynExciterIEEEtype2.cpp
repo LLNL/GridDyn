@@ -115,7 +115,7 @@ void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData *s
 
 // Jacobian
 void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                                matrixData<double> *ad,
+                                                matrixData<double> &ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
@@ -126,38 +126,38 @@ void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const s
   int refI = offset;
   double temp1;
   auto VLoc = argLocs[0];
-  // use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  // use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
   temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
-  ad->assign ( refI, refI, temp1);
-  ad->assign ( refI, refI + 1, 1.0 / Te);
+  ad.assign ( refI, refI, temp1);
+  ad.assign ( refI, refI + 1, 1.0 / Te);
 
   if (opFlags[outside_vlim])
     {
-      ad->assign (refI + 1, refI + 1, sD->cj);
+      ad.assign (refI + 1, refI + 1, sD->cj);
     }
   else
     {
       // Vr
       if (VLoc != kNullLocation)
         {
-          ad->assign (refI + 1, VLoc, -Ka / Ta);
+          ad.assign (refI + 1, VLoc, -Ka / Ta);
         }
-      ad->assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
-      ad->assign (refI + 1, refI + 2, Ka * Kf / Ta);
+      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
+      ad.assign (refI + 1, refI + 2, Ka * Kf / Ta);
     }
 
 
   // X1
-  ad->assign ( refI + 2, refI + 1,  1.0 / (Tf * Tf2));
-  ad->assign ( refI + 2, refI + 2, -1.0 / Tf - sD->cj);
-  ad->assign ( refI + 2, refI + 3, -1.0 / (Tf * Tf2));
+  ad.assign ( refI + 2, refI + 1,  1.0 / (Tf * Tf2));
+  ad.assign ( refI + 2, refI + 2, -1.0 / Tf - sD->cj);
+  ad.assign ( refI + 2, refI + 3, -1.0 / (Tf * Tf2));
 
   // X2
-  ad->assign (refI + 3, refI + 1, 1.0 / Tf2);
-  ad->assign (refI + 3, refI + 3, -1.0 / Tf2 - sD->cj);
+  ad.assign (refI + 3, refI + 1, 1.0 / Tf2);
+  ad.assign (refI + 3, refI + 3, -1.0 / Tf2 - sD->cj);
 
 
   //printf("%f\n",sD->cj);

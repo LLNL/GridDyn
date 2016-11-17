@@ -85,7 +85,7 @@ void gridDynPSS::set (const std::string &param, double val, gridUnits::units_t u
 }
 
 void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
-                                   matrixData<double> *,
+                                   matrixData<double> &,
                                    const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))

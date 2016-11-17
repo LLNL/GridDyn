@@ -47,9 +47,9 @@ public:
 
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;    //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
 

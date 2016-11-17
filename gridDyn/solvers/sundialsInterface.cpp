@@ -216,16 +216,16 @@ bool isSlsMatSetup (SlsMat J)
   return true;
 }
 
-void matrixDataToSlsMat (matrixData<double> *ad, SlsMat J,count_t svsize)
+void matrixDataToSlsMat (matrixData<double> &ad, SlsMat J,count_t svsize)
 {
   count_t colval = 0;
   J->colptrs[0] = colval;
 
-  ad->compact ();
+  ad.compact ();
 
-  int sz = static_cast<int> (ad->size());
+  int sz = static_cast<int> (ad.size());
 	/*
-  auto itel = ad->begin();
+  auto itel = ad.begin();
   for (int kk = 0; kk < sz; ++kk)
   {
 	  auto tp = *itel;
@@ -244,10 +244,10 @@ void matrixDataToSlsMat (matrixData<double> *ad, SlsMat J,count_t svsize)
   //SlsSetToZero(J);
 	
 
-  ad->start ();
+  ad.start ();
   for (int kk = 0; kk < sz; ++kk)
     {
-      auto tp = ad->next ();
+      auto tp = ad.next ();
       //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
       if (tp.col > colval)
         {

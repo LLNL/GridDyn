@@ -802,7 +802,7 @@ int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint3
 	return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> *a1, const std::string&filename, bool append)
+int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -823,12 +823,12 @@ int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_
 	bFile.write((char *)(&code), sizeof(std::uint32_t));
 	bFile.write((char *)(&index), sizeof(std::uint32_t));
 	bFile.write((char *)(&key), sizeof(std::uint32_t));
-	std::uint32_t numElements = a1->size();
+	std::uint32_t numElements = a1.size();
 	bFile.write((char *)(&numElements), sizeof(std::uint32_t));
-	a1->start();
+	a1.start();
 	for (size_t nn = 0; nn < numElements; ++nn)
 	{
-		auto el = a1->next();
+		auto el = a1.next();
 		bFile.write((char *)(&el), sizeof(matrixElement<double>));
 	}
 	return FUNCTION_EXECUTION_SUCCESS;
@@ -1040,7 +1040,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 
   sD.cj = 10000;
 
-  gds->jacobianElements (&sD, &ad, sMode);
+  gds->jacobianElements (&sD, ad, sMode);
 
   stringVec stateNames;
   gds->getStateName (stateNames, sMode);
@@ -1094,7 +1094,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
   stateData sD (gds->getCurrentTime (), sd->state_data (), sd->deriv_data ());
 
   sD.cj = 10000;
-  gds->jacobianElements (&sD, &ad, sMode);
+  gds->jacobianElements (&sD, ad, sMode);
 
 
   stringVec stateNames;

@@ -59,7 +59,7 @@ bool isSlsMatSetup (SlsMat J);
 @param[out] J the SUNDIALS matrix to store the data
 @param[in] svsize the number of states representing the matrix
 */
-void matrixDataToSlsMat (matrixData<double> *ad, SlsMat J,count_t svsize);
+void matrixDataToSlsMat (matrixData<double> &ad, SlsMat J,count_t svsize);
 
 #endif
 /** brief abstract base class for SUNDIALS based solverInterface objects doesn't really do anything on its own

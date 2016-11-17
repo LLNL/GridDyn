@@ -1334,7 +1334,7 @@ static const IOlocs kNullLocations {
 };
 
 // Jacobian
-void gridBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridBus::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   updateLocalCache (sD, sMode);
   // import bus values (current theta and voltage)

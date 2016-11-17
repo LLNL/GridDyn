@@ -214,7 +214,7 @@ public:
   \param ad the structure for storing \frac{dC_i}{dO_j}
   \param oMode the optimization mode to use.
   */
-  virtual void jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
+  virtual void jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode);
 
   //constraint functions
   /** get the linear constraint operations
@@ -224,7 +224,7 @@ public:
   \param[out] lowerLimit value for the lower bound on the constraint function
   \param[in] oMode the optimization mode to use.
   */
-  virtual void getConstraints (const optimData *oD, matrixData<double> * cons, double upperLimit[], double lowerLimit[], const optimMode &oMode);
+  virtual void getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode);
 
   /** get the linear constraint operations
   \param oD  the current object variable values
@@ -237,14 +237,14 @@ public:
   \param ad the structure for the constraint Jacobian entries
   \param oMode the optimization mode to use.
   */
-  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
+  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode);
 
   /** get the Hessian array for the objective function
   \param oD  the current object variable values
   \param ad the structure for the constraint Jacobian entries
   \param oMode the optimization mode to use.
   */
-  virtual void hessianElements(const optimData *oD, matrixData<double> *ad, const optimMode &oMode);
+  virtual void hessianElements(const optimData *oD, matrixData<double> &ad, const optimMode &oMode);
 
   /** get the names of the objective variables
   \param objNames  the location to store the names

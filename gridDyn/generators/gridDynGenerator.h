@@ -23,6 +23,7 @@ class gridDynPSS;
 class gridSource;
 class scheduler;
 class gridBus;
+class isocController;
 
 /**
 @ brief class describing a generator unit
@@ -58,20 +59,21 @@ public:
     at_limit = object_flag7,                            //!< flag indicating the generator is operating at a limit
     indirect_voltage_control_level = object_flag8,  //!< flag indicating that the generator should perform voltage control indirectly in power flow
     internal_frequency_calculation = object_flag9,  //!<flag indicating that the generator computes the frequency internally
+	isochronous_operation=object_flag10,			//!<flag telling the generator to operation is isochronous mode
   };
-  /** @brief enum indicating submodel locations in the subObject structure*/
+  /** @brief enum indicating subModel locations in the subObject structure*/
   enum submodel_locations
   {
-    genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4, pset_loc=5, vset_loc=6 
+    genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4, pset_loc=5, vset_loc=6, isoc_control=7,
   };
-  static std::atomic<count_t> genCount;                                      //!< generator count
+  static std::atomic<count_t> genCount;      //!< generator count
   double baseVoltage = 120;             //!< [V] base voltage
 protected:
-  double Qmax = kBigNum;                                             //!< [pu mbase] max steady state reactive power values for Power flow analysis
-  double Qmin = -kBigNum;                               //!< [pu mbase] min steady state reactive power values for Power flow analysis
+  double Qmax = kBigNum;              //!< [pu mbase] max steady state reactive power values for Power flow analysis
+  double Qmin = -kBigNum;             //!< [pu mbase] min steady state reactive power values for Power flow analysis
   double Pmax = kBigNum;              //!< [pu mbase]max steady state real power values for the generator
   double Pmin = -kBigNum;         //!< [pu mbase] min steady state real power values for the generator
-  double participation = 1.0;                                   //!< [%]a participation factor used in auto allocating load.
+  double participation = 1.0;          //!< [%]a participation factor used in auto allocating load.
   double vRegFraction = 1.0;                 //!< [%]  fraction of output reactive power to maintain voltage regulation
   double machineBasePower = 100;                          //!< MW the internal base power of the generator;
   gridBus *bus = nullptr;                                               //!< pointer to the parent bus (usually just a cast of the parent object
@@ -82,6 +84,7 @@ protected:
   gridSource *pSetControl = nullptr;				//!< source for throttle control
   gridSource *vSetControl = nullptr;				//!< source for voltage level control
   scheduler *sched = nullptr;			//!< alias to pSetControl if pSetControl is a scheduler
+  isocController *isoc = nullptr;		//!< pointer to a isochronous controller
   double P = 0.0;                    //!< [pu] Electrical generation real power output
   double Q = 0.0;                    //!< [pu] Electrical generation reactive power output
   double Pset = -kBigNum;                    //!< [pu] target power set point
@@ -101,7 +104,6 @@ protected:
   std::vector<double> PC;                       //!< power control point for the capability curve
   std::vector<double> minQPC;           //!< min reactive power corresponding to the PC point
   std::vector<double> maxQPC;           //!< max reactive power corresponding to the PC points
-
 public:
   static dynModel_t dynModelFromString (const std::string &dynModelType);
   /** @brief default constructor
@@ -140,9 +142,9 @@ public:
 
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
   virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
@@ -182,20 +184,20 @@ public:
   virtual double getAdjustableCapacityUp (double time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
   virtual double getAdjustableCapacityDown (double time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
 /** @brief get the maximum generation attainable in a specific amount of time
-@param[in] time  the time window to acheive the generation
+@param[in] time  the time window to achieve the generation
 @return the max real power*/
   virtual double getPmax (double time = kBigNum) const;
   /** @brief get the maximum reactive generation attainable in a specific amount of time
-  @param[in] time  the time window to acheive the generation
+  @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the max reactive power*/
   virtual double getQmax (double time = kBigNum,double Ptest = -kBigNum ) const;
   /** @brief get the minimum real generation attainable in a specific amount of time
-  @param[in] time  the time window to acheive the generation
+  @param[in] time  the time window to achieve the generation
   @return the max real power*/
   virtual double getPmin (double time = kBigNum) const;
   /** @brief get the minimum reactive generation attainable in a specific amount of time
-  @param[in] time  the time window to acheive the generation
+  @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the min reactive power*/
   virtual double getQmin (double time = kBigNum, double Ptest = -kBigNum) const;
@@ -216,34 +218,29 @@ protected:
   virtual index_t pSetLocation(const solverMode &sMode);
   virtual index_t vSetLocation(const solverMode &sMode);
 
-private:
+protected:
   class subModelInputs
   {
 public:
-    IOdata genModelInputs;
-    IOdata exciterInputs;
-    IOdata governorInputs;
-    IOdata pssInputs;
+	std::vector<IOdata> inputs;
     count_t seqID = 0;
     subModelInputs ();
   };
   class subModelInputLocs
   {
 public:
-    IOlocs genModelInputLocsAll;
+    
     IOlocs genModelInputLocsInternal;
     IOlocs genModelInputLocsExternal;
-    IOlocs exciterInputLocs;
-    IOlocs governorInputLocs;
-    IOlocs pssInputLocs;
+	std::vector<IOlocs> inputLocs;
     count_t seqID = 0;
     subModelInputLocs ();
   };
   subModelInputs subInputs;
   subModelInputLocs subInputLocs;
 
-  void generateSubModelInputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
-  void generateSubModelInputLocs (const IOlocs &argLocs, const stateData *sD, const solverMode &sMode);
+  virtual void generateSubModelInputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual void generateSubModelInputLocs (const IOlocs &argLocs, const stateData *sD, const solverMode &sMode);
 
   gridSubModel * replaceSubObject (gridSubModel *newObject, gridSubModel *oldObject,index_t newIndex);
   void setRemoteBus (gridCoreObject *newRemoteBus);

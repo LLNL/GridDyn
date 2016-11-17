@@ -460,7 +460,7 @@ void basicBlock::derivative (const IOdata &args, const stateData *sD, double der
 }
 
 
-void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   if ((opFlags[differential_output]) && (hasDifferential (sMode)))
@@ -468,28 +468,28 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
       auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
       if (!opFlags[use_state])
         {
-          ad->assignCheckCol (offset, argLoc, K * sD->cj);
-          ad->assign (offset, offset, -sD->cj);
+          ad.assignCheckCol (offset, argLoc, K * sD->cj);
+          ad.assign (offset, offset, -sD->cj);
         }
       if (limiter_diff > 0)
         {
           if (opFlags[use_ramp_limits])
             {
               --offset;
-              ad->assign (offset, offset, -sD->cj);
+              ad.assign (offset, offset, -sD->cj);
 
               if (!opFlags[ramp_limit_triggered])
                 {
-                  ad->assign (offset, offset + 1, sD->cj);
+                  ad.assign (offset, offset + 1, sD->cj);
                 }
             }
           if (opFlags[use_block_limits])
             {
               --offset;
-              ad->assign (offset, offset, -sD->cj);
+              ad.assign (offset, offset, -sD->cj);
               if (!opFlags[outside_lim])
                 {
-                  ad->assign (offset, offset + 1, sD->cj);
+                  ad.assign (offset, offset + 1, sD->cj);
                 }
             }
         }
@@ -500,23 +500,23 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
       auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
       if (!opFlags[use_state])
         {
-          ad->assignCheckCol (offset, argLoc, K);
-          ad->assign (offset, offset, -1);
+          ad.assignCheckCol (offset, argLoc, K);
+          ad.assign (offset, offset, -1);
         }
       if (limiter_alg > 0)
         {
           --offset;
-          ad->assign (offset, offset, -1);
+          ad.assign (offset, offset, -1);
           if (!opFlags[outside_lim])
             {
-              ad->assign (offset, offset + 1, 1.0);
+              ad.assign (offset, offset + 1, 1.0);
             }
         }
     }
 }
 
 
-void basicBlock::jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void basicBlock::jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   jacElements  (args[0], (args.size () > 1) ? args[1] : 0.0,sD, ad, argLocs[0], sMode);
 

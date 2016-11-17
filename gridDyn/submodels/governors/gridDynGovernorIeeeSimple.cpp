@@ -137,7 +137,7 @@ void gridDynGovernorIeeeSimple::timestep (double ttime,  const IOdata &args, con
   prevTime = ttime;
 }
 
-void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -146,8 +146,8 @@ void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const
   Lp Loc = offsets.getLocations (sD,nullptr, sMode, this);
 
   int refI = Loc.diffOffset;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   bool linkOmega = true;
   if (argLocs[govOmegaInLocation] == kNullLocation)
     {
@@ -167,22 +167,22 @@ void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const
     {
       if (!opFlags.test (p_limited))
         {
-          ad->assign (refI, argLocs[govOmegaInLocation], -K * T2 / (T1 * T3));
+          ad.assign (refI, argLocs[govOmegaInLocation], -K * T2 / (T1 * T3));
         }
-      ad->assign (refI + 1, argLocs[govOmegaInLocation], (T1 - T2) / (T1 * T1));
+      ad.assign (refI + 1, argLocs[govOmegaInLocation], (T1 - T2) / (T1 * T1));
     }
   if (opFlags.test (p_limited))
     {
-      ad->assign (refI, refI, sD->cj);
+      ad.assign (refI, refI, sD->cj);
     }
   else
     {
-      ad->assign (refI, refI, -1 / T3 - sD->cj);
-      ad->assign (refI, refI + 1, -K / T3);
+      ad.assign (refI, refI, -1 / T3 - sD->cj);
+      ad.assign (refI, refI + 1, -K / T3);
 
-      ad->assignCheck (refI, argLocs[govpSetInLocation], 1 / T3);
+      ad.assignCheck (refI, argLocs[govpSetInLocation], 1 / T3);
     }
-  ad->assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
+  ad.assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
 }
 
 

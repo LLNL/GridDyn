@@ -108,7 +108,7 @@ void controlSystem::residual (const IOdata & /*args*/, const stateData *, double
 }
 
 void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData *,
-                                      matrixData<double> *,
+                                      matrixData<double> &,
                                       const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 

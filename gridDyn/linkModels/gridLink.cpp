@@ -581,18 +581,18 @@ void gridLink::computePowers ()
 
 }
 
-void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 
 }
 
-void gridLink::outputPartialDerivatives (const stateData *, matrixData<double> *, const solverMode &)
+void gridLink::outputPartialDerivatives (const stateData *, matrixData<double> &, const solverMode &)
 {
 
 }
 
-void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> *, const solverMode &)
+void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const solverMode &)
 {
 
 

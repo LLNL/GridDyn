@@ -247,7 +247,6 @@ stringVec fmiCoSimSubModel::getInputNames() const
 
 void fmiCoSimSubModel::set(const std::string &param, const std::string &val)
 {
-	int out = PARAMETER_FOUND;
 	if (param == "fmu")
 	{
 		if (!(cs))
@@ -650,7 +649,7 @@ double fmiCoSimSubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 	return res;
 }
 void fmiCoSimSubModel::jacobianElements(const IOdata &args, const stateData *sD,
-	matrixData<double> *ad,
+	matrixData<double> &ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
 	
@@ -710,7 +709,7 @@ void fmiCoSimSubModel::timestep(double ttime, const IOdata &args, const solverMo
 	
 }
 
-void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 /*	updateInfo(args, sD, sMode);
 	double res;
@@ -733,7 +732,7 @@ void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData 
 		{
 			if (vu == inputVarIndices[sR])
 			{
-				ad->assign(kk, sR, 1.0);
+				ad.assign(kk, sR, 1.0);
 			}
 			else
 			{
@@ -741,7 +740,7 @@ void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData 
 				res = getPartial(vu, inputVarIndices[sR], kmode);
 				if (res != 0.0)
 				{
-					ad->assign(kk, sR, res);
+					ad.assign(kk, sR, res);
 				}
 
 			}
@@ -751,7 +750,7 @@ void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData 
 
 }
 
-void fmiCoSimSubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void fmiCoSimSubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
 

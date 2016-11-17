@@ -173,14 +173,14 @@ public:
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
   virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
   virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
 

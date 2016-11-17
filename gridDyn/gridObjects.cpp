@@ -1078,7 +1078,7 @@ void gridObject::updateFlags (bool dynamicsFlags)
 {
   for (auto &so:subObjectList)
     {
-      if (so->enabled)
+      if ((so)&&(so->enabled))
         {
           opFlags |= so->cascadingFlags ();
         }

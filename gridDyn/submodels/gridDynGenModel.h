@@ -59,7 +59,7 @@ public:
 
   virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut = 0) const override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   //TODO:: PT split these into separate functions for getting the value and getting the offset
   virtual double getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const;
@@ -101,9 +101,9 @@ public:
 
   virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut = 0) const override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
   /** helper function to get omega and its state location

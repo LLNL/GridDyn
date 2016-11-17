@@ -148,10 +148,10 @@ void gridDynGenModel5type2::residual (const IOdata &args, const stateData *sD, d
 
 
 void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateData *sD,
-                                              matrixData<double> *ad,
+                                              matrixData<double> &ad,
                                               const IOlocs &argLocs, const solverMode &sMode)
 {
-  // ad->assign (arrayIndex, RowIndex, ColIndex, value) const
+  // ad.assign (arrayIndex, RowIndex, ColIndex, value) const
   Lp Loc = offsets.getLocations (sD, sMode, this);
 
   auto refAlg = Loc.algOffset;
@@ -170,22 +170,22 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
     {
       if (TLoc != kNullLocation)
         {
-          ad->assign (refAlg, TLoc, Vq);
-          ad->assign (refAlg + 1, TLoc, -Vd);
+          ad.assign (refAlg, TLoc, Vq);
+          ad.assign (refAlg + 1, TLoc, -Vd);
         }
 
       // Q
       if (VLoc != kNullLocation)
         {
-          ad->assign (refAlg, VLoc, Vd / V);
-          ad->assign (refAlg + 1, VLoc, Vq / V);
+          ad.assign (refAlg, VLoc, Vd / V);
+          ad.assign (refAlg + 1, VLoc, Vq / V);
         }
 
-      ad->assign (refAlg, refAlg, Rs);
-      ad->assign (refAlg, refAlg + 1, (Xqpp));
+      ad.assign (refAlg, refAlg, Rs);
+      ad.assign (refAlg, refAlg + 1, (Xqpp));
 
-      ad->assign (refAlg + 1, refAlg, -(Xdpp));
-      ad->assign (refAlg + 1, refAlg + 1, Rs);
+      ad.assign (refAlg + 1, refAlg, -(Xdpp));
+      ad.assign (refAlg + 1, refAlg + 1, Rs);
 
       if (isAlgebraicOnly (sMode))
         {
@@ -194,30 +194,30 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
 
       // Id Differential
 
-      ad->assign (refAlg, refDiff, -Vq);
-      ad->assign (refAlg, refDiff + 2, -1.0);
+      ad.assign (refAlg, refDiff, -Vq);
+      ad.assign (refAlg, refDiff + 2, -1.0);
 
       // Iq differential
 
-      ad->assign (refAlg + 1, refDiff, Vd);
-      ad->assign (refAlg + 1, refDiff + 4, -1.0);
+      ad.assign (refAlg + 1, refDiff, Vd);
+      ad.assign (refAlg + 1, refDiff + 4, -1.0);
     }
   // delta
-  ad->assign (refDiff, refDiff, -sD->cj);
-  ad->assign (refDiff, refDiff + 1, m_baseFreq);
+  ad.assign (refDiff, refDiff, -sD->cj);
+  ad.assign (refDiff, refDiff + 1, m_baseFreq);
 
   // omega
   double kVal = -0.5  / H;
   if (hasAlgebraic (sMode))
     {
-      ad->assign (refDiff + 1, refAlg, -0.5  * (gmd[2] + (Xdpp - Xqpp) * gm[1]) / H);
-      ad->assign (refDiff + 1, refAlg + 1, -0.5  * (gmd[4] + (Xdpp - Xqpp) * gm[0]) / H);
+      ad.assign (refDiff + 1, refAlg, -0.5  * (gmd[2] + (Xdpp - Xqpp) * gm[1]) / H);
+      ad.assign (refDiff + 1, refAlg + 1, -0.5  * (gmd[4] + (Xdpp - Xqpp) * gm[0]) / H);
     }
-  ad->assign (refDiff + 1, refDiff + 1, -0.5 *  D / H - sD->cj);
-  ad->assign (refDiff + 1, refDiff + 2, -0.5  * gm[0] / H);
-  ad->assign (refDiff + 1, refDiff + 4, -0.5  * gm[1] / H);
+  ad.assign (refDiff + 1, refDiff + 1, -0.5 *  D / H - sD->cj);
+  ad.assign (refDiff + 1, refDiff + 2, -0.5  * gm[0] / H);
+  ad.assign (refDiff + 1, refDiff + 4, -0.5  * gm[1] / H);
 
-  ad->assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);          // governor: Pm
+  ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);          // governor: Pm
 
 
   double drat = Tdopp * (Xdpp + Xl) / (Tdop * (Xqp + Xl));
@@ -225,31 +225,31 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
   // Edpp
   if (hasAlgebraic (sMode))
     {
-      ad->assign (refDiff + 2, refAlg + 1, -(Xq - Xqpp) / Tqopp);
+      ad.assign (refDiff + 2, refAlg + 1, -(Xq - Xqpp) / Tqopp);
     }
-  ad->assign (refDiff + 2, refDiff + 2, -1 / Tqopp - sD->cj);
+  ad.assign (refDiff + 2, refDiff + 2, -1 / Tqopp - sD->cj);
 
   // Eqp
   if (hasAlgebraic (sMode))
     {
-      ad->assign (refDiff + 3, refAlg, (Xd - Xdp - drat * (Xd - Xdp)) / Tdop);
+      ad.assign (refDiff + 3, refAlg, (Xd - Xdp - drat * (Xd - Xdp)) / Tdop);
     }
-  ad->assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD->cj);
+  ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD->cj);
 
   if (argLocs[genModelEftInLocation] != kNullLocation)        //check if exciter exists
     {
-      ad->assign (refDiff + 3, argLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
-      ad->assign (refDiff + 4, argLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
+      ad.assign (refDiff + 3, argLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
+      ad.assign (refDiff + 4, argLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
     }
 
 
   //Eqpp
   if (hasAlgebraic (sMode))
     {
-      ad->assign (refDiff + 4, refAlg, (Xdp - Xdpp + drat * (Xd - Xdp)) / Tdopp);
+      ad.assign (refDiff + 4, refAlg, (Xdp - Xdpp + drat * (Xd - Xdp)) / Tdopp);
     }
-  ad->assign (refDiff + 4, refDiff + 3, 1.0 / Tdopp);
-  ad->assign (refDiff + 4, refDiff + 4, -1.0 / Tdopp - sD->cj);
+  ad.assign (refDiff + 4, refDiff + 3, 1.0 / Tdopp);
+  ad.assign (refDiff + 4, refDiff + 4, -1.0 / Tdopp - sD->cj);
 
 }
 

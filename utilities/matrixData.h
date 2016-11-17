@@ -208,14 +208,14 @@ public:
   */
   virtual matrixIterator<X> begin() const
   {
-		return matrixIterator<X>(this, 0);
+		return matrixIterator<X>(*this, 0);
   }
   /** @brief return an iterator to an element after the last data
   @return the terminal iterator
   */
   virtual matrixIterator<X> end() const
   {
-	  return matrixIterator<X>(this, size());
+	  return matrixIterator<X>(*this, size());
   }
   /** @brief check if the data sequence is at its end
   @return true if there are more points to grab false if not
@@ -228,13 +228,13 @@ public:
   * @brief merge 2 matrixData structures together
   * @param[in] a2 the matrixData to merge in
   */
-  virtual void merge(matrixData<X> *a2)
+  virtual void merge(matrixData<X> &a2)
   {
-	  count_t count = a2->size();
-	  a2->start();
+	  count_t count = a2.size();
+	  a2.start();
 	  for (index_t nn = 0; nn < count; ++nn)
 	  {
-		  auto tp = a2->next();
+		  auto tp = a2.next();
 		  assign(tp.row, tp.col, tp.data);
 	  }
   }
@@ -243,13 +243,13 @@ public:
   * @param[in] a2 the matrixData to merge in
   @param[in] scale a double scaler for each of the elements in the second matrix;
   */
-  virtual void merge(matrixData<X> *a2, X scale)
+  virtual void merge(matrixData<X> &a2, X scale)
   {
-	  count_t count = a2->size();
-	  a2->start();
+	  count_t count = a2.size();
+	  a2.start();
 	  for (index_t nn = 0; nn < count; ++nn)
 	  {
-		  auto tp = a2->next();
+		  auto tp = a2.next();
 		  assign(tp.row, tp.col, tp.data*scale);
 	  }
   }
@@ -259,15 +259,15 @@ public:
   @param[in] origRow  the original row
   @param[in] newRow the new row Value
   */
-  virtual void copyTranslateRow(matrixData<X> *a2, index_t origRow, index_t newRow)
+  virtual void copyTranslateRow(matrixData<X> &a2, index_t origRow, index_t newRow)
   {
-	  count_t count = a2->size();
-	  a2->start();
+	  count_t count = a2.size();
+	  a2.start();
 	  for (index_t nn = 0; nn < count; ++nn)
 	  {
-		  if (a2->rowIndex(nn) == origRow)
+		  if (a2.rowIndex(nn) == origRow)
 		  {
-			  assign(newRow, a2->colIndex(nn), a2->val(nn));
+			  assign(newRow, a2.colIndex(nn), a2.val(nn));
 		  }
 	  }
   }
@@ -279,9 +279,9 @@ template<class X>
 class matrixIteratorActual
 {
 public:
-	explicit matrixIteratorActual(const matrixData<X> *matrixData, index_t start = 0) :currentElement(start),mD(matrixData)
+	explicit matrixIteratorActual(const matrixData<X> &matrixData, index_t start = 0) :currentElement(start),mD(matrixData)
 	{}
-	 matrixIteratorActual(const matrixIteratorActual *it2) : currentElement(it2->currentElement), mD(it2->mD)
+	 matrixIteratorActual(const matrixIteratorActual &it2) : currentElement(it2.currentElement), mD(it2.mD)
 	{
 
 	}
@@ -305,11 +305,11 @@ public:
 
 	virtual matrixElement<X> operator*() const
 	{
-		return{ mD->rowIndex(currentElement),mD->colIndex(currentElement),mD->val(currentElement) };
+		return{ mD.rowIndex(currentElement),mD.colIndex(currentElement),mD.val(currentElement) };
 	}
 private:
 	index_t currentElement = 0;
-	const matrixData<X> *mD = nullptr;
+	const matrixData<X> &mD;
 
 };
 
@@ -320,7 +320,7 @@ template<class X>
 class matrixIterator :public std::iterator<std::input_iterator_tag, matrixElement<X>>
 {
 public:
-	explicit matrixIterator(const matrixData<X> *matrixData, index_t start = 0) :iteratorActual(new matrixIteratorActual<X>(matrixData, start))
+	explicit matrixIterator(const matrixData<X> &matrixData, index_t start = 0) :iteratorActual(new matrixIteratorActual<X>(matrixData, start))
 	{}
 	explicit matrixIterator(matrixIteratorActual<X> *mIA) :iteratorActual(mIA)
 	{}

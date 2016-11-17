@@ -152,13 +152,13 @@ void derivativeBlock::derivElements (double input, double /*didt*/, const stateD
   deriv[offset] = (K * (input + bias) - sD->state[offset]) / m_T1;
 }
 
-void derivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void derivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   if (hasDifferential (sMode))
     {
-      ad->assignCheck (offset, argLoc, K / m_T1);
-      ad->assign (offset, offset, -1.0 / m_T1 - sD->cj);
+      ad.assignCheck (offset, argLoc, K / m_T1);
+      ad.assign (offset, offset, -1.0 / m_T1 - sD->cj);
     }
   else
     {
@@ -167,8 +167,8 @@ void derivativeBlock::jacElements (double input, double didt, const stateData *s
   if (hasAlgebraic (sMode))
     {
       auto Aoffset = offsets.getAlgOffset (sMode) + limiter_alg;
-      ad->assignCheck (Aoffset, offset, sD->cj);
-      ad->assign (Aoffset, Aoffset, -1);
+      ad.assignCheck (Aoffset, offset, sD->cj);
+      ad.assign (Aoffset, Aoffset, -1);
       if (limiter_alg > 0)
         {
           basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);

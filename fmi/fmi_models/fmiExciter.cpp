@@ -262,15 +262,15 @@ void fmiExciter::derivative(const IOdata &args, const stateData *sD, double deri
 	fmisub->derivative(args, sD, deriv, sMode);
 }
 
-void fmiExciter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void fmiExciter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
 }
-void fmiExciter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->ioPartialDerivatives (args, sD, ad, argLocs, sMode);
 }
-void fmiExciter::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->jacobianElements (args, sD, ad, argLocs, sMode);
 }

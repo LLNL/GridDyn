@@ -444,7 +444,7 @@ int idaInterface::calcIC (double t0, double tstep0, ic_modes initCondMode, bool 
           //then locate the singular elements and fix them so the problem is valid
           if (retval == IDA_NO_RECOVERY)
             {
-              auto mvec = findMissing (&a1);
+              auto mvec = findMissing (a1);
               if (mvec.size () > 0)
                 {
                   double *lstate = NV_DATA_S (state);
@@ -629,7 +629,7 @@ int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Ve
 
   assert (Neq == static_cast<int> (sd->svsize));
   _unused(Neq);
-  matrixDataSparse<double> *a1 = &(sd->a1);
+  matrixDataSparse<double> &a1 = (sd->a1);
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
 
 
@@ -637,16 +637,16 @@ int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Ve
     {
       for (auto &v : sd->maskElements)
         {
-          a1->translateRow (v,kNullLocation);
-          a1->assign (v,v,100);
+          a1.translateRow (v,kNullLocation);
+          a1.assign (v,v,100);
         }
-      a1->filter ();
+      a1.filter ();
     }
 
   //assign the elements
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (kk = 0; kk < a1.size (); ++kk)
     {
-      DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) += a1->val (kk);
+      DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) += a1.val (kk);
       //DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) += DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) + a1->val (kk);
     }
 
@@ -668,38 +668,38 @@ int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_d
 
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
 
-  matrixDataSparse<double> *a1 = &(sd->a1);
+  matrixDataSparse<double> &a1 = sd->a1;
 
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
-  a1->sortIndexCol ();
+  a1.sortIndexCol ();
   if (sd->useMask)
     {
       for (auto &v : sd->maskElements)
         {
-          a1->translateRow (v,kNullLocation);
-          a1->assign (v, v,1);
+          a1.translateRow (v,kNullLocation);
+          a1.assign (v, v,1);
         }
-      a1->filter ();
-      a1->sortIndexCol ();
+      a1.filter ();
+      a1.sortIndexCol ();
     }
-  a1->compact ();
+  a1.compact ();
 
   SlsSetToZero (J);
 
   count_t colval = 0;
   J->colptrs[0] = colval;
-  for (index_t kk = 0; kk < a1->size (); ++kk)
+  for (index_t kk = 0; kk < a1.size (); ++kk)
     {
       //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
-      if (a1->colIndex (kk) > colval)
+      if (a1.colIndex (kk) > colval)
         {
           colval++;
           J->colptrs[colval] = static_cast<int> (kk);
         }
-      J->data[kk] = a1->val (kk);
-      J->rowvals[kk] = a1->rowIndex (kk);
+      J->data[kk] = a1.val (kk);
+      J->rowvals[kk] = a1.rowIndex (kk);
     }
-  J->colptrs[colval + 1] = static_cast<int> (a1->size ());
+  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
 
 #ifdef CAPTURE_JAC_FILE
   a1->saveFile (ttime, "jac_new.dat", true);

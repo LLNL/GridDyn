@@ -149,10 +149,10 @@ void gridDynGenModel5::derivative (const IOdata &args, const stateData *sD, doub
 }
 
 void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD,
-                                         matrixData<double> *ad,
+                                         matrixData<double> &ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
-  // ad->assign (arrayIndex, RowIndex, ColIndex, value) const
+  // ad.assign (arrayIndex, RowIndex, ColIndex, value) const
   Lp Loc = offsets.getLocations (sD,nullptr, sMode, this);
 
   auto refAlg = Loc.algOffset;
@@ -170,23 +170,23 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
     {
       if (TLoc != kNullLocation)
         {
-          ad->assign (refAlg, TLoc, Vq);
-          ad->assign (refAlg + 1, TLoc, -Vd);
+          ad.assign (refAlg, TLoc, Vq);
+          ad.assign (refAlg + 1, TLoc, -Vd);
         }
 
       // Q
       if (VLoc != kNullLocation)
         {
           double V = args[voltageInLocation];
-          ad->assign (refAlg, VLoc, Vd / V);
-          ad->assign (refAlg + 1, VLoc, Vq / V);
+          ad.assign (refAlg, VLoc, Vd / V);
+          ad.assign (refAlg + 1, VLoc, Vq / V);
         }
 
-      ad->assign (refAlg, refAlg, Rs);
-      ad->assign (refAlg, refAlg + 1, (Xqp));
+      ad.assign (refAlg, refAlg, Rs);
+      ad.assign (refAlg, refAlg + 1, (Xqp));
 
-      ad->assign (refAlg + 1, refAlg, -(Xdp));
-      ad->assign (refAlg + 1, refAlg + 1, Rs);
+      ad.assign (refAlg + 1, refAlg, -(Xdp));
+      ad.assign (refAlg + 1, refAlg + 1, Rs);
 
       if (isAlgebraicOnly (sMode))
         {
@@ -195,62 +195,62 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
 
       // Id Additional
 
-      ad->assign (refAlg, refDiff, -Vq);
-      ad->assign (refAlg, refDiff + 4, -1);
+      ad.assign (refAlg, refDiff, -Vq);
+      ad.assign (refAlg, refDiff + 4, -1);
 
       // Iq Additional
-      ad->assign (refAlg + 1, refDiff, Vd);
-      ad->assign (refAlg + 1, refDiff + 3, -1);
+      ad.assign (refAlg + 1, refDiff, Vd);
+      ad.assign (refAlg + 1, refDiff + 3, -1);
     }
 
 
   if (hasDifferential (sMode))
     {
       // delta
-      ad->assign (refDiff, refDiff, -sD->cj);
-      ad->assign (refDiff, refDiff + 1, m_baseFreq);
+      ad.assign (refDiff, refDiff, -sD->cj);
+      ad.assign (refDiff, refDiff + 1, m_baseFreq);
 
       // omega
       double kVal = -0.5 / H;
       if (hasAlg)
         {
-          ad->assign (refDiff + 1, refAlg, -0.5  * (gm[6] + (Xdp - Xqp) * gm[1]) / H);
-          ad->assign (refDiff + 1, refAlg + 1, -0.5  * (gm[5] + (Xdp - Xqp) * gm[0]) / H);
+          ad.assign (refDiff + 1, refAlg, -0.5  * (gm[6] + (Xdp - Xqp) * gm[1]) / H);
+          ad.assign (refDiff + 1, refAlg + 1, -0.5  * (gm[5] + (Xdp - Xqp) * gm[0]) / H);
         }
 
-      ad->assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD->cj);
-      ad->assign (refDiff + 1, refDiff + 4, -0.5  * gm[0] / H);
-      ad->assign (refDiff + 1, refDiff + 3, -0.5  * gm[1] / H);
+      ad.assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD->cj);
+      ad.assign (refDiff + 1, refDiff + 4, -0.5  * gm[0] / H);
+      ad.assign (refDiff + 1, refDiff + 3, -0.5  * gm[1] / H);
 
 
-      ad->assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);             // governor: Pm
+      ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);             // governor: Pm
 
 
       double xrat = Tqopp * (Xdp + Xl) / (Tqop * (Xqp + Xl));
       // Edp
       if (hasAlg)
         {
-          ad->assign (refDiff + 2, refAlg + 1, -(Xq - Xqp - xrat * (Xq - Xqp)) / Tqop);
+          ad.assign (refDiff + 2, refAlg + 1, -(Xq - Xqp - xrat * (Xq - Xqp)) / Tqop);
         }
-      ad->assign (refDiff + 2, refDiff + 2, -1 / Tqop - sD->cj);
+      ad.assign (refDiff + 2, refDiff + 2, -1 / Tqop - sD->cj);
 
       // Eqp
       if (hasAlg)
         {
-          ad->assign (refDiff + 3, refAlg, (Xd - Xdp) / Tdop);
+          ad.assign (refDiff + 3, refAlg, (Xd - Xdp) / Tdop);
         }
-      ad->assign (refDiff + 3, refDiff + 3, -1 / Tdop - sD->cj);
+      ad.assign (refDiff + 3, refDiff + 3, -1 / Tdop - sD->cj);
 
 
-      ad->assignCheckCol (refDiff + 3, argLocs[genModelEftInLocation], 1 / Tdop);             // exciter: Ef
+      ad.assignCheckCol (refDiff + 3, argLocs[genModelEftInLocation], 1 / Tdop);             // exciter: Ef
 
       //Edpp
       if (hasAlg)
         {
-          ad->assign (refDiff + 4, refAlg + 1, -(Xqp - Xdp + xrat * (Xq - Xqp)) / Tqopp);
+          ad.assign (refDiff + 4, refAlg + 1, -(Xqp - Xdp + xrat * (Xq - Xqp)) / Tqopp);
         }
-      ad->assign (refDiff + 4, refDiff + 2, 1 / Tqopp);
-      ad->assign (refDiff + 4, refDiff + 4, -1 / Tqopp - sD->cj);
+      ad.assign (refDiff + 4, refDiff + 2, 1 / Tqopp);
+      ad.assign (refDiff + 4, refDiff + 4, -1 / Tqopp - sD->cj);
     }
 
 

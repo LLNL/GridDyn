@@ -127,7 +127,7 @@ void controlBlock::derivElements (double input, double didt, const stateData *sD
 }
 
 
-void controlBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void controlBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -139,27 +139,27 @@ void controlBlock::jacElements (double input, double didt, const stateData *sD, 
     {
       if (hasAlgebraic (sMode))
         {
-          ad->assign (Loc.algOffset + limiter_alg, Loc.algOffset + limiter_alg, -1);
+          ad.assign (Loc.algOffset + limiter_alg, Loc.algOffset + limiter_alg, -1);
 
-          ad->assignCheckCol (Loc.algOffset + limiter_alg, argLoc, K * m_T2 / m_T1);
+          ad.assignCheckCol (Loc.algOffset + limiter_alg, argLoc, K * m_T2 / m_T1);
           if (limiter_alg > 0)
             {
               basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);
             }
           if (hasDifferential (sMode))
             {
-              ad->assign (Loc.algOffset + limiter_alg, Loc.diffOffset, 1);
+              ad.assign (Loc.algOffset + limiter_alg, Loc.diffOffset, 1);
             }
         }
 
       if (hasDifferential (sMode))
         {
-          ad->assignCheckCol (Loc.diffOffset, argLoc, K / m_T1);
+          ad.assignCheckCol (Loc.diffOffset, argLoc, K / m_T1);
           if (hasAlgebraic (sMode))
             {
-              ad->assign (Loc.diffOffset, Loc.algOffset + limiter_alg, -1 / m_T1);
+              ad.assign (Loc.diffOffset, Loc.algOffset + limiter_alg, -1 / m_T1);
             }
-          ad->assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
+          ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
         }
     }
 

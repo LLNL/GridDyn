@@ -703,7 +703,7 @@ double subsystem::getMaxTransfer () const
 
 
 //for computing all the Jacobian elements at once
-void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (busId <= 0)
     {
@@ -719,7 +719,7 @@ void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrix
     }
 }
 
-void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (busId <= 0)
     {

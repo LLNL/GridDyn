@@ -215,7 +215,7 @@ void dcLink::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 
-void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   // check if line is enabled
   updateLocalCache  (sD,sMode);
@@ -226,15 +226,15 @@ void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixDat
 
   if ((busId == 2) || (busId == B2->getID ()))
     {
-      ad->assignCheckCol (PoutLocation, argLocs[voltageInLocation], -Idc);
+      ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], -Idc);
     }
   else
     {
-      ad->assignCheckCol (PoutLocation, argLocs[voltageInLocation], Idc);
+      ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], Idc);
     }
 }
 
-void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -262,20 +262,20 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matri
 
 
 
-  //	ad->assign(B1Voffset, B2Voffset, Q1V2);
-  //	ad->assign(B2Voffset, B1Voffset, Q2V1);
+  //	ad.assign(B1Voffset, B2Voffset, Q1V2);
+  //	ad.assign(B2Voffset, B1Voffset, Q2V1);
   if ((busId == 2)||(busId == B2->getID ()))
     {
 
       if (stateSize (sMode) > 0)
         {
           auto offset = isDynamic (sMode) ? offsets.getDiffOffset (sMode) : offsets.getAlgOffset (sMode);
-          ad->assign (PoutLocation, offset, -linkInfo.v2);
+          ad.assign (PoutLocation, offset, -linkInfo.v2);
         }
       else
         {
           int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
-          ad->assignCheckCol (PoutLocation, B1Voffset, P2V1);
+          ad.assignCheckCol (PoutLocation, B1Voffset, P2V1);
         }
     }
   else
@@ -284,19 +284,19 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matri
       if (stateSize (sMode) > 0)
         {
           auto offset = isDynamic (sMode) ? offsets.getDiffOffset (sMode) : offsets.getAlgOffset (sMode);
-          ad->assign (PoutLocation, offset, linkInfo.v1);
+          ad.assign (PoutLocation, offset, linkInfo.v1);
         }
       else
         {
           int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
-          ad->assignCheckCol (PoutLocation, B2Voffset, P1V2);
+          ad.assignCheckCol (PoutLocation, B2Voffset, P1V2);
         }
     }
 
 }
 
 
-void dcLink::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void dcLink::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -307,19 +307,19 @@ void dcLink::jacobianElements (const stateData *sD, matrixData<double> *ad, cons
       if (isDynamic (sMode))
         {
           auto offset = offsets.getDiffOffset (sMode);
-          ad->assignCheckCol (offset, B1Voffset, 1 / x);
-          ad->assignCheckCol (offset, B2Voffset, -1 / x);
-          ad->assign (offset, offset, -r / x - sD->cj);
+          ad.assignCheckCol (offset, B1Voffset, 1 / x);
+          ad.assignCheckCol (offset, B2Voffset, -1 / x);
+          ad.assign (offset, offset, -r / x - sD->cj);
         }
       else
         {
           auto offset = offsets.getAlgOffset (sMode);
-          ad->assignCheckCol (offset, B1Voffset, 1);
-          ad->assignCheckCol (offset, B2Voffset, -1);
+          ad.assignCheckCol (offset, B1Voffset, 1);
+          ad.assignCheckCol (offset, B2Voffset, -1);
           if (opFlags.test (fixed_target_power))
             {
-              ad->assignCheckCol (offset,B1Voffset,-Pset / (linkInfo.v1 * linkInfo.v1));
-              ad->assign (offset,offset,-1);
+              ad.assignCheckCol (offset,B1Voffset,-Pset / (linkInfo.v1 * linkInfo.v1));
+              ad.assign (offset,offset,-1);
             }
         }
     }

@@ -40,10 +40,10 @@ public:
   virtual double quickupdateP () override;
 
 
-  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode &) override
+  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode &) override
   {
   }
-  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData *, matrixData<double> *, const solverMode &) override
+  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData *, matrixData<double> &, const solverMode &) override
   {
   }
 

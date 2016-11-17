@@ -363,7 +363,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int jacobianFunction (double ttime, const double state[], const double dstate_dt[], matrixData<double> *ad, double cj, const solverMode &sMode);
+  int jacobianFunction (double ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
 
   /** @brief compute any root values
     computes the roots for any root finding functions used in the system

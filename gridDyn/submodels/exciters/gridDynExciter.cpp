@@ -135,7 +135,7 @@ void gridDynExciter::derivative (const IOdata &args, const stateData *sD, double
 
 // Jacobian
 void gridDynExciter::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                       matrixData<double> *ad,
+                                       matrixData<double> &ad,
                                        const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
@@ -147,12 +147,12 @@ void gridDynExciter::jacobianElements (const IOdata & /*args*/, const stateData 
   // Ef (Vr)
   if (opFlags[outside_vlim])
     {
-      ad->assign (offset, offset, sD->cj);
+      ad.assign (offset, offset, sD->cj);
     }
   else
     {
-      ad->assign (offset, offset, -1.0 / Ta - sD->cj);
-      ad->assignCheckCol (offset, argLocs[voltageInLocation], -Ka / Ta);
+      ad.assign (offset, offset, -1.0 / Ta - sD->cj);
+      ad.assignCheckCol (offset, argLocs[voltageInLocation], -Ka / Ta);
     }
 
   //printf("%f\n",sD->cj);

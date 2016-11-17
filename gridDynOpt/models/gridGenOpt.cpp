@@ -317,7 +317,7 @@ void gridGenOpt::gradient (const optimData *oD, double deriv[], const optimMode 
         }
     }
 }
-void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
+void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   double P = oD->val[oo->gOffset];
@@ -351,7 +351,7 @@ void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, 
         }
       if (temp != 0)
         {
-          ad->assign (oo->gOffset,oo->gOffset, temp);
+          ad.assign (oo->gOffset,oo->gOffset, temp);
         }
       if ((!(Qcoeff.empty ())) && (isAC (oMode)))
         {
@@ -364,13 +364,13 @@ void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, 
             }
           if (temp != 0)
             {
-              ad->assign (oo->qOffset, oo->qOffset, temp);
+              ad.assign (oo->qOffset, oo->qOffset, temp);
             }
         }
     }
 }
 
-void gridGenOpt::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridGenOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
@@ -380,7 +380,7 @@ void gridGenOpt::constraintValue (const optimData *, double /*cVals*/ [], const 
 
 }
 
-void gridGenOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridGenOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 
 }

@@ -63,7 +63,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   //handle the rootfinding functions
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -103,7 +103,7 @@ public:
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -132,7 +132,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -164,7 +164,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
@@ -178,7 +178,7 @@ protected:
   @param[in] cj  the differential scale variable
   @param[out] ad the array structure to store the Jacobian data in
   */
-  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> *ad);
+  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> &ad);
 
 };
 
@@ -196,7 +196,7 @@ public:
   virtual void rootTest (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 protected:
-  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> *ad) override;
+  virtual void limitJacobian (double V, int Vloc, int refLoc, double cj, matrixData<double> &ad) override;
 };
 
 

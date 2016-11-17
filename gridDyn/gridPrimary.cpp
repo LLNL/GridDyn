@@ -223,7 +223,7 @@ void gridPrimary::converge (double /*ttime*/, double /*state*/[], double /*dstat
 }
 
 //Jacobian computation
-void gridPrimary::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode & sMode)
+void gridPrimary::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {
@@ -248,7 +248,7 @@ void gridPrimary::jacobianElements (const stateData *sD, matrixData<double> *ad,
     }
 }
 
-void gridPrimary::outputPartialDerivatives (const stateData *, matrixData<double> *, const solverMode &)
+void gridPrimary::outputPartialDerivatives (const stateData *, matrixData<double> &, const solverMode &)
 {
   //there are no standard outputs for a primary object so this is just a stub to do nothing
 }
@@ -341,7 +341,7 @@ void  gridPrimary::delayedAlgebraicUpdate (const stateData *sD, double update[],
 }
 
 
-void  gridPrimary::delayedJacobian (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void  gridPrimary::delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   jacobianElements (sD, ad, sMode);
 }

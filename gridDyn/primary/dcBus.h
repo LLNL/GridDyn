@@ -73,7 +73,7 @@ public:
 
   virtual void guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   void computeDerivatives(const stateData *sD, const solverMode &sMode);
 

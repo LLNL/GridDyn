@@ -50,7 +50,7 @@ public:
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   virtual stringVec localStateNames () const override;
 };
@@ -84,7 +84,7 @@ public:
 
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
 
   virtual stringVec localStateNames () const override;
@@ -128,7 +128,7 @@ public:
 
 
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   //virtual void setTime(double time){prevTime=time;};
 protected:
@@ -160,7 +160,7 @@ public:
 
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //virtual double residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   //virtual void setTime(double time){prevTime=time;};
   double computeValue (double input);
@@ -211,7 +211,7 @@ public:
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode) override;
+  virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (double time, double input) override;
   //virtual void setTime(double time){prevTime=time;};
   virtual stringVec localStateNames () const override;

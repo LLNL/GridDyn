@@ -343,7 +343,7 @@ void gridAreaOpt::gradient (const optimData *oD, double deriv[], const optimMode
     }
 
 }
-void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
+void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -351,7 +351,7 @@ void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> *ad,
     }
 
 }
-void gridAreaOpt::getConstraints (const optimData *oD, matrixData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
+void gridAreaOpt::getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -370,7 +370,7 @@ void gridAreaOpt::constraintValue (const optimData *oD, double cVals[], const op
 
 }
 
-void gridAreaOpt::constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode)
+void gridAreaOpt::constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {

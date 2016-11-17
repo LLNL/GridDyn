@@ -124,12 +124,13 @@ public:
 	/** set the matrixData object to translate to
 	@param[in] newAd  the new matrixData object
 	*/
-	void setArray(matrixData<Y> *newAd)
+	void setArray(matrixData<Y> &newAd)
 	{
-		ad = newAd;
+		ad = &newAd;
 		matrixData<Y>::colLim = ad->colLimit();
 		matrixData<Y>::rowLim = ad->rowLimit();
 	}
+	
 	/** set the translation array
 	@param[in] input  the input row to translate
 	@param[in] output the rowIndex to that input should be translated to

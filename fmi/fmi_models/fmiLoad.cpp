@@ -372,15 +372,15 @@ void fmiLoad::derivative(const IOdata &args, const stateData *sD, double deriv[]
 	fmisub->derivative(args, sD,deriv, sMode);
 }
 
-void fmiLoad::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void fmiLoad::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
 }
-void fmiLoad::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->ioPartialDerivatives (args, sD, ad, argLocs,sMode);
 }
-void fmiLoad::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->jacobianElements (args, sD, ad,argLocs, sMode);
 }

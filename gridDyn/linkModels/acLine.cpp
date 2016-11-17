@@ -586,11 +586,11 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 		ad.clear();
 		if (mterminal == fixedTerminal)
 		{
-			outputPartialDerivatives(mterminal, nullptr, &ad, cLocalSolverMode);
+			outputPartialDerivatives(mterminal, nullptr, ad, cLocalSolverMode);
 		}
 		else
 		{
-			ioPartialDerivatives(mterminal, nullptr, &ad, aLoc, cLocalSolverMode);
+			ioPartialDerivatives(mterminal, nullptr, ad, aLoc, cLocalSolverMode);
 		}
 		if (mterminal == 1)
 		{
@@ -726,7 +726,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 }
 
 
-void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	// check if line is enabled
 
@@ -758,13 +758,13 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<d
 		{
 			if (voltageLoc != kNullLocation)
 			{
-				ad->assign(PoutLocation, voltageLoc, LinkDeriv.dP2dv2);
-				ad->assign(QoutLocation, voltageLoc, LinkDeriv.dQ2dv2);
+				ad.assign(PoutLocation, voltageLoc, LinkDeriv.dP2dv2);
+				ad.assign(QoutLocation, voltageLoc, LinkDeriv.dQ2dv2);
 			}
 			if (angleLoc != kNullLocation)
 			{
-				ad->assign(PoutLocation, angleLoc, LinkDeriv.dP2dt2);
-				ad->assign(QoutLocation, angleLoc, LinkDeriv.dQ2dt2);
+				ad.assign(PoutLocation, angleLoc, LinkDeriv.dP2dt2);
+				ad.assign(QoutLocation, angleLoc, LinkDeriv.dQ2dt2);
 			}
 		}
 
@@ -775,14 +775,14 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<d
 		{
 			if (voltageLoc != kNullLocation)
 			{
-				ad->assign(PoutLocation, voltageLoc, LinkDeriv.dP1dv1);
-				ad->assign(QoutLocation, voltageLoc, LinkDeriv.dQ1dv1);
+				ad.assign(PoutLocation, voltageLoc, LinkDeriv.dP1dv1);
+				ad.assign(QoutLocation, voltageLoc, LinkDeriv.dQ1dv1);
 			}
 			if (angleLoc != kNullLocation)
 			{
-				ad->assign(PoutLocation, angleLoc, LinkDeriv.dP1dt1);
+				ad.assign(PoutLocation, angleLoc, LinkDeriv.dP1dt1);
 
-				ad->assign(QoutLocation, angleLoc, LinkDeriv.dQ1dt1);
+				ad.assign(QoutLocation, angleLoc, LinkDeriv.dQ1dt1);
 			}
 
 		}
@@ -791,13 +791,13 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<d
 
 }
 
-void acLine::outputPartialDerivatives(const stateData *, matrixData<double> *, const solverMode &)
+void acLine::outputPartialDerivatives(const stateData *, matrixData<double> &, const solverMode &)
 {
 	//there are theoretically 4 output for a standard ac line,  but no internal states therefore if this function is called from an external
 	//entity there are no output partial derivatives
 }
 
-void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
 
 	if (!isConnected())
@@ -834,16 +834,16 @@ void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixDa
 	{
 		if (B1Voffset != kNullLocation)
 		{
-			ad->assign(PoutLocation, B1Voffset, LinkDeriv.dP2dv1);
+			ad.assign(PoutLocation, B1Voffset, LinkDeriv.dP2dv1);
 			//reactive power vs Voltage
-			ad->assign(QoutLocation, B1Voffset, LinkDeriv.dQ2dv1);
+			ad.assign(QoutLocation, B1Voffset, LinkDeriv.dQ2dv1);
 		}
 		if (B1Aoffset != kNullLocation)
 		{
 			//power vs angle
-			ad->assign(PoutLocation, B1Aoffset, LinkDeriv.dP2dt1);
+			ad.assign(PoutLocation, B1Aoffset, LinkDeriv.dP2dt1);
 			//reactive power vs Angle
-			ad->assign(QoutLocation, B1Aoffset, LinkDeriv.dQ2dt1);
+			ad.assign(QoutLocation, B1Aoffset, LinkDeriv.dQ2dt1);
 		}
 
 	}
@@ -851,16 +851,16 @@ void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixDa
 	{
 		if (B2Voffset != kNullLocation)
 		{
-			ad->assign(PoutLocation, B2Voffset, LinkDeriv.dP1dv2);
+			ad.assign(PoutLocation, B2Voffset, LinkDeriv.dP1dv2);
 			//reactive power vs Voltage
-			ad->assign(QoutLocation, B2Voffset, LinkDeriv.dQ1dv2);
+			ad.assign(QoutLocation, B2Voffset, LinkDeriv.dQ1dv2);
 		}
 		if (B2Aoffset != kNullLocation)
 		{
 			//power vs angle
-			ad->assign(PoutLocation, B2Aoffset, LinkDeriv.dP1dt2);
+			ad.assign(PoutLocation, B2Aoffset, LinkDeriv.dP1dt2);
 			//reactive power vs Angle
-			ad->assign(QoutLocation, B2Aoffset, LinkDeriv.dQ1dt2);
+			ad.assign(QoutLocation, B2Aoffset, LinkDeriv.dQ1dt2);
 		}
 
 	}

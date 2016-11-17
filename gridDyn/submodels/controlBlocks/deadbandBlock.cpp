@@ -277,17 +277,17 @@ void deadbandBlock::algElements (double input, const stateData *sD, double updat
 }
 
 
-void deadbandBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void deadbandBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((!opFlags[differential_input])&& (hasAlgebraic (sMode)))
     {
       auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
-      ad->assign (offset, offset, -1.0);
+      ad.assign (offset, offset, -1.0);
       double dido = K * computeDoutDin (input + bias);
 
       if (argLoc != kNullLocation)
         {
-          ad->assign (offset, argLoc, dido);
+          ad.assign (offset, argLoc, dido);
         }
       if (limiter_alg > 0)
         {
@@ -297,12 +297,12 @@ void deadbandBlock::jacElements (double input, double didt, const stateData *sD,
   else if ((opFlags[differential_input]) && (hasDifferential (sMode)))
     {
       auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-      ad->assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD->cj);
       double dido = K * computeDoutDin (input + bias);
 
       if (argLoc != kNullLocation)
         {
-          ad->assign (offset, argLoc, dido * sD->cj);
+          ad.assign (offset, argLoc, dido * sD->cj);
         }
 
       if (limiter_diff > 0)

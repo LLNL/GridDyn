@@ -82,7 +82,7 @@ void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData *,
 }
 
 
-void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -90,25 +90,25 @@ void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stat
     }
   auto offset = offsets.getAlgOffset (sMode);
   auto refI = offset;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   int omegaLoc = -1;
 
   // Pm
   if (omegaLoc >= 0)
     {
-      ad->assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
+      ad.assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
 
     }
-  ad->assign (refI,refI,-1 / T3 - sD->cj);
-  ad->assign (refI,refI + 1,-K / T3);
+  ad.assign (refI,refI,-1 / T3 - sD->cj);
+  ad.assign (refI,refI + 1,-K / T3);
   // X
   if (omegaLoc >= 0)
     {
-      ad->assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
+      ad.assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
     }
 
-  ad->assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
+  ad.assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
 
 }
 

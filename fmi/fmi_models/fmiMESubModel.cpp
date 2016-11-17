@@ -687,7 +687,7 @@ double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 	return res;
 }
 void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
-	matrixData<double> *ad,
+	matrixData<double> &ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
 		if  (hasDifferential(sMode))
@@ -705,7 +705,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
-						ad->assign(Loc.diffOffset + kk, argLocs[vk], res);
+						ad.assign(Loc.diffOffset + kk, argLocs[vk], res);
 					}
 
 				}
@@ -714,10 +714,10 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
-						ad->assign(Loc.diffOffset + kk, Loc.diffOffset + vk, res);
+						ad.assign(Loc.diffOffset + kk, Loc.diffOffset + vk, res);
 					}
 				}
-				ad->assign(Loc.diffOffset + kk, Loc.diffOffset+kk, -sD->cj);
+				ad.assign(Loc.diffOffset + kk, Loc.diffOffset+kk, -sD->cj);
 				/* this is not allowed in fmus
 				for (auto &sR : varInfo[vu].derivDep)
 				{
@@ -725,7 +725,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, vk);
 					if (res != 0.0)
 					{
-						ad->assign(Loc.diffOffset + kk, Loc.diffOffset + varInfo[vk].index, res*sD->cj);
+						ad.assign(Loc.diffOffset + kk, Loc.diffOffset + varInfo[vk].index, res*sD->cj);
 					}
 				}
 				*/
@@ -747,7 +747,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
-						ad->assign(Loc.algOffset + kk, argLocs[vk], res);
+						ad.assign(Loc.algOffset + kk, argLocs[vk], res);
 					}
 				}
 				for (int vk : stateInformation[kk].stateDep)
@@ -755,7 +755,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
-						ad->assign(Loc.algOffset + kk, Loc.algOffset + kk, res);
+						ad.assign(Loc.algOffset + kk, Loc.algOffset + kk, res);
 					}
 				}
 			}
@@ -811,7 +811,7 @@ void fmiMESubModel::timestep(double ttime, const IOdata &args, const solverMode 
 	prevTime = time;
 }
 
-void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs & /*argLocs*/, const solverMode &sMode)
+void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
 	updateInfo (args, sD, sMode);
 	double ich = 1.0;
@@ -831,14 +831,14 @@ void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD
 			{
 				if (vu == inputVarIndices[sR])
 				{
-					ad->assign(kk, sR, ich);
+					ad.assign(kk, sR, ich);
 				}
 				else
 				{
 					double res = getPartial(vu, inputVarIndices[sR], kmode);
 					if (res != 0.0)
 					{
-						ad->assign(kk, sR, res);
+						ad.assign(kk, sR, res);
 					}
 
 				}
@@ -847,7 +847,7 @@ void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD
 	
 }
 
-void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	Lp Loc=offsets.getLocations(sD, sMode, this);
 	updateInfo(args, sD, sMode);
@@ -866,7 +866,7 @@ void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData
 		}
 		if (outputInformation[kk].isState)
 		{
-			ad->assign(kk, kk, 1.0);
+			ad.assign(kk, kk, 1.0);
 		}
 		else
 		{
@@ -877,7 +877,7 @@ void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData
 				double res = getPartial(vu, vk, kmode);
 				if (res != 0)
 				{
-					ad->assign(kk, offsetLoc + sR, res);
+					ad.assign(kk, offsetLoc + sR, res);
 				}
 
 			}

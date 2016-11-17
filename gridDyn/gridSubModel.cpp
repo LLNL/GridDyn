@@ -195,12 +195,12 @@ void gridSubModel::algebraicUpdate (const IOdata & /*args*/, const stateData *, 
 
 }
 
-void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 }
 
-void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 }
@@ -372,22 +372,22 @@ double gridSubModel::getDoutdt (const stateData *sD, const solverMode &sMode, in
 
 }
 
-void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
   auto so = offsets.getOffsets (sMode);
   if (opFlags[differential_output])
     {
-      ad->assignCheckCol (0, so->diffOffset, 1.0);
+      ad.assignCheckCol (0, so->diffOffset, 1.0);
     }
   else
     {
       if (so->total.algSize > 0)
         {
-          ad->assignCheckCol (0, so->algOffset, 1.0);
+          ad.assignCheckCol (0, so->algOffset, 1.0);
         }
       else if (so->total.diffSize > 0)
         {
-          ad->assignCheckCol (0, so->diffOffset, 1);
+          ad.assignCheckCol (0, so->diffOffset, 1);
         }
     }
 

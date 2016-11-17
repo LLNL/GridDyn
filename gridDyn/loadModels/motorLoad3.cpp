@@ -403,7 +403,7 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
 }
 
 
-void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   index_t refAlg,refDiff;
   const double *gm,*dst;
@@ -445,30 +445,30 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matr
   // P
   if (TLoc != kNullLocation)
     {
-      ad->assign (refAlg, TLoc, Vr);
-      ad->assign (refAlg + 1, TLoc, -Vm);
+      ad.assign (refAlg, TLoc, Vr);
+      ad.assign (refAlg + 1, TLoc, -Vm);
     }
   // Q
   if (VLoc != kNullLocation)
     {
-      ad->assign (refAlg, VLoc, Vm / V);
-      ad->assign (refAlg + 1, VLoc, Vr / V);
+      ad.assign (refAlg, VLoc, Vm / V);
+      ad.assign (refAlg + 1, VLoc, Vr / V);
     }
 
-  ad->assign (refAlg, refAlg, -xp);
-  ad->assign (refAlg, refAlg + 1, -r);
+  ad.assign (refAlg, refAlg, -xp);
+  ad.assign (refAlg, refAlg + 1, -r);
 
-  ad->assign (refAlg + 1, refAlg, -r);
-  ad->assign (refAlg + 1, refAlg + 1, xp);
+  ad.assign (refAlg + 1, refAlg, -r);
+  ad.assign (refAlg + 1, refAlg + 1, xp);
   if ((isDynamic (sMode))&&(isAlgebraicOnly (sMode)))
     {
       return;
     }
   // Ir Differential
 
-  ad->assign (refAlg, refDiff + 2, -1.0);
+  ad.assign (refAlg, refDiff + 2, -1.0);
   // Im Differential
-  ad->assign (refAlg + 1, refDiff + 1, -1.0);
+  ad.assign (refAlg + 1, refDiff + 1, -1.0);
 
 
   double slip = dst[0];
@@ -483,20 +483,20 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matr
       // slip
       if (opFlags[stalled])
         {
-          ad->assign (refDiff,refDiff,-cj);
+          ad.assign (refDiff,refDiff,-cj);
         }
       else
         {
-          ad->assign (refDiff, refDiff, dmechds (slip) / (2.0 * H) - cj);
-          ad->assign (refDiff, refDiff + 1, -gm[0] / (2.0 * H));
-          ad->assign (refDiff, refDiff + 2, -gm[1] / (2.0 * H));
-          ad->assign (refDiff, refAlg, -dst[1] / (2.0 * H));
-          ad->assign (refDiff, refAlg + 1, -dst[2] / (2.0 * H));
+          ad.assign (refDiff, refDiff, dmechds (slip) / (2.0 * H) - cj);
+          ad.assign (refDiff, refDiff + 1, -gm[0] / (2.0 * H));
+          ad.assign (refDiff, refDiff + 2, -gm[1] / (2.0 * H));
+          ad.assign (refDiff, refAlg, -dst[1] / (2.0 * H));
+          ad.assign (refDiff, refAlg + 1, -dst[2] / (2.0 * H));
         }
     }
   else
     {
-      ad->assign (refDiff,refDiff,1.0);
+      ad.assign (refDiff,refDiff,1.0);
     }
   // omega
 
@@ -505,19 +505,19 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matr
   //dv[2] = -m_baseFreq*slip*dst[1] - (dst[2] - (x0 - xp)*ast[0]) / T0p;
 
 
-  ad->assign (refDiff + 1, refAlg + 1,-(x0 - xp) / T0p );
-  ad->assign (refDiff + 1, refDiff, m_baseFreq * dst[2]);
-  ad->assign (refDiff + 1, refDiff + 1, -1.0 / T0p - cj);
-  ad->assign (refDiff + 1, refDiff + 2, m_baseFreq * slip);
+  ad.assign (refDiff + 1, refAlg + 1,-(x0 - xp) / T0p );
+  ad.assign (refDiff + 1, refDiff, m_baseFreq * dst[2]);
+  ad.assign (refDiff + 1, refDiff + 1, -1.0 / T0p - cj);
+  ad.assign (refDiff + 1, refDiff + 2, m_baseFreq * slip);
 
-  ad->assign (refDiff + 2, refAlg, (x0 - xp) / T0p);
-  ad->assign (refDiff + 2, refDiff, -m_baseFreq * dst[1]);
-  ad->assign (refDiff + 2, refDiff + 1, -m_baseFreq * slip);
-  ad->assign (refDiff + 2, refDiff + 2, -1.0 / T0p - cj);
+  ad.assign (refDiff + 2, refAlg, (x0 - xp) / T0p);
+  ad.assign (refDiff + 2, refDiff, -m_baseFreq * dst[1]);
+  ad.assign (refDiff + 2, refDiff + 1, -m_baseFreq * slip);
+  ad.assign (refDiff + 2, refDiff + 2, -1.0 / T0p - cj);
 
 }
 
-void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const solverMode &sMode)
+void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const solverMode &sMode)
 {
 
 
@@ -533,18 +533,18 @@ void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *
   //vr*m_state[0] + vm*m_state[1];
 
   //output P
-  ad->assign (PoutLocation, refAlg, vr * scale);
-  ad->assign (PoutLocation, refAlg + 1, vm * scale);
+  ad.assign (PoutLocation, refAlg, vr * scale);
+  ad.assign (PoutLocation, refAlg + 1, vm * scale);
 
   //vm*m_state[0] - vr*m_state[1];
   //output Q
-  ad->assign (QoutLocation, refAlg, vm * scale);
-  ad->assign (QoutLocation, refAlg + 1, -vr * scale);
+  ad.assign (QoutLocation, refAlg, vm * scale);
+  ad.assign (QoutLocation, refAlg + 1, -vr * scale);
 
 
 }
 
-void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -563,10 +563,10 @@ void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, 
   //P=vr*m_state[0] + vm*m_state[1];
 
   //Q=vm*m_state[0] - vr*m_state[1];
-  ad->assignCheckCol (PoutLocation, argLocs[angleInLocation], -ir * vm + vr * im);
-  ad->assignCheckCol (PoutLocation, argLocs[voltageInLocation], ir * vr / V + vm * im / V);
-  ad->assignCheckCol (QoutLocation, argLocs[angleInLocation], vr * ir + vm * im);
-  ad->assignCheckCol (QoutLocation, argLocs[voltageInLocation], vm * ir / V - vr * im / V);
+  ad.assignCheckCol (PoutLocation, argLocs[angleInLocation], -ir * vm + vr * im);
+  ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], ir * vr / V + vm * im / V);
+  ad.assignCheckCol (QoutLocation, argLocs[angleInLocation], vr * ir + vm * im);
+  ad.assignCheckCol (QoutLocation, argLocs[voltageInLocation], vm * ir / V - vr * im / V);
 
 }
 

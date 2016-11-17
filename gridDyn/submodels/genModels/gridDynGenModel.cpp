@@ -174,34 +174,34 @@ double gridDynGenModel::getOutput (const IOdata &args, const stateData *, const 
 }
 
 
-void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
 
   double V = args[voltageInLocation];
 
   if (V > 0.85)
     {
-      ad->assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd);
+      ad.assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd);
 
       if (argLocs[voltageInLocation] != kNullLocation)
         {
-          ad->assign (PoutLocation, argLocs[voltageInLocation], 0);
-          ad->assign (QoutLocation, argLocs[voltageInLocation], 0);
+          ad.assign (PoutLocation, argLocs[voltageInLocation], 0);
+          ad.assign (QoutLocation, argLocs[voltageInLocation], 0);
         }
-      ad->assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -1.0);
+      ad.assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -1.0);
     }
   else
     {
       double factor = V / 0.85;
-      ad->assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd * factor);
+      ad.assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd * factor);
 
       if (argLocs[voltageInLocation] != kNullLocation)
         {
           double Eft = args[genModelEftInLocation];
-          ad->assign (PoutLocation, argLocs[voltageInLocation],-args[genModelPmechInLocation] / 0.85);
-          ad->assign (QoutLocation, argLocs[voltageInLocation], -Eft * Xd / 0.85);
+          ad.assign (PoutLocation, argLocs[voltageInLocation],-args[genModelPmechInLocation] / 0.85);
+          ad.assign (QoutLocation, argLocs[voltageInLocation], -Eft * Xd / 0.85);
         }
-      ad->assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -factor);
+      ad.assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -factor);
     }
 
 

@@ -223,12 +223,12 @@ public:
 
 	virtual matrixIterator<Y> begin() const override
 	{
-		return matrixIterator<Y>(new matrixIteratorSparse(this, 0));
+		return matrixIterator<Y>(new matrixIteratorSparse(*this, 0));
 	}
 
 	virtual matrixIterator<Y> end() const override
 	{
-		return matrixIterator<Y>(new matrixIteratorSparse(this, size()));
+		return matrixIterator<Y>(new matrixIteratorSparse(*this, size()));
 	}
 
 	void start() override
@@ -415,10 +415,10 @@ public:
 	@param[in] origRow the column to change
 	@param[in] newRow the column to change origRow into
 	*/
-	void copyTranslateRow(matrixDataSparse<Y> *a2, index_t origRow, index_t newRow)
+	void copyTranslateRow(matrixDataSparse<Y> &a2, index_t origRow, index_t newRow)
 	{
-		auto res = a2->data.begin();
-		auto term = a2->data.end();
+		auto res = a2.data.begin();
+		auto term = a2.data.end();
 
 		while (res != term)
 		{
@@ -434,10 +434,10 @@ public:
 	@param[in] origCol the column to change
 	@param[in] newCol the column to change origCol into
 	*/
-	void copyTranslateCol(matrixDataSparse<Y> *a2, index_t origCol, index_t newCol)
+	void copyTranslateCol(matrixDataSparse<Y> &a2, index_t origCol, index_t newCol)
 	{
-		auto res = a2->data.begin();
-		auto term = a2->data.end();
+		auto res = a2.data.begin();
+		auto term = a2.data.end();
 
 		while (res != term)
 		{
@@ -457,10 +457,10 @@ public:
 	@param[in] newIndices a vector of indices to change
 	@param[in] mult the scaler multiplier for each fo the new indices
 	*/
-	void copyReplicate(matrixDataSparse<Y> *a2, index_t origCol, std::vector<index_t> newIndices, std::vector<Y> mult)
+	void copyReplicate(matrixDataSparse<Y> &a2, index_t origCol, std::vector<index_t> newIndices, std::vector<Y> mult)
 	{
-		auto res = a2->data.begin();
-		auto term = a2->data.end();
+		auto res = a2.data.begin();
+		auto term = a2.data.end();
 
 		while (res != term)
 		{
@@ -507,7 +507,7 @@ public:
 		data.resize(dvb - data.begin());
 	}
 
-	void cascade(matrixDataSparse<Y> *a2, index_t element)
+	void cascade(matrixDataSparse<Y> &a2, index_t element)
 	{
 		auto term = data.size();
 		size_t nn = 0;
@@ -518,20 +518,20 @@ public:
 			{
 				size_t mm = 0;
 				keyval = std::get<adVal>(data[nn]);
-				for (size_t kk = 0; kk < a2->data.size(); kk++)
+				for (size_t kk = 0; kk < a2.data.size(); kk++)
 				{
-					if (std::get<adRow>(a2->data[kk]) == element)
+					if (std::get<adRow>(a2.data[kk]) == element)
 					{
 						if (mm == 0)
 						{
-							std::get<adCol>(data[nn]) = std::get<adCol>(a2->data[kk]);
-							std::get<adVal>(data[nn]) = std::get<adVal>(a2->data[kk]) * keyval;
+							std::get<adCol>(data[nn]) = std::get<adCol>(a2.data[kk]);
+							std::get<adVal>(data[nn]) = std::get<adVal>(a2.data[kk]) * keyval;
 							++mm;
 						}
 						else
 						{
 							//data.push_back (cLoc (std::get<adRow> (data[nn]), std::get<adCol> (a2->data[kk]), keyval * std::get<adVal> (a2->data[kk])));
-							data.emplace_back(std::get<adRow>(data[nn]), std::get<adCol>(a2->data[kk]), keyval * std::get<adVal>(a2->data[kk]));
+							data.emplace_back(std::get<adRow>(data[nn]), std::get<adCol>(a2.data[kk]), keyval * std::get<adVal>(a2.data[kk]));
 							++mm;
 						}
 					}
@@ -541,9 +541,9 @@ public:
 		}
 	}
 	using matrixData<Y>::merge;
-	void merge(matrixDataSparse<Y> *a2)
+	void merge(matrixDataSparse<Y> &a2)
 	{
-		data.insert(data.end(), a2->data.begin(), a2->data.end());
+		data.insert(data.end(), a2.data.begin(), a2.data.end());
 	}
 
 	void transpose()
@@ -585,30 +585,30 @@ protected:
 	class matrixIteratorSparse :public matrixIteratorActual<Y>
 	{
 	public:
-		explicit matrixIteratorSparse(const matrixDataSparse<Y> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDS(matrixData)
+		explicit matrixIteratorSparse(const matrixDataSparse<Y> &matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDS(matrixData)
 		{
 			if (start == 0)
 			{
-				cptr = mDS->data.begin();
+				cptr = mDS.data.begin();
 			}
-			else if (start<mDS->size())
+			else if (start<mDS.size())
 			{
-				cptr = mDS->data.begin() + start;
+				cptr = mDS.data.begin() + start;
 			}
 			else
 			{
-				cptr = mDS->data.end();
+				cptr = mDS.data.end();
 			}
 
 		}
-		matrixIteratorSparse(const matrixIteratorSparse *it2) :matrixIteratorActual<Y>(it2->mDS), mDS(it2->mDS)
+		matrixIteratorSparse(const matrixIteratorSparse &it2) :matrixIteratorActual<Y>(it2.mDS), mDS(it2.mDS)
 		{
-			cptr = it2->cptr;
+			cptr = it2.cptr;
 		}
 
 		virtual matrixIteratorActual<Y> *clone() const override
 		{
-			return new matrixIteratorSparse(this);
+			return new matrixIteratorSparse(*this);
 		}
 
 		virtual void increment() override
@@ -623,27 +623,27 @@ protected:
 			return{ std::get<adRow>(*cptr), std::get<adCol>(*cptr), std::get<adVal>(*cptr) };
 		}
 	private:
-		const matrixDataSparse<Y> *mDS = nullptr;
-		decltype(mDS->data.begin()) cptr; //!< ptr to the beginning of the sequence;	
+		const matrixDataSparse<Y> &mDS;
+		decltype(matrixDataSparse<Y>::data.cbegin()) cptr; //!< ptr to the beginning of the sequence;	
 
 	};
 };
 
 template<class Y>
-std::vector<index_t> findMissing(matrixDataSparse<Y> *ad)
+std::vector<index_t> findMissing(matrixDataSparse<Y> &ad)
 {
 	std::vector<index_t> missing;
-	ad->sortIndexCol();
-	ad->compact();
-	ad->sortIndexRow();
+	ad.sortIndexCol();
+	ad.compact();
+	ad.sortIndexRow();
 	index_t pp = 0;
 	bool good = false;
-	for (index_t kk = 0; kk < ad->rowLimit(); ++kk)
+	for (index_t kk = 0; kk < ad.rowLimit(); ++kk)
 	{
 		good = false;
-		while ((pp < ad->size()) && (ad->rowIndex(pp) <= kk))
+		while ((pp < ad.size()) && (ad.rowIndex(pp) <= kk))
 		{
-			if ((ad->rowIndex(pp) == kk) && (std::isnormal(ad->val(pp))))
+			if ((ad.rowIndex(pp) == kk) && (std::isnormal(ad.val(pp))))
 			{
 				good = true;
 				++pp;
@@ -651,7 +651,7 @@ std::vector<index_t> findMissing(matrixDataSparse<Y> *ad)
 			}
 
 			++pp;
-			if (pp >= ad->size())
+			if (pp >= ad.size())
 			{
 				break;
 			}
@@ -665,46 +665,46 @@ std::vector<index_t> findMissing(matrixDataSparse<Y> *ad)
 }
 
 template <class Y>
-std::vector<std::vector<index_t>> findRank(matrixDataSparse<Y> *ad)
+std::vector<std::vector<index_t>> findRank(matrixDataSparse<Y> &ad)
 {
 	std::vector<index_t> vr, vt;
 	std::vector<Y> vq, vtq;
 	std::vector<std::vector<index_t>> mrows;
-	ad->sortIndexCol();
-	ad->compact();
-	ad->sortIndexRow();
+	ad.sortIndexCol();
+	ad.compact();
+	ad.sortIndexRow();
 	Y factor = 0;
 	index_t pp = 0;
 	index_t qq = 0;
-	auto mp = ad->size();
+	auto mp = ad.size();
 	bool good = false;
-	for (index_t kk = 0; kk < ad->rowLimit() - 1; ++kk)
+	for (index_t kk = 0; kk < ad.rowLimit() - 1; ++kk)
 	{
 		vr.clear();
 		vq.clear();
-		while (ad->rowIndex(pp) == kk)
+		while (ad.rowIndex(pp) == kk)
 		{
-			vr.push_back(ad->colIndex(pp));
-			vq.push_back(ad->val(pp));
+			vr.push_back(ad.colIndex(pp));
+			vq.push_back(ad.val(pp));
 			++pp;
 		}
 		qq = pp;
-		for (index_t nn = kk + 1; nn < ad->rowLimit(); ++nn)
+		for (index_t nn = kk + 1; nn < ad.rowLimit(); ++nn)
 		{
 			vt.clear();
 			vtq.clear();
 			good = false;
-			if (ad->colIndex(qq) != vr[0])
+			if (ad.colIndex(qq) != vr[0])
 			{
 				good = true;
 			}
-			while (ad->rowIndex(qq) == nn)
+			while (ad.rowIndex(qq) == nn)
 			{
 
 				if (!good)
 				{
-					vt.push_back(ad->colIndex(qq));
-					vtq.push_back(ad->val(qq));
+					vt.push_back(ad.colIndex(qq));
+					vtq.push_back(ad.val(qq));
 				}
 				++qq;
 				if (qq >= mp)

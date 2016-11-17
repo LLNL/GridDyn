@@ -131,7 +131,7 @@ void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData *s
 
 // Jacobian
 void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const stateData *sD,
-                                                matrixData<double> *ad,
+                                                matrixData<double> &ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (!hasDifferential (sMode))
@@ -141,31 +141,31 @@ void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const s
   auto offset = offsets.getDiffOffset (sMode);
 
 
-  // use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  // use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
   double temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
-  ad->assign (offset, offset, temp1);
-  ad->assign (offset, offset + 1, 1 / Te);
+  ad.assign (offset, offset, temp1);
+  ad.assign (offset, offset + 1, 1 / Te);
   if (opFlags[outside_vlim])
     {
-      ad->assign (offset + 1, offset + 1, sD->cj);
+      ad.assign (offset + 1, offset + 1, sD->cj);
     }
   else
     {
       // Vr
 
-      ad->assignCheckCol (offset + 1, argLocs[voltageInLocation], -Ka / Ta);
-      ad->assign (offset + 1, offset, -Ka * Kf / (Tf * Ta));
-      ad->assign (offset + 1, offset + 1, -1.0 / Ta - sD->cj);
-      ad->assign (offset + 1, offset + 2, Ka / Ta);
+      ad.assignCheckCol (offset + 1, argLocs[voltageInLocation], -Ka / Ta);
+      ad.assign (offset + 1, offset, -Ka * Kf / (Tf * Ta));
+      ad.assign (offset + 1, offset + 1, -1.0 / Ta - sD->cj);
+      ad.assign (offset + 1, offset + 2, Ka / Ta);
     }
 
 
   // Rf
-  ad->assign (offset + 2, offset, Kf / (Tf * Tf));
-  ad->assign (offset + 2, offset + 2, -1.0 / Tf - sD->cj);
+  ad.assign (offset + 2, offset, Kf / (Tf * Tf));
+  ad.assign (offset + 2, offset + 2, -1.0 / Tf - sD->cj);
 
   //printf("%f\n",sD->cj);
 

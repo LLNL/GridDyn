@@ -73,16 +73,16 @@ void exponentialLoad::set (const std::string &param, double val, gridUnits::unit
 
 
 
-void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   // power vs voltage
   if  (argLocs[voltageInLocation] != kNullLocation)
     {
-      ad->assign (PoutLocation, argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0));
+      ad.assign (PoutLocation, argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0));
 
       // reactive power vs voltage
-      ad->assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0));
+      ad.assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0));
     }
 }
 
@@ -308,22 +308,22 @@ void fDepLoad::set (const std::string &param, double val, gridUnits::units_t uni
 }
 
 
-void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   double freq = args[frequencyInLocation];
   // power vs voltage
   if  (argLocs[voltageInLocation] != kNullLocation)
     {
-      ad->assign (PoutLocation,argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0) * pow (freq, betaP));
+      ad.assign (PoutLocation,argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0) * pow (freq, betaP));
 
       // reactive power vs voltage
-      ad->assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0) * pow (freq, betaQ));
+      ad.assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0) * pow (freq, betaQ));
     }
   if (argLocs[frequencyInLocation] != kNullLocation)
     {
-      ad->assign (PoutLocation, argLocs[frequencyInLocation], P * pow (V, alphaP) * betaP * pow (freq, betaP - 1.0));
-      ad->assign (QoutLocation, argLocs[frequencyInLocation], Q * pow (V, alphaQ) * betaQ * pow (freq, betaQ - 1.0));
+      ad.assign (PoutLocation, argLocs[frequencyInLocation], P * pow (V, alphaP) * betaP * pow (freq, betaP - 1.0));
+      ad.assign (QoutLocation, argLocs[frequencyInLocation], Q * pow (V, alphaQ) * betaQ * pow (freq, betaQ - 1.0));
     }
 }
 

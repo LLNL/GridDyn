@@ -270,10 +270,10 @@ protected:
 public:
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode);
+  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
 
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> *ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
 
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
   virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;

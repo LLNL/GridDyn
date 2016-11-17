@@ -271,7 +271,7 @@ double gridDynGenModelInverter::getOutput(const IOdata &args, const stateData *s
 }
 
 
-void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 
@@ -286,22 +286,22 @@ void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const sta
 
 	if (argLocs[genModelEftInLocation] != kNullLocation)
 	{
-		ad->assign(PoutLocation, argLocs[genModelEftInLocation], -V*g*cAng - V*b*sAng);
-		ad->assign(QoutLocation, argLocs[genModelEftInLocation], -V*b*cAng + V*g*sAng);
+		ad.assign(PoutLocation, argLocs[genModelEftInLocation], -V*g*cAng - V*b*sAng);
+		ad.assign(QoutLocation, argLocs[genModelEftInLocation], -V*b*cAng + V*g*sAng);
 	}
 
 	if (argLocs[voltageInLocation] != kNullLocation)
 	{
 		double Eft = args[genModelEftInLocation] + 1.0;
-		ad->assign(PoutLocation, argLocs[voltageInLocation], 2.0*V*g - g*Eft*cAng - Eft*b*sAng);
-		ad->assign(QoutLocation, argLocs[voltageInLocation], 2.0*V*b - Eft*b*cAng + V*Eft*g*sAng);
+		ad.assign(PoutLocation, argLocs[voltageInLocation], 2.0*V*g - g*Eft*cAng - Eft*b*sAng);
+		ad.assign(QoutLocation, argLocs[voltageInLocation], 2.0*V*b - Eft*b*cAng + V*Eft*g*sAng);
 	}
 
 }
 
 
 void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateData *sD,
-	matrixData<double> *ad,
+	matrixData<double> &ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
@@ -312,7 +312,7 @@ void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateDa
 	auto offset = Loc.algOffset;
 	if (opFlags[at_angle_limits])
 	{
-		ad->assign(offset, offset, -1.0);
+		ad.assign(offset, offset, -1.0);
 	}
 	else
 	{
@@ -324,18 +324,18 @@ void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateDa
 		//rva[0] = Pmt -V*V*g - Eft*Eft*g - 2.0*V * Eft*g*cos(gm[0]) - V * Eft*b*sin(gm[0]);
 
 
-		ad->assign(offset, offset, 2.0*V*Eft*g*sAng - V*Eft*b*cAng);
+		ad.assign(offset, offset, 2.0*V*Eft*g*sAng - V*Eft*b*cAng);
 
-		ad->assignCheckCol(offset, argLocs[genModelPmechInLocation], 1.0);
-		ad->assignCheckCol(offset, argLocs[genModelEftInLocation], -2.0*Eft*g - 2.0*V*g*cAng - V*b*sAng);
-		ad->assignCheckCol(offset, argLocs[voltageInLocation], -2.0*V*g - 2.0*Eft*g*cAng - Eft*b*sAng);
+		ad.assignCheckCol(offset, argLocs[genModelPmechInLocation], 1.0);
+		ad.assignCheckCol(offset, argLocs[genModelEftInLocation], -2.0*Eft*g - 2.0*V*g*cAng - V*b*sAng);
+		ad.assignCheckCol(offset, argLocs[voltageInLocation], -2.0*V*g - 2.0*Eft*g*cAng - Eft*b*sAng);
 	}
 
 
 
 }
 
-void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
 	{
@@ -352,8 +352,8 @@ void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const
 	//out[QoutLocation] = V*V*b - V*Eft*b*cAng + V*Eft*g*sAng;
 
 
-	ad->assign(PoutLocation, Loc.algOffset, V*g*Eft*sAng - V*Eft*b*cAng);
-	ad->assign(QoutLocation, Loc.algOffset, V*Eft*b*sAng + V*Eft*g*cAng);
+	ad.assign(PoutLocation, Loc.algOffset, V*g*Eft*sAng - V*Eft*b*cAng);
+	ad.assign(QoutLocation, Loc.algOffset, V*Eft*b*sAng + V*Eft*g*cAng);
 
 
 }

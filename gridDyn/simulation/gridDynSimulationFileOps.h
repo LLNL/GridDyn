@@ -199,7 +199,7 @@ then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @return (0) is successful  (-1) if unable to open file
 */
 
-int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> *a1, const std::string&filename, bool append = true);
+int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
 
 class contingency;
 

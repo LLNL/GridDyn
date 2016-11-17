@@ -1133,7 +1133,7 @@ void sensor::timestep (double ttime, const solverMode &sMode)
   gridRelay::timestep (ttime,sMode);
 }
 
-void sensor::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void sensor::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -1146,13 +1146,13 @@ void sensor::jacobianElements (const stateData *sD, matrixData<double> *ad, cons
           double out = dataSourcesSt[ps[0]]->grabData (sD, sMode);
           if (dataSourcesSt[ps[0]]->jacCapable)
             {
-              dataSourcesSt[ps[0]]->outputPartialDerivatives (sD, &d2, sMode);
+              dataSourcesSt[ps[0]]->outputPartialDerivatives (sD, d2, sMode);
             }
           //make sure the process can be handled in states
 
           for (size_t psb = 1; psb < ps.size (); ++psb)
             {
-              filterBlocks[ps[psb]]->jacElements (out, 0,sD, &dp, currentLoc, sMode);
+              filterBlocks[ps[psb]]->jacElements (out, 0,sD, dp, currentLoc, sMode);
               out = filterBlocks[ps[psb]]->getBlockOutput ( sD, sMode);
             }
           if (d2.size () == 0)
@@ -1162,9 +1162,9 @@ void sensor::jacobianElements (const stateData *sD, matrixData<double> *ad, cons
             }
           else
             {
-              dp.cascade (&d2, 0);
+              dp.cascade (d2, 0);
             }
-          ad->merge (&dp);
+          ad.merge (dp);
         }
     }
 }
@@ -1379,7 +1379,7 @@ index_t sensor::getOutputLoc (const solverMode &sMode, index_t num) const
 }
 
 //TODO:: PT This is a complicated function still need to work on it
-void sensor::outputPartialDerivatives (const stateData * /*sD*/, matrixData<double> * /*ad*/, const solverMode & /*sMode*/)
+void sensor::outputPartialDerivatives (const stateData * /*sD*/, matrixData<double> & /*ad*/, const solverMode & /*sMode*/)
 {
 
 }

@@ -381,7 +381,7 @@ void motorLoad::derivative (const IOdata &args, const stateData *sD, double deri
 
 }
 
-void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isDynamic (sMode))
     {
@@ -392,15 +392,15 @@ void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matri
 		  double V = args[voltageInLocation];
 		  if (opFlags[stalled])
 		  {
-			  ad->assign(offset, offset, -sD->cj);
+			  ad.assign(offset, offset, -sD->cj);
 		  }
 		  else
 		  {
-			  ad->assignCheck(offset, argLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
+			  ad.assignCheck(offset, argLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
 			  //this is a really ugly looking derivative so I am computing it numerically
 			  double test1 = 0.5 / H * (mechPower(slip) - rPower(V, slip));
 			  double test2 = 0.5 / H * (mechPower(slip + cSmallDiff) - rPower(V * Vcontrol, slip + cSmallDiff));
-			  ad->assign(offset, offset, (test2 - test1) / cSmallDiff - sD->cj);
+			  ad.assign(offset, offset, (test2 - test1) / cSmallDiff - sD->cj);
 		  }
 	  }
     }
@@ -412,15 +412,15 @@ void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matri
 
       double t1 = rPower (V * Vcontrol, slip);
       double t3 = rPower (V * Vcontrol, slip + cSmallDiff);
-      ad->assign (offset, offset, dmechds (slip) - (t3 - t1) / cSmallDiff);
+      ad.assign (offset, offset, dmechds (slip) - (t3 - t1) / cSmallDiff);
 
 
-      ad->assignCheck (offset,argLocs[voltageInLocation],-2 * t1 / V);
+      ad.assignCheck (offset,argLocs[voltageInLocation],-2 * t1 / V);
 
     }
 }
 
-void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -433,21 +433,21 @@ void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *s
       double slip = sD->state[offset];
       double V = args[voltageInLocation];
 
-      ad->assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
+      ad.assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
 
-      ad->assign (QoutLocation, offset, scale * (qPower (V * Vcontrol, slip + cSmallDiff) - qPower (V * Vcontrol, slip)) / cSmallDiff);
+      ad.assign (QoutLocation, offset, scale * (qPower (V * Vcontrol, slip + cSmallDiff) - qPower (V * Vcontrol, slip)) / cSmallDiff);
     }
   else if (!opFlags[init_transient])
     {
       auto offset = offsets.getAlgOffset (sMode);
       double slip = sD->state[offset];
       double V = args[voltageInLocation];
-      ad->assign (QoutLocation, offset, scale * (qPower (V * Vcontrol, slip + cSmallDiff) - qPower (V * Vcontrol, slip)) / cSmallDiff);
-      ad->assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
+      ad.assign (QoutLocation, offset, scale * (qPower (V * Vcontrol, slip + cSmallDiff) - qPower (V * Vcontrol, slip)) / cSmallDiff);
+      ad.assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
     }
 }
 
-void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (argLocs[voltageInLocation] != kNullLocation)
     {
@@ -463,8 +463,8 @@ void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, m
           slip = sD->state[offsets.getAlgOffset (sMode)];
         }
       double temp = V * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1));
-      ad->assign (PoutLocation, argLocs[voltageInLocation], scale * (2 * r1 * temp));
-      ad->assign (QoutLocation, argLocs[voltageInLocation], scale * (2 * V / xm + 2 * slip * (x + x1) * temp));
+      ad.assign (PoutLocation, argLocs[voltageInLocation], scale * (2 * r1 * temp));
+      ad.assign (QoutLocation, argLocs[voltageInLocation], scale * (2 * V / xm + 2 * slip * (x + x1) * temp));
     }
 }
 

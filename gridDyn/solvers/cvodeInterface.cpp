@@ -565,10 +565,9 @@ int cvodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_da
 #define CHECK_JACOBIAN 0
 int cvodeJacDense (long int /*Neq*/, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
 {
-  index_t kk;
   cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
 
-  matrixDataSparse<double> *a1 = &(sd->a1);
+  matrixDataSparse<double> &a1 = sd->a1;
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt),a1, 0, sd->mode);
 
   
@@ -576,16 +575,16 @@ int cvodeJacDense (long int /*Neq*/, realtype ttime, N_Vector state, N_Vector ds
     {
       for (auto &v : sd->maskElements)
         {
-          a1->translateRow (v, kNullLocation);
-          a1->assign (v, v, 100);
+          a1.translateRow (v, kNullLocation);
+          a1.assign (v, v, 100);
         }
-      a1->filter ();
+      a1.filter ();
     }
 
   //assign the elements
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (index_t kk = 0; kk < a1.size (); ++kk)
     {
-      DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) = DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) + a1->val (kk);
+      DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) = DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) + a1.val (kk);
     }
 
 #if (CHECK_JACOBIAN > 0)
@@ -608,41 +607,41 @@ int cvodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J
 
   cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
 
-  matrixDataSparse<double> *a1 = &(sd->a1);
+  matrixDataSparse<double> &a1 = sd->a1;
 
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,0, sd->mode);
-  a1->sortIndexCol ();
+  a1.sortIndexCol ();
   if (sd->useMask)
     {
       for (auto &v : sd->maskElements)
         {
-          a1->translateRow (v, kNullLocation);
-          a1->assign (v, v, 1);
+          a1.translateRow (v, kNullLocation);
+          a1.assign (v, v, 1);
         }
-      a1->filter ();
-      a1->sortIndexCol ();
+      a1.filter ();
+      a1.sortIndexCol ();
     }
-  a1->compact ();
+  a1.compact ();
 
   SlsSetToZero (J);
 
   colval = 0;
   J->colptrs[0] = colval;
-  for (kk = 0; kk < a1->size (); ++kk)
+  for (kk = 0; kk < a1.size (); ++kk)
     {
-      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
-      if (a1->colIndex (kk) > colval)
+      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1.val(kk), a1.rowIndex(kk), a1.colIndex(kk));
+      if (a1.colIndex (kk) > colval)
         {
           colval++;
           J->colptrs[colval] = static_cast<int> (kk);
         }
-      J->data[kk] = a1->val (kk);
-      J->rowvals[kk] = a1->rowIndex (kk);
+      J->data[kk] = a1.val (kk);
+      J->rowvals[kk] = a1.rowIndex (kk);
     }
-  J->colptrs[colval + 1] = static_cast<int> (a1->size ());
+  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
 
 #ifdef CAPTURE_JAC_FILE
-  a1->saveFile (ttime, "jac_new.dat", true);
+  a1.saveFile (ttime, "jac_new.dat", true);
 #endif
 #if (CHECK_JACOBIAN > 0)
   auto mv = findMissing (a1);

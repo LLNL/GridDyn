@@ -102,18 +102,18 @@ void gridDynExciterDC2A::derivative (const IOdata &args, const stateData *sD, do
 }
 
 
-void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, double cj, matrixData<double> *ad)
+void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, double cj, matrixData<double> &ad)
 {
-  ad->assign (refLoc, refLoc, 1);
+  ad.assign (refLoc, refLoc, 1);
   if (opFlags.test (etrigger_high))
     {
-      //ad->assign(refLoc, VLoc, -Vrmax);
-      ad->assign (refLoc, VLoc, cj);
+      //ad.assign(refLoc, VLoc, -Vrmax);
+      ad.assign (refLoc, VLoc, cj);
     }
   else
     {
-      //ad->assign(refLoc, VLoc, -Vrmin);
-      ad->assign (refLoc, VLoc, cj);
+      //ad.assign(refLoc, VLoc, -Vrmin);
+      ad.assign (refLoc, VLoc, cj);
     }
 
 }

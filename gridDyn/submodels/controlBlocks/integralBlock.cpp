@@ -86,17 +86,17 @@ void integralBlock::derivElements (double input, double didt, const stateData *s
 }
 
 
-void integralBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void integralBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
       basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);
     }
   auto offset = offsets.getDiffOffset (sMode);
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
-  ad->assignCheck (offset, argLoc, K);
-  ad->assign (offset, offset, -sD->cj);
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
+  ad.assignCheck (offset, argLoc, K);
+  ad.assign (offset, offset, -sD->cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 

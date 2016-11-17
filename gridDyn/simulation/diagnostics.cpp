@@ -141,7 +141,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       gds->residual (&sD, resid.data (), sMode);
     }
 
-  gds->jacobianFunction (timeCurr, nstate.data (), ndstate.data (), &ad, sD.cj, sMode);
+  gds->jacobianFunction (timeCurr, nstate.data (), ndstate.data (), ad, sD.cj, sMode);
 
   stringVec stv;
   if (useStateNames)

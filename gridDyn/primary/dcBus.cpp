@@ -510,7 +510,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
         if (link->enabled)
         {
             link->updateLocalCache(sD, sMode);
-            link->ioPartialDerivatives(getID(), sD, &partDeriv, inLoc, sMode);
+            link->ioPartialDerivatives(getID(), sD, partDeriv, inLoc, sMode);
         }
     }
     if (!isExtended(sMode))
@@ -519,7 +519,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
         {
             if (gen->isConnected())
             {
-                gen->ioPartialDerivatives(outputs, sD, &partDeriv, inLoc, sMode);
+                gen->ioPartialDerivatives(outputs, sD, partDeriv, inLoc, sMode);
             }
         }
         for (auto &load : attachedLoads)
@@ -527,7 +527,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
             if (load->isConnected())
             {
 
-                load->ioPartialDerivatives(outputs, sD, &partDeriv, inLoc, sMode);
+                load->ioPartialDerivatives(outputs, sD, partDeriv, inLoc, sMode);
             }
         }
     }
@@ -535,7 +535,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
 
 }
 // Jacobian
-void dcBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void dcBus::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   auto args = getOutputs (sD, sMode);
@@ -553,12 +553,12 @@ void dcBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
     {
       if (useVoltage (sMode))
         {
-          ad->assign (Voffset, Voffset, dVdP);
+          ad.assign (Voffset, Voffset, dVdP);
           argLocs[voltageInLocation] = Voffset;
         }
       else
         {
-          ad->assign (Voffset, Voffset, 1.0);
+          ad.assign (Voffset, Voffset, 1.0);
           argLocs[voltageInLocation] = kNullLocation;
         }
     }
@@ -571,7 +571,7 @@ void dcBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
       if ((gen->jacSize (sMode) > 0) && (gen->enabled))
         {
           gen->jacobianElements (args, sD, ad, argLocs, sMode);
-          gen->outputPartialDerivatives (args, sD, &od, sMode);
+          gen->outputPartialDerivatives (args, sD, od, sMode);
         }
     }
   for (auto &load : attachedLoads)
@@ -579,20 +579,20 @@ void dcBus::jacobianElements (const stateData *sD, matrixData<double> *ad, const
       if ((load->jacSize (sMode) > 0) && (load->enabled))
         {
           load->jacobianElements (args, sD, ad, argLocs, sMode);
-          load->outputPartialDerivatives (args, sD, &od, sMode);
+          load->outputPartialDerivatives (args, sD, od, sMode);
         }
 
     }
   int gid = getID ();
   for (auto &link : attachedLinks)
     {
-      link->outputPartialDerivatives (gid, sD, &od, sMode);
+      link->outputPartialDerivatives (gid, sD, od, sMode);
     }
   /*if (argLocs[voltageInLocation] != kNullLocation)
     {
       if (useVoltage (sMode))
         {
-          ad->copyTranslateRow (&od, PoutLocation, argLocs[voltageInLocation]);
+          ad.copyTranslateRow (&od, PoutLocation, argLocs[voltageInLocation]);
         }
     }
         */

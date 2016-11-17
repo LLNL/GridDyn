@@ -79,14 +79,14 @@ void lutBlock::algElements (double input, const stateData *sD, double update[], 
     }
 }
 
-void lutBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void lutBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
-  ad->assignCheck (offset, argLoc, K * m);
-  ad->assign (offset, offset, -1);
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
+  ad.assignCheck (offset, argLoc, K * m);
+  ad.assign (offset, offset, -1);
   if (limiter_alg > 0)
     {
       basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);

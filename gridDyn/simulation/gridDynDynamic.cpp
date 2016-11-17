@@ -1235,7 +1235,7 @@ int gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double stat
 }
 
 // Jacobian computation
-int gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> *ad, double cj, const solverMode &sMode)
+int gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode)
 {
   ++JacobianCount;
   //assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption will be generally valid)
@@ -1244,7 +1244,7 @@ int gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[
   fillExtraStateData (&sD, sMode);
   //the area function to evaluate the Jacobian elements
   preEx (&sD, sMode);
-  ad->clear ();
+  ad.clear ();
   jacobianElements (&sD, ad, sMode);
   delayedJacobian (&sD, ad, sMode);
 

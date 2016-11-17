@@ -73,10 +73,10 @@ public:
 
   virtual double objValue (const optimData *oD, const optimMode &oMode) override;
   virtual void gradient (const optimData *oD, double deriv[], const optimMode &oMode) override;
-  virtual void jacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode) override;
-  virtual void getConstraints (const optimData *oD, matrixData<double> *cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
+  virtual void jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode) override;
+  virtual void getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
   virtual void constraintValue (const optimData *oD, double cVals[], const optimMode &oMode) override;
-  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> *ad, const optimMode &oMode) override;
+  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode) override;
   virtual void getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix = "") override;
 
   // parameter set functions

@@ -90,7 +90,7 @@ void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData 
 }
 
 
-void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -98,28 +98,28 @@ void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const st
     }
   auto offset = offsets.getAlgOffset (sMode);
   int refI = offset;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   int omegaLoc = -1;
   int nn = 0;
 
   // Pm
   if (omegaLoc >= 0)
     {
-      ad->assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
+      ad.assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
       nn++;
     }
-  ad->assign (refI,refI,-1 / T3 - sD->cj);
-  ad->assign (refI,refI + 1,-K / T3);
+  ad.assign (refI,refI,-1 / T3 - sD->cj);
+  ad.assign (refI,refI + 1,-K / T3);
   nn += 2;
   // X
   if (omegaLoc >= 0)
     {
-      ad->assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
+      ad.assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
       nn++;
     }
 
-  ad->assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
+  ad.assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
 
 }
 

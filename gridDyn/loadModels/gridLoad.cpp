@@ -896,7 +896,7 @@ IOdata gridLoad::getOutputs (const IOdata &args, const stateData *sD, const solv
   return output;
 }
 
-void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (args.empty ())  //we only have output derivatives if the input arguments are not counted
     {
@@ -906,7 +906,7 @@ void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD
     }
 }
 
-void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &)
+void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
   if  ((sD)&&(sD->time != lastTime))
     {
@@ -924,22 +924,22 @@ void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, ma
     }
 
 
-  ad->assignCheckCol (PoutLocation, argLocs[voltageInLocation], 2.0 * V * Yp + Ip + 2.0 * V * P * tv);
+  ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], 2.0 * V * Yp + Ip + 2.0 * V * P * tv);
 
   if (opFlags[use_power_factor_flag])
     {
       if (pfq < 1000.0)
         {
-          ad->assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * P * pfq * tv);
+          ad.assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * P * pfq * tv);
         }
       else
         {
-          ad->assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
+          ad.assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
         }
     }
   else
     {
-      ad->assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
+      ad.assignCheckCol (QoutLocation, argLocs[voltageInLocation], 2.0 * V * Yq + Iq + 2.0 * V * Q * tv);
     }
 
 }

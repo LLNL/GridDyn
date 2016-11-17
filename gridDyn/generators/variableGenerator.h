@@ -57,7 +57,7 @@ public:
 
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual double getAdjustableCapacityUp  (double /*time*/ = kBigNum) const override
   {

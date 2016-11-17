@@ -323,12 +323,12 @@ public:
 
 	virtual matrixIterator<Y> begin() const override
 	{
-		return matrixIterator<Y>(new matrixIteratorSM(this,0));
+		return matrixIterator<Y>(new matrixIteratorSM(*this,0));
 	}
 	
 	virtual matrixIterator<Y> end() const override
 	{
-		return matrixIterator<Y>(new matrixIteratorSM(this, size()));
+		return matrixIterator<Y>(new matrixIteratorSM(*this, size()));
 	}
 	void start() override
 	{
@@ -421,7 +421,7 @@ protected:
 	class matrixIteratorSM:public matrixIteratorActual<Y>
 	{
 	public:
-		explicit matrixIteratorSM(const matrixDataSparseSMB<K,X,Y,M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData,start), mDS(matrixData)
+		explicit matrixIteratorSM(const matrixDataSparseSMB<K,X,Y,M> &matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData,start), mDS(&matrixData)
 		{
 			if (start==0)
 			{
@@ -456,7 +456,7 @@ protected:
 			}
 			
 		}
-		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(it2->mDS, it2->ci), mDS(it2->mDS)
+		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS), it2->ci), mDS(it2->mDS)
 		{
 			ci = it2->ci;
 			cptr = it2 -> cptr;
@@ -688,7 +688,7 @@ public:
 	class matrixIteratorSM :public matrixIteratorActual<Y>
 	{
 	public:
-		explicit matrixIteratorSM(const matrixDataSparseSMB<0, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDS(matrixData)
+		explicit matrixIteratorSM(const matrixDataSparseSMB<0, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(*matrixData, start), mDS(matrixData)
 		{
 			if (start == 0)
 			{
@@ -704,7 +704,7 @@ public:
 			}
 
 		}
-		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(it2->mDS), mDS(it2->mDS)
+		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS)), mDS(it2->mDS)
 		{
 			cptr = it2->cptr;
 		}
@@ -953,7 +953,7 @@ public:
 		class matrixIteratorSM :public matrixIteratorActual<Y>
 		{
 		public:
-			explicit matrixIteratorSM(const matrixDataSparseSMB<1, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDS(matrixData)
+			explicit matrixIteratorSM(const matrixDataSparseSMB<1, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(*matrixData, start), mDS(matrixData)
 			{
 				if (start == 0)
 				{
@@ -970,7 +970,7 @@ public:
 				}
 
 			}
-			matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(it2->mDS, it2->ci), mDS(it2->mDS)
+			matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS), it2->ci), mDS(it2->mDS)
 			{
 				ci = it2->ci;
 				cptr = it2->cptr;

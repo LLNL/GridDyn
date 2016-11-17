@@ -231,15 +231,15 @@ double gridSecondary::getAdjustableCapacityDown (double /*time*/) const
   return 0;
 }
 
-void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> *, const solverMode & /*sMode*/)
+void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> &, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> *, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 

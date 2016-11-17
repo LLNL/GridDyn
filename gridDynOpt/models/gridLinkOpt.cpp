@@ -173,7 +173,7 @@ void gridLinkOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/
 void gridLinkOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
 {
 }
-void gridLinkOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridLinkOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 }
 
@@ -188,11 +188,11 @@ void gridLinkOpt::gradient (const optimData *, double /*deriv*/[], const optimMo
 {
 
 }
-void gridLinkOpt::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridLinkOpt::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 
 }
-void gridLinkOpt::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridLinkOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }

@@ -136,25 +136,25 @@ void transferFunctionBlock::derivElements (double input, double didt, const stat
 }
 
 
-void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
-  ad->assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
+  ad.assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
 
-  //ad->assignCheck(Loc.algOffset + 1, argLoc, m_T2 / m_T1);
+  //ad.assignCheck(Loc.algOffset + 1, argLoc, m_T2 / m_T1);
 
   basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);
   if (isAlgebraicOnly (sMode))
     {
       return;
     }
-  ad->assign (Loc.algOffset + 1, Loc.diffOffset, 1);
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  ad.assign (Loc.algOffset + 1, Loc.diffOffset, 1);
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
-  //ad->assignCheck(Loc.diffOffset, argLoc, 1 / m_T1);
-//	ad->assign(Loc.diffOffset, Loc.algOffset + 1, -1 / m_T1);
-  ad->assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
+  //ad.assignCheck(Loc.diffOffset, argLoc, 1 / m_T1);
+//	ad.assign(Loc.diffOffset, Loc.algOffset + 1, -1 / m_T1);
+  ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
 }
 
 double transferFunctionBlock::step (double ttime, double inputA)

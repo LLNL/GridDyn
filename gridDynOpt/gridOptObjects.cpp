@@ -453,11 +453,11 @@ void gridOptObject::gradient (const optimData *, double /*grad*/[], const optimM
 {
 }
 
-void gridOptObject::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridOptObject::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 }
 
-void gridOptObject::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridOptObject::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 }
 
@@ -465,11 +465,11 @@ void gridOptObject::constraintValue (const optimData *, double /*cVals*/[], cons
 {
 }
 
-void gridOptObject::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridOptObject::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 }
 
-void gridOptObject::hessianElements(const optimData *, matrixData<double> *, const optimMode &)
+void gridOptObject::hessianElements(const optimData *, matrixData<double> &, const optimMode &)
 {
 
 }

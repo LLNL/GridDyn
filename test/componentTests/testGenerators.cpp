@@ -17,6 +17,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
+#include "timeSeries.h"
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 
@@ -51,5 +52,26 @@ BOOST_AUTO_TEST_CASE(gen_test_remote2b)
 {
   std::string fname = std::string(GEN_TEST_DIRECTORY "test_gen_dualremote_b.xml");
   detailedStageCheck(fname, gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+}
+
+BOOST_AUTO_TEST_CASE(gen_test_isoc)
+{
+	std::string fname = std::string(GEN_TEST_DIRECTORY "test_isoc2.xml");
+
+	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+
+	gds->set("recorddirectory", GEN_TEST_DIRECTORY);
+
+	gds->run();
+
+	std::string recname = std::string(GEN_TEST_DIRECTORY "datafile.dat");
+	timeSeriesMulti ts3(recname);
+
+	BOOST_CHECK(ts3.data[0][30] < 0.995);
+	BOOST_CHECK(ts3.data[0].back() > 1.0);
+
+	BOOST_CHECK((ts3.data[1][0] - ts3.data[1].back()) > 0.199);
+	remove(recname.c_str());
+
 }
 BOOST_AUTO_TEST_SUITE_END()

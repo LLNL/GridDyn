@@ -160,7 +160,7 @@ void delayBlock::derivElements (double input, double didt, const stateData *sD, 
 }
 
 
-void delayBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void delayBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((isAlgebraicOnly (sMode))||(opFlags[simplified]))
     {
@@ -168,8 +168,8 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ma
       return;
     }
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-  ad->assignCheck (offset, argLoc, K / m_T1);
-  ad->assign (offset, offset, -1.0 / m_T1 - sD->cj);
+  ad.assignCheck (offset, argLoc, K / m_T1);
+  ad.assign (offset, offset, -1.0 / m_T1 - sD->cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 

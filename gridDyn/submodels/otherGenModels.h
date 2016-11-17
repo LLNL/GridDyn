@@ -49,9 +49,9 @@ public:
 
   virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut = 0) const override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
   /** helper function to get omega and its state location
@@ -106,7 +106,7 @@ public:
   // dynamics
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
 
@@ -133,7 +133,7 @@ public:
   virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual void algebraicUpdate  (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
@@ -161,7 +161,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 
@@ -183,7 +183,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
@@ -203,7 +203,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 };
 class gridDynGenModel6 : public gridDynGenModel5
@@ -221,7 +221,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate  (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
@@ -241,7 +241,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate  (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
@@ -261,7 +261,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void algebraicUpdate  (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
 };
@@ -281,7 +281,7 @@ public:
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
-                                 matrixData<double> *ad,
+                                 matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode ) override;
 };
 

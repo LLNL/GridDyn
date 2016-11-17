@@ -299,7 +299,7 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual double getRealPower  (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getRealPower (double V) const override;
@@ -328,7 +328,7 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual double getRealPower  (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getRealPower (double V) const override;

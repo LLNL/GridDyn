@@ -169,7 +169,7 @@ void gridLoadOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/
 void gridLoadOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
 {
 }
-void gridLoadOpt::constraintJacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridLoadOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 }
 
@@ -184,11 +184,11 @@ void gridLoadOpt::gradient (const optimData *, double /*deriv*/[], const optimMo
 {
 
 }
-void gridLoadOpt::jacobianElements (const optimData *, matrixData<double> *, const optimMode &)
+void gridLoadOpt::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
 {
 
 }
-void gridLoadOpt::getConstraints (const optimData *, matrixData<double> * /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridLoadOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }

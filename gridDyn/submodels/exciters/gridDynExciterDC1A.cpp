@@ -118,7 +118,7 @@ void gridDynExciterDC1A::derivative (const IOdata &args, const stateData *sD, do
 
 // Jacobian
 void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *sD,
-                                           matrixData<double> *ad,
+                                           matrixData<double> &ad,
                                            const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
@@ -129,13 +129,13 @@ void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *
   auto refI = offset;
 
   auto VLoc = argLocs[voltageInLocation];
-  // use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  // use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
   double temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
-  ad->assign (refI, refI, temp1);
-  ad->assign (refI, refI + 1, 1.0 / Te);
+  ad.assign (refI, refI, temp1);
+  ad.assign (refI, refI + 1, 1.0 / Te);
 
   if (opFlags[outside_vlim])
     {
@@ -147,34 +147,34 @@ void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *
       // Vr
       if (VLoc != kNullLocation)
         {
-          ad->assign (refI + 1, VLoc, -Ka * Tc / (Ta * Tb));
+          ad.assign (refI + 1, VLoc, -Ka * Tc / (Ta * Tb));
         }
-      ad->assign (refI + 1, refI, -Ka * Kf * Tc / (Tf * Ta * Tb));
-      ad->assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
-      ad->assign (refI + 1, refI + 2, Ka * (Tb - Tc) / (Ta * Tb));
-      ad->assign (refI + 1, refI + 3, Ka * Tc / (Ta * Tb));
+      ad.assign (refI + 1, refI, -Ka * Kf * Tc / (Tf * Ta * Tb));
+      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
+      ad.assign (refI + 1, refI + 2, Ka * (Tb - Tc) / (Ta * Tb));
+      ad.assign (refI + 1, refI + 3, Ka * Tc / (Ta * Tb));
     }
 
 
   // X
   if (VLoc != kNullLocation)
     {
-      ad->assign (refI + 2, VLoc, -1.0 / Tb);
+      ad.assign (refI + 2, VLoc, -1.0 / Tb);
     }
-  ad->assign (refI + 2, refI, -Kf / (Tf * Tb));
-  ad->assign (refI + 2, refI + 2, -1.0 / Tb - sD->cj);
-  ad->assign (refI + 2, refI + 3, 1.0 / Tb);
+  ad.assign (refI + 2, refI, -Kf / (Tf * Tb));
+  ad.assign (refI + 2, refI + 2, -1.0 / Tb - sD->cj);
+  ad.assign (refI + 2, refI + 3, 1.0 / Tb);
   // Rf
-  ad->assign (refI + 3, refI, Kf / (Tf * Tf));
-  ad->assign (refI + 3, refI + 3, -1.0 / Tf - sD->cj);
+  ad.assign (refI + 3, refI, Kf / (Tf * Tf));
+  ad.assign (refI + 3, refI + 3, -1.0 / Tf - sD->cj);
 
   //printf("%f--%f--\n",sD->time,sD->cj);
 
 }
 
-void gridDynExciterDC1A::limitJacobian (double /*V*/, int /*Vloc*/, int refLoc, double cj, matrixData<double> *ad)
+void gridDynExciterDC1A::limitJacobian (double /*V*/, int /*Vloc*/, int refLoc, double cj, matrixData<double> &ad)
 {
-  ad->assign (refLoc, refLoc, cj);
+  ad.assign (refLoc, refLoc, cj);
 }
 
 

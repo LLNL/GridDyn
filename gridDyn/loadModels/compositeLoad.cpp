@@ -353,7 +353,7 @@ void compositeLoad::derivative (const IOdata &args, const stateData *sD, double 
     }
 }
 
-void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
@@ -364,7 +364,7 @@ void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateDat
     }
 }
 
-void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
@@ -372,7 +372,7 @@ void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *s
     }
 }
 
-void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {

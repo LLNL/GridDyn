@@ -91,25 +91,25 @@ void functionBlock::algElements (double input, const stateData *sD, double updat
 
 
 
-void functionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> *ad, index_t argLoc, const solverMode &sMode)
+void functionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   if (opFlags[uses_constantarg])
     {
       double temp1 = fptr2 (gain * (input + bias),arg2);
       double temp2 = fptr2 (gain * (input + 1e-8 + bias),arg2);
-      ad->assignCheck (offset, argLoc, K * (temp2 - temp1) / 1e-8);
+      ad.assignCheck (offset, argLoc, K * (temp2 - temp1) / 1e-8);
     }
   else
     {
       double temp1 = fptr (gain * (input + bias));
       double temp2 = fptr (gain * (input + 1e-8 + bias));
-      ad->assignCheck (offset, argLoc, K * (temp2 - temp1) / 1e-8);
+      ad.assignCheck (offset, argLoc, K * (temp2 - temp1) / 1e-8);
     }
-  ad->assign (offset, offset, -1);
+  ad.assign (offset, offset, -1);
   if (limiter_alg > 0)
     {
       basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);

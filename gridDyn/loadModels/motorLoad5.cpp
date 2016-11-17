@@ -424,7 +424,7 @@ void motorLoad5::derivative (const IOdata & /*args*/, const stateData *sD, doubl
 }
 
 
-void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   index_t refAlg, refDiff;
   const double *gm, *dst;
@@ -469,30 +469,30 @@ void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matr
   // P
   if (TLoc != kNullLocation)
     {
-      ad->assign (refAlg, TLoc, Vr);
-      ad->assign (refAlg + 1, TLoc, -Vm);
+      ad.assign (refAlg, TLoc, Vr);
+      ad.assign (refAlg + 1, TLoc, -Vm);
     }
   // Q
   if (VLoc != kNullLocation)
     {
-      ad->assign (refAlg, VLoc, Vm / V);
-      ad->assign (refAlg + 1, VLoc, Vr / V);
+      ad.assign (refAlg, VLoc, Vm / V);
+      ad.assign (refAlg + 1, VLoc, Vr / V);
     }
 
-  ad->assign (refAlg, refAlg, -xpp);
-  ad->assign (refAlg, refAlg + 1, -r);
+  ad.assign (refAlg, refAlg, -xpp);
+  ad.assign (refAlg, refAlg + 1, -r);
 
-  ad->assign (refAlg + 1, refAlg, -r);
-  ad->assign (refAlg + 1, refAlg + 1, xpp);
+  ad.assign (refAlg + 1, refAlg, -r);
+  ad.assign (refAlg + 1, refAlg + 1, xpp);
   if ((isDynamic (sMode)) && (isAlgebraicOnly (sMode)))
     {
       return;
     }
   // Ir Differential
 
-  ad->assign (refAlg, refDiff + 4, -1);
+  ad.assign (refAlg, refDiff + 4, -1);
   // Im Differential
-  ad->assign (refAlg + 1, refDiff + 3, -1);
+  ad.assign (refAlg + 1, refDiff + 3, -1);
 
 
   double slip = dst[0];
@@ -507,20 +507,20 @@ void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matr
       // slip
       if (opFlags.test (stalled))
         {
-          ad->assign (refDiff, refDiff, -cj);
+          ad.assign (refDiff, refDiff, -cj);
         }
       else
         {
-          ad->assign (refDiff, refDiff, dmechds (slip) / (2 * H) - cj);
-          ad->assign (refDiff, refDiff + 3, -gm[0] / (2 * H));
-          ad->assign (refDiff, refDiff + 4, -gm[1] / (2 * H));
-          ad->assign (refDiff, refAlg, -dst[3] / (2 * H));
-          ad->assign (refDiff, refAlg + 1, -dst[4] / (2 * H));
+          ad.assign (refDiff, refDiff, dmechds (slip) / (2 * H) - cj);
+          ad.assign (refDiff, refDiff + 3, -gm[0] / (2 * H));
+          ad.assign (refDiff, refDiff + 4, -gm[1] / (2 * H));
+          ad.assign (refDiff, refAlg, -dst[3] / (2 * H));
+          ad.assign (refDiff, refAlg + 1, -dst[4] / (2 * H));
         }
     }
   else
     {
-      ad->assign (refDiff, refDiff, 1);
+      ad.assign (refDiff, refDiff, 1);
     }
   // omega
 
@@ -529,32 +529,32 @@ void motorLoad5::jacobianElements (const IOdata &args, const stateData *sD, matr
   //dv[2] = -m_baseFreq*slip*dst[1] - (dst[2] + (x0 - xp)*ast[0]) / T0p;
 
 
-  ad->assign (refDiff + 1, refAlg + 1, -(x0 - xp) / T0p);
-  ad->assign (refDiff + 1, refDiff, m_baseFreq * dst[2]);
-  ad->assign (refDiff + 1, refDiff + 1, -1 / T0p - cj);
-  ad->assign (refDiff + 1, refDiff + 2, m_baseFreq * slip);
+  ad.assign (refDiff + 1, refAlg + 1, -(x0 - xp) / T0p);
+  ad.assign (refDiff + 1, refDiff, m_baseFreq * dst[2]);
+  ad.assign (refDiff + 1, refDiff + 1, -1 / T0p - cj);
+  ad.assign (refDiff + 1, refDiff + 2, m_baseFreq * slip);
 
-  ad->assign (refDiff + 2, refAlg, (x0 - xp) / T0p);
-  ad->assign (refDiff + 2, refDiff, -m_baseFreq * dst[1]);
-  ad->assign (refDiff + 2, refDiff + 1, -m_baseFreq * slip);
-  ad->assign (refDiff + 2, refDiff + 2, -1 / T0p - cj);
+  ad.assign (refDiff + 2, refAlg, (x0 - xp) / T0p);
+  ad.assign (refDiff + 2, refDiff, -m_baseFreq * dst[1]);
+  ad.assign (refDiff + 2, refDiff + 1, -m_baseFreq * slip);
+  ad.assign (refDiff + 2, refDiff + 2, -1 / T0p - cj);
 
   //Erpp and Empp
   //dv[3] = -m_baseFreq*slip*(dst[2] - dst[4]) + ddt[1] - (dst[1] - dst[4] - (xp - xpp)*ast[1]) / T0pp;
   //dv[4] = m_baseFreq*slip*(dst[1] - dst[3]) + ddt[2] - (dst[2] - dst[3] + (xp - xpp)*ast[0]) / T0pp;
-  ad->assign (refDiff + 3, refAlg + 1, (xp - xpp) / T0pp);
-  ad->assign (refDiff + 3, refDiff, -m_baseFreq * (dst[2] - dst[4]));
-  ad->assign (refDiff + 3, refDiff + 1, -1 / T0pp + cj);
-  ad->assign (refDiff + 3, refDiff + 2, -m_baseFreq * slip);
-  ad->assign (refDiff + 3, refDiff + 3, -cj);
-  ad->assign (refDiff + 3, refDiff + 4, m_baseFreq * slip + 1 / T0pp);
+  ad.assign (refDiff + 3, refAlg + 1, (xp - xpp) / T0pp);
+  ad.assign (refDiff + 3, refDiff, -m_baseFreq * (dst[2] - dst[4]));
+  ad.assign (refDiff + 3, refDiff + 1, -1 / T0pp + cj);
+  ad.assign (refDiff + 3, refDiff + 2, -m_baseFreq * slip);
+  ad.assign (refDiff + 3, refDiff + 3, -cj);
+  ad.assign (refDiff + 3, refDiff + 4, m_baseFreq * slip + 1 / T0pp);
 
-  ad->assign (refDiff + 4, refAlg, -(xp - xpp) / T0pp);
-  ad->assign (refDiff + 4, refDiff, m_baseFreq * (dst[1] - dst[3]));
-  ad->assign (refDiff + 4, refDiff + 1, m_baseFreq * slip);
-  ad->assign (refDiff + 4, refDiff + 2, -1 / T0pp + cj);
-  ad->assign (refDiff + 4, refDiff + 3, -m_baseFreq * slip + 1 / T0pp);
-  ad->assign (refDiff + 4, refDiff + 4, -cj);
+  ad.assign (refDiff + 4, refAlg, -(xp - xpp) / T0pp);
+  ad.assign (refDiff + 4, refDiff, m_baseFreq * (dst[1] - dst[3]));
+  ad.assign (refDiff + 4, refDiff + 1, m_baseFreq * slip);
+  ad.assign (refDiff + 4, refDiff + 2, -1 / T0pp + cj);
+  ad.assign (refDiff + 4, refDiff + 3, -m_baseFreq * slip + 1 / T0pp);
+  ad.assign (refDiff + 4, refDiff + 4, -cj);
 
 }
 

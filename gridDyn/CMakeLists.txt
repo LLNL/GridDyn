@@ -30,12 +30,14 @@ set(genmodel_sources
 set(generator_headers
 	generators/gridDynGenerator.h
 	generators/variableGenerator.h
+	generators/isocController.h
 	)
 	
 set (generator_sources
 	${generator_headers}
 	generators/gridDynGenerator.cpp
 	generators/variableGenerator.cpp
+	generators/isocController.cpp
 	)
 
 set(gridSource_sources

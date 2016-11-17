@@ -118,14 +118,14 @@ void gridDynGovernorTgov1::timestep (double ttime, const IOdata &args, const sol
 
 }
 
-void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD,nullptr, sMode,  this);
 
   int refI = Loc.diffOffset;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
 
 
@@ -144,38 +144,38 @@ void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stat
   // Pm
   if (linkOmega)
     {
-      ad->assign (Loc.algOffset, argLocs[govOmegaInLocation], Dt );
+      ad.assign (Loc.algOffset, argLocs[govOmegaInLocation], Dt );
     }
 
-  ad->assign (Loc.algOffset, Loc.algOffset, 1);
+  ad.assign (Loc.algOffset, Loc.algOffset, 1);
   if (isAlgebraicOnly (sMode))
     {
       return;
     }
-  ad->assign (Loc.algOffset, refI, -1);
+  ad.assign (Loc.algOffset, refI, -1);
 
   if (opFlags[p_limited])
     {
-      ad->assign (refI + 1, refI + 1, sD->cj);
-      ad->assign (refI + 1, refI, 1 / T3);
-      ad->assign (refI + 1, refI + 1, -1 / T3 - sD->cj);
+      ad.assign (refI + 1, refI + 1, sD->cj);
+      ad.assign (refI + 1, refI, 1 / T3);
+      ad.assign (refI + 1, refI + 1, -1 / T3 - sD->cj);
     }
   else
     {
-      ad->assignCheckCol (refI + 1, argLocs[govpSetInLocation], 1 / T1);
-      ad->assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
+      ad.assignCheckCol (refI + 1, argLocs[govpSetInLocation], 1 / T1);
+      ad.assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
       if (linkOmega)
         {
-          ad->assign (refI + 1, argLocs[govOmegaInLocation], -K / (T1));
+          ad.assign (refI + 1, argLocs[govOmegaInLocation], -K / (T1));
         }
 
-      ad->assign (refI, refI + 1, (1 + T2 / T1) / T3);
-      ad->assignCheckCol (refI, argLocs[govpSetInLocation], -T2 / T1 / T3);
+      ad.assign (refI, refI + 1, (1 + T2 / T1) / T3);
+      ad.assignCheckCol (refI, argLocs[govpSetInLocation], -T2 / T1 / T3);
       if (linkOmega)
         {
-          ad->assign (refI, argLocs[govOmegaInLocation], K * T2 / (T1) / T3);
+          ad.assign (refI, argLocs[govOmegaInLocation], K * T2 / (T1) / T3);
         }
-      ad->assign (refI, refI, -1 / T3 - sD->cj);
+      ad.assign (refI, refI, -1 / T3 - sD->cj);
 
     }
 

@@ -141,12 +141,12 @@ void gridDynGovernorReheat::derivative (const IOdata &args, const stateData *sD,
 
 
 
-void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset  (sMode);
   if (isAlgebraicOnly (sMode))
     {
-      ad->assign (offset, offset, -1);
+      ad.assign (offset, offset, -1);
       return;
     }
 
@@ -166,8 +166,8 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
       limitTin = true;
     }
   int refI = offset;
-  //use the ad->assign Macro defined in basicDefs
-  // ad->assign(arrayIndex, RowIndex, ColIndex, value)
+  //use the ad.assign Macro defined in basicDefs
+  // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   bool linkOmega = (argLocs[govOmegaInLocation] != kNullLocation);
 
   /* if (opFlags.test (uses_deadband))
@@ -180,33 +180,33 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
          */
   if (limitTin)
     {
-      ad->assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
+      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
     }
   else
     {
       if (linkOmega)
         {
-          ad->assign (refI + 3, argLocs[govOmegaInLocation], K / T1);
+          ad.assign (refI + 3, argLocs[govOmegaInLocation], K / T1);
         }
       if (argLocs[govpSetInLocation] != kNullLocation)
         {
-          ad->assign (refI + 3, argLocs[govpSetInLocation], 1.0 / T1);
+          ad.assign (refI + 3, argLocs[govpSetInLocation], 1.0 / T1);
         }
-      ad->assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
+      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
     }
   // tg2
 
-  ad->assign (refI + 2, refI + 3, (1.0 - T3 / T2) * 1.0 / T2);
-  ad->assign (refI + 2, refI + 2, -1.0 / T2 - sD->cj);
+  ad.assign (refI + 2, refI + 3, (1.0 - T3 / T2) * 1.0 / T2);
+  ad.assign (refI + 2, refI + 2, -1.0 / T2 - sD->cj);
   //Tg3
-  ad->assign (refI + 1, refI + 2, (1.0 - T4 / T5) / T5);
-  ad->assign (refI + 1, refI + 3, ((1.0 - T4 / T5) * T3 / T2) / T5);
-  ad->assign (refI + 1, refI + 1, -1.0 / T5 - sD->cj);
+  ad.assign (refI + 1, refI + 2, (1.0 - T4 / T5) / T5);
+  ad.assign (refI + 1, refI + 3, ((1.0 - T4 / T5) * T3 / T2) / T5);
+  ad.assign (refI + 1, refI + 1, -1.0 / T5 - sD->cj);
   //Tout
-  ad->assign (refI, refI, -1);
-  ad->assign (refI, refI + 1, 1);
-  ad->assign (refI, refI + 2, T4 / T5);
-  ad->assign (refI, refI + 3, T4 / T5 * (T3 / T2));
+  ad.assign (refI, refI, -1);
+  ad.assign (refI, refI + 1, 1);
+  ad.assign (refI, refI + 2, T4 / T5);
+  ad.assign (refI, refI + 3, T4 / T5 * (T3 / T2));
 
 }
 

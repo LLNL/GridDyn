@@ -30,9 +30,9 @@ private:
 public:
 	/** @brief constructor
 	*/
-	matrixDataScale(matrixData<Y> *input, Y scaleFactor):scalingFactor(scaleFactor)
+	matrixDataScale(matrixData<Y> &input, Y scaleFactor):scalingFactor(scaleFactor)
 	{
-		setArray(input);
+		setArray(&input);
 	};
 
 	void clear() override

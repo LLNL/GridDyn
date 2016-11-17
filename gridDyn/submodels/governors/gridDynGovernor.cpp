@@ -165,7 +165,7 @@ void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, doubl
 }
 
 
-void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> *ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   cb.jacElements  (args[govOmegaInLocation], 0,sD, ad, argLocs[govOmegaInLocation], sMode);
 
@@ -177,7 +177,7 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 
   out = dbb.getOutput (kNullVec, sD, sMode);
   wloc = dbb.getOutputLoc(sMode);
-  delay.jacElements (out + args[govpSetInLocation], 0,sD, &kp, 0, sMode);
+  delay.jacElements (out + args[govpSetInLocation], 0,sD, kp, 0, sMode);
 
   if (argLocs[govpSetInLocation] != kNullLocation)
     {
@@ -185,11 +185,11 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
         {
           if (kp.colIndex (pp) == 0)
             {
-              ad->assign (kp.rowIndex (pp), wloc, kp.val (pp));
+              ad.assign (kp.rowIndex (pp), wloc, kp.val (pp));
             }
           else
             {
-              ad->assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
+              ad.assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
             }
         }
     }
@@ -199,12 +199,12 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
         {
           if (kp.colIndex (pp) == 0)
             {
-              ad->assign (kp.rowIndex (pp), wloc, kp.val (pp));
-              ad->assign (kp.rowIndex (pp), argLocs[govpSetInLocation], kp.val (pp));
+              ad.assign (kp.rowIndex (pp), wloc, kp.val (pp));
+              ad.assign (kp.rowIndex (pp), argLocs[govpSetInLocation], kp.val (pp));
             }
           else
             {
-              ad->assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
+              ad.assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
             }
         }
 

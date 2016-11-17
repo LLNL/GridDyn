@@ -319,7 +319,7 @@ double gridDynGenModelClassical::getOutput (const IOdata &args, const stateData 
 }
 
 
-void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
 
@@ -330,20 +330,20 @@ void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const s
 
   if (argLocs[angleInLocation] != kNullLocation)
     {
-      ad->assign (PoutLocation, argLocs[angleInLocation], gm[1] * Vd - gm[0] * Vq);
-      ad->assign (QoutLocation, argLocs[angleInLocation], -gm[1] * Vq - gm[0] * Vd);
+      ad.assign (PoutLocation, argLocs[angleInLocation], gm[1] * Vd - gm[0] * Vq);
+      ad.assign (QoutLocation, argLocs[angleInLocation], -gm[1] * Vq - gm[0] * Vd);
     }
   if (argLocs[voltageInLocation] != kNullLocation)
     {
-      ad->assign (PoutLocation, argLocs[voltageInLocation], -gm[1] * Vq / V - gm[0] * Vd / V);
-      ad->assign (QoutLocation, argLocs[voltageInLocation], -gm[1] * Vd / V + gm[0] * Vq / V);
+      ad.assign (PoutLocation, argLocs[voltageInLocation], -gm[1] * Vq / V - gm[0] * Vd / V);
+      ad.assign (QoutLocation, argLocs[voltageInLocation], -gm[1] * Vd / V + gm[0] * Vq / V);
     }
 
 }
 
 
 void gridDynGenModelClassical::jacobianElements (const IOdata &args, const stateData *sD,
-                                                 matrixData<double> *ad,
+                                                 matrixData<double> &ad,
                                                  const IOlocs &argLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, sMode, this);
@@ -363,37 +363,37 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
     {
       if (TLoc != kNullLocation)
         {
-          ad->assign (refAlg, TLoc, Vq);
-          ad->assign (refAlg + 1, TLoc, -Vd);
+          ad.assign (refAlg, TLoc, Vq);
+          ad.assign (refAlg + 1, TLoc, -Vd);
         }
 
       // Q
       if (VLoc != kNullLocation)
         {
 
-          ad->assign (refAlg, VLoc, Vd / args[voltageInLocation]);
-          ad->assign (refAlg + 1, VLoc, Vq / args[voltageInLocation]);
+          ad.assign (refAlg, VLoc, Vd / args[voltageInLocation]);
+          ad.assign (refAlg + 1, VLoc, Vq / args[voltageInLocation]);
         }
 
-      ad->assign (refAlg, refAlg, Rs);
-      ad->assign (refAlg, refAlg + 1, (Xd));
+      ad.assign (refAlg, refAlg, Rs);
+      ad.assign (refAlg, refAlg + 1, (Xd));
 
 
 
-      ad->assign (refAlg + 1, refAlg, -(Xd));
-      ad->assign (refAlg + 1, refAlg + 1, Rs);
-      ad->assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
+      ad.assign (refAlg + 1, refAlg, -(Xd));
+      ad.assign (refAlg + 1, refAlg + 1, Rs);
+      ad.assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
 
       if (isAlgebraicOnly (sMode))
         {
           return;
         }
-      ad->assign (refAlg, refDiff, -Vq);
+      ad.assign (refAlg, refDiff, -Vq);
 
-      ad->assign (refAlg + 1, refDiff + 1, -mp_Kw);
+      ad.assign (refAlg + 1, refDiff + 1, -mp_Kw);
 
       // Iq Differential
-      ad->assign (refAlg + 1, refDiff, Vd);
+      ad.assign (refAlg + 1, refDiff, Vd);
     }
   // Id and Iq
   /*
@@ -402,10 +402,10 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
   */
   // Id Differential
 
-  //ad->assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
+  //ad.assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
   // delta
-  ad->assign (refDiff, refDiff, -sD->cj);
-  ad->assign (refDiff, refDiff + 1, m_baseFreq);
+  ad.assign (refDiff, refDiff, -sD->cj);
+  ad.assign (refDiff, refDiff + 1, m_baseFreq);
   // omega
 
   double Eft = args[genModelEftInLocation];
@@ -414,19 +414,19 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
   double kVal = -0.5 / H;
 
 
-  //ad->assign (refDiff + 1, refAlg, -0.5  * (Xd - Xdp) * gm[1] / H);
+  //ad.assign (refDiff + 1, refAlg, -0.5  * (Xd - Xdp) * gm[1] / H);
   if (hasAlgebraic (sMode))
     {
-      ad->assign (refDiff + 1, refAlg + 1, kVal * (Eft + mp_Kw * (Loc.diffStateLoc[1] - 1.0)));
+      ad.assign (refDiff + 1, refAlg + 1, kVal * (Eft + mp_Kw * (Loc.diffStateLoc[1] - 1.0)));
     }
-  ad->assign (refDiff + 1, refDiff + 1, kVal * (D + mp_Kw * gm[1]) - sD->cj);
+  ad.assign (refDiff + 1, refDiff + 1, kVal * (D + mp_Kw * gm[1]) - sD->cj);
 
-  ad->assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);               // governor: Pm
-  ad->assignCheckCol (refDiff + 1, argLocs[genModelEftInLocation], kVal * gm[1]);               // exciter: Ef
+  ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);               // governor: Pm
+  ad.assignCheckCol (refDiff + 1, argLocs[genModelEftInLocation], kVal * gm[1]);               // exciter: Ef
 
 }
 
-void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> *ad, const solverMode &sMode)
+void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   auto refAlg = Loc.algOffset;
@@ -439,19 +439,19 @@ void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, con
   if (hasAlgebraic (sMode))
     {
       //output P
-      ad->assign (PoutLocation, refAlg, -Vd);
-      ad->assign (PoutLocation, refAlg + 1, -Vq);
+      ad.assign (PoutLocation, refAlg, -Vd);
+      ad.assign (PoutLocation, refAlg + 1, -Vq);
 
 
       //output Q
-      ad->assign (QoutLocation, refAlg, Vq);
-      ad->assign (QoutLocation, refAlg + 1, -Vd);
+      ad.assign (QoutLocation, refAlg, Vq);
+      ad.assign (QoutLocation, refAlg + 1, -Vd);
     }
 
   if (hasDifferential (sMode))
     {
-      ad->assign (PoutLocation, refDiff, -gm[1] * Vd + gm[0] * Vq);
-      ad->assign (QoutLocation, refDiff, gm[1] * Vq + gm[0] * Vd);
+      ad.assign (PoutLocation, refDiff, -gm[1] * Vd + gm[0] * Vq);
+      ad.assign (QoutLocation, refDiff, gm[1] * Vq + gm[0] * Vd);
     }
 
 }
