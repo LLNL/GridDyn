@@ -208,7 +208,7 @@ public:
           }
         else
           {
-            obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
+            obptr = std::make_shared<gridObjectHolder<Ntype>> (count);
             if (root)
               {
                 if (!obptr)
@@ -247,7 +247,7 @@ class childTypeFactory : public typeFactory<Btype>
   static_assert (std::is_base_of<gridCoreObject, Btype>::value, "factory class must have gridCoreObject as base");
   static_assert (std::is_base_of<Btype, Ntype>::value, "factory class types must have parent child relationship");
 private:
-  std::shared_ptr<gridObjectHolder<Ntype>> obptr;
+  std::shared_ptr<gridObjectHolder<Ntype>> obptr=nullptr;
   bool useBlock = false;
   count_t targetprepped = 0;
 public:
@@ -361,7 +361,7 @@ public:
           }
         else
           {
-            obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
+            obptr = std::make_shared<gridObjectHolder<Ntype>> (count);
             if (root)
               {
                 if (!obptr)

@@ -15,8 +15,9 @@
 #include "fncsLibrary.h"
 #include "fncsSupport.h"
 #include "core/helperTemplates.h"
+#include "stringOps.h"
 
-fncsCollector::fncsCollector(double time0, double period):collector(time0,period)
+fncsCollector::fncsCollector(gridDyn_time time0, double period):collector(time0,period)
 {
 
 }
@@ -56,10 +57,41 @@ change_code fncsCollector::trigger(double time)
 	auto out=collector::trigger(time);
 	
 	auto colNames = getColumnDescriptions();
+	std::vector<bool> subscribe(colNames.size(), true);
+
+	
+	for (size_t ii = 0; ii < complexPairs.size(); ++ii)
+	{
+		auto &n1 = complexPairs[ii].first;
+		auto &n2 = complexPairs[ii].second;
+		int index1 = -1;
+		int index2 = -1;
+		for (int pp = 0; pp < colNames.size(); ++pp)
+		{
+			if (n1 == colNames[pp])
+			{
+				index1 = pp;
+			}
+			if (n2 == colNames[pp])
+			{
+				index2 = pp;
+			}
+		}
+		if ((index1 >= 0) && (index2 >= 0))
+		{
+			subscribe[index1] = false;
+			subscribe[index2] = false;
+		}
+		fncsSendComplex(cnames[ii], data[index1], data[index2]);
+	}
+
 	for (size_t ii = 0; ii < data.size(); ++ii)
 	{
-
-		fncsSendVal(colNames[ii], data[ii]);
+		if (subscribe[ii])
+		{
+			fncsSendVal(colNames[ii], data[ii]);
+		}
+		
 	}
 	return out;
 }
@@ -73,9 +105,12 @@ void fncsCollector::set(const std::string &param, double val)
 
 void fncsCollector::set(const std::string &param, const std::string &val)
 {
-	if (param[0] == '#')
+	if (param == "complex")
 	{
-		
+		auto asLoc = val.find("as");
+		cnames.push_back(trim(val.substr(asLoc + 2)));
+		auto commaLoc = val.find_first_of(',');
+		complexPairs.emplace_back(trim(val.substr(0, commaLoc)), trim(val.substr(commaLoc + 1, asLoc - 1 - commaLoc)));
 	}
 	
 	else

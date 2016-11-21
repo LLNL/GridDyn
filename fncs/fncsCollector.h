@@ -15,12 +15,13 @@
 #define DIME_COLLECTOR_HEADER_
 
 #include "recorder_events/collector.h"
-
+#include <utility>
 
 class fncsCollector :public collector
 {
 private:
-	
+	std::vector<std::pair<std::string,std::string>> complexPairs;
+	std::vector<std::string> cnames;
 public:
 	fncsCollector(gridDyn_time time0 = 0, double period = 1.0);
 	explicit fncsCollector(const std::string &name);
@@ -28,7 +29,7 @@ public:
 
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
 
-	virtual change_code trigger(double time) override;
+	virtual change_code trigger(gridDyn_time time) override;
 
 
 	void set(const std::string &param, double val) override;

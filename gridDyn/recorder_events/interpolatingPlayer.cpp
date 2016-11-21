@@ -95,11 +95,11 @@ void interpolatingPlayer::setNextValue()
 	{
 		return;
 	}
-	if (currIndex == 0)
+	if (currIndex >= ts.count - 1)
 	{
 		if (period > 0)
 		{
-			slope = (ts.data[0] - ts.data.back()) / (ts.time[0] - ts.time.back());
+			slope = (ts.data[0] - ts.data.back()) / (ts.time[0] - ts.time.back()-period);
 		}
 		else
 		{
@@ -108,7 +108,7 @@ void interpolatingPlayer::setNextValue()
 	}
 	else
 	{
-		slope = (ts.data[currIndex] - ts.data[currIndex - 1]) / (ts.time[currIndex] - ts.time[currIndex - 1]);
+		slope = (ts.data[currIndex+1] - ts.data[currIndex]) / (ts.time[currIndex+1] - ts.time[currIndex]);
 	}
 	
 		if (useSlopeField)
@@ -119,7 +119,22 @@ void interpolatingPlayer::setNextValue()
 		else
 		{
 			triggerTime = std::min(ts.time[currIndex], triggerTime + samplePeriod);
-			value = ts.data[currIndex] - slope*(ts.time[currIndex] - triggerTime);
+			if (currIndex == 0)
+			{
+				if (period > 0)
+				{
+					value = ts.data.back() + slope*(triggerTime - ts.time.back());
+				}
+				else
+				{
+					value = ts.data[currIndex];
+				}
+			}
+			else
+			{
+				value = ts.data[currIndex - 1] + slope*(triggerTime - ts.time[currIndex - 1]);
+			}
+			
 		}
 }
 
@@ -197,7 +212,7 @@ change_code interpolatingPlayer::trigger()
 change_code interpolatingPlayer::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
-	if (time >= triggerTime)
+	if (time+kSmallTime >= triggerTime)
 	{
 		try
 		{

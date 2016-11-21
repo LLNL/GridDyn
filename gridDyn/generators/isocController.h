@@ -22,14 +22,16 @@ class gridDynGenerator;
 class isocController : public gridSubModel
 {
 protected:
-	double db = 0.001;
-	double upStep = -0.005*0.25;
-	double downStep = 0.01*0.08;
-	double upPeriod = 0.25;
-	double downPeriod = 0.08;
+	double db = 0.005;
+	double upStep = -0.01;
+	double downStep = 0.02*0.25;
+	double upPeriod = 1.0;
+	double downPeriod = 0.25;
 	double maxLevel = 1.0;
 	double minLevel = -1.0;
 	double lastFreq = 0;
+	double integralTrigger = 0.02;
+	double integratorLevel = 0;
 	gridDynGenerator *gen;
 
 public:

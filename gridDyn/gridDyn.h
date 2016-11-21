@@ -89,11 +89,11 @@ enum gd_extra_flags
 */
 struct tolerances
 {
-  double voltageTolerance = 1e-7;  //!< tolerance on the voltage levels
-  double angleTolerance = 1e-8;  //!< tolerance on the angles
-  double defaultTolerance = 1e-8; //!< default tolerance on all other variables
+  double voltageTolerance = 1e-6;  //!< tolerance on the voltage levels
+  double angleTolerance = 1e-7;  //!< tolerance on the angles
+  double defaultTolerance = 1e-6; //!< default tolerance on all other variables
   double toleranceRelaxationFactor = 1.0;  //!< relax the tolerances to help the solver
-  double rtol = 1e-6;  //!< the relative tolerance
+  double rtol = 1e-5;  //!< the relative tolerance
   double timeTol = kSmallTime; //!< the allowable time slop in events.  The time span below which the system doesn't really care about
 };
 

@@ -249,14 +249,14 @@ void breaker::updateA (double time)
 {
   if (opFlags[breaker_tripped_flag])
     {
-      if (time >= nextUpdateTime)
+      if (time+kSmallTime >= nextUpdateTime)
         {
           resetBreaker (time);
         }
     }
   else if (opFlags[overlimit_flag])
     {
-      if (time >= nextUpdateTime)
+      if (time+kSmallTime >= nextUpdateTime)
         {
           if (checkCondition (0))
             {//still over the limit->trip the breaker
@@ -273,7 +273,7 @@ void breaker::updateA (double time)
     {
       gridRelay::updateA (time);
     }
-  prevTime = time;
+ lastUpdateTime = time;
 }
 
 

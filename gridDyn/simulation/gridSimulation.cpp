@@ -84,12 +84,26 @@ void gridSimulation::addsp (std::shared_ptr<gridCoreObject> obj)
 {
   gridCoreObject *gco = obj.get ();
   obj->setOwner (nullptr, gco);       //set an ownership loop so the object would never get deleted in another way
-  try
+  if (std::dynamic_pointer_cast<gridObject>(obj))
   {
-	  gridArea::add(gco);       //add the object to the regular system
-	  extraObjects.push_back(obj);
+	  try
+	  {
+		  gridArea::add(gco);       //add the object to the regular system
+		  extraObjects.push_back(obj);
+	  }
+	  catch (const invalidObjectException &)
+	  {
+		  extraObjects.push_back(obj);
+		  obj->locIndex = static_cast<index_t> (extraObjects.size()) - 1;
+		  obj->setParent(this);
+		  obList->insert(gco);
+		  if (obj->getNextUpdateTime() < kHalfBigNum)               //check if the object has updates
+		  {
+			  EvQ->insert(gco);
+		  }
+	  }
   }
-  catch (const invalidObjectException &)
+  else
   {
 	  extraObjects.push_back(obj);
 	  obj->locIndex = static_cast<index_t> (extraObjects.size()) - 1;
@@ -100,6 +114,7 @@ void gridSimulation::addsp (std::shared_ptr<gridCoreObject> obj)
 		  EvQ->insert(gco);
 	  }
   }
+  
   
 }
 
