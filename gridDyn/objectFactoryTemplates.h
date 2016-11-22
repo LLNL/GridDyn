@@ -208,7 +208,7 @@ public:
           }
         else
           {
-            obptr = std::make_shared<gridObjectHolder<Ntype>> (count);
+            obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
             if (root)
               {
                 if (!obptr)
@@ -361,7 +361,7 @@ public:
           }
         else
           {
-            obptr = std::make_shared<gridObjectHolder<Ntype>> (count);
+            obptr = std::make_shared<gridObjectHolder<Ntype>> (targetprepped);
             if (root)
               {
                 if (!obptr)

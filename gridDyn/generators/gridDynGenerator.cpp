@@ -543,7 +543,7 @@ void gridDynGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &o
       inputArgs[govOmegaInLocation] = m_baseFreq;
       inputArgs[govpSetInLocation] = kNullVal;
 
-      desiredOutput[0] = P * scale;
+      desiredOutput[0] = Pset * scale;
 	  if (isoc)
 	  {
 		  desiredOutput[0] += isoc->getOutput()*scale;

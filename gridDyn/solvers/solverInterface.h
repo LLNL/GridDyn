@@ -106,7 +106,7 @@ protected:
   count_t rootCallCount = 0;
   count_t max_iterations = 10000;                                    //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
-  double tolerance = 1e-6;												//!<the default solver tolerance
+  double tolerance = 1e-8;												//!<the default solver tolerance
   gridDyn_time solveTime = -kBigNum;                            //!< storage for the time the solver is called
 	//TODO:convert to a bitset instead of all the flags
   bool dense = false;													//!< if the solver should use a dense or sparse version
