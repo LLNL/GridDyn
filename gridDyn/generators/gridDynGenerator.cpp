@@ -517,7 +517,13 @@ void gridDynGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &o
 
   m_Eft = computedInputs[genModelEftInLocation];
   genModel->guess (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
-  P = m_Pmech / scale;
+
+  Pset = m_Pmech / scale;
+  if (isoc)
+  {
+	  Pset -= isoc->getOutput();
+  }
+
 
   if ((ext) && (ext->enabled))
     {
@@ -538,6 +544,10 @@ void gridDynGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &o
       inputArgs[govpSetInLocation] = kNullVal;
 
       desiredOutput[0] = P * scale;
+	  if (isoc)
+	  {
+		  desiredOutput[0] += isoc->getOutput()*scale;
+	  }
       gov->initializeB (inputArgs, desiredOutput, computedInputs);
 
       gov->guess (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
@@ -1141,7 +1151,7 @@ void gridDynGenerator::setFlag (const std::string &flag, bool val)
 	  opFlags.set(local_power_control, false);
 	  opFlags.set(adjustable_P, false);
     }
-  else if ((flag == "no_control"))
+  else if (flag == "no_control")
   {
 	  opFlags.set(local_power_control, false);
 	  opFlags.set(adjustable_P, false);

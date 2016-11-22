@@ -45,7 +45,7 @@ public:
   /** update the source output
   @param[in] ttime  the time to update to
   */
-  virtual void sourceUpdate (double ttime);
+  virtual void sourceUpdate (gridDyn_time ttime);
   /** update the source output and advance the model time
   @param[in] ttime  the time to update to
   */
