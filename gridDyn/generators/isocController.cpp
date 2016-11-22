@@ -51,7 +51,7 @@ gridCoreObject *isocController::clone(gridCoreObject *obj) const
 	nobj->downPeriod = downPeriod;
 	nobj->maxLevel = maxLevel;
 	nobj->minLevel = minLevel;
-	
+	nobj->integralTrigger = integralTrigger;
 	return nobj;
 }
 
@@ -61,6 +61,7 @@ void isocController::objectInitializeA(gridDyn_time time0, unsigned long /*flags
 	updatePeriod = upPeriod;
 	nextUpdateTime = time0 + upPeriod;
 	opFlags.set(has_updates);
+	integratorLevel = 0;
 }
 
 void isocController::objectInitializeB(const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
@@ -100,23 +101,38 @@ void isocController::setLimits(double maxV, double minV)
 
 void isocController::updateA(double time)
 {
-	if (time < nextUpdateTime)
+	if (time+kSmallTime < nextUpdateTime)
 	{
+		assert(false);
 		return;
 	}
+	integratorLevel += lastFreq*updatePeriod;
 	if (lastFreq > db)	
 	{
 		m_output += upStep;
-		
 		updatePeriod = upPeriod;
 	}
-	else if (lastFreq < -0.0001)
+	else if (lastFreq < -db)
 	{
 		m_output += downStep;
-
 		updatePeriod = downPeriod;
+		
+	}
+	else
+	{
+		updatePeriod = upPeriod;
+		if (integratorLevel > integralTrigger)
+		{
+			m_output += upStep;
+			
+		}
+		else if (integratorLevel < -integralTrigger)
+		{
+			m_output += downStep;
+		}
 	}
 	m_output=valLimit(m_output, minLevel, maxLevel);
+	lastUpdateTime = time;
 	//printf("t=%f,output=%f\n", time, m_output);
 }
 

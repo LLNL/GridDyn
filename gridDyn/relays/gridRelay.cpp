@@ -522,7 +522,7 @@ void gridRelay::updateA (double time)
         }
 
     }
-  prevTime = time;
+  lastUpdateTime = time;
 }
 
 

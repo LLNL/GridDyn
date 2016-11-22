@@ -213,7 +213,7 @@ change_code compoundEventPlayer::trigger()
 change_code compoundEventPlayer::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
-	if (time >= triggerTime)
+	if (time+kSmallTime >= triggerTime)
 	{
 		try
 		{

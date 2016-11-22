@@ -110,7 +110,6 @@ void gridRecorder::set (const std::string &param, const std::string &val)
 void gridRecorder::saveFile (const std::string &fname)
 {
   
-
   bool bFile = binaryFile;
   boost::filesystem::path savefileName (filename);
   if (!fname.empty ())

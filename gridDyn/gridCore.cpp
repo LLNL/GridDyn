@@ -13,7 +13,7 @@
 
 #include "gridCore.h"
 #include "core/gridDynExceptions.h"  //This needs to be renamed
-
+#include <map>
 //set up the global object count
 
 //start at 100 since there are some objects that use low numbers as a check for interface number and the id as secondary
@@ -348,14 +348,14 @@ gridCoreObject * gridCoreObject::findByUserID (const std::string & /*typeName*/,
 
 void gridCoreObject::updateA (double time)
 {
-	prevTime = time;
+	lastUpdateTime = time;
 }
 
 double gridCoreObject::updateB ()
 {
 	if (nextUpdateTime != kNullVal)
 	{
-		while (prevTime+kSmallTime >= nextUpdateTime)
+		while (lastUpdateTime+kSmallTime >= nextUpdateTime)
 		{
 			nextUpdateTime += updatePeriod;
 		}
@@ -466,7 +466,7 @@ void condDelete (gridCoreObject *obj, gridCoreObject *Pobject)
                 }
               delete obj;
             }
-          else if (obj->parent->m_oid == Pobject->m_oid)
+          else if ((obj->parent)&&(obj->parent->m_oid == Pobject->m_oid))
             {
               obj->parent = nullptr;
             }
@@ -485,7 +485,7 @@ void condDelete (gridCoreObject *obj, gridCoreObject *Pobject)
     }
 }
 
-#include <map>
+
 
 static const std::map<std::string, print_level> printLevelsMap
 {

@@ -151,9 +151,9 @@ void gridPlayer::setNextValue()
 
 void gridPlayer::updateTrigger(gridDyn_time time)
 {
-	if (time > triggerTime)
+	if (time+kSmallTime > triggerTime)
 	{
-		if (time > ts.time[currIndex])
+		if (time+kSmallTime > ts.time[currIndex])
 		{
 			++currIndex;
 		}
@@ -265,7 +265,7 @@ change_code gridPlayer::trigger()
 change_code gridPlayer::trigger(gridDyn_time time)
 {
 	change_code ret = change_code::not_triggered;
-	if (time >= triggerTime)
+	if (time+kSmallTime >= triggerTime)
 	{
 		try
 		{

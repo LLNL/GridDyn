@@ -234,7 +234,7 @@ void collector::set(const std::string &param, const std::string &val)
 
 void collector::setTime(double time)
 {
-	if (time > triggerTime)
+	if (time+kSmallTime > triggerTime)
 	{
 		triggerTime = time;
 	}
@@ -274,7 +274,7 @@ change_code collector::trigger(double time)
 	{
 		recheckColumns();
 	}
-	if (time >= triggerTime)
+	if (time+kSmallTime >= triggerTime)
 	{
 		for (auto &datapoint:points)
 		{
@@ -291,7 +291,7 @@ change_code collector::trigger(double time)
 
 		}
 		triggerTime += timePeriod;
-		if (triggerTime < time)
+		if (triggerTime < time+kSmallTime)
 		{
 			triggerTime = time + (timePeriod - std::fmod(time - triggerTime, timePeriod));
 		}

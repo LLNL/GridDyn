@@ -251,7 +251,6 @@ fobjectPair getObjectFunction(gridBus *, const std::string &field)
 {
 	auto fnd = stringTranslate.find(field);
 	std::string nfstr = (fnd == stringTranslate.end()) ? field : fnd->second;
-
 	auto funcfind = busFunctions.find(nfstr);
 	if (funcfind != busFunctions.end())
 	{

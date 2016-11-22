@@ -27,6 +27,7 @@ protected:
   double m_tempOut = 0;      //!< temporary output corresponding to desired time
   double m_output = 0;       //!< the output corresponding to the last setTime
   double lasttime = 0;       //!<storage for the previously queried time
+  //gridUnits::units_t outputUnits = gridUnits::defUnit;
 public:
   gridSource (const std::string &objName = "source_#", double startVal = 0.0);
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
@@ -44,7 +45,7 @@ public:
   /** update the source output
   @param[in] ttime  the time to update to
   */
-  virtual void sourceUpdate (double ttime);
+  virtual void sourceUpdate (gridDyn_time ttime);
   /** update the source output and advance the model time
   @param[in] ttime  the time to update to
   */

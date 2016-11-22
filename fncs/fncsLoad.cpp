@@ -48,9 +48,13 @@ void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 	double V = bus->getVoltage();
 	double A = bus->getAngle();
 
-	std::complex<double> Vc = std::polar(V, A);
-	Vc *= baseVoltage;
-	fncsSendComplex(voltageKey, Vc);
+	if (!voltageKey.empty())
+	{
+		std::complex<double> Vc = std::polar(V, A);
+		Vc *= baseVoltage;
+		fncsSendComplex(voltageKey, Vc);
+	}
+	
 
 	prevP = P;
 	prevQ = Q;
@@ -69,9 +73,13 @@ void fncsLoad::updateA(gridDyn_time time)
 	double V = bus->getVoltage();
 	double A = bus->getAngle();
 
-	std::complex<double> Vc = std::polar(V, A);
-	Vc *= baseVoltage;
-	fncsSendComplex(voltageKey, Vc);
+	if (!voltageKey.empty())
+	{
+		std::complex<double> Vc = std::polar(V, A);
+		Vc *= baseVoltage;
+		fncsSendComplex(voltageKey, Vc);
+	}
+	
 
 	//now get the updates
 	auto res = fncsGetComplex(loadKey);

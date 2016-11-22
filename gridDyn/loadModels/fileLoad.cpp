@@ -100,7 +100,7 @@ void gridFileLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
 
 void gridFileLoad::updateA (double time)
 {
-  while (time >= schedLoad.time[currIndex])
+  while (time+kSmallTime >= schedLoad.time[currIndex])
     {
       ++currIndex;
       if (currIndex >= count)
@@ -195,7 +195,7 @@ void gridFileLoad::updateA (double time)
     {
       gridRampLoad::loadUpdateForward (time);
     }
-
+  lastUpdateTime = time;
   nextUpdateTime = (currIndex == count - 1) ? kBigNum : schedLoad.time[currIndex + 1];
 }
 

@@ -421,6 +421,10 @@ void gridObject::setFlag (const std::string &flag, bool val)
     {
       opFlags.set (no_gridobject_set, val);
     }
+  else if (flag == "disconnected")
+  {
+	  opFlags.set(disconnected, val);
+  }
   else
     {
       gridCoreObject::setFlag (flag,val);

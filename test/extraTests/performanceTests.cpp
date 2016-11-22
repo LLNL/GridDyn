@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(dynamic_scalable_test)
 		std::chrono::duration<double> load_time(0);
 
 		int gsize = 50;
-		int ii = 0;
+	//	int ii = 0;
 		
 			gds = new gridDynSimulation();
 

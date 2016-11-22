@@ -1040,6 +1040,7 @@ void acBus::dynObjectInitializeA (double time0, unsigned long flags)
     }
   if (opFlags[compute_frequency])
     {
+	  opFlags.set(uses_bus_frequency);
       LOG_TRACE ("computing bus frequency using frequency block");
       if (!fblock)
         {
@@ -1325,7 +1326,7 @@ void acBus::set (const std::string &param, const std::string &vali)
         {
           dynType = dynBusType::fixAngle;
         }
-      else if ((val == "fixedvoltage") || (val == "fixvoltage"))
+      else if ((val == "fixedvoltage") || (val == "fixvoltage")||(val=="vfix"))
         {
           dynType = dynBusType::fixVoltage;
         }
@@ -1351,14 +1352,14 @@ void acBus::set (const std::string &param, const std::string &vali)
           dynType = dynBusType::dynSLK;
           type = busType::SLK;
         }
-      else if ((val == "fixedangle") || (val == "fixangle") || (val == "ref"))
-        {
-          dynType = dynBusType::fixAngle;
-        }
-      else if ((val == "fixedvoltage") || (val == "fixvoltage"))
+	  else if ((val == "fixedvoltage") || (val == "fixvoltage") || (val=="vfix"))
         {
           dynType = dynBusType::fixVoltage;
         }
+	  else if ((val == "fixedangle") || (val == "fixangle") || (val == "ref") || (val == "afix"))
+	  {
+		  dynType = dynBusType::fixAngle;
+	  }
       else if ((val == "normal") || (val == "pq"))
         {
           dynType = dynBusType::normal;

@@ -14,8 +14,8 @@
 #ifndef BASICDEFS_H_
 #define BASICDEFS_H_
 
-const double kDayLength (86500.0f);
-const double kSmallTime (1e-9);
+const double kDayLength (86400.0f);
+const double kSmallTime (1e-7);
 const double kShortTime (1e-6);
 
 const double kPI (3.1415926535897931);  //defining a Pi constant
