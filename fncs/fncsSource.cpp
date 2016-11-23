@@ -159,11 +159,11 @@ void fncsSource::set(const std::string &param, const std::string &val)
 		fncsRegister::instance()->registerSubscription(val);
 
 	}
-	else if ((param == "input_units")||(param=="inunits"))
+	else if ((param == "input_units")||(param=="inunits")||(param=="inputunits"))
 	{
 		inputUnits = gridUnits::getUnits(val);
 	}
-	else if ((param == "output_units") || (param == "outunits"))
+	else if ((param == "output_units") || (param == "outunits")||(param=="outputunits"))
 	{
 		outputUnits = gridUnits::getUnits(val);
 	}

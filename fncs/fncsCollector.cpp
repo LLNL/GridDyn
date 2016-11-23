@@ -112,7 +112,6 @@ void fncsCollector::set(const std::string &param, const std::string &val)
 		auto commaLoc = val.find_first_of(',');
 		complexPairs.emplace_back(trim(val.substr(0, commaLoc)), trim(val.substr(commaLoc + 1, asLoc - 1 - commaLoc)));
 	}
-	
 	else
 	{
 		collector::set(param, val);

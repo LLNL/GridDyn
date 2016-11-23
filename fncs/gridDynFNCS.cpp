@@ -108,7 +108,7 @@ int main (int argc, char *argv[])
   }
   else
   {
-	  info.brokerAddress = "tcp:////localhost:5570";
+	  info.brokerAddress = "tcp://localhost:5570";
   }
   info.minTimeStep = 1;
   info.minTimeStepUnits = "us";

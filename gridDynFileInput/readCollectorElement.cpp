@@ -36,8 +36,13 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObjec
   int ret = FUNCTION_EXECUTION_SUCCESS;
   std::string name = ri->checkDefines (getElementField (element, nameString, defMatchType));
   std::string fname = ri->checkDefines(getElementFieldOptions(element, { "file","sink" }, defMatchType));
+  std::string type = ri->checkDefines(getElementField(element, "type", defMatchType));
+
   auto col = ri->findCollector(name, fname);
-	std::string type = ri->checkDefines(getElementField(element, "type", defMatchType));
+  if ((!type.empty())&&(name.empty())&&(fname.empty()))
+  {
+	  col = nullptr;
+  }
   if (type.empty())
   {
 	  if (element->getName() != collectorNameString)
