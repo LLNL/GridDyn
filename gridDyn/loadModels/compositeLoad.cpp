@@ -83,7 +83,7 @@ void compositeLoad::add (gridCoreObject *obj)
     }
 }
 
-void compositeLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   gridLoad::pFlowInitializeA (time0,flags);
   if (consumeSimpleLoad)
@@ -181,7 +181,7 @@ void compositeLoad::pFlowObjectInitializeB ()
     }
 }
 
-void compositeLoad::dynObjectInitializeA (double time, unsigned long flags)
+void compositeLoad::dynObjectInitializeA (gridDyn_time time, unsigned long flags)
 {
   for (auto &ld : subLoads)
     {
@@ -383,7 +383,7 @@ void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, m
     }
 }
 
-void compositeLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void compositeLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {

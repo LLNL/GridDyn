@@ -70,8 +70,8 @@ public:
   bool hasVoltageAdjustments (index_t sid) const;
   bool hasPowerAdjustments (index_t sid) const;
 
-  double getAdjustableCapacityUp (double time) const;
-  double getAdjustableCapacityDown (double time) const;
+  double getAdjustableCapacityUp (gridDyn_time time) const;
+  double getAdjustableCapacityDown (gridDyn_time time) const;
 
   void addPowerControlObject (gridObject * obj,bool update);
   void addVoltageControlObject (gridObject *obj, bool update);
@@ -126,8 +126,8 @@ public:
 	bool hasAdjustments() const;
 	bool hasAdjustments(index_t sid) const;
 
-	double getAdjustableCapacityUp(double time) const;
-	double getAdjustableCapacityDown(double time) const;
+	double getAdjustableCapacityUp(gridDyn_time time) const;
+	double getAdjustableCapacityDown(gridDyn_time time) const;
 
 	void addControlObject(gridObject *obj, bool update);
 

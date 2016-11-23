@@ -176,7 +176,7 @@ void gridLabDLoad::add (gridCoreObject *obj)
     }
 }
 
-void gridLabDLoad::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
+void gridLabDLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
   bus = dynamic_cast<gridBus *> (parent);
   if (opFlags[file_sent_flag] == false)
@@ -239,7 +239,7 @@ void gridLabDLoad::dynObjectInitializeB (const IOdata & /*args*/, const IOdata &
 
 
 
-void gridLabDLoad::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void gridLabDLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
 
 
@@ -289,7 +289,7 @@ void gridLabDLoad::timestep (double ttime, const IOdata &args, const solverMode 
   prevTime = ttime;
 }
 
-void gridLabDLoad::updateA (double ttime)
+void gridLabDLoad::updateA (gridDyn_time ttime)
 {
 
 
@@ -506,7 +506,7 @@ void gridLabDLoad::updateLocalCache (const IOdata &, const stateData *, const so
     }
 }
 
-void gridLabDLoad::runGridLabA (double ttime, const IOdata &args)
+void gridLabDLoad::runGridLabA (gridDyn_time ttime, const IOdata &args)
 {
   assert (opFlags[waiting_flag] == false);      //this should not happen;
   LOG_TRACE ("calling gridlab load 1A");
@@ -623,7 +623,7 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
   /* *INDENT-ON* */
 }
 
-void gridLabDLoad::run2GridLabA (double ttime, const IOdata &args)
+void gridLabDLoad::run2GridLabA (gridDyn_time ttime, const IOdata &args)
 {
   assert (opFlags[waiting_flag] == false);      //this should not happen;
   LOG_TRACE ("calling gridlab load 2A");
@@ -755,7 +755,7 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
   return retP;
 }
 
-void gridLabDLoad::run3GridLabA (double ttime, const IOdata &args)
+void gridLabDLoad::run3GridLabA (gridDyn_time ttime, const IOdata &args)
 {
 
   assert (opFlags[waiting_flag] == false);    //this should not happen;
@@ -1191,7 +1191,7 @@ void gridLabDLoad::rootTest (const IOdata &args, const stateData *, double roots
 
 }
 
-void gridLabDLoad::rootTrigger (double ttime, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridLabDLoad::rootTrigger (gridDyn_time ttime, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   if (rootMask[rootOffset])

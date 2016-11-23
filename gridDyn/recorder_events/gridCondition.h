@@ -27,7 +27,7 @@ enum class comparison_type
 };
 
 comparison_type comparisonFromString(const std::string &compStr);
-std::string fromString(comparison_type comp);
+std::string toString(comparison_type comp);
 
 /**
 *condition class:  sets up a comparison operator for both states and regular grabbers
@@ -143,7 +143,7 @@ private:
 */
 std::shared_ptr<gridCondition> make_condition (const std::string &condString, gridCoreObject *rootObject);
 std::shared_ptr<gridCondition> make_condition (const std::string &field, const std::string &compare, double level, gridCoreObject *rootObject);
-
+std::shared_ptr<gridCondition> make_condition (const std::string &field, comparison_type comp, double level, gridCoreObject *rootObject);
 /** evaluate a compound condition consisting of multiple individual conditions
 */
 class compoundCondition : public gridCondition

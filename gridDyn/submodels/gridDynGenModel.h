@@ -86,7 +86,7 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   //!< @brief virtual destructor
   virtual ~gridDynGenModelClassical ();
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;

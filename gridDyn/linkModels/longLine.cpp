@@ -48,7 +48,7 @@ void longLine::remove (gridCoreObject * /*obj*/)
 
 }
 
-void longLine::pFlowObjectInitializeA (double time0, unsigned long flags)
+void longLine::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   generateIntermediateLinks ();
   return subsystem::pFlowObjectInitializeA (time0, flags);

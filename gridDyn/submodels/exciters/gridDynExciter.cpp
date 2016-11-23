@@ -182,7 +182,7 @@ void gridDynExciter::rootTest (const IOdata &args, const stateData *sD, double r
 }
 
 
-void gridDynExciter::rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynExciter::rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   if (rootMask[rootOffset])

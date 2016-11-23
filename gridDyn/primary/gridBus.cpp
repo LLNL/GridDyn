@@ -328,7 +328,7 @@ void gridBus::alert (gridCoreObject *obj, int code)
     }
 }
 
-void gridBus::setTime (double time)
+void gridBus::setTime (gridDyn_time time)
 {
   for (auto &gen : attachedGens)
     {
@@ -353,7 +353,7 @@ void gridBus::followNetwork (int networkNum, std::queue<gridBus *> &bstk)
 }
 
 // initializeB states
-void gridBus::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridBus::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   //run the subObjects
   if (Vtol < 0)
@@ -475,7 +475,7 @@ change_code gridBus::powerFlowAdjust (unsigned long flags, check_level_t level)
 
 
 // initializeB states for dynamic solution
-void gridBus::dynObjectInitializeA (double time0, unsigned long flags)
+void gridBus::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   opFlags[preEx_requested] = false;
   opFlags[has_constraints] = false;
@@ -542,7 +542,7 @@ void gridBus::powerAdjust (double /*adjustment*/)
 
 }
 
-void gridBus::timestep (double ttime, const solverMode &sMode)
+void gridBus::timestep (gridDyn_time ttime, const solverMode &sMode)
 {
 
   auto args = getOutputs (nullptr,sMode);
@@ -1189,7 +1189,7 @@ int gridBus::propogatePower (bool /*makeSlack*/)
 
 
 //guess the solution
-void gridBus::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void gridBus::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   for (auto &gen : attachedGens)
     {
@@ -1251,7 +1251,7 @@ void gridBus::getTols (double tols[], const solverMode &sMode)
 }
 
 // pass the solution
-void gridBus::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void gridBus::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   for (auto &gen : attachedGens)
     {
@@ -1423,7 +1423,7 @@ void gridBus::algebraicUpdate (const stateData *sD, double update[], const solve
 
 
 
-void gridBus::converge (double /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &,  converge_mode /*mode*/,double /*tol*/ )
+void gridBus::converge (gridDyn_time /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &,  converge_mode /*mode*/,double /*tol*/ )
 {
 
 }
@@ -1832,12 +1832,12 @@ void gridBus::updateLocalCache ()
 
 
 
-double gridBus::getAdjustableCapacityUp (double /*time*/) const
+double gridBus::getAdjustableCapacityUp (gridDyn_time /*time*/) const
 {
   return 0.0;
 }
 
-double gridBus::getAdjustableCapacityDown (double /*time*/) const
+double gridBus::getAdjustableCapacityDown (gridDyn_time /*time*/) const
 {
   return 0.0;
 }
@@ -2157,7 +2157,7 @@ void gridBus::rootTest (const stateData *sD, double roots[], const solverMode &s
 }
 
 
-void gridBus::rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridBus::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   size_t rc = 0;
   int rootOffset = offsets.getRootOffset (sMode);

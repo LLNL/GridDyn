@@ -99,7 +99,7 @@ void isocController::setLimits(double maxV, double minV)
 
 
 
-void isocController::updateA(double time)
+void isocController::updateA(gridDyn_time time)
 {
 	if (time+kSmallTime < nextUpdateTime)
 	{
@@ -136,7 +136,7 @@ void isocController::updateA(double time)
 	//printf("t=%f,output=%f\n", time, m_output);
 }
 
-void isocController::timestep(double ttime, const IOdata &args, const solverMode &)
+void isocController::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
 	prevTime = ttime;
 	lastFreq = args[0];
@@ -213,7 +213,7 @@ void isocController::deactivate()
 	nextUpdateTime = kBigNum;
 }
 
-void isocController::activate(double time)
+void isocController::activate(gridDyn_time time)
 {
 	nextUpdateTime = time + upPeriod;
 }

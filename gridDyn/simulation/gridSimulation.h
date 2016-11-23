@@ -92,7 +92,7 @@ protected:
   double stopTime = 0.0;                                            //!< [s]  end time
   double currentTime = kNullVal;                                       //!< [s]  current time
   double stepTime = 0.05;                                           //!< [s]  time step
-  double timeReturn = 0.0;                                          //!< [s]  time returned by the solver
+  gridDyn_time timeReturn = 0.0;                                          //!< [s]  time returned by the solver
   double nextStopTime = -kBigNum;                                   //!< next time to stop the dynamic Simulation
 
   double minUpdateTime = 0.0001;                                    //!<minimum time period to go between updates; for the hybrid simultaneous partitioned solution

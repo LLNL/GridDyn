@@ -124,7 +124,7 @@ void commSource::setFlag(const std::string &flag, bool val)
 	
 }
 
-void commSource::updateA(double time)
+void commSource::updateA(gridDyn_time time)
 {
 	if (time > nextUpdateTime)
 	{

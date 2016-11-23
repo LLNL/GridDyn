@@ -178,7 +178,7 @@ void sourceLoad::set(const std::string &param, double val, gridUnits::units_t un
 	
 }
 
-void sourceLoad::pFlowObjectInitializeA(double time0, unsigned long flags)
+void sourceLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 {
 	//Do a check on the sources;
 	int fnd = 0;
@@ -213,13 +213,13 @@ void sourceLoad::pFlowObjectInitializeA(double time0, unsigned long flags)
 	getSourceLoads();
 }
 
-void sourceLoad::dynObjectInitializeA(double time0, unsigned long flags)
+void sourceLoad::dynObjectInitializeA(gridDyn_time time0, unsigned long flags)
 {
 	gridSecondary::dynObjectInitializeA(time0, flags);
 	getSourceLoads();
 }
 
-void sourceLoad::loadUpdate(double ttime)
+void sourceLoad::loadUpdate(gridDyn_time ttime)
 {
 	for (auto &src : sources)
 	{
@@ -228,7 +228,7 @@ void sourceLoad::loadUpdate(double ttime)
 	getSourceLoads();
 }
 
-void sourceLoad::loadUpdateForward(double ttime)
+void sourceLoad::loadUpdateForward(gridDyn_time ttime)
 {
 	for (auto &src : sources)
 	{

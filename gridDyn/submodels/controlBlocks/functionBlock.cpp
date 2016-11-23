@@ -117,7 +117,7 @@ void functionBlock::jacElements (double input, double didt, const stateData *sD,
 
 }
 
-double functionBlock::step (double ttime, double input)
+double functionBlock::step (gridDyn_time ttime, double input)
 {
   if (opFlags[uses_constantarg])
     {

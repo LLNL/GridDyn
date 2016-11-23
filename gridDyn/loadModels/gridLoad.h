@@ -64,12 +64,12 @@ public:
 
   virtual ~gridLoad ();
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
-  virtual void setTime (double time) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void setTime (gridDyn_time time) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -83,11 +83,11 @@ public:
 
   virtual void setLoad (double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit);
 
-  virtual void loadUpdate (double ttime)
+  virtual void loadUpdate (gridDyn_time ttime)
   {
     lastTime = ttime;
   }
-  virtual void loadUpdateForward (double ttime)
+  virtual void loadUpdateForward (gridDyn_time ttime)
   {
     loadUpdate (ttime);
     prevTime = ttime;
@@ -108,7 +108,7 @@ public:
   virtual double getRealPower () const override;
   virtual double getReactivePower () const override;
 
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;                                                                                                                                //for saving the state
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;                                                                                                                                //for saving the state
 
   double getdPdf () const
   {

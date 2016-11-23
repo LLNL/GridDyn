@@ -45,10 +45,10 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   virtual ~scheduler ();
 
-  virtual void updateA (double time) override;
-  virtual double predict (double time);
+  virtual void updateA (gridDyn_time time) override;
+  virtual double predict (gridDyn_time time);
 
-  virtual void setTarget (double time, double target);
+  virtual void setTarget (gridDyn_time time, double target);
   virtual void setTarget (double target);
   virtual void setTarget (const std::string &filename);
   virtual void setTarget (std::vector<double> &time, std::vector<double> &target);
@@ -58,24 +58,24 @@ public:
     return PCurr;
   }
 protected:
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void setFlag(const std::string &flag, bool val=true) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual void setTime (double time) override;
+  virtual void setTime (gridDyn_time time) override;
   /** tie the scheduler to a dispatcher */
   virtual void dispatcherLink ();
   /** get the maximum available power withing a specified time window
   @param[in] time the time window to make the power
   */
-  virtual double getMax(double time = kBigNum) const;
+  virtual double getMax(gridDyn_time time = kBigNum) const;
   /** get the low power level available withing a specified time window
   @param[in] time the time window to make the power level
   */
-  virtual double getMin(double time = kBigNum) const;
+  virtual double getMin(gridDyn_time time = kBigNum) const;
 protected:
   virtual void insertTarget (tsched ts);
   void clearSchedule ();
@@ -126,14 +126,14 @@ public:
   {
   }
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  void setTarget (double time, double target) override;
+  void setTarget (gridDyn_time time, double target) override;
   void setTarget (double target) override;
   void setTarget (const std::string &filename) override;
 
-  virtual void updateA (double time) override;
-  virtual double predict (double time) override;
+  virtual void updateA (gridDyn_time time) override;
+  virtual double predict (gridDyn_time time) override;
 
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual double getRamp (double *tRem) const;
@@ -157,8 +157,8 @@ public:
     return reserveAvail;
   }
   virtual void dispatcherLink () override;
-  virtual double getMax (double time = kBigNum) const override;
-  virtual double getMin (double time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = kBigNum) const override;
+  virtual double getMin (gridDyn_time time = -kBigNum) const override;
 protected:
   virtual void updatePTarget ();
   virtual void insertTarget (tsched ts) override;
@@ -217,10 +217,10 @@ public:
     return regEnabled;
   }
 
-  void updateA (double time) override;
-  double predict (double time) override;
+  void updateA (gridDyn_time time) override;
+  double predict (gridDyn_time time) override;
 
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   double getRamp (double *tRem) const override;
@@ -232,8 +232,8 @@ public:
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dispatcherLink () override;
-  virtual double getMax (double time = kBigNum) const override;
-  virtual double getMin (double time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = kBigNum) const override;
+  virtual double getMin (gridDyn_time time = -kBigNum) const override;
 
 protected:
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;

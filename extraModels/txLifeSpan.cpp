@@ -113,7 +113,7 @@ void txLifeSpan::add(gridCoreObject * /*obj*/)
 	throw(invalidObjectException(this));
 }
 
-void txLifeSpan::dynObjectInitializeA (double time0, unsigned long flags)
+void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 	if (!(m_sourceObject))
 	{
@@ -192,7 +192,7 @@ void txLifeSpan::dynObjectInitializeB(IOdata &outputSet)
 }
 
 
-void txLifeSpan::updateA(double time)
+void txLifeSpan::updateA(gridDyn_time time)
 {
 
 	double Temp = dataSources[0]->grabData();
@@ -210,7 +210,7 @@ void txLifeSpan::updateA(double time)
 	gridRelay::updateA(time);
 }
 
-void txLifeSpan::timestep(double ttime, const solverMode &)
+void txLifeSpan::timestep(gridDyn_time ttime, const solverMode &)
 {
 	updateA(ttime);
 }

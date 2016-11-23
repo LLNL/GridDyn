@@ -81,7 +81,7 @@ public:
 
   virtual double get (const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
   using gridRelay::add;
   virtual void add (gridCoreObject *obj) override;
@@ -111,13 +111,13 @@ public:
 
 
   //dynamic functions for evaluation with a limit exceeded
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
   virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
   virtual void setOffset (index_t offset, const solverMode &sMode) override;
@@ -144,12 +144,12 @@ public:
   @return a double with the requested raw input
   */
   double getInput (const stateData *sD, const solverMode &sMode, index_t inputNumber = 0) const;
-  virtual void updateA (double time) override;
+  virtual void updateA (gridDyn_time time) override;
   virtual void updateFlags (bool dynOnly = false) override;
   virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;

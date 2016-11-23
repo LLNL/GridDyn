@@ -54,7 +54,7 @@ gridCoreObject *dcLink::clone (gridCoreObject *obj) const
 }
 
 
-void  dcLink::timestep (double /*ttime*/, const solverMode & /*sMode*/)
+void  dcLink::timestep (gridDyn_time /*ttime*/, const solverMode & /*sMode*/)
 {
 
   if (!enabled)
@@ -133,7 +133,7 @@ void  dcLink::set (const std::string &param, double val, units_t unitType)
   
 }
 
-void dcLink::pFlowObjectInitializeA (double time0, unsigned long flags)
+void dcLink::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   gridLink::pFlowObjectInitializeA (time0,flags);
   if (enabled)
@@ -350,7 +350,7 @@ void dcLink::residual (const stateData *sD, double resid[], const solverMode &sM
     }
 }
 
-void dcLink::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void dcLink::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -371,7 +371,7 @@ void dcLink::setState (double ttime, const double state[], const double dstate_d
   prevTime = ttime;
 }
 
-void dcLink::guess (const double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void dcLink::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {

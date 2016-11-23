@@ -35,18 +35,18 @@ public:
   virtual ~gridLabDLoad ();
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void preEx (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
-  virtual void updateA (double time) override;
+  virtual void updateA (gridDyn_time time) override;
   virtual double updateB () override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -54,7 +54,7 @@ public:
   virtual void add (gridCoreObject *obj) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
   /** @brief return a count of the number of MPI objects the load requires*/
   int mpiCount ();
@@ -76,11 +76,11 @@ private:
   double triggerBound = 1.5;    //!< the bounds on the voltage in terms of the spread determining when to generate a new calculation
   double m_lastCallTime = -kBigNum;
   void gridLabDInitialize (void);
-  void runGridLabA (double ttime, const IOdata &args);
+  void runGridLabA (gridDyn_time ttime, const IOdata &args);
   std::vector<double> runGridLabB (bool unbalancedAlert);
-  void run2GridLabA (double ttime, const IOdata &args);
+  void run2GridLabA (gridDyn_time ttime, const IOdata &args);
   std::vector<double> run2GridLabB (bool unbalancedAlert);
-  void run3GridLabA (double ttime, const IOdata &args);
+  void run3GridLabA (gridDyn_time ttime, const IOdata &args);
   std::vector<double> run3GridLabB (bool unbalancedAlert);
 
 

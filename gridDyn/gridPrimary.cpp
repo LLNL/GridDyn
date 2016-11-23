@@ -23,7 +23,7 @@ gridPrimary::gridPrimary (const std::string &objName) : gridObject (objName)
 }
 
 
-void gridPrimary::pFlowInitializeA (double time0, unsigned long flags)
+void gridPrimary::pFlowInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (enabled)
     {
@@ -44,7 +44,7 @@ void gridPrimary::pFlowInitializeB ()
     }
 }
 
-void gridPrimary::dynInitializeA (double time0, unsigned long flags)
+void gridPrimary::dynInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (enabled)
     {
@@ -72,7 +72,7 @@ void gridPrimary::dynInitializeB (IOdata &outputSet)
 }
 
 
-void gridPrimary::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridPrimary::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (!subObjectList.empty ())
     {
@@ -109,7 +109,7 @@ void gridPrimary::pFlowObjectInitializeB ()
     }
 }
 
-void gridPrimary::dynObjectInitializeA (double time0, unsigned long flags)
+void gridPrimary::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (!subObjectList.empty ())
     {
@@ -217,7 +217,7 @@ void gridPrimary::preEx (const stateData *, const solverMode &)
 
 }
 
-void gridPrimary::converge (double /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &, converge_mode, double /*tol*/)
+void gridPrimary::converge (gridDyn_time /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &, converge_mode, double /*tol*/)
 {
 
 }
@@ -348,7 +348,7 @@ void  gridPrimary::delayedJacobian (const stateData *sD, matrixData<double> &ad,
 
 
 //for the stepwise dynamic system
-void gridPrimary::timestep (double ttime, const solverMode & sMode)
+void gridPrimary::timestep (gridDyn_time ttime, const solverMode & sMode)
 {
   prevTime = ttime;
   if (!subObjectList.empty ())
@@ -411,7 +411,7 @@ void gridPrimary::rootTest (const stateData *sD, double roots[], const solverMod
     }
 }
 
-void gridPrimary::rootTrigger (double /*ttime*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
+void gridPrimary::rootTrigger (gridDyn_time /*ttime*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
 {
 }
 

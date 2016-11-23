@@ -65,11 +65,11 @@ protected:
   std::string name;       //!< the text name of the object
   index_t id;              //!< a user defined id for the object
   gridCoreObject *parent = nullptr;      //!< a pointer to the parent object
-  double prevTime = -kBigNum;       //!<[s]the last state time of the object
-  double updatePeriod = kBigNum;      //!<[s]the update period
-  double nextUpdateTime = kBigNum;     //!<[s] the next scheduled update
-  double lastUpdateTime = -kBigNum;      //!<[s] the last update time
-  double m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
+  gridDyn_time prevTime = -kBigNum;       //!<[s]the last state time of the object
+  gridDyn_time updatePeriod = kBigNum;      //!<[s]the update period
+  gridDyn_time nextUpdateTime = kBigNum;     //!<[s] the next scheduled update
+  gridDyn_time lastUpdateTime = -kBigNum;      //!<[s] the last update time
+  gridDyn_time m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
   
 
   std::shared_ptr<gridPositionInfo> pos;  //!< pointer to as of yet undefined position information structure.
@@ -112,7 +112,7 @@ public:
   * @brief sets the object time used primarily for shifting the clock to a different basis
   * @param[in] time the time to set the object clock to.
   */
-  virtual void setTime (double time);
+  virtual void setTime (gridDyn_time time);
   /**
   * @brief changes ownership of the object
     @details so the owner can't be changed without the current owners permission
@@ -219,7 +219,7 @@ public:
 @ details if the object requires and A and B parts this is the A part the B part gets executed at a later time
   * @param[in] time the times to update the object to
   */
-  virtual void updateA (double time);
+  virtual void updateA (gridDyn_time time);
   /**
   * @brief the B update function for update calls with two parts
   */

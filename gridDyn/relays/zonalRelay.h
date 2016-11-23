@@ -42,7 +42,7 @@ public:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 protected:
   virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
   virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;

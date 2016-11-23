@@ -42,12 +42,12 @@ public:
   virtual ~dispatcher ();
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   void moveSchedulers (dispatcher *dis);
-  virtual double initialize (double time0,double dispatch);
+  virtual double initialize (gridDyn_time time0,double dispatch);
 
 
-  void setTime (double time) override;
-  virtual double updateP (double time,double required,double targetTime);
-  virtual double testP (double time,double required,double targetTime);
+  void setTime (gridDyn_time time) override;
+  virtual double updateP (gridDyn_time time,double required,double targetTime);
+  virtual double testP (gridDyn_time time,double required,double targetTime);
   double currentValue ()
   {
     return totalDispatch;

@@ -42,7 +42,7 @@ gridCoreObject *motorLoad3::clone (gridCoreObject *obj) const
 }
 
 
-void motorLoad3::pFlowObjectInitializeA (double time0, unsigned long flags)
+void motorLoad3::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 //setup the parameters
   x0 = x + xm;
@@ -222,12 +222,12 @@ void motorLoad3::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
-void motorLoad3::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void motorLoad3::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   gridSecondary::setState (ttime,state,dstate_dt,sMode);
 }
 
-void motorLoad3::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void motorLoad3::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   gridSecondary::guess (ttime,state,dstate_dt,sMode);
 }
@@ -343,7 +343,7 @@ void motorLoad3::getStateName (stringVec &stNames, const solverMode &sMode, cons
 }
 
 
-void motorLoad3::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad3::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   stateData sD(ttime,m_state.data());
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
@@ -657,7 +657,7 @@ void motorLoad3::rootTest (const IOdata & /*args*/, const stateData *sD, double 
     }
 }
 
-void motorLoad3::rootTrigger (double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void motorLoad3::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!rootMask[offsets.getRootOffset (sMode)])
     {

@@ -132,23 +132,23 @@ public:
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
 
 protected:
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
   //initializeB dynamics
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
 
 public:
-  virtual void setTime (double time) override;
+  virtual void setTime (gridDyn_time time) override;
 
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   //TODO:: Pt make this do something
   /** @brief update the angles may be deprecated
   @param[in] time the time to update to
   */
-  virtual void updateTheta (double time);
+  virtual void updateTheta (gridDyn_time time);
 
   // parameter set functions
   virtual void setFlag (const std::string &flag, bool val) override;
@@ -187,12 +187,12 @@ public:
 
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   //for identifying which variables are algebraic vs differential
   virtual void getVariableType (double sdata[], const solverMode &sMode) override;
   virtual void getTols (double tols[], const solverMode &sMode) override;
   // dynamic simulation
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   /** @brief try to do a local converge on the solution
    to be replaced by the algebraic update function soon
@@ -204,7 +204,7 @@ public:
   @param[in] tol  the tolerance to converge to
   
   */
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
   virtual void updateLocalCache () override;
 
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
@@ -212,7 +212,7 @@ public:
   virtual void reset (reset_levels level) override;
   //root finding functions
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level) override;
   //grab information
   /** @brief get a vector of voltage from the attached buses
@@ -319,12 +319,12 @@ public:
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Up
   */
-  double getAdjustableCapacityUp (double time = kBigNum) const;
+  double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
   /** @brief get the total adjustable Capacity Down for the area within a certain time frame
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Down
   */
-  double getAdjustableCapacityDown (double time = kBigNum) const;
+  double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
   /** @brief get the total loss for contained links
   @return the total area loss
   */

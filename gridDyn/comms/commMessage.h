@@ -14,6 +14,7 @@
 #ifndef COMM_MESSAGE_H_
 #define COMM_MESSAGE_H_
 
+#include "gridDynTypes.h"
 #include <vector>
 #include <cstddef>
 #include <string>

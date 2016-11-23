@@ -46,12 +46,12 @@ public:
   virtual ~reserveDispatcher ();
 
 
-  virtual double initializeA (double time0,double dispatch);
+  virtual double initializeA (gridDyn_time time0,double dispatch);
 
   void moveSchedulers (reserveDispatcher *rD);
-  void setTime (double time) override;
-  virtual double updateP (double time,double pShort);
-  virtual double testP (double time,double pShort);
+  void setTime (gridDyn_time time) override;
+  virtual double updateP (gridDyn_time time,double pShort);
+  virtual double testP (gridDyn_time time,double pShort);
   double getOutput (index_t /*num*/ = 0)
   {
     return currDispatch;

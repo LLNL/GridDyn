@@ -52,11 +52,11 @@ public:
         ~AGControl();
 
 
-        double initialize(double time0,double freq0,double tiedev0);
+        double initialize(gridDyn_time time0,double freq0,double tiedev0);
 
 
-        void setTime(double time);
-        double updateP(double time, double freq, double tiedev);
+        void setTime(gridDyn_time time);
+        double updateP(gridDyn_time time, double freq, double tiedev);
         double currentValue();
 
         double addGen(scheduler *sched);
@@ -146,7 +146,7 @@ void AGControl::objectInitializeB (const IOdata &args, const IOdata &outputSet, 
 }
 
 
-void AGControl::setTime (double time)
+void AGControl::setTime (gridDyn_time time)
 {
   prevTime = time;
   pid->setTime (time);
@@ -156,12 +156,12 @@ void AGControl::setTime (double time)
 }
 
 
-void AGControl::updateA (double /*time*/)
+void AGControl::updateA (gridDyn_time /*time*/)
 {
 
 }
 
-void AGControl::timestep (double ttime, const IOdata &args, const solverMode &)
+void AGControl::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   prevTime = ttime;
 

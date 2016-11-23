@@ -20,7 +20,7 @@
 #include <boost/filesystem.hpp>
 
 
-gridRecorder::gridRecorder (double time0, double period) :  collector (time0,period)
+gridRecorder::gridRecorder (gridDyn_time time0, double period) :  collector (time0,period)
 {
 
 }
@@ -202,7 +202,7 @@ void gridRecorder::fillDatasetFields()
 	dataset.fields = collector::getColumnDescriptions();
 }
 
-change_code gridRecorder::trigger (double time)
+change_code gridRecorder::trigger (gridDyn_time time)
 {
 	collector::trigger(time);
 	if (firstTrigger)

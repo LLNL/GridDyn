@@ -100,7 +100,7 @@ void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData *sD,
 
 }
 
-void gridDynExciterIEEEtype1::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynExciterIEEEtype1::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
 
   derivative ( args, nullptr, m_dstate_dt.data (), cLocalSolverMode);

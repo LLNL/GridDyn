@@ -74,7 +74,7 @@ gridCoreObject *delayBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void delayBlock::objectInitializeA (double time0, unsigned long flags)
+void delayBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if ((m_T1 < kMin_Res)||(opFlags[simplified]))
     {
@@ -99,7 +99,7 @@ void delayBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
     }
 }
 
-double delayBlock::step (double ttime, double inputA)
+double delayBlock::step (gridDyn_time ttime, double inputA)
 {
   if (opFlags[simplified])
     {

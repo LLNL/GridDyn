@@ -30,7 +30,7 @@ public:
 
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void sourceUpdate(double ttime) override;
+	virtual void sourceUpdate(gridDyn_time ttime) override;
 	virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
 	/** @brief clear the ramp (set it to 0)*/
 	void clearRamp()
@@ -64,10 +64,10 @@ public:
 	virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void objectInitializeA(double time0, unsigned long flags) override;
+	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
-	virtual void sourceUpdate(double time) override;
-	virtual void sourceUpdateForward(double ttime) override;
+	virtual void sourceUpdate(gridDyn_time time) override;
+	virtual void sourceUpdateForward(gridDyn_time ttime) override;
 	virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
 
 	virtual void setLevel(double val) override;
@@ -100,11 +100,11 @@ public:
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-	virtual void objectInitializeA(double time0, unsigned long flags) override;
+	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 	virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
 
-	virtual void sourceUpdate(double ttime) override;
-	virtual void sourceUpdateForward(double ttime) override;
+	virtual void sourceUpdate(gridDyn_time ttime) override;
+	virtual void sourceUpdateForward(gridDyn_time ttime) override;
 };
 
 class gridRandom;
@@ -146,8 +146,8 @@ public:
 
 	virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
 
-	virtual void objectInitializeA(double time0, unsigned long flags) override;
-	virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode) override;
+	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
+	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
 
 	bool isTriggered()
@@ -158,11 +158,11 @@ public:
 
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void updateA(double time) override;
+	virtual void updateA(gridDyn_time time) override;
 
 	void setFlag(const std::string &flag, bool val = true) override;
 
-	void setTime(double time) override;
+	void setTime(gridDyn_time time) override;
 protected:
 	void nextStep(double triggerTime);
 	double ntime();
@@ -195,13 +195,13 @@ public:
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
 	int setFile(const std::string filename, index_t column);
-	virtual void objectInitializeA(double time0, unsigned long flags) override;
+	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
-	virtual void updateA(double time) override;
-	virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode) override;
+	virtual void updateA(gridDyn_time time) override;
+	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 	//let predict fall through to ramp function
 
-	virtual void setTime(double time) override;
+	virtual void setTime(gridDyn_time time) override;
 private:
 	/** @brief load the file*/
 	int loadFile();

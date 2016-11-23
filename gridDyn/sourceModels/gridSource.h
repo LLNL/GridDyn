@@ -35,7 +35,7 @@ public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void timestep (double ttime, const IOdata &args,const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode) override;
 
   virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
@@ -49,7 +49,7 @@ public:
   /** update the source output and advance the model time
   @param[in] ttime  the time to update to
   */
-  virtual void sourceUpdateForward (double ttime);
+  virtual void sourceUpdateForward (gridDyn_time ttime);
   /** set the outputlevel 
   @param[in] newLevel the level to set the output at
   */

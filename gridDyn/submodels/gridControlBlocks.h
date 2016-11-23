@@ -64,7 +64,7 @@ public:
   basicBlock (double gain, const std::string &objName = "block_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 protected:
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
   virtual void setFlag (const std::string &flag, bool val) override;
@@ -120,17 +120,17 @@ public:
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep  (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
   /** @brief simplifying function in place of timestep since block have only one input/output
   @param[in] time  the time to step to
   @param[in] input  the input argument
   @return the output
   */
-  virtual double step (double time, double input);
+  virtual double step (gridDyn_time time, double input);
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
   virtual stringVec localStateNames () const override;
   virtual double getBlockOutput (const stateData *sD, const solverMode &sMode);
   virtual double getBlockOutput ();
@@ -164,9 +164,9 @@ public:
   virtual void residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
-  virtual double step (double time, double input) override;
-  // virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode);
-  //virtual void setTime(double time){prevTime=time;};
+  virtual double step (gridDyn_time time, double input) override;
+  // virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode);
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
 /** @brief class implementing a delay block
@@ -195,7 +195,7 @@ public:
   delayBlock (double t1, double gain, const std::string &objName = "delayBlock_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 protected:
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -205,8 +205,8 @@ public:
   virtual void derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
-  virtual double step (double time, double input) override;
-  //virtual void setTime(double time){prevTime=time;};
+  virtual double step (gridDyn_time time, double input) override;
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
 
@@ -227,7 +227,7 @@ public:
   derivativeBlock (double t1, const std::string &objName = "derivBlock_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 protected:
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -238,10 +238,10 @@ public:
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
-  virtual double step (double time, double input) override;
+  virtual double step (gridDyn_time time, double input) override;
 
   virtual stringVec localStateNames () const override;
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
 /** @brief class implementing a control block
@@ -271,7 +271,7 @@ public:
   */
   controlBlock (double t1, double t2, const std::string &objName = "controlBlock_#");  //convert to the equivalent of a delay block with t2=0;
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -282,8 +282,8 @@ public:
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
   virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
-  virtual double step (double time, double input) override;
-  //virtual void setTime(double time){prevTime=time;};
+  virtual double step (gridDyn_time time, double input) override;
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
   virtual stringVec localStateNames () const override;
 };
 
@@ -324,7 +324,7 @@ public:
   */
   deadbandBlock (double db, const std::string &objName = "deadband_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void setFlag (const std::string &flag, bool val) override;
@@ -337,9 +337,9 @@ public:
   virtual void algElements (double input, const stateData *sD, double deriv[], const solverMode &sMode) override;
 
   virtual void jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
-  virtual double step (double time, double input) override;
+  virtual double step (gridDyn_time time, double input) override;
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
   /** @brief get the deadband state
   @return the state of the deadband block
@@ -358,7 +358,7 @@ public:
   @return the computed derivative
   */
   double computeDoutDin (double input);
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
 

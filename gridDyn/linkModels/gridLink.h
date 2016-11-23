@@ -154,7 +154,7 @@ public:
   */
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
 
-  virtual void timestep (double ttime,const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime,const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -257,7 +257,7 @@ public:
 
   // initializeB power flow
 protected:
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 public:
   /** @brief check if two buses should be merged and the line effects ignored
   */
@@ -266,7 +266,7 @@ public:
   }
   //initializeB dynamics
 protected:
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 public:
   //for computing all the Jacobian elements at once
 
@@ -278,7 +278,7 @@ public:
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
   virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
   virtual IOdata getOutputs (index_t busId, const stateData *sD, const solverMode &sMode);
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
 protected:
   /** @brief deal with any effects of a switch change

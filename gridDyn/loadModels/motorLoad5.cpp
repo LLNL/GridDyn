@@ -47,7 +47,7 @@ gridCoreObject *motorLoad5::clone (gridCoreObject *obj) const
 }
 
 
-void motorLoad5::pFlowObjectInitializeA (double time0, unsigned long flags)
+void motorLoad5::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   //setup the parameters
   x0 = x + xm;
@@ -359,7 +359,7 @@ void motorLoad5::getStateName (stringVec &stNames, const solverMode &sMode, cons
     }
 
 }
-void motorLoad5::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad5::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   stateData sD(ttime, m_state.data());
 
@@ -622,7 +622,7 @@ void motorLoad5::rootTest (const IOdata & /*args*/, const stateData *sD, double 
     }
 }
 
-void motorLoad5::rootTrigger (double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void motorLoad5::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!rootMask[offsets.getRootOffset (sMode)])
     {

@@ -108,7 +108,7 @@ void gridDynGenModel4::residual (const IOdata &args, const stateData *sD, double
   //   }
 }
 
-void gridDynGenModel4::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynGenModel4::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   stateData sD (ttime,m_state.data ());
   derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);

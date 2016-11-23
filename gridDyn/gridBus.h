@@ -140,7 +140,7 @@ public:
 
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
 protected:
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 public:
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;      //only applicable in pFlow
@@ -150,7 +150,7 @@ public:
   virtual void reset (reset_levels level = reset_levels::minimal) override;
   //initializeB dynamics
 protected:
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
 public:
   virtual void disable () override;
@@ -176,9 +176,9 @@ public:
   virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
   virtual void voltageUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
 
   /** @brief  return the last error in the real power*/
   virtual double lastError () const;
@@ -187,10 +187,10 @@ public:
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
 
 public:
-  void setTime (double time) override;
-  void timestep (double ttime, const solverMode &sMode) override;
+  void setTime (gridDyn_time time) override;
+  void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   /** @brief a faster function to set the voltage and angle of a bus*
   @param[in] Vnew  the new voltage
   @param[in] Anew  the new angle
@@ -341,13 +341,13 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityUp (double time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityDown (double time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/
@@ -419,7 +419,7 @@ public:
   virtual double getFreq (const stateData *sD, const solverMode &sMode) const;
 
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level) override;
 
 

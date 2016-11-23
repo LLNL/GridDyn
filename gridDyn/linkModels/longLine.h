@@ -41,7 +41,7 @@ public:
   // remove components
   virtual void remove (gridCoreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

@@ -628,7 +628,7 @@ void adjustableTransformer::followNetwork (int network, std::queue<gridBus *> &s
     }
 }
 
-void adjustableTransformer::pFlowObjectInitializeA (double time0, unsigned long flags)
+void adjustableTransformer::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   if (cMode != control_mode_t::manual_control)
@@ -1085,7 +1085,7 @@ change_code adjustableTransformer::powerFlowAdjust (unsigned long flags, check_l
   return ret;
 }
 
-void adjustableTransformer::guess (double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void adjustableTransformer::guess (gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1293,7 +1293,7 @@ void adjustableTransformer::residual (const stateData *sD, double resid[], const
     }
 }
 
-void adjustableTransformer::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void adjustableTransformer::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1332,7 +1332,7 @@ void adjustableTransformer::setState (double ttime, const double state[], const 
 }
 
 
-void adjustableTransformer::dynObjectInitializeA (double time0, unsigned long flags)
+void adjustableTransformer::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   return acLine::dynObjectInitializeA (time0,flags);
@@ -1396,7 +1396,7 @@ void adjustableTransformer::rootTest (const stateData *sD, double roots[], const
     }
 }
 
-void adjustableTransformer::rootTrigger (double /*ttime*/, const std::vector<int> & /*rootMask*/, const solverMode &)
+void adjustableTransformer::rootTrigger (gridDyn_time /*ttime*/, const std::vector<int> & /*rootMask*/, const solverMode &)
 {
   double v1;
   switch (cMode)

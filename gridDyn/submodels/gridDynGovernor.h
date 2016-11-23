@@ -58,7 +58,7 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   /** @brief destructor*/
   virtual ~gridDynGovernor ();
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -71,12 +71,12 @@ public:
   virtual void jacobianElements (const IOdata &args, const stateData *sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void timestep  (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep  (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
 
 protected:
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
 #endif //GRIDGOVERNOR_H_

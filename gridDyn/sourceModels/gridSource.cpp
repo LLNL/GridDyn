@@ -80,7 +80,7 @@ void gridSource::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
-void gridSource::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
+void gridSource::timestep (gridDyn_time ttime, const IOdata & /*args*/, const solverMode &)
 {
   if (ttime != prevTime)
     {
@@ -122,11 +122,11 @@ index_t gridSource::getOutputLoc (const solverMode & ,index_t /*num*/) const
 }
 
 
-void gridSource::sourceUpdate (double /*ttime*/)
+void gridSource::sourceUpdate (gridDyn_time /*ttime*/)
 {
 }
 
-void gridSource::sourceUpdateForward (double ttime)
+void gridSource::sourceUpdateForward (gridDyn_time ttime)
 {
   sourceUpdate (ttime);
   m_output = m_tempOut;

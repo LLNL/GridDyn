@@ -30,7 +30,7 @@ the class also includes a null event which does nothing but can be called period
 class eventQueue
 {
 protected:
-  double timeTols = kSmallTime;  //!< the temporal tolerance on events
+  gridDyn_time timeTols = kSmallTime;  //!< the temporal tolerance on events
   std::list<std::shared_ptr<eventAdapter>> events; //!< storage location for events
   std::vector <std::shared_ptr<eventAdapter>> partB_list;  //!< container for immediate events awaiting part B execution
   std::shared_ptr<eventAdapter> nullEvent; //!< nullEvent operation for scheduling of the null event
@@ -149,7 +149,7 @@ public:
   @param[in] time the time for the null event
   @param[in] period the period of the null event
   */
-  void nullEventTime (double time, double period = kNullVal);
+  void nullEventTime (gridDyn_time time, double period = kNullVal);
 
   /** @brief get the time for the next Null Event*/
   double getNullEventTime () const;

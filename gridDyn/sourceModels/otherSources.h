@@ -69,7 +69,7 @@ public:
 	virtual void setFlag(const std::string &flag, bool val) override;
 	
 	virtual void setLevel(double val) override;
-	virtual void updateA(double time) override;
+	virtual void updateA(gridDyn_time time) override;
 
 	/** message processing function for use with communicators
 	@param[in] sourceID  the source of the comm message

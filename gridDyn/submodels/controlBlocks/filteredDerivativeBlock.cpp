@@ -54,7 +54,7 @@ gridCoreObject *filteredDerivativeBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void filteredDerivativeBlock::objectInitializeA (double time0, unsigned long flags)
+void filteredDerivativeBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   basicBlock::objectInitializeA (time0, flags);
   offsets.local->local.diffSize++;
@@ -91,7 +91,7 @@ void filteredDerivativeBlock::objectInitializeB (const IOdata &args, const IOdat
 
 }
 
-double filteredDerivativeBlock::step (double ttime, double inputA)
+double filteredDerivativeBlock::step (gridDyn_time ttime, double inputA)
 {
 
   index_t loc = limiter_diff;

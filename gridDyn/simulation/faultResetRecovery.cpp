@@ -105,7 +105,7 @@ int faultResetRecovery::faultResetFix1()
 	//auto err = JacobianCheck(sMode, -1, true);
 	//      dynamicSolverConvergenceTest(sMode, "convFile.dat",0,3);
 	double *states = solver->state_data();
-	double timeCurr = sim->getCurrentTime();
+	gridDyn_time timeCurr = sim->getCurrentTime();
 	sim->guess(timeCurr, states, solver->deriv_data(), solver->getSolverMode());
 	std::vector<double> vstates(solver->size(), 0);
 	sim->getVoltageStates(vstates.data(), solver->getSolverMode());
@@ -132,7 +132,7 @@ int faultResetRecovery::faultResetFix2(reset_levels rlevel)
 	{
 		return retval;
 	}
-	double timeCurr = sim -> getCurrentTime();
+	gridDyn_time timeCurr = sim -> getCurrentTime();
 	sim->guess(timeCurr, solver->state_data(), solver->deriv_data(), solver->getSolverMode());
 	//int mmatch = JacobianCheck(sim, solver->getSolverMode());
 	

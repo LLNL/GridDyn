@@ -55,7 +55,7 @@ gridDynGovernorIeeeSimple::~gridDynGovernorIeeeSimple ()
 
 }
 
-void gridDynGovernorIeeeSimple::objectInitializeA (double time0, unsigned long flags)
+void gridDynGovernorIeeeSimple::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   gridDynGovernor::objectInitializeA (time0,flags);
   if ((Pmax < 5000) || (Pmin > -5000))
@@ -111,7 +111,7 @@ void gridDynGovernorIeeeSimple::derivative (const IOdata &args, const stateData 
   Loc.destDiffLoc[1] = (-gs[1] + (1 - T2 / T1) * (omega - 1.0)) / T1;
 }
 
-void gridDynGovernorIeeeSimple::timestep (double ttime,  const IOdata &args, const solverMode &)
+void gridDynGovernorIeeeSimple::timestep (gridDyn_time ttime,  const IOdata &args, const solverMode &)
 {
 
 
@@ -238,7 +238,7 @@ void gridDynGovernorIeeeSimple::rootTest (const IOdata &args, const stateData *s
 
 }
 
-void gridDynGovernorIeeeSimple::rootTrigger (double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGovernorIeeeSimple::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   /*if (opFlags.test (uses_deadband))

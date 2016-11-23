@@ -150,7 +150,7 @@ void gridRampLoad::set (const std::string &param, double val, units_t unitType)
 }
 
 
-void gridRampLoad::loadUpdate (double ttime)
+void gridRampLoad::loadUpdate (gridDyn_time ttime)
 {
   double tdiff = ttime - lastTime;
   if (tdiff == 0.0)

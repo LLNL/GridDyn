@@ -39,7 +39,7 @@ gridCoreObject *gridFileLoad::clone (gridCoreObject *obj) const
 }
 
 
-void gridFileLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridFileLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   index_t ii = 0;
   count = 0;
@@ -98,7 +98,7 @@ void gridFileLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
 
 }
 
-void gridFileLoad::updateA (double time)
+void gridFileLoad::updateA (gridDyn_time time)
 {
   while (time+kSmallTime >= schedLoad.time[currIndex])
     {
@@ -199,7 +199,7 @@ void gridFileLoad::updateA (double time)
   nextUpdateTime = (currIndex == count - 1) ? kBigNum : schedLoad.time[currIndex + 1];
 }
 
-void gridFileLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
+void gridFileLoad::timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -210,7 +210,7 @@ void gridFileLoad::timestep (double ttime, const IOdata &args,const solverMode &
 }
 
 
-void gridFileLoad::setTime (double time)
+void gridFileLoad::setTime (gridDyn_time time)
 {
   if (opFlags.test (use_absolute_time_flag))
     {

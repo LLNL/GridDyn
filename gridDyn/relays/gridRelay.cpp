@@ -349,7 +349,7 @@ int gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t condi
   return LOADED;
 }
 
-void gridRelay::setTime (double time)
+void gridRelay::setTime (gridDyn_time time)
 {
   prevTime = time;
 }
@@ -459,7 +459,7 @@ void gridRelay::setFlag (const std::string &flag, bool val)
     }
 }
 
-void gridRelay::updateA (double time)
+void gridRelay::updateA (gridDyn_time time)
 {
   auto ncond = condChecks;
   condChecks.clear ();
@@ -526,7 +526,7 @@ void gridRelay::updateA (double time)
 }
 
 
-void gridRelay::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
+void gridRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
   if ((opFlags[use_commLink]) && (!(commLink)))
     {
@@ -560,7 +560,7 @@ void gridRelay::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
 }
 
 
-void gridRelay::dynObjectInitializeA (double time0, unsigned long /*flags*/)
+void gridRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
   if (opFlags[continuous_flag])
     {
@@ -670,7 +670,7 @@ void gridRelay::rootTest (const stateData *sD, double roots[], const solverMode 
     }
 }
 
-void gridRelay::rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridRelay::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   auto ro = offsets.getRootOffset (sMode);
   //Because conditionsWithRoots can change on a condition Trigger leading to an actionTaken
@@ -946,7 +946,7 @@ void gridRelay::actionTaken ( index_t ActionNum, index_t conditionNum, change_co
   LOG_DEBUG ((boost::format ("action %d taken based on condition %d  with return code %d") % ActionNum % conditionNum  % static_cast<int> (actionReturn)).str ());
 
 }
-void gridRelay::conditionTriggered (index_t conditionNum, double timeTriggered)
+void gridRelay::conditionTriggered (index_t conditionNum, gridDyn_time timeTriggered)
 {
   if (conditionTriggerTimes[conditionNum] > 0)
     {
@@ -958,7 +958,7 @@ void gridRelay::conditionTriggered (index_t conditionNum, double timeTriggered)
     }
 
 }
-void gridRelay::conditionCleared (index_t conditionNum, double timeTriggered)
+void gridRelay::conditionCleared (index_t conditionNum, gridDyn_time timeTriggered)
 {
   if (conditionTriggerTimes[conditionNum] > 0)
     {

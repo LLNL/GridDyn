@@ -32,9 +32,9 @@ public:
   compositeLoad (const std::string &objName = "compositeLoad_$");
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -51,7 +51,7 @@ public:
   virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual double getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;

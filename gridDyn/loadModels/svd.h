@@ -48,14 +48,14 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
   virtual void setLoad (double level, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void setLoad (double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;                //for initial setting of the state
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;                //for initial setting of the state
   //for identifying which variables are algebraic vs differential
   virtual void getVariableType (double sdata[], const solverMode &sMode) override;
 
@@ -83,10 +83,10 @@ public:
   virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void getStateName  (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 protected:
 	/** get the setting corresponding to a specfic output level

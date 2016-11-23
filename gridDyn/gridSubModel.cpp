@@ -24,7 +24,7 @@ gridSubModel::gridSubModel (const std::string &objName) : gridObject (objName)
 }
 
 
-void gridSubModel::initializeA (double time0, unsigned long flags)
+void gridSubModel::initializeA (gridDyn_time time0, unsigned long flags)
 {
   if (enabled)
     {
@@ -68,7 +68,7 @@ void gridSubModel::initializeB (const IOdata &args, const IOdata &outputSet, IOd
     }
 }
 
-void gridSubModel::objectInitializeA (double time0, unsigned long flags)
+void gridSubModel::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   if (!subObjectList.empty ())
@@ -114,7 +114,7 @@ void gridSubModel::objectInitializeB (const IOdata &args, const IOdata &outputSe
     }
 }
 
-void gridSubModel::timestep (double ttime, const IOdata & /*args*/, const solverMode &)
+void gridSubModel::timestep (gridDyn_time ttime, const IOdata & /*args*/, const solverMode &)
 {
   prevTime = ttime;
 }
@@ -123,7 +123,7 @@ void gridSubModel::rootTest (const IOdata & /*args*/, const stateData *, double 
 {
 }
 
-void gridSubModel::rootTrigger (double ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode)
+void gridSubModel::rootTrigger (gridDyn_time ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {

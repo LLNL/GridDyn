@@ -40,8 +40,8 @@ public:
   infiniteBus (double startVoltage, double startAngle,const std::string &objName = "infbus_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   // add components
-  void timestep (double ttime, const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  void timestep (gridDyn_time ttime, const solverMode &sMode) override;
+  void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -57,7 +57,7 @@ public:
 
 
 protected:
-  void updateVoltageAngle (double ttime);
+  void updateVoltageAngle (gridDyn_time ttime);
 };
 
 #endif

@@ -33,7 +33,7 @@ double eventQueue::getNextTime () const
 
 }
 
-void eventQueue::nullEventTime (double time, double period)
+void eventQueue::nullEventTime (gridDyn_time time, double period)
 {
 
   nullEvent->m_nextTime = time;

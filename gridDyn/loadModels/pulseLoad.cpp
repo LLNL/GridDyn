@@ -57,7 +57,7 @@ gridCoreObject *gridPulseLoad::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void gridPulseLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridPulseLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   cycleTime = time0 - shift * period - period;  //subtract a period so it cycles properly the first time
   if ((baseLoadP == 0.0)&&(baseLoadQ == 0))
@@ -69,7 +69,7 @@ void gridPulseLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
   return gridLoad::pFlowObjectInitializeA (time0,flags);
 }
 
-void gridPulseLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void gridPulseLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   cycleTime = time0 - shift * period - period;  //subtract a period so it cycles properly the first time
   loadUpdateForward (time0);
@@ -79,7 +79,7 @@ void gridPulseLoad::dynObjectInitializeA (double time0, unsigned long flags)
 }
 
 
-void gridPulseLoad::loadUpdate (double ttime)
+void gridPulseLoad::loadUpdate (gridDyn_time ttime)
 {
   double tdiff = ttime - cycleTime;
   if (ttime - lastTime == 0.0)
@@ -95,7 +95,7 @@ void gridPulseLoad::loadUpdate (double ttime)
   lastTime = ttime;
 }
 
-void gridPulseLoad::loadUpdateForward (double ttime)
+void gridPulseLoad::loadUpdateForward (gridDyn_time ttime)
 {
   double tdiff = ttime - cycleTime;
   if (ttime - lastTime == 0.0)

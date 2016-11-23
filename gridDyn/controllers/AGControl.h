@@ -70,10 +70,10 @@ public:
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
 
-  void setTime (double time) override;
-  virtual void updateA (double time) override;
+  void setTime (gridDyn_time time) override;
+  virtual void updateA (gridDyn_time time) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   double getOutput (index_t /*num*/ = 0) const override
   {
@@ -123,9 +123,9 @@ public:
         virtual ~AGControlBattery();
 
 
-        virtual double objectInitializeA (double time0,double freq0,double tiedev0);
+        virtual double objectInitializeA (gridDyn_time time0,double freq0,double tiedev0);
 
-        virtual double updateA(double time, double freq, double tiedev);
+        virtual double updateA(gridDyn_time time, double freq, double tiedev);
 
         virtual void addGen(schedulerReg *sched);
         virtual void removeSched(schedulerReg *sched);

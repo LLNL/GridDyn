@@ -115,12 +115,12 @@ public:
   /** @brief destructor*/
   virtual ~gridDynGenerator ();
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;       //for saving the state
-  virtual void guess (double ttime, double state[],double dstate_dt[], const solverMode &sMode) override;               //for initial setting of the state
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;       //for saving the state
+  virtual void guess (gridDyn_time ttime, double state[],double dstate_dt[], const solverMode &sMode) override;               //for initial setting of the state
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -147,10 +147,10 @@ public:
   virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
   /** @brief get the generator states
   @return a double pointer to the states*/
@@ -181,26 +181,26 @@ public:
 
   virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
-  virtual double getAdjustableCapacityUp (double time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (double time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
 /** @brief get the maximum generation attainable in a specific amount of time
 @param[in] time  the time window to achieve the generation
 @return the max real power*/
-  virtual double getPmax (double time = kBigNum) const;
+  virtual double getPmax (gridDyn_time time = kBigNum) const;
   /** @brief get the maximum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the max reactive power*/
-  virtual double getQmax (double time = kBigNum,double Ptest = -kBigNum ) const;
+  virtual double getQmax (gridDyn_time time = kBigNum,double Ptest = -kBigNum ) const;
   /** @brief get the minimum real generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @return the max real power*/
-  virtual double getPmin (double time = kBigNum) const;
+  virtual double getPmin (gridDyn_time time = kBigNum) const;
   /** @brief get the minimum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the min reactive power*/
-  virtual double getQmin (double time = kBigNum, double Ptest = -kBigNum) const;
+  virtual double getQmin (gridDyn_time time = kBigNum, double Ptest = -kBigNum) const;
   /** @brief adjust the output generation by the specified amount
   @param[in] adjustment the value of the desired adjustment
   */

@@ -53,7 +53,7 @@ public:
   {
   }
 
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -67,10 +67,10 @@ public:
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   //handle the rootfinding functions
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 protected:
   void checkForLimits ();
 };
@@ -91,14 +91,14 @@ public:
   explicit gridDynExciterIEEEtype1  (const std::string &objName = "exciterIEEEtype1_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual stringVec localStateNames () const override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   //only called if the genModel is not present
@@ -121,7 +121,7 @@ protected:
 public:
   explicit gridDynExciterIEEEtype2 (const std::string &objName = "exciterIEEEtype2_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -137,7 +137,7 @@ public:
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 
 
 };
@@ -153,7 +153,7 @@ public:
   explicit gridDynExciterDC1A (const std::string &objName = "exciterDC1A_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet,  IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -169,7 +169,7 @@ public:
 
   virtual void rootTest  (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode) override;
   virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 protected:
   /** @brief the Jacobian entries for the limiter
   @param[in] V the voltage

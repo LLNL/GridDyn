@@ -206,7 +206,7 @@ void randomSource::reset ()
   opFlags.reset (triggered_flag), opFlags.reset (object_armed_flag), offset = 0;
 }
 
-void randomSource::objectInitializeA (double time0, unsigned long flags)
+void randomSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   double triggerTime;
 
@@ -241,7 +241,7 @@ void randomSource::objectInitializeA (double time0, unsigned long flags)
 }
 
 
-void randomSource::updateA (double time)
+void randomSource::updateA (gridDyn_time time)
 {
   if (time < nextUpdateTime)
     {
@@ -354,7 +354,7 @@ void randomSource::nextStep (double triggerTime)
 
 }
 
-void randomSource::setTime (double time)
+void randomSource::setTime (gridDyn_time time)
 {
   double in = prevTime - lastUpdateTime;
 
@@ -364,7 +364,7 @@ void randomSource::setTime (double time)
 }
 
 
-void randomSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void randomSource::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {

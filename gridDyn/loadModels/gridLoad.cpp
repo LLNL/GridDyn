@@ -62,7 +62,7 @@ gridLoad::~gridLoad ()
 {
 }
 
-void gridLoad::setTime (double time)
+void gridLoad::setTime (gridDyn_time time)
 {
   prevTime = time;
   lastTime = time;
@@ -151,7 +151,7 @@ void gridLoad::dynObjectInitializeA (double /*time0*/, unsigned long flags)
 
 }
 
-void gridLoad::setState (double ttime, const double /*state*/[], const double /*dstate_dt*/ [], const solverMode &)
+void gridLoad::setState (gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/ [], const solverMode &)
 {
   if (ttime != prevTime)
     {
@@ -159,7 +159,7 @@ void gridLoad::setState (double ttime, const double /*state*/[], const double /*
     }
 }
 
-void gridLoad::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   if (!enabled)
     {

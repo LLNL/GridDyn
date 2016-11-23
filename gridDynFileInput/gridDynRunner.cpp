@@ -167,7 +167,7 @@ void GriddynRunner::Run (void)
 
 double GriddynRunner::Step (double time)
 {
-  double actual = time;
+  gridDyn_time actual = time;
   if (m_gds)
     {
       if (eventMode)

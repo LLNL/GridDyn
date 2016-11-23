@@ -187,4 +187,12 @@ BOOST_AUTO_TEST_CASE (object_factory_test)
 
 }
 
+BOOST_AUTO_TEST_CASE(gridDynTime_tests)
+{
+	gridDyn_time2 rt(34.123141512);
+
+	double dval = static_cast<double>(rt);
+	BOOST_CHECK_CLOSE(dval, 34.123141512, 0.0000001);
+}
+
 BOOST_AUTO_TEST_SUITE_END ()

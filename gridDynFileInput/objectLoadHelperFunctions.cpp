@@ -19,6 +19,7 @@
 #include "readElement.h"
 #include "gridDynFileInput.h"
 #include "readElement.h"
+#include "core/gridDynExceptions.h"
 
 static const stringVec indexAndNumber = { "index","number" };
 static const std::string nameString = "name";
@@ -47,5 +48,18 @@ void setIndex(std::shared_ptr<readerElement> &element, gridCoreObject *mobj, rea
 		Index = ri->checkDefines(Index);
 		double val = interpretString(Index, ri);
 		mobj->locIndex = static_cast<int> (val);
+	}
+	std::string purp = getElementField(element, "purpose", readerConfig::defMatchType);
+	if (!purp.empty())
+	{
+		purp = ri->checkDefines(purp);
+		try
+		{
+			mobj->set("purpose", purp);
+		}
+		catch (unrecognizedParameter &)
+		{
+			mobj->set("description", purp);
+		}
 	}
 }

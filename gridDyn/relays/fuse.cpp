@@ -111,7 +111,7 @@ void fuse::set (const std::string &param, double val, gridUnits::units_t unitTyp
 
 }
 
-void fuse::dynObjectInitializeA (double time0, unsigned long flags)
+void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   using namespace std::placeholders;
@@ -267,7 +267,7 @@ void fuse::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-void fuse::timestep (double ttime, const solverMode &)
+void fuse::timestep (gridDyn_time ttime, const solverMode &)
 {
 
   if (limit < kBigNum / 2)
@@ -283,7 +283,7 @@ void fuse::timestep (double ttime, const solverMode &)
   prevTime = ttime;
 }
 
-void fuse::converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode, double /*tol*/)
+void fuse::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode, double /*tol*/)
 {
   guess (ttime, state, dstate_dt, sMode);
 }
@@ -349,7 +349,7 @@ void fuse::jacobianElements (const stateData *sD, matrixData<double> &ad, const 
 
 }
 
-void fuse::setState (double ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
+void fuse::setState (gridDyn_time ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -387,7 +387,7 @@ void fuse::residual (const stateData *sD, double resid[], const solverMode &sMod
     }
 }
 
-void fuse::guess (const double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void fuse::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (useI2T)
     {

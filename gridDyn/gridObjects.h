@@ -244,14 +244,14 @@ public:
   \param dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
   \param sMode  -- the solverMode corresponding to the computed state.
   */
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
   /** @brief transfer state information from the objects to a vector
   \param ttime -the time the state corresponds to
   \param[out] state -- a double array pointing to the state information
   \param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
   \param sMode  -- the solverMode corresponding to the computed state.
   */
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode);
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode);
   /** @brief load tolerance information from the objects
   \param[out] tols -- a double array with the state tolerance information
   \param[in] sMode  -- the solverMode corresponding to the computed state.
@@ -318,7 +318,7 @@ public:
   @param[in] flags  any flags indicating how the initialization or execution will take place
   @return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
   */
-  void pFlowInitializeA (double time0, unsigned long flags);
+  void pFlowInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize object for power flow part B
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
@@ -334,7 +334,7 @@ public:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  void dynInitializeA (double time0, unsigned long flags);
+  void dynInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize object for dynamic simulation part B
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
@@ -350,7 +350,7 @@ protected:
 @param[in] time0 the time0 at which the power flow will take place
 @param[in] flags  any flags indicating how the initialization or execution will take place
 */
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags);
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize local object for power flow part B
    see pFlowInitializeB for more details
@@ -362,7 +362,7 @@ protected:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  virtual void dynObjectInitializeA (double time0, unsigned long flags);
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize local object for dynamics part B
    see dynInitializeB for more details
@@ -456,7 +456,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] ttime the time to progress to
   @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
   */
-  virtual void timestep (double ttime, const solverMode &sMode);
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode);
 
   /**
   *@brief set all the values of particular type of object to some value
@@ -482,7 +482,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode);
+  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode);
 
   /**
   *@brief evaluate the root functions and execute trigger from local state information
@@ -515,7 +515,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] mode  the mode of the convergence
   @param[in] tol  the convergence tolerance
   */
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01);
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01);
   /** @brief reset voltages
   * resets the voltage levels and any other parameters changed in power to a base level depending on the level
   * @param[in] level  the level of the reset
@@ -642,7 +642,7 @@ public:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  void pFlowInitializeA (double time0, unsigned long flags);
+  void pFlowInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize object for power flow part B
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
@@ -658,7 +658,7 @@ public:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  void dynInitializeA (double time0, unsigned long flags);
+  void dynInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize object for dynamic simulation part B
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
@@ -676,7 +676,7 @@ protected:
 @param[in] flags  any flags indicating how the initialization or execution will take place
 @return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
 */
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags);
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize local object for power flow part B
    see pFlowInitializeB for more details
@@ -689,7 +689,7 @@ protected:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  virtual void dynObjectInitializeA (double time0, unsigned long flags);
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
 
   /** @brief initialize local object for dynamics part B
    see dynInitializeB for more details
@@ -706,7 +706,7 @@ public:
   @param[in] args  the input arguments
   @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
   */
-  virtual void timestep (double ttime, const IOdata & args, const solverMode & sMode);
+  virtual void timestep (gridDyn_time ttime, const IOdata & args, const solverMode & sMode);
 
   /** @brief call any objects that need 2 part execution to allow for parallelism
    do any prework for a residual call later in the calculations
@@ -845,14 +845,14 @@ public:
   @param[in] time the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityUp (double time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
 
   /**
   *@brief get the available downwards generating capacity of a system
   @param[in] the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityDown (double time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
 
   /**
   *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
@@ -899,7 +899,7 @@ public:
   * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTrigger (double ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
 
   /**
   *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
@@ -964,7 +964,7 @@ public:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  void initializeA (double time, unsigned long flags);
+  void initializeA (gridDyn_time time, unsigned long flags);
   /** @brief initialize object for simulation part B
    partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
   This function is a wrapper around the dynObjectInitializeB function which does the local object init
@@ -981,7 +981,7 @@ protected:
   @param[in] time0 the time0 at which the power flow will take place
   @param[in] flags  any flags indicating how the initialization or execution will take place
   */
-  virtual void objectInitializeA (double time0, unsigned long flags);
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags);
   /** @brief initialize local object part B
    see initializeB for more details ,all arguments are pass through from the initializeB function
   @param[in] args  the input arguments
@@ -1001,7 +1001,7 @@ public:
   @param[in] args  the input arguments
   @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
   */
-  virtual void timestep (double ttime, const IOdata & args, const solverMode &sMode);
+  virtual void timestep (gridDyn_time ttime, const IOdata & args, const solverMode &sMode);
 
   /**
   *evaluate the root functions and return the value
@@ -1018,7 +1018,7 @@ public:
   * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTrigger (double ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
   /**
   *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
   * @param[in] ttime the simulation time the root evaluation takes place

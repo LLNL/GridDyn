@@ -122,7 +122,7 @@ void busRelay::set (const std::string &param, double val, gridUnits::units_t uni
 
 }
 
-void busRelay::dynObjectInitializeA (double time0, unsigned long flags)
+void busRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   auto ge = std::make_shared<gridEvent> (0.0);

@@ -53,7 +53,7 @@ gridCoreObject *deadbandBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void deadbandBlock::objectInitializeA (double time0, unsigned long flags)
+void deadbandBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   basicBlock::objectInitializeA (time0,flags);
   if (deadbandLow < deadbandHigh)     //this means it was set to some value
@@ -229,7 +229,7 @@ double deadbandBlock::computeDoutDin (double input)
     }
   return out;
 }
-double deadbandBlock::step (double ttime, double input)
+double deadbandBlock::step (gridDyn_time ttime, double input)
 {
   rootCheck ({ input }, nullptr, cLocalSolverMode, check_level_t::reversable_only);
   m_state[limiter_alg] = K * computeValue (input + bias);
@@ -384,7 +384,7 @@ void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double ro
 }
 
 
-void deadbandBlock::rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void deadbandBlock::rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   auto rootOffset = offsets.getRootOffset (sMode);
   if (limiter_alg + limiter_diff > 0)

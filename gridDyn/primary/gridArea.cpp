@@ -587,7 +587,7 @@ void gridArea::reset (reset_levels level)
 }
 
 // initializeB states
-void gridArea::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridArea::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   for (auto obj : primaryObjects)
     {
@@ -654,7 +654,7 @@ void gridArea::pFlowObjectInitializeB ()
   opObjectLists.makePreList (primaryObjects);
 }
 
-void gridArea::setTime (double time)
+void gridArea::setTime (gridDyn_time time)
 {
   for (auto &obj : primaryObjects)
     {
@@ -779,7 +779,7 @@ void gridArea::pFlowCheck (std::vector<violation> &Violation_vector)
 }
 
 // initializeB states for dynamic solution
-void gridArea::dynObjectInitializeA (double time0, unsigned long flags)
+void gridArea::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   for (auto obj : primaryObjects)
@@ -869,11 +869,11 @@ void gridArea::dynObjectInitializeB (IOdata &outputSet)
 }
 
 //TODO:: PT make this do something or remove it
-void gridArea::updateTheta (double /*time*/)
+void gridArea::updateTheta (gridDyn_time /*time*/)
 {
 }
 
-void gridArea::converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
+void gridArea::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
 {
 
   if (opFlags[reverse_converge])
@@ -1053,7 +1053,7 @@ double gridArea::get (const std::string &param, units_t unitType) const
 
 
 
-void gridArea::timestep (double ttime, const solverMode &sMode)
+void gridArea::timestep (gridDyn_time ttime, const solverMode &sMode)
 {
 
   //updateP the tie lines
@@ -1454,7 +1454,7 @@ count_t gridArea::getLinkBus (stringVec &nm, index_t start, int busNum) const
 
 
 
-double gridArea::getAdjustableCapacityUp (double time) const
+double gridArea::getAdjustableCapacityUp (gridDyn_time time) const
 {
   double adjUp = 0.0;
   for (auto &area : m_Areas)
@@ -1471,7 +1471,7 @@ double gridArea::getAdjustableCapacityUp (double time) const
   return adjUp;
 }
 
-double gridArea::getAdjustableCapacityDown (double time) const
+double gridArea::getAdjustableCapacityDown (gridDyn_time time) const
 {
   double adjDown = 0.0;
   for (auto &area : m_Areas)
@@ -1642,7 +1642,7 @@ double gridArea::getAvgFreq() const
 // -------------------- Power Flow --------------------
 
 //guess the solution
-void gridArea::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void gridArea::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   auto cobj = opObjectLists.begin (sMode);
   auto cend = opObjectLists.end (sMode);
@@ -1738,7 +1738,7 @@ change_code gridArea::rootCheck (const stateData *sD, const solverMode &sMode,  
 }
 
 
-void gridArea::rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridArea::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   auto RF = vecFindne (rootMask, 0);
   size_t cloc = 0;
@@ -1783,7 +1783,7 @@ void gridArea::rootTrigger (double ttime, const std::vector<int> &rootMask, cons
 }
 
 // pass the solution
-void gridArea::setState (double ttime, const double state[],const double dstate_dt[], const solverMode &sMode)
+void gridArea::setState (gridDyn_time ttime, const double state[],const double dstate_dt[], const solverMode &sMode)
 {
   prevTime = ttime;
 

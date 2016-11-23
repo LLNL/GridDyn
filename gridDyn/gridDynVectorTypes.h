@@ -41,6 +41,7 @@ typedef std::vector<index_t> IOlocs;
 #endif
 
 const IOdata emptyArguments{};
+const IOlocs emptyArgumentLocs{};
 
 #endif
 

@@ -175,7 +175,7 @@ void svd::updateSetting (int step)
     }
 }
 
-void svd::pFlowObjectInitializeA (double time0, unsigned long flags)
+void svd::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (opFlags[continuous_flag])
     {
@@ -195,7 +195,7 @@ void svd::pFlowObjectInitializeA (double time0, unsigned long flags)
   return gridLoad::pFlowObjectInitializeA (time0, flags);
 }
 
-void svd::dynObjectInitializeA (double time0,  unsigned long flags)
+void svd::dynObjectInitializeA (gridDyn_time time0,  unsigned long flags)
 {
   return gridLoad::dynObjectInitializeA (time0, flags);
 }
@@ -205,11 +205,11 @@ void svd::dynObjectInitializeB (const IOdata & /*args*/, const IOdata & /*output
 
 }
 
-void svd::setState (double /*ttime*/, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
+void svd::setState (gridDyn_time /*ttime*/, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
 {
 }
 
-void svd::guess (double /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode & /*sMode*/)
+void svd::guess (gridDyn_time /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode & /*sMode*/)
 {
 }
 
@@ -396,7 +396,7 @@ void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std:
 
 }
 
-void svd::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode &)
+void svd::timestep (gridDyn_time /*ttime*/, const IOdata & /*args*/, const solverMode &)
 {
   
 }
@@ -405,7 +405,7 @@ void svd::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/
 {
 }
 
-void svd::rootTrigger (double /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode &)
+void svd::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode &)
 {
 }
 

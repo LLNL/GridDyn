@@ -413,7 +413,14 @@ public:
   stateData (gridDyn_time sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
   {
   }
+  bool empty() const
+  {
+	  return (state != nullptr);
+  }
+
 };
+
+const stateData emptyStateData{};
 
 class gridObject;
 

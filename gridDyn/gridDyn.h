@@ -94,7 +94,7 @@ struct tolerances
   double defaultTolerance = 1e-8; //!< default tolerance on all other variables
   double toleranceRelaxationFactor = 1.0;  //!< relax the tolerances to help the solver
   double rtol = 1e-6;  //!< the relative tolerance
-  double timeTol = kSmallTime; //!< the allowable time slop in events.  The time span below which the system doesn't really care about
+  gridDyn_time timeTol = kSmallTime; //!< the allowable time slop in events.  The time span below which the system doesn't really care about
 };
 
 class gridRecorder;
@@ -331,7 +331,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int residualFunction (double ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
+  int residualFunction (gridDyn_time ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
 
   /** @brief compute the derivatives for all differential states
   @param[in] ttime  the simulation time of the evaluation
@@ -340,7 +340,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int derivativeFunction (double ttime, const double state[], double dstate_dt[], const solverMode &sMode);
+  int derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode);
 
   /** @brief compute an update to all algebraic states
    compute $x=f(\hat{x})$
@@ -351,7 +351,7 @@ public:
   @param[in] alpha a multiplication factor for updates that are expected to be iterative
   @return integer indicating success (0) or failure (non-zero)
   */
-  int algUpdateFunction (double ttime, const double state[], double update[], const solverMode &sMode, double alpha);
+  int algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha);
 
   /** @brief compute the Jacobian of the residuals
     computes $\frac{\partial r}{\partial x}$ for all components of the residual
@@ -363,7 +363,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int jacobianFunction (double ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
+  int jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
 
   /** @brief compute any root values
     computes the roots for any root finding functions used in the system
@@ -374,7 +374,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int rootFindingFunction (double ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
+  int rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
 
 
   /** @brief solve for the algebraic components of a system for use with the ode solvers
@@ -384,7 +384,7 @@ public:
   @param[in] sMode the solverMode to solve related to the differential state information
   @return integer indicating success (0) or failure (non-zero)
   */
-  int dynAlgebraicSolve(double ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
+  int dynAlgebraicSolve(gridDyn_time ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
 
   //solverMode and solverInterface search functions
 
@@ -596,7 +596,7 @@ protected:
 
   /** @brief function to help with IDA solving steps
   */
-  void handleEarlySolverReturn (int retval, double timeReturn, std::shared_ptr<solverInterface> &dynData);
+  void handleEarlySolverReturn (int retval, gridDyn_time timeReturn, std::shared_ptr<solverInterface> &dynData);
 
   /** @brief reset the dynamic simulation
    function checks for various conditions that cause specific things in the solver or simulation to be reset

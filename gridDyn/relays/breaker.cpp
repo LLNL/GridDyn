@@ -136,7 +136,7 @@ void breaker::set (const std::string &param, double val, gridUnits::units_t unit
     }
 }
 
-void breaker::dynObjectInitializeA (double time0, unsigned long flags)
+void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   auto ge = std::make_shared<gridEvent> ();
@@ -245,7 +245,7 @@ void breaker::conditionTriggered (index_t conditionNum, double triggeredTime)
     }
 }
 
-void breaker::updateA (double time)
+void breaker::updateA (gridDyn_time time)
 {
   if (opFlags[breaker_tripped_flag])
     {
@@ -290,7 +290,7 @@ void breaker::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-void breaker::timestep (double ttime, const solverMode &)
+void breaker::timestep (gridDyn_time ttime, const solverMode &)
 {
   prevTime = ttime;
   if (limit < kBigNum / 2)
@@ -374,7 +374,7 @@ void breaker::jacobianElements (const stateData *sD, matrixData<double> &ad, con
     }
 }
 
-void breaker::setState (double ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
+void breaker::setState (gridDyn_time ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
 {
   if (useCTI)
     {
@@ -420,7 +420,7 @@ void breaker::residual (const stateData *sD, double resid[], const solverMode &s
     }
 }
 
-void breaker::guess (const double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void breaker::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (useCTI)
     {
@@ -468,7 +468,7 @@ void breaker::getStateName (stringVec &stNames, const solverMode &sMode, const s
     }
 }
 
-void breaker::tripBreaker (double time)
+void breaker::tripBreaker (gridDyn_time time)
 {
   alert (this, BREAKER_TRIP_CURRENT);
   LOG_NORMAL ("breaker " + std::to_string (m_terminal) + " tripped on " + m_sourceObject->getName ());
@@ -492,7 +492,7 @@ void breaker::tripBreaker (double time)
 }
 
 
-void breaker::resetBreaker (double time)
+void breaker::resetBreaker (gridDyn_time time)
 {
   ++recloseAttempts;
   lastRecloseTime = time;

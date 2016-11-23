@@ -41,9 +41,9 @@ public:
 
 	virtual void objectInitializeB(const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
-	virtual void updateA(double time) override;
+	virtual void updateA(gridDyn_time time) override;
 
-	virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode) override;
+	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -53,7 +53,7 @@ public:
 
 	void setFreq(double freq);
 	void deactivate();
-	void activate(double time);
+	void activate(gridDyn_time time);
 
 };
 

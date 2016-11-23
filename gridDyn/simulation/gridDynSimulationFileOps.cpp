@@ -777,7 +777,7 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const so
 }
 
 
-int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
+int writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -802,7 +802,7 @@ int writeVector(double time, std::uint32_t code, std::uint32_t index, std::uint3
 	return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int writeArray(double time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
+int writeArray(gridDyn_time time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)

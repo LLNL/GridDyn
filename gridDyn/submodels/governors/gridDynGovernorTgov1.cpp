@@ -104,7 +104,7 @@ void gridDynGovernorTgov1::derivative (const IOdata &args, const stateData *sD, 
   Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
 }
 
-void gridDynGovernorTgov1::timestep (double ttime, const IOdata &args, const solverMode &)
+void gridDynGovernorTgov1::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   gridDynGovernorTgov1::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
@@ -219,7 +219,7 @@ void gridDynGovernorTgov1::rootTest (const IOdata &args, const stateData *sD, do
 
 }
 
-void gridDynGovernorTgov1::rootTrigger (double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGovernorTgov1::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   /*if (opFlags.test (uses_deadband))

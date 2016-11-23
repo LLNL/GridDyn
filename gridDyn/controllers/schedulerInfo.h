@@ -21,7 +21,7 @@
 class tsched
 {
 public:
-  double time = kBigNum;
+  gridDyn_time time = kBigNum;
   double target = 0;
   tsched ()
   {

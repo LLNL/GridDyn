@@ -43,7 +43,7 @@ public:
   /** @brief destructor method*/
   virtual ~variableGenerator ();
 protected:
-  // virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  // virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
 public:
@@ -59,11 +59,11 @@ public:
 
   virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual double getAdjustableCapacityUp  (double /*time*/ = kBigNum) const override
+  virtual double getAdjustableCapacityUp  (gridDyn_time /*time*/ = kBigNum) const override
   {
     return 0.0;
   }                                                                                    //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (double /*time*/ = kBigNum) const override
+  virtual double getAdjustableCapacityDown (gridDyn_time /*time*/ = kBigNum) const override
   {
     return 0.0;
   }                                                                                      //get the available adjustment Up within the specified timeframe

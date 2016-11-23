@@ -59,7 +59,7 @@ void controlSystem::add (basicBlock *blk)
   subObjectList.push_back (blk);
 }
 
-void controlSystem::objectInitializeA (double time0, unsigned long flags)
+void controlSystem::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   for (auto &bb : blocks)
     {
@@ -114,7 +114,7 @@ void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData *
 
 }
 
-void controlSystem::timestep (double /*ttime*/, const IOdata & /*args*/, const solverMode & /*sMode*/)
+void controlSystem::timestep (gridDyn_time /*ttime*/, const IOdata & /*args*/, const solverMode & /*sMode*/)
 {
   
 }
@@ -124,7 +124,7 @@ void controlSystem::rootTest (const IOdata & /*args*/, const stateData *, double
 
 }
 
-void controlSystem::rootTrigger (double /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
+void controlSystem::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
 {
 
 }
@@ -133,5 +133,5 @@ change_code controlSystem::rootCheck (const IOdata & /*args*/, const stateData *
 {
   return change_code::no_change;
 }
-//virtual void setTime(double time){prevTime=time;};
+//virtual void setTime(gridDyn_time time){prevTime=time;};
 

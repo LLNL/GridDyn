@@ -207,7 +207,7 @@ double zonalRelay::get (const std::string &param, gridUnits::units_t unitType) c
   return val;
 }
 
-void zonalRelay::dynObjectInitializeA (double time0, unsigned long flags)
+void zonalRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (autoName > 0)
     {

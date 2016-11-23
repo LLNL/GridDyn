@@ -255,7 +255,7 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
 static const IgnoreListType keywords {
   "type", "ref", "number","index", "retype","name","define","library","import","area","bus","link","load","exciter",
   "source","governor","controlblock", "pss", "simulation","generator","array","relay", "parent", "genmodel", "line", "solver",
-  "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom"
+  "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom", "purpose"
 };
 
 void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)

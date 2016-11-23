@@ -217,7 +217,7 @@ void gridRandomLoad::set (const std::string &param, double val, units_t unitType
   
 }
 
-void gridRandomLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridRandomLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   double triggerTime;
 
@@ -243,7 +243,7 @@ void gridRandomLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
   gridLoad::pFlowObjectInitializeA (time0,flags);
 }
 
-void gridRandomLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void gridRandomLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (isArmed ())
     {
@@ -260,7 +260,7 @@ void gridRandomLoad::dynObjectInitializeA (double time0, unsigned long flags)
 }
 
 
-void gridRandomLoad::updateA (double time)
+void gridRandomLoad::updateA (gridDyn_time time)
 {
   if (time + kSmallTime < nextUpdateTime)
     {
@@ -504,7 +504,7 @@ void gridRandomLoad::nextStep (double triggerTime)
 
 
 
-void gridRandomLoad::setTime (double time)
+void gridRandomLoad::setTime (gridDyn_time time)
 {
   double in = prevTime - lastUpdateTime;
 
@@ -514,7 +514,7 @@ void gridRandomLoad::setTime (double time)
 }
 
 
-void gridRandomLoad::timestep (double ttime, const IOdata &args,const solverMode &sMode)
+void gridRandomLoad::timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {

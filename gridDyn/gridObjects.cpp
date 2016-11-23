@@ -679,7 +679,7 @@ double gridObject::get(const std::string &param, gridUnits::units_t unitType) co
 }
 
 
-void gridObject::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void gridObject::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   prevTime = ttime;
   auto so = offsets.getOffsets(sMode);
@@ -715,7 +715,7 @@ void gridObject::setState (double ttime, const double state[], const double dsta
 
 }
 //for saving the state
-void gridObject::guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void gridObject::guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
 	auto so = offsets.getOffsets(sMode);
 	stateSizes *localStates = (subObjectList.empty()) ? &(so->total) : &(so->local);

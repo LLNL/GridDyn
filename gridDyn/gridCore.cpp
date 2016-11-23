@@ -14,7 +14,11 @@
 #include "gridCore.h"
 #include "core/gridDynExceptions.h"  //This needs to be renamed
 #include <map>
+#include <cmath>
+
+const double gridDyn_time2::scalarf = std::pow(2, 30);
 //set up the global object count
+
 
 //start at 100 since there are some objects that use low numbers as a check for interface number and the id as secondary
 std::atomic<count_t> gridCoreObject::s_obcnt(100);
@@ -140,7 +144,7 @@ void gridCoreObject::getParameterStrings (stringVec &pstr, paramStringType pstyp
 }
 
 
-void gridCoreObject::setTime (double time)
+void gridCoreObject::setTime (gridDyn_time time)
 {
   prevTime = time;
 }
@@ -346,7 +350,7 @@ gridCoreObject * gridCoreObject::findByUserID (const std::string & /*typeName*/,
     }
 }
 
-void gridCoreObject::updateA (double time)
+void gridCoreObject::updateA (gridDyn_time time)
 {
 	lastUpdateTime = time;
 }

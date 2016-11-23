@@ -86,7 +86,7 @@ comparison_type comparisonFromString(const std::string &compStr)
 	
 }
 
-std::string fromString(comparison_type comp)
+std::string toString(comparison_type comp)
 {
 	switch (comp)
 	{
@@ -111,16 +111,22 @@ std::string fromString(comparison_type comp)
 
 std::shared_ptr<gridCondition> make_condition(const std::string &field, const std::string &compare, double level, gridCoreObject *rootObject)
 {
+	return make_condition(field, comparisonFromString(compare), level, rootObject);
 	//get the state grabbers part
-	
+}
+
+std::shared_ptr<gridCondition> make_condition(const std::string &field, comparison_type comp, double level, gridCoreObject *rootObject)
+{
+	//get the state grabbers part
+
 	auto stGrabber = makeStateGrabbers(field, rootObject);
-	
+
 	if (stGrabber.empty())
 	{
 		rootObject->log(rootObject, print_level::warning, "unable to generate state grabber from " + field + '\n');
 		return nullptr;
 	}
-	
+
 	//get the regular grabbers parts
 	auto grabber = makeGrabbers(field, rootObject);
 	if (grabber.empty())
@@ -131,8 +137,8 @@ std::shared_ptr<gridCondition> make_condition(const std::string &field, const st
 	auto gc = std::make_shared<gridCondition>(grabber[0], stGrabber[0]);
 	gc->setConditionRHS(level);
 
-	gc->setComparison(comparisonFromString(compare));
-	
+	gc->setComparison(comp);
+
 	return gc;
 }
 
@@ -227,6 +233,7 @@ void gridCondition::updateObject(gridCoreObject *obj, object_update_mode mode)
 		conditionBst->updateObject(obj,mode);
 	}
 }
+
 void gridCondition::setComparison(const std::string &compStr)
 {
 	setComparison(comparisonFromString(compStr));

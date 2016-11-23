@@ -99,7 +99,7 @@ void controlRelay::set (const std::string &param, double val, gridUnits::units_t
 
 }
 
-void controlRelay::dynObjectInitializeA (double time0, unsigned long flags)
+void controlRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (autoName > 0)
     {

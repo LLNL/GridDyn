@@ -55,7 +55,7 @@ public:
   controlMessage(std::uint32_t type) : commMessage(type)
   {
   }
-  controlMessage (std::uint32_t type, std::string fld, double val, double time) : commMessage (type), m_field (fld), m_value (val), m_time (time)
+  controlMessage (std::uint32_t type, std::string fld, double val, gridDyn_time time) : commMessage (type), m_field (fld), m_value (val), m_time (time)
   {
   }
   virtual ~controlMessage ()

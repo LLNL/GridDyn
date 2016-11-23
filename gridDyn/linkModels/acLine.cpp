@@ -166,7 +166,7 @@ double acLine::quickupdateP()
 }
 
 
-void acLine::timestep(const double ttime, const solverMode &)
+void acLine::timestep(const gridDyn_time ttime, const solverMode &)
 {
 
 	if (!enabled)
@@ -911,7 +911,7 @@ double acLine::getMaxTransfer() const
 	}
 }
 
-void acLine::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void acLine::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	prevTime = ttime;
 	stateData sD(ttime, state, dstate_dt);

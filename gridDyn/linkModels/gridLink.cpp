@@ -166,7 +166,7 @@ double gridLink::quickupdateP ()
 }
 
 
-void gridLink::timestep (const double ttime, const solverMode &)
+void gridLink::timestep (const gridDyn_time ttime, const solverMode &)
 {
 
   if (!enabled)
@@ -701,7 +701,7 @@ double gridLink::getVoltage (index_t busId) const
     }
 }
 
-void gridLink::setState (double ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
+void gridLink::setState (gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
 {
   prevTime = ttime;
 

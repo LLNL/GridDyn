@@ -61,7 +61,7 @@ gridCoreObject *pulseSource::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void pulseSource::objectInitializeA (double time0, unsigned long flags)
+void pulseSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   cycleTime = time0 - shift * period - period;  //subtract a period so it cycles properly the first time
   sourceUpdate (time0);
@@ -69,7 +69,7 @@ void pulseSource::objectInitializeA (double time0, unsigned long flags)
 }
 
 
-void pulseSource::sourceUpdate (double ttime)
+void pulseSource::sourceUpdate (gridDyn_time ttime)
 {
 
   if (ttime - prevTime == 0.0)
@@ -84,7 +84,7 @@ void pulseSource::sourceUpdate (double ttime)
   lasttime = ttime;
 }
 
-void pulseSource::sourceUpdateForward (double ttime)
+void pulseSource::sourceUpdateForward (gridDyn_time ttime)
 {
 
   if (ttime - prevTime == 0.0)

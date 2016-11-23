@@ -102,7 +102,7 @@ void loadRelay::set (const std::string &param, double val, gridUnits::units_t un
 
 }
 
-void loadRelay::dynObjectInitializeA (double time0, unsigned long flags)
+void loadRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   auto ge = std::make_shared<gridEvent> ();

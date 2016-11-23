@@ -261,7 +261,7 @@ void acBus::alert (gridCoreObject *obj, int code)
 }
 
 // initializeB states
-void acBus::pFlowObjectInitializeA (double time0, unsigned long flags)
+void acBus::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (Vtol < 0)
     {
@@ -1004,7 +1004,7 @@ void acBus::pFlowCheck (std::vector<violation> &Violation_vector)
 }
 
 // initializeB states for dynamic solution
-void acBus::dynObjectInitializeA (double time0, unsigned long flags)
+void acBus::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   gridBus::dynObjectInitializeA (time0, flags);
   //find a
@@ -1223,7 +1223,7 @@ void acBus::powerAdjust (double adjustment)
 
 }
 
-void acBus::timestep (double ttime, const solverMode &sMode)
+void acBus::timestep (gridDyn_time ttime, const solverMode &sMode)
 {
   double dt = ttime - prevTime;
   if (dt < 1.0)
@@ -1971,7 +1971,7 @@ void acBus::removePowerControl (gridObject *obj)
 
 
 //guess the solution
-void acBus::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void acBus::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
 
   auto Voffset = offsets.getVOffset (sMode);
@@ -2092,7 +2092,7 @@ void acBus::getTols (double tols[], const solverMode &sMode)
 }
 
 // pass the solution
-void acBus::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void acBus::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 
   auto Aoffset = offsets.getAOffset (sMode);
@@ -2620,7 +2620,7 @@ void acBus::localConverge (const solverMode &sMode, int mode, double tol)
     }
 }
 
-void acBus::converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
+void acBus::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
 {
   if ((!enabled) || (isDifferentialOnly (sMode)) || (opFlags[disconnected]))            //nothing to do if differential
     {
@@ -3394,12 +3394,12 @@ void acBus::computePowerAdjustments ()
     }
 }
 
-double acBus::getAdjustableCapacityUp (double time) const
+double acBus::getAdjustableCapacityUp (gridDyn_time time) const
 {
   return busController.getAdjustableCapacityUp (time);
 }
 
-double acBus::getAdjustableCapacityDown (double time) const
+double acBus::getAdjustableCapacityDown (gridDyn_time time) const
 {
   return busController.getAdjustableCapacityDown (time);
 }

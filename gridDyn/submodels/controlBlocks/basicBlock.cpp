@@ -244,14 +244,14 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
 }
 
 
-void basicBlock::timestep (double ttime, const IOdata &args, const solverMode &)
+void basicBlock::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   step (ttime, args[0]);
 }
 
 static IOdata kNullVec;
 
-double basicBlock::step (double ttime, double input)
+double basicBlock::step (gridDyn_time ttime, double input)
 {
 
   if (!opFlags[use_state])
@@ -666,7 +666,7 @@ change_code basicBlock::rootCheck (const IOdata & /*args*/, const stateData *sD,
 
 }
 
-void basicBlock::rootTrigger (double /*ttime*/, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
+void basicBlock::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!opFlags[has_limits])
     {

@@ -51,7 +51,7 @@ void fncsCollector::dataPointAdded(const collectorPoint& cp)
 	}
 }
 
-change_code fncsCollector::trigger(double time)
+change_code fncsCollector::trigger(gridDyn_time time)
 {
 	
 	auto out=collector::trigger(time);

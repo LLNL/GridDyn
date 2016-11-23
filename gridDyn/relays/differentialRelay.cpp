@@ -128,7 +128,7 @@ void differentialRelay::set (const std::string &param, double val, gridUnits::un
 
 }
 
-void differentialRelay::pFlowObjectInitializeA (double time0, unsigned long flags)
+void differentialRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   //if the target object is a link of some kind
   if (dynamic_cast<gridLink *> (m_sourceObject))

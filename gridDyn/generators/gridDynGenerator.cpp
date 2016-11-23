@@ -274,7 +274,7 @@ void gridDynGenerator::buildDynModel (dynModel_t dynModel)
       break;
     }
 }
-void gridDynGenerator::pFlowObjectInitializeA (double time0, unsigned long /*flags*/)
+void gridDynGenerator::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
   bus = static_cast<gridBus *> (find ("bus"));
   if (!bus)
@@ -340,7 +340,7 @@ void gridDynGenerator::pFlowObjectInitializeA (double time0, unsigned long /*fla
   prevTime = time0;
 }
 
-void gridDynGenerator::dynObjectInitializeA (double time0, unsigned long flags)
+void gridDynGenerator::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   if (machineBasePower < 0)
@@ -583,7 +583,7 @@ void gridDynGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &o
 }
 
 // save an external state to the internal one
-void gridDynGenerator::setState (double ttime, const double state[], const double dstate_dt[],const solverMode &sMode)
+void gridDynGenerator::setState (gridDyn_time ttime, const double state[], const double dstate_dt[],const solverMode &sMode)
 {
 
   if (isDynamic (sMode))
@@ -611,7 +611,7 @@ void gridDynGenerator::setState (double ttime, const double state[], const doubl
 }
 
 //copy the current state to a vector
-void gridDynGenerator::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void gridDynGenerator::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -945,7 +945,7 @@ double gridDynGenerator::get (const std::string &param, units_t unitType) const
   return ret;
 }
 
-void gridDynGenerator::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void gridDynGenerator::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
   if (Pset < -kHalfBigNum)
     {
@@ -1755,7 +1755,7 @@ change_code gridDynGenerator::rootCheck ( const IOdata &args, const stateData *s
   
   return ret;
 }
-void gridDynGenerator::rootTrigger (double ttime, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGenerator::rootTrigger (gridDyn_time ttime, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
 	for (auto &sub : subObjectList)
 	{
@@ -1871,7 +1871,7 @@ gridCoreObject *gridDynGenerator::getSubObject (const std::string &typeName, ind
   return find (typeName);
 }
 
-double gridDynGenerator::getAdjustableCapacityUp (const double time) const
+double gridDynGenerator::getAdjustableCapacityUp (gridDyn_time time) const
 {
   if (sched)
     {
@@ -1883,7 +1883,7 @@ double gridDynGenerator::getAdjustableCapacityUp (const double time) const
     }
 }
 
-double gridDynGenerator::getAdjustableCapacityDown (double time) const
+double gridDynGenerator::getAdjustableCapacityDown (gridDyn_time time) const
 {
   if (sched)
     {
@@ -1913,7 +1913,7 @@ IOdata gridDynGenerator::predictOutputs (double ptime, const IOdata & /*args*/, 
   return out;
 }
 
-double gridDynGenerator::getPmax (const double time) const
+double gridDynGenerator::getPmax (const gridDyn_time time) const
 {
   if (sched)
     {
@@ -1925,7 +1925,7 @@ double gridDynGenerator::getPmax (const double time) const
     }
 }
 
-double gridDynGenerator::getQmax (const double /*time*/, double /*Ptest*/) const
+double gridDynGenerator::getQmax (const gridDyn_time /*time*/, double /*Ptest*/) const
 {
   if (opFlags[use_capability_curve])
     {
@@ -1937,7 +1937,7 @@ double gridDynGenerator::getQmax (const double /*time*/, double /*Ptest*/) const
     }
 }
 
-double gridDynGenerator::getPmin (const double time) const
+double gridDynGenerator::getPmin (const gridDyn_time time) const
 {
   if (sched)
     {
@@ -1948,7 +1948,7 @@ double gridDynGenerator::getPmin (const double time) const
       return Pmin;
     }
 }
-double gridDynGenerator::getQmin (const double /*time*/, double /*Ptest*/) const
+double gridDynGenerator::getQmin (const gridDyn_time /*time*/, double /*Ptest*/) const
 {
   if (opFlags[use_capability_curve])
     {

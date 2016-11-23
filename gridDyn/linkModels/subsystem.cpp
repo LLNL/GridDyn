@@ -148,7 +148,7 @@ void subsystem::reset (reset_levels level)
 }
 
 // initializeB states
-void subsystem::pFlowObjectInitializeA (double time0, unsigned long flags)
+void subsystem::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   //make sure the buses are set to the right terminal
@@ -165,7 +165,7 @@ void subsystem::pFlowObjectInitializeA (double time0, unsigned long flags)
 }
 
 
-void subsystem::setTime (double time)
+void subsystem::setTime (gridDyn_time time)
 {
 
   subarea.setTime (time);
@@ -193,13 +193,13 @@ void subsystem::pFlowCheck (std::vector<violation> &Violation_vector)
 }
 
 // initializeB states for dynamic solution
-void subsystem::dynObjectInitializeA (double time0, unsigned long flags)
+void subsystem::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   return subarea.dynInitializeA (time0, flags);
 }
 
 
-void subsystem::converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
+void subsystem::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
 {
   subarea.converge (ttime, state, dstate_dt, sMode, mode, tol);
 }
@@ -397,7 +397,7 @@ double subsystem::get (const std::string &param, units_t unitType) const
 
 
 
-void subsystem::timestep (const double ttime, const solverMode &sMode)
+void subsystem::timestep (const gridDyn_time ttime, const solverMode &sMode)
 {
 
   subarea.timestep (ttime, sMode);
@@ -422,7 +422,7 @@ double subsystem::getLoss () const
 
 
 // pass the solution
-void subsystem::setState (const double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void subsystem::setState (const gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 
   subarea.setState (ttime, state, dstate_dt, sMode);

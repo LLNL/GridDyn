@@ -458,7 +458,7 @@ void gridDynGenModelInverter::rootTest(const IOdata &args, const stateData *sD, 
 	}
 }
 
-void gridDynGenModelInverter::rootTrigger(double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGenModelInverter::rootTrigger(gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
 	if (rootSize(sMode) > 0)
 	{

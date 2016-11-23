@@ -192,7 +192,7 @@ fDepLoad::fDepLoad (double rP, double qP, const std::string &objName) : exponent
 
 }
 
-void fDepLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void fDepLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if ((betaP) || (betaQ))
     {

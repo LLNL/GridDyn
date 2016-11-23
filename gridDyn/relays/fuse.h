@@ -47,15 +47,15 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   //dynamic functions for evaluation with a limit exceeded
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
   virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:

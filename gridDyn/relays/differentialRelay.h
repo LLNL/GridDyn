@@ -42,7 +42,7 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long) override;
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 protected:

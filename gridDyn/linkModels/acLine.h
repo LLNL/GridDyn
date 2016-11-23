@@ -146,7 +146,7 @@ public:
   virtual void updateLocalCache () override;
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
 
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -175,7 +175,7 @@ public:
 
   virtual double getMaxTransfer () const override;
   //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
 
@@ -376,16 +376,16 @@ public:
   virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   void loadSizes (const solverMode &sMode, bool dynOnly) override;
 protected:
-  void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  void dynObjectInitializeA (double time0, unsigned long flags) override;
+  void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
 public:
   void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
 protected:

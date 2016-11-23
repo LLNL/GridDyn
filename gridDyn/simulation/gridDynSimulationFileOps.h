@@ -154,7 +154,7 @@ void loadPowerFlowCSV (gridDynSimulation *gds, const std::string &fname);
 */
 struct dataInfo
 {
-	double time = 0.0;
+	gridDyn_time time = 0.0;
 	std::uint32_t code = 0;
 	std::uint32_t index = 0;
 	std::uint32_t key = 0;
@@ -183,7 +183,7 @@ then write data (NumElements*8 Bytes);
 @return (0) is successful  (-1) if unable to open file
 */
 
-int writeVector(double time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
+int writeVector(gridDyn_time time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
 
 /** @brief write a array to a file
 encodes a header into the file
@@ -199,7 +199,7 @@ then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @return (0) is successful  (-1) if unable to open file
 */
 
-int writeArray(double time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
+int writeArray(gridDyn_time time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
 
 class contingency;
 

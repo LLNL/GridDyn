@@ -100,7 +100,7 @@ void integralBlock::jacElements (double input, double didt, const stateData *sD,
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 
-double integralBlock::step (double ttime, double inputA)
+double integralBlock::step (gridDyn_time ttime, double inputA)
 {
 
   double dt = ttime - prevTime;

@@ -27,7 +27,7 @@ static classFactory<collector> collFac("collector");
 
 static childClassFactory<gridRecorder,collector> grFac(std::vector<std::string> {"recorder", "rec", "file"}, "recorder");
 
-collector::collector(double time0, double period) : timePeriod(period), reqPeriod(period), triggerTime(time0)
+collector::collector(gridDyn_time time0, double period) : timePeriod(period), reqPeriod(period), triggerTime(time0)
 {
 
 }
@@ -232,7 +232,7 @@ void collector::set(const std::string &param, const std::string &val)
 }
 
 
-void collector::setTime(double time)
+void collector::setTime(gridDyn_time time)
 {
 	if (time+kSmallTime > triggerTime)
 	{
@@ -266,7 +266,7 @@ void collector::recheckColumns()
 	recheck = false;
 }
 
-change_code collector::trigger(double time)
+change_code collector::trigger(gridDyn_time time)
 {
 	std::vector<double> vals;
 

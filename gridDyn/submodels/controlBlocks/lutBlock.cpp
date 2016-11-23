@@ -161,7 +161,7 @@ void lutBlock::set (const std::string &param, double val, gridUnits::units_t uni
 
 }
 
-double lutBlock::step (double ttime, double input)
+double lutBlock::step (gridDyn_time ttime, double input)
 {
 
   m_state[limiter_alg] = K * computeValue (input + bias);

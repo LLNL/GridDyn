@@ -57,7 +57,7 @@ gridCoreObject *gridSineLoad::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void gridSineLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridSineLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   lastCycle = time0 - phase / (frequency * 2.0 * kPI) - sinePeriod;
@@ -66,7 +66,7 @@ void gridSineLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
 
 }
 
-void gridSineLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void gridSineLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
   lastCycle = time0 - phase / (frequency * 2.0 * kPI) - sinePeriod;
@@ -76,7 +76,7 @@ void gridSineLoad::dynObjectInitializeA (double time0, unsigned long flags)
 }
 
 
-void gridSineLoad::loadUpdate (double ttime)
+void gridSineLoad::loadUpdate (gridDyn_time ttime)
 {
 
   double tdiff = ttime - lastCycle;
@@ -105,7 +105,7 @@ void gridSineLoad::loadUpdate (double ttime)
   lastTime = ttime;
 }
 
-void gridSineLoad::loadUpdateForward (double ttime)
+void gridSineLoad::loadUpdateForward (gridDyn_time ttime)
 {
 
   double tdiff = ttime - lastCycle;

@@ -109,7 +109,7 @@ void scheduler::setTarget (double target)
 }
 
 
-void scheduler::setTarget (double time, double target)
+void scheduler::setTarget (gridDyn_time time, double target)
 {
 
   insertTarget (tsched (time, target));
@@ -160,10 +160,10 @@ void scheduler::setTarget (const std::string &filename)
 
 }
 
-void scheduler::setTime (double time)
+void scheduler::setTime (gridDyn_time time)
 {
 
-  double timeshift = time - prevTime;
+  gridDyn_time timeshift = time - prevTime;
   for (auto &pt : pTarget)
     {
       pt.time += timeshift;
@@ -173,7 +173,7 @@ void scheduler::setTime (double time)
   prevTime = time;
 }
 
-void scheduler::updateA (double time)
+void scheduler::updateA (gridDyn_time time)
 {
   double dt = (time - prevTime);
   if (dt == 0)
@@ -209,7 +209,7 @@ void scheduler::updateA (double time)
   lastUpdateTime = time;
 }
 
-double scheduler::predict (double time)
+double scheduler::predict (gridDyn_time time)
 {
   double out = m_output;
   if (time >= nextUpdateTime)
@@ -228,7 +228,7 @@ double scheduler::predict (double time)
 }
 
 
-void scheduler::objectInitializeA (double time0, unsigned long /*flags*/)
+void scheduler::objectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
 	commLink = cManager.build();
 
@@ -265,12 +265,12 @@ double scheduler::getTarget () const
 }
 
 
-double scheduler::getMax(double /*time*/) const
+double scheduler::getMax(gridDyn_time /*time*/) const
 {
 	return Pmax;
 }
 
-double scheduler::getMin(double /*time*/) const
+double scheduler::getMin(gridDyn_time /*time*/) const
 {
 	return Pmin;
 }

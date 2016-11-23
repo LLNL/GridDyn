@@ -187,7 +187,7 @@ protected:
   @param[in] sMode the solver mode*/
   virtual void computeDerivatives (const stateData *sD, const solverMode &sMode);
 public:
-  void timestep (double ttime, const solverMode &sMode) override;
+  void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   /** @brief a faster function to set the voltage and angle of a bus*

@@ -240,7 +240,7 @@ void txThermalModel::add(gridCoreObject * /*obj*/)
 	throw(invalidObjectException(this));
 }
 
-void txThermalModel::dynObjectInitializeA (double time0, unsigned long flags)
+void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 	if (!(m_sourceObject))
 	{
@@ -401,7 +401,7 @@ void txThermalModel::dynObjectInitializeB(IOdata &outputSet)
 }
 
 
-void txThermalModel::updateA(double time)
+void txThermalModel::updateA(gridDyn_time time)
 {
 	double dt = time - prevTime;
 	
@@ -446,7 +446,7 @@ void txThermalModel::updateA(double time)
 	gridRelay::updateA(time);
 }
 
-void txThermalModel::timestep(double ttime, const solverMode &)
+void txThermalModel::timestep(gridDyn_time ttime, const solverMode &)
 {
 	updateA(ttime);
 }

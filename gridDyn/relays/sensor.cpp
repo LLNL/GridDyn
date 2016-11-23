@@ -893,7 +893,7 @@ double sensor::getInput (const stateData *sD, const solverMode &sMode, index_t i
   return ret;
 }
 
-void sensor::dynObjectInitializeA (double time0, unsigned long flags)
+void sensor::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 
 
@@ -1097,7 +1097,7 @@ void sensor::setRootOffset (index_t Roffset, const solverMode &sMode)
     }
 }
 
-void sensor::updateA (double time)
+void sensor::updateA (gridDyn_time time)
 {
   if (time + kSmallTime >= m_nextSampleTime)
     {
@@ -1118,7 +1118,7 @@ void sensor::updateA (double time)
 
 
 
-void sensor::timestep (double ttime, const solverMode &sMode)
+void sensor::timestep (gridDyn_time ttime, const solverMode &sMode)
 {
   for (auto &ps : processSequence)
     {
@@ -1169,7 +1169,7 @@ void sensor::jacobianElements (const stateData *sD, matrixData<double> &ad, cons
     }
 }
 
-void sensor::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void sensor::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -1243,7 +1243,7 @@ void sensor::derivative (const stateData *sD, double deriv[], const solverMode &
     }
 }
 
-void sensor::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void sensor::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -1404,7 +1404,7 @@ void sensor::rootTest (const stateData *sD, double roots[], const solverMode &sM
     }
 }
 
-void sensor::rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void sensor::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   gridRelay::rootTrigger (ttime,rootMask,sMode);
   if (stateSize (sMode) > 0)

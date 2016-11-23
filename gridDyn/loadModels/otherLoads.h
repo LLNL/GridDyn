@@ -45,7 +45,7 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void loadUpdate (double ttime) override;
+  virtual void loadUpdate (gridDyn_time ttime) override;
   void clearRamp ();
 };
 
@@ -87,11 +87,11 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void loadUpdate (double ttime) override;
-  virtual void loadUpdateForward (double ttime) override;
+  virtual void loadUpdate (gridDyn_time ttime) override;
+  virtual void loadUpdateForward (gridDyn_time ttime) override;
   double pulseCalc (double td);
 protected:
 };
@@ -128,11 +128,11 @@ public:
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-	virtual void pFlowObjectInitializeA(double time0, unsigned long flags) override;
-	virtual void dynObjectInitializeA(double time0, unsigned long flags) override;
+	virtual void pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags) override;
+	virtual void dynObjectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
-	virtual void loadUpdate(double ttime) override;
-	virtual void loadUpdateForward(double ttime) override;
+	virtual void loadUpdate(gridDyn_time ttime) override;
+	virtual void loadUpdateForward(gridDyn_time ttime) override;
 private:
 	void getSourceLoads();
 };
@@ -164,11 +164,11 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void loadUpdate (double ttime) override;
-  virtual void loadUpdateForward (double ttime) override;
+  virtual void loadUpdate (gridDyn_time ttime) override;
+  virtual void loadUpdateForward (gridDyn_time ttime) override;
 };
 
 class gridRandom;
@@ -214,12 +214,12 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void updateA (double time) override;
+  virtual void updateA (gridDyn_time time) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
   bool isTriggered ()
   {
@@ -235,7 +235,7 @@ public:
 
   void setFlag (const std::string &flag, bool val = true) override;
 
-  void setTime (double time) override;
+  void setTime (gridDyn_time time) override;
 protected:
   void nextStep (double triggerTime);
   double ntime ();
@@ -267,13 +267,13 @@ public:
   {
   }
   gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
-  virtual void updateA (double time) override;
+  virtual void updateA (gridDyn_time time) override;
 
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
-  void setTime (double time) override;
+  void setTime (gridDyn_time time) override;
   virtual void setFlag (const std::string &param, bool val = true) override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -323,7 +323,7 @@ public:
 
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
 
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

@@ -80,7 +80,7 @@ gridDynGovernor::~gridDynGovernor ()
 
 }
 
-void gridDynGovernor::objectInitializeA (double time0, unsigned long flags)
+void gridDynGovernor::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   prevTime = time0;
   if (Wref < 0)
@@ -145,7 +145,7 @@ void gridDynGovernor::residual (const IOdata &args, const stateData *sD, double 
 
 }
 
-void gridDynGovernor::timestep (double ttime,  const IOdata &args,const solverMode &)
+void gridDynGovernor::timestep (gridDyn_time ttime,  const IOdata &args,const solverMode &)
 {
   double out = cb.step (ttime, args[govOmegaInLocation]);
 

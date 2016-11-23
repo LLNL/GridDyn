@@ -56,7 +56,7 @@ gridCoreObject *transferFunctionBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 //set up the number of states
-void transferFunctionBlock::objectInitializeA (double time0, unsigned long flags)
+void transferFunctionBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (b.back () == 0)
     {
@@ -157,7 +157,7 @@ void transferFunctionBlock::jacElements (double input, double didt, const stateD
   ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
 }
 
-double transferFunctionBlock::step (double ttime, double inputA)
+double transferFunctionBlock::step (gridDyn_time ttime, double inputA)
 {
 
   double dt = ttime - prevTime;

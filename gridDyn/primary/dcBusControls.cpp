@@ -48,7 +48,7 @@ bool dcBusControls::hasAdjustments(index_t sid) const
 
 
 
-double dcBusControls::getAdjustableCapacityUp(double time) const
+double dcBusControls::getAdjustableCapacityUp(gridDyn_time time) const
 {
 	double cap = 0.0;
 
@@ -67,7 +67,7 @@ double dcBusControls::getAdjustableCapacityUp(double time) const
 	return cap;
 }
 
-double dcBusControls::getAdjustableCapacityDown(double time) const
+double dcBusControls::getAdjustableCapacityDown(gridDyn_time time) const
 {
 	double cap = 0.0;
 

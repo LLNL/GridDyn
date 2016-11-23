@@ -48,7 +48,7 @@ gridCoreObject *pidBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void pidBlock::objectInitializeA (double time0, unsigned long flags)
+void pidBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   basicBlock::objectInitializeA (time0, flags);
   offsets.local->local.diffSize += 2;
@@ -153,7 +153,7 @@ void pidBlock::jacElements (double input, double didt, const stateData *sD, matr
     }
 }
 
-double pidBlock::step (double ttime, double inputA)
+double pidBlock::step (gridDyn_time ttime, double inputA)
 {
   double dt = ttime - prevTime;
   double input = inputA + bias;

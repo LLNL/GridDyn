@@ -23,7 +23,7 @@ gridSecondary::gridSecondary (const std::string &objName) : gridObject (objName)
 {
 }
 
-void gridSecondary::pFlowInitializeA (double time0, unsigned long flags)
+void gridSecondary::pFlowInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (enabled)
     {
@@ -43,7 +43,7 @@ void gridSecondary::pFlowInitializeB ()
       opFlags.set (pFlow_initialized);
     }
 }
-void gridSecondary::dynInitializeA (double time0, unsigned long flags)
+void gridSecondary::dynInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (enabled)
     {
@@ -75,7 +75,7 @@ void gridSecondary::dynInitializeB (const IOdata & args, const IOdata & outputSe
 }
 
 
-void gridSecondary::pFlowObjectInitializeA (double time0, unsigned long flags)
+void gridSecondary::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (!subObjectList.empty ())
     {
@@ -119,7 +119,7 @@ void gridSecondary::pFlowObjectInitializeB ()
     }
 }
 
-void gridSecondary::dynObjectInitializeA (double time0, unsigned long flags)
+void gridSecondary::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (!subObjectList.empty ())
     {
@@ -202,7 +202,7 @@ double gridSecondary::getReactivePower () const
 }
 
 
-void gridSecondary::timestep (double ttime, const IOdata & args, const solverMode & sMode)
+void gridSecondary::timestep (gridDyn_time ttime, const IOdata & args, const solverMode & sMode)
 {
   prevTime = ttime;
   if (!subObjectList.empty ())
@@ -221,12 +221,12 @@ void gridSecondary::timestep (double ttime, const IOdata & args, const solverMod
     }
 }
 
-double gridSecondary::getAdjustableCapacityUp (double /*time*/) const
+double gridSecondary::getAdjustableCapacityUp (gridDyn_time /*time*/) const
 {
   return 0;
 }
 
-double gridSecondary::getAdjustableCapacityDown (double /*time*/) const
+double gridSecondary::getAdjustableCapacityDown (gridDyn_time /*time*/) const
 {
   return 0;
 }
@@ -247,7 +247,7 @@ void gridSecondary::rootTest  (const IOdata & /*args*/, const stateData *, doubl
 {
 }
 
-void gridSecondary::rootTrigger (double /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
+void gridSecondary::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
 {
 }
 

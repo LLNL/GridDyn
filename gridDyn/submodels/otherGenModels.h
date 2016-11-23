@@ -34,7 +34,7 @@ public:
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
   //!< @brief virtual destructor
   virtual ~gridDynGenModelInverter ();
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
@@ -59,7 +59,7 @@ public:
   virtual double getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const override;
   virtual double getAngle (const stateData *sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const override;
   virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
 private:
   void reCalcImpedences ();
@@ -96,7 +96,7 @@ protected:
 public:
   gridDynGenModel3 (const std::string &objName = "genModel3_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
@@ -122,7 +122,7 @@ protected:
 public:
   gridDynGenModel4 (const std::string &objName = "genModel4_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
@@ -130,7 +130,7 @@ public:
 
   virtual stringVec localStateNames () const override;
   // dynamics
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
@@ -150,7 +150,7 @@ protected:
 public:
   gridDynGenModel5 (const std::string &objName = "genModel5_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
@@ -175,7 +175,7 @@ protected:
 public:
   gridDynGenModel5type2  (const std::string &objName = "genModel5type2_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;
@@ -195,7 +195,7 @@ protected:
 public:
   gridDynGenModel5type3  (const std::string &objName = "genModel5type3_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;
@@ -213,7 +213,7 @@ protected:
 public:
   gridDynGenModel6  (const std::string &objName = "genModel6_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;
@@ -233,7 +233,7 @@ protected:
 public:
   gridDynGenModel6type2 (const std::string &objName = "genModel6type2_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;
@@ -253,7 +253,7 @@ protected:
 public:
   gridDynGenModelGENROU (const std::string &objName = "genrou_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;
@@ -273,7 +273,7 @@ protected:
 public:
   gridDynGenModel8 (const std::string &objName = "genModel8_#");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (double time0, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual stringVec localStateNames () const override;

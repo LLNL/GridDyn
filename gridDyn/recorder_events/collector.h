@@ -50,7 +50,7 @@ protected:
 	int warningCount = 0;  //!< counter for the number of warnings
 	std::vector<std::string> warnList;  //!< listing for the number of warnings
 	std::string  name;  //!< name of the collector
-	double timePeriod; //!< the actual period of the collector
+	gridDyn_time timePeriod; //!< the actual period of the collector
 	double reqPeriod; //!< the requested period of the collector
 	double startTime = -kBigNum; //!< the time to start collecting
 	double stopTime = kBigNum;  //!< the time to stop collecting
@@ -78,14 +78,14 @@ protected:
 	bool delayProcess = true;          //!< wait to process recorders until other events have executed
 
 public:
-	collector(double time0 = 0, double period = 1.0);
+	collector(gridDyn_time time0 = 0, double period = 1.0);
 	explicit collector(const std::string &name);
 	virtual ~collector();
 
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const;
 
 	virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
-	virtual change_code trigger(double time) override;
+	virtual change_code trigger(gridDyn_time time) override;
 	void recheckColumns();
 	double nextTriggerTime() const override
 	{
@@ -111,7 +111,7 @@ public:
 	virtual void set(const std::string &param, const std::string &val);
 
 	
-	virtual void setTime(double time);
+	virtual void setTime(gridDyn_time time);
 
 
 	virtual gridCoreObject * getObject() const override;
@@ -184,13 +184,13 @@ protected:
   int precision = -1;                //!< precision for writing text files.
   count_t autosave = 0;			//!< flag indicating the recorder should autosave after the given number of points
 public:
-  gridRecorder (double time0 = 0,double period = 1.0);
+  gridRecorder (gridDyn_time time0 = 0,double period = 1.0);
   explicit gridRecorder(const std::string &name);
   ~gridRecorder ();
 
   virtual std::shared_ptr<collector> clone (std::shared_ptr<collector> gr=nullptr) const override;
 
-  virtual change_code trigger (double time) override;
+  virtual change_code trigger (gridDyn_time time) override;
 
   
   void saveFile (const std::string &fileName = "");

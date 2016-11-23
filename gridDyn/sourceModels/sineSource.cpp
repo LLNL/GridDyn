@@ -48,7 +48,7 @@ gridCoreObject *sineSource::clone (gridCoreObject *obj) const
 }
 
 
-void sineSource::objectInitializeA (double time0, unsigned long flags)
+void sineSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   lastCycle = time0 - phase / (frequency * 2.0 * kPI);
   pulseSource::objectInitializeA (time0,flags);
@@ -56,7 +56,7 @@ void sineSource::objectInitializeA (double time0, unsigned long flags)
 }
 
 
-void sineSource::sourceUpdate (double ttime)
+void sineSource::sourceUpdate (gridDyn_time ttime)
 {
 
   double tdiff = ttime - lastCycle;
@@ -87,7 +87,7 @@ void sineSource::sourceUpdate (double ttime)
   lasttime = ttime;
 }
 
-void sineSource::sourceUpdateForward (const double ttime)
+void sineSource::sourceUpdateForward (const gridDyn_time ttime)
 {
 
   double tdiff = ttime - lastCycle;

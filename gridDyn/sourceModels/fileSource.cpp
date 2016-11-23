@@ -46,7 +46,7 @@ int fileSource::setFile (const std::string filename, index_t column)
   return count;
 }
 
-void fileSource::objectInitializeA (double time0, unsigned long flags)
+void fileSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   index_t ii;
   ii = 0;
@@ -87,7 +87,7 @@ void fileSource::objectInitializeA (double time0, unsigned long flags)
 
 }
 
-void fileSource::updateA (double time)
+void fileSource::updateA (gridDyn_time time)
 {
   while (time >= schedLoad.time[currIndex])
     {
@@ -116,7 +116,7 @@ void fileSource::updateA (double time)
     }
 }
 
-void fileSource::timestep (double ttime, const IOdata &args, const solverMode &sMode)
+void fileSource::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
@@ -127,7 +127,7 @@ void fileSource::timestep (double ttime, const IOdata &args, const solverMode &s
 }
 
 
-void fileSource::setTime (double time)
+void fileSource::setTime (gridDyn_time time)
 {
   if (opFlags[use_absolute_time_flag])
     {

@@ -93,7 +93,7 @@ void schedulerReg::setReg (double regLevel)
 }
 
 
-void schedulerReg::updateA (double time)
+void schedulerReg::updateA (gridDyn_time time)
 {
   double dt = (time - prevTime);
 
@@ -121,7 +121,7 @@ void schedulerReg::updateA (double time)
 
 }
 
-double schedulerReg::predict (double time)
+double schedulerReg::predict (gridDyn_time time)
 {
   double dt = (time - prevTime);
   if (dt == 0)
@@ -144,7 +144,7 @@ double schedulerReg::predict (double time)
   return retout;
 }
 
-void schedulerReg::objectInitializeA (double time0, unsigned long flags)
+void schedulerReg::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   schedulerRamp::objectInitializeA (time0, flags);
   pr = (m_Base >= kHalfBigNum) ? regMax : m_Base;
@@ -201,12 +201,12 @@ double schedulerReg::getRamp (double *tRem) const
 
 }
 
-double schedulerReg::getMax (const double /*time*/) const
+double schedulerReg::getMax (const gridDyn_time /*time*/) const
 {
   return Pmax;
 }
 
-double schedulerReg::getMin (double /*time*/) const
+double schedulerReg::getMin (gridDyn_time /*time*/) const
 {
   return Pmin;
 }

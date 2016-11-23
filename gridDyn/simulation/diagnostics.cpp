@@ -95,7 +95,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
   double *state = sd->state_data ();
   double *dstate = sd->deriv_data ();
 
-  double timeCurr = gds->getCurrentTime ();
+  gridDyn_time timeCurr = gds->getCurrentTime ();
   if ((gds->currentProcessState () <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)&&(timeCurr<=gds->getStartTime()))
     {
       gds->guess (timeCurr, state, dstate, sd->getSolverMode());

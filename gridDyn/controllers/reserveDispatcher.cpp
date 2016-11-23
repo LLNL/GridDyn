@@ -43,12 +43,12 @@ public:
         virtual ~reserveDispatcher();
 
 
-        virtual double initialize(double time0,double dispatchSet);
+        virtual double initialize(gridDyn_time time0,double dispatchSet);
 
 
-        void setTime(double time);
-        virtual double updateP(double time);
-        virtual double testP(double time);
+        void setTime(gridDyn_time time);
+        virtual double updateP(gridDyn_time time);
+        virtual double testP(gridDyn_time time);
         double currentValue(){return dispatch;};
 
         virtual void addGen(scheduler *sched);
@@ -121,7 +121,7 @@ void reserveDispatcher::moveSchedulers (reserveDispatcher *rD)
 }
 
 
-double reserveDispatcher::initializeA (double time0,double dispatchSet)
+double reserveDispatcher::initializeA (gridDyn_time time0,double dispatchSet)
 {
 
   currDispatch = dispatchSet;
@@ -135,12 +135,12 @@ double reserveDispatcher::initializeA (double time0,double dispatchSet)
 }
 
 
-void reserveDispatcher::setTime (double time)
+void reserveDispatcher::setTime (gridDyn_time time)
 {
   prevTime = time;
 }
 
-double reserveDispatcher::updateP (double time,double pShort)
+double reserveDispatcher::updateP (gridDyn_time time,double pShort)
 {
   if (currDispatch > 0)
     {
@@ -173,7 +173,7 @@ double reserveDispatcher::updateP (double time,double pShort)
   return currDispatch;
 }
 
-double reserveDispatcher::testP (double time,double pShort)
+double reserveDispatcher::testP (gridDyn_time time,double pShort)
 {
   double output = 0;
   if (currDispatch > 0)

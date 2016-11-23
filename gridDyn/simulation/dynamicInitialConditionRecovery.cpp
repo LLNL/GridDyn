@@ -177,7 +177,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
 int dynamicInitialConditionRecovery::dynamicFix3 ()
 {
 
-  double timeCurr = sim->getCurrentTime ();
+  gridDyn_time timeCurr = sim->getCurrentTime ();
   sim->timestep (timeCurr + 0.001, solver->getSolverMode ());
   sim->dynamicCheckAndReset (solver->getSolverMode ());
   /*if (retval == 4)

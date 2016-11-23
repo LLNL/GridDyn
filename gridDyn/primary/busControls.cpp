@@ -60,7 +60,7 @@ bool busControls::hasPowerAdjustments(index_t sid) const
 	return false;
 }
 
-double busControls::getAdjustableCapacityUp(double time) const
+double busControls::getAdjustableCapacityUp(gridDyn_time time) const
 {
 	double cap = 0.0;
 
@@ -79,7 +79,7 @@ double busControls::getAdjustableCapacityUp(double time) const
 	return cap;
 }
 
-double busControls::getAdjustableCapacityDown(double time) const
+double busControls::getAdjustableCapacityDown(gridDyn_time time) const
 {
 	double cap = 0.0;
 

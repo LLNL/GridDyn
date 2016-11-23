@@ -122,7 +122,7 @@ gridCoreObject *acdcConverter::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void  acdcConverter::timestep (double ttime, const solverMode &)
+void  acdcConverter::timestep (gridDyn_time ttime, const solverMode &)
 {
 	//TODO: this function is incorrect
   if (!enabled)
@@ -336,7 +336,7 @@ void acdcConverter::pFlowObjectInitializeA (double /*time0*/, unsigned long /*fl
 
 }
 
-void acdcConverter::dynObjectInitializeA (double time0, unsigned long flags)
+void acdcConverter::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   updateLocalCache ();
   if (opFlags[fixed_target_power])
@@ -681,7 +681,7 @@ void acdcConverter::residual (const stateData *sD, double resid[], const solverM
     }
 }
 
-void acdcConverter::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void acdcConverter::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -713,7 +713,7 @@ void acdcConverter::setState (double ttime, const double state[], const double d
 
 }
 
-void acdcConverter::guess (double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void acdcConverter::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {

@@ -61,7 +61,7 @@ gridCoreObject *motorLoad::clone (gridCoreObject *obj) const
   return ld;
 }
 
-void motorLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void motorLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   m_state.resize (1);
   if (opFlags[init_transient])
@@ -90,7 +90,7 @@ void motorLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
   return gridLoad::pFlowObjectInitializeA (time0,flags);
 }
 
-void motorLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void motorLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   opFlags.set (has_roots);
   return gridLoad::dynObjectInitializeA (time0, flags);
@@ -279,7 +279,7 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
 
 }
 
-void motorLoad::setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void motorLoad::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -300,7 +300,7 @@ void motorLoad::setState (double ttime, const double state[], const double dstat
   prevTime = ttime;
 }
 
-void motorLoad::guess (double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void motorLoad::guess (gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -363,7 +363,7 @@ void motorLoad::getStateName (stringVec &stNames, const solverMode &sMode, const
     }
 
 }
-void motorLoad::timestep (double ttime, const IOdata &args, const solverMode &)
+void motorLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
   double dt = ttime - prevTime;
   motorLoad::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
@@ -495,7 +495,7 @@ void motorLoad::rootTest (const IOdata &args, const stateData *sD, double roots[
     }
 }
 
-void motorLoad::rootTrigger (double /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void motorLoad::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!rootMask[offsets.getRootOffset (sMode)])
     {

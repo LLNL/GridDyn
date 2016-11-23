@@ -55,7 +55,7 @@ gridCoreObject *controlBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 //set up the number of states
-void controlBlock::objectInitializeA (double time0, unsigned long flags)
+void controlBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   if (opFlags[differential_input])
     {
@@ -167,7 +167,7 @@ void controlBlock::jacElements (double input, double didt, const stateData *sD, 
 
 }
 
-double controlBlock::step (double ttime, double inputA)
+double controlBlock::step (gridDyn_time ttime, double inputA)
 {
 
   double dt = ttime - prevTime;

@@ -38,15 +38,15 @@ double dispatcher::initialize (double /*time0*/, double /*dispatch*/)
   return 0;
 }
 
-void dispatcher::setTime (double /*time*/)
+void dispatcher::setTime (gridDyn_time /*time*/)
 {
 }
 
-double dispatcher::updateP (double /*time*/, double /*required*/, double /*targetTime*/)
+double dispatcher::updateP (gridDyn_time /*time*/, double /*required*/, double /*targetTime*/)
 {
   return 0;
 }
-double dispatcher::testP (double /*time*/, double /*required*/, double /*targetTime*/)
+double dispatcher::testP (gridDyn_time /*time*/, double /*required*/, double /*targetTime*/)
 {
   return 0;
 }

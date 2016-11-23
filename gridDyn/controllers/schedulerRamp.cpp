@@ -63,7 +63,7 @@ void schedulerRamp::setTarget (double target)
 }
 
 
-void schedulerRamp::setTarget (double time, double target)
+void schedulerRamp::setTarget (gridDyn_time time, double target)
 {
 
   insertTarget (tsched(time, target));
@@ -75,7 +75,7 @@ void schedulerRamp::setTarget (double time, double target)
 
 
 
-void schedulerRamp::updateA (double time)
+void schedulerRamp::updateA (gridDyn_time time)
 {
   double dt = (time - prevTime);
 
@@ -106,7 +106,7 @@ void schedulerRamp::updateA (double time)
 
 }
 
-double schedulerRamp::predict (double time)
+double schedulerRamp::predict (gridDyn_time time)
 {
   double dt = (time - prevTime);
   if (dt == 0)
@@ -119,7 +119,7 @@ double schedulerRamp::predict (double time)
 }
 
 
-void schedulerRamp::objectInitializeA (double time0, unsigned long flags)
+void schedulerRamp::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   scheduler::objectInitializeA (time0, flags);
   prevTime = time0 - 0.001;
@@ -201,12 +201,12 @@ double schedulerRamp::getRamp (double *tRem) const
   return ramp;
 }
 
-double schedulerRamp::getMax (const double /*time*/) const
+double schedulerRamp::getMax (const gridDyn_time /*time*/) const
 {
   return Pmax;
 }
 
-double schedulerRamp::getMin (double /*time*/) const
+double schedulerRamp::getMin (gridDyn_time /*time*/) const
 {
   return Pmin;
 }
@@ -378,7 +378,7 @@ void schedulerRamp::updatePTarget ()
   double rempower = 0.0;
   double remtime = 0.0;
   double target;
-  double time;
+  gridDyn_time time;
   double td2;
   double rampLimitUp;
 

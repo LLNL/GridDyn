@@ -105,7 +105,7 @@ public:
   **/
   virtual int updateCondition (std::shared_ptr<gridCondition> gc,  index_t conditionNumber);
 
-  void setTime (double time) override;
+  void setTime (gridDyn_time time) override;
   /**
   *@brief reset the relay
   **/
@@ -140,12 +140,12 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit)  override;
 
-  virtual void updateA (double time)  override;
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (double time0, unsigned long flags)  override;
+  virtual void updateA (gridDyn_time time)  override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags)  override;
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
   virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode)  override;
-  virtual void rootTrigger (double ttime, const std::vector<int> &rootMask, const solverMode &sMode)  override;
+  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)  override;
   virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level)  override;
   /** message processing function for use with communicators
   @param[in] sourceID  the source of the comm message
@@ -182,12 +182,12 @@ protected:
   @param conditionNum the index of the condition that triggered the action
   @param timeTriggered the time at which the condition was triggered
   */
-  virtual void conditionTriggered (index_t conditionNum, double timeTriggered);
+  virtual void conditionTriggered (index_t conditionNum, gridDyn_time timeTriggered);
   /** do something when an condition is cleared
   @param conditionNum the index of the condition that triggered the action
   @param timeCleared the time at which the condition was cleared
   */
-  virtual void conditionCleared (index_t conditionNum, double timeCleared);
+  virtual void conditionCleared (index_t conditionNum, gridDyn_time timeCleared);
 private:
   /** @brief subclass  data container for helping with condition time checks*/
   class condCheckTime
@@ -204,7 +204,7 @@ public:
     @param[in] ttime the time to conduct a test
     @param[in] mcond  the value of the multiCondition flag
     */
-    condCheckTime (index_t cNum=0, index_t aNum=0, double ttime=kBigNum, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
+    condCheckTime (index_t cNum=0, index_t aNum=0, gridDyn_time ttime=kBigNum, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
     {
     }
   };

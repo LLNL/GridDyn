@@ -56,7 +56,7 @@ public:
 
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 protected:
-  virtual  void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual  void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual  void pFlowObjectInitializeB () override;
 public:
   virtual  change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;      //only applicable in pFlow
@@ -64,23 +64,23 @@ public:
   virtual  void pFlowCheck (std::vector<violation> &Violation_vector) override;
   //initializeB dynamics
 protected:
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
 public:
   // parameter set functions
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   void computeDerivatives(const stateData *sD, const solverMode &sMode);
 
   virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::local_iteration,double tol = 0.01) override;
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::local_iteration,double tol = 0.01) override;
 
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   virtual double getVoltage(const double state[], const solverMode &sMode) const override;
 

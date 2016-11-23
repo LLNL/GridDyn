@@ -58,11 +58,11 @@ public:
 	virtual void add(gridCoreObject *obj) final override;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-	virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
+	virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 	virtual void dynObjectInitializeB (IOdata &outputSet) override;
 
-	virtual void timestep(double ttime, const solverMode &sMode) override;
-	virtual void updateA(double time) override;
+	virtual void timestep(gridDyn_time ttime, const solverMode &sMode) override;
+	virtual void updateA(gridDyn_time time) override;
 };
 
 

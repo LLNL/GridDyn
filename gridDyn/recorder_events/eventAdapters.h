@@ -277,7 +277,7 @@ public:
   virtual change_code execute (double cTime) override
   {
     targetObject->updateB ();
-    double ttime = targetObject->getNextUpdateTime ();
+    gridDyn_time ttime = targetObject->getNextUpdateTime ();
     if ((ttime <= cTime) && (ttime <= m_nextTime))
       {
         m_nextTime = kBigNum;

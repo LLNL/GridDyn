@@ -61,17 +61,17 @@ public:
   virtual gridArea * getArea (index_t x) const override;
   // initializeB
 
-  virtual void pFlowObjectInitializeA (double time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
   //initializeB dynamics
-  virtual void dynObjectInitializeA (double time0, unsigned long flags) override;
-  virtual void setTime (double time) override;
+  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void setTime (gridDyn_time time) override;
 
-  virtual void timestep (double ttime, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   /** @brief relic of something not used to my knowledge*/
-  virtual void updateTheta (double /*time*/)
+  virtual void updateTheta (gridDyn_time /*time*/)
   {
   }
 
@@ -91,7 +91,7 @@ public:
 
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
 
-  virtual void setState (double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   //for identifying which variables are algebraic vs differential
   /** @brief do a local converge on the components in the area
    a wrapper around the area->converge function
@@ -102,7 +102,7 @@ public:
   @param[in] tol  the tolerance to do the convergence
   @param[in] mode the mode of convergence
   */
-  virtual void converge (double ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::block_iteration, double tol = 0.01) override;
+  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::block_iteration, double tol = 0.01) override;
   virtual void updateLocalCache () override;
   virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
 

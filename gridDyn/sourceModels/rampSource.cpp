@@ -65,7 +65,7 @@ void rampSource::set (const std::string &param, double val, gridUnits::units_t u
 }
 
 
-void rampSource::sourceUpdate (const double ttime)
+void rampSource::sourceUpdate (const gridDyn_time ttime)
 {
   double tdiff = ttime - prevTime;
   if (tdiff == 0.0)

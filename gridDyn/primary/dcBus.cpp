@@ -68,7 +68,7 @@ void dcBus::add (gridLink *lnk)
 
 
 // initializeB states
-void dcBus::pFlowObjectInitializeA (double time0, unsigned long flags)
+void dcBus::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   gridBus::pFlowObjectInitializeA (time0, flags);
 }
@@ -264,7 +264,7 @@ void dcBus::pFlowCheck (std::vector<violation> &Violation_vector)
 }
 
 // initializeB states for dynamic solution
-void dcBus::dynObjectInitializeA (double time0, unsigned long flags)
+void dcBus::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   return gridBus::dynObjectInitializeA (time0, flags);
 
@@ -281,7 +281,7 @@ void dcBus::dynObjectInitializeB (IOdata &outputSet)
 
 }
 
-void dcBus::timestep (double ttime, const solverMode &sMode)
+void dcBus::timestep (gridDyn_time ttime, const solverMode &sMode)
 {
   gridBus::timestep (ttime, sMode);
 
@@ -414,7 +414,7 @@ void dcBus::getStateName(stringVec &stNames, const solverMode &sMode, const std:
 }
 
 // pass the solution
-void dcBus::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void dcBus::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 
     auto Voffset = offsets.getVOffset(sMode);
@@ -444,7 +444,7 @@ void dcBus::setState(double ttime, const double state[], const double dstate_dt[
 
 }
 
-void dcBus::guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void dcBus::guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
 
     auto Voffset = offsets.getVOffset(sMode);
@@ -615,7 +615,7 @@ index_t dcBus::getOutputLoc(const solverMode &sMode, index_t num) const
 
 //TODO:: PT write this function
 void dcBus::converge (double, double [], double [], const solverMode &, converge_mode,double)
-//void dcBus::converge (const double ttime, double state[], double dstate_dt[], const solverMode &sMode, double tol, int mode)
+//void dcBus::converge (const gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, double tol, int mode)
 {
 
 }
