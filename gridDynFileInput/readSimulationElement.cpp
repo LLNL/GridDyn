@@ -28,6 +28,7 @@ static const IgnoreListType simIgnoreFields {
 
 bool isMasterObject (const gridCoreObject *searchObject, const gridSimulation *gs);
 
+static const std::string libstring("library");
 // read XML file
 //gridCoreObject * readSimXMLFile(const std::string &filename, gridCoreObject *gco, const std::string  prefix, readerInfo *ri) const
 gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject, gridSimulation *gs)
@@ -48,8 +49,15 @@ gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element,
   gridSimulation *simulation = ElementReaderSetup (element, gs, "simulation", ri, searchObject);
 
   //
+  
+  //load the simulation name and id
+  std::string ename = getElementField(element, "name", defMatchType);
+  if (!ename.empty())
+  {
+	  simulation->setName(ename);
+  }
+  setIndex(element, simulation, ri);
   // load any other attributes
-
   objSetAttributes (simulation, element, simulation->getName (), ri, simIgnoreFields);
 
   if (masterObject)
@@ -63,13 +71,13 @@ gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element,
         }
     }
   //load the libraries
-  if (element->hasElement ("library"))
+  if (element->hasElement (libstring))
     {
-      element->moveToFirstChild ("library");
+      element->moveToFirstChild (libstring);
       while (element->isValid ())
         {
           readLibraryElement (element, ri);
-          element->moveToNextSibling ("library");
+          element->moveToNextSibling (libstring);
         }
       element->moveToParent ();
     }
