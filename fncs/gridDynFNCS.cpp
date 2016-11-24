@@ -113,9 +113,9 @@ int main (int argc, char *argv[])
   info.minTimeStep = 1;
   info.minTimeStepUnits = "us";
 
-  fncsRegister::instance()->makeZPLfile("gridDyn.zpl", info);
+  auto configString=fncsRegister::instance()->makeZPLConfig(info);
 
-  fncs::initialize("gridDyn.zpl");
+  fncs::initialize(configString);
 
   /* unless FNCS detects another simulator terminates early, the
   * this simulator will run from time step 0 to time step 9 */
