@@ -72,7 +72,7 @@ bool operator!= (const tsched &td1, double timeC)
 
 scheduler::scheduler(const std::string &objName, double initialValue) : gridSource(objName, initialValue), PCurr(initialValue)
 {
-	prevTime = -kBigNum;     //override default setting
+	prevTime = negTime;     //override default setting
 
 }
 
@@ -175,8 +175,8 @@ void scheduler::setTime (gridDyn_time time)
 
 void scheduler::updateA (gridDyn_time time)
 {
-  double dt = (time - prevTime);
-  if (dt == 0)
+  auto dt = (time - prevTime);
+  if (dt == timeZero)
     {
       return;
     }
@@ -197,7 +197,7 @@ void scheduler::updateA (gridDyn_time time)
           pTarget.pop_front ();
           if (pTarget.empty ())
             {
-              nextUpdateTime = kBigNum;
+              nextUpdateTime = maxTime;
 
               break;
             }
@@ -360,7 +360,7 @@ void scheduler::clearSchedule ()
   if (!pTarget.empty ())
     {
       pTarget.resize (0);
-      nextUpdateTime = kBigNum;
+      nextUpdateTime = maxTime;
       alert (this, UPDATE_TIME_CHANGE);
     }
 }

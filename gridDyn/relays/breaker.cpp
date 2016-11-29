@@ -501,7 +501,7 @@ void breaker::resetBreaker (gridDyn_time time)
   opFlags.reset (breaker_tripped_flag);
   //timestep (time, solverMode::pFlow);
   triggerAction (1); //reclose the breaker
-  nextUpdateTime = kBigNum;
+  nextUpdateTime = maxTime;
   if (!opFlags[nonlink_source_flag])
     {//do a recompute power
       static_cast<gridLink *> (m_sourceObject)->updateLocalCache ();

@@ -210,7 +210,7 @@ void isocController::setFreq(double freq)
 void isocController::deactivate()
 {
 	m_output = 0;
-	nextUpdateTime = kBigNum;
+	nextUpdateTime = maxTime;
 }
 
 void isocController::activate(gridDyn_time time)

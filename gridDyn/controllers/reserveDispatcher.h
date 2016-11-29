@@ -30,10 +30,10 @@ public:
 protected:
   double thresholdStart = kBigNum;
   double thresholdStop = kBigNum;
-  double currDispatch = 0;
-  double reserveAvailable = 0;
-  double dispatchTime = -kBigNum;
-  double dispatchInterval = 60.0 * 5.0;
+  double currDispatch = 0.0;
+  double reserveAvailable = 0.0;
+  gridDyn_time dispatchTime = negTime;
+  gridDyn_time dispatchInterval = 60.0 * 5.0;
 
   count_t schedCount;
   std::vector<schedulerRamp *> schedList;

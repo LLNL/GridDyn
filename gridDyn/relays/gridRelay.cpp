@@ -289,7 +289,7 @@ void gridRelay::removeAction (index_t actionNumber)
           if (mcd.actionNum == actionNumber)
             {
               //set all the existing delay time for this action to a very large number
-              mcd.delayTime = kBigNum;
+              mcd.delayTime = maxTime;
             }
         }
     }

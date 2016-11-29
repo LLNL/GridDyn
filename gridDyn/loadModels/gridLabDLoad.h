@@ -74,7 +74,7 @@ private:
   double Vprev;  //!< storage for recent voltage call
   double Thprev;  //!< storage for recent phase call (phase is not really used yet)
   double triggerBound = 1.5;    //!< the bounds on the voltage in terms of the spread determining when to generate a new calculation
-  double m_lastCallTime = -kBigNum;
+  gridDyn_time m_lastCallTime = negTime;
   void gridLabDInitialize (void);
   void runGridLabA (gridDyn_time ttime, const IOdata &args);
   std::vector<double> runGridLabB (bool unbalancedAlert);
