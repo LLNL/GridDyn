@@ -117,7 +117,7 @@ void gridFileLoad::updateA (gridDyn_time time)
   double diffrate = 0;
   double val;
   prevTime = schedLoad.time[currIndex];
-  double dt = (currIndex < count - 1) ? (schedLoad.time[currIndex + 1] - prevTime) : kBigNum;
+  auto dt = (currIndex < count - 1) ? (schedLoad.time[currIndex + 1] - prevTime) : maxTime;
   for (count_t pp = 0; pp < schedLoad.cols; ++pp)
     {
       if (columnkey[pp] < 0)
@@ -218,7 +218,7 @@ void gridFileLoad::setTime (gridDyn_time time)
     }
   else
     {
-      double dt = time - prevTime;
+      auto dt = time - prevTime;
       for (index_t kk = 0; kk < count; ++kk)
         {
           schedLoad.time[kk] += dt;

@@ -356,6 +356,7 @@ void gridCoreObject::updateA (gridDyn_time time)
 
 double gridCoreObject::updateB ()
 {
+	assert(nextUpdateTime > negTime / 2);
 	if (nextUpdateTime < maxTime)
 	{
 		while (lastUpdateTime >= nextUpdateTime)
@@ -406,10 +407,14 @@ gridCoreObject* gridCoreObject::find (const std::string &object) const
     {
       return (parent->find (object));
     }
-  else
+  else if (object=="root")
     {
-      return nullptr;
+	  return const_cast<gridCoreObject *>(this);
     }
+  else
+  {
+	  return nullptr;
+  }
 
 }
 

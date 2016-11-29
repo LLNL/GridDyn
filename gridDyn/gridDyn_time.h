@@ -33,24 +33,28 @@ private:
 	static const long long int scalar = (1 << N);
 	static const long long int fracMask = ((1 << N) - 1);
 public:
-	typedef typename long long int baseType;
-	static long long int convert(double t)
+	typedef long long int baseType;
+	static baseType convert(double t)
 	{
+		if (t < -1e12)
+		{
+			return min();
+		}
 		double intpart;
 		double frac = std::modf(t, &intpart);
-		long long int nseconds = (static_cast<long long int>(intpart) << N) + static_cast<long long int>(ldexp(frac, N));
+		baseType nseconds = (static_cast<long long int>(intpart) << N) + static_cast<long long int>(ldexp(frac, N));
 		return nseconds;
 	}
 
-	static double toDouble(long long int val)
+	static double toDouble(baseType val)
 	{
 		return (static_cast<double>(val >> N) + std::ldexp(static_cast<double>(fracMask & val), -N));
 	}
-	static long long int max()
+	static baseType max()
 	{
 		return MAXLL;
 	}
-	static long long int min()
+	static baseType min()
 	{
 		return -(MAXLL - 1);
 	}
@@ -69,22 +73,26 @@ template <int N>
 class count_time
 {
 public:
-	typedef typename long long int baseType;
+	typedef long long int baseType;
 
-	static long long int convert(double t)
+	static baseType convert(double t)
 	{
-		return (static_cast<long long int>(t*fac10f[N]));
+		if (t < -1e12)
+		{
+			return min();
+		}
+		return (static_cast<baseType>(t*fac10f[N]));
 	}
 
-	static double toDouble(long long int val)
+	static double toDouble(baseType val)
 	{
 		return (static_cast<double>(val / fac10[N]) + static_cast<double>(val%fac10[N]) / fac10f[N]);
 	}
-	static long long int max()
+	static baseType max()
 	{
 		return MAXLL;
 	}
-	static long long int min()
+	static baseType min()
 	{
 		return -(MAXLL - 1);
 	}
@@ -94,23 +102,23 @@ public:
 class double_time
 {
 public:
-	typedef typename double baseType;
-	static double convert(double t)
+	typedef double baseType;
+	static baseType convert(double t)
 	{
 		return t;
 	}
 
-	static double toDouble(double val)
+	static double toDouble(baseType val)
 	{
 		return val;
 	}
-	static double max()
+	static baseType max()
 	{
-		return (1e48);
+		return (1e49);
 	}
-	static double min()
+	static baseType min()
 	{
-		return -(1e48);
+		return (-1.456e47);
 	}
 };
 
@@ -152,11 +160,15 @@ public:
 
 	static timeRepresentation max()
 	{
-		return timeRepresentation(Tconv::max());
+		timeRepresentation tret;
+		tret.timecode = Tconv::max();
+		return tret;
 	}
 	static timeRepresentation min()
 	{
-		return timeRepresentation(Tconv::min());
+		timeRepresentation tret;
+		tret.timecode = Tconv::min();
+		return tret;
 	}
 
 	timeRepresentation& operator= (const timeRepresentation &x)

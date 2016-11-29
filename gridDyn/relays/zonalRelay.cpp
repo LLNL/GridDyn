@@ -18,7 +18,7 @@
 #include "comms/relayMessage.h"
 #include "gridEvent.h"
 #include "gridCoreTemplates.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include "core/gridDynExceptions.h"
 
 
@@ -68,26 +68,42 @@ void zonalRelay::set (const std::string &param,  const std::string &val)
 {
   if (param == "levels")
     {
-      auto dvals = splitline (val);
+	  auto dvals = str2vector<double>(val, kNullVal);
+	  //check to make sure all the levels are valid
+	  for (auto level : dvals)
+	  {
+		  if (level <-0.00001)
+		  {
+			  throw(invalidParameterValue());
+		  }
+	  }
       set ("zones", dvals.size ());
       auto zL = m_zoneLevels.begin ();
-      for (auto ld : dvals)
+      for (auto level : dvals)
         {
-          *zL = std::stod (ld);
+          *zL = level;
           ++zL;
         }
     }
   else if (param == "delay")
     {
-      auto dvals = splitline (val);
+      auto dvals = str2vector<gridDyn_time> (val,negTime);
       if (dvals.size () != m_zoneDelays.size ())
         {
 		  throw(invalidParameterValue());
         }
+	  //check to make sure all the values are valid
+	  for (auto ld:dvals)
+	  {
+		  if (ld < timeZero)
+		  {
+			  throw(invalidParameterValue());
+		  }
+	  }
       auto zL = m_zoneDelays.begin ();
       for (auto ld : dvals)
         {
-          *zL = std::stod (ld);
+          *zL = ld;
           ++zL;
         }
     }
@@ -111,12 +127,12 @@ void zonalRelay::set (const std::string &param, double val, gridUnits::units_t u
               if (kk == 0)
                 {
                   m_zoneLevels.push_back (0.8);
-                  m_zoneDelays.push_back (0);
+                  m_zoneDelays.push_back (timeZero);
                 }
               else
                 {
                   m_zoneLevels.push_back (m_zoneLevels[kk - 1] + 0.7);
-                  m_zoneDelays.push_back (m_zoneDelays[kk - 1] + 1.0);
+                  m_zoneDelays.push_back (m_zoneDelays[kk - 1] + timeOne);
                 }
             }
 

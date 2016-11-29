@@ -742,7 +742,7 @@ namespace vectorConvertDetail
 
 
 
-template< typename X, typename Y, typename Z = Y::storage_type>
+template< typename X, typename Y, typename Z = typename Y::baseType>
 std::vector<X> vectorConvert(std::vector<Y> &&dvec)
 {
 	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Z>{});
@@ -754,7 +754,7 @@ std::vector<X> vectorConvert(std::vector<Y> &&dvec)
 	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Y>{});
 }
 
-template< typename X, typename Y, typename Z = Y::storage_type>
+template< typename X, typename Y, typename Z = typename Y::baseType>
 std::vector<X> vectorConvert(const std::vector<Y> &dvec)
 {
 	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Z>{});

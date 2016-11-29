@@ -64,7 +64,7 @@ inline long long numConv(const std::string &V)
 template <class X>
 inline X numConvComp(const std::string &V,size_t &rem)
 {
-	return X(std::stod(V,&rem))
+	return X(std::stod(V, &rem));
 }
 
 template <>
@@ -131,7 +131,7 @@ X  numeric_conversionComplete(const std::string &V, const X defValue)
 	try
 	{
 		size_t rem;
-		X res = numConvComp(V, &rem);
+		X res = numConvComp<X>(V, &rem);
 		while (rem < V.length())
 		{
 			if (!(isspace(V[rem])))

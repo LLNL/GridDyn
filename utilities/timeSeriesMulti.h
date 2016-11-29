@@ -64,7 +64,7 @@ public:
 		}
 		if (count > 0)
 		{
-			if (t - time[count - 1] > timeZero)
+			if (t - time[count - 1] > timeType(0.0))
 			{
 				time.push_back(t);
 				++count;
@@ -94,7 +94,7 @@ public:
 		}
 		if (count > 0)
 		{
-			if (t - time[count - 1] > timeZero)
+			if (t - time[count - 1] > timeType(0.0))
 			{
 				time.push_back(t);
 				++count;

@@ -255,7 +255,7 @@ public:
 			  throw(objectUpdateFailException());
 		  }
 	  }
-	  m_nextTime = (targetObject) ? targetObject->getNextUpdateTime() : kBigNum;
+	  m_nextTime = (targetObject) ? targetObject->getNextUpdateTime() : maxTime;
   }
 
   virtual std::shared_ptr<eventAdapter> clone(std::shared_ptr<eventAdapter> eA = nullptr) const override
@@ -280,7 +280,7 @@ public:
     gridDyn_time ttime = targetObject->getNextUpdateTime ();
     if ((ttime <= cTime) && (ttime <= m_nextTime))
       {
-        m_nextTime = kBigNum;
+        m_nextTime = maxTime;
       }
     else
       {

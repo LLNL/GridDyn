@@ -201,25 +201,25 @@ public:
    * \brief Gets the current simulation time.
    * \return a double representing the current simulation time, in seconds.
    */
-  double getCurrentTime () const
+  gridDyn_time getCurrentTime () const
   {
-    return static_cast<double>(currentTime);
+    return currentTime;
   }
 
   /**
    * \brief Gets the simulation start time.
    * \return a double representing the simulation start time, in seconds.
    */
-  double getStartTime () const
+  gridDyn_time getStartTime () const
   {
-    return static_cast<double>(startTime);
+    return startTime;
   }
 
   /**
   * \brief gets the next event time.
   * \return a double representing the next scheduled event in GridDyn.
   */
-  double getEventTime () const;
+  gridDyn_time getEventTime () const;
 };
 
 /** @brief find an object that has the same properties as obj1 located int the tree from src in the tree given by sec

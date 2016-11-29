@@ -30,7 +30,7 @@ protected:
   index_t m_terminal = 1;        //!< the side of the line to connect 1=from side 2=to side, 3+ for multiterminal devices
   double m_resetMargin = 0.01; //!<! the reset margin for clearing a fault
   std::vector<double> m_zoneLevels;        //!< the level of impedance to trigger
-  std::vector<double> m_zoneDelays;       //!< the delay upon which to act for the relay
+  std::vector<gridDyn_time> m_zoneDelays;       //!< the delay upon which to act for the relay
   count_t m_condition_level = kInvalidCount;    //!< the level of condition that has been triggered
   int autoName = -1;                                    //!< storage for indicator of the type of autoname to use
 public:

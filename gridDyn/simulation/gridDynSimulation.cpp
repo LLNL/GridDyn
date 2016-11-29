@@ -551,7 +551,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::initialize:
 	{
 
-		gridDyn_time t_start = (cmd.val_double != kNullVal) ? cmd.val_double : startTime;
+		gridDyn_time t_start = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : startTime;
 
 		if (pState == gridState_t::STARTUP)
 		{
@@ -575,24 +575,24 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::iterate:
 	{ 
-		gridDyn_time t_step = (cmd.val_double != kNullVal) ? cmd.val_double : stepTime;
-		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stopTime;
+		gridDyn_time t_step = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stepTime;
+		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stopTime;
 		out = eventDrivenPowerflow(t_end, t_step);
 	}
       break;
     case gridDynAction::gd_action_t::eventmode:
 	{
-		gridDyn_time t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+		gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
 		out = eventDrivenPowerflow(t_end);
 	}
       
       break;
     case gridDynAction::gd_action_t::dynamicDAE:
 	{
-		gridDyn_time t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+		gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -610,11 +610,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::dynamicPart:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
-		double t_step = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stepTime;
+		double t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
+		double t_step = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stepTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -632,11 +632,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::dynamicDecoupled:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
-		double t_step = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stepTime;
+		double t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
+		double t_step = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stepTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -650,11 +650,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::step:
 	{
 		
-		gridDyn_time t_step = (cmd.val_double != kNullVal) ? cmd.val_double : stepTime;
-		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stopTime;
+		gridDyn_time t_step = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stepTime;
+		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stopTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(negTime);
+			out2 = dynInitialize();
 		}
 		if (out2 != FUNCTION_EXECUTION_SUCCESS)
 		{
@@ -671,7 +671,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::run:
       if (actionQueue.empty ())
         {
-          gridDyn_time t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+          gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
           if (controlFlags[power_flow_only])
             {
               out2=powerflow ();
