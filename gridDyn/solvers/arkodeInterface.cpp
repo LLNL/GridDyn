@@ -369,7 +369,7 @@ static const std::map<int, std::string> arkodeRetCodes {
 };
 /* *INDENT-ON* */
 
-void arkodeInterface::initialize (double t0)
+void arkodeInterface::initialize (gridDyn_time t0)
 {
   if (!allocated)
     {
@@ -511,12 +511,14 @@ void arkodeInterface::getCurrentData ()
  
 }
 
-int arkodeInterface::solve (double tStop, double &tReturn, step_mode stepMode)
+int arkodeInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
   icCount = 0;
-  int retval = ARKode (solverMem, tStop, state, &tReturn, (stepMode == step_mode::normal) ? ARK_NORMAL : ARK_ONE_STEP);
+  double tret;
+  int retval = ARKode (solverMem, tStop, state, &tret, (stepMode == step_mode::normal) ? ARK_NORMAL : ARK_ONE_STEP);
+  tReturn = tret;
   check_flag (&retval, "ARKodeSolve", 1, false);
 
   if (retval == ARK_ROOT_RETURN)

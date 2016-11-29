@@ -33,7 +33,7 @@ protected:
   index_t m_terminal = 1;  //!< line terminal  (typically 1 or 2)
   double limit = kBigNum;         //!<[puA] maximum current
   double mp_I2T = 0.0;         //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
-  double minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
+  gridDyn_time minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
 private:
   double cI2T;        //!< calculated I2t value for fuse
   double Vbase = 120;       //!<[kV] Voltage base for bus
@@ -59,7 +59,7 @@ public:
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
-	virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
+	virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggerTime) override;
   change_code setupFuseEvaluation ();
 private:
   double I2Tequation (double current);

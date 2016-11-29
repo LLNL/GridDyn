@@ -233,6 +233,7 @@ set (core_headers
 	basicDefs.h
 	gridDynTypes.h
 	gridDynVectorTypes.h
+	gridDyn_time.h
 	gridCore.h
 	gridObjects.h
 	parameterOperator.hpp

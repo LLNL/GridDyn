@@ -369,40 +369,11 @@ int trailingStringInt (const std::string &input, int defNum)
     }
 }
 
-std::vector<double> str2vector (const std::string &line, double defValue, const std::string &delimiters)
-{
-  auto tempVec = splitline (line, delimiters);
-  std::vector<double> av;
-  av.reserve (tempVec.size ());
-  for (const auto &str : tempVec)
-    {
-      av.push_back (doubleRead(str, defValue));
-    }
-  return av;
-}
 
-std::vector<int> str2vectorInt (const std::string &line, int defValue, const std::string &delimiters)
-{
-  auto tempVec = splitline (line, delimiters);
-  std::vector<int> av;
-  av.reserve (tempVec.size ());
-  for (const auto &str : tempVec)
-    {
-      av.push_back (intRead(str, defValue));
-    }
-  return av;
-}
 
-std::vector<double> str2vector(const stringVector &tokens, double defValue)
-{
-	std::vector<double> av;
-	av.reserve(tokens.size());
-	for (const auto &str : tokens)
-	{
-		av.push_back(doubleRead(str, defValue));
-	}
-	return av;
-}
+
+
+
 
 
 static const charMapper numCheck("numericstart");

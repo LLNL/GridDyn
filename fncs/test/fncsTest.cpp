@@ -108,7 +108,7 @@ bool testFNCSsource()
 	fncs::publish("sourceTestVal", "4.345");
 	src->set("period", 1.0);
 	
-	src->initializeA(0, 0);
+	src->initializeA(timeZero, 0);
 	IOdata out;
 	src->initializeB(emptyArguments, emptyArguments, out);
 	

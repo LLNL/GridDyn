@@ -19,7 +19,7 @@
 #include "submodels/gridControlBlocks.h"
 #include "relays/gridRelay.h"
 #include "vectorOps.hpp"
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 #include "objectFactory.h"
 #include "simulation/diagnostics.h"
 #include <cstdio>
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(block_test1)
    
     
     std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-    timeSeriesMulti ts3;
+    timeSeriesMulti<> ts3;
     ts3.loadBinaryFile(recname);
 	BOOST_REQUIRE(ts3.count >= 15);
     BOOST_CHECK_CLOSE(ts3.data[0][5]*5,ts3.data[1][5],0.000001);
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(block_test2)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
 
   BOOST_CHECK_CLOSE(ts3.data[0][5] * 5, ts3.data[1][5], 0.001);
   BOOST_CHECK_CLOSE(ts3.data[0][280] * 5, ts3.data[1][280], 0.001);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(block_test3)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
   //ts3.loadBinaryFile(recname);
 
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(block_test4)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile(recname);
 
   BOOST_CHECK_CLOSE(ts3.data[1][5], -0.5, 0.01);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(block_test5)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile(recname);
   
 
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(block_test6)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile(recname);
  
 
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(deadband_block_test)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile(recname);
   
 
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
 
 
   std::string recname = std::string(BLOCK_TEST_DIRECTORY "blocktest.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile(recname);
   std::vector<double> df(ts3.count);
   compareVec(ts3.data[1], ts3.data[2], df);

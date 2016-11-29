@@ -152,7 +152,7 @@ void motorLoad5::converge ()
 
 }
 
-void motorLoad5::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void motorLoad5::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
 
 }

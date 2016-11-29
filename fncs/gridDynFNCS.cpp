@@ -123,7 +123,7 @@ int main (int argc, char *argv[])
   gridDyn_time stop_time = gds->get("stoptime");
 
 
-  gds->dynInitialize(0);
+  gds->dynInitialize(0.0);
   while (gds->getCurrentTime() < stop_time)
   {
 	  auto evntTime = gds->getEventTime();

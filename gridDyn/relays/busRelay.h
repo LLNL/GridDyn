@@ -28,8 +28,8 @@ public:
 protected:
   double cutoutVoltage = 0.0;		//!<[puV] low voltage limit
   double cutoutFrequency = 0.0;		//!<[puHz] trip on low frequency
-  double voltageDelay = 0.0;		//!< [s] period of time the voltage must be below limit to activate
-  double frequencyDelay = 0.0;		//!< [s] period of time the frequency must be below limit to activate
+  gridDyn_time voltageDelay = timeZero;		//!< [s] period of time the voltage must be below limit to activate
+  gridDyn_time frequencyDelay = timeZero;		//!< [s] period of time the frequency must be below limit to activate
 public:
   explicit busRelay (const std::string &objName = "busrelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj) const override;
@@ -40,7 +40,7 @@ public:
 
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 protected:
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time actionTime) override;
 
 };
 

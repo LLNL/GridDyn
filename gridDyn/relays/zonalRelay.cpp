@@ -278,7 +278,7 @@ void zonalRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, double /*actionTime*/)
+void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d taken terminal %d") %  conditionNum % ActionNum % m_terminal).str ());
 
@@ -300,7 +300,7 @@ void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_co
     }
 }
 
-void zonalRelay::conditionTriggered (index_t conditionNum, double /*triggerTime*/)
+void zonalRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d triggered terminal %d") % conditionNum % m_terminal).str ());
   if (conditionNum < m_condition_level)
@@ -331,7 +331,7 @@ void zonalRelay::conditionTriggered (index_t conditionNum, double /*triggerTime*
 
 }
 
-void zonalRelay::conditionCleared (index_t conditionNum, double /*triggerTime*/)
+void zonalRelay::conditionCleared (index_t conditionNum, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d cleared terminal %d ") % conditionNum  % m_terminal).str ());
   for (index_t kk = 0; kk < m_zones; ++kk)

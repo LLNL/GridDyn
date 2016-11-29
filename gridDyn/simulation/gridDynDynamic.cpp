@@ -113,7 +113,7 @@ int gridDynSimulation::dynInitialize (gridDyn_time tStart)
 
   //check if any updates need to take place
   // run any 0 time events
-  if (state_record_period > 0)
+  if (state_record_period > timeZero)
     {
       if (!(stateRecorder))
         {
@@ -146,7 +146,7 @@ int gridDynSimulation::dynInitialize (gridDyn_time tStart)
 
 
 
-int gridDynSimulation::runDynamicSolverStep (std::shared_ptr<solverInterface> &dynData, double nextStop, double &timeAct)
+int gridDynSimulation::runDynamicSolverStep (std::shared_ptr<solverInterface> &dynData, gridDyn_time nextStop, gridDyn_time &timeAct)
 {
   int retval = FUNCTION_EXECUTION_SUCCESS;
   if (controlFlags[single_step_mode])
@@ -248,11 +248,11 @@ int gridDynSimulation::dynamicDAEStartupConditions (std::shared_ptr<solverInterf
 }
 
 // IDA DAE Solver
-int gridDynSimulation::dynamicDAE ( double tStop)
+int gridDynSimulation::dynamicDAE ( gridDyn_time tStop)
 {
   int out = FUNCTION_EXECUTION_SUCCESS;
-  double nextStop;
-  double lastTimeStop;
+  gridDyn_time nextStop;
+  gridDyn_time lastTimeStop;
   int tstep = 0;
   const solverMode &sMode = *defDAEMode;
 
@@ -434,13 +434,13 @@ int gridDynSimulation::dynamicPartitionedStartupConditions (std::shared_ptr<solv
   return retval;
 }
 
-int gridDynSimulation::dynamicPartitioned (double tStop, double tStep)
+int gridDynSimulation::dynamicPartitioned (gridDyn_time tStop, gridDyn_time tStep)
 {
   int out = FUNCTION_EXECUTION_SUCCESS;
 
-  double nextEventTime = EvQ->getNextTime ();
+  auto nextEventTime = EvQ->getNextTime ();
   setupDynamicPartitioned ();
-  double lastTimeStop = currentTime;
+  gridDyn_time lastTimeStop = currentTime;
 
   auto dynDataAlg = getSolverInterface (*defDynAlgMode);
   auto dynDataDiff = getSolverInterface (*defDynDiffMode);
@@ -566,8 +566,8 @@ int gridDynSimulation::dynamicDecoupled (gridDyn_time /*tStop*/, gridDyn_time /*
 
 int gridDynSimulation::step ()
 {
-  double tact;
-  double nextT = currentTime + stepTime;
+  gridDyn_time tact;
+  gridDyn_time nextT = currentTime + stepTime;
   int ret = step (nextT, tact);
   if (tact != nextT)
     {
@@ -580,9 +580,9 @@ int gridDynSimulation::step ()
 int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
 {
 
-  if (currentTime + tols.timeTol >= nextStep)
+  if (currentTime >= nextStep)
     {
-      if (EvQ->getNextTime () <= currentTime + tols.timeTol)
+      if (EvQ->getNextTime () <= currentTime)
         {
           EvQ->executeEvents (currentTime);
         }
@@ -647,7 +647,7 @@ int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
         }
     }
   nextStopTime = std::min (nextStep, EvQ->getNextTime ());
-  double tStop;
+  gridDyn_time tStop;
   while (timeReturn < nextStep)
     {
       tStop = std::min (nextStep, nextStopTime);
@@ -667,7 +667,7 @@ int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
 
       while (timeReturn + tols.timeTol < tStop)
         {
-          double lastTimeStop = currentTime;
+          gridDyn_time lastTimeStop = currentTime;
           if (dynamicCheckAndReset (sm))
             {
               retval = generateDaeDynamicInitialConditions (sm);
@@ -918,7 +918,7 @@ int gridDynSimulation::generatePartitionedDynamicInitialConditions (const solver
       opFlags.reset(low_bus_voltage);
       */
     }
-  double tRet;
+  gridDyn_time tRet;
   retval = dynDataAlg->solve (currentTime + probeStepTime,tRet);
   if (retval == FUNCTION_EXECUTION_SUCCESS)
     {
@@ -1271,7 +1271,7 @@ int gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffSt
 	int ret = FUNCTION_EXECUTION_FAILURE;
 	if (sd)
 	{
-		double tret;
+		gridDyn_time tret;
 		ret=sd->solve(ttime, tret);
 		if (ret < 0)
 		{

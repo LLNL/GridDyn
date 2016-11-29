@@ -65,10 +65,10 @@ protected:
   std::string name;       //!< the text name of the object
   index_t id;              //!< a user defined id for the object
   gridCoreObject *parent = nullptr;      //!< a pointer to the parent object
-  gridDyn_time prevTime = -kBigNum;       //!<[s]the last state time of the object
-  gridDyn_time updatePeriod = kBigNum;      //!<[s]the update period
-  gridDyn_time nextUpdateTime = kBigNum;     //!<[s] the next scheduled update
-  gridDyn_time lastUpdateTime = -kBigNum;      //!<[s] the last update time
+  gridDyn_time prevTime = negTime;       //!<[s]the last state time of the object
+  gridDyn_time updatePeriod = maxTime;      //!<[s]the update period
+  gridDyn_time nextUpdateTime = maxTime;     //!<[s] the next scheduled update
+  gridDyn_time lastUpdateTime = negTime;      //!<[s] the last update time
   gridDyn_time m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
   
 
@@ -287,13 +287,13 @@ public:
   //@brief set the next update Time
   virtual void setUpdateTime (double newUpdateTime);
   //@brief get the next time the system should call the update functions
-  double getNextUpdateTime () const
+  gridDyn_time getNextUpdateTime () const
   {
     return nextUpdateTime;
   }
   
   //@brief return the last time the object had its state set or was updated
-  double currentTime () const
+  gridDyn_time currentTime () const
   {
     return prevTime;
   }

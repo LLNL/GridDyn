@@ -81,7 +81,7 @@ void zBreaker::set (const std::string &param, double val, units_t unitType)
 
 }
 
-void zBreaker::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void zBreaker::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   if (isConnected ())
     {
@@ -97,7 +97,7 @@ void zBreaker::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/
 
 }
 
-void zBreaker::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void zBreaker::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   if (isConnected ())
     {

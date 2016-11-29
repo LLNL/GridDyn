@@ -129,7 +129,7 @@ void controlRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags
 }
 
 
-void controlRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, double /*actionTime*/)
+void controlRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d taken") % conditionNum % ActionNum ).str ());
 
@@ -313,7 +313,7 @@ change_code controlRelay::executeAction (index_t index)
 }
 
 
-std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (double eventTime, std::uint64_t sourceID,std::shared_ptr<controlMessage> m)
+std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (gridDyn_time eventTime, std::uint64_t sourceID,std::shared_ptr<controlMessage> m)
 {
   
   auto act = getFreeAction ();
@@ -344,7 +344,7 @@ std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (double eve
 }
 
 
-std::shared_ptr<functionEventAdapter> controlRelay::generateSetEvent (double eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> m)
+std::shared_ptr<functionEventAdapter> controlRelay::generateSetEvent (gridDyn_time eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> m)
 {
 	auto act = getFreeAction();
 	actions[act].actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;

@@ -18,7 +18,7 @@
 
 #include "recorder_events/gridEvent.h"
 #include "units.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include <iostream>
 
 using namespace readerConfig;
@@ -87,7 +87,7 @@ auto eventString = aP->getMultiText (", ");
   field = getElementFieldOptions (aP, { "t","time" }, defMatchType);
   if (!field.empty ())
     {
-      gdEI.time = str2vector (field,kNullVal);
+      gdEI.time = str2vector<gridDyn_time> (field,negTime);
     }
 
   field = getElementFieldOptions (aP, { "value","val" }, defMatchType);

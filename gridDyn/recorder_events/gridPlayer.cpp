@@ -151,16 +151,16 @@ void gridPlayer::setNextValue()
 
 void gridPlayer::updateTrigger(gridDyn_time time)
 {
-	if (time+kSmallTime > triggerTime)
+	if (time>= triggerTime)
 	{
-		if (time+kSmallTime > ts.time[currIndex])
+		if (time >= ts.time[currIndex])
 		{
 			++currIndex;
 		}
 	}
 		if (static_cast<size_t> (currIndex) >= ts.count)
 		{
-			if (period > 0)                     //if we have a period loop the time series
+			if (period > timeZero)                     //if we have a period loop the time series
 			{
 				if (time - ts.time[currIndex] > period)
 				{
@@ -198,7 +198,7 @@ std::string gridPlayer::toString()
 	if (eFile.empty())
 	{
 		ss << '@' << triggerTime;
-		if (period > 0)
+		if (period > timeZero)
 		{
 			ss << '+' << period << '|';
 		}
@@ -241,7 +241,7 @@ std::string gridPlayer::toString()
 			ss << '#' << column;
 		}
 		ss << '}';
-		if (period > 0)
+		if (period > timeZero)
 		{
 			ss << '+' << period ;
 		}

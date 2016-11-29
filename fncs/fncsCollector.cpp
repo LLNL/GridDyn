@@ -17,7 +17,7 @@
 #include "core/helperTemplates.h"
 #include "stringOps.h"
 
-fncsCollector::fncsCollector(gridDyn_time time0, double period):collector(time0,period)
+fncsCollector::fncsCollector(gridDyn_time time0, gridDyn_time period):collector(time0,period)
 {
 
 }

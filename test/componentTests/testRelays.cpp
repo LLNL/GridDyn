@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE (relay_test1)
 
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
 
-  gds->dynInitialize (0);
+  gds->dynInitialize (timeZero);
 
   zonalRelay *Yp = dynamic_cast<zonalRelay *> (gds->getRelay (0));
   BOOST_CHECK (Yp != nullptr);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE (relay_test2)
 
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
 
-  gds->dynInitialize (0);
+  gds->dynInitialize (timeZero);
 
   zonalRelay *Yp = dynamic_cast<zonalRelay *> (gds->getRelay (0));
   BOOST_CHECK (Yp != nullptr);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE (relay_test_multi)
 
   gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
 
-  gds->dynInitialize (0);
+  gds->dynInitialize (timeZero);
   int cnt = gds->getInt("relaycount");
   
   BOOST_CHECK_EQUAL (cnt, 12);

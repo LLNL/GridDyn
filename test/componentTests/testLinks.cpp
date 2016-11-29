@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(link_test1_dynamic)
   int mmatch=runJacobianCheck(gds,cDaeSolverMode);
 
   BOOST_REQUIRE_EQUAL(mmatch,0);
-	gds->run(20);
+	gds->run(20.0);
   mmatch = runJacobianCheck(gds,cDaeSolverMode);
  
   BOOST_REQUIRE_EQUAL(mmatch, 0);

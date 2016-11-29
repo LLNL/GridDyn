@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE (gridlab_test2)
   val = ld->get ("q");
   BOOST_CHECK_CLOSE (val, 0.09, 0.01);
 
-  gds->run (30);
+  gds->run (30.0);
   GhostSwingBusManager::Instance ()->endSimulation ();
 }
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE (gridlab_test3)
   val = ld->get ("q");
   BOOST_CHECK_SMALL (val, 0.000001);
 
-  gds->run (30);
+  gds->run (30.0);
   GhostSwingBusManager::Instance ()->endSimulation ();
 }
 

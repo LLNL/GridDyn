@@ -15,7 +15,7 @@
 #include "objectFactoryTemplates.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include "gridCoreTemplates.h"
 
 //object factory statements
@@ -65,7 +65,7 @@ gridCoreObject *basicBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void basicBlock::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void basicBlock::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   offsets.local->reset ();
   offsets.unload ();       //unload all the offsets
@@ -886,7 +886,7 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
   auto fstr = blockstr.substr (0, posp1 - 1);
   auto argstr = blockstr.substr (posp1 + 1, posp2 - posp1 - 1);
 
-  std::vector<double> args = str2vector (argstr,kNullVal);
+  auto args = str2vector (argstr,kNullVal);
   auto tail = blockstr.substr (posp2 + 2);
   auto tailArgs = splitlineTrim (tail);
 

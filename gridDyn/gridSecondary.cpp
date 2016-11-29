@@ -64,7 +64,7 @@ void gridSecondary::dynInitializeB (const IOdata & args, const IOdata & outputSe
       m_dstate_dt.clear ();
       m_dstate_dt.resize (ns, 0);
       dynObjectInitializeB (args, outputSet);
-      if (updatePeriod < kHalfBigNum)
+      if (updatePeriod < maxTime)
         {
           opFlags.set (has_updates);
           nextUpdateTime = prevTime + updatePeriod;

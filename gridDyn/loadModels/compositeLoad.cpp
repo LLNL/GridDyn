@@ -16,7 +16,7 @@
 #include "gridBus.h"
 #include "objectFactoryTemplates.h"
 #include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 #include <cmath>
 
@@ -255,7 +255,7 @@ void compositeLoad::set (const std::string &param,  const std::string &val)
     }
   else if (param == "fraction")
     {
-      auto fval = str2vector (val,-1.0);
+      auto fval = str2vector<double> (val,-1.0);
       for (size_t nn = 0; nn < fval.size (); ++nn)
         {
           if (nn + 1 >= fraction.size ())

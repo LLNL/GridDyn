@@ -18,7 +18,7 @@
 #include "testHelper.h"
 #include "collector.h"
 #include "gridEvent.h"
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 #include <cstdio>
 #include <cmath>
 
@@ -29,16 +29,15 @@ static const std::string collector_test_directory = std::string(GRIDDYN_TEST_DIR
 
 BOOST_FIXTURE_TEST_SUITE (recorder_tests, gridDynSimulationTestFixture)
 
-BOOST_AUTO_TEST_CASE (ts2_tests)
+BOOST_AUTO_TEST_CASE (tsMulti_tests)
 {
-  timeSeriesMulti ts2;
-  timeSeriesMulti ts3 (1,10);
+  timeSeriesMulti<> ts2;
+  timeSeriesMulti<> ts3 (1,10);
   std::vector<double> tv (10);
   std::vector<double> val (10);
   ts2.setCols (1);
-  int kk;
   double t = 0.0;
-  for (kk = 0; kk < 10; ++kk)
+  for (int kk = 0; kk < 10; ++kk)
     {
       ts2.addData (t, 4.5);
       tv[kk] = t;
@@ -63,7 +62,7 @@ BOOST_AUTO_TEST_CASE (ts2_tests)
 
 BOOST_AUTO_TEST_CASE (file_save_tests)
 {
-  timeSeriesMulti ts2(1);
+  timeSeriesMulti<> ts2(1);
   double t = 0.0;
   for (int kk = 0; kk < 10; ++kk)
     {
@@ -74,7 +73,7 @@ BOOST_AUTO_TEST_CASE (file_save_tests)
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "ts_test.dat");
   ts2.writeBinaryFile (fname);
 
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
 
   ts3.loadBinaryFile (fname);
   BOOST_CHECK_EQUAL (ts3.cols, 1u);
@@ -87,7 +86,7 @@ BOOST_AUTO_TEST_CASE (file_save_tests)
 
 BOOST_AUTO_TEST_CASE (file_save_tests2)
 {
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.setCols (4); //test the set cols method
   BOOST_CHECK(ts2.cols == 4);
 
@@ -103,7 +102,7 @@ BOOST_AUTO_TEST_CASE (file_save_tests2)
   std::string fname = std::string (RECORDER_TEST_DIRECTORY "ts_test2.dat");
   ts2.writeBinaryFile (fname);
 
-  timeSeriesMulti ts3(fname);
+  timeSeriesMulti<> ts3(fname);
 
   BOOST_CHECK_EQUAL (ts3.cols, 4u);
   BOOST_CHECK_EQUAL (ts3.count, 30u);
@@ -131,7 +130,7 @@ BOOST_AUTO_TEST_CASE (recorder_test1)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "loadrec.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
   BOOST_CHECK(ts3.fields[0] == "load3:power");
   BOOST_CHECK_EQUAL (ts3.count, 31u);
   int ret = remove (recname.c_str ());
@@ -155,7 +154,7 @@ BOOST_AUTO_TEST_CASE (recorder_test2)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "genrec.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 31u);
   BOOST_CHECK_EQUAL (ts3.cols, 2u);
@@ -179,7 +178,7 @@ BOOST_AUTO_TEST_CASE (recorder_test3)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "genrec.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 121u);
   BOOST_CHECK_EQUAL (ts3.cols, 4u);
@@ -222,7 +221,7 @@ BOOST_AUTO_TEST_CASE (recorder_test4)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec.dat");
-  timeSeriesMulti ts3(recname);
+  timeSeriesMulti<> ts3(recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 61u);
   BOOST_CHECK_EQUAL (ts3.cols, 2u);
@@ -230,7 +229,7 @@ BOOST_AUTO_TEST_CASE (recorder_test4)
   BOOST_CHECK_EQUAL (ret, 0);
 
   recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2(recname);
+  timeSeriesMulti<> ts2(recname);
 
   BOOST_CHECK_EQUAL (ts2.count, 61u);
   BOOST_CHECK_EQUAL (ts2.cols, 2u);
@@ -257,7 +256,7 @@ BOOST_AUTO_TEST_CASE (recorder_test5)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busVrec.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile (recname);
  
 
@@ -295,7 +294,7 @@ BOOST_AUTO_TEST_CASE (recorder_test6)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile (recname);
   
 
@@ -306,7 +305,7 @@ BOOST_AUTO_TEST_CASE (recorder_test6)
   BOOST_CHECK_EQUAL (ret, 0);
 
   recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
  
 
@@ -335,7 +334,7 @@ BOOST_AUTO_TEST_CASE (recorder_test7)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile (recname);
 
   BOOST_CHECK_EQUAL (ts3.count, 61u);
@@ -345,7 +344,7 @@ BOOST_AUTO_TEST_CASE (recorder_test7)
   BOOST_CHECK_EQUAL (ret, 0);
 
   recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
   
 
@@ -373,7 +372,7 @@ BOOST_AUTO_TEST_CASE (recorder_test8)
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   ts3.loadBinaryFile (recname);
  
 
@@ -386,7 +385,7 @@ BOOST_AUTO_TEST_CASE (recorder_test8)
 
 
   recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
   
 
@@ -414,7 +413,7 @@ BOOST_AUTO_TEST_CASE (recorder_test9)
 
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
  
 
@@ -442,7 +441,7 @@ BOOST_AUTO_TEST_CASE (recorder_test10)
 
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
   
 
@@ -469,7 +468,7 @@ BOOST_AUTO_TEST_CASE (recorder_test11)
 
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
   
 
@@ -497,7 +496,7 @@ BOOST_AUTO_TEST_CASE (recorder_test12)
 
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec2.dat");
-  timeSeriesMulti ts2;
+  timeSeriesMulti<> ts2;
   ts2.loadBinaryFile (recname);
 
 
@@ -545,7 +544,7 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
 	gds->run();
 
 	std::string recname = std::string(RECORDER_TEST_DIRECTORY "recorder_dataA.dat");
-	timeSeriesMulti tsA(recname);
+	timeSeriesMulti<> tsA(recname);
 
 	std::string fname2 = collector_test_directory + "recorder_test_sineB.xml";
 	gds2 = static_cast<gridDynSimulation *> (readSimXMLFile(fname2));
@@ -558,7 +557,7 @@ BOOST_AUTO_TEST_CASE(recorder_test_period)
 	gds2->run();
 
 	std::string recname2 = std::string(RECORDER_TEST_DIRECTORY "recorder_dataB.dat");
-	timeSeriesMulti tsB(recname2);
+	timeSeriesMulti<> tsB(recname2);
 
 	size_t diffc = 0;
 	BOOST_REQUIRE((tsA.count - 1) * 4 == (tsB.count - 1));

@@ -19,6 +19,7 @@
 #include <cmath>
 #include <array>
 #include <functional>
+#include <type_traits>
 
 
 double solve2x2 (double a, double b, double c, double d, double y1, double y2, double &x1, double &x2);
@@ -707,4 +708,62 @@ auto countDiffsIfValidCallback(const std::vector<X> &a, const std::vector<X> &b,
 	}
 	return diffs;
 }
+/** functions that action do the vector conversions  if the types are actually the same just copy or 
+move them if possible.  If they are not the same type do a static cast in a transform to make a new vector
+  the code use SFINAE magic with the std::false_type and std::true_type to discriminate which overload to use
+the function below them vectorConvert include a type_trait check for if the vector types are the same 
+*/
+namespace vectorConvertDetail
+{
+	template< typename X, typename Y>
+	std::vector<X> vectorConvertActual(const std::vector<Y> &dvec, std::false_type)
+	{
+		std::vector<X> ret(dvec.size());
+		std::transform(dvec.begin(), dvec.end(), ret.begin(), [](Y val) {return static_cast<X>(val); });
+		return ret;
+	}
+
+	template< typename X, typename Y>
+	std::vector<X> vectorConvertActual(std::vector<Y> &&dvec, std::true_type)
+	{
+		std::vector<X> ret(dvec);
+		return ret;
+	}
+
+	template< typename X, typename Y>
+	std::vector<X> vectorConvertActual(const std::vector<Y> &dvec, std::true_type)
+	{
+		std::vector<X> ret = dvec;
+		return ret;
+	}
+
+	
+}
+
+
+
+template< typename X, typename Y, typename Z = Y::storage_type>
+std::vector<X> vectorConvert(std::vector<Y> &&dvec)
+{
+	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Z>{});
+}
+
+template< typename X, typename Y>
+std::vector<X> vectorConvert(std::vector<Y> &&dvec)
+{
+	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Y>{});
+}
+
+template< typename X, typename Y, typename Z = Y::storage_type>
+std::vector<X> vectorConvert(const std::vector<Y> &dvec)
+{
+	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Z>{});
+}
+
+template< typename X, typename Y>
+std::vector<X> vectorConvert(const std::vector<Y> &dvec)
+{
+	return vectorConvertDetail::vectorConvertActual<X, Y>(dvec, std::is_same<X, Y>{});
+}
+
 #endif

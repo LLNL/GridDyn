@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_governor_roots)
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   
   std::string recname = std::string(ROOTS_TEST_DIRECTORY "rootDisplay.dat");
-  timeSeriesMulti ts3;
+  timeSeriesMulti<> ts3;
   int ret = ts3.loadBinaryFile(recname);
   BOOST_CHECK_EQUAL(ret, 0);
 

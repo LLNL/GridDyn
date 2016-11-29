@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE (pflow_test_dcflow)
 
   auto smode = gds->getSolverMode("dcflow");
   gds->set("defpowerflow", "dcflow");
-  gds->pFlowInitialize(0);
+  gds->pFlowInitialize(0.0);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
 
   BOOST_CHECK_EQUAL(runJacobianCheck(gds, smode), 0);
@@ -461,7 +461,7 @@ BOOST_DATA_TEST_CASE(pflow_test_line_modes, data::make(approx_modes),approx)
 		gdsb->add(ns);
 		auto smode = gdsb->getSolverMode(approx);
 		gdsb->set("defpowerflow", approx);
-		gdsb->pFlowInitialize(0);
+		gdsb->pFlowInitialize(0.0);
 		BOOST_REQUIRE (gdsb->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
 		int errors;
 			if (approx == "small_angle_decoupled")

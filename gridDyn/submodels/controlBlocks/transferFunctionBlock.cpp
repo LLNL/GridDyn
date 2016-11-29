@@ -14,7 +14,7 @@
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include "gridCoreTemplates.h"
 #include "core/gridDynExceptions.h"
 
@@ -227,11 +227,11 @@ void transferFunctionBlock::set (const std::string &param, const std::string &va
 
   if (param == "a")
     {
-      a = str2vector (val,0);
+      a = str2vector<double> (val,0);
     }
   else if (param == "b")
     {
-      b = str2vector (val, 0);
+      b = str2vector<double> (val, 0);
     }
   else
     {

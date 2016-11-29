@@ -185,7 +185,7 @@ static const std::map<int, std::string> kinRetCodes {
 };
 /* *INDENT-ON* */
 
-void kinsolInterface::initialize (double /*t0*/)
+void kinsolInterface::initialize (gridDyn_time /*t0*/)
 {
   if (!allocated)
     {
@@ -373,7 +373,7 @@ double kinsolInterface::get (const std::string &param) const
 //#define KIN_LINESEARCH 1
 //#define KIN_PICARD     2
 //#define KIN_FP         3
-int kinsolInterface::solve (double tStop, double &tReturn, step_mode /*mode*/)
+int kinsolInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode /*mode*/)
 {
 	//check if the multiple data sets are in use and if we should toggle the data to use
 	solveTime = tStop;
@@ -459,7 +459,7 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
       long int val = 0;
       KINGetNumNonlinSolvIters (sd->solverMem, &val);
       double *resid = NVECTOR_DATA (sd->use_omp, f);
-      printf ("Residual for %s at time =%f iteration %ld\n", sd->name.c_str (), sd->solveTime,val);
+      printf ("Residual for %s at time =%f iteration %ld\n", sd->name.c_str (), static_cast<double>(sd->solveTime),val);
       for (int kk = 0; kk < static_cast<int> (sd->svsize); ++kk)
         {
           printf ("resid[%u]=%f\n", kk, resid[kk]);

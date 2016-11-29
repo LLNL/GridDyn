@@ -60,7 +60,7 @@ void gridPrimary::dynInitializeB (IOdata &outputSet)
   if (enabled)
     {
       dynObjectInitializeB (outputSet);
-      if (updatePeriod < kHalfBigNum)
+      if (updatePeriod < maxTime)
         {
           opFlags.set (has_updates);
           nextUpdateTime = prevTime + updatePeriod;

@@ -101,7 +101,7 @@ void isocController::setLimits(double maxV, double minV)
 
 void isocController::updateA(gridDyn_time time)
 {
-	if (time+kSmallTime < nextUpdateTime)
+	if (time < nextUpdateTime)
 	{
 		assert(false);
 		return;

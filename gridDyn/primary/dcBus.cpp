@@ -614,7 +614,7 @@ index_t dcBus::getOutputLoc(const solverMode &sMode, index_t num) const
 }
 
 //TODO:: PT write this function
-void dcBus::converge (double, double [], double [], const solverMode &, converge_mode,double)
+void dcBus::converge (gridDyn_time, double [], double [], const solverMode &, converge_mode,double)
 //void dcBus::converge (const gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, double tol, int mode)
 {
 

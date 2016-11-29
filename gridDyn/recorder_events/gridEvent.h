@@ -18,7 +18,7 @@
 //#include "gridDyn.h"
 
 #include "gridCore.h"
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 
 #include "eventInterface.h"
 #include "core/objectOperatorInterface.h"
@@ -33,8 +33,8 @@ public:
   std::string description;
   std::string type;
   std::string file;
-  double period = 0.0;
-  std::vector<double> time;
+  gridDyn_time period = timeZero;
+  std::vector<gridDyn_time> time;
   std::vector<double> value;
   stringVec fieldList;
   std::vector<gridCoreObject *>targetObjs;
@@ -69,7 +69,7 @@ private:
 	static std::atomic<count_t> eventCount;
 public:
 	explicit gridEvent(const std::string &newName);
-	explicit gridEvent(gridDyn_time time0 = kNullVal);
+	explicit gridEvent(gridDyn_time time0 = negTime);
 	gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
 
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const;
@@ -79,7 +79,7 @@ public:
         virtual change_code trigger();
         virtual change_code trigger(gridDyn_time time) override;
 
-        virtual double nextTriggerTime() const override
+        virtual gridDyn_time nextTriggerTime() const override
         {
                 return triggerTime;
         }
@@ -151,8 +151,8 @@ public:
 class gridPlayer: public gridEvent
 {
 protected:
-        double period = kBigNum;  //!< period of the player
-        timeSeries ts;	//!< the time series containing the data for the player 
+        gridDyn_time period = maxTime;  //!< period of the player
+        timeSeries<double,gridDyn_time> ts;	//!< the time series containing the data for the player 
         index_t currIndex = kNullLocation;	//!< the current index of the player
         std::string eFile;		//!< the file name
 		index_t column = 0;
@@ -186,8 +186,8 @@ protected:
 class compoundEventPlayer : public compoundEvent
 {
 protected:
-	double period = kBigNum;  //!< period of the player
-	timeSeriesMulti ts;	//!< the time series containing the data for the player 
+	gridDyn_time period = maxTime;  //!< period of the player
+	timeSeriesMulti<double,gridDyn_time> ts;	//!< the time series containing the data for the player 
 	index_t currIndex = kNullLocation;	//!< the current index of the player
 	std::string eFile;		//!< the file name
 	std::vector<index_t> columns;

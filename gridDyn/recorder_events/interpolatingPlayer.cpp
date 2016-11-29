@@ -97,7 +97,7 @@ void interpolatingPlayer::setNextValue()
 	}
 	if (currIndex >= ts.count - 1)
 	{
-		if (period > 0)
+		if (period > timeZero)
 		{
 			slope = (ts.data[0] - ts.data.back()) / (ts.time[0] - ts.time.back()-period);
 		}
@@ -121,7 +121,7 @@ void interpolatingPlayer::setNextValue()
 			triggerTime = std::min(ts.time[currIndex], triggerTime + samplePeriod);
 			if (currIndex == 0)
 			{
-				if (period > 0)
+				if (period > timeZero)
 				{
 					value = ts.data.back() + slope*(triggerTime - ts.time.back());
 				}
@@ -145,7 +145,7 @@ std::string interpolatingPlayer::toString()
 	if (eFile.empty())
 	{
 		ss << '@' << triggerTime;
-		if (period > 0)
+		if (period > timeZero)
 		{
 			ss << '+' << period << '|';
 		}
@@ -188,7 +188,7 @@ std::string interpolatingPlayer::toString()
 			ss << '#' << column;
 		}
 		ss << '}';
-		if (period > 0)
+		if (period > timeZero)
 		{
 			ss << '+' << period;
 		}

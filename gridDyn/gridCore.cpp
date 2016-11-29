@@ -16,7 +16,6 @@
 #include <map>
 #include <cmath>
 
-const double gridDyn_time2::scalarf = std::pow(2, 30);
 //set up the global object count
 
 
@@ -259,15 +258,15 @@ double gridCoreObject::get (const std::string & param, gridUnits::units_t unitTy
   double val = kNullVal;
   if (param == "period")
     {
-      val = gridUnits::unitConversion (updatePeriod, gridUnits::sec, unitType);
+      val = gridUnits::unitConversion (static_cast<double>(updatePeriod), gridUnits::sec, unitType);
     }
   else if (param == "time")
     {
-      val = prevTime;
+      val = static_cast<double>(prevTime);
     }
   else if (param == "update")
     {
-      val = nextUpdateTime;
+      val = static_cast<double>(nextUpdateTime);
     }
   return val;
 }
@@ -357,9 +356,9 @@ void gridCoreObject::updateA (gridDyn_time time)
 
 double gridCoreObject::updateB ()
 {
-	if (nextUpdateTime != kNullVal)
+	if (nextUpdateTime < maxTime)
 	{
-		while (lastUpdateTime+kSmallTime >= nextUpdateTime)
+		while (lastUpdateTime >= nextUpdateTime)
 		{
 			nextUpdateTime += updatePeriod;
 		}

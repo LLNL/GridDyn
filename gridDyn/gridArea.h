@@ -319,12 +319,12 @@ public:
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Up
   */
-  double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
+  double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
   /** @brief get the total adjustable Capacity Down for the area within a certain time frame
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Down
   */
-  double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
+  double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
   /** @brief get the total loss for contained links
   @return the total area loss
   */

@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
 
   gm->setName("namebbghs");
   BOOST_CHECK_EQUAL(gm->getName().compare("namebbghs"), 0);
-  gm->initializeA(0, 0);
+  gm->initializeA(timeZero, 0);
   BOOST_CHECK_EQUAL(gm->stateSize(cLocalSolverMode), 6u);
   gm->set ("h",4.5);
   gm->setOffset (0, cLocalSolverMode);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE (gridDynGovernor_test)
   std::string temp1 = "gov 2";
   gov->set ("name",temp1);
   BOOST_CHECK_EQUAL (gov->getName().compare (temp1),0);
-  gov->initializeA(0, 0);
+  gov->initializeA(timeZero, 0);
   BOOST_CHECK_EQUAL (gov->stateSize (cLocalSolverMode), 4u);
   gov->set ("t1",4.5);
   gov->setOffset(0, cLocalSolverMode);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE (object_factory_test)
 
 BOOST_AUTO_TEST_CASE(gridDynTime_tests)
 {
-	gridDyn_time2 rt(34.123141512);
+	gridDyn_time rt(34.123141512);
 
 	double dval = static_cast<double>(rt);
 	BOOST_CHECK_CLOSE(dval, 34.123141512, 0.0000001);

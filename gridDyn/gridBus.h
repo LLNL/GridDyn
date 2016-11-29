@@ -98,7 +98,7 @@ protected:
   double Vtol = -1.0;                         //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
   double Atol = -1.0;                         //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
   double freq = 1.0;       //!<[puHz] estimated actual frequency
-  gridDyn_time lowVtime = -kBigNum;	//!< the last time a low voltage alert was triggered
+  gridDyn_time lowVtime = negTime;	//!< the last time a low voltage alert was triggered
   IOdata outputs;   //!< the current output values
   IOlocs outLocs;   //!< the current output locations
 public:
@@ -341,13 +341,13 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/

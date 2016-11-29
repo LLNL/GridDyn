@@ -16,7 +16,7 @@
 
 #include "gridLoad.h"
 
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 #include <array>
 
 class gridBus;
@@ -253,7 +253,7 @@ public:
   };
 protected:
   std::string fname;			//!< the name of the file
-  timeSeriesMulti schedLoad;		//!< time series containing the load information
+  timeSeriesMulti<> schedLoad;		//!< time series containing the load information
   gridUnits::units_t inputUnits = gridUnits::defUnit;
   double scaleFactor = 1.0;			//!< scaling factor on the load
   index_t currIndex = 0;			//!< the current index on timeSeries

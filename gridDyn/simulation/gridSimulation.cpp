@@ -152,7 +152,7 @@ void gridSimulation::add (std::list<std::shared_ptr<gridEvent> > elist)
 }
 
 
-int gridSimulation::run (double /*finishTime*/)
+int gridSimulation::run (gridDyn_time /*finishTime*/)
 {
   return FUNCTION_EXECUTION_FAILURE;
 }

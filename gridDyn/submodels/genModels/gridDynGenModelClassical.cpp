@@ -54,7 +54,7 @@ gridCoreObject *gridDynGenModelClassical::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModelClassical::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridDynGenModelClassical::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   offsets.local->local.diffSize = 2;
   offsets.local->local.algSize = 2;

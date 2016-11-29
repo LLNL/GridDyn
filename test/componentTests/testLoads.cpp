@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 	ldT->set("dpdt",0.01);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ldT->loadUpdate(4);
+	ldT->loadUpdate(4.0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.54, 0.000001);
 	ld1->set("dpdt", 0.0);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 	ldT->set("dqdt",-0.01);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, -0.3, 0.000001);
-	ldT->loadUpdate(6);
+	ldT->loadUpdate(6.0);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, -0.36, 0.000001);
 	ld1->set("dqdt", 0.0);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
   ldT->set("drdt", 0.05); 
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.0, 0.000001);
-	ldT->loadUpdate(2);
+	ldT->loadUpdate(2.0);
 	val = ld1->getRealPower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.44/1.1, 0.000001);
 	ld1->set("drdt", 0.0);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
   ldT->set("dxdt", -0.05); 
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, 2.0, 0.000001);
-	ldT->loadUpdate(4);
+	ldT->loadUpdate(4.0);
 	val = ld1->getReactivePower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*1.2 / 0.3, 0.000001);
 	ld1->set("dxdt", 0.0);
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 	ldT->set("dipdt",-0.01);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ldT->loadUpdate(10);
+	ldT->loadUpdate(10.0);
 	val = ld1->getRealPower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*0.4 , 0.000001);
 	ld1->set("dipdt", 0.0);
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 	ldT->set("diqdt",0.05);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.0, 0.000001);
-	ldT->loadUpdate(1);
+	ldT->loadUpdate(1.0);
 	val = ld1->getReactivePower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*1.05, 0.000001);
 	ld1->set("diqdt", 0.0);
@@ -217,10 +217,10 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	ld1->set("size_dist", "constant");
 	ldT->set("mean_l" ,0.3);
 	ld1->set("p", 0.5);
-	ld1->pFlowInitializeA(0, 0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ld1->updateA(5);
+	ld1->updateA(5.0);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 	//check the uniform distribution
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	ld1->set("trigger_dist", "uniform");
 	ldT->set("min_t",2.0);
 	ldT->set("max_t", 5.0);
-	ld1->pFlowInitializeA(6,0);
+	ld1->pFlowInitializeA(6.0,0);
 	double otime = ld1->getNextUpdateTime();
 	BOOST_CHECK(otime >= 8.0);
 	BOOST_CHECK(otime <= 11.0);
@@ -240,17 +240,17 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	BOOST_CHECK_CLOSE(val, 1.1, 0.000001);
 	//check to make sure they are not the same number
   ldT->resetTrigger();
-	ld1->pFlowInitializeA(6, 0);
+	ld1->pFlowInitializeA(6.0, 0);
 	double ntime = ld1->getNextUpdateTime();
 	BOOST_CHECK(otime != ntime);
 	//check if the set seed works
   ldT->resetTrigger();
 	ldT->set("seed",0);
-	ld1->pFlowInitializeA(6, 0);
+	ld1->pFlowInitializeA(6.0, 0);
 	ntime = ld1->getNextUpdateTime();
   ldT->resetTrigger();
 	ldT->set("seed", 0);
-	ld1->pFlowInitializeA(6, 0);
+	ld1->pFlowInitializeA(6.0, 0);
 	otime = ld1->getNextUpdateTime();
 	BOOST_CHECK_CLOSE(otime, ntime, 0.000001);
 	
@@ -270,11 +270,11 @@ BOOST_AUTO_TEST_CASE(random_load_test2)
 	ldT->set("mean_l",0.5);
 	ld1->set("p", 0.5);
 	ldT->setFlag("interpolate");
-	ld1->pFlowInitializeA(0,0);
+	ld1->pFlowInitializeA(timeZero,0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
 	//check interpolate
-	ldT->loadUpdate(2);
+	ldT->loadUpdate(2.0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.7, 0.000001);
 	//check uniform load change
@@ -284,8 +284,8 @@ BOOST_AUTO_TEST_CASE(random_load_test2)
 	ldT->set("min_l", 0.2);
 	ldT->set("max_l",0.5);
 	ld1->set("p", 0.5);
-	ld1->pFlowInitializeA(6,0);
-	ld1->updateA(12);
+	ld1->pFlowInitializeA(6.0,0);
+	ld1->updateA(12.0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK(val >= 0.7);
 	BOOST_CHECK(val <= 1.0);
@@ -303,17 +303,17 @@ BOOST_AUTO_TEST_CASE(pulse_load_test2)
 	ld1->set("type", "square");
 	ldT->set("amplitude", 1.3);
 	ld1->set("period", 5);
-	ld1->pFlowInitializeA(0,0);
+	ld1->pFlowInitializeA(timeZero,0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
 	//check interpolate
-	ldT->loadUpdate(1);
+	ldT->loadUpdate(1.0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
-	ld1->loadUpdate(2);
+	ld1->loadUpdate(2.0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.3, 0.000001);
-	ldT->loadUpdate(4);
+	ldT->loadUpdate(4.0);
 	val = ldT->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
 	
@@ -329,12 +329,13 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 	ld1->set("file", fname);
 	ldT->setFlag("step");
 	
-	ld1->pFlowInitializeA(0,0);
+	ld1->pFlowInitializeA(timeZero,0);
 	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
 	//check interpolate
   solverMode sMode(2);
-	ldT->timestep(12,{ 0, 0 },sMode);
+  IOdata input{ 0,0 };
+	ldT->timestep(12.0,input,sMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 	delete ld1;
@@ -346,21 +347,22 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 	//test P ramp
 	ld1->set("file", fname);
 	ldT->set("mode", "interpolate");
-	ld1->pFlowInitializeA(0, 0);
-  ldT->timestep(1, { 0, 0 }, sMode);
+	ld1->pFlowInitializeA(timeZero, 0);
+	
+  ldT->timestep(1.0, input, sMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.53, 0.000001);
 	//check interpolate
-  ldT->timestep(10, { 0, 0 }, sMode);
+  ldT->timestep(10.0, input, sMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 
-  ldT->timestep(12, { 0, 0 }, sMode);
+  ldT->timestep(12.0, input, sMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.78, 0.000001);
 
 
-  ldT->timestep(50, { 0, 0 }, sMode);
+  ldT->timestep(50.0, input, sMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.6, 0.000001);
 }

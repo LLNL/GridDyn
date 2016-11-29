@@ -11,7 +11,6 @@
 #project name
 
 set(utilities_sources
-	timeSeries.cpp
 	gridRandom.cpp
 	saturation.cpp
 	stackInfo.cpp
@@ -28,6 +27,7 @@ set(utilities_sources
 set(utilities_headers
 	units.h
 	timeSeries.h
+	timeSeriesMulti.h
 	vectorOps.hpp
 	stringOps.h
 	gridRandom.h
@@ -46,6 +46,7 @@ set(utilities_headers
 	workQueue.h
 	zipUtilities.h
 	base64.h
+	stringConversion.h
 	)
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})

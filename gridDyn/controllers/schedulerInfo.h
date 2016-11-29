@@ -21,12 +21,12 @@
 class tsched
 {
 public:
-  gridDyn_time time = kBigNum;
+  gridDyn_time time = maxTime;
   double target = 0;
   tsched ()
   {
   }
-  tsched (double atime, double atarget) : time (atime),
+  tsched (gridDyn_time atime, double atarget) : time (atime),
                                           target (atarget)
   {
   }
@@ -46,17 +46,17 @@ bool operator== (const tsched &td1, const tsched &td2);
 
 bool operator!= (const tsched &td1, const tsched &td2);
 
-bool operator< (const tsched &td1, const double &timeC);
+bool operator< (const tsched &td1, double timeC);
 
-bool operator<= (const tsched &td1, const double &timeC);
+bool operator<= (const tsched &td1, double timeC);
 
-bool operator> (const tsched &td1, const double &timeC);
+bool operator> (const tsched &td1, double timeC);
 
-bool operator>= (const tsched &td1, const double &timeC);
+bool operator>= (const tsched &td1, double timeC);
 
-bool operator== (const tsched &td1, const double &timeC);
+bool operator== (const tsched &td1, double timeC);
 
-bool operator!= (const tsched &td1, const double &timeC);
+bool operator!= (const tsched &td1, double timeC);
 
 
 

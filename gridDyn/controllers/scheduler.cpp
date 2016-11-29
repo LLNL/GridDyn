@@ -45,27 +45,27 @@ bool operator!= (const tsched &td1, const tsched &td2)
 {
   return (td1.time != td2.time);
 }
-bool operator< (const tsched &td1, const double &timeC)
+bool operator< (const tsched &td1, double timeC)
 {
   return (td1.time < timeC);
 }
-bool operator<= (const tsched &td1, const double &timeC)
+bool operator<= (const tsched &td1, double timeC)
 {
   return (td1.time <= timeC);
 }
-bool operator> (const tsched &td1, const double &timeC)
+bool operator> (const tsched &td1, double timeC)
 {
   return (td1.time > timeC);
 }
-bool operator>= (const tsched &td1, const double &timeC)
+bool operator>= (const tsched &td1, double timeC)
 {
   return (td1.time >= timeC);
 }
-bool operator== (const tsched &td1, const double &timeC)
+bool operator== (const tsched &td1, double timeC)
 {
   return (td1.time == timeC);
 }
-bool operator!= (const tsched &td1, const double &timeC)
+bool operator!= (const tsched &td1, double timeC)
 {
   return (td1.time != timeC);
 }
@@ -141,7 +141,7 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
 
 void scheduler::setTarget (const std::string &filename)
 {
-  timeSeries targets;
+  timeSeries<double,gridDyn_time> targets;
   targets.loadBinaryFile (filename);
   
   std::list<tsched> flist;

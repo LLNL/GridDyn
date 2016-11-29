@@ -419,14 +419,14 @@ void idaInterface::setRootFinding (count_t numRoots)
 
 #define SHOW_MISSING_ELEMENTS 0
 
-int idaInterface::calcIC (double t0, double tstep0, ic_modes initCondMode, bool constraints)
+int idaInterface::calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes initCondMode, bool constraints)
 {
   int retval;
   ++icCount;
   assert (icCount < 200);
   if (initCondMode == ic_modes::fixed_masked_and_deriv) //mainly for use upon startup from steady state
     {
-      //do a series of steps to ensure the orginal algebraic states are fixed and the derivatives are fixed
+      //do a series of steps to ensure the original algebraic states are fixed and the derivatives are fixed
       useMask = true;
       loadMaskElements ();
       if (!dense)
@@ -538,12 +538,14 @@ void idaInterface::getCurrentData ()
   check_flag(&retval, "IDAGetConsistentIC", 1);
 }
 
-int idaInterface::solve (double tStop, double &tReturn, step_mode stepMode)
+int idaInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
   icCount = 0;
-  int retval = IDASolve (solverMem, tStop, &tReturn, state, dstate_dt, (stepMode == step_mode::normal) ? IDA_NORMAL : IDA_ONE_STEP);
+  double tret;
+  int retval = IDASolve (solverMem, tStop, &tret, state, dstate_dt, (stepMode == step_mode::normal) ? IDA_NORMAL : IDA_ONE_STEP);
+  tReturn = tret;
   switch (retval)
     {
     case 0:       //no error

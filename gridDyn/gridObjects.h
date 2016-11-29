@@ -845,14 +845,14 @@ public:
   @param[in] time the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const;
+  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
 
   /**
   *@brief get the available downwards generating capacity of a system
   @param[in] the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const;
+  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
 
   /**
   *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states

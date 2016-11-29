@@ -57,7 +57,7 @@ protected:
     extra_relay_flag = object_flag5,             //!< just defining an extra name for additional relay flags
 
   };
-  double triggerTime = kBigNum;            //!<the next time execute
+  gridDyn_time triggerTime = maxTime;            //!<the next time execute
   gridCoreObject *m_sourceObject = nullptr;       //!<the default object where the data comes from
   gridCoreObject *m_sinkObject = nullptr;            //!<the default object where the actions occur
   count_t triggerCount = 0;        //!< count of the number of triggers
@@ -68,7 +68,7 @@ protected:
   
   std::shared_ptr<gridCommunicator> commLink;             //!<communicator link
 
-  double m_nextSampleTime = 0.0;        //!< the next time to sample the conditions
+  gridDyn_time m_nextSampleTime = timeZero;        //!< the next time to sample the conditions
 
 public:
   explicit gridRelay (const std::string &objName = "relay_$");
@@ -130,9 +130,9 @@ public:
   double getConditionValue (index_t conditionNumber, const stateData *sD, const solverMode &sMode) const;
   bool checkCondition (index_t conditionNumber) const;
   void setConditionLevel (index_t conditionNumber, double levelVal);
-  virtual void setActionTrigger (index_t conditionNumber, index_t actionNumber, double delayTime = 0.0);
+  virtual void setActionTrigger (index_t conditionNumber, index_t actionNumber, gridDyn_time delayTime = timeZero);
   virtual change_code triggerAction (index_t actionNumber);
-  virtual void setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, double delayTime = 0.0);
+  virtual void setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, gridDyn_time delayTime = timeZero);
 
   void setResetMargin (index_t conditionNumber, double margin);
   virtual void setFlag (const std::string &flag, bool val = true)  override;
@@ -177,7 +177,7 @@ protected:
   @param actionReturn  the return code of the action execution
   @param actionTime the time at which the action was taken
   */
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum,  change_code actionReturn, double actionTime);
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum,  change_code actionReturn, gridDyn_time actionTime);
   /** do something when an condition is triggered
   @param conditionNum the index of the condition that triggered the action
   @param timeTriggered the time at which the condition was triggered
@@ -195,7 +195,7 @@ private:
 public:
     index_t conditionNum;                      //!< the condition Number
     index_t actionNum;                     //!< the action number
-    double testTime;                      //!< the time the test should be performed
+	gridDyn_time testTime;                      //!< the time the test should be performed
     bool multiCondition = false;                      //!< flag if the condition is part of a multiCondition
 
     /** @brief constructor with all the data
@@ -204,7 +204,7 @@ public:
     @param[in] ttime the time to conduct a test
     @param[in] mcond  the value of the multiCondition flag
     */
-    condCheckTime (index_t cNum=0, index_t aNum=0, gridDyn_time ttime=kBigNum, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
+    condCheckTime (index_t cNum=0, index_t aNum=0, gridDyn_time ttime=maxTime, bool mcond = false) : conditionNum (cNum), actionNum (aNum), testTime (ttime), multiCondition (mcond)
     {
     }
   };
@@ -214,9 +214,9 @@ public:
   public:
 	 index_t actionNum=kInvalidLocation;                      //!< the related ActionNumber
     std::vector<index_t> multiConditions;   //!< identification of the conditions involved
-    double delayTime=0.0;                     //!< the delay time all conditions must be true before the action is taken TODO:PT account for this delay
+    gridDyn_time delayTime=timeZero;                     //!< the delay time all conditions must be true before the action is taken TODO:PT account for this delay
 	mcondTrig() {};
-	mcondTrig(index_t actNum, const std::vector<index_t> &conds, double delTime = 0.0) :actionNum(actNum), multiConditions(conds), delayTime(delTime)
+	mcondTrig(index_t actNum, const std::vector<index_t> &conds, gridDyn_time delTime = timeZero) :actionNum(actNum), multiConditions(conds), delayTime(delTime)
 	{};
  };
   /** enumeration of relay flags*/
@@ -224,18 +224,18 @@ public:
   std::vector < std::shared_ptr < gridCondition >> conditions;                //!<state conditionals for the system
   std::vector < std::shared_ptr < eventAdapter >> actions;                //!<actions to take in response to triggers
   std::vector < std::vector < index_t >> actionTriggers;                //!<the conditions that cause actions
-  std::vector < std::vector < double >> actionDelays;               //!<the periods of time in which the condition must be true for an action to occur
+  std::vector < std::vector < gridDyn_time >> actionDelays;               //!<the periods of time in which the condition must be true for an action to occur
   std::vector<condition_states> cStates;               //!< a vector of states for the conditions
-  std::vector<double> conditionTriggerTimes;               //!< the times at which the condition triggered
+  std::vector<gridDyn_time> conditionTriggerTimes;               //!< the times at which the condition triggered
   std::vector<condCheckTime> condChecks;               //!<a vector of condition action pairs that are in wait and see mode
   std::vector < std::vector < mcondTrig >> multiConditionTriggers;               //!<a vector for action which have multiple triggers
   std::vector<index_t> conditionsWithRoots;			//!< indices of the conditions with root finding functions attached to them
 private:
   void clearCondChecks (index_t condNum);
-  change_code executeAction (index_t actionNum, index_t conditionNum, double actionTime);
-  change_code triggerCondition (index_t conditionNum,double conditionTriggerTime,double ignoreDelayTime);
-  change_code multiConditionCheckExecute (index_t conditionNum, double conditionTriggerTime, double ignoreDelayTime);
-  change_code evaluateCondCheck (condCheckTime &cond, double currentTime);
+  change_code executeAction (index_t actionNum, index_t conditionNum, gridDyn_time actionTime);
+  change_code triggerCondition (index_t conditionNum,gridDyn_time conditionTriggerTime, gridDyn_time ignoreDelayTime);
+  change_code multiConditionCheckExecute (index_t conditionNum, gridDyn_time conditionTriggerTime, gridDyn_time ignoreDelayTime);
+  change_code evaluateCondCheck (condCheckTime &cond, gridDyn_time currentTime);
 };
 
 

@@ -152,33 +152,7 @@ the delimiter characters are allowed inside the brackets and the resulting vecto
 */
 stringVector splitlineBracketTrim(const std::string &line, const std::string &delimiters = ",;", delimiter_compression compression = delimiter_compression::off);
 
-/** @brief  convert a string into a vector of double precision numbers
-@param[in] line the string to convert
-@param[in] defValue  the default numerical return value if conversion fails
-@param[in] delimiters  the delimiters to use to separate the numbers
-@return a vector of double precision numbers converted from the string
-*/
-std::vector<double> str2vector(const std::string &line, double defValue, const std::string &delimiters = ";,");
-/** @brief  convert a vector of strings into doubles
-@param[in] tokens the vector of string to convert
-@param[in] defValue  the default numerical return value if conversion fails
-@return a vector of double precision numbers converted from the string
-*/
-std::vector<double> str2vector(const stringVector &tokens, double defValue);
 
-/** @brief  convert a string into a vector of integers 
-@param[in] line the string to convert
-@param[in] defValue  the default numerical return value if conversion fails
-@param[in] delimiters  the delimiters to use to separate the numbers
-@return a vector of integers converted from the string
-*/
-std::vector<int> str2vectorInt(const std::string &line, int defValue, const std::string &delimiters = ";, ");
-
-/** @brief convert a string to an integer
-@param[in] V  the string to convert
-@param[in] def  the default value to return if the conversion fails
-@return the numerical result of the conversion or the def value
-*/
 int intRead(const std::string &V, int def = 0);
 
 /** @brief convert a string to an unsigned long

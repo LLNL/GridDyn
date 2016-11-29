@@ -48,7 +48,7 @@ gridCoreObject *gridDynGenModelInverter::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModelInverter::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridDynGenModelInverter::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
 
   offsets.local->local.algSize = 1;

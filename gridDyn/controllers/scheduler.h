@@ -71,11 +71,11 @@ public:
   /** get the maximum available power withing a specified time window
   @param[in] time the time window to make the power
   */
-  virtual double getMax(gridDyn_time time = kBigNum) const;
+  virtual double getMax(gridDyn_time time = maxTime) const;
   /** get the low power level available withing a specified time window
   @param[in] time the time window to make the power level
   */
-  virtual double getMin(gridDyn_time time = kBigNum) const;
+  virtual double getMin(gridDyn_time time = maxTime) const;
 protected:
   virtual void insertTarget (tsched ts);
   void clearSchedule ();
@@ -157,8 +157,8 @@ public:
     return reserveAvail;
   }
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = kBigNum) const override;
-  virtual double getMin (gridDyn_time time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = maxTime) const override;
+  virtual double getMin (gridDyn_time time = maxTime) const override;
 protected:
   virtual void updatePTarget ();
   virtual void insertTarget (tsched ts) override;
@@ -232,8 +232,8 @@ public:
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = kBigNum) const override;
-  virtual double getMin (gridDyn_time time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = maxTime) const override;
+  virtual double getMin (gridDyn_time time = maxTime) const override;
 
 protected:
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;

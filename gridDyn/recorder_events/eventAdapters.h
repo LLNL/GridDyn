@@ -37,9 +37,9 @@ public:
   bool two_part_execute = false;              //!< flag if the event has two parts
   bool partB_turn = false;                      //!< if we need to execute the second part only
   bool partB_only = false;                 //!<flag indicating we only run when partB runs
-  double m_period;                 //!< the period of the event;
-  double m_nextTime;              //!< the next time the event is scheduled to execute
-  double partBdelay = 0;              //!<the delay between the first and second parts
+  gridDyn_time m_period;                 //!< the period of the event;
+  gridDyn_time m_nextTime;              //!< the next time the event is scheduled to execute
+  gridDyn_time partBdelay = timeZero;              //!<the delay between the first and second parts
 private:
   static std::atomic<count_t> eventCounter;  //!< counter for generating the unique event ID
 public:
@@ -47,7 +47,7 @@ public:
   @param[in] nextTime the trigger time for the event
   @param[in] period the period of the event  (the event will trigger once per period starting at nextTime
   */
-  eventAdapter (double nextTime = kBigNum, double period = 0);
+  eventAdapter (gridDyn_time nextTime = maxTime, gridDyn_time period = timeZero);
 
   /** @brief destructor*/
   virtual ~eventAdapter ();
@@ -60,12 +60,12 @@ public:
   /** Execute the pre-event portion of the event for two part execution events
   @param[in] cTime the current execution time
   */
-  virtual void executeA (double cTime);
+  virtual void executeA (gridDyn_time cTime);
 
   /** Execute the event or partB of the event
   @param[in] cTime the current execution time
   */
-  virtual change_code execute (double cTime);
+  virtual change_code execute (gridDyn_time cTime);
 
   /** @brief update the next event time*/
   virtual void updateTime ();
@@ -128,7 +128,7 @@ public:
 	  m_eventObj->updateObject(newObject, mode);
   }
 
-  change_code execute (double cTime) override
+  change_code execute (gridDyn_time cTime) override
   {
     change_code retval = change_code::not_triggered;              //EVENT_NOT_TRIGGERED
     while (m_nextTime <= cTime)
@@ -196,7 +196,7 @@ public:
 	  m_eventObj->updateObject(newObject, mode);
   }
 
-  change_code execute (double cTime) override
+  change_code execute (gridDyn_time cTime) override
   {
     change_code retval = change_code::not_triggered;                          //EVENT_NOT_TRIGGERED
     while (m_nextTime <= cTime)
@@ -269,12 +269,12 @@ public:
 	  return newAdapter;
   }
 
-  virtual void executeA (double cTime) override
+  virtual void executeA (gridDyn_time cTime) override
   {
     targetObject->updateA (cTime);
   }
 
-  virtual change_code execute (double cTime) override
+  virtual change_code execute (gridDyn_time cTime) override
   {
     targetObject->updateB ();
     gridDyn_time ttime = targetObject->getNextUpdateTime ();
@@ -314,7 +314,7 @@ public:
   functionEventAdapter (std::function<change_code ()> fcal) : fptr (fcal)
   {
   }
-  functionEventAdapter (std::function<change_code ()> fcal, double triggerTime, double period = 0.0) : eventAdapter (triggerTime, period), fptr (fcal)
+  functionEventAdapter (std::function<change_code ()> fcal, gridDyn_time triggerTime, gridDyn_time period = 0.0) : eventAdapter (triggerTime, period), fptr (fcal)
   {
   }
 
@@ -328,7 +328,7 @@ public:
 	  //functions may not be amenable to cloning or duplication so we can't really clone here.  
 	  return newAdapter;
   }
-  virtual change_code execute (double cTime) override;
+  virtual change_code execute (gridDyn_time cTime) override;
 
 /** @brief set the function of the event adapter
  *@param[in] nfptr  a std::function which returns a change code and takes 0 arguments*/

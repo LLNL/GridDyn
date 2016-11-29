@@ -75,7 +75,7 @@ protected:
   double Tw = 0.1;               //!<time constant for the frequency estimator
 
 
-  gridDyn_time lastSetTime = -kBigNum;                      //!< last set time
+  gridDyn_time lastSetTime = negTime;                      //!< last set time
   std::shared_ptr<basicBlock> fblock;         //!< pointer to frequency estimator block
 
   busControls busController;                //!< pointer to the eControls object
@@ -233,13 +233,13 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const override;
+  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const override;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const override;
+  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const override;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/

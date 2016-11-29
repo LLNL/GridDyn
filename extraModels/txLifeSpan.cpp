@@ -120,14 +120,14 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 		return sensor::dynObjectInitializeA(time0, flags);
 	}
 
-	if (updatePeriod > kHalfBigNum)
+	if (updatePeriod > negTime)
 	{        //set the period to the period of the simulation to at least 1/5 the winding time constant
-		double pstep = parent->find("root")->get("steptime");
-		if (pstep < 0)
+		gridDyn_time pstep = parent->find("root")->get("steptime");
+		if (pstep < timeZero)
 		{
 			pstep = 1.0;
 		}
-		double mtimestep = 120.0;  //update once per minute
+		gridDyn_time mtimestep = 120.0;  //update once per minute
 		updatePeriod = pstep*std::floor(mtimestep / pstep);
 		if (updatePeriod < pstep)
 		{
@@ -173,11 +173,11 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 			auto cond = make_condition("output0", "<", 0, this);
 			gridRelay::add(cond);
 
-			setActionTrigger(0, 0, 0);
+			setActionTrigger(0, 0);
 			if (!opFlags[no_disconnect])
 			{
-				setActionTrigger(0, 1, 0);
-				setActionTrigger(0, 2, 0);
+				setActionTrigger(0, 1);
+				setActionTrigger(0, 2);
 			}
 		}
 		
@@ -215,7 +215,7 @@ void txLifeSpan::timestep(gridDyn_time ttime, const solverMode &)
 	updateA(ttime);
 }
 
-void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, double /*actionTime*/)
+void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
 	if (m_sinkObject)
 	{

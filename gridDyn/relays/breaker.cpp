@@ -199,7 +199,7 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void breaker::conditionTriggered (index_t conditionNum, double triggeredTime)
+void breaker::conditionTriggered (index_t conditionNum, gridDyn_time triggeredTime)
 {
   if (conditionNum == 0)
     {

@@ -22,7 +22,7 @@
 
 std::atomic<count_t> eventAdapter::eventCounter(0);
 
-eventAdapter::eventAdapter (double nextTime, double period) : m_period (period),m_nextTime (nextTime)
+eventAdapter::eventAdapter (gridDyn_time nextTime, gridDyn_time period) : m_period (period),m_nextTime (nextTime)
 {
   eventID = ++eventCounter;
 }
@@ -52,7 +52,7 @@ void eventAdapter::updateObject(gridCoreObject * /*newObject*/, object_update_mo
 	
 }
 
-void eventAdapter::executeA (double /*cTime*/)
+void eventAdapter::executeA (gridDyn_time /*cTime*/)
 {
 }
 
@@ -60,23 +60,23 @@ void eventAdapter::updateTime ()
 {
 }
 
-change_code eventAdapter::execute (double cTime)
+change_code eventAdapter::execute (gridDyn_time cTime)
 {
-  if (m_period > 0)
+  if (m_period > timeZero)
     {
       m_nextTime += std::floor ((cTime - m_nextTime) / m_period) * m_period + m_period;
     }
   else
     {
-      m_nextTime = kBigNum;
+      m_nextTime = maxTime;
     }
   return change_code::no_change;
 }
 
-change_code functionEventAdapter::execute (double cTime)
+change_code functionEventAdapter::execute (gridDyn_time cTime)
 {
   auto retval = fptr ();
-  if (m_period > 0)
+  if (m_period > timeZero)
     {
       m_nextTime += std::floor ((cTime - m_nextTime) / m_period) * m_period + m_period;
     }

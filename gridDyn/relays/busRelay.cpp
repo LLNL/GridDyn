@@ -151,7 +151,7 @@ void busRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void busRelay::actionTaken (index_t conditionNum, index_t /*ActionNum*/, change_code /*actionReturn*/, double /*actionTime*/)
+void busRelay::actionTaken (index_t conditionNum, index_t /*ActionNum*/, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
   if (conditionNum == 0)
     {

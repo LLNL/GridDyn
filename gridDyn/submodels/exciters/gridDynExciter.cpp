@@ -53,7 +53,7 @@ gridCoreObject *gridDynExciter::clone (gridCoreObject *obj) const
 }
 
 
-void gridDynExciter::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridDynExciter::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   offsets.local->local.diffSize = 1;
   offsets.local->local.jacSize = 4;

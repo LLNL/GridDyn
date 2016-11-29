@@ -127,7 +127,7 @@ void loadRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, double /*actionTime*/)
+void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d") %  conditionNum % ActionNum).str ());
   /*
@@ -160,7 +160,7 @@ void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_cod
   */
 }
 
-void loadRelay::conditionTriggered (index_t conditionNum, double /*triggerTime*/)
+void loadRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d triggered") % conditionNum).str ());
   /*
@@ -200,7 +200,7 @@ void loadRelay::conditionTriggered (index_t conditionNum, double /*triggerTime*/
   */
 }
 
-void loadRelay::conditionCleared (index_t conditionNum, double /*triggerTime*/)
+void loadRelay::conditionCleared (index_t conditionNum, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d cleared") % conditionNum ).str ());
   /*for (size_t kk = 0; kk < m_zones; ++kk)

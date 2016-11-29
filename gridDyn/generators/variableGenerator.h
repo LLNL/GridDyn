@@ -59,11 +59,11 @@ public:
 
   virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual double getAdjustableCapacityUp  (gridDyn_time /*time*/ = kBigNum) const override
+  virtual double getAdjustableCapacityUp  (gridDyn_time /*time*/ = maxTime) const override
   {
     return 0.0;
   }                                                                                    //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (gridDyn_time /*time*/ = kBigNum) const override
+  virtual double getAdjustableCapacityDown (gridDyn_time /*time*/ = maxTime) const override
   {
     return 0.0;
   }                                                                                      //get the available adjustment Up within the specified timeframe

@@ -49,19 +49,18 @@ BOOST_AUTO_TEST_CASE (gov_stability_test)
   gds->run (0.005);
   BOOST_CHECK_EQUAL(runJacobianCheck(gds, cDaeSolverMode), 0);
 
-  gds->run (400);
+  gds->run (400.0);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
-  gds->run (500);
+  gds->run (500.0);
   gds->saveRecorders ();
   std::vector<double> st2 = gds->getState ();
 
   //check for stability
   BOOST_REQUIRE_EQUAL (st.size (), st2.size ());
-  size_t kk;
   int ncnt = 0;
   double a0 = st2[0];
-  for (kk = 0; kk < st.size (); ++kk)
+  for (size_t kk = 0; kk < st.size (); ++kk)
     {
       if (std::abs (st[kk] - st2[kk]) > 0.0001)
         {

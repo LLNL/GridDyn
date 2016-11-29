@@ -40,7 +40,7 @@ gridCoreObject *gridDynGenModelGENROU::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModelGENROU::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridDynGenModelGENROU::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   offsets.local->local.diffSize = 6;
   offsets.local->local.algSize = 2;
@@ -138,7 +138,7 @@ void gridDynGenModelGENROU::derivative (const IOdata &args, const stateData *sD,
   // Edp and Eqp
   if (std::abs (gmp[1]) > 0.0001)
     {
-      printf ("[%d]t=%f gmp[1]=%f Pdiff=%f A=%f, B=%f, C=%f Xdp=%3.3f, Xqp=%3.3f\n", getID (), sD->time, gmp[1], Pmt - Pe, gmd[4] * gm[0], gmd[5] * gm[1], (Xdpp - Xqpp) * gm[0] * gm[1], Xdp, Xqp);
+      printf ("[%d]t=%f gmp[1]=%f Pdiff=%f A=%f, B=%f, C=%f Xdp=%3.3f, Xqp=%3.3f\n", getID (), static_cast<double>(sD->time), gmp[1], Pmt - Pe, gmd[4] * gm[0], gmd[5] * gm[1], (Xdpp - Xqpp) * gm[0] * gm[1], Xdp, Xqp);
     }
 }
 

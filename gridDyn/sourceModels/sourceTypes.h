@@ -181,7 +181,7 @@ public:
 	};
 private:
 	std::string fname;  //!< name of the file
-	timeSeries schedLoad;  //!< time series containing the output schedule
+	timeSeries<double, gridDyn_time> schedLoad;  //!< time series containing the output schedule
 	index_t currIndex = 0;                //!< the current location in the file
 	count_t count = 0;            //!< the total number of elements in the file
 	index_t m_column = 0;         //!< the column of the file to use

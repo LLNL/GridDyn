@@ -11,7 +11,7 @@
  * LLNS Copyright End
 */
 
-#include "stringOps.h"
+#include "stringConversion.h"
 #include "comms/schedulerMessage.h"
 #include "gridDynTypes.h"
 #include <cstring>

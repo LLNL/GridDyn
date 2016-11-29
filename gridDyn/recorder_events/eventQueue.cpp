@@ -27,13 +27,13 @@ eventQueue::eventQueue ()
   insert (nullEvent);
 }
 
-double eventQueue::getNextTime () const
+gridDyn_time eventQueue::getNextTime () const
 {
   return events.front ()->m_nextTime;
 
 }
 
-void eventQueue::nullEventTime (gridDyn_time time, double period)
+void eventQueue::nullEventTime (gridDyn_time time, gridDyn_time period)
 {
 
   nullEvent->m_nextTime = time;
@@ -44,7 +44,7 @@ void eventQueue::nullEventTime (gridDyn_time time, double period)
   events.sort (compareEventAdapters);
 }
 
-double eventQueue::getNullEventTime () const
+gridDyn_time eventQueue::getNullEventTime () const
 {
   return nullEvent->m_nextTime;
 }
@@ -77,7 +77,7 @@ void eventQueue::mapObjectsOnto(gridCoreObject *newRootObject)
 	}
 }
 
-change_code eventQueue::executeEvents (double cTime)
+change_code eventQueue::executeEvents (gridDyn_time cTime)
 {
   if (events.front ()->m_nextTime > cTime + timeTols)
     {
@@ -87,14 +87,14 @@ change_code eventQueue::executeEvents (double cTime)
   auto eret = change_code::no_change;
   if (!partB_list.empty ())
     {
-      ret = executeEventsBonly (cTime);
+      ret = executeEventsBonly ();
     }
   eret = executeEventsAonly (cTime);
   if (eret > ret)
     {
       ret = eret;
     }
-  eret = executeEventsBonly (cTime);
+  eret = executeEventsBonly ();
   if (eret > ret)
     {
       ret = eret;
@@ -103,7 +103,7 @@ change_code eventQueue::executeEvents (double cTime)
   return ret;
 }
 
-change_code eventQueue::executeEventsAonly (double cTime)
+change_code eventQueue::executeEventsAonly (gridDyn_time cTime)
 {
   if (events.front ()->m_nextTime > cTime + timeTols)
     {
@@ -123,7 +123,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
         {
           if ((*currentEvent)->partB_turn)
             {
-              eret = (*currentEvent)->execute (cTime + timeTols);
+              eret = (*currentEvent)->execute ((*currentEvent)->m_nextTime);
               if (eret > ret)
                 {
                   ret = eret;
@@ -142,10 +142,10 @@ change_code eventQueue::executeEventsAonly (double cTime)
                 }
               else
                 {
-                  (*currentEvent)->executeA (cTime);
-                  if ((*currentEvent)->partBdelay > 0)
+                  (*currentEvent)->executeA ((*currentEvent)->m_nextTime);
+                  if ((*currentEvent)->partBdelay > timeZero)
                     {
-                      (*currentEvent)->m_nextTime = cTime + (*currentEvent)->partBdelay;
+                      (*currentEvent)->m_nextTime += (*currentEvent)->partBdelay;
                       (*currentEvent)->partB_turn = true;
                     }
                   else
@@ -158,7 +158,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
         }
       else
         {
-          eret = (*currentEvent)->execute (cTime + timeTols);
+          eret = (*currentEvent)->execute ((*currentEvent)->m_nextTime);
           if (eret > ret)
             {
               ret = eret;
@@ -200,7 +200,7 @@ change_code eventQueue::executeEventsAonly (double cTime)
 }
 
 
-change_code eventQueue::executeEventsBonly (double cTime)
+change_code eventQueue::executeEventsBonly ()
 {
 
   auto ret = change_code::no_change;
@@ -208,7 +208,7 @@ change_code eventQueue::executeEventsBonly (double cTime)
 
   for (auto &currentEvent : partB_list)
     {
-      eret = currentEvent->execute (cTime + timeTols);
+      eret = currentEvent->execute (currentEvent->m_nextTime);
       if (eret > ret)
         {
           ret = eret;

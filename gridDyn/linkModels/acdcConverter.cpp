@@ -316,7 +316,7 @@ void  acdcConverter::set (const std::string &param, double val, units_t unitType
 }
 
 
-void acdcConverter::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void acdcConverter::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
 
   double v1 = B1->getVoltage ();

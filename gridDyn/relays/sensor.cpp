@@ -24,7 +24,7 @@
 #include "gridCoreTemplates.h"
 #include "matrixDataSparse.h"
 #include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 #include <boost/format.hpp>
 
@@ -479,7 +479,7 @@ void sensor::set (const std::string &param,  const std::string &val)
     }
   else if (iparam == "process")
     {
-      auto seq = str2vectorInt (val,-1,",: ");
+      auto seq = str2vector<int>(val,-1,",: ");
       if (num >= 0)
         {
           if (num >= static_cast<int> (processSequence.size ()))

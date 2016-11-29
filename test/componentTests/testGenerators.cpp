@@ -17,7 +17,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(gen_test_isoc)
 	gds->run();
 
 	std::string recname = std::string(GEN_TEST_DIRECTORY "datafile.dat");
-	timeSeriesMulti ts3(recname);
+	timeSeriesMulti<> ts3(recname);
 
 	BOOST_CHECK(ts3.data[0][30] < 0.995);
 	BOOST_CHECK(ts3.data[0].back() > 1.0);

@@ -383,7 +383,7 @@ public:
 class Lp
 {
 public:
-  gridDyn_time time = 0;                                              //!< time
+  gridDyn_time time = timeZero;                                              //!< time
   count_t algOffset = kNullLocation;    //!< data offset for algebraic components
   count_t diffOffset = kNullLocation;   //!< data offset for differential components
   const double *algStateLoc = nullptr;  //!< location of algebraic state variables

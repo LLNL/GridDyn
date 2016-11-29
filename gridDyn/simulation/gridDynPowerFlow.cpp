@@ -310,10 +310,10 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode,change_code change)
 //all other solver data objects would be initialized by a reInitPFlow(xxx) call;
 int gridDynSimulation::pFlowInitialize (gridDyn_time time0)
 {
-  if (time0 == kNullVal)
+  if (time0 == negTime)
     {
       time0 = powerFlowStartTime;
-      if (time0 == kNullVal)
+      if (time0 == negTime)
         {
           time0 = startTime - 0.001;
         }
@@ -467,12 +467,12 @@ void gridDynSimulation::pFlowSensitivityAnalysis ()
 
 int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_step)
 {
-  if (t_end == kNullVal)
+  if (t_end == negTime)
     {
       t_end = stopTime;
     }
 
-  if (t_step == kNullVal)
+  if (t_step == negTime)
     {
       t_step = stepTime;
     }
@@ -492,11 +492,10 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
     }
   //setup the periodic empty event in the queue
   EvQ->nullEventTime (currentTime + t_step, t_step);
-  double nextEvent = EvQ->getNextTime ();
-  bool powerflow_executed;
+  auto nextEvent = EvQ->getNextTime ();
   while (nextEvent <= t_end - kSmallTime)
     {
-      powerflow_executed = false;
+      bool powerflow_executed = false;
       currentTime = nextEvent;
       //advance the time
       timestep (currentTime, *defPowerFlowMode);
@@ -514,7 +513,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
         }
 
       //execute delayed events (typically recorders
-      ret = EvQ->executeEventsBonly (currentTime);
+      ret = EvQ->executeEventsBonly ();
       //if something changed rerun the power flow to get a good solution
       //NOTE this would be an atypical situation to have to rerun this
       if (ret >= change_code::parameter_change)
