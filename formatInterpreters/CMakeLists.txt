@@ -36,6 +36,10 @@ IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	add_compile_options(-Wno-suggest-override)
 ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
+
+add_subdirectory(yaml-cpp)
+target_link_libraries(formatInterpreter yaml-cpp)
+
 INSTALL(TARGETS formatInterpreter
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)

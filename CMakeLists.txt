@@ -249,6 +249,10 @@ IF (FMI_ENABLE)
 ENDIF(FMI_ENABLE)
 
 
+
+
+
+
 # -------------------------------------------------------------
 # Enable ZMQ interfacing
 # -------------------------------------------------------------
@@ -256,7 +260,7 @@ ENDIF(FMI_ENABLE)
 OPTION(ZMQ_ENABLE "Enable ZMQ networking library" OFF)
 # If ZMQ library is enabled try to locate it and link against it
 
-IF (ZMQ_ENABLE)
+IF ((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
 
 SHOW_VARIABLE(ZMQ_LIBRARY_PATH PATH
   "path to the zmq libraries" "${ZMQ_LIBRARY_PATH}")
@@ -273,37 +277,16 @@ find_package(ZMQ)
 	else(ZMQ_FOUND)
 		message("unable to locate zmq library")
 	endif(ZMQ_FOUND)
-ENDIF(ZMQ_ENABLE)
+ENDIF((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
 
-# -------------------------------------------------------------
-# Enable FNCS executable
-# -------------------------------------------------------------
 
-OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
-# If FNCS_EXECUTABLE is load the fncs directory
-# link against them.
-
-IF (FNCS_EXECUTABLE)
-	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
-	IF(USE_DUMMY_FNCS)
-		HIDE_VARIABLE(FNCS_INSTALL_PATH)
-	ELSE(USE_DUMMY_FNCS)
-		SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
-  
-		find_package(FNCS)
-	ENDIF(USE_DUMMY_FNCS)
-	add_subdirectory(fncs)
-ELSE(FNCS_EXECUTABLE)
-	HIDE_VARIABLE(FNCS_INSTALL_PATH)
-	HIDE_VARIABLE(USE_DUMMY_FNCS)
-ENDIF(FNCS_EXECUTABLE)
 
 
 # -------------------------------------------------------------
 # Enable support for Plugins
 # -------------------------------------------------------------
 
-OPTION(ENABLE_PLUGINS "Enable support for plugin modules" ON)
+OPTION(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
 IF (ENABLE_PLUGINS)
 	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
@@ -370,6 +353,37 @@ endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 
+# -------------------------------------------------------------
+# Enable FNCS executable
+# -------------------------------------------------------------
+
+OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
+# If FNCS_EXECUTABLE is load the fncs directory
+# link against them.
+
+IF (FNCS_EXECUTABLE)
+	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
+	IF(USE_DUMMY_FNCS)
+		HIDE_VARIABLE(FNCS_INSTALL_PATH)
+		
+	ELSE(USE_DUMMY_FNCS)
+		#SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
+  
+		#find_package(FNCS)
+
+		SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH
+  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
+  
+SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
+  "path to the czmq headers" "${CZMQ_INCLUDE_PATH}")
+find_package(CZMQ)
+list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
+	ENDIF(USE_DUMMY_FNCS)
+	add_subdirectory(fncs)
+ELSE(FNCS_EXECUTABLE)
+	HIDE_VARIABLE(FNCS_INSTALL_PATH)
+	HIDE_VARIABLE(USE_DUMMY_FNCS)
+ENDIF(FNCS_EXECUTABLE)
 
 # -------------------------------------------------------------
 # load the subdirectories
@@ -395,11 +409,13 @@ ENDIF(OPTIMIZATION_ENABLE)
 
 add_subdirectory(gridDynFileInput)
 
+add_subdirectory(coupling)
+
 add_subdirectory(gridDynCombined)
 
 add_subdirectory(gridDynMain)
 
-add_subdirectory(coupling)
+
 
 # -------------------------------------------------------------
 # Enable testCore construction?

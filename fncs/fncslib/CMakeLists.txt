@@ -33,12 +33,6 @@ set(griddynFNCS_headers
 IF(USE_DUMMY_FNCS)
 	list(APPEND griddynFNCS_headers stub/fncs.hpp)
 	list (APPEND griddynFNCS_sources stub/fncs.cpp)
-ELSE(USE_DUMMY_FNCS)
-	list(APPEND griddynFNCS_headers fncslib/fncs.hpp)
-	list (APPEND griddynFNCS_sources fncslib/fncs.cpp)
-	list(APPEND griddynFNCS_headers fncslib/log.hpp)
-	list(APPEND griddynFNCS_headers fncslib/fncs_internal.hpp)
-	list (APPEND griddynFNCS_headers fncslib/fncs.h)
 ENDIF(USE_DUMMY_FNCS)
 
 link_directories(${external_link_directories})
@@ -59,10 +53,8 @@ IF(USE_DUMMY_FNCS)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/fncs/stub)
 ADD_DEFINITIONS(-DUSE_DUMMY_FNCS )
 ELSE (USE_DUMMY_FNCS)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/fncs/fncslib)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters/yaml-cpp/include)
-INCLUDE_DIRECTORIES(${CZMQ_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${FNCS_INCLUDE_DIR})
+
 ENDIF(USE_DUMMY_FNCS)
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
@@ -82,14 +74,10 @@ ENDIF(WIN32)
 
 ADD_DEFINITIONS(-DFNCS_TEST_DIRECTORY="${test_dir}" )
 
-target_link_libraries(griddynFNCS gridDynCombined)
 IF(USE_DUMMY_FNCS)
-
-
+target_link_libraries(griddynFNCS gridDynCombined)
 ELSE(USE_DUMMY_FNCS)
-ADD_DEFINITIONS(-DLIBFNCS_STATIC)
-#ADD_DEFINITIONS(-DCZMQ_STATIC)
-
+target_link_libraries(griddynFNCS gridDynCombined ${FNCS_LIBRARIES})
 ENDIF(USE_DUMMY_FNCS)
 
 INSTALL(TARGETS griddynFNCS RUNTIME DESTINATION bin)
