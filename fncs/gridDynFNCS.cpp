@@ -128,9 +128,10 @@ int main (int argc, char *argv[])
   {
 	  auto evntTime = gds->getEventTime();
 	  time_desired = gd2fncsTime(evntTime);
-	  gds->run();
+	  
 
 	  time_granted = fncs::time_request(time_desired);
+	  gds->run(fncs2gdTime(time_granted));
   }
 
       GhostSwingBusManager::Instance ()->endSimulation ();

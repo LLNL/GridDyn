@@ -1060,10 +1060,6 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-
-
-
-
 #define DEBUG_RESID 0
 #define CHECK_RESID 1
 #define CHECK_STATE 1
