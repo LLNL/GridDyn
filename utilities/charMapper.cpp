@@ -11,63 +11,63 @@
 * LLNS Copyright End
 */
 
-#include "stringOps.h"
+#include "charMappers.h"
 
-charMapper::charMapper()
+charMapper<unsigned char> base64Mapper()
 {
-	key.fill(0);
-}
-
-charMapper::charMapper(const std::string &pmap)
-{
-	key.fill(0);
-	if (pmap == "numericstart") //fill with all the values that would not preclude a string from containing a valid number
+	charMapper<unsigned char> b64(0xFF);
+	unsigned char val = 0;
+	for (unsigned char c = 'A'; c <= 'Z'; ++c)
 	{
-		key['0'] = 1;
-		key['1'] = 1;
-		key['2'] = 1;
-		key['3'] = 1;
-		key['4'] = 1;
-		key['5'] = 1;
-		key['6'] = 1;
-		key['7'] = 1;
-		key['8'] = 1;
-		key['9'] = 1;
-		key['+'] = 1;
-		key['-'] = 1;
-		key[' '] = 1;
-		key['\t'] = 1;
-		key['.'] = 1;
-		key['\n'] = 1;
-		key['\r'] = 1;
-		key['\0'] = 1;
+		b64.addKey(c, val);
+		++val;
 	}
-	else if (pmap == "numeric") //load the characters that can be contained in a string of a number
+	for (unsigned char c = 'a'; c <= 'z'; ++c)
 	{
-		key['0'] = 1;
-		key['1'] = 1;
-		key['2'] = 1;
-		key['3'] = 1;
-		key['4'] = 1;
-		key['5'] = 1;
-		key['6'] = 1;
-		key['7'] = 1;
-		key['8'] = 1;
-		key['9'] = 1;
-		key['+'] = 1;
-		key['-'] = 1;
-		key[' '] = 1;
-		key['e'] = 1;
-		key['.'] = 1;
+		b64.addKey(c, val);
+		++val;
 	}
+	for (unsigned char c = '0'; c <= '9'; ++c)
+	{
+		b64.addKey(c, val);
+		++val;
+	}
+	b64.addKey('+', val++);
+	b64.addKey('/', val);
+	return b64;
 }
 
-int charMapper::getKey(unsigned char x)const
+charMapper<unsigned char> digitMapper()
 {
-	return key[x];
+	charMapper<unsigned char> dMap(0xFF);
+	unsigned char val = 0;
+	for (unsigned char c = '0'; c <= '9'; ++c)
+	{
+		dMap.addKey(c, val);
+		++val;
+	}
+	return dMap;
 }
 
-int charMapper::operator[](unsigned char x)const
+charMapper<unsigned char> hexMapper()
 {
-	return key[x];
+	charMapper<unsigned char> dMap(0xFF);
+	unsigned char val = 0;
+	for (unsigned char c = '0'; c <= '9'; ++c)
+	{
+		dMap.addKey(c, val);
+		++val;
+	}
+	for (unsigned char c = 'A'; c <= 'F'; ++c)
+	{
+		dMap.addKey(c, val);
+		++val;
+	}
+	val = 10;
+	for (unsigned char c = 'a'; c <= 'f'; ++c)
+	{
+		dMap.addKey(c, val);
+		++val;
+	}
+	return dMap;
 }

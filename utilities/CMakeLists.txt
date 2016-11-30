@@ -27,6 +27,7 @@ set(utilities_sources
 set(utilities_headers
 	units.h
 	timeSeries.h
+	charMappers.h
 	timeSeriesMulti.h
 	vectorOps.hpp
 	stringOps.h

@@ -17,7 +17,7 @@
 
 #include "stringOps.h"
 
-const charMapper numCheck("numericstart");
+const charMapper<bool> numCheck("numericstart");
 
 //templates for single numerical conversion
 template <typename X>
@@ -107,7 +107,7 @@ inline long long numConvComp(const std::string &V, size_t &rem)
 template<typename X>
 X numeric_conversion(const std::string &V, const X defValue)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == false))
 	{
 		return defValue;
 	}
@@ -124,7 +124,7 @@ X numeric_conversion(const std::string &V, const X defValue)
 template<typename X>
 X  numeric_conversionComplete(const std::string &V, const X defValue)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == false))
 	{
 		return defValue;
 	}

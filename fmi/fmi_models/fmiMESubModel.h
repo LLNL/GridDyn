@@ -43,7 +43,7 @@ protected:
 	std::shared_ptr<fmi2ME> me;
 
   std::vector<outputEstimator *> oEst;  //!<vector of objects used for output estimation //TODO:: Make this an actual vector of objects
-  double localIntegrationTime = 0.01;
+  gridDyn_time localIntegrationTime = 0.01;
   fmuMode prevFmiState;
   std::vector<vInfo> stateInformation;
   std::vector<vInfo> outputInformation;
@@ -60,7 +60,7 @@ private:
   virtual ~fmiMESubModel();
   virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
 protected:
-  virtual void objectInitializeA (double time, unsigned long flags) override;
+  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 public:
   virtual void getParameterStrings(stringVec &pstr, paramStringType pstype) const override;
@@ -77,11 +77,11 @@ public:
   virtual void jacobianElements(const IOdata &args, const stateData *sD,
     matrixData<double> &ad,
     const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void timestep (double ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
   virtual void ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger(double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual void rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
 
   IOdata getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
   virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
@@ -89,12 +89,12 @@ public:
 
   virtual double getOutput(index_t num = 0) const override;
   virtual index_t getOutputLoc( const solverMode &sMode, index_t num = 0) const override;
-  //virtual void setTime(double time){prevTime=time;};
+  //virtual void setTime(gridDyn_time time){prevTime=time;};
 
 
-  virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   //for saving the state
-  virtual void guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   virtual void getTols(double tols[], const solverMode &sMode) override;
 

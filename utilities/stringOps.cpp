@@ -372,15 +372,11 @@ int trailingStringInt (const std::string &input, int defNum)
 
 
 
-
-
-
-
-static const charMapper numCheck("numericstart");
+static const charMapper<int> numCheck("numericstart");
 
 int intRead(const std::string &V, int def)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0])==0))
+	if ((V.empty()) || (numCheck[V[0]]==0))
 	{
 		return def;
 	}
@@ -396,7 +392,7 @@ int intRead(const std::string &V, int def)
 
 unsigned long indexRead(const std::string &V, unsigned long def)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == 0))
 	{
 		return def;
 	}
@@ -412,7 +408,7 @@ unsigned long indexRead(const std::string &V, unsigned long def)
 
 double  doubleRead(const std::string &V, double def)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == 0))
 	{
 		return def;
 	}
@@ -429,7 +425,7 @@ double  doubleRead(const std::string &V, double def)
 int intReadComplete(const std::string &V, int def)
 {
 	
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == 0))
 	{
 		return def;
 	}
@@ -457,7 +453,7 @@ int intReadComplete(const std::string &V, int def)
 
 double  doubleReadComplete(const std::string &V, double def)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == 0))
 	{
 		return def;
 	}
@@ -485,7 +481,7 @@ double  doubleReadComplete(const std::string &V, double def)
 
 long long  longlongReadComplete(const std::string &V, long long def)
 {
-	if ((V.empty()) || (numCheck.getKey(V[0]) == 0))
+	if ((V.empty()) || (numCheck[V[0]] == 0))
 	{
 		return def;
 	}

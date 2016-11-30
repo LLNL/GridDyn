@@ -26,23 +26,32 @@
 this is done for performance because many mathematical operations are needed on the time and this way
 it could be implemented using shift and masks for some conversions to floating point operations
 */
-template <int N>
+template <int N, typename base=long long int>
 class integer_time
 {
 private:
-	static const long long int scalar = (1 << N);
-	static const long long int fracMask = ((1 << N) - 1);
+	static const base scalar = (1 << N);
+	static const base fracMask = ((1 << N) - 1);
 public:
-	typedef long long int baseType;
+	typedef base baseType;
+	static baseType maxVal()
+	{
+		return MAXLL;
+	}
+	static baseType minVal()
+	{
+		return -(MAXLL - 1);
+	}
+
 	static baseType convert(double t)
 	{
 		if (t < -1e12)
 		{
-			return min();
+			return minVal();
 		}
 		double intpart;
 		double frac = std::modf(t, &intpart);
-		baseType nseconds = (static_cast<long long int>(intpart) << N) + static_cast<long long int>(ldexp(frac, N));
+		baseType nseconds = (static_cast<base>(intpart) << N) + static_cast<base>(ldexp(frac, N));
 		return nseconds;
 	}
 
@@ -50,14 +59,7 @@ public:
 	{
 		return (static_cast<double>(val >> N) + std::ldexp(static_cast<double>(fracMask & val), -N));
 	}
-	static baseType max()
-	{
-		return MAXLL;
-	}
-	static baseType min()
-	{
-		return -(MAXLL - 1);
-	}
+	
 };
 
 
@@ -69,17 +71,24 @@ const double fac10f[16]{ 1.0,10.0,100.0,1000.0,10'000.0,100'000.0,
 1'000'000.0,10'000'000.0,100'000'000.0,1'000'000'000.0,10'000'000'000.0,100'000'000'000.0,
 1'000'000'000'000.0,10'000'000'000'000.0,100'000'000'000'000.0,1'000'000'000'000'000.0 };
 
-template <int N>
+template <int N, typename base = long long int>
 class count_time
 {
 public:
-	typedef long long int baseType;
-
+	typedef base baseType;
+	static baseType maxVal()
+	{
+		return MAXLL;
+	}
+	static baseType minVal()
+	{
+		return -(MAXLL - 1);
+	}
 	static baseType convert(double t)
 	{
 		if (t < -1e12)
 		{
-			return min();
+			return minVal();
 		}
 		return (static_cast<baseType>(t*fac10f[N]));
 	}
@@ -88,21 +97,14 @@ public:
 	{
 		return (static_cast<double>(val / fac10[N]) + static_cast<double>(val%fac10[N]) / fac10f[N]);
 	}
-	static baseType max()
-	{
-		return MAXLL;
-	}
-	static baseType min()
-	{
-		return -(MAXLL - 1);
-	}
+	
 };
 
-
+template<typename base=double>
 class double_time
 {
 public:
-	typedef double baseType;
+	typedef base baseType;
 	static baseType convert(double t)
 	{
 		return t;
@@ -112,11 +114,11 @@ public:
 	{
 		return val;
 	}
-	static baseType max()
+	static baseType maxVal()
 	{
 		return (1e49);
 	}
-	static baseType min()
+	static baseType minVal()
 	{
 		return (-1.456e47);
 	}
@@ -158,16 +160,16 @@ public:
 		DOUBLETIME
 	}
 
-	static timeRepresentation max()
+	static timeRepresentation maxVal()
 	{
 		timeRepresentation tret;
-		tret.timecode = Tconv::max();
+		tret.timecode = Tconv::maxVal();
 		return tret;
 	}
-	static timeRepresentation min()
+	static timeRepresentation minVal()
 	{
 		timeRepresentation tret;
-		tret.timecode = Tconv::min();
+		tret.timecode = Tconv::minVal();
 		return tret;
 	}
 

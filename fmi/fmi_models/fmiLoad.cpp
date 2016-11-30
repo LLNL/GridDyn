@@ -196,7 +196,7 @@ void fmiLoad::setupFmiIo()
 	}
 	fmisub->set("outputs", outputs);
 }
-void fmiLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
+void fmiLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 	if (fmisub->isLoaded()) 
 	{
@@ -214,7 +214,7 @@ void fmiLoad::pFlowObjectInitializeA (double time0, unsigned long flags)
 		disable();
 	}
 }
-void fmiLoad::dynObjectInitializeA (double time0, unsigned long flags)
+void fmiLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
 	fmisub->initializeA(time0, flags);
 	gridLoad::dynObjectInitializeA(time0, flags);
@@ -389,12 +389,12 @@ void fmiLoad::rootTest(const IOdata &args, const stateData *sD, double roots[], 
 {
 	fmisub->rootTest(args, sD, roots, sMode);
 }
-void fmiLoad::rootTrigger(double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void fmiLoad::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
 	fmisub->rootTrigger(ttime,args, rootMask, sMode);
 }
 
-void fmiLoad::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void fmiLoad::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	fmisub->setState(ttime, state, dstate_dt, sMode);
 	auto out = fmisub->getOutputs({}, nullptr, cLocalSolverMode);
@@ -407,7 +407,7 @@ index_t fmiLoad::findIndex(const std::string &field, const solverMode &sMode) co
 	return fmisub->findIndex(field, sMode);
 }
 
-void fmiLoad::timestep(double ttime, const IOdata &args, const solverMode &sMode)
+void fmiLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
 	prevTime = ttime;
 	fmisub->timestep(ttime, args, sMode);

@@ -24,7 +24,7 @@ from both the input and states and summing them with the actual difference betwe
 class outputEstimator
 {
 public:
-	double time;
+	gridDyn_time time;
 	double prevValue;
 	std::vector<int> stateDep;
 	std::vector<int> inputDep;
@@ -32,11 +32,11 @@ public:
 	std::vector<double> inputDiff;
 	std::vector<double> prevInputs;
 	std::vector<double> prevStates;
-	double timeDiff = 0;
+	double timeDiff = 0.0;
 
 	outputEstimator(std::vector<int> sDep, std::vector<int> iDep);
-	double estimate(double time, const IOdata &args, const double state[]);
-	bool update(double time, double val, const IOdata &args, const double state[]);
+	double estimate(gridDyn_time time, const IOdata &args, const double state[]);
+	bool update(gridDyn_time time, double val, const IOdata &args, const double state[]);
 };
 
 

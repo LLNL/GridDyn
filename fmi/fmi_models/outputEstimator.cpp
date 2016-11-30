@@ -29,7 +29,7 @@ outputEstimator::outputEstimator(std::vector<int> sDep, std::vector<int> iDep)
 	prevInputs.resize(inputDep.size());
 }
 
-double outputEstimator::estimate(double t, const IOdata &args, const double state[])
+double outputEstimator::estimate(gridDyn_time t, const IOdata &args, const double state[])
 {
 	double val = prevValue;
 	for (size_t kk = 0; kk < stateDep.size(); ++kk)
@@ -44,7 +44,7 @@ double outputEstimator::estimate(double t, const IOdata &args, const double stat
 	return val;
 }
 
-bool outputEstimator::update(double t, double val, const IOdata &args, const double state[])
+bool outputEstimator::update(gridDyn_time t, double val, const IOdata &args, const double state[])
 {
 	time = t;
 	

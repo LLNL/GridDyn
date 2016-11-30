@@ -256,27 +256,86 @@ std::string characterReplace (const std::string &source, char key, std::string r
 std::string xmlCharacterCodeReplace(std::string str);
 
 /** small helper class to map characters to values*/
+template<typename V>
 class charMapper
 {
 private:
-	std::array<int, 256> key; //!< the character map
+	std::array<V, 256> key; //!< the character map
 public:
 	/** default constructor*/
-	charMapper();
+	charMapper(V defVal=V(0))
+	{
+		key.fill(defVal);
+	}
+		
+	void addKey(unsigned char x, V val)
+	{
+		key[x] = val;
+	}
 	/** @brief the main constructor 
 	 *@param[in] pmap a string containing a description of the map to use*/
-	explicit charMapper(const std::string &pmap);
+	explicit charMapper(const std::string &pmap)
+	{
+		key.fill(0);
+		if (pmap == "numericstart") //fill with all the values that would not preclude a string from containing a valid number
+		{
+			key['0'] = V(1);
+			key['1'] = V(1);
+			key['2'] = V(1);
+			key['3'] = V(1);
+			key['4'] = V(1);
+			key['5'] = V(1);
+			key['6'] = V(1);
+			key['7'] = V(1);
+			key['8'] = V(1);
+			key['9'] = V(1);
+			key['+'] = V(1);
+			key['-'] = V(1);
+			key[' '] = V(1);
+			key['\t'] = V(1);
+			key['.'] = V(1);
+			key['\n'] = V(1);
+			key['\r'] = V(1);
+			key['\0'] = V(1);
+		}
+		else if (pmap == "numeric") //load the characters that can be contained in a string of a number
+		{
+			key['0'] = V(1);
+			key['1'] = V(1);
+			key['2'] = V(1);
+			key['3'] = V(1);
+			key['4'] = V(1);
+			key['5'] = V(1);
+			key['6'] = V(1);
+			key['7'] = V(1);
+			key['8'] = V(1);
+			key['9'] = V(1);
+			key['+'] = V(1);
+			key['-'] = V(1);
+			key[' '] = V(1);
+			key['e'] = V(1);
+			key['.'] = V(1);
+		}
+	}
 	/** get the value assigned to a character
 	 * @param[in] x the character to test or convert
 	 * @return the resulting value,  0 if nothing in particular is specified in a given map
 	 */
-	int getKey(unsigned char x)const;
+	V at(unsigned char x)const
+	{
+		return key[x];
+	}
 	/** get the value assigned to a character by bracket notation
 	* @param[in] x the character to test or convert
 	* @return the resulting value,  0 if nothing in particular is specified in a given map
 	*/
-	int operator[](unsigned char x) const;
+	V operator[](unsigned char x) const
+	{
+		return key[x];
+	}
 
 };
+
+
 
 #endif

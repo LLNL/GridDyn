@@ -159,8 +159,8 @@ inline bool operator<=(double lhs, gridDyn_time t1)
 	return (gridDyn_time(lhs) <= t1);
 }
 
-const gridDyn_time maxTime=gridDyn_time::max();
-const gridDyn_time negTime=gridDyn_time::min();
+const gridDyn_time maxTime=gridDyn_time::maxVal();
+const gridDyn_time negTime=gridDyn_time::minVal();
 const gridDyn_time timeZero(0.0);
 const gridDyn_time timeOne(1.0);
 
