@@ -18,7 +18,7 @@
 #include "zmqSocketDescriptor.h"
 #include "zmqContextManager.h"
 #include "zmqHelper.h"
-#include "zmqreactor.h"
+#include "zmqReactor.h"
 
 #include <chrono>
 #include <thread>
