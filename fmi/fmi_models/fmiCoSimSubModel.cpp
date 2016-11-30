@@ -57,7 +57,7 @@ bool fmiCoSimSubModel::isLoaded() const
 	return (cs) ? true : false;
 }
 
-void fmiCoSimSubModel::objectInitializeA(double time, unsigned long flags)
+void fmiCoSimSubModel::objectInitializeA(gridDyn_time time, unsigned long flags)
 {
 	if (CHECK_CONTROLFLAG(force_constant_pflow_initialization, flags))
 	{
@@ -397,7 +397,7 @@ void fmiCoSimSubModel::loadSizes(const solverMode &sMode, bool dynOnly)
 }
 
 
-void fmiCoSimSubModel::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void fmiCoSimSubModel::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	/*if (hasDifferential(sMode))
 	{
@@ -455,7 +455,7 @@ void fmiCoSimSubModel::setState(double ttime, const double state[], const double
 	*/
 }
 //for saving the state
-void fmiCoSimSubModel::guess(double ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void fmiCoSimSubModel::guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
 	/*
 	if (m_stateSize == 0)
@@ -656,7 +656,7 @@ void fmiCoSimSubModel::jacobianElements(const IOdata &args, const stateData *sD,
 
 }
 
-void fmiCoSimSubModel::timestep(double ttime, const IOdata &args, const solverMode &sMode)
+void fmiCoSimSubModel::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
 
 /*	double h = localIntegrationTime;
@@ -764,7 +764,7 @@ void fmiCoSimSubModel::rootTest(const IOdata &args, const stateData *sD, double 
 	//cs->getEventIndicators(&(roots[rootOffset]));
 }
 
-void fmiCoSimSubModel::rootTrigger(double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void fmiCoSimSubModel::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
 {
 	cs->setMode(fmuMode::eventMode);
 	//TODO: deal with the event

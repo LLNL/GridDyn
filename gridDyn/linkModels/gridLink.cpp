@@ -510,7 +510,7 @@ double  gridLink::get (const std::string &param, units_t unitType) const
   return val;
 }
 
-void gridLink::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridLink::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   if (!B1)
     {
@@ -552,7 +552,7 @@ int gridLink::fixPower  (double rPower, double /*qPower*/, index_t mterminal, in
   return fixRealPower (rPower, mterminal, fixedTerminal, unitType);
 }
 
-void gridLink::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridLink::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   if ((B1 == nullptr) || (B2 == nullptr))
     {

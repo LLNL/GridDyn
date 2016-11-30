@@ -397,7 +397,7 @@ void schedulerRamp::updatePTarget ()
   if (pTarget.empty ())
     {
       PRampCurr = 0;
-      nextUpdateTime = kBigNum;
+      nextUpdateTime = maxTime;
       return;
     }
   else
@@ -452,7 +452,7 @@ void schedulerRamp::updatePTarget ()
           else
             {
               PRampCurr = 0;
-              nextUpdateTime = kBigNum;
+              nextUpdateTime = maxTime;
             }
           return;
         }

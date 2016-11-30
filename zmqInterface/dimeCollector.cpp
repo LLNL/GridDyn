@@ -15,7 +15,7 @@
 #include "dimeClientInterface.h"
 #include "core/helperTemplates.h"
 
-dimeCollector::dimeCollector(double time0, double period):collector(time0,period)
+dimeCollector::dimeCollector(gridDyn_time time0, gridDyn_time period):collector(time0,period)
 {
 
 }
@@ -47,7 +47,7 @@ std::shared_ptr<collector> dimeCollector::clone(std::shared_ptr<collector> gr) c
 	return nrec;
 }
 
-change_code dimeCollector::trigger(double time)
+change_code dimeCollector::trigger(gridDyn_time time)
 {
 	if (!dime)
 	{

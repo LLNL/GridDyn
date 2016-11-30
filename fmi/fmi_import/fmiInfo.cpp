@@ -12,7 +12,7 @@
 */
 
 #include "fmiInfo.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include "tinyxml2ReaderElement.h"
 
 fmiInfo::fmiInfo()
@@ -663,7 +663,7 @@ void loadDependencies(std::shared_ptr<readerElement> &rd, std::vector<int> &stor
 		auto attDep = rd->getAttribute("dependencies");
 		auto attDepKind = rd->getAttribute("dependenciesKind");
 		index_t row = static_cast<index_t>(att.getValue());
-		auto dep = str2vectorInt(attDep.getText(), 0, " ");
+		auto dep = str2vector<int>(attDep.getText(), 0, " ");
 		auto depknd = (attDepKind.isValid()) ? splitline(attDepKind.getText(), " ", delimiter_compression::on) : stringVector();
 		store.push_back(row - 1);
 		auto validdepkind = (depknd.size() > 0);

@@ -199,7 +199,7 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void breaker::conditionTriggered (index_t conditionNum, double triggeredTime)
+void breaker::conditionTriggered (index_t conditionNum, gridDyn_time triggeredTime)
 {
   if (conditionNum == 0)
     {
@@ -501,7 +501,7 @@ void breaker::resetBreaker (gridDyn_time time)
   opFlags.reset (breaker_tripped_flag);
   //timestep (time, solverMode::pFlow);
   triggerAction (1); //reclose the breaker
-  nextUpdateTime = kBigNum;
+  nextUpdateTime = maxTime;
   if (!opFlags[nonlink_source_flag])
     {//do a recompute power
       static_cast<gridLink *> (m_sourceObject)->updateLocalCache ();

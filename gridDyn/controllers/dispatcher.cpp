@@ -33,7 +33,7 @@ gridCoreObject * dispatcher::clone (gridCoreObject * /*obj*/) const
 void dispatcher::moveSchedulers (dispatcher * /*dis*/)
 {
 }
-double dispatcher::initialize (double /*time0*/, double /*dispatch*/)
+double dispatcher::initialize (gridDyn_time /*time0*/, double /*dispatch*/)
 {
   return 0;
 }

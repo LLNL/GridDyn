@@ -155,7 +155,7 @@ protected:
   count_t linkCount = 0;           //!<counter for the number of links
   gridDyn_time probeStepTime = 1e-3;                                  //!< initial step size
   double powerAdjustThreshold = 0.01;                   //!< tolerance on the power adjust step
-  gridDyn_time powerFlowStartTime = kNullVal;                 //!< power flow start time  if nullval then it computes based on start time;
+  gridDyn_time powerFlowStartTime = negTime;                 //!< power flow start time  if nullval then it computes based on start time;
   struct tolerances tols;                                               //!< structure of the tolerances
 
 
@@ -236,12 +236,12 @@ public:
   /**@brief run the simulation until the specified time
   @param[in] t_end  the simulation time to stop defaults to the time given in system parameters
   @return int indicating success (0) or failure (non-zero)*/
-  int run (gridDyn_time t_end = kNullVal) override;
+  int run (gridDyn_time t_end = negTime) override;
 
   /**@brief initialize the simulation for power flow at the specified time
   @param[in] time0 the time of the initialization default to 0
   @return int indicating success (0) or failure (non-zero)*/
- int pFlowInitialize (gridDyn_time time0 = kNullVal);
+ int pFlowInitialize (gridDyn_time time0 = negTime);
 
   /**@brief step the simulation until the next event or stop point
   @param[in] t_end the maximum time to stop
@@ -261,11 +261,11 @@ public:
   @return int indicating success (0) or failure (non-zero)*/
   int step () override;
 
-  /**@brief run powerflow in event driven mode,  evaluate the power flow at every given event or iteration time
+  /**@brief run powerFlow in event driven mode,  evaluate the power flow at every given event or iteration time
   @param[in] t_end the stopping time for the simulation
-  @param[in] t_step  the step size (the maximum time between powerflow evaluation is t_step
+  @param[in] t_step  the step size (the maximum time between powerFlow evaluation is t_step
   @return int indicating success (0) or failure (non-zero)*/
-  virtual int eventDrivenPowerflow (gridDyn_time t_end = kNullVal, gridDyn_time t_step = kNullVal);
+  virtual int eventDrivenPowerflow (gridDyn_time t_end = negTime, gridDyn_time t_step = negTime);
 
   /** @brief execute a specific command
   *@param[in] cmd  the command to execute
@@ -306,7 +306,7 @@ public:
   /**@brief initialize the simulation for dynamic simulation at the specified time
   @param[in] tStart the time of the initialization default to 0
   @return int indicating success (0) or failure (non-zero)*/
-  int dynInitialize (gridDyn_time tStart = kNullVal);   //code can detect this default param and use a previously specified start time
+  int dynInitialize (gridDyn_time tStart = negTime);   //code can detect this default param and use a previously specified start time
   void alert (gridCoreObject *object, int code) override;
 
   /** @brief function to count the number of MPI objects required for this simulation
@@ -560,21 +560,21 @@ protected:
   @param[in] tStop the stop time for the simulation
   @return FUNCTION_EXECUTION_SUCCESS(0) if successful negative number if not
   */
-  virtual int dynamicDAE (double tStop);
+  virtual int dynamicDAE (gridDyn_time tStop);
 
   /** @brief execute a partitioned dynamic simulation
   @param[in] tStop the stop time for the simulation
   @param[in] tStep the step interval (defaults to the step size parameter stored in the simulation
  @return FUNCTION_EXECUTION_SUCCESS(0) if successful negative number if not
   */
-  virtual int dynamicPartitioned (double tStop, double tStep = kNullVal);
+  virtual int dynamicPartitioned (gridDyn_time tStop, gridDyn_time tStep = negTime);
 
   /** @brief execute a decoupled dynamic simulation
   @param[in] tStop the stop time for the simulation
   @param[in] tStep the step interval (defaults to the step size parameter stored in the simulation
  @return FUNCTION_EXECUTION_SUCCESS(0) if successful negative number if not
   */
-  virtual int dynamicDecoupled (double tStop, double tStep = kNullVal);
+  virtual int dynamicDecoupled (gridDyn_time tStop, gridDyn_time tStep = negTime);
 
   /** @brief ensure that the simulation has consistent initial conditions for starting a dynamic simulation
   @param[in] sMode the solver mode for which to generate the initial conditions
@@ -616,7 +616,7 @@ protected:
   @param[in] sMode the solverMode to run
   @return true if the reset Function was run and did something
   */
-  bool checkEventsForDynamicReset (double cTime, const solverMode &sMode);
+  bool checkEventsForDynamicReset (gridDyn_time cTime, const solverMode &sMode);
 
 
 private:
@@ -625,7 +625,7 @@ private:
 
   int dynamicDAEStartupConditions (std::shared_ptr<solverInterface> &dynData, const solverMode &sMode);
   int dynamicPartitionedStartupConditions (std::shared_ptr<solverInterface> &dynDataDiff, std::shared_ptr<solverInterface> &dynDataAlg, const solverMode &sModeDiff, const solverMode &sModeAlg);
-  int runDynamicSolverStep (std::shared_ptr<solverInterface> &dynDataDiff, double nextStop, double &timeReturn);
+  int runDynamicSolverStep (std::shared_ptr<solverInterface> &dynDataDiff, gridDyn_time nextStop, gridDyn_time &timeReturn);
 
   static gridDynSimulation* s_instance;        //!< static variable to set the master simulation instance
 };

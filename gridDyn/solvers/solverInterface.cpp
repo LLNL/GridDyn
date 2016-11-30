@@ -16,7 +16,7 @@
 #include "core/factoryTemplates.h"
 #include "core/gridDynExceptions.h"
 #include "gridDyn.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 #include <string>
 #include <iostream>
@@ -83,7 +83,7 @@ std::shared_ptr<solverInterface> solverInterface::clone(std::shared_ptr<solverIn
 		si->allocate(svsize, rootCount);
 		if (initialized)
 		{
-			si->initialize(0);
+			si->initialize(0.0);
 		}
 		//copy the state data
 		const double *sd = state_data();
@@ -163,7 +163,7 @@ void solverInterface::sparseReInit (sparse_reinit_modes /*mode*/)
 void solverInterface::setConstraints ()
 {
 }
-int solverInterface::calcIC (gridDyn_time /*t0*/, double /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
+int solverInterface::calcIC (gridDyn_time /*t0*/, gridDyn_time /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
 {
   return -101;
 }
@@ -383,7 +383,7 @@ void solverInterface::set (const std::string &param, const std::string &val)
     }
   else if (param == "mask")
     {
-      auto sep = str2vectorInt (val, -1, ",;");
+      auto sep = str2vector<int>(val, -1, ",;");
       maskElements.resize (sep.size ());
       for (size_t kk = 0; kk < sep.size (); ++kk)
         {
@@ -629,7 +629,7 @@ void solverInterface::check_flag (void *flagvalue, const std::string &funcname, 
 
 }
 
-int solverInterface::solve (double /*tStop*/, double & /*tReturn*/, step_mode)
+int solverInterface::solve (gridDyn_time /*tStop*/, gridDyn_time & /*tReturn*/, step_mode)
 {
   return -101;
 }

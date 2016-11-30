@@ -63,7 +63,7 @@ public:
 	virtual void timestep(gridDyn_time ttime, const solverMode &sMode) override;
 	virtual void updateA(gridDyn_time time) override;
 
-	void actionTaken(index_t conditionNum, index_t ActionNum, change_code actionReturn, double /*actionTime*/) override;
+	void actionTaken(index_t conditionNum, index_t ActionNum, change_code actionReturn, gridDyn_time /*actionTime*/) override;
 };
 
 

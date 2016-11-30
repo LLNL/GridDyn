@@ -71,11 +71,11 @@ public:
   /** get the maximum available power withing a specified time window
   @param[in] time the time window to make the power
   */
-  virtual double getMax(gridDyn_time time = kBigNum) const;
+  virtual double getMax(gridDyn_time time = maxTime) const;
   /** get the low power level available withing a specified time window
   @param[in] time the time window to make the power level
   */
-  virtual double getMin(gridDyn_time time = kBigNum) const;
+  virtual double getMin(gridDyn_time time = maxTime) const;
 protected:
   virtual void insertTarget (tsched ts);
   void clearSchedule ();
@@ -100,10 +100,10 @@ protected:
 	
   double rampUp = kBigNum;  //!< maximum ramp rate in the up direction
   double rampDown = kBigNum; //!< maximum ramp rate in the down direction
-  double rampTime = 20 * 60;  //!< the ramp window
-  double dPdt = 0;                      //!< the actual ramp rate
-  double PRampCurr = 0;         //!< the current scheduled ramp rate
-  double lastTargetTime = -kBigNum;  //!< the time of the last scheduled target power level
+  gridDyn_time rampTime = 20.0 * 60.0;  //!< the ramp window
+  double dPdt = 0.0;                      //!< the actual ramp rate
+  double PRampCurr = 0.0;         //!< the current scheduled ramp rate
+  gridDyn_time lastTargetTime = negTime;  //!< the time of the last scheduled target power level
 
   double ramp10Up = kBigNum;            //!<[puMW] The 10 minute maximum up ramp
   double ramp30Up = kBigNum;            //!< the 30 minute maximum up ramp
@@ -112,11 +112,11 @@ protected:
   rampMode_t mode = interp;                     //!< the interpolation mode
 
   //spinning reserve capacity
-  double reserveAvail = 0;                      //!< the amount of reserve power in the generator
-  double reserveUse = 0;                        //!< the amount of reserve power to use
-  double reserveRampTime = 15 * 60;     //!< the time window the object has to meet the reserve
-  double reserveAct = 0;                        //!< the actual current reserve
-  double reservePriority = 0;           //!< the priority level of the reserve
+  double reserveAvail = 0.0;                      //!< the amount of reserve power in the generator
+  double reserveUse = 0.0;                        //!< the amount of reserve power to use
+  gridDyn_time reserveRampTime = 15.0 * 60.0;     //!< the time window the object has to meet the reserve
+  double reserveAct = 0.0;                        //!< the actual current reserve
+  double reservePriority = 0.0;           //!< the priority level of the reserve
 
 
 public:
@@ -157,8 +157,8 @@ public:
     return reserveAvail;
   }
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = kBigNum) const override;
-  virtual double getMin (gridDyn_time time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = maxTime) const override;
+  virtual double getMin (gridDyn_time time = maxTime) const override;
 protected:
   virtual void updatePTarget ();
   virtual void insertTarget (tsched ts) override;
@@ -232,8 +232,8 @@ public:
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = kBigNum) const override;
-  virtual double getMin (gridDyn_time time = -kBigNum) const override;
+  virtual double getMax (gridDyn_time time = maxTime) const override;
+  virtual double getMin (gridDyn_time time = maxTime) const override;
 
 protected:
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;

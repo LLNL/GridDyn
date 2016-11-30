@@ -16,7 +16,7 @@
 
 #include "gridLoad.h"
 
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 #include <array>
 
 class gridBus;
@@ -66,7 +66,7 @@ protected:
   double dutyCycle = 0.5;
   double transTime = 0.05;
   double A = 0.0;
-  double cycleTime = kBigNum;
+  double cycleTime =kBigNum;
   double baseLoadP = 0.0;
   double baseLoadQ = 0.0;
   double shift = 0.0;                                 //!<storage for phase shift fraction (should be between 0 and 1)
@@ -190,7 +190,7 @@ public:
 
 protected:
   double min_t = 0.0;
-  double max_t = 100;
+  double max_t = 100.0;
   double min_L = 0.0;
   double max_L = 0.0;
   double mean_t = 0.0;
@@ -204,7 +204,7 @@ protected:
 
   double offset = 0;
 
-  double keyTime = 0;
+  gridDyn_time keyTime = timeZero;
 
 public:
   explicit gridRandomLoad (const std::string &objName = "randomLoad_$");
@@ -237,8 +237,8 @@ public:
 
   void setTime (gridDyn_time time) override;
 protected:
-  void nextStep (double triggerTime);
-  double ntime ();
+  void nextStep (gridDyn_time triggerTime);
+  gridDyn_time ntime ();
   double nval ();
 };
 
@@ -253,7 +253,7 @@ public:
   };
 protected:
   std::string fname;			//!< the name of the file
-  timeSeriesMulti schedLoad;		//!< time series containing the load information
+  timeSeriesMulti<> schedLoad;		//!< time series containing the load information
   gridUnits::units_t inputUnits = gridUnits::defUnit;
   double scaleFactor = 1.0;			//!< scaling factor on the load
   index_t currIndex = 0;			//!< the current index on timeSeries

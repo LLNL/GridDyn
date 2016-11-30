@@ -46,9 +46,9 @@ gridCoreObject *infiniteBus::clone (gridCoreObject *obj) const
 
 void infiniteBus::updateVoltageAngle (gridDyn_time ttime)
 {
-  double dt = (ttime - prevTime);
+  double dt = static_cast<double>(ttime - prevTime);
 
-  angle += 2 * kPI * dt * (dfdt / 2.0 + (freq - 1.0));
+  angle += 2.0 * kPI * dt * (dfdt / 2.0 + (freq - 1.0));
   freq += dfdt * dt;
   voltage += dvdt * dt;
 }
@@ -115,19 +115,19 @@ double infiniteBus::getAngle (const double /*state*/[], const solverMode &) cons
 
 double infiniteBus::getVoltage (const stateData *sD, const solverMode &) const
 {
-  const double dt = (sD) ? sD->time - prevTime : 0.0;
+  const double dt = (sD) ? static_cast<double>(sD->time - prevTime) : 0.0;
   return voltage + dt * dvdt;
 }
 
 double infiniteBus::getAngle (const stateData *sD, const solverMode &) const
 {
-  const double dt = (sD) ? sD->time - prevTime : 0.0;
+  const double dt = (sD) ? static_cast<double>(sD->time - prevTime) : 0.0;
   return angle + 2 * kPI * (dt * ((freq - 1.0) + dfdt / 2));
 }
 
 double infiniteBus::getFreq (const stateData *sD, const solverMode &) const
 {
-  double dt = (sD) ? (sD->time - prevTime) : 0.0;
+  double dt = (sD) ? static_cast<double>(sD->time - prevTime) : 0.0;
   return freq + dt * dfdt;
 }
 

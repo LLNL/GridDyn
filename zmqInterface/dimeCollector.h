@@ -24,13 +24,13 @@ private:
 	std::string processName;
 	std::unique_ptr<dimeClientInterface> dime;
 public:
-	dimeCollector(double time0 = 0, double period = 1.0);
+	dimeCollector(gridDyn_time time0 = timeZero, gridDyn_time period = timeOne);
 	explicit dimeCollector(const std::string &name);
 	~dimeCollector();
 
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
 
-	virtual change_code trigger(double time) override;
+	virtual change_code trigger(gridDyn_time time) override;
 
 
 	void set(const std::string &param, double val) override;

@@ -14,7 +14,7 @@
 #ifndef GRIDDYN_COLLECTOR_H_
 #define GRIDDYN_COLLECTOR_H_
 
-#include "timeSeries.h"
+#include "timeSeriesMulti.h"
 #include "eventInterface.h"
 
 #include "units.h"
@@ -51,10 +51,10 @@ protected:
 	std::vector<std::string> warnList;  //!< listing for the number of warnings
 	std::string  name;  //!< name of the collector
 	gridDyn_time timePeriod; //!< the actual period of the collector
-	double reqPeriod; //!< the requested period of the collector
-	double startTime = -kBigNum; //!< the time to start collecting
-	double stopTime = kBigNum;  //!< the time to stop collecting
-	double triggerTime = -kBigNum; //!< the next trigger time for the collector
+	gridDyn_time reqPeriod; //!< the requested period of the collector
+	gridDyn_time startTime = negTime; //!< the time to start collecting
+	gridDyn_time stopTime = maxTime;  //!< the time to stop collecting
+	gridDyn_time triggerTime = negTime; //!< the next trigger time for the collector
 	std::vector<double> data;
 	count_t columns = 0; //!< the length of the data vector
 	/** data structure to capture the grabbers and location for a specific grabber*/
@@ -78,7 +78,7 @@ protected:
 	bool delayProcess = true;          //!< wait to process recorders until other events have executed
 
 public:
-	collector(gridDyn_time time0 = 0, double period = 1.0);
+	collector(gridDyn_time time0 = timeZero, gridDyn_time period = 1.0);
 	explicit collector(const std::string &name);
 	virtual ~collector();
 
@@ -87,7 +87,7 @@ public:
 	virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	virtual change_code trigger(gridDyn_time time) override;
 	void recheckColumns();
-	double nextTriggerTime() const override
+	gridDyn_time nextTriggerTime() const override
 	{
 		return triggerTime;
 	}
@@ -174,8 +174,8 @@ class gridRecorder : public collector
 {
 protected:
   
-  double lastSaveTime = -kBigNum; //!< the last time the recorder saved to file
-  timeSeriesMulti dataset;  //!< the actual time series data
+  gridDyn_time lastSaveTime = negTime; //!< the last time the recorder saved to file
+  timeSeriesMulti<double,gridDyn_time> dataset;  //!< the actual time series data
   std::string filename; //!< the filename to store the data
   std::string directory; //!< the directory to generate the specified file 
   
@@ -184,7 +184,7 @@ protected:
   int precision = -1;                //!< precision for writing text files.
   count_t autosave = 0;			//!< flag indicating the recorder should autosave after the given number of points
 public:
-  gridRecorder (gridDyn_time time0 = 0,double period = 1.0);
+  gridRecorder (gridDyn_time time0 = timeZero,gridDyn_time period = 1.0);
   explicit gridRecorder(const std::string &name);
   ~gridRecorder ();
 
@@ -215,11 +215,11 @@ public:
   
   void reset ();
 
-  const timeSeriesMulti * getData () const
+  const timeSeriesMulti<double,gridDyn_time> * getData () const
   {
     return &(dataset);
   }
-  const std::vector<double> &getTime () const
+  const std::vector<gridDyn_time> &getTime () const
   {
     return dataset.time;
   }

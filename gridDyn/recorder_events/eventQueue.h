@@ -73,7 +73,7 @@ public:
     checkDuplicates ();
     return ev->eventID;
   }
-  //template<>
+
   /** @brief insert an eventAdapter into the queue
    take as an input a shared pointer to an object that implements an event interface and makes an eventAdapter out of it
   @arg newEvent  a shared pointer to the eventAdapter object
@@ -90,7 +90,7 @@ public:
   /** @brief get the next event time
         @return the next Event time
         */
-  virtual double getNextTime () const;
+  virtual gridDyn_time getNextTime () const;
 
   /** @brief clone the entire queue to a new queue
   @param[in] eQ the eventQueue to clone to
@@ -104,20 +104,19 @@ public:
   @param[in] cTime the current Time
   @return code describing the effect of the executed events
   */
-  virtual change_code executeEvents (double cTime);
+  virtual change_code executeEvents (gridDyn_time cTime);
 
   /** @brief Execute the first part of the events only
   @param[in] cTime the current Time
   @return code describing the effect of the executed events
   */
-  virtual change_code executeEventsAonly (double cTime);
+  virtual change_code executeEventsAonly (gridDyn_time cTime);
 
   /** @brief Execute second portion of any events where the A portion (could be skipped) was executed by a call to
   execute A Events only
-  @param[in] cTime the current Time
   @return code describing the effect of the executed events
   */
-  virtual change_code executeEventsBonly (double cTime);
+  virtual change_code executeEventsBonly ();
 
   /** @brief sort the event Queue by time */
   virtual void sort ();
@@ -149,10 +148,10 @@ public:
   @param[in] time the time for the null event
   @param[in] period the period of the null event
   */
-  void nullEventTime (gridDyn_time time, double period = kNullVal);
+  void nullEventTime (gridDyn_time time, gridDyn_time period = negTime);
 
   /** @brief get the time for the next Null Event*/
-  double getNullEventTime () const;
+  gridDyn_time getNullEventTime () const;
 };
 
 

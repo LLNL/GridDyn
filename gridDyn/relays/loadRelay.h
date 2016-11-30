@@ -28,9 +28,9 @@ public:
 protected:
   double cutoutVoltage = 0;			//!<[puV] low voltage trigger for load
   double cutoutFrequency = 0;		//!<[puHz] low frequency trigger for load
-  double voltageDelay = 0;			//!<[s]  the delay on the voltage trip
-  double frequencyDelay = 0;		//!<[s] the delay on the frequency tripping
-  double offTime = kBigNum;			//!<[s] the time before the load comes back on line if the trip cause has been corrected
+  gridDyn_time voltageDelay = timeZero;			//!<[s]  the delay on the voltage trip
+  gridDyn_time frequencyDelay = timeZero;		//!<[s] the delay on the frequency tripping
+  gridDyn_time offTime = maxTime;			//!<[s] the time before the load comes back on line if the trip cause has been corrected
 public:
   loadRelay (const std::string &objName = "loadRelay_$");
   virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
@@ -41,9 +41,9 @@ public:
 
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 protected:
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
-  virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
-  virtual void conditionCleared (index_t conditionNum, double triggerTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, gridDyn_time triggerTime) override;
 
 };
 

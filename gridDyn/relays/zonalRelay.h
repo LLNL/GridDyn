@@ -30,7 +30,7 @@ protected:
   index_t m_terminal = 1;        //!< the side of the line to connect 1=from side 2=to side, 3+ for multiterminal devices
   double m_resetMargin = 0.01; //!<! the reset margin for clearing a fault
   std::vector<double> m_zoneLevels;        //!< the level of impedance to trigger
-  std::vector<double> m_zoneDelays;       //!< the delay upon which to act for the relay
+  std::vector<gridDyn_time> m_zoneDelays;       //!< the delay upon which to act for the relay
   count_t m_condition_level = kInvalidCount;    //!< the level of condition that has been triggered
   int autoName = -1;                                    //!< storage for indicator of the type of autoname to use
 public:
@@ -44,9 +44,9 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 protected:
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
-  virtual void conditionTriggered (index_t conditionNum, double triggerTime) override;
-  virtual void conditionCleared (index_t conditionNum, double triggerTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, gridDyn_time triggerTime) override;
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
   /** function to automatically generate the comm system names
   @param[in] code  a code value representing the method of generating the name

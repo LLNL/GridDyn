@@ -129,7 +129,7 @@ void commSource::updateA(gridDyn_time time)
 	if (time > nextUpdateTime)
 	{
 		mp_dOdt = 0;
-		nextUpdateTime = kBigNum;
+		nextUpdateTime = maxTime;
 	}
 }
 

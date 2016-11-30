@@ -45,34 +45,34 @@ bool operator!= (const tsched &td1, const tsched &td2)
 {
   return (td1.time != td2.time);
 }
-bool operator< (const tsched &td1, const double &timeC)
+bool operator< (const tsched &td1, double timeC)
 {
   return (td1.time < timeC);
 }
-bool operator<= (const tsched &td1, const double &timeC)
+bool operator<= (const tsched &td1, double timeC)
 {
   return (td1.time <= timeC);
 }
-bool operator> (const tsched &td1, const double &timeC)
+bool operator> (const tsched &td1, double timeC)
 {
   return (td1.time > timeC);
 }
-bool operator>= (const tsched &td1, const double &timeC)
+bool operator>= (const tsched &td1, double timeC)
 {
   return (td1.time >= timeC);
 }
-bool operator== (const tsched &td1, const double &timeC)
+bool operator== (const tsched &td1, double timeC)
 {
   return (td1.time == timeC);
 }
-bool operator!= (const tsched &td1, const double &timeC)
+bool operator!= (const tsched &td1, double timeC)
 {
   return (td1.time != timeC);
 }
 
 scheduler::scheduler(const std::string &objName, double initialValue) : gridSource(objName, initialValue), PCurr(initialValue)
 {
-	prevTime = -kBigNum;     //override default setting
+	prevTime = negTime;     //override default setting
 
 }
 
@@ -141,7 +141,7 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
 
 void scheduler::setTarget (const std::string &filename)
 {
-  timeSeries targets;
+  timeSeries<double,gridDyn_time> targets;
   targets.loadBinaryFile (filename);
   
   std::list<tsched> flist;
@@ -175,8 +175,8 @@ void scheduler::setTime (gridDyn_time time)
 
 void scheduler::updateA (gridDyn_time time)
 {
-  double dt = (time - prevTime);
-  if (dt == 0)
+  auto dt = (time - prevTime);
+  if (dt == timeZero)
     {
       return;
     }
@@ -197,7 +197,7 @@ void scheduler::updateA (gridDyn_time time)
           pTarget.pop_front ();
           if (pTarget.empty ())
             {
-              nextUpdateTime = kBigNum;
+              nextUpdateTime = maxTime;
 
               break;
             }
@@ -360,7 +360,7 @@ void scheduler::clearSchedule ()
   if (!pTarget.empty ())
     {
       pTarget.resize (0);
-      nextUpdateTime = kBigNum;
+      nextUpdateTime = maxTime;
       alert (this, UPDATE_TIME_CHANGE);
     }
 }

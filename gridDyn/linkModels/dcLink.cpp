@@ -158,7 +158,7 @@ void dcLink::pFlowObjectInitializeB ()
 
 }
 
-void dcLink::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void dcLink::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   m_dstate_dt.resize (1);
   m_state.resize (1);

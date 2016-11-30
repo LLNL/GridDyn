@@ -145,10 +145,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
         }
       else
         {
-          stateData sD;
-          sD.time = sim->getCurrentTime ();
-          sD.state = solver->state_data ();
-          sD.dstate_dt = solver->deriv_data ();
+		  stateData sD(sim->getCurrentTime(), solver->state_data(), solver->deriv_data());
           change_code ret = sim->rootCheck (&sD, solver->getSolverMode (), check_level_t::reversable_only);
           sim->handleRootChange (solver->getSolverMode (), solver);
           if (ret > change_code::non_state_change)
@@ -173,7 +170,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
   return retval;
 }
 
-//check for some low voltage condtions and change the low voltage load conditions
+//check for some low voltage conditions and change the low voltage load conditions
 int dynamicInitialConditionRecovery::dynamicFix3 ()
 {
 

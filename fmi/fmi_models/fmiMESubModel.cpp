@@ -57,7 +57,7 @@ bool fmiMESubModel::isLoaded() const
 	return (me)?true:false;
 }
 
-void fmiMESubModel::objectInitializeA (double time, unsigned long flags)
+void fmiMESubModel::objectInitializeA (gridDyn_time time, unsigned long flags)
 {
 	if (CHECK_CONTROLFLAG(force_constant_pflow_initialization, flags))
 	{
@@ -319,7 +319,7 @@ double fmiMESubModel::get(const std::string &param, gridUnits::units_t unitType)
 
 	if (param == "localintegrationtime")
 	{
-		return localIntegrationTime;
+		return static_cast<double>(localIntegrationTime);
 	}
 	else
 	{
@@ -398,7 +398,7 @@ void fmiMESubModel::loadSizes(const solverMode &sMode, bool dynOnly)
 }
 
 
-void fmiMESubModel::setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void fmiMESubModel::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	if (hasDifferential(sMode))
 	{
@@ -455,7 +455,7 @@ void fmiMESubModel::setState(double ttime, const double state[], const double ds
 	prevTime = ttime;
 }
 //for saving the state
-void fmiMESubModel::guess(double /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void fmiMESubModel::guess(gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
 	if (m_stateSize == 0)
 	{
@@ -563,12 +563,12 @@ void fmiMESubModel::derivative(const IOdata &args, const stateData *sD, double d
 	if (isDynamic(sMode))
 	{
 		me->getDerivatives(Loc.destDiffLoc);
-		printf("tt=%f,I=%f, state=%f deriv=%e\n", sD->time,args[0],Loc.diffStateLoc[0],Loc.destDiffLoc[0]);
+		printf("tt=%f,I=%f, state=%f deriv=%e\n", static_cast<double>(sD->time),args[0],Loc.diffStateLoc[0],Loc.destDiffLoc[0]);
 	}
 	else
 	{
 		me->getDerivatives(Loc.destLoc);
-		printf("tt=%f,I=%f, state=%f,deriv=%e\n", sD->time,args[0],Loc.algStateLoc[0],Loc.destLoc[0]);
+		printf("tt=%f,I=%f, state=%f,deriv=%e\n", static_cast<double>(sD->time),args[0],Loc.algStateLoc[0],Loc.destLoc[0]);
 	}
 }
 
@@ -763,17 +763,17 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 
 }
 
-void fmiMESubModel::timestep(double ttime, const IOdata &args, const solverMode &)
+void fmiMESubModel::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
 
-	double h = localIntegrationTime;
+	gridDyn_time h = localIntegrationTime;
 	//int sv = 0;
 	//double aval = 0.95;
 	//size_t aloc = 7;
-	double time = prevTime;
+	gridDyn_time time = prevTime;
 	fmi2Boolean eventMode;
 	fmi2Boolean terminateSim;
-	double Tend = ttime;
+	gridDyn_time Tend = ttime;
 	std::vector<double> der_x(m_stateSize);
 	std::vector<double> der_x2(m_stateSize);
 	std::vector<double> prevInput(m_inputSize);
@@ -783,9 +783,10 @@ void fmiMESubModel::timestep(double ttime, const IOdata &args, const solverMode 
 	//get the current states
 	me->getStates(m_state.data());
 	//compute the slopes of the inputs
+	double h2 = 1.0 / (ttime - prevTime);
 	for (size_t kk = 0; kk < m_inputSize; ++kk)
 	{
-		inputSlope[kk] = (args[kk] - prevInput[kk]) / (ttime - prevTime);
+		inputSlope[kk] = (args[kk] - prevInput[kk]) *h2;
 	}
 	while (time < Tend)
 	{
@@ -795,11 +796,11 @@ void fmiMESubModel::timestep(double ttime, const IOdata &args, const solverMode 
 		// advance time
 
 		time = time + h;
-		vectorMultAdd(prevInput, inputSlope, h, prevInput);
+		vectorMultAdd(prevInput, inputSlope, static_cast<double>(h), prevInput);
 		me->setInputs(prevInput.data());
 		me->setTime(time);
 		// set states at t = time and perform one step
-		vectorMultAdd(m_state, der_x, h, m_state);
+		vectorMultAdd(m_state, der_x, static_cast<double>(h), m_state);
 		me->setStates(m_state.data());
 		
 		// get event indicators at t = time
@@ -894,7 +895,7 @@ void fmiMESubModel::rootTest(const IOdata &args, const stateData *sD, double roo
 	me->getEventIndicators(&(roots[rootOffset]));
 }
 
-void fmiMESubModel::rootTrigger(double /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode &)
+void fmiMESubModel::rootTrigger(gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode &)
 {
 	me->setMode(fmuMode::eventMode);
 	//TODO: deal with the event

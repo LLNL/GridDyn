@@ -128,14 +128,14 @@ void basicOdeSolver::set(const std::string &param, double val)
 
 }
 
-int basicOdeSolver::solve(double tStop, double &tReturn, step_mode stepMode)
+int basicOdeSolver::solve(gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
 {
 	if( solveTime==tStop)
 	{
 		tReturn = tStop;
 		return FUNCTION_EXECUTION_SUCCESS;
 	}
-	double Tstep = (std::min)(deltaT, tStop - solveTime);
+	gridDyn_time Tstep = (std::min)(deltaT, tStop - solveTime);
 	if (mode.pairedOffsetIndex != kNullLocation)
 	{
 		int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);

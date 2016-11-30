@@ -54,7 +54,7 @@ private:
 public:
 	void registerSubscription(const std::string &sub);
 	void registerPublication(const std::string &pub);
-	void makeZPLfile(const std::string &fname, const zplInfo &info);
+	std::string makeZPLConfig(const zplInfo &info);
 
 	static std::shared_ptr<fncsRegister> instance();
 };

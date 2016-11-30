@@ -31,7 +31,7 @@ public:
 	fmiExciter(std::string fmd = "");
 	~fmiExciter();
 	virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
-	virtual void objectInitializeA (double time, unsigned long flags) override;
+	virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
 	virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
 	virtual void set (const std::string &param, const std::string &val) override;
@@ -42,16 +42,16 @@ public:
 
 	virtual void derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;     //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
-	virtual void setState(double ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+	virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 	virtual void outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
 	virtual void ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 	virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
 	virtual void rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-	virtual void rootTrigger(double ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
+	virtual void rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
 
 	virtual index_t findIndex(const std::string &field, const solverMode &sMode) const override;
-	virtual void timestep(double ttime, const IOdata &args, const solverMode &sMode) override;
+	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
 	virtual IOdata getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 protected:

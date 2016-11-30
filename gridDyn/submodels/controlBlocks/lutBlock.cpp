@@ -15,7 +15,7 @@
 #include "vectorOps.hpp"
 #include "timeSeries.h"
 #include "matrixData.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 #include <utility>
 
 lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
@@ -127,7 +127,7 @@ void lutBlock::set (const std::string &param,  const std::string &val)
   else if (param == "file")
     {
       std::string temp = val;
-      timeSeries ts (temp);
+      timeSeries<> ts (temp);
      
       lut.clear ();
       lut.push_back (std::make_pair (-kBigNum, 0.0));

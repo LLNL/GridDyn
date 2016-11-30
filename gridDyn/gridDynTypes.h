@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2016, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,9 +17,9 @@
 #define GRIDDYN_TYPES_H_
 
 #include "griddyn-config.h"
-
+#include "gridDyn_time.h"
 #include <cstdint>
-#include <cmath>
+
 
 #ifdef ENABLE_64_BIT_INDEXING
 typedef std::uint64_t index_t;
@@ -30,7 +30,7 @@ typedef std::uint32_t count_t;
 #endif
 
 //at some point gridDyn may move to a different type for the time representation
-typedef double gridDyn_time;
+//typedef double gridDyn_time;
 
 const index_t kNullLocation (static_cast<index_t>(-1));
 const index_t kInvalidLocation (static_cast<index_t>(-2));
@@ -56,139 +56,116 @@ enum class change_code
   state_count_change = 5,               //!< a change in the number of states occurred
 };
 
-/** prototype class for representing time in GridDyn (incomplete yet)
-@details implements time as a count of 1/2^30 seconds  roughly corresponding to 1 ns (actually about 0.93 ns)
-this is done for performance because many mathematical operations are needed on the time and this way
-it could be implemented using shift and masks for some conversions to floating point operations
-*/
-
-class gridDyn_time2
-{
-private:
-	static const long long int scalar = (1<<30);
-	static const double scalarf;
-	long long int nseconds = 0;
-public:
-	//implicit conversion requested
-	gridDyn_time2(double t)
-	{
-		double intpart;
-		double frac=std::modf(t, &intpart);
-		nseconds = static_cast<long long int>(intpart)*scalar + static_cast<long long int>(frac*scalarf);
-	}
-
-	gridDyn_time2(const gridDyn_time2 &x):nseconds(x.nseconds)
-	{
-		
-	}
-
-	gridDyn_time2(long long int nsec) :nseconds(nsec)
-	{
-
-	}
-
-	gridDyn_time2& operator= (const gridDyn_time2 &x)
-	{
-		nseconds = x.nseconds;
-		return *this;
-	}
-
-	gridDyn_time2& operator= (const double x)
-	{
-		double intpart;
-		double frac = std::modf(x, &intpart);
-		nseconds = (static_cast<long long>(intpart)<<30) + static_cast<long long>(frac*scalarf);
-		return *this;
-	}
-
-	operator double()
-	{
-		return (static_cast<double>(nseconds >> 30) + static_cast<double>(0x0000'0000'3FFF'FFFF & nseconds) / scalarf);
-	}
-
-	gridDyn_time2 &operator+=(const gridDyn_time2 &rhs) {
-		nseconds += rhs.nseconds;
-		return *this;
-	}
-
-	gridDyn_time2 &operator-=(const gridDyn_time2 &rhs) {
-		nseconds -= rhs.nseconds;
-		return *this;
-	}
-
-	gridDyn_time2 operator+(const gridDyn_time2 &other) const 
-	{
-		return gridDyn_time2(nseconds + other.nseconds);
-	}
-
-	gridDyn_time2 operator-(const gridDyn_time2 &other) const
-	{
-		return gridDyn_time2(nseconds - other.nseconds);
-	}
-
-	gridDyn_time2 operator*(int multiplier) const
-	{
-		return gridDyn_time2(nseconds*multiplier);
-	}
-
-	gridDyn_time2 operator*(double multiplier) const
-	{
-		return gridDyn_time2(static_cast<double>(nseconds)*multiplier);
-	}
-
-	gridDyn_time2 operator/(int divisor) const
-	{
-		return gridDyn_time2(nseconds/divisor);
-	}
-
-	gridDyn_time2 operator/(double divisor) const
-	{
-		return gridDyn_time2(static_cast<double>(nseconds)/divisor);
-	}
-
-	bool operator==(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds == rhs.nseconds);
-	}
-
-	bool operator!=(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds != rhs.nseconds);
-	}
-
-	bool operator>(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds > rhs.nseconds);
-	}
-
-	bool operator<(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds < rhs.nseconds);
-	}
-
-	bool operator>=(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds >= rhs.nseconds);
-	}
-
-	bool operator<=(const gridDyn_time2 &rhs) const
-	{
-		return (nseconds <= rhs.nseconds);
-	}
 
 
-};
+
+typedef timeRepresentation<count_time<9>> gridDyn_time;
 
 
-inline double operator/(double x, gridDyn_time2 t)
+inline double operator/(double x, gridDyn_time t)
 {
 	return x / static_cast<double>(t);
 }
 
-inline gridDyn_time2 operator*(double x, gridDyn_time2 t)
+inline double operator*(double x, gridDyn_time t)
 {
-	return t*x;
+	return x*static_cast<double>(t);
 }
 
+
+inline gridDyn_time operator-(gridDyn_time t, double x)
+{
+	return t-gridDyn_time(x);
+}
+
+inline gridDyn_time operator-(double x, gridDyn_time t)
+{
+	return gridDyn_time(x)-t;
+}
+
+inline gridDyn_time operator+(gridDyn_time t, double x)
+{
+	return t + gridDyn_time(x);
+}
+
+inline gridDyn_time operator+(double x, gridDyn_time t)
+{
+	return gridDyn_time(x) + t;
+}
+
+inline double operator/(gridDyn_time t1, gridDyn_time t2)
+{
+	return static_cast<double>(t1) / static_cast<double>(t2);
+}
+
+
+inline bool operator==(gridDyn_time t1, double rhs)
+{
+	return (t1 == gridDyn_time(rhs));
+}
+
+inline bool operator!=(gridDyn_time t1, double rhs)
+{
+	return (t1 != gridDyn_time(rhs));
+}
+
+inline bool operator>(gridDyn_time t1, double rhs)
+{
+	return (t1 > gridDyn_time(rhs));
+}
+
+inline bool operator<(gridDyn_time t1, double rhs)
+{
+	return (t1 < gridDyn_time(rhs));
+}
+
+inline bool operator>=(gridDyn_time t1,double rhs)
+{
+	return (t1 >= gridDyn_time(rhs));
+}
+
+inline bool operator<=(gridDyn_time t1, double rhs)
+{
+	return (t1 <= gridDyn_time(rhs));
+}
+
+inline bool operator==(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) == t1);
+}
+
+inline bool operator!=(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) != t1);
+}
+
+inline bool operator>(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) > t1);
+}
+
+inline bool operator<(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) < t1);
+}
+
+inline bool operator>=(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) >= t1);
+}
+
+inline bool operator<=(double lhs, gridDyn_time t1)
+{
+	return (gridDyn_time(lhs) <= t1);
+}
+
+const gridDyn_time maxTime=gridDyn_time::maxVal();
+const gridDyn_time negTime=gridDyn_time::minVal();
+const gridDyn_time timeZero(0.0);
+const gridDyn_time timeOne(1.0);
+
+const gridDyn_time kDayLength(86400.0f);
+const gridDyn_time kSmallTime(1e-7);
+const gridDyn_time kShortTime(1e-6);
 
 #endif

@@ -152,7 +152,7 @@ void gridSimulation::add (std::list<std::shared_ptr<gridEvent> > elist)
 }
 
 
-int gridSimulation::run (double /*finishTime*/)
+int gridSimulation::run (gridDyn_time /*finishTime*/)
 {
   return FUNCTION_EXECUTION_FAILURE;
 }
@@ -366,7 +366,7 @@ void gridSimulation::log (gridCoreObject *object, print_level level, const std::
       object = this;
     }
   std::string cname = '[' + ((object->getID () == getID ()) ? "sim" : (fullObjectName (object) + '(' + std::to_string (object->getUserID ()) + ')')) + ']';
-  std::string simtime = ((currentTime > kNullVal / 2) ? '(' + std::to_string (currentTime) + ')' : std::string ("(PRESTART)"));
+  std::string simtime = ((currentTime > negTime) ? '(' + std::to_string (currentTime) + ')' : std::string ("(PRESTART)"));
   std::string key;
   if (level == print_level::warning)
     {
@@ -553,7 +553,7 @@ void gridSimulation::resetObjectCounters ()
 }
 
 
-double gridSimulation::getEventTime () const
+gridDyn_time gridSimulation::getEventTime () const
 {
   return EvQ->getNextTime ();
 }

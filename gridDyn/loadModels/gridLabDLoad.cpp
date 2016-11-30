@@ -196,7 +196,7 @@ void gridLabDLoad::pFlowObjectInitializeB ()
 
 }
 
-void gridLabDLoad::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridLabDLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
 
   switch (dynCoupling)

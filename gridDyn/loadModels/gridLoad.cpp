@@ -94,7 +94,7 @@ gridCoreObject *gridLoad::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void gridLoad::pFlowObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridLoad::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   bus = static_cast<gridBus *> (find ("bus"));
   if (!bus)
@@ -122,7 +122,7 @@ void gridLoad::setLoad (double Plevel, double Qlevel,units_t unitType)
   Q = unitConversion (Qlevel, unitType, puMW, systemBasePower);
 }
 
-void gridLoad::dynObjectInitializeA (double /*time0*/, unsigned long flags)
+void gridLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long flags)
 {
   double V;
   if ((opFlags[convert_to_constant_impedance])||CHECK_CONTROLFLAG (flags,all_loads_to_constant_impedence))

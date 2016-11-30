@@ -20,7 +20,7 @@
 #include <boost/filesystem.hpp>
 
 
-gridRecorder::gridRecorder (gridDyn_time time0, double period) :  collector (time0,period)
+gridRecorder::gridRecorder (gridDyn_time time0, gridDyn_time period) :  collector (time0,period)
 {
 
 }
@@ -134,7 +134,6 @@ void gridRecorder::saveFile (const std::string &fname)
         }
 
     }
-  int ret;
   if (!savefileName.empty ())
     {
       if (!directory.empty ())
@@ -148,8 +147,7 @@ void gridRecorder::saveFile (const std::string &fname)
       auto tmp = savefileName.parent_path ();
       if (!tmp.empty ())
         {
-          auto res = boost::filesystem::exists (tmp);
-          if (!res)
+          if (!boost::filesystem::exists(tmp))
             {
               boost::filesystem::create_directories (tmp);
             }
@@ -160,7 +158,7 @@ void gridRecorder::saveFile (const std::string &fname)
           recheckColumns ();
         }
       dataset.description = name + ": " + description;
-      bool append = (lastSaveTime > -kHalfBigNum);
+      bool append = (lastSaveTime > negTime);
 
       //create the file based on extension
       if (bFile)

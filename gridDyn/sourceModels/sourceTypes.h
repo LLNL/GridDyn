@@ -54,7 +54,7 @@ protected:
 	double period = kBigNum;         //!<[s] pulse period
 	double dutyCycle = 0.5;           //!<[%] pulse duty cycle
 	double A = 0.0;                    //!< pulse amplitude
-	double cycleTime = kBigNum;           //!<[s] the start time of the last cycle
+	double cycleTime= kBigNum;           //!<[s] the start time of the last cycle
 	double baseValue;                  //!< the base level of the output
 	double shift = 0;                 //!< storage for phase shift fraction (should be between 0 and 1)
 
@@ -132,7 +132,7 @@ protected:
 	double stdev_L = 0.0;         //!< the standard deviation of the level changes
 	double zbias = 0.0;           //!< a factor describing the preference of changes to trend toward zero mean
 	double offset = 0.0;          //!< the current bias in the value
-	double keyTime = 0.0;         //!< the next time change
+	gridDyn_time keyTime = 0.0;         //!< the next time change
 
 	std::unique_ptr<gridRandom> timeGenerator;            //!< random number generator for the time
 	std::unique_ptr<gridRandom> valGenerator;                     //!< random number generator for the value
@@ -164,8 +164,8 @@ public:
 
 	void setTime(gridDyn_time time) override;
 protected:
-	void nextStep(double triggerTime);
-	double ntime();
+	void nextStep(gridDyn_time triggerTime);
+	gridDyn_time ntime();
 	double nval();
 };
 
@@ -181,7 +181,7 @@ public:
 	};
 private:
 	std::string fname;  //!< name of the file
-	timeSeries schedLoad;  //!< time series containing the output schedule
+	timeSeries<double, gridDyn_time> schedLoad;  //!< time series containing the output schedule
 	index_t currIndex = 0;                //!< the current location in the file
 	count_t count = 0;            //!< the total number of elements in the file
 	index_t m_column = 0;         //!< the column of the file to use

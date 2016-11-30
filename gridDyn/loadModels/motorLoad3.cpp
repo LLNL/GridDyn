@@ -133,7 +133,7 @@ void motorLoad3::converge ()
 
 }
 
-void motorLoad3::dynObjectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void motorLoad3::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
 
 }

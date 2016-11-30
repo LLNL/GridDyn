@@ -82,7 +82,7 @@ void basicSolver::allocate (count_t stateCount, count_t numRoots)
 	}
 }
 
-void basicSolver::initialize (double /*t0*/)
+void basicSolver::initialize (gridDyn_time /*time0*/)
 {
   if (!allocated)
     {
@@ -148,7 +148,7 @@ void basicSolver::set (const std::string &param, double val)
 
 void cleanOscillations (const std::vector<double> &s1, const std::vector<double> &s2, std::vector<double> &s3, double conv);
 
-int basicSolver::solve (double tStop, double & /*tReturn*/, step_mode /*stepMode*/)
+int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mode /*stepMode*/)
 {
   double md = 1.0;
   iterations = 0;

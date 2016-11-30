@@ -107,7 +107,7 @@ protected:
   count_t max_iterations = 10000;                                    //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
   double tolerance = 1e-8;												//!<the default solver tolerance
-  gridDyn_time solveTime = -kBigNum;                            //!< storage for the time the solver is called
+  gridDyn_time solveTime = negTime;                            //!< storage for the time the solver is called
 	//TODO:convert to a bitset instead of all the flags
   bool dense = false;													//!< if the solver should use a dense or sparse version
   bool constantJacobian = false;										//!< if the solver should just keep a constant Jacobian
@@ -205,7 +205,7 @@ public:
   @param[in] constraints  flag indicating that constraints should be used
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
-  virtual int calcIC (gridDyn_time t0, double tstep0, ic_modes mode, bool constraints);
+  virtual int calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes mode, bool constraints);
   /** @brief get the current solution
    usually called after a call to CalcIC to get the calculated conditions
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
@@ -260,7 +260,7 @@ public:
   @param[in] stepMode  the step mode
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
-  virtual int solve (double tStop, double & tReturn, step_mode stepMode = step_mode::normal);
+  virtual int solve (gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal);
   /** @brief resize the storage array for the Jacobian
   @param[in] size  the number of elements to potentially store
   */
@@ -418,13 +418,13 @@ public:
   const double * deriv_data() const override;
   const double * type_data() const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (double t0) override;
+  virtual void initialize (gridDyn_time t0) override;
 
   virtual double get (const std::string & param) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
 
-  virtual int solve (double tStop, double & tReturn, step_mode stepMode = step_mode::normal) override;
+  virtual int solve (gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal) override;
 };
 
 /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
@@ -436,7 +436,7 @@ private:
 	std::vector<double> deriv;  //!< temp state data location 1
 	std::vector<double> state2;  //!< temp state data location 2
 	std::vector<double> type;                     //!< type data
-	double deltaT = 0.005;  //!< the default time step
+	gridDyn_time deltaT = 0.005;  //!< the default time step
 public:
 	/** @brief default constructor*/
 	explicit basicOdeSolver(const std::string &objName = "basicOde");
@@ -461,7 +461,7 @@ public:
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val) override;
 
-	virtual int solve(double tStop, double & tReturn, step_mode stepMode = step_mode::normal) override;
+	virtual int solve(gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal) override;
 };
 
 /** @brief make a solver from a particular mode

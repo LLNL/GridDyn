@@ -336,14 +336,14 @@ static const std::map<int, std::string> cvodeRetCodes {
   {CV_BAD_T, "The time t is outside the last step taken" },
   {CV_FIRST_RHSFUNC_ERR, "The user - provided rhs function failed recoverably on the first call" },
   {CV_REPTD_RHSFUNC_ERR, "convergence test failed with repeated recoverable errors in the rhs function" },
-  {CV_RTFUNC_FAIL, "The rootfinding function failed in an unrecoverable manner" },
+  {CV_RTFUNC_FAIL, "The rootFinding function failed in an unrecoverable manner" },
   {CV_UNREC_RHSFUNC_ERR, "The user-provided right hand side function repeatedly returned a recoverable error flag, but the solver was unable to recover" },
   {CV_BAD_K, "Bad K" },
   {CV_BAD_DKY, "Bad DKY" },
 };
 /* *INDENT-ON* */
 
-void cvodeInterface::initialize (double t0)
+void cvodeInterface::initialize (gridDyn_time t0)
 {
   if (!allocated)
     {
@@ -482,13 +482,15 @@ void cvodeInterface::getCurrentData ()
   */
 }
 
-int cvodeInterface::solve (double tStop, double &tReturn, step_mode stepMode)
+int cvodeInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
   icCount = 0;
   
-  int retval = CVode (solverMem, tStop, state, &tReturn, (stepMode == step_mode::normal) ? CV_NORMAL : CV_ONE_STEP);
+  double tret;
+  int retval = CVode (solverMem, tStop, state, &tret, (stepMode == step_mode::normal) ? CV_NORMAL : CV_ONE_STEP);
+  tReturn = tret;
   check_flag (&retval, "CVodeSolve", 1, false);
   if (retval == CV_ROOT_RETURN)
     {

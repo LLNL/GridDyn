@@ -13,8 +13,8 @@
 
 #include "fncsSupport.h"
 
-#include <iostream>
-#include <fstream>
+#include <sstream>
+
 
 #ifdef FULLCPP14
 
@@ -54,9 +54,9 @@ void fncsRegister::registerPublication(const std::string &pub)
 }
 
 static const std::string indent("    ");  //4 spaces
-void fncsRegister::makeZPLfile(const std::string &fileName, const zplInfo &info)
+std::string fncsRegister::makeZPLConfig( const zplInfo &info)
 {
-	std::ofstream zpl(fileName);
+	std::stringstream zpl;
 	zpl << "name = " << info.name << '\n';
 	zpl << "time_delta = " << info.minTimeStep << info.minTimeStepUnits << '\n';
 	zpl << "broker = " << info.brokerAddress << '\n';
@@ -65,7 +65,7 @@ void fncsRegister::makeZPLfile(const std::string &fileName, const zplInfo &info)
 	{
 		zpl << indent << sub << '\n';
 	}
-
+	return zpl.str();
 }
 
 std::shared_ptr<fncsRegister> fncsRegister::p_instance;

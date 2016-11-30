@@ -23,7 +23,7 @@ private:
 	std::vector<std::pair<std::string,std::string>> complexPairs;
 	std::vector<std::string> cnames;
 public:
-	fncsCollector(gridDyn_time time0 = 0, double period = 1.0);
+	fncsCollector(gridDyn_time time0 = timeZero, gridDyn_time period = timeOne);
 	explicit fncsCollector(const std::string &name);
 	~fncsCollector();
 

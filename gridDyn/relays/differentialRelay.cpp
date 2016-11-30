@@ -195,7 +195,7 @@ void differentialRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned lon
   gridRelay::pFlowObjectInitializeA (time0, flags);
 }
 
-void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, double /*actionTime*/)
+void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
 {
   LOG_NORMAL ("Relay Tripped");
 
@@ -210,7 +210,7 @@ void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/
 
 }
 
-void differentialRelay::conditionTriggered (index_t /*conditionNum*/, double /*triggerTime*/)
+void differentialRelay::conditionTriggered (index_t /*conditionNum*/, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ("differential condition met");
   if (opFlags.test (use_commLink))
@@ -222,7 +222,7 @@ void differentialRelay::conditionTriggered (index_t /*conditionNum*/, double /*t
 
 }
 
-void differentialRelay::conditionCleared (index_t /*conditionNum*/, double /*triggerTime*/)
+void differentialRelay::conditionCleared (index_t /*conditionNum*/, gridDyn_time /*triggerTime*/)
 {
   LOG_NORMAL ("differential condition cleared");
 

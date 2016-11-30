@@ -153,7 +153,7 @@ void gridRelay::setSink (gridCoreObject *obj)
   m_sinkObject = obj;
 }
 
-void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber, double delayTime)
+void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber, gridDyn_time delayTime)
 {
   if (conditionNumber >= conditions.size ())
     {
@@ -178,7 +178,7 @@ void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber,
 
 }
 
-void gridRelay::setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, double delayTime)
+void gridRelay::setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, gridDyn_time delayTime)
 {
   if (actionNumber >= actions.size ())
     {
@@ -289,7 +289,7 @@ void gridRelay::removeAction (index_t actionNumber)
           if (mcd.actionNum == actionNumber)
             {
               //set all the existing delay time for this action to a very large number
-              mcd.delayTime = kBigNum;
+              mcd.delayTime = maxTime;
             }
         }
     }
@@ -344,7 +344,7 @@ int gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t condi
     }
   conditions[conditionNumber] = gc;
   cStates[conditionNumber] = condition_states::active;
-  conditionTriggerTimes[conditionNumber] = -kBigNum;
+  conditionTriggerTimes[conditionNumber] = negTime;
   updateRootCount (true);
   return LOADED;
 }
@@ -406,10 +406,14 @@ void gridRelay::set (const std::string &param,  const std::string &val)
 void gridRelay::set (const std::string &param, double val, units_t unitType)
 {
 
-  if ((param == "samplingrate")||(param == "ts"))
+  if ((param == "samplingperiod")||(param == "ts")||(param=="sampleperiod"))
     {
       gridCoreObject::set ("period", val, unitType);
     }
+  else if ((param == "rate") || (param == "fs") || (param == "samplerate"))
+  {
+	  gridCoreObject::set("period", 1.0/unitConversion(val,unitType,Hz));
+  }
   else
     {
 	  if (cManager.set(param, val))
@@ -463,7 +467,7 @@ void gridRelay::updateA (gridDyn_time time)
 {
   auto ncond = condChecks;
   condChecks.clear ();
-  nextUpdateTime = kBigNum;
+  nextUpdateTime = maxTime;
   if (opFlags[continuous_flag])
     {
       for (auto &cond : ncond)
@@ -505,7 +509,7 @@ void gridRelay::updateA (gridDyn_time time)
             }
         }
 
-      if (time + kMin_Res >= m_nextSampleTime)
+      if (time + kSmallTime >= m_nextSampleTime)
         {
           for (index_t kk = 0; kk < conditions.size (); ++kk)
             {
@@ -522,6 +526,7 @@ void gridRelay::updateA (gridDyn_time time)
         }
 
     }
+  assert(nextUpdateTime > negTime / 2);
   lastUpdateTime = time;
 }
 
@@ -568,12 +573,12 @@ void gridRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long /*flags*
     }
   else
     {
-      if (updatePeriod > kHalfBigNum)
+      if (updatePeriod == maxTime)
         {        //set the period to the period of the simulation
           updatePeriod = parent->find ("root")->get ("steptime");
-          if (updatePeriod < 0)
+          if (updatePeriod < timeZero)
             {
-              updatePeriod = 1.0;
+              updatePeriod = timeOne;
             }
         }
       m_nextSampleTime = nextUpdateTime = time0 + updatePeriod;
@@ -708,7 +713,7 @@ change_code gridRelay::rootCheck (const stateData *sD, const solverMode &, check
 {
   count_t prevTrig = triggerCount;
   count_t prevAct = actionsTakenCount;
-  double ctime = (sD) ? (sD->time) : prevTime;
+  gridDyn_time ctime = (sD) ? (sD->time) : prevTime;
   updateA (ctime);
   if ((triggerCount > prevTrig) || (actionsTakenCount > prevAct))
     {
@@ -726,7 +731,7 @@ void gridRelay::clearCondChecks (index_t condNum)
 {
   auto cc = condChecks;
   condChecks.resize (0);
-  double mTime = nextUpdateTime;
+  gridDyn_time mTime = nextUpdateTime;
   for (auto &cond : cc)
     {
       if (cond.conditionNum != condNum)
@@ -785,7 +790,7 @@ int gridRelay::sendAlarm (std::uint32_t code)
   return FUNCTION_EXECUTION_FAILURE;
 }
 
-change_code gridRelay::triggerCondition (index_t conditionNum, double conditionTriggerTime,double ignoreDelayTime)
+change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time conditionTriggerTime,gridDyn_time ignoreDelayTime)
 {
   change_code eventReturn = change_code::no_change;
   cStates[conditionNum] = condition_states::triggered;
@@ -830,7 +835,7 @@ change_code gridRelay::triggerCondition (index_t conditionNum, double conditionT
 }
 
 
-change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, double actionTime)
+change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, gridDyn_time actionTime)
 {
   auto eventReturn = actions[actionNum]->execute (actionTime);
   ++actionsTakenCount;
@@ -838,7 +843,7 @@ change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, d
   return eventReturn;
 }
 
-change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, double conditionTriggerTime, double ignoreDelayTime)
+change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, gridDyn_time conditionTriggerTime, gridDyn_time ignoreDelayTime)
 {
   change_code eventReturn = change_code::no_change;
   //now check the multiCondition triggers
@@ -875,7 +880,7 @@ change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, double 
 }
 
 
-change_code gridRelay::evaluateCondCheck (condCheckTime &cond, double checkTime)
+change_code gridRelay::evaluateCondCheck (condCheckTime &cond, gridDyn_time checkTime)
 {
   change_code eventReturn = change_code::no_change;
   if (checkTime + kSmallTime >= cond.testTime)
@@ -893,7 +898,7 @@ change_code gridRelay::evaluateCondCheck (condCheckTime &cond, double checkTime)
           else               //it was a multiCondition trigger
             {
               bool all_triggered = true;
-              double trigDelay = multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
+              gridDyn_time trigDelay = multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
               for (auto &cnum : multiConditionTriggers[cond.conditionNum][cond.actionNum].multiConditions)
                 {
                   if (cStates[cnum] != condition_states::triggered)
@@ -941,14 +946,14 @@ change_code gridRelay::evaluateCondCheck (condCheckTime &cond, double checkTime)
 }
 
 #ifdef DEBUG_LOG_ENABLE
-void gridRelay::actionTaken ( index_t ActionNum, index_t conditionNum, change_code actionReturn, double /*actionTime*/)
+void gridRelay::actionTaken ( index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time /*actionTime*/)
 {
   LOG_DEBUG ((boost::format ("action %d taken based on condition %d  with return code %d") % ActionNum % conditionNum  % static_cast<int> (actionReturn)).str ());
 
 }
 void gridRelay::conditionTriggered (index_t conditionNum, gridDyn_time timeTriggered)
 {
-  if (conditionTriggerTimes[conditionNum] > 0)
+  if (conditionTriggerTimes[conditionNum] > timeZero)
     {
       LOG_DEBUG ((boost::format ("condition %d triggered again at %f") % conditionNum % timeTriggered).str ())
     }
@@ -960,7 +965,7 @@ void gridRelay::conditionTriggered (index_t conditionNum, gridDyn_time timeTrigg
 }
 void gridRelay::conditionCleared (index_t conditionNum, gridDyn_time timeTriggered)
 {
-  if (conditionTriggerTimes[conditionNum] > 0)
+  if (conditionTriggerTimes[conditionNum] > timeZero)
     {
       LOG_DEBUG ((boost::format ("condition %d cleared again at %f") % conditionNum % timeTriggered).str ());
     }

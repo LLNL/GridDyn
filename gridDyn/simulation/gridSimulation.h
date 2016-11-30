@@ -72,7 +72,7 @@ protected:
 
   std::string stateFile;                                        //!<record file for the state
   std::string recordDirectory;                                  //!<folder location for storing recorded files
-  double state_record_period = -1.0;                            //!<how often to record the state
+  gridDyn_time state_record_period = negTime;                            //!<how often to record the state
 
 
   std::ofstream logFileStream;  //!< logging file stream
@@ -88,25 +88,25 @@ protected:
   count_t errorCount = 0;                                       //!<count the number of logged warnings
   // ---------------- clock ----------------
 
-  double startTime = 0.0;                                           //!< [s]  start time
-  double stopTime = 0.0;                                            //!< [s]  end time
-  double currentTime = kNullVal;                                       //!< [s]  current time
-  double stepTime = 0.05;                                           //!< [s]  time step
-  gridDyn_time timeReturn = 0.0;                                          //!< [s]  time returned by the solver
-  double nextStopTime = -kBigNum;                                   //!< next time to stop the dynamic Simulation
+  gridDyn_time startTime = timeZero;                                           //!< [s]  start time
+  gridDyn_time stopTime = timeZero;                                            //!< [s]  end time
+  gridDyn_time currentTime = negTime;                                       //!< [s]  current time
+  gridDyn_time stepTime = 0.05;                                           //!< [s]  time step
+  gridDyn_time timeReturn = timeZero;                                          //!< [s]  time returned by the solver
+  gridDyn_time nextStopTime = negTime;                                   //!< next time to stop the dynamic Simulation
 
-  double minUpdateTime = 0.0001;                                    //!<minimum time period to go between updates; for the hybrid simultaneous partitioned solution
-  double maxUpdateTime = kBigNum;                                   //!<(s) max time period to go between updates
+  gridDyn_time minUpdateTime = 0.0001;                                    //!<minimum time period to go between updates; for the hybrid simultaneous partitioned solution
+  gridDyn_time maxUpdateTime = maxTime;                                   //!<(s) max time period to go between updates
   double absTime = 0;                                               //!< [s] seconds in unix time of the system start time;
 
 
   // ---------------- recorders ----------------
-  double recordStart = -kBigNum;                                         //!< [s]  recorder start time
-  double recordStop = kBigNum;                                          //!< [s]  recorder stop time
+  gridDyn_time recordStart = negTime;                                         //!< [s]  recorder start time
+  gridDyn_time recordStop = maxTime;                                          //!< [s]  recorder stop time
   std::vector < std::shared_ptr < collector >> collectorList;               //!< vector storing recorder objects
-  double nextRecordTime = kBigNum;                             //!<time for the next set of recorders
+  gridDyn_time nextRecordTime = maxTime;                             //!<time for the next set of recorders
 
-  double lastStateRecordTime = -kBigNum;                      //!<last time the full state was recorded
+  gridDyn_time lastStateRecordTime = negTime;                      //!<last time the full state was recorded
 
   // ----------------timestepP -----------------
   std::shared_ptr<eventQueue> EvQ;       //!< the event queue for the simulation system
@@ -177,7 +177,7 @@ public:
 @param[in] finishTime  the time to run to
 @return return code 0 for success other for failure
 */
-  virtual int run (double finishTime = kNullVal);
+  virtual int run (gridDyn_time finishTime = negTime);
   /** @brief have the simulator step forward in time
   @return return code 0 for success other for failure
   */
@@ -201,7 +201,7 @@ public:
    * \brief Gets the current simulation time.
    * \return a double representing the current simulation time, in seconds.
    */
-  double getCurrentTime () const
+  gridDyn_time getCurrentTime () const
   {
     return currentTime;
   }
@@ -210,7 +210,7 @@ public:
    * \brief Gets the simulation start time.
    * \return a double representing the simulation start time, in seconds.
    */
-  double getStartTime () const
+  gridDyn_time getStartTime () const
   {
     return startTime;
   }
@@ -219,7 +219,7 @@ public:
   * \brief gets the next event time.
   * \return a double representing the next scheduled event in GridDyn.
   */
-  double getEventTime () const;
+  gridDyn_time getEventTime () const;
 };
 
 /** @brief find an object that has the same properties as obj1 located int the tree from src in the tree given by sec

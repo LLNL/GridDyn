@@ -61,7 +61,7 @@ void compoundEventPlayer::setTimeValue(gridDyn_time time, double val)
 	value = val;
 }
 
-void compoundEventPlayer::setTimeValue(const std::vector<double> &, const std::vector<double> &)
+void compoundEventPlayer::setTimeValue(const std::vector<gridDyn_time> &, const std::vector<double> &)
 {
 
 	
@@ -98,7 +98,7 @@ void compoundEventPlayer::updateTrigger(gridDyn_time time)
 		currIndex++;
 		if (static_cast<size_t> (currIndex) >= ts.count)
 		{
-			if (period > 0)                     //if we have a period loop the time series
+			if (period > timeZero)                     //if we have a period loop the time series
 			{
 				if (time - ts.time[currIndex] > period)
 				{
@@ -132,7 +132,7 @@ void compoundEventPlayer::updateTrigger(gridDyn_time time)
 	}
 	else                //no file so loop if there is a period otherwise disarm
 	{
-		if (period > 0)
+		if (period > timeZero)
 		{
 			do
 			{
@@ -153,7 +153,7 @@ std::string compoundEventPlayer::toString()
 	if (eFile.empty())
 	{
 		ss << '@' << triggerTime;
-		if (period > 0)
+		if (period > timeZero)
 		{
 			ss << '+' << period << '|';
 		}

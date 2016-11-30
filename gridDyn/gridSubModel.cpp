@@ -58,7 +58,7 @@ void gridSubModel::initializeB (const IOdata &args, const IOdata &outputSet, IOd
       m_dstate_dt.resize (ns, 0);
 
       objectInitializeB (args, outputSet, inputSet);
-      if (updatePeriod < kHalfBigNum)
+      if (updatePeriod < maxTime)
         {
           opFlags.set (has_updates);
           nextUpdateTime = prevTime + updatePeriod;

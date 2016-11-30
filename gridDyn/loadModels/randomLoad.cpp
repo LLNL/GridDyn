@@ -219,7 +219,7 @@ void gridRandomLoad::set (const std::string &param, double val, units_t unitType
 
 void gridRandomLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 {
-  double triggerTime;
+  gridDyn_time triggerTime;
 
   if ((opFlags[triggered_flag]) || (isArmed ()))    //first time setup
     {
@@ -262,7 +262,7 @@ void gridRandomLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long fla
 
 void gridRandomLoad::updateA (gridDyn_time time)
 {
-  if (time + kSmallTime < nextUpdateTime)
+  if (time < nextUpdateTime)
     {
       return;
     }
@@ -270,11 +270,11 @@ void gridRandomLoad::updateA (gridDyn_time time)
 
   lastUpdateTime = nextUpdateTime;
   opFlags.set (triggered_flag);
-  double triggerTime = lastUpdateTime + ntime ();
+  auto triggerTime = lastUpdateTime + ntime ();
   if (opFlags.test (interpolate_flag))
     {
       gridRampLoad::setState (nextUpdateTime, nullptr,nullptr,cLocalSolverMode);
-      if (opFlags.test (repeated_flag))
+      if (opFlags[repeated_flag])
         {
           nextStep (triggerTime);
           nextUpdateTime = triggerTime;
@@ -283,7 +283,7 @@ void gridRandomLoad::updateA (gridDyn_time time)
       else
         {
           gridRampLoad::clearRamp ();
-          nextUpdateTime = kBigNum;
+          nextUpdateTime = maxTime;
           opFlags.set (armed_flag,false);
           prevTime = time;
           keyTime = time;
@@ -360,7 +360,7 @@ void gridRandomLoad::updateA (gridDyn_time time)
         }
       else
         {
-          nextUpdateTime = kBigNum;
+          nextUpdateTime = maxTime;
           opFlags.reset (armed_flag);
         }
       prevTime = time;
@@ -369,9 +369,9 @@ void gridRandomLoad::updateA (gridDyn_time time)
 }
 
 
-double gridRandomLoad::ntime ()
+gridDyn_time gridRandomLoad::ntime ()
 {
-  double triggerTime = kBigNum;
+  gridDyn_time triggerTime = maxTime;
   switch (timeGenerator->getDistribution ())
     {
     case gridRandom::dist_type_t::constant:
@@ -422,22 +422,22 @@ double gridRandomLoad::nval ()
   return nextVal;
 }
 
-void gridRandomLoad::nextStep (double triggerTime)
+void gridRandomLoad::nextStep (gridDyn_time triggerTime)
 {
   double rval;
   double nextVal;
-  if (opFlags.test (independent_flag))
+  if (opFlags[independent_flag])
     {
       if (P != 0)
         {
           rval = nval ();
-          nextVal = (opFlags.test (proportional_flag)) ? P + rval * P : P + rval;
+          nextVal = (opFlags[proportional_flag]) ? P + rval * P : P + rval;
           dPdt = (nextVal - P) / (triggerTime - keyTime);
         }
       if (Q != 0)
         {
           rval = nval ();
-          nextVal = (opFlags.test (proportional_flag)) ? Q + rval * Q : Q + rval;
+          nextVal = (opFlags[proportional_flag]) ? Q + rval * Q : Q + rval;
           dQdt = (nextVal - Q) / (triggerTime - keyTime);
         }
       if (Yp != 0)
@@ -506,7 +506,7 @@ void gridRandomLoad::nextStep (double triggerTime)
 
 void gridRandomLoad::setTime (gridDyn_time time)
 {
-  double in = prevTime - lastUpdateTime;
+  auto in = prevTime - lastUpdateTime;
 
   nextUpdateTime = time + (nextUpdateTime - prevTime);
   lastUpdateTime = time - in;
@@ -520,11 +520,11 @@ void gridRandomLoad::timestep (gridDyn_time ttime, const IOdata &args,const solv
     {
       lastUpdateTime = nextUpdateTime;
       opFlags.set (triggered_flag);
-      double triggerTime = lastUpdateTime + ntime ();
-      if (opFlags.test (interpolate_flag))
+      auto triggerTime = lastUpdateTime + ntime ();
+      if (opFlags[interpolate_flag])
         {
           gridRampLoad::timestep (prevTime, args,sMode);
-          if (opFlags.test (repeated_flag))
+          if (opFlags[repeated_flag])
             {
               nextStep (triggerTime);
               nextUpdateTime = triggerTime;
@@ -532,7 +532,7 @@ void gridRandomLoad::timestep (gridDyn_time ttime, const IOdata &args,const solv
           else
             {
               clearRamp ();
-              nextUpdateTime = kBigNum;
+              nextUpdateTime = maxTime;
               opFlags.set (armed_flag,false);
               prevTime = ttime;
             }
@@ -551,7 +551,7 @@ void gridRandomLoad::timestep (gridDyn_time ttime, const IOdata &args,const solv
             }
           else
             {
-              nextUpdateTime = kBigNum;
+              nextUpdateTime = maxTime;
               opFlags.set (armed_flag, false);
             }
           gridRampLoad::timestep (ttime, args, sMode);

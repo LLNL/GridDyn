@@ -33,7 +33,7 @@ public:
   {
   }
   /** get the next trigger time */
-  virtual double nextTriggerTime () const = 0;
+  virtual gridDyn_time nextTriggerTime () const = 0;
   /** get the events execution mode
   normal mean it run immediately
   delayed means it should run after other normal events
@@ -43,7 +43,7 @@ public:
   /** run the event if time >triggerTime
   @return a change code corresponding to what the event did
   */
-  virtual change_code trigger (double ctime) = 0;
+  virtual change_code trigger (gridDyn_time ctime) = 0;
   /** answer the question if the event is ready to triggered*/
   virtual bool isArmed () const
   {

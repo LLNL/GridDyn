@@ -220,7 +220,7 @@ std::string gridEvent::toString()
 {
 	// @time1 |[rootobj::obj:]field(units) = val1
 	std::stringstream ss;
-	if (triggerTime >(-kDayLength))
+	if (triggerTime >negTime)
 	{
 		ss << '@' << triggerTime;
 	ss << " | ";
@@ -381,7 +381,7 @@ event_types findEventType(gridEventInfo *gdEI)
 	{
 		return event_types::player;
 	}
-	if (gdEI->period > 0)
+	if (gdEI->period > timeZero)
 	{
 		return event_types::player;
 	}
@@ -444,7 +444,7 @@ void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *r
         }
       else
         {
-          time = str2vector (tstring,-1,",");
+          time=str2vector<gridDyn_time> (tstring,negTime,",");
         }
 	  objString = (posA > 2) ? eventString.substr(0, posA - 1) : eventString.substr(posT + 1, std::string::npos);
 
@@ -486,7 +486,7 @@ void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *r
 	  }
 	  else
 	  {
-		  value = str2vector(vstring, -1, ",");
+		  value = str2vector(vstring, -1.0, ",");
 	  }
   }
 }

@@ -30,9 +30,9 @@ struct delayedControlAction
   std::uint64_t sourceID;
   std::uint64_t actionID;
   std::string field;
-  double triggerTime;
+  gridDyn_time triggerTime;
+  gridDyn_time executionTime;
   double val;
-  double executionTime;
   gridUnits::units_t unitType = gridUnits::defUnit;
   bool executed;
   bool measureAction;
@@ -51,8 +51,8 @@ public:
   };
 protected:
   int autoName = -1;
-  double actionDelay = 0.0;		//!< the delay between comm signal and action
-  double measureDelay = 0.0;	//!< the delay between comm measure request and action measurement extraction
+  gridDyn_time actionDelay = timeZero;		//!< the delay between comm signal and action
+  gridDyn_time measureDelay = timeZero;	//!< the delay between comm measure request and action measurement extraction
   count_t instructionCounter = 0;	//!< counter for the number of instructions
 
   std::vector<delayedControlAction> actions;	//!< queue for delayed control actions
@@ -70,7 +70,7 @@ public:
 
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 protected:
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, double actionTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time actionTime) override;
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
   std::string generateAutoName (int code);
@@ -80,8 +80,8 @@ protected:
   index_t findAction (std::uint64_t actionID);
   index_t getFreeAction ();
 
-  std::shared_ptr<functionEventAdapter> generateGetEvent (double eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> message);
-  std::shared_ptr<functionEventAdapter> generateSetEvent (double eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> message);
+  std::shared_ptr<functionEventAdapter> generateGetEvent (gridDyn_time eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> message);
+  std::shared_ptr<functionEventAdapter> generateSetEvent (gridDyn_time eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> message);
 };
 
 

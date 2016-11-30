@@ -191,7 +191,7 @@ void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void fuse::conditionTriggered (index_t conditionNum, double /*triggerTime*/)
+void fuse::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
 {
   if (conditionNum == 2)
     {
@@ -377,7 +377,7 @@ void fuse::residual (const stateData *sD, double resid[], const solverMode &sMod
         }
       double I1 = getConditionValue (0,sD,sMode);
       resid[offset] = I2Tequation (I1) - *dst;
-      printf ("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", sD->time,I1, limit,offset, resid[offset],*dst);
+      printf ("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", static_cast<double>(sD->time),I1, limit,offset, resid[offset],*dst);
 
     }
   else if (stateSize (sMode) > 0)

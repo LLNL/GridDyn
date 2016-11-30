@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE (constraint_test1)
   printf ("completed power flow\n");
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-  gds->run (30);
+  gds->run (30.0);
   BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 

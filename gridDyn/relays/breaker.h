@@ -29,13 +29,13 @@ public:
     nonlink_source_flag = object_flag11,
   };
 protected:
-  double minClearingTime = 0.0;   //!<[s] minimum clearing time for from bus breaker
-  double recloseTime1 = 1;      //!<[s] first reclose time
-  double recloseTime2 = 5;    //!<[s] second reclose time
+  gridDyn_time minClearingTime = timeZero;   //!<[s] minimum clearing time for from bus breaker
+  gridDyn_time recloseTime1 = 1.0;      //!<[s] first reclose time
+  gridDyn_time recloseTime2 = 5.0;    //!<[s] second reclose time
   double recloserTap = 0;       //!< From side tap multiplier
   double limit = 1.0;         //!<[puA] maximum current in puA
-  double lastRecloseTime = -kBigNum;     //!<[s] last reclose time
-  double recloserResetTime = 60;    //!<[s] time the breaker has to be on before the recloser count resets
+  gridDyn_time lastRecloseTime = negTime;     //!<[s] last reclose time
+  gridDyn_time recloserResetTime = 60.0;    //!<[s] time the breaker has to be on before the recloser count resets
   count_t maxRecloseAttempts = 0;        //!< total number of recloses
   index_t m_terminal = 1;       //!< link terminal
   gridBus *bus = nullptr;
@@ -65,7 +65,7 @@ public:
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
 protected:
-  virtual void conditionTriggered (index_t conditionNum, double triggeredTime) override;
+  virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggeredTime) override;
   /** trip the breaker
   @param[in] time current time
   */

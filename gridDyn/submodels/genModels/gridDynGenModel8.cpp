@@ -34,7 +34,7 @@ gridCoreObject *gridDynGenModel8::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModel8::objectInitializeA (double /*time0*/, unsigned long /*flags*/)
+void gridDynGenModel8::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
 {
   offsets.local->local.diffSize = 8;
   offsets.local->local.algSize = 2;

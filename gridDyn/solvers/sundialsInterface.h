@@ -117,9 +117,9 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (double t0) override;
+  virtual void initialize (gridDyn_time time0) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
-  int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
   void setConstraints () override;
 
   void logSolverStats (print_level logLevel, bool iconly = false) const override;
@@ -175,9 +175,9 @@ public:
   void setMaxNonZeros (count_t size) override;
   virtual void initialize (gridDyn_time t0) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
-  int calcIC (double t0, double tstep0, ic_modes mode, bool constraints) override;
+  int calcIC (gridDyn_time time0, gridDyn_time tstep0, ic_modes mode, bool constraints) override;
   virtual void getCurrentData () override;
-  int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
@@ -225,11 +225,11 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (double t0) override;
+  virtual void initialize (gridDyn_time time0) override;
   void setMaxNonZeros (count_t size) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
   virtual void getCurrentData () override;
-  int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
@@ -281,11 +281,11 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (double t0) override;
+  virtual void initialize (gridDyn_time time0) override;
   void setMaxNonZeros (count_t size) override;
   virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;
   virtual void getCurrentData () override;
-  int solve (double tStop, double &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 

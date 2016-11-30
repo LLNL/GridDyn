@@ -181,26 +181,26 @@ public:
 
   virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData *sD, const solverMode &sMode) override;
 
-  virtual double getAdjustableCapacityUp (gridDyn_time time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (gridDyn_time time = kBigNum) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
 /** @brief get the maximum generation attainable in a specific amount of time
 @param[in] time  the time window to achieve the generation
 @return the max real power*/
-  virtual double getPmax (gridDyn_time time = kBigNum) const;
+  virtual double getPmax (gridDyn_time time = maxTime) const;
   /** @brief get the maximum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the max reactive power*/
-  virtual double getQmax (gridDyn_time time = kBigNum,double Ptest = -kBigNum ) const;
+  virtual double getQmax (gridDyn_time time = maxTime,double Ptest = -kBigNum ) const;
   /** @brief get the minimum real generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @return the max real power*/
-  virtual double getPmin (gridDyn_time time = kBigNum) const;
+  virtual double getPmin (gridDyn_time time = maxTime) const;
   /** @brief get the minimum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the min reactive power*/
-  virtual double getQmin (gridDyn_time time = kBigNum, double Ptest = -kBigNum) const;
+  virtual double getQmin (gridDyn_time time = maxTime, double Ptest = -kBigNum) const;
   /** @brief adjust the output generation by the specified amount
   @param[in] adjustment the value of the desired adjustment
   */

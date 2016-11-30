@@ -463,8 +463,12 @@ void gridDynSimulation::setupOffsets (const solverMode &sMode, offset_ordering o
 
 // --------------- run the simulation ---------------
 
-int gridDynSimulation::run (double te)
+int gridDynSimulation::run (gridDyn_time te)
 {
+	if (te == negTime)
+	{
+		te = stopTime;
+	}
   gridDynAction gda;
   gda.command = gridDynAction::gd_action_t::run;
   gda.val_double = te;
@@ -547,7 +551,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::initialize:
 	{
 
-		double t_start = (cmd.val_double != kNullVal) ? cmd.val_double : startTime;
+		gridDyn_time t_start = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : startTime;
 
 		if (pState == gridState_t::STARTUP)
 		{
@@ -571,24 +575,24 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::iterate:
 	{ 
-		double t_step = (cmd.val_double != kNullVal) ? cmd.val_double : stepTime;
-		double t_end = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stopTime;
+		gridDyn_time t_step = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stepTime;
+		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stopTime;
 		out = eventDrivenPowerflow(t_end, t_step);
 	}
       break;
     case gridDynAction::gd_action_t::eventmode:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+		gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
 		out = eventDrivenPowerflow(t_end);
 	}
       
       break;
     case gridDynAction::gd_action_t::dynamicDAE:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+		gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -606,11 +610,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::dynamicPart:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
-		double t_step = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stepTime;
+		double t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
+		double t_step = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stepTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -628,11 +632,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::dynamicDecoupled:
 	{
-		double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
-		double t_step = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stepTime;
+		double t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
+		double t_step = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stepTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 			if (out2 != FUNCTION_EXECUTION_SUCCESS)
 			{
 				return out2;
@@ -646,11 +650,11 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::step:
 	{
 		
-		double t_step = (cmd.val_double != kNullVal) ? cmd.val_double : stepTime;
-		double t_end = (cmd.val_double2 != kNullVal) ? cmd.val_double2 : stopTime;
+		gridDyn_time t_step = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stepTime;
+		gridDyn_time t_end = (cmd.val_double2 != kNullVal) ? gridDyn_time(cmd.val_double2) : stopTime;
 		if (pState < gridState_t::DYNAMIC_INITIALIZED)
 		{
-			out2 = dynInitialize(-kBigNum);
+			out2 = dynInitialize();
 		}
 		if (out2 != FUNCTION_EXECUTION_SUCCESS)
 		{
@@ -667,7 +671,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
     case gridDynAction::gd_action_t::run:
       if (actionQueue.empty ())
         {
-          double t_end = (cmd.val_double != kNullVal) ? cmd.val_double : stopTime;
+          gridDyn_time t_end = (cmd.val_double != kNullVal) ? gridDyn_time(cmd.val_double) : stopTime;
           if (controlFlags[power_flow_only])
             {
               out2=powerflow ();
@@ -1824,7 +1828,7 @@ void gridDynSimulation::fillExtraStateData (stateData *sD, const solverMode &sMo
     }
 }
 
-bool gridDynSimulation::checkEventsForDynamicReset (double cTime, const solverMode &sMode)
+bool gridDynSimulation::checkEventsForDynamicReset (gridDyn_time cTime, const solverMode &sMode)
 {
   if (EvQ->getNextTime () < cTime)
     {

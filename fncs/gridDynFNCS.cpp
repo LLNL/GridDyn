@@ -113,9 +113,10 @@ int main (int argc, char *argv[])
   info.minTimeStep = 1;
   info.minTimeStepUnits = "us";
 
-  fncsRegister::instance()->makeZPLfile("/home/phlptp/GridDyn/gridDyn.zpl", info);
 
-  fncs::initialize("/home/phlptp/GridDyn/gridDyn.zpl");
+  auto configString=fncsRegister::instance()->makeZPLConfig(info);
+
+  fncs::initialize(configString);
 
   /* unless FNCS detects another simulator terminates early, the
   * this simulator will run from time step 0 to time step 9 */
@@ -123,7 +124,7 @@ int main (int argc, char *argv[])
   gridDyn_time stop_time = gds->get("stoptime");
 
 
-  gds->dynInitialize(0);
+  gds->dynInitialize(0.0);
   while (gds->getCurrentTime() < stop_time)
   {
 	  auto evntTime = gds->getEventTime();

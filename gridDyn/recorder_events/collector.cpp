@@ -27,12 +27,12 @@ static classFactory<collector> collFac("collector");
 
 static childClassFactory<gridRecorder,collector> grFac(std::vector<std::string> {"recorder", "rec", "file"}, "recorder");
 
-collector::collector(gridDyn_time time0, double period) : timePeriod(period), reqPeriod(period), triggerTime(time0)
+collector::collector(gridDyn_time time0, gridDyn_time period) : timePeriod(period), reqPeriod(period), triggerTime(time0)
 {
 
 }
 
-collector::collector(const std::string &collectorName) : name(collectorName), timePeriod(1.0), reqPeriod(1.0), triggerTime(0.0)
+collector::collector(const std::string &collectorName) : name(collectorName), timePeriod(1.0), reqPeriod(1.0), triggerTime(timeZero)
 {
 
 }
@@ -234,7 +234,7 @@ void collector::set(const std::string &param, const std::string &val)
 
 void collector::setTime(gridDyn_time time)
 {
-	if (time+kSmallTime > triggerTime)
+	if (time > triggerTime)
 	{
 		triggerTime = time;
 	}
@@ -274,7 +274,7 @@ change_code collector::trigger(gridDyn_time time)
 	{
 		recheckColumns();
 	}
-	if (time+kSmallTime >= triggerTime)
+	if (time>= triggerTime)
 	{
 		for (auto &datapoint:points)
 		{
@@ -291,13 +291,17 @@ change_code collector::trigger(gridDyn_time time)
 
 		}
 		triggerTime += timePeriod;
-		if (triggerTime < time+kSmallTime)
+		if (triggerTime < time)
 		{
-			triggerTime = time + (timePeriod - std::fmod(time - triggerTime, timePeriod));
+			triggerTime += timePeriod;
+			if (triggerTime < time)
+			{
+				triggerTime = time + timePeriod;
+			}
 		}
 		if (triggerTime > stopTime)
 		{
-			triggerTime = kBigNum;
+			triggerTime = maxTime;
 		}
 
 	}
