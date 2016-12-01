@@ -32,28 +32,30 @@ gridDyn_time fncs2gdTime(fncs::time ftime)
 #else
 fncs::time gd2fncsTime(gridDyn_time evntTime)
 {
-	return static_cast<fncs::time>(evntTime*fncsTickPerSecond_f);
+	return static_cast<fncs::time>(static_cast<double>(evntTime)*fncsTickPerSecond_f);
 }
 
 gridDyn_time fncs2gdTime(fncs::time ftime)
 {
 	double val = static_cast<double>(ftime / fncsTickPerSecond_i); //this gets the decimal should be integer division
 	val += (static_cast<double>(ftime % fncsTickPerSecond_i) / fncsTickPerSecond_i);
-	return val;
+	return gridDyn_time(val);
 }
 #endif
 
-void fncsRegister::registerSubscription(const std::string &sub)
+
+void fncsRegister::registerSubscription(const std::string &sub, dataType dtype, const std::string &defVal, bool requestList)
 {
-	subscriptions.insert(sub);
+	subscriptions.emplace_back(sub, dtype, defVal, requestList);
 }
 
-void fncsRegister::registerPublication(const std::string &pub)
+void fncsRegister::registerPublication(const std::string &pub, dataType dtype)
 {
-	publications.insert(pub);
+	publications.emplace_back(pub,dtype);
 }
 
 static const std::string indent("    ");  //4 spaces
+static const std::string indent2("        "); //8 spaces
 std::string fncsRegister::makeZPLConfig( const zplInfo &info)
 {
 	std::stringstream zpl;
@@ -63,7 +65,11 @@ std::string fncsRegister::makeZPLConfig( const zplInfo &info)
 	zpl << "values\n";
 	for (auto &sub : subscriptions)
 	{
-		zpl << indent << sub << '\n';
+		zpl << indent << sub.topic << '\n';
+		zpl << indent2 << "topic = " << sub.topic << '\n';
+		zpl << indent2 << "default = " << sub.defValue << '\n';
+		zpl << indent2 << "type = " << type2string(sub.type) << '\n';
+		zpl << indent2 << "list = " << sub.list ? "true\n" : "false\n";
 	}
 	return zpl.str();
 }
@@ -77,4 +83,26 @@ std::shared_ptr<fncsRegister> fncsRegister::instance()
 		p_instance = std::shared_ptr<fncsRegister>(new fncsRegister());
 	}
 	return p_instance;
+}
+
+std::string fncsRegister::type2string(dataType dtype)
+{
+	switch (dtype)
+	{
+	case dataType::fncsDouble:
+	default:
+			return "double";
+	case dataType::fncsComplex:
+		return "complex";
+	case dataType::fncsInteger:
+		return "integer";
+	case dataType::fncsString:
+		return "string";
+	case dataType::fncsJSON:
+		return "json";
+	case dataType::fncsArray:
+		return "array";
+		
+	}
+	return "";
 }

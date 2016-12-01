@@ -47,7 +47,7 @@ void fncsCollector::dataPointAdded(const collectorPoint& cp)
 {
 	if (!cp.colname.empty())
 	{
-		fncsRegister::instance()->registerPublication(cp.colname);
+		fncsRegister::instance()->registerPublication(cp.colname, fncsRegister::dataType::fncsDouble);
 	}
 }
 
@@ -111,6 +111,7 @@ void fncsCollector::set(const std::string &param, const std::string &val)
 		cnames.push_back(trim(val.substr(asLoc + 2)));
 		auto commaLoc = val.find_first_of(',');
 		complexPairs.emplace_back(trim(val.substr(0, commaLoc)), trim(val.substr(commaLoc + 1, asLoc - 1 - commaLoc)));
+		fncsRegister::instance()->registerPublication(cnames.back(), fncsRegister::dataType::fncsComplex);
 	}
 	else
 	{

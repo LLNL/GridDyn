@@ -47,7 +47,12 @@ void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 
 	double V = bus->getVoltage();
 	double A = bus->getAngle();
+	auto Punit = unitConversion(P, gridUnits::puMW, gridUnits::MW, systemBasePower);
+	auto Qunit = unitConversion(Q, gridUnits::puMW, gridUnits::MW, systemBasePower);
+	std::string def = std::to_string(Punit) + "+" + std::to_string(Qunit) + "j";
+	fncsRegister::instance()->registerSubscription(loadKey,fncsRegister::dataType::fncsComplex,def);
 
+	fncsRegister::instance()->registerPublication(voltageKey, fncsRegister::dataType::fncsComplex);
 	if (!voltageKey.empty())
 	{
 		std::complex<double> Vc = std::polar(V, A);
@@ -197,12 +202,11 @@ void fncsLoad::set(const std::string &param, const std::string &val)
 	if (param == "voltagekey")
 	{
 		voltageKey = val;
-		fncsRegister::instance()->registerPublication(val);
 	}
 	else if (param == "loadkey")
 	{
 		loadKey = val;
-		fncsRegister::instance()->registerSubscription(val);
+		
 
 	}
 	else if (param == "units")

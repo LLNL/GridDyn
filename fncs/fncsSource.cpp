@@ -45,6 +45,8 @@ void fncsSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
 {
 	rampSource::objectInitializeA(time0, flags);
 
+	std::string def = std::to_string(gridUnits::unitConversion(m_output, outputUnits, inputUnits, systemBasePower));
+	fncsRegister::instance()->registerSubscription(valKey,fncsRegister::dataType::fncsDouble,def);
 	updateA(time0);
 }
 
@@ -156,7 +158,7 @@ void fncsSource::set(const std::string &param, const std::string &val)
 	if ((param == "valkey")||(param=="key"))
 	{
 		valKey = val;
-		fncsRegister::instance()->registerSubscription(val);
+		
 
 	}
 	else if ((param == "input_units")||(param=="inunits")||(param=="inputunits"))

@@ -21,7 +21,7 @@
 #include "fncs.hpp"
 #include <regex>
 #include <sstream>
-#include "stringOps.h"
+#include "stringConversion.h"
 
 static childClassFactory<fncsCollector, collector> fncsFac(std::vector<std::string> {"fncs"});
 
@@ -42,14 +42,14 @@ void fncsSendComplex(const std::string &key, double real, double imag)
 {
 	std::complex<double> cv(real, imag);
 	std::stringstream ss;
-	ss << std::to_string(real);
+	ss << real;
 	if (imag > 0)
 	{
-		ss << '+' << std::to_string(imag);
+		ss << '+' << imag;
 	}
 	else
 	{
-		ss << std::to_string(imag);
+		ss << imag;
 	}
 	ss << 'j';
 	fncs::publish(key, ss.str());
@@ -75,8 +75,8 @@ std::complex<double> fncsGetComplex(const std::string &key)
 	std::regex_search(s, m, creg);
 	if (m.size() == 9)
 	{
-		re = doubleReadComplete(m[1], kNullVal);
-		im = doubleReadComplete(m[5], kNullVal);
+		re = numeric_conversionComplete(m[1], kNullVal);
+		im = numeric_conversionComplete(m[5], kNullVal);
 		
 	}
 	else
@@ -84,12 +84,12 @@ std::complex<double> fncsGetComplex(const std::string &key)
 		if ((s.back() == 'j') || (s.back() == 'i'))
 		{
 			s.pop_back();
-			im = doubleReadComplete(s, kNullVal);
+			im = numeric_conversionComplete(s, kNullVal);
 
 		}
 		else
 		{
-			re = doubleReadComplete(s, kNullVal);
+			re = numeric_conversionComplete(s, kNullVal);
 		}
 	}
 	return std::complex<double>(re, im);
@@ -103,5 +103,5 @@ void fncsSendVal(const std::string &key, double val)
 double fncsGetVal(const std::string &key)
 {
 	std::string s= fncs::get_value(key);
-	return doubleReadComplete(s, kNullVal);
+	return numeric_conversionComplete(s, kNullVal);
 }
