@@ -364,25 +364,29 @@ OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
 IF (FNCS_EXECUTABLE)
 	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
 	IF(USE_DUMMY_FNCS)
+		HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
 		HIDE_VARIABLE(FNCS_INSTALL_PATH)
 		
 	ELSE(USE_DUMMY_FNCS)
-		#SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
-  
-		#find_package(FNCS)
-
-		SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH
-  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
-  
-SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
-  "path to the czmq headers" "${CZMQ_INCLUDE_PATH}")
-find_package(CZMQ)
-list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
+		SHOW_VARIABLE(USE_FNCS_SHARED_LIBRARY BOOL "used a dynamic shared library for the FNCS interface" OFF)
+		
+		IF(USE_FNCS_SHARED_LIBRARY)
+			SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
+			find_package(FNCS)
+		ELSE (USE_FNCS_SHARED_LIBRARY)
+			HIDE_VARIABLE(FNCS_INSTALL_PATH)
+			SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
+            SHOW_VARIABLE(CZMQ_INCLUDE_PATH PATH  "path to the czmq headers" "${CZMQ_INCLUDE_PATH}")
+				find_package(CZMQ)
+				list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
+		ENDIF(USE_FNCS_SHARED_LIBRARY)
+		
 	ENDIF(USE_DUMMY_FNCS)
 	add_subdirectory(fncs)
 ELSE(FNCS_EXECUTABLE)
 	HIDE_VARIABLE(FNCS_INSTALL_PATH)
 	HIDE_VARIABLE(USE_DUMMY_FNCS)
+	HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
 ENDIF(FNCS_EXECUTABLE)
 
 # -------------------------------------------------------------
