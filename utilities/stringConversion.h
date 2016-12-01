@@ -131,7 +131,7 @@ X  numeric_conversionComplete(const std::string &V, const X defValue)
 	try
 	{
 		size_t rem;
-		X res = numConvComp<X>(V, &rem);
+		X res = numConvComp<X>(V, rem);
 		while (rem < V.length())
 		{
 			if (!(isspace(V[rem])))
