@@ -32,7 +32,7 @@ protected:
   gridDyn_time frequencyDelay = timeZero;		//!< [s] period of time the frequency must be below limit to activate
 public:
   explicit busRelay (const std::string &objName = "busrelay_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj) const override;
+  virtual coreObject * clone (coreObject *obj) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual void set (const std::string &param,  const std::string &val) override;
 

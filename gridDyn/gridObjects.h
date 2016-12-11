@@ -23,7 +23,7 @@ class gridArea;
 class gridLink;
 class gridRelay;
 
-//forward declare the templated class matrixData
+//forward declare the template class matrixData
 template<class Y>
 class matrixData;
 
@@ -36,7 +36,7 @@ class violation;
 * and defining some common methods for use by all objects.  This object is not really intended to be instantiated directly and is mostly a
 * common interface to inheriting objects gridPrimary, gridSecondary, and gridSubModel as it encapsulated common functionality between those objects
 **/
-class gridObject : public gridCoreObject
+class gridObject : public coreObject
 {
 
 protected:
@@ -54,7 +54,7 @@ public:
   explicit gridObject (const std::string &objName = "");
   /** @brief virtual destructor*/
   virtual ~gridObject ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
   virtual void set (const std::string &param, const std::string &val) override;
 
@@ -62,7 +62,11 @@ public:
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual bool getFlag (const std::string &param) const override;
   virtual double get(const std::string &param, gridUnits::units_t unitType=gridUnits::defUnit) const override;
-
+  /** add a grid object to the subObject container
+  @param obj the object to add
+  */
+  void addSubObject(gridObject *obj);
+  virtual void remove(coreObject *obj) override;
   /** @brief method for checking a specific known flag
   @param[in] flagID the index of the flag to check
   @return boolean indicator of the flag
@@ -376,7 +380,7 @@ it is assumed any appropriate data would be cached during this time and not reru
 @param[in] sD the data representing the current state to operate on
 @param[in] sMode the solverMode which is being solved for
 */
-  virtual void preEx (const stateData *sD, const solverMode &sMode);
+  virtual void preEx (const stateData &sD, const solverMode &sMode);
 
   //Jacobian computation
   /** @brief compute the Jacobian for a given state
@@ -384,7 +388,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] ad the matrixData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
@@ -392,7 +396,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
   //residual computation
   /** @brief compute the residual for a given state
@@ -400,14 +404,14 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] resid the array to store the residual values in
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode);
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode);
 
   /** @brief compute the time derivatives for a given state for the differential variables
   @param[in] sD the data representing the current state to operate on
   @param[out] deriv the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode);
+  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode);
 
   /** @brief compute updates for all the algebraic variable
   @param[in] sD the data representing the current state to operate on
@@ -415,7 +419,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] sMode the solverMode which corresponds to the stateData
   @param[in] alpha the convergence gain
   */
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
+  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
   /** @brief get the residual computation for object requiring a delay
     basically calls the residual calculation on the delayed objects
@@ -423,7 +427,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] resid the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode);
+  virtual void delayedResidual (const stateData &sD, double resid[], const solverMode &sMode);
 
   /** @brief get the residual computation for object requiring a delay
     basically calls the derivative calculation on the delayed objects
@@ -431,7 +435,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] deriv the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode);
+  virtual void delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode);
 
   /** @brief get the algebraic update for object requesting a delay
     basically calls the residual calculation on the delayed objects
@@ -439,7 +443,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] update the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
+  virtual void delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
   /** @brief get the residual computation for object requiring a delay
     basically calls the Jacobian calculation on the delayed objects
@@ -447,7 +451,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] ad the matrixData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
   //for the stepwise dynamic system
   /** @brief move the object forward in time using local calculations
@@ -474,7 +478,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   * @param[out] roots the memory to store the root evaluation
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTest (const stateData *, double roots[], const solverMode &sMode);
+  virtual void rootTest (const stateData &, double roots[], const solverMode &sMode);
 
   /**
   *@brief a root has occurred now take action
@@ -492,7 +496,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] level the level of roots to check can be REVERSIBLE or NON_REVERSIBLE
   @return a change code indicating what if any changes in the object took place
   **/
-  virtual change_code rootCheck (const stateData *sD, const solverMode & sMode, check_level_t level);
+  virtual change_code rootCheck (const stateData &sD, const solverMode & sMode, check_level_t level);
 
   /** @brief check power flow adjustable parameters
   * adjust any parameters or checks needed on a power flow solution,  such as generator power limits, voltage levels, stepped adjustable taps, etc
@@ -531,7 +535,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   /** @brief do any power computation based on the state specified and cache results
   @param[in] sD  the state data to do the computation on
   @param[in] sMode the solverMode corresponding to the state data*/
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode);
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode);
 
   /** @brief do any local computation to get ready for measurements*/
   virtual void updateLocalCache ();
@@ -542,7 +546,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs
   **/
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode);
+  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const;
 
   /**
   *@brief get a vector state indices for the output
@@ -569,7 +573,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] num the number of the state being requested
   @return the value of the time derivative of a state being requested
   **/
-  virtual double getDoutdt (const stateData *sD, const solverMode &sMode, index_t num = 0) const;
+  virtual double getDoutdt (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get a single state
@@ -578,7 +582,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] num the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (const stateData *sD, const solverMode &sMode, index_t num = 0) const;
+  virtual double getOutput (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get a single state based on local data
@@ -588,7 +592,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   virtual double getOutput (index_t /*num*/ = 0) const;
 
 
-  virtual void alert (gridCoreObject *, int code) override;
+  virtual void alert (coreObject *, int code) override;
 
   /**
   *@brief get a pointer for a particular bus
@@ -716,7 +720,7 @@ public:
   @param[in] sD the data representing the current state to operate on
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void preEx (const IOdata & args, const stateData *sD, const solverMode & sMode);
+  virtual void preEx (const IOdata & args, const stateData &sD, const solverMode & sMode);
 
   //residual computation
   /** @brief compute the residual for a given state
@@ -725,7 +729,7 @@ public:
   @param[out] resid the array to store the residual values in
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void residual (const IOdata & args, const stateData *sD, double resid[], const solverMode & sMode);
+  virtual void residual (const IOdata & args, const stateData &sD, double resid[], const solverMode & sMode);
 
   /** @brief compute an update to all the algebraic variables in the object
   @param[in] args  the input arguments
@@ -735,7 +739,7 @@ public:
   @param[in] alpha the convergence gain
   */
 
-  virtual void algebraicUpdate (const IOdata & args, const stateData *sD, double update[], const solverMode & sMode, double alpha);
+  virtual void algebraicUpdate (const IOdata & args, const stateData &sD, double update[], const solverMode & sMode, double alpha);
 
   /** @brief compute the time derivative for a given state
   @param[in] args  the input arguments
@@ -743,7 +747,7 @@ public:
   @param[out] deriv the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void derivative (const IOdata & args, const stateData *sD, double deriv[], const solverMode &sMode);
+  virtual void derivative (const IOdata & args, const stateData &sD, double deriv[], const solverMode &sMode);
 
   /**
   *@brief get the real output power
@@ -754,7 +758,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @return the real output power consumed or generated by the device
   **/
-  virtual double getRealPower (const IOdata & args, const stateData *sD, const solverMode & sMode);
+  virtual double getRealPower (const IOdata & args, const stateData &sD, const solverMode & sMode) const;
 
   /**
   *@brief get the reactive output power
@@ -763,7 +767,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @return the reactive output power consumed or generated by the device
   **/
-  virtual double getReactivePower (const IOdata & args, const stateData *sD, const solverMode & sMode);
+  virtual double getReactivePower (const IOdata & args, const stateData &sD, const solverMode & sMode) const;
 
   /**
   *@brief get the real output power from local data
@@ -784,7 +788,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs
   **/
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const;
 
   /**
   *@brief get a vector state indices for the output
@@ -801,7 +805,7 @@ public:
   @param[in] num the number of the state being requested
   @return the location of the output state requested
   **/
-  virtual index_t getOutputLoc ( const solverMode &sMode, index_t num = 0);
+  virtual index_t getOutputLoc ( const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get the time derivative of a single state
@@ -811,7 +815,7 @@ public:
   @param[in] num the number of the state being requested
   @return the value of the time derivative of a state being requested
   **/
-  virtual double getDoutdt (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0);
+  virtual double getDoutdt (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get a single state
@@ -821,7 +825,7 @@ public:
   @param[in] num the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0);
+  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get a single state based on local data
@@ -838,7 +842,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the predicted outputs
   **/
-  virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData &sD, const solverMode &sMode) const;
 
   /**
   *@brief get the available upwards generating capacity of a system
@@ -862,7 +866,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void jacobianElements (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
@@ -871,7 +875,7 @@ public:
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> &ad, const solverMode & sMode);
+  virtual void outputPartialDerivatives  (const IOdata & args, const stateData &sD, matrixData<double> &ad, const solverMode & sMode);
 
   /**
   *@brief compute the partial derivatives of the output states with respect to inputs
@@ -881,7 +885,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void ioPartialDerivatives (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /**
   *evaluate the root functions and return the value
@@ -890,7 +894,7 @@ public:
   * @param[out] roots the memory to store the root evaluation
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTest  (const IOdata & args, const stateData *sD, double roots[], const solverMode & sMode);
+  virtual void rootTest  (const IOdata & args, const stateData &sD, double roots[], const solverMode & sMode);
 
   /**
   *a root has occurred now take action
@@ -909,7 +913,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @param[in] level the level of root to check for
   **/
-  virtual change_code rootCheck (const IOdata & args, const stateData *sD, const solverMode &sMode, check_level_t level);
+  virtual change_code rootCheck (const IOdata & args, const stateData &sD, const solverMode &sMode, check_level_t level);
 
   /** @brief reset power flow parameters
   *  resets the voltage levels and any other parameters changed in power to a base level depending on the level
@@ -936,7 +940,7 @@ public:
   @param[in] sD  the stage data to cache information from
   @param[in] sMode the solverMode corresponding to the stateData
   */
-  virtual void updateLocalCache (const IOdata & args, const stateData *sD, const solverMode &sMode);
+  virtual void updateLocalCache (const IOdata & args, const stateData &sD, const solverMode &sMode);
 };
 
 
@@ -1010,7 +1014,7 @@ public:
   * @param[out] roots the memory to store the root evaluation
   * @param[in] sMode the mode the solver is in
   **/
-  virtual void rootTest (const IOdata & args, const stateData *sD, double roots[], const solverMode &sMode);
+  virtual void rootTest (const IOdata & args, const stateData &sD, double roots[], const solverMode &sMode);
   /**
   *a root has occurred now take action
   * @param[in] ttime the simulation time the root evaluation takes place
@@ -1027,7 +1031,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @param[in] level the level of root to check for
   **/
-  virtual change_code rootCheck (const IOdata & args, const stateData *sD, const solverMode &sMode, check_level_t level);
+  virtual change_code rootCheck (const IOdata & args, const stateData &sD, const solverMode &sMode, check_level_t level);
   //residual computation
   /** @brief compute the residual for a given state
   @param[in] args  the input arguments
@@ -1035,14 +1039,14 @@ public:
   @param[out] resid the array to store the residual values in
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void residual (const IOdata & args, const stateData *sD, double resid[], const solverMode &sMode);
+  virtual void residual (const IOdata & args, const stateData &sD, double resid[], const solverMode &sMode);
   /** @brief compute the time derivative for a given state
   @param[in] args  the input arguments
   @param[in] sD the data representing the current state to operate on
   @param[out] deriv the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void derivative (const IOdata & args, const stateData *sD, double deriv[], const solverMode & sMode);
+  virtual void derivative (const IOdata & args, const stateData &sD, double deriv[], const solverMode & sMode);
   /** @brief compute an update to all the algebraic variables in the object
   @param[in] args  the input arguments
   @param[in] sD the data representing the current state to operate on
@@ -1050,7 +1054,7 @@ public:
   @param[in] sMode the solverMode which is being solved for
   @param[in] alpha the convergence gain
   */
-  virtual void algebraicUpdate (const IOdata & args, const stateData *sD, double update[], const solverMode & sMode, double alpha);
+  virtual void algebraicUpdate (const IOdata & args, const stateData &sD, double update[], const solverMode & sMode, double alpha);
   /**
   *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
   @param[in] args the inputs for the secondary object
@@ -1059,7 +1063,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void jacobianElements (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
+  virtual void jacobianElements (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
   /**
   *@brief compute the partial derivatives of the output states with respect to internal states
   @param[in] args the inputs for the secondary object
@@ -1067,7 +1071,7 @@ public:
   * @param[out] ad  the array to store the information in
   * @param[in] sMode the operations mode
   **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives  (const IOdata & args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /**
   *@brief compute the partial derivatives of the output states with respect to inputs
   @param[in] args the inputs for the secondary object
@@ -1076,7 +1080,7 @@ public:
   * @param[in] argLocs the vector of input argument locations
   * @param[in] sMode the operations mode
   **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData *sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
+  virtual void ioPartialDerivatives (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
   /** @brief adjust the power flow solution if needed
   @param[in] args the inputs for the secondary object
@@ -1106,7 +1110,7 @@ public:
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs
   **/
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const;
   /**
   *@brief get the time derivative of a single state
   * @param[in] sD the current state data for the simulation
@@ -1114,7 +1118,7 @@ public:
   @param[in] num the number of the state being requested
   @return the value of the time derivative of a state being requested
   **/
-  virtual double getDoutdt (const stateData *sD, const solverMode &sMode, index_t num = 0);
+  virtual double getDoutdt (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
   /**
   *@brief get a single state
   @param[in] args the inputs for the secondary object
@@ -1123,7 +1127,7 @@ public:
   @param[in] num the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const;
+  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
   /**
   *@brief get a single state based on local data
   @param[in] the number of the state being requested
@@ -1163,7 +1167,7 @@ public:
   @param[in] sD  the stage data to cache information from
   @param[in] sMode the solverMode corresponding to the stateData
   */
-  virtual void updateLocalCache (const IOdata & args, const stateData *sD, const solverMode &sMode);
+  virtual void updateLocalCache (const IOdata & args, const stateData &sD, const solverMode &sMode);
 protected:
 };
 

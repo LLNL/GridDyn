@@ -36,15 +36,15 @@ protected:
 
 public:
   gridRelayOpt (const std::string &objName = "");
-  gridRelayOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridRelayOpt (coreObject *obj, const std::string &objName = "");
   ~gridRelayOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
 
   virtual count_t objSize (const optimMode &oMode);
@@ -85,9 +85,9 @@ public:
 
 
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
 
 protected:
 };

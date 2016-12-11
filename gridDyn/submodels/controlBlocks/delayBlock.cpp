@@ -52,7 +52,7 @@ delayBlock::delayBlock (double t1, double gain, const std::string &objName) : ba
 
 }
 
-gridCoreObject *delayBlock::clone (gridCoreObject *obj) const
+coreObject *delayBlock::clone (coreObject *obj) const
 {
   delayBlock *nobj;
   if (obj == nullptr)
@@ -148,11 +148,11 @@ double delayBlock::step (gridDyn_time ttime, double inputA)
   return out;
 }
 
-void delayBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void delayBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
-  deriv[offset] =  (K * (input + bias) - sD->state[offset]) / m_T1;
+  deriv[offset] =  (K * (input + bias) - sD.state[offset]) / m_T1;
   if (limiter_diff > 0)
     {
       basicBlock::derivElements (input, didt, sD, deriv, sMode);
@@ -160,7 +160,7 @@ void delayBlock::derivElements (double input, double didt, const stateData *sD, 
 }
 
 
-void delayBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void delayBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((isAlgebraicOnly (sMode))||(opFlags[simplified]))
     {
@@ -169,7 +169,7 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ma
     }
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
   ad.assignCheck (offset, argLoc, K / m_T1);
-  ad.assign (offset, offset, -1.0 / m_T1 - sD->cj);
+  ad.assign (offset, offset, -1.0 / m_T1 - sD.cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 
@@ -177,7 +177,7 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ma
 // set parameters
 void delayBlock::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  return coreObject::set (param, val);
 }
 
 void delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)

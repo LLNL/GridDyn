@@ -251,7 +251,7 @@ public:
   /** get the locations for the data
   *@param[in] oMode the optimMode we are interested in
   */
-  //void getLocations (const stateData *sD, double d[], const optimMode &oMode, Lp *Loc, gridObject *obj);
+  //void getLocations (const stateData &sD, double d[], const optimMode &oMode, Lp *Loc, gridObject *obj);
   /** get the locations for the data from a stateData pointer
   *@param[in] oMode the optimMode we are interested in
   *@return the angle offset

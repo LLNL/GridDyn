@@ -86,7 +86,7 @@ int dynamicInitialConditionRecovery::lowVoltageCheck ()
 {
   stateData sD (sim->getCurrentTime (), solver->state_data (), solver->deriv_data ());
 
-  sim->rootCheck (&sD, solver->getSolverMode (), check_level_t::low_voltage_check);
+  sim->rootCheck (sD, solver->getSolverMode (), check_level_t::low_voltage_check);
 
   int mmatch = JacobianCheck (sim, solver->getSolverMode ());
   if (mmatch != 0)
@@ -96,7 +96,7 @@ int dynamicInitialConditionRecovery::lowVoltageCheck ()
   return solver->calcIC (sim->getCurrentTime (), sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
 }
 
-//Try any non-reversable adjustments which might be out there
+//Try any non-reversible adjustments which might be out there
 int dynamicInitialConditionRecovery::dynamicFix1 ()
 {
   sim->checkNetwork (gridDynSimulation::network_check_type::simplified);                    //do a network check
@@ -104,7 +104,7 @@ int dynamicInitialConditionRecovery::dynamicFix1 ()
   return solver->calcIC (sim->getCurrentTime (), sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
 }
 
-// try a few rounds of Guass Seidel like convergence
+// try a few rounds of Gauss Seidel like convergence
 int dynamicInitialConditionRecovery::dynamicFix2 ()
 {
   sim->converge (sim->getCurrentTime (), solver->state_data (), solver->deriv_data (), solver->getSolverMode (), converge_mode::block_iteration, 3.0);
@@ -124,11 +124,9 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
           sim->opFlags.reset (disable_flag_updates);
           sim->updateFlags ();
           sim->handleRootChange (solver->getSolverMode (), solver);
-          stateData sD (sim->getCurrentTime (), solver->state_data ());
+          stateData sD (sim->getCurrentTime (), solver->state_data (), solver->deriv_data());
 
-          sD.dstate_dt = solver->deriv_data ();
-
-          change_code ret = sim->rootCheck (&sD, solver->getSolverMode (), check_level_t::complete_state_check);
+          change_code ret = sim->rootCheck (sD, solver->getSolverMode (), check_level_t::complete_state_check);
           sim->handleRootChange (solver->getSolverMode (), solver);
           if (ret > change_code::no_change)
             {
@@ -146,7 +144,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
       else
         {
 		  stateData sD(sim->getCurrentTime(), solver->state_data(), solver->deriv_data());
-          change_code ret = sim->rootCheck (&sD, solver->getSolverMode (), check_level_t::reversable_only);
+          change_code ret = sim->rootCheck (sD, solver->getSolverMode (), check_level_t::reversable_only);
           sim->handleRootChange (solver->getSolverMode (), solver);
           if (ret > change_code::non_state_change)
             {

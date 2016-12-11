@@ -31,7 +31,7 @@ static const IgnoreListType busIgnore {
 };
 static const std::string busComponentName = "bus";
 // "aP" is the XML element passed from the reader
-gridBus * readBusElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject)
+gridBus * readBusElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject)
 {
 
   gridParameter param;

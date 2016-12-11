@@ -21,7 +21,7 @@
 #include <iostream>
 #include <sstream>
 
-void loadMFile(gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
+void loadMFile(coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
 {
 	std::ifstream infile(filename.c_str(), std::ios::in);
 	std::stringstream strStream;

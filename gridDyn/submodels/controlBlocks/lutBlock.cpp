@@ -24,7 +24,7 @@ lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
 }
 
 
-gridCoreObject *lutBlock::clone (gridCoreObject *obj) const
+coreObject *lutBlock::clone (coreObject *obj) const
 {
   lutBlock *nobj;
   if (obj == nullptr)
@@ -69,7 +69,7 @@ void lutBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, I
 
 }
 
-void lutBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void lutBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
   update[offset] = K * computeValue (input + bias);
@@ -79,7 +79,7 @@ void lutBlock::algElements (double input, const stateData *sD, double update[], 
     }
 }
 
-void lutBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void lutBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
@@ -209,7 +209,7 @@ double lutBlock::computeValue (double input)
 }
 
 /*
-double lutBlock::currentValue(const IOdata &args, const stateData *sD, const solverMode &sMode) const
+double lutBlock::currentValue(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc;
   offsets.getLocations(sD, sMode, &Loc, this);

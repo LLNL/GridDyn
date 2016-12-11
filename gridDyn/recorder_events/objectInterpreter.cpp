@@ -21,13 +21,13 @@ objInfo::objInfo ()
 {
 }
 
-objInfo::objInfo (const std::string &Istring, gridCoreObject *obj)
+objInfo::objInfo (const std::string &Istring, coreObject *obj)
 {
   LoadInfo (Istring, obj);
 }
 
 
-void objInfo::LoadInfo (const std::string &Istring, gridCoreObject *obj)
+void objInfo::LoadInfo (const std::string &Istring, coreObject *obj)
 {
   //get the object which to grab from
   size_t rlc = Istring.find_last_of (":?");
@@ -53,9 +53,9 @@ void objInfo::LoadInfo (const std::string &Istring, gridCoreObject *obj)
 }
 
 
-gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj, bool rootSearch)
+coreObject* locateObject (std::string Istring, const coreObject *rootObj, bool rootSearch)
 {
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   std::string mname = Istring;
   std::string secName = "_";
   //get the object which to grab from
@@ -70,7 +70,7 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
 
   if (mname == rootObj->getName ())
     {
-      obj = const_cast<gridCoreObject *> (rootObj);
+      obj = const_cast<coreObject *> (rootObj);
     }
   else if ((mname[0] == '@')||(mname[0] == '/')) //implies searching the parent object as well
     {
@@ -115,7 +115,7 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
             }
           else if (rootSearch)
             {
-              gridCoreObject *rootObject2 = rootObj->find ("root");
+              coreObject *rootObject2 = rootObj->find ("root");
               obj = rootObject2->find (mname);
             }
         }
@@ -132,9 +132,9 @@ gridCoreObject* locateObject (std::string Istring, const gridCoreObject *rootObj
 }
 
 
-gridCoreObject * findMatchingObject(gridCoreObject *obj, gridCoreObject *root)
+coreObject * findMatchingObject(coreObject *obj, coreObject *root)
 {
-	gridCoreObject *par = obj;
+	coreObject *par = obj;
 	
 	stringVec stackNames;
 	while (par->getName() != root->getName())
@@ -148,7 +148,7 @@ gridCoreObject * findMatchingObject(gridCoreObject *obj, gridCoreObject *root)
 		
 	}
 	//now trace back through the new root object
-	gridCoreObject *matchObj = root;
+	coreObject *matchObj = root;
 	while (!stackNames.empty())
 	{
 		matchObj=matchObj->find(stackNames.back());

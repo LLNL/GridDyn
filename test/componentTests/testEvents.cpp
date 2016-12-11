@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cmath>
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 static std::string event_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/event_tests/");
 

@@ -44,7 +44,7 @@ using namespace std::placeholders;
 #include "linkModels/gridLink.h"
 
 
-static const std::map < std::string, std::function < gridCoreObject *(std::shared_ptr<readerElement> &, readerInfo *)>> loadFunctionMap
+static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo *)>> loadFunctionMap
 {
   /* *INDENT-OFF* */
 	  {"genmodel", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynGenModel *)(nullptr), "genmodel", ri,nullptr); }},
@@ -83,7 +83,7 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri
 
   while (element->isValid ())
     {
-      gridCoreObject  *obj = nullptr;
+      coreObject  *obj = nullptr;
       std::string fname = convertToLowerCase (element->getName ());
       //std::cout<<"library model :"<<fname<<":\n";
       if ((fname == "define") || (fname == "recorder") || (fname == "event"))

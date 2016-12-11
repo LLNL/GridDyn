@@ -50,12 +50,12 @@ private:
 public:
 	/** @brief constructor*/
 	txThermalModel(const std::string &objName="txThermal_$");
-	virtual gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
+	virtual coreObject * clone(coreObject *obj=nullptr) const override;
 	virtual void setFlag(const std::string &param, bool val=true) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void add(gridCoreObject *obj) final override;
+	virtual void add(coreObject *obj) final override;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 	virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;

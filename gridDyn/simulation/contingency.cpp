@@ -281,12 +281,12 @@ std::string contingency::generateViolationsOutputLine() const
 	return ss.str();
 }
 
-gridCoreObject *contingency::getObject() const
+coreObject *contingency::getObject() const
 {
 	return gds;
 }
 
-void contingency::getObjects(std::vector<gridCoreObject *> &objects) const
+void contingency::getObjects(std::vector<coreObject *> &objects) const
 {
 	for (auto &evL:eventList)
 	{
@@ -297,7 +297,7 @@ void contingency::getObjects(std::vector<gridCoreObject *> &objects) const
 	}
 }
 
-void contingency::updateObject(gridCoreObject *newObj, object_update_mode mode)
+void contingency::updateObject(coreObject *newObj, object_update_mode mode)
 {
 	//update all the events
 	for (size_t kk = 0; kk<eventList.size(); ++kk)

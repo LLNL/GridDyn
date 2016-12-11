@@ -162,7 +162,7 @@ inline bool operator<=(double lhs, gridDyn_time t1)
 const gridDyn_time maxTime=gridDyn_time::maxVal();
 const gridDyn_time negTime=gridDyn_time::minVal();
 const gridDyn_time timeZero(0.0);
-const gridDyn_time timeOne(1.0);
+const gridDyn_time timeOneSecond(1.0);
 
 const gridDyn_time kDayLength(86400.0f);
 const gridDyn_time kSmallTime(1e-7);

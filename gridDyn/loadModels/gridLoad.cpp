@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <complex>
 
 static gridBus defBus (1.0,0);
 
@@ -28,13 +29,13 @@ using namespace gridUnits;
 
 //setup the load object factories
 static typeFactory<gridLoad> glf ("load", stringVec { "basic", "zip" }, "basic"); //set basic to the default
-static childTypeFactory<gridPulseLoad, gridLoad> glfp ("load", "pulse");
-static childTypeFactory<gridSineLoad, gridLoad> cfgsl ("load", stringVec {"sine","sin","sinusoidal"});
+static typeFactoryArg<sourceLoad, sourceLoad::sourceType> glfp ("load", "pulse", sourceLoad::sourceType::pulse);
+static typeFactoryArg<sourceLoad, sourceLoad::sourceType> cfgsl ("load", stringVec {"sine","sin","sinusoidal"}, sourceLoad::sourceType::sine);
 static childTypeFactory<gridRampLoad, gridLoad> glfr ("load", "ramp");
-static childTypeFactory<gridRandomLoad, gridLoad> glfrand ("load", stringVec {"random","rand"});
+static typeFactoryArg<sourceLoad, sourceLoad::sourceType> glfrand ("load", stringVec {"random","rand"}, sourceLoad::sourceType::random);
 static childTypeFactory<gridFileLoad, gridLoad> glfld ("load", "file");
-
-static childTypeFactory<exponentialLoad,gridLoad> glexp ("load", "exponential");
+static childTypeFactory<sourceLoad, gridLoad> srcld("load", stringVec{ "src","source" });
+static childTypeFactory<exponentialLoad, gridLoad> glexp("load", stringVec{ "exponential","exp" });
 static childTypeFactory<fDepLoad,gridLoad> glfd ("load", "fdep");
 
 
@@ -44,7 +45,7 @@ gridLoad::gridLoad (const std::string &objName) : gridSecondary (objName),bus (&
   constructionHelper ();
 }
 
-gridLoad::gridLoad (double rP, double rQ, const std::string &objName) : gridSecondary (objName), bus (&defBus),P (rP),Q (rQ)
+gridLoad::gridLoad (double rP, double rQ, const std::string &objName) : gridSecondary (objName),P (rP),Q (rQ), bus(&defBus)
 {
   constructionHelper ();
 
@@ -62,12 +63,8 @@ gridLoad::~gridLoad ()
 {
 }
 
-void gridLoad::setTime (gridDyn_time time)
-{
-  prevTime = time;
-  lastTime = time;
-}
-gridCoreObject *gridLoad::clone (gridCoreObject *obj) const
+
+coreObject *gridLoad::clone (coreObject *obj) const
 {
   gridLoad *nobj = cloneBaseFactory<gridLoad, gridSecondary> (this, obj, &glf);
   if (!(nobj) )
@@ -81,8 +78,6 @@ gridCoreObject *gridLoad::clone (gridCoreObject *obj) const
   nobj->Yq = Yq;
   nobj->Iq = Iq;
   nobj->Ip = Ip;
-  nobj->r = r;
-  nobj->x = x;
   nobj->pfq = pfq;
   nobj->Pout = Pout;
   nobj->dPdf = dPdf;
@@ -90,11 +85,10 @@ gridCoreObject *gridLoad::clone (gridCoreObject *obj) const
   nobj->H = H;
   nobj->Vpqmax = Vpqmax;
   nobj->Vpqmin = Vpqmin;
-  nobj->lastTime = lastTime;
   return nobj;
 }
 
-void gridLoad::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
   bus = static_cast<gridBus *> (find ("bus"));
   if (!bus)
@@ -103,7 +97,7 @@ void gridLoad::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*f
     }
   Psched = getRealPower ();
   dPdf = -H / 30 * Psched;
-
+  lastTime = time0;
 #ifdef SGS_DEBUG
   std::cout << "SGS : " << prevTime << " : " << name << " gridLoad::pFlowInitializeA realPower = " << getRealPower () << " reactive power = " << getReactivePower () << '\n';
 #endif
@@ -113,21 +107,20 @@ void gridLoad::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*f
 
 void gridLoad::setLoad (double level, units_t unitType )
 {
-  P = unitConversion (level,unitType,puMW,systemBasePower);
+  setP(unitConversion (level,unitType,puMW,systemBasePower));
 }
 
 void gridLoad::setLoad (double Plevel, double Qlevel,units_t unitType)
 {
-  P = unitConversion (Plevel, unitType, puMW, systemBasePower);
-  Q = unitConversion (Qlevel, unitType, puMW, systemBasePower);
+  setP(unitConversion (Plevel, unitType, puMW, systemBasePower));
+  setQ(unitConversion (Qlevel, unitType, puMW, systemBasePower));
 }
 
 void gridLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long flags)
 {
-  double V;
   if ((opFlags[convert_to_constant_impedance])||CHECK_CONTROLFLAG (flags,all_loads_to_constant_impedence))
     {
-      V = bus->getVoltage ();
+      double V = bus->getVoltage ();
 
       Yp = Yp + P / (V * V);
       P = 0;
@@ -141,8 +134,6 @@ void gridLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long flags
           Yq = Yq + Q / (V * V);
           Q = 0;
         }
-      r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-      x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
     }
 
 #ifdef SGS_DEBUG
@@ -151,17 +142,10 @@ void gridLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long flags
 
 }
 
-void gridLoad::setState (gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/ [], const solverMode &)
-{
-  if (ttime != prevTime)
-    {
-      loadUpdateForward (ttime);
-    }
-}
 
 void gridLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
 {
-  if (!enabled)
+  if (!isConnected())
     {
       Pout = 0;
       dPdf = 0;
@@ -169,7 +153,7 @@ void gridLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMod
     }
   if (ttime != prevTime)
     {
-      loadUpdateForward (ttime);
+	  updateLocalCache(args, stateData(ttime), cLocalSolverMode);
     }
 
   double freq = (args.size () > 2) ? args[frequencyInLocation] : 1.0;
@@ -185,7 +169,6 @@ void gridLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMod
 #ifdef SGS_DEBUG
   std::cout << "SGS : " << prevTime << " : " << name << " gridLoad::timestep realPower = " << getRealPower () << " reactive power = " << getReactivePower () << '\n';
 #endif
-  prevTime = ttime;
 }
 
 
@@ -215,14 +198,7 @@ void gridLoad::setFlag (const std::string &flag, bool val)
           if (!(opFlags[use_power_factor_flag]))
             {
               opFlags.set (use_power_factor_flag);
-              if (P != 0)
-                {
-                  pfq = Q / P;
-                }
-              else
-                {
-                  pfq = kBigNum;
-                }
+			  updatepfq();
             }
         }
       else
@@ -279,17 +255,22 @@ double gridLoad::get (const std::string &param, units_t unitType) const
           val = unitConversion (Q, puMW, unitType, systemBasePower);
           break;
         case 'r':
-          val = r;
+          val = getr();
           break;
         case 'x':
-          val = x;
+          val = getx();
           break;
         case 'z':
-          val = 1 / x;
+          val = std::abs(std::complex<double>(getr(),getx()));
           break;
         case 'y':
+			val = std::abs(1.0/std::complex<double>(getr(), getx()));
+			break;
         case 'g':
-          val = 1 / r;
+          val = 1 / getr();
+		  break;
+		case 'b':
+			val = 1.0 / getx();
           break;
 		default:
 			break;
@@ -331,67 +312,22 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
         {
 
         case 'p':
-          P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-          if (opFlags[use_power_factor_flag])
-            {
-              if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
-                {
-                  if (P != 0)
-                    {
-                      pfq = Q / P;
-                    }
-
-                }
-            }
+          setP(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
           break;
         case 'q':
-          Q = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-          if (opFlags[use_power_factor_flag])
-            {
-              if (P != 0)
-                {
-                  pfq = Q / P;
-
-                }
-              else
-                {
-                  pfq = kBigNum;
-                }
-            }
+          setQ(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
           break;
         case 'r':
-          r = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
-          Yp = r / (r * r + x * x);
-          Yq = x / (r * r + x * x);
+          setr(unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage));
           break;
         case 'x':
-          x = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
-          Yp = r / (r * r + x * x);
-          Yq = x / (r * r + x * x);
+          setx(unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage));
           break;
         case 'g':
-          if (val != 0.0)
-            {
-              Yp = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-              r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-            }
-          else
-            {
-              Yp = 0.0;
-              r = kBigNum;
-            }
+              setYp(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
           break;
         case 'b':
-          if (val != 0.0)
-            {
-              Yq = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-              x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
-            }
-          else
-            {
-              Yq = 0.0;
-              x = 0.0;
-            }
+              setYq(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
           break;
         case 'h':
           H = val;
@@ -412,58 +348,21 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
 	  if (param == "p+")
 	  {
 		  P += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
-		  if (opFlags[use_power_factor_flag])
-		  {
-			  if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
-			  {
-				  if (P != 0)
-				  {
-					  pfq = Q / P;
-				  }
-
-			  }
-		  }
+		  checkpfq();
 	  }
 	  else if (param == "q+")
 	  {
 		  Q += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
-		  if (opFlags[use_power_factor_flag])
-		  {
-			  if (P != 0)
-			  {
-				  pfq = Q / P;
-
-			  }
-			  else
-			  {
-				  pfq = kBigNum;
-			  }
-		  }
+		  updatepfq();
 	  }
 	  else if ((param == "yp+") || (param == "zr+"))
 	  {
 		  Yp += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
-		  if (Yp != 0)
-		  {
-			  r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-		  }
-		  else
-		  {
-			  r = kBigNum;
-		  }
 		  checkFaultChange();
 	  }
 	  else if ((param == "yq+") || (param == "zq+"))
 	  {
 		  Yq += unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
-		  if (Yq != 0)
-		  {
-			  x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
-		  }
-		  else
-		  {
-			  x = 0.0;
-		  }
 		  checkFaultChange();
 	  }
 	  else if ((param == "ir+") || (param == "ip+"))
@@ -487,58 +386,21 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
 	  if (param == "p*")
 	  {
 		  P *= val;
-		  if (opFlags[use_power_factor_flag])
-		  {
-			  if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
-			  {
-				  if (P != 0)
-				  {
-					  pfq = Q / P;
-				  }
-
-			  }
-		  }
+		  checkpfq();
 	  }
 	  else if (param == "q*")
 	  {
 		  Q *= val;
-		  if (opFlags[use_power_factor_flag])
-		  {
-			  if (P != 0)
-			  {
-				  pfq = Q / P;
-
-			  }
-			  else
-			  {
-				  pfq = kBigNum;
-			  }
-		  }
+		  updatepfq();
 	  }
 	  else if ((param == "yp*") || (param == "zr*"))
 	  {
 		  Yp *= val;
-		  if (Yp != 0)
-		  {
-			  r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-		  }
-		  else
-		  {
-			  r = kBigNum;
-		  }
 		  checkFaultChange();
 	  }
 	  else if ((param == "yq*") || (param == "zq*"))
 	  {
 		  Yq *= val;
-		  if (Yq != 0)
-		  {
-			  x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
-		  }
-		  else
-		  {
-			  x = 0.0;
-		  }
 		  checkFaultChange();
 	  }
 	  else if ((param == "ir*") || (param == "ip*"))
@@ -558,74 +420,28 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
   }
   else if (param == "load p")
     {
-      P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-      if (opFlags[use_power_factor_flag])
-        {
-          if (pfq > 1000.0)              //if the pfq is screwy then recalculate otherwise leave it the same.
-            {
-              if (P != 0)
-                {
-                  pfq = Q / P;
-                }
-
-            }
-        }
-      checkFaultChange ();
+      setP(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
     }
   else if  (param == "load q")
     {
-      Q = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-      if (opFlags[use_power_factor_flag])
-        {
-          if (P != 0)
-            {
-              pfq = Q / P;
-
-            }
-          else
-            {
-              pfq = kBigNum;
-            }
-        }
-      checkFaultChange ();
+      setQ(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
     }
   else if ((param == "yp") || (param == "shunt g") || (param == "zr"))
     {
-      if (val != 0.0)
-        {
-          Yp = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-          r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-        }
-      else
-        {
-          Yp = 0.0;
-          r = kBigNum;
-        }
-      checkFaultChange ();
+       setYp(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
     }
   else if ((param == "yq") || (param == "shunt b") ||(param == "zq"))
     {
-      if (val != 0.0)
-        {
-          Yq = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
-          x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
-        }
-      else
-        {
-          Yq = 0.0;
-          x = 0.0;
-        }
-      checkFaultChange ();
+
+       setYq(unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
     }
   else if ((param == "ir")||(param == "ip"))
     {
-      Ip = unitConversion (val, unitType, puA, systemBasePower, baseVoltage);
-      checkFaultChange ();
+      setIp(unitConversion (val, unitType, puA, systemBasePower, baseVoltage));
     }
   else if (param == "iq")
     {
-      Iq = unitConversion (val, unitType, puA, systemBasePower, baseVoltage);
-      checkFaultChange ();
+      setIq(unitConversion (val, unitType, puA, systemBasePower, baseVoltage));
     }
   else if ((param == "pf") || (param == "powerfactor"))
     {
@@ -696,207 +512,218 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-void gridLoad::checkFaultChange ()
+
+void gridLoad::setP(double newP)
 {
-  if (opFlags[pFlow_initialized])
-    {
-      if (bus->getVoltage () < 0.05)                        //we are in fault condition
-        {
-          alert (this, POTENTIAL_FAULT_CHANGE);
-        }
-    }
+	P = newP;
+	checkpfq();
+	checkFaultChange();
+}
+
+void gridLoad::setQ(double newQ)
+{
+	Q = newQ;
+	updatepfq();
+	checkFaultChange();
+}
+
+void gridLoad::setYp(double newYp)
+{
+	Yp = newYp;
+	checkFaultChange();
+}
+
+void gridLoad::setYq(double newYq)
+{
+	Yq = newYq;
+	checkFaultChange();
+}
+
+void gridLoad::setIp(double newIp)
+{
+	Ip = newIp;
+	checkFaultChange();
+}
+
+void gridLoad::setIq(double newIq)
+{
+	Iq = newIq;
+	checkFaultChange();
+}
+
+void gridLoad::setr(double newr)
+{
+	if (newr == 0.0)
+	{
+		Yp = 0.0;
+		return;
+	}
+	std::complex<double> z(newr, getx());
+	auto y = std::conj(1.0 / z);
+	Yp = y.real();
+	Yq = y.imag();
+	checkFaultChange();
+}
+void gridLoad::setx(double newx)
+{
+	if (newx == 0.0)
+	{
+		Yq = 0.0;
+		return;
+	}
+	std::complex<double> z(getr(), -newx);
+	auto y = 1.0 / z;
+	Yp = y.real();
+	Yq = y.imag();
+	checkFaultChange();
+}
+
+double gridLoad::getr() const
+{
+	if (Yp == 0.0)
+	{
+		return 0.0;
+	}
+	std::complex<double> y(Yp, Yq);
+	auto z = 1.0 / y; //I would take a conjugate but it doesn't matter since we are only returning the real part
+	return z.real();
+}
+
+double gridLoad::getx() const
+{
+	if (Yq == 0.0)
+	{
+		return 0.0;
+	}
+	std::complex<double> y(Yp, Yq);
+	auto z = std::conj(1.0 / y);
+	return z.imag();
 }
 
 
+void gridLoad::updatepfq()
+{
+	if (opFlags[use_power_factor_flag])
+	{
+		pfq = (P == 0.0) ? kBigNum : Q / P;
+	}
+}
+
+void gridLoad::checkpfq()
+{
+	if (opFlags[use_power_factor_flag])
+	{
+		if (pfq > 1000.0)                          //if the pfq is screwy, recalculate, otherwise leave it the same.
+		{
+			if (P != 0.0)
+			{
+				pfq = Q / P;
+			}
+
+		}
+	}
+}
+
+void gridLoad::checkFaultChange ()
+{
+  if ((opFlags[pFlow_initialized])&& (bus->getVoltage() < 0.05))
+    {
+          alert (this, POTENTIAL_FAULT_CHANGE);
+    }
+}
+
+void gridLoad::updateLocalCache(const IOdata & /*args*/, const stateData &sD, const solverMode &)
+{
+	lastTime = sD.time;
+}
+
+void gridLoad::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+{
+	stateData sD(ttime, state, dstate_dt);
+	updateLocalCache(emptyArguments, sD, sMode);
+	prevTime = ttime;
+}
+
+double gridLoad::voltageAdjustment(double val, double V) const
+{
+	if (V < Vpqmin)
+	{
+		val = V * V * val * trigVVlow;
+	}
+	else if (V > Vpqmax)
+	{
+		val = V * V * val * trigVVhigh;
+	}
+	return val;
+}
+
+double gridLoad::getQval() const
+{
+	double val = Q;
+
+	if (opFlags[use_power_factor_flag])
+	{
+		if (pfq < 1000.0)
+		{
+			val = P * pfq;
+		}
+	}
+	return val;
+}
+
 double gridLoad::getRealPower () const
 {
-  double val = P;
-  double V;
+	double V = bus->getVoltage();
+	return getRealPower(V);
 
-  if (isConnected ())
-    {
-      V = bus->getVoltage ();
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
-      val += V * (V * Yp + Ip);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
 }
 
 double gridLoad::getReactivePower () const
 {
-  if (isConnected ())
-    {
-      double val = Q;
-
-      if (opFlags[use_power_factor_flag])
-        {
-          if (pfq < 1000.0)
-            {
-              val = P * pfq;
-            }
-
-        }
-      double V;
-
-      V = bus->getVoltage ();
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
-      val += V * (V * Yq + Iq);
-      return val;
-    }
-  else
-    {
-      return 0.0;
-    }
+      double V = bus->getVoltage ();
+	  return getReactivePower(V);
 }
 
-double gridLoad::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double gridLoad::getRealPower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
-  if (isConnected ())
-    {
-      if ((sD) && (sD->time != lastTime))
-        {
-          loadUpdate (sD->time);
-        }
-      double V = (args.empty ()) ? (bus->getVoltage ((sD) ? (sD->state) : nullptr, sMode)) : args[voltageInLocation];
-      double val = P;
-
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
-      val += V * (V * Yp + Ip);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+      double V = (args.empty ()) ? (bus->getVoltage (sD, sMode)) : args[voltageInLocation];
+	  return getRealPower(V);
 }
 
-double gridLoad::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double gridLoad::getReactivePower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
-
-  if ((sD)&&(sD->time != lastTime))
-    {
-      loadUpdate (sD->time);
-    }
-  double V = (args.empty ()) ? (bus->getVoltage ((sD) ? (sD->state) : nullptr, sMode)) : args[voltageInLocation];
-  double val = Q;
-  if (opFlags[use_power_factor_flag])
-    {
-      if (pfq < 1000.0)
-        {
-          val = P * pfq;
-        }
-    }
-  if (enabled)
-    {
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
-      val += V * (V * Yq + Iq);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+  double V = (args.empty ()) ? (bus->getVoltage (sD, sMode)) : args[voltageInLocation];
+  return getReactivePower(V);
+ 
 }
 
 double gridLoad::getRealPower (const double V) const
 {
-  double val = P;
-  if (isConnected ())
-    {
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
+	if (!isConnected())
+	{
+		return 0.0;
+	}
+	double val = voltageAdjustment(P, V);
       val += V * (V * Yp + Ip);
 
       return val;
-    }
-  else
-    {
-      return 0;
-    }
+ 
 }
 
 double gridLoad::getReactivePower (double V) const
 {
-  double val = Q;
-  if (opFlags[use_power_factor_flag])
-    {
-      if (pfq < 1000.0)
-        {
-          val = P * pfq;
-        }
-    }
-  if (isConnected ())
-    {
-      if (V < Vpqmin)
-        {
-          val = V * V * val * trigVVlow;
-        }
-      else if (V > Vpqmax)
-        {
-          val = V * V * val * trigVVhigh;
-        }
+	if (!isConnected())
+	{
+		return 0.0;
+	}
+	double val = voltageAdjustment(getQval(), V);
+     
       val += V * (V * Yq + Iq);
       return val;
-    }
-  else
-    {
-      return 0;
-    }
+
 }
 
-//TODO:: PT remove this function it is duplicative of the one in gridSecondary
-IOdata gridLoad::getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode)
-{
-  IOdata output {
-    0.0,0.0
-  };
-  if (isConnected ())
-    {
-      output[PoutLocation] = getRealPower (args,sD,sMode);
-      output[QoutLocation] = getReactivePower (args, sD, sMode);
-    }
-  return output;
-}
-
-void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (args.empty ())  //we only have output derivatives if the input arguments are not counted
     {
@@ -906,11 +733,11 @@ void gridLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD
     }
 }
 
-void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
+void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
-  if  ((sD)&&(sD->time != lastTime))
+  if  (sD.time != lastTime)
     {
-      loadUpdate (sD->time);
+      updateLocalCache (args,sD,sMode);
     }
   double V = args[voltageInLocation];
   double tv = 0.0;
@@ -947,15 +774,7 @@ void gridLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, ma
 bool compareLoad (gridLoad *ld1, gridLoad *ld2, bool /*printDiff*/)
 {
   bool cmp = true;
-  if (std::abs (ld1->r - ld2->r) > 0.00001)
-    {
-      cmp = false;
-    }
-
-  if (std::abs (ld1->x - ld2->x) > 0.00001)
-    {
-      cmp = false;
-    }
+ 
   if ((ld1->opFlags.to_ullong () & flagMask) != (ld2->opFlags.to_ullong () & flagMask))
     {
       cmp = false;

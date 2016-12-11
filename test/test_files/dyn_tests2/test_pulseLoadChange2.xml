@@ -59,9 +59,9 @@
       <load name="load3" type="pulse">
          <P>1.500</P>
          <Q>0</Q>
-        <period>6</period>
-		<amplitude>0.2</amplitude>
-		<pulsetype>triangle</pulsetype>
+        <p:period>6</p:period>
+		<p:amplitude>0.2</p:amplitude>
+		<p:pulsetype>triangle</p:pulsetype>
       </load>
    </bus>
    <bus name="bus4">

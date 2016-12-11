@@ -22,7 +22,7 @@
 #include <cstdio>
 #include <cmath>
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define RECORDER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/recorder_tests/"
 static const std::string collector_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/recorder_tests/");

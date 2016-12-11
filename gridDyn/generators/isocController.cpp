@@ -26,7 +26,7 @@ isocController::isocController(const std::string &objName) : gridSubModel(objNam
 }
 
 
-gridCoreObject *isocController::clone(gridCoreObject *obj) const
+coreObject *isocController::clone(coreObject *obj) const
 {
 	isocController *nobj;
 	if (obj == nullptr)
@@ -39,11 +39,11 @@ gridCoreObject *isocController::clone(gridCoreObject *obj) const
 		if (nobj == nullptr)
 		{
 			//if we can't cast the pointer clone at the next lower m_output
-			gridCoreObject::clone(obj);
+			coreObject::clone(obj);
 			return obj;
 		}
 	}
-	gridCoreObject::clone(nobj);
+	coreObject::clone(nobj);
 	nobj->db = db;
 	nobj->upStep = upStep;
 	nobj->downStep = downStep;

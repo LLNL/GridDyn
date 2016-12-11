@@ -31,7 +31,7 @@ enum class change_code; //forward declare change_code enumeration
 
 /**
 *@brief relay class:
- relay's are sensors and actuators.  They can read data from gridCoreObjects and then take actions on other
+ relay's are sensors and actuators.  They can read data from coreObjects and then take actions on other
 * objects on a regular schedule or on a functional basis.
 **/
 class gridRelay : public gridPrimary, objectOperatorInterface
@@ -58,8 +58,8 @@ protected:
 
   };
   gridDyn_time triggerTime = maxTime;            //!<the next time execute
-  gridCoreObject *m_sourceObject = nullptr;       //!<the default object where the data comes from
-  gridCoreObject *m_sinkObject = nullptr;            //!<the default object where the actions occur
+  coreObject *m_sourceObject = nullptr;       //!<the default object where the data comes from
+  coreObject *m_sinkObject = nullptr;            //!<the default object where the actions occur
   count_t triggerCount = 0;        //!< count of the number of triggers
   count_t actionsTakenCount = 0;        //!< count of the number of actions taken
 
@@ -73,11 +73,11 @@ protected:
 public:
   explicit gridRelay (const std::string &objName = "relay_$");
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual ~gridRelay ();
 
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   /**
   *@brief add a gridEvent to the system
@@ -95,17 +95,16 @@ public:
   /**
   *@brief update a specific action
   **/
-  virtual int updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber);
+  virtual void updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber);
   /**
   *@brief update a specific action
   **/
-  virtual int updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber);
+  virtual void updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber);
   /**
   *@brief update a specific condition
   **/
-  virtual int updateCondition (std::shared_ptr<gridCondition> gc,  index_t conditionNumber);
+  virtual void updateCondition (std::shared_ptr<gridCondition> gc,  index_t conditionNumber);
 
-  void setTime (gridDyn_time time) override;
   /**
   *@brief reset the relay
   **/
@@ -113,11 +112,11 @@ public:
   /**
   * @brief set the relay source object
   */
-  void setSource (gridCoreObject *obj);
+  void setSource (coreObject *obj);
   /**
   * @brief set the relay sink object
   */
-  void setSink (gridCoreObject *obj);
+  void setSink (coreObject *obj);
 
   void setConditionState (index_t conditionNumber,condition_states newState = condition_states::active);
   void removeAction (index_t conditionNumber);
@@ -127,7 +126,7 @@ public:
 
   condition_states getConditionStatus (index_t conditionNumber);
   double getConditionValue (index_t conditionNumber) const;
-  double getConditionValue (index_t conditionNumber, const stateData *sD, const solverMode &sMode) const;
+  double getConditionValue (index_t conditionNumber, const stateData &sD, const solverMode &sMode) const;
   bool checkCondition (index_t conditionNumber) const;
   void setConditionLevel (index_t conditionNumber, double levelVal);
   virtual void setActionTrigger (index_t conditionNumber, index_t actionNumber, gridDyn_time delayTime = timeZero);
@@ -144,9 +143,9 @@ public:
   virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags)  override;
   virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode)  override;
+  virtual void rootTest (const stateData &sD, double roots[], const solverMode &sMode)  override;
   virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)  override;
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level)  override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode,  check_level_t level)  override;
   /** message processing function for use with communicators
   @param[in] sourceID  the source of the comm message
   @param[in] message the actual message to process
@@ -163,9 +162,9 @@ public:
   std::shared_ptr<eventAdapter> make_alarm (const std::string &val);
   //Object operator interface functions
 
-  virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
-  virtual gridCoreObject * getObject() const override;
-  virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+  virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  virtual coreObject * getObject() const override;
+  virtual void getObjects(std::vector<coreObject *> &objects) const override;
 protected:
 	/** update the number of root finding functions used in the relay
 	@param[in] alertChange true if the function should send alerts to its parent object if the number of roots changes

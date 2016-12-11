@@ -34,7 +34,7 @@ class matrixData;
 * and defining some common methods for use by all objects.  This object is not really intended to be instantiated directly and is mostly a
 * common interface to inheriting objects gridPrimary, gridSecondary, and gridSubModel as it encapsulated common functionality between those objects
 **/
-class gridOptObject : public gridCoreObject
+class gridOptObject : public coreObject
 {
 public:
   std::bitset<32> optFlags;        //!< operational flags these flags are designed to be normal false
@@ -43,7 +43,7 @@ public:
 protected:
 public:
   gridOptObject (const std::string &objName = "optObject_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void set (const std::string &param, const std::string &val) override;
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

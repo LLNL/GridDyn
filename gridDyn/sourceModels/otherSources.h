@@ -29,14 +29,14 @@ private:
 public:
 	functionSource(const std::string &objName = "functionsource_#");
 
-	gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+	coreObject * clone(coreObject *obj = nullptr) const override;
 
-	virtual IOdata getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-	virtual double getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
+	virtual IOdata getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
+	virtual double getOutput(const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
 	virtual double getOutput(index_t num = 0) const override;
 
-	virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
+	virtual double getDoutdt(const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
 	void setFunction(std::function<double(double)> calcFunc);
 
@@ -61,7 +61,7 @@ public:
 	};
 	commSource(const std::string &objName = "commSource_#");
 
-	gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+	coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;

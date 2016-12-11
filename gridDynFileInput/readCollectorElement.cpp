@@ -31,7 +31,7 @@ static const IgnoreListType collectorIgnoreStrings {
 
 static const std::string collectorNameString ("collector");
 
-int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri)
+int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo *ri)
 {
   int ret = FUNCTION_EXECUTION_SUCCESS;
   std::string name = ri->checkDefines (getElementField (element, nameString, defMatchType));
@@ -123,7 +123,7 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObjec
 
   setAttributes (col, element, collectorNameString, ri, collectorIgnoreStrings);
   setParams (col, element, collectorNameString, ri, collectorIgnoreStrings);
-  gridCoreObject *targetObj = obj;
+  coreObject *targetObj = obj;
 
   if (!((gdRI.m_target.empty()) || (gdRI.m_target == obj->getName())))
   {

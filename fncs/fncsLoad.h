@@ -39,12 +39,12 @@ public:
 	~fncsLoad()
 	{
 	}
-	gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+	coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags) override;
 	virtual void pFlowObjectInitializeB() override;
 
 	virtual void updateA(gridDyn_time time) override;
-
+	virtual gridDyn_time updateB() override;
 	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 	virtual void setFlag(const std::string &param, bool val = true) override;
 	virtual void set(const std::string &param, const std::string &val) override;

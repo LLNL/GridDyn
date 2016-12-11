@@ -28,7 +28,7 @@
 using namespace gridUnits;
 
 void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderInfo &bri);
-void pspReadBranch (gridCoreObject *parentObject, std::string line, std::string line2,double base, std::vector<gridBus *> busList, const basicReaderInfo &bri);
+void pspReadBranch (coreObject *parentObject, std::string line, std::string line2,double base, std::vector<gridBus *> busList, const basicReaderInfo &bri);
 
 /*
 The PECO PSAP File Format is fully described in the _PJM Power System
@@ -52,7 +52,7 @@ a 9999 card.
 The 15 card indicates that area interchange data follows. The data ends with
 a 9999 card.
 */
-void loadPSP (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
+void loadPSP (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
   std::string line;        //line storage
@@ -467,7 +467,7 @@ Second Line Card (follows 'C' in first card)
 
 */
 
-void pspReadBranch (gridCoreObject *parentObject, std::string line, std::string line2, double base, std::vector<gridBus *> busList, const basicReaderInfo &bri)
+void pspReadBranch (coreObject *parentObject, std::string line, std::string line2, double base, std::vector<gridBus *> busList, const basicReaderInfo &bri)
 {
 
   gridBus *bus1, *bus2;

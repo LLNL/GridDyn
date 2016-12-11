@@ -35,7 +35,7 @@ functionBlock::functionBlock (const std::string &fname) : basicBlock ("functionB
   setFunction (fname);
 }
 
-gridCoreObject *functionBlock::clone (gridCoreObject *obj) const
+coreObject *functionBlock::clone (coreObject *obj) const
 {
   functionBlock *nobj = cloneBase<functionBlock, basicBlock> (this, obj);
   if (nobj == nullptr)
@@ -72,7 +72,7 @@ void functionBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
 }
 
 
-void functionBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void functionBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
   if (opFlags[uses_constantarg])
@@ -91,7 +91,7 @@ void functionBlock::algElements (double input, const stateData *sD, double updat
 
 
 
-void functionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void functionBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
@@ -187,7 +187,7 @@ void functionBlock::setFunction (const std::string &fname)
 }
 
 /*
-double functionBlock::currentValue(const IOdata &args, const stateData *sD, const solverMode &sMode) const
+double functionBlock::currentValue(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc;
   offsets.getLocations(sD, sMode, &Loc, this);

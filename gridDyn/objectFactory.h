@@ -45,19 +45,19 @@ public:
   /** @brief make and object   abstract function
   @return a pointer to a newly constructed object
   */
-  virtual gridCoreObject * makeObject () = 0;
+  virtual coreObject * makeObject () = 0;
 
   /** @brief make and object   abstract function
   @param[in] objectName  the name of the object to construct
   @return a pointer to a newly constructed object
   */
 
-  virtual gridCoreObject * makeObject (const std::string &objectName) = 0;
+  virtual coreObject * makeObject (const std::string &objectName) = 0;
   /** @brief prepare to make a certain number of objects
   *@param[in] count  the number of object to prepare for
   @param[in] obj a parent to assign the object to
   */
-  virtual void prepObjects (count_t /*count*/, gridCoreObject * /*obj*/);
+  virtual void prepObjects (count_t /*count*/, coreObject * /*obj*/);
   /** @brief get the number of unused prepped objects
   @return the number of prepped objects
   */
@@ -82,9 +82,9 @@ public:
   explicit componentFactory (const std::string componentName);
   ~componentFactory ();
   stringVec getTypeNames ();
-  gridCoreObject * makeObject (const std::string &type,const std::string &objectName);
-  gridCoreObject * makeObject (const std::string &type);
-  gridCoreObject * makeObject ();
+  coreObject * makeObject (const std::string &type,const std::string &objectName);
+  coreObject * makeObject (const std::string &type);
+  coreObject * makeObject ();
   void registerFactory (std::string typeName, objectFactory *oFac);
   void registerFactory (objectFactory *oFac);
   void setDefault (const std::string &type);
@@ -129,21 +129,21 @@ public:
 
   /** @brief create the default object from a given component
   @param[in] componentName  the name of the category of objects
-  @return the created gridCoreObject */
-  gridCoreObject * createObject(const std::string &componentName);
+  @return the created coreObject */
+  coreObject * createObject(const std::string &componentName);
 
   /** @brief create an object from a given objectType and typeName
   @param[in] componentName  the name of the category of objects
   @param[in] typeName  the specific type to create
-  @return the created gridCoreObject */
-  gridCoreObject * createObject (const std::string &componentName, const std::string &typeName);
+  @return the created coreObject */
+  coreObject * createObject (const std::string &componentName, const std::string &typeName);
 
   /** @brief create an object from a given objectType and typeName
   @param[in] componentName  the name of the category of objects
   @param[in] typeName  the specific type to create
   @param[in] objName  the name of the object to create
-  @return the created gridCoreObject */
-  gridCoreObject * createObject (const std::string &componentName, const std::string &typeName, const std::string &objName);
+  @return the created coreObject */
+  coreObject * createObject (const std::string &componentName, const std::string &typeName, const std::string &objName);
 
   /** @brief get a specific type factory
   @param[in] componentName the name of the typeFactory to get
@@ -163,14 +163,14 @@ public:
   @param[in] numObjects  the number of objects to preallocate
   @param[in] obj the object to reference as the owner responsible for deleting the container
   */
-  void prepObjects (const std::string &component, const std::string &typeName, count_t numObjects, gridCoreObject *obj);
+  void prepObjects (const std::string &component, const std::string &typeName, count_t numObjects, coreObject *obj);
 
   /** @brief prepare a number of objects for use later so they can all be constructed at once of the default type for a given container
   @param[in] component the category of Object to create
   @param[in] numObjects  the number of objects to preallocate
   @param[in] obj the object to reference as the owner responsible for deleting the container
   */
-  void prepObjects (const std::string &component, count_t numObjects, gridCoreObject *obj);
+  void prepObjects (const std::string &component, count_t numObjects, coreObject *obj);
 private:
   coreObjectFactory ();
 

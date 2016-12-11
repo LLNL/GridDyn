@@ -35,7 +35,7 @@ protected:
   int autoName = -1;                                    //!< storage for indicator of the type of autoname to use
 public:
   explicit zonalRelay (const std::string &objName = "zonalRelay_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual void set (const std::string &param,  const std::string &val) override;
 

@@ -54,8 +54,6 @@ public:
 
         double initialize(gridDyn_time time0,double freq0,double tiedev0);
 
-
-        void setTime(gridDyn_time time);
         double updateP(gridDyn_time time, double freq, double tiedev);
         double currentValue();
 
@@ -90,7 +88,7 @@ AGControl::~AGControl ()
 
 }
 
-gridCoreObject *AGControl::clone (gridCoreObject *obj) const
+coreObject *AGControl::clone (coreObject *obj) const
 {
   AGControl *nobj;
   if (obj == nullptr)
@@ -103,11 +101,11 @@ gridCoreObject *AGControl::clone (gridCoreObject *obj) const
       if (nobj == nullptr)
         {
           //if we can't cast the pointer clone at the next lower level
-          gridCoreObject::clone (obj);
+          coreObject::clone (obj);
           return obj;
         }
     }
-  gridCoreObject::clone (nobj);
+  coreObject::clone (nobj);
   nobj->KI = KI;
   nobj->KP = KP;
   nobj->beta = beta;
@@ -143,16 +141,6 @@ void AGControl::objectInitializeB (const IOdata &args, const IOdata &outputSet, 
   //freg=db->updateA(time0,freg);
   inputSet[0] = pid->getOutput ();
 
-}
-
-
-void AGControl::setTime (gridDyn_time time)
-{
-  prevTime = time;
-  pid->setTime (time);
-  filt1->setTime (time);
-  filt2->setTime (time);
-  db->setTime (time);
 }
 
 
@@ -203,7 +191,7 @@ void AGControl::timestep (gridDyn_time ttime, const IOdata &args, const solverMo
     }
 }
 
-void AGControl::add (gridCoreObject *obj)
+void AGControl::add (coreObject *obj)
 {
   if (dynamic_cast<schedulerReg *> (obj))
     {
@@ -226,7 +214,7 @@ void AGControl::add (schedulerReg *sched)
 }
 
 
-void AGControl::remove (gridCoreObject *sched)
+void AGControl::remove (coreObject *sched)
 {
   for (size_t kk = 0; kk < schedCount; kk++)
     {
@@ -245,7 +233,7 @@ void AGControl::remove (gridCoreObject *sched)
 
 void AGControl::set (const std::string &param,  const std::string &val)
 {
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 }
 
 void AGControl::set (const std::string &param, double val,gridUnits::units_t unitType)
@@ -283,7 +271,7 @@ void AGControl::set (const std::string &param, double val,gridUnits::units_t uni
     }
   else
     {
-      gridCoreObject::set (param,val,unitType);
+      coreObject::set (param,val,unitType);
     }
 
 }

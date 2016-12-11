@@ -64,13 +64,12 @@ protected:
   std::shared_ptr<gridCommunicator> comms;
 public:
   AGControl (const std::string &objName = "AGC_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~AGControl ();
 
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
 
-  void setTime (gridDyn_time time) override;
   virtual void updateA (gridDyn_time time) override;
 
   virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
@@ -79,9 +78,9 @@ public:
   {
     return reg;
   }
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   virtual void add (schedulerReg *sched);
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
@@ -119,7 +118,7 @@ protected:
         double batReg;
 public:
         AGControlBattery();
-        virtual gridCoreObject *clone(gridCoreObject *obj = NULL, bool copyName = false) const;
+        virtual coreObject *clone(coreObject *obj = NULL, bool copyName = false) const;
         virtual ~AGControlBattery();
 
 

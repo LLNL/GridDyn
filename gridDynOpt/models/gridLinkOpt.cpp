@@ -35,7 +35,7 @@ gridLinkOpt::gridLinkOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridLinkOpt::gridLinkOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),link (dynamic_cast<gridLink *> (obj))
+gridLinkOpt::gridLinkOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),link (dynamic_cast<gridLink *> (obj))
 {
 
   if (link)
@@ -48,7 +48,7 @@ gridLinkOpt::gridLinkOpt (gridCoreObject *obj, const std::string &objName) : gri
     }
 }
 
-gridCoreObject *gridLinkOpt::clone (gridCoreObject *obj) const
+coreObject *gridLinkOpt::clone (coreObject *obj) const
 {
   gridLinkOpt *nobj;
   if (obj == nullptr)
@@ -110,7 +110,7 @@ void gridLinkOpt::loadSizes (const optimMode &oMode)
 
 
 
-void gridLinkOpt::add (gridCoreObject *obj)
+void gridLinkOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridLink *> (obj))
     {
@@ -131,7 +131,7 @@ void gridLinkOpt::add (gridCoreObject *obj)
 
 
 
-void gridLinkOpt::remove (gridCoreObject *)
+void gridLinkOpt::remove (coreObject *)
 {
 
   
@@ -259,7 +259,7 @@ void gridLinkOpt::set (const std::string &param, double val, units_t unitType)
 
 
 
-gridCoreObject *gridLinkOpt::find (const std::string &objname) const
+coreObject *gridLinkOpt::find (const std::string &objname) const
 {
   if ((objname == this->name) || (objname == "link"))
     {
@@ -288,7 +288,7 @@ gridCoreObject *gridLinkOpt::find (const std::string &objname) const
   return (parent->find (objname));
 }
 
-gridCoreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "bus")
     {
@@ -304,7 +304,7 @@ gridCoreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t 
   return nullptr;
 }
 
-gridCoreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName == "bus")
     {

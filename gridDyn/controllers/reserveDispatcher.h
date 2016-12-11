@@ -24,7 +24,7 @@ class schedulerRamp;
 
 /** in development object to manage the dispatch of reserve generation
 */
-class reserveDispatcher : public gridCoreObject
+class reserveDispatcher : public coreObject
 {
 public:
 protected:
@@ -42,14 +42,14 @@ protected:
 
 public:
   reserveDispatcher (const std::string &objName = "reserveDispatch_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~reserveDispatcher ();
 
 
   virtual double initializeA (gridDyn_time time0,double dispatch);
 
   void moveSchedulers (reserveDispatcher *rD);
-  void setTime (gridDyn_time time) override;
+
   virtual double updateP (gridDyn_time time,double pShort);
   virtual double testP (gridDyn_time time,double pShort);
   double getOutput (index_t /*num*/ = 0)
@@ -58,10 +58,10 @@ public:
   }
 
   virtual void add (schedulerRamp *sched);
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   virtual void remove (schedulerRamp *sched);
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

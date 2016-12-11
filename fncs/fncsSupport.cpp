@@ -46,11 +46,29 @@ gridDyn_time fncs2gdTime(fncs::time ftime)
 
 void fncsRegister::registerSubscription(const std::string &sub, dataType dtype, const std::string &defVal, bool requestList)
 {
+	for (auto &subs : subscriptions)
+	{
+		if (subs.topic == sub)
+		{
+			subs.list = requestList;
+			subs.type = dtype;
+			subs.defValue = defVal;
+			return;
+		}
+	}
 	subscriptions.emplace_back(sub, dtype, defVal, requestList);
 }
 
 void fncsRegister::registerPublication(const std::string &pub, dataType dtype)
 {
+	for (auto &pubs : publications)
+	{
+		if (pubs.topic == pub)
+		{
+			pubs.type = dtype;
+			return;
+		}
+	}
 	publications.emplace_back(pub,dtype);
 }
 
@@ -69,7 +87,7 @@ std::string fncsRegister::makeZPLConfig( const zplInfo &info)
 		zpl << indent2 << "topic = " << sub.topic << '\n';
 		zpl << indent2 << "default = " << sub.defValue << '\n';
 		zpl << indent2 << "type = " << type2string(sub.type) << '\n';
-		zpl << indent2 << "list = " << sub.list ? "true\n" : "false\n";
+		zpl << indent2 << "list = " << (sub.list ? std::string("true\n") : std::string("false\n"));
 	}
 	return zpl.str();
 }
@@ -91,11 +109,11 @@ std::string fncsRegister::type2string(dataType dtype)
 	{
 	case dataType::fncsDouble:
 	default:
-			return "double";
+		return "double";
 	case dataType::fncsComplex:
 		return "complex";
 	case dataType::fncsInteger:
-		return "integer";
+		return "int";
 	case dataType::fncsString:
 		return "string";
 	case dataType::fncsJSON:
@@ -104,5 +122,4 @@ std::string fncsRegister::type2string(dataType dtype)
 		return "array";
 		
 	}
-	return "";
 }

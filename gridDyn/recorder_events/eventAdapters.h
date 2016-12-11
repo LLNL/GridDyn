@@ -73,7 +73,7 @@ public:
   @param[in] newObject the new object
   @param[in] mode update_mode direct or match
   */
-  virtual void updateObject(gridCoreObject *newObject, object_update_mode mode = object_update_mode::direct);
+  virtual void updateObject(coreObject *newObject, object_update_mode mode = object_update_mode::direct);
 
 };
 
@@ -123,7 +123,7 @@ public:
 	  return newAdapter;
   }
 
-  virtual void updateObject(gridCoreObject * newObject, object_update_mode mode) override
+  virtual void updateObject(coreObject * newObject, object_update_mode mode) override
   {
 	  m_eventObj->updateObject(newObject, mode);
   }
@@ -191,7 +191,7 @@ public:
 	  return newAdapter;
   }
 
-  virtual void updateObject(gridCoreObject * newObject, object_update_mode mode) override
+  virtual void updateObject(coreObject * newObject, object_update_mode mode) override
   {
 	  m_eventObj->updateObject(newObject, mode);
   }
@@ -219,15 +219,15 @@ public:
   }
 };
 
-class gridCoreObject;
+class coreObject;
 
 template<>
-class eventTypeAdapter<gridCoreObject> : public eventAdapter
+class eventTypeAdapter<coreObject> : public eventAdapter
 {
 private:
-	gridCoreObject *targetObject;
+	coreObject *targetObject;
 public:
-  eventTypeAdapter (gridCoreObject *gco=nullptr):targetObject(gco)
+  eventTypeAdapter (coreObject *gco=nullptr):targetObject(gco)
   {
     m_nextTime = targetObject->getNextUpdateTime ();
     two_part_execute = true;
@@ -236,7 +236,7 @@ public:
   {
   }
 
-  virtual void updateObject(gridCoreObject *newObject, object_update_mode mode) override
+  virtual void updateObject(coreObject *newObject, object_update_mode mode) override
   {
 	  if (mode == object_update_mode::direct)
 	  {
@@ -260,7 +260,7 @@ public:
 
   virtual std::shared_ptr<eventAdapter> clone(std::shared_ptr<eventAdapter> eA = nullptr) const override
   {
-	  auto newAdapter = cloneBase<eventTypeAdapter<gridCoreObject>, eventAdapter>(this, eA);
+	  auto newAdapter = cloneBase<eventTypeAdapter<coreObject>, eventAdapter>(this, eA);
 	  if (!newAdapter)
 	  {
 		  return eA;
@@ -295,7 +295,7 @@ public:
   }
 
 
-  gridCoreObject* getTarget() const
+  coreObject* getTarget() const
   {
 	  return targetObject;
   }

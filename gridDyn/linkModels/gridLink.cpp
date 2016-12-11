@@ -62,7 +62,7 @@ gridLink::gridLink (const std::string &objName) : gridPrimary (objName)
 
 }
 
-gridCoreObject *gridLink::clone (gridCoreObject *obj) const
+coreObject *gridLink::clone (coreObject *obj) const
 {
   gridLink *lnk = cloneBaseFactory<gridLink, gridPrimary> (this, obj, &glf);
   if (!(lnk))
@@ -434,7 +434,7 @@ void gridLink::set (const std::string &param, double val, units_t unitType)
 }
 
 
-gridCoreObject *gridLink::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridLink::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "bus")
     {
@@ -581,28 +581,28 @@ void gridLink::computePowers ()
 
 }
 
-void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 
 }
 
-void gridLink::outputPartialDerivatives (const stateData *, matrixData<double> &, const solverMode &)
+void gridLink::outputPartialDerivatives (const stateData &, matrixData<double> &, const solverMode &)
 {
 
 }
 
-void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const solverMode &)
+void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData &, matrixData<double> &, const solverMode &)
 {
 
 
 }
-IOdata gridLink::getOutputs (const stateData *sD, const solverMode &sMode)
+IOdata gridLink::getOutputs (const stateData &sD, const solverMode &sMode) const
 {
   return getOutputs (1,sD,sMode);
 }
 
-IOdata gridLink::getOutputs (index_t busId, const stateData *, const solverMode &)
+IOdata gridLink::getOutputs (index_t busId, const stateData &, const solverMode &) const
 {
   // set from/to buses
   IOdata out {
@@ -707,13 +707,13 @@ void gridLink::setState (gridDyn_time ttime, const double /*state*/[], const dou
 
 }
 
-void gridLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void gridLink::updateLocalCache (const stateData &sD, const solverMode &sMode)
 {
   if (!enabled)
     {
       return;
     }
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
     {
       return;            //already computed
     }
@@ -724,7 +724,7 @@ void gridLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
 
   linkInfo.theta1 = t1 - t2;
   linkInfo.theta2 = t2 - t1;
-  linkInfo.seqID = sD->seqID;
+  linkInfo.seqID = sD.seqID;
 
 }
 

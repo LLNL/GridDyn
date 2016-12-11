@@ -32,9 +32,9 @@ public:
 class coreObjectException : public gridDynException
 {
 protected:
-	gridCoreObject *throwingObject;  //<!* the object that threw the exception
+	coreObject *throwingObject;  //<!* the object that threw the exception
 public:
-	coreObjectException(gridCoreObject *obj);
+	coreObjectException(coreObject *obj);
 	virtual const char *what() const noexcept override
 	{
 		return "core object exception";
@@ -42,7 +42,7 @@ public:
 	/** return the full name of the object that threw the exception*/
 	std::string who() const noexcept;
 	/** change the object for use with a cascading object*/
-	void updateObject(gridCoreObject *newobj)
+	void updateObject(coreObject *newobj)
 	{
 		throwingObject = newobj;
 	}
@@ -52,7 +52,7 @@ public:
 class invalidObjectException : public coreObjectException
 {
 public:
-	invalidObjectException(gridCoreObject *obj) :coreObjectException(obj) {};
+	invalidObjectException(coreObject *obj) :coreObjectException(obj) {};
 	virtual const char *what() const noexcept override
 	{
 		return "invalid object";
@@ -62,7 +62,7 @@ public:
 class objectAddFailure : public coreObjectException
 {
 public:
-	objectAddFailure(gridCoreObject *obj) :coreObjectException(obj) {};
+	objectAddFailure(coreObject *obj) :coreObjectException(obj) {};
 	virtual const char *what() const noexcept override
 	{
 		return "failure to add object";
@@ -72,7 +72,7 @@ public:
 class objectRemoveFailure : public coreObjectException
 {
 public:
-	objectRemoveFailure(gridCoreObject *obj) :coreObjectException(obj) {};
+	objectRemoveFailure(coreObject *obj) :coreObjectException(obj) {};
 	virtual const char *what() const noexcept override
 	{
 		return "failure to remove object";
@@ -102,22 +102,29 @@ public:
 class cloneFailure : public coreObjectException
 {
 public:
-	cloneFailure(gridCoreObject *obj) :coreObjectException(obj) {};
+	cloneFailure(coreObject *obj) :coreObjectException(obj) {};
 	virtual const char *what() const noexcept override
 	{
 		return "clone failure";
 	}
 };
 
-
-class invalidFileName : public gridDynException
+class fileOperationError : public gridDynException
 {
+private:
+	std::string message;
 public:
-	invalidFileName() {};
+	fileOperationError(std::string error_message = "fileOperation error"):message(error_message) {};
 	virtual const char *what() const noexcept override
 	{
-		return "file name is invalid";
+		return message.c_str();
 	}
+};
+
+class invalidFileName : public fileOperationError
+{
+public:
+	invalidFileName(std::string error_message = "file name is invalid"):fileOperationError(error_message) {};
 };
 #endif
 

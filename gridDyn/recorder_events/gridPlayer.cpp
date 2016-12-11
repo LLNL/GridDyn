@@ -34,7 +34,7 @@ gridPlayer::gridPlayer(gridDyn_time time0,double loopPeriod) : gridEvent(time0),
 }
 
 
-gridPlayer::gridPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject) : gridEvent(gdEI,rootObject), period(gdEI->period)
+gridPlayer::gridPlayer(gridEventInfo *gdEI, coreObject *rootObject) : gridEvent(gdEI,rootObject), period(gdEI->period)
 {
 	if (gdEI->file.empty())
 	{
@@ -51,7 +51,7 @@ gridPlayer::gridPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject) : gridEv
 	
 }
 
-void gridPlayer::updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
+void gridPlayer::updateEvent(gridEventInfo *gdEI, coreObject *rootObject)
 {
 	if (gdEI->file.empty())
 	{
@@ -281,7 +281,7 @@ change_code gridPlayer::trigger(gridDyn_time time)
 	return ret;
 }
 
-bool gridPlayer::setTarget(gridCoreObject *gdo, const std::string &var)
+bool gridPlayer::setTarget(coreObject *gdo, const std::string &var)
 {
 	if (!var.empty())
 	{

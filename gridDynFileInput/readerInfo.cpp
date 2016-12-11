@@ -262,7 +262,7 @@ std::string readerInfo::objectNameTranslate (const std::string input)
   return out;
 }
 
-bool readerInfo::addLibraryObject (gridCoreObject *obj, std::vector<gridParameter> &pobjs)
+bool readerInfo::addLibraryObject (coreObject *obj, std::vector<gridParameter> &pobjs)
 {
   auto retval = library.find (obj->getName ());
   if (retval == library.end ())
@@ -278,7 +278,7 @@ bool readerInfo::addLibraryObject (gridCoreObject *obj, std::vector<gridParamete
 
 }
 
-gridCoreObject *readerInfo::findLibraryObject (const std::string &ename) const
+coreObject *readerInfo::findLibraryObject (const std::string &ename) const
 {
   auto retval = library.find (ename);
   if (retval == library.end ())
@@ -292,7 +292,7 @@ gridCoreObject *readerInfo::findLibraryObject (const std::string &ename) const
 }
 
 const std::string libraryLabel = "library";
-gridCoreObject *readerInfo::makeLibraryObject (const std::string &ename, gridCoreObject *mobj)
+coreObject *readerInfo::makeLibraryObject (const std::string &ename, coreObject *mobj)
 {
   auto retval = library.find (ename);
   if (retval == library.end ())
@@ -302,7 +302,7 @@ gridCoreObject *readerInfo::makeLibraryObject (const std::string &ename, gridCor
     }
   else
     {
-      gridCoreObject *obj = retval->second.first->clone (mobj);
+      coreObject *obj = retval->second.first->clone (mobj);
       for (auto &po : retval->second.second)
         {
           paramStringProcess (&po, this);

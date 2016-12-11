@@ -17,7 +17,8 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
-#define BOOST_TEST_MODULE gridCoreObject testComponents
+
+#define BOOST_TEST_MODULE coreObject testComponents
 #define BOOST_TEST_DETECT_MEMORY_LEAK 0
 
 #include <boost/test/unit_test.hpp>

@@ -35,11 +35,11 @@ private:
 public:
   /** @brief default constructor*/
   longLine (const std::string &objName = "longLine_$" );
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) final override;  //there shouldn't be any additional adds
+  virtual void add (coreObject *obj) final override;  //there shouldn't be any additional adds
   // remove components
-  virtual void remove (gridCoreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
+  virtual void remove (coreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
 
   virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 

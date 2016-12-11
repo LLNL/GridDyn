@@ -34,10 +34,10 @@ void epcReadBus (gridBus *bus, std::string line, double base, const basicReaderI
 void epcReadLoad (gridLoad *ld, std::string line, double base);
 void epcReadFixedShunt (gridLoad *ld, std::string line, double base);
 void epcReadGen (gridDynGenerator *gen, std::string line, double base);
-void epcReadBranch (gridCoreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
-void epcReadTX (gridCoreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+void epcReadBranch (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+void epcReadTX (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
 
-double epcReadSolutionParamters (gridCoreObject *parentObject, std::string line);
+double epcReadSolutionParamters (coreObject *parentObject, std::string line);
 
 bool nextLine (std::ifstream &file, std::string &line)
 {
@@ -99,7 +99,7 @@ int getLineIndex (std::string &line)
   return index;
 }
 
-void loadEPC (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
+void loadEPC (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
   std::string line;        //line storage
@@ -408,7 +408,7 @@ sbase
 System base, MVA
 */
 
-double epcReadSolutionParamters (gridCoreObject *parentObject, std::string line)
+double epcReadSolutionParamters (coreObject *parentObject, std::string line)
 {
   auto tokens = splitline (line, " ",delimiter_compression::on);
   double val = doubleRead (tokens[1]);
@@ -763,7 +763,7 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
 }
 
 
-void epcReadBranch (gridCoreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
+void epcReadBranch (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
   std::string temp2;
   gridBus *bus1, *bus2;
@@ -859,7 +859,7 @@ void epcReadBranch (gridCoreObject *parentObject, std::string line, double base,
 
 }
 
-void epcReadTX (gridCoreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
+void epcReadTX (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
   std::string temp, temp2;
   gridBus *bus1, *bus2;

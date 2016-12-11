@@ -18,7 +18,7 @@
 #include <exception>
 
 
-class gridCoreObject;
+class coreObject;
 
 /**enumeration of the update mode*/
 enum class object_update_mode
@@ -64,25 +64,25 @@ public:
 		in the container object and updated
 	@throw objectUpdateFailException on update failure
 	*/
-	virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) = 0;
+	virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) = 0;
 
 	/** function to check whether the object can be updated
 	@details used in cases where a throw might cause an inconsistent state for cases of a match object_update_mode
 	@param[in] obj the new object
 	@return true if the object update will succeed false otherwise
 	*/
-	virtual bool checkValidUpdate(gridCoreObject *obj) const
+	virtual bool checkValidUpdate(coreObject *obj) const
 	{
 		return (obj!=nullptr);
 	}
 	/** get an object that is used by the interface
 	@return a pointer to the object
 	*/
-	virtual gridCoreObject * getObject() const = 0;
+	virtual coreObject * getObject() const = 0;
 	/** add the object contained in the operator to a vector of objects
 	@param[out] objs the vector of objects to add any used objects to
 	*/
-	virtual void getObjects(std::vector<gridCoreObject *> &objects) const = 0;
+	virtual void getObjects(std::vector<coreObject *> &objects) const = 0;
 };
 
 

@@ -45,15 +45,15 @@ protected:
 
 public:
   gridLinkOpt (const std::string &objName = "");
-  gridLinkOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridLinkOpt (coreObject *obj, const std::string &objName = "");
   ~gridLinkOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
   virtual void objectInitializeA (unsigned long flags) override;
   virtual void loadSizes (const optimMode &oMode) override;
@@ -90,9 +90,9 @@ public:
 
 
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
 
   virtual gridOptObject * getBus (index_t index) const override;
   virtual gridOptObject * getArea (index_t index) const override;

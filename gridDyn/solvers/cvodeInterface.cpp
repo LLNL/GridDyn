@@ -533,17 +533,21 @@ int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_da
 
   cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
   sd->funcCallCount++;
-    if (sd->mode.pairedOffsetIndex!=kNullLocation)
-    {
-		int ret = sd->m_gds->dynAlgebraicSolve(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
-		if (ret < FUNCTION_EXECUTION_SUCCESS)
-		{
-			return ret;
-		}
-        
-    }
-  int ret = sd->m_gds->derivativeFunction (ttime, NVECTOR_DATA (sd->use_omp,state), NVECTOR_DATA (sd->use_omp, dstate_dt), sd->mode);
+  try
+  {
+	  if (sd->mode.pairedOffsetIndex != kNullLocation)
+	  {
+		  sd->m_gds->dynAlgebraicSolve(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
 
+
+	  }
+	  sd->m_gds->derivativeFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
+
+  }
+  catch (std::runtime_error &re)
+  {
+	  return FUNCTION_EXECUTION_FAILURE;
+  }
   if (sd->fileCapture)
   {
       if (!sd->stateFile.empty())
@@ -551,9 +555,9 @@ int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_da
           writeVector(ttime, STATE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, state), sd->stateFile, (sd->funcCallCount != 1));
           writeVector(ttime, DERIVATIVE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, dstate_dt), sd->stateFile);
       }
-}
+	}
 
-  return ret;
+  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 int cvodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_data)

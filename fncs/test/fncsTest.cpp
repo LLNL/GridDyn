@@ -96,7 +96,7 @@ bool testComplexConversion()
 bool testFNCSsource()
 {
 	fncs::clear();
-	gridCoreObject *obj = coreObjectFactory::instance()->createObject("source", "fncs", "fncsSource");
+	coreObject *obj = coreObjectFactory::instance()->createObject("source", "fncs", "fncsSource");
 
 	if (!dynamic_cast<fncsSource *>(obj))
 	{

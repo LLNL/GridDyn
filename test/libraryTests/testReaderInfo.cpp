@@ -11,7 +11,7 @@
 * LLNS Copyright End
 */
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 #include "gridDynTypes.h"

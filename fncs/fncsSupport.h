@@ -21,10 +21,10 @@
 
 #ifdef FULLCPP14
 template<typename T>
-constexpr T fncsTickPerSecond = T(1'000'000'000.00);
+constexpr T fncsTickPerSecond = T(1'000'000.00);
 #else
-const double fncsTickPerSecond_f(1'000'000'000.00);
-const unsigned long long fncsTickPerSecond_i(1'000'000'000);
+const double fncsTickPerSecond_f(1'000'000.00);
+const unsigned long long fncsTickPerSecond_i(1'000'000);
 #endif
 
 fncs::time gd2fncsTime(gridDyn_time evntTime);

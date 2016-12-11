@@ -20,7 +20,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <cstdio>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define CONSTRAINT_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/constraint_tests/"
 

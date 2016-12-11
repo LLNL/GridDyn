@@ -27,11 +27,11 @@
 * @return pointer to the cloned object
 */
 template<class A, class B>
-A * cloneBase (const A *originalObject, gridCoreObject *obj)
+A * cloneBase (const A *originalObject, coreObject *obj)
 {
   static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
-  static_assert (std::is_base_of<gridCoreObject, B>::value, "classes must be inherited from gridCoreObject");
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, B>::value, "classes must be inherited from coreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
   A *clonedObject;
   if (obj == nullptr)
     {
@@ -65,8 +65,8 @@ template<class A, class B>
 void getParamString (const A *cobj, stringVec &pstr, const stringVec &numStr, const stringVec &strStr, const stringVec &flagStr, paramStringType pstype)
 {
   static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
-  static_assert (std::is_base_of<gridCoreObject, B>::value, "classes must be inherited from gridCoreObject");
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, B>::value, "classes must be inherited from coreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
   switch (pstype)
     {
     case paramStringType::all:

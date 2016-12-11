@@ -32,7 +32,7 @@ pidBlock::pidBlock (double P, double I, double D,const std::string &objName) : b
     }
 }
 
-gridCoreObject *pidBlock::clone (gridCoreObject *obj) const
+coreObject *pidBlock::clone (coreObject *obj) const
 {
 	pidBlock *nobj = cloneBase<pidBlock, basicBlock>(this, obj);
   if (nobj == nullptr)
@@ -106,7 +106,7 @@ void pidBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, I
   prevInput = in + bias;
 }
 
-void pidBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void pidBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
   Loc.destDiffLoc[limiter_diff + 2] = m_I * (input + bias);
@@ -120,7 +120,7 @@ void pidBlock::derivElements (double input, double didt, const stateData *sD, do
 }
 
 
-void pidBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void pidBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, nullptr, sMode,this);
   //adjust the offset to account for the limiter states;
@@ -133,23 +133,23 @@ void pidBlock::jacElements (double input, double didt, const stateData *sD, matr
           basicBlock::jacElements (input, didt, sD, ad, argLoc, sMode);
         }
 
-      ad.assign (Loc.diffOffset, Loc.diffOffset, -1.0 / m_Td - sD->cj);
-      ad.assign (Loc.diffOffset, Loc.diffOffset + 1, K * sD->cj / m_Td);
+      ad.assign (Loc.diffOffset, Loc.diffOffset, -1.0 / m_Td - sD.cj);
+      ad.assign (Loc.diffOffset, Loc.diffOffset + 1, K * sD.cj / m_Td);
 
       ad.assign (Loc.diffOffset, Loc.diffOffset + 2, K / m_Td);
       ad.assignCheckCol (Loc.diffOffset, argLoc, K * m_P / m_Td);
       if (no_D)
         {
-          ad.assign (Loc.diffOffset + 1, Loc.diffOffset + 1, -sD->cj);
+          ad.assign (Loc.diffOffset + 1, Loc.diffOffset + 1, -sD.cj);
         }
       else
         {
           ad.assignCheckCol (Loc.diffOffset + 1, argLoc, m_D / m_T1);
-          ad.assign (Loc.diffOffset + 1, Loc.diffOffset + 1, -1.0 / m_T1 - sD->cj);
+          ad.assign (Loc.diffOffset + 1, Loc.diffOffset + 1, -1.0 / m_T1 - sD.cj);
         }
 
       ad.assignCheckCol (Loc.diffOffset + 2, argLoc, m_I);
-      ad.assign (Loc.diffOffset + 2, Loc.diffOffset + 2, -sD->cj);
+      ad.assign (Loc.diffOffset + 2, Loc.diffOffset + 2, -sD.cj);
     }
 }
 

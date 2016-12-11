@@ -24,14 +24,14 @@
 
 using namespace gridUnits;
 
-void autoGrabbers (gridCoreObject * obj, std::vector < std::shared_ptr < gridGrabber >> &v);
-void allGrabbers (const std::string & mode, gridCoreObject * obj, std::vector < std::shared_ptr < gridGrabber >> &v);
+void autoGrabbers (coreObject * obj, std::vector < std::shared_ptr < gridGrabber >> &v);
+void allGrabbers (const std::string & mode, coreObject * obj, std::vector < std::shared_ptr < gridGrabber >> &v);
 
-static grabberInterpreter<gridGrabber, opGrabber, functionGrabber> gInterpret ([](const std::string &fld, gridCoreObject *obj){
+static grabberInterpreter<gridGrabber, opGrabber, functionGrabber> gInterpret ([](const std::string &fld, coreObject *obj){
   return createGrabber (fld, obj);
 });
 
-std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string & command, gridCoreObject * obj)
+std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string & command, coreObject * obj)
 {
   std::vector < std::shared_ptr < gridGrabber >> v;
   auto gstr = splitlineBracketTrim (command);
@@ -105,7 +105,7 @@ std::vector < std::shared_ptr < gridGrabber >> makeGrabbers (const std::string &
 
 }
 
-void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber> > &v)
+void autoGrabbers (coreObject *obj, std::vector<std::shared_ptr<gridGrabber> > &v)
 {
   std::shared_ptr<gridGrabber> ggb;
 
@@ -194,7 +194,7 @@ void autoGrabbers (gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber>
 
 }
 
-void allGrabbers (const std::string &mode, gridCoreObject *obj, std::vector<std::shared_ptr<gridGrabber> > &v)
+void allGrabbers (const std::string &mode, coreObject *obj, std::vector<std::shared_ptr<gridGrabber> > &v)
 {
   std::shared_ptr<gridGrabber> ggb = nullptr;
 

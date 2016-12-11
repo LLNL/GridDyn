@@ -12,15 +12,15 @@
 	 </load>
 	  <load name="loadP" type="pulse">
 	 <p>0</p>
-	 <period>3</period>
-	 <a>0.2</a>
-	 <pulsetype>square</pulsetype>
+	 <p:period>3</p:period>
+	 <p:a>0.2</p:a>
+	 <p:pulsetype>square</p:pulsetype>
 	 </load>
 	 <load name="loadP2" type="pulse">
 	 <p>0</p>
-	 <period>2</period>
-	 <a>0.1</a>
-	 <pulsetype>triangle</pulsetype>
+	 <p:period>2</p:period>
+	 <p:a>0.1</p:a>
+	 <p:pulsetype>triangle</p:pulsetype>
 	 </load>
    </bus>
    

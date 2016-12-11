@@ -28,7 +28,7 @@ differentialRelay::differentialRelay (const std::string&objName) : gridRelay (ob
   opFlags.set (continuous_flag);
 }
 
-gridCoreObject *differentialRelay::clone (gridCoreObject *obj) const
+coreObject *differentialRelay::clone (coreObject *obj) const
 {
   differentialRelay *nobj = cloneBase<differentialRelay, gridRelay> (this, obj);
   if (!(nobj))

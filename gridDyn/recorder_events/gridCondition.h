@@ -72,12 +72,12 @@ public:
   *run the comparison between for state grabbers
   * @return returns a difference between the condition and parameter designed to go negative if the condition is met
   **/
-  virtual double evalCondition (const stateData *sD, const solverMode &sMode);
+  virtual double evalCondition (const stateData &sD, const solverMode &sMode);
   /**
   *get the value for which the comparison is made
   * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
   **/
-  double getVal (int side,const stateData *sD,const solverMode &sMode) const;
+  double getVal (int side,const stateData &sD,const solverMode &sMode) const;
   /**
   *get the value for which the comparison is made
   * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
@@ -88,7 +88,7 @@ public:
  @param[in] obj the object we want the condition based on
 @param[in] mode  the mode of the update
 */
-  virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
 
   /** evaluation the condition based on object data
   @return true if the condition evaluates true
@@ -99,7 +99,7 @@ public:
   @param[in] sMode the solver mode related to the data
   @return true if the condition evaluates true
   */
-  virtual bool checkCondition (const stateData *sD, const solverMode &sMode) const;
+  virtual bool checkCondition (const stateData &sD, const solverMode &sMode) const;
   /** set the comparison operator
   @param[in] ct the comparison type*/
   void setComparison (comparison_type ct);
@@ -128,9 +128,9 @@ public:
     use_margin = margin_on;
   }
 
-  virtual gridCoreObject * getObject() const override;
+  virtual coreObject * getObject() const override;
 
-  virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+  virtual void getObjects(std::vector<coreObject *> &objects) const override;
 private:
   std::function<double(double A, double B,double margin)> evalf; //!< the function evaluation used in the condition
   comparison_type comp = comparison_type::gt;	//!< the condition operator
@@ -141,9 +141,9 @@ private:
 * @param[in] condString a condition string  like bus1:Voltage>bus2::voltage
 * @param[in] rootObject the root object to find the other objects
 */
-std::shared_ptr<gridCondition> make_condition (const std::string &condString, gridCoreObject *rootObject);
-std::shared_ptr<gridCondition> make_condition (const std::string &field, const std::string &compare, double level, gridCoreObject *rootObject);
-std::shared_ptr<gridCondition> make_condition (const std::string &field, comparison_type comp, double level, gridCoreObject *rootObject);
+std::shared_ptr<gridCondition> make_condition (const std::string &condString, coreObject *rootObject);
+std::shared_ptr<gridCondition> make_condition (const std::string &field, const std::string &compare, double level, coreObject *rootObject);
+std::shared_ptr<gridCondition> make_condition (const std::string &field, comparison_type comp, double level, coreObject *rootObject);
 /** evaluate a compound condition consisting of multiple individual conditions
 */
 class compoundCondition : public gridCondition
@@ -157,9 +157,9 @@ public:
   compoundCondition();
 
   virtual double evalCondition () override;
-  double evalCondition (const stateData *sD, const solverMode &sMode) override;
+  double evalCondition (const stateData &sD, const solverMode &sMode) override;
   bool checkCondition () const override;
-  bool checkCondition (const stateData *sD, const solverMode &sMode) const override;
+  bool checkCondition (const stateData &sD, const solverMode &sMode) const override;
   void add (std::shared_ptr<gridCondition> gc);
   void setMode (compound_mode md)
   {

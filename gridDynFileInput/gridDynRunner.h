@@ -16,7 +16,7 @@
 #define GRIDDYN_GRIDDYN_RUNNER_H
 
 #include "griddyn-config.h"
-
+#include "gridDynTypes.h"
 #include <chrono>
 #include <memory>
 
@@ -52,6 +52,7 @@ public:
   int Initialize (int argc, char *argv[]);
 #endif
 
+  void simInitialize();
   /**
    * Run simulation to completion
    */
@@ -64,17 +65,21 @@ public:
    * @param time maximum time simulation may advance to.
    * @return time simulation successfully advanced to.
    */
-  double Step (double time);
+  gridDyn_time Step (gridDyn_time time);
 
   /**
    * Get the next GridDyn Event time
    *
    * @return the next event time
    */
-  double getNextEvent () const;
+  gridDyn_time getNextEvent () const;
 
   void Finalize (void);
-
+  /** get a pointer to the simulation object*/
+  std::shared_ptr<gridDynSimulation> getSim() const
+  {
+	  return m_gds;
+  }
 private:
   /**
    * Get the next GridDyn Event time

@@ -19,7 +19,7 @@
 #include "vectorOps.hpp"
 #include "timeSeries.h"
 #include <cstdio>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define ROOTS_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/rootFinding_tests/"
 

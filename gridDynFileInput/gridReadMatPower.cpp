@@ -40,14 +40,14 @@ using namespace gridUnits;
 typedef std::vector<std::vector<double> > mArray;
 
 void removeMatlabComments (std::string &text);
-void loadBusArray (gridCoreObject *parentObject, double basepower, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
-int loadGenArray (gridCoreObject *parentObject, mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
-void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost,int gencount);
-void loadLinkArray (gridCoreObject *parentObject, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+void loadBusArray (coreObject *parentObject, double basepower, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+void loadGenCostArray (coreObject *parentObject, mArray &genCost,int gencount);
+void loadLinkArray (coreObject *parentObject, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
 //wrapper function to detect m file format for matpower or PSAT
 
 
-void loadMatPower (gridCoreObject *parentObject, const std::string &filetext, std::string basename, const basicReaderInfo &bri)
+void loadMatPower (coreObject *parentObject, const std::string &filetext, std::string basename, const basicReaderInfo &bri)
 {
   double basepower = bri.base;
   gridSimulation::resetObjectCounters ();       //reset all the object counters to 0
@@ -83,7 +83,7 @@ void loadMatPower (gridCoreObject *parentObject, const std::string &filetext, st
 
 }
 
-void loadBusArray (gridCoreObject *parentObject, double basepower, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &)
+void loadBusArray (coreObject *parentObject, double basepower, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &)
 {
 
   gridLoad *ld = nullptr;
@@ -191,7 +191,7 @@ MU QMAX† 24 Kuhn-Tucker multiplier on upper Qg limit (u/MVAr)
 MU QMIN† 25 Kuhn-Tucker multiplier on lower Qg limit (u/MVAr)
 */
 
-int loadGenArray (gridCoreObject *parentObject,  mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo &)
+int loadGenArray (coreObject *parentObject,  mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo &)
 {
   index_t kk = 1;
 
@@ -304,7 +304,7 @@ n + 1 coecients of n-th order polynomial cost, starting with
 highest order, where cost is f(p) = cnpn +    + c1p + c0
 */
 #ifdef OPTIMIZATION_ENABLE
-void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencount)
+void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
 {
 
   gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->find ("root"));
@@ -315,7 +315,7 @@ void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencou
 
   gridGenOpt *go;
   gridOptObject *oo;
-  gridCoreObject *obj;
+  coreObject *obj;
   int mode = 0;
   int numc = 0;
   int q = 0;
@@ -366,7 +366,7 @@ void loadGenCostArray (gridCoreObject *parentObject, mArray &genCost, int gencou
   
 }
 #else
-void loadGenCostArray(gridCoreObject *, mArray & /*genCost*/, int /*gencount*/)
+void loadGenCostArray(coreObject *, mArray & /*genCost*/, int /*gencount*/)
 {
 }
 #endif
@@ -396,7 +396,7 @@ MU ANGMIN‡ 20 Kuhn-Tucker multiplier lower angle dierence limit (u/degree)
 MU ANGMAX‡ 21 Kuhn-Tucker multiplier upper angle dierence limit (u/degree)
 */
 
-void loadLinkArray (gridCoreObject *parentObject, mArray &lnks, std::vector<gridBus *> &busList, const basicReaderInfo &)
+void loadLinkArray (coreObject *parentObject, mArray &lnks, std::vector<gridBus *> &busList, const basicReaderInfo &)
 {
 
   auto linkFactory = dynamic_cast<typeFactory<gridLink> *> (coreObjectFactory::instance ()->getFactory ("link")->getFactory (""));

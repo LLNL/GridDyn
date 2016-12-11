@@ -24,7 +24,7 @@ class gridArea;
 class scheduler;
 
 
-class dispatcher : public gridCoreObject
+class dispatcher : public coreObject
 {
 public:
 protected:
@@ -40,12 +40,10 @@ public:
   dispatcher (const std::string &objName = "dispatcher_#");
 
   virtual ~dispatcher ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   void moveSchedulers (dispatcher *dis);
   virtual double initialize (gridDyn_time time0,double dispatch);
 
-
-  void setTime (gridDyn_time time) override;
   virtual double updateP (gridDyn_time time,double required,double targetTime);
   virtual double testP (gridDyn_time time,double required,double targetTime);
   double currentValue ()
@@ -53,9 +51,9 @@ public:
     return totalDispatch;
   }
 
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   virtual void add (scheduler *sched);
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   virtual void remove (scheduler *sched);
 
   virtual void set (const std::string &param, const std::string &val) override;

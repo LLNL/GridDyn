@@ -25,7 +25,7 @@ busRelay::busRelay (const std::string&objName) : gridRelay (objName)
   opFlags.set (continuous_flag);
 }
 
-gridCoreObject *busRelay::clone (gridCoreObject *obj) const
+coreObject *busRelay::clone (coreObject *obj) const
 {
 	busRelay *nobj = cloneBase<busRelay, gridRelay>(this, obj);
 	if (nobj == nullptr)

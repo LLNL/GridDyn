@@ -15,51 +15,39 @@
 #include "gridRandom.h"
 #include "stringOps.h"
 #include "core/gridDynExceptions.h"
+#include "gridCoreTemplates.h"
 #include <iostream>
 #include <cassert>
 
-randomSource::randomSource (const std::string &objName, double startVal) : rampSource (objName,startVal)
+randomSource::randomSource (const std::string &objName, double startVal) : rampSource (objName,startVal),mean_L(startVal)
 {
-  mean_L = startVal;
-  timeGenerator = std::unique_ptr<gridRandom> (new gridRandom (gridRandom::dist_type_t::constant));
-  valGenerator = std::unique_ptr<gridRandom> (new gridRandom (gridRandom::dist_type_t::constant));
+  timeGenerator = std::make_unique<gridRandom> (gridRandom::dist_type_t::constant);
+  valGenerator = std::make_unique<gridRandom> (gridRandom::dist_type_t::constant);
 }
 
 
-gridCoreObject *randomSource::clone (gridCoreObject *obj) const
+coreObject *randomSource::clone (coreObject *obj) const
 {
-  randomSource *ld;
-  if (obj == nullptr)
+	randomSource *src = cloneBase<randomSource, rampSource>(this, obj);
+  if (src == nullptr)
     {
-      ld = new randomSource ();
+	  return obj;
     }
-  else
-    {
-      ld = dynamic_cast<randomSource *> (obj);
-      if (ld == nullptr)
-        {
-          rampSource::clone (obj);
-          return obj;
-        }
-    }
-  rampSource::clone (ld);
-
-
-  ld->min_t = min_t;
-  ld->max_t = max_t;
-  ld->min_L = min_L;
-  ld->max_L = max_L;
-  ld->mean_t = mean_t;
-  ld->mean_L = mean_L;
-  ld->scale_t = scale_t;
-  ld->stdev_L = stdev_L;
-  ld->opFlags.reset (triggered_flag);
-  ld->zbias = zbias;
-  ld->opFlags.reset (object_armed_flag);
-  ld->keyTime = keyTime;
-  ld->timeGenerator->setDistribution (timeGenerator->getDistribution ());
-  ld->valGenerator->setDistribution (valGenerator->getDistribution ());
-  return ld;
+  src->min_t = min_t;
+  src->max_t = max_t;
+  src->min_L = min_L;
+  src->max_L = max_L;
+  src->mean_t = mean_t;
+  src->mean_L = mean_L;
+  src->scale_t = scale_t;
+  src->stdev_L = stdev_L;
+  src->opFlags.reset (triggered_flag);
+  src->zbias = zbias;
+  src->opFlags.reset (object_armed_flag);
+  src->keyTime = keyTime;
+  src->timeGenerator->setDistribution (timeGenerator->getDistribution ());
+  src->valGenerator->setDistribution (valGenerator->getDistribution ());
+  return src;
 }
 
 // set properties
@@ -205,32 +193,14 @@ void randomSource::reset ()
 {
 	opFlags.reset(triggered_flag);
 	opFlags.reset(object_armed_flag);
-	offset = 0;
+	offset = 0.0;
 }
 
-void randomSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void randomSource::objectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
 {
-
-  if ((opFlags[triggered_flag]) || (isArmed ()))
-    {
-      if (isArmed ())
-        {
-          if (time0 != keyTime)
-            {
-              if (time0 >= nextUpdateTime)
-                {
-                  updateA (time0);
-                }
-              rampSource::setState (time0, nullptr, nullptr, cLocalSolverMode);
-            }
-          rampSource::objectInitializeA (time0, flags);
-        }
-    }
-  else//first time setup
-    {
+	reset();
       keyTime = time0;
-      prevTime = time0;
-	  gridDyn_time triggerTime = prevTime + ntime ();
+	  gridDyn_time triggerTime = time0 + ntime ();
 
       if (opFlags[interpolate_flag])
         {
@@ -238,9 +208,14 @@ void randomSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
         }
       nextUpdateTime = triggerTime;
       opFlags.set (object_armed_flag);
-    }
 }
 
+
+void randomSource::updateOutput(gridDyn_time time)
+{
+	updateA(time);
+	rampSource::updateOutput(time);
+}
 
 void randomSource::updateA (gridDyn_time time)
 {
@@ -274,12 +249,11 @@ void randomSource::updateA (gridDyn_time time)
     }
   else
     {
-      double rval;
-      rval = nval ();
+      double rval = nval ();
 
-      m_output = (opFlags.test (proportional_flag)) ? m_output + rval * m_output : m_output + rval;
+      m_output = (opFlags[proportional_flag]) ? m_output + rval * m_output : m_output + rval;
 
-      if (opFlags.test (repeated_flag))
+      if (opFlags[repeated_flag])
         {
           nextUpdateTime = triggerTime;
         }
@@ -291,6 +265,11 @@ void randomSource::updateA (gridDyn_time time)
       prevTime = time;
       keyTime = time;
     }
+  if (nextUpdateTime <= time)
+  {
+	  updateA(time);
+  }
+  m_tempOut = m_output;
 }
 
 
@@ -355,61 +334,9 @@ void randomSource::nextStep (gridDyn_time triggerTime)
 
 }
 
-void randomSource::setTime (gridDyn_time time)
-{
-  auto in = prevTime - lastUpdateTime;
-
-  nextUpdateTime = time + (nextUpdateTime - prevTime);
-  lastUpdateTime = time - in;
-  prevTime = time;
-}
-
 
 void randomSource::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
 {
-  if (ttime > nextUpdateTime)
-    {
-      lastUpdateTime = nextUpdateTime;
-      opFlags.set (triggered_flag);
-      auto triggerTime = lastUpdateTime + ntime ();
-      if (opFlags.test (interpolate_flag))
-        {
-          rampSource::timestep (nextUpdateTime,args,sMode);
-          if (opFlags.test (repeated_flag))
-            {
-              nextStep (triggerTime);
-              nextUpdateTime = triggerTime;
-            }
-          else
-            {
-              clearRamp ();
-              nextUpdateTime = maxTime;
-              opFlags.set (object_armed_flag,false);
-              prevTime = ttime;
-            }
-          rampSource::timestep (ttime, args,sMode);
-        }
-      else
-        {
-          double rval;
-
-          rval = nval ();
-          m_output = (opFlags.test (proportional_flag)) ? m_output + rval * m_output : m_output + rval;
-
-          if (opFlags.test (repeated_flag))
-            {
-              nextUpdateTime = triggerTime;
-            }
-          else
-            {
-              nextUpdateTime = maxTime;
-              opFlags.set (object_armed_flag, false);
-            }
-          rampSource::timestep (ttime, args,sMode);
-        }
-    }
-  else
-    {
-      rampSource::timestep (ttime,  args,sMode);
-    }
+	updateA(ttime);
+	rampSource::timestep(ttime, args, sMode);
 }

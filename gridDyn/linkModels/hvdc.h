@@ -29,7 +29,7 @@ protected:
 public:
   /** @brief constructor*/
   hvdc (const std::string &objName = "hvdc_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // parameter set functions
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

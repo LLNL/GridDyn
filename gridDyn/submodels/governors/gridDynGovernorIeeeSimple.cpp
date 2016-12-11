@@ -36,7 +36,7 @@ gridDynGovernorIeeeSimple::gridDynGovernorIeeeSimple (const std::string &objName
 
 }
 
-gridCoreObject *gridDynGovernorIeeeSimple::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorIeeeSimple::clone (coreObject *obj) const
 {
   gridDynGovernorIeeeSimple *gov = cloneBase<gridDynGovernorIeeeSimple, gridDynGovernor> (this, obj);
   if (gov == nullptr)
@@ -79,7 +79,7 @@ void gridDynGovernorIeeeSimple::objectInitializeB (const IOdata & /*args*/, cons
 }
 
 // residual
-void gridDynGovernorIeeeSimple::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGovernorIeeeSimple::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -92,7 +92,7 @@ void gridDynGovernorIeeeSimple::residual (const IOdata &args, const stateData *s
   Loc.destDiffLoc[1] -= Loc.dstateLoc[1];
 }
 
-void gridDynGovernorIeeeSimple::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGovernorIeeeSimple::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
 
@@ -115,11 +115,11 @@ void gridDynGovernorIeeeSimple::timestep (gridDyn_time ttime,  const IOdata &arg
 {
 
 
-  gridDynGovernorIeeeSimple::derivative ( args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+  gridDynGovernorIeeeSimple::derivative ( args, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[0] += dt * m_dstate_dt[0];
   m_state[1] += dt * m_dstate_dt[1];
-  if (opFlags.test (p_limited))
+  if (opFlags[p_limited])
     {
 
     }
@@ -137,7 +137,7 @@ void gridDynGovernorIeeeSimple::timestep (gridDyn_time ttime,  const IOdata &arg
   prevTime = ttime;
 }
 
-void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -173,16 +173,16 @@ void gridDynGovernorIeeeSimple::jacobianElements (const IOdata & /*args*/, const
     }
   if (opFlags.test (p_limited))
     {
-      ad.assign (refI, refI, sD->cj);
+      ad.assign (refI, refI, sD.cj);
     }
   else
     {
-      ad.assign (refI, refI, -1 / T3 - sD->cj);
+      ad.assign (refI, refI, -1 / T3 - sD.cj);
       ad.assign (refI, refI + 1, -K / T3);
 
       ad.assignCheck (refI, argLocs[govpSetInLocation], 1 / T3);
     }
-  ad.assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
+  ad.assign (refI + 1, refI + 1, -1 / T1 - sD.cj);
 }
 
 
@@ -201,7 +201,7 @@ index_t gridDynGovernorIeeeSimple::findIndex (const std::string &field, const so
   return ret;
 }
 
-void gridDynGovernorIeeeSimple::rootTest (const IOdata &args, const stateData *sD, double root[], const solverMode &sMode)
+void gridDynGovernorIeeeSimple::rootTest (const IOdata &args, const stateData &sD, double root[], const solverMode &sMode)
 {
 
   int rootOffset = offsets.getRootOffset (sMode);
@@ -266,7 +266,7 @@ void gridDynGovernorIeeeSimple::rootTrigger (gridDyn_time /*ttime*/, const IOdat
               alert (this, JAC_COUNT_DECREASE);
             }
 
-          derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+          derivative (args, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
         }
       ++rootOffset;
     }

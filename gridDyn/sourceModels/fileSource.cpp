@@ -24,7 +24,7 @@ fileSource::fileSource (const std::string filename, int column) : rampSource ("f
 
 }
 
-gridCoreObject *fileSource::clone (gridCoreObject *obj) const
+coreObject *fileSource::clone (coreObject *obj) const
 {
   fileSource *nobj = cloneBase<fileSource, rampSource> (this, obj);
   if (nobj == nullptr)
@@ -127,22 +127,6 @@ void fileSource::timestep (gridDyn_time ttime, const IOdata &args, const solverM
 }
 
 
-void fileSource::setTime (gridDyn_time time)
-{
-  if (opFlags[use_absolute_time_flag])
-    {
-      timestep (time, {},cLocalSolverMode);
-    }
-  else
-    {
-      double dt = time - prevTime;
-      for (index_t kk = 0; kk < count; ++kk)
-        {
-          schedLoad.time[kk] += dt;
-        }
-    }
-
-}
 
 void fileSource::set (const std::string &param,  const std::string &val)
 {

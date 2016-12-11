@@ -25,7 +25,7 @@ protected:
   double Pdown;               //!< [pu] lower ramp limit
 public:
   gridDynGovernorIeeeSimple (const std::string &objName = "govIeeeSimple_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorIeeeSimple ();
   virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
@@ -33,13 +33,13 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void timestep  (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
   //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
@@ -54,15 +54,15 @@ protected:
   double T5;                          //!< [s]    Reheat time constant
 public:
   gridDynGovernorReheat (const std::string &objName = "govReheat_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorReheat ();
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
@@ -78,7 +78,7 @@ protected:
   double Dt = 0.0;              //!<speed damping constant
 public:
   gridDynGovernorTgov1 (const std::string &objName = "govTgov1_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorTgov1 ();
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
@@ -86,12 +86,12 @@ public:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void timestep  (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
 
 };
@@ -104,7 +104,7 @@ protected:
   double Tw;              //!< [s] spill tube time constant
 public:
   gridDynGovernorHydro (const std::string &objName = "govHydro_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorHydro ();
 
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
@@ -114,10 +114,10 @@ public:
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
   //only called if the genModel is not present
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
@@ -131,7 +131,7 @@ protected:
   double Tch;             //!< [s] steam reheat chest time constant
 public:
   gridDynGovernorSteamNR  (const std::string &objName = "govSteamNR_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorSteamNR ();
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
@@ -140,9 +140,9 @@ public:
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
   //only called if the genModel is not present
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
@@ -160,7 +160,7 @@ protected:
   double  Flp;             //!< [s] steam reheat chest time constant
 public:
   gridDynGovernorSteamTCSR  (const std::string &objName = "govSteamTCSR_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynGovernorSteamTCSR ();
 
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
@@ -169,9 +169,9 @@ public:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode ) override;
 

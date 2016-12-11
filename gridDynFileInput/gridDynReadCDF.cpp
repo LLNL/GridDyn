@@ -27,9 +27,9 @@
 using namespace gridUnits;
 
 void cdfReadBusLine (gridBus *bus,std::string line,double base, const basicReaderInfo &bri);
-void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList, const basicReaderInfo &bri);
+void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList, const basicReaderInfo &bri);
 
-void loadCDF (gridCoreObject *parentObject,const std::string &filename, const basicReaderInfo &bri)
+void loadCDF (coreObject *parentObject,const std::string &filename, const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
   std::string line;        //line storage
@@ -430,7 +430,7 @@ Columns 113-119 Minimum voltage, MVAR or MW limit (F)
 Columns 120-126 Maximum voltage, MVAR or MW limit (F)
 */
 
-void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList,const basicReaderInfo &bri)
+void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList,const basicReaderInfo &bri)
 {
   gridBus *bus1, *bus2;
   gridLink *lnk = nullptr;

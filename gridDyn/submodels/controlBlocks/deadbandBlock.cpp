@@ -26,7 +26,7 @@ deadbandBlock::deadbandBlock (double db, const std::string &objName) : basicBloc
   opFlags.set (use_state);
 }
 
-gridCoreObject *deadbandBlock::clone (gridCoreObject *obj) const
+coreObject *deadbandBlock::clone (coreObject *obj) const
 {
   deadbandBlock *nobj;
   if (obj == nullptr)
@@ -80,11 +80,11 @@ void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
   if (outputSet.empty ())
     {
       m_state[limiter_alg] = deadbandLevel;
-      rootCheck (args,nullptr,cLocalSolverMode, check_level_t::reversable_only);
+      rootCheck (args,emptyStateData,cLocalSolverMode, check_level_t::reversable_only);
       m_state[limiter_alg] = K * computeValue (args[0] + bias);
       if (limiter_alg > 0)
         {
-          basicBlock::rootCheck (args,nullptr,cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (args,emptyStateData,cLocalSolverMode, check_level_t::reversable_only);
         }
     }
 
@@ -92,7 +92,7 @@ void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
     {
       if (limiter_alg > 0)
         {
-          basicBlock::rootCheck (args, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
         }
       dbstate = deadbandstate_t::normal;
       double ival = m_state[limiter_alg] / K;
@@ -231,7 +231,7 @@ double deadbandBlock::computeDoutDin (double input)
 }
 double deadbandBlock::step (gridDyn_time ttime, double input)
 {
-  rootCheck ({ input }, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+  rootCheck ({ input }, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
   m_state[limiter_alg] = K * computeValue (input + bias);
   if (limiter_alg > 0)
     {
@@ -246,7 +246,7 @@ double deadbandBlock::step (gridDyn_time ttime, double input)
   return m_state[0];
 }
 
-void deadbandBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void deadbandBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   if (opFlags[differential_input])
     {
@@ -261,14 +261,14 @@ void deadbandBlock::derivElements (double input, double didt, const stateData *s
     }
 }
 
-void deadbandBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void deadbandBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   if (!opFlags[differential_input])
     {
       auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
       double ival = input + bias;
       update[offset] = K * computeValue (ival);
-      //printf("db %f intput=%f val=%f dbstate=%d\n", sD->time, ival, update[offset], static_cast<int>(dbstate));
+      //printf("db %f intput=%f val=%f dbstate=%d\n", sD.time, ival, update[offset], static_cast<int>(dbstate));
       if (limiter_alg > 0)
         {
           return basicBlock::algElements (input, sD, update, sMode);
@@ -277,7 +277,7 @@ void deadbandBlock::algElements (double input, const stateData *sD, double updat
 }
 
 
-void deadbandBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void deadbandBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((!opFlags[differential_input])&& (hasAlgebraic (sMode)))
     {
@@ -297,12 +297,12 @@ void deadbandBlock::jacElements (double input, double didt, const stateData *sD,
   else if ((opFlags[differential_input]) && (hasDifferential (sMode)))
     {
       auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-      ad.assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD.cj);
       double dido = K * computeDoutDin (input + bias);
 
       if (argLoc != kNullLocation)
         {
-          ad.assign (offset, argLoc, dido * sD->cj);
+          ad.assign (offset, argLoc, dido * sD.cj);
         }
 
       if (limiter_diff > 0)
@@ -313,7 +313,7 @@ void deadbandBlock::jacElements (double input, double didt, const stateData *sD,
 }
 
 
-void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double root[], const solverMode &sMode)
+void deadbandBlock::rootTest (const IOdata &args, const stateData &sD, double root[], const solverMode &sMode)
 {
 
   if (limiter_alg + limiter_diff > 0)
@@ -466,7 +466,7 @@ void deadbandBlock::rootTrigger (gridDyn_time ttime, const IOdata &args, const s
     }
 }
 
-change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t /*level*/)
+change_code deadbandBlock::rootCheck (const IOdata &args, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
 {
   change_code ret = change_code::no_change;
   auto cstate = dbstate;

@@ -21,7 +21,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <cstdio>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 
 static const std::string clone_test_directory= std::string(GRIDDYN_TEST_DIRECTORY "/clone_tests/");

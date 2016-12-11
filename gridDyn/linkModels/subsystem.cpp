@@ -57,7 +57,7 @@ subsystem::subsystem (count_t terminals, const std::string &objName) : gridLink 
   subObjectList.push_back (&subarea);  //add the subarea to the subobject list to take advantage of the code in gridPrimary.
 }
 
-gridCoreObject *subsystem::clone (gridCoreObject *obj) const
+coreObject *subsystem::clone (coreObject *obj) const
 {
   subsystem *sub = cloneBase<subsystem, gridLink> (this, obj);
   if (!(sub))
@@ -81,7 +81,7 @@ subsystem::~subsystem ()
 
 }
 
-void subsystem::add (gridCoreObject *obj)
+void subsystem::add (coreObject *obj)
 {
   subarea.add (obj);
 }
@@ -90,7 +90,7 @@ void subsystem::add (gridCoreObject *obj)
 
 // --------------- remove components ---------------
 
-void subsystem::remove (gridCoreObject *obj)
+void subsystem::remove (coreObject *obj)
 {
   subarea.remove (obj);
 }
@@ -118,12 +118,12 @@ gridArea *subsystem::getArea (index_t num) const
   return (num == 0) ? const_cast<gridArea *> (&subarea) : nullptr;
 }
 
-gridCoreObject *subsystem::find (const std::string &objname) const
+coreObject *subsystem::find (const std::string &objname) const
 {
   return subarea.find (objname);
 }
 
-gridCoreObject *subsystem::getSubObject (const std::string &typeName, index_t num) const
+coreObject *subsystem::getSubObject (const std::string &typeName, index_t num) const
 {
   return subarea.getSubObject (typeName, num);
 }
@@ -134,7 +134,7 @@ void subsystem::setAll (const std::string &type, std::string param, double val, 
 
 }
 
-gridCoreObject *subsystem::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *subsystem::findByUserID (const std::string &typeName, index_t searchID) const
 {
   return subarea.findByUserID (typeName, searchID);
 }
@@ -165,18 +165,12 @@ void subsystem::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void subsystem::setTime (gridDyn_time time)
-{
-
-  subarea.setTime (time);
-}
-
 void subsystem::updateLocalCache ()
 {
   subarea.updateLocalCache ();
 }
 
-void subsystem::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void subsystem::updateLocalCache (const stateData &sD, const solverMode &sMode)
 {
   subarea.updateLocalCache (sD,sMode);
 }
@@ -703,7 +697,7 @@ double subsystem::getMaxTransfer () const
 
 
 //for computing all the Jacobian elements at once
-void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void subsystem::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (busId <= 0)
     {
@@ -719,7 +713,7 @@ void subsystem::ioPartialDerivatives (index_t busId, const stateData *sD, matrix
     }
 }
 
-void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void subsystem::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (busId <= 0)
     {
@@ -735,14 +729,13 @@ void subsystem::outputPartialDerivatives (index_t busId, const stateData *sD, ma
     }
 }
 
-IOdata subsystem::getOutputs (const stateData *sD, const solverMode &sMode)
+IOdata subsystem::getOutputs (const stateData &sD, const solverMode &sMode) const
 {
   return getOutputs (1, sD, sMode);
 }
-//virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-IOdata subsystem::getOutputs (index_t busId, const stateData *sD, const solverMode &sMode)
+
+IOdata subsystem::getOutputs (index_t busId, const stateData &, const solverMode &) const
 {
-  updateLocalCache (sD, sMode);
   IOdata out {
     Pout[0], Qout[0]
   };

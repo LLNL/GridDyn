@@ -37,7 +37,7 @@ gridAreaOpt::gridAreaOpt (const std::string &objName) : gridOptObject (objName)
 
 
 
-gridAreaOpt::gridAreaOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),area (dynamic_cast<gridArea *> (obj))
+gridAreaOpt::gridAreaOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),area (dynamic_cast<gridArea *> (obj))
 {
   if (area)
     {
@@ -59,7 +59,7 @@ gridAreaOpt::~gridAreaOpt ()
 
 }
 
-gridCoreObject *gridAreaOpt::clone (gridCoreObject *obj) const
+coreObject *gridAreaOpt::clone (coreObject *obj) const
 {
   gridAreaOpt *nobj;
   if (obj == nullptr)
@@ -461,7 +461,7 @@ void gridAreaOpt::setOffset (index_t offset, index_t constraintOffset, const opt
 }
 
 
-void gridAreaOpt::add (gridCoreObject *obj)
+void gridAreaOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridArea *> (obj))
     {
@@ -498,7 +498,7 @@ void gridAreaOpt::add (gridCoreObject *obj)
   throw(invalidObjectException(this));
 }
 
-void gridAreaOpt::remove (gridCoreObject *obj)
+void gridAreaOpt::remove (coreObject *obj)
 {
   gridAreaOpt *sa = dynamic_cast<gridAreaOpt *> (obj);
   if (sa)
@@ -782,9 +782,9 @@ void gridAreaOpt::set (const std::string &param, double val, units_t unitType)
 
 
 
-gridCoreObject *gridAreaOpt::find (const std::string &objname) const
+coreObject *gridAreaOpt::find (const std::string &objname) const
 {
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   if (objname == this->name)
     {
       return const_cast<gridAreaOpt *> (this);
@@ -822,7 +822,7 @@ gridCoreObject *gridAreaOpt::find (const std::string &objname) const
   return obj;
 }
 
-gridCoreObject *gridAreaOpt::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridAreaOpt::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "link")
     {
@@ -846,9 +846,9 @@ gridCoreObject *gridAreaOpt::getSubObject (const std::string &typeName, index_t 
     }
 }
 
-gridCoreObject *gridAreaOpt::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridAreaOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
-  gridCoreObject *A1;
+  coreObject *A1;
   if (typeName == "area")
     {
       for (auto &subarea : areaList)
@@ -915,7 +915,7 @@ gridCoreObject *gridAreaOpt::findByUserID (const std::string &typeName, index_t 
 
 
 // check bus members
-bool gridAreaOpt::isMember (gridCoreObject *object) const
+bool gridAreaOpt::isMember (coreObject *object) const
 {
   return optObList.isMember (object);
 }
@@ -962,7 +962,7 @@ double gridAreaOpt::get (const std::string &param, gridUnits::units_t unitType) 
     }
   else
     {
-      fval = gridCoreObject::get (param, unitType);
+      fval = coreObject::get (param, unitType);
     }
   return (ival != kNullLocation) ? static_cast<double> (ival) : fval;
 }

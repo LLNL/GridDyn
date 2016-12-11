@@ -94,19 +94,19 @@ public:
   /** @brief destructor*/
   virtual ~acBus ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
   using gridBus::add;
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief  add a gridBus object for merging buses*/
   virtual void add (acBus *bus);
   // remove components
   using gridBus::remove;
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
   virtual void remove (acBus *bus);
   //deal with control alerts
-  virtual void alert (gridCoreObject *, int code) override;
+  virtual void alert (coreObject *, int code) override;
 
   // initializeB
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
@@ -142,11 +142,11 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // solver functions
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
-  virtual void voltageUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void voltageUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
   virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
 
@@ -178,14 +178,14 @@ public:
   /** @brief  return the last error in the real power*/
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 protected:
   /** @brief  compute adjustments required for the dynamic update*/
   virtual void computePowerAdjustments ();
   /** @brief  compute the partial derivatives based on the given state data
   @param[in] sD  the state Data in question
   @param[in] sMode the solver mode*/
-  virtual void computeDerivatives (const stateData *sD, const solverMode &sMode);
+  virtual void computeDerivatives (const stateData &sD, const solverMode &sMode);
 public:
   void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
@@ -276,7 +276,7 @@ public:
     return 0;
   }
 
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
+  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
   virtual index_t getOutputLoc (const solverMode &sMode, index_t num) const override;
 
   virtual IOlocs getOutputLocs (const solverMode &sMode) const override;
@@ -297,21 +297,21 @@ public:
   @param[in] sMode the corresponding solverMode to the state data
   @return the bus voltage
   **/
-  virtual double getVoltage (const stateData *sD, const solverMode &sMode) const override;
+  virtual double getVoltage (const stateData &sD, const solverMode &sMode) const override;
   /** @brief get the angle
   * @param[in] sD the system state data
   @param[in] sMode the corresponding solverMode to the state
   @return the bus angle
   **/
-  virtual double getAngle (const stateData *sD, const solverMode &sMode) const override;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode) const override;
   /** @brief get the bus frequency
   * @param[in] sD the system state data
   @param[in] sMode the corresponding solverMode to the state
   @return the bus frequency
   **/
-  virtual double getFreq (const stateData *sD, const solverMode &sMode) const override;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode) const override;
 
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode, check_level_t level) override;
   /** @brief function used for returning the mode of the bus
    depends on the interaction of the solverInterface and the bus type
   @param[in] sMode the corresponding solverMode to the state
@@ -355,7 +355,7 @@ protected:
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */
-  virtual double computeError (const stateData *sD, const solverMode &sMode) override;
+  virtual double computeError (const stateData &sD, const solverMode &sMode) override;
 private:
   double getAverageAngle ();
   gridDynGenerator *keyGen = nullptr;

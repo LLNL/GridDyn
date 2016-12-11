@@ -21,7 +21,7 @@
 #include "generators/gridDynGenerator.h"
 
 #include <cmath>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define EXCITER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/exciter_tests/"
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability2.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability3.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test4)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability4.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 

@@ -32,7 +32,7 @@ controlBlock::controlBlock (double t1,double t2, const std::string &objName) : b
   opFlags.set (use_state);
 }
 
-gridCoreObject *controlBlock::clone (gridCoreObject *obj) const
+coreObject *controlBlock::clone (coreObject *obj) const
 {
   controlBlock *nobj;
   if (obj == nullptr)
@@ -92,7 +92,7 @@ void controlBlock::objectInitializeB (const IOdata &args, const IOdata &outputSe
 }
 
 
-void controlBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void controlBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   if (!opFlags[differential_input])
     {
@@ -107,7 +107,7 @@ void controlBlock::algElements (double input, const stateData *sD, double update
 
 }
 
-void controlBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void controlBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
   if (opFlags[differential_input])
@@ -127,7 +127,7 @@ void controlBlock::derivElements (double input, double didt, const stateData *sD
 }
 
 
-void controlBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void controlBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -159,7 +159,7 @@ void controlBlock::jacElements (double input, double didt, const stateData *sD, 
             {
               ad.assign (Loc.diffOffset, Loc.algOffset + limiter_alg, -1 / m_T1);
             }
-          ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
+          ad.assign (Loc.diffOffset, Loc.diffOffset, -sD.cj);
         }
     }
 

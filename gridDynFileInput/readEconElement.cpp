@@ -33,13 +33,13 @@ static const IgnoreListType econIgnoreElements {
 };
 #ifndef OPTIMIZATION_ENABLE
 
-gridCoreObject * readEconElement (std::shared_ptr<readerElement> & /*element*/, readerInfo *, gridCoreObject * searchObject)
+coreObject * readEconElement (std::shared_ptr<readerElement> & /*element*/, readerInfo *, coreObject * searchObject)
 {
 
   return searchObject;
 }
 #else
-gridCoreObject * readEconElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject)
+coreObject * readEconElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject)
 {
 
   //get the optimization root
@@ -57,8 +57,8 @@ gridCoreObject * readEconElement (std::shared_ptr<readerElement> &element, reade
   std::string objectType;
   std::string ename;
   auto coof = coreOptObjectFactory::instance ();
-  gridCoreObject *obj;
-  gridCoreObject *targetObject = nullptr;
+  coreObject *obj;
+  coreObject *targetObject = nullptr;
   gridOptObject *parentOo = nullptr;
 
 

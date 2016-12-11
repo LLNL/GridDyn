@@ -109,126 +109,126 @@ static const std::map<std::string, std::string> stringTranslate
 
 static const std::map<std::string, fobjectPair> objectFunctions
 {
-	{ "connected",{ [](gridCoreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->isConnected()); },defUnit } },
-	{ "enabled",{ [](gridCoreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->enabled); },defUnit } },
-	{ "armed",{ [](gridCoreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->isArmed()); },defUnit } },
+	{ "connected",{ [](coreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->isConnected()); },defUnit } },
+	{ "enabled",{ [](coreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->enabled); },defUnit } },
+	{ "armed",{ [](coreObject *obj) {return static_cast<double>(static_cast<gridObject *>(obj)->isArmed()); },defUnit } },
 
 };
 
 static const std::map<std::string, fobjectPair> busFunctions
 {
-	{"v",{[](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getVoltage(); }, puV} },
-	{ "angle",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getAngle(); }, rad } },
-	{ "freq",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getFreq(); },puHz } },
-	{ "genreal",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getGenerationReal(); }, puMW } },
-	{ "genreactive",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getGenerationReactive(); }, puMW } },
-	{ "loadreal",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getLoadReal(); }, puMW } },
-	{ "loadreactive",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getLoadReactive(); }, puMW } },
-	{ "linkreal",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getLinkReal(); }, puMW } },
-	{ "linkreactive",{ [](gridCoreObject *obj) {return static_cast<gridBus *>(obj)->getLinkReactive(); }, puMW } },
+	{"v",{[](coreObject *obj) {return static_cast<gridBus *>(obj)->getVoltage(); }, puV} },
+	{ "angle",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getAngle(); }, rad } },
+	{ "freq",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getFreq(); },puHz } },
+	{ "genreal",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getGenerationReal(); }, puMW } },
+	{ "genreactive",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getGenerationReactive(); }, puMW } },
+	{ "loadreal",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getLoadReal(); }, puMW } },
+	{ "loadreactive",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getLoadReactive(); }, puMW } },
+	{ "linkreal",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getLinkReal(); }, puMW } },
+	{ "linkreactive",{ [](coreObject *obj) {return static_cast<gridBus *>(obj)->getLinkReactive(); }, puMW } },
 };
 
 static const std::map<std::string, fobjectPair> areaFunctions
 {
-	{ "avgfreq",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getAvgFreq(); },puHz } },
-	{ "genreal",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getGenerationReal(); }, puMW } },
-	{ "genreactive",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getGenerationReactive(); }, puMW } },
-	{ "loadreal",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getLoadReal(); }, puMW } },
-	{ "loadreactive",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getLoadReactive(); }, puMW } },
-	{ "loss",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getLoss(); }, puMW } },
-	{ "tieflow",{ [](gridCoreObject *obj) {return static_cast<gridArea *>(obj)->getTieFlowReal(); }, puMW } },
+	{ "avgfreq",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getAvgFreq(); },puHz } },
+	{ "genreal",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getGenerationReal(); }, puMW } },
+	{ "genreactive",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getGenerationReactive(); }, puMW } },
+	{ "loadreal",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getLoadReal(); }, puMW } },
+	{ "loadreactive",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getLoadReactive(); }, puMW } },
+	{ "loss",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getLoss(); }, puMW } },
+	{ "tieflow",{ [](coreObject *obj) {return static_cast<gridArea *>(obj)->getTieFlowReal(); }, puMW } },
 };
 
 static const std::map<std::string, fvecPair> areaVecFunctions
 {
-	{ "v",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getVoltage(data); }, puV } },
-	{ "angle",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getAngle(data); }, rad } },
-	{ "freq",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getFreq(data); },puHz } },
-	{ "busgenreal",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusGenerationReal(data); }, puMW } },
-	{ "busgenreactive",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusGenerationReactive(data); }, puMW } },
-	{ "busloadreal",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusLoadReal(data); }, puMW } },
-	{ "busloadreactive",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusLoadReactive(data); }, puMW } },
-	{ "linkreal",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkRealPower(data); }, puMW } },
-	{ "linkreactive",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkReactivePower(data); }, puMW } },
-	{ "linkloss",{ [](gridCoreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkLoss(data); }, puMW } },
+	{ "v",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getVoltage(data); }, puV } },
+	{ "angle",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getAngle(data); }, rad } },
+	{ "freq",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getFreq(data); },puHz } },
+	{ "busgenreal",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusGenerationReal(data); }, puMW } },
+	{ "busgenreactive",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusGenerationReactive(data); }, puMW } },
+	{ "busloadreal",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusLoadReal(data); }, puMW } },
+	{ "busloadreactive",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getBusLoadReactive(data); }, puMW } },
+	{ "linkreal",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkRealPower(data); }, puMW } },
+	{ "linkreactive",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkReactivePower(data); }, puMW } },
+	{ "linkloss",{ [](coreObject *obj,std::vector<double> &data) {return static_cast<gridArea *>(obj)->getLinkLoss(data); }, puMW } },
 
 };
 
 static const std::map<std::string, descVecFunc> areaVecDescFunctions
 {
-	{ "v", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "angle", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "freq", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "busgenreal", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "busgenreactive", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "busloadreal", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "busloadreactive", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
-	{ "linkreal", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc);  } },
-	{ "linkreactive", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc); } },
-	{ "linkloss", [](gridCoreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc);  } },
+	{ "v", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "angle", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "freq", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "busgenreal", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "busgenreactive", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "busloadreal", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "busloadreactive", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getBusName(desc); } },
+	{ "linkreal", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc);  } },
+	{ "linkreactive", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc); } },
+	{ "linkloss", [](coreObject *obj,stringVec &desc) {return static_cast<gridArea *>(obj)->getLinkName(desc);  } },
 
 };
 
 static const std::map<std::string, fobjectPair> loadFunctions
 {
-	{ "real",{ [](gridCoreObject *obj) {return static_cast<gridLoad *>(obj)->getRealPower(); }, puMW } },
-	{ "reactive",{ [](gridCoreObject *obj) {return static_cast<gridLoad *>(obj)->getReactivePower(); }, puMW } },
-	{ "loadreal",{ [](gridCoreObject *obj) {return static_cast<gridLoad *>(obj)->getRealPower(); },puMW } },
-	{ "loadreactive",{ [](gridCoreObject *obj) {return static_cast<gridLoad *>(obj)->getReactivePower(); }, puMW } },
+	{ "real",{ [](coreObject *obj) {return static_cast<gridLoad *>(obj)->getRealPower(); }, puMW } },
+	{ "reactive",{ [](coreObject *obj) {return static_cast<gridLoad *>(obj)->getReactivePower(); }, puMW } },
+	{ "loadreal",{ [](coreObject *obj) {return static_cast<gridLoad *>(obj)->getRealPower(); },puMW } },
+	{ "loadreactive",{ [](coreObject *obj) {return static_cast<gridLoad *>(obj)->getReactivePower(); }, puMW } },
 };
 
 static const std::map<std::string, fobjectPair> genFunctions
 {
-	{ "real",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getRealPower(); }, puMW } },
-	{ "reactive",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getReactivePower(); }, puMW } },
-	{ "genreal",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getRealPower(); },puMW } },
-	{ "genreactive",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getReactivePower(); }, puMW } },
-	{ "pset",{[](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPset(); },puMW } },
-	{ "adjup",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityUp(); },puMW } },
-	{ "adjdown",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityDown(); },puMW } },
-	{ "pmax",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPmax(); },puMW } },
-	{ "pmin",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPmin(); },puMW } },
-	{ "qmax",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getQmax(); },puMW } },
-	{ "qmin",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getQmin(); },puMW } },
-	{"freq",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getFreq(nullptr,cLocalSolverMode); },puHz } },
-	{ "angle",{ [](gridCoreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAngle(nullptr,cLocalSolverMode); },rad } },
+	{ "real",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getRealPower(); }, puMW } },
+	{ "reactive",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getReactivePower(); }, puMW } },
+	{ "genreal",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getRealPower(); },puMW } },
+	{ "genreactive",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getReactivePower(); }, puMW } },
+	{ "pset",{[](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPset(); },puMW } },
+	{ "adjup",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityUp(); },puMW } },
+	{ "adjdown",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAdjustableCapacityDown(); },puMW } },
+	{ "pmax",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPmax(); },puMW } },
+	{ "pmin",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getPmin(); },puMW } },
+	{ "qmax",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getQmax(); },puMW } },
+	{ "qmin",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getQmin(); },puMW } },
+	{"freq",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getFreq(emptyStateData,cLocalSolverMode); },puHz } },
+	{ "angle",{ [](coreObject *obj) {return static_cast<gridDynGenerator *>(obj)->getAngle(emptyStateData,cLocalSolverMode); },rad } },
 };
 
 static const std::map<std::string, fobjectPair> linkFunctions
 {
-	{ "real",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(1); }, puMW } },
-	{ "reactive",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
-	{ "linkreal",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(1); },puMW } },
-	{ "linkreactive",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
-	{ "z",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getTotalImpedance(1); },puOhm } },
-	{ "y",{ [](gridCoreObject *obj) {return 1.0/(static_cast<gridLink *>(obj)->getTotalImpedance(1)); }, puOhm } },
-	{ "r",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealImpedance(1); },puOhm } },
-	{ "x",{ [](gridCoreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(1)); }, puOhm } },
-	{ "current",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getCurrent(1)); }, puA } },
-	{ "realcurrent",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getRealCurrent(1)); }, puA } },
-	{ "imagcurrent",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getImagCurrent(1)); }, puA } },
-	{ "voltage",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getVoltage(1)); }, puV } },
-	{ "absangle",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getAbsAngle(1)); }, rad } },
+	{ "real",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(1); }, puMW } },
+	{ "reactive",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
+	{ "linkreal",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(1); },puMW } },
+	{ "linkreactive",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(1); }, puMW } },
+	{ "z",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getTotalImpedance(1); },puOhm } },
+	{ "y",{ [](coreObject *obj) {return 1.0/(static_cast<gridLink *>(obj)->getTotalImpedance(1)); }, puOhm } },
+	{ "r",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealImpedance(1); },puOhm } },
+	{ "x",{ [](coreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(1)); }, puOhm } },
+	{ "current",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getCurrent(1)); }, puA } },
+	{ "realcurrent",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getRealCurrent(1)); }, puA } },
+	{ "imagcurrent",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getImagCurrent(1)); }, puA } },
+	{ "voltage",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getVoltage(1)); }, puV } },
+	{ "absangle",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getAbsAngle(1)); }, rad } },
 	//functions for to side
-	{ "real2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(2); }, puMW } },
-	{ "reactive2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
-	{ "linkreal2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(2); },puMW } },
-	{ "linkreactive2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
-	{ "z2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getTotalImpedance(2); },puOhm } },
-	{ "y2",{ [](gridCoreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getTotalImpedance(2)); }, puOhm } },
-	{ "r2",{ [](gridCoreObject *obj) {return static_cast<gridLink *>(obj)->getRealImpedance(2); },puOhm } },
-	{ "x2",{ [](gridCoreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(2)); }, puOhm } },
-	{ "current2",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getCurrent(2)); }, puA } },
-	{ "realcurrent2",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getRealCurrent(2)); }, puA } },
-	{ "imagcurrent2",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getImagCurrent(2)); }, puA } },
-	{ "voltage2",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getVoltage(2)); }, puV } },
-	{ "absangle2",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getAbsAngle(2)); }, rad } },
+	{ "real2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(2); }, puMW } },
+	{ "reactive2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
+	{ "linkreal2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealPower(2); },puMW } },
+	{ "linkreactive2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getReactivePower(2); }, puMW } },
+	{ "z2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getTotalImpedance(2); },puOhm } },
+	{ "y2",{ [](coreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getTotalImpedance(2)); }, puOhm } },
+	{ "r2",{ [](coreObject *obj) {return static_cast<gridLink *>(obj)->getRealImpedance(2); },puOhm } },
+	{ "x2",{ [](coreObject *obj) {return 1.0 / (static_cast<gridLink *>(obj)->getImagImpedance(2)); }, puOhm } },
+	{ "current2",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getCurrent(2)); }, puA } },
+	{ "realcurrent2",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getRealCurrent(2)); }, puA } },
+	{ "imagcurrent2",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getImagCurrent(2)); }, puA } },
+	{ "voltage2",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getVoltage(2)); }, puV } },
+	{ "absangle2",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getAbsAngle(2)); }, rad } },
 
 	//non numbered fields
-	{ "angle",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getAngle()); }, rad } },
-	{ "loss",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getLoss()); }, puMW } },
-	{ "lossreactive",{ [](gridCoreObject *obj) {return (static_cast<gridLink *>(obj)->getReactiveLoss()); }, puMW } },
-	{ "attached",{ [](gridCoreObject *obj) {return static_cast<double> (((!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch1_open_flag)) || (!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch2_open_flag))) && (static_cast<gridLink *>(obj)->enabled)); }, defUnit } },
+	{ "angle",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getAngle()); }, rad } },
+	{ "loss",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getLoss()); }, puMW } },
+	{ "lossreactive",{ [](coreObject *obj) {return (static_cast<gridLink *>(obj)->getReactiveLoss()); }, puMW } },
+	{ "attached",{ [](coreObject *obj) {return static_cast<double> (((!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch1_open_flag)) || (!static_cast<gridLink *>(obj)->checkFlag(gridLink::switch2_open_flag))) && (static_cast<gridLink *>(obj)->enabled)); }, defUnit } },
 };
 
 /* *INDENT-ON* */
@@ -251,6 +251,7 @@ fobjectPair getObjectFunction(gridBus *, const std::string &field)
 {
 	auto fnd = stringTranslate.find(field);
 	std::string nfstr = (fnd == stringTranslate.end()) ? field : fnd->second;
+
 	auto funcfind = busFunctions.find(nfstr);
 	if (funcfind != busFunctions.end())
 	{
@@ -364,34 +365,34 @@ fobjectPair getObjectFunction(gridRelay *rel, const std::string &field)
 	int num = trailingStringInt(field, fld, 0);
 	if ((field == "cv") || (field == "currentvalue") || (field == "value") || (field == "output"))
 	{
-		retPair.first = [](gridCoreObject *obj)->double {
+		retPair.first = [](coreObject *obj)->double {
 			return static_cast<gridRelay *>(obj)->getOutput(0);
 		};
 	}
 	else if (fld == "status")
 	{
-		retPair.first = [num](gridCoreObject *obj) {
+		retPair.first = [num](coreObject *obj) {
 			return static_cast<double> (static_cast<gridRelay *>(obj)->getConditionStatus(num));
 		};
 	}
 	else if ((fld == "output") || (fld == "o"))
 	{ //TODO:: PT figure out why the basic getOutput function doesn't work here
-		retPair.first = [=](gridCoreObject *obj) {
-			return static_cast<gridRelay *>(obj)->getOutput(nullptr, cLocalSolverMode, num);
+		retPair.first = [=](coreObject *obj) {
+			return static_cast<gridRelay *>(obj)->getOutput(emptyStateData, cLocalSolverMode, num);
 		};
 	}
 	else if ((fld == "block") || (fld == "b"))
 	{
 		if (dynamic_cast<sensor *> (rel))
 		{
-			retPair.first = [=](gridCoreObject *obj) {
-				return static_cast<sensor *> (obj)->getBlockOutput(nullptr, cLocalSolverMode, num);
+			retPair.first = [=](coreObject *obj) {
+				return static_cast<sensor *> (obj)->getBlockOutput(emptyStateData, cLocalSolverMode, num);
 			};
 		}
 	}
 	else if ((fld == "condition") || (fld == "c"))
 	{
-		retPair.first = [num](gridCoreObject *obj) {
+		retPair.first = [num](coreObject *obj) {
 			return static_cast<gridRelay *>(obj)->getConditionValue(num);
 		};
 	}
@@ -399,8 +400,8 @@ fobjectPair getObjectFunction(gridRelay *rel, const std::string &field)
 	{
 		if (dynamic_cast<sensor *> (rel))
 		{
-			retPair.first = [num](gridCoreObject *obj) {
-				return static_cast<sensor *> (obj)->getInput(nullptr, cLocalSolverMode, num);
+			retPair.first = [num](coreObject *obj) {
+				return static_cast<sensor *> (obj)->getInput(emptyStateData, cLocalSolverMode, num);
 			};
 		}
 	}
@@ -412,8 +413,8 @@ fobjectPair getObjectFunction(gridRelay *rel, const std::string &field)
 			index_t outIndex = static_cast<sensor *> (rel)->lookupOutput(field);
 			if (outIndex != kNullLocation)
 			{
-				retPair.first = [outIndex](gridCoreObject *obj) {
-					return static_cast<sensor *> (obj)->getOutput(nullptr, cLocalSolverMode, outIndex);
+				retPair.first = [outIndex](coreObject *obj) {
+					return static_cast<sensor *> (obj)->getOutput(emptyStateData, cLocalSolverMode, outIndex);
 				};
 			}
 		}

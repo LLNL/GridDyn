@@ -125,11 +125,8 @@ set(load_headers
 set(load_sources
 	${load_headers}
 	loadModels/gridLoad.cpp
-	loadModels/pulseLoad.cpp
 	loadModels/rampLoad.cpp
-	loadModels/sineLoad.cpp
 	loadModels/fileLoad.cpp
-	loadModels/randomLoad.cpp
 	loadModels/motorLoad.cpp
 	loadModels/motorLoad3.cpp
 	loadModels/motorLoad5.cpp

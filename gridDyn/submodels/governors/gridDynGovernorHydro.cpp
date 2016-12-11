@@ -33,7 +33,7 @@ gridDynGovernorHydro::gridDynGovernorHydro (const std::string &objName) : gridDy
   offsets.local->local.jacSize = 5;
 }
 
-gridCoreObject *gridDynGovernorHydro::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorHydro::clone (coreObject *obj) const
 {
   gridDynGovernorHydro *gov = cloneBase<gridDynGovernorHydro, gridDynGovernorIeeeSimple> (this, obj);
   if (gov == nullptr)
@@ -74,7 +74,7 @@ void gridDynGovernorHydro::objectInitializeB (const IOdata & /*args*/, const IOd
 
 
 // residual
-void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData *, double resid[],  const solverMode &sMode)
+void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset] = 0;
@@ -82,7 +82,7 @@ void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData *,
 }
 
 
-void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -100,7 +100,7 @@ void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stat
       ad.assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
 
     }
-  ad.assign (refI,refI,-1 / T3 - sD->cj);
+  ad.assign (refI,refI,-1 / T3 - sD.cj);
   ad.assign (refI,refI + 1,-K / T3);
   // X
   if (omegaLoc >= 0)
@@ -108,7 +108,7 @@ void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stat
       ad.assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
     }
 
-  ad.assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
+  ad.assign (refI + 1,refI + 1,-1 / T1 - sD.cj);
 
 }
 
@@ -131,7 +131,7 @@ index_t gridDynGovernorHydro::findIndex (const std::string &field, const solverM
 // set parameters
 void gridDynGovernorHydro::set (const std::string &param,  const std::string &val)
 {
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 }
 
 void gridDynGovernorHydro::set (const std::string &param, double val, gridUnits::units_t unitType)
@@ -172,7 +172,7 @@ void gridDynGovernorHydro::set (const std::string &param, double val, gridUnits:
     }
   else
     {
-      gridCoreObject::set (param,val,unitType);
+      coreObject::set (param,val,unitType);
     }
 
 

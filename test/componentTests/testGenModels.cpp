@@ -21,7 +21,7 @@
 #include "vectorOps.hpp"
 
 #include <cmath>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 
 #define GENMODEL_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/genmodel_tests/"
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE (model_test2)  //Jacobian code check
 
   gridDynGenerator *gen = gds->getGen (0);
   auto cof = coreObjectFactory::instance ();
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   auto genlist = cof->getTypeNames ("genmodel");
 
   for (auto &gname : genlist)
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(model_test2_withr)  //Jacobian code check
 
 	gridDynGenerator *gen = gds->getGen(0);
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 	auto genlist = cof->getTypeNames("genmodel");
 
 	for (auto &gname : genlist)
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(model_test2_alg_diff_tests)  //test the algebraic updates a
 
 	gridDynGenerator *gen = gds->getGen(0);
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 	auto genlist = cof->getTypeNames("genmodel");
 
 	for (auto &gname : genlist)

@@ -104,9 +104,12 @@ public:
 	void assign(index_t row, index_t col, Y num) override
 	{
 		assert(row != ((index_t)(-1)));
+		assert(col != ((index_t)(-1)));
 		assert(row < matrixData<Y>::rowLim);
 		assert(col < matrixData<Y>::colLim);
 		assert(std::isfinite(num));
+		assert(static_cast<int>(row) >= 0);
+		assert(static_cast<int>(col) >= 0);
 
 		//data.push_back (cLoc (X, Y, num));
 		data.emplace_back(row, col, num);

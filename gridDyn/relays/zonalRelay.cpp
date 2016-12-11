@@ -29,7 +29,7 @@ zonalRelay::zonalRelay (const std::string&objName) : gridRelay (objName)
   opFlags.set (continuous_flag);
 }
 
-gridCoreObject *zonalRelay::clone (gridCoreObject *obj) const
+coreObject *zonalRelay::clone (coreObject *obj) const
 {
   zonalRelay *nobj = cloneBase<zonalRelay, gridRelay> (this, obj);
   if (!(nobj))
@@ -132,7 +132,7 @@ void zonalRelay::set (const std::string &param, double val, gridUnits::units_t u
               else
                 {
                   m_zoneLevels.push_back (m_zoneLevels[kk - 1] + 0.7);
-                  m_zoneDelays.push_back (m_zoneDelays[kk - 1] + timeOne);
+                  m_zoneDelays.push_back (m_zoneDelays[kk - 1] + timeOneSecond);
                 }
             }
 

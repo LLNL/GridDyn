@@ -47,12 +47,12 @@ gridEvent::gridEvent (gridDyn_time time0): triggerTime(time0)
 	eventId=++eventCount;
 }
 
-gridEvent::gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
+gridEvent::gridEvent(gridEventInfo *gdEI, coreObject *rootObject)
 {
 	gridEvent::updateEvent(gdEI, rootObject);
 }
 
-void gridEvent::updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
+void gridEvent::updateEvent(gridEventInfo *gdEI, coreObject *rootObject)
 {
 	if (!gdEI->description.empty())
 	{
@@ -70,7 +70,7 @@ void gridEvent::updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject)
 	{
 		triggerTime = gdEI->time[0];
 	}
-	gridCoreObject *searchObj = rootObject;
+	coreObject *searchObj = rootObject;
 
 	if (!gdEI->targetObjs.empty())
 	{
@@ -105,7 +105,7 @@ bool gridEvent::checkArmed()
 	return false;
 }
 
-void gridEvent::loadField(gridCoreObject *searchObj, const std::string newfield)
+void gridEvent::loadField(coreObject *searchObj, const std::string newfield)
 {
 	objInfo fdata(newfield, searchObj);
 	field = fdata.m_field;
@@ -277,7 +277,7 @@ change_code gridEvent::trigger (gridDyn_time time)
   return ret;
 }
 
-void gridEvent::updateObject(gridCoreObject *gco, object_update_mode mode)
+void gridEvent::updateObject(coreObject *gco, object_update_mode mode)
 {
 	if (mode == object_update_mode::direct)
 	{
@@ -306,17 +306,17 @@ void gridEvent::updateObject(gridCoreObject *gco, object_update_mode mode)
 	}
 }
 
-gridCoreObject * gridEvent::getObject() const
+coreObject * gridEvent::getObject() const
 {
 	return m_obj;
 }
 
-void gridEvent::getObjects(std::vector<gridCoreObject *> &objects) const
+void gridEvent::getObjects(std::vector<coreObject *> &objects) const
 {
 	objects.push_back(getObject());
 }
 
-bool gridEvent::setTarget ( gridCoreObject *gdo,const std::string &var)
+bool gridEvent::setTarget ( coreObject *gdo,const std::string &var)
 {
 	if (gdo)
 	{
@@ -404,14 +404,14 @@ event_types findEventType(gridEventInfo *gdEI)
 }
 
 
-gridEventInfo::gridEventInfo(const std::string &eventString, gridCoreObject *rootObj)
+gridEventInfo::gridEventInfo(const std::string &eventString, coreObject *rootObj)
 {
 	loadString(eventString, rootObj);
 }
 
 // @time1[,time2,time3,... + period] |[rootobj::obj1:]field(units) const = val1,[val2,val3,...];[rootobj::obj1:]field(units) const = val1,[val2,val3,...];  or
 // [rootobj::obj:]field(units) = val1,[val2,val3,...] @time1[,time2,time3,...|+ period] or
-void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *rootObj)
+void gridEventInfo::loadString(const std::string &eventString, coreObject *rootObj)
 {
 
   std::string objString;
@@ -492,7 +492,7 @@ void gridEventInfo::loadString(const std::string &eventString, gridCoreObject *r
 }
 
 
-std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, gridCoreObject *rootObject)
+std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, coreObject *rootObject)
 {
   auto ev = std::make_shared<gridEvent> (eventTime);
   objInfo fdata (field, rootObject);
@@ -501,13 +501,13 @@ std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gri
   return ev;
 }
 
-std::shared_ptr<gridEvent> make_event(const std::string &eventString, gridCoreObject *rootObject)
+std::shared_ptr<gridEvent> make_event(const std::string &eventString, coreObject *rootObject)
 {
 	gridEventInfo gdEI(eventString, rootObject);
 	return make_event(&gdEI, rootObject);
 }
 
-std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *rootObject)
+std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, coreObject *rootObject)
 {
 	std::shared_ptr<gridEvent> ev;
 	if (!gdEI->type.empty())

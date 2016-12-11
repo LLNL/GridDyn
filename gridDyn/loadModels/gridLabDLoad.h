@@ -34,7 +34,7 @@ public:
 
   virtual ~gridLabDLoad ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
@@ -44,21 +44,21 @@ public:
 
   virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
 
-  virtual void preEx (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual void preEx (const IOdata &args, const stateData &sD, const solverMode &sMode) override;
 
   virtual void updateA (gridDyn_time time) override;
-  virtual double updateB () override;
+  virtual gridDyn_time updateB () override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual change_code rootCheck (const IOdata &args, const stateData &sD, const solverMode &sMode, check_level_t level) override;
   /** @brief return a count of the number of MPI objects the load requires*/
   int mpiCount ();
-  virtual void updateLocalCache (const IOdata & args, const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata & args, const stateData &sD, const solverMode &sMode) override;
 private:
   // double abstime;
   double m_mult = 1.0;                  //!< a load multiplier

@@ -17,14 +17,14 @@
 #include <cstdio>
 #include <iostream>
 
-gridOptObject::gridOptObject (const std::string &objName) : gridCoreObject (objName)
+gridOptObject::gridOptObject (const std::string &objName) : coreObject (objName)
 {
 
 }
 
-gridCoreObject *gridOptObject::clone (gridCoreObject *obj) const
+coreObject *gridOptObject::clone (coreObject *obj) const
 {
-  gridOptObject *nobj = cloneBase<gridOptObject, gridCoreObject> (this, obj);
+  gridOptObject *nobj = cloneBase<gridOptObject, coreObject> (this, obj);
   if (nobj == nullptr)
     {
       return obj;
@@ -268,12 +268,12 @@ void gridOptObject::set (const std::string &param, const std::string &val)
         }
       else
         {
-          gridCoreObject::set (param, val);
+          coreObject::set (param, val);
         }
     }
   else
     {
-      gridCoreObject::set (param, val);
+      coreObject::set (param, val);
     }
 }
 
@@ -285,7 +285,7 @@ void gridOptObject::set (const std::string &param, double val, gridUnits::units_
     }
   else
     {
-      gridCoreObject::set (param, val, unitType);
+      coreObject::set (param, val, unitType);
     }
 
 }

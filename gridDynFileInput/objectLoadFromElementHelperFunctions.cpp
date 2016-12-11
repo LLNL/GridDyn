@@ -22,7 +22,7 @@
 
 using namespace readerConfig;
 
-gridCoreObject* getParent (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject,const std::string &alternateName)
+coreObject* getParent (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject,const std::string &alternateName)
 {
   std::string parentName = getElementField (element, "parent", defMatchType);
   if (!parentName.empty ())

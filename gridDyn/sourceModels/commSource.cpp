@@ -23,7 +23,7 @@ commSource::commSource(const std::string &objName):rampSource(objName)
 	opFlags.set(has_updates);
 }
 
-gridCoreObject * commSource::clone(gridCoreObject *obj) const
+coreObject * commSource::clone(coreObject *obj) const
 {
 	commSource *cs = cloneBase<commSource, rampSource>(this, obj);
 	if (cs == nullptr)

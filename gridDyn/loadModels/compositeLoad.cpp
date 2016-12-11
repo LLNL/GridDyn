@@ -29,7 +29,7 @@ compositeLoad::compositeLoad (const std::string &objName) : gridLoad (objName)
 
 }
 
-gridCoreObject * compositeLoad::clone (gridCoreObject *obj) const
+coreObject * compositeLoad::clone (coreObject *obj) const
 {
   compositeLoad *nobj = cloneBase<compositeLoad, gridLoad> (this, obj);
   if (!(nobj))
@@ -70,7 +70,7 @@ void compositeLoad::add (gridLoad *ld)
     }
 }
 
-void compositeLoad::add (gridCoreObject *obj)
+void compositeLoad::add (coreObject *obj)
 {
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   if (ld)
@@ -118,23 +118,23 @@ void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fl
         }
       //do a first pass of loading
       double rem = 1.0;
-      P = ((compositeLoad *)sLoad)->P;              //so this composite load function has direct access to the gridLoad variables seems a little odd to need to do this but seems to be a requirement in C++
-      Q = ((compositeLoad *)sLoad)->Q;
-      Ip = ((compositeLoad *)sLoad)->Ip;
-      Iq = ((compositeLoad *)sLoad)->Iq;
-      Yp = ((compositeLoad *)sLoad)->Yp;
-      Yq = ((compositeLoad *)sLoad)->Yq;
+      setP(((compositeLoad *)sLoad)->getP());              //so this composite load function has direct access to the gridLoad variables seems a little odd to need to do this but seems to be a requirement in C++
+      setQ(((compositeLoad *)sLoad)->getQ());
+      setIp(((compositeLoad *)sLoad)->getIp());
+      setIq(((compositeLoad *)sLoad)->getIq());
+      setYp(((compositeLoad *)sLoad)->getYp());
+      setYq(((compositeLoad *)sLoad)->getYq());
 
       for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
           if (fraction[nn] > 0)
             {
-              subLoads[nn]->set ("p", P * fraction[nn]);
-              subLoads[nn]->set ("q", Q * fraction[nn]);
-              subLoads[nn]->set ("ip", Ip * fraction[nn]);
-              subLoads[nn]->set ("iq", Iq * fraction[nn]);
-              subLoads[nn]->set ("yp", Yp * fraction[nn]);
-              subLoads[nn]->set ("yq", Yq * fraction[nn]);
+              subLoads[nn]->set ("p", getP() * fraction[nn]);
+              subLoads[nn]->set ("q", getQ() * fraction[nn]);
+              subLoads[nn]->set ("ip", getIp() * fraction[nn]);
+              subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+              subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+              subLoads[nn]->set ("yq", getYq() * fraction[nn]);
               rem -= fraction[nn];
             }
         }
@@ -153,13 +153,13 @@ void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fl
             {
               if (fraction[nn] < 0)
                 {
-                  subLoads[nn]->set ("p", P * mxP);
-                  subLoads[nn]->set ("q", Q * mxP);
-                  subLoads[nn]->set ("ip", Ip * mxP);
-                  subLoads[nn]->set ("iq", Iq * mxP);
-                  subLoads[nn]->set ("yp", Yp * mxP);
+                  subLoads[nn]->set ("p", getP() * mxP);
+                  subLoads[nn]->set ("q", getQ() * mxP);
+                  subLoads[nn]->set ("ip", getIp() * mxP);
+                  subLoads[nn]->set ("iq", getIq() * mxP);
+                  subLoads[nn]->set ("yp", getYp() * mxP);
 
-                  subLoads[nn]->set ("yq", Yq * mxP);
+                  subLoads[nn]->set ("yq", getYq() * mxP);
                   fraction[nn] = mxP;
                 }
             }
@@ -265,16 +265,16 @@ void compositeLoad::set (const std::string &param,  const std::string &val)
             }
           fraction[nn + 1] = fval[nn];
         }
-      if (opFlags.test (pFlow_initialized))
+      if (opFlags[pFlow_initialized])
         {
           for (size_t nn = 0; nn < subLoads.size (); ++nn)
             {
-              subLoads[nn]->set ("p", P * fraction[nn]);
-              subLoads[nn]->set ("q", Q * fraction[nn]);
-              subLoads[nn]->set ("ir", Ip * fraction[nn]);
-              subLoads[nn]->set ("iq", Iq * fraction[nn]);
-              subLoads[nn]->set ("yp", Yp * fraction[nn]);
-              subLoads[nn]->set ("Yq", Yq * fraction[nn]);
+              subLoads[nn]->set ("p", getP() * fraction[nn]);
+              subLoads[nn]->set ("q", getQ() * fraction[nn]);
+              subLoads[nn]->set ("ir", getIp() * fraction[nn]);
+              subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+              subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+              subLoads[nn]->set ("Yq", getYq() * fraction[nn]);
             }
         }
     }
@@ -320,18 +320,18 @@ void compositeLoad::set (const std::string &param, double val, gridUnits::units_
     {
       for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
-          subLoads[nn]->set ("p", P * fraction[nn]);
-          subLoads[nn]->set ("q", Q * fraction[nn]);
-          subLoads[nn]->set ("ir", Ip * fraction[nn]);
-          subLoads[nn]->set ("iq", Iq * fraction[nn]);
-          subLoads[nn]->set ("yp", Yp * fraction[nn]);
-          subLoads[nn]->set ("yq", Yq * fraction[nn]);
+          subLoads[nn]->set ("p", getP() * fraction[nn]);
+          subLoads[nn]->set ("q", getQ() * fraction[nn]);
+          subLoads[nn]->set ("ir", getIp() * fraction[nn]);
+          subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+          subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+          subLoads[nn]->set ("yq", getYq() * fraction[nn]);
         }
     }
 
 }
 
-void compositeLoad::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void compositeLoad::residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
@@ -342,7 +342,7 @@ void compositeLoad::residual (const IOdata &args, const stateData *sD, double re
     }
 }
 
-void compositeLoad::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void compositeLoad::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
@@ -353,7 +353,7 @@ void compositeLoad::derivative (const IOdata &args, const stateData *sD, double 
     }
 }
 
-void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
@@ -364,7 +364,7 @@ void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateDat
     }
 }
 
-void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
@@ -372,7 +372,7 @@ void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *s
     }
 }
 
-void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
@@ -391,7 +391,7 @@ void compositeLoad::timestep (gridDyn_time ttime, const IOdata &args, const solv
     }
 }
 
-double compositeLoad::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double compositeLoad::getRealPower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   double rp = 0;
   for (auto &ld : subLoads)
@@ -404,7 +404,7 @@ double compositeLoad::getRealPower (const IOdata &args, const stateData *sD, con
   return rp;
 }
 
-double compositeLoad::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double compositeLoad::getReactivePower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   double rp = 0;
   for (auto &ld : subLoads)

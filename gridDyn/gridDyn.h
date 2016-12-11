@@ -173,7 +173,7 @@ public:
   @param[in] objName the name of the simulation*/
   explicit gridDynSimulation (const std::string &objName = "gridDynSim_#");
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   /** @brief set a particular instantiation of the simulation object to be the master for various purposes
    this function along with getInstance is used by external libraries to get particular information about the simulation
@@ -307,7 +307,7 @@ public:
   @param[in] tStart the time of the initialization default to 0
   @return int indicating success (0) or failure (non-zero)*/
   int dynInitialize (gridDyn_time tStart = negTime);   //code can detect this default param and use a previously specified start time
-  void alert (gridCoreObject *object, int code) override;
+  void alert (coreObject *object, int code) override;
 
   /** @brief function to count the number of MPI objects required for this simulation
   @param[in] printInfo if set to true the information is printed to the console
@@ -329,18 +329,16 @@ public:
   @param[in] dstate_dt  the time derivative of the state
   @param[out] resid the storage location for the residual function
   @param[in] sMode the solverMode to solve for
-  @return integer indicating success (0) or failure (non-zero)
   */
-  int residualFunction (gridDyn_time ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
+  void residualFunction (gridDyn_time ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
 
   /** @brief compute the derivatives for all differential states
   @param[in] ttime  the simulation time of the evaluation
   @param[in] state  the state information to evaluation
   @param[out] dstate_dt  the time derivative of the state
   @param[in] sMode the solverMode to solve for
-  @return integer indicating success (0) or failure (non-zero)
   */
-  int derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode);
+  void derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode);
 
   /** @brief compute an update to all algebraic states
    compute $x=f(\hat{x})$
@@ -349,9 +347,8 @@ public:
   @param[out] update  the updated state information
   @param[in] sMode the solverMode to solve for
   @param[in] alpha a multiplication factor for updates that are expected to be iterative
-  @return integer indicating success (0) or failure (non-zero)
   */
-  int algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha);
+  void algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha);
 
   /** @brief compute the Jacobian of the residuals
     computes $\frac{\partial r}{\partial x}$ for all components of the residual
@@ -363,7 +360,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
-  int jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
+ void jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
 
   /** @brief compute any root values
     computes the roots for any root finding functions used in the system
@@ -372,9 +369,8 @@ public:
   @param[in] dstate_dt  the time derivative of the state
   @param[out] roots the storage location for the roots
   @param[in] sMode the solverMode to solve for
-  @return integer indicating success (0) or failure (non-zero)
   */
-  int rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
+  void rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
 
 
   /** @brief solve for the algebraic components of a system for use with the ode solvers
@@ -382,9 +378,8 @@ public:
   @param[in] diffstate  the current derivative information
   @param[in] deriv the current derivative information
   @param[in] sMode the solverMode to solve related to the differential state information
-  @return integer indicating success (0) or failure (non-zero)
   */
-  int dynAlgebraicSolve(gridDyn_time ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
+  void dynAlgebraicSolve(gridDyn_time ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
 
   //solverMode and solverInterface search functions
 
@@ -492,7 +487,7 @@ public:
   @param[in] sD the stateData object to load
   @param[in] sMode the solverMode of the state Data object
   */
-  void fillExtraStateData (stateData *sD, const solverMode &sMode) const;
+  void fillExtraStateData (stateData &sD, const solverMode &sMode) const;
 protected:
   /** @brief makes sure the specified mode has the correct offsets
   @param[in] sMode the solverMode of the offsets to check

@@ -32,7 +32,7 @@ breaker::breaker (const std::string&objName) : gridRelay (objName)
   opFlags.reset (no_dyn_states);
 }
 
-gridCoreObject *breaker::clone (gridCoreObject *obj) const
+coreObject *breaker::clone (coreObject *obj) const
 {
   breaker *nobj = cloneBase<breaker, gridRelay> (this, obj);
   if (!(nobj))
@@ -171,13 +171,13 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
   auto gc2 = std::make_shared<gridCondition> ();
 
   auto cg = std::make_shared<customGrabber> ();
-  cg->setGrabberFunction ("I2T", [this](gridCoreObject *){
+  cg->setGrabberFunction ("I2T", [this](coreObject *){
     return cTI;
   });
 
   auto cgst = std::make_shared<customStateGrabber> (this);
-  cgst->setGrabberFunction ([ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) -> double {
-    return sD->state[static_cast<breaker *>(obj)->offsets.getDiffOffset (sMode)];
+  cgst->setGrabberFunction ([ ](coreObject *obj, const stateData &sD, const solverMode &sMode) -> double {
+    return sD.state[static_cast<breaker *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
   gc->setConditionLHS(cg, cgst);
@@ -306,7 +306,7 @@ void breaker::timestep (gridDyn_time ttime, const solverMode &)
 
 }
 
-void breaker::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void breaker::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (useCTI)
     {
@@ -364,13 +364,13 @@ void breaker::jacobianElements (const stateData *sD, matrixData<double> &ad, con
       ad.merge (d);
 
 
-      ad.assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD.cj);
 
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      ad.assign (offset,offset,sD->cj);
+      ad.assign (offset,offset,sD.cj);
     }
 }
 
@@ -384,12 +384,12 @@ void breaker::setState (gridDyn_time ttime, const double state[], const double /
   prevTime = ttime;
 }
 
-void breaker::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void breaker::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (useCTI)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      const double *dst = sD->dstate_dt + offset;
+      const double *dst = sD.dstate_dt + offset;
 
       if (!opFlags[nonlink_source_flag])
         {
@@ -411,12 +411,12 @@ void breaker::residual (const stateData *sD, double resid[], const solverMode &s
         }
 
 
-      // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD->time, I1, offset, 1.0 / (recloserTap / temp + minClearingTime),sD->state[offset]);
+      // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD.time, I1, offset, 1.0 / (recloserTap / temp + minClearingTime),sD.state[offset]);
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      resid[offset] = sD->dstate_dt[offset];
+      resid[offset] = sD.dstate_dt[offset];
     }
 }
 

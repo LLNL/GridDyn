@@ -110,12 +110,12 @@ protected:
 
   // ----------------timestepP -----------------
   std::shared_ptr<eventQueue> EvQ;       //!< the event queue for the simulation system
-  /** @brief storage location for shared_ptrs to gridCoreObjects
+  /** @brief storage location for shared_ptrs to coreObjects
    the direct pointer to the object will get passed to the system but the ownership will be changed so it won't be deleted by the normal means
   this allows storage of shared_ptrs to modeled objects but also other objects that potentially act as storage containers, do periodic updates, generate alerts or
   interact with other simulations
   */
-  std::vector<std::shared_ptr<gridCoreObject> > extraObjects;
+  std::vector<std::shared_ptr<coreObject> > extraObjects;
 public:
   /** @brief constructor*/
   explicit gridSimulation (const std::string &objName = "sim_#");
@@ -123,7 +123,7 @@ public:
   /** @brief destructor
   */
   ~gridSimulation ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   /** @brief get the current state of the simulation
   @return the current state
@@ -146,7 +146,7 @@ public:
 
   // add components
   using gridArea::add;       //use the add function of gridArea
-  virtual void addsp (std::shared_ptr<gridCoreObject> obj) override;
+  virtual void addsp (std::shared_ptr<coreObject> obj) override;
   /** @brief function to add collectors to the system
   @param[in] col the collector to add into the simulation
   */
@@ -189,8 +189,8 @@ public:
   virtual std::string getString (const std::string &param) const override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  void alert (gridCoreObject *object, int code) override;
-  virtual void log (gridCoreObject *object, print_level level, const std::string &message) override;
+  void alert (coreObject *object, int code) override;
+  virtual void log (coreObject *object, print_level level, const std::string &message) override;
 
   /** @brief save all the recorder data to files
    all the recorders have files associated with them that get automatically saved at certain points this function forces them
@@ -228,6 +228,6 @@ public:
 @param[in] sec the tree to do the search in
 @return the located object or nullptr
 */
-gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gridPrimary *sec);
+coreObject * findMatchingObject (coreObject *obj1, gridPrimary *src, gridPrimary *sec);
 
 #endif

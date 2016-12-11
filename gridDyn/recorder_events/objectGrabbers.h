@@ -22,7 +22,7 @@
 class gridSubModel;
 class gridObject;
 
-typedef std::pair<std::function<double(gridCoreObject *)>, gridUnits::units_t> fobjectPair;
+typedef std::pair<std::function<double(coreObject *)>, gridUnits::units_t> fobjectPair;
 
 fobjectPair getObjectFunction(gridObject *obj, const std::string &field);
  fobjectPair getObjectFunction(gridBus *bus, const std::string &field);
@@ -32,14 +32,14 @@ fobjectPair getObjectFunction(gridDynGenerator *gen, const std::string &field);
 fobjectPair getObjectFunction(gridArea *area, const std::string &field);
 fobjectPair getObjectFunction(gridRelay *rel, const std::string &field);
 
- typedef std::pair<std::function<void(gridCoreObject *, std::vector<double> &)>, gridUnits::units_t> fvecPair;
+ typedef std::pair<std::function<void(coreObject *, std::vector<double> &)>, gridUnits::units_t> fvecPair;
  
 fvecPair getObjectVectorFunction(gridObject *obj, const std::string &field);
  
  fvecPair getObjectVectorFunction(gridArea *area, const std::string &field);
 
 
- typedef std::function<void(gridCoreObject *, stringVec &)> descVecFunc;
+ typedef std::function<void(coreObject *, stringVec &)> descVecFunc;
 
 descVecFunc getObjectVectorDescFunction(gridObject *obj, const std::string &field);
  descVecFunc getObjectVectorDescFunction(gridArea *area, const std::string &field);
@@ -100,9 +100,9 @@ public:
 		return gridGrabber::updateField(fld);
 	}
 
-	void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override
+	void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override
 	{
-		gridCoreObject *newObject = (mode == object_update_mode::direct) ? obj : findMatchingObject(cobj, obj);
+		coreObject *newObject = (mode == object_update_mode::direct) ? obj : findMatchingObject(cobj, obj);
 		if (dynamic_cast<X *> (newObject))
 		{
 			tobject = static_cast<X *> (newObject);
@@ -191,9 +191,9 @@ public:
 		return FUNCTION_EXECUTION_SUCCESS;
 	}
 
-	void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override
+	void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override
 	{
-		gridCoreObject *newObject = (mode == object_update_mode::direct) ? obj : findMatchingObject(cobj, obj);
+		coreObject *newObject = (mode == object_update_mode::direct) ? obj : findMatchingObject(cobj, obj);
 		if (dynamic_cast<X *> (newObject))
 		{
 			tobject = static_cast<X *> (newObject);

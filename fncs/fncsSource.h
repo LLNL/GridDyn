@@ -38,7 +38,7 @@ public:
 	~fncsSource()
 	{
 	}
-	gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+	coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
 	virtual void updateA(gridDyn_time time) override;
@@ -46,6 +46,7 @@ public:
 	virtual void setFlag(const std::string &param, bool val = true) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-
+private:
+	void updateSubscription();
 };
 #endif

@@ -60,8 +60,8 @@
       <load name="load3" type="sine">
          <P>1.500</P>
          <Q>0</Q>
-        <period>6</period>
-		<amplitude>0.1</amplitude>
+        <p:period>6</p:period>
+		<p:amplitude>0.1</p:amplitude>
       </load>
    </bus>
    <bus name="bus4">

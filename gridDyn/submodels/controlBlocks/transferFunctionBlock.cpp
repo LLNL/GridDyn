@@ -43,7 +43,7 @@ transferFunctionBlock::transferFunctionBlock (std::vector<double> Acoef, std::ve
   opFlags.set (use_state);
 }
 
-gridCoreObject *transferFunctionBlock::clone (gridCoreObject *obj) const
+coreObject *transferFunctionBlock::clone (coreObject *obj) const
 {
 	transferFunctionBlock *nobj = cloneBase<transferFunctionBlock, basicBlock>(this, obj);
   if (nobj == nullptr)
@@ -87,7 +87,7 @@ void transferFunctionBlock::objectInitializeB (const IOdata &args, const IOdata 
       m_state[0] = m_state[1] * K;
       if (opFlags[has_limits])
         {
-          basicBlock::rootCheck (args, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
           m_state[0] = valLimit (m_state[0], Omin, Omax);
         }
       fieldSet[0] = m_state[0];
@@ -104,7 +104,7 @@ void transferFunctionBlock::objectInitializeB (const IOdata &args, const IOdata 
 
 
 // residual
-void transferFunctionBlock::residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode)
+void transferFunctionBlock::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, resid, sMode, this);
   if (extraOutputState)
@@ -124,11 +124,11 @@ void transferFunctionBlock::residElements (double input, double didt, const stat
 
 }
 
-void transferFunctionBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void transferFunctionBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 //  auto offset = offsets.getDiffOffset (sMode);
 // auto Aoffset = offsets.getAlgOffset (sMode);
-//deriv[offset + limiter_diff] = K*(input + bias - sD->state[Aoffset + limiter_alg]) / m_T1;
+//deriv[offset + limiter_diff] = K*(input + bias - sD.state[Aoffset + limiter_alg]) / m_T1;
   if (opFlags[use_ramp_limits])
     {
       basicBlock::derivElements (input, didt, sD, deriv, sMode);
@@ -136,7 +136,7 @@ void transferFunctionBlock::derivElements (double input, double didt, const stat
 }
 
 
-void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void transferFunctionBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   ad.assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
@@ -154,7 +154,7 @@ void transferFunctionBlock::jacElements (double input, double didt, const stateD
 
   //ad.assignCheck(Loc.diffOffset, argLoc, 1 / m_T1);
 //	ad.assign(Loc.diffOffset, Loc.algOffset + 1, -1 / m_T1);
-  ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
+  ad.assign (Loc.diffOffset, Loc.diffOffset, -sD.cj);
 }
 
 double transferFunctionBlock::step (gridDyn_time ttime, double inputA)

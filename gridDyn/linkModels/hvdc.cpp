@@ -71,7 +71,7 @@ hvdc::hvdc (const std::string &objName) : subsystem (4,objName)
 
 }
 
-gridCoreObject *hvdc::clone (gridCoreObject *obj) const
+coreObject *hvdc::clone (coreObject *obj) const
 {
 
   hvdc *nobj = cloneBase<hvdc, subsystem> (this, obj);

@@ -529,6 +529,13 @@ std::string getTailString(const std::string &input, char sep)
 	return ret;
 }
 
+std::string getTailString(const std::string &input, const std::string &sep)
+{
+	auto tc = input.find_last_of(sep);
+	std::string ret = (tc == std::string::npos) ? input : input.substr(tc + 1);
+	return ret;
+}
+
 int findCloseStringMatch(const stringVector &testStrings, const stringVector &iStrings, string_match_type_t smatch)
 {
 	std::string lct; //lower case test string

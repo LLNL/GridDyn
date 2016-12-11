@@ -164,28 +164,28 @@ void gridSecondary::dynObjectInitializeB (const IOdata & args, const IOdata & ou
     }
 }
 
-void gridSecondary::preEx (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/)
+void gridSecondary::preEx (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::residual (const IOdata & /*args*/, const stateData *, double /*resid*/[], const solverMode & /*sMode*/)
+void gridSecondary::residual (const IOdata & /*args*/, const stateData &, double /*resid*/[], const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::algebraicUpdate (const IOdata & /*args*/, const stateData *, double /*update*/[], const solverMode & /*sMode*/, double /*alpha*/)
+void gridSecondary::algebraicUpdate (const IOdata & /*args*/, const stateData &, double /*update*/[], const solverMode & /*sMode*/, double /*alpha*/)
 {
 }
 
-void gridSecondary::derivative (const IOdata & /*args*/, const stateData *, double /*deriv*/[], const solverMode & /*sMode*/)
+void gridSecondary::derivative (const IOdata & /*args*/, const stateData &, double /*deriv*/[], const solverMode & /*sMode*/)
 {
 }
 
-double gridSecondary::getRealPower (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/)
+double gridSecondary::getRealPower (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/) const
 {
   return 0.0;
 }
 
-double gridSecondary::getReactivePower (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/)
+double gridSecondary::getReactivePower (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/) const
 {
   return 0.0;
 }
@@ -231,19 +231,19 @@ double gridSecondary::getAdjustableCapacityDown (gridDyn_time /*time*/) const
   return 0;
 }
 
-void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> &, const solverMode & /*sMode*/)
+void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData &, matrixData<double> &, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 }
 
-void gridSecondary::rootTest  (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode & /*sMode*/)
+void gridSecondary::rootTest  (const IOdata & /*args*/, const stateData &, double /*roots*/[], const solverMode & /*sMode*/)
 {
 }
 
@@ -251,7 +251,7 @@ void gridSecondary::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/
 {
 }
 
-change_code gridSecondary::rootCheck (const IOdata & /*args*/, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code gridSecondary::rootCheck (const IOdata & /*args*/, const stateData &, const solverMode &, check_level_t /*level*/)
 {
   return change_code::no_change;
 }
@@ -265,7 +265,7 @@ change_code gridSecondary::powerFlowAdjust (const IOdata & /*args*/, unsigned lo
   return change_code::no_change;
 }
 
-double gridSecondary::getDoutdt (const IOdata & /*args*/, const stateData *, const solverMode &, index_t /*num*/)
+double gridSecondary::getDoutdt (const IOdata & /*args*/, const stateData &, const solverMode &, index_t /*num*/) const
 {
   return 0.0;
 }
@@ -281,12 +281,12 @@ IOlocs gridSecondary::getOutputLocs  (const solverMode &) const
   return NullLocVec;
 }
 
-index_t gridSecondary::getOutputLoc ( const solverMode &, index_t /*num*/)
+index_t gridSecondary::getOutputLoc ( const solverMode &, index_t /*num*/) const
 {
 	return kNullLocation;
 }
 
-double gridSecondary::getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num)
+double gridSecondary::getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num) const
 {
   if (num == PoutLocation)
     {
@@ -319,7 +319,7 @@ double gridSecondary::getOutput (index_t num) const
     }
 }
 
-IOdata gridSecondary::getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridSecondary::getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   IOdata out (2);
   out[PoutLocation] = getRealPower (args, sD, sMode);
@@ -327,7 +327,7 @@ IOdata gridSecondary::getOutputs (const IOdata &args, const stateData *sD, const
   return out;
 }
 
-IOdata gridSecondary::predictOutputs (double /*ptime*/, const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridSecondary::predictOutputs (double /*ptime*/, const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   IOdata out (2);
   out[PoutLocation] = getRealPower (args, sD, sMode);
@@ -427,7 +427,7 @@ index_t gridSecondary::findIndex (const std::string & field, const solverMode & 
 }
 
 
-void gridSecondary::updateLocalCache(const IOdata & /*args*/, const stateData *, const solverMode &)
+void gridSecondary::updateLocalCache(const IOdata & /*args*/, const stateData &, const solverMode &)
 {
 	//nothing to cache by default
 }

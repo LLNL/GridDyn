@@ -180,10 +180,10 @@ then write data (NumElements*8 Bytes);
 @param[in] data the data to write to the file
 @param[in] filename the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)
-@return (0) is successful  (-1) if unable to open file
+@throw fileOperationError if the file cannot be opened
 */
 
-int writeVector(gridDyn_time time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
+void writeVector(gridDyn_time time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
 
 /** @brief write a array to a file
 encodes a header into the file
@@ -196,10 +196,11 @@ then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @param[in] a1 the Jacobian data to write to the file
 @param[in] filename the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)
-@return (0) is successful  (-1) if unable to open file
+@throw fileOperationError if the file cannot be opened
 */
 
-int writeArray(gridDyn_time time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
+#define JACOBIAN_DATA 1
+void writeArray(gridDyn_time time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
 
 class contingency;
 

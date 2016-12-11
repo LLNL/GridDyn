@@ -19,7 +19,7 @@
 
 class gridEvent;
 class gridRecorder;
-class gridCoreObject;
+class coreObject;
 class gridDynSimulation;
 
 
@@ -70,24 +70,24 @@ gridDynSimulation * readSimXMLFile (const std::string &filename, readerInfo *ri 
 
 std::uint32_t addflags (std::uint32_t iflags, const std::string &flags);
 
-void loadFile (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri = nullptr, std::string ext = "");
+void loadFile (coreObject *parentObject, const std::string &filename, readerInfo *ri = nullptr, std::string ext = "");
 
-void loadGDZ(gridCoreObject *parentObject, const std::string &fileName, readerInfo *ri = nullptr);
+void loadGDZ(coreObject *parentObject, const std::string &fileName, readerInfo *ri = nullptr);
 
-void loadCDF (gridCoreObject *parentObject,const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadCDF (coreObject *parentObject,const std::string &filename, const basicReaderInfo &bri = defInfo);
 
-void loadPSP (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
-void loadPTI (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadPSP (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadPTI (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
 
-void loadRAW (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadRAW (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
 
-void loadDYR (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
-void loadEPC (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadDYR (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadEPC (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
 
 //wrapper function to detect m file format for matpower or PSAT
-void loadMFile (gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
+void loadMFile (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri = defInfo);
 
-void loadCSV (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri, const std::string &oname = "");
+void loadCSV (coreObject *parentObject, const std::string &filename, readerInfo *ri, const std::string &oname = "");
 
 /** function sets a parameter in an object
 @param[in] label the name to be printed if there is a problem
@@ -95,9 +95,9 @@ void loadCSV (gridCoreObject *parentObject, const std::string &filename, readerI
 @param[in] param a gridParameter definition
 @return 0 if successful (-1) if the setting failed
 */
-int objectParameterSet (const std::string &label, gridCoreObject *obj, gridParameter &param) noexcept;
+int objectParameterSet (const std::string &label, coreObject *obj, gridParameter &param) noexcept;
 
-void addToParent (gridCoreObject *objectToAdd, gridCoreObject *parentObject);
+void addToParent (coreObject *objectToAdd, coreObject *parentObject);
 /** @brief attempt to add to a parent object with renaming sequence*/
-void addToParentRename(gridCoreObject *objectToAdd, gridCoreObject *parentObject);
+void addToParentRename(coreObject *objectToAdd, coreObject *parentObject);
 #endif

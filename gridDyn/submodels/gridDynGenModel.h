@@ -46,7 +46,7 @@ protected:
 public:
   //!< @brief default constructor
   gridDynGenModel (const std::string &objName = "genModel_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   //!< @brief virtual destructor
   virtual ~gridDynGenModel ();
 
@@ -55,15 +55,15 @@ public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
 
-  virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut = 0) const override;
+  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t numOut = 0) const override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   //TODO:: PT split these into separate functions for getting the value and getting the offset
-  virtual double getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const;
-  virtual double getAngle (const stateData *sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const;
 };
 
 
@@ -83,7 +83,7 @@ protected:
 public:
   //!< @brief default constructor
   gridDynGenModelClassical (const std::string &objName = "genModelClassic_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   //!< @brief virtual destructor
   virtual ~gridDynGenModelClassical ();
   virtual void objectInitializeA (gridDyn_time time0, unsigned long flags) override;
@@ -95,22 +95,22 @@ public:
   virtual stringVec localStateNames () const override;
   // dynamics
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
 
-  virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut = 0) const override;
+  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t numOut = 0) const override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void algebraicUpdate (const IOdata &args, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
   /** helper function to get omega and its state location
   */
-  virtual double getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const override;
-  virtual double getAngle (const stateData *sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const override;
-  virtual void updateLocalCache (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const override;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const override;
+  virtual void updateLocalCache (const IOdata &args, const stateData &sD, const solverMode &sMode) override;
 protected:
   void computeInitialAngleAndCurrent (const IOdata &args, const IOdata &outputSet, double R1, double X1);
 };

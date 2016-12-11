@@ -41,7 +41,7 @@ gridArea::gridArea (const std::string &objName) : gridPrimary (objName), obList 
   opFlags.set (multipart_calculation_capable);
 }
 
-gridCoreObject *gridArea::clone (gridCoreObject *obj) const
+coreObject *gridArea::clone (coreObject *obj) const
 {
   gridArea *area = cloneBase<gridArea, gridPrimary> (this, obj);
   if (area == nullptr)
@@ -135,7 +135,7 @@ gridArea::~gridArea ()
     }
 }
 
-void gridArea::add (gridCoreObject *obj)
+void gridArea::add (coreObject *obj)
 {
   if (dynamic_cast<gridBus *> (obj))
     {
@@ -205,7 +205,7 @@ void gridArea::add (gridRelay *relay)
 }
 
 // --------------- remove components ---------------
-void gridArea::remove (gridCoreObject *obj)
+void gridArea::remove (coreObject *obj)
 {
   if (dynamic_cast<gridBus *> (obj))
     {
@@ -286,7 +286,7 @@ void gridArea::remove (gridRelay *relay)
 }
 
 
-void gridArea::alert (gridCoreObject *obj, int code)
+void gridArea::alert (coreObject *obj, int code)
 {
   switch (code)
     {
@@ -358,7 +358,7 @@ gridDynGenerator *gridArea::getGen (index_t x)
   return nullptr;
 }
 
-gridCoreObject *gridArea::find (const std::string &objname) const
+coreObject *gridArea::find (const std::string &objname) const
 {
   
   if (objname == "root")
@@ -373,7 +373,7 @@ gridCoreObject *gridArea::find (const std::string &objname) const
         }
     }
 
-  gridCoreObject *obj;
+  coreObject *obj;
   auto rlc = objname.find_first_of (":/?");
   if (rlc != std::string::npos)
     {
@@ -398,7 +398,7 @@ gridCoreObject *gridArea::find (const std::string &objname) const
   return obj;
 }
 
-gridCoreObject *gridArea::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridArea::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "bus")
     {
@@ -464,7 +464,7 @@ void gridArea::setAll (const std::string &type, std::string param, double val, g
 
 }
 
-gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridArea::findByUserID (const std::string &typeName, index_t searchID) const
 {
 
   if ((typeName == "area")&&(searchID == id))
@@ -476,7 +476,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
       //this is potentially painful, wouldn't recommend doing this search in a big system
       for (auto &bus : m_Buses)
         {
-          gridCoreObject *obj = bus->findByUserID (typeName, searchID);
+          coreObject *obj = bus->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -484,7 +484,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
         }
       for (auto &area : m_Areas)
         {
-          gridCoreObject *obj = area->findByUserID (typeName, searchID);
+          coreObject *obj = area->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -497,7 +497,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
     {
       for (auto &area : m_Areas)
         {
-          gridCoreObject *obj = area->findByUserID (typeName, searchID);
+          coreObject *obj = area->findByUserID (typeName, searchID);
           if (obj)
             {
               return obj;
@@ -560,7 +560,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
   //if we haven't found something try the subareas
   for (auto &area : m_Areas)
     {
-      gridCoreObject *obj = area->findByUserID (typeName, searchID);
+      coreObject *obj = area->findByUserID (typeName, searchID);
       if (obj)
         {
           return obj;
@@ -571,7 +571,7 @@ gridCoreObject *gridArea::findByUserID (const std::string &typeName, index_t sea
 
 
 // check bus members
-bool gridArea::isMember (gridCoreObject *object) const
+bool gridArea::isMember (coreObject *object) const
 {
   return obList->isMember (object);
 }
@@ -654,14 +654,6 @@ void gridArea::pFlowObjectInitializeB ()
   opObjectLists.makePreList (primaryObjects);
 }
 
-void gridArea::setTime (gridDyn_time time)
-{
-  for (auto &obj : primaryObjects)
-    {
-      obj->setTime (time);
-    }
-}
-
 void gridArea::updateLocalCache ()
 {
   //links should come first
@@ -697,7 +689,7 @@ void gridArea::updateLocalCache ()
 }
 
 
-void gridArea::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void gridArea::updateLocalCache (const stateData &sD, const solverMode &sMode)
 {
   //links should come first
   for (auto &link : m_Links)
@@ -1608,7 +1600,7 @@ double gridArea::getAvgAngle () const
   return (a / cnt);
 }
 
-double gridArea::getAvgAngle (const stateData *sD, const solverMode &sMode) const
+double gridArea::getAvgAngle (const stateData &sD, const solverMode &sMode) const
 {
   double a = 0;
   double cnt = 0.0;
@@ -1682,7 +1674,7 @@ void gridArea::getTols (double tols[], const solverMode &sMode)
 }
 
 //#define DEBUG_PRINT
-void gridArea::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
+void gridArea::rootTest (const stateData &sD, double roots[], const solverMode &sMode)
 {
   for (auto ro : rootObjects)
     {
@@ -1696,7 +1688,7 @@ void gridArea::rootTest (const stateData *sD, double roots[], const solverMode &
 #endif
 }
 
-change_code gridArea::rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level)
+change_code gridArea::rootCheck (const stateData &sD, const solverMode &sMode,  check_level_t level)
 {
   change_code ret = change_code::no_change;
   //root checks can trigger flag updates disable and just do the update once
@@ -1902,19 +1894,19 @@ void gridArea::getAngleStates (double aStates[], const solverMode &sMode) const
 
 // residual
 
-void gridArea::preEx (const stateData *sD, const solverMode &sMode)
+void gridArea::preEx (const stateData &sD, const solverMode &sMode)
 {
   opObjectLists.preEx (sD, sMode);
 }
 
-void gridArea::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void gridArea::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   opObjectLists.residual (sD, resid, sMode);
 
   //next do any internal states
 }
 
-void gridArea::algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha)
+void gridArea::algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha)
 {
   opObjectLists.algebraicUpdate (sD, update, sMode, alpha);
 
@@ -1945,35 +1937,35 @@ void gridArea::getStateName (stringVec &stNames, const solverMode &sMode, const 
 }
 
 
-void gridArea::delayedResidual (const stateData *sD, double resid[], const solverMode &sMode)
+void gridArea::delayedResidual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   opObjectLists.delayedResidual (sD, resid, sMode);
 }
 
-void gridArea::delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode)
+void gridArea::delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode)
 {
   opObjectLists.delayedDerivative (sD, deriv, sMode);
 }
 
-void gridArea::delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridArea::delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   opObjectLists.delayedJacobian (sD, ad, sMode);
 }
 
-void gridArea::delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha)
+void gridArea::delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha)
 {
   opObjectLists.delayedAlgebraicUpdate (sD, update, sMode, alpha);
 }
 
 
-void gridArea::derivative ( const stateData *sD, double deriv[], const solverMode &sMode)
+void gridArea::derivative ( const stateData &sD, double deriv[], const solverMode &sMode)
 {
   opObjectLists.derivative (sD, deriv, sMode);
   //next do any internal states
 }
 
 // Jacobian
-void gridArea::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridArea::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   opObjectLists.jacobianElements (sD, ad, sMode);
   //next do any internal control elements
@@ -2061,7 +2053,7 @@ double gridArea::getTieFlowReal () const
   return (getGenerationReal () - getLoadReal () - getLoss ());
 }
 
-double gridArea::getMasterAngle (const stateData *sD, const solverMode &sMode) const
+double gridArea::getMasterAngle (const stateData &sD, const solverMode &sMode) const
 {
   if (masterBus < 0)
     {

@@ -15,7 +15,7 @@
 #define TIMESERIESMULTI_H_
 
 #include "timeSeries.h"
-
+//TODO make the members private
 template <typename dataType=double, typename timeType=double>
 class timeSeriesMulti
 {
@@ -198,6 +198,10 @@ public:
 		count = 0;
 	}
 
+	const std::vector<dataType> &operator[](size_t kk) const
+	{
+		return data[kk];
+	}
 	/** @brief load a file into the time series
 	automatically detect the file type based on extension
 	@param[in] filename  the file to load

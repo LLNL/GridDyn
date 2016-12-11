@@ -25,7 +25,7 @@ protected:
   bool merged = false;  //!< flag indicating that the buses have been merged
 public:
   zBreaker (const std::string &objName = "zbreaker_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // parameter set functions
 
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -36,14 +36,14 @@ public:
   virtual void switchMode (index_t num, bool mode) override;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
   virtual double quickupdateP () override;
 
 
-  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode &) override
+  virtual void ioPartialDerivatives (index_t  /*busId*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode &) override
   {
   }
-  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData *, matrixData<double> &, const solverMode &) override
+  virtual void outputPartialDerivatives  (index_t  /*busId*/, const stateData &, matrixData<double> &, const solverMode &) override
   {
   }
 

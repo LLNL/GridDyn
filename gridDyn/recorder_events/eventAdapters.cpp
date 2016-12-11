@@ -47,7 +47,7 @@ std::shared_ptr<eventAdapter> eventAdapter::clone(std::shared_ptr<eventAdapter> 
 	return newAdapter;
 }
 
-void eventAdapter::updateObject(gridCoreObject * /*newObject*/, object_update_mode /*mode*/)
+void eventAdapter::updateObject(coreObject * /*newObject*/, object_update_mode /*mode*/)
 {
 	
 }

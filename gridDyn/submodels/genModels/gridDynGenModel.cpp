@@ -57,7 +57,7 @@ gridDynGenModel::~gridDynGenModel ()
 {
 }
 
-gridCoreObject *gridDynGenModel::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModel::clone (coreObject *obj) const
 {
   gridDynGenModel *gd = cloneBase<gridDynGenModel, gridSubModel> (this,obj);
   if (!(gd))
@@ -94,7 +94,7 @@ void gridDynGenModel::objectInitializeB (const IOdata &args, const IOdata &outpu
 
 // residual
 
-double gridDynGenModel::getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset) const
+double gridDynGenModel::getFreq (const stateData &sD, const solverMode &sMode, index_t *FreqOffset) const
 {
   //there is no inertia in this gen model so it can't compute a frequency and must use the bus frequency
   if (FreqOffset)
@@ -105,7 +105,7 @@ double gridDynGenModel::getFreq (const stateData *sD, const solverMode &sMode, i
 
 }
 
-double gridDynGenModel::getAngle (const stateData *, const solverMode &, index_t *AngleOffset) const
+double gridDynGenModel::getAngle (const stateData &, const solverMode &, index_t *AngleOffset) const
 {
   //there is no inertia in this gen model so it can't compute a frequency and must use the bus frequency
   if (AngleOffset)
@@ -116,7 +116,7 @@ double gridDynGenModel::getAngle (const stateData *, const solverMode &, index_t
 
 }
 
-IOdata gridDynGenModel::getOutputs (const IOdata &args, const stateData *, const solverMode &)
+IOdata gridDynGenModel::getOutputs (const IOdata &args, const stateData &, const solverMode &) const
 {
 
   IOdata out (2);
@@ -140,7 +140,7 @@ IOdata gridDynGenModel::getOutputs (const IOdata &args, const stateData *, const
 
 
 
-double gridDynGenModel::getOutput (const IOdata &args, const stateData *, const solverMode &, index_t numOut) const
+double gridDynGenModel::getOutput (const IOdata &args, const stateData &, const solverMode &, index_t numOut) const
 {
   double V = args[voltageInLocation];
   double Eft = args[genModelEftInLocation];
@@ -174,7 +174,7 @@ double gridDynGenModel::getOutput (const IOdata &args, const stateData *, const 
 }
 
 
-void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
+void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
 
   double V = args[voltageInLocation];

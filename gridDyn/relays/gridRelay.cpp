@@ -58,7 +58,7 @@ gridRelay::gridRelay (const std::string &objName) : gridPrimary (objName)
   opFlags.set (no_dyn_states);
 }
 
-gridCoreObject * gridRelay::clone (gridCoreObject *obj) const
+coreObject * gridRelay::clone (coreObject *obj) const
 {
   gridRelay *nobj = cloneBase<gridRelay, gridPrimary> (this, obj);
   if (!(nobj))
@@ -112,7 +112,7 @@ gridRelay::~gridRelay ()
 	
 }
 
-void gridRelay::add (gridCoreObject *obj)
+void gridRelay::add (coreObject *obj)
 {
   m_sourceObject = obj;
   m_sinkObject = obj;
@@ -141,14 +141,14 @@ void gridRelay::add (std::shared_ptr<eventAdapter> geA)
 }
 
 
-void gridRelay::setSource (gridCoreObject *obj)
+void gridRelay::setSource (coreObject *obj)
 {
   m_sourceObject = obj;
 }
 /**
 * set the relay sink object
 */
-void gridRelay::setSink (gridCoreObject *obj)
+void gridRelay::setSink (coreObject *obj)
 {
   m_sinkObject = obj;
 }
@@ -230,7 +230,7 @@ double gridRelay::getConditionValue (index_t conditionNumber) const
   return conditions[conditionNumber]->getVal (1);
 }
 
-double gridRelay::getConditionValue (index_t conditionNumber, const stateData *sD, const solverMode &sMode) const
+double gridRelay::getConditionValue (index_t conditionNumber, const stateData &sD, const solverMode &sMode) const
 {
   if (conditionNumber >= conditions.size ())
     {
@@ -316,43 +316,37 @@ std::shared_ptr<eventAdapter> gridRelay::getAction (index_t actionNumber)
 
 
 
-int gridRelay::updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber)
+void gridRelay::updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber)
 {
   if (actionNumber >= actions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
   actions[actionNumber] = std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (ge);
-  return LOADED;
 }
 
-int gridRelay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
+void gridRelay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
 {
   if (actionNumber >= actions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
   actions[actionNumber] = geA;
-  return LOADED;
 }
 
-int gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t conditionNumber)
+void gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t conditionNumber)
 {
   if (conditionNumber >= conditions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
   conditions[conditionNumber] = gc;
   cStates[conditionNumber] = condition_states::active;
   conditionTriggerTimes[conditionNumber] = negTime;
   updateRootCount (true);
-  return LOADED;
 }
 
-void gridRelay::setTime (gridDyn_time time)
-{
-  prevTime = time;
-}
+
 void gridRelay::resetRelay ()
 {
 }
@@ -408,11 +402,11 @@ void gridRelay::set (const std::string &param, double val, units_t unitType)
 
   if ((param == "samplingperiod")||(param == "ts")||(param=="sampleperiod"))
     {
-      gridCoreObject::set ("period", val, unitType);
+      coreObject::set ("period", val, unitType);
     }
   else if ((param == "rate") || (param == "fs") || (param == "samplerate"))
   {
-	  gridCoreObject::set("period", 1.0/unitConversion(val,unitType,Hz));
+	  coreObject::set("period", 1.0/unitConversion(val,unitType,Hz));
   }
   else
     {
@@ -578,7 +572,7 @@ void gridRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long /*flags*
           updatePeriod = parent->find ("root")->get ("steptime");
           if (updatePeriod < timeZero)
             {
-              updatePeriod = timeOne;
+              updatePeriod = timeOneSecond;
             }
         }
       m_nextSampleTime = nextUpdateTime = time0 + updatePeriod;
@@ -665,7 +659,7 @@ change_code gridRelay::powerFlowAdjust (unsigned long /*flags*/, check_level_t l
 }
 
 
-void gridRelay::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
+void gridRelay::rootTest (const stateData &sD, double roots[], const solverMode &sMode)
 {
   auto ro = offsets.getRootOffset (sMode);
   for (auto condNum : conditionsWithRoots)
@@ -709,11 +703,11 @@ void gridRelay::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMas
 
 }
 
-change_code gridRelay::rootCheck (const stateData *sD, const solverMode &, check_level_t /*level*/)
+change_code gridRelay::rootCheck (const stateData &sD, const solverMode &, check_level_t /*level*/)
 {
   count_t prevTrig = triggerCount;
   count_t prevAct = actionsTakenCount;
-  gridDyn_time ctime = (sD) ? (sD->time) : prevTime;
+  gridDyn_time ctime = (!sD.empty()) ? (sD.time) : prevTime;
   updateA (ctime);
   if ((triggerCount > prevTrig) || (actionsTakenCount > prevAct))
     {
@@ -993,7 +987,7 @@ void gridRelay::conditionCleared (index_t /*conditionNum*/, double /*timeTrigger
 #endif
 
 
-void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
+void gridRelay::updateObject(coreObject *obj, object_update_mode mode)
 {
 	if (mode == object_update_mode::direct)
 	{
@@ -1020,7 +1014,7 @@ void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
 	}
 }
 
-gridCoreObject * gridRelay::getObject() const
+coreObject * gridRelay::getObject() const
 {
 	if (m_sourceObject)
 	{
@@ -1033,7 +1027,7 @@ gridCoreObject * gridRelay::getObject() const
 	return nullptr;
 }
 
-void gridRelay::getObjects(std::vector<gridCoreObject *> &objects) const
+void gridRelay::getObjects(std::vector<coreObject *> &objects) const
 {
 	if (m_sourceObject)
 	{

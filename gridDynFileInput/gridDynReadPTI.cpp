@@ -35,8 +35,8 @@ void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);
 void ptiReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &opt);
 void ptiReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &opt);
 void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo &opt);
-void ptiReadBranch (gridCoreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt);
-int ptiReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt);
+void ptiReadBranch (coreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt);
+int ptiReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt);
 
 //static variables with the factories
 //get the basic busFactory
@@ -50,7 +50,7 @@ static typeFactory<gridLink> *linkfactory = nullptr;
 static typeFactory<gridDynGenerator> *genfactory = nullptr;
 
 
-void loadPTI (gridCoreObject *parentObject, const std::string &filename,const basicReaderInfo &bri)
+void loadPTI (coreObject *parentObject, const std::string &filename,const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
   std::string line;        //line storage
@@ -595,7 +595,7 @@ void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
 }
 
 
-void ptiReadBranch (gridCoreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
+void ptiReadBranch (coreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
 {
   std::string temp, temp2;
   gridBus *bus1, *bus2;
@@ -654,7 +654,7 @@ void ptiReadBranch (gridCoreObject *parentObject, const std::string &line, std::
   //TODO get the other parameters (not critical for power flow)
 }
 
-int ptiReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt)
+int ptiReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt)
 {
   int tline = 4;
   std::string temp, temp2;

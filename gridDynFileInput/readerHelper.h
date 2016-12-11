@@ -30,7 +30,7 @@
 
 class gridParameter;
 class readerInfo;
-class gridCoreObject;
+class coreObject;
 class basicReaderInfo;
 
 
@@ -50,10 +50,10 @@ bool readMatlabArray (const std::string &Name, const std::string &text, mArray &
 stringVec readMatlabCellArray (const std::string &text, size_t start);
 void removeMatlabComments (std::string &text);
 
-void loadPSAT (gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
-void loadMatPower (gridCoreObject *parentObject, const std::string &filetext, std::string basename, const basicReaderInfo &bri);
-void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
-void loadMatDynEvent (gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
+void loadPSAT (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
+void loadMatPower (coreObject *parentObject, const std::string &filetext, std::string basename, const basicReaderInfo &bri);
+void loadMatDyn (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
+void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
 
 //TODO::PT replace the calls of these functions with those from stringOps.h
 

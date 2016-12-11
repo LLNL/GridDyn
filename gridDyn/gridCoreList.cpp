@@ -17,7 +17,7 @@ gridCoreList::gridCoreList()
 {
 }
 
-bool gridCoreList::insert(gridCoreObject *obj, bool replace)
+bool gridCoreList::insert(coreObject *obj, bool replace)
 {
 	auto inp = m_objects.insert(obj);
 	if (inp.second)
@@ -32,7 +32,7 @@ bool gridCoreList::insert(gridCoreObject *obj, bool replace)
 	return false;
 
 }
-gridCoreObject *gridCoreList::find(const std::string &objname) const
+coreObject *gridCoreList::find(const std::string &objname) const
 {
 	auto fp = m_objects.get<name>().find(objname);
 	if (fp != m_objects.get<name>().end())
@@ -45,11 +45,11 @@ gridCoreObject *gridCoreList::find(const std::string &objname) const
 	}
 }
 
-std::vector<gridCoreObject *> gridCoreList::find(index_t searchID) const
+std::vector<coreObject *> gridCoreList::find(index_t searchID) const
 {
 	auto fp = m_objects.get<uid>().lower_bound(searchID);
 	auto fp2 = m_objects.get<uid>().upper_bound(searchID);
-	std::vector<gridCoreObject *> out;
+	std::vector<coreObject *> out;
 	while (fp != fp2)
 	{
 		if ((*fp)->getUserID() == searchID)
@@ -61,7 +61,7 @@ std::vector<gridCoreObject *> gridCoreList::find(index_t searchID) const
 	return out;
 }
 
-bool gridCoreList::remove(gridCoreObject *obj)
+bool gridCoreList::remove(coreObject *obj)
 {
 	auto fp = m_objects.get<id>().find(obj->getID());
 	if (fp != m_objects.get<id>().end())
@@ -87,13 +87,13 @@ bool gridCoreList::remove(const std::string &objname)
 	return false;
 }
 
-bool gridCoreList::isMember(gridCoreObject *obj) const
+bool gridCoreList::isMember(coreObject *obj) const
 {
 	auto fp = m_objects.get<id>().find(obj->getID());
-	return (fp != m_objects.get<id>().end()) ? true : false;
+	return (fp != m_objects.get<id>().end());
 }
 
-void gridCoreList::deleteAll(gridCoreObject *parent)
+void gridCoreList::deleteAll(coreObject *parent)
 {
 	for (auto &it : m_objects)
 	{
@@ -102,7 +102,7 @@ void gridCoreList::deleteAll(gridCoreObject *parent)
 
 }
 
-void gridCoreList::updateObject(gridCoreObject *obj)
+void gridCoreList::updateObject(coreObject *obj)
 {
 	auto fp = m_objects.get<id>().find(obj->getID());
 	m_objects.replace(fp, obj);

@@ -124,7 +124,7 @@ void setDefaultMatchType (const std::string &matchType)
 
 using namespace readerConfig;
 
-int objectParameterSet (const std::string &label,gridCoreObject *obj, gridParameter &param) noexcept
+int objectParameterSet (const std::string &label,coreObject *obj, gridParameter &param) noexcept
 {
 	try
 	{
@@ -180,7 +180,7 @@ uint32_t addflags (uint32_t iflags, const std::string &flags)
 }
 
 
-void loadFile (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri, std::string ext)
+void loadFile (coreObject *parentObject, const std::string &filename, readerInfo *ri, std::string ext)
 {
   boost::filesystem::path sourcePath (filename);
 
@@ -258,7 +258,7 @@ void loadFile (gridCoreObject *parentObject, const std::string &filename, reader
     }
 }
 
-void addToParent (gridCoreObject *objectToAdd, gridCoreObject *parentObject)
+void addToParent (coreObject *objectToAdd, coreObject *parentObject)
 {
 	try
 	{
@@ -275,7 +275,7 @@ void addToParent (gridCoreObject *objectToAdd, gridCoreObject *parentObject)
 }
 
 
-void addToParentRename(gridCoreObject *objectToAdd, gridCoreObject *parentObject)
+void addToParentRename(coreObject *objectToAdd, coreObject *parentObject)
 {
 	std::string bname = objectToAdd->getName();
 	int cnt = 2;

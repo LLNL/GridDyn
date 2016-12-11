@@ -34,7 +34,7 @@ gridLoadOpt::gridLoadOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridLoadOpt::gridLoadOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),load (dynamic_cast<gridLoad *> (obj))
+gridLoadOpt::gridLoadOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),load (dynamic_cast<gridLoad *> (obj))
 {
   if (load)
     {
@@ -46,7 +46,7 @@ gridLoadOpt::gridLoadOpt (gridCoreObject *obj, const std::string &objName) : gri
     }
 }
 
-gridCoreObject *gridLoadOpt::clone (gridCoreObject *obj) const
+coreObject *gridLoadOpt::clone (coreObject *obj) const
 {
   gridLoadOpt *nobj;
   if (obj == nullptr)
@@ -74,7 +74,7 @@ gridCoreObject *gridLoadOpt::clone (gridCoreObject *obj) const
 }
 
 
-void gridLoadOpt::add (gridCoreObject *obj)
+void gridLoadOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridLoad *> (obj))
     {

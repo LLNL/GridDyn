@@ -22,7 +22,7 @@ objectFactory::objectFactory (const std::string & /*componentName*/, const strin
 }
 
 
-void objectFactory::prepObjects (count_t /*count*/, gridCoreObject * /*obj*/)
+void objectFactory::prepObjects (count_t /*count*/, coreObject * /*obj*/)
 {
 }
 
@@ -70,11 +70,11 @@ stringVec componentFactory::getTypeNames ()
   return tnames;
 }
 
-gridCoreObject *componentFactory::makeObject ()
+coreObject *componentFactory::makeObject ()
 {
   if (!m_defaultType.empty ())
     {
-      gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject ();
+      coreObject *obj = m_factoryMap[m_defaultType]->makeObject ();
       return obj;
     }
     return nullptr;
@@ -86,37 +86,37 @@ bool componentFactory::isValidType (const std::string &typeName) const
   return (mfind != m_factoryMap.end ());
 }
 
-gridCoreObject *componentFactory::makeObject (const std::string &type)
+coreObject *componentFactory::makeObject (const std::string &type)
 {
   auto mfind = m_factoryMap.find (type);
   if (mfind != m_factoryMap.end())
   {
-	  gridCoreObject *obj = m_factoryMap[type]->makeObject();
+	  coreObject *obj = m_factoryMap[type]->makeObject();
 	  return obj;
   }
 
   if (!m_defaultType.empty())
   {
-	  gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject();
+	  coreObject *obj = m_factoryMap[m_defaultType]->makeObject();
 	  return obj;
   }
 
   return nullptr;
 }
 
-gridCoreObject *componentFactory::makeObject (const std::string &type, const std::string &objName)
+coreObject *componentFactory::makeObject (const std::string &type, const std::string &objName)
 {
 
 	auto mfind = m_factoryMap.find(type);
 	if (mfind != m_factoryMap.end())
 	{
-		gridCoreObject *obj = m_factoryMap[type]->makeObject(objName);
+		coreObject *obj = m_factoryMap[type]->makeObject(objName);
 		return obj;
 	}
 
 	if (!m_defaultType.empty())
 	{
-		gridCoreObject *obj = m_factoryMap[m_defaultType]->makeObject(objName);
+		coreObject *obj = m_factoryMap[m_defaultType]->makeObject(objName);
 		return obj;
 	}
 
@@ -207,34 +207,34 @@ stringVec coreObjectFactory::getTypeNames (const std::string &componentName)
     }
 }
 
-gridCoreObject *coreObjectFactory::createObject(const std::string &componentType)
+coreObject *coreObjectFactory::createObject(const std::string &componentType)
 {
 	auto mfind = m_factoryMap.find(componentType);
 	if (mfind != m_factoryMap.end())
 	{
-		gridCoreObject *obj = m_factoryMap[componentType]->makeObject();
+		coreObject *obj = m_factoryMap[componentType]->makeObject();
 		return obj;
 	}
 	return nullptr;
 }
 
-gridCoreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName)
+coreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName)
 {
   auto mfind = m_factoryMap.find (componentType);
   if (mfind != m_factoryMap.end ())
     {
-      gridCoreObject *obj = m_factoryMap[componentType]->makeObject (typeName);
+      coreObject *obj = m_factoryMap[componentType]->makeObject (typeName);
       return obj;
     }
     return nullptr;
 }
 
-gridCoreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName, const std::string &objName)
+coreObject *coreObjectFactory::createObject (const std::string &componentType, const std::string &typeName, const std::string &objName)
 {
   auto mfind = m_factoryMap.find (componentType);
   if (mfind != m_factoryMap.end ())
     {
-      gridCoreObject *obj = m_factoryMap[componentType]->makeObject (typeName, objName);
+      coreObject *obj = m_factoryMap[componentType]->makeObject (typeName, objName);
       return obj;
     }
     return nullptr;
@@ -273,7 +273,7 @@ bool coreObjectFactory::isValidType (const std::string &componentName, const std
 }
 
 
-void coreObjectFactory::prepObjects (const std::string &componentName, const std::string &typeName, count_t numObjects, gridCoreObject *obj)
+void coreObjectFactory::prepObjects (const std::string &componentName, const std::string &typeName, count_t numObjects, coreObject *obj)
 {
   auto mfind = m_factoryMap.find (componentName);
   if (mfind != m_factoryMap.end ())
@@ -286,7 +286,7 @@ void coreObjectFactory::prepObjects (const std::string &componentName, const std
     }
 }
 
-void coreObjectFactory::prepObjects (const std::string &componentName, count_t numObjects, gridCoreObject *obj)
+void coreObjectFactory::prepObjects (const std::string &componentName, count_t numObjects, coreObject *obj)
 {
   auto mfind = m_factoryMap.find (componentName);
   if (mfind != m_factoryMap.end ())

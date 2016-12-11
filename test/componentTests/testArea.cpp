@@ -21,7 +21,7 @@
 #include "testHelper.h"
 #include "vectorOps.hpp"
 #include <cmath>
-//testP case for gridCoreObject object
+//testP case for coreObject object
 
 
 #define AREA_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/area_tests/"

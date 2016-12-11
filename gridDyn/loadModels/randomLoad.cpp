@@ -501,19 +501,6 @@ void gridRandomLoad::nextStep (gridDyn_time triggerTime)
     }
 }
 
-
-
-
-void gridRandomLoad::setTime (gridDyn_time time)
-{
-  auto in = prevTime - lastUpdateTime;
-
-  nextUpdateTime = time + (nextUpdateTime - prevTime);
-  lastUpdateTime = time - in;
-  prevTime = time;
-}
-
-
 void gridRandomLoad::timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)

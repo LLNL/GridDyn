@@ -38,7 +38,7 @@ public:
   /** @brief default constructor*/
   variableGenerator (const std::string &objName = "varGen_$");
   variableGenerator (dynModel_t dynModel, const std::string &objName = "varGen_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   /** @brief destructor method*/
   virtual ~variableGenerator ();
@@ -50,14 +50,14 @@ public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   virtual void add (gridSubModel *obj) override;
 
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
   virtual double getAdjustableCapacityUp  (gridDyn_time /*time*/ = maxTime) const override
   {
@@ -70,10 +70,10 @@ public:
   virtual void powerAdjust (double /*adjustment*/) override
   {
   }
-  virtual gridCoreObject * find (const std::string &object) const override;
-  virtual gridCoreObject * getSubObject (const std::string &type, index_t num) const override;
+  virtual coreObject * find (const std::string &object) const override;
+  virtual coreObject * getSubObject (const std::string &type, index_t num) const override;
 protected:
-	virtual double pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+	virtual double pSetControlUpdate(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
 	virtual index_t pSetLocation(const solverMode &sMode) override;
 };
 

@@ -29,7 +29,7 @@ fmiExciter::~fmiExciter()
 	//fmisub gets deleted from the object
 }
 
-gridCoreObject * fmiExciter::clone(gridCoreObject *obj) const
+coreObject * fmiExciter::clone(coreObject *obj) const
 {
 	fmiExciter *nobj = cloneBase<fmiExciter, gridDynExciter>(this, obj);
 	if (!(nobj))
@@ -252,30 +252,30 @@ void fmiExciter::getParameterStrings(stringVec &pstr, paramStringType pstype) co
 	}
 }
 
-void fmiExciter::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void fmiExciter::residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
 	fmisub->residual(args, sD, resid, sMode);
 }
 
-void fmiExciter::derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void fmiExciter::derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 	fmisub->derivative(args, sD, deriv, sMode);
 }
 
-void fmiExciter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiExciter::outputPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
 }
-void fmiExciter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->ioPartialDerivatives (args, sD, ad, argLocs, sMode);
 }
-void fmiExciter::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::jacobianElements(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->jacobianElements (args, sD, ad, argLocs, sMode);
 }
 
-void fmiExciter::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void fmiExciter::rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode)
 {
 	fmisub->rootTest(args, sD, roots, sMode);
 }
@@ -287,7 +287,7 @@ void fmiExciter::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::
 void fmiExciter::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	fmisub->setState(ttime, state, dstate_dt, sMode);
-	auto out = fmisub->getOutputs({}, nullptr, cLocalSolverMode);
+	auto out = fmisub->getOutputs({}, emptyStateData, cLocalSolverMode);
 	
 }
 
@@ -301,7 +301,7 @@ void fmiExciter::timestep(gridDyn_time ttime, const IOdata &args, const solverMo
 	prevTime = ttime;
 	fmisub->timestep(ttime, args, sMode);
 }
-IOdata fmiExciter::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata fmiExciter::getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	return fmisub->getOutputs(args, sD, sMode);
 }

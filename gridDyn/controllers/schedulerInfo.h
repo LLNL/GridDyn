@@ -46,17 +46,17 @@ bool operator== (const tsched &td1, const tsched &td2);
 
 bool operator!= (const tsched &td1, const tsched &td2);
 
-bool operator< (const tsched &td1, double timeC);
+bool operator< (const tsched &td1, gridDyn_time timeC);
 
-bool operator<= (const tsched &td1, double timeC);
+bool operator<= (const tsched &td1, gridDyn_time timeC);
 
-bool operator> (const tsched &td1, double timeC);
+bool operator> (const tsched &td1, gridDyn_time timeC);
 
-bool operator>= (const tsched &td1, double timeC);
+bool operator>= (const tsched &td1, gridDyn_time timeC);
 
-bool operator== (const tsched &td1, double timeC);
+bool operator== (const tsched &td1, gridDyn_time timeC);
 
-bool operator!= (const tsched &td1, double timeC);
+bool operator!= (const tsched &td1, gridDyn_time timeC);
 
 
 

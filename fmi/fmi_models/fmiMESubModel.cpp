@@ -41,7 +41,7 @@ fmiMESubModel::~fmiMESubModel()
 	
 }
 
-gridCoreObject * fmiMESubModel::clone(gridCoreObject *obj) const
+coreObject * fmiMESubModel::clone(coreObject *obj) const
 {
 	auto *gco = cloneBase<fmiMESubModel, gridSubModel>(this, obj);
 	if (!(gco))
@@ -538,7 +538,7 @@ index_t fmiMESubModel::findIndex(const std::string &field, const solverMode &) c
 	return kInvalidLocation;
 }
 
-void fmiMESubModel::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void fmiMESubModel::residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
 	if (hasDifferential(sMode))
 	{
@@ -556,19 +556,19 @@ void fmiMESubModel::residual(const IOdata &args, const stateData *sD, double res
 
 }
 
-void fmiMESubModel::derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void fmiMESubModel::derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 	Lp Loc=offsets.getLocations(sD, deriv, sMode, this);
-	updateInfo(args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
 	if (isDynamic(sMode))
 	{
 		me->getDerivatives(Loc.destDiffLoc);
-		printf("tt=%f,I=%f, state=%f deriv=%e\n", static_cast<double>(sD->time),args[0],Loc.diffStateLoc[0],Loc.destDiffLoc[0]);
+		printf("tt=%f,I=%f, state=%f deriv=%e\n", static_cast<double>(sD.time),args[0],Loc.diffStateLoc[0],Loc.destDiffLoc[0]);
 	}
 	else
 	{
 		me->getDerivatives(Loc.destLoc);
-		printf("tt=%f,I=%f, state=%f,deriv=%e\n", static_cast<double>(sD->time),args[0],Loc.algStateLoc[0],Loc.destLoc[0]);
+		printf("tt=%f,I=%f, state=%f,deriv=%e\n", static_cast<double>(sD.time),args[0],Loc.algStateLoc[0],Loc.destLoc[0]);
 	}
 }
 
@@ -686,23 +686,21 @@ double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 	}
 	return res;
 }
-void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
+void fmiMESubModel::jacobianElements(const IOdata &args, const stateData &sD,
 	matrixData<double> &ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
 		if  (hasDifferential(sMode))
 		{
 			Lp Loc=offsets.getLocations(sD, sMode, this);
-			updateInfo(args, sD, sMode);
-			double res;
+			updateLocalCache(args, sD, sMode);
 			//for all the inputs
-			int vu;
 			for (index_t kk = 0; kk < Loc.diffSize; ++kk)
 			{
-				vu = stateInformation[kk].varIndex;
+				int vu = stateInformation[kk].varIndex;
 				for (int vk : stateInformation[kk].inputDep)
 				{
-					res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
+					double res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
 						ad.assign(Loc.diffOffset + kk, argLocs[vk], res);
@@ -711,13 +709,13 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 				}
 				for (int vk : stateInformation[kk].stateDep)
 				{
-					res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
+					double res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
 						ad.assign(Loc.diffOffset + kk, Loc.diffOffset + vk, res);
 					}
 				}
-				ad.assign(Loc.diffOffset + kk, Loc.diffOffset+kk, -sD->cj);
+				ad.assign(Loc.diffOffset + kk, Loc.diffOffset+kk, -sD.cj);
 				/* this is not allowed in fmus
 				for (auto &sR : varInfo[vu].derivDep)
 				{
@@ -725,7 +723,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 					res = getPartial(vu, vk);
 					if (res != 0.0)
 					{
-						ad.assign(Loc.diffOffset + kk, Loc.diffOffset + varInfo[vk].index, res*sD->cj);
+						ad.assign(Loc.diffOffset + kk, Loc.diffOffset + varInfo[vk].index, res*sD.cj);
 					}
 				}
 				*/
@@ -734,17 +732,14 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 		else if (!isDynamic(sMode) && (opFlags[pflow_init_required]))
 		{
 			Lp Loc=offsets.getLocations(sD, sMode,  this);
-			updateInfo(args, sD, sMode);
-			double res;
+			updateLocalCache(args, sD, sMode);
 			//for all the inputs
-			index_t kk;
-			int vu;
-			for (kk = 0; kk < m_stateSize; ++kk)
+			for (index_t kk = 0; kk < m_stateSize; ++kk)
 			{
-				vu = stateInformation[kk].varIndex;
+				int vu = stateInformation[kk].varIndex;
 				for (int vk : stateInformation[kk].inputDep)
 				{
-					res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
+					double res = getPartial(vu, inputVarIndices[vk], stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
 						ad.assign(Loc.algOffset + kk, argLocs[vk], res);
@@ -752,7 +747,7 @@ void fmiMESubModel::jacobianElements(const IOdata &args, const stateData *sD,
 				}
 				for (int vk : stateInformation[kk].stateDep)
 				{
-					res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
+					double res = getPartial(vu, stateInformation[vk].varIndex, stateInformation[kk].refMode);
 					if (res != 0.0)
 					{
 						ad.assign(Loc.algOffset + kk, Loc.algOffset + kk, res);
@@ -812,9 +807,9 @@ void fmiMESubModel::timestep(gridDyn_time ttime, const IOdata &args, const solve
 	prevTime = time;
 }
 
-void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs & /*argLocs*/, const solverMode &sMode)
+void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
-	updateInfo (args, sD, sMode);
+	updateLocalCache (args, sD, sMode);
 	double ich = 1.0;
 
 		for (index_t kk = 0; kk < m_outputSize; ++kk)
@@ -848,10 +843,10 @@ void fmiMESubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD
 	
 }
 
-void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	Lp Loc=offsets.getLocations(sD, sMode, this);
-	updateInfo(args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
 	auto offsetLoc = isDynamic(sMode) ? Loc.diffOffset : Loc.algOffset;
 
 	for (index_t kk = 0; kk < m_outputSize; ++kk)
@@ -888,9 +883,9 @@ void fmiMESubModel::outputPartialDerivatives(const IOdata &args, const stateData
 
 }
 
-void fmiMESubModel::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void fmiMESubModel::rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode)
 {
-	updateInfo(args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
 	auto rootOffset = offsets.getRootOffset(sMode);
 	me->getEventIndicators(&(roots[rootOffset]));
 }
@@ -906,21 +901,21 @@ void fmiMESubModel::rootTrigger(gridDyn_time /*ttime*/, const IOdata & /*args*/,
 
 
 
-IOdata fmiMESubModel::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata fmiMESubModel::getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	IOdata out(m_outputSize,0);
 	if (me->getCurrentMode() >= fmuMode::initializationMode)
 	{
-		updateInfo(args, sD, sMode);
+		//updateInfo(args, sD, sMode);
 		me->getOutputs(out.data());
-		printf("time=%f, out1 =%f, out 2=%f\n", (sD) ? sD->time : prevTime, out[0], out[1]);
-		if ((opFlags[use_output_estimator]) &&(sD)&& (!opFlags[fixed_output_interval])&&(isDynamic(sMode)))
+		printf("time=%f, out1 =%f, out 2=%f\n", static_cast<double>((!sD.empty()) ? sD.time : prevTime), out[0], out[1]);
+		if ((opFlags[use_output_estimator]) &&(!sD.empty())&& (!opFlags[fixed_output_interval])&&(isDynamic(sMode)))
 		{
 			for (size_t pp = 0; pp < m_outputSize; ++pp)
 			{
 				if (outputInformation[pp].refMode >= refMode_t::level4)
 				{
-					const double res=oEst[pp]->estimate(sD->time, args, sD->state + offsets.getDiffOffset(sMode));
+					const double res=oEst[pp]->estimate(sD.time, args, sD.state + offsets.getDiffOffset(sMode));
 					out[pp] = res;
 				}
 			}
@@ -930,23 +925,23 @@ IOdata fmiMESubModel::getOutputs(const IOdata &args, const stateData *sD, const 
 }
 
 
-double fmiMESubModel::getDoutdt(const stateData *, const solverMode &, index_t /*num*/)
+double fmiMESubModel::getDoutdt(const stateData &, const solverMode &, index_t /*num*/) const
 {
 	return 0;
 }
 
-double fmiMESubModel::getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode,index_t num) const
+double fmiMESubModel::getOutput(const IOdata &args, const stateData &sD, const solverMode &sMode,index_t num) const
 {
 	double out = kNullVal;
 	if (me->getCurrentMode() >= fmuMode::initializationMode)
 	{
 		//updateInfo(args, sD, sMode);
 		
-		if ((opFlags[use_output_estimator]) && (sD) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
+		if ((opFlags[use_output_estimator]) && (!sD.empty()) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
 		{
 			if (outputInformation[num].refMode >= refMode_t::level4)
 			{
-				out = oEst[num]->estimate(sD->time, args, sD->state + offsets.getDiffOffset(sMode));
+				out = oEst[num]->estimate(sD.time, args, sD.state + offsets.getDiffOffset(sMode));
 			}
 		}
 		else
@@ -972,16 +967,16 @@ index_t fmiMESubModel::getOutputLoc(const solverMode &,  index_t /*num*/) const
 	return kNullLocation;
 }
 
-void fmiMESubModel::updateInfo(const IOdata &args, const stateData *sD, const solverMode &sMode)
+void fmiMESubModel::updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode)
 {
 	fmi2Boolean eventMode;
 	fmi2Boolean terminateSim;
-	if (sD)
+	if (!sD.empty())
 	{
-		if ((sD->seqID == 0) || (sD->seqID != lastSeqID))
+		if (sD.updateRequired(lastSeqID))
 		{
 			Lp Loc = offsets.getLocations(sD, sMode,  this);
-			me->setTime(sD->time);
+			me->setTime(sD.time);
 			if (m_stateSize > 0)
 			{
 				if (isDynamic(sMode))
@@ -994,7 +989,7 @@ void fmiMESubModel::updateInfo(const IOdata &args, const stateData *sD, const so
 				}
 			}
 			me->setInputs(args.data());
-			lastSeqID = sD->seqID;
+			lastSeqID = sD.seqID;
 			if (m_stateSize > 0)
 			{
 				me->getDerivatives(tempdState.data());

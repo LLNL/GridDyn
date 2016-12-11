@@ -37,7 +37,7 @@ sensor::sensor (const std::string&objName) : gridRelay (objName)
   opFlags.reset (no_dyn_states);
 }
 
-gridCoreObject *sensor::clone (gridCoreObject *obj) const
+coreObject *sensor::clone (coreObject *obj) const
 {
   sensor *nobj = cloneBase<sensor, gridRelay> (this, obj);
   if (!(nobj))
@@ -167,7 +167,7 @@ gridCoreObject *sensor::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void sensor::add (gridCoreObject *obj)
+void sensor::add (coreObject *obj)
 {
   if (dynamic_cast<basicBlock *> (obj))
     {
@@ -228,7 +228,7 @@ void sensor::add (std::shared_ptr<gridGrabber> dGr, std::shared_ptr<stateGrabber
     }
 }
 
-void sensor::addsp (std::shared_ptr<gridCoreObject> obj)
+void sensor::addsp (std::shared_ptr<coreObject> obj)
 {
   if (std::dynamic_pointer_cast<basicBlock> (obj))
     {
@@ -632,7 +632,7 @@ double sensor::get (const std::string & param, gridUnits::units_t unitType) cons
   return ret;
 }
 
-void sensor::updateObject(gridCoreObject *obj, object_update_mode mode)
+void sensor::updateObject(coreObject *obj, object_update_mode mode)
 {
     for (auto &ds : dataSources)
     {
@@ -652,7 +652,7 @@ void sensor::updateObject(gridCoreObject *obj, object_update_mode mode)
     gridRelay::updateObject(obj, mode);
 }
 
-void sensor::getObjects(std::vector<gridCoreObject *> &objects) const
+void sensor::getObjects(std::vector<coreObject *> &objects) const
 {
     for (auto &ds : dataSources)
     {
@@ -699,7 +699,7 @@ void sensor::generateInputGrabbers ()
           num = -1;
         }
       auto cloc = istr.find_first_of (':');
-      gridCoreObject *target_obj = (m_sourceObject) ? m_sourceObject : parent;
+      coreObject *target_obj = (m_sourceObject) ? m_sourceObject : parent;
       if (cloc == std::string::npos)
         {  //if there is a colon assume the input is fully specified
           if ((opFlags[link_type_source]) && (!isdigit (istr.back ())))
@@ -851,7 +851,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
 
 const static IOdata kNullVec;
 
-double sensor::getBlockOutput (const stateData *sD, const solverMode &sMode, index_t block) const
+double sensor::getBlockOutput (const stateData &sD, const solverMode &sMode, index_t block) const
 {
   double ret = kNullVal;
   if (isLocal (sMode))
@@ -872,7 +872,7 @@ double sensor::getBlockOutput (const stateData *sD, const solverMode &sMode, ind
   return ret;
 }
 
-double sensor::getInput (const stateData *sD, const solverMode &sMode, index_t inputNumber) const
+double sensor::getInput (const stateData &sD, const solverMode &sMode, index_t inputNumber) const
 {
   double ret = kNullVal;
   if (isLocal (sMode))
@@ -1099,7 +1099,7 @@ void sensor::setRootOffset (index_t Roffset, const solverMode &sMode)
 
 void sensor::updateA (gridDyn_time time)
 {
-  if (time + kSmallTime >= m_nextSampleTime)
+  if (time>= m_nextSampleTime)
     {
       for (auto &ps : processSequence)
         {
@@ -1133,7 +1133,7 @@ void sensor::timestep (gridDyn_time ttime, const solverMode &sMode)
   gridRelay::timestep (ttime,sMode);
 }
 
-void sensor::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void sensor::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -1185,7 +1185,7 @@ void sensor::setState (gridDyn_time ttime, const double state[], const double ds
 
 }
 
-void sensor::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void sensor::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
 
   if (stateSize (sMode) > 0)
@@ -1205,7 +1205,7 @@ void sensor::residual (const stateData *sD, double resid[], const solverMode &sM
     }
 }
 
-void sensor::algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double /*alpha*/)
+void sensor::algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
 {
   if (algSize (sMode) > 0)
     {
@@ -1224,7 +1224,7 @@ void sensor::algebraicUpdate (const stateData *sD, double update[], const solver
     }
 }
 
-void sensor::derivative (const stateData *sD, double deriv[], const solverMode &sMode)
+void sensor::derivative (const stateData &sD, double deriv[], const solverMode &sMode)
 {
   if (diffSize (sMode) > 0)
     {
@@ -1283,7 +1283,7 @@ index_t sensor::lookupOutput (const std::string &outName)
   return kNullLocation;
 }
 
-IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
+IOdata sensor::getOutputs ( const stateData &sD, const solverMode &sMode) const
 {
   IOdata out (outputs.size ());
   for (size_t pp = 0; pp < outputs.size (); ++pp)
@@ -1294,7 +1294,7 @@ IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
           out[pp] = filterBlocks[outputs[pp]]->getOutput (kNullVec,sD,sMode);
           break;
         case outputMode_t::processed:
-          if (sD)
+          if (!sD.empty())
             {
               out[pp] = outGrabberSt[pp]->grabData (sD, sMode);
             }
@@ -1304,7 +1304,7 @@ IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
             }
           break;
         case outputMode_t::direct:
-          if (sD)
+          if (!sD.empty())
             {
               out[pp] = dataSources[outputs[pp]]->grabData ();
             }
@@ -1321,7 +1321,7 @@ IOdata sensor::getOutputs ( const stateData *sD, const solverMode &sMode)
   return out;
 }
 
-double sensor::getOutput (const stateData *sD, const solverMode &sMode, index_t num) const
+double sensor::getOutput (const stateData &sD, const solverMode &sMode, index_t num) const
 {
   double out = kNullVal;
   if (num >= outputMode.size ())
@@ -1334,7 +1334,7 @@ double sensor::getOutput (const stateData *sD, const solverMode &sMode, index_t 
       out = filterBlocks[outputs[num]]->getOutput (kNullVec, sD, sMode);
       break;
     case outputMode_t::processed:
-      if (sD)
+      if (!sD.empty())
         {
           out = outGrabberSt[num]->grabData (sD, sMode);
         }
@@ -1344,7 +1344,7 @@ double sensor::getOutput (const stateData *sD, const solverMode &sMode, index_t 
         }
       break;
     case outputMode_t::direct:
-      if (sD)
+      if (!sD.empty())
         {
           out = dataSourcesSt[outputs[num]]->grabData (sD,sMode);
         }
@@ -1378,13 +1378,13 @@ index_t sensor::getOutputLoc (const solverMode &sMode, index_t num) const
     }
 }
 
-//TODO:: PT This is a complicated function still need to work on it
-void sensor::outputPartialDerivatives (const stateData * /*sD*/, matrixData<double> & /*ad*/, const solverMode & /*sMode*/)
+//TODO:: PT This is a really complicated function still need to work on it
+void sensor::outputPartialDerivatives (const stateData & /*sD*/, matrixData<double> & /*ad*/, const solverMode & /*sMode*/)
 {
 
 }
 
-void sensor::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
+void sensor::rootTest (const stateData &sD, double roots[], const solverMode &sMode)
 {
   gridRelay::rootTest (sD,roots,sMode);
   if (stateSize (sMode) > 0)
@@ -1425,7 +1425,7 @@ void sensor::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, 
 
 }
 
-change_code sensor::rootCheck ( const stateData *sD, const solverMode &sMode, check_level_t level)
+change_code sensor::rootCheck ( const stateData &sD, const solverMode &sMode, check_level_t level)
 {
   change_code ret = gridRelay::rootCheck (sD,sMode,level);
   if (stateSize (sMode) > 0)

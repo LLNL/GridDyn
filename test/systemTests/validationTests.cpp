@@ -30,7 +30,7 @@
 #if (COMPUTE_TIMES>0)
 #include <chrono>
 #endif
-//test case for gridCoreObject object
+//test case for coreObject object
 
 static const std::string validationTestDirectory(GRIDDYN_TEST_DIRECTORY "/validation_tests/");
 

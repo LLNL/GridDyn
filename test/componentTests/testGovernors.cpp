@@ -21,7 +21,7 @@
 
 #include "generators/gridDynGenerator.h"
 #include <cmath>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 
 #define GOVERNOR_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/governor_tests/"
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE (gov_stability_test)
   gridDynGenerator *gen = static_cast<gridDynGenerator *> (gds->findByUserID ("gen", 2));
 
   auto cof = coreObjectFactory::instance ();
-  gridCoreObject *obj = cof->createObject ("governor", "basic");
+  coreObject *obj = cof->createObject ("governor", "basic");
 
   gen->add (obj);
 

@@ -73,7 +73,7 @@ protected:
 public:
   gridDynOptimization (const std::string &simName = "gridDynOptSim_#");
   ~gridDynOptimization ();
-  gridCoreObject * clone (gridCoreObject *obj) const override;
+  coreObject * clone (coreObject *obj) const override;
 
 
 
@@ -94,14 +94,14 @@ public:
   //void get(std::string param,int &val);
   //void get(std::string param, double &val);
 
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
   /** find the economic data for a corresponding grid core object
-  @input gridCoreObject the object for which to find the corresponding econ Data
+  @input coreObject the object for which to find the corresponding econ Data
   */
-  virtual gridOptObject * getOptData (gridCoreObject *obj = nullptr);
-  virtual gridOptObject * makeOptObjectPath (gridCoreObject *obj);
+  virtual gridOptObject * getOptData (coreObject *obj = nullptr);
+  virtual gridOptObject * makeOptObjectPath (coreObject *obj);
 protected:
   optimizerInterface * updateOptimizer (const optimMode &oMode);
 

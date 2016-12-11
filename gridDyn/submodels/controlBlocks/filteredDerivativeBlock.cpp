@@ -32,7 +32,7 @@ filteredDerivativeBlock::filteredDerivativeBlock (double t1, double t2,const std
   opFlags.set (differential_output);
 }
 
-gridCoreObject *filteredDerivativeBlock::clone (gridCoreObject *obj) const
+coreObject *filteredDerivativeBlock::clone (coreObject *obj) const
 {
   filteredDerivativeBlock *nobj;
   if (obj == nullptr)
@@ -140,15 +140,15 @@ double filteredDerivativeBlock::step (gridDyn_time ttime, double inputA)
 }
 
 
-void filteredDerivativeBlock::derivElements (double input, double /*didt*/, const stateData *sD, double deriv[], const solverMode &sMode)
+void filteredDerivativeBlock::derivElements (double input, double /*didt*/, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
-  deriv[offset + 1] = (K * (input + bias) - sD->state[offset + 1]) / m_T1;
-  deriv[offset] = (sD->dstate_dt[offset + 1] - sD->state[offset]) / m_T2;
+  deriv[offset + 1] = (K * (input + bias) - sD.state[offset + 1]) / m_T1;
+  deriv[offset] = (sD.dstate_dt[offset + 1] - sD.state[offset]) / m_T2;
 }
 
-void filteredDerivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void filteredDerivativeBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if (!hasDifferential (sMode))
     {
@@ -157,10 +157,10 @@ void filteredDerivativeBlock::jacElements (double input, double didt, const stat
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
   ad.assignCheckCol (offset + 1, argLoc, K / m_T1);
-  ad.assign (offset + 1, offset + 1, -1 / m_T1 - sD->cj);
+  ad.assign (offset + 1, offset + 1, -1 / m_T1 - sD.cj);
 
-  ad.assign (offset, offset + 1, sD->cj / m_T2);
-  ad.assign (offset, offset, -1 / m_T2 - sD->cj);
+  ad.assign (offset, offset + 1, sD.cj / m_T2);
+  ad.assign (offset, offset, -1 / m_T2 - sD.cj);
 
   if (limiter_diff > 0)
     {

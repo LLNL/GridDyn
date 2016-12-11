@@ -119,7 +119,7 @@ void gridSubModel::timestep (gridDyn_time ttime, const IOdata & /*args*/, const 
   prevTime = ttime;
 }
 
-void gridSubModel::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode &)
+void gridSubModel::rootTest (const IOdata & /*args*/, const stateData &, double /*roots*/[], const solverMode &)
 {
 }
 
@@ -149,7 +149,7 @@ void gridSubModel::rootTrigger (gridDyn_time ttime, const IOdata & args, const s
     }
 }
 
-change_code gridSubModel::rootCheck (const IOdata & args, const stateData *sD, const solverMode &sMode, check_level_t level)
+change_code gridSubModel::rootCheck (const IOdata & args, const stateData &sD, const solverMode &sMode, check_level_t level)
 {
   auto ret = change_code::no_change;
   if (!subObjectList.empty ())
@@ -182,25 +182,25 @@ change_code gridSubModel::rootCheck (const IOdata & args, const stateData *sD, c
   return ret;
 }
 
-void gridSubModel::residual (const IOdata & /*args*/, const stateData *, double /*resid*/[], const solverMode &)
+void gridSubModel::residual (const IOdata & /*args*/, const stateData &, double /*resid*/[], const solverMode &)
 {
 }
 
-void gridSubModel::derivative (const IOdata & /*args*/, const stateData *, double /*deriv*/[], const solverMode & /*sMode*/)
+void gridSubModel::derivative (const IOdata & /*args*/, const stateData &, double /*deriv*/[], const solverMode & /*sMode*/)
 {
 }
 
-void gridSubModel::algebraicUpdate (const IOdata & /*args*/, const stateData *, double /*update*/ [], const solverMode &, double /*alpha*/)
-{
-
-}
-
-void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::algebraicUpdate (const IOdata & /*args*/, const stateData &, double /*update*/ [], const solverMode &, double /*alpha*/)
 {
 
 }
 
-void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridSubModel::jacobianElements (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+{
+
+}
+
+void gridSubModel::ioPartialDerivatives  (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
 
 }
@@ -238,7 +238,7 @@ change_code gridSubModel::powerFlowAdjust (const IOdata & args, unsigned long fl
   return ret;
 }
 
-double gridSubModel::getOutput (const IOdata & /*args*/, const stateData *sD, const solverMode &sMode, index_t Num) const
+double gridSubModel::getOutput (const IOdata & /*args*/, const stateData &sD, const solverMode &sMode, index_t Num) const
 {
   if (Num > m_outputSize)
     {
@@ -279,7 +279,7 @@ static const IOdata kNullVec;
 
 double gridSubModel::getOutput (index_t Num) const
 {
-  return getOutput (kNullVec, nullptr, cLocalSolverMode, Num);
+  return getOutput (kNullVec, emptyStateData, cLocalSolverMode, Num);
 }
 
 index_t gridSubModel::getOutputLoc (const solverMode &sMode, index_t Num) const
@@ -308,7 +308,7 @@ index_t gridSubModel::getOutputLoc (const solverMode &sMode, index_t Num) const
 }
 
 
-IOdata gridSubModel::getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridSubModel::getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
   IOdata mout (m_outputSize);
   for (count_t pp = 0; pp < m_outputSize; ++pp)
@@ -343,7 +343,7 @@ IOlocs gridSubModel::getOutputLocs  (const solverMode &sMode) const
 
 }
 
-double gridSubModel::getDoutdt (const stateData *sD, const solverMode &sMode, index_t Num)
+double gridSubModel::getDoutdt (const stateData &sD, const solverMode &sMode, index_t Num) const
 {
   if (Num > m_outputSize)
     {
@@ -372,7 +372,7 @@ double gridSubModel::getDoutdt (const stateData *sD, const solverMode &sMode, in
 
 }
 
-void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void gridSubModel::outputPartialDerivatives (const IOdata & /*args*/, const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
   auto so = offsets.getOffsets (sMode);
   if (opFlags[differential_output])
@@ -490,7 +490,7 @@ index_t gridSubModel::findIndex (const std::string & field, const solverMode &sM
   return kInvalidLocation;
 }
 
-void gridSubModel::updateLocalCache (const IOdata & /*args*/, const stateData *, const solverMode &)
+void gridSubModel::updateLocalCache (const IOdata & /*args*/, const stateData &, const solverMode &)
 {
   //nothing to cache by default
 }

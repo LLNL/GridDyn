@@ -62,7 +62,7 @@ x(xP)
 
 static typeFactory<acLine> glf("link", "tie");
 
-gridCoreObject *acLine::clone(gridCoreObject *obj) const
+coreObject *acLine::clone(coreObject *obj) const
 {
 	acLine *lnk = cloneBaseFactory<acLine, gridLink>(this, obj, &glf);
 	if (!(lnk))
@@ -586,11 +586,11 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 		ad.clear();
 		if (mterminal == fixedTerminal)
 		{
-			outputPartialDerivatives(mterminal, nullptr, ad, cLocalSolverMode);
+			outputPartialDerivatives(mterminal, emptyStateData, ad, cLocalSolverMode);
 		}
 		else
 		{
-			ioPartialDerivatives(mterminal, nullptr, ad, aLoc, cLocalSolverMode);
+			ioPartialDerivatives(mterminal, emptyStateData, ad, aLoc, cLocalSolverMode);
 		}
 		if (mterminal == 1)
 		{
@@ -726,7 +726,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 }
 
 
-void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void acLine::ioPartialDerivatives(index_t busId, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	// check if line is enabled
 
@@ -791,13 +791,13 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData *, matrixData<d
 
 }
 
-void acLine::outputPartialDerivatives(const stateData *, matrixData<double> &, const solverMode &)
+void acLine::outputPartialDerivatives(const stateData &, matrixData<double> &, const solverMode &)
 {
 	//there are theoretically 4 output for a standard ac line,  but no internal states therefore if this function is called from an external
 	//entity there are no output partial derivatives
 }
 
-void acLine::outputPartialDerivatives(index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void acLine::outputPartialDerivatives(index_t busId, const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
 
 	if (!isConnected())
@@ -918,17 +918,17 @@ void acLine::setState(gridDyn_time ttime, const double state[], const double dst
 
 	if (sMode.approx[decoupled])
 	{ //recompute power with new state updates for the decoupled system
-		updateLocalCache(&sD, sMode);
+		updateLocalCache(sD, sMode);
 		constLinkInfo = linkInfo;      //update the constant linkInfo
 		constLinkComp = linkComp;
 		linkInfo.seqID = 0;
 		//update the cache twice to get the correct values with the decoupled mode
-		updateLocalCache(&sD, sMode);
+		updateLocalCache(sD, sMode);
 	}
 	else if (sMode.approx[linear])
 	{
-		//relinearize at each step
-		loadLinkInfo(&sD, sMode);
+		//reLinearize at each step
+		loadLinkInfo(sD, sMode);
 		if (!isConnected())
 		{
 			if (fault >= 0)
@@ -952,7 +952,7 @@ void acLine::setState(gridDyn_time ttime, const double state[], const double dst
 	}
 	else  //the other states are normal
 	{
-		updateLocalCache(&sD, sMode);
+		updateLocalCache(sD, sMode);
 		constLinkInfo = linkInfo;      //update the constant linkInfo
 		constLinkComp = linkComp;
 	}
@@ -967,7 +967,7 @@ double acLine::getAngle(const double state[], const solverMode &sMode) const
 	return t1 - t2-tapAngle;
 }
 
-change_code acLine::rootCheck(const stateData *sD, const solverMode &sMode, check_level_t level)
+change_code acLine::rootCheck(const stateData &sD, const solverMode &sMode, check_level_t level)
 {
 	auto ret = change_code::no_change;
 	if (level == check_level_t::complete_state_check)
@@ -984,13 +984,13 @@ change_code acLine::rootCheck(const stateData *sD, const solverMode &sMode, chec
 	}
 	return ret;
 }
-void acLine::updateLocalCache(const stateData *sD, const solverMode &sMode)
+void acLine::updateLocalCache(const stateData &sD, const solverMode &sMode)
 {
 	if (!enabled)
 	{
 		return;
 	}
-	if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+	if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
 	{
 		return;  //already computed
 	}
@@ -1087,9 +1087,9 @@ void acLine::loadLinkInfo()
 	constLinkComp = linkComp;
 }
 
-void acLine::loadLinkInfo(const stateData *sD, const solverMode &sMode)
+void acLine::loadLinkInfo(const stateData &sD, const solverMode &sMode)
 {
-	if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+	if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
 	{
 		return;
 	}
@@ -1102,7 +1102,7 @@ void acLine::loadLinkInfo(const stateData *sD, const solverMode &sMode)
 	linkInfo.theta2 = -linkInfo.theta1;
 
 	linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
-	linkInfo.seqID = sD->seqID;
+	linkInfo.seqID = sD.seqID;
 	//don't compute the trig functions yet as that may not be necessary
 }
 

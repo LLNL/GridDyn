@@ -30,7 +30,11 @@
 <gov ref="govref"/>
 <pmin>0</pmin>
 <p>0.1</p>
-<dpdt>0.01</dpdt>
+<event>
+<time>1.0</time>
+<field>dpdt</field>
+<value>0.01</value>
+</event>
 </gen>
 </bus>
 
@@ -41,11 +45,19 @@
 <p>0.1</p>
 <flag>no_control</flag>
 <source type="fncs">
+<val>0.1</val>
 <key>genSim/genDispatch</key>
+<period>1.0</period>
+<scalefactor>-1</scalefactor>
 </source>
-<load type=="ramp">
+</gen>
+<load type="ramp">
 <p>0.2</p>
-<dpdt>0.02</dpdt>
+<event>
+<time>1.0</time>
+<field>dpdt</field>
+<value>0.02</value>
+</event>
 </load>
 </bus>
 
@@ -57,16 +69,20 @@
 
 
 <recorder period=1>
-<autosave>2000</autosave>
+<autosave>10</autosave>
    <file>testout.csv</file>
    <field>bus#0:genp</field>
    <field>bus#1:genp</field>
+   <field>bus#0:v</field>
+   <field>bus#1:v</field>
+   <field>bus#0:angle(deg)</field>
+   <field>bus#1:angle(deg)</field>
    </recorder>
    
   <collector type="fncs" period=1>
-   <field>bus#0::genp as genDispatch</field>
+   <field>bus#0:genp as genDispatch</field>
    </collector>
    
    <timestart>0</timestart>
-   <timestop>200</timestop>
+   <timestop>100</timestop>
 </griddyn>

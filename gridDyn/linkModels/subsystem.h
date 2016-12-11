@@ -47,11 +47,11 @@ public:
   subsystem (const std::string &objName = "subsystem_$");
   /** @brief the destructor*/
   virtual ~subsystem ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
 
   //get component models
@@ -66,7 +66,6 @@ public:
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
   //initializeB dynamics
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void setTime (gridDyn_time time) override;
 
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
@@ -83,9 +82,9 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
   // solver functions
 
 
@@ -104,7 +103,7 @@ public:
   */
   virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::block_iteration, double tol = 0.01) override;
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
   virtual void reset (reset_levels level) override;
   //root finding functions
@@ -159,12 +158,12 @@ public:
 
 
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
-  virtual IOdata getOutputs (index_t busId, const stateData *sD, const solverMode &sMode) override;
+  //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
+  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
+  virtual IOdata getOutputs (index_t busId, const stateData &sD, const solverMode &sMode) const override;
   //TODO:: PT add the other getOutput functions
 protected:
   /** @brief get a vector with pointers to all the buses

@@ -29,7 +29,7 @@ gridRampLoad::gridRampLoad (double rP, double qP, const std::string &objName) : 
 {
 }
 
-gridCoreObject *gridRampLoad::clone (gridCoreObject *obj) const
+coreObject *gridRampLoad::clone (coreObject *obj) const
 {
   gridRampLoad *ld = cloneBase<gridRampLoad, gridLoad> (this, obj);
   if (ld == nullptr)
@@ -149,44 +149,40 @@ void gridRampLoad::set (const std::string &param, double val, units_t unitType)
 
 }
 
-
-void gridRampLoad::loadUpdate (gridDyn_time ttime)
+void gridRampLoad::updateLocalCache(const IOdata & /*args*/, const stateData &sD, const solverMode &)
 {
-  double tdiff = ttime - lastTime;
-  if (tdiff == 0.0)
+  auto tdiff = sD.time - lastTime;
+  if (tdiff == timeZero)
     {
       return;
     }
-  P = P + dPdt * tdiff;
-  Q = Q + dQdt * tdiff;
+  if (dPdt != 0.0)
+  {
+	  setP(getP() + dPdt * tdiff);
+  }
+  if (dQdt != 0.0)
+  {
+	  setQ(getQ() + dQdt * tdiff);
+  }
+  
   if ((drdt != 0) || (dxdt != 0))
     {
-      r = r + drdt * tdiff;
-      x = x + dxdt * tdiff;
-      Yp = r / (r * r + x * x);
-      Yq = x / (r * r + x * x);
+      setr(getr() + drdt * tdiff);
+      setx(getx() + dxdt * tdiff);
     }
   else if ((dYpdt != 0.0) || (dYqdt != 0.0))
     {
-      Yp = Yp + dYpdt * tdiff;
-      Yq = Yq + dYqdt * tdiff;
-      if (Yq == 0)
-        {
-          r = 1 / Yp;
-          x = 0;
-        }
-      else
-        {
-          double rat = (Yp / Yq);
-          x = rat / Yp / (1 + rat);
-          r = x * rat;
-        }
+      setYp(getYp() + dYpdt * tdiff);
+      setYq(getYq() + dYqdt * tdiff);
     }
+  if ((dIpdt != 0) || (dIqdt != 0))
+  {
+	  setIp(getIp() + dIpdt * tdiff);
+	  setIq(getIq() + dIqdt * tdiff);
+  }
+  
 
-  Ip = Ip + dIpdt * tdiff;
-  Iq = Iq + dIqdt * tdiff;
-
-  lastTime = ttime;
+  lastTime = sD.time;
 }
 
 void gridRampLoad::clearRamp ()

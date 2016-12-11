@@ -13,7 +13,7 @@
 
 #include "sourceTypes.h"
 #include "vectorOps.hpp"
-
+#include "gridCoreTemplates.h"
 #include <ctime>
 
 rampSource::rampSource (const std::string &objName, double startVal) : gridSource (objName,startVal)
@@ -21,23 +21,13 @@ rampSource::rampSource (const std::string &objName, double startVal) : gridSourc
 
 }
 
-gridCoreObject *rampSource::clone (gridCoreObject *obj) const
+coreObject *rampSource::clone (coreObject *obj) const
 {
-  rampSource *ld;
-  if (obj == nullptr)
+	rampSource *ld = cloneBase<rampSource, gridSource>(this, obj);
+  if (ld == nullptr)
     {
-      ld = new rampSource ();
+	  return obj;
     }
-  else
-    {
-      ld = dynamic_cast<rampSource *> (obj);
-      if (ld == nullptr)
-        {
-          gridSource::clone (obj);
-          return obj;
-        }
-    }
-  gridSource::clone (ld);
   ld->mp_dOdt = mp_dOdt;
   return ld;
 }
@@ -65,18 +55,14 @@ void rampSource::set (const std::string &param, double val, gridUnits::units_t u
 }
 
 
-void rampSource::sourceUpdate (const gridDyn_time ttime)
+double rampSource::computeOutput (gridDyn_time ttime) const
 {
-  double tdiff = ttime - prevTime;
-  if (tdiff == 0.0)
-    {
-      return;
-    }
-  m_tempOut = m_output + mp_dOdt * tdiff;
+  auto tdiff = ttime - prevTime;
+  return m_output + mp_dOdt * tdiff;
 }
 
 
-double rampSource::getDoutdt(const stateData *, const solverMode &, index_t /*num*/)
+double rampSource::getDoutdt(const stateData &, const solverMode &, index_t num) const
 {
-	return mp_dOdt;
+	return (num==0)?mp_dOdt:0.0;
 }

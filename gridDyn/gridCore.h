@@ -47,46 +47,46 @@ typedef void gridPositionInfo;
 and some common functionality that unifies all objects that are part of the simulation including object ownership, updates, set and get functions, search features,
 alert and logging functions
 **/
-class gridCoreObject
+class coreObject
 {
 public:
   std::string description;             //!< storage for a description of the object meant for user, no operational impact
   index_t locIndex = kNullLocation;           //!< a lookup index for the object to reference parent location in storage arrays for use by containing objects no operational dependencies
   index_t locIndex2 = kNullLocation;           //!< a second lookup index for the object to reference parent location in storage arrays for use by containing objects no operational dependencies
-  //this is used much more frequently than any other so it gets its own bool for ease of use
+  //this is used much more frequently than any other so it gets its own boolean for ease of use
 
   bool enabled = true;           //!< enabled indicator TODO: PT move to a protected instead of public
 
 private:
   static std::atomic<count_t> s_obcnt;       //!< the global object counter
   count_t m_oid;       //!< a unique index for the object
-  gridCoreObject *owner = nullptr;      //!<a pointer to the owner object
+  coreObject *owner = nullptr;      //!<a pointer to the owner object
 protected:
   std::string name;       //!< the text name of the object
   index_t id;              //!< a user defined id for the object
-  gridCoreObject *parent = nullptr;      //!< a pointer to the parent object
+  coreObject *parent = nullptr;      //!< a pointer to the parent object
   gridDyn_time prevTime = negTime;       //!<[s]the last state time of the object
   gridDyn_time updatePeriod = maxTime;      //!<[s]the update period
   gridDyn_time nextUpdateTime = maxTime;     //!<[s] the next scheduled update
   gridDyn_time lastUpdateTime = negTime;      //!<[s] the last update time
-  gridDyn_time m_bDelay  = -1.0;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
+  gridDyn_time m_bDelay  = timeZero;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
   
 
   std::shared_ptr<gridPositionInfo> pos;  //!< pointer to as of yet undefined position information structure.
 public:
   /** @brief default constructor*/
-  explicit gridCoreObject (const std::string &name = "object_#");
+  explicit coreObject (const std::string &name = "object_#");
 
   //don't allow copy constructors and equal operator as they would introduce all sorts of other complicated issues in the system
-  gridCoreObject (const gridCoreObject&) = delete;
-  void operator= (gridCoreObject &obj) = delete;
+  coreObject (const coreObject&) = delete;
+  void operator= (coreObject &obj) = delete;
   /** @brief default destructor  so it can be overridden*/
-  virtual ~gridCoreObject ();
+  virtual ~coreObject ();
   /**
   * @brief clones an object to another object or makes a new on
   * @param[in] obj the object to clone to or leave nullptr for a new object.
   */
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const;
+  virtual coreObject * clone (coreObject *obj = nullptr) const;
 
   /** @brief update a name potentially containing specific codes
    names ending in # have the '#' replaced with the oid
@@ -99,7 +99,7 @@ public:
    * @param[in] object the object that generated the alert.
    * @param[in] code an alert code
    */
-  virtual void alert (gridCoreObject *object, int code);
+  virtual void alert (coreObject *object, int code);
 
   /**
   * @brief forwards a log message from object *object up the chain or processes it.
@@ -107,12 +107,8 @@ public:
   * @param[in] level the level of the log message
   * @param[in] message the log message
   */
-  virtual void log (gridCoreObject *object, print_level level, const std::string &message);
-  /**
-  * @brief sets the object time used primarily for shifting the clock to a different basis
-  * @param[in] time the time to set the object clock to.
-  */
-  virtual void setTime (gridDyn_time time);
+  virtual void log (coreObject *object, print_level level, const std::string &message);
+  
   /**
   * @brief changes ownership of the object
     @details so the owner can't be changed without the current owners permission
@@ -122,47 +118,47 @@ public:
   @param[in]  newOwner  the desired newOwner of the object
   @return indicator of success  true if successful
   */
-  bool setOwner (gridCoreObject *currentOwner, gridCoreObject *newOwner);
+  bool setOwner (coreObject *currentOwner, coreObject *newOwner);
   /**
   * @brief search for an object with the name indicated by &object.
   * @param[in] object the name of the object to search for.
   @return nullptr if the object is not found otherwise the object
   */
-  virtual gridCoreObject* find (const std::string &object) const;
+  virtual coreObject* find (const std::string &object) const;
   /**
   * @brief retrieve a subObject of type typeName and index num.
   * @param[in] typeName a string indicating which type of object to retrieve
   * @param[in] num the index of the object to retrieve  (index is 0 based)
   @return nullptr if the object is not found otherwise the object
   */
-  virtual gridCoreObject* getSubObject (const std::string & typeName, index_t num) const;
+  virtual coreObject* getSubObject (const std::string & typeName, index_t num) const;
   /**
   * @brief locate a subObject of type typeName and searchID.
   * @param[in] typeName a string indicating which type of object to retrieve
   * @param[in] searchID the id of the object to search for
   @return nullptr if the object is not found otherwise the object
   */
-  virtual gridCoreObject * findByUserID (const std::string & typeName, index_t searchID) const;
+  virtual coreObject * findByUserID (const std::string & typeName, index_t searchID) const;
   /**
   * @brief adds an object to another object for instance adding a load to the bus.
   * @param[in] obj the object to add
   * throws and exception if the object is invalid or cannot be added
   */
-  virtual void add (gridCoreObject * obj);
+  virtual void add (coreObject * obj);
 
   /**
   * @brief adds a shared ptr object.
   * @param[in] obj the object to add
   * throws and exception if the object is invalid or cannot be added
   */
-  virtual void addsp (std::shared_ptr<gridCoreObject> obj);
+  virtual void addsp (std::shared_ptr<coreObject> obj);
 
   /**
   * @brief remove an object from the calling object
   * @param[in] obj the object to remove
   * @return value indicating success or failure 0 success -1 (object not found) -2(removal failure)
   */
-  virtual void remove (gridCoreObject * obj);
+  virtual void remove (coreObject * obj);
   /**
   * @brief sets a string parameter of an object
   * @param[in] param the name of the parameter to change
@@ -223,7 +219,7 @@ public:
   /**
   * @brief the B update function for update calls with two parts
   */
-  virtual double updateB ();
+  virtual gridDyn_time updateB ();
   /**
   * @brief function to enable the object, most objects are enabled by default
   */
@@ -270,9 +266,9 @@ public:
   }
 
   /** @brief set the parent*/
-  virtual void setParent (gridCoreObject *parentObj);
+  virtual void setParent (coreObject *parentObj);
   /** @brief get the parent object*/
-  gridCoreObject * getParent () const
+  coreObject * getParent () const
   {
     return parent;
   }
@@ -297,10 +293,10 @@ public:
   {
     return prevTime;
   }
-  friend void condDelete (gridCoreObject *obj, gridCoreObject *Pobject);
-  friend bool compareUpdates (gridCoreObject *o1, gridCoreObject *o2);
-  friend bool compareNames (gridCoreObject *o1, gridCoreObject *o2);
-  friend std::string fullObjectName (gridCoreObject *obj);
+  friend void condDelete (coreObject *obj, coreObject *Pobject);
+  friend bool compareUpdates (coreObject *o1, coreObject *o2);
+  friend bool compareNames (coreObject *o1, coreObject *o2);
+  friend std::string fullObjectName (coreObject *obj);
 };
 
 /**
@@ -309,20 +305,20 @@ public:
 @param[in] o2 the second object to compare
 @return true if the update time from o1 comes before the update time in o2
 */
-bool compareUpdates (gridCoreObject *o1, gridCoreObject *o2);
+bool compareUpdates (coreObject *o1, coreObject *o2);
 /**
 * @brief function to compare names of two objects
 * @param[in] o1 the first object to compare
 * @param[in] o2 the second object to compare
 @return true if the first object comes before the second alphabetically
 */
-bool compareNames (gridCoreObject *o1, gridCoreObject *o2);
+bool compareNames (coreObject *o1, coreObject *o2);
 /**
 * @brief general deletion function that verifies object ownership
 * @param[in] objToDelete the object to potentially delete
 * @param[in] parentObject the object that is doing the deletion
 */
-void condDelete (gridCoreObject *objToDelete, gridCoreObject *parentObject);
+void condDelete (coreObject *objToDelete, coreObject *parentObject);
 //helper templates
 
 /**
@@ -330,7 +326,7 @@ void condDelete (gridCoreObject *objToDelete, gridCoreObject *parentObject);
 * @param[in] obj for which to get the full name
 @return the full object path
 */
-std::string fullObjectName (gridCoreObject *obj);
+std::string fullObjectName (coreObject *obj);
 
 /**
 * @brief convert a string to a print level

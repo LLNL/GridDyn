@@ -84,7 +84,7 @@ public:
 
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const;
 
-	virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	virtual change_code trigger(gridDyn_time time) override;
 	void recheckColumns();
 	gridDyn_time nextTriggerTime() const override
@@ -98,8 +98,8 @@ public:
 
 	virtual void add(std::shared_ptr<gridGrabber> ggb, int column = -1);
 	virtual void add(std::shared_ptr<stateGrabber> sst, int column = -1);
-	virtual void add(gridGrabberInfo *gdRI, gridCoreObject *obj);
-	virtual void add(const std::string &field, gridCoreObject *obj);
+	virtual void add(gridGrabberInfo *gdRI, coreObject *obj);
+	virtual void add(const std::string &field, coreObject *obj);
 	virtual void add(std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrabber> sst, int column);
 
 	bool isArmed() const override
@@ -114,9 +114,9 @@ public:
 	virtual void setTime(gridDyn_time time);
 
 
-	virtual gridCoreObject * getObject() const override;
+	virtual coreObject * getObject() const override;
 
-	virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+	virtual void getObjects(std::vector<coreObject *> &objects) const override;
 
 	const std::string &getName() const
 	{

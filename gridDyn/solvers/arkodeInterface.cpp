@@ -557,17 +557,19 @@ int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_d
 {
   arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
   sd->funcCallCount++;
-  if (sd->mode.pairedOffsetIndex != kNullLocation)
+  try
   {
-	  int ret = sd->m_gds->dynAlgebraicSolve(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
-	  if (ret < FUNCTION_EXECUTION_SUCCESS)
+	  if (sd->mode.pairedOffsetIndex != kNullLocation)
 	  {
-		  return ret;
+		  sd->m_gds->dynAlgebraicSolve(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
 	  }
+	  sd->m_gds->derivativeFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
 
-	}
-  int ret = sd->m_gds->derivativeFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
-
+  }
+  catch (std::runtime_error &re)
+  {
+	  return (-1);
+  }
   if (sd->fileCapture)
   {
 	  if (!sd->stateFile.empty())
@@ -576,7 +578,7 @@ int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_d
 		  writeVector(ttime, DERIVATIVE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, dstate_dt), sd->stateFile);
 	  }
   }
-  return ret;
+  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 int arkodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_data)

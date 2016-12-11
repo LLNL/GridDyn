@@ -50,13 +50,13 @@ protected:
   double mBase = 100;  //!< the machine base of the generator
 public:
   gridGenOpt (const std::string &objName = "");
-  gridGenOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridGenOpt (coreObject *obj, const std::string &objName = "");
   ~gridGenOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
 
-  virtual void add (gridCoreObject * obj)  override;
+  virtual void add (coreObject * obj)  override;
   virtual void objectInitializeA (unsigned long flags) override;
   virtual void loadSizes (const optimMode &oMode) override;
 

@@ -24,7 +24,7 @@ gridDynGenModel8::gridDynGenModel8 (const std::string &objName) : gridDynGenMode
 
 }
 
-gridCoreObject *gridDynGenModel8::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModel8::clone (coreObject *obj) const
 {
   gridDynGenModel8 *gd = cloneBase<gridDynGenModel8, gridDynGenModel6> (this, obj);
   if (gd == nullptr)
@@ -73,7 +73,7 @@ void gridDynGenModel8::objectInitializeB (const IOdata &args, const IOdata &outp
 
 }
 
-void gridDynGenModel8::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGenModel8::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -115,7 +115,7 @@ void gridDynGenModel8::derivative (const IOdata &args, const stateData *sD, doub
 
 }
 
-void gridDynGenModel8::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGenModel8::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
 
@@ -151,7 +151,7 @@ void gridDynGenModel8::residual (const IOdata &args, const stateData *sD, double
 }
 
 
-void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD,
+void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData &sD,
                                          matrixData<double> &ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
@@ -215,7 +215,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
       ad.assign (refAlg + 1, refDiff + 5, -1.0);
     }
   // delta
-  ad.assign (refDiff, refDiff, -sD->cj);
+  ad.assign (refDiff, refDiff, -sD.cj);
   ad.assign (refDiff, refDiff + 1, m_baseFreq);
 
   // omega
@@ -226,7 +226,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
       ad.assign (refDiff + 1, refAlg, 0.5  * (gmd[7]) / H);
       ad.assign (refDiff + 1, refAlg + 1, -0.5  * (gmd[6]) / H);
     }
-  ad.assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD->cj);
+  ad.assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD.cj);
   ad.assign (refDiff + 1, refDiff + 6, -0.5  * gm[1] / H);
   ad.assign (refDiff + 1, refDiff + 7, 0.5  * gm[0] / H);
 
@@ -240,14 +240,14 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
     {
       ad.assign (refDiff + 2, refAlg + 1, -(Xq - Xqp - qrat * (Xq - Xqp)) / Tqop);
     }
-  ad.assign (refDiff + 2, refDiff + 2, -1.0 / Tqop - sD->cj);
+  ad.assign (refDiff + 2, refDiff + 2, -1.0 / Tqop - sD.cj);
 
   // Eqp
   if (hasAlgebraic (sMode))
     {
       ad.assign (refDiff + 3, refAlg, (Xd - Xdp - drat * (Xd - Xdp)) / Tdop);
     }
-  ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD->cj);
+  ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD.cj);
 
 
   if (argLocs[genModelEftInLocation] != kNullLocation)      //check if exciter exists
@@ -261,7 +261,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
       ad.assign (refDiff + 4, refAlg + 1, -(Xqp - Xqpp + qrat * (Xq - Xqp)) / Tqopp);
     }
   ad.assign (refDiff + 4, refDiff + 2, 1.0 / Tqopp);
-  ad.assign (refDiff + 4, refDiff + 4, -1.0 / Tqopp - sD->cj);
+  ad.assign (refDiff + 4, refDiff + 4, -1.0 / Tqopp - sD.cj);
 
   //Eqpp
   if (hasAlgebraic (sMode))
@@ -269,7 +269,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
       ad.assign (refDiff + 5, refAlg, (Xdp - Xdpp + drat * (Xd - Xdp)) / Tdopp);
     }
   ad.assign (refDiff + 5, refDiff + 3, 1.0 / Tdopp);
-  ad.assign (refDiff + 5, refDiff + 5, -1.0 / Tdopp - sD->cj);
+  ad.assign (refDiff + 5, refDiff + 5, -1.0 / Tdopp - sD.cj);
 
   /*
   rv[8] = m_baseFreq*(Vd + Rs*gm[0] + gm[3] / m_baseFreq*gm[9]) - gmp[8];
@@ -281,7 +281,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
       ad.assign (refDiff + 6, refAlg, Rs * m_baseFreq);
     }
   ad.assign (refDiff + 6, refDiff + 1, gmd[7] * m_baseFreq);
-  ad.assign (refDiff + 6, refDiff + 6, -sD->cj);
+  ad.assign (refDiff + 6, refDiff + 6, -sD.cj);
   ad.assign (refDiff + 6, refDiff + 7, gmd[1] * m_baseFreq);
   ad.assign (refDiff + 6, refDiff, -Vq * m_baseFreq);
 
@@ -291,7 +291,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData *sD
     }
   ad.assign (refDiff + 7, refDiff + 1, -gmd[6] * m_baseFreq);
   ad.assign (refDiff + 7, refDiff + 6, -gmd[1] * m_baseFreq);
-  ad.assign (refDiff + 7, refDiff + 7, -sD->cj);
+  ad.assign (refDiff + 7, refDiff + 7, -sD.cj);
   ad.assign (refDiff + 7, refDiff, Vd * m_baseFreq);
 
   if (VLoc != kNullLocation)

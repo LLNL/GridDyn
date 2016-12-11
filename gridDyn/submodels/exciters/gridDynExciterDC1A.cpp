@@ -34,7 +34,7 @@ gridDynExciterDC1A::gridDynExciterDC1A (const std::string &objName) : gridDynExc
 }
 
 //cloning function
-gridCoreObject *gridDynExciterDC1A::clone (gridCoreObject *obj) const
+coreObject *gridDynExciterDC1A::clone (coreObject *obj) const
 {
   gridDynExciterDC1A *gdE;
   if (obj == nullptr)
@@ -79,7 +79,7 @@ void gridDynExciterDC1A::objectInitializeB (const IOdata &args, const IOdata & o
 
 
 // residual
-void gridDynExciterDC1A::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynExciterDC1A::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -88,7 +88,7 @@ void gridDynExciterDC1A::residual (const IOdata &args, const stateData *sD, doub
   derivative (args, sD, resid, sMode);
 
   auto offset = offsets.getDiffOffset (sMode);
-  const double *esp = sD->dstate_dt + offset;
+  const double *esp = sD.dstate_dt + offset;
   resid[offset] -= esp[0];
   resid[offset + 1] -= esp[1];
   resid[offset + 2] -= esp[2];
@@ -96,7 +96,7 @@ void gridDynExciterDC1A::residual (const IOdata &args, const stateData *sD, doub
 
 }
 
-void gridDynExciterDC1A::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynExciterDC1A::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode,  this);
   const double *es = Loc.diffStateLoc;
@@ -117,7 +117,7 @@ void gridDynExciterDC1A::derivative (const IOdata &args, const stateData *sD, do
 
 
 // Jacobian
-void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *sD,
+void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData &sD,
                                            matrixData<double> &ad,
                                            const IOlocs &argLocs, const solverMode &sMode)
 {
@@ -133,13 +133,13 @@ void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
-  double temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
+  double temp1 = -(Ke + Aex * exp (Bex * sD.state[offset]) * (1.0 + Bex * sD.state[offset])) / Te - sD.cj;
   ad.assign (refI, refI, temp1);
   ad.assign (refI, refI + 1, 1.0 / Te);
 
   if (opFlags[outside_vlim])
     {
-      limitJacobian (args[voltageInLocation], VLoc, refI + 1, sD->cj, ad);
+      limitJacobian (args[voltageInLocation], VLoc, refI + 1, sD.cj, ad);
 
     }
   else
@@ -150,7 +150,7 @@ void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *
           ad.assign (refI + 1, VLoc, -Ka * Tc / (Ta * Tb));
         }
       ad.assign (refI + 1, refI, -Ka * Kf * Tc / (Tf * Ta * Tb));
-      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
+      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD.cj);
       ad.assign (refI + 1, refI + 2, Ka * (Tb - Tc) / (Ta * Tb));
       ad.assign (refI + 1, refI + 3, Ka * Tc / (Ta * Tb));
     }
@@ -162,13 +162,13 @@ void gridDynExciterDC1A::jacobianElements (const IOdata &args, const stateData *
       ad.assign (refI + 2, VLoc, -1.0 / Tb);
     }
   ad.assign (refI + 2, refI, -Kf / (Tf * Tb));
-  ad.assign (refI + 2, refI + 2, -1.0 / Tb - sD->cj);
+  ad.assign (refI + 2, refI + 2, -1.0 / Tb - sD.cj);
   ad.assign (refI + 2, refI + 3, 1.0 / Tb);
   // Rf
   ad.assign (refI + 3, refI, Kf / (Tf * Tf));
-  ad.assign (refI + 3, refI + 3, -1.0 / Tf - sD->cj);
+  ad.assign (refI + 3, refI + 3, -1.0 / Tf - sD.cj);
 
-  //printf("%f--%f--\n",sD->time,sD->cj);
+  //printf("%f--%f--\n",sD.time,sD.cj);
 
 }
 
@@ -178,10 +178,10 @@ void gridDynExciterDC1A::limitJacobian (double /*V*/, int /*Vloc*/, int refLoc, 
 }
 
 
-void gridDynExciterDC1A::rootTest (const IOdata &args, const stateData *sD, double root[],  const solverMode &sMode)
+void gridDynExciterDC1A::rootTest (const IOdata &args, const stateData &sD, double root[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
-  const double *es = sD->state + offset;
+  const double *es = sD.state + offset;
 
   int rootOffset = offsets.getRootOffset (sMode);
   if (opFlags[outside_vlim])
@@ -200,7 +200,7 @@ void gridDynExciterDC1A::rootTest (const IOdata &args, const stateData *sD, doub
 
 }
 
-change_code gridDynExciterDC1A::rootCheck ( const IOdata &args, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code gridDynExciterDC1A::rootCheck ( const IOdata &args, const stateData &, const solverMode &, check_level_t /*level*/)
 {
   double *es = m_state.data ();
   double test;

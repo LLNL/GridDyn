@@ -171,11 +171,11 @@ static const std::map<int, std::string> kinRetCodes {
   {KIN_ILL_INPUT, "Illegal Input"},
   {KIN_NO_MALLOC, " No memory allocation"},
   {KIN_MEM_FAIL, "Memory Allocation failed"},
-  {KIN_LINESEARCH_NONCONV, "linesearch failed to converge"},
+  {KIN_LINESEARCH_NONCONV, "line search failed to converge"},
   {KIN_MAXITER_REACHED, " Max iteration reached"},
   {KIN_MXNEWT_5X_EXCEEDED, "Five consecutive steps have been taken that satisfy a scaled step length test"},
-  {KIN_LINESEARCH_BCFAIL, "The linesearch algorithm was unable to satisfy the beta -condition for nbcfails iterations"},
-  {KIN_LINSOLV_NO_RECOVERY, "The user - supplied routine preconditioner slve function failed recoverably, but the preconditioner is already current"},
+  {KIN_LINESEARCH_BCFAIL, "The line search algorithm was unable to satisfy the beta -condition for nbcfails iterations"},
+  {KIN_LINSOLV_NO_RECOVERY, "The user - supplied routine preconditioner solve function failed recoverably, but the preconditioner is already current"},
   {KIN_LINIT_FAIL, "The linear solver's initialization function failed"},
   {KIN_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"},
   {KIN_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"},
@@ -439,7 +439,7 @@ void kinsolInterface::setConstraints ()
 // function not in the class
 // KINSOL C functions
 
-int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
+int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
   sd->funcCallCount++;
@@ -452,17 +452,24 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
   sd->residTime += elapsed_t.count ();
 #else
  
-  int ret = sd->m_gds->residualFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, NVECTOR_DATA (sd->use_omp, f), sd->mode);
+  try
+  {
+	  sd->m_gds->residualFunction(sd->solveTime, NVECTOR_DATA(sd->use_omp, state), nullptr, NVECTOR_DATA(sd->use_omp, resid), sd->mode);
+  }
+  catch (std::runtime_error &)
+  {
+	  return FUNCTION_EXECUTION_FAILURE;
+  }
 #endif
   if (sd->printResid)
     {
       long int val = 0;
       KINGetNumNonlinSolvIters (sd->solverMem, &val);
-      double *resid = NVECTOR_DATA (sd->use_omp, f);
+      double *residuals = NVECTOR_DATA (sd->use_omp, resid);
       printf ("Residual for %s at time =%f iteration %ld\n", sd->name.c_str (), static_cast<double>(sd->solveTime),val);
       for (int kk = 0; kk < static_cast<int> (sd->svsize); ++kk)
         {
-          printf ("resid[%u]=%f\n", kk, resid[kk]);
+          printf ("resid[%u]=%f\n", kk, residuals[kk]);
         }
       printf ("---------------------------------\n");
 
@@ -471,28 +478,28 @@ int kinsolFunc (N_Vector u, N_Vector f, void *user_data)
   {
 	  if (!sd->stateFile.empty())
 	  {
-		  writeVector(sd->solveTime, 0, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, u), sd->stateFile, (sd->funcCallCount != 1));
-		  writeVector(sd->solveTime, 2, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, f), sd->stateFile);
+		  writeVector(sd->solveTime, STATE_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, state), sd->stateFile, (sd->funcCallCount != 1));
+		  writeVector(sd->solveTime, RESIDUAL_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, resid), sd->stateFile);
 	  }
   }
-  return ret;
+  return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int kinsolJacDense (long int Neq, N_Vector u, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
+int kinsolJacDense (long int Neq, N_Vector state, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
   assert(Neq == static_cast<int> (sd->svsize));
   _unused(Neq);
 
   matrixDataSundialsDense a1 (J);
-  sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, a1, 0, sd->mode);
+  sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
   sd->jacCallCount++;
   return 0;
 }
 
 #ifdef KLU_ENABLE
 
-int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
+int kinsolJacSparse (N_Vector state, N_Vector /*f*/, SlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
 {
 
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
@@ -530,7 +537,7 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
       a1->setRowLimit (sd->svsize);
       a1->setColLimit (sd->svsize);
 
-      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, *(a1.get ()), 0, sd->mode);
+      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, *(a1.get ()), 0, sd->mode);
 
 
       sd->jacCallCount++;
@@ -550,7 +557,7 @@ int kinsolJacSparse (N_Vector u, N_Vector /*f*/, SlsMat J, void *user_data, N_Ve
     {
       //if it isn't the first we can use the SUNDIALS arraySparse object
       matrixDataSundialsSparse a1 (J);
-      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, u), nullptr, a1, 0, sd->mode);
+      sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
       sd->jacCallCount++;
 	  if (sd->fileCapture)
 	  {

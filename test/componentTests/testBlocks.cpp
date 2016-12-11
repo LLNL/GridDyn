@@ -298,8 +298,8 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
       bb2->set(pp.first, pp.second);
     }
   }
-  rel1->add(bb1);
-  rel2->add(bb2);
+  //rel1->add(bb1);
+  //rel2->add(bb2);
   int  retval = gds->dynInitialize();
 
   BOOST_CHECK_EQUAL(retval, 0);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(compare_block_test)
 }
 
 #ifdef LOAD_CVODE
-/** test the control block if they can handle differential only Jacobians and algebraic only Jacobians
+/** test the control block if they can handle a differential only Jacobian and an algebraic only Jacobian
 */
 BOOST_AUTO_TEST_CASE(block_alg_diff_jac_test)
 {

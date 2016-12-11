@@ -36,7 +36,7 @@ protected:
 
 public:
 	isocController(const std::string &objName = "ISOC_#");
-	virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+	virtual coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void objectInitializeA(gridDyn_time time0, unsigned long flags) override;
 
 	virtual void objectInitializeB(const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;

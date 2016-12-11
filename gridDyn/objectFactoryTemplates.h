@@ -18,15 +18,15 @@
 
 /** @brief template class for object ownership*/
 template <class Ntype>
-class gridObjectHolder : public gridCoreObject
+class gridObjectHolder : public coreObject
 {
-  static_assert (std::is_base_of<gridCoreObject, Ntype>::value, "holder object must have gridCoreObject as base");
+  static_assert (std::is_base_of<coreObject, Ntype>::value, "holder object must have coreObject as base");
 private:
   std::vector<Ntype> objArray;
   count_t next = 0;
   count_t objCount = 0;
 public:
-  explicit gridObjectHolder (count_t objs) : gridCoreObject ("holder_#"),objArray (objs), objCount (objs)
+  explicit gridObjectHolder (count_t objs) : coreObject ("holder_#"),objArray (objs), objCount (objs)
   {
     for (auto &so : objArray)
       {
@@ -59,7 +59,7 @@ public:
     return objCount - next;
   }
 
-  gridCoreObject * getRoot () const
+  coreObject * getRoot () const
   {
     if (parent)
       {
@@ -83,7 +83,7 @@ public:
 template <class Ntype>
 class typeFactory : public objectFactory
 {
-  static_assert (std::is_base_of<gridCoreObject, Ntype>::value, "factory class must have gridCoreObject as base");
+  static_assert (std::is_base_of<coreObject, Ntype>::value, "factory class must have coreObject as base");
 private:
   std::shared_ptr<gridObjectHolder<Ntype>> obptr = nullptr;
   bool useBlock = false;
@@ -114,15 +114,15 @@ public:
     tF->setDefault (defType);
   }
 
-  gridCoreObject * makeObject () override
+  coreObject * makeObject () override
   {
-    gridCoreObject *ret = makeTypeObject ();
+    coreObject *ret = makeTypeObject ();
     return ret;
   }
 
-  gridCoreObject * makeObject (const std::string &objName) override
+  coreObject * makeObject (const std::string &objName) override
   {
-    gridCoreObject *ret = makeTypeObject (objName);
+    coreObject *ret = makeTypeObject (objName);
     return ret;
   }
 
@@ -189,7 +189,7 @@ public:
     return ret;
   }
 
-  virtual void prepObjects (count_t count, gridCoreObject *obj) override
+  virtual void prepObjects (count_t count, coreObject *obj) override
   {
     auto root = obj->find ("root");
     useBlock = true;
@@ -234,7 +234,7 @@ public:
     return (obptr) ? (obptr->remaining () + targetprepped) : 0;
   }
 
-  virtual std::shared_ptr<gridCoreObject> getHolder () const
+  virtual std::shared_ptr<coreObject> getHolder () const
   {
     return obptr;
   }
@@ -244,7 +244,7 @@ public:
 template <class Ntype, class Btype>
 class childTypeFactory : public typeFactory<Btype>
 {
-  static_assert (std::is_base_of<gridCoreObject, Btype>::value, "factory class must have gridCoreObject as base");
+  static_assert (std::is_base_of<coreObject, Btype>::value, "factory class must have coreObject as base");
   static_assert (std::is_base_of<Btype, Ntype>::value, "factory class types must have parent child relationship");
 private:
   std::shared_ptr<gridObjectHolder<Ntype>> obptr=nullptr;
@@ -263,16 +263,16 @@ public:
   {
 
   }
-  gridCoreObject * makeObject () override
+  coreObject * makeObject () override
   {
-    gridCoreObject *ret = makeTypeObject ();
+    coreObject *ret = makeTypeObject ();
 
     return ret;
   }
 
-  gridCoreObject * makeObject (const std::string &objName) override
+  coreObject * makeObject (const std::string &objName) override
   {
-    gridCoreObject *ret = makeTypeObject (objName);
+    coreObject *ret = makeTypeObject (objName);
 
     return ret;
   }
@@ -341,7 +341,7 @@ public:
     return ret;
   }
 
-  virtual void prepObjects (count_t count, gridCoreObject *obj) override
+  virtual void prepObjects (count_t count, coreObject *obj) override
   {
 
     auto root = obj->find ("root");
@@ -385,7 +385,7 @@ public:
   {
     return (obptr) ? (obptr->remaining () + targetprepped) : 0;
   }
-  virtual std::shared_ptr<gridCoreObject> getHolder () const override
+  virtual std::shared_ptr<coreObject> getHolder () const override
   {
     return obptr;
   }
@@ -394,7 +394,7 @@ public:
 template <class Ntype, class argType>
 class typeFactoryArg : public objectFactory
 {
-  static_assert (std::is_base_of<gridCoreObject, Ntype>::value, "factory class must have gridCoreObject as base");
+  static_assert (std::is_base_of<coreObject, Ntype>::value, "factory class must have coreObject as base");
   static_assert (!std::is_same<argType, std::string>::value, "arg type cannot be a std::string");
 public:
   argType arg;
@@ -414,14 +414,14 @@ public:
       }
   }
 
-  gridCoreObject * makeObject () override
+  coreObject * makeObject () override
   {
-    return static_cast<gridCoreObject *> (new Ntype (arg));
+    return static_cast<coreObject *> (new Ntype (arg));
   }
 
-  gridCoreObject * makeObject (const std::string &objName) override
+  coreObject * makeObject (const std::string &objName) override
   {
-    return static_cast<gridCoreObject *> (new Ntype (arg,objName));
+    return static_cast<coreObject *> (new Ntype (arg,objName));
   }
 
   Ntype * makeTypeObject (const std::string &objName = "")
@@ -447,11 +447,11 @@ public:
 * @return pointer to the cloned object
 */
 template<class A, class B>
-A * cloneBaseFactory (const A *bobj, gridCoreObject *obj, objectFactory *cfact)
+A * cloneBaseFactory (const A *bobj, coreObject *obj, objectFactory *cfact)
 {
   static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
-  static_assert (std::is_base_of<gridCoreObject, B>::value, "classes must be inherited from gridCoreObject");
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, B>::value, "classes must be inherited from coreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
   A *nobj;
   if (obj == nullptr)
     {

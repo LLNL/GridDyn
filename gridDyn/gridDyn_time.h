@@ -18,6 +18,7 @@
 #define GRIDDYN_TIME_H_
 
 #include <cmath>
+#include <type_traits>
 
 #define MAXLL 0x7FFF'FFFF'FFFF'FFFF
 
@@ -60,6 +61,10 @@ public:
 		return (static_cast<double>(val >> N) + std::ldexp(static_cast<double>(fracMask & val), -N));
 	}
 	
+	static long long int seconds(baseType val)
+	{
+		return static_cast<long long int>(val >> N);
+	}
 };
 
 
@@ -97,7 +102,10 @@ public:
 	{
 		return (static_cast<double>(val / fac10[N]) + static_cast<double>(val%fac10[N]) / fac10f[N]);
 	}
-	
+	static long long int seconds(baseType val)
+	{
+		return static_cast<long long int>(val / fac10[N]);
+	}
 };
 
 template<typename base=double>
@@ -122,6 +130,11 @@ public:
 	{
 		return (-1.456e47);
 	}
+	static long long int seconds(baseType val)
+	{
+		return static_cast<long long int>(val);
+	}
+
 };
 
 /** prototype class for representing time
@@ -149,9 +162,8 @@ private:
 public:
 	//implicit conversion requested
 	timeRepresentation() {};
-	timeRepresentation(double t)
+	timeRepresentation(double t):timecode(Tconv::convert(t))
 	{
-		timecode = Tconv::convert(t);
 		DOUBLETIME
 	}
 
@@ -173,6 +185,11 @@ public:
 		return tret;
 	}
 
+	long long int seconds() const
+	{
+		return Tconv::seconds(timecode);
+	}
+
 	timeRepresentation& operator= (const timeRepresentation &x)
 	{
 		timecode = x.timecode;
@@ -181,10 +198,10 @@ public:
 	}
 
 	timeRepresentation& operator= (double t)
-	{
-		*this = timeRepresentation(t);
+	{   
+		timecode = Tconv::convert(t);
 		DOUBLETIME
-			return *this;
+		return *this;
 	}
 
 	operator double() const
@@ -229,6 +246,34 @@ public:
 			return *this;
 	}
 
+	timeRepresentation operator%(const timeRepresentation &other) const
+	{
+		timeRepresentation trep;
+		if (std::is_integral<baseType>::value)
+		{
+			trep.timecode = timecode%other.timecode;
+		}
+		else
+		{
+			trep.timecode = Tconv::convert(std::fmod(Tconv::toDouble(timecode), Tconv::toDouble(other.timecode)));
+		}
+		return trep;
+	}
+
+	timeRepresentation &operator%=(const timeRepresentation &other)
+	{
+		
+		if (std::is_integral<baseType>::value)
+		{
+			timecode = timecode%other.timecode;
+		}
+		else
+		{
+			timecode = Tconv::convert(std::fmod(Tconv::toDouble(timecode), Tconv::toDouble(other.timecode)));
+		}
+		DOUBLETIME
+	    return *this;
+	}
 	timeRepresentation operator+(const timeRepresentation &other) const
 	{
 		timeRepresentation trep;

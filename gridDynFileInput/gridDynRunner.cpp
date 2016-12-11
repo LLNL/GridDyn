@@ -148,14 +148,20 @@ int GriddynRunner::Initialize (int argc, char *argv[])
   std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
   m_gds->log (m_gds.get (), print_level::normal,"\nInitialization " + m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
 
-  m_startTime = std::chrono::high_resolution_clock::now ();
+  
 
-  m_gds->dynInitialize (m_gds->getStartTime ());
-  if (!(m_gds->hasDynamics ()))
-    {
-      eventMode = true;
-    }
+ 
   return 0;
+}
+
+void GriddynRunner::simInitialize()
+{
+	m_startTime = std::chrono::high_resolution_clock::now();
+	m_gds->dynInitialize();
+	if (!(m_gds->hasDynamics()))
+	{
+		eventMode = true;
+	}
 }
 
 void GriddynRunner::Run (void)
@@ -165,7 +171,7 @@ void GriddynRunner::Run (void)
   m_gds->run ();
 }
 
-double GriddynRunner::Step (double time)
+gridDyn_time GriddynRunner::Step (gridDyn_time time)
 {
   gridDyn_time actual = time;
   if (m_gds)
@@ -195,7 +201,7 @@ double GriddynRunner::Step (double time)
   return actual;
 }
 
-double GriddynRunner::getNextEvent () const
+gridDyn_time GriddynRunner::getNextEvent () const
 {
   return m_gds->getEventTime ();
 }
@@ -410,8 +416,8 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
   //input boost controls
   cmd_only.add_options()
 	  ("help,h", "produce help message")
-	  ("config-file", po::value<std::string>(), "specify a config file to use")
-	  ("config-file-output", po::value<std::string>(), "file to store current config options")
+	  ("config-file", po::value<std::string>(), "specify a configuration file to use")
+	  ("config-file-output", po::value<std::string>(), "file to store current configuration options")
 	  ("mpicount", "setup for an MPI run")
 	  ("version", "print version string")
 	  ("test", "run a test program[ignored in many cases]");
@@ -443,7 +449,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
     ("input", po::value<std::string> (), "input file");
 
   po::options_description cmd_line ("command line options");
-  po::options_description config_file ("config file options");
+  po::options_description config_file ("configuration file options");
   po::options_description visible ("allowed options");
 
   cmd_line.add (cmd_only).add (config).add (hidden);

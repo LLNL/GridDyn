@@ -36,13 +36,13 @@ protected:
 
 public:
   gridLoadOpt (const std::string &objName = "");
-  gridLoadOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridLoadOpt (coreObject *obj, const std::string &objName = "");
 
   ~gridLoadOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   virtual count_t objSize (const optimMode &oMode);
   virtual count_t contObjSize (const optimMode &oMode);
   virtual count_t intObjSize (const optimMode &oMode);

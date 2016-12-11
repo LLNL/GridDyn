@@ -22,7 +22,7 @@
 #include "gridBus.h"
 #include "simulation/diagnostics.h"
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 #include "fmi_models/fmiLoad.h"

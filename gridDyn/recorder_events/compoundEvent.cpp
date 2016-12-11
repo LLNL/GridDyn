@@ -34,7 +34,7 @@ compoundEvent::compoundEvent(const std::string &eventName) : gridEvent(eventName
 
 }
 
-compoundEvent::compoundEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) : gridEvent(gdEI, rootObject)
+compoundEvent::compoundEvent(gridEventInfo *gdEI, coreObject *rootObject) : gridEvent(gdEI, rootObject)
 {
 
 }
@@ -55,7 +55,7 @@ std::shared_ptr<gridEvent> compoundEvent::clone(std::shared_ptr<gridEvent> gE) c
 	return nE;
 }
 
-void compoundEvent::updateObject(gridCoreObject *gco, object_update_mode mode)
+void compoundEvent::updateObject(coreObject *gco, object_update_mode mode)
 {
 
 	//TODO:  more thinking on exception safety
@@ -80,12 +80,12 @@ void compoundEvent::updateObject(gridCoreObject *gco, object_update_mode mode)
 	}
 }
 
-gridCoreObject * compoundEvent::getObject() const
+coreObject * compoundEvent::getObject() const
 {
 	return targetObjects[0];
 }
 
-void compoundEvent::getObjects(std::vector<gridCoreObject *> &objects) const
+void compoundEvent::getObjects(std::vector<coreObject *> &objects) const
 {
 	for (auto &obj : targetObjects)
 	{
@@ -192,7 +192,7 @@ change_code compoundEvent::trigger(gridDyn_time time)
 	return ret;
 }
 
-bool compoundEvent::setTarget(gridCoreObject *gdo, const std::string &var)
+bool compoundEvent::setTarget(coreObject *gdo, const std::string &var)
 {
 	if (!var.empty())
 	{

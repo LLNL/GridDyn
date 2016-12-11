@@ -25,31 +25,31 @@ public:
   std::string m_purpose;        //!< string for use by applications to indicate usage
 protected:
   double m_tempOut = 0;      //!< temporary output corresponding to desired time
-  double m_output = 0;       //!< the output corresponding to the last setTime
-  double lasttime = 0;       //!<storage for the previously queried time
+  gridDyn_time lastTime = timeZero;       //!<storage for the previously queried time
   //gridUnits::units_t outputUnits = gridUnits::defUnit;
 public:
   gridSource (const std::string &objName = "source_#", double startVal = 0.0);
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode) override;
 
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-  virtual double getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
+  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
   virtual double getOutput (index_t num = 0) const override;
   virtual index_t getOutputLoc (const solverMode &sMode,  index_t num = 0) const override;
-  /** update the source output
-  @param[in] ttime  the time to update to
-  */
-  virtual void sourceUpdate (gridDyn_time ttime);
+  
+  virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void updateOutput(gridDyn_time ttime);
+  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+ 
   /** update the source output and advance the model time
   @param[in] ttime  the time to update to
   */
-  virtual void sourceUpdateForward (gridDyn_time ttime);
+  virtual double computeOutput (gridDyn_time ttime) const;
   /** set the outputlevel 
   @param[in] newLevel the level to set the output at
   */

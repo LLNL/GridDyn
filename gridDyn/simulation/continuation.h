@@ -26,17 +26,17 @@ class gridDynSimulation;
 class parameterSequence
 {
 public:
-  gridCoreObject *m_target;
+  coreObject *m_target;
   std::string m_field;
   double m_startValue;
   double m_stepSize;
   gridUnits::units_t m_unitType = gridUnits::defUnit;
 protected:
   int m_currentStep = 0;
-  gridCoreObject *m_obj = nullptr;
+  coreObject *m_obj = nullptr;
 public:
   parameterSequence ();
-  bool setTarget (gridCoreObject *gdo, const std::string var = "");
+  bool setTarget (coreObject *gdo, const std::string var = "");
   void setValue (double start, double step) const;
   void step ();
   void step (int stepNumber);

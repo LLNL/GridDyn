@@ -66,9 +66,9 @@ public:
   /** @brief the default destructor*/
   virtual ~gridArea ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief add a bus to the area
   @param[in] bus  the bus to add
   @return success indicator  OBJECT_ADD_SUCCESS(0) const on success
@@ -90,7 +90,7 @@ public:
   */
   virtual void add (gridRelay *relay);
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   /** @brief remove a bus from the area
   @param[in] bus  the bus to remove
   @return success indicator  OBJECT_REMOVE_SUCCESS(0) const on success
@@ -140,7 +140,6 @@ protected:
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
 
 public:
-  virtual void setTime (gridDyn_time time) override;
 
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
@@ -162,26 +161,26 @@ public:
   @param[in] obj  the object to check
   @return true if the object is a member false if not
   */
-  virtual bool isMember (gridCoreObject *obj) const;
+  virtual bool isMember (coreObject *obj) const;
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
   // solver functions
 
-  virtual void alert (gridCoreObject *obj, int code) override;
+  virtual void alert (coreObject *obj, int code) override;
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
-  virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void preEx (const stateData &sD, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
 
-  virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void delayedResidual (const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
 
 
 
@@ -207,13 +206,13 @@ public:
   virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
   virtual void updateLocalCache () override;
 
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
   virtual void reset (reset_levels level) override;
   //root finding functions
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level) override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode,  check_level_t level) override;
   //grab information
   /** @brief get a vector of voltage from the attached buses
   @param[out] V the vector to put the bus  voltages
@@ -354,7 +353,7 @@ public:
   @param[in] sMode the solverMode corresponding to the state data
   @return the average angle
   */
-  double getAvgAngle (const stateData *sD, const solverMode &sMode) const;
+  double getAvgAngle (const stateData &sD, const solverMode &sMode) const;
   
 
   /** @brief get the average frequency for the area
@@ -373,7 +372,7 @@ public:
   */
   void getVoltageStates (double vStates[], const solverMode &sMode) const;
   void getAngleStates (double aStates[],const solverMode &sMode) const;
-  double getMasterAngle (const stateData *sD, const solverMode &sMode) const;
+  double getMasterAngle (const stateData &sD, const solverMode &sMode) const;
   virtual void updateFlags (bool dynOnly = false) override;
   /** @brief  get a vector of buses of the area
   @param[out] busList  a vector of buses

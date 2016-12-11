@@ -18,7 +18,7 @@
 #include "testHelper.h"
 #include "linkModels/acLine.h"
 #include "simulation/diagnostics.h"
-//testP case for gridCoreObject object
+//testP case for coreObject object
 
 
 #define TADJ_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/adj_tests/"

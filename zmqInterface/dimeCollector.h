@@ -24,7 +24,7 @@ private:
 	std::string processName;
 	std::unique_ptr<dimeClientInterface> dime;
 public:
-	dimeCollector(gridDyn_time time0 = timeZero, gridDyn_time period = timeOne);
+	dimeCollector(gridDyn_time time0 = timeZero, gridDyn_time period = timeOneSecond);
 	explicit dimeCollector(const std::string &name);
 	~dimeCollector();
 

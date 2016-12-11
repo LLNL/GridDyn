@@ -50,7 +50,7 @@ gridDynGovernor::gridDynGovernor (const std::string &objName) : gridSubModel (ob
   delay.setOwner (nullptr, &delay);
 }
 
-gridCoreObject *gridDynGovernor::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernor::clone (coreObject *obj) const
 {
   gridDynGovernor *gov = cloneBase<gridDynGovernor, gridSubModel> (this, obj);
   if (!gov)
@@ -137,7 +137,7 @@ void gridDynGovernor::objectInitializeB (const IOdata &args, const IOdata &outpu
 }
 
 // residual
-void gridDynGovernor::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGovernor::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   cb.residElements (args[govOmegaInLocation], 0,sD, resid, sMode);
   dbb.residElements (cb.getBlockOutput (sD,sMode), 0,sD, resid, sMode);
@@ -154,7 +154,7 @@ void gridDynGovernor::timestep (gridDyn_time ttime,  const IOdata &args,const so
 
 }
 
-void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGovernor::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   IOdata i {
     args[govOmegaInLocation]
@@ -165,7 +165,7 @@ void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, doubl
 }
 
 
-void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernor::jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   cb.jacElements  (args[govOmegaInLocation], 0,sD, ad, argLocs[govOmegaInLocation], sMode);
 
@@ -236,7 +236,7 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 }
 
 
-void gridDynGovernor::rootTest (const IOdata & /*args*/, const stateData *sD, double root[],  const solverMode &sMode)
+void gridDynGovernor::rootTest (const IOdata & /*args*/, const stateData &sD, double root[],  const solverMode &sMode)
 {
   IOdata i {
     cb.getOutput (kNullVec, sD, sMode)

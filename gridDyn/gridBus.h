@@ -45,7 +45,7 @@ public:
   {
   }
   void reset ();
-  bool needsUpdate (const stateData *sD) const;
+  bool needsUpdate (const stateData &sD) const;
   double sumP () const
   {
     return (linkP + loadP + genP);
@@ -112,9 +112,9 @@ public:
   /** @brief destructor*/
   virtual ~gridBus ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief  add a gridLoad object*/
   virtual void add (gridLoad *pl);
   /** @brief  add a gridGenerator object*/
@@ -123,7 +123,7 @@ public:
   virtual void add (gridLink *lnk);
 
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   /** @brief  remove a gridLoad object*/
   virtual void remove (gridLoad *pl);
   /** @brief  remove a gridDynGenerator object*/
@@ -131,7 +131,7 @@ public:
   /** @brief  remove a gridLink object*/
   virtual void remove (gridLink *lnk);
   //deal with control alerts
-  virtual void alert (gridCoreObject *, int code) override;
+  virtual void alert (coreObject *, int code) override;
 
   // initializeB
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
@@ -170,12 +170,12 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // solver functions
-  virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
-  virtual void voltageUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
+  virtual void preEx (const stateData &sD, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void voltageUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
   virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
@@ -184,10 +184,9 @@ public:
   virtual double lastError () const;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
 public:
-  void setTime (gridDyn_time time) override;
   void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
@@ -215,9 +214,9 @@ public:
   @return  a pointer to a Link that connects the current bus to the bus specified by bs or nullptr if none exists
   */
   gridLink * findLink (gridBus *bs) const;
-  gridCoreObject * find (const std::string &objname) const override;
-  gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  coreObject * find (const std::string &objname) const override;
+  coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
 
   gridLink * getLink (index_t x) const override;
   /**
@@ -377,7 +376,7 @@ public:
   **/
   virtual double getSched () const;
 
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
+  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
   virtual IOlocs getOutputLocs  (const solverMode &sMode) const override;
 
   /** @brief get a const ref to the outputs*/
@@ -386,7 +385,7 @@ public:
   */
   virtual const IOlocs &getOutputLocsRef () const;
 
-  virtual double getOutput (const stateData *sD, const solverMode &sMode, index_t outNum = 0) const override;
+  virtual double getOutput (const stateData &sD, const solverMode &sMode, index_t outNum = 0) const override;
   /** @brief get the voltage
   * @param[in] state the system state
   @param[in] sMode the corresponding solverMode to the state
@@ -404,23 +403,23 @@ public:
   @param[in] sMode the corresponding solverMode to the state data
   @return the bus voltage
   **/
-  virtual double getVoltage (const stateData *sD, const solverMode &sMode) const;
+  virtual double getVoltage (const stateData &sD, const solverMode &sMode) const;
   /** @brief get the angle
   * @param[in] sD the system state data
   @param[in] sMode the corresponding solverMode to the state
   @return the bus angle
   **/
-  virtual double getAngle (const stateData *sD, const solverMode &sMode) const;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode) const;
   /** @brief get the bus frequency
   * @param[in] sD the system state data
   @param[in] sMode the corresponding solverMode to the state
   @return the bus frequency
   **/
-  virtual double getFreq (const stateData *sD, const solverMode &sMode) const;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode) const;
 
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level) override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode,  check_level_t level) override;
 
 
   friend bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink, bool printDiff);
@@ -450,7 +449,7 @@ protected:
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */
-  virtual double computeError (const stateData *sD, const solverMode &sMode);
+  virtual double computeError (const stateData &sD, const solverMode &sMode);
 private:
   template<class X>
   friend void addObject (gridBus *bus, X* obj, std::vector<X *> &objVector);

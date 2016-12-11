@@ -94,7 +94,7 @@ acdcConverter::~acdcConverter ()
 	subObjectList.clear();
 }
 
-gridCoreObject *acdcConverter::clone (gridCoreObject *obj) const
+coreObject *acdcConverter::clone (coreObject *obj) const
 {
   acdcConverter *nobj = cloneBase<acdcConverter, gridLink> (this, obj);
   if (nobj == nullptr)
@@ -392,7 +392,7 @@ void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
 }
 
 
-void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void acdcConverter::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   if  (!(enabled))
     {
@@ -459,7 +459,7 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData *sD, ma
     }
 }
 
-void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void acdcConverter::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -540,7 +540,7 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData *sD
 }
 
 
-void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void acdcConverter::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	auto B1Loc=B1->getOutputLocs(sMode);
   auto B1Voffset = B1Loc[voltageInLocation];
@@ -619,23 +619,23 @@ void acdcConverter::jacobianElements (const stateData *sD, matrixData<double> &a
     {
       auto offset = offsets.getAlgOffset (sMode);
 
-      //resid[offset] = k3sq2*linkInfo.v1*sD->state[offset] - 3 / kPI*x*Idc - linkInfo.v2;
+      //resid[offset] = k3sq2*linkInfo.v1*sD.state[offset] - 3 / kPI*x*Idc - linkInfo.v2;
 
       ad.assign (offset, offset, k3sq2 * linkInfo.v1);
       if (opFlags[fixed_target_power])
         {
-          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset]);
+          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD.state[offset]);
           ad.assignCheckCol (offset, B2Voffset, 3.0 / kPI * x * Pset / (linkInfo.v2 * linkInfo.v2) - 1.0);
         }
       else
         {
-          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD->state[offset] - 3 / kPI * x / tap);
+          ad.assignCheckCol (offset, B1Voffset, k3sq2 * sD.state[offset] - 3 / kPI * x / tap);
           ad.assignCheckCol (offset, B2Voffset, -1);
         }
     }
 }
 
-void acdcConverter::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void acdcConverter::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
 
   updateLocalCache (sD, sMode);
@@ -677,7 +677,7 @@ void acdcConverter::residual (const stateData *sD, double resid[], const solverM
       auto offset = offsets.getAlgOffset (sMode);
       Idc = (opFlags[fixed_target_power]) ? Pset / linkInfo.v2 : linkInfo.v1 / tap;
 
-      resid[offset] = k3sq2 * linkInfo.v1 * sD->state[offset] - 3 / kPI * x * Idc - linkInfo.v2;
+      resid[offset] = k3sq2 * linkInfo.v1 * sD.state[offset] - 3 / kPI * x * Idc - linkInfo.v2;
     }
 }
 
@@ -734,9 +734,9 @@ void acdcConverter::guess (gridDyn_time ttime, double state[], double dstate_dt[
 }
 
 
-void  acdcConverter::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void  acdcConverter::updateLocalCache (const stateData &sD, const solverMode &sMode)
 {
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
     {
       return;
     }
@@ -746,7 +746,7 @@ void  acdcConverter::updateLocalCache (const stateData *sD, const solverMode &sM
       return;
     }
   std::memset (&linkInfo, 0, sizeof(linkI));
-  linkInfo.seqID = sD->seqID;
+  linkInfo.seqID = sD.seqID;
 
 
   linkInfo.v1 = B1->getVoltage (sD, sMode);

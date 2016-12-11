@@ -19,7 +19,7 @@
 #include <list>
 #include <cstdint>
 
-class gridCoreObject;
+class coreObject;
 
 /** @brief class implementing a discrete event queue for a continuous time simulation
  the time check on events includes a tolerance to allow for numerical error in the execution of events
@@ -99,7 +99,7 @@ public:
   virtual std::shared_ptr<eventQueue> clone(std::shared_ptr<eventQueue> eQ = nullptr) const;
   /** @brief map all objects used in the events to a new root object
  */
-  virtual void mapObjectsOnto(gridCoreObject *newRootObject);
+  virtual void mapObjectsOnto(coreObject *newRootObject);
   /** @brief Execute the events up to the given time
   @param[in] cTime the current Time
   @return code describing the effect of the executed events
@@ -131,7 +131,7 @@ public:
   virtual void recheck ();
 
   /** @brief check for duplicate events and remove the duplicate
-   this is important for removing duplicate gridCoreObject events so we don't have two of those being executed
+   this is important for removing duplicate coreObject events so we don't have two of those being executed
   which could cause all sorts of issues with the simulation
   */
   virtual void checkDuplicates ();

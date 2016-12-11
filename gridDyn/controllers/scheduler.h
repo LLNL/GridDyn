@@ -42,7 +42,7 @@ protected:
 public:
   scheduler (const std::string &objName = "scheduler_#", double initialValue=0.0);
   scheduler(double initialValue, const std::string &objName = "scheduler_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~scheduler ();
 
   virtual void updateA (gridDyn_time time) override;
@@ -65,7 +65,6 @@ public:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void setFlag(const std::string &flag, bool val=true) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual void setTime (gridDyn_time time) override;
   /** tie the scheduler to a dispatcher */
   virtual void dispatcherLink ();
   /** get the maximum available power withing a specified time window
@@ -125,7 +124,7 @@ public:
   virtual ~schedulerRamp ()
   {
   }
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   void setTarget (gridDyn_time time, double target) override;
   void setTarget (double target) override;
   void setTarget (const std::string &filename) override;
@@ -192,7 +191,7 @@ public:
   schedulerReg (const std::string &objName = "schedulerReg_#");
   schedulerReg (double initialValue, const std::string &objName = "schedulerReg_#");
   schedulerReg (double initialValue,double initialReg, const std::string &objName = "schedulerReg_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   ~schedulerReg ();
   void setReg (double regLevel);
 

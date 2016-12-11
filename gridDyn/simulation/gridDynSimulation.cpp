@@ -38,7 +38,7 @@ static typeFactory<gridDynSimulation> gf ("simulation", stringVec { "GridDyn", "
 gridDynSimulation* gridDynSimulation::s_instance = nullptr;
 
 //local search functions for MPI based objects
-count_t searchForGridlabDobject (gridCoreObject *obj);
+count_t searchForGridlabDobject (coreObject *obj);
 
 gridDynSimulation::gridDynSimulation (const std::string &objName) : gridSimulation (objName),controlFlags (0ll)
 {
@@ -59,7 +59,7 @@ gridDynSimulation* gridDynSimulation::getInstance (void)
   return s_instance;
 }
 
-gridCoreObject *gridDynSimulation::clone (gridCoreObject *obj) const
+coreObject *gridDynSimulation::clone (coreObject *obj) const
 {
   gridDynSimulation *sim = cloneBase<gridDynSimulation, gridSimulation> (this, obj);
   if (sim == nullptr)
@@ -518,9 +518,6 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
       break;
     case gridDynAction::gd_action_t::setall:
       setAll (cmd.string1, cmd.string2, cmd.val_double);
-      break;
-    case gridDynAction::gd_action_t::settime:
-      setTime (cmd.val_double);
       break;
     case gridDynAction::gd_action_t::setsolver:
       solverSet (cmd.string1, cmd.string2, cmd.val_double);
@@ -1256,7 +1253,7 @@ static std::map<int, size_t> alertFlags {
 
 };
 
-void gridDynSimulation::alert (gridCoreObject *object, int code)
+void gridDynSimulation::alert (coreObject *object, int code)
 {
   if ((code >= MIN_CHANGE_ALERT) && (code < MAX_CHANGE_ALERT))
     {
@@ -1785,7 +1782,7 @@ void gridDynSimulation::getSolverReady (std::shared_ptr<solverInterface> &solver
 
 }
 
-void gridDynSimulation::fillExtraStateData (stateData *sD, const solverMode &sMode) const
+void gridDynSimulation::fillExtraStateData (stateData &sD, const solverMode &sMode) const
 {
   if ((!isDAE (sMode)) && (isDynamic (sMode)))
     {
@@ -1796,32 +1793,32 @@ void gridDynSimulation::fillExtraStateData (stateData *sD, const solverMode &sMo
             {
 				if (extraStateInformation[pSMode.offsetIndex])
 				{
-					sD->diffState = extraStateInformation[pSMode.offsetIndex];
-					sD->dstate_dt = extraDerivInformation[pSMode.offsetIndex];
-					sD->altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
-					sD->pairIndex = pSMode.offsetIndex;
+					sD.diffState = extraStateInformation[pSMode.offsetIndex];
+					sD.dstate_dt = extraDerivInformation[pSMode.offsetIndex];
+					sD.altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
+					sD.pairIndex = pSMode.offsetIndex;
 				}
 				else
 				{
-					sD->diffState = solverInterfaces[pSMode.offsetIndex]->state_data();
-					sD->dstate_dt = solverInterfaces[pSMode.offsetIndex]->deriv_data();
-					sD->altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
-					sD->pairIndex = pSMode.offsetIndex;
+					sD.diffState = solverInterfaces[pSMode.offsetIndex]->state_data();
+					sD.dstate_dt = solverInterfaces[pSMode.offsetIndex]->deriv_data();
+					sD.altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
+					sD.pairIndex = pSMode.offsetIndex;
 				}
               
 			  
             }
           else if (isAlgebraicOnly (pSMode))
             {
-              sD->algState = solverInterfaces[pSMode.offsetIndex]->state_data ();
-			  sD->altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
-              sD->pairIndex = pSMode.offsetIndex;
+              sD.algState = solverInterfaces[pSMode.offsetIndex]->state_data ();
+			  sD.altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
+              sD.pairIndex = pSMode.offsetIndex;
             }
           else if (isDAE (pSMode))
             {
-              sD->fullState = solverInterfaces[pSMode.offsetIndex]->state_data ();
-              sD->pairIndex = pSMode.offsetIndex;
-			  sD->altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
+              sD.fullState = solverInterfaces[pSMode.offsetIndex]->state_data ();
+              sD.pairIndex = pSMode.offsetIndex;
+			  sD.altTime = solverInterfaces[pSMode.offsetIndex]->getSolverTime();
             }
         }
 
@@ -1842,14 +1839,14 @@ bool gridDynSimulation::checkEventsForDynamicReset (gridDyn_time cTime, const so
 }
 
 
-count_t searchForGridlabDobject (gridCoreObject *obj)
+count_t searchForGridlabDobject (coreObject *obj)
 {
   count_t cnt = 0;
   gridBus *bus = dynamic_cast<gridBus *> (obj);
   if (bus)
     {
       index_t kk = 0;
-      gridCoreObject *obj2 = bus->getLoad (kk);
+      coreObject *obj2 = bus->getLoad (kk);
       while (obj2)
         {
           gridLabDLoad *gLd = dynamic_cast<gridLabDLoad *> (obj2);

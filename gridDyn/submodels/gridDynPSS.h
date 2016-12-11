@@ -30,19 +30,19 @@ protected:
   double mp_Smin;
 public:
   explicit gridDynPSS (const std::string &objName = "pss_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~gridDynPSS ();
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &args, const stateData &sD,
                                  matrixData<double> &ad,
                                  const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void derivative  (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
+  virtual void derivative  (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
 
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 };

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 
 	
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 	
 	auto genlist = cof->getTypeNames("genmodel");
 

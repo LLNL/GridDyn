@@ -23,7 +23,7 @@ using namespace readerConfig;
 static const IgnoreListType areaIgnoreElements{ "agc", "reserve", "reservedispatch", "dispatch" };
 static const std::string areaComponentName("area");
 // "aP" is the XML element passed from the reader
-gridArea *readAreaElement(std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject)
+gridArea *readAreaElement(std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject)
 {
 
 	auto riScope = ri->newScope();

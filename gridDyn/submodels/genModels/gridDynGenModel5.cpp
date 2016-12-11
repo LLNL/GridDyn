@@ -28,7 +28,7 @@ gridDynGenModel5::gridDynGenModel5 (const std::string &objName) : gridDynGenMode
 
 }
 
-gridCoreObject *gridDynGenModel5::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModel5::clone (coreObject *obj) const
 {
   gridDynGenModel5 *gd = cloneBase<gridDynGenModel5, gridDynGenModel4> (this, obj);
   if (gd == nullptr)
@@ -75,7 +75,7 @@ void gridDynGenModel5::objectInitializeB (const IOdata &args, const IOdata &outp
 
 }
 
-void gridDynGenModel5::algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double /*alpha*/)
+void gridDynGenModel5::algebraicUpdate (const IOdata &args, const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
 {
   Lp Loc = offsets.getLocations (sD, update, sMode, this);
   updateLocalCache (args, sD, sMode);
@@ -84,7 +84,7 @@ void gridDynGenModel5::algebraicUpdate (const IOdata &args, const stateData *sD,
 }
 
 
-void gridDynGenModel5::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGenModel5::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
   const double *gm = Loc.algStateLoc;
@@ -118,7 +118,7 @@ void gridDynGenModel5::residual (const IOdata &args, const stateData *sD, double
 
 }
 
-void gridDynGenModel5::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGenModel5::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
   const double *ast = Loc.algStateLoc;
@@ -148,7 +148,7 @@ void gridDynGenModel5::derivative (const IOdata &args, const stateData *sD, doub
 
 }
 
-void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD,
+void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData &sD,
                                          matrixData<double> &ad,
                                          const IOlocs &argLocs, const solverMode &sMode)
 {
@@ -207,7 +207,7 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
   if (hasDifferential (sMode))
     {
       // delta
-      ad.assign (refDiff, refDiff, -sD->cj);
+      ad.assign (refDiff, refDiff, -sD.cj);
       ad.assign (refDiff, refDiff + 1, m_baseFreq);
 
       // omega
@@ -218,7 +218,7 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
           ad.assign (refDiff + 1, refAlg + 1, -0.5  * (gm[5] + (Xdp - Xqp) * gm[0]) / H);
         }
 
-      ad.assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD->cj);
+      ad.assign (refDiff + 1, refDiff + 1, -0.5  * D / H - sD.cj);
       ad.assign (refDiff + 1, refDiff + 4, -0.5  * gm[0] / H);
       ad.assign (refDiff + 1, refDiff + 3, -0.5  * gm[1] / H);
 
@@ -232,14 +232,14 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
         {
           ad.assign (refDiff + 2, refAlg + 1, -(Xq - Xqp - xrat * (Xq - Xqp)) / Tqop);
         }
-      ad.assign (refDiff + 2, refDiff + 2, -1 / Tqop - sD->cj);
+      ad.assign (refDiff + 2, refDiff + 2, -1 / Tqop - sD.cj);
 
       // Eqp
       if (hasAlg)
         {
           ad.assign (refDiff + 3, refAlg, (Xd - Xdp) / Tdop);
         }
-      ad.assign (refDiff + 3, refDiff + 3, -1 / Tdop - sD->cj);
+      ad.assign (refDiff + 3, refDiff + 3, -1 / Tdop - sD.cj);
 
 
       ad.assignCheckCol (refDiff + 3, argLocs[genModelEftInLocation], 1 / Tdop);             // exciter: Ef
@@ -250,7 +250,7 @@ void gridDynGenModel5::jacobianElements (const IOdata &args, const stateData *sD
           ad.assign (refDiff + 4, refAlg + 1, -(Xqp - Xdp + xrat * (Xq - Xqp)) / Tqopp);
         }
       ad.assign (refDiff + 4, refDiff + 2, 1 / Tqopp);
-      ad.assign (refDiff + 4, refDiff + 4, -1 / Tqopp - sD->cj);
+      ad.assign (refDiff + 4, refDiff + 4, -1 / Tqopp - sD.cj);
     }
 
 

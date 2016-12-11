@@ -25,13 +25,13 @@
 void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo *ri);
 
 template<class RX>
-gridCoreObject * loadElementFile (gridCoreObject *parentObject, const std::string &filename, readerInfo *ri)
+coreObject * loadElementFile (coreObject *parentObject, const std::string &filename, readerInfo *ri)
 {
   using namespace readerConfig;
-  static_assert (std::is_base_of<readerElement, RX>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<readerElement, RX>::value, "classes must be inherited from coreObject");
   // pointers
 
-  gridCoreObject *gco = nullptr;
+  coreObject *gco = nullptr;
   bool rootSimFile = true;
   if (parentObject != nullptr)
     {

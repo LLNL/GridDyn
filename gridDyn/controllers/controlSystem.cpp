@@ -27,7 +27,7 @@ controlSystem::~controlSystem ()
 
 }
 
-gridCoreObject * controlSystem::clone (gridCoreObject *obj) const
+coreObject * controlSystem::clone (coreObject *obj) const
 {
   controlSystem *cs = cloneBase<controlSystem, gridSubModel> (this, obj);
   if (cs == nullptr)
@@ -38,7 +38,7 @@ gridCoreObject * controlSystem::clone (gridCoreObject *obj) const
 }
 
 
-void controlSystem::add (gridCoreObject *obj)
+void controlSystem::add (coreObject *obj)
 {
   if (dynamic_cast<basicBlock *> (obj))
     {
@@ -102,12 +102,12 @@ index_t controlSystem::findIndex (const std::string & /*field*/, const solverMod
   return kInvalidLocation;
 }
 
-void controlSystem::residual (const IOdata & /*args*/, const stateData *, double /*resid*/[], const solverMode &)
+void controlSystem::residual (const IOdata & /*args*/, const stateData &, double /*resid*/[], const solverMode &)
 {
 
 }
 
-void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData *,
+void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData &,
                                       matrixData<double> &,
                                       const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
 {
@@ -119,7 +119,7 @@ void controlSystem::timestep (gridDyn_time /*ttime*/, const IOdata & /*args*/, c
   
 }
 
-void controlSystem::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode & /*sMode*/)
+void controlSystem::rootTest (const IOdata & /*args*/, const stateData &, double /*roots*/[], const solverMode & /*sMode*/)
 {
 
 }
@@ -129,7 +129,7 @@ void controlSystem::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/
 
 }
 
-change_code controlSystem::rootCheck (const IOdata & /*args*/, const stateData *, const solverMode & /*sMode*/, check_level_t /*level*/)
+change_code controlSystem::rootCheck (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/, check_level_t /*level*/)
 {
   return change_code::no_change;
 }

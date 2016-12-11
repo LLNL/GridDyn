@@ -24,17 +24,17 @@
 #include "testHelper.h"
 #include "objectFactory.h"
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 using namespace gridUnits;
 BOOST_AUTO_TEST_SUITE(core_tests)
 
 
-BOOST_AUTO_TEST_CASE (gridCoreObject_test)
+BOOST_AUTO_TEST_CASE (coreObject_test)
 {
 
-  gridCoreObject *obj1 = new gridCoreObject ();
-  gridCoreObject *obj2 = new gridCoreObject ();
+  coreObject *obj1 = new coreObject ();
+  coreObject *obj2 = new coreObject ();
 
   BOOST_CHECK_EQUAL (obj1->getName().compare ("object_"+std::to_string(obj1->getID())),0);
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 
   BOOST_CHECK (compareUpdates (obj2,obj1));
 
-  gridCoreObject *obj3 = nullptr;
+  coreObject *obj3 = nullptr;
   obj3 = obj1->clone (obj3);
 
   //check the copy constructor
@@ -172,11 +172,11 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
 BOOST_AUTO_TEST_CASE (object_factory_test)
 {
   auto cof = coreObjectFactory::instance ();
-  gridCoreObject *obj = cof->createObject ("load", "basic");
+  coreObject *obj = cof->createObject ("load", "basic");
   gridLoad *ld = dynamic_cast<gridLoad *> (obj);
   BOOST_CHECK (ld != nullptr);
   delete ld;
-  gridSineLoad *gsL = dynamic_cast<gridSineLoad *> (cof->createObject ("load", "sine"));
+  sourceLoad *gsL = dynamic_cast<sourceLoad *> (cof->createObject ("load", "sine"));
   BOOST_CHECK (gsL != nullptr);
   delete gsL;
 

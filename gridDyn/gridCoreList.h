@@ -26,16 +26,16 @@
 #include <unordered_map>
 #include <map>
 */
-/** @brief list class that facilitates adding or searching for pointers to gridCoreObjects by name or id
+/** @brief list class that facilitates adding or searching for pointers to coreObjects by name or id
 * a list class that stores a list of the objects contained in an unordered map to faciliate searching for objects
 */
 /*
 class gridCoreList
 {
 private:
-  typedef std::unordered_map<std::string, gridCoreObject *> obMapStr;            //!< typedef for the map
-  typedef std::unordered_map<index_t, gridCoreObject *> obMapOID;            //!< typedef for the map
-  typedef std::multimap<index_t, gridCoreObject *> obMapUID;            //!< typedef for the map of userIDS
+  typedef std::unordered_map<std::string, coreObject *> obMapStr;            //!< typedef for the map
+  typedef std::unordered_map<index_t, coreObject *> obMapOID;            //!< typedef for the map
+  typedef std::multimap<index_t, coreObject *> obMapUID;            //!< typedef for the map of userIDS
   obMapStr m_oblistStr;            //!<the object map structure
   obMapOID m_oblistID;             //!<the object map by id
   obMapUID m_oblistUID;             //!<the object map by user id
@@ -49,13 +49,13 @@ public:
 * @param[in] replace an optional indicator telling whether to replace the object or nor
 * @return a bool indicating successful insertion
 */
-//  bool insert (gridCoreObject *obj, bool replace = false);
+//  bool insert (coreObject *obj, bool replace = false);
 /** @brief remove an object
 * function to remove an object from the container
 * @param[in] obj the object to insert
 * @return a bool indicating successful removal (0 on success, -1 on failure) const
 */
-//  bool remove (gridCoreObject *obj);
+//  bool remove (coreObject *obj);
 /** @brief remove an object by name
 * function to remove an object from the container
 * @param[in] obj the object to insert
@@ -68,27 +68,27 @@ public:
 * @param[in] objname the name of the object to search for
 * @return a pointer to the object if found otherwise nullptr
 */
-//  gridCoreObject * find (const std::string &objname) const;
+//  coreObject * find (const std::string &objname) const;
 
 /** @brief find object by id
 * function to find an object by user id code
 * @param[in] objname the name of the object to search for
 * @return a vector of objects with the appropriate searchID
 */
-//  std::vector<gridCoreObject *> find(index_t searchID) const;
+//  std::vector<coreObject *> find(index_t searchID) const;
 
 /** @brief check if an object is already contained
 * function to find an object by id
 * @param[in] obj to check
 * @return a bool indicating if the object is a member or not
 */
-//  bool isMember (gridCoreObject *obj);
+//  bool isMember (coreObject *obj);
 
 /**
 * @brief deletes all object pointed to by the list
   calls the condDel
 */
-// void deleteAll (gridCoreObject *parent) const;
+// void deleteAll (coreObject *parent) const;
 
 /** @brief get the size of the list
 @param[in] the parent object which is doing the deleting
@@ -103,7 +103,7 @@ public:
 * @brief update a single object with a name change or index change
 @param[in] obj the object with the change
 */
-// void updateObject(gridCoreObject *obj);
+// void updateObject(coreObject *obj);
 //};
 
 
@@ -121,15 +121,15 @@ struct uid {};
 //define a multiindex container based on the object id, which should be unique, and the name which also should be unique, and the user id,
 // which isn't necessarily unique.  
 typedef multi_index_container<
-    gridCoreObject *,
+    coreObject *,
     indexed_by<
-      ordered_unique<tag<id>, const_mem_fun<gridCoreObject, index_t, &gridCoreObject::getID> >,
-      ordered_unique<tag<name>,const_mem_fun<gridCoreObject, const std::string &, &gridCoreObject::getName> >,
-      ordered_non_unique<tag<uid>, const_mem_fun<gridCoreObject, index_t, &gridCoreObject::getUserID> >
+      ordered_unique<tag<id>, const_mem_fun<coreObject, index_t, &coreObject::getID> >,
+      ordered_unique<tag<name>,const_mem_fun<coreObject, const std::string &, &coreObject::getName> >,
+      ordered_non_unique<tag<uid>, const_mem_fun<coreObject, index_t, &coreObject::getUserID> >
       >
     > objectIndex;
 
-/** @brief list class that facilitates adding or searching for pointers to gridCoreObjects by name or id
+/** @brief list class that facilitates adding or searching for pointers to coreObjects by name or id
 * a list class that stores a list of the objects contained in an unordered map to facilitate searching for objects
 */
 class gridCoreList
@@ -145,13 +145,13 @@ public:
   * @param[in] replace an optional indicator telling whether to replace the object or nor
   * @return a bool indicating successful insertion
   */
-  bool insert (gridCoreObject *obj, bool replace = false);
+  bool insert (coreObject *obj, bool replace = false);
   /** @brief remove an object
   * function to remove an object from the container
   * @param[in] obj the object to insert
   * @return a bool indicating successful removal (0 on success, -1 on failure) const
   */
-  bool remove (gridCoreObject *obj);
+  bool remove (coreObject *obj);
   /** @brief remove an object by name
   * function to remove an object from the container
   * @param[in] obj the object to insert
@@ -164,27 +164,27 @@ public:
   * @param[in] objname the name of the object to search for
   * @return a pointer to the object if found otherwise nullptr
   */
-  gridCoreObject * find (const std::string &objname) const;
+  coreObject * find (const std::string &objname) const;
 
   /** @brief find object by id
   * function to find an object by user id code
   * @param[in] objname the name of the object to search for
   * @return a vector of objects with the appropriate searchID
   */
-  std::vector<gridCoreObject *> find (index_t searchID) const;
+  std::vector<coreObject *> find (index_t searchID) const;
 
   /** @brief check if an object is already contained
   * function to find an object by id
   * @param[in] obj to check
   * @return a bool indicating if the object is a member or not
   */
-  bool isMember (gridCoreObject *obj) const;
+  bool isMember (coreObject *obj) const;
 
   /**
   * @brief deletes all object pointed to by the list
   calls the condDel
   */
-  void deleteAll (gridCoreObject *parent);
+  void deleteAll (coreObject *parent);
 
   /** @brief get the size of the list
  
@@ -199,6 +199,6 @@ public:
   * @brief update a single object with a name change or index change
   @param[in] obj the object with the change
   */
-  void updateObject (gridCoreObject *obj);
+  void updateObject (coreObject *obj);
 };
 #endif

@@ -26,7 +26,7 @@
 #include "vectorOps.hpp"
 #include <iostream>
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE (xml_test4)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("exciter");
   BOOST_REQUIRE (obj != nullptr);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE (xml_test5)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = ri.findLibraryObject ("ex1");
   BOOST_REQUIRE (obj != nullptr);
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE (xml_test6)
   BOOST_REQUIRE (gen != nullptr);
   gridDynGenModel *gm = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("genmodel");
   BOOST_REQUIRE (obj != nullptr);
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE (xml_test7)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("exciter");
   BOOST_REQUIRE (obj != nullptr);

@@ -19,7 +19,7 @@ functionSource::functionSource(const std::string &objName) :gridSource(objName)
 
 }
 
-gridCoreObject * functionSource::clone(gridCoreObject *obj) const
+coreObject * functionSource::clone(coreObject *obj) const
 {
 	functionSource *gS = cloneBase<functionSource, gridSubModel>(this, obj);
 	if (gS == nullptr)
@@ -30,13 +30,13 @@ gridCoreObject * functionSource::clone(gridCoreObject *obj) const
 	return gS;
 }
 
-IOdata functionSource::getOutputs(const IOdata & /*args*/, const stateData *sD, const solverMode &)
+IOdata functionSource::getOutputs(const IOdata & /*args*/, const stateData &sD, const solverMode &) const
 {
-	return{ sourceFunc(sD->time) };
+	return{ sourceFunc(sD.time) };
 }
-double functionSource::getOutput(const IOdata & /*args*/, const stateData *sD, const solverMode &, index_t num) const
+double functionSource::getOutput(const IOdata & /*args*/, const stateData &sD, const solverMode &, index_t num) const
 {
-	return (num == 0) ? sourceFunc(sD->time) : kNullVal;
+	return (num == 0) ? sourceFunc(sD.time) : kNullVal;
 }
 
 double functionSource::getOutput(index_t num) const
@@ -46,9 +46,9 @@ double functionSource::getOutput(index_t num) const
 }
 
 
-double functionSource::getDoutdt(const stateData *sD, const solverMode &, index_t num)
+double functionSource::getDoutdt(const stateData &sD, const solverMode &, index_t num) const
 {
-	return  (num == 0) ? ((sourceFunc(sD->time + 1e-7) - sourceFunc(sD->time)) / 1e-7) : 0.0;
+	return  (num == 0) ? ((sourceFunc(sD.time + 1e-7) - sourceFunc(sD.time)) / 1e-7) : 0.0;
 }
 
 void functionSource::setFunction(std::function<double(double)> calcFunc)

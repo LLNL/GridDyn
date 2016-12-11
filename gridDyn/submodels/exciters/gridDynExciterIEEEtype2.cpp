@@ -25,7 +25,7 @@ gridDynExciterIEEEtype2::gridDynExciterIEEEtype2 (const std::string &objName) : 
 }
 
 //cloning function
-gridCoreObject *gridDynExciterIEEEtype2::clone (gridCoreObject *obj) const
+coreObject *gridDynExciterIEEEtype2::clone (coreObject *obj) const
 {
   gridDynExciterIEEEtype2 *gdE = cloneBase<gridDynExciterIEEEtype2, gridDynExciterIEEEtype1> (this, obj);
   if (gdE == nullptr)
@@ -62,15 +62,15 @@ void gridDynExciterIEEEtype2::objectInitializeB (const IOdata &args, const IOdat
 
 
 // residual
-void gridDynExciterIEEEtype2::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynExciterIEEEtype2::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
       return;
     }
   auto offset = offsets.getDiffOffset (sMode);
-  const double *es = sD->state + offset;
-  const double *esp = sD->dstate_dt + offset;
+  const double *es = sD.state + offset;
+  const double *esp = sD.dstate_dt + offset;
   double *rv = resid + offset;
   rv[0] = (-(Ke + Aex * exp (Bex * es[0])) * es[0] + es[1]) / Te - esp[0];
   if (opFlags[outside_vlim])
@@ -93,7 +93,7 @@ void gridDynExciterIEEEtype2::residual (const IOdata &args, const stateData *sD,
 
 }
 
-void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
   const double *es = Loc.diffStateLoc;
@@ -114,7 +114,7 @@ void gridDynExciterIEEEtype2::derivative (const IOdata &args, const stateData *s
 // compute the bus element contributions
 
 // Jacobian
-void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const stateData *sD,
+void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const stateData &sD,
                                                 matrixData<double> &ad,
                                                 const IOlocs &argLocs, const solverMode &sMode)
 {
@@ -130,13 +130,13 @@ void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const s
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
 
   // Ef
-  temp1 = -(Ke + Aex * exp (Bex * sD->state[offset]) * (1.0 + Bex * sD->state[offset])) / Te - sD->cj;
+  temp1 = -(Ke + Aex * exp (Bex * sD.state[offset]) * (1.0 + Bex * sD.state[offset])) / Te - sD.cj;
   ad.assign ( refI, refI, temp1);
   ad.assign ( refI, refI + 1, 1.0 / Te);
 
   if (opFlags[outside_vlim])
     {
-      ad.assign (refI + 1, refI + 1, sD->cj);
+      ad.assign (refI + 1, refI + 1, sD.cj);
     }
   else
     {
@@ -145,22 +145,22 @@ void gridDynExciterIEEEtype2::jacobianElements (const IOdata & /*args*/, const s
         {
           ad.assign (refI + 1, VLoc, -Ka / Ta);
         }
-      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD->cj);
+      ad.assign (refI + 1, refI + 1, -1.0 / Ta - sD.cj);
       ad.assign (refI + 1, refI + 2, Ka * Kf / Ta);
     }
 
 
   // X1
   ad.assign ( refI + 2, refI + 1,  1.0 / (Tf * Tf2));
-  ad.assign ( refI + 2, refI + 2, -1.0 / Tf - sD->cj);
+  ad.assign ( refI + 2, refI + 2, -1.0 / Tf - sD.cj);
   ad.assign ( refI + 2, refI + 3, -1.0 / (Tf * Tf2));
 
   // X2
   ad.assign (refI + 3, refI + 1, 1.0 / Tf2);
-  ad.assign (refI + 3, refI + 3, -1.0 / Tf2 - sD->cj);
+  ad.assign (refI + 3, refI + 3, -1.0 / Tf2 - sD.cj);
 
 
-  //printf("%f\n",sD->cj);
+  //printf("%f\n",sD.cj);
 
 }
 
@@ -174,11 +174,11 @@ stringVec gridDynExciterIEEEtype2::localStateNames () const
   return ieeeType2Fields;
 }
 
-void gridDynExciterIEEEtype2::rootTest (const IOdata &args, const stateData *sD, double roots[],  const solverMode &sMode)
+void gridDynExciterIEEEtype2::rootTest (const IOdata &args, const stateData &sD, double roots[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   int rootOffset = offsets.getRootOffset (sMode);
-  const double *es = sD->state + offset;
+  const double *es = sD.state + offset;
 
 
   if (opFlags[outside_vlim])
@@ -195,7 +195,7 @@ void gridDynExciterIEEEtype2::rootTest (const IOdata &args, const stateData *sD,
     }
 }
 
-change_code gridDynExciterIEEEtype2::rootCheck ( const IOdata &args, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code gridDynExciterIEEEtype2::rootCheck ( const IOdata &args, const stateData &, const solverMode &, check_level_t /*level*/)
 {
 
   double *es = m_state.data ();

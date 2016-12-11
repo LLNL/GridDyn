@@ -15,7 +15,7 @@
 #include "grabberInterpreter.hpp"
 #include <map>
 
-std::shared_ptr<gridCondition> make_condition(const std::string &condString, gridCoreObject *rootObject)
+std::shared_ptr<gridCondition> make_condition(const std::string &condString, coreObject *rootObject)
 {
 	auto cString = xmlCharacterCodeReplace(condString);
 	//size_t posA = condString.find_first_of("&|");
@@ -109,13 +109,13 @@ std::string toString(comparison_type comp)
 	}
 }
 
-std::shared_ptr<gridCondition> make_condition(const std::string &field, const std::string &compare, double level, gridCoreObject *rootObject)
+std::shared_ptr<gridCondition> make_condition(const std::string &field, const std::string &compare, double level, coreObject *rootObject)
 {
 	return make_condition(field, comparisonFromString(compare), level, rootObject);
 	//get the state grabbers part
 }
 
-std::shared_ptr<gridCondition> make_condition(const std::string &field, comparison_type comp, double level, gridCoreObject *rootObject)
+std::shared_ptr<gridCondition> make_condition(const std::string &field, comparison_type comp, double level, coreObject *rootObject)
 {
 	//get the state grabbers part
 
@@ -211,7 +211,7 @@ void gridCondition::setConditionRHS(std::shared_ptr<gridGrabber> valGrabber, std
 	}
 }
 
-void gridCondition::updateObject(gridCoreObject *obj, object_update_mode mode)
+void gridCondition::updateObject(coreObject *obj, object_update_mode mode)
 {
 	//TODO:: This function could potentially leave stuff in an unstable state
 	//Practically speaking it is very likely that if condition A update doesn't throw an error the others won't either and in that codition
@@ -270,7 +270,7 @@ double gridCondition::evalCondition()
 	return evalf(v1,v2,m_curr_margin);
 }
 
-double gridCondition::evalCondition(const stateData *sD, const solverMode &sMode)
+double gridCondition::evalCondition(const stateData &sD, const solverMode &sMode)
 {
 	double v1 = conditionAst->grabData(sD, sMode);
 	double v2 = (m_constB)?m_constant:conditionBst->grabData(sD, sMode);
@@ -284,7 +284,7 @@ double gridCondition::getVal(int side) const
 return v;
 }
 
-double gridCondition::getVal(int side,const stateData *sD, const solverMode &sMode) const
+double gridCondition::getVal(int side,const stateData &sD, const solverMode &sMode) const
 {
   double v = (side == 2) ? ((m_constB) ? m_constant : conditionBst->grabData(sD, sMode)) : conditionAst->grabData(sD, sMode);
   return v;
@@ -306,7 +306,7 @@ bool gridCondition::checkCondition() const
 
 }
 
-bool gridCondition::checkCondition(const stateData *sD, const solverMode &sMode) const
+bool gridCondition::checkCondition(const stateData &sD, const solverMode &sMode) const
 {
 	if (!conditionAst)
 	{
@@ -337,7 +337,7 @@ void gridCondition::setMargin(double val)
   }
 }
 
-gridCoreObject * gridCondition::getObject() const
+coreObject * gridCondition::getObject() const
 {
 	if (conditionA)
 	{
@@ -350,7 +350,7 @@ gridCoreObject * gridCondition::getObject() const
 	return nullptr;
 }
 
-void gridCondition::getObjects(std::vector<gridCoreObject *> &objects) const
+void gridCondition::getObjects(std::vector<coreObject *> &objects) const
 {
 	if (conditionA)
 	{

@@ -26,12 +26,12 @@ static const IgnoreListType simIgnoreFields {
   "version", "basepower"
 };
 
-bool isMasterObject (const gridCoreObject *searchObject, const gridSimulation *gs);
+bool isMasterObject (const coreObject *searchObject, const gridSimulation *gs);
 
 static const std::string libstring("library");
 // read XML file
-//gridCoreObject * readSimXMLFile(const std::string &filename, gridCoreObject *gco, const std::string  prefix, readerInfo *ri) const
-gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject, gridSimulation *gs)
+//coreObject * readSimXMLFile(const std::string &filename, coreObject *gco, const std::string  prefix, readerInfo *ri) const
+gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject, gridSimulation *gs)
 {
   // pointers
   bool masterObject = isMasterObject (searchObject, gs);
@@ -152,7 +152,7 @@ void loadDefaultObjectTranslations (readerInfo *ri)
 }
 
 
-bool isMasterObject (const gridCoreObject *searchObject, const gridSimulation *gs)
+bool isMasterObject (const coreObject *searchObject, const gridSimulation *gs)
 {
   if (searchObject)
     {

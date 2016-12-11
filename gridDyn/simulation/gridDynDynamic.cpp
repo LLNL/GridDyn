@@ -674,7 +674,7 @@ int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
               if (retval != FUNCTION_EXECUTION_SUCCESS)
                 {
                   timeActual = currentTime;
-                  return 1;
+                  return retval;
                 }
             }      //this step does a reset of IDA if necessary
           tStop = std::min (stopTime, EvQ->getNextTime ());             //update the stopping time just in case the events have changed
@@ -684,7 +684,7 @@ int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
           if (timeReturn < lastTimeStop + tols.timeTol)
             {
               timeActual = currentTime;
-              return (1);  //TODO:: PT replace this with a constant
+              return (retval);  //TODO:: PT replace this with a constant
             }
 
         }
@@ -719,6 +719,7 @@ void gridDynSimulation::handleEarlySolverReturn (int retval, gridDyn_time time, 
         {               // Note that if a root is found, integration halts at the root time which is
                         // returned in timeReturn.
           dynData->getRoots ();
+		  currentTime = time;
           setState (time, dynData->state_data (),dynData->deriv_data (), dynData->getSolverMode ());
           LOG_DEBUG ("Root detected");
           rootTrigger (time, dynData->rootsfound, dynData->getSolverMode ());
@@ -728,7 +729,7 @@ void gridDynSimulation::handleEarlySolverReturn (int retval, gridDyn_time time, 
           //if we get into here the most likely cause is a very low voltage bus
           stateData sD (time, dynData->state_data (), dynData->deriv_data ());
 
-          rootCheck (&sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
+          rootCheck (sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
           //return dynData->calcIC(getCurrentTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
           opFlags.reset (low_bus_voltage);
 #if JAC_CHECK_ENABLED > 0
@@ -827,7 +828,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
     {
       stateData sD (getCurrentTime (), dynData->state_data (),dynData->deriv_data ());
 
-      rootCheck (&sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
+      rootCheck (sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
       //return dynData->calcIC(getCurrentTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
       opFlags.reset (low_bus_voltage);
     }
@@ -935,7 +936,7 @@ int gridDynSimulation::checkAlgebraicRoots (std::shared_ptr<solverInterface> &dy
       dynData->getCurrentData ();
       setState (currentTime + probeStepTime, dynData->state_data (), dynData->deriv_data (), sMode);
       updateLocalCache ();
-      change_code ret = rootCheck (nullptr, cLocalSolverMode, check_level_t::full_check);
+      change_code ret = rootCheck (emptyStateData, cLocalSolverMode, check_level_t::full_check);
       handleRootChange (sMode, dynData);
       if (ret > change_code::non_state_change)
         {
@@ -1060,6 +1061,10 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
+
+
+
+
 #define DEBUG_RESID 0
 #define CHECK_RESID 1
 #define CHECK_STATE 1
@@ -1068,7 +1073,7 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
 const static double resid_print_tol = 1e-7;
 #endif
 // IDA nonlinear function evaluation
-int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double resid[], const solverMode &sMode)
+void gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double resid[], const solverMode &sMode)
 {
   ++residCount;
   stateData sD (ttime, state,dstate_dt,residCount);
@@ -1079,18 +1084,20 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
     {
       if (!std::isfinite (state[kk]))
         {
-          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
+		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
+          LOG_ERROR (estring);
+
 		  printStateNames(this,sMode);
-          return FUNCTION_EXECUTION_FAILURE;
+		  throw(std::runtime_error(estring));
         }
     }
 #endif
 
-  fillExtraStateData (&sD, sMode);
+  fillExtraStateData (sD, sMode);
   //call the area based function to handle the looping
-  preEx (&sD, sMode);
-  residual (&sD, resid, sMode);
-  delayedResidual (&sD, resid, sMode);
+  preEx (sD, sMode);
+  residual (sD, resid, sMode);
+  delayedResidual (sD, resid, sMode);
  // if (sourceFile == "case2383wp.m") //active debugging
   //{
 	//  setState(ttime, state, dstate_dt, sMode);
@@ -1103,9 +1110,11 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
     {
       if (!std::isfinite (resid[kk]))
         {
-          LOG_ERROR ("resid[" + std::to_string (kk) + "] is not finite");
-          printStateNames (this, sMode);
-          assert (std::isfinite (resid[kk]));
+		  std::string estring = "resid[" + std::to_string(kk) + "] is not finite";
+		  LOG_ERROR(estring);
+
+		  printStateNames(this, sMode);
+		  throw(std::runtime_error(estring));
         }
     }
 #endif
@@ -1114,7 +1123,7 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
   static std::vector<double> rvals;
   static std::vector<double> lstate;
   static std::vector<int> dbigger;
-  static double ptime = -kBigNum;
+  static gridDyn_time ptime = negTime;
   auto dynData = getSolverInterface (sMode);
   auto ss = dynData->size ();
   if (rvals.size () != ss)
@@ -1130,11 +1139,11 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
       for (index_t kk = 0; kk < ss; kk++)
         {
 #if (DEBUG_RESID == 3)
-          printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), ttime, static_cast<int> (kk), resid[kk], state[kk]);
+          printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), static_cast<double>(ttime), static_cast<int> (kk), resid[kk], state[kk]);
 #else
           if (std::abs (resid[kk]) > resid_print_tol)
             {
-              printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), ttime, static_cast<int> (kk), resid[kk], state[kk]);
+              printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), static_cast<double>(ttime), static_cast<int> (kk), resid[kk], state[kk]);
             }
             #endif
         }
@@ -1149,15 +1158,15 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
       std::fill (dbigger.begin (), dbigger.end (), 0);
 
 #if DEBUG_RESID > 1
-      printf ("time change %e\n", ttime - ptime);
+      printf ("time change %e\n", static_cast<double>(ttime - ptime));
       for (index_t kk = 0; kk < ss; kk++)
         {
 #if (DEBUG_RESID == 3)
-          printf ("%d[%f] %d r=%e state=%f\n", residCount, ttime, kk, resid[kk], state[kk]);
+          printf ("%d[%f] %d r=%e state=%f\n", residCount, static_cast<double>(ttime), kk, resid[kk], state[kk]);
 #else
           if (std::abs (resid[kk]) > resid_print_tol)
             {
-              printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), ttime, static_cast<int> (kk), resid[kk], state[kk]);
+              printf ("%d[%f] %d r=%e state=%f\n", static_cast<int> (residCount), static_cast<double>(ttime), static_cast<int> (kk), resid[kk], state[kk]);
             }
             #endif
         }
@@ -1171,11 +1180,11 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
         {
 #if DEBUG_RESID > 1
         #if (DEBUG_RESID == 3)
-          printf ("%d[%f] %d r=%e state=%f dr=%e ds=%e\n", static_cast<int> (residCount), ttime, static_cast<int> (kk), resid[kk], state[kk], resid[kk] - rvals[kk], state[kk] - lstate[kk]);
+          printf ("%d[%f] %d r=%e state=%f dr=%e ds=%e\n", static_cast<int> (residCount), static_cast<double>(ttime), static_cast<int> (kk), resid[kk], state[kk], resid[kk] - rvals[kk], state[kk] - lstate[kk]);
         #else
           if ((std::abs (resid[kk]) > resid_print_tol) || (std::abs (state[kk] - lstate[kk]) > 1e-7))
             {
-              printf ("%d[%f] %d r=%e state=%f dr=%e ds=%e\n", static_cast<int> (residCount), ttime, static_cast<int> (kk), resid[kk],state[kk],resid[kk] - rvals[kk],state[kk] - lstate[kk]);
+              printf ("%d[%f] %d r=%e state=%f dr=%e ds=%e\n", static_cast<int> (residCount), static_cast<double>(ttime), static_cast<int> (kk), resid[kk],state[kk],resid[kk] - rvals[kk],state[kk] - lstate[kk]);
             }
         #endif
 #endif
@@ -1184,7 +1193,7 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
               dbigger[kk] += 1;
               if (dbigger[kk] > 2)
                 {
-                  printf ("residual[%d] getting bigger from %e to %e at time=%f\n", static_cast<int> (kk), rvals[kk], resid[kk], ttime);
+                  printf ("residual[%d] getting bigger from %e to %e at time=%f\n", static_cast<int> (kk), rvals[kk], resid[kk], static_cast<double>(ttime));
                 }
 
             }
@@ -1197,74 +1206,68 @@ int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[
       std::copy (state, state + ss, lstate.data ());
     }
 #endif
-  if (opFlags[invalid_state_flag])
-    {
-      opFlags.reset (invalid_state_flag);
-      return 1;
-    }
-  return 0;
+
 }
 
 
-int gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode)
+void gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode)
 {
   ++residCount;
   stateData sD (ttime,state,dstate_dt,residCount);
-  fillExtraStateData (&sD, sMode);
+  fillExtraStateData (sD, sMode);
 #if (CHECK_STATE > 0)
   auto dynDataa = getSolverInterface (sMode);
   for (size_t kk = 0; kk < dynDataa->size (); ++kk)
     {
       if (!std::isfinite (state[kk]))
         {
-          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
-          return FUNCTION_EXECUTION_FAILURE;
+		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
+          LOG_ERROR (estring);
+          throw(std::runtime_error(estring));
         }
     }
 #endif
 
   //call the area based function to handle the looping
-  preEx (&sD, sMode);
-  derivative (&sD, dstate_dt, sMode);
-  delayedDerivative (&sD, dstate_dt, sMode);
-  return FUNCTION_EXECUTION_SUCCESS;
+  preEx (sD, sMode);
+  derivative (sD, dstate_dt, sMode);
+  delayedDerivative (sD, dstate_dt, sMode);
 }
 
 // Jacobian computation
-int gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode)
+void gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode)
 {
   ++JacobianCount;
   //assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption will be generally valid)
   stateData sD (ttime,state,dstate_dt,residCount);
   sD.cj = cj;
-  fillExtraStateData (&sD, sMode);
+  fillExtraStateData (sD, sMode);
   //the area function to evaluate the Jacobian elements
-  preEx (&sD, sMode);
+  preEx (sD, sMode);
   ad.clear ();
-  jacobianElements (&sD, ad, sMode);
-  delayedJacobian (&sD, ad, sMode);
+  jacobianElements (sD, ad, sMode);
+  delayedJacobian (sD, ad, sMode);
 
-  return FUNCTION_EXECUTION_SUCCESS;
+
 }
 
 
-int gridDynSimulation::rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode)
+void gridDynSimulation::rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode)
 {
   stateData sD (ttime,state,dstate_dt,residCount);
-  fillExtraStateData (&sD, sMode);
-  rootTest (&sD, roots, sMode);
-  return FUNCTION_EXECUTION_SUCCESS;
+  fillExtraStateData (sD, sMode);
+  rootTest (sD, roots, sMode);
 
 }
 
 
-int gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffState[],const double deriv[], const solverMode &sMode)
+void gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffState[],const double deriv[], const solverMode &sMode)
 {
 	extraStateInformation[sMode.offsetIndex] = diffState;
 	extraDerivInformation[sMode.offsetIndex] = deriv;
 	
 	auto sd = getSolverInterface(sMode.pairedOffsetIndex);
-	int ret = FUNCTION_EXECUTION_FAILURE;
+	int ret=0;
 	if (sd)
 	{
 		gridDyn_time tret;
@@ -1282,6 +1285,9 @@ int gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffSt
 	}
 	extraStateInformation[sMode.offsetIndex] = nullptr;
 	extraDerivInformation[sMode.offsetIndex] = nullptr;
-	return ret;
+	if (ret < 0)
+	{
+		throw(std::runtime_error(sd->getLastErrorString()));
+	}
 	
 }

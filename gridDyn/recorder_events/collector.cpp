@@ -77,7 +77,7 @@ std::shared_ptr<collector> collector::clone(std::shared_ptr<collector> gr) const
 }
 
 
-void collector::updateObject(gridCoreObject *gco, object_update_mode mode)
+void collector::updateObject(coreObject *gco, object_update_mode mode)
 {
 
 	for (auto gg : points)
@@ -98,7 +98,7 @@ void collector::updateObject(gridCoreObject *gco, object_update_mode mode)
 
 }
 
-gridCoreObject * collector::getObject() const
+coreObject * collector::getObject() const
 {
 	if (!points.empty())
 	{
@@ -115,7 +115,7 @@ gridCoreObject * collector::getObject() const
 	return nullptr;
 }
 
-void collector::getObjects(std::vector<gridCoreObject *> &objects) const
+void collector::getObjects(std::vector<coreObject *> &objects) const
 {
 	for (auto gg : points)
 	{
@@ -412,7 +412,7 @@ void collector::dataPointAdded(const collectorPoint& )
 
 }
 
-void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
+void collector::add(gridGrabberInfo *gdRI, coreObject *obj)
 {
 	if (gdRI->field.empty())              //any field specification overrides the offset
 	{
@@ -498,7 +498,7 @@ void collector::add(gridGrabberInfo *gdRI, gridCoreObject *obj)
 
 }
 
-void collector::add(const std::string &field, gridCoreObject *obj)
+void collector::add(const std::string &field, coreObject *obj)
 {
 	if (field.find_first_of(",;") != std::string::npos)
 	{                     //now go into a loop of the comma variables

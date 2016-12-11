@@ -136,11 +136,11 @@ public:
   void reset();
   void wait() const;
 
-  gridCoreObject *getObject() const override;
+  coreObject *getObject() const override;
 
-  void getObjects(std::vector<gridCoreObject *> &objects) const override;
+  void getObjects(std::vector<coreObject *> &objects) const override;
 
- void updateObject(gridCoreObject *newObj, object_update_mode mode = object_update_mode::match) override;
+ void updateObject(coreObject *newObj, object_update_mode mode = object_update_mode::match) override;
 
   std::shared_ptr<contingency> clone(std::shared_ptr<contingency> con=nullptr) const;
 

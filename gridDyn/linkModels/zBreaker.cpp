@@ -31,7 +31,7 @@ zBreaker::zBreaker (const std::string &objName) : gridLink (objName)
 	opFlags.set(network_connected);
 }
 
-gridCoreObject * zBreaker::clone (gridCoreObject *obj) const
+coreObject * zBreaker::clone (coreObject *obj) const
 {
   zBreaker *lnk = cloneBase<zBreaker, gridLink> (this, obj);
   if (lnk == nullptr)
@@ -163,18 +163,18 @@ void zBreaker::updateLocalCache ()
   linkInfo.v1 = B1->getVoltage ();
   linkInfo.v2 = linkInfo.v1;
 }
-void zBreaker::updateLocalCache (const stateData *sD, const solverMode &)
+void zBreaker::updateLocalCache (const stateData &sD, const solverMode &)
 {
   if (!enabled)
     {
       return;
     }
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
     {
       return;
     }
   std::memset (&linkInfo, 0, sizeof(linkI));
-  linkInfo.seqID = sD->seqID;
+  linkInfo.seqID = sD.seqID;
   linkInfo.v1 = B1->getVoltage ();
   linkInfo.v2 = linkInfo.v1;
 }

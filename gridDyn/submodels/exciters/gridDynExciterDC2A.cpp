@@ -41,7 +41,7 @@ gridDynExciterDC2A::gridDynExciterDC2A (const std::string &objName) : gridDynExc
 }
 
 //cloning function
-gridCoreObject *gridDynExciterDC2A::clone (gridCoreObject *obj) const
+coreObject *gridDynExciterDC2A::clone (coreObject *obj) const
 {
   gridDynExciterDC2A *gdE = cloneBase<gridDynExciterDC2A, gridDynExciterDC1A> (this, obj);
   if (gdE == nullptr)
@@ -54,7 +54,7 @@ gridCoreObject *gridDynExciterDC2A::clone (gridCoreObject *obj) const
 
 
 // residual
-void gridDynExciterDC2A::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynExciterDC2A::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
 
   if (isAlgebraicOnly (sMode))
@@ -77,7 +77,7 @@ void gridDynExciterDC2A::residual (const IOdata &args, const stateData *sD, doub
     }
 }
 
-void gridDynExciterDC2A::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynExciterDC2A::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 
   if (isAlgebraicOnly (sMode))
@@ -118,11 +118,11 @@ void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, doub
 
 }
 
-void gridDynExciterDC2A::rootTest (const IOdata &args, const stateData *sD, double roots[],  const solverMode &sMode)
+void gridDynExciterDC2A::rootTest (const IOdata &args, const stateData &sD, double roots[],  const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   int rootOffset = offsets.getRootOffset (sMode);
-  const double *es = sD->state + offset;
+  const double *es = sD.state + offset;
   double V = args[voltageInLocation];
   if (opFlags.test (outside_vlim))
     {
@@ -138,7 +138,7 @@ void gridDynExciterDC2A::rootTest (const IOdata &args, const stateData *sD, doub
     }
 }
 
-change_code gridDynExciterDC2A::rootCheck ( const IOdata &args, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code gridDynExciterDC2A::rootCheck ( const IOdata &args, const stateData &, const solverMode &, check_level_t /*level*/)
 {
 
   double *es = m_state.data ();

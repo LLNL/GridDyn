@@ -38,7 +38,7 @@ gridGenOpt::gridGenOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridGenOpt::gridGenOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),gen (dynamic_cast<gridDynGenerator *> (obj))
+gridGenOpt::gridGenOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),gen (dynamic_cast<gridDynGenerator *> (obj))
 {
 
   if (gen)
@@ -51,7 +51,7 @@ gridGenOpt::gridGenOpt (gridCoreObject *obj, const std::string &objName) : gridO
     }
 }
 
-gridCoreObject *gridGenOpt::clone (gridCoreObject *obj) const
+coreObject *gridGenOpt::clone (coreObject *obj) const
 {
   gridGenOpt *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
   if (nobj == nullptr)
@@ -72,7 +72,7 @@ gridCoreObject *gridGenOpt::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void gridGenOpt::add (gridCoreObject *obj)
+void gridGenOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridDynGenerator *> (obj))
     {

@@ -42,7 +42,7 @@ gridSimulation::~gridSimulation ()
   opFlags.set (being_deleted);       //set this flag to handle some unusual circumstances with extra objects
 }
 
-gridCoreObject *gridSimulation::clone (gridCoreObject *obj) const
+coreObject *gridSimulation::clone (coreObject *obj) const
 {
 	gridSimulation *sim = cloneBase<gridSimulation, gridArea>(this, obj);
 	if (!sim)
@@ -80,9 +80,9 @@ void gridSimulation::setErrorCode (int ecode)
   pState = ((ecode == GS_NO_ERROR) ? pState : gridState_t::GD_ERROR), errorCode = ecode;
 }
 
-void gridSimulation::addsp (std::shared_ptr<gridCoreObject> obj)
+void gridSimulation::addsp (std::shared_ptr<coreObject> obj)
 {
-  gridCoreObject *gco = obj.get ();
+  coreObject *gco = obj.get ();
   obj->setOwner (nullptr, gco);       //set an ownership loop so the object would never get deleted in another way
   if (std::dynamic_pointer_cast<gridObject>(obj))
   {
@@ -355,7 +355,7 @@ std::shared_ptr<collector> gridSimulation::findCollector (const std::string &col
   return nullptr;
 }
 
-void gridSimulation::log (gridCoreObject *object, print_level level, const std::string &message)
+void gridSimulation::log (coreObject *object, print_level level, const std::string &message)
 {
   if ((level > consolePrintLevel) && (level > logPrintLevel))
     {
@@ -433,7 +433,7 @@ static const std::map<int, std::string> alertStrings {
 };
 /* *INDENT-ON* */
 
-void gridSimulation::alert (gridCoreObject *object, int code)
+void gridSimulation::alert (coreObject *object, int code)
 {
 
 
@@ -558,7 +558,7 @@ gridDyn_time gridSimulation::getEventTime () const
   return EvQ->getNextTime ();
 }
 
-gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gridPrimary *sec)
+coreObject * findMatchingObject (coreObject *obj1, gridPrimary *src, gridPrimary *sec)
 {
   
   if (!obj1)
@@ -569,7 +569,7 @@ gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gri
     {
       return sec;
     }
-  gridCoreObject *obj2 = nullptr;
+  coreObject *obj2 = nullptr;
   if (dynamic_cast<gridSecondary *> (obj1))             //we know it is a gen or load so it parent should be a bus
     {
       gridBus *bus = dynamic_cast<gridBus *> (obj1->getParent ());
@@ -600,7 +600,7 @@ gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gri
     }
   else               //now we get ugly we are gridSecondary Object
     {
-      gridCoreObject *pobj = findMatchingObject (obj1->getParent (), src, sec);
+      coreObject *pobj = findMatchingObject (obj1->getParent (), src, sec);
       if (pobj)
         {//this is and internal string sequence, likely won't be documented
           obj2 = pobj->getSubObject ("submodelcode", obj1->locIndex);

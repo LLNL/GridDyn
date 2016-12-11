@@ -33,7 +33,7 @@ compoundEventPlayer::compoundEventPlayer(const std::string &eventName):compoundE
 {
 
 }
-compoundEventPlayer::compoundEventPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject):compoundEvent(gdEI,rootObject)
+compoundEventPlayer::compoundEventPlayer(gridEventInfo *gdEI, coreObject *rootObject):compoundEvent(gdEI,rootObject)
 {
 
 }
@@ -229,7 +229,7 @@ change_code compoundEventPlayer::trigger(gridDyn_time time)
 	return ret;
 }
 
-bool compoundEventPlayer::setTarget(gridCoreObject *gdo, const std::string &var)
+bool compoundEventPlayer::setTarget(coreObject *gdo, const std::string &var)
 {
 	if (!var.empty())
 	{

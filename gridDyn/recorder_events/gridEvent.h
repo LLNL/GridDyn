@@ -37,16 +37,16 @@ public:
   std::vector<gridDyn_time> time;
   std::vector<double> value;
   stringVec fieldList;
-  std::vector<gridCoreObject *>targetObjs;
+  std::vector<coreObject *>targetObjs;
   std::vector<index_t> columns;
   std::vector<gridUnits::units_t> units;
 public:
   gridEventInfo ()
   {
   }
-  gridEventInfo(const std::string &eventString, gridCoreObject *rootObj);
+  gridEventInfo(const std::string &eventString, coreObject *rootObj);
 
-  void loadString(const std::string &eventString, gridCoreObject *rootObj);
+  void loadString(const std::string &eventString, coreObject *rootObj);
 };
 
 /** basic event class enabling a property change in an object */
@@ -60,7 +60,7 @@ protected:
 		index_t eventId;		//!< a unique Identifier code for the event
         double value=0.0;			//!< new value
 		gridDyn_time triggerTime;		//!< the time the event is scheduled to be triggered
-        gridCoreObject *m_obj = nullptr;		//!< the target object of the event
+        coreObject *m_obj = nullptr;		//!< the target object of the event
 		gridUnits::units_t unitType = gridUnits::defUnit; //!< units of the event
         bool armed = false;		//!< flag indicating if the event is armed or not
 		bool resettable = false;  //!< flag indicating if the event can be reset;
@@ -70,12 +70,12 @@ private:
 public:
 	explicit gridEvent(const std::string &newName);
 	explicit gridEvent(gridDyn_time time0 = negTime);
-	gridEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
+	gridEvent(gridEventInfo *gdEI, coreObject *rootObject);
 
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const;
         virtual ~gridEvent();
 
-		virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
+		virtual void updateEvent(gridEventInfo *gdEI, coreObject *rootObject);
         virtual change_code trigger();
         virtual change_code trigger(gridDyn_time time) override;
 
@@ -97,12 +97,12 @@ public:
         virtual void setValue(double val, gridUnits::units_t unitType=gridUnits::defUnit);
         virtual std::string toString();
 
-        virtual bool setTarget(gridCoreObject *gdo, const std::string &var = "");
+        virtual bool setTarget(coreObject *gdo, const std::string &var = "");
 
-		virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+		virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 
-		virtual gridCoreObject * getObject() const override;
-		virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+		virtual coreObject * getObject() const override;
+		virtual void getObjects(std::vector<coreObject *> &objects) const override;
 		const std::string &getName() const
 		{
 			return name;
@@ -112,7 +112,7 @@ public:
 			name = newName;
 		}
 protected:
-	void loadField(gridCoreObject *gdo, const std::string field);
+	void loadField(coreObject *gdo, const std::string field);
 	virtual bool checkArmed();
 };
 
@@ -123,14 +123,14 @@ protected:
         stringVec fields;
         std::vector<double> values;
         std::vector<gridUnits::units_t> units;
-        std::vector<gridCoreObject *> targetObjects;
+        std::vector<coreObject *> targetObjects;
 public:
 	explicit compoundEvent(const std::string &newName);
 	explicit compoundEvent(gridDyn_time time0 = 0.0);
-	compoundEvent(gridEventInfo *gdEI, gridCoreObject *rootObject);
+	compoundEvent(gridEventInfo *gdEI, coreObject *rootObject);
 	virtual std::shared_ptr<gridEvent> clone( std::shared_ptr<gridEvent> ggb = nullptr) const override;
 	
-	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+	//virtual void updateEvent(gridEventInfo *gdEI, coreObject *rootObject) override;
 	virtual change_code trigger() override;
 	virtual change_code trigger(gridDyn_time time) override;
 
@@ -141,10 +141,10 @@ public:
 	virtual void setValue(const std::vector<double> &val);
 	virtual std::string toString() override;
 
-	virtual bool setTarget(gridCoreObject *gdo, const std::string &var = "") override;
-	virtual void updateObject(gridCoreObject *gco, object_update_mode mode = object_update_mode::direct) override;
-	virtual gridCoreObject * getObject() const override;
-	virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
+	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+	virtual coreObject * getObject() const override;
+	virtual void getObjects(std::vector<coreObject *> &objects) const override;
 };
 
 /** event player allowing a timeSeries of events to occur over numerous time points on a single object and field*/
@@ -159,10 +159,10 @@ protected:
 public:
 	explicit gridPlayer(const std::string &newName);
         gridPlayer(gridDyn_time time0 = 0.0, double loopPeriod = 0.0);
-		gridPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
+		gridPlayer(gridEventInfo *gdEI, coreObject *rootObject);
 		virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
-		virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+		virtual void updateEvent(gridEventInfo *gdEI, coreObject *rootObject) override;
 		virtual change_code trigger() override;
 		virtual change_code trigger(gridDyn_time time) override;
 
@@ -174,7 +174,7 @@ public:
         void loadEventFile(const std::string &fname);
         virtual std::string toString() override;
 
-        virtual bool setTarget(gridCoreObject *gdo, const std::string &var = "") override;
+        virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 
         //friendly helper functions for sorting
 protected:
@@ -194,10 +194,10 @@ protected:
 public:
 	explicit compoundEventPlayer(const std::string &newName);
 	compoundEventPlayer();
-	compoundEventPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
+	compoundEventPlayer(gridEventInfo *gdEI, coreObject *rootObject);
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
-	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+	//virtual void updateEvent(gridEventInfo *gdEI, coreObject *rootObject) override;
 
 	virtual change_code trigger() override;
 	virtual change_code trigger(gridDyn_time time) override;
@@ -210,7 +210,7 @@ public:
 	void loadEventFile(const std::string &fname);
 	virtual std::string toString() override;
 
-	virtual bool setTarget(gridCoreObject *gdo, const std::string &var = "") override;
+	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 
 protected:
 	virtual void updateTrigger(gridDyn_time time);
@@ -228,10 +228,10 @@ protected:
 public:
 	explicit interpolatingPlayer(const std::string &newName);
 	interpolatingPlayer(gridDyn_time time0 = 0.0, double loopPeriod = 0.0);
-	interpolatingPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject);
+	interpolatingPlayer(gridEventInfo *gdEI, coreObject *rootObject);
 	virtual std::shared_ptr<gridEvent> clone(std::shared_ptr<gridEvent> ggb = nullptr) const override;
 
-	//virtual void updateEvent(gridEventInfo *gdEI, gridCoreObject *rootObject) override;
+	//virtual void updateEvent(gridEventInfo *gdEI, coreObject *rootObject) override;
 	virtual change_code trigger() override;
 	virtual change_code trigger(gridDyn_time time) override;
 
@@ -245,7 +245,7 @@ protected:
 	virtual void setNextValue() override;
 };
 
-std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, gridCoreObject *rootObject);
-std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, gridCoreObject *rootObject);
-std::shared_ptr<gridEvent> make_event(const std::string &field, gridCoreObject *rootObject);
+std::shared_ptr<gridEvent> make_event (const std::string &field, double val, gridDyn_time eventTime, coreObject *rootObject);
+std::shared_ptr<gridEvent> make_event (gridEventInfo *gdEI, coreObject *rootObject);
+std::shared_ptr<gridEvent> make_event(const std::string &field, coreObject *rootObject);
 #endif

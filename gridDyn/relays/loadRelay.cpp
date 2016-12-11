@@ -23,7 +23,7 @@ loadRelay::loadRelay (const std::string&objName) : gridRelay (objName)
   // opFlags.set(continuous_flag);
 }
 
-gridCoreObject *loadRelay::clone (gridCoreObject *obj) const
+coreObject *loadRelay::clone (coreObject *obj) const
 {
   loadRelay *nobj = cloneBase<loadRelay, gridRelay> (this, obj);
   if (nobj == nullptr)

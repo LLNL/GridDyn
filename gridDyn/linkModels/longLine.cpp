@@ -23,7 +23,7 @@ longLine::longLine (const std::string &objName) : subsystem (objName)
 
 }
 
-gridCoreObject * longLine::clone (gridCoreObject *obj) const
+coreObject * longLine::clone (coreObject *obj) const
 {
   longLine *line = cloneBase<longLine, gridLink> (this, obj);
   if (!(line))
@@ -38,12 +38,12 @@ gridCoreObject * longLine::clone (gridCoreObject *obj) const
   return line;
 }
 // add components
-void longLine::add (gridCoreObject * /*obj*/)
+void longLine::add (coreObject * /*obj*/)
 {
 	return throw(invalidObjectException(this));
 }
 // remove components
-void longLine::remove (gridCoreObject * /*obj*/)
+void longLine::remove (coreObject * /*obj*/)
 {
 
 }

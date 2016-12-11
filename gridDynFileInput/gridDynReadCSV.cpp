@@ -35,7 +35,7 @@ enum mode_state
   read_header, read_data
 };
 
-void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerInfo *ri, const std::string &oname)
+void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo *ri, const std::string &oname)
 {
   auto cof = coreObjectFactory::instance ();
   std::ifstream file (filename, std::ios::in);
@@ -52,7 +52,7 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
   std::vector<int> skipToken;
   std::vector<units_t> units;
   std::string ObjectMode;
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   int typekey = -1;
   int refkey = -1;
   std::string type;
@@ -62,7 +62,7 @@ void loadCSV (gridCoreObject *parentObject,const std::string &filename, readerIn
   int ret;
   std::string str;
   gridBus *bus = nullptr;
-  gridCoreObject *obj2 = nullptr;
+  coreObject *obj2 = nullptr;
   mode_state mState = read_header;
 
 

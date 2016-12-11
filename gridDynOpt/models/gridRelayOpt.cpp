@@ -32,7 +32,7 @@ gridRelayOpt::gridRelayOpt (const std::string &objName) : gridOptObject (objName
 
 }
 
-gridRelayOpt::gridRelayOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),relay (dynamic_cast<gridRelay *> (obj))
+gridRelayOpt::gridRelayOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),relay (dynamic_cast<gridRelay *> (obj))
 {
   if (relay)
     {
@@ -45,7 +45,7 @@ gridRelayOpt::gridRelayOpt (gridCoreObject *obj, const std::string &objName) : g
 
 }
 
-gridCoreObject *gridRelayOpt::clone (gridCoreObject *obj) const
+coreObject *gridRelayOpt::clone (coreObject *obj) const
 {
   gridRelayOpt *nobj;
   if (obj == nullptr)
@@ -75,7 +75,7 @@ gridCoreObject *gridRelayOpt::clone (gridCoreObject *obj) const
 }
 
 
-void gridRelayOpt::add (gridCoreObject *obj)
+void gridRelayOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridRelay *> (obj))
     {
@@ -135,7 +135,7 @@ void gridRelayOpt::objectInitializeA (unsigned long /*flags*/)
 
 
 
-void gridRelayOpt::remove (gridCoreObject *)
+void gridRelayOpt::remove (coreObject *)
 {
 
 }
@@ -261,9 +261,9 @@ void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
 
 
 
-gridCoreObject *gridRelayOpt::find (const std::string &objname) const
+coreObject *gridRelayOpt::find (const std::string &objname) const
 {
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   if ((objname == this->name)|| (objname == "relay"))
     {
       return const_cast<gridRelayOpt *> (this);
@@ -284,7 +284,7 @@ gridCoreObject *gridRelayOpt::find (const std::string &objname) const
   return obj;
 }
 
-gridCoreObject *gridRelayOpt::getSubObject (const std::string &typeName, index_t /*num*/) const
+coreObject *gridRelayOpt::getSubObject (const std::string &typeName, index_t /*num*/) const
 {
   if (typeName == "target")
     {
@@ -297,7 +297,7 @@ gridCoreObject *gridRelayOpt::getSubObject (const std::string &typeName, index_t
     }
 }
 
-gridCoreObject *gridRelayOpt::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridRelayOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName == "relay")
     {

@@ -15,7 +15,7 @@
 
 #include "gridDynExceptions.h"
 
-coreObjectException::coreObjectException(gridCoreObject *obj):throwingObject(obj)
+coreObjectException::coreObjectException(coreObject *obj):throwingObject(obj)
 {
 
 }

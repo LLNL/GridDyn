@@ -23,9 +23,9 @@ using namespace readerConfig;
 static const IgnoreListType ignoreConditionVariables {
   "condition"
 };
-bool checkCondition (const std::string &cond, readerInfo *ri, gridCoreObject *parentObject);
+bool checkCondition (const std::string &cond, readerInfo *ri, coreObject *parentObject);
 // "aP" is the XML element passed from the reader
-void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject)
+void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
 {
 
   auto riScope = ri->newScope ();
@@ -65,7 +65,7 @@ void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *
 }
 
 
-bool checkCondition (const std::string &cond, readerInfo *ri, gridCoreObject * /*parentObject*/)
+bool checkCondition (const std::string &cond, readerInfo *ri, coreObject * /*parentObject*/)
 {
   size_t pos = cond.find_first_of ("><=!");
   bool eval = false;

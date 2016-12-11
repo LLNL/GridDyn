@@ -41,18 +41,18 @@ protected:
   gridBus *bus = nullptr;
 public:
   gridBusOpt (const std::string &objName = "");
-  gridBusOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridBusOpt (coreObject *obj, const std::string &objName = "");
   ~gridBusOpt ();
 
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
- void add (gridCoreObject *obj) override;
+ void add (coreObject *obj) override;
   void add (gridLoadOpt *pl);
   void add (gridGenOpt *gen);
   void add (gridLinkOpt *lnk);
 
   // remove components
-  void remove (gridCoreObject *obj)  override;
+  void remove (coreObject *obj)  override;
   void remove (gridLoadOpt *pl);
   void remove (gridGenOpt *gen);
   void remove (gridLinkOpt *lnk);
@@ -92,13 +92,13 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 
-  //void alert (gridCoreObject *object, int code);
+  //void alert (coreObject *object, int code);
 
   // find components
   gridLinkOpt * findLink (gridBus *bs) const;
-  gridCoreObject * find (const std::string &objname) const  override;
-  gridCoreObject * getSubObject (const std::string &typeName, index_t num) const  override;
-  gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const  override;
+  coreObject * find (const std::string &objname) const  override;
+  coreObject * getSubObject (const std::string &typeName, index_t num) const  override;
+  coreObject * findByUserID (const std::string &typeName, index_t searchID) const  override;
 
   gridOptObject * getLink (index_t x) const  override;
   gridOptObject * getLoad (index_t x = 0) const;

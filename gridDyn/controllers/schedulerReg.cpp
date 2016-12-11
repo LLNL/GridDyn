@@ -37,7 +37,7 @@ schedulerReg::schedulerReg (double initialValue,double initialReg,const std::str
   rampTime = 600;
 }
 
-gridCoreObject *schedulerReg::clone (gridCoreObject *obj) const
+coreObject *schedulerReg::clone (coreObject *obj) const
 {
   schedulerReg *nobj = cloneBase<schedulerReg, schedulerRamp> (this, obj);
   if (nobj == nullptr)

@@ -32,7 +32,7 @@ fuse::fuse (const std::string&objName) : gridRelay (objName)
   opFlags.reset (no_dyn_states);
 }
 
-gridCoreObject *fuse::clone (gridCoreObject *obj) const
+coreObject *fuse::clone (coreObject *obj) const
 {
   fuse *nobj = cloneBase<fuse, gridRelay> (this, obj);
   if (!(nobj))
@@ -140,13 +140,13 @@ void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
   auto gc2 = std::make_shared<gridCondition> ();
 
   auto cg = std::make_shared<customGrabber> ();
-  cg->setGrabberFunction ("I2T", [ this ](gridCoreObject *){
+  cg->setGrabberFunction ("I2T", [ this ](coreObject *){
     return cI2T;
   });
 
   auto cgst = std::make_shared<customStateGrabber> (this);
-  cgst->setGrabberFunction ([ ](gridCoreObject *obj, const stateData *sD,const solverMode &sMode) -> double {
-    return sD->state[static_cast<fuse *>(obj)->offsets.getDiffOffset (sMode)];
+  cgst->setGrabberFunction ([ ](coreObject *obj, const stateData &sD,const solverMode &sMode) -> double {
+    return sD.state[static_cast<fuse *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
 
@@ -288,7 +288,7 @@ void fuse::converge (gridDyn_time ttime, double state[], double dstate_dt[], con
   guess (ttime, state, dstate_dt, sMode);
 }
 
-void fuse::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fuse::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   if (useI2T)
@@ -338,13 +338,13 @@ void fuse::jacobianElements (const stateData *sD, matrixData<double> &ad, const 
       ad.merge (d);
 
 
-      ad.assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD.cj);
 
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      ad.assign (offset,offset,-sD->cj);
+      ad.assign (offset,offset,-sD.cj);
     }
 
 }
@@ -364,12 +364,12 @@ double fuse::I2Tequation (double current)
   return (current * current - limit * limit);
 }
 
-void fuse::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void fuse::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (useI2T)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      const double *dst = sD->dstate_dt + offset;
+      const double *dst = sD.dstate_dt + offset;
 
       if (!opFlags[nonlink_source_flag])
         {
@@ -377,13 +377,13 @@ void fuse::residual (const stateData *sD, double resid[], const solverMode &sMod
         }
       double I1 = getConditionValue (0,sD,sMode);
       resid[offset] = I2Tequation (I1) - *dst;
-      printf ("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", static_cast<double>(sD->time),I1, limit,offset, resid[offset],*dst);
+      printf ("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", static_cast<double>(sD.time),I1, limit,offset, resid[offset],*dst);
 
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      resid[offset] = -sD->dstate_dt[offset];
+      resid[offset] = -sD.dstate_dt[offset];
     }
 }
 

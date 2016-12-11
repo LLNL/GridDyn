@@ -538,6 +538,10 @@ namespace zmq
 
 		inline void setsockopt(int option_, const std::string &optval)
 		{
+			if (optval.empty())
+			{
+				throw error_t();
+			}
 			setsockopt(option_, optval.c_str(), optval.length());
 		}
 
@@ -625,6 +629,16 @@ namespace zmq
             return(ptr != NULL);
         }
         
+		inline size_t send(std::string const& msg, int flags_ = 0)
+		{
+			int nbytes = zmq_send(ptr, (void *)msg.c_str(), msg.size(), flags_);
+			if (nbytes >= 0)
+				return (size_t)nbytes;
+			if (zmq_errno() == EAGAIN)
+				return 0;
+			throw error_t();
+		}
+
         inline size_t send (const void *buf_, size_t len_, int flags_ = 0)
         {
             int nbytes = zmq_send (ptr, buf_, len_, flags_);

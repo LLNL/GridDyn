@@ -137,7 +137,7 @@ void gridPrimary::dynObjectInitializeB (IOdata &inputSet)
   if (!subObjectList.empty ())
     {
       IOdata out;
-      auto args = getOutputs (nullptr, cLocalSolverMode);
+      auto args = getOutputs (emptyStateData, cLocalSolverMode);
       for (auto &subobj : subObjectList)
         {
           if (dynamic_cast<gridSubModel *> (subobj))
@@ -176,7 +176,7 @@ static const std::map<int, int> alertFlags {
   std::make_pair (CONSTRAINT_COUNT_CHANGE, 1),
 };
 
-void gridPrimary::alert (gridCoreObject *object, int code)
+void gridPrimary::alert (coreObject *object, int code)
 {
   if ((code >= MIN_CHANGE_ALERT)  && (code < MAX_CHANGE_ALERT))
     {
@@ -212,7 +212,7 @@ void gridPrimary::alert (gridCoreObject *object, int code)
 }
 
 //TODO:: PT make the rest of these functions to use the subObjectList and do the appropriate thing
-void gridPrimary::preEx (const stateData *, const solverMode &)
+void gridPrimary::preEx (const stateData &, const solverMode &)
 {
 
 }
@@ -223,7 +223,7 @@ void gridPrimary::converge (gridDyn_time /*ttime*/, double /*state*/[], double /
 }
 
 //Jacobian computation
-void gridPrimary::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode & sMode)
+void gridPrimary::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {
@@ -248,13 +248,13 @@ void gridPrimary::jacobianElements (const stateData *sD, matrixData<double> &ad,
     }
 }
 
-void gridPrimary::outputPartialDerivatives (const stateData *, matrixData<double> &, const solverMode &)
+void gridPrimary::outputPartialDerivatives (const stateData &, matrixData<double> &, const solverMode &)
 {
   //there are no standard outputs for a primary object so this is just a stub to do nothing
 }
 
 //residual computation
-void gridPrimary::residual (const stateData *sD, double resid[], const solverMode & sMode)
+void gridPrimary::residual (const stateData &sD, double resid[], const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {
@@ -276,7 +276,7 @@ void gridPrimary::residual (const stateData *sD, double resid[], const solverMod
         }
     }
 }
-void gridPrimary::derivative (const stateData *sD, double deriv[], const solverMode & sMode)
+void gridPrimary::derivative (const stateData &sD, double deriv[], const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {
@@ -299,7 +299,7 @@ void gridPrimary::derivative (const stateData *sD, double deriv[], const solverM
     }
 }
 
-void gridPrimary::algebraicUpdate ( const stateData *sD, double update[], const solverMode & sMode, double alpha)
+void gridPrimary::algebraicUpdate ( const stateData &sD, double update[], const solverMode & sMode, double alpha)
 {
   if (!subObjectList.empty ())
     {
@@ -323,25 +323,25 @@ void gridPrimary::algebraicUpdate ( const stateData *sD, double update[], const 
 }
 
 
-void  gridPrimary::delayedResidual (const stateData *sD, double resid[], const solverMode &sMode)
+void  gridPrimary::delayedResidual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   residual (sD, resid, sMode);
 }
 
 
-void  gridPrimary::delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode)
+void  gridPrimary::delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode)
 {
   derivative (sD, deriv, sMode);
 }
 
 
-void  gridPrimary::delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha)
+void  gridPrimary::delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha)
 {
   algebraicUpdate (sD, update, sMode, alpha);
 }
 
 
-void  gridPrimary::delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void  gridPrimary::delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   jacobianElements (sD, ad, sMode);
 }
@@ -353,7 +353,7 @@ void gridPrimary::timestep (gridDyn_time ttime, const solverMode & sMode)
   prevTime = ttime;
   if (!subObjectList.empty ())
     {
-      auto args = getOutputs (nullptr, sMode);
+      auto args = getOutputs (emptyStateData, sMode);
       for (auto &subobj : subObjectList)
         {
           if (dynamic_cast<gridSubModel *> (subobj))
@@ -383,11 +383,11 @@ void gridPrimary::setAll (const std::string & type, std::string param, double va
     }
 }
 
-void gridPrimary::rootTest (const stateData *sD, double roots[], const solverMode & sMode)
+void gridPrimary::rootTest (const stateData &sD, double roots[], const solverMode & sMode)
 {
   if (!subObjectList.empty ())
     {
-      auto args = getOutputs (nullptr, sMode);
+      auto args = getOutputs (emptyStateData, sMode);
       for (auto &subobj : subObjectList)
         {
           if ((!subobj) || (!subobj->checkFlag (has_roots)))
@@ -415,7 +415,7 @@ void gridPrimary::rootTrigger (gridDyn_time /*ttime*/, const std::vector<int> & 
 {
 }
 
-change_code gridPrimary::rootCheck (const stateData *sD, const solverMode & sMode, check_level_t level)
+change_code gridPrimary::rootCheck (const stateData &sD, const solverMode & sMode, check_level_t level)
 {
   auto ret = change_code::no_change;
   if (!subObjectList.empty ())
@@ -461,7 +461,7 @@ void gridPrimary::pFlowCheck (std::vector<violation> & /*Violation_vector*/)
 {
 }
 
-void gridPrimary::updateLocalCache (const stateData *, const solverMode &)
+void gridPrimary::updateLocalCache (const stateData &, const solverMode &)
 {
 
 }
@@ -473,7 +473,7 @@ void gridPrimary::updateLocalCache ()
 static const IOdata nullVec (0);
 
 //TODO:: PT really should do something more intelligent here
-IOdata gridPrimary::getOutputs (const stateData *, const solverMode &)
+IOdata gridPrimary::getOutputs (const stateData &, const solverMode &) const
 {
   return nullVec;
 }
@@ -489,11 +489,11 @@ index_t gridPrimary::getOutputLoc(const solverMode &, index_t /*num*/) const
 	return kNullLocation;
 }
 
-double gridPrimary::getDoutdt(const stateData *, const solverMode &, index_t /*num*/) const
+double gridPrimary::getDoutdt(const stateData &, const solverMode &, index_t /*num*/) const
 {
 	return 0;
 }
-double gridPrimary::getOutput(const stateData *, const solverMode &, index_t /*num*/) const
+double gridPrimary::getOutput(const stateData &, const solverMode &, index_t /*num*/) const
 {
 	return 0;
 }

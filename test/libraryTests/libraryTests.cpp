@@ -18,7 +18,7 @@
 #endif
 
 
-#define BOOST_TEST_MODULE gridCoreObject testLibrary
+#define BOOST_TEST_MODULE coreObject testLibrary
 #define BOOST_TEST_DETECT_MEMORY_LEAK 0
 
 #include <boost/test/unit_test.hpp>

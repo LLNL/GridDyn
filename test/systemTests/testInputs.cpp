@@ -25,7 +25,7 @@
 #include <utility>
 #include <iostream>
 #include <functional>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define INPUT_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/input_tests/"
 

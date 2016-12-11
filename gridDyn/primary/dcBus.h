@@ -47,7 +47,7 @@ public:
   dcBus (const std::string &objName = "dcBus_$");
   ~dcBus ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
   using gridBus::add;
   virtual void add (gridLink *lnk) override;  //this add function checks for DC capable links
@@ -73,18 +73,18 @@ public:
 
   virtual void guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  void computeDerivatives(const stateData *sD, const solverMode &sMode);
+  void computeDerivatives(const stateData &sD, const solverMode &sMode);
 
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
   virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::local_iteration,double tol = 0.01) override;
 
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
 
   virtual double getVoltage(const double state[], const solverMode &sMode) const override;
 
-  virtual double getVoltage(const stateData *sD, const solverMode &sMode) const override;
+  virtual double getVoltage(const stateData &sD, const solverMode &sMode) const override;
 
 
 

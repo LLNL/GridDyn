@@ -27,7 +27,7 @@ static const IgnoreListType relayIgnoreElements {
 static const std::string relayComponentName = "relay";
 
 // "aP" is the XML element passed from the reader
-gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject)
+gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject)
 {
 
   auto riScope = ri->newScope ();
@@ -36,7 +36,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
 
   //boiler plate code to setup the object from references or new object
   //check for the area field
-  gridCoreObject *keyObject = searchObject;
+  coreObject *keyObject = searchObject;
   gridRelay *relay = nullptr;
   searchObject = updateSearchObject<gridPrimary> (element, ri, searchObject);
   if (!(dynamic_cast<gridArea *> (searchObject)))
@@ -75,7 +75,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
     }
   relay = ElementReaderSetup (element, relay, relayComponentName, ri, searchObject);
 
-  gridCoreObject *targetObj = nullptr;
+  coreObject *targetObj = nullptr;
   std::string objname = getElementField (element, "target", defMatchType);
   if (!objname.empty ())
     {

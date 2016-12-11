@@ -34,7 +34,7 @@ interpolatingPlayer::interpolatingPlayer(gridDyn_time time0, double loopPeriod) 
 }
 
 
-interpolatingPlayer::interpolatingPlayer(gridEventInfo *gdEI, gridCoreObject *rootObject) : gridPlayer(gdEI, rootObject)
+interpolatingPlayer::interpolatingPlayer(gridEventInfo *gdEI, coreObject *rootObject) : gridPlayer(gdEI, rootObject)
 {
 
 }

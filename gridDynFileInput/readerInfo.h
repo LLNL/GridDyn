@@ -33,7 +33,7 @@ class gridGrabberInfo;
 
 class collector;
 class gridEvent;
-class gridCoreObject;
+class coreObject;
 
 /** @brief class containing some basic information for reading power system files*/
 class basicReaderInfo
@@ -71,7 +71,7 @@ private:
   std::vector<std::string > directories;              //!<stores a list of folders for finding files
   std::unordered_map<std::string, std::string> objectTranslations;           //!<storage for object Translations
   std::unordered_map<std::string, std::string> objectTranslationsType;          //!<storage for the type associated with an object translation
-  std::map < std::string, std::pair < gridCoreObject *, std::vector<gridParameter >>> library;          //!< library objects
+  std::map < std::string, std::pair < coreObject *, std::vector<gridParameter >>> library;          //!< library objects
   std::unordered_map<std::string, std::string> lockDefines;       //!< locked definitions
   std::map<std::string, std::pair<std::shared_ptr<readerElement>,int>> customElements;       //!< custom objects
   scopeID currentScope = 0;
@@ -92,18 +92,18 @@ public:
   @param[in] pobjs a set of parameter objects to apply to newly created objects
   @return true if object was successfully added
   */
-  bool addLibraryObject (gridCoreObject *obj, std::vector<gridParameter> &pobjs);
+  bool addLibraryObject (coreObject *obj, std::vector<gridParameter> &pobjs);
   /** @brief  create an object based on a reference object in the library
   @param[in] ename  the name of the object in the library to find
   @param[in] mobj set to nullptr to create a new object, if set the library object is cloned onto the given object
   @return a pointer to the new object created/or cloned from the library object
   */
-  gridCoreObject * makeLibraryObject (const std::string &ename, gridCoreObject *mobj);
+  coreObject * makeLibraryObject (const std::string &ename, coreObject *mobj);
   /** @brief get a pointer to a library object
   @param[in] ename  the name of the object in the library to locate
   @return nullptr if no object found or a pointer to the library object
   */
-  gridCoreObject * findLibraryObject (const std::string &ename) const;
+  coreObject * findLibraryObject (const std::string &ename) const;
 
   /** @brief  find a collector stored in the readerInfo either by name or by sink location
   *@param[in] name  the name of the collector to find

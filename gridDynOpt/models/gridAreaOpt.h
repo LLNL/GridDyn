@@ -45,20 +45,20 @@ protected:
   gridCoreList optObList;                //a search index for object names
 public:
   gridAreaOpt (const std::string &objName = "");
-  gridAreaOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridAreaOpt (coreObject *obj, const std::string &objName = "");
   ~gridAreaOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
 
-  void add (gridCoreObject *obj) override;
+  void add (coreObject *obj) override;
   void add (gridAreaOpt *pl);
   void add (gridBusOpt *gen);
   void add (gridLinkOpt *lnk);
   void add (gridRelayOpt *rel);
 
   // remove components
-  void remove (gridCoreObject *obj) override;
+  void remove (coreObject *obj) override;
   void remove (gridAreaOpt *pl);
   void remove (gridBusOpt *gen);
   void remove (gridLinkOpt *lnk);
@@ -98,12 +98,12 @@ public:
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  virtual bool isMember (gridCoreObject *obj) const;
+  virtual bool isMember (coreObject *obj) const;
   // find components
 
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
 
   virtual gridOptObject * getBus (index_t index) const override;
   virtual gridOptObject * getArea (index_t index) const override;

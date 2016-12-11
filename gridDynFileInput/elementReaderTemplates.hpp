@@ -27,9 +27,9 @@
 const IgnoreListType emptyIgnoreList {};
 
 template <class X>
-void loadParentInfo (std::shared_ptr<readerElement> &element, X *mobj, readerInfo *ri, gridCoreObject *parentObject)
+void loadParentInfo (std::shared_ptr<readerElement> &element, X *mobj, readerInfo *ri, coreObject *parentObject)
 {
-  gridCoreObject *newParentObject = getParent (element, ri, parentObject, parentSearchComponent (mobj));
+  coreObject *newParentObject = getParent (element, ri, parentObject, parentSearchComponent (mobj));
   if (newParentObject)
     {
       if (mobj->getParent () == nullptr)
@@ -58,9 +58,9 @@ void loadParentInfo (std::shared_ptr<readerElement> &element, X *mobj, readerInf
 }
 
 template<class X>
-gridCoreObject * updateSearchObject (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject)
+coreObject * updateSearchObject (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
 {
-  gridCoreObject *alternateObject = getParent (element, ri, parentObject, parentSearchComponent (static_cast<X*>(nullptr)));
+  coreObject *alternateObject = getParent (element, ri, parentObject, parentSearchComponent (static_cast<X*>(nullptr)));
 
   return (alternateObject) ? alternateObject : parentObject;
 }
@@ -72,10 +72,10 @@ const stringVec NumandIndexNames {
 const stringVec typeandRetype{ "type","retype" };
 
 template<class X>
-X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
+X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo *ri, coreObject *searchObject)
 {
   using namespace readerConfig;
-  gridCoreObject *obj;
+  coreObject *obj;
   //try to locate the object if it exists already
   std::string ename = getElementField (element, "name", defMatchType);
   if (!ename.empty ())
@@ -115,7 +115,7 @@ X* locateObjectFromElement (std::shared_ptr<readerElement> &element, const std::
 }
 
 template<class X>
-X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
+X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, coreObject *searchObject)
 {
   using namespace readerConfig;
   auto cof = coreObjectFactory::instance ();
@@ -249,7 +249,7 @@ X* buildObject (std::shared_ptr<readerElement> &element, X* mobj, const std::str
 }
 
 template<class X>
-X* ElementReaderSetup (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
+X* ElementReaderSetup (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, coreObject *searchObject)
 {
   using namespace readerConfig;
 
@@ -272,7 +272,7 @@ X* ElementReaderSetup (std::shared_ptr<readerElement> &element, X* mobj, const s
 }
 
 template<class X>
-X* ElementReader (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, gridCoreObject *searchObject)
+X* ElementReader (std::shared_ptr<readerElement> &element, X* mobj, const std::string &componentName, readerInfo *ri, coreObject *searchObject)
 {
   using namespace readerConfig;
   auto riScope = ri->newScope ();

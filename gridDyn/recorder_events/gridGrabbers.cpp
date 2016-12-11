@@ -36,7 +36,7 @@ gridGrabber::gridGrabber(const std::string &fld)
 	gridGrabber::updateField(fld);
 }
 
-gridGrabber::gridGrabber(const std::string &fld, gridCoreObject *obj)
+gridGrabber::gridGrabber(const std::string &fld, coreObject *obj)
 {
 	gridGrabber::updateObject(obj);
 	gridGrabber::updateField(fld);
@@ -65,11 +65,11 @@ std::shared_ptr<gridGrabber> gridGrabber::clone (std::shared_ptr<gridGrabber> gg
 }
 
 /* *INDENT-OFF* */
-static const std::map<std::string, std::function<double(gridCoreObject *)>> coreFunctions 
+static const std::map<std::string, std::function<double(coreObject *)>> coreFunctions 
 {
-{ "nextupdatetime", [](gridCoreObject *obj){return obj->getNextUpdateTime(); } },
-{ "lastupdatetime", [](gridCoreObject *obj) {return obj->get("lastupdatetime"); } },
-{"constant", [](gridCoreObject *) {return 0.0; } },
+{ "nextupdatetime", [](coreObject *obj){return obj->getNextUpdateTime(); } },
+{ "lastupdatetime", [](coreObject *obj) {return obj->get("lastupdatetime"); } },
+{"constant", [](coreObject *) {return 0.0; } },
 };
 
 /* *INDENT-OFF* */
@@ -176,7 +176,7 @@ void gridGrabber::grabData (std::vector<double> &vals)
     }
 }
 
-void gridGrabber::updateObject (gridCoreObject *obj,object_update_mode mode)
+void gridGrabber::updateObject (coreObject *obj,object_update_mode mode)
 {
   if (obj)
     {
@@ -230,12 +230,12 @@ void gridGrabber::makeDescription ()
   
 }
 
-gridCoreObject * gridGrabber::getObject() const
+coreObject * gridGrabber::getObject() const
 {
 	return cobj;
 }
 
-void gridGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+void gridGrabber::getObjects(std::vector<coreObject *> &objects) const
 {
 	objects.push_back(getObject());
 }
@@ -276,7 +276,7 @@ bool gridGrabber::checkIfLoaded()
 	return false;
 }
 
-std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, gridCoreObject *obj)
+std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, coreObject *obj)
 {
   std::shared_ptr<gridGrabber> ggb = nullptr;
 
@@ -333,7 +333,7 @@ std::shared_ptr<gridGrabber> createGrabber (const std::string &fld, gridCoreObje
 
 }
 
-std::shared_ptr<gridGrabber> createGrabber (int noffset, gridCoreObject *obj)
+std::shared_ptr<gridGrabber> createGrabber (int noffset, coreObject *obj)
 {
   std::shared_ptr<gridGrabber> ggb = nullptr;
 
@@ -354,7 +354,7 @@ std::shared_ptr<gridGrabber> createGrabber (int noffset, gridCoreObject *obj)
 }
 
 
-void customGrabber::setGrabberFunction (std::string fld, std::function<double (gridCoreObject *)> nfptr)
+void customGrabber::setGrabberFunction (std::string fld, std::function<double (coreObject *)> nfptr)
 {
   fptr = nfptr;
   loaded = true;
@@ -362,7 +362,7 @@ void customGrabber::setGrabberFunction (std::string fld, std::function<double (g
   field = fld;
 }
 
-void customGrabber::setGrabberFunction(std::function<void(gridCoreObject *, std::vector<double> &)> nVptr)
+void customGrabber::setGrabberFunction(std::function<void(coreObject *, std::vector<double> &)> nVptr)
 {
 	vectorGrab = true;
 	fptrV = nVptr;
@@ -501,7 +501,7 @@ void functionGrabber::grabData (std::vector<double> &vdata)
 
 
 
-void functionGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
+void functionGrabber::updateObject (coreObject *obj, object_update_mode mode)
 {
   if (bgrabber)
     {
@@ -526,7 +526,7 @@ bool functionGrabber::checkIfLoaded()
 	}
 }
 
-gridCoreObject *functionGrabber::getObject () const
+coreObject *functionGrabber::getObject () const
 {
   if (bgrabber)
     {
@@ -539,7 +539,7 @@ gridCoreObject *functionGrabber::getObject () const
 }
 
 
-void functionGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+void functionGrabber::getObjects(std::vector<coreObject *> &objects) const
 {
 	if (bgrabber)
 	{
@@ -693,7 +693,7 @@ void opGrabber::grabData (std::vector<double> &vdata)
 }
 
 
-void opGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
+void opGrabber::updateObject (coreObject *obj, object_update_mode mode)
 {
   if (bgrabber1)
     {
@@ -705,7 +705,7 @@ void opGrabber::updateObject (gridCoreObject *obj, object_update_mode mode)
     }
 }
 
-void opGrabber::updateObject (gridCoreObject *obj,int num)
+void opGrabber::updateObject (coreObject *obj,int num)
 {
   if (num == 1)
     {
@@ -724,7 +724,7 @@ void opGrabber::updateObject (gridCoreObject *obj,int num)
 
 }
 
-gridCoreObject *opGrabber::getObject () const
+coreObject *opGrabber::getObject () const
 {
   if (bgrabber1)
     {
@@ -734,7 +734,7 @@ gridCoreObject *opGrabber::getObject () const
 }
 
 
-void opGrabber::getObjects(std::vector<gridCoreObject *> &objects) const
+void opGrabber::getObjects(std::vector<coreObject *> &objects) const
 {
 	if (bgrabber1)
 	{

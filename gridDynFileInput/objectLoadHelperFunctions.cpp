@@ -39,7 +39,7 @@ std::string getObjectName(std::shared_ptr<readerElement> &element, readerInfo *r
 	return newName;
 }
 
-void setIndex(std::shared_ptr<readerElement> &element, gridCoreObject *mobj, readerInfo *ri)
+void setIndex(std::shared_ptr<readerElement> &element, coreObject *mobj, readerInfo *ri)
 {
 	
 	std::string Index = getElementFieldOptions(element, indexAndNumber, readerConfig::defMatchType);

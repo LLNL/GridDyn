@@ -34,12 +34,12 @@ class grabberInterpreter
   static_assert (std::is_base_of<baseX, opX>::value, "Operations class and base class must have a parent child relationship");
   static_assert (std::is_base_of<baseX, funcX>::value, "functions class and base class must have a parent child relationship");
 private:
-  std::function < std::shared_ptr<baseX> (const std::string &, gridCoreObject *)> createX;
+  std::function < std::shared_ptr<baseX> (const std::string &, coreObject *)> createX;
 public:
-  grabberInterpreter (std::function < std::shared_ptr<baseX> (const std::string &, gridCoreObject *)> fc) : createX (fc)
+  grabberInterpreter (std::function < std::shared_ptr<baseX> (const std::string &, coreObject *)> fc) : createX (fc)
   {
   }
-  std::shared_ptr<baseX> interpretGrabberBlock (const std::string &command, gridCoreObject *obj)
+  std::shared_ptr<baseX> interpretGrabberBlock (const std::string &command, coreObject *obj)
   {
     //this is to resolve an issue with URI specified parameters and the division operator but still allow
 	  //normal division operator in most cases  for URI specified the % must be used for division or the function form
@@ -110,10 +110,10 @@ public:
     return ggb;
   }
 private:
-  std::shared_ptr<baseX> singleBlockInterpreter (const std::string &command, gridCoreObject *obj)
+  std::shared_ptr<baseX> singleBlockInterpreter (const std::string &command, coreObject *obj)
   {
     std::shared_ptr<baseX> ggb;
-    gridCoreObject *mobj = obj;
+    coreObject *mobj = obj;
     std::string field(command);
     gridUnits::units_t outUnit = gridUnits::defUnit;
     //get the object which to grab from
@@ -143,7 +143,7 @@ private:
   }
 
 
-  std::shared_ptr<baseX> addSubGrabberBlocks (const std::string &command, gridCoreObject *obj, size_t rlc)
+  std::shared_ptr<baseX> addSubGrabberBlocks (const std::string &command, coreObject *obj, size_t rlc)
   {
     std::shared_ptr<baseX> ggb = nullptr;
     std::string Ablock = command.substr (0, rlc);
@@ -217,7 +217,7 @@ private:
     return ggb;
   }
 
-  std::shared_ptr<baseX> multDivGrabberBlocks (const std::string &command, gridCoreObject *obj, size_t rlc)
+  std::shared_ptr<baseX> multDivGrabberBlocks (const std::string &command, coreObject *obj, size_t rlc)
   {
 
     std::shared_ptr<baseX> ggb = nullptr;

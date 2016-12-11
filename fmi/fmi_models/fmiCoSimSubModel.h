@@ -53,7 +53,7 @@ private:
 
 	  fmiCoSimSubModel(std::shared_ptr<fmi2CoSim> fmi = nullptr);
   virtual ~fmiCoSimSubModel();
-  virtual gridCoreObject * clone(gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone(coreObject *obj = nullptr) const override;
   virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
   virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
 
@@ -66,24 +66,23 @@ private:
   virtual double get(const std::string &param , gridUnits::units_t unitType = gridUnits::defUnit) const  override;
   virtual index_t findIndex(const std::string &field, const solverMode &sMode) const  override;
   virtual void loadSizes(const solverMode &sMode, bool dynOnly) override;
-  virtual void residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements(const IOdata &args, const stateData *sD,
+  virtual void residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void jacobianElements(const IOdata &args, const stateData &sD,
     matrixData<double> &ad,
     const IOlocs &argLocs, const solverMode &sMode) override;
   virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
 
-  IOdata getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-  virtual double getDoutdt(const stateData *sD, const solverMode &sMode, index_t num = 0) override;
-  virtual double getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
+  IOdata getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getDoutdt(const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+  virtual double getOutput(const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
   virtual double getOutput(index_t num = 0) const override;
   virtual index_t getOutputLoc( const solverMode &sMode, index_t num = 0) const override;
-  //virtual void setTime(double time){prevTime=time;};
 
 
   virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
@@ -93,10 +92,11 @@ private:
   virtual void getTols(double tols[], const solverMode &sMode) override;
 
   virtual void getStateName(stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
+  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
   bool isLoaded() const;
   protected:
   void loadFMU();
-  void updateInfo(const IOdata &args, const stateData *sD,const solverMode &sMode);
+  
   void instantiateFMU();
   void updateDependencyInfo();
   void makeSettableState();

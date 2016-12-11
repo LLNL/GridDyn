@@ -83,7 +83,7 @@ public:
 
   /** @brief virtual destructor*/
   virtual ~gridLink ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void disable () override;
   /** @brief reconnect the link*/
@@ -117,7 +117,7 @@ public:
   virtual bool isConnected () const override;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
   /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or another
    performs the calculations necessary to get the power at the mterminal to be a certain value
   @param[in] power  the desired real power flow as measured by mterminal
@@ -252,7 +252,7 @@ public:
 
   gridBus * getBus (index_t busInd)  const override;
 
-  gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  coreObject * getSubObject (const std::string &typeName, index_t num) const override;
 
 
   // initializeB power flow
@@ -270,14 +270,14 @@ protected:
 public:
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
 
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
-  //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
-  virtual IOdata getOutputs (index_t busId, const stateData *sD, const solverMode &sMode);
+  //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
+  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
+  virtual IOdata getOutputs (index_t busId, const stateData &sD, const solverMode &sMode) const;
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
 protected:

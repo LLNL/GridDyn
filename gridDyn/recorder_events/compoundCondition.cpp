@@ -29,7 +29,7 @@
 		return false;
 	}
 
-	double compoundCondition::evalCondition(const stateData *, const solverMode &)
+	double compoundCondition::evalCondition(const stateData &, const solverMode &)
 	{
 		return 0.0;
 	}
@@ -39,7 +39,7 @@
 		return false;
 	}
 
-	bool compoundCondition::checkCondition(const stateData *, const solverMode &) const
+	bool compoundCondition::checkCondition(const stateData &, const solverMode &) const
 	{
 		return false;
 	}

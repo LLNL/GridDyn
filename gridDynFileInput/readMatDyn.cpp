@@ -33,12 +33,12 @@ using namespace gridUnits;
 
 
 
-void loadGenExcArray (gridCoreObject *parentObject, mArray &Exc, std::vector<gridDynGenerator *> &genList);
-void loadGenDynArray (gridCoreObject *parentObject, mArray &Gen, std::vector<gridDynGenerator *> &genList);
-void loadGenGovArray (gridCoreObject *parentObject, mArray &Gov, std::vector<gridDynGenerator *> &genList);
+void loadGenExcArray (coreObject *parentObject, mArray &Exc, std::vector<gridDynGenerator *> &genList);
+void loadGenDynArray (coreObject *parentObject, mArray &Gen, std::vector<gridDynGenerator *> &genList);
+void loadGenGovArray (coreObject *parentObject, mArray &Gov, std::vector<gridDynGenerator *> &genList);
 
 
-void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
+void loadMatDyn (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
 {
   mArray M1;
 
@@ -115,7 +115,7 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
           return;
         }
       //now we load the existing components of our generator onto the existing one
-      gridCoreObject *obj = ngen->getSubObject ("exciter", 0);
+      coreObject *obj = ngen->getSubObject ("exciter", 0);
       if (obj)
         {
           obj->setOwner (nullptr,gen);               //transfer ownership
@@ -152,7 +152,7 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
 
 }
 
-void loadGenDynArray (gridCoreObject * /*parentObject*/, mArray &Gen, std::vector<gridDynGenerator *> &genList)
+void loadGenDynArray (coreObject * /*parentObject*/, mArray &Gen, std::vector<gridDynGenerator *> &genList)
 {
   gridDynGenerator *gen = nullptr;
   gridDynExciter *exc;
@@ -237,7 +237,7 @@ void loadGenDynArray (gridCoreObject * /*parentObject*/, mArray &Gen, std::vecto
 10 Urmin, lower voltage limit
 11 Urmax, upper voltage limit
 */
-void loadGenExcArray (gridCoreObject * /*parentObject*/, mArray &excData, std::vector<gridDynGenerator *> &genList)
+void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vector<gridDynGenerator *> &genList)
 {
 
   /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
@@ -279,7 +279,7 @@ void loadGenExcArray (gridCoreObject * /*parentObject*/, mArray &excData, std::v
 8 Pmax, maximal turbine output
 9 Pmin, minimal turbine output
 */
-void loadGenGovArray(gridCoreObject * /*parentObject*/, mArray &govData, std::vector<gridDynGenerator *> &genList)
+void loadGenGovArray(coreObject * /*parentObject*/, mArray &govData, std::vector<gridDynGenerator *> &genList)
 {
 
 	gridDynGenerator *gen = nullptr;
@@ -314,7 +314,7 @@ void loadGenGovArray(gridCoreObject * /*parentObject*/, mArray &govData, std::ve
 
 
 //read matdyn Event files
-void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
+void loadMatDynEvent(coreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
 {
 	
 	mArray::size_type kk;

@@ -28,7 +28,7 @@ integralBlock::integralBlock (double gain, const std::string &objName) : basicBl
   opFlags.set (use_state);
 }
 
-gridCoreObject *integralBlock::clone (gridCoreObject *obj) const
+coreObject *integralBlock::clone (coreObject *obj) const
 {
   integralBlock *nobj = cloneBase<integralBlock, basicBlock> (this, obj);
   if (nobj == nullptr)
@@ -62,7 +62,7 @@ void integralBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
 
 
 // residual
-void integralBlock::residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode)
+void integralBlock::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -70,12 +70,12 @@ void integralBlock::residElements (double input, double didt, const stateData *s
       return;
     }
   auto offset = offsets.getDiffOffset (sMode);
-  resid[offset] = (K * (input + bias) - sD->dstate_dt[offset]);
+  resid[offset] = (K * (input + bias) - sD.dstate_dt[offset]);
   basicBlock::residElements (input, didt, sD, resid, sMode);
 
 }
 
-void integralBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void integralBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   deriv[offset + limiter_diff ] = K * (input + bias);
@@ -86,7 +86,7 @@ void integralBlock::derivElements (double input, double didt, const stateData *s
 }
 
 
-void integralBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void integralBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -96,7 +96,7 @@ void integralBlock::jacElements (double input, double didt, const stateData *sD,
   //use the ad.assign Macro defined in basicDefs
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   ad.assignCheck (offset, argLoc, K);
-  ad.assign (offset, offset, -sD->cj);
+  ad.assign (offset, offset, -sD.cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 

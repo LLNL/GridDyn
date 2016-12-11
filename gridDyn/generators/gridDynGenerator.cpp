@@ -69,7 +69,7 @@ gridDynGenerator::gridDynGenerator (dynModel_t dynModel, const std::string &objN
 
   buildDynModel (dynModel);
 }
-gridCoreObject *gridDynGenerator::clone (gridCoreObject *obj) const
+coreObject *gridDynGenerator::clone (coreObject *obj) const
 {
   gridDynGenerator *gen = cloneBaseFactory<gridDynGenerator, gridSecondary> (this, obj,&gf);
   if (!(gen))
@@ -598,9 +598,6 @@ void gridDynGenerator::setState (gridDyn_time ttime, const double state[], const
         }
       Pset += dPdt * (ttime - prevTime);
       Pset = valLimit (Pset, Pmin, Pmax);
-      auto out = getOutputs (emptyArguments,nullptr,cLocalSolverMode);
-      P = -out[PoutLocation];
-      Q = -out[QoutLocation];
     }
   else if (stateSize (sMode) > 0)
     {
@@ -608,6 +605,28 @@ void gridDynGenerator::setState (gridDyn_time ttime, const double state[], const
       Q = state[offset];
     }
   prevTime = ttime;
+}
+
+
+void gridDynGenerator::updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode)
+{
+		if ((isDynamic(sMode))&&(sD.updateRequired(subInputs.seqID)))
+		{
+			for (auto &so : subObjectList)
+			{
+				if (so->enabled)
+				{
+					if (dynamic_cast<gridSubModel *>(so))
+					{
+						static_cast<gridSubModel *>(so)->updateLocalCache(args, sD, sMode);
+					}
+				}
+			}
+			generateSubModelInputs(args, sD, sMode);
+			double scale = machineBasePower / systemBasePower;
+			P = -genModel->getOutput(subInputs.inputs[genmodel_loc], sD, sMode, PoutLocation)*scale;
+			Q = -genModel->getOutput(subInputs.inputs[genmodel_loc], sD, sMode, QoutLocation)*scale;
+		}
 }
 
 //copy the current state to a vector
@@ -633,7 +652,7 @@ void gridDynGenerator::guess (gridDyn_time ttime, double state[], double dstate_
 }
 
 
-void gridDynGenerator::add (gridCoreObject *obj)
+void gridDynGenerator::add (coreObject *obj)
 {
   if (dynamic_cast<gridSubModel *> (obj))
     {
@@ -771,7 +790,7 @@ gridSubModel *gridDynGenerator::replaceSubObject (gridSubModel *newObject, gridS
 }
 
 
-void gridDynGenerator::setRemoteBus (gridCoreObject *newRemoteBus)
+void gridDynGenerator::setRemoteBus (coreObject *newRemoteBus)
 {
   gridBus* newRbus = dynamic_cast<gridBus *> (newRemoteBus);
   if (!newRbus)
@@ -832,7 +851,7 @@ void gridDynGenerator::set (const std::string &param,  const std::string &val)
     }
   else if (param == "remote")
     {
-      gridCoreObject *root = parent->find ("root");
+      coreObject *root = parent->find ("root");
       setRemoteBus (locateObject (val, root, false));
     }
   else if (param == "remote_power_control")
@@ -973,7 +992,7 @@ void gridDynGenerator::timestep (gridDyn_time ttime, const IOdata &args, const s
     {
 
 	  
-      double omega = genModel->getFreq ((stateData *)(nullptr), cLocalSolverMode);
+      double omega = genModel->getFreq (emptyStateData, cLocalSolverMode);
 
       if ((gov) && (gov->enabled))
         {
@@ -995,7 +1014,7 @@ void gridDynGenerator::timestep (gridDyn_time ttime, const IOdata &args, const s
 
 
       genModel->timestep (ttime, { args[voltageInLocation], args[angleInLocation], m_Eft, m_Pmech }, sMode);
-      auto vals = genModel->getOutputs ({ args[voltageInLocation], args[angleInLocation], m_Eft, m_Pmech }, nullptr, cLocalSolverMode);
+      auto vals = genModel->getOutputs ({ args[voltageInLocation], args[angleInLocation], m_Eft, m_Pmech }, emptyStateData, cLocalSolverMode);
       P = vals[PoutLocation] * scale;
       Q = vals[QoutLocation] * scale;
 
@@ -1005,11 +1024,11 @@ void gridDynGenerator::timestep (gridDyn_time ttime, const IOdata &args, const s
   prevTime = ttime;
 }
 
-void gridDynGenerator::algebraicUpdate (const IOdata &args, const stateData *sD, double update[],const solverMode &sMode, double alpha)
+void gridDynGenerator::algebraicUpdate (const IOdata &args, const stateData &sD, double update[],const solverMode &sMode, double alpha)
 {
-  generateSubModelInputs (args, sD, sMode);
+  updateLocalCache (args, sD, sMode);
   
-  if ((sD) && (!isLocal (sMode)))
+  if ((!sD.empty()) && (!isLocal (sMode)))
     {
 	  for (auto &sub : subObjectList)
 	  {
@@ -1021,13 +1040,12 @@ void gridDynGenerator::algebraicUpdate (const IOdata &args, const stateData *sD,
     }
   else
     {
-      stateData sD2;
-      sD2.state = m_state.data ();
+      stateData sD2(0.0, m_state.data());
 	  for (auto &sub : subObjectList)
 	  {
 		  if (sub->enabled)
 		  {
-			  static_cast<gridSubModel*>(sub)->algebraicUpdate(subInputs.inputs[sub->locIndex], &sD2, m_state.data(), cLocalbSolverMode, alpha);
+			  static_cast<gridSubModel*>(sub)->algebraicUpdate(subInputs.inputs[sub->locIndex], sD2, m_state.data(), cLocalbSolverMode, alpha);
 		  }
 	  }
 
@@ -1108,7 +1126,7 @@ static std::map<int, int> alertFlags {
   std::make_pair (CONSTRAINT_COUNT_CHANGE, 1),
 };
 
-void gridDynGenerator::alert (gridCoreObject *object, int code)
+void gridDynGenerator::alert (coreObject *object, int code)
 {
   if ((code >= MIN_CHANGE_ALERT)&& (code < MAX_CHANGE_ALERT))
     {
@@ -1386,7 +1404,7 @@ void gridDynGenerator::set (const std::string &param, double val,units_t unitTyp
     }
   else if (param == "remote")
     {
-      gridCoreObject *root = parent->find ("root");
+      coreObject *root = parent->find ("root");
       setRemoteBus (root->findByUserID ("bus", static_cast<index_t> (val)));
     }
   else
@@ -1450,7 +1468,7 @@ void gridDynGenerator::updateFlags (bool dynOnly)
 
 
 
-void gridDynGenerator::outputPartialDerivatives (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridDynGenerator::outputPartialDerivatives (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   double scale = machineBasePower / systemBasePower;
   if (!isDynamic (sMode))
@@ -1465,7 +1483,7 @@ void gridDynGenerator::outputPartialDerivatives (const IOdata & /*args*/, const 
 
   matrixDataSparse<double> d;
 
-  //compute the Jacobians
+  //compute the Jacobian
 
 
   genModel->outputPartialDerivatives (subInputs.inputs[genmodel_loc], sD,d, sMode);
@@ -1477,7 +1495,7 @@ void gridDynGenerator::outputPartialDerivatives (const IOdata & /*args*/, const 
 
 }
 
-void gridDynGenerator::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenerator::ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   double scale = machineBasePower / systemBasePower;
   if  (isDynamic (sMode))
@@ -1503,9 +1521,8 @@ void gridDynGenerator::ioPartialDerivatives (const IOdata &args, const stateData
 
 }
 
-IOdata gridDynGenerator::getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridDynGenerator::getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
-  generateSubModelInputs (args, sD, sMode);
   double scale = machineBasePower / systemBasePower;
   IOdata output = { -P / scale, -Q / scale };
   if (isDynamic (sMode))       //use as a proxy for dynamic state
@@ -1517,7 +1534,7 @@ IOdata gridDynGenerator::getOutputs (const IOdata &args, const stateData *sD, co
       if (opFlags[indirect_voltage_control])
         {
           auto offset = offsets.getAlgOffset (sMode);
-          output[QoutLocation] = -sD->state[offset] / scale;
+          output[QoutLocation] = -sD.state[offset] / scale;
           if (args[voltageInLocation] < 0.8)
             {
               if (!opFlags[no_voltage_derate])
@@ -1541,14 +1558,13 @@ IOdata gridDynGenerator::getOutputs (const IOdata &args, const stateData *sD, co
   return output;
 }
 
-double gridDynGenerator::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double gridDynGenerator::getRealPower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 
   double scale = machineBasePower / systemBasePower;
   double output = -P / scale;
   if (isDynamic (sMode))            //use as a proxy for dynamic state
     {
-      generateSubModelInputs (args, sD, sMode);
       output = genModel->getOutput (subInputs.inputs[genmodel_loc], sD, sMode,0);
     }
   else
@@ -1575,22 +1591,22 @@ double gridDynGenerator::getRealPower (const IOdata &args, const stateData *sD, 
   //printf("t=%f (%s ) V=%f T=%f, P=%f\n", ttime, parent->name.c_str(), args[voltageInLocation], args[angleInLocation], output[PoutLocation]);
   return output;
 }
-double gridDynGenerator::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double gridDynGenerator::getReactivePower (const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 
   double scale = machineBasePower / systemBasePower;
-  double output =  -Q / scale;
+  double output;
   if (isDynamic (sMode))            //use as a proxy for dynamic state
     {
-      generateSubModelInputs (args, sD, sMode);
       output = genModel->getOutput (subInputs.inputs[genmodel_loc], sD, sMode,1);
     }
   else
     {
+	  output = -Q / scale;
       if (opFlags[indirect_voltage_control])
         {
           auto offset = offsets.getAlgOffset (sMode);
-          output = -sD->state[offset] / scale;
+          output = -sD.state[offset] / scale;
         }
       else if (args[voltageInLocation] < 0.8)
         {
@@ -1617,27 +1633,27 @@ double gridDynGenerator::getReactivePower () const
 
 
 // compute the residual for the dynamic states
-void gridDynGenerator::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void gridDynGenerator::residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if ((!isDynamic (sMode))&&(opFlags[indirect_voltage_control]))
     { //the bus is managing a remote bus voltage
       double V = remoteBus->getVoltage (sD, sMode);
       auto offset = offsets.getAlgOffset (sMode);
-      // printf("Q=%f\n",sD->state[offset]);
+      // printf("Q=%f\n",sD.state[offset]);
       if (!opFlags[at_limit])
         {
-          resid[offset] = sD->state[offset] - (V - m_Vtarget) * vRegFraction * 10000;
+          resid[offset] = sD.state[offset] - (V - m_Vtarget) * vRegFraction * 10000;
         }
       else
         {
-          resid[offset] = sD->state[offset] + Q;
+          resid[offset] = sD.state[offset] + Q;
         }
       return;
     }
   if ((isDynamic (sMode))||(opFlags[has_pflow_states]))
     {
       //compute the residuals
-      generateSubModelInputs (args, sD, sMode);
+      updateLocalCache(args, sD, sMode);
 	  for (auto &sub : subObjectList)
 	  {
 		  if ((sub) && (sub->enabled))
@@ -1648,10 +1664,10 @@ void gridDynGenerator::residual (const IOdata &args, const stateData *sD, double
     }
 }
 
-void gridDynGenerator::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGenerator::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 
-  generateSubModelInputs (args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
   //compute the residuals
   for (auto &sub : subObjectList)
   {
@@ -1663,7 +1679,7 @@ void gridDynGenerator::derivative (const IOdata &args, const stateData *sD, doub
   
 }
 
-void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
+void gridDynGenerator::jacobianElements (const IOdata &args,const stateData &sD,
                                          matrixData<double> &ad,
                                          const IOlocs &argLocs,const solverMode &sMode)
 {
@@ -1673,7 +1689,7 @@ void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
       auto offset = offsets.getAlgOffset (sMode);
       if (!opFlags[at_limit])
         {
-          //resid[offset] = sD->state[offset] - (V - m_Vtarget)*remoteVRegFraction * 10000;
+          //resid[offset] = sD.state[offset] - (V - m_Vtarget)*remoteVRegFraction * 10000;
           ad.assignCheck (offset, offset, 1);
           ad.assignCheck (offset,Voff,-vRegFraction * 10000);
         }
@@ -1688,7 +1704,7 @@ void gridDynGenerator::jacobianElements (const IOdata &args,const stateData *sD,
     {
       return;
     }
-  generateSubModelInputs (args, sD, sMode);
+  updateLocalCache(args, sD, sMode);
   generateSubModelInputLocs (argLocs, sD, sMode);
 
   //compute the Jacobians
@@ -1723,9 +1739,9 @@ void gridDynGenerator::getStateName (stringVec &stNames, const solverMode &sMode
     }
 }
 
-void gridDynGenerator::rootTest (const IOdata &args, const stateData *sD, double root[], const solverMode &sMode)
+void gridDynGenerator::rootTest (const IOdata &args, const stateData &sD, double root[], const solverMode &sMode)
 {
-  generateSubModelInputs (args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
 
   for (auto &sub : subObjectList)
   {
@@ -1736,10 +1752,10 @@ void gridDynGenerator::rootTest (const IOdata &args, const stateData *sD, double
   }
 }
 
-change_code gridDynGenerator::rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level)
+change_code gridDynGenerator::rootCheck ( const IOdata &args, const stateData &sD, const solverMode &sMode, check_level_t level)
 {
   auto ret = change_code::no_change;
-  generateSubModelInputs (args, sD, sMode);
+  updateLocalCache(args, sD, sMode);
 
   for (auto &sub:subObjectList)
   {
@@ -1786,7 +1802,7 @@ index_t gridDynGenerator::findIndex (const std::string &field, const solverMode 
   return ret;
 }
 
-gridCoreObject *gridDynGenerator::find (const std::string &object) const
+coreObject *gridDynGenerator::find (const std::string &object) const
 {
   if (object == "bus")
     {
@@ -1849,7 +1865,7 @@ gridCoreObject *gridDynGenerator::find (const std::string &object) const
   return nullptr;
 }
 
-gridCoreObject *gridDynGenerator::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridDynGenerator::getSubObject (const std::string &typeName, index_t num) const
 {
   if ((typeName == "subobject")||(typeName == "submodel"))
     {
@@ -1895,7 +1911,7 @@ double gridDynGenerator::getAdjustableCapacityDown (gridDyn_time time) const
     }
 }
 
-IOdata gridDynGenerator::predictOutputs (double ptime, const IOdata & /*args*/, const stateData *, const solverMode &)
+IOdata gridDynGenerator::predictOutputs (double ptime, const IOdata & /*args*/, const stateData &, const solverMode &) const
 {
   IOdata out (2);
   out[PoutLocation] = Pset;
@@ -1961,12 +1977,12 @@ double gridDynGenerator::getQmin (const gridDyn_time /*time*/, double /*Ptest*/)
 }
 
 
-double gridDynGenerator::getFreq (const stateData *sD, const solverMode &sMode, index_t *freqOffset) const
+double gridDynGenerator::getFreq (const stateData &sD, const solverMode &sMode, index_t *freqOffset) const
 {
    return  genModel->getFreq (sD, sMode,freqOffset);
 }
 
-double gridDynGenerator::getAngle(const stateData *sD, const solverMode &sMode, index_t *angleOffset) const
+double gridDynGenerator::getAngle(const stateData &sD, const solverMode &sMode, index_t *angleOffset) const
 {
 	return  genModel->getAngle(sD, sMode, angleOffset);
 }
@@ -1990,9 +2006,10 @@ gridDynGenerator::subModelInputLocs::subModelInputLocs() :  genModelInputLocsInt
 	genModelInputLocsInternal[angleInLocation] = kNullLocation;
 }
 
-void gridDynGenerator::generateSubModelInputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+void gridDynGenerator::generateSubModelInputs(const IOdata &args, const stateData &sD, const solverMode &sMode)
 {
-	if ((sD) && ((sD->seqID == subInputs.seqID) && (sD->seqID != 0)))
+
+	if (!sD.updateRequired(subInputs.seqID))
 	{
 		return;
 	}
@@ -2032,11 +2049,12 @@ void gridDynGenerator::generateSubModelInputs(const IOdata &args, const stateDat
 		}
 	}
 	
-
+	double scale = systemBasePower / machineBasePower;
 	double Pcontrol = pSetControlUpdate(args,sD,sMode);
 	Pcontrol = valLimit(Pcontrol, Pmin, Pmax);
-	subInputs.inputs[governor_loc][govpSetInLocation] = Pcontrol*systemBasePower/machineBasePower;
-
+	
+	subInputs.inputs[governor_loc][govpSetInLocation] = Pcontrol*scale;
+	
 	subInputs.inputs[exciter_loc][exciterVsetInLocation] = vSetControlUpdate(args,sD,sMode);
 	double Eft = m_Eft;
 	if ((ext) && (ext->enabled))
@@ -2044,7 +2062,7 @@ void gridDynGenerator::generateSubModelInputs(const IOdata &args, const stateDat
 		Eft = ext->getOutput(subInputs.inputs[exciter_loc], sD, sMode, 0);
 	}
 	subInputs.inputs[genmodel_loc][genModelEftInLocation] = Eft;
-	double pmech = m_Pmech;
+	double pmech = Pcontrol*scale;
 	if ((gov) && (gov->enabled))
 	{
 		pmech = gov->getOutput(subInputs.inputs[governor_loc], sD, sMode, 0);
@@ -2052,17 +2070,18 @@ void gridDynGenerator::generateSubModelInputs(const IOdata &args, const stateDat
 
 	subInputs.inputs[genmodel_loc][genModelPmechInLocation] = pmech;
 	
-	if (sD)
+	if (!sD.empty())
 	{
-		subInputs.seqID = sD->seqID;
+		subInputs.seqID = sD.seqID;
 	}
 	
 }
 
 
-void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const stateData *sD, const solverMode &sMode)
+void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const stateData &sD, const solverMode &sMode)
 {
-	if ((sD) && ((sD->seqID == subInputLocs.seqID) && (sD->seqID != 0)))
+
+	if (!sD.updateRequired(subInputLocs.seqID))
 	{
 		return;
 	}
@@ -2100,7 +2119,7 @@ void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const st
 		}
 		else
 		{
-			subInputLocs.inputLocs[genmodel_loc][genModelPmechInLocation] = kNullLocation;
+			subInputLocs.inputLocs[genmodel_loc][genModelPmechInLocation] = pSetLocation(sMode);
 		}
 		subInputLocs.genModelInputLocsInternal[genModelPmechInLocation] = subInputLocs.inputLocs[genmodel_loc][genModelPmechInLocation];
 		
@@ -2108,19 +2127,20 @@ void gridDynGenerator::generateSubModelInputLocs(const IOlocs &argLocs, const st
 		{
 			subInputLocs.inputLocs[isoc_control][0] = subInputLocs.inputLocs[governor_loc][govOmegaInLocation];
 		}
-		subInputs.seqID = sD->seqID;
+		subInputs.seqID = sD.seqID;
 }
 
-double gridDynGenerator::pSetControlUpdate(const IOdata & args, const stateData *sD, const solverMode &sMode)
+double gridDynGenerator::pSetControlUpdate(const IOdata & args, const stateData &sD, const solverMode &sMode)
 {
 	double val;
 	if (pSetControl)
 	{
 		val = pSetControl->getOutput(args, sD, sMode);
+		
 	}
 	else
 	{
-		val = (sD) ? (Pset + dPdt * (sD->time - prevTime)) : Pset;
+		val = (!sD.empty()) ? (Pset + dPdt * (sD.time - prevTime)) : Pset;
 	}
 	if (opFlags[isochronous_operation])
 	{
@@ -2132,29 +2152,18 @@ double gridDynGenerator::pSetControlUpdate(const IOdata & args, const stateData 
 	return val;
 }
 
-double gridDynGenerator::vSetControlUpdate(const IOdata & args, const stateData *sD, const solverMode &sMode)
+double gridDynGenerator::vSetControlUpdate(const IOdata & args, const stateData &sD, const solverMode &sMode)
 {
-	double val = 1.0;
-	if (vSetControl)
-	{
-		val = pSetControl->getOutput(args, sD, sMode);
-	}
-	return val;
+	return (vSetControl) ? vSetControl->getOutput(args, sD, sMode) : 1.0;
 }
 
 index_t gridDynGenerator::pSetLocation(const solverMode &sMode)
 {
-	if (pSetControl)
-	{
-		return pSetControl->getOutputLoc(sMode);
-	}
-	return kNullLocation;
+
+	return (pSetControl) ? pSetControl->getOutputLoc(sMode) : kNullLocation;
 }
 index_t gridDynGenerator::vSetLocation(const solverMode &sMode)
 {
-	if (vSetControl)
-	{
-		return vSetControl->getOutputLoc(sMode);
-	}
-	return kNullLocation;
+
+	return (vSetControl) ? vSetControl->getOutputLoc(sMode) : kNullLocation;
 }

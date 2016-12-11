@@ -40,7 +40,7 @@ dcLink::~dcLink ()
 {
 }
 
-gridCoreObject *dcLink::clone (gridCoreObject *obj) const
+coreObject *dcLink::clone (coreObject *obj) const
 {
   dcLink *nobj = cloneBase<dcLink, gridLink> (this, obj);
   if (nobj == nullptr)
@@ -215,7 +215,7 @@ void dcLink::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 
-void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void dcLink::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
   // check if line is enabled
   updateLocalCache  (sD,sMode);
@@ -234,7 +234,7 @@ void dcLink::ioPartialDerivatives (index_t busId, const stateData *sD, matrixDat
     }
 }
 
-void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void dcLink::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (!(enabled))
     {
@@ -296,7 +296,7 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData *sD, matri
 }
 
 
-void dcLink::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void dcLink::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -309,7 +309,7 @@ void dcLink::jacobianElements (const stateData *sD, matrixData<double> &ad, cons
           auto offset = offsets.getDiffOffset (sMode);
           ad.assignCheckCol (offset, B1Voffset, 1 / x);
           ad.assignCheckCol (offset, B2Voffset, -1 / x);
-          ad.assign (offset, offset, -r / x - sD->cj);
+          ad.assign (offset, offset, -r / x - sD.cj);
         }
       else
         {
@@ -325,7 +325,7 @@ void dcLink::jacobianElements (const stateData *sD, matrixData<double> &ad, cons
     }
 }
 
-void dcLink::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void dcLink::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -333,14 +333,14 @@ void dcLink::residual (const stateData *sD, double resid[], const solverMode &sM
       if (isDynamic (sMode))
         {
           auto offset = offsets.getDiffOffset (sMode);
-          resid[offset] = (linkInfo.v1 - linkInfo.v2 - r * sD->state[offset]) / x - sD->dstate_dt[offset];
+          resid[offset] = (linkInfo.v1 - linkInfo.v2 - r * sD.state[offset]) / x - sD.dstate_dt[offset];
         }
       else
         {
           auto offset = offsets.getAlgOffset (sMode);
           if (opFlags.test (fixed_target_power))
             {
-              resid[offset] = (linkInfo.v1 - linkInfo.v2) + Pset / linkInfo.v1 - sD->state[offset];
+              resid[offset] = (linkInfo.v1 - linkInfo.v2) + Pset / linkInfo.v1 - sD.state[offset];
             }
           else
             {
@@ -400,9 +400,9 @@ void dcLink::getStateName (stringVec &stNames, const solverMode &sMode, const st
     }
 }
 
-void  dcLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void  dcLink::updateLocalCache (const stateData &sD, const solverMode &sMode)
 {
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
     {
       return;
     }
@@ -414,12 +414,12 @@ void  dcLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
   std::memset (&linkInfo, 0, sizeof(linkI));
 
 
-  linkInfo.v1 = B1->getVoltage (sD->state, sMode);
-  linkInfo.v2 = B2->getVoltage (sD->state, sMode);
+  linkInfo.v1 = B1->getVoltage (sD.state, sMode);
+  linkInfo.v2 = B2->getVoltage (sD.state, sMode);
   if (stateSize (sMode) > 0)
     {
       auto offset = (isDynamic (sMode)) ? offsets.getDiffOffset (sMode) : offsets.getAlgOffset (sMode);
-      Idc = sD->state[offset];
+      Idc = sD.state[offset];
     }
   else
     {

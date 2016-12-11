@@ -18,7 +18,7 @@
 
 using namespace boost::filesystem;
 
-void loadGDZ(gridCoreObject *parentObject, const std::string &filename, readerInfo *ri)
+void loadGDZ(coreObject *parentObject, const std::string &filename, readerInfo *ri)
 {
 	path fpath(filename);
 	if (!exists(fpath))

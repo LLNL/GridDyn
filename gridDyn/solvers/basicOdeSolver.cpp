@@ -138,11 +138,7 @@ int basicOdeSolver::solve(gridDyn_time tStop, gridDyn_time &tReturn, step_mode s
 	gridDyn_time Tstep = (std::min)(deltaT, tStop - solveTime);
 	if (mode.pairedOffsetIndex != kNullLocation)
 	{
-		int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
-		if (ret<FUNCTION_EXECUTION_SUCCESS)
-		{
-			return ret;
-		}
+		m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
 	}
 	m_gds->derivativeFunction(solveTime, state.data(), deriv.data(), mode);
 	std::transform(state.begin(), state.end(), deriv.begin(), state.begin(), [Tstep](double a, double b) {return fma(Tstep, b, a); });
@@ -155,11 +151,7 @@ int basicOdeSolver::solve(gridDyn_time tStop, gridDyn_time &tReturn, step_mode s
 			Tstep = (std::min)(deltaT, tStop - solveTime);
 			if (mode.pairedOffsetIndex != kNullLocation)
 			{
-				int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
-				if (ret<FUNCTION_EXECUTION_SUCCESS)
-				{
-					return ret;
-				}
+				m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);
 			}
 			m_gds->derivativeFunction(solveTime, state.data(), deriv.data(), mode);
 			std::transform(state.begin(), state.end(), deriv.begin(), state.begin(), [Tstep](double a, double b) {return fma(Tstep, b, a); });

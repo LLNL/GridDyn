@@ -65,12 +65,12 @@ protected:
 
 
 */
-reserveDispatcher::reserveDispatcher (const std::string &objName) : gridCoreObject (objName)
+reserveDispatcher::reserveDispatcher (const std::string &objName) : coreObject (objName)
 {
 
 }
 
-gridCoreObject *reserveDispatcher::clone (gridCoreObject *obj) const
+coreObject *reserveDispatcher::clone (coreObject *obj) const
 {
   reserveDispatcher *nobj;
   if (obj == nullptr)
@@ -83,11 +83,11 @@ gridCoreObject *reserveDispatcher::clone (gridCoreObject *obj) const
       if (nobj == nullptr)
         {
           //if we can't cast the pointer clone at the next lower level
-          gridCoreObject::clone (obj);
+          coreObject::clone (obj);
           return obj;
         }
     }
-  gridCoreObject::clone (nobj);
+  coreObject::clone (nobj);
   nobj->thresholdStart = thresholdStart;
   nobj->thresholdStop = thresholdStop;
   nobj->dispatchInterval = dispatchInterval;        //5 minutes
@@ -134,11 +134,6 @@ double reserveDispatcher::initializeA (gridDyn_time time0,double dispatchSet)
   return currDispatch;
 }
 
-
-void reserveDispatcher::setTime (gridDyn_time time)
-{
-  prevTime = time;
-}
 
 double reserveDispatcher::updateP (gridDyn_time time,double pShort)
 {
@@ -215,7 +210,7 @@ void reserveDispatcher::remove (schedulerRamp *sched)
     }
 }
 
-void reserveDispatcher::add (gridCoreObject *obj)
+void reserveDispatcher::add (coreObject *obj)
 {
   if (dynamic_cast<schedulerRamp *> (obj))
     {
@@ -238,7 +233,7 @@ void reserveDispatcher::add (schedulerRamp *sched)
 
 }
 
-void reserveDispatcher::remove (gridCoreObject *obj)
+void reserveDispatcher::remove (coreObject *obj)
 {
   if (dynamic_cast<schedulerRamp *> (obj))
     {
@@ -250,7 +245,7 @@ void reserveDispatcher::remove (gridCoreObject *obj)
 void reserveDispatcher::set (const std::string &param,  const std::string &val)
 {
 
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 
 }
 
@@ -275,7 +270,7 @@ void reserveDispatcher::set (const std::string &param, double val,gridUnits::uni
     }
   else
     {
-      gridCoreObject::set (param,val,unitType);
+      coreObject::set (param,val,unitType);
     }
 }
 

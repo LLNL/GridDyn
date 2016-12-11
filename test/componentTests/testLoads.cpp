@@ -130,67 +130,67 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 	double val;
 	//test P ramp
 	ld1->set("p", 0.5);
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	ldT->set("dpdt",0.01);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ldT->loadUpdate(4.0);
+	ldT->setState(4.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.54, 0.000001);
 	ld1->set("dpdt", 0.0);
 	//test Q ramp
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero,0);
 	ldT->set("p", 0.0);
 	ldT->set("q", -0.3);
 	ldT->set("dqdt",-0.01);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, -0.3, 0.000001);
-	ldT->loadUpdate(6.0);
+	ldT->setState(6.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, -0.36, 0.000001);
 	ld1->set("dqdt", 0.0);
 	ld1->set("q", 0.0);
 	//test r ramp
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	ldT->set("r", 1.0);
   ldT->set("drdt", 0.05); 
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.0, 0.000001);
-	ldT->loadUpdate(2.0);
+	ldT->setState(2.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getRealPower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.44/1.1, 0.000001);
 	ld1->set("drdt", 0.0);
 	ld1->set("r", 0.0);
 	//test x ramp
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	ldT->set("x", 0.5);
   ldT->set("dxdt", -0.05); 
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, 2.0, 0.000001);
-	ldT->loadUpdate(4.0);
+	ldT->setState(4.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getReactivePower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*1.2 / 0.3, 0.000001);
 	ld1->set("dxdt", 0.0);
 	ld1->set("x", 0.0);
 	ld1->set("r", kBigNum);
 	//test Ir ramp
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	ldT->set("ip", 0.5);
 	ldT->set("dipdt",-0.01);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ldT->loadUpdate(10.0);
+	ldT->setState(10.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getRealPower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*0.4 , 0.000001);
 	ld1->set("dipdt", 0.0);
 	ld1->set("ip", 0.0);
 	//test Iq ramp
-	ld1->setTime(0.0);
+	ld1->pFlowInitializeA(timeZero, 0);
 	ldT->set("iq", 1.0);
 	ldT->set("diqdt",0.05);
 	val = ld1->getReactivePower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.0, 0.000001);
-	ldT->loadUpdate(1.0);
+	ldT->setState(1.0, nullptr, nullptr, cLocalSolverMode);
 	val = ld1->getReactivePower(1.2);
 	BOOST_CHECK_CLOSE(val, 1.2*1.05, 0.000001);
 	ld1->set("diqdt", 0.0);
@@ -207,85 +207,83 @@ BOOST_AUTO_TEST_CASE(ramp_load_test)
 
 BOOST_AUTO_TEST_CASE(random_load_test)
 {
-	ld1 = new gridRandomLoad();
-	gridRandomLoad *ldT = static_cast<gridRandomLoad *>(ld1);
+	ld1 = new sourceLoad(sourceLoad::sourceType::random);
+	sourceLoad *ldT = static_cast<sourceLoad *>(ld1);
 	BOOST_REQUIRE(ldT != nullptr);
-	double val;
-	//test P ramp
-	ld1->set("trigger_dist", "constant");
-	ldT->set("mean_t",5.0);
-	ld1->set("size_dist", "constant");
-	ldT->set("mean_l" ,0.3);
+	//test P random
+	ld1->set("p:trigger_dist", "constant");
+	ldT->set("p:mean_t",5.0);
+	ld1->set("p:size_dist", "constant");
+	ldT->set("p:mean_l" ,0.3);
 	ld1->set("p", 0.5);
 	ld1->pFlowInitializeA(timeZero, 0);
-	val = ld1->getRealPower(1.0);
+	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ld1->updateA(5.0);
+	ld1->timestep(5.0,emptyArguments,cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 	//check the uniform distribution
-	ldT->resetTrigger();
-	ld1->set("trigger_dist", "uniform");
-	ldT->set("min_t",2.0);
-	ldT->set("max_t", 5.0);
+	ldT->reset();
+	ld1->set("p:trigger_dist", "uniform");
+	ldT->set("p:min_t",2.0);
+	ldT->set("p:max_t", 5.0);
 	ld1->pFlowInitializeA(6.0,0);
-	double otime = ld1->getNextUpdateTime();
+	auto src = ld1->find("p");
+	BOOST_REQUIRE(src != nullptr);
+	gridDyn_time otime = src->getNextUpdateTime();
 	BOOST_CHECK(otime >= 8.0);
 	BOOST_CHECK(otime <= 11.0);
-	ld1->updateA(otime-0.2);
+	ld1->timestep(otime-0.2, emptyArguments, cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
-	ld1->dynInitializeA(otime + 0.2,0);
+	ld1->timestep(otime + 0.2, emptyArguments, cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 1.1, 0.000001);
 	//check to make sure they are not the same number
-  ldT->resetTrigger();
 	ld1->pFlowInitializeA(6.0, 0);
-	double ntime = ld1->getNextUpdateTime();
+	double ntime = src->getNextUpdateTime();
 	BOOST_CHECK(otime != ntime);
 	//check if the set seed works
-  ldT->resetTrigger();
-	ldT->set("seed",0);
+	ldT->set("p:seed",0);
 	ld1->pFlowInitializeA(6.0, 0);
-	ntime = ld1->getNextUpdateTime();
-  ldT->resetTrigger();
-	ldT->set("seed", 0);
+	ntime = src->getNextUpdateTime();
+	ldT->set("p:seed", 0);
 	ld1->pFlowInitializeA(6.0, 0);
-	otime = ld1->getNextUpdateTime();
-	BOOST_CHECK_CLOSE(otime, ntime, 0.000001);
+	otime = src->getNextUpdateTime();
+	BOOST_CHECK(otime==ntime);
 	
 	
 }
 
 BOOST_AUTO_TEST_CASE(random_load_test2)
 {
-	ld1 = new gridRandomLoad();
-	gridRandomLoad *ldT = static_cast<gridRandomLoad *>(ld1);
+	ld1 = new sourceLoad(sourceLoad::sourceType::random);
+	sourceLoad *ldT = static_cast<sourceLoad *>(ld1);
 	BOOST_REQUIRE(ldT != nullptr);
 	double val;
 	//test P ramp
-	ld1->set("trigger_dist", "constant");
-	ldT->set("mean_t",5.0);
-	ld1->set("size_dist", "constant");
-	ldT->set("mean_l",0.5);
+	ld1->set("p:trigger_dist", "constant");
+	ldT->set("p:mean_t",5.0);
+	ld1->set("p:size_dist", "constant");
+	ldT->set("p:mean_l",0.5);
 	ld1->set("p", 0.5);
-	ldT->setFlag("interpolate");
+	ldT->setFlag("p:interpolate");
 	ld1->pFlowInitializeA(timeZero,0);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
 	//check interpolate
-	ldT->loadUpdate(2.0);
+	ldT->setState(2.0,nullptr,nullptr,cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.7, 0.000001);
 	//check uniform load change
-  ldT->resetTrigger();
-	ldT->setFlag("interpolate",false);
-	ld1->set("size_dist", "uniform");
-	ldT->set("min_l", 0.2);
-	ldT->set("max_l",0.5);
+	ldT->reset();
+	ldT->setFlag("p:interpolate",false);
+	ld1->set("p:size_dist", "uniform");
+	ldT->set("p:min_l", 0.2);
+	ldT->set("p:max_l",0.5);
 	ld1->set("p", 0.5);
 	ld1->pFlowInitializeA(6.0,0);
-	ld1->updateA(12.0);
+	ld1->timestep(12.0, emptyArguments, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK(val >= 0.7);
 	BOOST_CHECK(val <= 1.0);
@@ -295,25 +293,25 @@ BOOST_AUTO_TEST_CASE(random_load_test2)
 
 BOOST_AUTO_TEST_CASE(pulse_load_test2)
 {
-	ld1 = new gridPulseLoad();
-	gridPulseLoad *ldT = static_cast<gridPulseLoad *>(ld1);
+	ld1 = new sourceLoad(sourceLoad::sourceType::pulse);
+	sourceLoad *ldT = static_cast<sourceLoad *>(ld1);
 	BOOST_REQUIRE(ldT != nullptr);
-	double val;
+
 	//test P ramp
-	ld1->set("type", "square");
-	ldT->set("amplitude", 1.3);
-	ld1->set("period", 5);
+	ld1->set("p:type", "square");
+	ldT->set("p:amplitude", 1.3);
+	ld1->set("p:period", 5);
 	ld1->pFlowInitializeA(timeZero,0);
-	val = ld1->getRealPower(1.0);
+	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
-	//check interpolate
-	ldT->loadUpdate(1.0);
+	//check the pulse
+	ldT->timestep(1.0, emptyArguments, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
-	BOOST_CHECK_CLOSE(val, 0, 0.000001);
-	ld1->loadUpdate(2.0);
+	BOOST_CHECK_CLOSE(val, 0.0, 0.000001);
+	ld1->timestep(2.0, emptyArguments, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.3, 0.000001);
-	ldT->loadUpdate(4.0);
+	ld1->timestep(4.0, emptyArguments, cLocalSolverMode);
 	val = ldT->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
 	
@@ -333,9 +331,9 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
 	//check interpolate
-  solverMode sMode(2);
+
   IOdata input{ 0,0 };
-	ldT->timestep(12.0,input,sMode);
+	ldT->timestep(12.0,input, cPflowSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 	delete ld1;
@@ -349,20 +347,20 @@ BOOST_AUTO_TEST_CASE(file_load_test1)
 	ldT->set("mode", "interpolate");
 	ld1->pFlowInitializeA(timeZero, 0);
 	
-  ldT->timestep(1.0, input, sMode);
+  ldT->timestep(1.0, input, cPflowSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.53, 0.000001);
 	//check interpolate
-  ldT->timestep(10.0, input, sMode);
+  ldT->timestep(10.0, input, cPflowSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 
-  ldT->timestep(12.0, input, sMode);
+  ldT->timestep(12.0, input, cPflowSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.78, 0.000001);
 
 
-  ldT->timestep(50.0, input, sMode);
+  ldT->timestep(50.0, input, cPflowSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.6, 0.000001);
 }

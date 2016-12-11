@@ -30,7 +30,7 @@ static const IgnoreListType eventIgnoreStrings{
 	"time","t","offset", "units", "gain", "bias", "field", "target", "type"
 };
 
-void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo *ri,gridCoreObject *obj)
+void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo *ri,coreObject *obj)
 {
 
   //get the event strings that may be present
@@ -113,7 +113,7 @@ auto eventString = aP->getMultiText (", ");
 }
 
 
-int loadEventElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri)
+int loadEventElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo *ri)
 {
 
 

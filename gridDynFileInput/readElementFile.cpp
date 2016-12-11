@@ -23,7 +23,7 @@
 
 using namespace readerConfig;
 
-void loadElementInformation (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo *ri, const IgnoreListType &ignoreList)
+void loadElementInformation (coreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo *ri, const IgnoreListType &ignoreList)
 {
   objSetAttributes (obj, element, objectName, ri, ignoreList);
   readImports (element, ri, obj, false);
@@ -36,7 +36,7 @@ void loadElementInformation (gridCoreObject *obj, std::shared_ptr<readerElement>
 }
 
 static const std::string importString ("import");
-void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject, bool finalFlag)
+void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject, bool finalFlag)
 {
   if (element->hasElement (importString) == false)
     {
@@ -258,7 +258,7 @@ static const IgnoreListType keywords {
   "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom", "purpose"
 };
 
-void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
+void objSetAttributes (coreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
 {
 
   auto att = aP->getFirstAttribute ();
@@ -347,7 +347,7 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
 }
 
 
-void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
+void paramLoopElement (coreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
 {
 
   gridParameter param;

@@ -24,7 +24,7 @@ int readElementInteger(std::shared_ptr<readerElement> &element, const std::strin
 
 static const IgnoreListType ignoreArrayVariables{ "count", "loopvariable", "interval","start","stop" };
 // "aP" is the XML element passed from the reader
-void readArrayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject)
+void readArrayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
 {
 
 	auto riScope = ri->newScope();

@@ -25,7 +25,7 @@ fncsSource::fncsSource(const std::string &objName) : rampSource(objName)
 
 }
 
-gridCoreObject *fncsSource::clone(gridCoreObject *obj) const
+coreObject *fncsSource::clone(coreObject *obj) const
 {
 	fncsSource *nobj = cloneBase<fncsSource, rampSource>(this, obj);
 	if (!(nobj))
@@ -45,14 +45,23 @@ void fncsSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
 {
 	rampSource::objectInitializeA(time0, flags);
 
-	std::string def = std::to_string(gridUnits::unitConversion(m_output, outputUnits, inputUnits, systemBasePower));
-	fncsRegister::instance()->registerSubscription(valKey,fncsRegister::dataType::fncsDouble,def);
+	if (updatePeriod == maxTime)
+	{
+		LOG_WARNING("no period specified defaulting to 10s");
+		updatePeriod = 10.0;
+	}
+	nextUpdateTime = time0;
 	updateA(time0);
+	nextUpdateTime = time0 + updatePeriod;
 }
 
 
 void fncsSource::updateA(gridDyn_time time)
 {
+	if (time < nextUpdateTime)
+	{
+		return;
+	}
 	auto res = fncsGetVal(valKey)*scaleFactor;
 	double newVal = unitConversion(res, inputUnits, outputUnits, systemBasePower);
 	if (newVal == kNullVal)
@@ -91,11 +100,12 @@ void fncsSource::updateA(gridDyn_time time)
 	else
 	{
 		m_output = newVal;
+		m_tempOut = newVal;
 		prevVal = newVal;
 		mp_dOdt = 0;
 		lastUpdateTime = time;
 	}
-	
+	lastTime = time;
 	prevTime = time;
 
 }
@@ -121,16 +131,8 @@ void fncsSource::setFlag(const std::string &param, bool val)
 	}
 	else if (param == "predictive")
 	{
-		if (val)
-		{
-			opFlags.set(use_ramp, val);
-			opFlags.set(predictive_ramp, val);
-		}
-		else
-		{
-			opFlags.set(predictive_ramp, false);
-		}
-		
+		opFlags.set(use_ramp, val);
+		opFlags.set(predictive_ramp, val);
 	}
 	else if (param == "interpolate")
 	{
@@ -158,16 +160,18 @@ void fncsSource::set(const std::string &param, const std::string &val)
 	if ((param == "valkey")||(param=="key"))
 	{
 		valKey = val;
-		
-
+		updateSubscription();
 	}
 	else if ((param == "input_units")||(param=="inunits")||(param=="inputunits"))
 	{
 		inputUnits = gridUnits::getUnits(val);
+		updateSubscription();
 	}
 	else if ((param == "output_units") || (param == "outunits")||(param=="outputunits"))
 	{
 		outputUnits = gridUnits::getUnits(val);
+		updateSubscription();
+		
 	}
 	else
 	{
@@ -184,9 +188,19 @@ void fncsSource::set(const std::string &param, double val, gridUnits::units_t un
 	if ((param == "scalefactor") || (param == "scaling"))
 	{
 		scaleFactor = val;
+		updateSubscription();
 	}
 	else
 	{
 		gridSource::set(param, val, unitType);
+	}
+}
+
+void fncsSource::updateSubscription()
+{
+	if (!valKey.empty())
+	{
+		std::string def = std::to_string(gridUnits::unitConversion(m_output / scaleFactor, outputUnits, inputUnits, systemBasePower));
+		fncsRegister::instance()->registerSubscription(valKey, fncsRegister::dataType::fncsDouble, def);
 	}
 }

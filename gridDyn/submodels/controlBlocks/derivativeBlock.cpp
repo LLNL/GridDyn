@@ -32,7 +32,7 @@ derivativeBlock::derivativeBlock (double t1, const std::string &objName) : basic
   opFlags.set (use_state);
 }
 
-gridCoreObject *derivativeBlock::clone (gridCoreObject *obj) const
+coreObject *derivativeBlock::clone (coreObject *obj) const
 {
   derivativeBlock *nobj;
   if (obj == nullptr)
@@ -136,29 +136,29 @@ double derivativeBlock::step (gridDyn_time ttime, double inputA)
   return out;
 }
 
-void derivativeBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void derivativeBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, update, sMode, this);
   Loc.destLoc[limiter_alg] = Loc.dstateLoc[0];
-//	update[Aoffset + limiter_alg] = sD->state[Aoffset + limiter_alg] - sD->dstate_dt[offset];
+//	update[Aoffset + limiter_alg] = sD.state[Aoffset + limiter_alg] - sD.dstate_dt[offset];
   basicBlock::algElements (input,  sD, update, sMode);
 }
 
 
-void derivativeBlock::derivElements (double input, double /*didt*/, const stateData *sD, double deriv[], const solverMode &sMode)
+void derivativeBlock::derivElements (double input, double /*didt*/, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode); //limiter diff must be 0 since the output is algebraic
 
-  deriv[offset] = (K * (input + bias) - sD->state[offset]) / m_T1;
+  deriv[offset] = (K * (input + bias) - sD.state[offset]) / m_T1;
 }
 
-void derivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void derivativeBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   if (hasDifferential (sMode))
     {
       ad.assignCheck (offset, argLoc, K / m_T1);
-      ad.assign (offset, offset, -1.0 / m_T1 - sD->cj);
+      ad.assign (offset, offset, -1.0 / m_T1 - sD.cj);
     }
   else
     {
@@ -167,7 +167,7 @@ void derivativeBlock::jacElements (double input, double didt, const stateData *s
   if (hasAlgebraic (sMode))
     {
       auto Aoffset = offsets.getAlgOffset (sMode) + limiter_alg;
-      ad.assignCheck (Aoffset, offset, sD->cj);
+      ad.assignCheck (Aoffset, offset, sD.cj);
       ad.assign (Aoffset, Aoffset, -1);
       if (limiter_alg > 0)
         {

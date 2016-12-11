@@ -25,7 +25,7 @@ fncsLoad::fncsLoad(const std::string &objName) : gridRampLoad(objName)
 
 }
 
-gridCoreObject *fncsLoad::clone(gridCoreObject *obj) const
+coreObject *fncsLoad::clone(coreObject *obj) const
 {
 	fncsLoad *nobj = cloneBase<fncsLoad, gridRampLoad>(this, obj);
 	if (!(nobj))
@@ -47,12 +47,9 @@ void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 
 	double V = bus->getVoltage();
 	double A = bus->getAngle();
-	auto Punit = unitConversion(P, gridUnits::puMW, gridUnits::MW, systemBasePower);
-	auto Qunit = unitConversion(Q, gridUnits::puMW, gridUnits::MW, systemBasePower);
-	std::string def = std::to_string(Punit) + "+" + std::to_string(Qunit) + "j";
-	fncsRegister::instance()->registerSubscription(loadKey,fncsRegister::dataType::fncsComplex,def);
+	
 
-	fncsRegister::instance()->registerPublication(voltageKey, fncsRegister::dataType::fncsComplex);
+	
 	if (!voltageKey.empty())
 	{
 		std::complex<double> Vc = std::polar(V, A);
@@ -61,8 +58,8 @@ void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 	}
 	
 
-	prevP = P;
-	prevQ = Q;
+	prevP = getP();
+	prevQ = getQ();
 }
 
 void fncsLoad::pFlowObjectInitializeB()
@@ -84,19 +81,22 @@ void fncsLoad::updateA(gridDyn_time time)
 		Vc *= baseVoltage;
 		fncsSendComplex(voltageKey, Vc);
 	}
-	
+	lastUpdateTime = time;
+}
 
+gridDyn_time fncsLoad::updateB()
+{
+	nextUpdateTime += updatePeriod;
+	
 	//now get the updates
 	auto res = fncsGetComplex(loadKey);
 	if (res.real() == kNullVal)
 	{
 		dPdt = 0.0;
 		dQdt = 0.0;
-		prevP = P;
-		prevQ = Q;
-		lastUpdateTime = time;
-		prevTime = time;
-		return;
+		prevP = getP();
+		prevQ = getQ();
+		return nextUpdateTime;
 	}
 	res - res*scaleFactor;
 	double newP = unitConversion(res.real(), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
@@ -106,12 +106,12 @@ void fncsLoad::updateA(gridDyn_time time)
 	{
 		if (opFlags[predictive_ramp]) //ramp uses the previous change to guess into the future
 		{
-			P = newP;
-			Q = newQ;
+			setP(newP);
+			setQ(newQ);
 			if ((prevTime - lastUpdateTime) > 0.001)
 			{
-				dPdt = (newP - prevP) / (time - lastUpdateTime);
-				dQdt = (newQ - prevQ) / (time - lastUpdateTime);
+				dPdt = (newP - prevP) / (prevTime - lastUpdateTime);
+				dQdt = (newQ - prevQ) / (prevTime - lastUpdateTime);
 			}
 			else
 			{
@@ -120,28 +120,26 @@ void fncsLoad::updateA(gridDyn_time time)
 			}
 			prevP = newP;
 			prevQ = newQ;
-			lastUpdateTime = time;
+			prevTime = lastUpdateTime;
 		}
 		else // output will ramp up to the specified value in the update period
 		{
-			dPdt = (newP - P) / updatePeriod;
-			dQdt = (newQ - Q) / updatePeriod;
-			prevP = P;
-			prevQ = Q;
-			lastUpdateTime = prevTime;
+			dPdt = (newP - getP()) / updatePeriod;
+			dQdt = (newQ - getQ()) / updatePeriod;
+			prevP = getP();
+			prevQ = getQ();
 		}
 	}
 	else
 	{
-		P = newP;
-		Q = newQ;
+		setP(newP);
+		setQ(newQ);
 		prevP = newP;
 		prevQ = newQ;
 		dPdt = 0;
 		dQdt = 0;
-		lastUpdateTime = time;
 	}
-	prevTime = time;
+	return nextUpdateTime;
 }
 
 void fncsLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
@@ -202,11 +200,15 @@ void fncsLoad::set(const std::string &param, const std::string &val)
 	if (param == "voltagekey")
 	{
 		voltageKey = val;
+		fncsRegister::instance()->registerPublication(voltageKey, fncsRegister::dataType::fncsComplex);
 	}
 	else if (param == "loadkey")
 	{
 		loadKey = val;
-		
+		auto Punit = unitConversion(getP(), gridUnits::puMW, gridUnits::MW, systemBasePower);
+		auto Qunit = unitConversion(getQ(), gridUnits::puMW, gridUnits::MW, systemBasePower);
+		std::string def = std::to_string(Punit) + "+" + std::to_string(Qunit) + "j";
+		fncsRegister::instance()->registerSubscription(loadKey, fncsRegister::dataType::fncsComplex, def);
 
 	}
 	else if (param == "units")

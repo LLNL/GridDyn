@@ -34,7 +34,7 @@ variableGenerator::variableGenerator (dynModel_t dynModel, const std::string &ob
   opFlags.reset(local_power_control);
 }
 
-gridCoreObject *variableGenerator::clone (gridCoreObject *obj) const
+coreObject *variableGenerator::clone (coreObject *obj) const
 {
   variableGenerator *gen = cloneBase<variableGenerator, gridDynGenerator> (this, obj);
   if (!(gen))
@@ -76,7 +76,7 @@ void variableGenerator::dynObjectInitializeB (const IOdata &args, const IOdata &
 
 }
 
-void variableGenerator::add (gridCoreObject *obj)
+void variableGenerator::add (coreObject *obj)
 {
   if (dynamic_cast<gridSubModel *> (obj))
     {
@@ -184,7 +184,7 @@ void variableGenerator::set (const std::string &param, double val, units_t unitT
 
 
 // compute the residual for the dynamic states
-void variableGenerator::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void variableGenerator::residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
   gridDynGenerator::residual (args, sD, resid, sMode);
   if ((m_source) && (m_source->enabled))
@@ -198,7 +198,7 @@ void variableGenerator::residual (const IOdata &args, const stateData *sD, doubl
     }
 
 }
-void variableGenerator::jacobianElements (const IOdata &args, const stateData *sD,
+void variableGenerator::jacobianElements (const IOdata &args, const stateData &sD,
                                           matrixData<double> &ad,
                                           const IOlocs &argLocs,const solverMode &sMode)
 {
@@ -214,7 +214,7 @@ void variableGenerator::jacobianElements (const IOdata &args, const stateData *s
 }
 
 
-gridCoreObject *variableGenerator::find (const std::string &object) const
+coreObject *variableGenerator::find (const std::string &object) const
 {
   if (object == "source")
     {
@@ -231,7 +231,7 @@ gridCoreObject *variableGenerator::find (const std::string &object) const
     }
 }
 
-gridCoreObject *variableGenerator::getSubObject (const std::string &typeName, index_t num) const
+coreObject *variableGenerator::getSubObject (const std::string &typeName, index_t num) const
 {
   auto out = gridDynGenerator::getSubObject (typeName,num);
   if (!out)
@@ -243,7 +243,7 @@ gridCoreObject *variableGenerator::getSubObject (const std::string &typeName, in
 }
 
 
-double variableGenerator::pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode)
+double variableGenerator::pSetControlUpdate(const IOdata &args, const stateData &sD, const solverMode &sMode)
 {
 	if ((m_cBlock) && (m_cBlock->enabled))
 	{

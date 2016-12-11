@@ -30,7 +30,7 @@ fmiLoad::~fmiLoad()
 //fmisub gets deleted from the object
 }
 
-gridCoreObject * fmiLoad::clone(gridCoreObject *obj) const
+coreObject * fmiLoad::clone(coreObject *obj) const
 {
 	fmiLoad *nobj = cloneBase<fmiLoad, gridLoad>(this, obj);
 	if (!(nobj))
@@ -204,7 +204,7 @@ void fmiLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 		SET_CONTROLFLAG(flags, force_constant_pflow_initialization);
 		fmisub->initializeA(time0, flags);
 		gridLoad::pFlowObjectInitializeA(time0, flags);
-		auto args = bus->getOutputs(nullptr,cLocalSolverMode);
+		auto args = bus->getOutputs(emptyStateData,cLocalSolverMode);
 		IOdata outset;
 		fmisub->initializeB(args, outset, outset);
 		opFlags.set(pFlow_initialized);
@@ -362,30 +362,30 @@ void fmiLoad::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 	}
 }
 
-void fmiLoad::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void fmiLoad::residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
 	fmisub->residual(args, sD, resid, sMode);
 }
 
-void fmiLoad::derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void fmiLoad::derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 	fmisub->derivative(args, sD,deriv, sMode);
 }
 
-void fmiLoad::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiLoad::outputPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
 }
-void fmiLoad::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->ioPartialDerivatives (args, sD, ad, argLocs,sMode);
 }
-void fmiLoad::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::jacobianElements(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 	fmisub->jacobianElements (args, sD, ad,argLocs, sMode);
 }
 
-void fmiLoad::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void fmiLoad::rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode)
 {
 	fmisub->rootTest(args, sD, roots, sMode);
 }
@@ -397,9 +397,9 @@ void fmiLoad::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vec
 void fmiLoad::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	fmisub->setState(ttime, state, dstate_dt, sMode);
-	auto out = fmisub->getOutputs({}, nullptr, cLocalSolverMode);
-	P = out[PoutLocation];
-	Q = out[QoutLocation];
+	auto out = fmisub->getOutputs(emptyArguments, emptyStateData, cLocalSolverMode);
+	setP(out[PoutLocation]);
+	setQ(out[QoutLocation]);
 }
 
 index_t fmiLoad::findIndex(const std::string &field, const solverMode &sMode) const
@@ -412,36 +412,36 @@ void fmiLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode 
 	prevTime = ttime;
 	fmisub->timestep(ttime, args, sMode);
 }
-IOdata fmiLoad::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata fmiLoad::getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	return fmisub->getOutputs(args, sD, sMode);
 }
-double fmiLoad::getRealPower(const IOdata &args, const stateData *sD, const solverMode &sMode)
+double fmiLoad::getRealPower(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	return fmisub->getOutput(args, sD, sMode,0);
 }
-double fmiLoad::getReactivePower(const IOdata &args, const stateData *sD, const solverMode &sMode)
+double fmiLoad::getReactivePower(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	return fmisub->getOutput(args, sD, sMode, 1);
 }
 double fmiLoad::getRealPower(const double V) const
 {
 
-	auto args = bus->getOutputs(nullptr,cLocalSolverMode);
+	auto args = bus->getOutputs(emptyStateData,cLocalSolverMode);
 	args[voltageInLocation] = V;
-	return fmisub->getOutput(args, nullptr, cLocalSolverMode,0);
+	return fmisub->getOutput(args, emptyStateData, cLocalSolverMode,0);
 }
 double fmiLoad::getReactivePower(const double V) const
 {
-	auto args = bus->getOutputs(nullptr, cLocalSolverMode);
+	auto args = bus->getOutputs(emptyStateData, cLocalSolverMode);
 	args[voltageInLocation] = V;
-	return fmisub->getOutput(args, nullptr, cLocalSolverMode, 1);
+	return fmisub->getOutput(args, emptyStateData, cLocalSolverMode, 1);
 }
 double fmiLoad::getRealPower() const
 {
-	return P;
+	return getP();
 }
 double fmiLoad::getReactivePower() const
 {
-	return Q;
+	return getQ();
 }

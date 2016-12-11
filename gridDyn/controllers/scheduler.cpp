@@ -45,27 +45,27 @@ bool operator!= (const tsched &td1, const tsched &td2)
 {
   return (td1.time != td2.time);
 }
-bool operator< (const tsched &td1, double timeC)
+bool operator< (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time < timeC);
 }
-bool operator<= (const tsched &td1, double timeC)
+bool operator<= (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time <= timeC);
 }
-bool operator> (const tsched &td1, double timeC)
+bool operator> (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time > timeC);
 }
-bool operator>= (const tsched &td1, double timeC)
+bool operator>= (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time >= timeC);
 }
-bool operator== (const tsched &td1, double timeC)
+bool operator== (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time == timeC);
 }
-bool operator!= (const tsched &td1, double timeC)
+bool operator!= (const tsched &td1, gridDyn_time timeC)
 {
   return (td1.time != timeC);
 }
@@ -83,7 +83,7 @@ scheduler::scheduler (double initialValue, const std::string &objName) : schedul
 
 
 
-gridCoreObject *scheduler::clone (gridCoreObject *obj) const
+coreObject *scheduler::clone (coreObject *obj) const
 {
   scheduler *nobj = cloneBase<scheduler, gridSource> (this, obj);
   if (nobj == nullptr)
@@ -142,7 +142,7 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
 void scheduler::setTarget (const std::string &filename)
 {
   timeSeries<double,gridDyn_time> targets;
-  targets.loadBinaryFile (filename);
+  targets.loadFile (filename);
   
   std::list<tsched> flist;
   for (index_t kk = 0; kk < targets.count; ++kk)
@@ -160,18 +160,7 @@ void scheduler::setTarget (const std::string &filename)
 
 }
 
-void scheduler::setTime (gridDyn_time time)
-{
 
-  gridDyn_time timeshift = time - prevTime;
-  for (auto &pt : pTarget)
-    {
-      pt.time += timeshift;
-    }
-  nextUpdateTime += timeshift;
-  alert (this,UPDATE_TIME_CHANGE);
-  prevTime = time;
-}
 
 void scheduler::updateA (gridDyn_time time)
 {

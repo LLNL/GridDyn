@@ -86,7 +86,7 @@ gridOptObject *optComponentFactory::makeObject (const std::string &type)
     }
 }
 
-gridOptObject *optComponentFactory::makeObject (gridCoreObject *obj)
+gridOptObject *optComponentFactory::makeObject (coreObject *obj)
 {
   gridOptObject *oo;
 
@@ -176,7 +176,7 @@ gridOptObject *coreOptObjectFactory::createObject (const std::string &optType, c
     }
 }
 
-gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, gridCoreObject *obj)
+gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, coreObject *obj)
 {
   gridOptObject *oo;
   auto mfind = m_factoryMap.find (optType);
@@ -191,7 +191,7 @@ gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, 
     }
 }
 
-gridOptObject *coreOptObjectFactory::createObject (gridCoreObject *obj)
+gridOptObject *coreOptObjectFactory::createObject (coreObject *obj)
 {
   if (m_defaultType.empty ())
     {
@@ -275,7 +275,7 @@ void coreOptObjectFactory::setDefaultType (const std::string defType)
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &optType, const std::string &typeName, count_t numObjects, gridCoreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &optType, const std::string &typeName, count_t numObjects, coreObject *obj)
 {
   auto mfind = m_factoryMap.find (optType);
   if (mfind != m_factoryMap.end ())
@@ -288,7 +288,7 @@ void coreOptObjectFactory::prepObjects (const std::string &optType, const std::s
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, gridCoreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, coreObject *obj)
 {
   if (m_defaultType.empty ())
     {

@@ -23,10 +23,10 @@
 
 
 //this functions is here since it depends on gridObject information
-Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode &sMode, const gridObject *obj) const
+Lp offsetTable::getLocations (const stateData &sD, double d[], const solverMode &sMode, const gridObject *obj) const
 {
 	Lp Loc = getLocations(sD, sMode, obj);
-  if ((sMode.local)||(!(sD)))
+  if ((sMode.local)||(sD.empty()))
     {
       Loc.destLoc = d;
       Loc.destDiffLoc = d + Loc.algSize;
@@ -56,14 +56,14 @@ Lp offsetTable::getLocations (const stateData *sD, double d[], const solverMode 
 }
 
 //this functions is here since it depends on gridObject information
-Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, const gridObject *obj) const
+Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, const gridObject *obj) const
 {
   Lp Loc;
   Loc.algOffset = offsetContainer[sMode.offsetIndex].algOffset;
   Loc.diffOffset = offsetContainer[sMode.offsetIndex].diffOffset;
   Loc.diffSize = offsetContainer[sMode.offsetIndex].total.diffSize;
   Loc.algSize = offsetContainer[sMode.offsetIndex].total.algSize;
-  if ((sMode.local) || (!(sD)))
+  if ((sMode.local) || (sD.empty()))
     {
       Loc.time = obj->prevTime;
       Loc.algStateLoc = obj->m_state.data ();
@@ -80,36 +80,36 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
     }
   else if (isDAE (sMode))
     {
-      Loc.time = sD->time;
-      Loc.algStateLoc = sD->state + Loc.algOffset;
-      Loc.diffStateLoc = sD->state + Loc.diffOffset;
-      Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
+      Loc.time = sD.time;
+      Loc.algStateLoc = sD.state + Loc.algOffset;
+      Loc.diffStateLoc = sD.state + Loc.diffOffset;
+      Loc.dstateLoc = sD.dstate_dt + Loc.diffOffset;
     }
   else if (hasAlgebraic (sMode))
     {
-      Loc.time = sD->time;
-      if (sD->state)
+      Loc.time = sD.time;
+      if (sD.state)
         {
-          Loc.algStateLoc = sD->state + Loc.algOffset;
+          Loc.algStateLoc = sD.state + Loc.algOffset;
         }
       else
         {
-          Loc.algStateLoc = sD->algState + Loc.algOffset;
+          Loc.algStateLoc = sD.algState + Loc.algOffset;
         }
-	  if ((isDynamic(sMode)) && (sD->pairIndex != kNullLocation))
+	  if ((isDynamic(sMode)) && (sD.pairIndex != kNullLocation))
 	  {
-		  if (sD->diffState)
+		  if (sD.diffState)
 		  {
-			  Loc.diffStateLoc = sD->diffState + offsetContainer[sD->pairIndex].diffOffset;
+			  Loc.diffStateLoc = sD.diffState + offsetContainer[sD.pairIndex].diffOffset;
 		  }
-		  else if (sD->fullState)
+		  else if (sD.fullState)
 		  {
-			  Loc.diffStateLoc = sD->fullState + offsetContainer[sD->pairIndex].diffOffset;
+			  Loc.diffStateLoc = sD.fullState + offsetContainer[sD.pairIndex].diffOffset;
 		  }
 		 
-		  if (sD->dstate_dt)
+		  if (sD.dstate_dt)
 		  {
-			  Loc.dstateLoc = sD->dstate_dt + offsetContainer[sD->pairIndex].diffOffset;
+			  Loc.dstateLoc = sD.dstate_dt + offsetContainer[sD.pairIndex].diffOffset;
 		  }
 	  }
 	  else
@@ -122,25 +122,25 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
     }
   else if (hasDifferential (sMode))
     {
-      Loc.time = sD->time;
-      if (sD->state)
+      Loc.time = sD.time;
+      if (sD.state)
         {
-          Loc.diffStateLoc = sD->state + Loc.diffOffset;
+          Loc.diffStateLoc = sD.state + Loc.diffOffset;
         }
       else
         {
-          Loc.diffStateLoc = sD->diffState + Loc.diffOffset;
+          Loc.diffStateLoc = sD.diffState + Loc.diffOffset;
         }
-      Loc.dstateLoc = sD->dstate_dt + Loc.diffOffset;
-		if (sD->pairIndex != kNullLocation)
+      Loc.dstateLoc = sD.dstate_dt + Loc.diffOffset;
+		if (sD.pairIndex != kNullLocation)
 		{
-			if (sD->algState)
+			if (sD.algState)
 			{
-				Loc.algStateLoc = sD->algState + offsetContainer[sD->pairIndex].algOffset;
+				Loc.algStateLoc = sD.algState + offsetContainer[sD.pairIndex].algOffset;
 			}
-			else if (sD->fullState)
+			else if (sD.fullState)
 			{
-				Loc.algStateLoc = sD->fullState + offsetContainer[sD->pairIndex].algOffset;
+				Loc.algStateLoc = sD.fullState + offsetContainer[sD.pairIndex].algOffset;
 			}
 		}
       else
@@ -167,7 +167,7 @@ Lp offsetTable::getLocations (const stateData *sD, const solverMode &sMode, cons
   return Loc;
 }
 
-gridObject::gridObject (const std::string &objName) : gridCoreObject (objName)
+gridObject::gridObject (const std::string &objName) : coreObject (objName)
 {
   offsets.setAlgOffset (0,cLocalSolverMode);
 }
@@ -180,9 +180,9 @@ gridObject::~gridObject ()
     }
 }
 
-gridCoreObject *gridObject::clone (gridCoreObject *obj) const
+coreObject *gridObject::clone (coreObject *obj) const
 {
-  gridObject *nobj = cloneBase<gridObject, gridCoreObject> (this, obj);
+  gridObject *nobj = cloneBase<gridObject, coreObject> (this, obj);
   if (!(nobj))
     {
       return obj;
@@ -405,30 +405,33 @@ bool gridObject::isLoaded (const solverMode &sMode,bool dynOnly) const
   return (dynOnly) ? offsets.isrjLoaded (sMode) : offsets.isLoaded (sMode);
 }
 
+/* *INDENT-OFF* */
+static std::map<std::string, operation_flags> user_settable_flags
+{
+	{ "use_bus_frequency", uses_bus_frequency },
+	{ "late_b_initialize", late_b_initialize },
+	{"error",error_flag},
+	{"no_gridobject_set",no_gridobject_set },
+	{ "disconnected",disconnected },
+	{ "disable_flag_update", disable_flag_updates },
+	{ "flag_update_required", flag_update_required },
+	{ "pflow_init_required", pflow_init_required },
+};
+
+
 //there isn't that many flags that we want to be user settable, most are controlled by the model so allowing them to be set by an external function
 // might not be the best thing
 void gridObject::setFlag (const std::string &flag, bool val)
 {
-  if (flag == "error")
-    {
-      opFlags.set (error_flag, val);
-    }
-  else if (flag == "late_b_initialize")
-    {
-      opFlags.set (late_b_initialize, val);
-    }
-  else if (flag == "no_gridobject_set")
-    {
-      opFlags.set (no_gridobject_set, val);
-    }
-  else if (flag == "disconnected")
-  {
-	  opFlags.set(disconnected, val);
-  }
-  else
-    {
-      gridCoreObject::setFlag (flag,val);
-    }
+	auto ffind = user_settable_flags.find(flag);
+	if (ffind != user_settable_flags.end())
+	{
+		opFlags.set(ffind->second,val);
+	}
+	else
+	{
+		coreObject::setFlag(flag, val);
+	}
 }
 
 /* *INDENT-OFF* */
@@ -541,7 +544,7 @@ static const stringVec locStrStrings {
 
 void gridObject::getParameterStrings (stringVec &pstr, paramStringType pstype) const
 {
-  getParamString<gridObject,gridCoreObject> (this,pstr,locNumStrings,locStrStrings,{},pstype);
+  getParamString<gridObject,coreObject> (this,pstr,locNumStrings,locStrStrings,{},pstype);
 }
 
 void gridObject::set (const std::string &param,  const std::string &val)
@@ -589,7 +592,7 @@ void gridObject::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      gridCoreObject::set (param, val);
+      coreObject::set (param, val);
     }
   
 }
@@ -654,7 +657,7 @@ void gridObject::set (const std::string &param, double val, gridUnits::units_t u
     }
   else
     {
-      gridCoreObject::set (param, val, unitType);
+      coreObject::set (param, val, unitType);
     }
 
 }
@@ -673,11 +676,39 @@ double gridObject::get(const std::string &param, gridUnits::units_t unitType) co
 	}
 	else
 	{
-		out = gridCoreObject::get(param, unitType);
+		out = coreObject::get(param, unitType);
 	}
 	return out;
 }
 
+
+void gridObject::addSubObject(gridObject *obj)
+{
+	for (auto &sobj : subObjectList)
+	{
+		if (sobj->getID() == obj->getID())
+		{
+			return;
+		}
+	}
+	subObjectList.push_back(static_cast<gridObject *>(obj));
+}
+
+void gridObject::remove(coreObject *obj)
+{
+	auto listObj = subObjectList.begin();
+	auto listEnd = subObjectList.end();
+	while (listObj != listEnd)
+	{
+		if ((*listObj)->getID() == obj->getID())
+		{
+			subObjectList.erase(listObj);
+			condDelete(obj, this);
+			return;
+		}
+	}
+	
+}
 
 void gridObject::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {

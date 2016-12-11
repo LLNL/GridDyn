@@ -73,7 +73,7 @@ protected:
 public:
   /** @brief default constructor*/
   explicit sensor (const std::string &objName = "sensor_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual void set (const std::string &param,  const std::string &val) override;
 
@@ -84,7 +84,7 @@ public:
   virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
   virtual void dynObjectInitializeB (IOdata &outputSet) override;
   using gridRelay::add;
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief add a filter block to the relay
   @param[in] blk a pointer to a filter block
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
@@ -106,17 +106,17 @@ public:
   @param[in] obj a shared pointer to a filter block
   @return OBJECT_ADD_SUCCESS if successful OBJECT_ADD_FAILURE otherwise
   */
-  virtual void addsp (std::shared_ptr<gridCoreObject> obj) override;
+  virtual void addsp (std::shared_ptr<coreObject> obj) override;
 
 
 
   //dynamic functions for evaluation with a limit exceeded
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
   virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
@@ -125,9 +125,9 @@ public:
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
-  virtual double getOutput (const stateData *sD, const solverMode &sMode, index_t num = 0) const override;
+  virtual double getOutput (const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
   virtual index_t getOutputLoc (const solverMode &sMode, index_t num) const override;
-  virtual IOdata getOutputs ( const stateData *sD, const solverMode &sMode) override;
+  virtual IOdata getOutputs ( const stateData &sD, const solverMode &sMode) const override;
 
   /** @brief get the block output from the sensor
   @param[in] sD  the state data to get the output from
@@ -135,7 +135,7 @@ public:
   @param[in] blockNumber the number of the block to get the output from
   @return a double with the requested block output
   */
-  double getBlockOutput (const stateData *sD,const solverMode &sMode, index_t blockNumber) const;
+  double getBlockOutput (const stateData &sD,const solverMode &sMode, index_t blockNumber) const;
 
   /** @brief get the raw sensor input
   @param[in] sD  the state data to get the output from
@@ -143,14 +143,14 @@ public:
   @param[in] inputNumber the input of the index to get the value
   @return a double with the requested raw input
   */
-  double getInput (const stateData *sD, const solverMode &sMode, index_t inputNumber = 0) const;
+  double getInput (const stateData &sD, const solverMode &sMode, index_t inputNumber = 0) const;
   virtual void updateA (gridDyn_time time) override;
   virtual void updateFlags (bool dynOnly = false) override;
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 
@@ -160,8 +160,8 @@ public:
   */
   index_t lookupOutput (const std::string &outName);
 
-  virtual void updateObject(gridCoreObject *obj, object_update_mode mode = object_update_mode::direct) override;
-  virtual void getObjects(std::vector<gridCoreObject *> &objects) const override;
+  virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  virtual void getObjects(std::vector<coreObject *> &objects) const override;
 protected:
   /** @brief generate the input grabbers
    used in the initialize function

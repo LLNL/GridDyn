@@ -25,7 +25,7 @@ gridDynPSS::gridDynPSS (const std::string &objName) : gridSubModel (objName)
 
 }
 
-gridCoreObject *gridDynPSS::clone (gridCoreObject *obj) const
+coreObject *gridDynPSS::clone (coreObject *obj) const
 {
   gridDynPSS *pss;
   if (obj == nullptr)
@@ -59,7 +59,7 @@ void gridDynPSS::objectInitializeB (const IOdata & /*args*/, const IOdata & /*ou
 
 
 // residual
-void gridDynPSS::residual (const IOdata & /*args*/, const stateData *, double /*resid*/ [],  const solverMode &)
+void gridDynPSS::residual (const IOdata & /*args*/, const stateData &, double /*resid*/ [],  const solverMode &)
 {
 
 }
@@ -71,7 +71,7 @@ index_t gridDynPSS::findIndex (const std::string & /*field*/, const solverMode &
 
 void gridDynPSS::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  return coreObject::set (param, val);
 }
 
 // set parameters
@@ -79,12 +79,12 @@ void gridDynPSS::set (const std::string &param, double val, gridUnits::units_t u
 {
 
   {
-    gridCoreObject::set (param,val,unitType);
+    coreObject::set (param,val,unitType);
   }
 
 }
 
-void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
+void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData &,
                                    matrixData<double> &,
                                    const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
@@ -95,7 +95,7 @@ void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
 }
 
 
-void gridDynPSS::derivative (const IOdata & /*args*/, const stateData *, double /*deriv*/[], const solverMode &)
+void gridDynPSS::derivative (const IOdata & /*args*/, const stateData &, double /*deriv*/[], const solverMode &)
 {
 
 }

@@ -42,7 +42,7 @@ gridDynOptimization::~gridDynOptimization ()
   delete areaOpt;
 }
 
-gridCoreObject *gridDynOptimization::clone (gridCoreObject *obj) const
+coreObject *gridDynOptimization::clone (coreObject *obj) const
 {
   gridDynOptimization *sim = cloneBase<gridDynOptimization, gridDynSimulation> (this, obj);
   if (sim == nullptr)
@@ -208,7 +208,7 @@ double gridDynOptimization::get (const std::string &param, gridUnits::units_t un
 }
 
 
-gridCoreObject * gridDynOptimization::find (const std::string &objname) const
+coreObject * gridDynOptimization::find (const std::string &objname) const
 {
   if (objname == "optroot")
     {
@@ -225,7 +225,7 @@ gridCoreObject * gridDynOptimization::find (const std::string &objname) const
 
 }
 
-gridCoreObject * gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
+coreObject * gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName.substr (0, 3) == "opt")
     {
@@ -236,7 +236,7 @@ gridCoreObject * gridDynOptimization::getSubObject (const std::string &typeName,
       return gridDynSimulation::getSubObject (typeName, num);
     }
 }
-gridCoreObject * gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject * gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName.substr (0, 3) == "opt")
     {
@@ -249,11 +249,11 @@ gridCoreObject * gridDynOptimization::findByUserID (const std::string &typeName,
 }
 
 
-gridOptObject * gridDynOptimization::getOptData (gridCoreObject *obj)
+gridOptObject * gridDynOptimization::getOptData (coreObject *obj)
 {
   if (obj)
     {
-      gridCoreObject *nobj = areaOpt->find (obj->getName ());
+      coreObject *nobj = areaOpt->find (obj->getName ());
       if (nobj)
         {
           return static_cast<gridOptObject *> (nobj);
@@ -269,7 +269,7 @@ gridOptObject * gridDynOptimization::getOptData (gridCoreObject *obj)
     }
 }
 
-gridOptObject *gridDynOptimization::makeOptObjectPath (gridCoreObject *obj)
+gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
 {
   gridOptObject *oo = getOptData (obj);
   if (oo)

@@ -30,7 +30,7 @@ static const IgnoreListType linkIgnoreElements {
 };
 static const std::string linkComponentName = "link";
 // aP is the link element
-gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject, bool warnlink)
+gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject, bool warnlink)
 {
 
   auto riScope = ri->newScope ();

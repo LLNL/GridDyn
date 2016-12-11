@@ -27,12 +27,12 @@
 
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance();
 
-void loadGENROU(gridCoreObject *parentObject, stringVec &tokens);
-void loadESDC1A(gridCoreObject *parentObject, stringVec &tokens);
-void loadTGOV1(gridCoreObject *parentObject, stringVec &tokens);
-void loadEXDC2(gridCoreObject *parentObject, stringVec &tokens);
+void loadGENROU(coreObject *parentObject, stringVec &tokens);
+void loadESDC1A(coreObject *parentObject, stringVec &tokens);
+void loadTGOV1(coreObject *parentObject, stringVec &tokens);
+void loadEXDC2(coreObject *parentObject, stringVec &tokens);
 
-void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basicReaderInfo &)
+void loadDYR(coreObject *parentObject,const std::string &filename,const basicReaderInfo &)
 {
   std::ifstream file(filename.c_str(), std::ios::in);
   std::string line,line2;  //line storage
@@ -97,7 +97,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 }
 
 
-  void loadGENROU(gridCoreObject *parentObject, stringVec &tokens)
+  void loadGENROU(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -127,7 +127,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   }
 
-  void loadESDC1A(gridCoreObject *parentObject, stringVec &tokens)
+  void loadESDC1A(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -165,7 +165,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   }
 
-  void loadEXDC2(gridCoreObject *parentObject, stringVec &tokens)
+  void loadEXDC2(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -193,7 +193,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   }
 
-  void loadTGOV1(gridCoreObject *parentObject, stringVec &tokens)
+  void loadTGOV1(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));

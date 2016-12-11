@@ -14,7 +14,7 @@
 #include "sourceTypes.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
-
+#include "gridCoreTemplates.h"
 #include <cmath>
 
 /*
@@ -34,24 +34,13 @@ pulseSource::pulseSource (const std::string &objName, double startVal) : gridSou
 }
 
 
-gridCoreObject *pulseSource::clone (gridCoreObject *obj) const
+coreObject *pulseSource::clone (coreObject *obj) const
 {
-  pulseSource *nobj;
-  if (obj == nullptr)
+	pulseSource *nobj = cloneBase<pulseSource, gridSource>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new pulseSource ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<pulseSource *> (obj);
-      if (nobj == nullptr)
-        {
-          //if we can't cast the pointer clone at the next lower level
-          gridSource::clone (obj);
-          return obj;
-        }
-    }
-  gridSource::clone (nobj);
   nobj->ptype = ptype;
   nobj->dutyCycle = dutyCycle;
   nobj->A = A;
@@ -64,56 +53,57 @@ gridCoreObject *pulseSource::clone (gridCoreObject *obj) const
 void pulseSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
 {
   cycleTime = time0 - shift * period - period;  //subtract a period so it cycles properly the first time
-  sourceUpdate (time0);
+  updateOutput (time0);
   return gridSource::objectInitializeA (time0,flags);
 }
 
 
-void pulseSource::sourceUpdate (gridDyn_time ttime)
+void pulseSource::updateOutput(gridDyn_time ttime)
 {
 
-  if (ttime - prevTime == 0.0)
-    {
-      return;
-    }
-  double tdiff = std::fmod (ttime - cycleTime, period);
+	if (ttime == prevTime)
+	{
+		return;
+	}
+	gridDyn_time tdiff = ttime - cycleTime;
+	if (tdiff > period)
+	{
+		cycleTime += period * (std::floor(tdiff / period));
+		tdiff = tdiff%period;
+	}
 
-  double pcalc = pulseCalc (tdiff);
+	double pcalc = pulseCalc(static_cast<double>(tdiff));
 
-  m_tempOut = baseValue + pcalc;
-  lasttime = ttime;
+	m_output = baseValue + pcalc;
+	prevTime = ttime;
 }
 
-void pulseSource::sourceUpdateForward (gridDyn_time ttime)
+double pulseSource::computeOutput(gridDyn_time ttime) const
 {
+	if (ttime == prevTime)
+	{
+		return m_output;
+	}
+	auto tdiff = (ttime - cycleTime)%period;
 
-  if (ttime - prevTime == 0.0)
-    {
-      return;
-    }
-  double tdiff = std::fmod (ttime - cycleTime, period);
+	const double pcalc = pulseCalc(static_cast<double>(tdiff));
 
-  const double pcalc = pulseCalc (tdiff);
-
-  m_output = baseValue + pcalc;
-  prevTime = lasttime = ttime;
+	return baseValue + pcalc;
 }
 
 
-double pulseSource::getDoutdt (const stateData *sD, const solverMode &, index_t /*num*/)
+
+double pulseSource::getDoutdt (const stateData &sD, const solverMode &, index_t /*num*/) const
 {
   double o1, o2;
-  if (sD)
+  if (!sD.empty())
     {
-      sourceUpdate (sD->time - 0.0001);
-      o1 = m_tempOut;
-      sourceUpdate (sD->time);
-      o2 = m_tempOut;
+      o1 = computeOutput(sD.time-0.0001);
+      o2 = computeOutput(sD.time);
     }
   else
     {
-      sourceUpdate (prevTime - 0.0001);
-      o1 = m_tempOut;
+      o1 = computeOutput(prevTime - 0.0001);
       o2 = m_output;
     }
   return ((o2 - o1) / 0.0001);
@@ -154,7 +144,7 @@ void pulseSource::set (const std::string &param,  const std::string &val)
           ptype = pulse_type_t::cosine;
         }
 
-      cycleTime = cycleTime - period;
+      cycleTime -= period;
     }
   else
     {
@@ -176,7 +166,8 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
   if ((param == "a")|| (param == "amplitude"))
     {
       A = val;
-      cycleTime = cycleTime - period;
+	  //done to ensure a new value is computed at the next update
+      cycleTime -=  period;
     }
   else if (param == "period")
     {
@@ -185,7 +176,8 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
   else if (param == "dutycycle")
     {
       dutyCycle = val;
-      cycleTime = cycleTime - period;
+	  //done to ensure a new value is computed at the next update
+      cycleTime -= period;
     }
   else if (param == "shift")
     {
@@ -195,7 +187,7 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
   else if (param == "base")
     {
       baseValue = val;
-      cycleTime = cycleTime - period;
+      cycleTime -= period;
     }
   else if (param == "invert")
     {
@@ -207,7 +199,7 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
         {
           opFlags.reset (invert_flag);
         }
-      cycleTime = cycleTime - period;
+      cycleTime -= period;
     }
   else
     {
@@ -216,48 +208,38 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
 
 }
 
-double pulseSource::pulseCalc (double td)
+double pulseSource::pulseCalc (double td) const
 {
-  double pamp = 0;
-  double mult;
+  
+  double mult=1.0;
   double cloc = td / period;
   double prop = (cloc - dutyCycle / 2) / dutyCycle;
   if ((prop < 0) || (prop >= 1.0))
     {
-      return (opFlags.test (invert_flag)) ? A : 0.0;
+      return (opFlags[invert_flag]) ? A : 0.0;
     }
 
   //calculate the multiplier
   if (prop < 0.05)
     {
-      mult = 20 * prop;
+      mult = 20.0 * prop;
     }
   else if (prop > 0.95)
     {
-      mult = 20 * (1 - prop);
-    }
-  else
-    {
-      mult = 1;
+      mult = 20.0 * (1 - prop);
     }
 
+  double pamp = 0.0;
   switch (ptype)
     {
     case pulse_type_t::square:
       pamp = A;
       break;
     case pulse_type_t::triangle:
-      if (prop < 0.5)
-        {
-          pamp = 2 * A * prop;
-        }
-      else
-        {
-          pamp = 2 * A * (1 - prop);
-        }
+      pamp = 2.0 * A * ((prop < 0.5)?prop:(1.0-prop));
       break;
     case pulse_type_t::gaussian:
-      pamp = mult * A * exp ((prop - 0.5) * (prop - 0.5) * 25);
+      pamp = mult * A * exp ((prop - 0.5) * (prop - 0.5) * 25.0);
       break;
     case pulse_type_t::monocycle:
       pamp = 11.6583 * (prop - 0.5) * exp (-(prop - 0.5) * (prop - 0.5));
@@ -265,11 +247,11 @@ double pulseSource::pulseCalc (double td)
     case pulse_type_t::biexponential:
       if (prop < 0.5)
         {
-          pamp = mult * A * exp (-(0.5 - prop) * 12);
+          pamp = mult * A * exp (-(0.5 - prop) * 12.0);
         }
       else
         {
-          pamp = mult * A * exp (-(prop - 0.5) * 12);
+          pamp = mult * A * exp (-(prop - 0.5) * 12.0);
         }
       break;
     case pulse_type_t::exponential:
@@ -277,7 +259,7 @@ double pulseSource::pulseCalc (double td)
         {
           mult = 1.0;
         }
-      pamp = mult * A * exp (-prop * 6);
+      pamp = mult * A * exp (-prop * 6.0);
       break;
     case pulse_type_t::cosine:
 
@@ -297,8 +279,10 @@ double pulseSource::pulseCalc (double td)
           pamp = A;
         }
       break;
+	default:
+		break;
     }
-  if (opFlags.test (invert_flag))
+  if (opFlags[invert_flag])
     {
       pamp = A - pamp;
     }

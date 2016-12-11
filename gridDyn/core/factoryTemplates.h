@@ -94,7 +94,7 @@ class coreClassFactory
 
 	/** @brief create an object from a given objectType and typeName
 	@param[in] typeName  the specific type to create
-	@return the created gridCoreObject */
+	@return the created coreObject */
 	std::shared_ptr<parentClass> createObject(const std::string &typeName)
 	{
 		auto mfind = m_factoryMap.find(typeName);
@@ -113,7 +113,7 @@ class coreClassFactory
 	/** @brief create an object from the specific type with a name of objName
 	@param[in] typeName  the specific type to create
 	@param[in] objName  the name of the object to create
-	@return the created gridCoreObject */
+	@return the created coreObject */
 	std::shared_ptr<parentClass> createObject(const std::string &typeName, const std::string &objName)
 	{
 		auto mfind = m_factoryMap.find(typeName);

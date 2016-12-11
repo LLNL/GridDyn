@@ -30,7 +30,7 @@ txThermalModel::txThermalModel(const std::string &objName):sensor(objName)
 	outputNames = { "ambient", "top_oil", "hot_spot" }; //preset the outputNames
 }
 
-gridCoreObject * txThermalModel::clone(gridCoreObject *obj) const
+coreObject * txThermalModel::clone(coreObject *obj) const
 {
 	txThermalModel *nobj = cloneBase<txThermalModel, sensor>(this, obj);
 	if (!(nobj))
@@ -235,7 +235,7 @@ double txThermalModel::get(const std::string & param, gridUnits::units_t unitTyp
 	return sensor::get(param, unitType);
 }
 
-void txThermalModel::add(gridCoreObject * /*obj*/)
+void txThermalModel::add(coreObject * /*obj*/)
 {
 	throw(invalidObjectException(this));
 }
@@ -311,7 +311,7 @@ void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long fla
 			sensor::add(b1);
 			sensor::add(b2);
 			auto g1 = std::make_shared<customGrabber>();
-			g1->setGrabberFunction("ambient", [this](gridCoreObject *)->double {return ambientTemp; });
+			g1->setGrabberFunction("ambient", [this](coreObject *)->double {return ambientTemp; });
 			sensor::add(g1, nullptr);
 
 			outputSize = (outputSize > 3) ? outputSize : 3;

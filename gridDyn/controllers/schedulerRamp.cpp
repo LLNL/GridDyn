@@ -29,7 +29,7 @@ schedulerRamp::schedulerRamp (double initialValue, const std::string &objName) :
 
 }
 
-gridCoreObject *schedulerRamp::clone (gridCoreObject *obj) const
+coreObject *schedulerRamp::clone (coreObject *obj) const
 {
   schedulerRamp *nobj = cloneBase<schedulerRamp, scheduler> (this, obj);
   if (nobj == nullptr)

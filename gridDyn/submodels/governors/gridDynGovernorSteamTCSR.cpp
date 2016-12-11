@@ -32,7 +32,7 @@ gridDynGovernorSteamTCSR::gridDynGovernorSteamTCSR (const std::string &objName) 
   offsets.local->local.jacSize = 5;
 }
 
-gridCoreObject *gridDynGovernorSteamTCSR::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorSteamTCSR::clone (coreObject *obj) const
 {
   gridDynGovernorSteamTCSR *gov;
   if (obj == nullptr)
@@ -44,11 +44,11 @@ gridCoreObject *gridDynGovernorSteamTCSR::clone (gridCoreObject *obj) const
       gov = dynamic_cast<gridDynGovernorSteamTCSR *> (obj);
       if (gov == nullptr)
         {
-          gridCoreObject::clone (obj);
+          coreObject::clone (obj);
           return obj;
         }
     }
-  gridCoreObject::clone (gov);
+  coreObject::clone (gov);
   gov->K     = K;
   gov->T1    = T1;
   gov->T2    = T2;
@@ -78,14 +78,14 @@ void gridDynGovernorSteamTCSR::objectInitializeB (const IOdata &args, const IOda
 
 
 // residual
-void gridDynGovernorSteamTCSR::residual (const IOdata & /*args*/, const stateData *, double resid[],  const solverMode &sMode)
+void gridDynGovernorSteamTCSR::residual (const IOdata & /*args*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset]   = 0;
   resid[offset + 1] = 0;
 }
 
-void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -103,7 +103,7 @@ void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*args*/, const 
       ad.assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
 
     }
-  ad.assign (refI,refI,-1 / T3 - sD->cj);
+  ad.assign (refI,refI,-1 / T3 - sD.cj);
   ad.assign (refI,refI + 1,-K / T3);
 
   // X
@@ -112,7 +112,7 @@ void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*args*/, const 
       ad.assign ( refI + 1, omegaLoc, (T1 - T2) / (T1 * T1));
     }
 
-  ad.assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
+  ad.assign (refI + 1,refI + 1,-1 / T1 - sD.cj);
 
 
 
@@ -137,7 +137,7 @@ index_t gridDynGovernorSteamTCSR::findIndex (const std::string &field, const sol
 // set parameters
 void gridDynGovernorSteamTCSR::set (const std::string &param,  const std::string &val)
 {
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 }
 
 void gridDynGovernorSteamTCSR::set (const std::string &param, double val, gridUnits::units_t unitType)
@@ -178,7 +178,7 @@ void gridDynGovernorSteamTCSR::set (const std::string &param, double val, gridUn
     }
   else
     {
-      gridCoreObject::set (param,val,unitType);
+      coreObject::set (param,val,unitType);
     }
 
 

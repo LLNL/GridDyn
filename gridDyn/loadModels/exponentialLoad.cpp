@@ -27,7 +27,7 @@ exponentialLoad::exponentialLoad (double rP, double qP, const std::string &objNa
 
 }
 
-gridCoreObject *exponentialLoad::clone (gridCoreObject *obj) const
+coreObject *exponentialLoad::clone (coreObject *obj) const
 {
   exponentialLoad *ld = cloneBase<exponentialLoad, gridLoad> (this, obj);
   if (ld == nullptr)
@@ -73,16 +73,16 @@ void exponentialLoad::set (const std::string &param, double val, gridUnits::unit
 
 
 
-void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
+void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   // power vs voltage
   if  (argLocs[voltageInLocation] != kNullLocation)
     {
-      ad.assign (PoutLocation, argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0));
+      ad.assign (PoutLocation, argLocs[voltageInLocation], getP() * alphaP * pow (V, alphaP - 1.0));
 
       // reactive power vs voltage
-      ad.assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0));
+      ad.assign (QoutLocation, argLocs[voltageInLocation], getQ() * alphaQ * pow (V, alphaQ - 1.0));
     }
 }
 
@@ -90,96 +90,49 @@ void exponentialLoad::ioPartialDerivatives (const IOdata &args, const stateData 
 
 double exponentialLoad::getRealPower () const
 {
-  double val = P;
-  double v;
-
-  if (enabled)
-    {
-      v = bus->getVoltage ();
-      val *= pow (v, alphaP);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+  return getRealPower(bus->getVoltage());
 }
 
 double exponentialLoad::getReactivePower () const
 {
-  double val = Q;
-
-  double v;
-  if (enabled)
-    {
-      v = bus->getVoltage ();
-      val *= pow (v, alphaQ);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getReactivePower(bus->getVoltage());
 }
 
-double exponentialLoad::getRealPower (const IOdata &args, const stateData *, const solverMode &)
+double exponentialLoad::getRealPower (const IOdata &args, const stateData &, const solverMode &) const
 {
-  const double V = args[voltageInLocation];
-  double val = P;
-  if (enabled)
-    {
-      val *= pow (V, alphaP);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+  return getRealPower(args[voltageInLocation]);
 }
 
-double exponentialLoad::getReactivePower (const IOdata &args, const stateData *, const solverMode &)
+double exponentialLoad::getReactivePower (const IOdata &args, const stateData &, const solverMode &) const
 {
-  const double V = args[voltageInLocation];
-  double val = Q;
-
-  if (enabled)
-    {
-      val *= pow (V,alphaQ);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+  return getReactivePower(args[voltageInLocation]);
 }
 
 double exponentialLoad::getRealPower (const double V) const
 {
-
-  double val = P;
-  if (enabled)
+  if (isConnected())
     {
+	  double val = getP();
       val *= pow (V, alphaP);
       return val;
     }
   else
     {
-      return 0;
+      return 0.0;
     }
 }
 
 double exponentialLoad::getReactivePower (double V) const
 {
-  double val = Q;
-
-  if (enabled)
+  if (isConnected())
     {
+	  double val = getQ();
       val *= pow (V, alphaQ);
       return val;
     }
   else
     {
-      return 0;
+      return 0.0;
     }
 }
 
@@ -201,7 +154,7 @@ void fDepLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
   return exponentialLoad::dynObjectInitializeA (time0,flags);
 }
 
-gridCoreObject *fDepLoad::clone (gridCoreObject *obj) const
+coreObject *fDepLoad::clone (coreObject *obj) const
 {
   fDepLoad *ld = cloneBase<fDepLoad, exponentialLoad> (this, obj);
   if (ld == nullptr)
@@ -308,22 +261,22 @@ void fDepLoad::set (const std::string &param, double val, gridUnits::units_t uni
 }
 
 
-void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
+void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
 {
   const double V = args[voltageInLocation];
   double freq = args[frequencyInLocation];
   // power vs voltage
   if  (argLocs[voltageInLocation] != kNullLocation)
     {
-      ad.assign (PoutLocation,argLocs[voltageInLocation], P * alphaP * pow (V, alphaP - 1.0) * pow (freq, betaP));
+      ad.assign (PoutLocation,argLocs[voltageInLocation], getP() * alphaP * pow (V, alphaP - 1.0) * pow (freq, betaP));
 
       // reactive power vs voltage
-      ad.assign (QoutLocation, argLocs[voltageInLocation], Q * alphaQ * pow (V, alphaQ - 1.0) * pow (freq, betaQ));
+      ad.assign (QoutLocation, argLocs[voltageInLocation], getQ() * alphaQ * pow (V, alphaQ - 1.0) * pow (freq, betaQ));
     }
   if (argLocs[frequencyInLocation] != kNullLocation)
     {
-      ad.assign (PoutLocation, argLocs[frequencyInLocation], P * pow (V, alphaP) * betaP * pow (freq, betaP - 1.0));
-      ad.assign (QoutLocation, argLocs[frequencyInLocation], Q * pow (V, alphaQ) * betaQ * pow (freq, betaQ - 1.0));
+      ad.assign (PoutLocation, argLocs[frequencyInLocation], getP() * pow (V, alphaP) * betaP * pow (freq, betaP - 1.0));
+      ad.assign (QoutLocation, argLocs[frequencyInLocation], getQ() * pow (V, alphaQ) * betaQ * pow (freq, betaQ - 1.0));
     }
 }
 
@@ -331,96 +284,62 @@ void fDepLoad::ioPartialDerivatives (const IOdata &args, const stateData *, matr
 
 double fDepLoad::getRealPower () const
 {
-  double val = P;
-  double v;
-  double freq = bus->getFreq ();
-  if (enabled)
-    {
-      v = bus->getVoltage ();
-      val *= pow (v, alphaP) * pow (freq,betaP);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getRealPower(bus->getVoltage(), bus->getFreq());
 }
 
 double fDepLoad::getReactivePower () const
 {
-  double val = Q;
-  double freq = bus->getFreq ();
-  double v;
-  if (enabled)
-    {
-      v = bus->getVoltage ();
-      val *= pow (v, alphaQ) * pow (freq, betaQ);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getReactivePower(bus->getVoltage(), bus->getFreq());
 }
 
-double fDepLoad::getRealPower (const IOdata &args, const stateData *, const solverMode &)
+double fDepLoad::getRealPower (const IOdata &args, const stateData &, const solverMode &) const
 {
-  const double V = args[voltageInLocation];
-  double freq = args[frequencyInLocation];
-  double val = P;
-  if (enabled)
-    {
-      val *= pow (V, alphaP) * pow (freq, betaP);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getRealPower(args[voltageInLocation], args[frequencyInLocation]);
 }
 
-double fDepLoad::getReactivePower (const IOdata &args, const stateData *, const solverMode &)
+double fDepLoad::getReactivePower (const IOdata &args, const stateData &, const solverMode &) const
 {
-  const double V = args[voltageInLocation];
-  double val = Q;
-  double freq = args[frequencyInLocation];
-  if (enabled)
-    {
-      val *= pow (V, alphaQ) * pow (freq, betaQ);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+
+  return getReactivePower(args[voltageInLocation], args[frequencyInLocation]);
 }
 
 double fDepLoad::getRealPower (const double V) const
 {
-  double freq = bus->getFreq ();
-  double val = P;
-  if (enabled)
-    {
-      val *= pow (V, alphaP) * pow (freq, betaP);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getRealPower(V, bus->getFreq());
 }
 
 double fDepLoad::getReactivePower (double V) const
 {
-  double val = Q;
-  double freq = bus->getFreq ();
-  if (enabled)
-    {
-      val *= pow (V, alphaQ) * pow (freq, betaQ);
-      return val;
-    }
-  else
-    {
-      return 0;
-    }
+	return getReactivePower(V, bus->getFreq());
+
+}
+
+
+double fDepLoad::getRealPower(double V, double f) const
+{
+	if (isConnected())
+	{
+		double val = getP();
+		val *= pow(V, alphaP) * pow(f, betaP);
+		return val;
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+
+double fDepLoad::getReactivePower(double V, double f) const
+{
+	
+	if (isConnected())
+	{
+		double val = getQ();
+		val *= pow(V, alphaQ) * pow(f, betaQ);
+		return val;
+	}
+	else
+	{
+		return 0.0;
+	}
 }

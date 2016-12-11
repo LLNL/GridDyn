@@ -29,7 +29,7 @@ txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
 	outputNames = { "remaininglife", "lossoflife" ,"rate"};
 }
 
-gridCoreObject * txLifeSpan::clone(gridCoreObject *obj) const
+coreObject * txLifeSpan::clone(coreObject *obj) const
 {
 	txLifeSpan *nobj = cloneBase<txLifeSpan, sensor>(this, obj);
 	if (!(nobj))
@@ -108,7 +108,7 @@ double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) c
 	return sensor::get(param, unitType);
 }
 
-void txLifeSpan::add(gridCoreObject * /*obj*/)
+void txLifeSpan::add(coreObject * /*obj*/)
 {
 	throw(invalidObjectException(this));
 }
@@ -149,7 +149,7 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 		sensor::set("output1", "block0");
 
 		auto g1 = std::make_shared<customGrabber>();
-		g1->setGrabberFunction("rate", [this](gridCoreObject *)->double {return Faa; });
+		g1->setGrabberFunction("rate", [this](coreObject *)->double {return Faa; });
 		sensor::add(g1, nullptr);
 		
 		sensor::set("output2", "input1");

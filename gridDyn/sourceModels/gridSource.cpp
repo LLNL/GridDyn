@@ -27,13 +27,14 @@ static childTypeFactory<randomSource, gridSource> glfrand ("source", "random");
 static childTypeFactory<fileSource, gridSource> glfld ("source", "file");
 
 
-gridSource::gridSource (const std::string &objName, double startVal) : gridSubModel (objName), m_tempOut (startVal), m_output (startVal)
+gridSource::gridSource (const std::string &objName, double startVal) : gridSubModel (objName), m_tempOut (startVal)
 {
+	m_output = startVal;
   m_inputSize = 0;
   m_outputSize = 1;
 }
 
-gridCoreObject *gridSource::clone (gridCoreObject *obj) const
+coreObject *gridSource::clone (coreObject *obj) const
 {
   gridSource *gS = cloneBase<gridSource, gridSubModel> (this, obj);
   if (gS == nullptr)
@@ -41,8 +42,7 @@ gridCoreObject *gridSource::clone (gridCoreObject *obj) const
       return obj;
     }
   gS->m_tempOut = m_tempOut;
-  gS->m_output = m_output;
-  gS->lasttime = lasttime;
+  gS->lastTime = lastTime;
   return gS;
 }
 
@@ -80,40 +80,46 @@ void gridSource::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
+void gridSource::setState(gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &/*sMode*/)
+{
+	updateOutput(ttime);
+}
+
+void gridSource::updateOutput(gridDyn_time ttime)
+{
+	m_tempOut = computeOutput(ttime);
+	m_output = m_tempOut;
+	prevTime = ttime;
+	lastTime = ttime;
+}
+
 void gridSource::timestep (gridDyn_time ttime, const IOdata & /*args*/, const solverMode &)
 {
   if (ttime != prevTime)
     {
-      sourceUpdateForward (ttime);
+      updateOutput (ttime);
+	  m_tempOut = m_output;
+	  prevTime = ttime;
     }
 
-  prevTime = ttime;
+  
 
 }
 
-IOdata gridSource::getOutputs (const IOdata & /*args*/, const stateData *sD, const solverMode &)
+
+IOdata gridSource::getOutputs (const IOdata & /*args*/, const stateData &, const solverMode &) const
 {
-  if ((sD) && (sD->time != lasttime))
-    {
-      sourceUpdate (sD->time);
-    }
-  return {
-           m_tempOut
-  };
+  return {m_tempOut};
 }
 
-double gridSource::getOutput (const IOdata & /*args*/, const stateData *sD, const solverMode &, index_t /*num*/) const
+double gridSource::getOutput (const IOdata & /*args*/, const stateData &, const solverMode &, index_t num) const
 {
-  if ((sD) && (sD->time != lasttime))
-    {
-        //sourceUpdate (sD->time);
-    }
-  return m_tempOut;
+	return (num == 0) ? m_tempOut : kNullVal;
 }
 
-double gridSource::getOutput (index_t /*num*/) const
+double gridSource::getOutput (index_t num) const
 {
-  return m_output;
+	return (num == 0) ? m_tempOut : kNullVal;
 }
 
 index_t gridSource::getOutputLoc (const solverMode & ,index_t /*num*/) const
@@ -121,13 +127,18 @@ index_t gridSource::getOutputLoc (const solverMode & ,index_t /*num*/) const
 	return kNullLocation;
 }
 
-
-void gridSource::sourceUpdate (gridDyn_time /*ttime*/)
+void gridSource::updateLocalCache(const IOdata &/*args*/, const stateData &sD, const solverMode &/*sMode*/)
 {
+	if (prevTime != sD.time)
+	{
+		m_tempOut = computeOutput(sD.time);
+		lastTime = sD.time;
+	}
+
 }
 
-void gridSource::sourceUpdateForward (gridDyn_time ttime)
+
+double gridSource::computeOutput(gridDyn_time /*ttime*/) const
 {
-  sourceUpdate (ttime);
-  m_output = m_tempOut;
+	return m_output;
 }

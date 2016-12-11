@@ -38,7 +38,7 @@ public:
   *@param[in] objName  the name of the infinite bus object
   */
   infiniteBus (double startVoltage, double startAngle,const std::string &objName = "infbus_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
   void timestep (gridDyn_time ttime, const solverMode &sMode) override;
   void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
@@ -51,9 +51,9 @@ public:
 
   virtual double getVoltage (const double state[], const solverMode &sMode) const override;
   virtual double getAngle (const double state[], const solverMode &sMode) const override;
-  virtual double getVoltage (const stateData *sD, const solverMode &sMode) const override;
-  virtual double getAngle (const stateData *sD, const solverMode &sMode) const override;
-  virtual double getFreq (const stateData *sD, const solverMode &sMode) const override;
+  virtual double getVoltage (const stateData &sD, const solverMode &sMode) const override;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode) const override;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode) const override;
 
 
 protected:

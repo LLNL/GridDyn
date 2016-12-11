@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <cmath>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #define DYN2_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/dyn_tests2/"
 

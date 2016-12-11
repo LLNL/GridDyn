@@ -128,17 +128,17 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
   stateData sD (timeCurr, nstate.data (), ndstate.data ());
   if (sMode.pairedOffsetIndex != kNullLocation)
     {
-      gds->fillExtraStateData (&sD, sMode);
+      gds->fillExtraStateData (sD, sMode);
     }
   if (isDifferentialOnly (sMode))
     {
       sD.cj = 0.0;
-      gds->derivative (&sD, resid.data (), sMode);
+      gds->derivative (sD, resid.data (), sMode);
     }
   else
     {
       sD.cj = 100;
-      gds->residual (&sD, resid.data (), sMode);
+      gds->residual (sD, resid.data (), sMode);
     }
 
   gds->jacobianFunction (timeCurr, nstate.data (), ndstate.data (), ad, sD.cj, sMode);
@@ -154,11 +154,11 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       nstate[kk] += delta;
       if (isDifferentialOnly (sMode))
         {
-          gds->derivative (&sD, resid2.data (), sMode);
+          gds->derivative (sD, resid2.data (), sMode);
         }
       else
         {
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (sD, resid2.data (), sMode);
         }
 
       //find the changed elements
@@ -173,11 +173,11 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       nstate[kk] += delta2;
       if (isDifferentialOnly (sMode))
         {
-          gds->derivative (&sD, resid2.data (), sMode);
+          gds->derivative (sD, resid2.data (), sMode);
         }
       else
         {
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (sD, resid2.data (), sMode);
         }
 
       for (index_t pp = 0; pp < nsize; ++pp)
@@ -192,7 +192,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       if (isDAE (sMode))
         {
           ndstate[kk] += delta;
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (sD, resid2.data (), sMode);
           //find the changed elements
           for (index_t pp = 0; pp < nsize; ++pp)
             {
@@ -203,7 +203,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
             }
           ndstate[kk] -= delta;
           ndstate[kk] += delta2;
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (sD, resid2.data (), sMode);
           for (index_t pp = 0; pp < nsize; ++pp)
             {
               if (std::abs (resid[pp] - resid2[pp]) > delta2 * jactol / 2)
@@ -348,7 +348,7 @@ int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &
 
   sD.dstate_dt = (isDAE (sMode)) ? sd->deriv_data () : nullptr;
 
-  gds->residual (&sD, resid.data (), sMode);
+  gds->residual (sD, resid.data (), sMode);
   for (size_t kk = 0; kk < nsize; ++kk)
     {
       if (std::abs (resid[kk]) > residTol)
@@ -410,7 +410,7 @@ int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode 
   stateData sD (time, sd->state_data ());
   sD.dstate_dt = (isDAE (sMode)) ? sd->deriv_data () : nullptr;
 
-  gds->algebraicUpdate (&sD, update.data (), sMode,1.0);
+  gds->algebraicUpdate (sD, update.data (), sMode,1.0);
   std::vector<double> vtype (nsize);
 
   gds->getVariableType (vtype.data (), sMode);
@@ -441,7 +441,7 @@ int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode 
 
 int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double derivtol, bool useStateNames)
 {
-  if (isDynamic (sMode))
+  if (hasDifferential (sMode))
     {
       if (gds->currentProcessState () < gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
         {
@@ -478,10 +478,9 @@ int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode
     {
       derivtol = resid_check_tol;
     }
-  stateData sD (time, sd->state_data ());
-  sD.dstate_dt = (hasDifferential (sMode)) ? sd->deriv_data () : nullptr;
+  stateData sD (time, sd->state_data (), sd->deriv_data());
 
-  gds->derivative (&sD, deriv.data (), sMode);
+  gds->derivative (sD, deriv.data (), sMode);
   std::vector<double> vtype (nsize);
 
   gds->getVariableType (vtype.data (), sMode);

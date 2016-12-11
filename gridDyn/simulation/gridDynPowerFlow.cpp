@@ -547,7 +547,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha)
+void gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha)
 {
   ++evalCount;
   stateData sD(ttime,state);
@@ -559,8 +559,9 @@ int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state
     {
       if (!std::isfinite (state[kk]))
         {
-          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
-          return FUNCTION_EXECUTION_FAILURE;
+		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
+          LOG_ERROR (estring);
+		  throw(std::runtime_error(estring));
         }
     }
 #endif
@@ -570,8 +571,7 @@ int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state
       sD.fullState = solverInterfaces[defDAEMode->offsetIndex]->state_data ();
     }
   //call the area based function to handle the looping
-  preEx (&sD, sMode);
-  algebraicUpdate (&sD, update, sMode, alpha);
-  delayedAlgebraicUpdate (&sD, update, sMode, alpha);
-  return FUNCTION_EXECUTION_SUCCESS;
+  preEx (sD, sMode);
+  algebraicUpdate (sD, update, sMode, alpha);
+  delayedAlgebraicUpdate (sD, update, sMode, alpha);
 }

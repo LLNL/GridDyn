@@ -20,7 +20,7 @@
 #include "testHelper.h"
 #include "simulation/diagnostics.h"
 #include "vectorOps.hpp"
-//test case for gridCoreObject object
+//test case for coreObject object
 
 
 #define DYN1_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/dyn_tests1/"
@@ -183,4 +183,7 @@ BOOST_AUTO_TEST_CASE(dyn_test_mbase)
   std::string fname = std::string(DYN1_TEST_DIRECTORY "test_dynSimple1_mod.xml");
   detailedStageCheck(fname, gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
+
+
+
 BOOST_AUTO_TEST_SUITE_END ()

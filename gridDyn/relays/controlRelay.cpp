@@ -29,7 +29,7 @@ controlRelay::controlRelay (const std::string &objName) : gridRelay (objName)
 
 }
 
-gridCoreObject *controlRelay::clone (gridCoreObject *obj) const
+coreObject *controlRelay::clone (coreObject *obj) const
 {
   controlRelay *nobj = cloneBase<controlRelay, gridRelay> (this, obj);
   if (!(nobj))

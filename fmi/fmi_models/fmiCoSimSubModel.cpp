@@ -41,7 +41,7 @@ fmiCoSimSubModel::~fmiCoSimSubModel()
 
 }
 
-gridCoreObject * fmiCoSimSubModel::clone(gridCoreObject *obj) const
+coreObject * fmiCoSimSubModel::clone(coreObject *obj) const
 {
 	auto *gco = cloneBase<fmiCoSimSubModel, gridSubModel>(this, obj);
 	if (!(gco))
@@ -499,7 +499,7 @@ index_t fmiCoSimSubModel::findIndex(const std::string &field, const solverMode &
 
 }
 
-void fmiCoSimSubModel::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void fmiCoSimSubModel::residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
 {
 	/*if (hasDifferential(sMode))
 	{
@@ -517,19 +517,19 @@ void fmiCoSimSubModel::residual(const IOdata &args, const stateData *sD, double 
 	*/
 }
 
-void fmiCoSimSubModel::derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void fmiCoSimSubModel::derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 	/*Lp Loc = offsets.getLocations(sD, deriv, sMode, this);
 	updateInfo(args, sD, sMode);
 	if (isDynamic(sMode))
 	{
 		cs->getDerivatives(Loc.destDiffLoc);
-		printf("tt=%f,I=%f, state=%f deriv=%e\n", sD->time, args[0], Loc.diffStateLoc[0], Loc.destDiffLoc[0]);
+		printf("tt=%f,I=%f, state=%f deriv=%e\n", sD.time, args[0], Loc.diffStateLoc[0], Loc.destDiffLoc[0]);
 	}
 	else
 	{
 		cs->getDerivatives(Loc.destLoc);
-		printf("tt=%f,I=%f, state=%f,deriv=%e\n", sD->time, args[0], Loc.algStateLoc[0], Loc.destLoc[0]);
+		printf("tt=%f,I=%f, state=%f,deriv=%e\n", sD.time, args[0], Loc.algStateLoc[0], Loc.destLoc[0]);
 	}
 	*/
 }
@@ -648,7 +648,7 @@ double fmiCoSimSubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 	}
 	return res;
 }
-void fmiCoSimSubModel::jacobianElements(const IOdata &args, const stateData *sD,
+void fmiCoSimSubModel::jacobianElements(const IOdata &args, const stateData &sD,
 	matrixData<double> &ad,
 	const IOlocs &argLocs, const solverMode &sMode)
 {
@@ -709,7 +709,7 @@ void fmiCoSimSubModel::timestep(gridDyn_time ttime, const IOdata &args, const so
 	
 }
 
-void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
 {
 /*	updateInfo(args, sD, sMode);
 	double res;
@@ -750,16 +750,16 @@ void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &args, const stateData 
 
 }
 
-void fmiCoSimSubModel::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiCoSimSubModel::outputPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
 
 
 }
 
-void fmiCoSimSubModel::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void fmiCoSimSubModel::rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode)
 {
-	updateInfo(args, sD, sMode);
+	updateLocalCache(args, sD, sMode);
 	auto rootOffset = offsets.getRootOffset(sMode);
 	//cs->getEventIndicators(&(roots[rootOffset]));
 }
@@ -775,21 +775,21 @@ void fmiCoSimSubModel::rootTrigger(gridDyn_time ttime, const IOdata &args, const
 
 
 
-IOdata fmiCoSimSubModel::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata fmiCoSimSubModel::getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const
 {
 	IOdata out(m_outputSize, 0);
 	if (cs->getCurrentMode() >= fmuMode::initializationMode)
 	{
-		updateInfo(args, sD, sMode);
+		//updateInfo(args, sD, sMode);
 		cs->getOutputs(out.data());
-		printf("time=%f, out1 =%f, out 2=%f\n", (sD) ? sD->time : prevTime, out[0], out[1]);
-		if ((opFlags[use_output_estimator]) && (sD) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
+		printf("time=%f, out1 =%f, out 2=%f\n", static_cast<double>((!sD.empty()) ? sD.time : prevTime), out[0], out[1]);
+		if ((opFlags[use_output_estimator]) && (!sD.empty()) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
 		{
 			for (size_t pp = 0; pp < m_outputSize; ++pp)
 			{
 			/*	if (outputInformation[pp].refMode >= refMode_t::level4)
 				{
-					const double res = oEst[pp]->estimate(sD->time, args, sD->state + offsets.getDiffOffset(sMode));
+					const double res = oEst[pp]->estimate(sD.time, args, sD.state + offsets.getDiffOffset(sMode));
 					out[pp] = res;
 				}
 				*/
@@ -800,23 +800,23 @@ IOdata fmiCoSimSubModel::getOutputs(const IOdata &args, const stateData *sD, con
 }
 
 
-double fmiCoSimSubModel::getDoutdt(const stateData *sD, const solverMode &sMode, index_t num)
+double fmiCoSimSubModel::getDoutdt(const stateData &sD, const solverMode &sMode, index_t num) const
 {
 	return 0;
 }
 
-double fmiCoSimSubModel::getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t num) const
+double fmiCoSimSubModel::getOutput(const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num) const
 {
 	double out = kNullVal;
 	if (cs->getCurrentMode() >= fmuMode::initializationMode)
 	{
 		//updateInfo(args, sD, sMode);
 
-		if ((opFlags[use_output_estimator]) && (sD) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
+		if ((opFlags[use_output_estimator]) && (!sD.empty()) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
 		{
 		/*	if (outputInformation[num].refMode >= refMode_t::level4)
 			{
-				out = oEst[num]->estimate(sD->time, args, sD->state + offsets.getDiffOffset(sMode));
+				out = oEst[num]->estimate(sD.time, args, sD.state + offsets.getDiffOffset(sMode));
 			}
 			*/
 		}
@@ -843,16 +843,16 @@ index_t fmiCoSimSubModel::getOutputLoc(const solverMode &sMode, index_t num) con
 	return kNullLocation;
 }
 
-void fmiCoSimSubModel::updateInfo(const IOdata &args, const stateData *sD, const solverMode &sMode)
+void fmiCoSimSubModel::updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode)
 {
 	/*	fmi2Boolean eventMode;
 	fmi2Boolean terminateSim;
-	if (sD)
+	if (!sD.empty())
 	{
-		if ((sD->seqID == 0) || (sD->seqID != lastSeqID))
+		if ((sD.seqID == 0) || (sD.seqID != lastSeqID))
 		{
 			Lp Loc = offsets.getLocations(sD, sMode, this);
-			cs->setTime(sD->time);
+			cs->setTime(sD.time);
 			if (m_stateSize > 0)
 			{
 				if (isDynamic(sMode))
@@ -865,7 +865,7 @@ void fmiCoSimSubModel::updateInfo(const IOdata &args, const stateData *sD, const
 				}
 			}
 			cs->setInputs(args.data());
-			lastSeqID = sD->seqID;
+			lastSeqID = sD.seqID;
 			if (m_stateSize > 0)
 			{
 				cs->getDerivatives(tempdState.data());

@@ -33,12 +33,12 @@ public:
   dcLink (double rP,double Lp, const std::string &objName = "dclink_$");
   //gridLink(double max_power,gridBus *bus1, gridBus *bus2);
   virtual ~dcLink ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void updateBus (gridBus *bus, index_t busnumber) override;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
   virtual double getMaxTransfer () const override;
   virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
@@ -60,11 +60,11 @@ public:
 
   //initializeB dynamics
   //virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   //for computing all the Jacobian elements at once

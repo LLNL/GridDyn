@@ -39,11 +39,11 @@ BOOST_AUTO_TEST_CASE (source_test1)
   BOOST_CHECK_CLOSE (src1->getOutput (), 1.0, 0.001);
   src1->set ("rate", 0.5);
   src1->initializeA (0.0, 0);  
-  src1->timestep (3.0, {}, cLocalSolverMode);
+  src1->timestep (3.0, emptyArguments, cLocalSolverMode);
   double rval = src1->getOutput();
   BOOST_CHECK_CLOSE (rval, 2.5, 0.001);
   src1->set ("rate", -0.75);
-  src1->timestep (5.0, {}, cLocalSolverMode);
+  src1->timestep (5.0, emptyArguments, cLocalSolverMode);
   rval = src1->getOutput();
   BOOST_CHECK_CLOSE (rval, 1.0, 0.001);
   delete src1;
@@ -55,11 +55,11 @@ BOOST_AUTO_TEST_CASE (source_test1)
   src1->set ("period", 2);
   src1->set ("a", 1.0);
   src1->initializeA (0.0, 0);
-  src1->timestep (2.5, {}, cLocalSolverMode);
+  src1->timestep (2.5, emptyArguments, cLocalSolverMode);
   rval = src1->getOutput();
   BOOST_CHECK_CLOSE (rval, 2.0, 0.001);
   src1->set ("period", 1);
-  src1->timestep (2.75, {}, cLocalSolverMode);
+  src1->timestep (2.75, emptyArguments, cLocalSolverMode);
   rval = src1->getOutput();
   BOOST_CHECK_CLOSE (rval, 1.0, 0.001);
   delete src1;

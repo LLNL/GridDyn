@@ -98,7 +98,7 @@ public:
   acLine (double rP, double xP, const std::string &objName = "acline_$");
   /** @brief virtual destructor*/
   virtual ~acLine ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
 
   /** @brief get the current tap value
@@ -144,7 +144,7 @@ public:
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
   virtual void pFlowObjectInitializeB() override;
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
@@ -168,16 +168,16 @@ public:
 
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
   virtual double getMaxTransfer () const override;
-  //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
+  //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
 protected:
   void setAdmit ();
@@ -252,7 +252,7 @@ protected:
   /** @brief load information into the linkInfo structure
   @param[in] sD  the state Data
   @param[in] sMode the corresponding solver Mode*/
-  void loadLinkInfo (const stateData *sD, const solverMode &sMode);
+  void loadLinkInfo (const stateData &sD, const solverMode &sMode);
   /** @brief load the approximation functions in the bizarely defined array above*/
   void loadApproxFunctions ();
 
@@ -347,7 +347,7 @@ public:
   ~adjustableTransformer ()
   {
   }
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   void set (const std::string &param, const std::string &val) override;
@@ -366,16 +366,14 @@ public:
   void reset (reset_levels level) override;
 
   void updateLocalCache () override;
-  void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
 
-  virtual IOdata getOutputs (index_t  busId, const stateData *sD, const solverMode &sMode) override;
-
-  void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
   void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   void loadSizes (const solverMode &sMode, bool dynOnly) override;
@@ -384,7 +382,7 @@ protected:
   void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
 
 public:
-  void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
+  void rootTest (const stateData &sD, double roots[], const solverMode &sMode) override;
   void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
@@ -394,27 +392,27 @@ protected:
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MWJac (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void MWJac (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the Jacobian elements based on the MVar control
   @param[in] sD  the statedata of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MVarJac (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void MVarJac (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap angle
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapAnglePartial (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void tapAnglePartial (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap setting
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
   @param[in] sD  the statedata of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapPartial (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void tapPartial (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief do any stepped adjustments  based on voltage control from the power flow calculations
   @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
   */

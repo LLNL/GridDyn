@@ -49,12 +49,12 @@ private:
 	double Faa = 0.0;
 public:
 	txLifeSpan(const std::string &objName="txlifeSpan_$");
-	gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
+	coreObject * clone(coreObject *obj=nullptr) const override;
 	virtual void setFlag(const std::string &flag, bool val=true) override;
 	virtual void set (const std::string &param, const std::string &val) override;
 
 	virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void add(gridCoreObject *obj) override final;
+	virtual void add(coreObject *obj) override final;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 	virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;

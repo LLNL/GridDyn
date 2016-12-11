@@ -35,7 +35,7 @@ dcBus::dcBus (const std::string &objName) : gridBus (objName), busController(thi
 
 }
 
-gridCoreObject *dcBus::clone (gridCoreObject *obj) const
+coreObject *dcBus::clone (coreObject *obj) const
 {
   dcBus *nobj = cloneBase<dcBus, gridBus> (this, obj);
   if (nobj == nullptr)
@@ -228,7 +228,7 @@ change_code dcBus::powerFlowAdjust (unsigned long flags, check_level_t level)
           break;
         }
     }
-  auto args = getOutputs (nullptr, cLocalSolverMode);
+  auto args = getOutputs (emptyStateData, cLocalSolverMode);
   for (auto &gen : attachedGens)
     {
       if (gen->checkFlag (has_powerflow_adjustments))
@@ -469,7 +469,7 @@ void dcBus::guess(gridDyn_time ttime, double state[], double dstate_dt[], const 
 }
 
 // residual
-void dcBus::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void dcBus::residual (const stateData &sD, double resid[], const solverMode &sMode)
 {
   gridBus::residual(sD, resid, sMode);
   auto Voffset = offsets.getVOffset (sMode);
@@ -483,7 +483,7 @@ void dcBus::residual (const stateData *sD, double resid[], const solverMode &sMo
         }
       else
         {
-          resid[Voffset] = sD->state[Voffset] - voltage;
+          resid[Voffset] = sD.state[Voffset] - voltage;
         }
     }
  
@@ -496,7 +496,7 @@ static const IOlocs inLoc{
     0,1,2
 };
 
-void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
+void dcBus::computeDerivatives(const stateData &sD, const solverMode &sMode)
 {
     matrixDataCompact<2, 3> partDeriv;
     if (!isConnected())
@@ -519,6 +519,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
         {
             if (gen->isConnected())
             {
+				gen->updateLocalCache(outputs, sD, sMode);
                 gen->ioPartialDerivatives(outputs, sD, partDeriv, inLoc, sMode);
             }
         }
@@ -526,7 +527,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
         {
             if (load->isConnected())
             {
-
+				load->updateLocalCache(outputs, sD, sMode);
                 load->ioPartialDerivatives(outputs, sD, partDeriv, inLoc, sMode);
             }
         }
@@ -535,7 +536,7 @@ void dcBus::computeDerivatives(const stateData *sD, const solverMode &sMode)
 
 }
 // Jacobian
-void dcBus::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void dcBus::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 
   auto args = getOutputs (sD, sMode);
@@ -654,7 +655,7 @@ double dcBus::getVoltage(const double state[], const solverMode &sMode) const
 	return voltage;
 }
 
-double dcBus::getVoltage(const stateData *sD, const solverMode &sMode) const
+double dcBus::getVoltage(const stateData &sD, const solverMode &sMode) const
 {
 	if (isLocal(sMode))
 	{
@@ -663,7 +664,7 @@ double dcBus::getVoltage(const stateData *sD, const solverMode &sMode) const
 	if (useVoltage(sMode))
 	{
 		auto Voffset = offsets.getVOffset(sMode);
-		return (Voffset != kNullLocation) ? sD->state[Voffset] : voltage;
+		return (Voffset != kNullLocation) ? sD.state[Voffset] : voltage;
 	}
 	return voltage;
 	

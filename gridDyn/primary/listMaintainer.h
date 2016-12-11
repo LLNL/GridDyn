@@ -37,16 +37,16 @@ public:
 
   //void listOperation(const solverMode &sMode);  //A work in progress
 
-  void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
-  void preEx (const stateData *sD, const solverMode &sMode);
-  void residual (const stateData *sD, double resid[], const solverMode &sMode);
-  void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
-  void derivative (const stateData *sD, double deriv[], const solverMode &sMode);
+  void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
+  void preEx (const stateData &sD, const solverMode &sMode);
+  void residual (const stateData &sD, double resid[], const solverMode &sMode);
+  void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
+  void derivative (const stateData &sD, double deriv[], const solverMode &sMode);
 
-  void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode);
-  void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode);
-  void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
-  void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha);
+  void delayedResidual (const stateData &sD, double resid[], const solverMode &sMode);
+  void delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode);
+  void delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
+  void delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
   bool isListValid (const solverMode &sMode) const;
   void invalidate (const solverMode &sMode);

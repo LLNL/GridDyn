@@ -39,7 +39,7 @@ gridBusOpt::gridBusOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridBusOpt::gridBusOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName), bus (dynamic_cast<gridBus *> (obj))
+gridBusOpt::gridBusOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName), bus (dynamic_cast<gridBus *> (obj))
 {
 
   if (bus)
@@ -52,7 +52,7 @@ gridBusOpt::gridBusOpt (gridCoreObject *obj, const std::string &objName) : gridO
     }
 }
 
-gridCoreObject *gridBusOpt::clone (gridCoreObject *obj) const
+coreObject *gridBusOpt::clone (coreObject *obj) const
 {
   gridBusOpt *nobj;
   if (obj == nullptr)
@@ -201,7 +201,7 @@ void gridBusOpt::getTols (double tols[], const optimMode &oMode)
 }
 
 
-//void alert (gridCoreObject *object, int code);
+//void alert (coreObject *object, int code);
 
 void gridBusOpt::valueBounds (double ttime, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
@@ -389,7 +389,7 @@ gridBusOpt::~gridBusOpt ()
     }
 }
 
-void gridBusOpt::add (gridCoreObject *obj)
+void gridBusOpt::add (coreObject *obj)
 {
   auto ld = dynamic_cast<gridLoadOpt *> (obj);
   if (ld)
@@ -427,7 +427,7 @@ void gridBusOpt::add (gridCoreObject *obj)
 // add load
 void gridBusOpt::add (gridLoadOpt *ld)
 {
-  gridCoreObject *obj = find (ld->getName ());
+  coreObject *obj = find (ld->getName ());
   if (obj == nullptr)
     {
       ld->locIndex = static_cast<index_t> (loadList.size ());
@@ -443,7 +443,7 @@ void gridBusOpt::add (gridLoadOpt *ld)
 // add generator
 void gridBusOpt::add (gridGenOpt *gen)
 {
-  gridCoreObject *obj = find (gen->getName ());
+  coreObject *obj = find (gen->getName ());
   if (obj == nullptr)
     {
       gen->locIndex = static_cast<index_t> (genList.size ());
@@ -469,7 +469,7 @@ void gridBusOpt::add (gridLinkOpt *lnk)
   linkList.push_back (lnk);
 }
 
-void gridBusOpt::remove (gridCoreObject *obj)
+void gridBusOpt::remove (coreObject *obj)
 {
   gridLoadOpt *ld = dynamic_cast<gridLoadOpt *> (obj);
   if (ld)
@@ -609,9 +609,9 @@ void gridBusOpt::set (const std::string &param, double val, units_t unitType)
 
 
 
-gridCoreObject *gridBusOpt::find (const std::string &objname) const
+coreObject *gridBusOpt::find (const std::string &objname) const
 {
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
   if ((objname == this->name) || (objname == "bus"))
     {
       return const_cast<gridBusOpt *> (this);
@@ -649,7 +649,7 @@ gridCoreObject *gridBusOpt::find (const std::string &objname) const
   return obj;
 }
 
-gridCoreObject *gridBusOpt::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridBusOpt::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "link")
     {
@@ -669,7 +669,7 @@ gridCoreObject *gridBusOpt::getSubObject (const std::string &typeName, index_t n
     }
 }
 
-gridCoreObject *gridBusOpt::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridBusOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName == "load")
     {
@@ -729,7 +729,7 @@ double gridBusOpt::get (const std::string &param, gridUnits::units_t unitType) c
     }
   else
     {
-      fval = gridCoreObject::get (param,unitType);
+      fval = coreObject::get (param,unitType);
     }
   return (ival != kInvalidCount) ? static_cast<double> (ival) : fval;
 }

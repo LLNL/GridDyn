@@ -69,7 +69,7 @@ std::shared_ptr<eventQueue> eventQueue::clone(std::shared_ptr<eventQueue> eQ) co
 	return newQueue;
 }
 
-void eventQueue::mapObjectsOnto(gridCoreObject *newRootObject)
+void eventQueue::mapObjectsOnto(coreObject *newRootObject)
 {
 	for (auto ev : events)
 	{
@@ -249,7 +249,7 @@ void eventQueue::sort ()
 }
 
 void eventQueue::checkDuplicates ()
-{ //checking for duplicated gridCoreObject updates which could potentially be bad
+{ //checking for duplicated coreObject updates which could potentially be bad
 
   auto currentEvent = events.begin ();
   auto nextEvent = currentEvent;
@@ -260,10 +260,10 @@ void eventQueue::checkDuplicates ()
         {
           if (typeid(*currentEvent) == typeid(*nextEvent))
             {
-              auto ap = dynamic_cast<eventTypeAdapter<gridCoreObject> *> ((*currentEvent).get ());
+              auto ap = dynamic_cast<eventTypeAdapter<coreObject> *> ((*currentEvent).get ());
               if (ap)
                 {
-                  auto bp = dynamic_cast<eventTypeAdapter<gridCoreObject> *> ((*nextEvent).get ());
+                  auto bp = dynamic_cast<eventTypeAdapter<coreObject> *> ((*nextEvent).get ());
                   if (bp)
                     {
                       if (ap->getTarget()->getID () == bp->getTarget()->getID ())

@@ -46,7 +46,7 @@ private:
   bool useCTI = false;		//!< internal flag to use the CTI stuff
 public:
   explicit breaker (const std::string &objName = "breaker_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj) const override;
+  virtual coreObject * clone (coreObject *obj) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual void set (const std::string &param,  const std::string &val) override;
 
@@ -57,9 +57,9 @@ public:
 
   //dynamic state functions
   virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
   virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
   virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;

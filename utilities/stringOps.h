@@ -62,6 +62,13 @@ std::string trim(const std::string& input, const std::string& whitespace = " \t\
 if not found returns the entire string
 */
 std::string getTailString (const std::string &input, char sep);
+/** @brief get a string that comes after the last of a specificed seperator
+@param[in] input  the string to separate
+@param[in] sep the separation character
+@return  the tail string or the string that comes after the last sep character
+if not found returns the entire string
+*/
+std::string getTailString(const std::string &input, const std::string &sep);
 
 enum class delimiter_compression
 {

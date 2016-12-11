@@ -97,7 +97,7 @@ enum operation_flags
   //Various informative flags that can be used in some situations
   disconnected = 49, //!< flag indicating that the object is disconnected
   differential_output = 50, //!< flag that the model has a differential state variable that is the primary output
-  no_gridobject_set = 51,  //!< flag indicating skipping of the gridCoreObject set function for parent setting without fault
+  no_gridobject_set = 51,  //!< flag indicating skipping of the coreObject set function for parent setting without fault
   being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some large objects with components allocated in larger fashion so we skip over some steps in object removal
 
   /*flags 53-63 are intended for object capabilities*/
@@ -415,9 +415,12 @@ public:
   }
   bool empty() const
   {
-	  return (state != nullptr);
+	  return (state == nullptr);
   }
-
+  bool updateRequired(count_t checkID) const
+  {
+	  return ((checkID != seqID) || (seqID == 0)||(empty()));
+  }
 };
 
 const stateData emptyStateData{};
@@ -563,7 +566,7 @@ public:
   @param[in] obj  the object to use if local information is required
   @return Lp the Location pointer object to fill
   */
-  Lp getLocations (const stateData *sD, double d[], const solverMode &sMode, const gridObject *obj) const;
+  Lp getLocations (const stateData &sD, double d[], const solverMode &sMode, const gridObject *obj) const;
 
   /** @brief get the locations for the data from a stateData pointer
   *@param[in] sMode the solverMode we are interested in
@@ -571,7 +574,7 @@ public:
   @param[in] obj  the object to use if local information is required
   @return Lp the Location pointer object to fill
   */
-  Lp getLocations (const stateData *sD, const solverMode &sMode, const gridObject *obj) const;
+  Lp getLocations (const stateData &sD, const solverMode &sMode, const gridObject *obj) const;
 
   /** @brief get the locations offsets for the data
   *@param[in] sMode the solverMode we are interested in

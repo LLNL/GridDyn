@@ -34,7 +34,7 @@ gridDynGovernorReheat::gridDynGovernorReheat (const std::string &objName) : grid
   offsets.local->local.jacSize = 12;
 }
 
-gridCoreObject *gridDynGovernorReheat::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorReheat::clone (coreObject *obj) const
 {
   gridDynGovernorReheat *gov = cloneBase<gridDynGovernorReheat, gridDynGovernor> (this, obj);
   if (gov == nullptr)
@@ -88,18 +88,18 @@ void gridDynGovernorReheat::objectInitializeB (const IOdata &args, const IOdata 
 
 
 // residual
-void gridDynGovernorReheat::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGovernorReheat::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode);
-  const double *gsp = sD->dstate_dt + offset;
+  const double *gsp = sD.dstate_dt + offset;
   if (isAlgebraicOnly (sMode))
     {
-      gsp = sD->dstate_dt + offsets.getAlgOffset (solverMode (4));
-      resid[offset + 0] = gsp[1] + T4 / T5 * (gsp[2] + T3 / T2 * gsp[3]) - sD->state[offset];
+      gsp = sD.dstate_dt + offsets.getAlgOffset (solverMode (4));
+      resid[offset + 0] = gsp[1] + T4 / T5 * (gsp[2] + T3 / T2 * gsp[3]) - sD.state[offset];
       return;
     }
-  const double *gs = sD->state + offset;
+  const double *gs = sD.state + offset;
 
   //double omega = getControlFrequency (args);
   double omega = args[govOmegaInLocation];
@@ -119,10 +119,10 @@ void gridDynGovernorReheat::residual (const IOdata &args, const stateData *sD, d
   resid[offset + 0] = gs[1] + T4 / T5 * (gs[2] + T3 / T2 * gs[3]) - gs[0];
 }
 
-void gridDynGovernorReheat::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGovernorReheat::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
-  const double *gs = sD->state + offset;
+  const double *gs = sD.state + offset;
   //double omega = getControlFrequency (args);
   double omega = args[govOmegaInLocation];
   double Tin = args[govpSetInLocation] + K * (Wref - omega);
@@ -141,7 +141,7 @@ void gridDynGovernorReheat::derivative (const IOdata &args, const stateData *sD,
 
 
 
-void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset  (sMode);
   if (isAlgebraicOnly (sMode))
@@ -180,7 +180,7 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
          */
   if (limitTin)
     {
-      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
+      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD.cj);
     }
   else
     {
@@ -192,16 +192,16 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
         {
           ad.assign (refI + 3, argLocs[govpSetInLocation], 1.0 / T1);
         }
-      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD->cj);
+      ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD.cj);
     }
   // tg2
 
   ad.assign (refI + 2, refI + 3, (1.0 - T3 / T2) * 1.0 / T2);
-  ad.assign (refI + 2, refI + 2, -1.0 / T2 - sD->cj);
+  ad.assign (refI + 2, refI + 2, -1.0 / T2 - sD.cj);
   //Tg3
   ad.assign (refI + 1, refI + 2, (1.0 - T4 / T5) / T5);
   ad.assign (refI + 1, refI + 3, ((1.0 - T4 / T5) * T3 / T2) / T5);
-  ad.assign (refI + 1, refI + 1, -1.0 / T5 - sD->cj);
+  ad.assign (refI + 1, refI + 1, -1.0 / T5 - sD.cj);
   //Tout
   ad.assign (refI, refI, -1);
   ad.assign (refI, refI + 1, 1);

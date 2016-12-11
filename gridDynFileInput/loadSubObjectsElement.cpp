@@ -40,27 +40,27 @@
 
 using namespace readerConfig;
 
-static const std::map < std::string, std::function < gridCoreObject *(std::shared_ptr<readerElement> &, readerInfo *, gridCoreObject * parent) >> loadFunctionMap
+static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo *, coreObject * parent) >> loadFunctionMap
 {
   /* *INDENT-OFF* */
-  {"genmodel", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (gridDynGenModel *)(nullptr), "genmodel", ri, parent);}},
-  {"exciter", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (gridDynExciter *)(nullptr), "exciter", ri, parent);}},
-  {"governor", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (gridDynGovernor *)(nullptr), "governor", ri, parent);}},
-  {"pss", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (gridDynPSS *)(nullptr), "pss", ri, parent);}},
-  {"source", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (gridSource *)(nullptr), "source", ri, parent);}},
-  {"scheduler", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, parent);}},
-  { "agc", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, parent); } },
-  { "reservedispatcher", [](std::shared_ptr<readerElement> &cd, readerInfo *ri,gridCoreObject *parent){return ElementReader(cd, (reserveDispatcher *)(nullptr), "reservedispatcher", ri, parent); } },
-  {"controlblock", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader (cd, (basicBlock *)(nullptr), "controlblock", ri, parent);}},
-  {"generator", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, parent); }},
-  {"load", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, parent); } },
-  {"bus", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return readBusElement (cd, ri, parent);}},
-  {"relay", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return readRelayElement (cd, ri, parent);}},
-  {"area", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){return readAreaElement (cd, ri, parent);}},
-  {"link", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){ return readLinkElement (cd, ri, parent, false);}},
-  { "econ", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){readEconElement(cd, ri, parent);return parent;} },
-  {"array", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){readArrayElement (cd, ri, parent);return parent;}},
-  {"if", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, gridCoreObject *parent){loadConditionElement(cd, ri, parent); return parent; }}
+  {"genmodel", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynGenModel *)(nullptr), "genmodel", ri, parent);}},
+  {"exciter", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynExciter *)(nullptr), "exciter", ri, parent);}},
+  {"governor", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynGovernor *)(nullptr), "governor", ri, parent);}},
+  {"pss", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynPSS *)(nullptr), "pss", ri, parent);}},
+  {"source", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridSource *)(nullptr), "source", ri, parent);}},
+  {"scheduler", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, parent);}},
+  { "agc", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, parent); } },
+  { "reservedispatcher", [](std::shared_ptr<readerElement> &cd, readerInfo *ri,coreObject *parent){return ElementReader(cd, (reserveDispatcher *)(nullptr), "reservedispatcher", ri, parent); } },
+  {"controlblock", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (basicBlock *)(nullptr), "controlblock", ri, parent);}},
+  {"generator", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, parent); }},
+  {"load", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, parent); } },
+  {"bus", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readBusElement (cd, ri, parent);}},
+  {"relay", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readRelayElement (cd, ri, parent);}},
+  {"area", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readAreaElement (cd, ri, parent);}},
+  {"link", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){ return readLinkElement (cd, ri, parent, false);}},
+  { "econ", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){readEconElement(cd, ri, parent);return parent;} },
+  {"array", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){readArrayElement (cd, ri, parent);return parent;}},
+  {"if", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){loadConditionElement(cd, ri, parent); return parent; }}
   /* *INDENT-ON* */
 };
 
@@ -68,7 +68,7 @@ static const IgnoreListType customIgnore {
   "args","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9","arg0"
 };
 
-void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject)
+void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
 {
   //read areas first to set them up for other things to call
   if (element->hasElement ("area"))
@@ -119,7 +119,7 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, gr
           auto rval = loadFunctionMap.find (obname);
           if (rval != loadFunctionMap.end ())
             {
-              gridCoreObject *obj = rval->second (element, ri, parentObject);
+              coreObject *obj = rval->second (element, ri, parentObject);
               if ((obj->getParent () == nullptr) && (obj != parentObject))
                 {
                   WARNPRINT (READER_WARN_IMPORTANT, obj->getName () << " not owned by any other object");
