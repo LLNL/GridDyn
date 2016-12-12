@@ -708,10 +708,10 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
   std::complex<double> S2 = Vg[3] * Ig[3] + Vg[4] * Ig[4] + Vg[5] * Ig[5];
   #endif
   double scale = m_mult / (systemBasePower * 1000000.0);
-  double P1 = S1.real () * scale;       //basepower is MW
-  double P2 = S2.real () * scale;       //basepower is MW
-  double Q1 = S1.imag () * scale;       //basepower is MW
-  double Q2 = S2.imag () * scale;       //basepower is MW
+  double P1 = S1.real () * scale;       //basePower is MW
+  double P2 = S2.real () * scale;       //basePower is MW
+  double Q1 = S1.imag () * scale;       //basePower is MW
+  double Q2 = S2.imag () * scale;       //basePower is MW
 
   double V2 = V;        //baseVoltage is in KV  we ignore the angle since it shouldn't matter
   double V1 = V * (1.0 + spread);
@@ -745,7 +745,7 @@ void gridLabDLoad::run3GridLabA (gridDyn_time ttime, const IOdata &args)
 {
 
   assert (opFlags[waiting_flag] == false);    //this should not happen;
-  LOG_TRACE ("calling gridlab load 3A");
+  LOG_TRACE ("calling gridLab-d load 3A");
 
   GhostSwingBusManager::cvec Vg (9);
   auto dt = ttime - m_lastCallTime;
@@ -761,7 +761,7 @@ void gridLabDLoad::run3GridLabA (gridDyn_time ttime, const IOdata &args)
   Vprev = args[voltageInLocation];
   Thprev = args[angleInLocation];
 
-  //send the current voltage as the last in the serioes
+  //send the current voltage as the last in the series
   Vg[6] = std::complex<double> (V * baseVoltage * 1000.0, 0); //baseVoltage is in KV  we ignore the angle since it shouldn't matter
   Vg[7] = Vg[6] * rotn120;
   Vg[8] = Vg[6] * rotp120;
@@ -798,7 +798,7 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
   assert (opFlags[waiting_flag]);      //this should not happen;
 
-  LOG_TRACE ("calling gridlab load 3B");
+  LOG_TRACE ("calling gridLab-d load 3B");
   GhostSwingBusManager::cvec Ig (9);
   GhostSwingBusManager::cvec Ig2 (9);
   GhostSwingBusManager::cvec Vg (9);
@@ -868,12 +868,12 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
         }
     }
   double scale = m_mult / (systemBasePower * 1000000.0);
-  P1 = S1.real () * scale;       //basepower is MW
-  double P2 = S2.real () * scale;       //basepower is MW
-  double P3 = S3.real () * scale;       //basepower is MW
-  double Q1 = S1.imag () * scale;       //basepower is MW
-  double Q2 = S2.imag () * scale;       //basepower is MW
-  double Q3 = S3.imag () * scale;       //basepower is MW
+  P1 = S1.real () * scale;       //basePower is MW
+  double P2 = S2.real () * scale;       //basePower is MW
+  double P3 = S3.real () * scale;       //basePower is MW
+  double Q1 = S1.imag () * scale;       //basePower is MW
+  double Q2 = S2.imag () * scale;       //basePower is MW
+  double Q3 = S3.imag () * scale;       //basePower is MW
 
   double V3 = V;
   double V1 = V + spread;

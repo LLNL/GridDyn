@@ -25,9 +25,9 @@ sourceLoad::sourceLoad(const std::string &objName) :gridLoad(objName)
 	sourceLink.fill(-1);
 }
 
-sourceLoad::sourceLoad(sourceType sources, const std::string &objName):sourceLoad(objName)
+sourceLoad::sourceLoad(sourceType type, const std::string &objName):sourceLoad(objName)
 {
-	sType = sources;
+	sType = type;
 	//add the sources for P and Q
 	add(makeSource(p_source));
 	add(makeSource(q_source));
@@ -45,7 +45,12 @@ coreObject * sourceLoad::clone(coreObject *obj) const
 	nobj->sourceLink = sourceLink;
 	for (auto &src : sources)
 	{
-		nobj->add(src->clone());
+		if (src)
+		{
+			auto newsrc = static_cast<gridSource *>(src->clone());
+			newsrc->locIndex = src->locIndex;
+			nobj->add(newsrc);
+		}
 	}
 	return nobj;
 }

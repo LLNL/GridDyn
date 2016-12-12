@@ -104,7 +104,6 @@ int main (int argc, char *argv[])
 	  printf("eventTime=%f\n", static_cast<double>(evntTime));
 
 	  time_granted = fncs::time_request(time_desired);
-	  if (time_granted<gd2fncsTime(0.000001))
 	  printf("grantTime=%llu\n", static_cast<unsigned long long>(time_granted));
 	  //check if the granted time is too small to do anything about
 	  if (time_granted < time_desired)
