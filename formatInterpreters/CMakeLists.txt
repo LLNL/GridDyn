@@ -24,6 +24,8 @@ tinyxml2ReaderElement.cpp
 tinyxml2ReaderElement.h
 tinyxmlReaderElement.cpp
 tinyxmlReaderElement.h
+yamlReaderElement.h
+yamlReaderElement.cpp
 readerElement.h
 readerElement.cpp
 )
@@ -39,6 +41,8 @@ ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 add_subdirectory(yaml-cpp)
 target_link_libraries(formatInterpreter yaml-cpp)
+
+INCLUDE_DIRECTORIES(yaml-cpp/include)
 
 INSTALL(TARGETS formatInterpreter
 	LIBRARY DESTINATION lib

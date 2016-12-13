@@ -53,8 +53,9 @@ protected:
   double bias = 0.0;                    //!< bias
   double resetLevel = -0.001;   //!< the level below or above the max/min that the limiters should be removed
   double prevInput = 0.0;  //!< variable to hold previous input values;
-  int limiter_alg = 0;          //!< the number of alg states used by the limiters
-  int limiter_diff = 0;         //!< the number of diff states used by the limiters
+  int limiter_alg = 0;          //!< the number of algebraic states used by the limiters
+  int limiter_diff = 0;         //!< the number of differential states used by the limiters
+  std::string outputName = "output";  //!< the name of the output state
 public:
   /** @brief default constructor*/
   explicit basicBlock (const std::string &objName = "block_#");
@@ -134,6 +135,10 @@ public:
   virtual stringVec localStateNames () const override;
   virtual double getBlockOutput (const stateData &sD, const solverMode &sMode);
   virtual double getBlockOutput ();
+  const std::string &getOutputName() const
+  {
+	  return outputName;
+  }
 };
 
 /** @brief class implementing an integral block
@@ -165,7 +170,7 @@ public:
   //only called if the genModel is not present
   virtual void jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode) override;
   virtual double step (gridDyn_time time, double input) override;
-  // virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode);
+  // virtual void timestep(gridDyn_time time, const IOdata &args, const solverMode &sMode);
   //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 
@@ -344,7 +349,7 @@ public:
   /** @brief get the deadband state
   @return the state of the deadband block
   */
-  deadbandstate_t getDBState ()
+  deadbandstate_t getDBState () const
   {
     return dbstate;
   }
@@ -352,12 +357,12 @@ public:
   @param[in] the input value
   @return the computed output value
   */
-  double computeValue (double input);
+  double computeValue (double input) const;
   /** @brief compute the partial derivative of the output with respect to the input
   @param[in] the input value
   @return the computed derivative
   */
-  double computeDoutDin (double input);
+  double computeDoutDin (double input) const;
   //virtual void setTime(gridDyn_time time){prevTime=time;};
 };
 

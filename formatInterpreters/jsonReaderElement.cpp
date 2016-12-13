@@ -420,7 +420,7 @@ void jsonReaderElement::moveToFirstChild ()
       ++current.elementIndex;
     }
   parents.push_back (current);
-  current = jsonElement (Json::nullValue, "");
+  current.clear();
 
 }
 
@@ -442,7 +442,7 @@ void jsonReaderElement::moveToFirstChild (const std::string &childName)
     }
 
   parents.push_back (current);
-  current = jsonElement (Json::nullValue, "");
+  current.clear();
 
 }
 
@@ -463,7 +463,7 @@ void jsonReaderElement::moveToNextSibling ()
     }
   if (parents.empty ())
     {
-      current = jsonElement (Json::nullValue, "");
+      current.clear();
       return;
     }
   //there are no more elements in a potential array
@@ -476,7 +476,7 @@ void jsonReaderElement::moveToNextSibling ()
       ++elementIterator;
       if (elementIterator == endIterator)
         {
-          current = jsonElement (Json::nullValue, "");
+          current.clear();
         }
     }
   //Now find the next valid element
@@ -491,7 +491,7 @@ void jsonReaderElement::moveToNextSibling ()
       ++elementIterator;
       ++parents.back ().elementIndex;
     }
-  current = jsonElement (Json::nullValue, "");
+  current.clear();
 
 }
 
@@ -512,7 +512,7 @@ void jsonReaderElement::moveToNextSibling (const std::string &siblingName)
             }
           ++current.arrayIndex;
         }
-      current = jsonElement (Json::nullValue, "");
+      current.clear();
     }
   else
     {

@@ -538,10 +538,6 @@ namespace zmq
 
 		inline void setsockopt(int option_, const std::string &optval)
 		{
-			if (optval.empty())
-			{
-				throw error_t();
-			}
 			setsockopt(option_, optval.c_str(), optval.length());
 		}
 

@@ -15,6 +15,7 @@
 #include "stringOps.h"
 #include "basicDefs.h"
 #include "gridDynTypes.h"
+#include "core/gridDynExceptions.h"
 
 gridParameter::gridParameter()
 {
@@ -40,13 +41,13 @@ void gridParameter::reset()
 	applyIndex.resize(0);
 }
 
-int gridParameter::fromString(const std::string &str)
+void gridParameter::fromString(const std::string &str)
 {
 	valid = false;
 	size_t rlc = str.find_last_of('=');
 	if (rlc == std::string::npos)
 	{
-		return FUNCTION_EXECUTION_FAILURE;
+		throw(invalidParameterValue());
 	}
 	valid = true;
 	field = str.substr(0, rlc);
@@ -63,5 +64,4 @@ int gridParameter::fromString(const std::string &str)
 		paramUnits = gridUnits::getUnits(field.substr(rlc + 1, rlc2 - rlc - 1));
 		field = field.substr(0, rlc);
 	}
-	return FUNCTION_EXECUTION_SUCCESS;
 }

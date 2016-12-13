@@ -41,6 +41,7 @@ namespace po = boost::program_options;
 // main
 int main (int argc, char *argv[])
 {
+	loadLibraries();
 	loadFNCSLibrary();
 
   //
@@ -121,7 +122,9 @@ int main (int argc, char *argv[])
 	  catch (const std::runtime_error &re)
 	  {
 		  printf("execution error in GridDyn: %s\n", re.what());
-		  break;
+		  fncs::die();
+		  gdr.Finalize();
+		  return (-1);
 	  }
   }
   fncs::finalize();

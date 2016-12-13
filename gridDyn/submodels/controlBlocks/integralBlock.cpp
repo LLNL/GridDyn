@@ -138,7 +138,7 @@ void integralBlock::set (const std::string &param, double val, gridUnits::units_
     {
       if (val != 0)
         {
-          K = 1 / val;
+          K = 1.0 / val;
         }
     }
   else

@@ -691,7 +691,10 @@ void gridObject::addSubObject(gridObject *obj)
 			return;
 		}
 	}
-	subObjectList.push_back(static_cast<gridObject *>(obj));
+	obj->setParent(this);
+	obj->m_baseFreq = m_baseFreq;
+	obj->systemBasePower = systemBasePower;
+	subObjectList.push_back(obj);
 }
 
 void gridObject::remove(coreObject *obj)

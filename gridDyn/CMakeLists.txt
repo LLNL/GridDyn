@@ -91,6 +91,8 @@ set (controlblock_sources
 	submodels/controlBlocks/lutBlock.cpp
 	submodels/controlBlocks/transferFunctionBlock.cpp
 	submodels/controlBlocks/filteredDerivativeBlock.cpp
+	submodels/controlBlocks/blockSequence.cpp
+	submodels/controlBlocks/blockSequence.h
 	submodels/otherBlocks.h
 	submodels/gridControlBlocks.h
 	)

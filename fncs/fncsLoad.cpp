@@ -45,19 +45,8 @@ void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 {
 	gridRampLoad::pFlowObjectInitializeA(time0, flags);
 
-	double V = bus->getVoltage();
-	double A = bus->getAngle();
+	updateA(time0);
 	
-
-	
-	if (!voltageKey.empty())
-	{
-		std::complex<double> Vc = std::polar(V, A);
-		Vc *= baseVoltage;
-		fncsSendComplex(voltageKey, Vc);
-	}
-	
-
 	prevP = getP();
 	prevQ = getQ();
 }
@@ -83,11 +72,11 @@ void fncsLoad::updateA(gridDyn_time time)
 	}
 	lastUpdateTime = time;
 }
-
+	
 gridDyn_time fncsLoad::updateB()
 {
 	nextUpdateTime += updatePeriod;
-	
+
 	//now get the updates
 	auto res = fncsGetComplex(loadKey);
 	if (res.real() == kNullVal)
@@ -146,7 +135,7 @@ void fncsLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode
 {
 	while (ttime > nextUpdateTime)
 	{
-		updateA(ttime);
+		updateA(nextUpdateTime);
 		updateB();
 	}
 

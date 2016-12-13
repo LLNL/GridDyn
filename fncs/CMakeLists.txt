@@ -15,6 +15,7 @@ set(griddynFNCS_sources
 	gridDynFNCS.cpp
 	fncsSource.cpp
 	fncsCollector.cpp
+	fncsGhostBus.cpp
 	fncsLoad.cpp
 	fncsLibrary.cpp
 	fncsSupport.cpp
@@ -25,6 +26,7 @@ set(griddynFNCS_headers
 	fncsLibrary.h
 	fncsSource.h
 	fncsCollector.h
+	fncsGhostBus.h
 	fncsLoad.h
 	fncsSupport.h
 	test/fncsTest.h

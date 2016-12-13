@@ -12,7 +12,7 @@
 */
 
 #include "readerElement.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 
 readerAttribute::readerAttribute ()
@@ -33,12 +33,12 @@ void readerAttribute::set (std::string attName, std::string attText)
 
 double readerAttribute::getValue () const
 {
-  return doubleReadComplete (text, readerNullVal);
+  return numeric_conversion<double>(text, readerNullVal);
 }
 
 long long readerAttribute::getInt() const
 {
-	return longlongReadComplete(text, readerNullVal);
+	return numeric_conversion<long long>(text, readerNullVal);
 }
 
 readerElement::~readerElement ()

@@ -171,10 +171,10 @@ static const std::map<int, std::string> kinRetCodes {
   {KIN_ILL_INPUT, "Illegal Input"},
   {KIN_NO_MALLOC, " No memory allocation"},
   {KIN_MEM_FAIL, "Memory Allocation failed"},
-  {KIN_LINESEARCH_NONCONV, "line search failed to converge"},
+  {KIN_LINESEARCH_NONCONV, "linesearch failed to converge"},
   {KIN_MAXITER_REACHED, " Max iteration reached"},
   {KIN_MXNEWT_5X_EXCEEDED, "Five consecutive steps have been taken that satisfy a scaled step length test"},
-  {KIN_LINESEARCH_BCFAIL, "The line search algorithm was unable to satisfy the beta -condition for nbcfails iterations"},
+  {KIN_LINESEARCH_BCFAIL, "The linesearch algorithm was unable to satisfy the beta -condition for nbcfails iterations"},
   {KIN_LINSOLV_NO_RECOVERY, "The user - supplied routine preconditioner solve function failed recoverably, but the preconditioner is already current"},
   {KIN_LINIT_FAIL, "The linear solver's initialization function failed"},
   {KIN_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"},
@@ -452,14 +452,7 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
   sd->residTime += elapsed_t.count ();
 #else
  
-  try
-  {
-	  sd->m_gds->residualFunction(sd->solveTime, NVECTOR_DATA(sd->use_omp, state), nullptr, NVECTOR_DATA(sd->use_omp, resid), sd->mode);
-  }
-  catch (std::runtime_error &)
-  {
-	  return FUNCTION_EXECUTION_FAILURE;
-  }
+  int ret = sd->m_gds->residualFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, NVECTOR_DATA (sd->use_omp, resid), sd->mode);
 #endif
   if (sd->printResid)
     {
@@ -482,7 +475,7 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
 		  writeVector(sd->solveTime, RESIDUAL_INFORMATION, sd->funcCallCount, sd->mode.offsetIndex, sd->svsize, NVECTOR_DATA(sd->use_omp, resid), sd->stateFile);
 	  }
   }
-  return FUNCTION_EXECUTION_SUCCESS;
+  return ret;
 }
 
 int kinsolJacDense (long int Neq, N_Vector state, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)

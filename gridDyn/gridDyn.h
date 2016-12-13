@@ -329,16 +329,18 @@ public:
   @param[in] dstate_dt  the time derivative of the state
   @param[out] resid the storage location for the residual function
   @param[in] sMode the solverMode to solve for
+  @return integer indicating success (0) or failure (non-zero)
   */
-  void residualFunction (gridDyn_time ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
+  int residualFunction (gridDyn_time ttime, const double state[],const double dstate_dt[], double resid[], const solverMode &sMode);
 
   /** @brief compute the derivatives for all differential states
   @param[in] ttime  the simulation time of the evaluation
   @param[in] state  the state information to evaluation
   @param[out] dstate_dt  the time derivative of the state
   @param[in] sMode the solverMode to solve for
+  @return integer indicating success (0) or failure (non-zero)
   */
-  void derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode);
+  int derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode);
 
   /** @brief compute an update to all algebraic states
    compute $x=f(\hat{x})$
@@ -347,8 +349,9 @@ public:
   @param[out] update  the updated state information
   @param[in] sMode the solverMode to solve for
   @param[in] alpha a multiplication factor for updates that are expected to be iterative
+  @return integer indicating success (0) or failure (non-zero)
   */
-  void algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha);
+  int algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha);
 
   /** @brief compute the Jacobian of the residuals
     computes $\frac{\partial r}{\partial x}$ for all components of the residual
@@ -360,7 +363,7 @@ public:
   @param[in] sMode the solverMode to solve for
   @return integer indicating success (0) or failure (non-zero)
   */
- void jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
+  int jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode);
 
   /** @brief compute any root values
     computes the roots for any root finding functions used in the system
@@ -369,8 +372,9 @@ public:
   @param[in] dstate_dt  the time derivative of the state
   @param[out] roots the storage location for the roots
   @param[in] sMode the solverMode to solve for
+  @return integer indicating success (0) or failure (non-zero)
   */
-  void rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
+  int rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode);
 
 
   /** @brief solve for the algebraic components of a system for use with the ode solvers
@@ -378,8 +382,9 @@ public:
   @param[in] diffstate  the current derivative information
   @param[in] deriv the current derivative information
   @param[in] sMode the solverMode to solve related to the differential state information
+  @return integer indicating success (0) or failure (non-zero)
   */
-  void dynAlgebraicSolve(gridDyn_time ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
+  int dynAlgebraicSolve(gridDyn_time ttime, const double diffstate[],const double deriv[], const solverMode &sMode);
 
   //solverMode and solverInterface search functions
 

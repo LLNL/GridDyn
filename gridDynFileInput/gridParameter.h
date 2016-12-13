@@ -51,9 +51,9 @@ public:
   void reset ();
   /** @brief load a gridParameter from a string*
   @param[in] str the string to load from
-  @return FUNCTION_EXECUTION_SUCCESS on successful convergence FUNCTION_EXECUTION_FAILURE otherwise
+  @throw invalidParameterValue on failure
   */
-  int fromString (const std::string &str);
+  void fromString (const std::string &str);
 };
 
 #endif

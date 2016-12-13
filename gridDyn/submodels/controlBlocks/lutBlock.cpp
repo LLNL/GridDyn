@@ -16,6 +16,7 @@
 #include "timeSeries.h"
 #include "matrixData.h"
 #include "stringConversion.h"
+#include "gridCoreTemplates.h"
 #include <utility>
 
 lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
@@ -26,21 +27,11 @@ lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
 
 coreObject *lutBlock::clone (coreObject *obj) const
 {
-  lutBlock *nobj;
-  if (obj == nullptr)
+	lutBlock *nobj = cloneBase<lutBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new lutBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<lutBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
   nobj->lut = lut;
   nobj->b = b;
   nobj->m = 0;

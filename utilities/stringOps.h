@@ -203,12 +203,6 @@ int intReadComplete (const std::string &V, int def = 0);
 */
 double  doubleReadComplete (const std::string &V, double def = 0);
 
-/** @brief convert a string to a long long making sure the complete string was converted
-@param[in] V  the string to convert
-@param[in] def  the default value to return if the conversion fails
-@return the numerical result of the conversion or the def value
-*/
-long long  longlongReadComplete(const std::string &V, long long def = 0);
 
 /**@brief enumeration for string close matches
 */

@@ -142,7 +142,7 @@ void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
 
 }
 
-double deadbandBlock::computeValue (double input)
+double deadbandBlock::computeValue (double input) const
 {
   double out = input;
   switch (dbstate)
@@ -191,7 +191,7 @@ double deadbandBlock::computeValue (double input)
   return out;
 }
 
-double deadbandBlock::computeDoutDin (double input)
+double deadbandBlock::computeDoutDin (double input) const
 {
   double out = 0.0;
   switch (dbstate)

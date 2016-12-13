@@ -29,7 +29,6 @@
 #include "workQueue.h"
 #include "core/gridDynExceptions.h"
 
-#include "libraryLoader.h"
 
 #ifdef GRIDDYN_HAVE_FSKIT
 #include "fskit/ptrace.h"
@@ -69,6 +68,7 @@ int griddyn_runner_main (int argc, char *argv[])
   GridDyn->Initialize (argc, argv, scheduler);
 #else
   GridDyn->Initialize (argc, argv);
+  GridDyn->simInitialize();
 #endif
 
   GridDyn->Run ();
@@ -96,7 +96,7 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 #endif
 
   GRIDDYN_TRACER ("GridDyn::GriddynRunner::Initialize");
-  loadLibraries();
+ 
   m_startTime = std::chrono::high_resolution_clock::now ();
 
   m_gds = std::make_shared<gridDynSimulation> ();
@@ -156,12 +156,12 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 
 void GriddynRunner::simInitialize()
 {
-	m_startTime = std::chrono::high_resolution_clock::now();
+  m_startTime = std::chrono::high_resolution_clock::now ();
 	m_gds->dynInitialize();
-	if (!(m_gds->hasDynamics()))
-	{
-		eventMode = true;
-	}
+  if (!(m_gds->hasDynamics ()))
+    {
+      eventMode = true;
+    }
 }
 
 void GriddynRunner::Run (void)
@@ -540,6 +540,7 @@ void loadXMLinfo (po::variables_map &vm_map, readerInfo *ri)
     {
       auto deflist = vm_map["define"].as<stringVec > ();
       for (auto defstr : deflist)
+
         {
           auto N = defstr.find_first_of ('=');
           auto def = trim (defstr.substr (0, N));

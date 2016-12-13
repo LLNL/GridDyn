@@ -237,10 +237,7 @@ void fncs::initialize()
     }
     else if (EndsWith(fncs_config_file, "yaml")) {
         try {
-            ifstream fin(fncs_config_file);
-            YAML::Parser parser(fin);
-            YAML::Node doc;
-            parser.GetNextDocument(doc);
+			YAML::Node doc = YAML::LoadFile(fncs_config_file);
             config = parse_config(doc);
         } catch (YAML::ParserException &) {
             cerr << "could not open " << fncs_config_file << endl;
@@ -1081,10 +1078,8 @@ fncs::Config fncs::parse_config(const string &configuration)
     else {
         /* attempt to load as a YAML document */
         try {
-            istringstream sin(configuration);
-            YAML::Parser parser(sin);
-            YAML::Node doc;
-            parser.GetNextDocument(doc);
+           
+			YAML::Node doc = YAML::Load(configuration);
             config = parse_config(doc);
         } catch (YAML::ParserException &) {
             cerr << "could not load YAML configuration string" << endl;
@@ -1103,45 +1098,45 @@ fncs::Config fncs::parse_config(const YAML::Node &doc)
 
     fncs::Config config;
 
-    if (const YAML::Node *node = doc.FindValue("name")) {
-        if (node->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node node = doc["name"]) {
+        if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'name' must be a Scalar" << endl;
         }
         else {
-            *node >> config.name;
+			config.name = node.as<std::string>();
         }
     }
 
-    if (const YAML::Node *node = doc.FindValue("broker")) {
-        if (node->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node node = doc["broker"]) {
+        if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'broker' must be a Scalar" << endl;
         }
         else {
-            *node >> config.broker;
+			config.broker = node.as<std::string>();
         }
     }
 
-    if (const YAML::Node *node = doc.FindValue("time_delta")) {
-        if (node->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node node = doc["time_delta"]) {
+        if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'time_delta' must be a Scalar" << endl;
         }
         else {
-            *node >> config.time_delta;
+			config.time_delta = node.as<std::string>();
         }
     }
 
-    if (const YAML::Node *node = doc.FindValue("fatal")) {
-        if (node->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node node = doc["fatal"]) {
+        if (node.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'fatal' must be a Scalar" << endl;
         }
         else {
-            *node >> config.fatal;
+			config.fatal = node.as<std::string>();
         }
     }
 
     /* parse subscriptions */
-    if (const YAML::Node *node = doc.FindValue("values")) {
-        config.values = parse_values(*node);
+    if (const YAML::Node node = doc["values"]) {
+        config.values = parse_values(node);
     }
 
     return config;
@@ -1191,39 +1186,39 @@ fncs::Subscription fncs::parse_value(const YAML::Node &node)
 
     fncs::Subscription sub;
 
-    if (const YAML::Node *child = node.FindValue("topic")) {
-        if (child->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node child = node["topic"]) {
+        if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'topic' must be a Scalar" << endl;
         }
         else {
-            *child >> sub.topic;
+			sub.topic = child.as<std::string>();
         }
     }
 
-    if (const YAML::Node *child = node.FindValue("default")) {
-        if (child->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node child = node["default"]) {
+        if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'default' must be a Scalar" << endl;
         }
         else {
-            *child >> sub.def;
+			sub.def = child.as<std::string>();
         }
     }
 
-    if (const YAML::Node *child = node.FindValue("type")) {
-        if (child->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node child = node["type"]) {
+        if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'type' must be a Scalar" << endl;
         }
         else {
-            *child >> sub.type;
+			sub.type = child.as<std::string>();
         }
     }
 
-    if (const YAML::Node *child = node.FindValue("list")) {
-        if (child->Type() != YAML::NodeType::Scalar) {
+    if (const YAML::Node child = node["list"]) {
+        if (child.Type() != YAML::NodeType::Scalar) {
             cerr << "YAML 'list' must be a Scalar" << endl;
         }
         else {
-            *child >> sub.list;
+			sub.list = child.as<std::string>();
         }
     }
 
@@ -1295,23 +1290,25 @@ vector<fncs::Subscription> fncs::parse_values(const YAML::Node &node)
     vector<fncs::Subscription> subs;
 
     if (YAML::NodeType::Sequence == node.Type()) {
-        for (YAML::Iterator it=node.begin(); it!=node.end(); ++it) {
+        for (YAML::const_iterator it=node.begin(); it!=node.end(); ++it) {
             fncs::Subscription sub;
             const YAML::Node &child = *it;
             if (YAML::NodeType::Scalar == child.Type()) {
-                child >> sub.key;
-                child >> sub.topic;
+				sub.key=child.Tag();
+				sub.topic = child.as<std::string>();
             }
             else if (YAML::NodeType::Map == child.Type()) {
-                for (YAML::Iterator it2=child.begin();
+                for (YAML::const_iterator it2=child.begin();
                         it2!=child.end(); ++it2) {
-                    if (YAML::NodeType::Scalar == it2.second().Type()) {
-                        it2.first() >> sub.key;
-                        it2.second() >> sub.topic;
+                    if (YAML::NodeType::Scalar == it2->second.Type()) {
+						sub.key=it2->second.Tag();
+						sub.topic = it2->second.as<std::string>();
+
                     }
-                    else if (YAML::NodeType::Map == it2.second().Type()) {
-                        sub = parse_value(it2.second());
-                        it2.first() >> sub.key;
+                    else if (YAML::NodeType::Map == it2->second.Type()) {
+                        sub = parse_value(it2->second);
+
+						sub.key = it2->first.as<std::string>();
                     }
                 }
             }
@@ -1319,15 +1316,15 @@ vector<fncs::Subscription> fncs::parse_values(const YAML::Node &node)
         }
     }
     else if (YAML::NodeType::Map == node.Type()) {
-        for (YAML::Iterator it=node.begin(); it!=node.end(); ++it) {
+        for (YAML::const_iterator it=node.begin(); it!=node.end(); ++it) {
             fncs::Subscription sub;
-            if (YAML::NodeType::Scalar == it.second().Type()) {
-                it.first() >> sub.key;
-                it.second() >> sub.topic;
+            if (YAML::NodeType::Scalar == it->second.Type()) {
+				sub.key=it->first.Tag();
+				sub.topic=it->second.as<std::string>();
             }
-            if (YAML::NodeType::Map == it.second().Type()) {
-                sub = parse_value(it.second());
-                it.first() >> sub.key;
+            if (YAML::NodeType::Map == it->second.Type()) {
+                sub = parse_value(it->second);
+				sub.key = it->first.Tag();
             }
             subs.push_back(sub);
         }

@@ -547,7 +547,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-void gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha)
+int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha)
 {
   ++evalCount;
   stateData sD(ttime,state);
@@ -559,9 +559,8 @@ void gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double stat
     {
       if (!std::isfinite (state[kk]))
         {
-		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
-          LOG_ERROR (estring);
-		  throw(std::runtime_error(estring));
+          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
+          return FUNCTION_EXECUTION_FAILURE;
         }
     }
 #endif
@@ -574,4 +573,5 @@ void gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double stat
   preEx (sD, sMode);
   algebraicUpdate (sD, update, sMode, alpha);
   delayedAlgebraicUpdate (sD, update, sMode, alpha);
+  return FUNCTION_EXECUTION_SUCCESS;
 }

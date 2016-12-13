@@ -479,34 +479,6 @@ double  doubleReadComplete(const std::string &V, double def)
 	}
 }
 
-long long  longlongReadComplete(const std::string &V, long long def)
-{
-	if ((V.empty()) || (numCheck[V[0]] == 0))
-	{
-		return def;
-	}
-	try
-	{
-		size_t rem;
-		long long res = std::stoll(V, &rem);
-		while (rem < V.length())
-		{
-			if (!(isspace(V[rem])))
-			{
-				res = def;
-				break;
-			}
-			++rem;
-		}
-		return res;
-
-	}
-	catch (std::invalid_argument)
-	{
-		return def;
-	}
-}
-
 void removeQuotes(std::string &str)
 {
 	trimString(str);

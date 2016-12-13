@@ -674,7 +674,7 @@ int gridDynSimulation::step (gridDyn_time nextStep, gridDyn_time &timeActual)
               if (retval != FUNCTION_EXECUTION_SUCCESS)
                 {
                   timeActual = currentTime;
-                  return retval;
+                  return 1;
                 }
             }      //this step does a reset of IDA if necessary
           tStop = std::min (stopTime, EvQ->getNextTime ());             //update the stopping time just in case the events have changed
@@ -1073,7 +1073,7 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
 const static double resid_print_tol = 1e-7;
 #endif
 // IDA nonlinear function evaluation
-void gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double resid[], const solverMode &sMode)
+int gridDynSimulation::residualFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double resid[], const solverMode &sMode)
 {
   ++residCount;
   stateData sD (ttime, state,dstate_dt,residCount);
@@ -1084,11 +1084,9 @@ void gridDynSimulation::residualFunction (gridDyn_time ttime, const double state
     {
       if (!std::isfinite (state[kk]))
         {
-		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
-          LOG_ERROR (estring);
-
+          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
 		  printStateNames(this,sMode);
-		  throw(std::runtime_error(estring));
+          return FUNCTION_EXECUTION_FAILURE;
         }
     }
 #endif
@@ -1110,11 +1108,9 @@ void gridDynSimulation::residualFunction (gridDyn_time ttime, const double state
     {
       if (!std::isfinite (resid[kk]))
         {
-		  std::string estring = "resid[" + std::to_string(kk) + "] is not finite";
-		  LOG_ERROR(estring);
-
-		  printStateNames(this, sMode);
-		  throw(std::runtime_error(estring));
+          LOG_ERROR ("resid[" + std::to_string (kk) + "] is not finite");
+          printStateNames (this, sMode);
+          assert (std::isfinite (resid[kk]));
         }
     }
 #endif
@@ -1206,11 +1202,16 @@ void gridDynSimulation::residualFunction (gridDyn_time ttime, const double state
       std::copy (state, state + ss, lstate.data ());
     }
 #endif
-
+  if (opFlags[invalid_state_flag])
+    {
+      opFlags.reset (invalid_state_flag);
+      return 1;
+    }
+  return 0;
 }
 
 
-void gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode)
+int gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double state[], double dstate_dt[], const solverMode &sMode)
 {
   ++residCount;
   stateData sD (ttime,state,dstate_dt,residCount);
@@ -1221,9 +1222,8 @@ void gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double sta
     {
       if (!std::isfinite (state[kk]))
         {
-		  std::string estring = "state[" + std::to_string(kk) + "] is not finite";
-          LOG_ERROR (estring);
-          throw(std::runtime_error(estring));
+          LOG_ERROR ("state[" + std::to_string (kk) + "] is not finite");
+          return FUNCTION_EXECUTION_FAILURE;
         }
     }
 #endif
@@ -1232,10 +1232,11 @@ void gridDynSimulation::derivativeFunction (gridDyn_time ttime, const double sta
   preEx (sD, sMode);
   derivative (sD, dstate_dt, sMode);
   delayedDerivative (sD, dstate_dt, sMode);
+  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 // Jacobian computation
-void gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode)
+int gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], matrixData<double> &ad, double cj, const solverMode &sMode)
 {
   ++JacobianCount;
   //assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption will be generally valid)
@@ -1248,26 +1249,27 @@ void gridDynSimulation::jacobianFunction (gridDyn_time ttime, const double state
   jacobianElements (sD, ad, sMode);
   delayedJacobian (sD, ad, sMode);
 
-
+  return FUNCTION_EXECUTION_SUCCESS;
 }
 
 
-void gridDynSimulation::rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode)
+int gridDynSimulation::rootFindingFunction (gridDyn_time ttime, const double state[], const double dstate_dt[], double roots[], const solverMode &sMode)
 {
   stateData sD (ttime,state,dstate_dt,residCount);
   fillExtraStateData (sD, sMode);
   rootTest (sD, roots, sMode);
+  return FUNCTION_EXECUTION_SUCCESS;
 
 }
 
 
-void gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffState[],const double deriv[], const solverMode &sMode)
+int gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffState[],const double deriv[], const solverMode &sMode)
 {
 	extraStateInformation[sMode.offsetIndex] = diffState;
 	extraDerivInformation[sMode.offsetIndex] = deriv;
 	
 	auto sd = getSolverInterface(sMode.pairedOffsetIndex);
-	int ret=0;
+	int ret = FUNCTION_EXECUTION_FAILURE;
 	if (sd)
 	{
 		gridDyn_time tret;
@@ -1285,9 +1287,6 @@ void gridDynSimulation::dynAlgebraicSolve(gridDyn_time ttime, const double diffS
 	}
 	extraStateInformation[sMode.offsetIndex] = nullptr;
 	extraDerivInformation[sMode.offsetIndex] = nullptr;
-	if (ret < 0)
-	{
-		throw(std::runtime_error(sd->getLastErrorString()));
-	}
+	return ret;
 	
 }

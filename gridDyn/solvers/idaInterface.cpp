@@ -581,15 +581,8 @@ int idaFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, N_Vector resid,
 {
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
   //printf("time=%f\n", ttime);
-  try
-  {
-	  sd->m_gds->residualFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), NVECTOR_DATA(sd->use_omp, resid), sd->mode);
-  }
-  catch (std::runtime_error &)
-  {
-	  return FUNCTION_EXECUTION_FAILURE;
-  }
-	if (sd->useMask)
+  int ret = sd->m_gds->residualFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), NVECTOR_DATA (sd->use_omp, resid), sd->mode);
+  if (sd->useMask)
     {
       double *lstate = NVECTOR_DATA (sd->use_omp, state);
       double *lresid = NVECTOR_DATA (sd->use_omp, resid);
@@ -608,7 +601,7 @@ int idaFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, N_Vector resid,
 		}
 }
 
-  return FUNCTION_EXECUTION_SUCCESS;
+  return ret;
 }
 
 int idaRootFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data)
@@ -668,19 +661,43 @@ int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_d
   matrixDataSparse<double> &a1 = sd->a1;
 
   sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
-  
-  sd->jacCallCount++;
-  matrixDataToSlsMat(a1, J, sd->svsize);
-  sd->nnz = a1.size();
+  a1.sortIndexCol ();
+  if (sd->useMask)
+    {
+      for (auto &v : sd->maskElements)
+        {
+          a1.translateRow (v,kNullLocation);
+          a1.assign (v, v,1);
+        }
+      a1.filter ();
+      a1.sortIndexCol ();
+    }
+  a1.compact ();
 
-  
-  if (sd->fileCapture)
+  SlsSetToZero (J);
+
+  count_t colval = 0;
+  J->colptrs[0] = colval;
+  for (index_t kk = 0; kk < a1.size (); ++kk)
+    {
+      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
+      if (a1.colIndex (kk) > colval)
+        {
+          colval++;
+          J->colptrs[colval] = static_cast<int> (kk);
+        }
+      J->data[kk] = a1.val (kk);
+      J->rowvals[kk] = a1.rowIndex (kk);
+    }
+  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
+
+if (sd->fileCapture)
   {
 	  if (!sd->jacFile.empty())
 	  {
 		  long int val = 0;
 		  IDAGetNumNonlinSolvIters(sd->solverMem, &val);
-		  writeArray(sd->solveTime, JACOBIAN_DATA, val, sd->mode.offsetIndex, a1, sd->jacFile);
+		  writeArray(sd->solveTime, 1, val, sd->mode.offsetIndex, a1, sd->jacFile);
 	  }
   }
 #if (CHECK_JACOBIAN > 0)

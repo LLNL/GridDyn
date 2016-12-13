@@ -729,7 +729,7 @@ index_t basicBlock::findIndex (const std::string &field, const solverMode &sMode
     {
       ret = offsets.getAlgOffset (sMode);
     }
-  if (field == "block_limit")
+  else if (field == "block_limit")
     {
       if (opFlags[use_block_limits])
         {
@@ -1046,5 +1046,5 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
 
 stringVec basicBlock::localStateNames () const
 {
-  return stNames;
+	return{ outputName,"test" };
 }
