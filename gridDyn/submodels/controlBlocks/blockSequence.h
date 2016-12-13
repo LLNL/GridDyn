@@ -14,7 +14,7 @@
 #ifndef BLOCK_SEQUENCE_H_
 #define BLOCK_SEQUENCE_H_
 
-#include "subModels/gridControlBlocks.h"
+#include "submodels/gridControlBlocks.h"
 /** @brief class implementing a sequence of blocks as a single block 
 A block is defined as a single input single output submodel.  This object takes any number of blocks in a sequence
 and processes them in the appropriate fashion.  

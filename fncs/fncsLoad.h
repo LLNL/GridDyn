@@ -28,7 +28,7 @@ public:
 protected:
 	std::string voltageKey;			//!< the key to send voltage
 	std::string loadKey; 	//!< time series containing the load information
-	gridUnits::units_t inputUnits = gridUnits::defUnit;
+	gridUnits::units_t inputUnits = gridUnits::MW;
 	double scaleFactor = 1.0;			//!< scaling factor on the load
 private:
 	double prevP = 0;
@@ -49,6 +49,7 @@ public:
 	virtual void setFlag(const std::string &param, bool val = true) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	
+private:
+	void setSubscription();
 };
 #endif

@@ -87,7 +87,7 @@ gridDyn_time fncsLoad::updateB()
 		prevQ = getQ();
 		return nextUpdateTime;
 	}
-	res - res*scaleFactor;
+	res = res*scaleFactor;
 	double newP = unitConversion(res.real(), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
 	double newQ = unitConversion(res.imag(), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
 
@@ -194,15 +194,13 @@ void fncsLoad::set(const std::string &param, const std::string &val)
 	else if (param == "loadkey")
 	{
 		loadKey = val;
-		auto Punit = unitConversion(getP(), gridUnits::puMW, gridUnits::MW, systemBasePower);
-		auto Qunit = unitConversion(getQ(), gridUnits::puMW, gridUnits::MW, systemBasePower);
-		std::string def = std::to_string(Punit) + "+" + std::to_string(Qunit) + "j";
-		fncsRegister::instance()->registerSubscription(loadKey, fncsRegister::dataType::fncsComplex, def);
+		setSubscription();
 
 	}
 	else if (param == "units")
 	{
 		inputUnits = gridUnits::getUnits(val);
+		setSubscription();
 	}
 
 	else
@@ -220,9 +218,22 @@ void fncsLoad::set(const std::string &param, double val, gridUnits::units_t unit
 	if ((param == "scalefactor") || (param == "scaling"))
 	{
 		scaleFactor = val;
+		setSubscription();
 	}
 	else
 	{
 		gridLoad::set(param, val, unitType);
 	}
+}
+
+void fncsLoad::setSubscription()
+{
+	if (!loadKey.empty())
+	{
+		auto Punit = unitConversion(getP(), gridUnits::puMW, inputUnits, systemBasePower);
+		auto Qunit = unitConversion(getQ(), gridUnits::puMW, inputUnits, systemBasePower);
+		std::string def = std::to_string(Punit / scaleFactor) + "+" + std::to_string(Qunit / scaleFactor) + "j";
+		fncsRegister::instance()->registerSubscription(loadKey, fncsRegister::dataType::fncsComplex, def);
+	}
+	
 }

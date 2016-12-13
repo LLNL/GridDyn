@@ -51,7 +51,6 @@ void fncsGhostBus::pFlowObjectInitializeB()
 	gridBus::pFlowInitializeB();
 	updateA(prevTime);
 	updateB();
-	//clear any ramps initially
 
 }
 
@@ -60,7 +59,9 @@ void fncsGhostBus::updateA(gridDyn_time time)
 
 	if (!loadKey.empty())
 	{
-		std::complex<double> ld(S.sumP(), S.sumQ());
+		double Pact = unitConversion(S.sumP(), gridUnits::puMW, outUnits, systemBasePower);
+		double Qact = unitConversion(S.sumQ(), gridUnits::puMW, outUnits, systemBasePower);
+		std::complex<double> ld(Pact, Qact);
 
 		fncsSendComplex(loadKey, ld);
 	}
