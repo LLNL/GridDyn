@@ -24,7 +24,7 @@ workQueue::workQueue(int threadCount):numWorkers(threadCount)
 #else
 	if (numWorkers < 0)
 	{
-		numWorkers = static_cast<int>(std::thread::hardware_concurrency());
+		numWorkers = static_cast<int>(std::thread::hardware_concurrency())+1;
 	}
 	threadpool.resize(numWorkers);
 	for (int kk = 0; kk < numWorkers; ++kk)
@@ -96,7 +96,7 @@ void workQueue::addWorkBlock(std::vector<std::shared_ptr<basicWorkBlock>> &newWo
 {
 	if (numWorkers > 0)
 	{
-		{
+		{ //new scope block for the mutex
 			std::lock_guard<std::mutex> lock(queueLock);
 			switch (priority)
 			{

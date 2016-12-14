@@ -35,7 +35,8 @@ public:
 };
 
 /** implementation of a workBlock class
-The class takes as an input object of some kind function, std::function, lambda that can be executed
+The class takes as an input object of some kind function, std::function, lambda that can be executed, functionoid,
+or something that overrides operator()
 */
 template <typename Func, typename retType>
 class workBlock :public basicWorkBlock

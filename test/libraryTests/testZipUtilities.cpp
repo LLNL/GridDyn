@@ -24,8 +24,8 @@ BOOST_AUTO_TEST_SUITE(zipUtilities_tests)
 
 BOOST_AUTO_TEST_CASE(unzip_test)
 {
-	std::string file = zip_test_directory + "rectifier.fmu";
-	std::string directory = zip_test_directory + "rectifier";
+	std::string file = zip_test_directory + "Rectifier.fmu";
+	std::string directory = zip_test_directory + "Rectifier";
 	int status=unzip(file,directory);
 	BOOST_CHECK(status == 0);
 	BOOST_REQUIRE(boost::filesystem::exists(directory));

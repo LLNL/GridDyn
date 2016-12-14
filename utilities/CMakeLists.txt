@@ -41,6 +41,7 @@ set(utilities_headers
 	matrixDataBoost.h
 	matrixDataSparseSM.h
 	matrixDataTranslate.h
+	matrixDataContainer.h
 	matrixDataScale.h
 	matrixDataOrdered.h
 	functionInterpreter.h

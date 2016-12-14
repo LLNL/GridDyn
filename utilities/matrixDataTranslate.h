@@ -15,7 +15,7 @@
 #ifndef _MATRIX_DATA_TRANSLATE_H_
 #define _MATRIX_DATA_TRANSLATE_H_
 
-#include "matrixData.h"
+#include "matrixDataContainer.h"
 #include <array>
 
 /** @brief class implementation translation for another matrixData object
@@ -25,10 +25,8 @@ though rowIndex, colIndex, and val will still return the original values.  The i
 it is to act as a filter in cases where elements need to be added but the row needs a translation,  using it outside that purpose could lead to issues
 */
 template< int CT, class Y=double>
-class matrixDataTranslate : public matrixData<Y>
+class matrixDataTranslate : public matrixDataContainer<Y>
 {
-public:
-	matrixData<Y> *ad;  //!< the matrix to translate to
 private:
 	std::array<index_t, CT> Trow;         //!< the vector of translations
 public:
@@ -38,11 +36,6 @@ public:
 	{
 		Trow.fill((index_t)(-1));
 		//setRowLimit(CT);
-	};
-
-	void clear() override
-	{
-		ad->clear();
 	};
 
 	void assign(index_t row, index_t col, Y num) override
@@ -55,61 +48,6 @@ public:
 		}
 	};
 
-	count_t size() const override
-	{
-		return ad->size();
-	};
-
-	count_t capacity() const override
-	{
-		return ad->capacity();
-	};
-
-	index_t rowIndex(index_t N) const override
-	{
-		return ad->rowIndex(N);
-	};
-
-	index_t colIndex(index_t N) const override
-	{
-		return ad->colIndex(N);
-	};
-
-	Y val(index_t N) const override
-	{
-		return ad->val(N);
-	};
-
-	void compact() override
-	{
-		ad->compact();
-	}
-
-	virtual matrixIterator<Y> begin() const override
-	{
-		return ad->begin();
-	}
-
-	virtual matrixIterator<Y> end() const override
-	{
-		return ad->end();
-	}
-
-	void start() override
-	{
-		ad->start();
-	}
-
-	matrixElement<Y> next() override
-	{
-		return ad->next();
-	}
-
-	bool moreData() override
-	{
-		return ad->moreData();
-	}
-
 	Y at(index_t rowN, index_t colN) const override
 	{
 		if ((rowN < CT) && (Trow[rowN] < matrixData<Y>::rowLim))
@@ -121,15 +59,6 @@ public:
 			return Y(0);
 		}
 	};
-	/** set the matrixData object to translate to
-	@param[in] newAd  the new matrixData object
-	*/
-	void setArray(matrixData<Y> &newAd)
-	{
-		ad = &newAd;
-		matrixData<Y>::colLim = ad->colLimit();
-		matrixData<Y>::rowLim = ad->rowLimit();
-	}
 	
 	/** set the translation array
 	@param[in] input  the input row to translate

@@ -20,12 +20,13 @@
 
 static char zipname[] = "minizip";
 static char ziparg1[] = "-o";
-static char ziparg2[] = "-1";
+static char ziparg2[] = "-3";
+static char ziparg3[] = "-j";
 
 int zip(const std::string &file, const std::vector<std::string> &filesToZip)
 {
 
-#define NUMBER_FIXED_ARGS 4
+#define NUMBER_FIXED_ARGS 5
 	
 
 	std::vector<char> fileV(file.c_str(), file.c_str() + file.size() + 1u); //1u for /0 at end of string
@@ -42,7 +43,7 @@ int zip(const std::string &file, const std::vector<std::string> &filesToZip)
 
 	-j  exclude path. store only the file name.
 	*/
-	std::vector<char *> argv{ zipname,ziparg1,ziparg2,fileV.data() };
+	std::vector<char *> argv{ zipname,ziparg1,ziparg2,ziparg3, fileV.data() };
 	std::vector<std::vector<char>> filez(filesToZip.size());
 	int argc = NUMBER_FIXED_ARGS + static_cast<int>(filesToZip.size());
 	argv.resize(argc + 1, 0);
