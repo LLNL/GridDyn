@@ -34,6 +34,7 @@ as well as control for the power set point and voltage set point
 class gridDynGenerator : public gridSecondary
 {
 public:
+	/** @brief set of options for default generators*/
   enum class dynModel_t
   {
     invalid,
@@ -67,7 +68,6 @@ public:
     genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4, pset_loc=5, vset_loc=6, isoc_control=7,
   };
   static std::atomic<count_t> genCount;      //!< generator count
-  double baseVoltage = 120;             //!< [V] base voltage
 protected:
   double Qmax = kBigNum;              //!< [pu mbase] max steady state reactive power values for Power flow analysis
   double Qmin = -kBigNum;             //!< [pu mbase] min steady state reactive power values for Power flow analysis

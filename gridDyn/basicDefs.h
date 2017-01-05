@@ -14,12 +14,14 @@
 #ifndef BASICDEFS_H_
 #define BASICDEFS_H_
 
-const double kPI (3.1415926535897931);  //defining a Pi constant
-const double kWS (60.0 * 2.0 * kPI);  //radians per second at 60 Hz
-const double kWS50 (50.0 * 2.0 * kPI); //radians per second at 50 Hz
+constexpr double kPI (3.1415926535897931);  //!<defining a Pi constant
+constexpr double kWS (60.0 * 2.0 * kPI);  //!<[rps]radians per second at 60 Hz
+constexpr double kWS50 (50.0 * 2.0 * kPI); //!<[rps]radians per second at 50 Hz
 
-const double kMin_Res (1e-7);
+constexpr double kMin_Res (1e-7);  //!< defining a minimum value resolution
 
+constexpr double defaultBaseVoltage(230.0);  //!< [kV] The default Base Voltage level
+constexpr double defaultBasePower(100.0);  //!<[MVA] the default base power level
 #define PARAMETER_FOUND (0)
 #define PARAMETER_NOT_FOUND (-1)
 #define INVALID_PARAMETER_VALUE (-2)

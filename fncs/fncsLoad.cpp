@@ -67,7 +67,7 @@ void fncsLoad::updateA(gridDyn_time time)
 	if (!voltageKey.empty())
 	{
 		std::complex<double> Vc = std::polar(V, A);
-		Vc *= baseVoltage;
+		Vc *= baseVoltage*1000.0;
 		fncsSendComplex(voltageKey, Vc);
 	}
 	lastUpdateTime = time;

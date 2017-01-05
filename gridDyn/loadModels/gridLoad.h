@@ -32,7 +32,6 @@ public:
     no_pqvoltage_limit = object_flag3,
   };
   static std::atomic<count_t> loadCount;      //!<counter for automatic load id's
-  double baseVoltage;        //!< base voltage of the load
 private:
 	double P = 0.0;                                     //!< [pu] real component of the load (constant Power)
 	double Q = 0.0;                                     //!< [pu] imaginary component of the load (constant Power)

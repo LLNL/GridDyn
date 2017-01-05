@@ -17,7 +17,7 @@
 
 #include "stringOps.h"
 
-const charMapper<bool> numCheck("numericstart");
+const charMapper<bool> numCheck(std::string("numericstart"));
 
 //templates for single numerical conversion
 template <typename X>

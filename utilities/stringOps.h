@@ -264,7 +264,7 @@ private:
 	std::array<V, 256> key; //!< the character map
 public:
 	/** default constructor*/
-	charMapper(V defVal=V(0))
+	explicit charMapper(V defVal=V(0))
 	{
 		key.fill(defVal);
 	}
@@ -277,7 +277,7 @@ public:
 	 *@param[in] pmap a string containing a description of the map to use*/
 	explicit charMapper(const std::string &pmap)
 	{
-		key.fill(0);
+		key.fill(V(0));
 		if (pmap == "numericstart") //fill with all the values that would not preclude a string from containing a valid number
 		{
 			key['0'] = V(1);

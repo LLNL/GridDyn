@@ -42,7 +42,7 @@ class gridObject : public coreObject
 protected:
 	count_t numParams = 0;       //!< the number of parameters to store in an archive
 	double m_baseFreq = kWS;              //!<[radians per second] the base frequency of the system default to 60Hz
-	double systemBasePower = 100;		//!<[MVA] base power for all PU computations 
+	double systemBasePower = defaultBasePower;		//!<[MVA] base power for all PU computations 
     offsetTable offsets;              //!<a table of offsets for the different solver modes
   std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false
   std::vector<double> m_state;              //!<storage location for internal state
@@ -635,6 +635,8 @@ it is assumed any appropriate data would be cached during this time and not reru
 **/
 class gridSecondary : public gridObject
 {
+protected:
+	double baseVoltage = defaultBaseVoltage;  //!< [kV] the baseVoltage for the secondary object
 public:
   /** @brief default constructor*/
   explicit gridSecondary (const std::string &objName="");

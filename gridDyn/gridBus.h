@@ -90,7 +90,7 @@ protected:
 
   double angle = 0.0;                                   //!< [rad]     voltage angle
   double voltage = 1.0;                                 //!< [puV]    per unit voltage magnitude
-  double baseVoltage = 120;                             //!< [kV]    base voltage level
+  double baseVoltage = defaultBaseVoltage;                             //!< [kV]    base voltage level
   busType type = busType::PQ;                                   //!< [busType] bus type: PV, PQ, or slack/swing
   dynBusType dynType = dynBusType::normal;                     //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types as for power flow but for dynamic simulations
 

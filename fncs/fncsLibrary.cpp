@@ -21,6 +21,7 @@
 #include "fncs.hpp"
 #include <regex>
 #include <sstream>
+#include <iomanip>
 #include "stringConversion.h"
 
 static childClassFactory<fncsCollector, collector> fncsFac(std::vector<std::string> {"fncs"});
@@ -40,10 +41,14 @@ void loadFNCSLibrary()
 
 void fncsSendComplex(const std::string &key, double real, double imag)
 {
-	std::complex<double> cv(real, imag);
+	//std::complex<double> cv(real, imag);
 	std::stringstream ss;
 	ss << real;
-	if (imag > 0)
+
+	std::showpos(ss);
+	ss << imag;
+	/*
+	if (imag >= 0)
 	{
 		ss << '+' << imag;
 	}
@@ -51,6 +56,7 @@ void fncsSendComplex(const std::string &key, double real, double imag)
 	{
 		ss << imag;
 	}
+	*/
 	ss << 'j';
 	fncs::publish(key, ss.str());
 }
