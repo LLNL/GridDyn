@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,8 +16,8 @@
 #include "gridArea.h"
 #include "submodels/otherBlocks.h"
 #include "scheduler.h"
-#include "objectFactoryTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
 /*
 class AGControl
 {
@@ -52,9 +52,9 @@ public:
         ~AGControl();
 
 
-        double initialize(gridDyn_time time0,double freq0,double tiedev0);
+        double initialize(coreTime time0,double freq0,double tiedev0);
 
-        double updateP(gridDyn_time time, double freq, double tiedev);
+        double updateP(coreTime time, double freq, double tiedev);
         double currentValue();
 
         double addGen(scheduler *sched);
@@ -80,7 +80,6 @@ AGControl::AGControl (const std::string &objName) : gridSubModel (objName)
   db = std::make_shared<deadbandBlock> (deadband,"deadband");
   db->setParent (this);
   db->set ("rampband",4);
-  enabled = true;
 }
 
 AGControl::~AGControl ()
@@ -122,38 +121,38 @@ coreObject *AGControl::clone (coreObject *obj) const
 }
 
 
-void AGControl::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void AGControl::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
 
   IOdata iSet (1);
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      ACE = (args[1]) - 10 * beta * args[0];
+      ACE = (inputs[1]) - 10 * beta * inputs[0];
     }
   else
     {
-      ACE = outputSet[0];
+      ACE = desiredOutput[0];
     }
-  filt1->initializeB ({0},{ACE},iSet);
+  filt1->dynInitializeB ({0},{ACE},iSet);
   fACE = ACE;
-  pid->initializeB ({0},{fACE},iSet);
-  //freg=filt2->initializeB(time0,reg);
+  pid->dynInitializeB ({0},{fACE},iSet);
+  //freg=filt2->dynInitializeB(time0,reg);
   //freg=db->updateA(time0,freg);
   inputSet[0] = pid->getOutput ();
 
 }
 
 
-void AGControl::updateA (gridDyn_time /*time*/)
+void AGControl::updateA (coreTime /*time*/)
 {
 
 }
 
-void AGControl::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void AGControl::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
   prevTime = ttime;
 
-  ACE = (args[1]) - 10 * beta * args[0];
+  ACE = (inputs[1]) - 10 * beta * inputs[0];
   fACE=filt1->step(ttime, ACE);
   
   reg+=pid->step(ttime,  fACE - reg );
@@ -199,7 +198,7 @@ void AGControl::add (coreObject *obj)
     }
   else
     {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
     }
 }
 

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,8 +14,8 @@
 
 #include "controlSystem.h"
 #include "submodels/gridControlBlocks.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 controlSystem::controlSystem (const std::string &objName) : gridSubModel (objName)
 {
@@ -46,27 +46,25 @@ void controlSystem::add (coreObject *obj)
     }
   else
     {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
     }
 }
 
 void controlSystem::add (basicBlock *blk)
 {
-  blk->setParent (this);
-  blk->set ("basepower", systemBasePower);
   blocks.push_back (blk);
   blk->locIndex = static_cast<index_t> (blocks.size ()) - 1;
-  subObjectList.push_back (blk);
+  addSubObject(blk);
 }
 
-void controlSystem::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void controlSystem::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   for (auto &bb : blocks)
     {
-      bb->initializeA (time0, flags);
+      bb->dynInitializeA (time0, flags);
     }
 }
-void controlSystem::objectInitializeB (const IOdata & /*args*/, const IOdata & /*outputSet*/, IOdata & /*inputSet*/)
+void controlSystem::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata & /*inputSet*/)
 {
 
 }
@@ -102,36 +100,36 @@ index_t controlSystem::findIndex (const std::string & /*field*/, const solverMod
   return kInvalidLocation;
 }
 
-void controlSystem::residual (const IOdata & /*args*/, const stateData &, double /*resid*/[], const solverMode &)
+void controlSystem::residual (const IOdata & /*inputs*/, const stateData &, double /*resid*/[], const solverMode &)
 {
 
 }
 
-void controlSystem::jacobianElements (const IOdata & /*args*/, const stateData &,
+void controlSystem::jacobianElements (const IOdata & /*inputs*/, const stateData &,
                                       matrixData<double> &,
-                                      const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+                                      const IOlocs & /*inputLocs*/, const solverMode & /*sMode*/)
 {
 
 }
 
-void controlSystem::timestep (gridDyn_time /*ttime*/, const IOdata & /*args*/, const solverMode & /*sMode*/)
+void controlSystem::timestep (coreTime /*ttime*/, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
 {
   
 }
 
-void controlSystem::rootTest (const IOdata & /*args*/, const stateData &, double /*roots*/[], const solverMode & /*sMode*/)
+void controlSystem::rootTest (const IOdata & /*inputs*/, const stateData &, double /*roots*/[], const solverMode & /*sMode*/)
 {
 
 }
 
-void controlSystem::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
+void controlSystem::rootTrigger (coreTime /*ttime*/, const IOdata & /*inputs*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
 {
 
 }
 
-change_code controlSystem::rootCheck (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/, check_level_t /*level*/)
+change_code controlSystem::rootCheck (const IOdata & /*inputs*/, const stateData &, const solverMode & /*sMode*/, check_level_t /*level*/)
 {
   return change_code::no_change;
 }
-//virtual void setTime(gridDyn_time time){prevTime=time;};
+//virtual void setTime(coreTime time){prevTime=time;};
 

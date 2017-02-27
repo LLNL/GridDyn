@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -28,11 +28,11 @@ along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 
 
 #include <boost/dll/alias.hpp> // for BOOST_DLL_ALIAS   
-#include "../plugins/gridDynPluginApi.h"
+#include "plugins/gridDynPluginApi.h"
 
 #include "fmi_importGD.h"
 
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "fmi_models/fmiLoad.h"
 #include <memory>
 
@@ -69,7 +69,7 @@ namespace fmi_plugin_namespace
 		}
 
 		void load() override {
-			auto b = std::make_shared<childTypeFactory<fmiLoad, gridLoad>>("load", stringVec{ "fmiload", "fmi" });
+			auto b = std::make_shared<childTypeFactory<fmiLoad, zipLoad>>("load", stringVec{ "fmiload", "fmi" });
 			fmiFactories.push_back(b);
 
 		}

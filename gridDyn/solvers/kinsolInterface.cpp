@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,7 +17,7 @@
 #include "simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 //#include "matrixDataBoost.h"
-#include "matrixDataSparseSM.h"
+#include "matrixCreation.h"
 #include "core/helperTemplates.h"
 #include <kinsol/kinsol.h>
 #include <kinsol/kinsol_dense.h>
@@ -62,7 +62,7 @@ kinsolInterface::kinsolInterface (gridDynSimulation *gds, const solverMode& sMod
 kinsolInterface::~kinsolInterface ()
 {
   // clear the memory,  the sundialsInterface destructor will clear the rest
-  if (initialized)
+  if (flags[initialized_flag])
     {
       if (m_kinsolInfoFile)
         {
@@ -107,7 +107,7 @@ void kinsolInterface::allocate (count_t stateCount, count_t /*numroots*/)
 // output solver stats
 void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
-  if (!initialized)
+  if (!flags[initialized_flag])
     {
       return;
     }
@@ -118,7 +118,7 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
   flag = KINGetNumFuncEvals (solverMem, &nfe);
   check_flag (&flag, "KINGetNumFuncEvals", 1);
 
-  if (dense)
+  if (flags[dense_flag])
     {
       flag = KINDlsGetNumJacEvals (solverMem, &nje);
       check_flag (&flag, "KINDlsGetNumJacEvals", 1);
@@ -185,21 +185,28 @@ static const std::map<int, std::string> kinRetCodes {
 };
 /* *INDENT-ON* */
 
-void kinsolInterface::initialize (gridDyn_time /*t0*/)
+void kinsolInterface::initialize (coreTime /*t0*/)
 {
-  if (!allocated)
+  if (!flags[allocated_flag])
     {
 	  throw(InvalidSolverOperation());
     }
 
   if (!(solverLogFile.empty ()))
     {
-      m_kinsolInfoFile = fopen (solverLogFile.c_str (), "w");
+	  if (!m_kinsolInfoFile)
+	  {
+		  m_kinsolInfoFile = fopen(solverLogFile.c_str(), "w");
+	  }
+      
     }
   else
-    {
-      solverLogFile = "kinsol.out";
-      m_kinsolInfoFile = fopen ("kinsol.out", "w");
+  {
+	  if (!m_kinsolInfoFile)
+	  {
+		  solverLogFile = "kinsol.out";
+			m_kinsolInfoFile = fopen("kinsol.out", "w");
+		}
     }
 
 
@@ -231,7 +238,7 @@ void kinsolInterface::initialize (gridDyn_time /*t0*/)
 
 #ifdef KLU_ENABLE
   jacCallCount = 0;
-  if (dense)
+  if (flags[dense_flag])
     {
       retval = KINDense (solverMem, svsize);
 	  check_flag(&retval, "KINDense", 1);
@@ -242,7 +249,7 @@ void kinsolInterface::initialize (gridDyn_time /*t0*/)
   else
     {
       auto jsize = m_gds->jacSize (mode);
-      retval = KINKLU (solverMem, static_cast<int> (svsize), static_cast<int> (jsize));
+      retval = KINKLU (solverMem, static_cast<int> (svsize), static_cast<int> (jsize),CSR_MAT);
 	  check_flag(&retval, "KINKLU", 1);
 
       retval = KINSlsSetSparseJacFn (solverMem, kinsolJacSparse);
@@ -272,7 +279,7 @@ void kinsolInterface::initialize (gridDyn_time /*t0*/)
   retval = KINSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, (void *)this);
   check_flag(&retval, "KINSetErrHandlerFn", 1);
   
-  initialized = true;
+  flags.set(initialized_flag);
 
 }
 
@@ -323,7 +330,7 @@ double kinsolInterface::get (const std::string &param) const
   long int val = -1;
  if (param == "jac calls")
     {
-      if (dense)
+      if (flags[dense_flag])
         {
           KINDlsGetNumJacEvals (solverMem, &val);
         }
@@ -373,7 +380,7 @@ double kinsolInterface::get (const std::string &param) const
 //#define KIN_LINESEARCH 1
 //#define KIN_PICARD     2
 //#define KIN_FP         3
-int kinsolInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode /*mode*/)
+int kinsolInterface::solve (coreTime tStop, coreTime &tReturn, step_mode /*mode*/)
 {
 	//check if the multiple data sets are in use and if we should toggle the data to use
 	solveTime = tStop;
@@ -459,7 +466,7 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
       long int val = 0;
       KINGetNumNonlinSolvIters (sd->solverMem, &val);
       double *residuals = NVECTOR_DATA (sd->use_omp, resid);
-      printf ("Residual for %s at time =%f iteration %ld\n", sd->name.c_str (), static_cast<double>(sd->solveTime),val);
+      printf ("Residual for %s at time =%f iteration %ld\n", sd->getName().c_str (), static_cast<double>(sd->solveTime),val);
       for (int kk = 0; kk < static_cast<int> (sd->svsize); ++kk)
         {
           printf ("resid[%u]=%f\n", kk, residuals[kk]);
@@ -467,7 +474,7 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
       printf ("---------------------------------\n");
 
     }
-  if (sd->fileCapture)
+  if (sd->flags[fileCapture_flag])
   {
 	  if (!sd->stateFile.empty())
 	  {
@@ -478,13 +485,14 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
   return ret;
 }
 
+//TODO:: move these function to use the sundials functions  
 int kinsolJacDense (long int Neq, N_Vector state, N_Vector /*f*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/)
 {
   kinsolInterface *sd = reinterpret_cast<kinsolInterface *> (user_data);
   assert(Neq == static_cast<int> (sd->svsize));
   _unused(Neq);
 
-  matrixDataSundialsDense a1 (J);
+  sundialsMatrixDataDense a1 (J);
   sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
   sd->jacCallCount++;
   return 0;
@@ -501,32 +509,8 @@ int kinsolJacSparse (N_Vector state, N_Vector /*f*/, SlsMat J, void *user_data, 
 #endif
   if ((sd->jacCallCount == 0)||(!isSlsMatSetup (J)))
     {
-      std::unique_ptr<matrixData<double>> a1;
-      if (sd->svsize < 65535)
-        {
-          //matrixDataSparse *a1 = &(sd->a1);
-          if (sd->svsize < 100)
-            {
-              a1.reset (new matrixDataSparseSMB<0, std::uint32_t> (sd->maxNNZ));
-            }
-          else if (sd->svsize < 1000)
-            {
-              a1.reset (new matrixDataSparseSMB<1, std::uint32_t> (sd->maxNNZ));
-            }
-          else if (sd->svsize < 20000)
-            {
-              a1.reset (new matrixDataSparseSMB<2, std::uint32_t> (sd->maxNNZ));
-            }
-          else
-            {
-              a1.reset (new matrixDataSparseSMB<2, std::uint32_t> (sd->maxNNZ));
-            }
-
-        }
-      else
-        {
-          a1.reset ( new matrixDataSparseSMB<2, std::uint64_t> (sd->maxNNZ));
-        }
+	  auto a1 = makeSparseMatrix(sd->svsize, sd->maxNNZ);
+     
       a1->setRowLimit (sd->svsize);
       a1->setColLimit (sd->svsize);
 
@@ -536,7 +520,7 @@ int kinsolJacSparse (N_Vector state, N_Vector /*f*/, SlsMat J, void *user_data, 
       sd->jacCallCount++;
       matrixDataToSlsMat (*(a1.get ()), J,sd->svsize);
       sd->nnz = a1->size ();
-	  if (sd->fileCapture)
+	  if (sd->flags[fileCapture_flag])
 	  {
 		  if (!sd->jacFile.empty())
 		  {
@@ -549,10 +533,10 @@ int kinsolJacSparse (N_Vector state, N_Vector /*f*/, SlsMat J, void *user_data, 
   else
     {
       //if it isn't the first we can use the SUNDIALS arraySparse object
-      matrixDataSundialsSparse a1 (J);
+      sundialsMatrixDataSparseRow a1 (J);
       sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
       sd->jacCallCount++;
-	  if (sd->fileCapture)
+	  if (sd->flags[fileCapture_flag])
 	  {
 		  if (!sd->jacFile.empty())
 		  {

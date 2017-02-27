@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,9 +12,9 @@
 */
 
 #include "linkModels/longLine.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "primary/acBus.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 
@@ -31,7 +31,7 @@ coreObject * longLine::clone (coreObject *obj) const
       return obj;
     }
   line->segmentationLength = segmentationLength;
-  if (opFlags.test (pFlow_initialized))
+  if (opFlags[pFlow_initialized])
     {
       subsystem::clone (line);
     }
@@ -40,7 +40,7 @@ coreObject * longLine::clone (coreObject *obj) const
 // add components
 void longLine::add (coreObject * /*obj*/)
 {
-	return throw(invalidObjectException(this));
+	return throw(unrecognizedObjectException(this));
 }
 // remove components
 void longLine::remove (coreObject * /*obj*/)
@@ -48,7 +48,7 @@ void longLine::remove (coreObject * /*obj*/)
 
 }
 
-void longLine::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void longLine::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   generateIntermediateLinks ();
   return subsystem::pFlowObjectInitializeA (time0, flags);
@@ -171,7 +171,7 @@ void longLine::generateIntermediateLinks ()
 
   int clinks = getInt ("linkCount");
   gridLink *link;
-  gridBus *bus;
+  
   if (clinks == 0)
     {
       link = new acLine (sr, sx);
@@ -200,7 +200,8 @@ void longLine::generateIntermediateLinks ()
     }
   for (int pp = clinks; pp < numLinks; ++pp)
     {
-      bus = new acBus ("ibus" + std::to_string (pp));
+      gridBus *bus = new acBus ("ibus" + std::to_string (pp));
+	  
       subsystem::add (bus);
 
       link = new acLine (sr, sx);

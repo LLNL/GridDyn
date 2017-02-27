@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "submodels/otherBlocks.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 pidBlock::pidBlock (const std::string &objName) : basicBlock (objName)
 {
@@ -45,14 +45,15 @@ coreObject *pidBlock::clone (coreObject *obj) const
   nobj->m_T1 = m_T1;
   nobj->iv = iv;
   nobj->no_D = no_D;
+  nobj->m_Td = m_Td;
   return nobj;
 }
 
-void pidBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void pidBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  basicBlock::objectInitializeA (time0, flags);
-  offsets.local->local.diffSize += 2;
-  offsets.local->local.jacSize += 8;
+  basicBlock::dynObjectInitializeA (time0, flags);
+  offsets.local().local.diffSize += 2;
+  offsets.local().local.jacSize += 8;
 }
 
 // initial conditions
@@ -64,11 +65,11 @@ void pidBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 [limiter_diff+1] is the derivative filter
 [limiter_diff+2] is the integral calculation
 */
-void pidBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void pidBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-  double in = (args.empty ()) ? 0 : args[0] + bias;
-  basicBlock::objectInitializeB (args, outputSet, fieldSet);
-  if (outputSet.empty ())
+  double in = (inputs.empty ()) ? 0 : inputs[0] + bias;
+  basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
+  if (desiredOutput.empty ())
     {
       m_state[limiter_diff + 2] = iv;
       m_dstate_dt[limiter_diff + 2] = in * m_I; //integral
@@ -83,7 +84,7 @@ void pidBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, I
 
       m_dstate_dt[limiter_diff + 2] = m_I * in; //rate of change of integral value
       m_state[limiter_diff + 1] = in;     //derivative uses a filter function
-      m_state[limiter_diff] = outputSet[0];
+      m_state[limiter_diff] = desiredOutput[0];
       //m_state[1] should be 0
       if (m_I != 0)
         {
@@ -93,7 +94,7 @@ void pidBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, I
         {
           m_state[limiter_diff + 2] = 0;
           bias += m_state[limiter_diff] / K / m_P - in;
-          in = args[0] + bias;
+          in = inputs[0] + bias;
           m_dstate_dt[limiter_diff + 2] = m_I * in; //integral
           m_state[limiter_diff + 2] = in; //derivative uses a filter function
         }
@@ -153,7 +154,7 @@ void pidBlock::jacElements (double input, double didt, const stateData &sD, matr
     }
 }
 
-double pidBlock::step (gridDyn_time ttime, double inputA)
+double pidBlock::step (coreTime ttime, double inputA)
 {
   double dt = ttime - prevTime;
   double input = inputA + bias;
@@ -268,19 +269,10 @@ void pidBlock::set (const std::string &param, double val, gridUnits::units_t uni
 
 stringVec pidBlock::localStateNames () const
 {
-  stringVec out (stateSize (cLocalSolverMode));
-  int loc = 0;
-  if (opFlags[use_block_limits])
-    {
-      out[loc++] = "limiter_out";
-    }
-  if (opFlags[use_ramp_limits])
-    {
-      out[loc++] = "ramp_limiter_out";
-    }
-  out[loc++] = "output";
-  out[loc++] = "deriv_delay";
-  out[loc] = "integral";
+  stringVec out=basicBlock::localStateNames();
+  
+  out.push_back("deriv_delay");
+  out.push_back("integral");
   return out;
 
 }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "fncsLoad.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
 #include "fncsLibrary.h"
@@ -41,7 +41,7 @@ coreObject *fncsLoad::clone(coreObject *obj) const
 }
 
 
-void fncsLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void fncsLoad::pFlowObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	gridRampLoad::pFlowObjectInitializeA(time0, flags);
 
@@ -59,7 +59,7 @@ void fncsLoad::pFlowObjectInitializeB()
 	dQdt = 0.0;
 }
 
-void fncsLoad::updateA(gridDyn_time time)
+void fncsLoad::updateA(coreTime time)
 {
 	double V = bus->getVoltage();
 	double A = bus->getAngle();
@@ -67,13 +67,13 @@ void fncsLoad::updateA(gridDyn_time time)
 	if (!voltageKey.empty())
 	{
 		std::complex<double> Vc = std::polar(V, A);
-		Vc *= baseVoltage*1000.0;
+		Vc *= baseVoltage;
 		fncsSendComplex(voltageKey, Vc);
 	}
 	lastUpdateTime = time;
 }
 	
-gridDyn_time fncsLoad::updateB()
+coreTime fncsLoad::updateB()
 {
 	nextUpdateTime += updatePeriod;
 
@@ -131,7 +131,7 @@ gridDyn_time fncsLoad::updateB()
 	return nextUpdateTime;
 }
 
-void fncsLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void fncsLoad::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 	while (ttime > nextUpdateTime)
 	{
@@ -139,7 +139,7 @@ void fncsLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode
 		updateB();
 	}
 
-	gridRampLoad::timestep(ttime, args, sMode);
+	gridRampLoad::timestep(ttime, inputs, sMode);
 }
 
 
@@ -205,8 +205,8 @@ void fncsLoad::set(const std::string &param, const std::string &val)
 
 	else
 	{
-		//no reason to set the ramps in fncs load so go to gridLoad instead
-		gridLoad::set(param, val);
+		//no reason to set the ramps in fncs load so go to zipLoad instead
+		zipLoad::set(param, val);
 	}
 
 }
@@ -222,7 +222,7 @@ void fncsLoad::set(const std::string &param, double val, gridUnits::units_t unit
 	}
 	else
 	{
-		gridLoad::set(param, val, unitType);
+		zipLoad::set(param, val, unitType);
 	}
 }
 

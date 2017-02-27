@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,15 +12,14 @@
 */
 
 #include "submodels/gridControlBlocks.h"
-#include "objectFactory.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectFactory.h"
+#include "core/coreExceptions.h"
 #include "matrixData.h"
+#include "core/coreObjectTemplates.h"
 
 #include <cmath>
 
-static const stringVec stNames {
-  "output", "deriv","delayI"
-};
+
 
 derivativeBlock::derivativeBlock (const std::string &objName) : basicBlock (objName)
 {
@@ -34,50 +33,40 @@ derivativeBlock::derivativeBlock (double t1, const std::string &objName) : basic
 
 coreObject *derivativeBlock::clone (coreObject *obj) const
 {
-  derivativeBlock *nobj;
-  if (obj == nullptr)
+	derivativeBlock *nobj = cloneBase<derivativeBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new derivativeBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<derivativeBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
   nobj->m_T1 = m_T1;
 
   return nobj;
 }
 
-void derivativeBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void derivativeBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  basicBlock::objectInitializeA (time0, flags);
-  offsets.local->local.diffSize++;
-  offsets.local->local.jacSize += 2;
+  basicBlock::dynObjectInitializeA (time0, flags);
+  offsets.local().local.diffSize++;
+  offsets.local().local.jacSize += 2;
 
 }
 
-void derivativeBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void derivativeBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
   index_t loc = limiter_alg;        //can't have a ramp limiter
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      m_state[loc + 1] = K * (args[0] + bias);
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      m_state[loc + 1] = K * (inputs[0] + bias);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
       m_state[loc] = 0;
     }
   else
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
-      m_dstate_dt[loc + 1] = outputSet[0];
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
+      m_dstate_dt[loc + 1] = desiredOutput[0];
       if (std::abs (m_dstate_dt[loc + 1]) < 1e-7)
         {
-          m_state[loc + 1] = K * (args[0] + bias);
+          m_state[loc + 1] = K * (inputs[0] + bias);
         }
       else
         {
@@ -87,7 +76,7 @@ void derivativeBlock::objectInitializeB (const IOdata &args, const IOdata &outpu
 
 }
 
-double derivativeBlock::step (gridDyn_time ttime, double inputA)
+double derivativeBlock::step (coreTime ttime, double inputA)
 {
 
   index_t loc = limiter_alg;
@@ -187,9 +176,6 @@ void derivativeBlock::set (const std::string &param,  const std::string &val)
 
 void derivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-
-  //param   = gridDynSimulation::toLower(param);
-
   if ((param == "t1") || (param == "t"))
     {
       if (std::abs (val) < kMin_Res)
@@ -208,7 +194,11 @@ void derivativeBlock::set (const std::string &param, double val, gridUnits::unit
 
 }
 
+
 stringVec derivativeBlock::localStateNames () const
 {
-  return stNames;
+	auto bbstates = basicBlock::localStateNames();
+	bbstates.emplace_back("deriv");
+	bbstates.emplace_back("delayI");
+	return bbstates;
 }

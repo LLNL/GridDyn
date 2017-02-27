@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -52,21 +52,31 @@ public:
 	}
 };
 
-typedef std::uint32_t fsize_t;
+class invalidDataSize :public std::exception
+{
+public:
+	virtual const char *what() const noexcept override
+	{
+		return "input data sizes are not valid";
+	}
+};
+using fsize_t= std::uint32_t;
 
 
 //TODO::PT add iterators
-//TODO:: PT make some of the data private
 /** @brief class to hold a single time series*/
 template <typename dataType=double, typename timeType=double>
 class timeSeries
 {
 public:
   std::string description;  //!< time series description
-  std::vector<timeType> time;  //!< storage for time data
-  std::vector<dataType> data;  //!< storage for value data
   std::string field;    //!< the name of the field the data comes from
+private:
+  std::vector<timeType> m_time;  //!< storage for time data
+  std::vector<dataType> m_data;  //!< storage for value data
+  
   fsize_t count = 0;  //!< the current index location
+public:
   /** default constructor*/
   timeSeries()
   {
@@ -81,65 +91,99 @@ public:
   @param[in] point the value
   @return true if the data was successfully added
   */
-  bool addData (timeType t, dataType point)
+  void addData (timeType t, dataType point)
   {
-	  time.push_back(t);
-	  data.push_back(point);
+	  m_time.push_back(t);
+	  m_data.push_back(point);
 	  count = count + 1;
-	  return true;
-
   }
   /** add a vector of data points to the time series
   @param[in] tm the time
   @param[in] val the value
   @return true if the data was successfully added
   */
-  bool addData (const std::vector<timeType> &tm, const std::vector<dataType> &val)
+  void addData (const std::vector<timeType> &tm, const std::vector<dataType> &val)
   {
 	  if (tm.size() == val.size())
 	  {
-		  time.resize(count + tm.size());
-		  data.resize(count + tm.size());
-		  std::copy(tm.begin(), tm.end(), time.begin() + count);
-		  std::copy(val.begin(), val.end(), data.begin() + count);
+		  m_time.resize(count + tm.size());
+		  m_data.resize(count + tm.size());
+		  std::copy(tm.begin(), tm.end(), m_time.begin() + count);
+		  std::copy(val.begin(), val.end(), m_data.begin() + count);
 		  count += static_cast<fsize_t> (tm.size());
 	  }
 	  else if (val.size() == 1)
 	  {
-		  time.resize(count + tm.size());
-		  std::copy(tm.begin(), tm.end(), time.begin() + count);
-		  data.resize(count + tm.size(), val[0]);
+		  m_time.resize(count + tm.size());
+		  std::copy(tm.begin(), tm.end(), m_time.begin() + count);
+		  m_data.resize(count + tm.size(), val[0]);
 		  count += static_cast<fsize_t> (tm.size());
 	  }
 	  else
 	  {
-		  return false;
+		  throw(invalidDataSize());
 	  }
-	  return true;
+
   }
   /** resize the time series
   @param[in] newSize  the new size of the time series*/
   void resize (fsize_t newSize)
   {
-	  time.resize(newSize, timeType(0.0));
-	  data.resize(newSize, dataType(0.0));
+	  m_time.resize(newSize, timeType(0.0));
+	  m_data.resize(newSize, dataType(0.0));
 	  count = newSize;
   }
   /** reserve space in the time series
   @param[in] newCapacity  the required capacity of the time series*/
   void reserve (fsize_t newCapacity)
   {
-	  time.reserve(newCapacity);
-	  data.reserve(newCapacity);
+	  m_time.reserve(newCapacity);
+	  m_data.reserve(newCapacity);
   }
 
+  fsize_t size() const
+  {
+	  return count;
+  }
   /** @brief clear the data from the time series*/
   void clear ()
   {
-	  time.clear();
-	  data.clear();
+	  m_time.clear();
+	  m_data.clear();
+	  count = 0;
   }
 
+  /** @brief get a vector for the time*/
+  const std::vector<timeType> &time() const
+  {
+	  return m_time;
+  }
+  /** @brief get an element of the time*/
+  timeType time(fsize_t index) const
+  {
+	  return m_time[index];
+  }
+
+  timeType lastTime() const
+  {
+	  return m_time[count - 1];
+  }
+  /** @brief get a vector for the data*/
+  const std::vector<dataType> &data() const
+  {
+	  return m_data;
+  }
+
+  /** @brief get an element of the time*/
+ dataType data(fsize_t index) const
+  {
+	  return m_data[index];
+  }
+
+  dataType lastData() const
+  {
+	  return m_data[count - 1];
+  }
   /** @brief load a file into the time series
   automatically detect the file type based on extension
   @param[in] filename  the file to load
@@ -147,7 +191,7 @@ public:
   */
   void loadFile(const std::string &filename, unsigned int column = 0)
   {
-	  std::string ext = filename.substr(filename.length() - 3);
+	  std::string ext = convertToLowerCase(filename.substr(filename.length() - 3));
 	  if ((ext == "csv") || (ext == "txt"))
 	  {
 		  loadTextFile(filename, column);
@@ -205,20 +249,13 @@ public:
 		  fio.read((char *)(&len), 1);
 		  if (cc == column)
 		  {
-			  if ((len > 0) && (len <= 256))
+			  if (len > 0)
 			  {
-
 				  if (cc == column)
 				  {
 					  fio.read(dbuff.data(), len);
 					  field = std::string(dbuff.data(), len);
 				  }
-			  }
-			  else if (len > 256)
-			  {
-				  fio.read(dbuff.data(), 256);
-				  field = std::string(dbuff.data(), 256);
-				  fio.seekg(len - 256, std::ifstream::ios_base::cur);
 			  }
 		  }
 		  else
@@ -240,7 +277,7 @@ public:
 	  {
 		  if (cc == column)
 		  {
-			  fio.read((char *)(data.data()), nc * sizeof(dataType));
+			  fio.read((char *)(m_data.data()), nc * sizeof(dataType));
 		  }
 		  else
 		  {
@@ -263,7 +300,7 @@ public:
 		  {
 			  if (cc == column)
 			  {
-				  fio.read((char *)(data.data() + ocount), nc * sizeof(dataType));
+				  fio.read((char *)(m_data.data() + ocount), nc * sizeof(dataType));
 			  }
 			  else
 			  {
@@ -277,7 +314,7 @@ public:
 	  }
 
 
-	  time = vectorConvert<timeType>(std::move(buf));
+	  m_time = vectorConvert<timeType>(std::move(buf));
 	  fio.close();
 
 
@@ -303,7 +340,7 @@ public:
 	  {
 		  line2 = line;
 	  }
-	  auto cols = splitlineBracket(line2, ",");
+	  auto cols = stringOps::splitlineBracket(line2, ",");
 	  if (cols.size() <= column + 1)
 	  {
 		  fio.close();
@@ -314,7 +351,7 @@ public:
 		  description = line.substr(1);
 	  }
 	  clear();
-	  field = removeChars(cols[column + 1], "\"");
+	  field = stringOps::removeChars(cols[column + 1], "\"");
 
 	  while (std::getline(fio, line))
 	  {
@@ -380,12 +417,12 @@ public:
 	  }
 	  if (count > 0)
 	  {
-		  for (auto &t : time)
+		  for (auto &t : m_time)
 		  {
 			  double tr = static_cast<double>(t);
 			  fio.write((const char *)(&tr), sizeof(double));
 		  }
-		  fio.write((const char *)(data.data()), count * sizeof(dataType));
+		  fio.write((const char *)(m_data.data()), count * sizeof(dataType));
 	  }
 
 	  fio.close();
@@ -406,7 +443,7 @@ public:
 	  }
 	  if (!append)
 	  {
-		  std::string ndes = characterReplace(description, '\n', "\n#");
+		  auto ndes = stringOps::characterReplace(description, '\n', "\n#");
 		  fio << "#" << ndes << "\n\"time\", \"" << field << "\"\n";
 	  }
 	  if (precision < 1)
@@ -415,7 +452,7 @@ public:
 	  }
 	  for (size_t rr = 0; rr < count; rr++)
 	  {
-		  fio << std::setprecision(5) << time[rr] << ',' << std::setprecision(precision) << data[rr] << '\n';
+		  fio << std::setprecision(5) << m_time[rr] << ',' << std::setprecision(precision) << m_data[rr] << '\n';
 	  }
 	  fio.close();
 

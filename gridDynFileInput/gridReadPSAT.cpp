@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,11 +15,11 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "primary/acBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "loadModels/motorLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "recorder_events/gridEvent.h"
+#include "events/gridEvent.h"
 #include "stringOps.h"
 
 #ifdef OPTIMIZATION_ENABLE
@@ -205,7 +205,7 @@ void loadPSATBusArray (coreObject *parentObject, double basepower, const mArray 
                        const mArray &PV, const mArray &PQ, const stringVec &busnames, std::vector<gridBus *> &busList)
 {
   std::vector<double>::size_type kk;
-  gridLoad *ld;
+  zipLoad *ld;
   gridBus *bus;
   gridDynGenerator *gen;
   size_t ind1;
@@ -302,7 +302,7 @@ void loadPSATBusArray (coreObject *parentObject, double basepower, const mArray 
       Q = PQ[kk][4];
       if ((P != 0) || (Q != 0))
         {
-          ld = new gridLoad (P,Q);
+          ld = new zipLoad (P,Q);
           bus->add (ld);
         }
 
@@ -385,7 +385,7 @@ void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const
 //  coreObject *obj;
   gridBus *bus;
   gridDynGenerator *gen;
-  gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->find ("root"));
+  gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot());
   if (!(gdo))
     {
       return;
@@ -484,7 +484,7 @@ void loadPSATLinkArray (coreObject *parentObject, const mArray &lnks, const std:
       temp = lnks[kk][1];
       ind2 = static_cast<size_t> (temp);
       bus2 = busList[ind2 - 1];
-      lnk = new gridLink ();
+      lnk = new acLine ();
 
       lnk->updateBus (bus1, 1);
       lnk->updateBus (bus2, 2);
@@ -560,7 +560,7 @@ void loadPSATLinkArrayB (coreObject *parentObject, const mArray &lnks, const std
       temp = lnks[kk][1];
       ind2 = static_cast<size_t> (temp);
       bus2 = busList[ind2 - 1];
-      lnk = new gridLink ();
+      lnk = new acLine ();
       lnk->updateBus (bus1, 1);
       lnk->updateBus (bus2, 2);
       parentObject->add (lnk);
@@ -619,7 +619,7 @@ void loadPSATShuntArray (coreObject * /*parentObject*/, const mArray &shunts, co
      auto ld = bus1->getLoad ();
       if (ld == nullptr)
         {
-          ld = new gridLoad ();
+          ld = new zipLoad ();
           bus1->add (ld);
         }
 
@@ -866,7 +866,7 @@ void loadPSATSynArray (coreObject * /*parentObject*/, const mArray &syn, const s
         }
       if (gm == nullptr)
         {
-          std::cout << "genModel " << mode << " not implmented yet\n";
+          std::cout << "genModel " << mode << " not implemented yet\n";
           continue;
         }
       gm->set ("rating", genData[1], MW);
@@ -959,7 +959,7 @@ void loadPSATTgArray (coreObject *parentObject, const mArray &tg, const std::vec
 
       if (gm == nullptr)
         {
-          std::cout << "governor " << mode << " not implmented yet\n";
+          std::cout << "governor " << mode << " not implemented yet\n";
           continue;
         }
       gm->set ("r", govData[3]);
@@ -1002,7 +1002,7 @@ void loadPSATExcArray (coreObject *parentObject, const mArray &excData, const st
 
       if (gm == nullptr)
         {
-          std::cout << "exciter " << mode << " not implmented yet\n";
+          std::cout << "exciter " << mode << " not implemented yet\n";
           continue;
         }
       gm->set ("r", eData[3]);
@@ -1021,19 +1021,19 @@ void loadPsatFaultArray (coreObject *parentObject, const mArray &fault, const st
 {
   gridBus *bus;
   std::shared_ptr<gridEvent> evnt1, evnt2;
-  gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->find ("root"));
+  gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot());
   if (gds == nullptr)
     {     //cant make faults if we don't have access to the simulation
       return;
     }
-  gridLoad *ld;
+  zipLoad *ld;
   int ind;
   for (auto &flt : fault)
     {
       ind = static_cast<int> (flt[0]);
       bus = busList[ind - 1];
 
-      ld = new gridLoad ();
+      ld = new zipLoad ();
       bus->add (ld);
 
       if (flt[6] != 0)
@@ -1068,7 +1068,7 @@ void loadPsatBreakerArray (coreObject *parentObject, const mArray &brkr, const s
 {
   double status = 1.0;
   gridLink *lnk;
-  gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->find ("root"));
+  gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot());
   if (gds == nullptr)
     {     //cant make faults if we don't have access to the simulation
       return;

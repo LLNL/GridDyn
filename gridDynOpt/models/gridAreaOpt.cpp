@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -21,7 +21,7 @@
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "linkModels/gridLink.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "gridBus.h"
 #include "stringOps.h"
 
@@ -41,11 +41,11 @@ gridAreaOpt::gridAreaOpt (coreObject *obj, const std::string &objName) : gridOpt
 {
   if (area)
     {
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = area->getName ();
+          setName(area->getName ());
         }
-      id = area->getUserID ();
+      setUserID(area->getUserID ());
     }
 }
 
@@ -54,7 +54,7 @@ gridAreaOpt::~gridAreaOpt ()
 {
   for (auto &obj : objectList)
     {
-      condDelete (obj, this);
+      removeReference (obj, this);
     }
 
 }
@@ -133,7 +133,7 @@ coreObject *gridAreaOpt::clone (coreObject *obj) const
 
 
 
-void gridAreaOpt::objectInitializeA (unsigned long flags)
+void gridAreaOpt::dynObjectInitializeA (unsigned long flags)
 {
   //first do a check to make sure all gridDyn areas are represented by gridDynOpt Area
   gridArea *a;
@@ -231,7 +231,7 @@ void gridAreaOpt::objectInitializeA (unsigned long flags)
 
   for (auto obj : objectList)
     {
-      obj->objectInitializeA (flags);
+      obj->dynInitializeA (flags);
     }
 
 }
@@ -261,7 +261,7 @@ void gridAreaOpt::loadSizes (const optimMode &oMode)
 }
 
 
-void gridAreaOpt::setValues (const optimData *oD, const optimMode &oMode)
+void gridAreaOpt::setValues (const optimData &oD, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -307,7 +307,7 @@ void gridAreaOpt::valueBounds (double ttime, double upperLimit[], double lowerLi
 
 }
 
-void gridAreaOpt::linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode)
+void gridAreaOpt::linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -315,7 +315,7 @@ void gridAreaOpt::linearObj (const optimData *oD, vectData<double> *linObj, cons
     }
 
 }
-void gridAreaOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode)
+void gridAreaOpt::quadraticObj (const optimData &oD, vectData<double> &linObj, vectData<double> &quadObj, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -324,7 +324,7 @@ void gridAreaOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, v
 
 }
 
-double gridAreaOpt::objValue (const optimData *oD, const optimMode &oMode)
+double gridAreaOpt::objValue (const optimData &oD, const optimMode &oMode)
 {
   double cost = 0;
   for (auto obj : objectList)
@@ -335,7 +335,7 @@ double gridAreaOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridAreaOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridAreaOpt::gradient (const optimData &oD, double deriv[], const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -343,7 +343,7 @@ void gridAreaOpt::gradient (const optimData *oD, double deriv[], const optimMode
     }
 
 }
-void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
+void gridAreaOpt::jacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -351,7 +351,7 @@ void gridAreaOpt::jacobianElements (const optimData *oD, matrixData<double> &ad,
     }
 
 }
-void gridAreaOpt::getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
+void gridAreaOpt::getConstraints (const optimData &oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -360,7 +360,7 @@ void gridAreaOpt::getConstraints (const optimData *oD, matrixData<double> &cons,
 
 }
 
-void gridAreaOpt::constraintValue (const optimData *oD, double cVals[], const optimMode &oMode)
+void gridAreaOpt::constraintValue (const optimData &oD, double cVals[], const optimMode &oMode)
 {
 
   for (auto obj : objectList)
@@ -370,7 +370,7 @@ void gridAreaOpt::constraintValue (const optimData *oD, double cVals[], const op
 
 }
 
-void gridAreaOpt::constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
+void gridAreaOpt::constraintJacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto obj : objectList)
     {
@@ -388,7 +388,7 @@ void gridAreaOpt::getObjName (stringVec &objNames, const optimMode &oMode, const
 
 void gridAreaOpt::disable ()
 {
-  enabled = false;
+	gridOptObject::disable();
   for (auto &link : linkList)
     {
       link->disable ();
@@ -466,11 +466,11 @@ void gridAreaOpt::add (coreObject *obj)
   if (dynamic_cast<gridArea *> (obj))
     {
       area = static_cast<gridArea *> (obj);
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = area->getName ();
+          setName(area->getName ());
         }
-      id = area->getUserID ();
+      setUserID(area->getUserID ());
       return;
     }
   gridAreaOpt *sa = dynamic_cast<gridAreaOpt *> (obj);
@@ -495,7 +495,7 @@ void gridAreaOpt::add (coreObject *obj)
     {
       return add (relay);
     }
-  throw(invalidObjectException(this));
+  throw(unrecognizedObjectException(this));
 }
 
 void gridAreaOpt::remove (coreObject *obj)
@@ -522,7 +522,7 @@ void gridAreaOpt::remove (coreObject *obj)
     {
       return remove (relay);
     }
-  throw(invalidObjectException(this));
+  throw(unrecognizedObjectException(this));
 }
 
 //TODO:: make this work like gridArea
@@ -544,7 +544,7 @@ void gridAreaOpt::add (gridAreaOpt *newArea)
   if (!isMember (newArea))
     {
       areaList.push_back (newArea);
-      newArea->parent = this;
+      newArea->setParent(this);
       newArea->locIndex = static_cast<index_t> (areaList.size ()) - 1;
       optObList.insert (newArea);
       objectList.push_back (newArea);
@@ -637,7 +637,7 @@ void gridAreaOpt::remove (gridAreaOpt *rarea)
 {
   if (areaList[rarea->locIndex]->getID () == rarea->getID ())
     {
-      areaList[rarea->locIndex]->parent = nullptr;
+      areaList[rarea->locIndex]->setParent(nullptr);
       areaList.erase (areaList.begin () + rarea->locIndex);
       for (auto kk = rarea->locIndex; kk < areaList.size (); ++kk)
         {
@@ -736,24 +736,9 @@ void gridAreaOpt::setAll (const std::string &type, std::string param, double val
 // set properties
 void gridAreaOpt::set (const std::string &param,  const std::string &val)
 {
-  if (param == "status")
+	if (param[0] == '#')
     {
-      auto v2 = convertToLowerCase (val);
-      if (v2 == "out")
-        {
-          if (enabled)
-            {
-              disable ();
-            }
-
-        }
-      if (v2 == "in")
-        {
-          if (!enabled)
-            {
-              enable ();
-            }
-        }
+      
     }
   else
     {
@@ -768,7 +753,7 @@ void gridAreaOpt::set (const std::string &param, double val, units_t unitType)
     {
 
     }
-  else if ((param == "anareaeetolerance") || (param == "atol"))
+  else if ((param == "angletolerance") || (param == "atol"))
     {
 
     }
@@ -785,20 +770,9 @@ void gridAreaOpt::set (const std::string &param, double val, units_t unitType)
 coreObject *gridAreaOpt::find (const std::string &objname) const
 {
   coreObject *obj = nullptr;
-  if (objname == this->name)
+  if (objname == getName())
     {
       return const_cast<gridAreaOpt *> (this);
-    }
-  if (objname == "root")
-    {
-      if (parent)
-        {
-          return (parent->find (objname));
-        }
-      else
-        {
-          return const_cast<gridAreaOpt *> (this);
-        }
     }
   for (auto ob : busList)
     {
@@ -970,14 +944,14 @@ double gridAreaOpt::get (const std::string &param, gridUnits::units_t unitType) 
 
 gridAreaOpt * getMatchingArea (gridAreaOpt *area, gridOptObject *src, gridOptObject *sec)
 {
-  if (area->getParent () == nullptr)
+  if (area->isRoot())
     {
       return nullptr;
     }
-  gridAreaOpt *A2;
-  if (area->getParent ()->getID () == src->getID ())    //if this is true then things are easy
+
+  if (isSameObject(area->getParent (),src))    //if this is true then things are easy
     {
-      A2 = static_cast<gridAreaOpt *> (sec->getArea (area->locIndex));
+      return static_cast<gridAreaOpt *> (sec->getArea (area->locIndex));
     }
   else
     {
@@ -1003,10 +977,9 @@ gridAreaOpt * getMatchingArea (gridAreaOpt *area, gridOptObject *src, gridOptObj
         {
           par = static_cast<gridOptObject *> (par->getArea (lkind[kk]));
         }
-      A2 = static_cast<gridAreaOpt *> (par->getArea (lkind[0]));
+      return  static_cast<gridAreaOpt *> (par->getArea (lkind[0]));
 
     }
-  return A2;
 }
 
 

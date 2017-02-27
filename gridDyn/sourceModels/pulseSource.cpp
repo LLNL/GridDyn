@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "sourceTypes.h"
 #include "vectorOps.hpp"
 #include "stringOps.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include <cmath>
 
 /*
@@ -47,53 +47,62 @@ coreObject *pulseSource::clone (coreObject *obj) const
   nobj->cycleTime = cycleTime;
   nobj->baseValue = baseValue;
   nobj->shift = shift;
+  nobj->period = period;
   return nobj;
 }
 
-void pulseSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
+
+void pulseSource::dynObjectInitializeA (coreTime time0, unsigned long /*flags*/)
 {
   cycleTime = time0 - shift * period - period;  //subtract a period so it cycles properly the first time
   updateOutput (time0);
-  return gridSource::objectInitializeA (time0,flags);
 }
 
 
-void pulseSource::updateOutput(gridDyn_time ttime)
+void pulseSource::updateOutput(coreTime ttime)
 {
 
-	if (ttime == prevTime)
+	if ((ttime == prevTime)|| (period == maxTime))
 	{
 		return;
 	}
-	gridDyn_time tdiff = ttime - cycleTime;
+
+	coreTime tdiff = ttime - cycleTime;
 	if (tdiff > period)
 	{
-		cycleTime += period * (std::floor(tdiff / period));
-		tdiff = tdiff%period;
+		cycleTime += period;
+		tdiff -= period;
+		if (tdiff > period)
+		{
+			cycleTime += period * (std::floor(tdiff / period));
+			tdiff = tdiff%period;
+		}
 	}
 
 	double pcalc = pulseCalc(static_cast<double>(tdiff));
 
 	m_output = baseValue + pcalc;
+	//printf("at %f setting output to %f\n", static_cast<double>(ttime), m_output);
 	prevTime = ttime;
 }
 
-double pulseSource::computeOutput(gridDyn_time ttime) const
+double pulseSource::computeOutput(coreTime ttime) const
 {
-	if (ttime == prevTime)
+	if ((ttime == prevTime) || (period == maxTime))
 	{
 		return m_output;
 	}
 	auto tdiff = (ttime - cycleTime)%period;
-
+	
 	const double pcalc = pulseCalc(static_cast<double>(tdiff));
-
+	//printf("%d, output =%f at %f, td=%f\n", getUserID(),baseValue + pcalc, static_cast<double>(ttime), static_cast<double>(tdiff));
 	return baseValue + pcalc;
+
 }
 
 
 
-double pulseSource::getDoutdt (const stateData &sD, const solverMode &, index_t /*num*/) const
+double pulseSource::getDoutdt (const IOdata & /*inputs*/, const stateData &sD, const solverMode &, index_t /*num*/) const
 {
   double o1, o2;
   if (!sD.empty())
@@ -103,8 +112,8 @@ double pulseSource::getDoutdt (const stateData &sD, const solverMode &, index_t 
     }
   else
     {
-      o1 = computeOutput(prevTime - 0.0001);
-      o2 = m_output;
+      o1 = computeOutput(lastTime - 0.0001);
+      o2 = m_tempOut;
     }
   return ((o2 - o1) / 0.0001);
 }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -29,13 +29,13 @@ public:
     nonlink_source_flag = object_flag11,
   };
 protected:
-  gridDyn_time minClearingTime = timeZero;   //!<[s] minimum clearing time for from bus breaker
-  gridDyn_time recloseTime1 = 1.0;      //!<[s] first reclose time
-  gridDyn_time recloseTime2 = 5.0;    //!<[s] second reclose time
+  coreTime minClearingTime = timeZero;   //!<[s] minimum clearing time for from bus breaker
+  coreTime recloseTime1 = 1.0;      //!<[s] first reclose time
+  coreTime recloseTime2 = 5.0;    //!<[s] second reclose time
   double recloserTap = 0;       //!< From side tap multiplier
   double limit = 1.0;         //!<[puA] maximum current in puA
-  gridDyn_time lastRecloseTime = negTime;     //!<[s] last reclose time
-  gridDyn_time recloserResetTime = 60.0;    //!<[s] time the breaker has to be on before the recloser count resets
+  coreTime lastRecloseTime = negTime;     //!<[s] last reclose time
+  coreTime recloserResetTime = coreTime(60.0);    //!<[s] time the breaker has to be on before the recloser count resets
   count_t maxRecloseAttempts = 0;        //!< total number of recloses
   index_t m_terminal = 1;       //!< link terminal
   gridBus *bus = nullptr;
@@ -52,28 +52,28 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void updateA (gridDyn_time time) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void updateA (coreTime time) override;
 
   //dynamic state functions
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
 protected:
-  virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggeredTime) override;
+  virtual void conditionTriggered (index_t conditionNum, coreTime triggeredTime) override;
   /** trip the breaker
   @param[in] time current time
   */
-  void tripBreaker (gridDyn_time time);
+  void tripBreaker (coreTime time);
   /** reset the breaker
   @param[in] time current time
   */
-  void resetBreaker (gridDyn_time time);
+  void resetBreaker (coreTime time);
 
 };
 

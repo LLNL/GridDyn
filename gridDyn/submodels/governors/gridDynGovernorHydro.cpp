@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 gridDynGovernorHydro::gridDynGovernorHydro (const std::string &objName) : gridDynGovernorIeeeSimple (objName)
 {
@@ -29,8 +29,8 @@ gridDynGovernorHydro::gridDynGovernorHydro (const std::string &objName) : gridDy
   Pmax  = kBigNum;
   Pmin  = 0;
   Pset    = 0;
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.jacSize = 5;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.jacSize = 5;
 }
 
 coreObject *gridDynGovernorHydro::clone (coreObject *obj) const
@@ -60,10 +60,10 @@ gridDynGovernorHydro::~gridDynGovernorHydro ()
 }
 
 // initial conditions
-void gridDynGovernorHydro::objectInitializeB (const IOdata & /*args*/, const IOdata &outputSet, IOdata & /*fieldSet*/)
+void gridDynGovernorHydro::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata & /*fieldSet*/)
 {
   m_state[1] = 0;
-  m_state[0] = outputSet[0];
+  m_state[0] = desiredOutput[0];
   auto genObj = find ("gen");
   if (genObj)
     {
@@ -74,7 +74,7 @@ void gridDynGovernorHydro::objectInitializeB (const IOdata & /*args*/, const IOd
 
 
 // residual
-void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData &, double resid[],  const solverMode &sMode)
+void gridDynGovernorHydro::residual (const IOdata & /*inputs*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset] = 0;
@@ -82,7 +82,7 @@ void gridDynGovernorHydro::residual (const IOdata & /*args*/, const stateData &,
 }
 
 
-void gridDynGovernorHydro::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorHydro::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {

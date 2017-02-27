@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,8 +14,8 @@
 #include "gridSource.h"
 #include "sourceTypes.h"
 #include "otherSources.h"
-#include "gridCoreTemplates.h"
-#include "objectFactoryTemplates.h"
+#include "core/coreObjectTemplates.h"
+#include "core/objectFactoryTemplates.h"
 
 
 //setup the load object factories
@@ -43,6 +43,7 @@ coreObject *gridSource::clone (coreObject *obj) const
     }
   gS->m_tempOut = m_tempOut;
   gS->lastTime = lastTime;
+  gS->m_purpose = m_purpose;
   return gS;
 }
 
@@ -80,12 +81,15 @@ void gridSource::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
-void gridSource::setState(gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &/*sMode*/)
+void gridSource::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	updateOutput(ttime);
+	gridObject::setState(ttime, state, dstate_dt, sMode);
+	m_tempOut = m_output;
+	lastTime = ttime;
 }
 
-void gridSource::updateOutput(gridDyn_time ttime)
+void gridSource::updateOutput(coreTime ttime)
 {
 	m_tempOut = computeOutput(ttime);
 	m_output = m_tempOut;
@@ -93,7 +97,7 @@ void gridSource::updateOutput(gridDyn_time ttime)
 	lastTime = ttime;
 }
 
-void gridSource::timestep (gridDyn_time ttime, const IOdata & /*args*/, const solverMode &)
+void gridSource::timestep (coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
   if (ttime != prevTime)
     {
@@ -106,13 +110,17 @@ void gridSource::timestep (gridDyn_time ttime, const IOdata & /*args*/, const so
 
 }
 
+count_t gridSource::outputDependencyCount(index_t /*num*/, const solverMode &) const
+{
+	return 0;
+}
 
-IOdata gridSource::getOutputs (const IOdata & /*args*/, const stateData &, const solverMode &) const
+IOdata gridSource::getOutputs (const IOdata & /*inputs*/, const stateData &, const solverMode &) const
 {
   return {m_tempOut};
 }
 
-double gridSource::getOutput (const IOdata & /*args*/, const stateData &, const solverMode &, index_t num) const
+double gridSource::getOutput (const IOdata & /*inputs*/, const stateData &, const solverMode &, index_t num) const
 {
 	return (num == 0) ? m_tempOut : kNullVal;
 }
@@ -127,9 +135,9 @@ index_t gridSource::getOutputLoc (const solverMode & ,index_t /*num*/) const
 	return kNullLocation;
 }
 
-void gridSource::updateLocalCache(const IOdata &/*args*/, const stateData &sD, const solverMode &/*sMode*/)
+void gridSource::updateLocalCache(const IOdata &/*inputs*/, const stateData &sD, const solverMode &/*sMode*/)
 {
-	if (prevTime != sD.time)
+	if ((prevTime != sD.time)&&(sD.time>timeZero))
 	{
 		m_tempOut = computeOutput(sD.time);
 		lastTime = sD.time;
@@ -138,7 +146,7 @@ void gridSource::updateLocalCache(const IOdata &/*args*/, const stateData &sD, c
 }
 
 
-double gridSource::computeOutput(gridDyn_time /*ttime*/) const
+double gridSource::computeOutput(coreTime /*ttime*/) const
 {
 	return m_output;
 }

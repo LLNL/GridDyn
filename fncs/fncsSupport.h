@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,12 +14,14 @@
 #ifndef FNCS_SUPPORT_HEADER_
 #define FNCS_SUPPORT_HEADER_
 
+
 #include "fncs.hpp"
-#include "gridDynTypes.h"
+#include "gridDynDefinitions.h"
+#include "config.h"
 #include <vector>
 #include <memory>
 
-#ifdef FULLCPP14
+#ifdef HAVE_VARIABLE_TEMPLATES
 template<typename T>
 constexpr T fncsTickPerSecond = T(1'000'000.00);
 #else
@@ -27,9 +29,9 @@ const double fncsTickPerSecond_f(1'000'000.00);
 const unsigned long long fncsTickPerSecond_i(1'000'000);
 #endif
 
-fncs::time gd2fncsTime(gridDyn_time evntTime);
+fncs::time gd2fncsTime(coreTime evntTime);
 
-gridDyn_time fncs2gdTime(fncs::time ftime);
+coreTime fncs2gdTime(fncs::time ftime);
 
 class zplInfo
 {

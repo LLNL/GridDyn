@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2015, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,13 +18,11 @@
 #include "fmiSupport.h"
 #include <map>
 
-
-
-class fmi2CoSim;
+class fmi2CoSimObject;
 class outputEstimator;
 
 
-/** class defining a subModel interacting with an FMU v2.0 object*/
+/** class defining a subModel interacting with an FMU v2.0 object using cosimulation*/
 class fmiCoSimSubModel : public gridSubModel
 {
 public:
@@ -32,30 +30,24 @@ public:
 	{
 		use_output_estimator = object_flag2,
 		fixed_output_interval = object_flag3,
-		reprobe_flag = object_flag4,
 		has_derivative_function = object_flag5,
 	};
 protected:
-	count_t m_stateSize = 0;
-	count_t m_jacElements = 0;
-	count_t m_eventCount = 0;
-	std::shared_ptr<fmi2CoSim> cs;
+	std::shared_ptr<fmi2CoSimObject> cs;
 
-  std::vector<outputEstimator *> oEst;  //!<vector of objects used for output estimation
+  std::vector<outputEstimator *> estimators;  //!<vector of objects used for output estimation
   double localIntegrationTime = 0.01;
 private:
 
 	int lastSeqID = 0;
-	std::vector<double> tempState;
-	std::vector<double> tempdState;
   public:
-	  fmiCoSimSubModel(const std::string &newName="fmicosimsubmodel_#", std::shared_ptr<fmi2CoSim> fmi=nullptr);
+	  fmiCoSimSubModel(const std::string &newName="fmicosimsubmodel_#", std::shared_ptr<fmi2CoSimObject> fmi=nullptr);
 
-	  fmiCoSimSubModel(std::shared_ptr<fmi2CoSim> fmi = nullptr);
+	  fmiCoSimSubModel(std::shared_ptr<fmi2CoSimObject> fmi = nullptr);
   virtual ~fmiCoSimSubModel();
   virtual coreObject * clone(coreObject *obj = nullptr) const override;
-  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 
   virtual void getParameterStrings(stringVec &pstr, paramStringType pstype) const override;
   virtual stringVec getOutputNames() const;
@@ -64,35 +56,17 @@ private:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit)  override;
 
   virtual double get(const std::string &param , gridUnits::units_t unitType = gridUnits::defUnit) const  override;
-  virtual index_t findIndex(const std::string &field, const solverMode &sMode) const  override;
-  virtual void loadSizes(const solverMode &sMode, bool dynOnly) override;
-  virtual void residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements(const IOdata &args, const stateData &sD,
-    matrixData<double> &ad,
-    const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-
-  IOdata getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
-  virtual double getDoutdt(const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
-  virtual double getOutput(const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+ 
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  
+  IOdata getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+  virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
   virtual double getOutput(index_t num = 0) const override;
-  virtual index_t getOutputLoc( const solverMode &sMode, index_t num = 0) const override;
 
-
-  virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  //for saving the state
-  virtual void guess(gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-
-  virtual void getTols(double tols[], const solverMode &sMode) override;
-
-  virtual void getStateName(stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
-  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+  virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
   bool isLoaded() const;
   protected:
   void loadFMU();

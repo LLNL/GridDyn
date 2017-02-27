@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,7 +18,7 @@
 #include "stringOps.h"
 #include "core/helperTemplates.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <cvode/cvode.h>
 #include <cvode/cvode_dense.h>
@@ -30,7 +30,6 @@
 #endif
 
 #include <cstdio>
-#include <string>
 #include <cassert>
 #include <map>
 
@@ -60,7 +59,7 @@ cvodeInterface::cvodeInterface (gridDynSimulation *gds, const solverMode& sMode)
 cvodeInterface::~cvodeInterface ()
 {
   // clear variables for CVode to use
-  if (initialized)
+  if (flags[initialized_flag])
     {
       CVodeFree (&solverMem);
     }
@@ -74,8 +73,6 @@ std::shared_ptr<solverInterface> cvodeInterface::clone(std::shared_ptr<solverInt
         return si;
     }
 
-    rp->use_bdf = use_bdf;
-    rp->use_newton = use_newton;
     return rp;
 }
 
@@ -86,7 +83,7 @@ void cvodeInterface::allocate (count_t stateCount, count_t numRoots)
     {
       return;
     }
-  initialized = false;
+  flags.reset(initialized_flag);
   a1.setRowLimit (stateCount);
   a1.setColLimit (stateCount);
 
@@ -118,32 +115,9 @@ void cvodeInterface::setMaxNonZeros (count_t nonZeroCount)
 void cvodeInterface::set (const std::string &param, const std::string &val)
 {
 
-  if (param == "mode")
+	if (param[0] == '#')
     {
-      auto v2 = splitlineTrim (convertToLowerCase (val));
-      for (const auto &str : v2)
-        {
-          if (str == "bdf")
-            {
-              use_bdf = true;
-            }
-          else if (str == "adams")
-            {
-              use_bdf = false;
-            }
-          else if (str == "functional")
-            {
-              use_newton = false;
-            }
-          else if (str == "newton")
-            {
-              use_newton = true;
-            }
-          else
-            {
-			  throw(invalidParameterValue());
-            }
-        }
+      
     }
   else
     {
@@ -187,7 +161,7 @@ void cvodeInterface::set (const std::string &param, double val)
     }
     if (checkStepUpdate)
     {
-        if (initialized)
+        if (flags[initialized_flag])
         {
             CVodeSetMaxStep(solverMem, maxStep);
             CVodeSetMinStep(solverMem, minStep);
@@ -228,7 +202,7 @@ double cvodeInterface::get (const std::string &param) const
 // output solver stats
 void cvodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
-  if (!initialized)
+  if (!flags[initialized_flag])
     {
       return;
     }
@@ -343,16 +317,16 @@ static const std::map<int, std::string> cvodeRetCodes {
 };
 /* *INDENT-ON* */
 
-void cvodeInterface::initialize (gridDyn_time t0)
+void cvodeInterface::initialize (coreTime t0)
 {
-  if (!allocated)
+  if (!flags[allocated_flag])
     {
 	  throw(InvalidSolverOperation());
     }
 
   auto jsize = m_gds->jacSize (mode);
 
-  // initializeB CVode - Sundials
+  // dynInitializeB CVode - Sundials
 
   int retval = CVodeSetUserData (solverMem, (void *)this);
   check_flag(&retval, "CVodeSetUserData", 1);
@@ -379,7 +353,7 @@ void cvodeInterface::initialize (gridDyn_time t0)
   check_flag(&retval, "CVodeSetMaxNumSteps", 1);
 
 #ifdef KLU_ENABLE
-  if (dense)
+  if (flags[dense_flag])
     {
       retval = CVDense (solverMem, svsize);
 	  check_flag(&retval, "CVDense", 1);
@@ -392,7 +366,7 @@ void cvodeInterface::initialize (gridDyn_time t0)
   else
     {
 
-      retval = CVKLU (solverMem, svsize, jsize);
+      retval = CVKLU (solverMem, svsize, jsize,CSR_MAT);
 	  check_flag(&retval, "CVodeKLU", 1);
 
 
@@ -442,7 +416,7 @@ void cvodeInterface::initialize (gridDyn_time t0)
   }
   setConstraints ();
 
-  initialized = true;
+  flags.set(initialized_flag);
 
 
 }
@@ -453,6 +427,7 @@ void cvodeInterface::sparseReInit (sparse_reinit_modes reInitMode)
   int kinmode = (reInitMode == sparse_reinit_modes::refactor) ? 1 : 2;
   int retval = CVKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
   check_flag(&retval, "KINKLUReInit", 1);
+  jacCallCount = 0;
 
 #endif
 }
@@ -482,7 +457,7 @@ void cvodeInterface::getCurrentData ()
   */
 }
 
-int cvodeInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
+int cvodeInterface::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
@@ -544,7 +519,7 @@ int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_da
     }
   int ret = sd->m_gds->derivativeFunction (ttime, NVECTOR_DATA (sd->use_omp,state), NVECTOR_DATA (sd->use_omp, dstate_dt), sd->mode);
 
-  if (sd->fileCapture)
+  if (sd->flags[fileCapture_flag])
   {
       if (!sd->stateFile.empty())
       {
@@ -564,95 +539,19 @@ int cvodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_da
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-#define CHECK_JACOBIAN 0
-int cvodeJacDense (long int /*Neq*/, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
+
+int cvodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-  cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
-
-  matrixDataSparse<double> &a1 = sd->a1;
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt),a1, 0, sd->mode);
-
-  
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v, kNullLocation);
-          a1.assign (v, v, 100);
-        }
-      a1.filter ();
-    }
-
-  //assign the elements
-  for (index_t kk = 0; kk < a1.size (); ++kk)
-    {
-      DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) = DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) + a1.val (kk);
-    }
-
-#if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n", me);
-    }
-#endif
-  return FUNCTION_EXECUTION_SUCCESS;
+	return sundialsJacDense(Neq, ttime, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
 }
 
 //#define CAPTURE_JAC_FILE
 
 #ifdef KLU_ENABLE
-int cvodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector, N_Vector, N_Vector)
+int cvodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-  count_t kk;
-  count_t colval;
-
-  cvodeInterface *sd = reinterpret_cast<cvodeInterface *> (user_data);
-
-  matrixDataSparse<double> &a1 = sd->a1;
-
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), a1,0, sd->mode);
-  a1.sortIndexCol ();
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v, kNullLocation);
-          a1.assign (v, v, 1);
-        }
-      a1.filter ();
-      a1.sortIndexCol ();
-    }
-  a1.compact ();
-
-  SlsSetToZero (J);
-
-  colval = 0;
-  J->colptrs[0] = colval;
-  for (kk = 0; kk < a1.size (); ++kk)
-    {
-      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1.val(kk), a1.rowIndex(kk), a1.colIndex(kk));
-      if (a1.colIndex (kk) > colval)
-        {
-          colval++;
-          J->colptrs[colval] = static_cast<int> (kk);
-        }
-      J->data[kk] = a1.val (kk);
-      J->rowvals[kk] = a1.rowIndex (kk);
-    }
-  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
-
-#ifdef CAPTURE_JAC_FILE
-  a1.saveFile (ttime, "jac_new.dat", true);
-#endif
-#if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n", me);
-    }
-#endif
-  return 0;
+	return sundialsJacSparse(ttime, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
+  
 }
 #endif
 

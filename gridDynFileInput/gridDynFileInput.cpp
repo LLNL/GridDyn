@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,17 +18,17 @@
 #include "readElement.h"
 
 #include "tinyxmlReaderElement.h"
-//#include "tinyxml2ReaderElement.h"
+#include "tinyxml2ReaderElement.h"
 #include "jsonReaderElement.h"
+#include "yamlReaderElement.h"
 #include "readElementFile.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 #include "gridDyn.h"
-#include "gridCore.h"
 
 namespace readerConfig {
 int printMode = READER_DEFAULT_PRINT;
@@ -36,6 +36,9 @@ int warnMode = READER_WARN_ALL;
 int warnCount = 0;
 
 match_type defMatchType = match_type::capital_case_match;
+
+xmlreader default_xml_reader = xmlreader::tinyxml;
+
 void setPrintMode (int val)
 {
   printMode = val;
@@ -116,6 +119,17 @@ void setDefaultMatchType (const std::string &matchType)
     }
 }
 
+void setDefaultXMLReader(const std::string &xmltype)
+{
+	if ((xmltype == "1") || (xmltype == "tinyxml1") || (xmltype == "ticpp"))
+	{
+		default_xml_reader = xmlreader::tinyxml;
+	}
+	else if ((xmltype == "2") || (xmltype == "tinyxml2"))
+	{
+		default_xml_reader = xmlreader::tinyxml2;
+	}
+}
 }
 
 
@@ -165,9 +179,10 @@ int objectParameterSet (const std::string &label,coreObject *obj, gridParameter 
 
 uint32_t addflags (uint32_t iflags, const std::string &flags)
 {
+	using namespace stringOps;
   uint32_t oflags = iflags;
-  auto flagsep = splitlineTrim (flags);
-
+  auto flagsep = splitline (flags);
+  trim(flagsep);
   for (auto &flag:flagsep)
     {
       if (flag == "ignore_step_up_transformers")
@@ -193,23 +208,32 @@ void loadFile (coreObject *parentObject, const std::string &filename, readerInfo
         }
     }
 
-  double delri = false;
-  if (!ri)
-    {
-      ri = new readerInfo ();
-      delri = true;
-    }
+  std::unique_ptr<readerInfo> uri = (ri) ? nullptr : std::make_unique<readerInfo>();
+  if (uri)
+  {
+	  ri = uri.get();
+  }
 
   //get rid of the . on the extension if it has one
 
   if (ext == "xml")
     {
-      loadElementFile<tinyxmlReaderElement> (parentObject, filename, ri);
+	  switch (default_xml_reader)
+	  {
+	  case xmlreader::tinyxml:
+	  default:
+		  loadElementFile<tinyxmlReaderElement>(parentObject, filename, ri);
+		  break;
+	  case xmlreader::tinyxml2:
+		  loadElementFile<tinyxml2ReaderElement>(parentObject, filename, ri);
+		  break;
+	  }
+      
 
     }
   else if (ext == "csv")
     {
-      loadCSV (parentObject, filename, ri);
+      loadCSV (parentObject, filename, *ri);
 
     }
   else if (ext == "raw")
@@ -248,14 +272,17 @@ void loadFile (coreObject *parentObject, const std::string &filename, readerInfo
     {
       loadElementFile<jsonReaderElement> (parentObject, filename, ri);
     }
+#ifdef YAML_FOUND
+  else if ((ext == "yaml") || (ext == "yml"))
+  {
+	  loadElementFile<yamlReaderElement>(parentObject, filename, ri);
+  }
+#endif
   else if (ext=="gdz")  //gridDyn Zipped file
   {
-	  loadGDZ(parentObject, filename, ri);
+	  loadGDZ(parentObject, filename, *ri);
   }
-  if (delri)
-    {
-      delete ri;
-    }
+  
 }
 
 void addToParent (coreObject *objectToAdd, coreObject *parentObject)
@@ -264,7 +291,7 @@ void addToParent (coreObject *objectToAdd, coreObject *parentObject)
 	{
 		parentObject->add(objectToAdd);
 	}
-	catch (const invalidObjectException &)
+	catch (const unrecognizedObjectException &)
 	{
 		WARNPRINT(READER_WARN_IMPORTANT, "Object " << objectToAdd->getName() << " not recognized by " << parentObject->getName());
 	}
@@ -274,7 +301,8 @@ void addToParent (coreObject *objectToAdd, coreObject *parentObject)
 	}
 }
 
-
+//if multiple object with the same name may have been added (parallel transmission lines, generators, etc)
+//sequence through the count to find one that hasn't been used then rename the object and add it.
 void addToParentRename(coreObject *objectToAdd, coreObject *parentObject)
 {
 	std::string bname = objectToAdd->getName();

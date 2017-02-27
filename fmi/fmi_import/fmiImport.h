@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2015, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -97,7 +97,7 @@ public:
 };
 
 /**contains functions that are specific to model exchange*/
-class fmiMEFunctions
+class fmiModelExchangeFunctions
 {
 public:
 	std::function<fmi2EnterEventModeTYPE> fmi2EnterEventMode;
@@ -140,8 +140,8 @@ public:
 };
 
 //forward declarations NOTE:: may move around later
-class fmi2ME;
-class fmi2CoSim;
+class fmi2ModelExchangeObject;
+class fmi2CoSimObject;
 
 
 
@@ -155,15 +155,31 @@ class fmiLibrary
 public:
 	fmiLibrary();
 	~fmiLibrary();
+	/** construct an fmilibrary object from the fmu path
+	@param[in] the path to the fmu 
+	*/
 	fmiLibrary(const std::string &fmupath);
+	/** construct an fmilibrary object from the fmu path
+	@param[in] the path to the fmu
+	@param[in] the extraction path for the fmu
+	*/
 	fmiLibrary(const std::string &fmupath, const std::string &extractLoc);
-	/** */
+	/** check if the xml file for the fmu has been loaded
+	@return true if loaded false if not*/
 	bool isXmlLoaded() const
 	{
 		return xmlLoaded;
 	}
+	/** check if the shared object file for the fmu has been loaded
+	@return true if loaded false if not*/
 	bool isSoLoaded(fmutype_t type = fmutype_t::unknown) const;
+	/** load the FMU from the fmu path
+	@param[in] path the fmu*/
 	void loadFMU(const std::string &fmupath);
+	/** load the FMU from the fmu path
+	@param[in] fmupath the fmu
+	@param[in] extractLoc the path to extract the fmu to
+	*/
 	void loadFMU(const std::string &fmupath, const std::string &extractLoc);
 	std::shared_ptr<fmiInfo> getInfo() const { return information; }
 	void close();
@@ -173,18 +189,19 @@ public:
 
 	bool checkFlag(fmuCapabilityFlags flag) const;
 
-	std::shared_ptr<fmi2ME> createModelExchangeObject(const std::string &name);
-	std::shared_ptr<fmi2CoSim> createCoSimulationObject(const std::string &name);
+	std::unique_ptr<fmi2ModelExchangeObject> createModelExchangeObject(const std::string &name);
+	std::unique_ptr<fmi2CoSimObject> createCoSimulationObject(const std::string &name);
+	std::string getTypes();
+	std::string getVersion();
 private: //private functions
 	void loadInformation();
 	int extract();
 	
 
 	boost::filesystem::path findSoPath(fmutype_t type = fmutype_t::unknown);
-	fmiBaseFunctions fmiBase;
 	void loadBaseFunctions();
 	void loadCommonFunctions();
-	void loadMEFunctions();
+	void loadModelExchangeFunctions();
 	void loadCoSimFunctions();
 
 	void makeCallbackFunctions();
@@ -198,7 +215,7 @@ private: //private Variables
 	bool soCoSimLoaded = false; //!< flag indicating that the shared library has been loaded for CoSimulation;
 	std::string modelName;  //!< the name of the model
 	int mecount=0;				//!< counter for the number of created model exchange objects		
-	int cosimcount=0;			//!< counter for the number of created cosimulation objects
+	int cosimcount=0;			//!< counter for the number of created co-simulation objects
 	std::shared_ptr<fmiInfo> information;		//!< an object containing information derived from the FMU XML file
 	
 
@@ -206,7 +223,7 @@ private: //private Variables
 	std::shared_ptr<fmi2CallbackFunctions_nc> callbacks;
 	fmiBaseFunctions baseFunctions;
 	std::shared_ptr<fmiCommonFunctions> commonFunctions;
-	std::shared_ptr<fmiMEFunctions> MEFunctions;
+	std::shared_ptr<fmiModelExchangeFunctions> ModelExchangeFunctions;
 	std::shared_ptr<fmiCoSimFunctions> CoSimFunctions;
 };
 

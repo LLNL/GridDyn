@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -19,12 +19,12 @@
 #include "gridBusOpt.h"
 #include "gridBus.h"
 #include "generators/gridDynGenerator.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "optObjectFactory.h"
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 #include <utility>
@@ -44,11 +44,11 @@ gridBusOpt::gridBusOpt (coreObject *obj, const std::string &objName) : gridOptOb
 
   if (bus)
     {
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = bus->getName ();
+          setName(bus->getName ());
         }
-      id = bus->getUserID ();
+      setUserID(bus->getUserID ());
     }
 }
 
@@ -92,7 +92,7 @@ coreObject *gridBusOpt::clone (coreObject *obj) const
     {
       if (kk >= nobj->loadList.size ())
         {
-          nobj->add (static_cast<gridLoad *> (loadList[kk]->clone (nullptr)));
+          nobj->add (static_cast<zipLoad *> (loadList[kk]->clone (nullptr)));
         }
       else
         {
@@ -104,16 +104,16 @@ coreObject *gridBusOpt::clone (coreObject *obj) const
 
 
 
-void gridBusOpt::objectInitializeA (unsigned long flags)
+void gridBusOpt::dynObjectInitializeA (unsigned long flags)
 {
 
   for (auto ld : loadList)
     {
-      ld->objectInitializeA (flags);
+      ld->dynObjectInitializeA (flags);
     }
   for (auto gen : genList)
     {
-      gen->objectInitializeA (flags);
+      gen->dynObjectInitializeA (flags);
     }
 }
 
@@ -152,7 +152,7 @@ void gridBusOpt::loadSizes (const optimMode &oMode)
 }
 
 
-void gridBusOpt::setValues (const optimData *oD, const optimMode &oMode)
+void gridBusOpt::setValues (const optimData &oD, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -215,7 +215,7 @@ void gridBusOpt::valueBounds (double ttime, double upperLimit[], double lowerLim
     }
 }
 
-void gridBusOpt::linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode)
+void gridBusOpt::linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -226,7 +226,7 @@ void gridBusOpt::linearObj (const optimData *oD, vectData<double> *linObj, const
       gen->linearObj (oD, linObj, oMode);
     }
 }
-void gridBusOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode)
+void gridBusOpt::quadraticObj (const optimData &oD, vectData<double> &linObj, vectData<double> &quadObj, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -238,7 +238,7 @@ void gridBusOpt::quadraticObj (const optimData *oD, vectData<double> *linObj, ve
     }
 }
 
-double gridBusOpt::objValue (const optimData *oD, const optimMode &oMode)
+double gridBusOpt::objValue (const optimData &oD, const optimMode &oMode)
 {
   double cost = 0;
   for (auto ld : loadList)
@@ -252,7 +252,7 @@ double gridBusOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridBusOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridBusOpt::gradient (const optimData &oD, double deriv[], const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -263,7 +263,7 @@ void gridBusOpt::gradient (const optimData *oD, double deriv[], const optimMode 
       gen->gradient (oD, deriv, oMode);
     }
 }
-void gridBusOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
+void gridBusOpt::jacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -274,7 +274,7 @@ void gridBusOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, 
       gen->jacobianElements (oD, ad, oMode);
     }
 }
-void gridBusOpt::getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
+void gridBusOpt::getConstraints (const optimData &oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -286,7 +286,7 @@ void gridBusOpt::getConstraints (const optimData *oD, matrixData<double> &cons, 
     }
 }
 
-void gridBusOpt::constraintValue (const optimData *oD, double cVals[], const optimMode &oMode)
+void gridBusOpt::constraintValue (const optimData &oD, double cVals[], const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -298,7 +298,7 @@ void gridBusOpt::constraintValue (const optimData *oD, double cVals[], const opt
     }
 }
 
-void gridBusOpt::constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
+void gridBusOpt::constraintJacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode)
 {
   for (auto ld : loadList)
     {
@@ -326,7 +326,7 @@ void gridBusOpt::getObjName (stringVec &objNames, const optimMode &oMode, const 
 
 void gridBusOpt::disable ()
 {
-  enabled = false;
+  gridOptObject::disable();
   for (auto &link : linkList)
     {
       link->disable ();
@@ -380,12 +380,12 @@ gridBusOpt::~gridBusOpt ()
 {
   for (auto &ld : loadList)
     {
-      condDelete (ld, this);
+      removeReference(ld, this);
     }
 
   for (auto &gen : genList)
     {
-      condDelete (gen, this);
+      removeReference (gen, this);
     }
 }
 
@@ -412,15 +412,15 @@ void gridBusOpt::add (coreObject *obj)
   if (dynamic_cast<gridBus *> (obj))
     {
       bus = static_cast<gridBus *> (obj);
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = bus->getName ();
+          setName(bus->getName ());
         }
-      id = bus->getUserID ();
+      setUserID(bus->getUserID ());
     }
   else
   {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
   }
 }
 
@@ -558,28 +558,9 @@ void gridBusOpt::setAll (const std::string &type, std::string param, double val,
 // set properties
 void gridBusOpt::set (const std::string &param,  const std::string &val)
 {
-  if (param == "status")
+	if (param[0] == '#')
     {
-      auto v2 = convertToLowerCase (val);
-      if (v2 == "out")
-        {
-          if (enabled)
-            {
-              disable ();
-            }
-
-        }
-      else if (v2 == "in")
-        {
-          if (!enabled)
-            {
-              enable ();
-            }
-        }
-      else
-        {
-          gridOptObject::set (param, val);
-        }
+      
     }
   else
     {
@@ -612,20 +593,9 @@ void gridBusOpt::set (const std::string &param, double val, units_t unitType)
 coreObject *gridBusOpt::find (const std::string &objname) const
 {
   coreObject *obj = nullptr;
-  if ((objname == this->name) || (objname == "bus"))
+  if ((objname == getName()) || (objname == "bus"))
     {
       return const_cast<gridBusOpt *> (this);
-    }
-  if (objname == "root")
-    {
-      if (parent)
-        {
-          return (parent->find (objname));
-        }
-      else
-        {
-          return const_cast<gridBusOpt *> (this);
-        }
     }
   for (auto ob : genList)
     {
@@ -739,14 +709,13 @@ double gridBusOpt::get (const std::string &param, gridUnits::units_t unitType) c
 
 gridBusOpt * getMatchingBus (gridBusOpt *bus, gridOptObject *src, gridOptObject *sec)
 {
-  gridBusOpt *B2 = nullptr;
-  if (bus->getParent () == nullptr)
+  if (bus->isRoot())
     {
       return nullptr;
     }
-  if (bus->getParent ()->getID () == src->getID ())    //if this is true then things are easy
+  if (isSameObject(bus->getParent (),src))    //if this is true then things are easy
     {
-      B2 = static_cast<gridBusOpt *> (sec->getBus (bus->locIndex));
+      return static_cast<gridBusOpt *> (sec->getBus (bus->locIndex));
     }
   else
     {
@@ -773,8 +742,7 @@ gridBusOpt * getMatchingBus (gridBusOpt *bus, gridOptObject *src, gridOptObject 
         {
           par = par->getArea (lkind[kk]);
         }
-      B2 = static_cast<gridBusOpt *> (par->getBus (lkind[0]));
+      return static_cast<gridBusOpt *> (par->getBus (lkind[0]));
 
     }
-  return B2;
 }

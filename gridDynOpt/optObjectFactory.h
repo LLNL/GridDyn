@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,11 +10,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef GD_OPT_OBJECT_FACTORY_H_
 #define GD_OPT_OBJECT_FACTORY_H_
 
-#include "gridCore.h"
 #include "gridOptObjects.h"
 #include <map>
 #include <vector>
@@ -52,7 +51,7 @@ public:
   }
 };
 
-typedef std::map<std::string, optFactory *> optMap;
+using optMap= std::map<std::string, optFactory *>;
 
 class optComponentFactory
 {
@@ -76,7 +75,7 @@ protected:
 };
 
 //create a high level object factory for the coreObject class
-typedef std::map<std::string, std::shared_ptr<optComponentFactory>> optfMap;
+using optfMap= std::map<std::string, std::shared_ptr<optComponentFactory>>;
 
 class coreOptObjectFactory
 {
@@ -127,7 +126,7 @@ public:
   {
     for (auto &so : objArray)
       {
-        so.setOwner (nullptr,this);
+		so.addOwningReference();
       }
   }
   Ntype * getNext ()
@@ -266,7 +265,7 @@ public:
 
   virtual void prepObjects (count_t count, coreObject *obj) override
   {
-    auto root = obj->find ("root");
+    auto root = obj->getRoot();
     gOOH = new gridOptObjectHolder<Ntype,gdType> (count);
     root->add (gOOH);
     useBlock = true;

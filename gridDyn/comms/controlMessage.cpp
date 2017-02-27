@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -11,10 +11,12 @@
 * LLNS Copyright End
 */
 #include "comms/controlMessage.h"
-#include "gridDynTypes.h"
-#include "stringOps.h"
+#include "gridDynDefinitions.h"
+#include "stringConversion.h"
 
 static dMessageFactory<controlMessage, BASE_CONTROL_MESSAGE_NUMBER, BASE_CONTROL_MESSAGE_NUMBER+16> dmf("control");
+
+using namespace stringOps;
 
 std::string controlMessage::toString(int modifiers) const
 {
@@ -146,7 +148,7 @@ void controlMessage::loadString(const std::string &fromString)
 		}
 		else
 		{
-			m_actionID = std::stoull(idstring);
+			m_actionID = numeric_conversion<unsigned long long>(idstring,0);
 		}
 		auto svec = splitline(vstring, "=@");
 		auto psep = splitline(svec[0], "()");
@@ -155,10 +157,10 @@ void controlMessage::loadString(const std::string &fromString)
 			m_units = psep[1];
 		}
 		m_field = psep[0];
-		m_value = doubleRead(svec[1], kNullVal);
+		m_value = numeric_conversion(svec[1], kNullVal);
 		if (svec.size() > 2)
 		{
-			m_time= doubleRead(svec[2], kNullVal);
+			m_time= numeric_conversion(svec[2], kNullVal);
 		}
 	}
 	else if (lstr == "GET")
@@ -182,7 +184,7 @@ void controlMessage::loadString(const std::string &fromString)
 		
 		if (svec.size() > 1)
 		{
-			m_time = doubleRead(svec[1], kNullVal);
+			m_time = numeric_conversion(svec[1], kNullVal);
 		}
 	}
 	else if (lstr == "GET_PERIODIC")
@@ -206,7 +208,7 @@ void controlMessage::loadString(const std::string &fromString)
 
 		if (svec.size() > 1)
 		{
-			m_time = doubleRead(svec[1], kNullVal);
+			m_time = numeric_conversion(svec[1], kNullVal);
 		}
 	}
 	else if (lstr == "GET_MULTIPLE")
@@ -242,7 +244,7 @@ void controlMessage::loadString(const std::string &fromString)
 			if (fsep.size() == 2)
 			{
 				multiFields.push_back(fsep[0]);
-				multiValues.push_back(doubleRead(fsep[1], kNullVal));
+				multiValues.push_back(numeric_conversion(fsep[1], kNullVal));
 			}
 		}
 	}
@@ -275,10 +277,10 @@ void controlMessage::loadString(const std::string &fromString)
 			m_units = psep[1];
 		}
 		m_field = psep[0];
-		m_value = doubleRead(svec[1], kNullVal);
+		m_value = numeric_conversion(svec[1], kNullVal);
 		if (svec.size() > 2)
 		{
-			m_time = doubleRead(svec[2], kNullVal);
+			m_time = numeric_conversion(svec[2], kNullVal);
 		}
 	}
 	else if (lstr == "SET SCHEDULED")

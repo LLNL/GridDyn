@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -58,10 +58,10 @@ BOOST_AUTO_TEST_CASE(performance_tests1)
 		}
 		for (int kk = 0; kk < 10; ++kk)  //Do this 10 time
 		{
-			gds = new gridDynSimulation();
+			gds = std::make_unique<gridDynSimulation>();
 			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
-			loadFile(gds, fname);
+			loadFile(gds.get(), fname);
 			gds->setFlag("no_powerflow_adjustments");
 			auto stop_t = std::chrono::high_resolution_clock::now();
 			load_time += (stop_t - start_t);
@@ -79,8 +79,6 @@ BOOST_AUTO_TEST_CASE(performance_tests1)
 				break;
 			}
 			BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-			delete gds;
-			gds = nullptr;
 		}
 		printf("%s load in %f powerflow in %f\n", mp.c_str(), load_time.count() / 10.0, pflow_time.count() / 10.0);
 
@@ -113,13 +111,13 @@ BOOST_AUTO_TEST_CASE(performance_tests_scaling_pFlow)
 		int ii = 0;
 		for (auto gsize : elements)
 		{
-			gds = new gridDynSimulation();
+			gds = std::make_unique<gridDynSimulation>();
 
 			readerInfo ri;
 			ri.addLockedDefinition("garraySize", std::to_string(gsize));
 			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
-			loadFile(gds, testFile, &ri);
+			loadFile(gds.get(), testFile, &ri);
 			gds->setFlag("no_powerflow_adjustments");
 			auto stop_t = std::chrono::high_resolution_clock::now();
 			load_time = (stop_t - start_t);
@@ -149,14 +147,10 @@ BOOST_AUTO_TEST_CASE(performance_tests_scaling_pFlow)
 			outfile << ", " << sc->get("jac1time") << ", " << sc->get("kin1time") << "\n";
 			std::vector<double> v;
 			int cnt = gds->getVoltage(v);
-			int locMin;
-			double minV = minLoc(v, locMin);
-			int locMax;
-			double maxV = maxLoc(v, locMax);
-			printf("cnt=%d vmin=%f at %d, vmax=%f at %d \n", cnt, minV, locMin, maxV, locMax);
+			auto minV = minLoc(v);
+			auto maxV = maxLoc(v);
+			printf("cnt=%d vmin=%f at %d, vmax=%f at %d \n", cnt, minV.first, minV.second, maxV.first, maxV.second);
 			//savePowerFlowCSV(gds,"bigCSV.csv");
-			delete gds;
-			gds = nullptr;
 		}
 	}
 }
@@ -175,13 +169,13 @@ BOOST_AUTO_TEST_CASE(dynamic_scalable_test)
 		int gsize = 50;
 	//	int ii = 0;
 		
-			gds = new gridDynSimulation();
+			gds = std::make_unique<gridDynSimulation>();
 
 			readerInfo ri;
 			ri.addLockedDefinition("garraySize", std::to_string(gsize));
 			gds->set("consoleprintlevel", "summary");
 			auto start_t = std::chrono::high_resolution_clock::now();
-			loadFile(gds, testFile, &ri);
+			loadFile(gds.get(), testFile, &ri);
 			gds->setFlag("no_powerflow_adjustments");
 			auto stop_t = std::chrono::high_resolution_clock::now();
 			load_time = (stop_t - start_t);
@@ -218,7 +212,7 @@ BOOST_AUTO_TEST_CASE(test_pjm_pflow)
 {
 
 	std::string fname = std::string(OTHER_TEST_DIRECTORY "pf.output.raw");
-	gds = new gridDynSimulation();
+	gds = std::make_unique<gridDynSimulation>();
 	readerInfo ri;
 	ri.flags = addflags(0, "ignore_step_up_transformers");
 	loadFile(gds, fname, &ri);

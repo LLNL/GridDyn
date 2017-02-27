@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -33,7 +33,7 @@ private:
 	std::uint64_t commDestId = 0;       //!< the default communication destination id
 
 	std::shared_ptr<gridCommunicator> commLink;             //!<communicator link
-	propertyBuffer *commPropBuffer = nullptr;
+	std::unique_ptr<propertyBuffer> commPropBuffer; //!< a property buffer for the communicator
 
 public:
 	commManager();
@@ -59,11 +59,11 @@ public:
 	{
 		return commDestName;
 	}
-	const std::string &name() const
+	const std::string &getName() const
 	{
 		return commName;
 	}
-
+	void setName(const std::string &name);
 	std::uint64_t id() const
 	{
 		return commId;

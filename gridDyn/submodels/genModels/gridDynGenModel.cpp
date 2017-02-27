@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,11 +14,11 @@
 #include "submodels/gridDynGenModel.h"
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
-#include "objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
+#include "core/objectFactoryTemplates.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "vectorOps.hpp"
 
 
@@ -53,10 +53,6 @@ gridDynGenModel::gridDynGenModel (const std::string &objName) : gridSubModel (ob
 
 }
 
-gridDynGenModel::~gridDynGenModel ()
-{
-}
-
 coreObject *gridDynGenModel::clone (coreObject *obj) const
 {
   gridDynGenModel *gd = cloneBase<gridDynGenModel, gridSubModel> (this,obj);
@@ -74,22 +70,23 @@ coreObject *gridDynGenModel::clone (coreObject *obj) const
 
 
 // initial conditions
-void gridDynGenModel::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+
+void gridDynGenModel::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
 
-  if (args[voltageInLocation] > 0.85)
+  if (inputs[voltageInLocation] > 0.85)
     {
-      inputSet[genModelPmechInLocation] = outputSet[PoutLocation];                 //Pmt
-      inputSet[genModelEftInLocation] = outputSet[QoutLocation] / Xd;
+      inputSet[genModelPmechInLocation] = desiredOutput[PoutLocation];                 //Pmt
+      inputSet[genModelEftInLocation] = desiredOutput[QoutLocation] / Xd;
     }
   else
     {
-      inputSet[genModelPmechInLocation] = outputSet[PoutLocation] / args[voltageInLocation] * 0.85;               //Pmt
-      inputSet[genModelEftInLocation] = outputSet[QoutLocation] / Xd / args[voltageInLocation] * 0.85;
+      inputSet[genModelPmechInLocation] = desiredOutput[PoutLocation] / inputs[voltageInLocation] * 0.85;               //Pmt
+      inputSet[genModelEftInLocation] = desiredOutput[QoutLocation] / Xd / inputs[voltageInLocation] * 0.85;
     }
 
 
-  bus = static_cast<gridBus *> (parent->find ("bus"));
+  bus = static_cast<gridBus *> (find ("bus"));
 }
 
 // residual
@@ -116,21 +113,27 @@ double gridDynGenModel::getAngle (const stateData &, const solverMode &, index_t
 
 }
 
-IOdata gridDynGenModel::getOutputs (const IOdata &args, const stateData &, const solverMode &) const
+
+count_t gridDynGenModel::outputDependencyCount(index_t /*num*/, const solverMode & /*sMode*/) const
+{
+	return 0;
+}
+
+IOdata gridDynGenModel::getOutputs (const IOdata &inputs, const stateData &, const solverMode &) const
 {
 
   IOdata out (2);
-  double V = args[voltageInLocation];
-  double Eft = args[genModelEftInLocation];
+  double V = inputs[voltageInLocation];
+  double Eft = inputs[genModelEftInLocation];
   if (V > 0.85)
     {
-      out[PoutLocation] = -args[genModelPmechInLocation];
+      out[PoutLocation] = -inputs[genModelPmechInLocation];
       out[QoutLocation] = -Eft * Xd;
 
     }
   else
     {
-      out[PoutLocation] = -args[genModelPmechInLocation] * V / 0.85;
+      out[PoutLocation] = -inputs[genModelPmechInLocation] * V / 0.85;
       out[QoutLocation] = -Eft * Xd * V / 0.85;
     }
 
@@ -140,15 +143,15 @@ IOdata gridDynGenModel::getOutputs (const IOdata &args, const stateData &, const
 
 
 
-double gridDynGenModel::getOutput (const IOdata &args, const stateData &, const solverMode &, index_t numOut) const
+double gridDynGenModel::getOutput (const IOdata &inputs, const stateData &, const solverMode &, index_t numOut) const
 {
-  double V = args[voltageInLocation];
-  double Eft = args[genModelEftInLocation];
+  double V = inputs[voltageInLocation];
+  double Eft = inputs[genModelEftInLocation];
   if (V > 0.85)
     {
       if (numOut == PoutLocation)
         {
-          return -args[genModelPmechInLocation];
+          return -inputs[genModelPmechInLocation];
         }
       else if (numOut == QoutLocation)
         {
@@ -160,7 +163,7 @@ double gridDynGenModel::getOutput (const IOdata &args, const stateData &, const 
     {
       if (numOut == PoutLocation)
         {
-          return -args[genModelPmechInLocation] * V / 0.85;
+          return -inputs[genModelPmechInLocation] * V / 0.85;
         }
       else if (numOut == QoutLocation)
         {
@@ -174,34 +177,34 @@ double gridDynGenModel::getOutput (const IOdata &args, const stateData &, const 
 }
 
 
-void gridDynGenModel::ioPartialDerivatives (const IOdata &args, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &)
+void gridDynGenModel::ioPartialDerivatives (const IOdata &inputs, const stateData &, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &)
 {
 
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
 
   if (V > 0.85)
     {
-      ad.assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd);
+      ad.assignCheckCol (QoutLocation, inputLocs[genModelEftInLocation], -Xd);
 
-      if (argLocs[voltageInLocation] != kNullLocation)
+      if (inputLocs[voltageInLocation] != kNullLocation)
         {
-          ad.assign (PoutLocation, argLocs[voltageInLocation], 0);
-          ad.assign (QoutLocation, argLocs[voltageInLocation], 0);
+          ad.assign (PoutLocation, inputLocs[voltageInLocation], 0);
+          ad.assign (QoutLocation, inputLocs[voltageInLocation], 0);
         }
-      ad.assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -1.0);
+      ad.assignCheckCol (PoutLocation, inputLocs[genModelPmechInLocation], -1.0);
     }
   else
     {
       double factor = V / 0.85;
-      ad.assignCheckCol (QoutLocation, argLocs[genModelEftInLocation], -Xd * factor);
+      ad.assignCheckCol (QoutLocation, inputLocs[genModelEftInLocation], -Xd * factor);
 
-      if (argLocs[voltageInLocation] != kNullLocation)
+      if (inputLocs[voltageInLocation] != kNullLocation)
         {
-          double Eft = args[genModelEftInLocation];
-          ad.assign (PoutLocation, argLocs[voltageInLocation],-args[genModelPmechInLocation] / 0.85);
-          ad.assign (QoutLocation, argLocs[voltageInLocation], -Eft * Xd / 0.85);
+          double Eft = inputs[genModelEftInLocation];
+          ad.assign (PoutLocation, inputLocs[voltageInLocation],-inputs[genModelPmechInLocation] / 0.85);
+          ad.assign (QoutLocation, inputLocs[voltageInLocation], -Eft * Xd / 0.85);
         }
-      ad.assignCheckCol (PoutLocation, argLocs[genModelPmechInLocation], -factor);
+      ad.assignCheckCol (PoutLocation, inputLocs[genModelPmechInLocation], -factor);
     }
 
 

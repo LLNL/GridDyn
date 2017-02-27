@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2014, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,16 +15,16 @@
 #include "gridArea.h"
 
 #include "generators/gridDynGenerator.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/gridLink.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "infiniteBus.h"
 #include "gridBus.h"
 #include "acBus.h"
 #include "dcBus.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "vectorOps.hpp"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "stringOps.h"
 
 
@@ -44,7 +44,7 @@ using namespace gridUnits;
 gridBus::gridBus (const std::string &objName) : gridPrimary (objName),outputs (3),outLocs (3)
 {
   // default values
-  id = ++busCount;
+  setUserID(++busCount);
   updateName ();
 
 
@@ -53,7 +53,7 @@ gridBus::gridBus (const std::string &objName) : gridPrimary (objName),outputs (3
 gridBus::gridBus (double vStart, double angleStart,const std::string &objName) : gridPrimary (objName),angle (angleStart), voltage (vStart)
 {
   // default values
-  id = ++busCount;
+  setUserID(++busCount);
   updateName ();
 
 }
@@ -69,39 +69,14 @@ coreObject *gridBus::clone (coreObject *obj) const
   nobj->dynType = dynType;
   nobj->angle = angle;
   nobj->voltage = voltage;
-  nobj->baseVoltage = baseVoltage;
+  nobj->set("basevoltage",baseVoltage); //this is to set all the sub objects as well
   nobj->freq = freq;
   nobj->Vtol = Vtol;
   nobj->Atol = Atol;
   nobj->Network = Network;
   nobj->zone = zone;
   nobj->lowVtime = lowVtime;
-  //now clone all the loads and generators
-  //cloning the links from this component would be bad
-  //clone the generators and loads
-
-  for (size_t kk = 0; kk < attachedGens.size (); ++kk)
-    {
-      if (kk >= nobj->attachedGens.size ())
-        {
-          nobj->add (static_cast<gridDynGenerator *> (attachedGens[kk]->clone (nullptr)));
-        }
-      else
-        {
-          attachedGens[kk]->clone (nobj->attachedGens[kk]);
-        }
-    }
-  for (size_t kk = 0; kk < attachedLoads.size (); ++kk)
-    {
-      if (kk >= nobj->attachedLoads.size ())
-        {
-          nobj->add (static_cast<gridLoad *> (attachedLoads[kk]->clone (nullptr)));
-        }
-      else
-        {
-          attachedLoads[kk]->clone (nobj->attachedLoads[kk]);
-        }
-    }
+  
   return nobj;
 }
 
@@ -114,21 +89,21 @@ bool gridBus::checkCapable ()
     }
   for (auto &load : attachedLoads)
     {
-      if (load->enabled)
+      if (load->isConnected())
         {
           tP -= load->getRealPower ();
         }
     }
   for (auto &gen : attachedGens)
     {
-      if (gen->enabled)
+      if (gen->isConnected())
         {
           tP += gen->getPmax ();
         }
     }
   for (auto &link : attachedLinks)
     {
-      if (link->enabled)
+      if (link->isConnected())
         {
           tP += link->getMaxTransfer ();
         }
@@ -142,7 +117,7 @@ bool gridBus::checkCapable ()
 
 void gridBus::disable ()
 {
-  enabled = false;
+  coreObject::disable();
   alert (this, STATE_COUNT_CHANGE);
   for (auto &link : attachedLinks)
     {
@@ -150,19 +125,6 @@ void gridBus::disable ()
     }
 }
 
-// destructor
-gridBus::~gridBus ()
-{
-  for (auto &ld : attachedLoads)
-    {
-      condDelete (ld, this);
-    }
-
-  for (auto &gen : attachedGens)
-    {
-      condDelete (gen, this);
-    }
-}
 
 void gridBus::add (coreObject *obj)
 {
@@ -183,7 +145,7 @@ void gridBus::add (coreObject *obj)
     {
       return add (lnk);
     }
-  throw(invalidObjectException(this));
+  throw(unrecognizedObjectException(this));
 }
 
 template<class X>
@@ -194,10 +156,8 @@ void addObject (gridBus *bus, X* obj, std::vector<X *> &objVector)
     {
       obj->locIndex = static_cast<index_t> (objVector.size ());
       objVector.push_back (obj);
-      obj->setParent (bus);
-      obj->set ("basepower", bus->systemBasePower);
-      obj->set ("basefreq", bus->m_baseFreq);
       obj->set ("basevoltage", bus->baseVoltage);
+	  bus->addSubObject(obj);
       if (bus->checkFlag (pFlow_initialized))
         {
           bus->alert (bus, OBJECT_COUNT_INCREASE);
@@ -226,7 +186,7 @@ void gridBus::add (gridLink *lnk)
 {
   for (auto &links : attachedLinks)
     {
-      if (links->getID () == lnk->getID ())
+      if (isSameObject(links, lnk))
         {
           return;
         }
@@ -255,17 +215,17 @@ void gridBus::remove (coreObject *obj)
       return(remove (lnk));
     }
 
-  throw(invalidObjectException(this));
+  throw(unrecognizedObjectException(this));
 }
 
 template<class X>
-void removeObject (X* obj, std::vector<X *> &objVector)
+bool removeObject (X* obj, std::vector<X *> &objVector)
 {
   if (obj->locIndex > objVector.size ())
     {
-	  return;
+	  return false;
     }
-  if (obj->getID () == objVector[obj->locIndex]->getID ())
+  if (isSameObject(obj, objVector[obj->locIndex]))
     {
       //alert that the states might have changed
       if (obj->checkFlag (has_dyn_states))
@@ -277,21 +237,28 @@ void removeObject (X* obj, std::vector<X *> &objVector)
           obj->getParent ()->alert (obj->getParent (), STATE_COUNT_DECREASE);
         }
 
-      objVector[obj->locIndex]->setParent (nullptr);
       objVector.erase (objVector.begin () + obj->locIndex);
+	  return true;
     }
+  return false;
 }
 
 // remove load
 void gridBus::remove (gridLoad *ld)
 {
-  removeObject (ld, attachedLoads);
+	if (removeObject(ld, attachedLoads))
+	{
+		gridObject::remove(ld);
+	}
 }
 
 // remove generator
 void gridBus::remove (gridDynGenerator *gen)
 {
-  removeObject (gen, attachedGens);
+	if (removeObject(gen, attachedGens))
+	{
+		gridObject::remove(gen);
+	}
 }
 
 // remove link
@@ -299,7 +266,7 @@ void gridBus::remove (gridLink *lnk)
 {
   for (size_t kk = 0; kk < attachedLinks.size (); ++kk)
     {
-      if (lnk->getID () == attachedLinks[kk]->getID ())
+      if (isSameObject(lnk,attachedLinks[kk]))
         {
           attachedLinks.erase (attachedLinks.begin () + kk);
 		  return;
@@ -338,17 +305,17 @@ void gridBus::followNetwork (int networkNum, std::queue<gridBus *> &bstk)
     }
 }
 
-// initializeB states
-void gridBus::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+// dynInitializeB states
+void gridBus::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   //run the subObjects
   if (Vtol < 0)
     {
-      Vtol = find ("root")->get ("voltagetolerance");
+      Vtol = getRoot()->get ("voltagetolerance");
     }
   if (Atol < 0)
     {
-      Atol = find ("root")->get ("angletolerance");
+      Atol = getRoot()->get ("angletolerance");
     }
   for (auto &gen : attachedGens)
     {
@@ -382,24 +349,11 @@ void gridBus::pFlowObjectInitializeB ()
 }
 
 
-void gridBus::preEx (const stateData &sD, const solverMode &sMode)
+void gridBus::preEx (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode)
 {
-  auto args = getOutputs (sD, sMode);
-  for (auto &gen : attachedGens)
-    {
-      if (gen->checkFlag (preEx_requested))
-        {
-          gen->preEx (args, sD, sMode);
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if (load->checkFlag (preEx_requested))
-        {
-          load->preEx (args, sD, sMode);
-        }
-    }
-
+  auto inputs = getOutputs (noInputs,sD, sMode);
+  gridObject::preEx(inputs, sD, sMode);
+  
 }
 //function to reset the bus type and voltage
 
@@ -433,17 +387,17 @@ void gridBus::reset (reset_levels level)
     }
 }
 
-change_code gridBus::powerFlowAdjust (unsigned long flags, check_level_t level)
+change_code gridBus::powerFlowAdjust (const IOdata &/*inputs*/, unsigned long flags, check_level_t level)
 {
 
 
   auto out = change_code::no_change;
-  IOdata args = { voltage,angle,freq };
+  IOdata inputs = { voltage,angle,freq };
   for (auto &gen : attachedGens)
     {
       if (gen->checkFlag (has_powerflow_adjustments))
         {
-          auto pout = gen->powerFlowAdjust (args, flags, level);
+          auto pout = gen->powerFlowAdjust (inputs, flags, level);
           out = (std::max)(pout, out);
         }
     }
@@ -451,7 +405,7 @@ change_code gridBus::powerFlowAdjust (unsigned long flags, check_level_t level)
     {
       if (ld->checkFlag (has_powerflow_adjustments))
         {
-          auto pout = ld->powerFlowAdjust (args, flags, level);
+          auto pout = ld->powerFlowAdjust (inputs, flags, level);
           out = (std::max)(pout, out);
         }
     }
@@ -460,8 +414,8 @@ change_code gridBus::powerFlowAdjust (unsigned long flags, check_level_t level)
 }
 
 
-// initializeB states for dynamic solution
-void gridBus::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+// dynInitializeB states for dynamic solution
+void gridBus::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   opFlags[preEx_requested] = false;
   opFlags[has_constraints] = false;
@@ -479,22 +433,28 @@ void gridBus::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 
 }
 
-// initializeB states for dynamic solution part 2  //final clean up
-void gridBus::dynObjectInitializeB (IOdata &outputSet)
+// dynInitializeB states for dynamic solution part 2  //final clean up
+void gridBus::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & desiredOutput, IOdata &fieldSet)
 {
-  if (outputSet.size () > 0)
-    {
-      if (outputSet[voltageInLocation] > 0)
+	if (desiredOutput.size() > voltageInLocation)
+	{
+		if (desiredOutput[voltageInLocation] > 0)
+		{
+			voltage = desiredOutput[voltageInLocation];
+		}
+	}
+	if (desiredOutput.size() > angleInLocation)
+	{
+		if (desiredOutput[angleInLocation] > -kHalfBigNum)
+		{
+			angle = desiredOutput[angleInLocation];
+		}
+	}
+	 if (desiredOutput.size() > frequencyInLocation)
+	  {
+      if (std::abs (desiredOutput[frequencyInLocation] - 1.0) < 0.5)
         {
-          voltage = outputSet[voltageInLocation];
-        }
-      if (outputSet[angleInLocation] > -kHalfBigNum)
-        {
-          angle = outputSet[angleInLocation];
-        }
-      if (std::abs (outputSet[frequencyInLocation] - 1.0) < 0.5)
-        {
-          freq = outputSet[frequencyInLocation];
+          freq = desiredOutput[frequencyInLocation];
         }
     }
   updateLocalCache ();
@@ -502,22 +462,24 @@ void gridBus::dynObjectInitializeB (IOdata &outputSet)
   m_state[voltageInLocation] = voltage;
   m_state[angleInLocation] = angle;
   m_state[frequencyInLocation] = freq;
-
+  
   //first get the state size for the internal state ordering
-  IOdata args {
+  IOdata inputs {
     voltage,angle,freq
   };
+  fieldSet = inputs;
 
   IOdata pc;
   for (auto &gen : attachedGens)
     {
-      gen->dynInitializeB (args, pc);
+      gen->dynInitializeB (inputs, noInputs,pc);
     }
   for (auto &load : attachedLoads)
     {
-      load->dynInitializeB (args, pc);
+      load->dynInitializeB (inputs, noInputs, pc);
 
     }
+  //TODO:: actually us the pc outputs
 
 }
 
@@ -528,21 +490,11 @@ void gridBus::powerAdjust (double /*adjustment*/)
 
 }
 
-void gridBus::timestep (gridDyn_time ttime, const solverMode &sMode)
+void gridBus::timestep (coreTime ttime, const IOdata & /*inputs*/, const solverMode &sMode)
 {
 
-  auto args = getOutputs (emptyStateData,sMode);
-  for (auto &load : attachedLoads)
-    {
-      load->timestep (ttime, args, sMode);
-    }
-  for (auto &gen : attachedGens)
-    {
-      gen->timestep (ttime, args, sMode);
-    }
-  //localConverge (sMode, 0);
-  //updateLocalCache ();
-  prevTime = ttime;
+  auto inputs = getOutputs (noInputs,emptyStateData,sMode);
+  gridObject::timestep(ttime, inputs, sMode);
 }
 
 
@@ -563,6 +515,17 @@ void gridBus::setAll (const std::string &objtype, std::string param, double val,
           ld->set (param, val, unitType);
         }
     }
+  else if (objtype == "secondary")
+  {
+	  for (auto &gen : attachedGens)
+	  {
+		  gen->set(param, val, unitType);
+	  }
+	  for (auto &ld : attachedLoads)
+	  {
+		  ld->set(param, val, unitType);
+	  }
+  }
 
 }
 
@@ -613,32 +576,9 @@ void gridBus::set (const std::string &param, const std::string &vali)
 {
   auto val = convertToLowerCase (vali);
 
-  if (param == "status")
+  if (param[0] == '#')
     {
-      makeLowerCase (val);
-      if ((val == "out") || (val == "off") || (val == "disconnected"))
-        {
-          if (enabled)
-            {
-              disable ();
-            }
-
-        }
-      else if ((val == "in") || (val == "on"))
-        {
-          if (!enabled)
-            {
-              enable ();
-            }
-        }
-      else if (val == "disconnected")
-        {
-          disconnect ();
-        }
-      else
-        {
-		  throw(invalidParameterValue());
-        }
+     
     }
   else
     {
@@ -655,7 +595,7 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
 		{
 			if (opFlags[dyn_initialized])
 			{
-				parent->alert(this, POTENTIAL_FAULT_CHANGE);
+				alert(this, POTENTIAL_FAULT_CHANGE);
 			}
 		}
       voltage = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
@@ -676,45 +616,6 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
           ld->set ("basevoltage", val);
         }
     }
-  else if (param == "basepower")
-    {
-      systemBasePower = unitConversionPower (val, unitType, MW);           //
-
-      for (auto &gen : attachedGens)
-        {
-          gen->set ("basepower", val);
-        }
-      for (auto &ld : attachedLoads)
-        {
-          ld->set ("basepower", val);
-        }
-    }
-  else if ((param == "basefrequency") || (param == "basefreq"))
-    {
-      m_baseFreq = unitConversionFreq (val, unitType, rps);
-
-      for (auto &gen : attachedGens)
-        {
-          gen->set ("basefreq", m_baseFreq);
-        }
-      for (auto &ld : attachedLoads)
-        {
-          ld->set ("basefreq", m_baseFreq);
-        }
-
-    }
-  else if (param == "disconnect")
-    {
-      if (val > 0.1)
-        {
-          disconnect ();
-        }
-      else
-        {
-          reconnect ();
-        }
-    }
-
   else if ((param == "p") || (param == "gen p"))
     {
       S.genP = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
@@ -762,7 +663,7 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
         {
           if (val != 0.0)
             {
-              add (new gridLoad ());  //TODO :: use the object factory instead
+              add (new zipLoad ()); 
             }
           else
             {
@@ -778,7 +679,7 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
         {
           if (val != 0.0)
             {
-              add (new gridLoad ());
+              add (new zipLoad ());
             }
           else
             {
@@ -786,10 +687,6 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
             }
         }
       attachedLoads[0]->set ("b", -val, unitType);
-    }
-  else if ((param == "zone")||(param=="zone number"))
-    {
-      zone = static_cast<int> (val);
     }
   else if ((param=="area")||(param == "area number"))
   {
@@ -811,7 +708,7 @@ void gridBus::setVoltageAngle (double Vnew, double Anew)
 
 static const IOdata kNullVec;
 
-IOdata gridBus::getOutputs (const stateData &sD, const solverMode &sMode) const
+IOdata gridBus::getOutputs (const IOdata & /*inputs*/,const stateData &sD, const solverMode &sMode) const
 {
 
   if ((sMode.local) || (sD.empty()))
@@ -847,7 +744,7 @@ const IOlocs &gridBus::getOutputLocsRef () const
   return noLocs;
 }
 
-double gridBus::getOutput (const stateData &sD, const solverMode &sMode, index_t outNum) const
+double gridBus::getOutput (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode, index_t outNum) const
 {
   switch (outNum)
     {
@@ -919,7 +816,7 @@ bool gridBus::directPath (gridObject *target, gridObject *source)
   gridLink *nLink = nullptr;
   for (auto &lnk : attachedLinks)
     {
-      if (lnk->enabled)
+      if (lnk->isConnected())
         {
           if (lnk->getID () != sid)
             {
@@ -988,7 +885,7 @@ std::vector<gridObject *> gridBus::getDirectPath (gridObject *target, gridObject
   gridLink *nLink = nullptr;
   for (auto &lnk : attachedLinks)
     {
-      if (lnk->enabled)
+      if (lnk->isConnected())
         {
           if (lnk->getID () != sid)
             {
@@ -1053,7 +950,6 @@ std::vector<gridObject *> gridBus::getDirectPath (gridObject *target, gridObject
 
 int gridBus::propogatePower (bool /*makeSlack*/)
 {
-  int ret = 0;
 
   int unfixed_lines = 0;
   gridLink *unfixed_line = nullptr;
@@ -1073,7 +969,7 @@ int gridBus::propogatePower (bool /*makeSlack*/)
     }
   if (unfixed_lines > 1)
     {
-      return ret;
+      return 0;
     }
 
   int adjPSecondary = 0;
@@ -1174,105 +1070,22 @@ int gridBus::propogatePower (bool /*makeSlack*/)
 // -------------------- Power Flow --------------------
 
 
-//guess the solution
-void gridBus::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
-{
-  for (auto &gen : attachedGens)
-    {
-      if ((gen->enabled) && (gen->stateSize (sMode) > 0))
-        {
-          gen->guess (ttime, state, dstate_dt, sMode);
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->stateSize (sMode) > 0) && (load->enabled))
-        {
-          load->guess (ttime, state, dstate_dt, sMode);
-        }
-    }
-
-}
-
-// set algebraic and dynamic variables assume preset to differential
-void gridBus::getVariableType (double sdata[], const solverMode &sMode)
-{
-
-  for (auto &gen : attachedGens)
-    {
-      if (gen->enabled)
-        {
-          gen->getVariableType (sdata, sMode);
-        }
-    }
-
-  for (auto &load : attachedLoads)
-    {
-      if (load->checkFlag (has_dyn_states))
-        {
-          load->getVariableType (sdata, sMode);
-        }
-    }
-
-}
-
-void gridBus::getTols (double tols[], const solverMode &sMode)
-{
-
-  for (auto &gen : attachedGens)
-    {
-      if (gen->enabled)
-        {
-          gen->getTols (tols, sMode);
-        }
-    }
-
-  for (auto &load : attachedLoads)
-    {
-      if ((load->stateSize (sMode) > 0) && (load->enabled))
-        {
-          load->getTols (tols, sMode);
-        }
-    }
-}
-
-// pass the solution
-void gridBus::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
-{
-  for (auto &gen : attachedGens)
-    {
-      if (gen->enabled)
-        {
-          gen->setState (ttime, state, dstate_dt, sMode);
-        }
-    }
-  for (auto &ld : attachedLoads)
-    {
-      if (ld->enabled)
-        {
-          ld->setState (ttime, state, dstate_dt, sMode);
-        }
-    }
-
-  //	assert(voltage > 0.0);
-  prevTime = ttime;
-}
 
 // residual
-void gridBus::residual (const stateData &sD, double resid[], const solverMode &sMode)
+void gridBus::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
 
-  updateLocalCache (sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
   if ((opFlags[low_voltage_check_flag])&&(outputs[voltageInLocation] < Vtol / 2.0)&& (isConnected ()))
     {
       alert (this,INVALID_STATE_ALERT);
-      alert (this, VERY_LOW_VOLTAGE_ALERT);
+	  alert (this, VERY_LOW_VOLTAGE_ALERT);
 	  lowVtime = (!sD.empty()) ? sD.time : prevTime;
       return;
     }
   for (auto &gen : attachedGens)
     {
-      if ((gen->stateSize (sMode) > 0) && (gen->enabled))
+      if ((gen->stateSize (sMode) > 0) && (gen->isEnabled()))
         {
           gen->residual (outputs, sD, resid, sMode);
         }
@@ -1283,7 +1096,7 @@ void gridBus::residual (const stateData &sD, double resid[], const solverMode &s
     }
   for (auto &load : attachedLoads)
     {
-      if ((load->stateSize (sMode) > 0) && (load->enabled))
+      if ((load->stateSize (sMode) > 0) && (load->isEnabled()))
         {
           load->residual (outputs, sD, resid, sMode);
         }
@@ -1295,14 +1108,14 @@ void gridBus::residual (const stateData &sD, double resid[], const solverMode &s
 
 }
 
-void gridBus::derivative (const stateData &sD, double deriv[], const solverMode &sMode)
+void gridBus::derivative (const IOdata & inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-  auto args = getOutputs (sD, sMode);
+  auto secondaryInputs = getOutputs (inputs,sD, sMode);
   for (auto &gen : attachedGens)
     {
       if (gen->diffSize (sMode) > 0)
         {
-          gen->derivative (args, sD, deriv, sMode);
+          gen->derivative (secondaryInputs, sD, deriv, sMode);
         }
     }
 
@@ -1310,7 +1123,7 @@ void gridBus::derivative (const stateData &sD, double deriv[], const solverMode 
     {
       if (load->diffSize (sMode) > 0)
         {
-          load->derivative (args, sD, deriv, sMode);
+          load->derivative (secondaryInputs, sD, deriv, sMode);
         }
     }
 }
@@ -1320,9 +1133,9 @@ static const IOlocs kNullLocations {
 };
 
 // Jacobian
-void gridBus::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
+void gridBus::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
-  updateLocalCache (sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
   // import bus values (current theta and voltage)
 
   //printf("t=%f,id=%d, dpdt=%f, dpdv=%f, dqdt=%f, dqdv=%f\n", ttime, id, Ptii, Pvii, Qvii, Qtii);
@@ -1382,15 +1195,15 @@ void gridBus::voltageUpdate (const stateData &, double /*update*/[], const solve
 
 }
 
-void gridBus::algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha)
+void gridBus::algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha)
 {
   if (algSize (sMode) == offsets.getOffsets (sMode)->local.algSize)
     {
       //no algebraic states in the secondary objects
       return;
     }
-  updateLocalCache (sD, sMode);
-
+  updateLocalCache (inputs, sD, sMode);
+  
   for (auto &gen : attachedGens)
     {
       if (gen->algSize (sMode) > 0)
@@ -1409,7 +1222,7 @@ void gridBus::algebraicUpdate (const stateData &sD, double update[], const solve
 
 
 
-void gridBus::converge (gridDyn_time /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &,  converge_mode /*mode*/,double /*tol*/ )
+void gridBus::converge (coreTime /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode &,  converge_mode /*mode*/,double /*tol*/ )
 {
 
 }
@@ -1417,90 +1230,17 @@ void gridBus::converge (gridDyn_time /*ttime*/, double /*state*/[], double /*dst
 
 double gridBus::computeError (const stateData &sD, const solverMode &sMode)
 {
-  updateLocalCache (sD, sMode);
+  updateLocalCache (noInputs, sD, sMode);
 
   double err = std::abs (S.sumP ()) + std::abs (S.sumQ ());
 
   return err;
 }
 
-void gridBus::getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
-{
-  std::string prefix2 = prefix + name + "::";
-
-  if (stateSize (sMode) == 0)
-    {
-      return;
-    }
-  for (auto &gen : attachedGens)
-    {
-      if (gen->enabled)
-        {
-          gen->getStateName (stNames, sMode, prefix2);
-        }
-    }
-
-  for (auto &load : attachedLoads)
-    {
-      if (load->enabled)
-        {
-          load->getStateName (stNames, sMode, prefix2);
-        }
-    }
-}
 
 
-void gridBus::setOffsets (const solverOffsets &newOffsets, const solverMode &sMode)
-{
-  offsets.setOffsets (newOffsets, sMode);
-  solverOffsets no (newOffsets);
-  no.localIncrement (offsets.getOffsets (sMode));
-  for (auto ld : attachedLoads)
-    {
-      ld->setOffsets (no, sMode);
-      no.increment (ld->getOffsets (sMode));
-    }
-  for (auto gen : attachedGens)
-    {
-      gen->setOffsets (no, sMode);
-      no.increment (gen->getOffsets (sMode));
-    }
-}
-
-void gridBus::setOffset (index_t offset, const solverMode &sMode)
-{
-  for (auto ld : attachedLoads)
-    {
-      ld->setOffset (offset, sMode);
-      offset += ld->stateSize (sMode);
-
-    }
-  for (auto gen : attachedGens)
-    {
-      gen->setOffset (offset, sMode);
-      offset += gen->stateSize (sMode);
-    }
 
 
-}
-
-void gridBus::setRootOffset (index_t Roffset, const solverMode &sMode)
-{
-
-  offsets.setRootOffset (Roffset, sMode);
-  auto so = offsets.getOffsets (sMode);
-  auto nR = so->local.algRoots + so->local.diffRoots;
-  for (auto &gen : attachedGens)
-    {
-      gen->setRootOffset (Roffset + nR, sMode);
-      nR += gen->rootSize (sMode);
-    }
-  for (auto &ld : attachedLoads)
-    {
-      ld->setRootOffset (Roffset + nR, sMode);
-      nR += ld->rootSize (sMode);
-    }
-}
 
 void gridBus::disconnect ()
 {
@@ -1523,7 +1263,7 @@ void gridBus::reconnect (gridBus *mapBus)
     {
       LOG_DEBUG ("reconnecting to network");
       opFlags.reset (disconnected);
-      alert (this, JAC_COUNT_INCREASE);
+	  alert (this, JAC_COUNT_INCREASE);
       if (mapBus)
         {
           angle = mapBus->angle;
@@ -1548,7 +1288,7 @@ void gridBus::reconnect ()
     {
       LOG_DEBUG ("reconnecting to network");
       opFlags.reset (disconnected);
-      alert (this, JAC_COUNT_INCREASE);
+	  alert (this, JAC_COUNT_INCREASE);
 
       reset (reset_levels::low_voltage_dyn1);
       for (auto &lnk : attachedLinks)
@@ -1559,102 +1299,17 @@ void gridBus::reconnect ()
 }
 
 
-void gridBus::loadSizes (const solverMode &sMode, bool dynOnly)
-{
-  if (isLoaded (sMode, dynOnly))
-    {
-      return;
-    }
-  auto so = offsets.getOffsets (sMode);
-  if (!enabled)
-    {
-      so->reset ();
-      so->stateLoaded = true;
-      so->rjLoaded = true;
-      return;
-    }
-  if (dynOnly)
-    {
-      so->rootAndJacobianCountReset ();
-    }
-  else
-    {
-      so->reset ();
-    }
 
 
 
 
-
-  for (auto ld : attachedLoads)
-    {
-      if (!(ld->isLoaded (sMode, dynOnly)))
-        {
-          ld->loadSizes (sMode, dynOnly);
-        }
-      if (dynOnly)
-        {
-          so->addRootAndJacobianSizes (ld->getOffsets (sMode));
-        }
-      else
-        {
-          so->addSizes (ld->getOffsets (sMode));
-        }
-    }
-  for (auto gen : attachedGens)
-    {
-      if (!(gen->isLoaded (sMode, dynOnly)))
-        {
-          gen->loadSizes (sMode, dynOnly);
-        }
-      if (dynOnly)
-        {
-          so->addRootAndJacobianSizes (gen->getOffsets (sMode));
-        }
-      else
-        {
-          so->addSizes (gen->getOffsets (sMode));
-        }
-    }
-  if (!dynOnly)
-    {
-      so->stateLoaded = true;
-
-    }
-  so->rjLoaded = true;
-  /*if (!isDynamic(sMode))
-  {
-    if (stateSize(sMode)>2)
-    {
-          printf("%s %d has statesize=%d\n",name.c_str(),id, stateSize(sMode));
-    }
-  }*/
-}
-
-
-
-void gridBus::updateFlags (bool /*dynOnly*/)
+void gridBus::updateFlags (bool dynOnly)
 {
 
 
   opFlags.reset (preEx_requested);
   opFlags.reset (has_powerflow_adjustments);
-
-  for (auto &gen : attachedGens)
-    {
-      if (gen->enabled)
-        {
-          opFlags |= gen->cascadingFlags ();
-        }
-
-    }
-  for (auto &load : attachedLoads)
-    {
-      if (load->enabled)
-        {
-          opFlags |= load->cascadingFlags ();
-        }
-    }
+  gridObject::updateFlags(dynOnly);
 
 }
 
@@ -1665,7 +1320,7 @@ static const IOlocs inLoc {
 
 //#define DEBUG_KEY_BUS 1445
 // computed power at bus
-void gridBus::updateLocalCache  (const stateData &sD, const solverMode &sMode)
+void gridBus::updateLocalCache  (const IOdata &, const stateData &sD, const solverMode &sMode)
 {
   if (!S.needsUpdate (sD))
     {
@@ -1688,9 +1343,9 @@ void gridBus::updateLocalCache  (const stateData &sD, const solverMode &sMode)
   auto cid = getID ();
   for (auto &link : attachedLinks)
     {
-      if (link->enabled)
+      if (link->isEnabled())
         {
-          link->updateLocalCache (sD, sMode);
+          link->updateLocalCache (noInputs, sD, sMode);
           S.linkP += link->getRealPower (cid);
           S.linkQ += link->getReactivePower (cid);
 #if DEBUG_KEY_BUS > 0
@@ -1769,7 +1424,7 @@ void gridBus::updateLocalCache ()
   auto cid = getID ();
   for (auto &link : attachedLinks)
     {
-      if (link->enabled)
+      if (link->isEnabled())
         {
 		  link->updateLocalCache();
           S.linkP += link->getRealPower (cid);
@@ -1821,12 +1476,12 @@ void gridBus::updateLocalCache ()
 
 
 
-double gridBus::getAdjustableCapacityUp (gridDyn_time /*time*/) const
+double gridBus::getAdjustableCapacityUp (coreTime /*time*/) const
 {
   return 0.0;
 }
 
-double gridBus::getAdjustableCapacityDown (gridDyn_time /*time*/) const
+double gridBus::getAdjustableCapacityDown (coreTime /*time*/) const
 {
   return 0.0;
 }
@@ -1868,44 +1523,13 @@ gridLink *gridBus::findLink (gridBus *bs) const
 
 
 
-coreObject *gridBus::find (const std::string &objname) const
+coreObject *gridBus::find (const std::string &objName) const
 {
-  coreObject *obj = nullptr;
-  if ((objname == this->name) || (objname == "bus"))
+  if ((objName == getName()) || (objName == "bus"))
     {
       return const_cast<gridBus *> (this);
     }
-  if (objname == "root")
-    {
-      if (parent)
-        {
-          return (parent->find (objname));
-        }
-      else
-        {
-          return const_cast<gridBus *> (this);
-        }
-    }
-  for (auto ob : attachedGens)
-    {
-      if (objname == ob->getName ())
-        {
-          obj = ob;
-          break;
-        }
-    }
-  if (obj == nullptr)
-    {
-      for (auto ob : attachedLoads)
-        {
-          if (objname == ob->getName ())
-            {
-              obj = ob;
-              break;
-            }
-        }
-    }
-  return obj;
+  return gridObject::find(objName);
 }
 
 coreObject *gridBus::getSubObject (const std::string &typeName, index_t num) const
@@ -1924,7 +1548,7 @@ coreObject *gridBus::getSubObject (const std::string &typeName, index_t num) con
     }
   else
     {
-      return nullptr;
+      return gridObject::getSubObject(typeName,num);
     }
 }
 
@@ -1960,7 +1584,7 @@ coreObject *gridBus::findByUserID (const std::string &typeName, index_t searchID
             }
         }
     }
-  return nullptr;
+  return gridObject::findByUserID(typeName, searchID);
 }
 
 gridLink *gridBus::getLink (index_t x) const
@@ -2075,10 +1699,6 @@ double gridBus::get (const std::string &param, units_t unitType) const
     {
       val = static_cast<double> (attachedLoads.size ());
     }
-  else if (param == "zone")
-    {
-      val = zone;
-    }
   else if ((param == "p")||(param == "q")||(param == "yp")||(param == "yq")||(param == "ip")||(param == "iq"))
     {
       val = 0;
@@ -2094,59 +1714,22 @@ double gridBus::get (const std::string &param, units_t unitType) const
   return val;
 }
 
-change_code gridBus::rootCheck (const stateData &sD, const solverMode &sMode, check_level_t level)
+change_code gridBus::rootCheck (const IOdata &/*inputs*/, const stateData &sD, const solverMode &sMode, check_level_t level)
 {
-  auto args = getOutputs (sD, sMode);
-  // double vcurr = args[voltageInLocation];
-  change_code ret = change_code::no_change;
-  //make sure we are not in a fault condition
-  for (auto &gen : attachedGens)
-    {
-      if ((gen->checkFlag (has_alg_roots)) && (gen->enabled))
-        {
-          auto iret = gen->rootCheck (args, sD, sMode, level);
-          if (iret > ret)
-            {
-              ret = iret;
-            }
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->checkFlag (has_alg_roots)) && (load->enabled))
-        {
-          auto iret = load->rootCheck (args, sD, sMode, level);
-          if (iret > ret)
-            {
-              ret = iret;
-            }
-        }
-    }
-  return ret;
+  auto inputs = getOutputs (noInputs,sD, sMode);
+  return gridObject::rootCheck(inputs, sD, sMode, level);
+  
 }
 
-void gridBus::rootTest (const stateData &sD, double roots[], const solverMode &sMode)
+void gridBus::rootTest (const IOdata &/*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
-  auto args = getOutputs (sD, sMode);
-  for (auto &gen : attachedGens)
-    {
-      if ((gen->checkFlag (has_roots)) && (gen->enabled))
-        {
-          gen->rootTest (args, sD, roots, sMode);
-
-        }
-    }
-  for (auto &load : attachedLoads)
-    {
-      if ((load->checkFlag (has_roots)) && (load->enabled))
-        {
-          load->rootTest (args, sD, roots, sMode);
-        }
-    }
+  auto inputs = getOutputs (noInputs, sD, sMode);
+  gridObject::rootTest(inputs, sD, roots, sMode);
+  
 }
 
 
-void gridBus::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridBus::rootTrigger (coreTime ttime, const IOdata &/*inputs*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   size_t rc = 0;
   int rootOffset = offsets.getRootOffset (sMode);
@@ -2156,16 +1739,16 @@ void gridBus::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask,
   if (RF.size () > 0)
     {
       size_t rfi = 0;
-      auto args = getOutputs (emptyStateData, cLocalSolverMode);
+      auto inputs = getOutputs (noInputs,emptyStateData, cLocalSolverMode);
       auto nR = RF[rfi];
       for (auto &gen : attachedGens)
         {
-          if ((gen->checkFlag (has_roots)) && (gen->enabled))
+          if ((gen->checkFlag (has_roots)) && (gen->isEnabled()))
             {
               rc += gen->rootSize (sMode);
               if (nR < rootOffset + rc)
                 {
-                  gen->rootTrigger (ttime, args, rootMask, sMode);
+                  gen->rootTrigger (ttime, inputs, rootMask, sMode);
                   do
                     {
                       ++rfi;
@@ -2182,13 +1765,13 @@ void gridBus::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask,
         }
       for (auto &load : attachedLoads)
         {
-          if ((load->checkFlag (has_roots)) && (load->enabled))
+          if ((load->checkFlag (has_roots)) && (load->isEnabled()))
             {
 
               rc += load->rootSize (sMode);
               if (nR < rootOffset + rc)
                 {
-                  load->rootTrigger (ttime, args, rootMask, sMode);
+                  load->rootTrigger (ttime, inputs, rootMask, sMode);
                   do
                     {
                       ++rfi;
@@ -2236,7 +1819,8 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool /*cmpBus*/, bool printDiff)
           fmatch = false;
           for (size_t jj = 0; jj < bus2->attachedLoads.size (); ++jj)
             {
-              if (compareLoad (bus1->attachedLoads[kk], bus2->attachedLoads[jj], printDiff))
+			  
+              if (bus1->attachedLoads[kk]->getName()==bus2->attachedLoads[jj]->getName())
                 {
                   fmatch = true;
                   break;
@@ -2277,11 +1861,11 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool /*cmpBus*/, bool printDiff)
 gridBus * getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec)
 {
   
-  if (bus->getParent () == nullptr)
+  if (bus->isRoot())
     {
       return nullptr;
     }
-  if (bus->getParent ()->getID () == src->getID ())                //if this is true then things are easy
+  if (isSameObject(bus->getParent (),src))                //if this is true then things are easy
     {
       return sec->getBus (bus->locIndex);
     }

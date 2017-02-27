@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE(mainexe_test1)
 {
 	if (mainExeRunner.isActive())
 	{
-		printf("exestring=%s\n",mainExeRunner.getExeString().c_str());
+		//printf("exestring=%s\n",mainExeRunner.getExeString().c_str());
 		auto out = mainExeRunner.runCaptureOutput("--version");
-		printf("out=%s\n",out.c_str());
+		//printf("out=%s\n",out.c_str());
 		BOOST_CHECK(out.compare(0, 15, "GridDyn version") == 0);
 	}
 	else

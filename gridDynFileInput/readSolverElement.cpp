@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,6 +17,7 @@
 #include "gridDynFileInput.h"
 #include "solvers/solverInterface.h"
 #include "gridDyn.h"
+#include "stringConversion.h"
 
 
 using namespace readerConfig;
@@ -26,7 +27,7 @@ static const IgnoreListType solverIgnoreFields {
   "flags", "name", "type", "index"
 };
 
-void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridDynSimulation *gdo)
+void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri, gridDynSimulation *gdo)
 {
 
   std::shared_ptr<solverInterface> sd;
@@ -38,8 +39,8 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo *ri,
   //check for the field attributes
   if (!name.empty ())
     {
-      int index;
-      paramRead (name, index, -1);
+      int index= numeric_conversion(name, -1);
+
       if (index >= 0)
         {
           sd = gdo->getSolverInterface (index);
@@ -112,8 +113,8 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo *ri,
       sd->set ("flags", field);
     }
 
-  setAttributes (sd, element, "solver", ri, solverIgnoreFields);
-  setParams (sd, element, "solver", ri, solverIgnoreFields);
+  setAttributes (sd.get(), element, "solver", ri, solverIgnoreFields);
+  setParams (sd.get(), element, "solver", ri, solverIgnoreFields);
   //add the solver
   gdo->add (sd);
 

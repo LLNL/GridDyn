@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include <cmath>
 
 gridDynExciterIEEEtype1::gridDynExciterIEEEtype1 (const std::string &objName) : gridDynExciter (objName)
@@ -44,21 +44,21 @@ coreObject *gridDynExciterIEEEtype1::clone (coreObject *obj) const
   return gdE;
 }
 
-void gridDynExciterIEEEtype1::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynExciterIEEEtype1::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->local.diffSize = 3;
-  offsets.local->local.jacSize = 14;
+  offsets.local().local.diffSize = 3;
+  offsets.local().local.jacSize = 14;
   checkForLimits ();
 }
 
 // initial conditions
-void gridDynExciterIEEEtype1::objectInitializeB (const IOdata &args, const IOdata & outputSet, IOdata &inputSet)
+void gridDynExciterIEEEtype1::dynObjectInitializeB (const IOdata &inputs, const IOdata & desiredOutput, IOdata &inputSet)
 {
-  gridDynExciter::objectInitializeB (args, outputSet, inputSet);           //this will initializeB the field state if need be
+  gridDynExciter::dynObjectInitializeB (inputs, desiredOutput, inputSet);           //this will dynInitializeB the field state if need be
   double *gs = m_state.data ();
   gs[1] = (Ke + Aex * exp (Bex * gs[0])) * gs[0]; // Vr
   gs[2] = gs[0] * Kf / Tf;                        // Rf
-  vBias = args[voltageInLocation] + gs[1] / Ka - Vref;
+  vBias = inputs[voltageInLocation] + gs[1] / Ka - Vref;
   inputSet[1] = Vref;
   m_dstate_dt[0] = 0.0;
   m_dstate_dt[1] = 0.0;
@@ -69,7 +69,7 @@ void gridDynExciterIEEEtype1::objectInitializeB (const IOdata &args, const IOdat
 
 
 // residual
-void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
+void gridDynExciterIEEEtype1::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   if (!hasDifferential(sMode))
     {
@@ -94,16 +94,16 @@ void gridDynExciterIEEEtype1::residual (const IOdata &args, const stateData &sD,
   else
     {
 
-      rv[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf + Ka * (Vref + vBias - args[voltageInLocation])) / Ta - esp[1];
+      rv[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf + Ka * (Vref + vBias - inputs[voltageInLocation])) / Ta - esp[1];
     }
   rv[2] = (-es[2] + es[0] * Kf / Tf) / Tf - esp[2];
 
 }
 
-void gridDynExciterIEEEtype1::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void gridDynExciterIEEEtype1::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
 
-  derivative ( args, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
+  derivative ( inputs, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[0] += dt * m_dstate_dt[0];
   m_state[1] += dt * m_dstate_dt[1];
@@ -111,7 +111,7 @@ void gridDynExciterIEEEtype1::timestep (gridDyn_time ttime, const IOdata &args, 
   prevTime = ttime;
 }
 
-void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void gridDynExciterIEEEtype1::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode,  this);
   const double *es = Loc.diffStateLoc;
@@ -123,16 +123,16 @@ void gridDynExciterIEEEtype1::derivative (const IOdata &args, const stateData &s
     }
   else
     {
-      d[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf + Ka * (Vref + vBias - args[voltageInLocation])) / Ta;
+      d[1] = (-es[1] + Ka * es[2] - es[0] * Ka * Kf / Tf + Ka * (Vref + vBias - inputs[voltageInLocation])) / Ta;
 		
     }
   d[2] = (-es[2] + es[0] * Kf / Tf) / Tf;
 }
 
 // Jacobian
-void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const stateData &sD,
+void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*inputs*/, const stateData &sD,
                                                 matrixData<double> &ad,
-                                                const IOlocs &argLocs, const solverMode &sMode)
+                                                const IOlocs &inputLocs, const solverMode &sMode)
 {
   if  (!hasDifferential (sMode))
     {
@@ -156,7 +156,7 @@ void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const s
     {
       // Vr
 
-      ad.assignCheckCol (offset + 1, argLocs[voltageInLocation], -Ka / Ta);
+      ad.assignCheckCol (offset + 1, inputLocs[voltageInLocation], -Ka / Ta);
       ad.assign (offset + 1, offset, -Ka * Kf / (Tf * Ta));
       ad.assign (offset + 1, offset + 1, -1.0 / Ta - sD.cj);
       ad.assign (offset + 1, offset + 2, Ka / Ta);
@@ -171,17 +171,17 @@ void gridDynExciterIEEEtype1::jacobianElements (const IOdata & /*args*/, const s
 
 }
 
-void gridDynExciterIEEEtype1::rootTest (const IOdata &args, const stateData &sD, double roots[],  const solverMode &sMode)
+void gridDynExciterIEEEtype1::rootTest (const IOdata &inputs, const stateData &sD, double roots[],  const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   int rootOffset = offsets.getRootOffset (sMode);
   const double *es = sD.state + offset;
 
-  //printf("t=%f V=%f\n", ttime, args[voltageInLocation]);
+  //printf("t=%f V=%f\n", ttime, inputs[voltageInLocation]);
 
   if (opFlags[outside_vlim])
     {
-      roots[rootOffset] = es[2] - es[0] * Kf / Tf + (Vref + vBias - args[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
+      roots[rootOffset] = es[2] - es[0] * Kf / Tf + (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka + 0.001 * es[1] / Ka / Ta;
 
     }
   else
@@ -196,7 +196,7 @@ void gridDynExciterIEEEtype1::rootTest (const IOdata &args, const stateData &sD,
 
 }
 
-change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const stateData &, const solverMode & /*sMode*/, check_level_t /*level*/)
+change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &inputs, const stateData &, const solverMode & /*sMode*/, check_level_t /*level*/)
 {
 
   const double *es = m_state.data ();
@@ -204,7 +204,7 @@ change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const state
   change_code ret = change_code::no_change;
   if (opFlags[outside_vlim])
     {
-      test = es[2] - es[0] * Kf / Tf + (Vref + vBias - args[voltageInLocation]) - es[1] / Ka;
+      test = es[2] - es[0] * Kf / Tf + (Vref + vBias - inputs[voltageInLocation]) - es[1] / Ka;
 
 
       if (opFlags[etrigger_high])
@@ -213,7 +213,7 @@ change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const state
             {
               ret = change_code::jacobian_change;
 
-              LOG_NORMAL ("root change V=" + std::to_string (args[voltageInLocation]));
+              LOG_NORMAL ("root change V=" + std::to_string (inputs[voltageInLocation]));
               opFlags.reset (outside_vlim);
               opFlags.reset (etrigger_high);
               alert (this, JAC_COUNT_INCREASE);
@@ -223,7 +223,7 @@ change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const state
         {
           if (test > -0.001 * es[1] / Ka / Ta)
             {
-              LOG_NORMAL ("root change V=" + std::to_string (args[voltageInLocation]));
+              LOG_NORMAL ("root change V=" + std::to_string (inputs[voltageInLocation]));
               ret = change_code::jacobian_change;
               opFlags.reset (outside_vlim);
               alert (this, JAC_COUNT_INCREASE);
@@ -236,7 +236,7 @@ change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const state
       if (es[1] > Vrmax + 0.00001)
         {
 
-          LOG_NORMAL ("root toggle V=" + std::to_string (args[voltageInLocation]));
+          LOG_NORMAL ("root toggle V=" + std::to_string (inputs[voltageInLocation]));
           opFlags.set (etrigger_high);
           opFlags.set (outside_vlim);
           m_state[1] = Vrmax;
@@ -246,7 +246,7 @@ change_code gridDynExciterIEEEtype1::rootCheck ( const IOdata &args, const state
         }
       else if (es[1] < Vrmin - 0.00001)
         {
-          LOG_NORMAL ("root toggle V=" + std::to_string (args[voltageInLocation]));
+          LOG_NORMAL ("root toggle V=" + std::to_string (inputs[voltageInLocation]));
 
           opFlags.reset (etrigger_high);
           opFlags.set (outside_vlim);

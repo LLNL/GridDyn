@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #ifndef OTHERLOAD_H_
 #define OTHERLOAD_H_
 
-#include "gridLoad.h"
+#include "zipLoad.h"
 
 #include "timeSeriesMulti.h"
 #include <array>
@@ -22,7 +22,7 @@
 class gridBus;
 
 /** @brief a load with ramping of the load types*/
-class gridRampLoad : public gridLoad
+class gridRampLoad : public zipLoad
 {
 
 protected:
@@ -38,70 +38,26 @@ public:
   explicit gridRampLoad (const std::string &objName = "rampLoad_$");
   gridRampLoad (double rP, double rQ, const std::string &objName = "rampLoad_$");
 
-  virtual ~gridRampLoad ();
-
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+  virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
   void clearRamp ();
 };
 
-
-
-/** @brief a load with period pulses of various shapes*/
-/*
-class gridPulseLoad : public gridLoad
+/** class that allows a load to have a frequency dependent component*/
+class frequencyDepLoad: public zipLoad
 {
-public:
-  static const char invert_flag = object_flag5;
-  enum class pulse_type_t
-  {
-    square, triangle, gaussian, biexponential, exponential, cosine, flattop, monocycle
-  };
-  pulse_type_t ptype = pulse_type_t::square;
-protected:
-  double period = kBigNum;
-  double dutyCycle = 0.5;
-  double transTime = 0.05;
-  double A = 0.0;
-  double cycleTime =kBigNum;
-  double baseLoadP = 0.0;
-  double baseLoadQ = 0.0;
-  double shift = 0.0;                                 //!<storage for phase shift fraction (should be between 0 and 1)
-
-  double Pfrac = 1.0;
-  double Qfrac = 0.0;
-  gridDyn_time nextToggleTime = 0;
-public:
-  explicit gridPulseLoad (const std::string &objName = "pulseLoad_$");
-  gridPulseLoad (double rP, double rQ, const std::string &objName = "pulseLoad_$");
-
-  virtual ~gridPulseLoad ()
-  {
-  }
-
-  virtual coreObject * clone (coreObject *obj = nullptr) const override;
-
-  virtual void set (const std::string &param, const std::string &val) override;
-  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-
-  //virtual void loadUpdate (gridDyn_time ttime) override;
-  //virtual void loadUpdateForward (gridDyn_time ttime) override;
-  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
-  double pulseCalc (double td);
-protected:
+	
 };
-*/
+
+
 class gridSource;
 /** @brief a load that uses sources to calculate the values for the each of the load parameters
 eventually will replace most of the shaped loads*/
-class sourceLoad : public gridLoad
+class sourceLoad : public zipLoad
 {
 public:
 	enum sourceLoc
@@ -142,13 +98,13 @@ public:
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 	virtual void setFlag(const std::string &flag, bool val=true) override;
 
-	virtual void pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags) override;
-	virtual void dynObjectInitializeA(gridDyn_time time0, unsigned long flags) override;
+	virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags) override;
+	virtual void dynObjectInitializeA(coreTime time0, unsigned long flags) override;
 
-	virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+	virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 	
-	virtual void setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-	virtual void timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+	virtual void setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+	virtual void timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
 	coreObject *find(const std::string &obj) const override;
 private:
@@ -167,9 +123,9 @@ public:
 protected:
   double frequency = kBigNum;
   double phase = 0.0;
-  gridDyn_time lastCycle = negTime;
+  coreTime lastCycle = negTime;
   double Amp = 0.0;
-  gridDyn_time sinePeriod = maxTime;
+  coreTime sinePeriod = maxTime;
   double dfdt = 0.0;
   double dAdt = 0.0;
 
@@ -186,12 +142,12 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void loadUpdate (gridDyn_time ttime) override;
-  virtual void loadUpdateForward (gridDyn_time ttime) override;
-  virtual void updateLocalCache(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+  virtual void loadUpdate (coreTime ttime) override;
+  virtual void loadUpdateForward (coreTime ttime) override;
+  virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 };
 
 class gridRandom;
@@ -229,7 +185,7 @@ protected:
 
   double offset = 0;
 
-  gridDyn_time keyTime = timeZero;
+  coreTime keyTime = timeZero;
 
 public:
   explicit gridRandomLoad (const std::string &objName = "randomLoad_$");
@@ -239,12 +195,12 @@ public:
 
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void updateA (gridDyn_time time) override;
+  virtual void updateA (coreTime time) override;
 
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   bool isTriggered ()
   {
@@ -261,8 +217,8 @@ public:
   void setFlag (const std::string &flag, bool val = true) override;
 
 protected:
-  void nextStep (gridDyn_time triggerTime);
-  gridDyn_time ntime ();
+  void nextStep (coreTime triggerTime);
+  coreTime ntime ();
   double nval ();
 };
 */
@@ -277,7 +233,7 @@ public:
   };
 protected:
   std::string fname;			//!< the name of the file
-  timeSeriesMulti<double, gridDyn_time> schedLoad;		//!< time series containing the load information
+  timeSeriesMulti<double, coreTime> schedLoad;		//!< time series containing the load information
   gridUnits::units_t inputUnits = gridUnits::defUnit;
   double scaleFactor = 1.0;			//!< scaling factor on the load
   index_t currIndex = 0;			//!< the current index on timeSeries
@@ -287,15 +243,12 @@ protected:
 public:
   explicit gridFileLoad (const std::string &objName = "fileLoad_$");
 
-  ~gridFileLoad ()
-  {
-  }
   coreObject * clone (coreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void updateA (gridDyn_time time) override;
+  virtual void updateA (coreTime time) override;
 
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   virtual void setFlag (const std::string &param, bool val = true) override;
   virtual void set (const std::string &param, const std::string &val) override;
@@ -322,9 +275,9 @@ public:
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual double getRealPower  (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
-  virtual double getReactivePower (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
+  virtual void ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual double getRealPower  (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual double getRealPower (double V) const override;
   virtual double getReactivePower (double V) const override;
   virtual double getRealPower () const override;
@@ -346,14 +299,14 @@ public:
 
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual double getRealPower  (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
-  virtual double getReactivePower (const IOdata &args, const stateData &sD, const solverMode &sMode) const override;
+  virtual void ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual double getRealPower  (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual double getRealPower (double V) const override;
   virtual double getReactivePower (double V) const override;
   virtual double getRealPower () const override;

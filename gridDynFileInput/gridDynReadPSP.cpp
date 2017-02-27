@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,17 +15,18 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "primary/acBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "core/coreExceptions.h"
+#include "stringConversion.h"
 
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
 
 using namespace gridUnits;
+using namespace stringOps;
 
 void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderInfo &bri);
 void pspReadBranch (coreObject *parentObject, std::string line, std::string line2,double base, std::vector<gridBus *> busList, const basicReaderInfo &bri);
@@ -282,7 +283,7 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
   //get the baseVoltage
   temp = line.substr (18, 3);
 
-  paramRead (temp,val);
+  val = numeric_conversion<double>(temp,0.0);
 
   if (val > 0.0)
     {
@@ -291,14 +292,14 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
   //voltage and angle common to all bus types
   //get the actual voltage
   temp = line.substr (22, 4);
-  paramRead (temp,val);
+  val = numeric_conversion<double>(temp,0.0);
   if (val > 0.0)
     {
       bus->set ("voltage", val / 1000);
     }
   //get the angle
   temp = line.substr (26, 4);
-  paramRead (temp,val);
+  val = numeric_conversion<double>(temp,0.0);
   if (val != 0)
     {
       bus->set ("angle", val / 180 * kPI);
@@ -306,7 +307,7 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
 
   //get the bus type
   temp = line.substr (7, 1);
-  code = (temp[0] == ' ') ? 0 : intRead (temp);
+  code = (temp[0] == ' ') ? 0 : numeric_conversion<int> (temp,0);
   switch (code)
     {
     case 0:     //PQ
@@ -317,9 +318,9 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
       bus->set ("type", "pv");
       //get the Qmax and Qmin
       temp = line.substr (40, 5);
-      paramRead (temp,P);
+      P = numeric_conversion<double>(temp,0.0);
       temp = line.substr (45, 5);
-      paramRead (temp,Q);
+      Q = numeric_conversion<double>(temp,0.0);
       if (P != 0)
         {
           bus->set ("qmin", P / base);
@@ -330,17 +331,17 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
         }
       //get the desired voltage
       temp = line.substr (22, 4);
-      paramRead (temp,val);
+      val = numeric_conversion<double>(temp,0.0);
       bus->set ("vtarget", val / 1000);
       break;
     case 2:     //swing bus
       bus->set ("type", "slk");
       //get the desired voltage
       temp = line.substr (22, 4);
-      paramRead (temp,val);
+      val = numeric_conversion<double>(temp,0.0);
       bus->set ("vtarget", val / 1000);
       temp = line.substr (26, 4);
-      paramRead (temp, val);
+       val = numeric_conversion<double>(temp,0.0);
       if (val != 0)
         {
           bus->set ("atarget", val,deg);
@@ -350,24 +351,24 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
   //load section
   P = 0, Q = 0;
   temp = line.substr (55, 5);
-  paramRead (temp,P);
+  P = numeric_conversion<double>(temp,0.0);
   temp = line.substr (60, 5);
-  paramRead (temp,Q);
+  Q = numeric_conversion<double>(temp,0.0);
 
   if ((P != 0) || (Q != 0))
     {
-      ld = new gridLoad (P / base, Q / base);
+      ld = new zipLoad (P / base, Q / base);
       bus->add (ld);
     }
   //get the shunt impedance
   P = 0, Q = 0;
   temp = trim (line.substr (65, 5));
-  Q = doubleRead (temp);
+  Q = numeric_conversion<double> (temp,0.0);
   if (Q != 0)
     {
       if (ld == nullptr)
         {
-          ld = new gridLoad ();
+          ld = new zipLoad ();
           bus->add (ld);
         }
       if (Q != 0)
@@ -378,9 +379,9 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
   //get the generation
   P = 0, Q = 0;
   temp = trim (line.substr (30, 5));
-  P = doubleRead (temp);
+  P = numeric_conversion<double> (temp,0.0);
   temp = trim (line.substr (35, 5));
-  Q = doubleRead (temp);
+  Q = numeric_conversion<double> (temp,0.0);
 
   if ((P != 0) || (Q != 0))
     {
@@ -390,9 +391,9 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
       gen->set ("q", Q / base);
       //get the Qmax and Qmin
       temp = line.substr (40, 5);
-      paramRead (temp,P);
+      P = numeric_conversion<double>(temp,0.0);
       temp = line.substr (45, 5);
-      paramRead (temp,Q);
+      Q = numeric_conversion<double>(temp,0.0);
       if (P != 0)
         {
           gen->set ("qmin", P / base);
@@ -406,9 +407,9 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
   else if (bus->getType () != gridBus::busType::PQ)
     {
       temp = line.substr (40, 5);
-      paramRead (temp,P);
+      P = numeric_conversion<double>(temp,0.0);
       temp = line.substr (45, 5);
-      paramRead (temp,Q);
+      Q = numeric_conversion<double>(temp,0.0);
       if ((P != 0) || (Q != 0))
         {
           gen = new gridDynGenerator ();
@@ -541,7 +542,7 @@ void pspReadBranch (coreObject *parentObject, std::string line, std::string line
 	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
 	  std::string sub = lnk->getName();
 	  char m = 'a';
-	  while (lnk->getParent() == nullptr)
+	  while (lnk->isRoot())
 	  {
 		  lnk->setName(sub + '_' + m);
 		  m = m + 1;
@@ -569,28 +570,28 @@ void pspReadBranch (coreObject *parentObject, std::string line, std::string line
   //get the branch impedance
   R = 0, X = 0;
   temp = line.substr (17, 6);
-  paramRead (temp,R);
+  R = numeric_conversion<double>(temp, 0.0);
   temp = line.substr (23, 6);
-  paramRead (temp,X);
+  X = numeric_conversion<double>(temp, 0.0);
 
   lnk->set ("r", R / 100);
   lnk->set ("x", X / 100);
   //get line capacitance
   temp = line.substr (29, 6);
-  paramRead (temp,val);
+  val = numeric_conversion<double>(temp,0.0);
   lnk->set ("b", val / base);
 
   //turns ratio
   if (istransformer)
     {
       temp = line.substr (35, 5);
-      paramRead (temp,val);
+      val = numeric_conversion<double>(temp,0.0);
       if (val > 0.0)
         {
           lnk->set ("tap", val / 1000);
         }
       //tapAngle
-      val = doubleRead (trim (line.substr (50, 5)));
+      val = numeric_conversion (trim (line.substr (50, 5)),0.0);
       if (val != 0.0)
         {
           lnk->set ("tapangle", val / 1000);

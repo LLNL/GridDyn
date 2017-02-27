@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 #include <cmath>
 
@@ -35,17 +35,17 @@ coreObject *gridDynGenModel5type3::clone (coreObject *obj) const
 }
 
 
-void gridDynGenModel5type3::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynGenModel5type3::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->local.diffSize = 5;
-  offsets.local->local.algSize = 2;
-  offsets.local->local.jacSize = 40;
+  offsets.local().local.diffSize = 5;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.jacSize = 40;
 
 }
 // initial conditions
-void gridDynGenModel5type3::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGenModel5type3::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  computeInitialAngleAndCurrent (args, outputSet, Rs, Xq);
+  computeInitialAngleAndCurrent (inputs, desiredOutput, Rs, Xq);
   double *gm = m_state.data ();
 
   gm[5] = Vq + Rs * gm[1];
@@ -69,7 +69,7 @@ void gridDynGenModel5type3::objectInitializeB (const IOdata &args, const IOdata 
 
 }
 
-void gridDynGenModel5type3::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void gridDynGenModel5type3::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
   const double *gm = Loc.algStateLoc;
@@ -77,9 +77,9 @@ void gridDynGenModel5type3::derivative (const IOdata &args, const stateData &sD,
   const double *gmp = Loc.dstateLoc;
   double *dv = Loc.destDiffLoc;
   //Get the exciter field
-  double Eft = args[genModelEftInLocation];
-  double Pmt = args[genModelPmechInLocation];
-  updateLocalCache (args, sD, sMode);
+  double Eft = inputs[genModelEftInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
+  updateLocalCache (inputs, sD, sMode);
   // Id and Iq
 
   dv[0] = m_baseFreq * (gmd[1] - 1.0);
@@ -98,7 +98,7 @@ void gridDynGenModel5type3::derivative (const IOdata &args, const stateData &sD,
 }
 
 
-void gridDynGenModel5type3::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
+void gridDynGenModel5type3::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
 
@@ -119,7 +119,7 @@ void gridDynGenModel5type3::residual (const IOdata &args, const stateData &sD, d
     }
   if (hasDifferential (sMode))
     {
-      derivative (args, sD, resid, sMode);
+      derivative (inputs, sD, resid, sMode);
       //Get the exciter field
 
       // delta
@@ -134,27 +134,27 @@ void gridDynGenModel5type3::residual (const IOdata &args, const stateData &sD, d
 
 
 
-void gridDynGenModel5type3::jacobianElements (const IOdata &args, const stateData &sD,
+void gridDynGenModel5type3::jacobianElements (const IOdata &inputs, const stateData &sD,
                                               matrixData<double> &ad,
-                                              const IOlocs &argLocs, const solverMode &sMode)
+                                              const IOlocs &inputLocs, const solverMode &sMode)
 {
   //use the ad.assign Macro defined in basicDefs
   // ad.assign (arrayIndex, RowIndex, ColIndex, value) const
   Lp Loc = offsets.getLocations (sD, sMode, this);
 
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
   const double *gm = Loc.algStateLoc;
   const double *gmd = Loc.diffStateLoc;
   // const double *gmp = Loc.dstateLoc;
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   auto refAlg = Loc.algOffset;
   auto refDiff = Loc.diffOffset;
 
 
-  auto VLoc = argLocs[voltageInLocation];
-  auto TLoc = argLocs[angleInLocation];
+  auto VLoc = inputLocs[voltageInLocation];
+  auto TLoc = inputLocs[angleInLocation];
 
   // P
   if (hasAlgebraic (sMode))
@@ -197,7 +197,7 @@ void gridDynGenModel5type3::jacobianElements (const IOdata &args, const stateDat
 
 
 
-  ad.assignCheckCol (refDiff + 1 + 3, argLocs[genModelPmechInLocation], -kVal);           // governor: Pm
+  ad.assignCheckCol (refDiff + 1 + 3, inputLocs[genModelPmechInLocation], -kVal);           // governor: Pm
 
 
   //  rvd[2] = drat * ((Eft - gmd[2]) / Tdop - drat2 * gmp[3]) - gmp[2];
@@ -207,7 +207,7 @@ void gridDynGenModel5type3::jacobianElements (const IOdata &args, const stateDat
   ad.assign (refDiff + 2, refDiff + 2, -drat / Tdop - sD.cj);
   ad.assign (refDiff + 2, refDiff + 3, -drat * drat2 * sD.cj);
 
-  ad.assignCheckCol (refDiff + 2, argLocs[genModelEftInLocation], drat / Tdop);           // exciter: Ef
+  ad.assignCheckCol (refDiff + 2, inputLocs[genModelEftInLocation], drat / Tdop);           // exciter: Ef
 
   // rvd[3] = m_baseFreq * (Vd + Rs * gm[0] + gmd[1] / m_baseFreq * gmd[4]) - gmp[3];
   //rvd[4] = m_baseFreq * (Vq + Rs * gm[1] - gmd[2] / m_baseFreq * gmd[3]) - gmp[4];

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE (relay_test1)
 {
   std::string fname = std::string (RELAY_TEST_DIRECTORY "relay_test1.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   gds->dynInitialize (timeZero);
 
@@ -43,12 +43,13 @@ BOOST_AUTO_TEST_CASE (relay_test1)
   BOOST_CHECK (Yp != nullptr);
 }
 
+#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (relay_test2)
 {
   //test a bunch of different link parameters to make sure all the solve properly
   std::string fname = std::string (RELAY_TEST_DIRECTORY "relay_test2.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   gds->dynInitialize (timeZero);
 
@@ -64,17 +65,18 @@ BOOST_AUTO_TEST_CASE (relay_test2)
   std::vector<double> v;
   gds->getVoltage (v);
 
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
+#endif
 
-
+#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (relay_test_multi)
 {
   //test a bunch of different link parameters to make sure all the solve properly
   std::string fname = std::string (RELAY_TEST_DIRECTORY "relay_test_multi.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   gds->dynInitialize (timeZero);
   int cnt = gds->getInt("relaycount");
@@ -94,7 +96,7 @@ BOOST_AUTO_TEST_CASE (relay_test_multi)
   BOOST_REQUIRE((ps == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE) || (ps == gridDynSimulation::gridState_t::DYNAMIC_PARTIAL));
 
 }
-
+#endif
 
 BOOST_AUTO_TEST_CASE(test_bus_relay)
 {
@@ -103,23 +105,24 @@ BOOST_AUTO_TEST_CASE(test_bus_relay)
 
 }
 
+#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(test_differential_relay)
 {
   std::string fname = std::string(RELAY_TEST_DIRECTORY "test_differential_relay.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::summary;
   gds->run();
   auto obj = gds->find("bus1_to_bus3");
   BOOST_CHECK_EQUAL(static_cast<gridObject *>(obj)->isConnected(),false);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
-
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_control_relay)
 {
 	std::string fname = std::string(RELAY_TEST_DIRECTORY "test_control_relay.xml");
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	//gds->consolePrintLevel = print_level::no_print;
 	auto obj = gds->find("bus4::load4");
 	auto cr = dynamic_cast<controlRelay *>(gds->getRelay(0));
@@ -161,7 +164,7 @@ BOOST_AUTO_TEST_CASE(test_control_relay)
 BOOST_AUTO_TEST_CASE(test_relay_comms)
 {
 	std::string fname = std::string(RELAY_TEST_DIRECTORY "test_relay_comms.xml");
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	//gds->consolePrintLevel = print_level::no_print;
 	gds->dynInitialize();
 	auto obj = gds->find("sensor1");

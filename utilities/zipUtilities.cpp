@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -56,7 +56,7 @@ int zip(const std::string &file, const std::vector<std::string> &filesToZip)
 		filez[kk].assign(filesToZip[kk].c_str(), filesToZip[kk].c_str()+filesToZip[kk].size() + 1u); //1u to copy the NULL at the end of the string
 		argv[NUMBER_FIXED_ARGS + kk] = filez[kk].data();
 	}
-	/* minunz may change the current working directory */
+	/* minizip may change the current working directory */
 	auto cpath = boost::filesystem::current_path();
 	/* Zip */
 	int status = minizip(argc, argv.data());

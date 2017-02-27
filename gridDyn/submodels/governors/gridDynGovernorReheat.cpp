@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,10 +13,10 @@
 
 #include "submodels/otherGovernors.h"
 #include "generators/gridDynGenerator.h"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 using namespace gridUnits;
 
@@ -29,9 +29,9 @@ gridDynGovernorReheat::gridDynGovernorReheat (const std::string &objName) : grid
   T3 = 0.05;
   T4 = 12.0;
   T5 = 50.0;
-  offsets.local->local.algSize = 1;
-  offsets.local->local.diffSize = 3;
-  offsets.local->local.jacSize = 12;
+  offsets.local().local.algSize = 1;
+  offsets.local().local.diffSize = 3;
+  offsets.local().local.jacSize = 12;
 }
 
 coreObject *gridDynGovernorReheat::clone (coreObject *obj) const
@@ -56,16 +56,16 @@ gridDynGovernorReheat::~gridDynGovernorReheat ()
 }
 
 // initial conditions
-void gridDynGovernorReheat::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGovernorReheat::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
   if (Wref < 0)
     {
       Wref = m_baseFreq;
     }
 
-  double P = outputSet[0];
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  double P = desiredOutput[0];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
   if (P > Pmax)
     {
       P = Pmax;
@@ -88,7 +88,7 @@ void gridDynGovernorReheat::objectInitializeB (const IOdata &args, const IOdata 
 
 
 // residual
-void gridDynGovernorReheat::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
+void gridDynGovernorReheat::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode);
@@ -101,10 +101,10 @@ void gridDynGovernorReheat::residual (const IOdata &args, const stateData &sD, d
     }
   const double *gs = sD.state + offset;
 
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
 
-  double Tin = args[govpSetInLocation] + K * (Wref - omega);
+  double Tin = inputs[govpSetInLocation] + K * (Wref - omega);
   if (Tin > Pmax)
     {
       Tin = Pmax;
@@ -119,13 +119,13 @@ void gridDynGovernorReheat::residual (const IOdata &args, const stateData &sD, d
   resid[offset + 0] = gs[1] + T4 / T5 * (gs[2] + T3 / T2 * gs[3]) - gs[0];
 }
 
-void gridDynGovernorReheat::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void gridDynGovernorReheat::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   const double *gs = sD.state + offset;
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
-  double Tin = args[govpSetInLocation] + K * (Wref - omega);
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
+  double Tin = inputs[govpSetInLocation] + K * (Wref - omega);
   if (Tin > Pmax)
     {
       Tin = Pmax;
@@ -141,7 +141,7 @@ void gridDynGovernorReheat::derivative (const IOdata &args, const stateData &sD,
 
 
 
-void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorReheat::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad,  const IOlocs &inputLocs, const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset  (sMode);
   if (isAlgebraicOnly (sMode))
@@ -151,10 +151,10 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
     }
 
 
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
   bool limitTin = false;
-  double Tin = args[govpSetInLocation] + K * (Wref - omega);
+  double Tin = inputs[govpSetInLocation] + K * (Wref - omega);
   if (Tin > Pmax)
     {
       Tin = Pmax;
@@ -168,7 +168,7 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
   int refI = offset;
   //use the ad.assign Macro defined in basicDefs
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
-  bool linkOmega = (argLocs[govOmegaInLocation] != kNullLocation);
+  bool linkOmega = (inputLocs[govOmegaInLocation] != kNullLocation);
 
   /* if (opFlags.test (uses_deadband))
      {
@@ -186,11 +186,11 @@ void gridDynGovernorReheat::jacobianElements (const IOdata &args, const stateDat
     {
       if (linkOmega)
         {
-          ad.assign (refI + 3, argLocs[govOmegaInLocation], K / T1);
+          ad.assign (refI + 3, inputLocs[govOmegaInLocation], K / T1);
         }
-      if (argLocs[govpSetInLocation] != kNullLocation)
+      if (inputLocs[govpSetInLocation] != kNullLocation)
         {
-          ad.assign (refI + 3, argLocs[govpSetInLocation], 1.0 / T1);
+          ad.assign (refI + 3, inputLocs[govpSetInLocation], 1.0 / T1);
         }
       ad.assign (refI + 3, refI + 3, -1.0 / T1 - sD.cj);
     }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,14 +12,14 @@
 */
 
 #include "controlRelay.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/controlMessage.h"
 #include "simulation/gridSimulation.h"
-#include "eventQueue.h"
-#include "gridEvent.h"
-#include "gridCoreTemplates.h"
+#include "events/eventQueue.h"
+#include "events/gridEvent.h"
+#include "core/coreObjectTemplates.h"
 #include "stringOps.h"
 
 #include <boost/format.hpp>
@@ -99,22 +99,9 @@ void controlRelay::set (const std::string &param, double val, gridUnits::units_t
 
 }
 
-void controlRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void controlRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  if (autoName > 0)
-    {
-      std::string newName = generateAutoName (autoName);
-      if (!newName.empty ())
-        {
-          if (newName != name)
-            {
-              name = newName;
-              alert (this, OBJECT_NAME_CHANGE);
-            }
-        }
-    }
-
-  rootSim = dynamic_cast<gridSimulation *> (parent->find ("root"));
+  rootSim = dynamic_cast<gridSimulation *> (getRoot());
 
 
   gridRelay::dynObjectInitializeA (time0, flags);
@@ -129,7 +116,7 @@ void controlRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags
 }
 
 
-void controlRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void controlRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d taken") % conditionNum % ActionNum ).str ());
 
@@ -141,7 +128,6 @@ void controlRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_
 void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> msg)
 {
   auto m = std::dynamic_pointer_cast<controlMessage> (msg);
-  std::shared_ptr<controlMessage> reply;
   index_t actnum;
   ++instructionCounter;
 
@@ -158,17 +144,17 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           else
             {
               auto fea = generateSetEvent (prevTime + actionDelay, sourceID, m);
-              rootSim->add (fea);
+              rootSim->add (std::move(fea));
             }
         }
       else
         {
-          auto gres = std::make_shared<controlMessage> (controlMessage::SET_SCHEDULED);
+          auto gres = std::make_unique<controlMessage> (controlMessage::SET_SCHEDULED);
           gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
-          commLink->transmit (sourceID, gres);
+          commLink->transmit (sourceID, std::move(gres));
           //make the event
           auto fea = generateSetEvent (m->m_time, sourceID, m);
-          rootSim->add (fea);
+          rootSim->add (std::move(fea));
 
         }
       break;
@@ -185,16 +171,16 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           else
             {
               auto fea = generateGetEvent (prevTime + measureDelay, sourceID, m);
-              rootSim->add (fea);
+              rootSim->add (std::move(fea));
             }
         }
       else
         {
-          auto gres = std::make_shared<controlMessage> (controlMessage::GET_SCHEDULED);
+          auto gres = std::make_unique<controlMessage> (controlMessage::GET_SCHEDULED);
           gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
-          commLink->transmit (sourceID, gres);
+          commLink->transmit (sourceID, std::move(gres));
           auto fea = generateGetEvent (m->m_time,sourceID,m);
-          rootSim->add (fea);
+          rootSim->add (std::move(fea));
         }
       break;
     case controlMessage::GET_MULTIPLE:
@@ -218,47 +204,59 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           if ((actions[actnum].executed == false) && (actions[actnum].triggerTime > actionDelay))
             {            //cannot cancel actions closer than the inherent actionDelay
               actions[actnum].executed = true;
-              auto gres = std::make_shared<controlMessage> (controlMessage::CANCEL_SUCCESS);
+              auto gres = std::make_unique<controlMessage> (controlMessage::CANCEL_SUCCESS);
               gres->m_actionID = m->m_actionID;
-              commLink->transmit (sourceID, gres);
+              commLink->transmit (sourceID, std::move(gres));
             }
           else
             {
-              auto gres = std::make_shared<controlMessage> (controlMessage::CANCEL_FAIL);
+              auto gres = std::make_unique<controlMessage> (controlMessage::CANCEL_FAIL);
               gres->m_actionID = m->m_actionID;
-              commLink->transmit (sourceID, gres);
+              commLink->transmit (sourceID, std::move(gres));
             }
         }
       else
         {
-          auto gres = std::make_shared<controlMessage> (controlMessage::CANCEL_FAIL);
+          auto gres = std::make_unique<controlMessage> (controlMessage::CANCEL_FAIL);
           gres->m_actionID = m->m_actionID;
-          commLink->transmit (sourceID, gres);
+          commLink->transmit (sourceID, std::move(gres));
         }
       break;
     }
 
 }
 
+std::string controlRelay::generateCommName()
+{
+	if (autoName > 0)
+	{
+		auto aname=generateAutoName(autoName);
+		if (aname != getName())
+		{
+			setName(aname);
+		}
+		return aname;
+	}
+	else
+	{
+		return gridRelay::generateCommName();
+	}
+}
+
 std::string controlRelay::generateAutoName (int code)
 {
-  std::string autoname = "";
-
-
   switch (code)
     {
     case 1:
-      autoname = m_sinkObject->getName ();
+      return m_sinkObject->getName ();
       break;
     case 2:
-      autoname = m_sourceObject->getName ();
+      return m_sourceObject->getName ();
       break;
     default:
-      ;
+      return getName();
       //do nothing
     }
-
-  return autoname;
 }
 
 
@@ -276,11 +274,11 @@ change_code controlRelay::executeAction (index_t index)
       if (cact.measureAction)
         {
           double val = m_sourceObject->get (cact.field, cact.unitType);
-          auto gres = std::make_shared<controlMessage> (controlMessage::GET_RESULT);
+          auto gres = std::make_unique<controlMessage> (controlMessage::GET_RESULT);
           gres->m_field = cact.field;
           gres->m_value = val;
           gres->m_time = prevTime;
-          commLink->transmit (cact.sourceID, gres);
+          commLink->transmit (cact.sourceID, std::move(gres));
           return change_code::no_change;
         }
       else
@@ -288,21 +286,21 @@ change_code controlRelay::executeAction (index_t index)
 		  try
 		  {
 			  m_sinkObject->set(cact.field, cact.val, cact.unitType);
-			  if (!opFlags.test(no_message_reply))               //unless told not to respond return with the
+			  if (!opFlags[no_message_reply])               //unless told not to respond return with the
 			  {
-				  auto gres = std::make_shared<controlMessage>(controlMessage::SET_SUCCESS);
+				  auto gres = std::make_unique<controlMessage>(controlMessage::SET_SUCCESS);
 				  gres->m_actionID = cact.actionID;
-				  commLink->transmit(cact.sourceID, gres);
+				  commLink->transmit(cact.sourceID, std::move(gres));
 			  }
 			  return change_code::parameter_change;
 		  }
 		  catch (const gridDynException &)
 		  {
-			  if (!opFlags.test(no_message_reply))               //unless told not to respond return with the
+			  if (!opFlags[no_message_reply])               //unless told not to respond return with the
 			  {
-				  auto gres = std::make_shared<controlMessage>(controlMessage::SET_FAIL);
+				  auto gres = std::make_unique<controlMessage>(controlMessage::SET_FAIL);
 				  gres->m_actionID = cact.actionID;
-				  commLink->transmit(cact.sourceID, gres);
+				  commLink->transmit(cact.sourceID, std::move(gres));
 			  }
 			  return change_code::execution_failure;
 		 }
@@ -312,8 +310,26 @@ change_code controlRelay::executeAction (index_t index)
   return change_code::not_triggered;
 }
 
+void controlRelay::updateObject(coreObject *obj, object_update_mode mode)
+{
+	gridRelay::updateObject(obj, mode);
+	if (opFlags[dyn_initialized])
+	{
+		rootSim = dynamic_cast<gridSimulation *> (getRoot());
 
-std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (gridDyn_time eventTime, std::uint64_t sourceID,std::shared_ptr<controlMessage> m)
+		if (dynamic_cast<gridLink *> (m_sourceObject))
+		{
+			opFlags.set(link_type_source);
+		}
+		if (dynamic_cast<gridLink *> (m_sinkObject))
+		{
+			opFlags.set(link_type_sink);
+		}
+	}
+	
+}
+
+std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime eventTime, std::uint64_t sourceID,std::shared_ptr<controlMessage> m)
 {
   
   auto act = getFreeAction ();
@@ -337,14 +353,14 @@ std::shared_ptr<functionEventAdapter> controlRelay::generateGetEvent (gridDyn_ti
   {
 	  actions[act].unitType = gridUnits::getUnits(m->m_units);
   }
-  auto fea = std::make_shared<functionEventAdapter> ([act, this]() {
+  auto fea = std::make_unique<functionEventAdapter> ([act, this]() {
     return executeAction (act);
   },eventTime);
   return fea;
 }
 
 
-std::shared_ptr<functionEventAdapter> controlRelay::generateSetEvent (gridDyn_time eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> m)
+std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<controlMessage> m)
 {
 	auto act = getFreeAction();
 	actions[act].actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
@@ -377,7 +393,7 @@ std::shared_ptr<functionEventAdapter> controlRelay::generateSetEvent (gridDyn_ti
 	  actions[act].unitType = gridUnits::getUnits(m->m_units);
   }
  
-  auto fea = std::make_shared<functionEventAdapter> ([act, this]() {
+  auto fea = std::make_unique<functionEventAdapter> ([act, this]() {
     return executeAction (act);
   },eventTime);
   return fea;

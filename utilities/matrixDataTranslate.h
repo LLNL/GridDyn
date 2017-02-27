@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -19,7 +19,7 @@
 #include <array>
 
 /** @brief class implementation translation for another matrixData object
- most function are just simple forwarding to the underlying matrixData object
+ most functions are just simple forwarding to the underlying matrixData object
 except the assign and at operator which basically means the matrixData can interact with a small subset of a bigger matrixData object
 though rowIndex, colIndex, and val will still return the original values.  The intent of this class is not to replace the interactions with another
 it is to act as a filter in cases where elements need to be added but the row needs a translation,  using it outside that purpose could lead to issues
@@ -37,6 +37,11 @@ public:
 		Trow.fill((index_t)(-1));
 		//setRowLimit(CT);
 	};
+	explicit matrixDataTranslate(matrixData<Y> &input):matrixDataContainer<Y>(input)
+	{
+		Trow.fill((index_t)(-1));
+		//setRowLimit(CT);
+	};
 
 	void assign(index_t row, index_t col, Y num) override
 	{
@@ -44,7 +49,7 @@ public:
 		//and we do automatic checking of the translation and if it isn't valid don't do the assignment
 		if ((row< CT) && (Trow[row] < matrixData<Y>::rowLim))
 		{
-			ad->assign(Trow[row], col, num);
+			matrixDataContainer<Y>::ad->assign(Trow[row], col, num);
 		}
 	};
 
@@ -52,7 +57,7 @@ public:
 	{
 		if ((rowN < CT) && (Trow[rowN] < matrixData<Y>::rowLim))
 		{
-			return ad->at(Trow[rowN], colN);
+			return matrixDataContainer<Y>::ad->at(Trow[rowN], colN);
 		}
 		else
 		{

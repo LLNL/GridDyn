@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -34,20 +34,11 @@ commManager::commManager(const commManager &cm)
 	}
 	if (cm.commPropBuffer)
 	{
-		commPropBuffer = new propertyBuffer(*cm.commPropBuffer);
+		commPropBuffer = std::make_unique<propertyBuffer>(*cm.commPropBuffer);
 	}
 }
 
-commManager::commManager(commManager &&cm): commName(std::move(cm.commName)), commType(std::move(cm.commType)),commDestName(std::move(cm.commDestName))
-{
-	commId = cm.commId;
-	commDestId = cm.commDestId;
-
-	commLink = cm.commLink;
-
-	commPropBuffer = cm.commPropBuffer;
-	cm.commPropBuffer = nullptr;
-}
+commManager::commManager(commManager &&cm) = default;
 
 
 commManager &commManager::operator=(const commManager &cm)
@@ -61,45 +52,31 @@ commManager &commManager::operator=(const commManager &cm)
 	{
 		commLink = cm.commLink->clone();
 	}
-	if (commPropBuffer)
-	{
-		delete commPropBuffer;
-	}
+	
 	if (cm.commPropBuffer)
 	{
-		commPropBuffer = new propertyBuffer(*(cm.commPropBuffer));
+		commPropBuffer = std::make_unique<propertyBuffer>(*(cm.commPropBuffer));
 	}
-	return *this;
-}
-commManager &commManager::operator=(commManager &&cm)
-{
-	commName = std::move(cm.commName);
-	commId = cm.commId;
-	commType = std::move(cm.commType);
-	commDestName = cm.commDestName;
-	commDestId = std::move(cm.commDestId);
-	commLink = cm.commLink;
-
-	commPropBuffer = cm.commPropBuffer;
-	cm.commPropBuffer = nullptr;
-	
-	return *this;
-}
-
-commManager::~commManager()
-{
-	if (commPropBuffer)
+	else
 	{
-		delete commPropBuffer;
+		commPropBuffer = nullptr;
 	}
+	return *this;
+}
+commManager &commManager::operator=(commManager &&cm) = default;
 
+commManager::~commManager() = default;
+
+void commManager::setName(const std::string &name)
+{
+	commName = name;
 }
 
 bool commManager::set(const std::string &param, const std::string &val)
 {
 	if ((param == "commname")||(param=="name"))
 	{
-		commName = val;
+		setName(val);
 		
 	}
 	else if (param == "commtype")
@@ -128,7 +105,7 @@ bool commManager::set(const std::string &param, const std::string &val)
 		{
 			if (!commPropBuffer)
 			{
-				commPropBuffer = new propertyBuffer;
+				commPropBuffer = std::make_unique<propertyBuffer>();
 			}
 			commPropBuffer->set(param.substr(6), val);
 		}
@@ -159,7 +136,7 @@ bool commManager::set(const std::string &param, double val)
 		{
 			if (!commPropBuffer)
 			{
-				commPropBuffer = new propertyBuffer;
+				commPropBuffer = std::make_unique<propertyBuffer>();
 			}
 			commPropBuffer->set(param.substr(6), val);
 		}
@@ -185,7 +162,7 @@ bool commManager::setFlag(const std::string &flag, bool val)
 		{
 			if (!commPropBuffer)
 			{
-				commPropBuffer = new propertyBuffer;
+				commPropBuffer = std::make_unique<propertyBuffer>();
 			}
 			commPropBuffer->setFlag(flag.substr(6), val);
 		}
@@ -204,7 +181,6 @@ std::shared_ptr<gridCommunicator> commManager::build()
 	if (commPropBuffer)
 	{
 		commPropBuffer->apply(commLink.get());
-		delete commPropBuffer;
 		commPropBuffer = nullptr;
 	}
 	return commLink;

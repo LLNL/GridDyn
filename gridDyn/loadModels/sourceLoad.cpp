@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,13 +14,13 @@
 #include "sourceModels/gridSource.h"
 #include "sourceModels/sourceTypes.h"
 #include "loadModels/otherLoads.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 #include <map>
 #include <cmath>
 
 
-sourceLoad::sourceLoad(const std::string &objName) :gridLoad(objName)
+sourceLoad::sourceLoad(const std::string &objName) :zipLoad(objName)
 {
 	sourceLink.fill(-1);
 }
@@ -37,7 +37,7 @@ sourceLoad::sourceLoad(sourceType type, const std::string &objName):sourceLoad(o
 
 coreObject * sourceLoad::clone(coreObject *obj) const
 {
-	sourceLoad *nobj = cloneBase<sourceLoad, gridLoad>(this, obj);
+	sourceLoad *nobj = cloneBase<sourceLoad, zipLoad>(this, obj);
 	if (nobj == nullptr)
 	{
 		return obj;
@@ -192,7 +192,8 @@ void sourceLoad::remove(gridSource *obj)
 {
 	if ((obj->locIndex != kNullLocation) && (obj->locIndex < sources.size()))
 	{
-		if ((sources[obj->locIndex]) && (sources[obj->locIndex]->getID() == obj->getID()))
+
+		if (isSameObject(sources[obj->locIndex],obj))
 		{
 			sources[obj->locIndex] = nullptr;
 			obj->setParent(nullptr);
@@ -265,7 +266,7 @@ void sourceLoad::setFlag(const std::string &flag, bool val)
 	}
 	else
 	{
-		gridLoad::setFlag(flag, val);
+		zipLoad::setFlag(flag, val);
 	}
 }
 
@@ -286,25 +287,25 @@ void sourceLoad::set(const std::string &param, const std::string &val)
 	}
 	else
 	{
-		gridLoad::set(param, val);
+		zipLoad::set(param, val);
 	}
 }
 
-void sourceLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void sourceLoad::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
-	for (auto &src : subObjectList)
+	for (auto &src : getSubObjects())
 	{
-		static_cast<gridSource *>(src)->timestep(ttime, emptyArguments, sMode);
+		static_cast<gridSource *>(src)->timestep(ttime, noInputs, sMode);
 	}
 	getSourceLoads();
 	prevTime = ttime;
-	gridLoad::timestep(ttime, args, sMode);
+	zipLoad::timestep(ttime, inputs, sMode);
 }
 
-void sourceLoad::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void sourceLoad::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	
-	for (auto &src : subObjectList)
+	for (auto &src : getSubObjects())
 	{
 		src->setState(ttime,state,dstate_dt,sMode);
 	}
@@ -361,13 +362,13 @@ void sourceLoad::set(const std::string &param, double val, gridUnits::units_t un
 					return;
 				}
 			}
-			gridLoad::set(param, val, unitType);
+			zipLoad::set(param, val, unitType);
 		}
 	}
 	
 }
 
-void sourceLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void sourceLoad::pFlowObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	//Do a check on the sources;
 	int fnd = 0;
@@ -392,17 +393,17 @@ void sourceLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 	getSourceLoads();
 }
 
-void sourceLoad::dynObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void sourceLoad::dynObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	gridSecondary::dynObjectInitializeA(time0, flags);
 	getSourceLoads();
 }
 
-void sourceLoad::updateLocalCache(const IOdata & /*args*/, const stateData &sD, const solverMode &sMode)
+void sourceLoad::updateLocalCache(const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode)
 {
 	for (auto &src : sources)
 	{
-		src->updateLocalCache(emptyArguments,sD,sMode);
+		src->updateLocalCache(noInputs,sD,sMode);
 	}
 	getSourceLoads();
 }

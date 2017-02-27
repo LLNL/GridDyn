@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridBus.h"
 #include "linkModels/gridLink.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "vectorOps.hpp"
@@ -32,11 +32,11 @@ BOOST_AUTO_TEST_CASE (area_test1)
 {
   std::string fname = std::string (AREA_TEST_DIRECTORY "area_test1.xml");
 
-  gds = static_cast<gridDynSimulation *>(readSimXMLFile (fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile (fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   gds->pFlowInitialize ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
 
   int count;
   count= gds->getInt ("totalareacount");
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
   BOOST_CHECK_EQUAL (count, 9);
 
   gds->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 
   auto st= gds->getState();
@@ -58,11 +58,11 @@ BOOST_AUTO_TEST_CASE (area_test1)
   fname = std::string (AREA_TEST_DIRECTORY "area_test0.xml");
 
 
-  gds2 = static_cast<gridDynSimulation *>(readSimXMLFile (fname));
+  gds2 = readSimXMLFile (fname);
 
 
   gds2->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 
   auto st2 = gds2->getState();
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
 
 BOOST_AUTO_TEST_CASE(area_test_add)
 {
-	auto area = new gridArea("area1");
+	auto area = std::make_unique<gridArea>("area1");
 
 	auto bus1 = new gridBus("bus1");
 	try
@@ -101,15 +101,13 @@ BOOST_AUTO_TEST_CASE(area_test_add)
 	try
 	{
 		area->add(bus2);
-		BOOST_CHECK(bus2->getParent()->getID() == area->getID());
+		BOOST_CHECK(isSameObject(bus2->getParent(),area.get()));
 	}
 	catch (...)
 	{
 		BOOST_CHECK(false);
 	}
 	
-
-	delete area;
 
 }
 

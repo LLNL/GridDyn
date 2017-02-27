@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "submodels/gridControlBlocks.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 integralBlock::integralBlock (const std::string &objName) : basicBlock (objName)
 {
@@ -41,21 +41,21 @@ coreObject *integralBlock::clone (coreObject *obj) const
 
 
 // initial conditions
-void integralBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void integralBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
   index_t loc = limiter_diff;
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
       m_state[loc] = iv;
       if (limiter_diff > 0)
         {
-          basicBlock::objectInitializeB (args, outputSet,fieldSet);
+          basicBlock::dynObjectInitializeB (inputs, desiredOutput,fieldSet);
         }
-      m_dstate_dt[loc] = K * (args[0] + bias);
+      m_dstate_dt[loc] = K * (inputs[0] + bias);
     }
   else
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     }
 
 }
@@ -100,7 +100,7 @@ void integralBlock::jacElements (double input, double didt, const stateData &sD,
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 
-double integralBlock::step (gridDyn_time ttime, double inputA)
+double integralBlock::step (coreTime ttime, double inputA)
 {
 
   double dt = ttime - prevTime;

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -69,13 +69,14 @@ class sundialsInterface : public solverInterface
 {
 protected:
 	count_t maxNNZ = 0;															//!< the maximum number of non-zeros that might be needed
-
+	bool use_omp = false;														//!< helper variable to handle omp functionality
   N_Vector state = nullptr;                                                        //!< state vector
   N_Vector dstate_dt = nullptr;                                                  //!< dstate_dt information
   N_Vector abstols = nullptr;                                                     //!< tolerance vector
   N_Vector consData = nullptr;                                                     //!<constraint type Vector
   N_Vector scale = nullptr;                                                      //!< scaling vector
   N_Vector types = nullptr;						//!< type data
+  void *solverMem = nullptr;                                                            //!< the memory used by a specific solver internally
 public:
   explicit sundialsInterface (const std::string &objName = "sundials");
   /** @brief constructor loading the solverInterface structure*
@@ -97,8 +98,21 @@ public:
   virtual void allocate (count_t size, count_t numroots) override;
   virtual void setMaxNonZeros(count_t size) override;
   virtual double get (const std::string &param) const override;
+
+  /** @brief get the dedicated memory space of the solver
+  @return a void pointer to the memory location of the solver specific memory
+  */
+  void * getSolverMem() const
+  {
+	  return solverMem;
+  }
+  friend int sundialsJacDense(long int Neq, realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+  friend int sundialsJacSparse(realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 };
 
+
+int sundialsJacDense(long int Neq, realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+int sundialsJacSparse(realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 /** @brief solverInterface interfacing to the SUNDIALS kinsol solver
 */
 class kinsolInterface : public sundialsInterface
@@ -117,9 +131,9 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (gridDyn_time time0) override;
+  virtual void initialize (coreTime time0) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
-  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
   void setConstraints () override;
 
   void logSolverStats (print_level logLevel, bool iconly = false) const override;
@@ -160,7 +174,7 @@ private:
   std::vector<double> tempState;                                          //!<temporary holding location for a state vector
 public:
   /** @brief constructor*/
-  idaInterface (const std::string &objName = "ida");
+  explicit idaInterface (const std::string &objName = "ida");
   /** @brief alternate constructor
   @param[in] gds  the gridDynSimulation object to connect to
   @param[in] sMode the solverMode to solve For
@@ -173,11 +187,11 @@ public:
 
   virtual void allocate (count_t size, count_t numroots = 0) override;
   void setMaxNonZeros (count_t size) override;
-  virtual void initialize (gridDyn_time t0) override;
+  virtual void initialize (coreTime t0) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
-  int calcIC (gridDyn_time time0, gridDyn_time tstep0, ic_modes mode, bool constraints) override;
+  int calcIC (coreTime time0, coreTime tstep0, ic_modes mode, bool constraints) override;
   virtual void getCurrentData () override;
-  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
+  int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
@@ -207,8 +221,6 @@ public:
 private:
   matrixDataSparse<double> a1;                         //!< array structure for holding the Jacobian information
   std::vector<double> tempState;                                                //!<temporary holding location for a state vector
-  bool use_bdf = false;
-  bool use_newton = false;
   double maxStep = -1.0;
   double minStep = -1.0;
   double step = 0.0;
@@ -225,19 +237,19 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (gridDyn_time time0) override;
-  void setMaxNonZeros (count_t size) override;
+  virtual void initialize (coreTime time0) override;
+  virtual void setMaxNonZeros (count_t size) override;
   virtual void sparseReInit (sparse_reinit_modes mode) override;
   virtual void getCurrentData () override;
-  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
+  virtual int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
-  void logSolverStats (print_level logLevel, bool iconly = false) const override;
-  void logErrorWeights (print_level logLevel) const override;
+  virtual void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  virtual void logErrorWeights (print_level logLevel) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
-  double get (const std::string &param) const override;
+  virtual double get (const std::string &param) const override;
   // declare friend some helper functions
   friend int cvodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_data);
   friend int cvodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
@@ -263,8 +275,6 @@ private:
   matrixDataSparse<double> a1;                                                                                                           //!< array structure for holding the Jacobian information
 
   std::vector<double> tempState;                                                      //!<temporary holding location for a state vector
-  bool use_bdf = false;
-  bool use_newton = false;
   double maxStep = -1.0;
   double minStep = -1.0;
   double step = 0.0;
@@ -281,19 +291,19 @@ public:
 
   virtual std::shared_ptr<solverInterface> clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (gridDyn_time time0) override;
-  void setMaxNonZeros (count_t size) override;
+  virtual void initialize (coreTime time0) override;
+  virtual void setMaxNonZeros (count_t size) override;
   virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;
   virtual void getCurrentData () override;
-  int solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode = step_mode::normal) override;
+  virtual int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
   virtual void getRoots () override;
   virtual void setRootFinding (count_t numRoots) override;
 
-  void logSolverStats (print_level logLevel, bool iconly = false) const override;
-  void logErrorWeights (print_level logLevel) const override;
+  virtual void logSolverStats (print_level logLevel, bool iconly = false) const override;
+  virtual void logErrorWeights (print_level logLevel) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
-  double get (const std::string &param) const override;
+  virtual double get (const std::string &param) const override;
   // declare friend some helper functions
   friend int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_data);
   friend int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #ifndef GRIDOBJECT_H_
 #define GRIDOBJECT_H_
-#include "gridCore.h"
+#include "core/coreObject.h"
 #include "gridObjectsHelperClasses.h"
 
 #include <bitset>
@@ -40,13 +40,15 @@ class gridObject : public coreObject
 {
 
 protected:
-	count_t numParams = 0;       //!< the number of parameters to store in an archive
+	count_t m_inputSize = 0;            //!< the required size of the inputs input
+	count_t m_outputSize = 0;            //!< the number of outputs the subModel produces
 	double m_baseFreq = kWS;              //!<[radians per second] the base frequency of the system default to 60Hz
-	double systemBasePower = defaultBasePower;		//!<[MVA] base power for all PU computations 
+	double systemBasePower = 100;		//!<[MVA] base power for all PU computations 
     offsetTable offsets;              //!<a table of offsets for the different solver modes
   std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false
   std::vector<double> m_state;              //!<storage location for internal state
   std::vector<double> m_dstate_dt;             //!<storage location for internal state differential
+private:
   std::vector<gridObject *>subObjectList;        //!<a vector of all the subObjects;
   // stringVec stateNames;           //!<a vector with the names of the states
 public:
@@ -55,13 +57,95 @@ public:
   /** @brief virtual destructor*/
   virtual ~gridObject ();
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
+  /** @brief update internal object linkages to use objects from a new tree
+  @details after a clone call on a full simulation
+  it is possible that there could be internal linkages inside of objects still pointing to the original tree
+  This function is intended to allow object to update any internal object pointers so they point appropriately
+  to new object inside the new tree
+  The call should really only be initiated by a root object
+  @param[in] newRoot the root of the new simulation tree
+  */
+  virtual void updateObjectLinkages(coreObject *newRoot);
+  
+  /** @brief initialize object for power flow part A
+  after part A of the initialization the object should know how many states it has as part of the powerflow, before this calling the load sizes
+  powerflow related solverModes will be unspecified. This function is a wrapper around the pFlowObjectInitializeA function which does the local object init
+  this function handles any global setup and makes sure all the flags are set properly
+  @param[in] time0 the time0 at which the power flow will take place
+  @param[in] flags  any flags indicating how the initialization or execution will take place
+  @return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
+  */
+  virtual void pFlowInitializeA(coreTime time0, unsigned long flags);
+
+  /** @brief initialize object for power flow part B
+  partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
+  This function is a wrapper around the pFlowObjectInitializeB function which does the local object init
+  this function handles any global setup and makes sure all the flags are set properly
+  */
+  virtual void pFlowInitializeB();
+  
+  /** @brief initialize object for dynamic simulation part A
+  after part A of the initialization the object should know how many states it has as part of the dynamic simulation, before this calling the load sizes
+  dynamic related solverModes will be unspecified. This function is a wrapper around the dynObjectInitializeA function which does the local object init
+  this function handles any global setup and makes sure all the flags are set properly
+  @param[in] time0 the time0 at which the power flow will take place
+  @param[in] flags  any flags indicating how the initialization or execution will take place
+  */
+  virtual void dynInitializeA(coreTime time0, unsigned long flags);
+
+  /** @brief initialize object for dynamic simulation part B
+  partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
+  This function is a wrapper around the dynObjectInitializeB function which does the local object init
+  this function handles any global setup and makes sure all the flags are set properly
+  @param[in]  desiredOutput the desired output of the gridPrimary
+  */
+  virtual void dynInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet);
+protected: //don't allow these functions to be called directly in the public interface
+    /** @brief initialize local object for power flow part A
+	see pFlowInitializeA for more details
+	@param[in] time0 the time0 at which the power flow will take place
+	@param[in] flags  any flags indicating how the initialization or execution will take place
+	*/
+	virtual void pFlowObjectInitializeA(coreTime time0, unsigned long flags);
+
+	/** @brief initialize local object for power flow part B
+	see pFlowInitializeB for more details
+	*/
+	virtual void pFlowObjectInitializeB();
+		   /** @brief initialize local object for dynamics part A
+	see dynInitializeA for more details
+	@param[in] time0 the time at which the power flow will take place
+	@param[in] flags  any flags indicating how the initialization or execution will take place
+	*/
+	virtual void dynObjectInitializeA(coreTime time0, unsigned long flags);
+
+	/** @brief initialize local object for dynamics part B
+	see dynInitializeB for more details
+	@param[in]  the desired initial output of the gridPrimary
+	*/
+	virtual void dynObjectInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet);
+public:
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype = paramStringType::all) const override;
   virtual void set (const std::string &param, const std::string &val) override;
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  /** check if the parameter being set is for a subobject, determine which sub object and perform the set operation*/
+  bool subObjectSet(const std::string &param, double val, gridUnits::units_t unitType);
+  /** check if the parameter being set is for a subobject, determine which sub object and perform the set operation*/
+  bool subObjectSet(const std::string &param, const std::string &val);
+  /** check if the parameter being set is for a subobject, determine which sub object and perform the setFlag operation*/
+  bool subObjectSet(const std::string &flag, bool val);
   virtual void setFlag (const std::string &flag, bool val = true) override;
+  /** there are few flags that parents should be able to set in their children, this function allows that to take place
+  @param[in] flagID  the numerical location of the flag
+  @param[in] val the value to set the flag too
+  @param[in] parent the identifier of the parent, it must match the objects parent
+  */
+  void parentSetFlag(index_t flagID, bool val, coreObject *parent);
   virtual bool getFlag (const std::string &param) const override;
   virtual double get(const std::string &param, gridUnits::units_t unitType=gridUnits::defUnit) const override;
+  /** check if the parameter being get is for a subobject, determine which sub object and perform the setFlag operation*/
+  double subObjectGet(const std::string &param, gridUnits::units_t) const;
   /** add a grid object to the subObject container
   @param obj the object to add
   */
@@ -78,33 +162,40 @@ public:
     return (opFlags.to_ullong () & flagMask);
   }
 
-  /** @brief set the offsets of an object for a particular optimization mode using a single offset.
-  \param[in] offset the offset index all variables are sequential.
-  \param sMode the solver mode to use.
+  virtual coreObject* find(const std::string &object) const override;
+ 
+  virtual coreObject* getSubObject(const std::string & typeName, index_t num) const override;
+  
+  virtual coreObject * findByUserID(const std::string & typeName, index_t searchID) const override;
+ 
+
+  /** @brief set the offsets of an object for a particular solver mode using a single offset.
+  @param[in] offset the offset index all variables are sequential.
+  @param sMode the solver mode to use.
   */
   virtual void setOffset (index_t offset, const solverMode &sMode);
 
-  /** @brief set the offsets of an object for a particular optimization mode using a single offset.
-  \param newOffsets the offset index all variables are sequential.
-  \param sMode the solver mode to use.
+  /** @brief set the offsets of an object for a particular solver mode using a single offset.
+  @param newOffsets the offset index all variables are sequential.
+  @param sMode the solver mode to use.
   */
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode);
 
   /** @brief get a state value
-  \param offset the offset index: all state variables are sequential.
+  @param offset the offset index: all state variables are sequential.
   @return the value of the state in question
   */
   virtual double getState (index_t offset) const;
 
   /** @brief set the offsets for root finding
-  \param[in] Roffset the offset index all variables are sequential.
-  \param[in] sMode the solver mode to use.
+  @param[in] newRootOffset the offset index all variables are sequential.
+  @param[in] sMode the solver mode to use.
   */
-  virtual void setRootOffset (index_t Roffset, const solverMode &sMode);
+  virtual void setRootOffset (index_t newRootOffset, const solverMode &sMode);
 
   /** @brief set the offsets for parameter control
-  \param[in] Poffset the offset index all variables are sequential.
-  \param[in] sMode the solver mode to use.
+  @param[in] Poffset the offset index all variables are sequential.
+  @param[in] sMode the solver mode to use.
   */
   virtual void setParamOffset (index_t Poffset, const solverMode &sMode);
 
@@ -203,10 +294,28 @@ public:
   @return the number of parameters
   */
   count_t paramSize (const solverMode &sMode) const;
-  /** @brief function to get a constant pointer to the object offsets 
-   * @param[in] sMode the mode to get the offsets for
-   * return a const pointer to the solver Offsets
+  
+
+   /** @brief get the number of outputs
+   @return the number of outputs
    */
+  count_t numOutputs() const
+  {
+	  return m_outputSize;
+  }
+  /** @brief get the number of inputs
+  @return the number of inputs
+  */
+  count_t numInputs() const
+  {
+	  return m_inputSize;
+  }
+
+  //TODO:: PT change this to return a constant reference(this is complicated to do)
+  /** @brief function to get a constant pointer to the object offsets
+  * @param[in] sMode the mode to get the offsets for
+  * return a const pointer to the solver Offsets
+  */
   const solverOffsets *getOffsets(const solverMode &sMode) const;
 
   /** @brief checks if the object is loaded
@@ -218,6 +327,13 @@ public:
   @return boolean true if the object is armed false if not
   */
   bool isArmed () const;
+
+  /** @brief convenience function for checking if the object has states
+  @param[in] sMode  the solverMode to check
+  @return boolean true if the object is armed false if not
+  */
+  bool hasStates(const solverMode &sMode) const;
+
   /** @brief function for checking connected status
   @return boolean true if the object is connect false if not
   */
@@ -233,59 +349,280 @@ public:
   */
   void setupDynFlags ();
   /** @brief compute the sizes and store them in the offsetTables.
-  \param sMode the optimization mode to use.
-  \param dynOnly set to true if only the dynamic conditions are of concern
+  @param sMode the optimization mode to use.
+  @param dynOnly set to true if only the dynamic conditions are of concern
   */
   virtual void loadSizes (const solverMode &sMode, bool dynOnly = false);
-  /** @brief compute the sizes of the subobject and store them in the offsetTables.
-  \param sMode the solver mode to use.
-  \param dynOnly set to true if only the dynamic conditions are of concern
+  /** @brief compute the sizes of the subObject and store them in the offsetTables.
+  @param sMode the solver mode to use.
+  @param dynOnly set to true if only the dynamic conditions are of concern
   */
   void loadSizesSub (const solverMode &sMode, bool dynOnly);
   /** @brief transfer a computed state to the objects
-  \param ttime -the time the state corresponds to
-  \param state -- a double array pointing to the state information
-  \param dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
-  \param sMode  -- the solverMode corresponding to the computed state.
+  @param ttime -the time the state corresponds to
+  @param state -- a double array pointing to the state information
+  @param dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
+  @param sMode  -- the solverMode corresponding to the computed state.
   */
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
+
+  /** @brief reset the object
+  * reset any internal states to a base level depending on the level
+  * @param[in] level  the level of the reset
+  */
+  virtual void reset(reset_levels level = reset_levels::minimal);
+
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode);
   /** @brief transfer state information from the objects to a vector
-  \param ttime -the time the state corresponds to
-  \param[out] state -- a double array pointing to the state information
-  \param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
-  \param sMode  -- the solverMode corresponding to the computed state.
+  @param ttime -the time the state corresponds to
+  @param[out] state -- a double array pointing to the state information
+  @param[out] dstate_dt a double array pointing to the state derivative information (not necessary for states with no corresponding time derivative
+  @param sMode  -- the solverMode corresponding to the computed state.
   */
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode);
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode);
   /** @brief load tolerance information from the objects
-  \param[out] tols -- a double array with the state tolerance information
-  \param[in] sMode  -- the solverMode corresponding to the computed state.
+  @param[out] tols -- a double array with the state tolerance information
+  @param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getTols (double tols[], const solverMode &sMode);
   /** @brief load variable information 1 for algebraic state 0 for differential state
-  \param[out] sdata -- a double array with the state tolerance information
-  \param[in] sMode  -- the solverMode corresponding to the computed state.
+  @param[out] sdata -- a double array with the state tolerance information
+  @param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getVariableType (double sdata[], const solverMode &sMode);
+
+  const std::vector<gridObject *> &getSubObjects() const
+  {
+	  return subObjectList;
+  }
   /** @brief load constraint information
    0 for no constraints
   1 for > 0
   -1 for <0
   2 for >=0
   -2 for <=0
-  \param[out] constraints -- a double array with the constraint
-  \param[in] sMode  -- the solverMode corresponding to the computed state.
+  @param[out] constraints -- a double array with the constraint
+  @param[in] sMode  -- the solverMode corresponding to the computed state.
   */
   virtual void getConstraints (double constraints[], const solverMode &sMode);
   /** @brief update cascading flag information
-  \param[in] dynamics  if true only do so for flags corresponding to dynamic solution
+  @param[in] dynamics  if true only do so for flags corresponding to dynamic solution
   */
   virtual void updateFlags (bool dynamics = true);
   /** @brief get the names for all the states
-  \param[out] stNames -- the output state names
-  \param[in] sMode  -- the solverMode corresponding to the computed state.
-  \param[in] prefix  a string prefix to put before the state names of the object-- intended for cascading calls
+  @param[out] stNames -- the output state names
+  @param[in] sMode  -- the solverMode corresponding to the computed state.
+  @param[in] prefix  a string prefix to put before the state names of the object-- intended for cascading calls
   */
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const;
+  
+  /**brief update any local cached information about a particular state/input set
+  @param[in] inputs the input inputs
+  @param[in] sD  the stage data to cache information from
+  @param[in] sMode the solverMode corresponding to the stateData
+  */
+  virtual void updateLocalCache(const IOdata & inputs, const stateData &sD, const solverMode &sMode);
+  /** @brief locate a state index based on field name
+  @param[in] field the name of the field to search for
+  @param[in] sMode the solverMode to find the location for
+  @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not initialized yet(try again later)
+  */
+  virtual index_t findIndex(const std::string & field, const solverMode & sMode) const;
+  
+  /**
+  *@brief set all the values of particular type of object to some value
+  * @param[in] type the type of unit to set
+  * @param[in] param the parameter to set
+  * @param[in] val, the value to set it to
+  * @param[in] unitType the units of the val
+  */
+  virtual void setAll(const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
+  /** @brief get the local state names
+  used within a couple functions to automate the population of the state names and finding of the indices  states should be algebraic states first,  then differential states
+  @return a string vector of the local state names
+  */
+  virtual stringVec localStateNames() const;
+
+  /******************************************
+  Functions for mathematical updates
+  *******************************************/
+  //residual computation
+  /** @brief compute the residual for a given state
+  @param[in] inputs  the input arguments
+  @param[in] sD the data representing the current state to operate on
+  @param[out] resid the array to store the residual values in
+  @param[in] sMode the solverMode which is being solved for
+  */
+  virtual void residual(const IOdata & inputs, const stateData &sD, double resid[], const solverMode & sMode);
+
+  /** @brief compute an update to all the algebraic variables in the object
+  @param[in] inputs  the input arguments
+  @param[in] sD the data representing the current state to operate on
+  @param[out] update the array to store the computed state values
+  @param[in] sMode the solverMode which is being solved for
+  @param[in] alpha the convergence gain
+  */
+
+  virtual void algebraicUpdate(const IOdata & inputs, const stateData &sD, double update[], const solverMode & sMode, double alpha);
+
+  /** @brief compute the time derivative for a given state
+  @param[in] inputs  the input arguments
+  @param[in] sD the data representing the current state to operate on
+  @param[out] deriv the array to store the computed derivative values
+  @param[in] sMode the solverMode which is being solved for
+  */
+  virtual void derivative(const IOdata & inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+  /**
+  *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[out] ad  the array to store the information in
+  * @param[in] inputLocs the vector of input argument locations
+  * @param[in] sMode the operations mode
+  **/
+  virtual void jacobianElements(const IOdata & inputs, const stateData &sD, matrixData<double> &ad, const IOlocs & inputLocs, const solverMode & sMode);
+
+  //for the stepwise dynamic system
+  /** @brief move the object forward in time using local calculations
+  tells the object to progress time to a certain point the sMode is guidance on how to do it not necessarily indicative of a particular solver
+  it is meant as a suggestion not a requirement.
+  @param[in] time the time to progress to
+  @param[in] inputs  the input arguments
+  @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
+  */
+  virtual void timestep(coreTime time, const IOdata & inputs, const solverMode & sMode);
+
+  /**
+  *@brief compute the partial derivatives of the output states with respect to internal states
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[out] ad  the array to store the information in
+  * @param[in] sMode the operations mode
+  **/
+  virtual void outputPartialDerivatives(const IOdata & inputs, const stateData &sD, matrixData<double> &ad, const solverMode & sMode);
+  /** 
+  @brief return the count of output dependencies on internal states
+  @param[in] num  the index of the output to query
+  @param[in] sMode the solver mode to consider
+  @return the count of the output Dependencies
+  */
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const;
+  /**
+  *@brief compute the partial derivatives of the output states with respect to inputs
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[out] ad  the array to store the information in
+  * @param[in] inputLocs the vector of input argument locations
+  * @param[in] sMode the operations mode
+  **/
+  virtual void ioPartialDerivatives(const IOdata & inputs, const stateData &sD, matrixData<double> &ad, const IOlocs & inputLocs, const solverMode & sMode);
+
+  /** @brief call any objects that need 2 part execution to allow for parallelism
+  do any pre-work for a residual call later in the calculations
+  secondary objects do not allow partial computation like primary objects can so there is no delayed computation calls
+  just the regular call and the primary object will handle delaying action.
+  @param[in] inputs  the input arguments
+  @param[in] sD the data representing the current state to operate on
+  @param[in] sMode the solverMode which is being solved for
+  */
+  virtual void preEx(const IOdata & inputs, const stateData &sD, const solverMode & sMode);
+
+  /******************************************
+  Functions related to root finding
+  *******************************************/
+  /**
+  *evaluate the root functions and return the value
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the state of the system
+  * @param[out] roots the memory to store the root evaluation
+  * @param[in] sMode the mode the solver is in
+  **/
+  virtual void rootTest(const IOdata & inputs, const stateData &sD, double roots[], const solverMode & sMode);
+
+  /**
+  *a root has occurred now take action
+  * @param[in] time the simulation time the root evaluation takes place
+  @param[in] a vector of integers representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
+  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
+  * @param[in] sMode the mode the solver is in
+  **/
+  virtual void rootTrigger(coreTime time, const IOdata & inputs, const std::vector<int> & rootMask, const solverMode & sMode);
+
+  /**
+  *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
+  * @param[in] time the simulation time the root evaluation takes place
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the state of the system
+  * @param[in] sMode the mode the solver is in
+  @param[in] level the level of root to check for
+  **/
+  virtual change_code rootCheck(const IOdata & inputs, const stateData &sD, const solverMode &sMode, check_level_t level);
+  /******************************************
+  output functions
+  *******************************************/
+  /**
+  *@brief get a vector of all outputs
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[in] sMode the mode the solver is in
+  @return a vector containing  all the outputs
+  **/
+  virtual IOdata getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const;
+
+
+  /**
+  *@brief get the time derivative of a single state
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[in] sMode the mode the solver is in
+  @param[in] num the number of the state being requested
+  @return the value of the time derivative of a state being requested
+  **/
+  virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
+
+  /**
+  *@brief get a single state
+  @param[in] inputs the inputs for the secondary object
+  * @param[in] sD the current state data for the simulation
+  * @param[in] sMode the mode the solver is in
+  @param[in] num the number of the state being requested
+  @return the value of the state being requested
+  **/
+  virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
+
+  /**
+  *@brief get a single state based on local data
+  @param[in] the number of the state being requested
+  @return the value of the state being requested
+  **/
+  virtual double getOutput(index_t num = 0) const;
+  /**
+  *@brief get a single output and location
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
+  * @param[in] sMode the mode the solver is in
+  @param[in] num the number of the state being requested
+  @return the value of the state requested
+  **/
+  virtual index_t getOutputLoc(const solverMode &sMode, index_t num = 0) const;
+  /**
+  *@brief get a vector state indices for the output
+  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
+  * @param[in] sMode the mode the solver is in
+  @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
+  **/
+  virtual IOlocs getOutputLocs(const solverMode &sMode) const;
+  
+  
+
+  /****
+  other items
+  */
+
+  /** @brief adjust the power flow solution if needed
+  @param[in] inputs the inputs for the secondary object
+  @param[in] flags for suggesting how the object handle the adjustments
+  * @param[in] level  the level of the adjustments to perform
+  */
+  virtual change_code powerFlowAdjust(const IOdata & inputs, unsigned long flags, check_level_t level);
   friend class offsetTable;
 };
 
@@ -311,123 +648,38 @@ enum secondary_output_locations
 class gridPrimary : public gridObject
 {
 public:
+	int zone = 1;  //!< publicly accessible loss zone indicator not used internally
+public:
   /**@brief default constructor*/
   explicit gridPrimary (const std::string &objName = "");
 
-  /** @brief initialize object for power flow part A
-   after part A of the initialization the object should know how many states it has as part of the powerflow, before this calling the load sizes
-  powerflow related solverModes will be unspecified. This function is a wrapper around the pFlowObjectInitializeA function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  @return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
-  */
-  void pFlowInitializeA (gridDyn_time time0, unsigned long flags);
 
-  /** @brief initialize object for power flow part B
-   partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
-  This function is a wrapper around the pFlowObjectInitializeB function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  */
-  void pFlowInitializeB ();
+  virtual coreObject * clone(coreObject *obj = nullptr) const override;
+  
+  virtual void pFlowInitializeA (coreTime time0, unsigned long flags) final override;
 
-  /** @brief initialize object for dynamic simulation part A
-   after part A of the initialization the object should know how many states it has as part of the dynamic simulation, before this calling the load sizes
-  dynamic related solverModes will be unspecified. This function is a wrapper around the dynObjectInitializeA function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  void dynInitializeA (gridDyn_time time0, unsigned long flags);
+  
+  virtual void pFlowInitializeB () final override;
 
-  /** @brief initialize object for dynamic simulation part B
-   partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
-  This function is a wrapper around the dynObjectInitializeB function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in]  outputSet the desired output of the gridPrimary
-  */
-  void dynInitializeB (IOdata &outputSet);
+  virtual void dynInitializeA(coreTime time0, unsigned long flags) final override;
 
-protected:
-  /** @brief initialize local object for power flow part A
- see pFlowInitializeA for more details
-@param[in] time0 the time0 at which the power flow will take place
-@param[in] flags  any flags indicating how the initialization or execution will take place
-*/
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags);
-
-  /** @brief initialize local object for power flow part B
-   see pFlowInitializeB for more details
-  */
-  virtual void pFlowObjectInitializeB ();
-
-  /** @brief initialize local object for dynamics part A
-   see dynInitializeA for more details
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
-
-  /** @brief initialize local object for dynamics part B
-   see dynInitializeB for more details
-  @param[in]  the desired initial output of the gridPrimary
-  */
-  virtual void dynObjectInitializeB (IOdata &outputSet);
+  virtual void dynInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) final override;
+  
 public:
-  /** @brief call any objects that needs 2 part execution to allow for parallelism
- do any prework for the calculation calls (residual, derivative, Jacobian, algebraicUpdate) later in the calculations
-it is assumed any appropriate data would be cached during this time and not rerun if called multiple times
-@param[in] sD the data representing the current state to operate on
-@param[in] sMode the solverMode which is being solved for
-*/
-  virtual void preEx (const stateData &sD, const solverMode &sMode);
 
-  //Jacobian computation
-  /** @brief compute the Jacobian for a given state
-  @param[in] sD the data representing the current state to operate on
-  @param[out] ad the matrixData structure to store the Jacobian values
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
-  /**
-  *@brief compute the partial derivatives of the output states with respect to internal states
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] sMode the operations mode
-  **/
-  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
+	virtual void set(const std::string &param, const std::string &val) override;
 
-  //residual computation
-  /** @brief compute the residual for a given state
-  @param[in] sD the data representing the current state to operate on
-  @param[out] resid the array to store the residual values in
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode);
+	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  /** @brief compute the time derivatives for a given state for the differential variables
-  @param[in] sD the data representing the current state to operate on
-  @param[out] deriv the array to store the computed derivative values
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode);
-
-  /** @brief compute updates for all the algebraic variable
-  @param[in] sD the data representing the current state to operate on
-  @param[out] update the array to store the computed algebraic states
-  @param[in] sMode the solverMode which corresponds to the stateData
-  @param[in] alpha the convergence gain
-  */
-  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
-
+	virtual double get(const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   /** @brief get the residual computation for object requiring a delay
     basically calls the residual calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on
   @param[out] resid the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedResidual (const stateData &sD, double resid[], const solverMode &sMode);
+  virtual void delayedResidual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode);
 
   /** @brief get the residual computation for object requiring a delay
     basically calls the derivative calculation on the delayed objects
@@ -435,7 +687,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] deriv the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode);
+  virtual void delayedDerivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
 
   /** @brief get the algebraic update for object requesting a delay
     basically calls the residual calculation on the delayed objects
@@ -443,7 +695,7 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] update the array to store the computed derivative values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
+  virtual void delayedAlgebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
   /** @brief get the residual computation for object requiring a delay
     basically calls the Jacobian calculation on the delayed objects
@@ -451,60 +703,8 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[out] ad the matrixData structure to store the Jacobian values
   @param[in] sMode the solverMode which is being solved for
   */
-  virtual void delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
+  virtual void delayedJacobian (const IOdata &inputs, const stateData &sD, matrixData<double> &ad,const IOlocs &inputLocs, const solverMode &sMode);
 
-  //for the stepwise dynamic system
-  /** @brief move the object forward in time using local calculations
-    tells the object to progress time to a certain point the sMode is guidance on how to do it not necessarily indicative of a particular solver
-  it is meant as a suggestion not a requirement.
-  @param[in] ttime the time to progress to
-  @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
-  */
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode);
-
-  /**
-  *@brief set all the values of particular type of object to some value
-  * @param[in] type the type of unit to set
-  * @param[in] param the parameter to set
-  * @param[in] val, the value to set it to
-  * @param[in] unitType the units of the val
-  */
-  virtual void setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
-
-  //for rootfinding in the dynamic solver
-  /**
-  *@brief evaluate the root functions and return the value
-  * @param[in] sD the current state data for the simulation
-  * @param[out] roots the memory to store the root evaluation
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTest (const stateData &, double roots[], const solverMode &sMode);
-
-  /**
-  *@brief a root has occurred now take action
-  * @param[in] ttime the simulation time the root evaluation takes place
-  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode);
-
-  /**
-  *@brief evaluate the root functions and execute trigger from local state information
-   for operation after an initial condition check or timestep
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @param[in] level the level of roots to check can be REVERSIBLE or NON_REVERSIBLE
-  @return a change code indicating what if any changes in the object took place
-  **/
-  virtual change_code rootCheck (const stateData &sD, const solverMode & sMode, check_level_t level);
-
-  /** @brief check power flow adjustable parameters
-  * adjust any parameters or checks needed on a power flow solution,  such as generator power limits, voltage levels, stepped adjustable taps, etc
-  * @param[in] flags,  a set of flags for controlling the adjustments
-  @param[in] level - the level of adjustments can be REVERSIBLE or NON_REVERSIBLE
-  @return a change code indicating what if any changes in the object took place
-  */
-  virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level);
 
   /** @brief  try to shift the states to something more consistent
     called when the current states do not make a consistent condition,  calling converge will attempt to move them to a more valid state
@@ -519,12 +719,8 @@ it is assumed any appropriate data would be cached during this time and not reru
   @param[in] mode  the mode of the convergence
   @param[in] tol  the convergence tolerance
   */
-  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01);
-  /** @brief reset voltages
-  * resets the voltage levels and any other parameters changed in power to a base level depending on the level
-  * @param[in] level  the level of the reset
-  */
-  virtual void reset (reset_levels level = reset_levels::minimal);
+  virtual void converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode= converge_mode::high_error_only, double tol = 0.01);
+  
 
   /** @brief do a check on the power flow results
   * checks for an violations of recommended power flow levels such as voltage, power limits, transfer capacity, angle limits, etc
@@ -532,64 +728,9 @@ it is assumed any appropriate data would be cached during this time and not reru
   */
   virtual void pFlowCheck (std::vector<violation> & Violation_vector);
 
-  /** @brief do any power computation based on the state specified and cache results
-  @param[in] sD  the state data to do the computation on
-  @param[in] sMode the solverMode corresponding to the state data*/
-  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode);
-
+  using gridObject::updateLocalCache;
   /** @brief do any local computation to get ready for measurements*/
   virtual void updateLocalCache ();
-
-  /**
-  *@brief get a vector of all outputs
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @return a vector containing  all the outputs
-  **/
-  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const;
-
-  /**
-  *@brief get a vector state indices for the output
-  @details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
-  **/
-  virtual IOlocs getOutputLocs  (const solverMode &sMode) const;
-
-  /**
-  *@brief get the state index of an output
-  @details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the state requested
-  **/
-  virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
-
-  /**
-  *@brief get the time derivative of a single state
-   if the output is algebraic the return value may not be meaningful
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the time derivative of a state being requested
-  **/
-  virtual double getDoutdt (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
-
-  /**
-  *@brief get a single state
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the state being requested
-  **/
-  virtual double getOutput (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
-
-  /**
-  *@brief get a single state based on local data
-  @param[in] num the number of the state being requested
-  @return the value of the state being requested
-  **/
-  virtual double getOutput (index_t /*num*/ = 0) const;
 
 
   virtual void alert (coreObject *, int code) override;
@@ -628,7 +769,7 @@ it is assumed any appropriate data would be cached during this time and not reru
 
 
 
-
+class gridBus;
 
 /** @brief base class for objects that can attach to a bus like gridLoad and gridDynGenerator
 *  gridSecondary class defines the interface for secondary objects which are nominally objects that hang directly off a bus
@@ -636,140 +777,57 @@ it is assumed any appropriate data would be cached during this time and not reru
 class gridSecondary : public gridObject
 {
 protected:
-	double baseVoltage = defaultBaseVoltage;  //!< [kV] the baseVoltage for the secondary object
+	double baseVoltage = 120.0;  //!< [kV] base voltage for the secondary object
+	gridBus *bus = nullptr;		//!< reference to the bus managing the object;
 public:
   /** @brief default constructor*/
   explicit gridSecondary (const std::string &objName="");
 
-  /** @brief initialize object for power flow part A
-   after part A of the initialization the object should know how many states it has as part of the powerflow, before this calling the load sizes
-  powerflow related solverModes will be unspecified. This function is a wrapper around the pFlowObjectInitializeA function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  void pFlowInitializeA (gridDyn_time time0, unsigned long flags);
+  virtual coreObject * clone(coreObject *obj = nullptr) const override;
 
-  /** @brief initialize object for power flow part B
-   partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
-  This function is a wrapper around the pFlowObjectInitializeB function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  */
-  void pFlowInitializeB ();
+  virtual void updateObjectLinkages(coreObject *newRoot) override;
+  
+  virtual void pFlowInitializeA (coreTime time0, unsigned long flags) override final;
 
-  /** @brief initialize object for dynamic simulation part A
-   after part A of the initialization the object should know how many states it has as part of the dynamic simulation, before this calling the load sizes
-  dynamic related solverModes will be unspecified. This function is a wrapper around the dynObjectInitializeA function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  void dynInitializeA (gridDyn_time time0, unsigned long flags);
+  
+  virtual void pFlowInitializeB () override final;
 
-  /** @brief initialize object for dynamic simulation part B
-   partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
-  This function is a wrapper around the dynObjectInitializeB function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] args  the input arguments typically [voltage, angle, frequency]
-  @param[in]  outputSet  the desired output of the gridSecondary [P,Q]
-  */
-  void dynInitializeB (const IOdata & args, const IOdata & outputSet);
+  
+  virtual void dynInitializeA (coreTime time0, unsigned long flags) override final;
+
+  virtual void dynInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override final;
 
 protected:
-  /** @brief initialize local object for power flow part A
- see pFlowInitializeA for more details
-@param[in] time0 the time0 at which the power flow will take place
-@param[in] flags  any flags indicating how the initialization or execution will take place
-@return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
-*/
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags);
 
-  /** @brief initialize local object for power flow part B
-   see pFlowInitializeB for more details
-  @return  an execution success  will return FUNCTION_EXECUTION_SUCCESS(0) if nothing went wrong
-  */
-  virtual void pFlowObjectInitializeB ();
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  /** @brief initialize local object for dynamics part A
-   see dynInitializeA for more details
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
+ 
 
-  /** @brief initialize local object for dynamics part B
-   see dynInitializeB for more details
-  @param[in] args  the input arguments typically [voltage, angle, frequency]
-  @param[in]  the desired initial output of the gridPrimary
-  */
-  virtual void dynObjectInitializeB (const IOdata & args, const IOdata & outputSet);
 public:
-  //for the stepwise dynamic system
-  /** @brief move the object forward in time using local calculations
-    tells the object to progress time to a certain point the sMode is guidance on how to do it not necessarily indicative of a particular solver
-  it is meant as a suggestion not a requirement.
-  @param[in] ttime the time to progress to
-  @param[in] args  the input arguments
-  @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
-  */
-  virtual void timestep (gridDyn_time ttime, const IOdata & args, const solverMode & sMode);
+ 
+	virtual void set(const std::string &param, const std::string &val) override;
 
-  /** @brief call any objects that need 2 part execution to allow for parallelism
-   do any prework for a residual call later in the calculations
-  secondary objects do not allow partial computation like primary objects can so there is no delayed computation calls
-  just the regular call and the primary object will handle delaying action.
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void preEx (const IOdata & args, const stateData &sD, const solverMode & sMode);
-
-  //residual computation
-  /** @brief compute the residual for a given state
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] resid the array to store the residual values in
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void residual (const IOdata & args, const stateData &sD, double resid[], const solverMode & sMode);
-
-  /** @brief compute an update to all the algebraic variables in the object
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] update the array to store the computed state valuse
-  @param[in] sMode the solverMode which is being solved for
-  @param[in] alpha the convergence gain
-  */
-
-  virtual void algebraicUpdate (const IOdata & args, const stateData &sD, double update[], const solverMode & sMode, double alpha);
-
-  /** @brief compute the time derivative for a given state
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] deriv the array to store the computed derivative values
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void derivative (const IOdata & args, const stateData &sD, double deriv[], const solverMode &sMode);
+	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   /**
   *@brief get the real output power
   @detail  these are the main data output functions for secondary object.  The intention is to supply the load/gen to the bus
   they may have other outputs but first and second are the real and reactive power negative numbers indicate power generation
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @return the real output power consumed or generated by the device
   **/
-  virtual double getRealPower (const IOdata & args, const stateData &sD, const solverMode & sMode) const;
+  virtual double getRealPower (const IOdata & inputs, const stateData &sD, const solverMode & sMode) const;
 
   /**
   *@brief get the reactive output power
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @return the reactive output power consumed or generated by the device
   **/
-  virtual double getReactivePower (const IOdata & args, const stateData &sD, const solverMode & sMode) const;
+  virtual double getReactivePower (const IOdata & inputs, const stateData &sD, const solverMode & sMode) const;
 
   /**
   *@brief get the real output power from local data
@@ -785,164 +843,66 @@ public:
 
   /**
   *@brief get a vector of all outputs
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the outputs
   **/
-  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const;
+  virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
 
-  /**
-  *@brief get a vector state indices for the output
-  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
-  **/
-  virtual IOlocs getOutputLocs  (const solverMode &sMode) const;
-
-  /**
-  *@brief get a single output and location
-  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the location of the output state requested
-  **/
-  virtual index_t getOutputLoc ( const solverMode &sMode, index_t num = 0) const;
 
   /**
   *@brief get the time derivative of a single state
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
   @return the value of the time derivative of a state being requested
   **/
-  virtual double getDoutdt (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
+  virtual double getDoutdt (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
   /**
   *@brief get a single state
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @param[in] num the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
+  virtual double getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
   /**
   *@brief get a single state based on local data
   @param[in] the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (index_t num = 0) const;
+  virtual double getOutput (index_t num = 0) const override;
 
   /**
   *@brief predict what the outputs will be at a specific time in the future
   @param[in] ptime the time for which to make a prediction
-  @param[in] args the inputs for the secondary object
+  @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation
   * @param[in] sMode the mode the solver is in
   @return a vector containing  all the predicted outputs
   **/
-  virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData &sD, const solverMode &sMode) const;
+  virtual IOdata predictOutputs (coreTime predictionTime, const IOdata &inputs, const stateData &sD, const solverMode &sMode) const;
 
   /**
   *@brief get the available upwards generating capacity of a system
   @param[in] time the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
+  virtual double getAdjustableCapacityUp (coreTime time = maxTime) const;
 
   /**
   *@brief get the available downwards generating capacity of a system
   @param[in] the time period within which to do the adjustment
   @return the available up capacity of the gridSecondary unit
   **/
-  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
+  virtual double getAdjustableCapacityDown (coreTime time = maxTime) const;
 
-  /**
-  *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
-   @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] argLocs the vector of input argument locations
-  * @param[in] sMode the operations mode
-  **/
-  virtual void jacobianElements (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
-
-  /**
-  *@brief compute the partial derivatives of the output states with respect to internal states
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] sMode the operations mode
-  **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData &sD, matrixData<double> &ad, const solverMode & sMode);
-
-  /**
-  *@brief compute the partial derivatives of the output states with respect to inputs
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] argLocs the vector of input argument locations
-  * @param[in] sMode the operations mode
-  **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
-
-  /**
-  *evaluate the root functions and return the value
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the state of the system
-  * @param[out] roots the memory to store the root evaluation
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTest  (const IOdata & args, const stateData &sD, double roots[], const solverMode & sMode);
-
-  /**
-  *a root has occurred now take action
-  * @param[in] ttime the simulation time the root evaluation takes place
-  @param[in] a vector of ints representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
-  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
-
-  /**
-  *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
-  * @param[in] ttime the simulation time the root evaluation takes place
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the state of the system
-  * @param[in] sMode the mode the solver is in
-  @param[in] level the level of root to check for
-  **/
-  virtual change_code rootCheck (const IOdata & args, const stateData &sD, const solverMode &sMode, check_level_t level);
-
-  /** @brief reset power flow parameters
-  *  resets the voltage levels and any other parameters changed in power to a base level depending on the level
-  * @param[in] level,  the level of the reset
-  */
-  virtual void reset (reset_levels level = reset_levels::minimal);
-
-  /** @brief adjust the power flow solution if needed
-  @param[in] args the inputs for the secondary object
-  @param[in]  flags for suggesting how the object handle the adjustments
-  * @param[in] level  the level of the adjustments to perform
-  */
-  virtual change_code powerFlowAdjust (const IOdata & args, unsigned long flags, check_level_t level);
-
-  /** @brief locate a state index based on field name
-  @param[in] the name of the field to search for
-  @param[in]  the solverMode to find the location for
-  @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not initialized yet(try again later)
-  */
-  virtual index_t findIndex (const std::string & field, const solverMode & sMode) const;
-
-  /**brief update any local cached information about a particular state/input set
-  @param[in] args the input args
-  @param[in] sD  the stage data to cache information from
-  @param[in] sMode the solverMode corresponding to the stateData
-  */
-  virtual void updateLocalCache (const IOdata & args, const stateData &sD, const solverMode &sMode);
+ 
 };
 
 
@@ -955,222 +915,23 @@ many of the function calls are intended to be the same,  The main difference bei
 class gridSubModel : public gridObject
 {
 protected:
-  count_t m_inputSize = 0;            //!< the required size of the args input
-  count_t m_outputSize = 1;            //!< the number of outputs the submodel produces
+  
   double m_output = 0.0;              //!< storage location for the current output
 public:
   /** @brief default constructor*/
   explicit gridSubModel (const std::string &objName = "submodel_#");
 
-  //TODO:: PT add a clone function to copy over the input and output sizes
-  /** @brief initialize the submodel for partA
-   after part A of the initialization the object should know how many states it has as part of the simulation, before calling this function load sizes
-  on the related solverModes will be unspecified. This function is a wrapper around the objectInitializeA function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  void initializeA (gridDyn_time time, unsigned long flags);
-  /** @brief initialize object for simulation part B
-   partB is to actually initialize the object so an initial guess will be meaningful,  many objects just do everything in part A if there is no need to separate the functions
-  This function is a wrapper around the dynObjectInitializeB function which does the local object init
-  this function handles any global setup and makes sure all the flags are set properly
-  @param[in] args  the input arguments
-  @param[in]  outputSet  the desired output
-  @param[out] fieldSet the basic concept is that either the args or outputSet can be given or both if available
-                        fieldSet then contains the appropriate input or output depending on what was given
-  */
-  void initializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet);
-protected:
-  /** @brief initialize local object for power flow part A
-   see initializeA for more details
-  @param[in] time0 the time0 at which the power flow will take place
-  @param[in] flags  any flags indicating how the initialization or execution will take place
-  */
-  virtual void objectInitializeA (gridDyn_time time0, unsigned long flags);
-  /** @brief initialize local object part B
-   see initializeB for more details ,all arguments are pass through from the initializeB function
-  @param[in] args  the input arguments
-  @param[in]  the desired initial output
-  @param[out] fieldSet the basic concept is that either the args or outputSet can be given or both if available
-        fieldSet then contains the appropriate input or output depending on what was given
-  */
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet);
 
-public:
-  virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
-  //for the stepwise dynamic system
-  /** @brief move the object forward in time using local calculations
-    tells the object to progress time to a certain point the sMode is guidance on how to do it not necessarily indicative of a particular solver
-  it is meant as a suggestion not a requirement.
-  @param[in] ttime the time to progress to
-  @param[in] args  the input arguments
-  @param[in] sMode the solverMode to give guidance to objects on how to perform internal calculations
-  */
-  virtual void timestep (gridDyn_time ttime, const IOdata & args, const solverMode &sMode);
+  virtual void pFlowInitializeA(coreTime time0, unsigned long flags) final override;
 
-  /**
-  *evaluate the root functions and return the value
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the state of the system
-  * @param[out] roots the memory to store the root evaluation
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTest (const IOdata & args, const stateData &sD, double roots[], const solverMode &sMode);
-  /**
-  *a root has occurred now take action
-  * @param[in] ttime the simulation time the root evaluation takes place
-  @param[in] a vector of ints representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
-  * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
-  * @param[in] sMode the mode the solver is in
-  **/
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata & args, const std::vector<int> & rootMask, const solverMode & sMode);
-  /**
-  *evaluate the root functions and execute trigger from a static state for operation after an initial condition check
-  * @param[in] ttime the simulation time the root evaluation takes place
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the state of the system
-  * @param[in] sMode the mode the solver is in
-  @param[in] level the level of root to check for
-  **/
-  virtual change_code rootCheck (const IOdata & args, const stateData &sD, const solverMode &sMode, check_level_t level);
-  //residual computation
-  /** @brief compute the residual for a given state
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] resid the array to store the residual values in
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void residual (const IOdata & args, const stateData &sD, double resid[], const solverMode &sMode);
-  /** @brief compute the time derivative for a given state
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] deriv the array to store the computed derivative values
-  @param[in] sMode the solverMode which is being solved for
-  */
-  virtual void derivative (const IOdata & args, const stateData &sD, double deriv[], const solverMode & sMode);
-  /** @brief compute an update to all the algebraic variables in the object
-  @param[in] args  the input arguments
-  @param[in] sD the data representing the current state to operate on
-  @param[out] update the array to store the computed state values
-  @param[in] sMode the solverMode which is being solved for
-  @param[in] alpha the convergence gain
-  */
-  virtual void algebraicUpdate (const IOdata & args, const stateData &sD, double update[], const solverMode & sMode, double alpha);
-  /**
-  *@brief compute the partial derivatives of the internal states with respect to inputs and other internal states
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] argLocs the vector of input argument locations
-  * @param[in] sMode the operations mode
-  **/
-  virtual void jacobianElements (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
-  /**
-  *@brief compute the partial derivatives of the output states with respect to internal states
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] sMode the operations mode
-  **/
-  virtual void outputPartialDerivatives  (const IOdata & args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
-  /**
-  *@brief compute the partial derivatives of the output states with respect to inputs
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[out] ad  the array to store the information in
-  * @param[in] argLocs the vector of input argument locations
-  * @param[in] sMode the operations mode
-  **/
-  virtual void ioPartialDerivatives (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs & argLocs, const solverMode & sMode);
 
-  /** @brief adjust the power flow solution if needed
-  @param[in] args the inputs for the secondary object
-  @param[in] flags for suggesting how the object handle the adjustments
-  * @param[in] level  the level of the adjustments to perform
-  */
-  virtual change_code powerFlowAdjust (const IOdata & args, unsigned long flags, check_level_t level);
+  virtual void pFlowInitializeB() final override;
 
-  /** @brief get the number of outputs
-  @return the number of outputs
-  */
-  count_t numOutputs () const
-  {
-    return m_outputSize;
-  }
-  /** @brief get the number of inputs
-  @return the number of inputs
-  */
-  count_t numInputs () const
-  {
-    return m_inputSize;
-  }
-  /**
-  *@brief get a vector of all outputs
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @return a vector containing  all the outputs
-  **/
-  virtual IOdata getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const;
-  /**
-  *@brief get the time derivative of a single state
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the time derivative of a state being requested
-  **/
-  virtual double getDoutdt (const stateData &sD, const solverMode &sMode, index_t num = 0) const;
-  /**
-  *@brief get a single state
-  @param[in] args the inputs for the secondary object
-  * @param[in] sD the current state data for the simulation
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the state being requested
-  **/
-  virtual double getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num = 0) const;
-  /**
-  *@brief get a single state based on local data
-  @param[in] the number of the state being requested
-  @return the value of the state being requested
-  **/
-  virtual double getOutput (index_t num = 0) const;
-  /**
-  *@brief get a single output and location
-  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @param[in] num the number of the state being requested
-  @return the value of the state requested
-  **/
-  virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
-  /**
-  *@brief get a vector state indices for the output
-  @ details used in cases where the state of one object is used int the computation of another for computation of the Jacobian
-  * @param[in] sMode the mode the solver is in
-  @return a vector containing  all the outputs locations,  kNullLocation if there is no state representing the output
-  **/
-  virtual IOlocs getOutputLocs  (const solverMode &sMode) const;
-  /** @brief locate a state index based on field name
-  @param[in] field the name of the field to search for
-  @param[in] sMode the solverMode to find the location for
-  @return the index of the state  some number if valid  kInvalidLocation if not found, kNullLocation if not initialized yet(try again later)
-  */
-  virtual index_t findIndex (const std::string & field, const solverMode & sMode) const;
-  /** @brief get the local state names
-  used within a couple functions to automate the population of the state names and finding of the indices  states should be algebraic states first,  then differential states
-  @return a string vector of the local state names
-  */
-  virtual stringVec localStateNames () const;
+  
+  virtual void dynInitializeA (coreTime time, unsigned long flags) override final;
+  
+  virtual void dynInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override final;
 
-  /**brief update any local cached information about a particular state/input set
-   this function performs equivalent purpose as updateLocalCache in gridPrimary and intended to be used to compute cached values or prepare an object for calling the const output functions
-  @param[in] args the input args
-  @param[in] sD  the stage data to cache information from
-  @param[in] sMode the solverMode corresponding to the stateData
-  */
-  virtual void updateLocalCache (const IOdata & args, const stateData &sD, const solverMode &sMode);
-protected:
 };
 
 /** @brief display all the state names to the screen

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -22,9 +22,8 @@
 #include "matrixDataSparse.h"
 #include "units.h"
 #include "contingency.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include <boost/filesystem.hpp>
-
 
 #include <fstream>
 #include <cstdio>
@@ -453,7 +452,7 @@ void savePowerFlowCdf (gridDynSimulation *gds, const std::string &fname)
 
   double basePower = gds->get ("basepower");
   //Title Data
-  fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", ("GridDyn " + griddyn_version).c_str (), static_cast<int> (basePower),gds->getName ().c_str ());
+  fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", ("GridDyn " + std::string(griddyn_version)).c_str (), static_cast<int> (basePower),gds->getName ().c_str ());
 
   //Bus Data
   fprintf (fp, "BUS DATA FOLLOWS\n");
@@ -779,7 +778,7 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const so
 }
 
 
-void writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
+void writeVector(coreTime time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -803,7 +802,7 @@ void writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std
 	bFile.write((char *)(data), sizeof(double) * numElements);
 }
 
-void writeArray(gridDyn_time time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
+void writeArray(coreTime time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -1043,7 +1042,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 
   sD.cj = 10000;
 
-  gds->jacobianElements (sD, ad, sMode);
+  gds->jacobianElements (noInputs, sD, ad,noInputLocs, sMode);
 
   stringVec stateNames;
   gds->getStateName (stateNames, sMode);
@@ -1067,12 +1066,10 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 
   for (index_t kk = 0; kk < dsize; ++kk)
     {
-      index_t r = ad.rowIndex (kk);
-      index_t c = ad.colIndex (kk);
-      double val = ad.val (kk);
-      bFile.write ((char *)(&r), sizeof(index_t));
-      bFile.write ((char *)(&c), sizeof(index_t));
-      bFile.write ((char *)(&val), sizeof(double));
+	  auto el = ad.element(kk);
+      bFile.write ((char *)(&(el.row)), sizeof(index_t));
+      bFile.write ((char *)(&(el.col)), sizeof(index_t));
+      bFile.write ((char *)(&(el.data)), sizeof(double));
     }
 
   bFile.close ();
@@ -1098,7 +1095,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
   stateData sD (gds->getCurrentTime (), solverInterface->state_data (), solverInterface->deriv_data ());
 
   sD.cj = 10000;
-  gds->jacobianElements (sD, ad, sMode);
+  gds->jacobianElements (noInputs, sD, ad,noInputLocs, sMode);
 
 
   stringVec stateNames;
@@ -1118,12 +1115,10 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
 
   for (unsigned kk = 0; kk < dsize; ++kk)
     {
-      index_t r = ad.rowIndex (kk);
-      index_t c = ad.colIndex (kk);
-      double val = ad.val (kk);
-      bFile.write ((char *)(&r), sizeof(index_t));
-      bFile.write ((char *)(&c), sizeof(index_t));
-      bFile.write ((char *)(&val), sizeof(double));
+	  auto el = ad.element(kk);
+	  bFile.write((char *)(&(el.row)), sizeof(index_t));
+	  bFile.write((char *)(&(el.col)), sizeof(index_t));
+	  bFile.write((char *)(&(el.data)), sizeof(double));
     }
 }
 

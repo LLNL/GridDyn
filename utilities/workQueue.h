@@ -3,7 +3,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,6 +17,7 @@
 #define WORKQUEUE_H_
 #include <thread>
 #include <memory>
+#include <utility>
 #include <queue>
 #include <mutex>
 #include <future>
@@ -25,7 +26,7 @@ class basicWorkBlock
 {
 public:
 	basicWorkBlock() {};
-	virtual ~basicWorkBlock() {};
+	virtual ~basicWorkBlock()=default;
 	/** run the work block*/
 	virtual void execute() = 0;
 	/** check if the work is finished
@@ -38,124 +39,151 @@ public:
 The class takes as an input object of some kind function, std::function, lambda that can be executed, functionoid,
 or something that overrides operator()
 */
-template <typename Func, typename retType>
+template <typename retType>
 class workBlock :public basicWorkBlock
 {
 public:
 	workBlock() { reset(); };
-	workBlock(const Func &newWork) :loaded(true),workFunc(newWork) { reset(); };
-	workBlock(Func &&newWork) :loaded(true),workFunc(newWork) { reset(); };
-	~workBlock()
+	//copy constructor intentionally omitted*/
+	/** move constructor*/
+	workBlock(workBlock &&wb) = default;
+	/** constructor from a packaged task*/
+	workBlock(std::packaged_task<retType()> &&newTask):loaded(true), task(std::move(newTask))
 	{
-
-	};
+		reset();
+	}
+	/** construct from a some sort of functional object*/
+	template<typename Func> //universal reference
+	workBlock(Func&& newWork) :loaded(true), task(std::forward<Func>(newWork))
+	{
+		static_assert(std::is_same<decltype(newWork()), retType>::value, "work does not match type");
+		reset();
+	}
+	/** move assignement*/
+	workBlock &operator=(workBlock &&wb) = default;
+	/** execute the work block*/
 	virtual void execute() override
 	{
 		if (!finished)
 		{
 			if (loaded)
 			{
-				promise_val.set_value(workFunc());
-			}
-			else
-			{
-				promise_val.set_value(retType());
+				task();
 			}
 			finished = true;
 		}
-	};
+	}
+	/** get the return value,  will block until the task is finished*/
 	retType getReturnVal() const
 	{
 		return future_ret.get();
-	};
-	void updateWorkFunction(const Func &newWork)
+	}
+	/** update the work function 
+	@param[in] the work to do*/
+	template<typename Func>
+	void updateWorkFunction(Func&& newWork)//universal reference
 	{
-		workFunc = newWork;
-		if (finished)
-		{
-			reset();
-		}
+		static_assert(std::is_same<decltype(newWork()), retType>::value, "work does not match type");
+		loaded = false;
+		task=std::packaged_task<retType()>(std::forward<Func>(newWork));
+		reset();
 		loaded = true;
-	};
-	void updateWorkFunction(Func &&newWork)
+	}
+	/** update the task with a new packaged_task*/
+	void updateTask(std::packaged_task<retType()> &&newTask)
 	{
-		workFunc = newWork;
-		if (finished)
-		{
-			reset();
-		}
+		loaded = false;
+		task = std::move(newTask);
+		reset();
 		loaded = true;
-	};
+	}
+	/** check if the task is finished*/
 	bool isFinished() const override
 	{
 		return finished;
 	};
+	/** wait until the work is done*/
 	void wait()
 	{
 		future_ret.wait();
 	};
+	/** reset the work so it can run again*/
 	void reset()
 	{
+		if (loaded)
+		{
+			task.reset();
+		}
 		finished = false;
-		promise_val = std::promise<retType>();
-		future_ret = std::shared_future<retType>(promise_val.get_future());
+		future_ret = task.get_future();
 	};
+	/** get the shared future object*/
+	std::shared_future<retType> get_future()
+	{
+		return future_ret;
+	}
 private:
-	bool finished = false;
-	bool loaded = false;
-	std::promise<retType> promise_val;
-	std::shared_future<retType> future_ret;
-	Func workFunc;
+	bool finished;  //!< flag indicating the work has been done
+	bool loaded = false;		//!< flag indicating that the task is loaded
+	std::shared_future<retType> future_ret; //!< shared future object
+	std::packaged_task<retType()> task; //!< the task to do
 };
 
 /** implementation of a workBlock class with void return type
 The class takes as an input object of some kind function, std::function, lambda that can be executed
 */
-template <typename Func>
-class workBlock<Func,void> :public basicWorkBlock
+template <>
+class workBlock<void> :public basicWorkBlock
 {
 public:
 	workBlock() { reset(); };
-	workBlock(const Func &newWork) :loaded(true),workFunc(newWork) { reset(); };
-	workBlock(Func &&newWork) :loaded(true),workFunc(newWork) { reset(); };
-	~workBlock()
+	workBlock(std::packaged_task<void()> &&newTask) :loaded(true), task(std::move(newTask))
 	{
+		reset();
+	}
 
-	};
+	template<typename Func>
+	workBlock(Func&& newWork) : loaded(true), task(std::forward<Func>(newWork))
+	{
+		static_assert(std::is_same<decltype(newWork()), void>::value, "work does not match type");
+		reset();
+	}
+	
+	
+	workBlock(workBlock &&wb) = default;
+	workBlock &operator=(workBlock &&wb) = default;
 	virtual void execute() override
 	{
 		if (!finished)
 		{
 			if (loaded)
 			{
-				workFunc();
+				task();
 			}
-			promise_val.set_value();
 			finished = true;
 		}
 	};
 	void getReturnVal() const
 	{
 		future_ret.wait();
-	};
-	void updateWorkFunction(const Func &newWork)
+	}
+	
+	template<typename Func>
+	void updateWorkFunction(Func&& newWork)
 	{
-		workFunc = newWork;
-		if (finished)
-		{
-			reset();
-		}
+		static_assert(std::is_same<decltype(newWork()), void>::value, "work does not match type");
+		loaded = false;
+		task = std::packaged_task<void()>(std::forward<Func>(newWork));
+		reset();
 		loaded = true;
-	};
-	void updateWorkFunction(Func &&newWork)
+	}
+	void updateTask(std::packaged_task<void()> &&newTask)
 	{
-		workFunc = newWork;
-		if (finished)
-		{
-			reset();
-		}
+		loaded = false;
+		task = std::move(newTask);
+		reset();
 		loaded = true;
-	};
+	}
 	bool isFinished() const override
 	{
 		return finished;
@@ -166,24 +194,66 @@ public:
 	};
 	void reset()
 	{
+		if (loaded)
+		{
+			task.reset();
+		}
 		finished = false;
-		promise_val = std::promise<void>();
-		future_ret = std::shared_future<void>(promise_val.get_future());
+		future_ret = task.get_future();
 	};
+	std::shared_future<void> get_future()
+	{
+		return future_ret;
+	}
 private:
-	bool finished = false;
+	bool finished;
 	bool loaded = false;
-	std::promise<void> promise_val;
 	std::shared_future<void> future_ret;
-	Func workFunc;
+	std::packaged_task<void()> task;
 };
 
+/** make a unique pointer to a workBlock object from a functional object
+@param[in] fptr a std::function, std::bind, functionoid, lamda function or anything else 
+that could be called with operator()
+@return a unique pointer to a work block function
+*/
 template <typename X>
-auto make_workBlock(X fptr)->std::shared_ptr<workBlock<X,decltype(fptr())>>
+auto make_workBlock(X&& fptr)//->std::unique_ptr<workBlock<decltype(fptr())>>
 {
-	return std::make_shared<workBlock<X,decltype(fptr())>>(fptr);
+	return std::make_unique<workBlock<decltype(fptr())>>(std::forward<X>(fptr));
+}
+/** make a shared pointer to a workBlock object from a functional object
+@param[in] fptr a std::function, std::bind, functionoid, lambda function or anything else
+that could be called with operator()
+@return a shared pointer to a work block function
+*/
+template <typename X>
+auto make_shared_workBlock(X&& fptr)//->std::shared_ptr<workBlock<decltype(fptr())>>
+{
+	return std::make_shared<workBlock<decltype(fptr())>>(std::forward<X>(fptr));
 }
 
+/** make a unique pointer to a workBlock object from a packaged task object
+@param[in] task a packaged task containing something to do
+@return a unique pointer to a work block function
+*/
+template <typename X>
+auto make_workBlock(std::packaged_task<X()> &&task)
+{
+	return std::make_unique<workBlock<X>>(std::move(task));
+}
+
+/** make a shared pointer to a workBlock object from a packaged task object
+@param[in] task a packeged task containing something to do
+@return a unique pointer to a work block function
+*/
+template <typename X>
+auto make_shared_workBlock(std::packaged_task<X()> &&task)
+{
+	return std::make_shared<workBlock<X>>(std::move(task));
+}
+
+/** the defualt ratio between med and low priority tasks*/
 const int defaultPriorityRatio(4);
 
 /** class defining a work queuing system
@@ -198,9 +268,9 @@ public:
 	/** enumeration defining the work block priority*/
 	enum class workPriority
 	{
-		medium,
-		low,
-		high
+		medium, //!< do the work with a specific ratio of priority to low priority tasks
+		low,	//!< low priority do the work every once in a while determined by the priority ratio
+		high,  //!< do the work as soon as possible
 	};
 	/**
 	* class destructor must be public so it can be used with shared_ptr
@@ -220,6 +290,7 @@ public:
 	static int getWorkerCount();
 	/** destroy the workQueue*/
 	void destroyWorkerQueue();
+
 	/** add a block of work to the workQueue
 	@param[in] newWork  the block of new work for the queue
 	*/
@@ -259,7 +330,8 @@ private:
 	* Singleton instance.
 	*/
 	static std::shared_ptr<workQueue> pInstance;  //!< the pointer to the singleton
-	bool halt=false;  //!< flag indicating the threads should halt
+	static std::mutex instanceLock;  //!< lock for creating the queue
+
 	int priorityRatio = defaultPriorityRatio; //!< the ratio of medium Priority blocks to low priority blocks
 	int numWorkers = 0; //!< counter for the number of workers
 	int MedCounter = 0; //!< the counter to use low instead of Med
@@ -271,6 +343,7 @@ private:
 	std::condition_variable queueCondition; //!< condition variable for waking the threads
 	std::mutex queueLock; //!< mutex lock for ensuring concurrent access on the threads
 	std::vector<std::thread> threadpool; //!< the threads
+	bool halt = false;  //!< flag indicating the threads should halt
 };
 
 #endif

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,15 +18,12 @@
 #include <iterator>
 
 #ifdef ENABLE_64_BIT_INDEXING
-typedef std::uint64_t index_t;
-typedef std::uint64_t count_t;
+using index_t=std::uint64_t;
+using count_t= std::uint64_t;
 #else
-typedef std::uint32_t index_t;
-typedef std::uint32_t count_t;
+using index_t= std::uint32_t;
+using count_t=std::uint32_t;
 #endif
-
-//TODO:: make an iterator class for use in the matrix data that returns a matrix element
-
 
 /** @brief convenience structure for returning data
 	*/
@@ -37,15 +34,30 @@ typedef std::uint32_t count_t;
 		index_t row; //!< row
 		index_t col; //!< column
 		X data;  //!< value
+		matrixElement() {};
+		matrixElement(index_t R, index_t C, X D) :row(R), col(C), data(D)
+		{};
 	};
-	
 
-	template<class X>
-	class matrixIterator;
-
+	template <class X>
+	static bool compareRow(const matrixElement<X> &A, const matrixElement<X> &B)
+	{
+		return (A.row < B.row) ? true : ((A.row > B.row) ? false : (A.col < B.col));
+	}
+	template <class X>
+	static bool compareCol(const matrixElement<X> &A, const matrixElement<X> &B)
+	{
+		return (A.col < B.col) ? true : ((A.col > B.col) ? false : (A.row < B.row));
+	}
 
 /** @brief class implementing a matrix entry class for handling Jacobian entries
-  this is a purely virtual interface a specific instantiation is required
+  @details this is a purely virtual interface a specific instantiation is required
+  in general matrixData objects are not thread safe, accessing from more than one thread at a time 
+  will likely be problematic,  because they are virtual classes, no specific iterator is possible without dynamic allocation
+  and that makes them really slow.  there is a sequential access methods,  start(), next(), and moreData(), 
+  the element method should be thread-safe for random access but is likely to be slow in many implementations.
+  Specific implementations may define an iterator that may be more useful.  
+  individual classes
  */
 template <class X=double>
 class matrixData
@@ -159,26 +171,12 @@ public:
   */
   virtual X at(index_t rowN, index_t colN) const = 0;
 
-
   /**
-  * @brief get the row value
+  * @brief get element at index N
   * @param[in] N the element number to return
-  * @return the row of the corresponding index
+  * @return the element corresponding to the index
   */
-  virtual index_t rowIndex(index_t N) const = 0;
-
-  /**
-  * @brief get the column value
-  * @param[in] N the element number to return
-  * @return the column of the corresponding index
-  */
-  virtual index_t colIndex(index_t N) const = 0;
-  /**
-  * @brief get the value
-  * @param[in] N the element number to return
-  * @return the value of the corresponding index
-  */
-  virtual X val(index_t N) const = 0;
+  virtual matrixElement<X> element(index_t N) const = 0;
 
   /** @brief change the matrixData to a compact sorted form
   */
@@ -200,23 +198,9 @@ public:
   */
   virtual matrixElement<X> next()
   {
-	  return{ rowIndex(cur),colIndex(cur),val(cur++) };
+	  return element(cur++);
   }
 
-  /** @brief get an iterator to the first element
-  @return the iterator
-  */
-  virtual matrixIterator<X> begin() const
-  {
-		return matrixIterator<X>(*this, 0);
-  }
-  /** @brief return an iterator to an element after the last data
-  @return the terminal iterator
-  */
-  virtual matrixIterator<X> end() const
-  {
-	  return matrixIterator<X>(*this, size());
-  }
   /** @brief check if the data sequence is at its end
   @return true if there are more points to grab false if not
   */
@@ -265,129 +249,13 @@ public:
 	  a2.start();
 	  for (index_t nn = 0; nn < count; ++nn)
 	  {
-		  if (a2.rowIndex(nn) == origRow)
+		  auto element = a2.next();
+		  if (element.row == origRow)
 		  {
-			  assign(newRow, a2.colIndex(nn), a2.val(nn));
+			  assign(newRow, element.col, element.data);
 		  }
 	  }
   }
 };
 
-
-
-template<class X>
-class matrixIteratorActual
-{
-public:
-	explicit matrixIteratorActual(const matrixData<X> &matrixData, index_t start = 0) :currentElement(start),mD(matrixData)
-	{}
-	 matrixIteratorActual(const matrixIteratorActual &it2) : currentElement(it2.currentElement), mD(it2.mD)
-	{
-
-	}
-	
-	virtual matrixIteratorActual *clone() const
-	{
-		return new matrixIteratorActual(mD, currentElement);
-	}
-
-	virtual ~matrixIteratorActual()
-	{}
-	
-	virtual void increment()
-	{
-		++currentElement;
-	}
-	virtual bool isEqual(const matrixIteratorActual *it2) const
-	{
-		return (currentElement == it2->currentElement);
-	}
-
-	virtual matrixElement<X> operator*() const
-	{
-		return{ mD.rowIndex(currentElement),mD.colIndex(currentElement),mD.val(currentElement) };
-	}
-private:
-	index_t currentElement = 0;
-	const matrixData<X> &mD;
-
-};
-
-
-
-/** @brief iterator class for iterating through the elements in a matrix data object*/
-template<class X>
-class matrixIterator :public std::iterator<std::input_iterator_tag, matrixElement<X>>
-{
-public:
-	explicit matrixIterator(const matrixData<X> &matrixData, index_t start = 0) :iteratorActual(new matrixIteratorActual<X>(matrixData, start))
-	{}
-	explicit matrixIterator(matrixIteratorActual<X> *mIA) :iteratorActual(mIA)
-	{}
-	matrixIterator(const matrixIterator &mI):iteratorActual(mI.iteratorActual->clone())
-	{
-
-	}
-
-	matrixIterator(matrixIterator &&mI):iteratorActual(mI.iteratorActual)
-	{
-		mI.iteratorActual = nullptr;
-	}
-
-	~matrixIterator()
-	{
-		if (iteratorActual)
-		{
-			delete iteratorActual;
-		}
-	}
-
-	void operator=(const matrixIterator &mI)
-	{
-		if (iteratorActual)
-		{
-			delete iteratorActual;
-		}
-		iteratorActual= mI.iteratorActual->clone();
-	}
-
-	void operator=(matrixIterator &&mI)
-	{
-		if (iteratorActual)
-		{
-			delete iteratorActual;
-		}
-		iteratorActual = mI.iteratorActual;
-		mI.iteratorActual = nullptr;
-	}
-
-	matrixIterator &operator++()
-	{
-		iteratorActual->increment();
-		return *this;
-	}
-	bool operator==(const matrixIterator &it2) const
-	{
-		return (iteratorActual->isEqual(it2.iteratorActual));
-	}
-	bool operator!=(const matrixIterator &it2) const
-	{
-		return !(iteratorActual->isEqual(it2.iteratorActual));
-	}
-	matrixIterator operator++(int)
-	{
-		matrixIterator retval = *this;
-		++(*this);
-		return retval;
-	}
-
-
-	matrixElement<X> operator*() const
-	{
-		return *(*iteratorActual);
-	}
-private:
-	matrixIteratorActual<X> *iteratorActual;
-
-};
 #endif

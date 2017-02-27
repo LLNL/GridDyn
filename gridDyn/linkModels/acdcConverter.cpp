@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,9 +16,9 @@
 #include "vectorOps.hpp"
 #include "primary/dcBus.h"
 #include "submodels/otherBlocks.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "matrixDataSparse.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 
 #include <cmath>
@@ -76,22 +76,18 @@ void acdcConverter::buildSubsystem ()
   opFlags.set (adjustable_P);
   opFlags.set (adjustable_Q);
   firingAngleControl = std::make_shared<pidBlock> (-dirMult * mp_Kp, -dirMult * mp_Ki, 0, "angleControl");
-  firingAngleControl->setParent (this);
-  firingAngleControl->setOwner(nullptr,firingAngleControl.get());
+  firingAngleControl->addOwningReference();
+  addSubObject(firingAngleControl.get());
   powerLevelControl = std::make_shared<pidBlock> (mp_controlKp, mp_controlKi, 0, "powerControl");
-  powerLevelControl->setParent (this);
-  powerLevelControl->setOwner(nullptr, powerLevelControl.get());
+  powerLevelControl->addOwningReference();
+  addSubObject(powerLevelControl.get());
   controlDelay = std::make_shared<delayBlock> (tD, "controlDelay");
-  controlDelay->setParent (this);
-  controlDelay->setOwner(nullptr, controlDelay.get());
-  subObjectList.push_back (firingAngleControl.get ());
-  subObjectList.push_back (powerLevelControl.get ());
-  subObjectList.push_back (controlDelay.get ());
+  controlDelay->addOwningReference();
+  addSubObject(controlDelay.get());
 }
 
 acdcConverter::~acdcConverter ()
 {
-	subObjectList.clear();
 }
 
 coreObject *acdcConverter::clone (coreObject *obj) const
@@ -122,10 +118,10 @@ coreObject *acdcConverter::clone (coreObject *obj) const
   return nobj;
 }
 
-void  acdcConverter::timestep (gridDyn_time ttime, const solverMode &)
+void  acdcConverter::timestep (coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 	//TODO: this function is incorrect
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
 
@@ -316,7 +312,7 @@ void  acdcConverter::set (const std::string &param, double val, units_t unitType
 }
 
 
-void acdcConverter::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void acdcConverter::pFlowObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
 
   double v1 = B1->getVoltage ();
@@ -331,12 +327,12 @@ void acdcConverter::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned lon
     }
   angle = (v1 + 3 / kPI * x * Idc) / (k3sq2 * v1);
   updateLocalCache();
-  offsets.local->local.algSize = 1;
-  offsets.local->local.jacSize = 4;
+  offsets.local().local.algSize = 1;
+  offsets.local().local.jacSize = 4;
 
 }
 
-void acdcConverter::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void acdcConverter::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   updateLocalCache ();
   if (opFlags[fixed_target_power])
@@ -344,11 +340,11 @@ void acdcConverter::dynObjectInitializeA (gridDyn_time time0, unsigned long flag
       tap = linkInfo.v2 * linkInfo.v1 / Pset;
     }
   baseTap = tap;
-  firingAngleControl->initializeA (time0,flags);
+  firingAngleControl->dynInitializeA (time0,flags);
 
   vTarget = B2->getVoltage ();
-  powerLevelControl->initializeA (time0,flags);
-  controlDelay->initializeA (time0,flags);
+  powerLevelControl->dynInitializeA (time0,flags);
+  controlDelay->dynInitializeA (time0,flags);
   if (tD < 0.0001) //check if control are needed
     {
       controlDelay->disable ();
@@ -358,8 +354,8 @@ void acdcConverter::dynObjectInitializeA (gridDyn_time time0, unsigned long flag
       powerLevelControl->disable ();
       controlDelay->disable ();
     }
-  offsets.local->local.algSize = 1;
-  offsets.local->local.jacSize = 4;
+  offsets.local().local.algSize = 1;
+  offsets.local().local.jacSize = 4;
 
 }
 
@@ -367,19 +363,18 @@ static IOdata zVec {
   0.0,0.0,0.0
 };
 
-static const IOdata nvec {};
 
-void acdcConverter::dynObjectInitializeB (IOdata & /*fieldSet*/)
+void acdcConverter::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata & fieldSet)
 {
-  IOdata out (1);
-  firingAngleControl->initializeB (zVec,{angle},out);
+
+  firingAngleControl->dynInitializeB (noInputs,{angle},fieldSet);
   if (control_mode == control_mode_t::voltage)
     {
       vTarget = B2->getVoltage ();
-      powerLevelControl->initializeB (zVec, nvec, out);
+	  powerLevelControl->dynInitializeB({ vTarget }, noInputs, fieldSet);
       if (tD > 0.0001)
         {
-          controlDelay->initializeB (out, nvec, out);
+          controlDelay->dynInitializeB (fieldSet, noInputs, fieldSet);
         }
 
     }
@@ -392,17 +387,17 @@ void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
 }
 
 
-void acdcConverter::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void acdcConverter::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-  if  (!(enabled))
+  if  (!(isEnabled()))
     {
       return;
     }
-  if (argLocs[voltageInLocation] == kNullLocation)
+  if (inputLocs[voltageInLocation] == kNullLocation)
     {
       return;
     }
-  updateLocalCache (sD, sMode);
+  updateLocalCache (noInputs, sD, sMode);
   //int mode = B1->getMode(sMode) * 4 + B2->getMode(sMode);
 
   /*
@@ -412,7 +407,7 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData &sD, ma
 
   linkInfo.Q1 = -std::sqrt(sr*sr - linkInfo.P1*linkInfo.P1);
   */
-  index_t vLoc = argLocs[voltageInLocation];
+  index_t vLoc = inputLocs[voltageInLocation];
   if (isDynamic (sMode))
     {
       if (busId == B2->getID ())
@@ -461,11 +456,11 @@ void acdcConverter::ioPartialDerivatives (index_t busId, const stateData &sD, ma
 
 void acdcConverter::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }
-  updateLocalCache (sD, sMode);
+  updateLocalCache (noInputs, sD, sMode);
 
 
 
@@ -514,7 +509,7 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData &sD
       */
       if (busId == B2->getID ())
         {
-          if (!opFlags.test (fixed_target_power))
+          if (!opFlags[fixed_target_power])
             {
               ad.assignCheckCol (PoutLocation, B1Voffset, dirMult * linkInfo.v2 / tap);
             }
@@ -539,14 +534,25 @@ void acdcConverter::outputPartialDerivatives (index_t busId, const stateData &sD
     }
 }
 
+count_t acdcConverter::outputDependencyCount(index_t /*num*/, const solverMode &sMode) const
+{
+	if (isDynamic(sMode))
+	{
+		return 2;
+	}
+	else
+	{
+		return 1;
+	}
+}
 
-void acdcConverter::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
+void acdcConverter::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
 	auto B1Loc=B1->getOutputLocs(sMode);
   auto B1Voffset = B1Loc[voltageInLocation];
   auto B2Loc = B2->getOutputLocs(sMode);
   auto B2Voffset = B2Loc[voltageInLocation];
-  updateLocalCache(sD, sMode);
+  updateLocalCache(noInputs, sD, sMode);
   if (isDynamic (sMode))
     {
       auto Loc = offsets.getLocations (sD, sMode,this);
@@ -557,7 +563,7 @@ void acdcConverter::jacobianElements (const stateData &sD, matrixData<double> &a
       IOdata a1 {
         linkInfo.v2 - vTarget
       };
-      double I0;
+
       index_t refLoc;
       matrixDataSparse<double> tad1,tad2;
 
@@ -580,7 +586,7 @@ void acdcConverter::jacobianElements (const stateData &sD, matrixData<double> &a
               tap = baseTap / (1.0 + dirMult * baseTap * Padj);
               tad2.assign (0, refLoc, -dirMult * linkInfo.v1);
             }
-          I0 = linkInfo.v1 / tap;
+          double I0 = linkInfo.v1 / tap;
           a1[0] = Loc.algStateLoc[0] - I0;
           double cA = firingAngleControl->getOutput (a1, sD, sMode);
 		  refLoc = firingAngleControl->getOutputLoc(sMode);
@@ -635,10 +641,10 @@ void acdcConverter::jacobianElements (const stateData &sD, matrixData<double> &a
     }
 }
 
-void acdcConverter::residual (const stateData &sD, double resid[], const solverMode &sMode)
+void acdcConverter::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
 
-  updateLocalCache (sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
   if (isDynamic (sMode))
     {
 
@@ -681,14 +687,14 @@ void acdcConverter::residual (const stateData &sD, double resid[], const solverM
     }
 }
 
-void acdcConverter::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void acdcConverter::setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
       Idc = state[offsets.getAlgOffset (sMode)];
-      for (auto &sub : subObjectList)
+      for (auto &sub : getSubObjects())
         {
-          if (sub->enabled)
+          if (sub->isEnabled())
             {
               sub->setState (ttime, state, dstate_dt, sMode);
             }
@@ -713,14 +719,14 @@ void acdcConverter::setState (gridDyn_time ttime, const double state[], const do
 
 }
 
-void acdcConverter::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void acdcConverter::guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
       state[offsets.getAlgOffset (sMode)] = Idc;
-      for (auto &sub:subObjectList)
+      for (auto &sub:getSubObjects())
         {
-          if (sub->enabled)
+          if (sub->isEnabled())
             {
               sub->guess (ttime, state, dstate_dt, sMode);
             }
@@ -734,14 +740,14 @@ void acdcConverter::guess (gridDyn_time ttime, double state[], double dstate_dt[
 }
 
 
-void  acdcConverter::updateLocalCache (const stateData &sD, const solverMode &sMode)
+void  acdcConverter::updateLocalCache (const IOdata &, const stateData &sD, const solverMode &sMode)
 {
-  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
+  if (!sD.updateRequired(linkInfo.seqID))
     {
       return;
     }
 
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
@@ -788,7 +794,7 @@ void  acdcConverter::updateLocalCache ()
 
   std::memset (&linkInfo, 0, sizeof(linkI));
 
-  if (enabled)
+  if (isEnabled())
     {
       linkInfo.v1 = B1->getVoltage ();
       linkInfo.v2 = B2->getVoltage ();
@@ -801,7 +807,7 @@ void  acdcConverter::updateLocalCache ()
     }
 }
 
-int acdcConverter::fixRealPower (double power, index_t /*mterminal*/, index_t fixedTerminal, gridUnits::units_t unitType)
+int acdcConverter::fixRealPower (double power, index_t /*measureTerminal*/, index_t fixedTerminal, gridUnits::units_t unitType)
 {
   if (fixedTerminal != 1)
     {
@@ -815,7 +821,7 @@ int acdcConverter::fixRealPower (double power, index_t /*mterminal*/, index_t fi
   return 0;
 }
 
-int acdcConverter::fixPower (double /*power*/, double /*qpower*/, index_t /*mterminal*/,index_t /*fixedTerminal*/, gridUnits::units_t /*unitType*/)
+int acdcConverter::fixPower (double /*power*/, double /*qpower*/, index_t /*measureTerminal*/,index_t /*fixedTerminal*/, gridUnits::units_t /*unitType*/)
 {
   return 0;
 }
@@ -825,7 +831,7 @@ void acdcConverter::getStateName (stringVec &stNames, const solverMode &sMode, c
 {
   auto offset = offsets.getAlgOffset (sMode);
 
-  std::string prefix2 = prefix + name + ':';
+  std::string prefix2 = prefix + getName() + ':';
 
   if (isDynamic (sMode))
     {
@@ -834,10 +840,10 @@ void acdcConverter::getStateName (stringVec &stNames, const solverMode &sMode, c
           stNames[offset] = prefix2 + "Idc";
         }
       firingAngleControl->getStateName (stNames,sMode,prefix2);
-      if (powerLevelControl->enabled)
+      if (powerLevelControl->isEnabled())
         {
           powerLevelControl->getStateName (stNames,sMode,prefix2);
-          if (controlDelay->enabled)
+          if (controlDelay->isEnabled())
             {
               controlDelay->getStateName (stNames,sMode,prefix2);
             }

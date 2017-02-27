@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,9 +15,10 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include "gridDyn.h"
 #include "gridBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "loadModels/gridLabDLoad.h"
 #include "loadModels/motorLoad.h"
+#include "loadModels/gridLoad3Phase.h"
 #include "gridDynFileInput.h"
 #include "simulation/diagnostics.h"
 #include "testHelper.h"
@@ -30,7 +31,7 @@ BOOST_FIXTURE_TEST_SUITE(load_tests, gridLoadTestFixture)
 
 BOOST_AUTO_TEST_CASE(basic_load_test)
 {
-	ld1 = new gridLoad(1.1, -0.3);
+	ld1 = new zipLoad(1.1, -0.3);
   ld1->setFlag("no_pqvoltage_limit");
 	double val;
 	//check basic return values
@@ -103,17 +104,16 @@ BOOST_AUTO_TEST_CASE(basic_load_test)
 
 BOOST_AUTO_TEST_CASE(load_voltage_sweep)
 {
-  ld1 = new gridLoad(1.0,0.0);
+  ld1 = new zipLoad(1.0,0.0);
   std::vector<double> v;
   std::vector<double> out;
   ld1->set("vpqmin",0.75);
   ld1->set("vpqmax",1.25);
-  double o1;
+ 
   for (double vt=0.0;vt<=1.5;vt+=0.001)
   {
-    o1=ld1->getRealPower(vt);
-    v.push_back(vt);
-    out.push_back(o1);
+	  v.push_back(vt);
+    out.push_back(ld1->getRealPower(vt));
   }
   v.push_back(1.5);
   BOOST_CHECK_SMALL(std::abs(out[400]-v[400]*v[400]/(0.75*0.75)),0.001);
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	ld1->pFlowInitializeA(timeZero, 0);
 	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.5, 0.000001);
-	ld1->timestep(5.0,emptyArguments,cLocalSolverMode);
+	ld1->timestep(5.0,noInputs,cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
 	//check the uniform distribution
@@ -230,19 +230,19 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	ld1->pFlowInitializeA(6.0,0);
 	auto src = ld1->find("p");
 	BOOST_REQUIRE(src != nullptr);
-	gridDyn_time otime = src->getNextUpdateTime();
-	BOOST_CHECK(otime >= 8.0);
-	BOOST_CHECK(otime <= 11.0);
-	ld1->timestep(otime-0.2, emptyArguments, cLocalSolverMode);
+	coreTime otime = src->getNextUpdateTime();
+	BOOST_CHECK_GE(otime, 8.0);
+	BOOST_CHECK_LE(otime,11.0);
+	ld1->timestep(otime-0.2, noInputs, cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 0.8, 0.000001);
-	ld1->timestep(otime + 0.2, emptyArguments, cLocalSolverMode);
+	ld1->timestep(otime + 0.2, noInputs, cLocalSolverMode);
 	val = ld1->getRealPower(1.1);
 	BOOST_CHECK_CLOSE(val, 1.1, 0.000001);
 	//check to make sure they are not the same number
 	ld1->pFlowInitializeA(6.0, 0);
 	double ntime = src->getNextUpdateTime();
-	BOOST_CHECK(otime != ntime);
+	BOOST_CHECK_NE(otime,ntime);
 	//check if the set seed works
 	ldT->set("p:seed",0);
 	ld1->pFlowInitializeA(6.0, 0);
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(random_load_test)
 	ldT->set("p:seed", 0);
 	ld1->pFlowInitializeA(6.0, 0);
 	otime = src->getNextUpdateTime();
-	BOOST_CHECK(otime==ntime);
+	BOOST_CHECK_EQUAL(otime,ntime);
 	
 	
 }
@@ -281,12 +281,13 @@ BOOST_AUTO_TEST_CASE(random_load_test2)
 	ld1->set("p:size_dist", "uniform");
 	ldT->set("p:min_l", 0.2);
 	ldT->set("p:max_l",0.5);
+	ldT->set("p:seed", "");
 	ld1->set("p", 0.5);
 	ld1->pFlowInitializeA(6.0,0);
-	ld1->timestep(12.0, emptyArguments, cLocalSolverMode);
+	ld1->timestep(12.0, noInputs, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
-	BOOST_CHECK(val >= 0.7);
-	BOOST_CHECK(val <= 1.0);
+	BOOST_CHECK_GE(val, 0.7);
+	BOOST_CHECK_LE(val,1.0);
 	
 
 }
@@ -305,13 +306,13 @@ BOOST_AUTO_TEST_CASE(pulse_load_test2)
 	double val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
 	//check the pulse
-	ldT->timestep(1.0, emptyArguments, cLocalSolverMode);
+	ldT->timestep(1.0, noInputs, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0.0, 0.000001);
-	ld1->timestep(2.0, emptyArguments, cLocalSolverMode);
+	ld1->timestep(2.0, noInputs, cLocalSolverMode);
 	val = ld1->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 1.3, 0.000001);
-	ld1->timestep(4.0, emptyArguments, cLocalSolverMode);
+	ld1->timestep(4.0, noInputs, cLocalSolverMode);
 	val = ldT->getRealPower(1.0);
 	BOOST_CHECK_CLOSE(val, 0, 0.000001);
 	
@@ -369,7 +370,7 @@ BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
 {
 	std::string fname = gridlabd_test_directory+"IEEE_13_mod.xml";
 
-	gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	auto gds = readSimXMLFile(fname);
 
 	gridBus *bus = gds->getBus(1);
 	gridLabDLoad *gld = dynamic_cast<gridLabDLoad *>(bus->getLoad());
@@ -377,9 +378,8 @@ BOOST_AUTO_TEST_CASE(gridDynLoad_test1)
 	BOOST_REQUIRE(gld != nullptr);
 	
 	gds->run();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (),gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 	
-	delete gds;
 	
 }
 
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(motor_test1)
 {
   std::string fname = load_test_directory+ "motorload_test1.xml";
 
-  gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+  auto gds = readSimXMLFile(fname);
 
 
   gridBus *bus = gds->getBus(1);
@@ -396,24 +396,22 @@ BOOST_AUTO_TEST_CASE(motor_test1)
   BOOST_REQUIRE(mtld!=nullptr);
  
  gds->dynInitialize();
- BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+ BOOST_REQUIRE_EQUAL (gds->currentProcessState (),gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
  int mmatch=runResidualCheck(gds,cDaeSolverMode);
 
  BOOST_REQUIRE_EQUAL(mmatch, 0);
   mmatch=runJacobianCheck(gds,cDaeSolverMode);
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->run();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
  
-  delete gds;
-
 }
 
 BOOST_AUTO_TEST_CASE(motor_test3)
 {
   std::string fname = load_test_directory+"motorload_test3.xml";
 
-  gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+  auto gds = readSimXMLFile(fname);
 
 
   gridBus *bus = gds->getBus(1);
@@ -422,24 +420,18 @@ BOOST_AUTO_TEST_CASE(motor_test3)
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
   
-  int mmatch=runJacobianCheck(gds,cPflowSolverMode);
+  runJacobianCheck(gds,cPflowSolverMode);
  
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->dynInitialize();
-  mmatch=runResidualCheck(gds,cDaeSolverMode);
+  runResidualCheck(gds,cDaeSolverMode);
 
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
-  mmatch=JacobianCheck(gds,cDaeSolverMode,1e-8);
-  if (mmatch>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+  
+  runJacobianCheck(gds,cDaeSolverMode,1e-8);
+  
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
   gds->run();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
-  delete gds;
 }
 
 /** test case runs a 3rd order motor load to stall and unstall conditions*/
@@ -447,7 +439,7 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
 {
   std::string fname = load_test_directory+"motorload_test3_stall.xml";
 
-  gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+  auto gds = readSimXMLFile(fname);
 
 
   gridBus *bus = gds->getBus(1);
@@ -456,26 +448,20 @@ BOOST_AUTO_TEST_CASE(motor_test3_stall)
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
 
-  int mmatch = runJacobianCheck(gds,cPflowSolverMode);
+  runJacobianCheck(gds,cPflowSolverMode);
  
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
   gds->dynInitialize();
-  mmatch = runResidualCheck(gds,cDaeSolverMode);
- 
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
-  mmatch = JacobianCheck(gds,cDaeSolverMode, 1e-8);
-  if (mmatch>0)
-  {
-    printStateNames(gds, cDaeSolverMode);
-  }
-  BOOST_REQUIRE_EQUAL(mmatch, 0);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+  runResidualCheck(gds,cDaeSolverMode);
+
+ runJacobianCheck(gds,cDaeSolverMode, 1e-8);
+  
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
   gds->run(2.5);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   BOOST_CHECK(mtld->checkFlag(motorLoad::stalled));
   gds->run();
   BOOST_CHECK(!mtld->checkFlag(motorLoad::stalled));
-  delete gds;
+
 }
 
 
@@ -485,7 +471,7 @@ BOOST_AUTO_TEST_CASE(motor_test5)
 {
   std::string fname = std::string(LOAD_TEST_DIRECTORY "motorload_test5.xml");
   readerConfig::setPrintMode(0);
-  gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+  auto gds = readSimXMLFile(fname);
 
 
   gridBus *bus = gds->getBus(1);
@@ -493,25 +479,17 @@ BOOST_AUTO_TEST_CASE(motor_test5)
 
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
-  int err = runJacobianCheck(gds,cPflowSolverMode);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
+  runJacobianCheck(gds,cPflowSolverMode);
  
   gds->dynInitialize();
-  err=residualCheck(gds,cDaeSolverMode);
-  if (err>0)
-  {
-    printf("residual issue\n");
-    printStateNames(gds, cDaeSolverMode);
-  }
-  err=JacobianCheck(gds,cDaeSolverMode);
-  if (err>0)
-  {
-  printf("error int dae Jacobian\n");
-  printStateNames(gds, cDaeSolverMode);
-  }
+  runResidualCheck(gds,cDaeSolverMode);
+ 
+  runJacobianCheck(gds,cDaeSolverMode);
+ 
   gds->run();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
-  delete gds;
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+ 
 }
 
 #endif
@@ -521,7 +499,7 @@ BOOST_AUTO_TEST_CASE(fdep_test)
 {
   std::string fname = load_test_directory+"fdepLoad.xml";
   readerConfig::setPrintMode(1);
-  gridDynSimulation *gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+  auto gds = readSimXMLFile(fname);
 
 
   gridBus *bus = gds->getBus(2);
@@ -529,18 +507,71 @@ BOOST_AUTO_TEST_CASE(fdep_test)
 
   BOOST_REQUIRE(mtld != nullptr);
   gds->pFlowInitialize();
-  auto err = runJacobianCheck(gds,cPflowSolverMode);
-  BOOST_REQUIRE_EQUAL(err, 0);
+  runJacobianCheck(gds,cPflowSolverMode);
+  
   gds->dynInitialize();
-  err=runResidualCheck(gds,cDaeSolverMode);
-  BOOST_REQUIRE_EQUAL(err, 0);
-  err=runJacobianCheck(gds,cDaeSolverMode);
-  BOOST_REQUIRE_EQUAL(err, 0);
+  runResidualCheck(gds,cDaeSolverMode);
+  
+  runJacobianCheck(gds,cDaeSolverMode);
+  
   
   gds->run();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
-
-  delete gds;
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
+
+BOOST_AUTO_TEST_CASE(simple_3phase_load_test)
+{
+	auto ld3 = std::make_unique<gridLoad3Phase>();
+	ld3->setPa(1.1);
+	ld3->setPb(1.2);
+	ld3->setPc(1.3);
+
+	auto P = ld3->getRealPower();
+	BOOST_CHECK_CLOSE(P, 3.6, 0.00001);
+
+	ld3->setQa(0.1);
+	ld3->setQb(0.3);
+	ld3->setQc(0.62);
+
+	auto Q = ld3->getReactivePower();
+	BOOST_CHECK_CLOSE(Q, 1.02, 0.00001);
+
+	ld3->setLoad(3.0);
+	BOOST_CHECK_CLOSE(ld3->get("pa"), 1.0, 0.0000001);
+	
+
+	ld3->set("pb", 0.5);
+	ld3->set("pc", 0.4);
+
+	P = ld3->getRealPower();
+	BOOST_CHECK_CLOSE(P, 1.9, 0.00001);
+
+	auto res = ld3->getRealPower3Phase();
+	BOOST_CHECK_EQUAL(res.size(), 3u);
+	BOOST_CHECK_CLOSE(res[0], 1.0, 0.0000001);
+	BOOST_CHECK_CLOSE(res[1], 0.5, 0.0000001);
+	BOOST_CHECK_CLOSE(res[2], 0.4, 0.0000001);
+
+	auto res2 = ld3->getRealPower3Phase(phase_type_t::pnz);
+	BOOST_CHECK_EQUAL(res2.size(), 3u);
+	BOOST_CHECK_CLOSE(res2[0], 1.9, 0.00001);
+
+	ld3->setLoad(2.7,0.3);
+	res = ld3->getRealPower3Phase();
+	BOOST_CHECK_CLOSE(res[0], 0.9, 0.0000001);
+	BOOST_CHECK_CLOSE(res[1], 0.9, 0.0000001);
+	BOOST_CHECK_CLOSE(res[2], 0.9, 0.0000001);
+
+	res = ld3->getRealPower3Phase(phase_type_t::pnz);
+	BOOST_CHECK_CLOSE(res[0], 2.7, 0.0000001);
+	BOOST_CHECK_SMALL(res[1], 0.0000001);
+	BOOST_CHECK_SMALL(res[2], 0.0000001);
+
+	res = ld3->getReactivePower3Phase(phase_type_t::pnz);
+	BOOST_CHECK_CLOSE(res[0], 0.3, 0.0000001);
+	BOOST_CHECK_SMALL(res[1], 0.0000001);
+	BOOST_CHECK_SMALL(res[2], 0.0000001);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

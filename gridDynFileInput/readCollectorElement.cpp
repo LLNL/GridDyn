@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,8 +17,8 @@
 #include "gridDynFileInput.h"
 #include "core/factoryTemplates.h"
 
-#include "recorder_events/collector.h"
-#include "objectInterpreter.h"
+#include "measurement/collector.h"
+#include "core/objectInterpreter.h"
 
 
 using namespace readerConfig;
@@ -31,14 +31,14 @@ static const IgnoreListType collectorIgnoreStrings {
 
 static const std::string collectorNameString ("collector");
 
-int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo *ri)
+int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo &ri)
 {
   int ret = FUNCTION_EXECUTION_SUCCESS;
-  std::string name = ri->checkDefines (getElementField (element, nameString, defMatchType));
-  std::string fname = ri->checkDefines(getElementFieldOptions(element, { "file","sink" }, defMatchType));
-  std::string type = ri->checkDefines(getElementField(element, "type", defMatchType));
+  std::string name = ri.checkDefines (getElementField (element, nameString, defMatchType));
+  std::string fname = ri.checkDefines(getElementFieldOptions(element, { "file","sink" }, defMatchType));
+  std::string type = ri.checkDefines(getElementField(element, "type", defMatchType));
 
-  auto col = ri->findCollector(name, fname);
+  auto col = ri.findCollector(name, fname);
   if ((!type.empty())&&(name.empty())&&(fname.empty()))
   {
 	  col = nullptr;
@@ -59,14 +59,14 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
         {
           col->set ("file",fname);
         }
-	  ri->collectors.push_back(col);
+	  ri.collectors.push_back(col);
     }
 
   gridGrabberInfo gdRI;
   name = getElementField (element, "target", defMatchType);
   if (!name.empty ())
     {
-      name = ri->checkDefines (name);
+      name = ri.checkDefines (name);
       gdRI.m_target = name;
     }
   auto fieldList = getElementFieldMultiple (element, "field", defMatchType);
@@ -76,7 +76,7 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
       gdRI.field = "";
       for (auto &fstr : fieldList)
         {
-          fstr = ri->checkDefines (fstr);
+          fstr = ri.checkDefines (fstr);
           if (gdRI.field.empty ())
             {
               gdRI.field = fstr;
@@ -102,7 +102,7 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
   elementText = getElementFieldOptions (element, { "units","unit" }, defMatchType);
   if (!elementText.empty ())
     {
-	  elementText = ri->checkDefines (elementText);
+	  elementText = ri.checkDefines (elementText);
       gdRI.outputUnits = gridUnits::getUnits (elementText);
     }
   elementText = getElementField (element, "column", defMatchType);
@@ -121,8 +121,8 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
     }
   //now load the other fields for the recorder
 
-  setAttributes (col, element, collectorNameString, ri, collectorIgnoreStrings);
-  setParams (col, element, collectorNameString, ri, collectorIgnoreStrings);
+  setAttributes (col.get(), element, collectorNameString, ri, collectorIgnoreStrings);
+  setParams (col.get(), element, collectorNameString, ri, collectorIgnoreStrings);
   coreObject *targetObj = obj;
 
   if (!((gdRI.m_target.empty()) || (gdRI.m_target == obj->getName())))

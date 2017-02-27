@@ -3,16 +3,14 @@ cmake_minimum_required(VERSION 2.8)
 project(minizip C)
 
 set(BUILD_SHARED_LIBS OFF)
-set(SKIP_INSTALL_HEADERS ON)
-set(SKIP_INSTALL_FILES ON)
-if(NOT FMILIB_INSTALL_SUBLIBS)
-	set(SKIP_INSTALL_LIBRARIES ON)
-endif()
-add_subdirectory("../Zlib/zlib-1.2.6" "${CMAKE_BINARY_DIR}/zlib")
 
-if(CMAKE_CL_64)
-	set_target_properties(zlib PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
-endif()
+cmake_minimum_required(VERSION 3.4)
+cmake_policy(VERSION 3.4)
+
+IF (NOT ZLIB_INCLUDES)
+find_package(ZLIB REQUIRED)
+ENDIF(NOT ZLIB_INCLUDES)
+
 
 if(CMAKE_HOST_APPLE)
 set(PLATFORM __APPLE__)
@@ -34,7 +32,7 @@ if(MSVC)
   add_definitions(/wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456)
 endif(MSVC)
 
-include_directories("../Zlib/zlib-1.2.6" "${CMAKE_BINARY_DIR}/zlib")
+include_directories(${ZLIB_INCLUDES})
 set(SOURCE
   ioapi.c
   miniunz.c
@@ -52,6 +50,7 @@ set(HEADERS
   crypt.h
   ioapi.h  
   miniunz.h
+  minizip.h
   #mztools.h
   unzip.h
 )
@@ -62,11 +61,10 @@ endif(WIN32)
 
 add_library(minizip ${SOURCE} ${HEADERS})
 
-target_link_libraries(minizip zlib)
-
 
 	install(TARGETS minizip
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib 
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/
 	)
 
+
+INSTALL(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/minizip)

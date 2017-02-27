@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 
 
 #include "dispatcher.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 
 dispatcher::dispatcher (const std::string &objName) : coreObject (objName)
@@ -33,17 +33,17 @@ coreObject * dispatcher::clone (coreObject * /*obj*/) const
 void dispatcher::moveSchedulers (dispatcher * /*dis*/)
 {
 }
-double dispatcher::initialize (gridDyn_time /*time0*/, double /*dispatch*/)
+double dispatcher::initialize (coreTime /*time0*/, double /*dispatch*/)
 {
   return 0;
 }
 
 
-double dispatcher::updateP (gridDyn_time /*time*/, double /*required*/, double /*targetTime*/)
+double dispatcher::updateP (coreTime /*time*/, double /*required*/, double /*targetTime*/)
 {
   return 0;
 }
-double dispatcher::testP (gridDyn_time /*time*/, double /*required*/, double /*targetTime*/)
+double dispatcher::testP (coreTime /*time*/, double /*required*/, double /*targetTime*/)
 {
   return 0;
 }

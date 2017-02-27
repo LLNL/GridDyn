@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -28,8 +28,8 @@ gridDynGovernorSteamTCSR::gridDynGovernorSteamTCSR (const std::string &objName) 
   Pmax  = kBigNum;
   Pmin  = 0;
   Pset    = 0;
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.jacSize = 5;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.jacSize = 5;
 }
 
 coreObject *gridDynGovernorSteamTCSR::clone (coreObject *obj) const
@@ -68,24 +68,24 @@ gridDynGovernorSteamTCSR::~gridDynGovernorSteamTCSR ()
 }
 
 // initial conditions
-void gridDynGovernorSteamTCSR::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata & /*inputSet*/)
+void gridDynGovernorSteamTCSR::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata & /*inputSet*/)
 {
   m_state[1] = 0;
-  m_state[0] = outputSet[PoutLocation];
-  Pset = args[govpSetInLocation];
+  m_state[0] = desiredOutput[PoutLocation];
+  Pset = inputs[govpSetInLocation];
 
 }
 
 
 // residual
-void gridDynGovernorSteamTCSR::residual (const IOdata & /*args*/, const stateData &, double resid[],  const solverMode &sMode)
+void gridDynGovernorSteamTCSR::residual (const IOdata & /*inputs*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset]   = 0;
   resid[offset + 1] = 0;
 }
 
-void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamTCSR::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {

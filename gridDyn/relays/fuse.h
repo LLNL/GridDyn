@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -33,7 +33,7 @@ protected:
   index_t m_terminal = 1;  //!< line terminal  (typically 1 or 2)
   double limit = kBigNum;         //!<[puA] maximum current
   double mp_I2T = 0.0;         //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
-  gridDyn_time minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
+  coreTime minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
 private:
   double cI2T;        //!< calculated I2t value for fuse
   double Vbase = 120;       //!<[kV] Voltage base for bus
@@ -47,19 +47,19 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
   //dynamic functions for evaluation with a limit exceeded
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
-  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
-	virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggerTime) override;
+	virtual void conditionTriggered (index_t conditionNum, coreTime triggerTime) override;
   change_code setupFuseEvaluation ();
 private:
   double I2Tequation (double current);

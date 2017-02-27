@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -72,19 +72,19 @@ void basicOdeSolver::allocate(count_t stateCount, count_t numRoots)
 		deriv.resize(stateCount);
 		state2.resize(stateCount);
 		svsize = stateCount;
-		initialized = false;
-		allocated = true;
+		flags.reset(initialized_flag);
+		flags.set(allocated_flag);
 		rootsfound.resize(numRoots);
 	}
 }
 
-void basicOdeSolver::initialize(gridDyn_time t0)
+void basicOdeSolver::initialize(coreTime t0)
 {
-	if (!allocated)
+	if (!flags[allocated_flag])
 	{
 		throw(InvalidSolverOperation(-2));
 	}
-	initialized = true;
+	flags.set(initialized_flag);
 	solverCallCount = 0;
 	solveTime = t0;
 }
@@ -128,14 +128,14 @@ void basicOdeSolver::set(const std::string &param, double val)
 
 }
 
-int basicOdeSolver::solve(gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
+int basicOdeSolver::solve(coreTime tStop, coreTime &tReturn, step_mode stepMode)
 {
 	if( solveTime==tStop)
 	{
 		tReturn = tStop;
 		return FUNCTION_EXECUTION_SUCCESS;
 	}
-	gridDyn_time Tstep = (std::min)(deltaT, tStop - solveTime);
+	coreTime Tstep = (std::min)(deltaT, tStop - solveTime);
 	if (mode.pairedOffsetIndex != kNullLocation)
 	{
 		int ret = m_gds->dynAlgebraicSolve(solveTime, state.data(), deriv.data(), mode);

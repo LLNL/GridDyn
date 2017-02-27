@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,8 +16,8 @@
 #define _MATRIX_DATA_SPARSE_H_
 
 #include "matrixData.h"
+#include "matrixDataOrdering.h"
 #include <vector>
-#include <tuple>
 #include <cassert>
 #include <cmath>
 #include <algorithm>
@@ -27,65 +27,14 @@
 * class for storing data from the Jacobian computation
 */
 
-const int adRow = 0;
-const int adCol = 1;
-const int adVal = 2;
 /** @brief class implementing an expandable sparse matrix geared for Jacobian entries*/
 template <class Y=double>
 class matrixDataSparse: public matrixData<Y>
 {
-public:
-	typedef std::tuple<index_t, index_t, Y> cLoc;
 private:
-	std::vector<cLoc> data;         //!< the vector of tuples containing the data			
+	std::vector<matrixElement<Y>> data;         //!< the vector of tuples containing the data			
 	count_t sortCount = 0;			//!< count of the last sort operation
-	decltype(data.begin()) cptr; //!< ptr to the beginning of the sequence;
-protected:
-	static bool compareLocRow(cLoc A, cLoc B)
-	{
-		bool ans;
-		if (std::get<adRow>(A) < std::get<adRow>(B))
-		{
-			ans = true;
-		}
-		else if (std::get<adRow>(A) > std::get<adRow>(B))
-		{
-			ans = false;
-		}
-		else       //A(0)==B(0)  so check the column
-		{
-			ans = (std::get<adCol>(A) < std::get<adCol>(B)) ? true : false;
-		}
-		return ans;
-	}
-
-	static bool compareLocCol(cLoc A, cLoc B)
-	{
-		bool ans;
-		if (std::get<adCol>(A) < std::get<adCol>(B))
-		{
-			ans = true;
-		}
-		else if (std::get<adCol>(A) > std::get<adCol>(B))
-		{
-			ans = false;
-		}
-		else       //A(1)==B(1)  so check the row
-		{
-			ans = (std::get<adRow>(A) < std::get<adRow>(B)) ? true : false;
-		}
-		return ans;
-	}
-
-	static bool compareLocRowQuick(cLoc A, cLoc B)
-	{
-		return (std::get<adRow>(A) < std::get<adRow>(B));
-	}
-
-	static bool compareLocColQuick(cLoc A, cLoc B)
-	{
-		return (std::get<adCol>(A) < std::get<adCol>(B));
-	}
+	decltype(data.cbegin()) cptr; //!< ptr to the beginning of the sequence;
 public:	
 	/** @brief constructor 
 	@param[in] startCount  the number of elements to allocate space for initially
@@ -136,28 +85,20 @@ public:
 	/**
 	* sort the index based first on column number then column number
 	*/
-	void sortIndex()
+	void sortIndex(sparse_ordering ordering=sparse_ordering::row_ordered)
 	{
-		std::sort(data.begin(), data.end(), compareLocCol);
+		switch (ordering)
+		{
+		case sparse_ordering::column_ordered:
+			std::sort(data.begin(), data.end(), compareCol<Y>);
+			break;
+		case sparse_ordering::row_ordered:
+			std::sort(data.begin(), data.end(), compareRow<Y>);
+			break;
+		}
 		sortCount = static_cast<count_t>(data.size());
 	}
-	/**
-	* sort the index based first on column number then column number
-	*/
-	void sortIndexCol()
-	{
-		std::sort(data.begin(), data.end(), compareLocCol);
-		sortCount = static_cast<count_t>(data.size());
-	}
-
-	/**
-	* @brief sort the index based first on row number then row number
-	*/
-	void sortIndexRow()
-	{
-		std::sort(data.begin(), data.end(), compareLocRow);
-		sortCount = static_cast<count_t>(data.size());
-	}
+	
 	/**
 	* @brief compact the index merging values with the same row and column number together
 	*/
@@ -169,7 +110,7 @@ public:
 		}
 		if (!isSorted())
 		{
-			sortIndex();
+			sortIndex(sparse_ordering::column_ordered);
 		}
 		auto currentDataLocation = data.begin();
 		auto testDataLocation = currentDataLocation + 1;
@@ -178,9 +119,9 @@ public:
 		{
 			//Check if the next is equal to the previous in location 
 			//if they are add them if not shift the new one to the right location and move on
-			if ((std::get<adCol>(*testDataLocation) == std::get<adCol>(*currentDataLocation)) && (std::get<adRow>(*testDataLocation) == std::get<adRow>(*currentDataLocation)))
+			if ((testDataLocation->col == currentDataLocation->col) && (testDataLocation->row == currentDataLocation->row))
 			{
-				std::get<adVal>(*currentDataLocation) += std::get<adVal>(*testDataLocation);
+				currentDataLocation->data += testDataLocation->data;
 
 			}
 			else
@@ -196,59 +137,37 @@ public:
 		sortCount = static_cast<count_t>(data.size());
 
 	}
-	/**
-	* @brief get the row value
-	* @param[in] N the element number to return
-	* @return the row of the corresponding index
-	*/
-	index_t rowIndex(index_t N) const override
+	matrixElement<Y> element(index_t N) const override
 	{
-		return std::get<adRow>(data[N]);
+		return data[N];
 	}
-	/**
-	* @brief get the column value
-	* @param[in] N the element number to return
-	* @return the column of the corresponding index
-	*/
-	index_t colIndex(index_t N) const override
+	
+
+	auto begin() const
 	{
-		return std::get<adCol>(data[N]);
-	}
-	/**
-	* @brief get the value
-	* @param[in] N the element number to return
-	* @return the value of the corresponding index
-	*/
-	Y val(index_t N) const override
-	{
-		return std::get<adVal>(data[N]);
+		return data.cbegin();
 	}
 
-	virtual matrixIterator<Y> begin() const override
+	auto end() const
 	{
-		return matrixIterator<Y>(new matrixIteratorSparse(*this, 0));
-	}
-
-	virtual matrixIterator<Y> end() const override
-	{
-		return matrixIterator<Y>(new matrixIteratorSparse(*this, size()));
+		return data.end();
 	}
 
 	void start() override
 	{
-		cptr = data.begin();
+		cptr = data.cbegin();
 	}
 
 	matrixElement<Y> next() override
 	{
-		matrixElement<Y> tp{ std::get<adRow>(*cptr), std::get<adCol>(*cptr), std::get<adVal>(*cptr) };
+		matrixElement<Y> tp = *cptr;
 		++cptr;
 		return tp;
 	}
 
 	bool moreData() override
 	{
-		return (cptr != data.end());
+		return (cptr != data.cend());
 	}
 
 	/**
@@ -259,20 +178,20 @@ public:
 	{
 		if (!isSorted())
 		{
-			sortIndexCol();
+			sortIndex(sparse_ordering::column_ordered);
 		}
 		auto dataEnd = data.end();
-		std::vector<count_t> colCount(std::get<adRow>(*(dataEnd - 1)), 0);
+		std::vector<count_t> colCount((*(dataEnd - 1)).row, 0);
 		count_t cnt = 1;
 
-		index_t testRow = std::get<adRow>(data.front());
+		index_t testRow = data.front().row;
 		for (auto testData = data.begin(); testData != dataEnd; ++testData)
 		{
-			if (testRow != std::get<adRow>(*testData))
+			if (testRow != testData->row)
 			{
 				colCount[testRow] = cnt;
 				cnt = 0;
-				testRow = std::get<adRow>(*testData);
+				testRow = testData->row;
 			}
 			++cnt;
 		}
@@ -292,14 +211,14 @@ public:
 	{
 		if (isSorted())
 		{
-			auto res = std::lower_bound(data.begin(), data.end(), cLoc(rowN, colN, 0.0), compareLocCol);
+			auto res = std::lower_bound(data.begin(), data.end(), matrixElement<Y>{rowN, colN, Y(0)}, compareCol<Y>);
 			if (res == data.end())
 			{
 				return Y(0);
 			}
-			if ((std::get<adRow>(*res) == rowN) && (std::get<adCol>(*res) == colN))
+			if ((res->row == rowN) && (res->col == colN))
 			{
-				return std::get<adVal>(*res);
+				return res->data;
 			}
 			else
 			{
@@ -310,9 +229,9 @@ public:
 		{
 			for (const auto &rv : data)
 			{
-				if ((std::get<adRow>(rv) == rowN) && (std::get<adCol>(rv) == colN))
+				if ((rv.row == rowN) && (rv.col == colN))
 				{
-					return std::get<adVal>(rv);
+					return rv.data;
 				}
 			}
 			return Y(0);
@@ -339,7 +258,7 @@ public:
 		}
 		while (res != term)
 		{
-			std::get<adVal>(*res) *= factor;
+			res->data *= factor;
 			++res;
 		}
 	}
@@ -349,15 +268,12 @@ public:
 	*/
 	void scaleRow(index_t row, Y factor)
 	{
-		auto res = data.begin();
-		auto term = data.end();
-		while (res != term)
+		for (auto &res : data)
 		{
-			if (std::get<adRow>(*res) == row)
+			if (res.row == row)
 			{
-				std::get<adVal>(*res) *= factor;
+				res.data *= factor;
 			}
-			++res;
 		}
 	}
 	/** @brief scale all the elements of a particular column
@@ -366,15 +282,12 @@ public:
 	*/
 	void scaleCol(index_t col, Y factor)
 	{
-		auto res = data.begin();
-		auto term = data.end();
-		while (res != term)
+		for (auto &res : data)
 		{
-			if (std::get<adCol>(*res) == col)
+			if (res.col == col)
 			{
-				std::get<adVal>(*res) *= factor;
+				res.data *= factor;
 			}
-			++res;
 		}
 	}
 	/** @brief translate all the elements in a particular row to some other row
@@ -383,15 +296,12 @@ public:
 	*/
 	void translateRow(index_t origRow, index_t newRow)
 	{
-		auto res = data.begin();
-		auto term = data.end();
-		while (res != term)
+		for (auto &res : data)
 		{
-			if (std::get<adRow>(*res) == origRow)
+			if (res.row == origRow)
 			{
-				std::get<adRow>(*res) = newRow;
+				res.row = newRow;
 			}
-			++res;
 		}
 	}
 	/** @brief translate all the elements in a particular column to some other column
@@ -400,16 +310,14 @@ public:
 	*/
 	void translateCol(index_t origCol, index_t newCol)
 	{
-		auto res = data.begin();
-		auto term = data.end();
-		while (res != term)
+		for (auto &res : data)
 		{
-			if (std::get<adCol>(*res) == origCol)
+			if (res.col == origCol)
 			{
-				std::get<adCol>(*res) = newCol;
+				res.col = newCol;
 			}
-			++res;
 		}
+		
 	}
 	using matrixData<Y>::copyTranslateRow;
 
@@ -418,18 +326,14 @@ public:
 	@param[in] origRow the column to change
 	@param[in] newRow the column to change origRow into
 	*/
-	void copyTranslateRow(matrixDataSparse<Y> &a2, index_t origRow, index_t newRow)
+	void copyTranslateRow(const matrixDataSparse<Y> &a2, index_t origRow, index_t newRow)
 	{
-		auto res = a2.data.begin();
-		auto term = a2.data.end();
-
-		while (res != term)
+		for (const auto &res : a2.data)
 		{
-			if (std::get<adRow>(*res) == origRow)
+			if (res.row == origRow)
 			{
-				data.emplace_back(newRow, std::get<adCol>(*res), std::get<adVal>(*res));
+				data.emplace_back(newRow, res.col, res.data);
 			}
-			++res;
 		}
 	}
 	/** @brief translate all the elements in a particular column in a2 and translate column origCol to newCol
@@ -437,18 +341,14 @@ public:
 	@param[in] origCol the column to change
 	@param[in] newCol the column to change origCol into
 	*/
-	void copyTranslateCol(matrixDataSparse<Y> &a2, index_t origCol, index_t newCol)
+	void copyTranslateCol(const matrixDataSparse<Y> &a2, index_t origCol, index_t newCol)
 	{
-		auto res = a2.data.begin();
-		auto term = a2.data.end();
-
-		while (res != term)
+		for (const auto &res : a2.data)
 		{
-			if (std::get<adCol>(*res) == origCol)
+			if (res.col == origCol)
 			{
-				data.emplace_back(std::get<adRow>(*res), newCol, std::get<adVal>(*res));
+				data.emplace_back(res.row, newCol, res.data);
 			}
-			++res;
 		}
 	}
 
@@ -460,81 +360,62 @@ public:
 	@param[in] newIndices a vector of indices to change
 	@param[in] mult the scaler multiplier for each fo the new indices
 	*/
-	void copyReplicate(matrixDataSparse<Y> &a2, index_t origCol, std::vector<index_t> newIndices, std::vector<Y> mult)
+	void copyReplicate(const matrixDataSparse<Y> &a2, index_t origCol, std::vector<index_t> newIndices, std::vector<Y> mult)
 	{
-		auto res = a2.data.begin();
-		auto term = a2.data.end();
-
-		while (res != term)
+		for (const auto &res : a2.data)
 		{
-			if (std::get<adCol>(*res) == origCol)
+			if (res.col == origCol)
 			{
 				for (index_t nn = 0; nn<newIndices.size(); ++nn)
 				{
-					//data.push_back(cLoc(std::get<adRow>(*res), newIndices[nn], std::get<adVal>(*res)*mult[nn]));
-					data.emplace_back(std::get<adRow>(*res), newIndices[nn], std::get<adVal>(*res)*mult[nn]);
+					data.emplace_back(res.row, newIndices[nn], res.data*mult[nn]);
 				}
 			}
 			else
 			{
-				data.push_back(*res);
+				data.push_back(res);
 			}
-			++res;
 		}
+		
 	}
 	/** @brief remove invalid rows or those given by the testrow
 	@param[in] rowTest,  the row index to remove*/
 	void filter(index_t rowTest = (index_t)(-1))
 	{
-		if (data.empty())
-		{
-			return;
-		}
-		auto dvb = data.begin();
-		auto dv2 = dvb;
-		auto dvend = data.end();
-		while (dv2 != dvend)
-		{
-			index_t row = std::get<adRow>(*dv2);
-			index_t col = std::get<adCol>(*dv2);
-			if ((row < matrixData<Y>::rowLim) && (row != rowTest))
-			{
-				if (col < matrixData<Y>::colLim)
-				{
-					*dvb = *dv2;
-					++dvb;
-				}
-			}
-			++dv2;
-		}
-		data.resize(dvb - data.begin());
+		auto rem=std::remove_if(data.begin(), data.end(),
+			[rowTest, clim = matrixData<Y>::colLim, rlim = matrixData<Y>::rowLim](const matrixElement<Y> &el)
+		{return ((el.row == rowTest) ||
+			(el.row >= rlim) ||
+			(el.col >= clim)); });
+		data.erase(rem, data.end());
+		
 	}
 
 	void cascade(matrixDataSparse<Y> &a2, index_t element)
 	{
 		auto term = data.size();
 		size_t nn = 0;
-		Y keyval = 0;
+		Y keyval = Y(0);
 		while (nn != term)
 		{
-			if (std::get<adCol>(data[nn]) == element)
+			if (data[nn].col == element)
 			{
 				size_t mm = 0;
-				keyval = std::get<adVal>(data[nn]);
+				keyval = data[nn].data;
 				for (size_t kk = 0; kk < a2.data.size(); kk++)
 				{
-					if (std::get<adRow>(a2.data[kk]) == element)
+					if (a2.data[kk].row == element)
 					{
 						if (mm == 0)
 						{
-							std::get<adCol>(data[nn]) = std::get<adCol>(a2.data[kk]);
-							std::get<adVal>(data[nn]) = std::get<adVal>(a2.data[kk]) * keyval;
+							data[nn].col = a2.data[kk].col;
+							data[nn].data = a2.data[kk].data * keyval;
 							++mm;
 						}
 						else
 						{
 							//data.push_back (cLoc (std::get<adRow> (data[nn]), std::get<adCol> (a2->data[kk]), keyval * std::get<adVal> (a2->data[kk])));
-							data.emplace_back(std::get<adRow>(data[nn]), std::get<adCol>(a2.data[kk]), keyval * std::get<adVal>(a2.data[kk]));
+							data.emplace_back(data[nn].row, a2.data[kk].col, keyval * a2.data[kk].data);
 							++mm;
 						}
 					}
@@ -553,7 +434,7 @@ public:
 	{
 		for (auto &element:data)
 		{
-			std::swap(std::get<adCol>(element), std::get<adRow>(element));
+			std::swap(element.col, element.row);
 		//	int t1 = std::get<adCol>(data[kk]);
 		//	std::get<adCol>(data[kk]) = std::get<adRow>(data[kk]);
 		//	std::get<adRow>(data[kk]) = t1;
@@ -563,90 +444,49 @@ public:
 	{
 		for (size_t kk = 0; kk < data.size(); kk++)
 		{
-			std::get<adVal>(data[kk]) *= diag[std::get < adCol >(data[kk])];
+			data[kk].data *= diag[data[kk].col];
 		}
 	}
 
 	std::vector<Y> vectorMult(std::vector<Y> V)
 	{
-		sortIndexRow();
-		auto maxRow = std::get<adRow>(data.back());
+		sortIndex(sparse_ordering::row_ordered);
+		auto maxRow = data.back().row;
 		std::vector<Y> out(maxRow, 0);
 		auto res = data.begin();
 		auto term = data.end();
 		for (index_t nn = 0; nn <= maxRow; ++nn)
 		{
-			while ((res != term) && (std::get<adRow>(*res) == nn))
+			while ((res != term) && (*res.row == nn))
 			{
-				out[nn] += std::get<adVal>(*res) * V[std::get < adCol >(*res)];
+				out[nn] += *res.data * V[*res.col];
 				++res;
 			}
 		}
 		return out;
 	}
 protected:
-	class matrixIteratorSparse :public matrixIteratorActual<Y>
-	{
-	public:
-		explicit matrixIteratorSparse(const matrixDataSparse<Y> &matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDS(matrixData)
-		{
-			if (start == 0)
-			{
-				cptr = mDS.data.begin();
-			}
-			else if (start<mDS.size())
-			{
-				cptr = mDS.data.begin() + start;
-			}
-			else
-			{
-				cptr = mDS.data.end();
-			}
-
-		}
-		matrixIteratorSparse(const matrixIteratorSparse &it2) :matrixIteratorActual<Y>(it2.mDS), mDS(it2.mDS)
-		{
-			cptr = it2.cptr;
-		}
-
-		virtual matrixIteratorActual<Y> *clone() const override
-		{
-			return new matrixIteratorSparse(*this);
-		}
-
-		virtual void increment() override
-		{
-			matrixIteratorActual<Y>::increment();
-			++cptr;
-		}
-
-
-		virtual matrixElement<Y> operator*() const override
-		{
-			return{ std::get<adRow>(*cptr), std::get<adCol>(*cptr), std::get<adVal>(*cptr) };
-		}
-	private:
-		const matrixDataSparse<Y> &mDS;
-		decltype(matrixDataSparse<Y>::data.cbegin()) cptr; //!< ptr to the beginning of the sequence;	
-
-	};
+	
 };
 
 template<class Y>
 std::vector<index_t> findMissing(matrixDataSparse<Y> &ad)
 {
 	std::vector<index_t> missing;
-	ad.sortIndexCol();
 	ad.compact();
-	ad.sortIndexRow();
+	ad.sortIndex(sparse_ordering::row_ordered);
 	index_t pp = 0;
-	bool good = false;
 	for (index_t kk = 0; kk < ad.rowLimit(); ++kk)
 	{
-		good = false;
-		while ((pp < ad.size()) && (ad.rowIndex(pp) <= kk))
+		bool good = false;
+		if (pp > ad.size())
 		{
-			if ((ad.rowIndex(pp) == kk) && (std::isnormal(ad.val(pp))))
+			break;
+		}
+		auto element = ad.element(pp);
+		while (element.row <= kk)
+		{
+			if ((element.row == kk) && (std::isnormal(element.data)))
 			{
 				good = true;
 				++pp;
@@ -658,6 +498,7 @@ std::vector<index_t> findMissing(matrixDataSparse<Y> &ad)
 			{
 				break;
 			}
+			element = ad.element(pp);
 		}
 		if (!good)
 		{
@@ -673,9 +514,9 @@ std::vector<std::vector<index_t>> findRank(matrixDataSparse<Y> &ad)
 	std::vector<index_t> vr, vt;
 	std::vector<Y> vq, vtq;
 	std::vector<std::vector<index_t>> mrows;
-	ad.sortIndexCol();
+	ad.sortIndex(sparse_ordering::column_ordered);
 	ad.compact();
-	ad.sortIndexRow();
+	ad.sortIndex(sparse_ordering::row_ordered);
 	Y factor = 0;
 	index_t pp = 0;
 	index_t qq = 0;
@@ -685,11 +526,13 @@ std::vector<std::vector<index_t>> findRank(matrixDataSparse<Y> &ad)
 	{
 		vr.clear();
 		vq.clear();
-		while (ad.rowIndex(pp) == kk)
+		auto element = ad.element(pp);
+		while (element.row == kk)
 		{
-			vr.push_back(ad.colIndex(pp));
-			vq.push_back(ad.val(pp));
+			vr.push_back(element.col);
+			vq.push_back(element.data);
 			++pp;
+			element = ad.element(pp);
 		}
 		qq = pp;
 		for (index_t nn = kk + 1; nn < ad.rowLimit(); ++nn)
@@ -697,23 +540,25 @@ std::vector<std::vector<index_t>> findRank(matrixDataSparse<Y> &ad)
 			vt.clear();
 			vtq.clear();
 			good = false;
-			if (ad.colIndex(qq) != vr[0])
+			if (element.col != vr[0])
 			{
 				good = true;
 			}
-			while (ad.rowIndex(qq) == nn)
+			while (element.row == nn)
 			{
 
 				if (!good)
 				{
-					vt.push_back(ad.colIndex(qq));
-					vtq.push_back(ad.val(qq));
+					vt.push_back(element.col);
+					vtq.push_back(element.data);
 				}
 				++qq;
+
 				if (qq >= mp)
 				{
 					break;
 				}
+				element = ad.element(qq);
 			}
 			if (!good)
 			{

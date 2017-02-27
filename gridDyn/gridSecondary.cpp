@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,58 +12,78 @@
 */
 
 #include "gridObjects.h"
+#include "core/coreObjectTemplates.h"
+#include "core/objectInterpreter.h"
 #include "stringOps.h"
+#include "gridBus.h"
 #include <cstdio>
 #include <iostream>
 
+static gridBus defBus(1.0, 0);
 
-
-
-gridSecondary::gridSecondary (const std::string &objName) : gridObject (objName)
+gridSecondary::gridSecondary (const std::string &objName) : gridObject (objName), bus(&defBus)
 {
+	m_outputSize = 2;
+	m_inputSize = 3;
 }
 
-void gridSecondary::pFlowInitializeA (gridDyn_time time0, unsigned long flags)
+coreObject * gridSecondary::clone(coreObject *obj) const
 {
-  if (enabled)
-    {
+	gridSecondary *nobj = cloneBase<gridSecondary, gridObject>(this, obj);
+	if (!(nobj))
+	{
+		return obj;
+	}
+	nobj->baseVoltage = baseVoltage;
+	nobj->bus = bus;
+	return nobj;
+}
 
-      pFlowObjectInitializeA (time0, flags);
-      prevTime = time0;
-      updateFlags (false);
-      setupPFlowFlags ();
-    }
+
+void gridSecondary::updateObjectLinkages(coreObject *newRoot)
+{
+	if (opFlags[pFlow_initialized])
+	{
+		auto nobj = findMatchingObject(bus, newRoot);
+		if (dynamic_cast<gridBus *>(nobj))
+		{
+			bus = static_cast<gridBus *>(nobj);
+		}
+	}
+	gridObject::updateObjectLinkages(newRoot);
+}
+
+void gridSecondary::pFlowInitializeA (coreTime time0, unsigned long flags)
+{
+
+		bus = static_cast<gridBus *> (getParent()->find("bus"));
+		if (!bus)
+		{
+			bus = &defBus;
+		}
+		gridObject::pFlowInitializeA(time0, flags);
 }
 
 void gridSecondary::pFlowInitializeB ()
 {
-  if (enabled)
-    {
-      pFlowObjectInitializeB ();
-      opFlags.set (pFlow_initialized);
-    }
-}
-void gridSecondary::dynInitializeA (gridDyn_time time0, unsigned long flags)
-{
-  if (enabled)
-    {
-      dynObjectInitializeA (time0, flags);
-      prevTime = time0;
-      updateFlags (true);
-      setupDynFlags ();
-    }
+	gridObject::pFlowInitializeB();
 }
 
-void gridSecondary::dynInitializeB (const IOdata & args, const IOdata & outputSet)
+void gridSecondary::dynInitializeA (coreTime time0, unsigned long flags)
 {
-  if (enabled)
+	gridObject::dynInitializeA(time0, flags);
+}
+
+void gridSecondary::dynInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet)
+{
+  if (isEnabled())
     {
 
       auto ns = stateSize (cLocalSolverMode);
       m_state.resize (ns, 0);
       m_dstate_dt.clear ();
       m_dstate_dt.resize (ns, 0);
-      dynObjectInitializeB (args, outputSet);
+      dynObjectInitializeB (inputs, desiredOutput,fieldSet);
       if (updatePeriod < maxTime)
         {
           opFlags.set (has_updates);
@@ -75,117 +95,51 @@ void gridSecondary::dynInitializeB (const IOdata & args, const IOdata & outputSe
 }
 
 
-void gridSecondary::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void gridSecondary::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  if (!subObjectList.empty ())
+  if (!getSubObjects().empty ())
     {
-      for (auto &subobj : subObjectList)
+      for (auto &subobj : getSubObjects())
         {
 		  if (dynamic_cast<gridSubModel *>(subobj))
 		  {
 			  if (subobj->checkFlag(pflow_init_required))
 			  {
-				  static_cast<gridSubModel *> (subobj)->initializeA(time0, flags);
+				  static_cast<gridSubModel *> (subobj)->dynInitializeA(time0, flags);
 			  }
 		  }
-		  else if (dynamic_cast<gridSecondary *> (subobj))
+		  else 
             {
-              static_cast<gridSecondary *> (subobj)->pFlowInitializeA (time0, flags);
-            }
-          else if (dynamic_cast<gridPrimary *> (subobj))
-            {
-              static_cast<gridPrimary *> (subobj)->pFlowInitializeA (time0, flags);
+              subobj->pFlowInitializeA (time0, flags);
             }
         }
     }
 
 }
 
-void gridSecondary::pFlowObjectInitializeB ()
+void gridSecondary::set(const std::string &param, const std::string &val)
 {
-  if (!subObjectList.empty ())
-    {
-      for (auto &subobj : subObjectList)
-        {
-		  if (dynamic_cast<gridSecondary *> (subobj))
-            {
-              static_cast<gridSecondary *> (subobj)->pFlowInitializeB ();
-            }
-          else if (dynamic_cast<gridPrimary *> (subobj))
-            {
-              static_cast<gridPrimary *> (subobj)->pFlowInitializeB ();
-            }
-        }
-    }
+	gridObject::set(param, val);
 }
 
-void gridSecondary::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void gridSecondary::set(const std::string &param, double val, gridUnits::units_t unitType)
 {
-  if (!subObjectList.empty ())
-    {
-      for (auto &subobj : subObjectList)
-        {
-          if (dynamic_cast<gridSubModel *> (subobj))
-            {
-              static_cast<gridSubModel *> (subobj)->initializeA (time0, flags);
-            }
-          else if (dynamic_cast<gridSecondary *> (subobj))
-            {
-              static_cast<gridSecondary *> (subobj)->dynInitializeA (time0, flags);
-            }
-          else if (dynamic_cast<gridPrimary *> (subobj))
-            {
-              static_cast<gridPrimary *> (subobj)->dynInitializeA (time0, flags);
-            }
-        }
-    }
+	if ((param == "basevoltage") || (param == "basev")||(param=="bv"))
+	{
+		baseVoltage = gridUnits::unitConversion(val, unitType, gridUnits::kV);
+	}
+	else
+	{
+		gridObject::set(param, val, unitType);
+	}
 }
 
-void gridSecondary::dynObjectInitializeB (const IOdata & args, const IOdata & outputSet)
-{
-  if (!subObjectList.empty ())
-    {
-      IOdata iset;
-      for (auto &subobj : subObjectList)
-        {
-          if (dynamic_cast<gridSubModel *> (subobj))
-            {
-              static_cast<gridSubModel *> (subobj)->initializeB (args, outputSet, iset);
-            }
-          else if (dynamic_cast<gridSecondary *> (subobj))
-            {
-              static_cast<gridSecondary *> (subobj)->dynInitializeB (args, outputSet);
-            }
-          else if (dynamic_cast<gridPrimary *> (subobj))
-            {
-              static_cast<gridPrimary *> (subobj)->dynInitializeB (iset);
-            }
-        }
-    }
-}
-
-void gridSecondary::preEx (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::residual (const IOdata & /*args*/, const stateData &, double /*resid*/[], const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::algebraicUpdate (const IOdata & /*args*/, const stateData &, double /*update*/[], const solverMode & /*sMode*/, double /*alpha*/)
-{
-}
-
-void gridSecondary::derivative (const IOdata & /*args*/, const stateData &, double /*deriv*/[], const solverMode & /*sMode*/)
-{
-}
-
-double gridSecondary::getRealPower (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/) const
+double gridSecondary::getRealPower (const IOdata & /*inputs*/, const stateData &, const solverMode & /*sMode*/) const
 {
   return 0.0;
 }
 
-double gridSecondary::getReactivePower (const IOdata & /*args*/, const stateData &, const solverMode & /*sMode*/) const
+double gridSecondary::getReactivePower (const IOdata & /*inputs*/, const stateData &, const solverMode & /*sMode*/) const
 {
   return 0.0;
 }
@@ -198,103 +152,35 @@ double gridSecondary::getRealPower () const
 
 double gridSecondary::getReactivePower () const
 {
-  return 0;
+  return 0.0;
 }
 
 
-void gridSecondary::timestep (gridDyn_time ttime, const IOdata & args, const solverMode & sMode)
+double gridSecondary::getAdjustableCapacityUp (coreTime /*time*/) const
 {
-  prevTime = ttime;
-  if (!subObjectList.empty ())
-    {
-      for (auto &subobj : subObjectList)
-        {
-          if (dynamic_cast<gridSubModel *> (subobj))
-            {
-              static_cast<gridSubModel *> (subobj)->timestep (ttime, args, sMode);
-            }
-          else if (dynamic_cast<gridSecondary *> (subobj))
-            {
-              static_cast<gridSecondary *> (subobj)->timestep (ttime, args, sMode);
-            }
-        }
-    }
+  return 0.0;
 }
 
-double gridSecondary::getAdjustableCapacityUp (gridDyn_time /*time*/) const
+double gridSecondary::getAdjustableCapacityDown (coreTime /*time*/) const
 {
-  return 0;
+  return 0.0;
 }
 
-double gridSecondary::getAdjustableCapacityDown (gridDyn_time /*time*/) const
-{
-  return 0;
-}
-
-void gridSecondary::jacobianElements (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::outputPartialDerivatives  (const IOdata & /*args*/, const stateData &, matrixData<double> &, const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::ioPartialDerivatives (const IOdata & /*args*/, const stateData &, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::rootTest  (const IOdata & /*args*/, const stateData &, double /*roots*/[], const solverMode & /*sMode*/)
-{
-}
-
-void gridSecondary::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode & /*sMode*/)
-{
-}
-
-change_code gridSecondary::rootCheck (const IOdata & /*args*/, const stateData &, const solverMode &, check_level_t /*level*/)
-{
-  return change_code::no_change;
-}
-
-void gridSecondary::reset (reset_levels /*level*/)
-{
-}
-
-change_code gridSecondary::powerFlowAdjust (const IOdata & /*args*/, unsigned long /*flags*/, check_level_t /*level*/)
-{
-  return change_code::no_change;
-}
-
-double gridSecondary::getDoutdt (const IOdata & /*args*/, const stateData &, const solverMode &, index_t /*num*/) const
+double gridSecondary::getDoutdt (const IOdata & /*inputs*/, const stateData &, const solverMode &, index_t /*num*/) const
 {
   return 0.0;
 }
 
 
-
-static const IOlocs NullLocVec {
-  kNullLocation, kNullLocation
-};
-
-IOlocs gridSecondary::getOutputLocs  (const solverMode &) const
-{
-  return NullLocVec;
-}
-
-index_t gridSecondary::getOutputLoc ( const solverMode &, index_t /*num*/) const
-{
-	return kNullLocation;
-}
-
-double gridSecondary::getOutput (const IOdata &args, const stateData &sD, const solverMode &sMode, index_t num) const
+double gridSecondary::getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num) const
 {
   if (num == PoutLocation)
     {
-      return getRealPower (args, sD, sMode);
+      return getRealPower (inputs, sD, sMode);
     }
   else if (num == QoutLocation)
     {
-      return getReactivePower (args, sD, sMode);
+      return getReactivePower (inputs, sD, sMode);
     }
   else
     {
@@ -319,115 +205,18 @@ double gridSecondary::getOutput (index_t num) const
     }
 }
 
-IOdata gridSecondary::getOutputs (const IOdata &args, const stateData &sD, const solverMode &sMode) const
+IOdata gridSecondary::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   IOdata out (2);
-  out[PoutLocation] = getRealPower (args, sD, sMode);
-  out[QoutLocation] = getReactivePower (args, sD, sMode);
+  out[PoutLocation] = getRealPower (inputs, sD, sMode);
+  out[QoutLocation] = getReactivePower (inputs, sD, sMode);
   return out;
 }
 
-IOdata gridSecondary::predictOutputs (double /*ptime*/, const IOdata &args, const stateData &sD, const solverMode &sMode) const
+IOdata gridSecondary::predictOutputs (coreTime /*predictionTime*/, const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   IOdata out (2);
-  out[PoutLocation] = getRealPower (args, sD, sMode);
-  out[QoutLocation] = getReactivePower (args, sD, sMode);
+  out[PoutLocation] = getRealPower (inputs, sD, sMode);
+  out[QoutLocation] = getReactivePower (inputs, sD, sMode);
   return out;
-}
-
-
-
-index_t gridSecondary::findIndex (const std::string & field, const solverMode & sMode) const
-{
-  std::string ifield;
-
-  index_t ret = kInvalidLocation;
-  int num = trailingStringInt (field, ifield, -1);
-  if (num >= 0)
-    {
-      auto so = offsets.getOffsets (sMode);
-
-      if (ifield == "state")
-        {
-          if (num < static_cast<int> (so->total.algSize))
-            {
-              if (so->algOffset != kNullLocation)
-                {
-                  ret = so->algOffset + num;
-                }
-              else
-                {
-                  ret = kNullLocation;
-                }
-            }
-          else if (num < static_cast<int> (so->total.algSize + so->total.diffSize))
-            {
-              if (so->diffOffset != kNullLocation)
-                {
-                  ret = so->diffOffset + (num - so->total.algSize);
-                }
-              else
-                {
-                  ret = kNullLocation;
-                }
-            }
-        }
-      else if (ifield == "alg")
-        {
-          if (num < static_cast<int> (so->total.algSize))
-            {
-              if (so->algOffset != kNullLocation)
-                {
-                  ret = so->algOffset + num;
-                }
-              else
-                {
-                  ret = kNullLocation;
-                }
-            }
-        }
-      else if (ifield == "diff")
-        {
-          if (num < static_cast<int> (so->total.diffSize))
-            {
-              if (so->diffOffset != kNullLocation)
-                {
-                  ret = so->diffOffset + num;
-                }
-              else
-                {
-                  ret = kNullLocation;
-                }
-            }
-        }
-    }
-  else
-    {
-      for (auto &subobj : subObjectList)
-        {
-          if (dynamic_cast<gridSubModel *> (subobj))
-            {
-              ret = static_cast<gridSubModel *> (subobj)->findIndex (field, sMode);
-            }
-          else if (dynamic_cast<gridSecondary *> (subobj))
-            {
-              ret = static_cast<gridSecondary *> (subobj)->findIndex (field, sMode);
-            }
-          if (ret != kInvalidLocation)
-            {
-              break;
-            }
-
-        }
-    }
-
-
-
-  return ret;
-}
-
-
-void gridSecondary::updateLocalCache(const IOdata & /*args*/, const stateData &, const solverMode &)
-{
-	//nothing to cache by default
 }

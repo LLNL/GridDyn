@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,14 +13,15 @@
 
 
 #include "txLifeSpan.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 #include "submodels/gridControlBlocks.h"
 #include "linkModels/gridLink.h"
-#include "recorder_events/gridGrabbers.h"
-#include "recorder_events/gridEvent.h"
-#include "recorder_events/gridCondition.h"
-#include "core/gridDynExceptions.h"
+#include "measurement/gridGrabbers.h"
+#include "measurement/grabberSet.h"
+#include "events/gridEvent.h"
+#include "measurement/gridCondition.h"
+#include "core/coreExceptions.h"
 #include <cmath>
 
 txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
@@ -110,10 +111,10 @@ double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) c
 
 void txLifeSpan::add(coreObject * /*obj*/)
 {
-	throw(invalidObjectException(this));
+	throw(unrecognizedObjectException(this));
 }
 
-void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void txLifeSpan::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 	if (!(m_sourceObject))
 	{
@@ -122,12 +123,12 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 
 	if (updatePeriod > negTime)
 	{        //set the period to the period of the simulation to at least 1/5 the winding time constant
-		gridDyn_time pstep = parent->find("root")->get("steptime");
+		coreTime pstep = getRoot()->get("steptime");
 		if (pstep < timeZero)
 		{
 			pstep = 1.0;
 		}
-		gridDyn_time mtimestep = 120.0;  //update once per minute
+		coreTime mtimestep = 120.0;  //update once per minute
 		updatePeriod = pstep*std::floor(mtimestep / pstep);
 		if (updatePeriod < pstep)
 		{
@@ -150,28 +151,28 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 
 		auto g1 = std::make_shared<customGrabber>();
 		g1->setGrabberFunction("rate", [this](coreObject *)->double {return Faa; });
-		sensor::add(g1, nullptr);
+		sensor::add(g1);
 		
 		sensor::set("output2", "input1");
 		if (m_sinkObject)
 		{
-			auto ge = std::make_shared<gridEvent>();
+			auto ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "g");
 			ge->setValue(100.0);
-			gridRelay::add(ge);
+			gridRelay::add(std::move(ge));
 
-			ge = std::make_shared<gridEvent>();
+			ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch1");
 			ge->setValue(1.0);
-			gridRelay::add(ge);
+			gridRelay::add(std::move(ge));
 
-			ge = std::make_shared<gridEvent>();
+			ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch2");
 			ge->setValue(1.0);
-			gridRelay::add(ge);
+			gridRelay::add(std::move(ge));
 
 			auto cond = make_condition("output0", "<", 0, this);
-			gridRelay::add(cond);
+			gridRelay::add(std::move(cond));
 
 			setActionTrigger(0, 0);
 			if (!opFlags[no_disconnect])
@@ -184,15 +185,15 @@ void txLifeSpan::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 	}
 	return sensor::dynObjectInitializeA(time0, flags);
 }
-void txLifeSpan::dynObjectInitializeB(IOdata &outputSet)
+void txLifeSpan::dynObjectInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet)
 {
 	IOdata iset{0.0};
-	filterBlocks[0]->initializeB(iset, iset, iset);
-	gridRelay::dynObjectInitializeB(outputSet);//skip over sensor::dynInitializeB since we are initializing the blocks here
+	filterBlocks[0]->dynInitializeB(iset, iset, iset);
+	gridRelay::dynObjectInitializeB(inputs, desiredOutput,fieldSet);//skip over sensor::dynInitializeB since we are initializing the blocks here
 }
 
 
-void txLifeSpan::updateA(gridDyn_time time)
+void txLifeSpan::updateA(coreTime time)
 {
 
 	double Temp = dataSources[0]->grabData();
@@ -210,12 +211,12 @@ void txLifeSpan::updateA(gridDyn_time time)
 	gridRelay::updateA(time);
 }
 
-void txLifeSpan::timestep(gridDyn_time ttime, const solverMode &)
+void txLifeSpan::timestep(coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 	updateA(ttime);
 }
 
-void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
 	if (m_sinkObject)
 	{

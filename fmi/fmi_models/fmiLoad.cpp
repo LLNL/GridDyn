@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,12 +15,12 @@
 #include "fmiLoad.h"
 #include "fmi_import/fmiObjects.h"
 #include "fmiMESubModel.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
-fmiLoad::fmiLoad(std::string objName):gridLoad(objName)
+fmiLoad::fmiLoad(std::string objName):zipLoad(objName)
 {
 	
 }
@@ -32,7 +32,7 @@ fmiLoad::~fmiLoad()
 
 coreObject * fmiLoad::clone(coreObject *obj) const
 {
-	fmiLoad *nobj = cloneBase<fmiLoad, gridLoad>(this, obj);
+	fmiLoad *nobj = cloneBase<fmiLoad, zipLoad>(this, obj);
 	if (!(nobj))
 	{
 		return obj;
@@ -53,6 +53,7 @@ coreObject * fmiLoad::clone(coreObject *obj) const
 
 void fmiLoad::setupFmiIo()
 {
+	using namespace stringOps;
 	auto ostrings = fmisub->getOutputNames();
 	auto istrings = fmisub->getInputNames();
 	std::string v_in_string;
@@ -190,23 +191,23 @@ void fmiLoad::setupFmiIo()
 		outputs =q_out_string;
 		if (!p_out_string.empty())
 		{
-			outputs += ", " + q_out_string;
+			outputs += ", " + p_out_string;
 		}
 
 	}
 	fmisub->set("outputs", outputs);
 }
-void fmiLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void fmiLoad::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
 	if (fmisub->isLoaded()) 
 	{
 		setupFmiIo();
 		SET_CONTROLFLAG(flags, force_constant_pflow_initialization);
-		fmisub->initializeA(time0, flags);
-		gridLoad::pFlowObjectInitializeA(time0, flags);
-		auto args = bus->getOutputs(emptyStateData,cLocalSolverMode);
+		fmisub->dynInitializeA(time0, flags);
+		zipLoad::pFlowObjectInitializeA(time0, flags);
+		auto inputs = bus->getOutputs(noInputs,emptyStateData,cLocalSolverMode);
 		IOdata outset;
-		fmisub->initializeB(args, outset, outset);
+		fmisub->dynInitializeB(inputs, outset, outset);
 		opFlags.set(pFlow_initialized);
 	}
 	else
@@ -214,16 +215,15 @@ void fmiLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 		disable();
 	}
 }
-void fmiLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void fmiLoad::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-	fmisub->initializeA(time0, flags);
-	gridLoad::dynObjectInitializeA(time0, flags);
+	fmisub->dynInitializeA(time0, flags);
+	zipLoad::dynObjectInitializeA(time0, flags);
 }
 
-void fmiLoad::dynObjectInitializeB (const IOdata &args, const IOdata &outputSet)
+void fmiLoad::dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet)
 {
-	IOdata inSet(3);
-	fmisub->initializeB(args, outputSet,inSet);
+	fmisub->dynInitializeB(inputs, desiredOutput,fieldSet);
 }
 
 void fmiLoad::set (const std::string &param, const std::string &val)
@@ -234,13 +234,11 @@ void fmiLoad::set (const std::string &param, const std::string &val)
 	{
 		if (fmisub)
 		{
-			delete fmisub;
-			subObjectList.clear();
+			remove(fmisub);
 		}
-		fmisub = new fmiMESubModel(name);
+		fmisub = new fmiMESubModel(getName());
 		fmisub->set("fmu", val);
-		subObjectList.push_back(fmisub);
-		fmisub->setParent(this);
+		addSubObject(fmisub);
 	}
 	else if (param2 == "v_in")
 	{
@@ -267,7 +265,7 @@ void fmiLoad::set (const std::string &param, const std::string &val)
 		bool valid = false;
 		try
 		{
-			gridLoad::set(param, val);
+			zipLoad::set(param, val);
 			valid = true;
 		}
 		catch (const unrecognizedParameter &)
@@ -300,7 +298,7 @@ void fmiLoad::set (const std::string &param, double val, gridUnits::units_t unit
 	bool valid = false;
 	try
 	{
-		gridLoad::set(param, val,unitType);
+		zipLoad::set(param, val,unitType);
 		valid = true;
 	}
 	catch (const unrecognizedParameter &)
@@ -336,7 +334,7 @@ void fmiLoad::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 		gridSecondary::getParameterStrings(pstr, paramStringType::numeric);
 		pstr.push_back("#");
 		fmisub->getParameterStrings(pstr, paramStringType::localstr);
-		gridSecondary::getParameterStrings(pstr, paramStringType::string);
+		gridSecondary::getParameterStrings(pstr, paramStringType::str);
 		break;
 	case paramStringType::localnum:
 		fmisub->getParameterStrings(pstr, paramStringType::localnum);
@@ -351,9 +349,9 @@ void fmiLoad::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 		fmisub->getParameterStrings(pstr, paramStringType::localnum);
 		gridSecondary::getParameterStrings(pstr, paramStringType::numeric);
 		break;
-	case paramStringType::string:
+	case paramStringType::str:
 		fmisub->getParameterStrings(pstr, paramStringType::localstr);
-		gridSecondary::getParameterStrings(pstr, paramStringType::string);
+		gridSecondary::getParameterStrings(pstr, paramStringType::str);
 		break;
 	case paramStringType::flags:
 		fmisub->getParameterStrings(pstr, paramStringType::localflags);
@@ -362,42 +360,42 @@ void fmiLoad::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 	}
 }
 
-void fmiLoad::residual(const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
+void fmiLoad::residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-	fmisub->residual(args, sD, resid, sMode);
+	fmisub->residual(inputs, sD, resid, sMode);
 }
 
-void fmiLoad::derivative(const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void fmiLoad::derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-	fmisub->derivative(args, sD,deriv, sMode);
+	fmisub->derivative(inputs, sD,deriv, sMode);
 }
 
-void fmiLoad::outputPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiLoad::outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
-	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
+	fmisub->outputPartialDerivatives(inputs, sD, ad, sMode);
 }
-void fmiLoad::ioPartialDerivatives(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-	fmisub->ioPartialDerivatives (args, sD, ad, argLocs,sMode);
+	fmisub->ioPartialDerivatives (inputs, sD, ad, inputLocs,sMode);
 }
-void fmiLoad::jacobianElements(const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiLoad::jacobianElements(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-	fmisub->jacobianElements (args, sD, ad,argLocs, sMode);
-}
-
-void fmiLoad::rootTest(const IOdata &args, const stateData &sD, double roots[], const solverMode &sMode)
-{
-	fmisub->rootTest(args, sD, roots, sMode);
-}
-void fmiLoad::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
-{
-	fmisub->rootTrigger(ttime,args, rootMask, sMode);
+	fmisub->jacobianElements (inputs, sD, ad,inputLocs, sMode);
 }
 
-void fmiLoad::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void fmiLoad::rootTest(const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
+{
+	fmisub->rootTest(inputs, sD, roots, sMode);
+}
+void fmiLoad::rootTrigger(coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
+{
+	fmisub->rootTrigger(ttime,inputs, rootMask, sMode);
+}
+
+void fmiLoad::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	fmisub->setState(ttime, state, dstate_dt, sMode);
-	auto out = fmisub->getOutputs(emptyArguments, emptyStateData, cLocalSolverMode);
+	auto out = fmisub->getOutputs(noInputs, emptyStateData, cLocalSolverMode);
 	setP(out[PoutLocation]);
 	setQ(out[QoutLocation]);
 }
@@ -407,35 +405,35 @@ index_t fmiLoad::findIndex(const std::string &field, const solverMode &sMode) co
 	return fmisub->findIndex(field, sMode);
 }
 
-void fmiLoad::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void fmiLoad::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 	prevTime = ttime;
-	fmisub->timestep(ttime, args, sMode);
+	fmisub->timestep(ttime, inputs, sMode);
 }
-IOdata fmiLoad::getOutputs(const IOdata &args, const stateData &sD, const solverMode &sMode) const
+IOdata fmiLoad::getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-	return fmisub->getOutputs(args, sD, sMode);
+	return fmisub->getOutputs(inputs, sD, sMode);
 }
-double fmiLoad::getRealPower(const IOdata &args, const stateData &sD, const solverMode &sMode) const
+double fmiLoad::getRealPower(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-	return fmisub->getOutput(args, sD, sMode,0);
+	return fmisub->getOutput(inputs, sD, sMode,0);
 }
-double fmiLoad::getReactivePower(const IOdata &args, const stateData &sD, const solverMode &sMode) const
+double fmiLoad::getReactivePower(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-	return fmisub->getOutput(args, sD, sMode, 1);
+	return fmisub->getOutput(inputs, sD, sMode, 1);
 }
 double fmiLoad::getRealPower(const double V) const
 {
 
-	auto args = bus->getOutputs(emptyStateData,cLocalSolverMode);
-	args[voltageInLocation] = V;
-	return fmisub->getOutput(args, emptyStateData, cLocalSolverMode,0);
+	auto inputs = bus->getOutputs(noInputs,emptyStateData,cLocalSolverMode);
+	inputs[voltageInLocation] = V;
+	return fmisub->getOutput(inputs, emptyStateData, cLocalSolverMode,0);
 }
 double fmiLoad::getReactivePower(const double V) const
 {
-	auto args = bus->getOutputs(emptyStateData, cLocalSolverMode);
-	args[voltageInLocation] = V;
-	return fmisub->getOutput(args, emptyStateData, cLocalSolverMode, 1);
+	auto inputs = bus->getOutputs(noInputs,emptyStateData, cLocalSolverMode);
+	inputs[voltageInLocation] = V;
+	return fmisub->getOutput(inputs, emptyStateData, cLocalSolverMode, 1);
 }
 double fmiLoad::getRealPower() const
 {

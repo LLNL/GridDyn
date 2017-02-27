@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "fncsGhostBus.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
 #include "fncsLibrary.h"
@@ -39,7 +39,7 @@ coreObject *fncsGhostBus::clone(coreObject *obj) const
 }
 
 
-void fncsGhostBus::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void fncsGhostBus::pFlowObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	gridBus::pFlowObjectInitializeA(time0, flags);
 
@@ -54,7 +54,7 @@ void fncsGhostBus::pFlowObjectInitializeB()
 
 }
 
-void fncsGhostBus::updateA(gridDyn_time time)
+void fncsGhostBus::updateA(coreTime time)
 {
 
 	if (!loadKey.empty())
@@ -68,7 +68,7 @@ void fncsGhostBus::updateA(gridDyn_time time)
 	lastUpdateTime = time;
 }
 
-gridDyn_time fncsGhostBus::updateB()
+coreTime fncsGhostBus::updateB()
 {
 	nextUpdateTime += updatePeriod;
 
@@ -86,16 +86,16 @@ gridDyn_time fncsGhostBus::updateB()
 	return nextUpdateTime;
 }
 
-void fncsGhostBus::timestep(gridDyn_time ttime, const solverMode &sMode)
+void fncsGhostBus::timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 	while (ttime > nextUpdateTime)
 	{
 		updateA(nextUpdateTime);
 		updateB();
-		gridBus::timestep(nextUpdateTime, sMode);
+		gridBus::timestep(nextUpdateTime, inputs, sMode);
 	}
 
-	gridBus::timestep(ttime, sMode);
+	gridBus::timestep(ttime, inputs, sMode);
 }
 
 

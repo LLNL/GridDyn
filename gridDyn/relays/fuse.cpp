@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,18 +12,20 @@
 */
 
 #include "fuse.h"
-#include "gridCondition.h"
-#include "eventQueue.h"
-#include "gridEvent.h"
+#include "measurement/gridCondition.h"
+#include "events/eventQueue.h"
+#include "events/gridEvent.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "matrixDataSparse.h"
-#include "core/gridDynExceptions.h"
+#include "measurement/gridGrabbers.h"
+#include "measurement/stateGrabber.h"
+#include "measurement/grabberSet.h"
+#include "core/coreExceptions.h"
 
 
 #include <boost/format.hpp>
-
 #include <cmath>
 using namespace gridUnits;
 fuse::fuse (const std::string&objName) : gridRelay (objName)
@@ -111,10 +113,8 @@ void fuse::set (const std::string &param, double val, gridUnits::units_t unitTyp
 
 }
 
-void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-
-  using namespace std::placeholders;
   auto ge = std::make_shared<gridEvent> ();
 
   if (dynamic_cast<gridLink *> (m_sourceObject))
@@ -134,43 +134,44 @@ void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
       bus = static_cast<gridBus *> (m_sourceObject->find ("bus"));
     }
 
-  add (ge);
-  //now make the gridCondition for the I2T condtion
-  auto gc = std::make_shared<gridCondition> ();
-  auto gc2 = std::make_shared<gridCondition> ();
+  add (std::move(ge));
+  //now make the gridCondition for the I2T condition
+  auto gc = std::make_unique<gridCondition> ();
+  auto gc2 = std::make_unique<gridCondition> ();
 
-  auto cg = std::make_shared<customGrabber> ();
+  auto cg = std::make_unique<customGrabber> ();
   cg->setGrabberFunction ("I2T", [ this ](coreObject *){
     return cI2T;
   });
 
-  auto cgst = std::make_shared<customStateGrabber> (this);
+  auto cgst = std::make_unique<customStateGrabber> (this);
   cgst->setGrabberFunction ([ ](coreObject *obj, const stateData &sD,const solverMode &sMode) -> double {
     return sD.state[static_cast<fuse *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
+  //this one needs to be shared since I use it twice
+  auto gset = std::make_shared<grabberSet>(std::move(cg), std::move(cgst));
+  gc->setConditionLHS(gset);
 
-  gc->setConditionLHS(cg, cgst);
-
-  gc2->setConditionLHS(cg, cgst);
+  gc2->setConditionLHS(std::move(gset));
   gc->setConditionRHS(mp_I2T);
   gc2->setConditionRHS(-mp_I2T / 2.0);
 
   gc->setComparison (comparison_type::gt);
   gc2->setComparison (comparison_type::lt);
 
-  add (gc);
-  add (gc2);
+  add (std::move(gc));
+  add (std::move(gc2));
   setConditionState (1,condition_states::disabled);
   setConditionState (2, condition_states::disabled);
 
   cI2T = 0;
 
   //add the event for setting up the fuse evaluation
-  auto ge2 = std::make_shared<functionEventAdapter> ([this]() {
+  auto ge2 = std::make_unique<functionEventAdapter> ([this]() {
     return setupFuseEvaluation ();
   });
-  add (ge2);
+  add (std::move(ge2));
   if (mp_I2T <= 0.0)
     {
       setActionTrigger (0, 1, 0.0);
@@ -181,17 +182,17 @@ void fuse::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
     }
 
   //add the event for blowing the fuse after i2T is exceeded
-  auto ge3 = std::make_shared<functionEventAdapter> ([this]() {
+  auto ge3 = std::make_unique<functionEventAdapter> ([this]() {
     return blowFuse ();
   });
-  add (ge3);
+  add (std::move(ge3));
   setActionTrigger (1, 2, 0.0);
 
   gridRelay::dynObjectInitializeA (time0, flags);
 }
 
 
-void fuse::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
+void fuse::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
 {
   if (conditionNum == 2)
     {
@@ -267,10 +268,10 @@ void fuse::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-void fuse::timestep (gridDyn_time ttime, const solverMode &)
+void fuse::timestep (coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 
-  if (limit < kBigNum / 2)
+  if (limit < kBigNum / 2.0)
     {
       double val = getConditionValue (0);
       if (val > limit)
@@ -283,36 +284,36 @@ void fuse::timestep (gridDyn_time ttime, const solverMode &)
   prevTime = ttime;
 }
 
-void fuse::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode, double /*tol*/)
+void fuse::converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode, double /*tol*/)
 {
   guess (ttime, state, dstate_dt, sMode);
 }
 
-void fuse::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
+void fuse::jacobianElements (const IOdata &/*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs &/*inputLocs*/, const solverMode &sMode)
 {
-
+	//TODO don't use matrixDataSparse here use a translation matrix
   if (useI2T)
     {
       matrixDataSparse<double> d;
       IOdata out;
       auto Voffset = bus->getOutputLoc(sMode,voltageInLocation);
-      auto args = bus->getOutputs (sD,sMode);
-      auto argLocs = bus->getOutputLocs (sMode);
+      auto inputs = bus->getOutputs (noInputs,sD,sMode);
+      auto inputLocs = bus->getOutputLocs (sMode);
       if (opFlags[nonlink_source_flag])
         {
           gridSecondary *gs = static_cast<gridSecondary *> (m_sourceObject);
-          out = gs->getOutputs (args,sD,sMode);
-          gs->outputPartialDerivatives (args,sD,d,sMode);
-          gs->ioPartialDerivatives (args,sD,d,argLocs,sMode);
+          out = gs->getOutputs (inputs,sD,sMode);
+          gs->outputPartialDerivatives (inputs,sD,d,sMode);
+          gs->ioPartialDerivatives (inputs,sD,d,inputLocs,sMode);
         }
       else
         {
           gridLink *lnk = static_cast<gridLink *> (m_sourceObject);
           int bid = bus->getID ();
-          lnk->updateLocalCache (sD, sMode);
+          lnk->updateLocalCache (noInputs, sD, sMode);
           out = lnk->getOutputs (bid, sD, sMode);
           lnk->outputPartialDerivatives (bid, sD, d, sMode);
-          lnk->ioPartialDerivatives (bid,sD,d,argLocs,sMode);
+          lnk->ioPartialDerivatives (bid,sD,d,inputLocs,sMode);
         }
 
 
@@ -333,7 +334,7 @@ void fuse::jacobianElements (const stateData &sD, matrixData<double> &ad, const 
       d.translateRow (QoutLocation,offset);
       d.assignCheck (offset, Voffset, -S / (V * V));
 
-      d.scaleRow (offset,2 * I);
+      d.scaleRow (offset,2.0 * I);
 
       ad.merge (d);
 
@@ -349,7 +350,7 @@ void fuse::jacobianElements (const stateData &sD, matrixData<double> &ad, const 
 
 }
 
-void fuse::setState (gridDyn_time ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
+void fuse::setState (coreTime ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -364,7 +365,7 @@ double fuse::I2Tequation (double current)
   return (current * current - limit * limit);
 }
 
-void fuse::residual (const stateData &sD, double resid[], const solverMode &sMode)
+void fuse::residual (const IOdata & /*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (useI2T)
     {
@@ -373,7 +374,7 @@ void fuse::residual (const stateData &sD, double resid[], const solverMode &sMod
 
       if (!opFlags[nonlink_source_flag])
         {
-          static_cast<gridPrimary *> (m_sourceObject)->updateLocalCache (sD, sMode);
+          static_cast<gridLink *> (m_sourceObject)->updateLocalCache (noInputs,sD, sMode);
         }
       double I1 = getConditionValue (0,sD,sMode);
       resid[offset] = I2Tequation (I1) - *dst;
@@ -387,7 +388,7 @@ void fuse::residual (const stateData &sD, double resid[], const solverMode &sMod
     }
 }
 
-void fuse::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void fuse::guess (const coreTime /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (useI2T)
     {
@@ -416,11 +417,11 @@ void fuse::getStateName (stringVec &stNames, const solverMode &sMode, const std:
         }
       if (prefix.empty ())
         {
-          stNames[offset] = name + ":I2T";
+          stNames[offset] = getName() + ":I2T";
         }
       else
         {
-          stNames[offset] = prefix + "::" + name + ":I2T";
+          stNames[offset] = prefix + "::" + getName() + ":I2T";
         }
     }
 }

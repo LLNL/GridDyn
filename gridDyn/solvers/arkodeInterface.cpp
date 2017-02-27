@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,7 +18,7 @@
 #include "stringOps.h"
 #include "core/helperTemplates.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <arkode/arkode.h>
 #include <arkode/arkode_dense.h>
@@ -29,7 +29,6 @@
 #include <arkode/arkode_sparse.h>
 #endif
 
-#include <string>
 #include <map>
 #include <cassert>
 
@@ -60,7 +59,7 @@ arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode& sMod
 arkodeInterface::~arkodeInterface ()
 {
   // clear variables for CVode to use
-  if (initialized)
+  if (flags[initialized_flag])
     {
       ARKodeFree (&solverMem);
     }
@@ -84,7 +83,7 @@ void arkodeInterface::allocate (count_t stateCount, count_t numRoots)
     {
       return;
     }
-  initialized = false;
+  flags.reset(initialized_flag);
   
   a1.setRowLimit (stateCount);
   a1.setColLimit (stateCount);
@@ -113,36 +112,12 @@ void arkodeInterface::setMaxNonZeros (count_t nonZeroCount)
   a1.clear ();
 }
 
-
 void arkodeInterface::set (const std::string &param, const std::string &val)
 {
 
-  if (param == "mode")
+	if (param[0] == '#')
     {
-      auto v2 = splitlineTrim (convertToLowerCase (val));
-      for (const auto &str : v2)
-        {
-          if (str == "bdf")
-            {
-              use_bdf = true;
-            }
-          else if (str == "adams")
-            {
-              use_bdf = false;
-            }
-          else if (str == "functional")
-            {
-              use_newton = false;
-            }
-          else if (str == "newton")
-            {
-              use_newton = true;
-            }
-          else
-            {
-			  throw(invalidParameterValue());
-            }
-        }
+     
     }
   else
     {
@@ -185,7 +160,7 @@ void arkodeInterface::set (const std::string &param, double val)
   }
   if (checkStepUpdate)
   {
-	  if (initialized)
+	  if (flags[initialized_flag])
 	  {
 		  ARKodeSetMaxStep(solverMem, maxStep);
 		  ARKodeSetMinStep(solverMem, minStep);
@@ -225,7 +200,7 @@ double arkodeInterface::get (const std::string &param) const
 // output solver stats
 void arkodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) const
 {
-  if (!initialized)
+  if (!flags[initialized_flag])
     {
       return;
     }
@@ -316,68 +291,35 @@ static const std::map<int, std::string> arkodeRetCodes {
   {ARK_MEM_NULL, "The solver memory argument was NULL"},
   {ARK_ILL_INPUT, "One of the function inputs is illegal"},
   {ARK_NO_MALLOC, "The solver memory was not allocated by a call to CVodeMalloc"},
-  {ARK_TOO_MUCH_WORK, "The solver took mxstep internal steps but could not reach tout"},
-  {
-    ARK_TOO_MUCH_ACC, "The solver could not satisfy the accuracy demanded by the user for some internal step"
-  },
-  {
-    ARK_TOO_CLOSE, "t0 and tout are too close and user didn't specify a step size"
-  },
-  {
-    ARK_LINIT_FAIL, "The linear solver's initialization function failed"
-  },
-  {
-    ARK_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"
-  },
-  {
-    ARK_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"
-  },
-  {
-    ARK_ERR_FAILURE, "The error test occured too many times"
-  },
-  {
-    ARK_MEM_FAIL, "A memory allocation failed"
-  },
-  {
-    ARK_CONV_FAILURE, "convergence test failed too many times"
-  },
-  {
-    ARK_BAD_T, "The time t is outside the last step taken"
-  },
-  {
-    ARK_FIRST_RHSFUNC_ERR, "The user - provided rhs function failed recoverably on the first call"
-  },
-  {
-    ARK_REPTD_RHSFUNC_ERR, "convergence test failed with repeated recoverable erros in the rhs function"
-  },
+  {ARK_TOO_MUCH_WORK, "The solver took the maximum internal steps but could not reach tout"},
+  {ARK_TOO_MUCH_ACC, "The solver could not satisfy the accuracy demanded by the user for some internal step"},
+  {ARK_TOO_CLOSE, "t0 and tout are too close and user didn't specify a step size"},
+  {ARK_LINIT_FAIL, "The linear solver's initialization function failed"},
+  {ARK_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"},
+  {ARK_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"},
+  {ARK_ERR_FAILURE, "The error test occurred too many times"},
+  {ARK_MEM_FAIL, "A memory allocation failed"},
+  {ARK_CONV_FAILURE, "convergence test failed too many times"},
+  {ARK_BAD_T, "The time t is outside the last step taken"},
+  {ARK_FIRST_RHSFUNC_ERR, "The user - provided derivative function failed recoverably on the first call"},
+  {ARK_REPTD_RHSFUNC_ERR, "convergence test failed with repeated recoverable errors in the derivative function"},
+  {ARK_RTFUNC_FAIL, "The rootfinding function failed in an unrecoverable manner"},
+  {ARK_UNREC_RHSFUNC_ERR, "The user-provided right hand side function repeatedly returned a recoverable error flag, but the solver was unable to recover"},
+  {ARK_BAD_K, "Bad K"},
+  {ARK_BAD_DKY, "Bad DKY"},
 
-  {
-    ARK_RTFUNC_FAIL, "The rootfinding function failed in an unrecoverable manner"
-  },
-  {
-    ARK_UNREC_RHSFUNC_ERR, "The user-provided right hand side function repeatedly returned a recoverable error flag, but the solver was unable to recover"
-  },
-  {
-    ARK_BAD_K, "Bad K"
-  },
-  {
-    ARK_BAD_DKY, "Bad DKY"
-  },
-  {
-    ARK_BAD_DKY, "Bad DKY"
-  },
 };
 /* *INDENT-ON* */
 
-void arkodeInterface::initialize (gridDyn_time t0)
+void arkodeInterface::initialize (coreTime t0)
 {
-  if (!allocated)
+  if (!flags[allocated_flag])
     {
 	  throw(InvalidSolverOperation());
     }
   auto jsize = m_gds->jacSize (mode);
 
-  // initializeB CVode - Sundials
+  // dynInitializeB CVode - Sundials
 
   int retval = ARKodeSetUserData (solverMem, (void *)this);
   check_flag(&retval, "ARKodeSetUserData", 1);
@@ -408,7 +350,7 @@ void arkodeInterface::initialize (gridDyn_time t0)
   check_flag(&retval, "ARKodeSetMaxNumSteps", 1);
 
 #ifdef KLU_ENABLE
-  if (dense)
+  if (flags[dense_flag])
     {
       retval = ARKDense (solverMem, svsize);
 	  check_flag(&retval, "ARKDense", 1);
@@ -421,7 +363,7 @@ void arkodeInterface::initialize (gridDyn_time t0)
   else
     {
 
-      retval = ARKKLU (solverMem, svsize, jsize);
+      retval = ARKKLU (solverMem, svsize, jsize,CSR_MAT);
 	  check_flag(&retval, "ARKodeKLU", 1);
 
 
@@ -471,14 +413,14 @@ void arkodeInterface::initialize (gridDyn_time t0)
 
   }
   setConstraints ();
-
-  initialized = true;
+  flags.set(initialized_flag);
 
 }
 
 void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
 #ifdef KLU_ENABLE
+	jacCallCount = 0;
   int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
   int retval = ARKKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
   check_flag(&retval, "ARKKLUReInit", 1);
@@ -511,7 +453,7 @@ void arkodeInterface::getCurrentData ()
  
 }
 
-int arkodeInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
+int arkodeInterface::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
@@ -568,7 +510,7 @@ int arkodeFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, void *user_d
 	}
   int ret = sd->m_gds->derivativeFunction(ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), sd->mode);
 
-  if (sd->fileCapture)
+  if (sd->flags[fileCapture_flag])
   {
 	  if (!sd->stateFile.empty())
 	  {
@@ -590,95 +532,17 @@ int arkodeRootFunc (realtype ttime, N_Vector state, realtype *gout, void *user_d
 }
 
 #define CHECK_JACOBIAN 1
-int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
+int arkodeJacDense (long int Neq, realtype ttime, N_Vector state, N_Vector dstate_dt, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-  arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
-
-  assert(Neq == static_cast<int> (sd->svsize));
-  _unused(Neq);
-
-  matrixDataSparse<double> &a1 = sd->a1;
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
-
-
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v, kNullLocation);
-          a1.assign (v, v, 100);
-        }
-      a1.filter ();
-    }
-
-  //assign the elements
-  for (index_t kk = 0; kk < a1.size (); ++kk)
-    {
-      DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) = DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) + a1.val (kk);
-    }
-
-#if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n", me);
-    }
-#endif
-  return FUNCTION_EXECUTION_SUCCESS;
+	return sundialsJacDense(Neq, ttime, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
 }
 
 //#define CAPTURE_JAC_FILE
 
 #ifdef KLU_ENABLE
-int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector, N_Vector, N_Vector)
+int arkodeJacSparse (realtype ttime, N_Vector state, N_Vector dstate_dt, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-
-  arkodeInterface *sd = reinterpret_cast<arkodeInterface *> (user_data);
-
-  matrixDataSparse<double> &a1 = sd->a1;
-
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,0, sd->mode);
-  a1.sortIndexCol ();
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v, kNullLocation);
-          a1.assign (v, v, 1);
-        }
-      a1.filter ();
-      a1.sortIndexCol ();
-    }
-  a1.compact ();
-
-  SlsSetToZero (J);
-
-  count_t colval = 0;
-  J->colptrs[0] = colval;
-  for (index_t kk = 0; kk < a1.size (); ++kk)
-    {
-      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1.val(kk), a1.rowIndex(kk), a1.colIndex(kk));
-      if (a1.colIndex (kk) > colval)
-        {
-          colval++;
-          J->colptrs[colval] = static_cast<int> (kk);
-        }
-      J->data[kk] = a1.val (kk);
-      J->rowvals[kk] = a1.rowIndex (kk);
-    }
-  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
-
-#ifdef CAPTURE_JAC_FILE
-  a1.saveFile (ttime, "jac_new.dat", true);
-#endif
-#if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n", me);
-    }
-#endif
-  return 0;
+	return sundialsJacSparse(ttime, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
 }
 #endif
 

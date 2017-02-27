@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -36,42 +36,43 @@ using namespace std::placeholders;
 #include "controllers/scheduler.h"
 #include "controllers/reserveDispatcher.h"
 #include "sourceModels/gridSource.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "relays/gridRelay.h"
 #include "gridArea.h"
 #include "linkModels/gridLink.h"
 
+#define READSIGNATURE [](std::shared_ptr<readerElement> &cd, readerInfo &ri)
 
-static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo *)>> loadFunctionMap
+static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo &)>> loadFunctionMap
 {
   /* *INDENT-OFF* */
-	  {"genmodel", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynGenModel *)(nullptr), "genmodel", ri,nullptr); }},
-	  {"exciter", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynExciter *)(nullptr), "exciter", ri, nullptr); }},
-	  {"governor", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynGovernor *)(nullptr), "governor", ri, nullptr); }},
-	  {"pss", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynPSS *)(nullptr), "pss", ri, nullptr); }},
-	  {"source", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridSource *)(nullptr), "source", ri, nullptr); }},
-	  {"controlblock", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (basicBlock *)(nullptr), "controlblock", ri, nullptr); }},
-	  {"generator", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, nullptr); }},
-	  {"load", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, nullptr); }},
-	  {"bus", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return readBusElement(cd, ri, nullptr); }},
-	  {"relay", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return readRelayElement(cd, ri, nullptr); }},
-	  {"area", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return readAreaElement(cd, ri, nullptr); }},
-	  {"link", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return readLinkElement(cd, ri, nullptr, false); }},
-	  {"scheduler", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, nullptr); }},
-	  { "agc", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, nullptr); }},
-	  { "econ", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return readEconElement(cd, ri, nullptr); } },
-	  { "reservedispatcher", [](std::shared_ptr<readerElement> &cd, readerInfo *ri) {return ElementReader(cd, (reserveDispatcher *)(nullptr), "reserveDispatcher", ri, nullptr); }},
+	  {"genmodel", READSIGNATURE{return ElementReader(cd, (gridDynGenModel *)(nullptr), "genmodel", ri,nullptr); }},
+	  {"exciter", READSIGNATURE{return ElementReader(cd, (gridDynExciter *)(nullptr), "exciter", ri, nullptr); }},
+	  {"governor", READSIGNATURE{return ElementReader(cd, (gridDynGovernor *)(nullptr), "governor", ri, nullptr); }},
+	  {"pss", READSIGNATURE{return ElementReader(cd, (gridDynPSS *)(nullptr), "pss", ri, nullptr); }},
+	  {"source", READSIGNATURE{return ElementReader(cd, (gridSource *)(nullptr), "source", ri, nullptr); }},
+	  {"controlblock",READSIGNATURE{return ElementReader(cd, (basicBlock *)(nullptr), "controlblock", ri, nullptr); }},
+	  {"generator", READSIGNATURE{return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, nullptr); }},
+	  {"load", READSIGNATURE{return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, nullptr); }},
+	  {"bus", READSIGNATURE{return readBusElement(cd, ri, nullptr); }},
+	  {"relay", READSIGNATURE{return readRelayElement(cd, ri, nullptr); }},
+	  {"area", READSIGNATURE{return readAreaElement(cd, ri, nullptr); }},
+	  {"link", READSIGNATURE{return readLinkElement(cd, ri, nullptr, false); }},
+	  {"scheduler", READSIGNATURE{return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, nullptr); }},
+	  { "agc", READSIGNATURE{return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, nullptr); }},
+	  { "econ", READSIGNATURE{return readEconElement(cd, ri, nullptr); } },
+	  { "reservedispatcher", READSIGNATURE{return ElementReader(cd, (reserveDispatcher *)(nullptr), "reserveDispatcher", ri, nullptr); }},
   /* *INDENT-ON* */
 };
 
 
 
-void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri)
+void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo &ri)
 {
 
-  auto riScope = ri->newScope ();
+  auto riScope = ri.newScope ();
   //readerInfo xm2;
   std::string baseName = element->getName ();
   element->bookmark ();
@@ -91,7 +92,7 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri
         }
       else
         {
-          auto obname = ri->objectNameTranslate (fname);
+          auto obname = ri.objectNameTranslate (fname);
           auto rval = loadFunctionMap.find (obname);
           if (rval != loadFunctionMap.end ())
             {
@@ -107,7 +108,7 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri
       if (obj)
         {
           std::vector<gridParameter> pf;
-          bool found = ri->addLibraryObject (obj, pf);
+          bool found = ri.addLibraryObject (obj, pf);
           if (found)
             {
               LEVELPRINT (READER_VERBOSE_PRINT, "adding " << fname << " " << obj->getName () << " to Library");
@@ -115,7 +116,7 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri
           else
             {
               WARNPRINT (READER_WARN_IMPORTANT, "Duplicate library objects: ignoring second object " << obj->getName ());
-              condDelete (obj,nullptr);
+			  removeReference(obj);
             }
 
         }
@@ -124,12 +125,12 @@ void readLibraryElement (std::shared_ptr<readerElement> &element, readerInfo *ri
 
   element->restore ();
   assert (element->getName () == baseName);
-  ri->closeScope (riScope);
+  ri.closeScope (riScope);
 }
 
 static const std::string defineString ("define");
 
-void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
+void loadDefines (std::shared_ptr<readerElement> &element, readerInfo &ri)
 {
   if (element->hasElement (defineString) == false)
     {
@@ -175,7 +176,7 @@ void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
           locked = ((lockstr == "true")||(lockstr == "1")) ? true : false;
         }
 
-      auto kcheck = ri->checkDefines (rep);
+      auto kcheck = ri.checkDefines (rep);
       if (def == kcheck)
         {
           WARNPRINT (READER_WARN_ALL, "illegal recursive definition " << def << " name and value are equivalent");
@@ -201,11 +202,11 @@ void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
 
       if (locked)
         {
-          ri->addLockedDefinition (def, rep);
+          ri.addLockedDefinition (def, rep);
         }
       else
         {
-          ri->addDefinition (def, rep);
+          ri.addDefinition (def, rep);
         }
 
 
@@ -217,7 +218,7 @@ void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri)
 
 static const std::string directoryString ("directory");
 
-void loadDirectories (std::shared_ptr<readerElement> &element, readerInfo *ri)
+void loadDirectories (std::shared_ptr<readerElement> &element, readerInfo &ri)
 {
   //loop through all directory elements
   if (!element->hasElement (directoryString))
@@ -227,23 +228,16 @@ void loadDirectories (std::shared_ptr<readerElement> &element, readerInfo *ri)
   element->moveToFirstChild (directoryString);
   while (element->isValid ())
     {
-      std::string dfld;
-      if (element->hasAttribute ("value"))
-        {
-          dfld = element->getAttributeText ("value");
-        }
-      else
-        {
-          dfld = element->getText ();
-        }
-      ri->addDirectory (dfld);
+	  std::string dfld = (element->hasAttribute("value")) ? element->getAttributeText("value") : element->getText();
+      
+      ri.addDirectory (dfld);
       element->moveToNextSibling (directoryString);
     }
   element->moveToParent ();
 }
 
 static const std::string customString ("custom");
-void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo *ri)
+void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo &ri)
 {
   if (!element->hasElement (customString))
     {
@@ -265,14 +259,14 @@ void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo *ri
         {
           nargs = 0;
         }
-      ri->addCustomElement (name, element, nargs);
+      ri.addCustomElement (name, element, nargs);
       element->moveToNextSibling (directoryString);
     }
   element->moveToParent ();
 }
 
 static const std::string translateString ("translate");
-void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo *ri)
+void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo &ri)
 {
 
   if (!element->hasElement (translateString))
@@ -303,7 +297,7 @@ void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo *ri)
           continue;
         }
 
-      auto kcheck = ri->objectNameTranslate (component);
+      auto kcheck = ri.objectNameTranslate (component);
       if (def == kcheck)
         {
           WARNPRINT (READER_WARN_ALL, "illegal recursive object name translation " << def << " name and value are equivalent");
@@ -323,22 +317,22 @@ void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo *ri)
             }
           else
             {
-              ri->addTranslate (def, component);
+              ri.addTranslate (def, component);
             }
         }
       else
         {
           if (def.empty ())
             {
-              ri->addTranslateType (component, type);
+              ri.addTranslateType (component, type);
             }
           else if (component.empty ())
             {
-              ri->addTranslateType (def, type);
+              ri.addTranslateType (def, type);
             }
           else
             {
-              ri->addTranslate (def, component, type);
+              ri.addTranslate (def, component, type);
             }
 
         }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -22,11 +22,14 @@ class stateData;
 /** @brief helper class for areas to maintain lists of objects used for execution of each mode*/
 class listMaintainer
 {
+public:
+	bool parResid = false;
+	bool parJac = false;
 private:
-  std::vector<gridPrimary *> preExObjs;          //!< lists of all the objects that request preexecution
+  std::vector<gridPrimary *> preExObjs;          //!< lists of all the objects that request pre-execution
   std::vector< std::vector<gridPrimary *>> objectLists;        //!< lists of all the objects with states in a certain mode
-  std::vector< std::vector<gridPrimary *>> partialLists;        //!< list of all the non preex object with states in a certain mode
-  std::vector< solverMode > sModeLists;			//!< the list of solverModes relevent to each list
+  std::vector< std::vector<gridPrimary *>> partialLists;        //!< list of all the non preEx object with states in a certain mode
+  std::vector< solverMode > sModeLists;			//!< the list of solverModes relevant to each list
 
 public:
   listMaintainer ();
@@ -37,16 +40,16 @@ public:
 
   //void listOperation(const solverMode &sMode);  //A work in progress
 
-  void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
-  void preEx (const stateData &sD, const solverMode &sMode);
-  void residual (const stateData &sD, double resid[], const solverMode &sMode);
-  void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
-  void derivative (const stateData &sD, double deriv[], const solverMode &sMode);
+  void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode);
+  void preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode);
+  void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode);
+  void algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha);
+  void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
 
-  void delayedResidual (const stateData &sD, double resid[], const solverMode &sMode);
-  void delayedDerivative (const stateData &sD, double deriv[], const solverMode &sMode);
-  void delayedJacobian (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
-  void delayedAlgebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
+  void delayedResidual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode);
+  void delayedDerivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
+  void delayedJacobian (const IOdata &inputs, const stateData &sD, matrixData<double> &ad,const IOlocs &inputLocs, const solverMode &sMode);
+  void delayedAlgebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
   bool isListValid (const solverMode &sMode) const;
   void invalidate (const solverMode &sMode);

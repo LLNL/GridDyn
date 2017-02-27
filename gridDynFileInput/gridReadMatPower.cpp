@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,10 +17,10 @@
 
 
 #include "gridBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 
 #ifdef OPTIMIZATION_ENABLE
 #include "gridDynOpt.h"
@@ -30,14 +30,14 @@
 #include "simulation/gridSimulation.h"
 #endif
 
-#include "stringOps.h"
+#include "stringConversion.h"
 
 #include <cstdlib>
 
 
 using namespace gridUnits;
 
-typedef std::vector<std::vector<double> > mArray;
+using mArray= std::vector<std::vector<double>>;
 
 void removeMatlabComments (std::string &text);
 void loadBusArray (coreObject *parentObject, double basepower, mArray &buses, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
@@ -60,7 +60,7 @@ void loadMatPower (coreObject *parentObject, const std::string &filetext, std::s
       size_t B = filetext.find_first_of ('=', A);
       size_t C = filetext.find_first_of (";\n", A);
       auto tstr = filetext.substr (B + 1, C - B - 1);
-      basepower = doubleRead (tstr);
+      basepower = numeric_conversion (tstr,0.0);
       parentObject->set ("basepower", basepower);
     }
   // now find the bus structure
@@ -291,7 +291,7 @@ int loadGenArray (coreObject *parentObject,  mArray &gens, std::vector<gridBus *
 MODEL 1 cost model, 1 = piecewise linear, 2 = polynomial
 gridState_t::STARTUP 2 startup cost in US dollars*
 SHUTDOWN 3 shutdown cost in US dollars*
-NCOST 4 number of cost coecients for polynomial cost function,
+NCOST 4 number of cost coeficients for polynomial cost function,
 or number of data points for piecewise linear
 COST 5 parameters dening total cost function f(p) begin in this column,
 units of f and p are $/hr and MW (or MVAr), respectively
@@ -300,14 +300,14 @@ where p0 < p1 <    < pn and the cost f(p) is dened by
 the coordinates (p0; f0), (p1; f1), . . . , (pn; fn)
 of the end/break-points of the piecewise linear cost
 (MODEL = 2) ) cn; : : : ; c1; c0
-n + 1 coecients of n-th order polynomial cost, starting with
+n + 1 coeficients of n-th order polynomial cost, starting with
 highest order, where cost is f(p) = cnpn +    + c1p + c0
 */
 #ifdef OPTIMIZATION_ENABLE
 void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
 {
 
-  gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->find ("root"));
+  gridDynOptimization *gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot());
   if (!(gdo))        //return if the core object doesn't support optimization
     {
       return;

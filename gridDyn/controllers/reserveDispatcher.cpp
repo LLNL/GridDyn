@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "gridArea.h"
 #include "reserveDispatcher.h"
 #include "scheduler.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 /*
 
 class reserveDispatcher
@@ -43,12 +43,12 @@ public:
         virtual ~reserveDispatcher();
 
 
-        virtual double initialize(gridDyn_time time0,double dispatchSet);
+        virtual double initialize(coreTime time0,double dispatchSet);
 
 
-        void setTime(gridDyn_time time);
-        virtual double updateP(gridDyn_time time);
-        virtual double testP(gridDyn_time time);
+        void setTime(coreTime time);
+        virtual double updateP(coreTime time);
+        virtual double testP(coreTime time);
         double currentValue(){return dispatch;};
 
         virtual void addGen(scheduler *sched);
@@ -121,7 +121,7 @@ void reserveDispatcher::moveSchedulers (reserveDispatcher *rD)
 }
 
 
-double reserveDispatcher::initializeA (gridDyn_time time0,double dispatchSet)
+double reserveDispatcher::dynInitializeA (coreTime time0,double dispatchSet)
 {
 
   currDispatch = dispatchSet;
@@ -135,7 +135,7 @@ double reserveDispatcher::initializeA (gridDyn_time time0,double dispatchSet)
 }
 
 
-double reserveDispatcher::updateP (gridDyn_time time,double pShort)
+double reserveDispatcher::updateP (coreTime time,double pShort)
 {
   if (currDispatch > 0)
     {
@@ -168,7 +168,7 @@ double reserveDispatcher::updateP (gridDyn_time time,double pShort)
   return currDispatch;
 }
 
-double reserveDispatcher::testP (gridDyn_time time,double pShort)
+double reserveDispatcher::testP (coreTime time,double pShort)
 {
   double output = 0;
   if (currDispatch > 0)
@@ -218,7 +218,7 @@ void reserveDispatcher::add (coreObject *obj)
     }
   else
   {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
   }
 }
 

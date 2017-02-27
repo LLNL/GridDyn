@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,15 +12,15 @@
 */
 
 #include "submodels/controlBlocks/blockSequence.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "stringConversion.h"
 
 blockSequence::blockSequence(const std::string &objName) : basicBlock(objName)
 {
-	opFlags.set(use_state);
+	opFlags[use_direct] = true;
 }
 
 
@@ -35,28 +35,61 @@ coreObject *blockSequence::clone(coreObject *obj) const
 	return nobj;
 }
 
-void blockSequence::objectInitializeA(gridDyn_time time0, unsigned long flags)
+void blockSequence::dynObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	
 	bool diffInput = opFlags[differential_inputActual];
+	if (sequence.empty())
+	{//create a default sequence with all the blocks
+		for (int kk = 0; kk < static_cast<int>(blocks.size()); ++kk)
+		{
+			sequence.push_back(kk);
+		}
+	}
 	for (auto nn : sequence)
 	{
 		if (diffInput)
 		{
 			blocks[nn]->setFlag("differential_input", true);
 		}
-		blocks[nn]->initializeA(time0, flags);
+		blocks[nn]->dynInitializeA(time0, flags);
 		diffInput = blocks[nn]->checkFlag(differential_output);
 	}
 	opFlags[differential_input] = diffInput;
-	basicBlock::objectInitializeA(time0, flags);
+	basicBlock::dynObjectInitializeA(time0, flags);
 	updateFlags(); //update the flags for the subObjects;
 
 }
 // initial conditions
-void blockSequence::objectInitializeB(const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void blockSequence::dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
+	auto cnt = sequence.size();
+	if (desiredOutput.empty())
+	{
+		IOdata inAct{ inputs.size() > 0 ? inputs[0] + bias : 0.0,getRateInput(inputs) };
 
+		for (decltype(cnt) ii = 0; ii<cnt; ++ii)
+		{
+			blocks[sequence[ii]]->dynInitializeB(inAct, noInputs, inAct);
+		}
+		basicBlock::dynObjectInitializeB(inAct,desiredOutput,fieldSet);
+	}
+	else if (inputs.empty())
+	{
+		IOdata inReq;
+		inReq.resize(2);
+		basicBlock::dynObjectInitializeB(noInputs, desiredOutput, inReq);
+		for (int ii = static_cast<int>(cnt-1); ii>=0; --ii)
+		{
+			blocks[sequence[ii]]->dynInitializeB(noInputs, inReq, inReq);
+		}
+		fieldSet = inReq;
+		fieldSet[0] -= bias;
+	}
+	else// we have inputs and outputs
+	{
+		fieldSet = desiredOutput;  //the field is the output
+	}
 	
 
 }
@@ -70,7 +103,7 @@ void blockSequence::add(coreObject *obj)
 	}
 	else
 	{
-		throw(invalidObjectException(this));
+		throw(unrecognizedObjectException(this));
 	}
 }
 
@@ -78,7 +111,7 @@ void blockSequence::add(basicBlock *blk)
 {
 	if (blk->locIndex == kNullLocation)
 	{
-		blk->locIndex = blocks.size();
+		blk->locIndex = static_cast<index_t>(blocks.size());
 	}
 
 	if (blocks.size() < blk->locIndex)
@@ -95,148 +128,167 @@ void blockSequence::add(basicBlock *blk)
 }
 
 
-double blockSequence::step(gridDyn_time ttime, double input)
+void blockSequence::updateLocalCache(const IOdata &, const stateData &sD, const solverMode &sMode)
 {
-	//compute a core sample time then cycle through all the objects at that sampling rate
-	return 0.0;
-}
-
-void blockSequence::residElements(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
-{
-	if ((opFlags[differential_output]) && (!hasDifferential(sMode)))
+	if (!sD.updateRequired(seqID))
 	{
 		return;
 	}
 
-	auto so = offsets.getOffsets(sMode);
-	if (so->total.diffSize > 0)
+	if (blockOutputs.size() != sequence.size())
 	{
-		derivElements(input, didt, sD, resid, sMode);
-		for (index_t ii = 0; ii < so->total.diffSize; ++ii)
-		{
-			resid[so->diffOffset + ii] -= sD.dstate_dt[so->diffOffset + ii];
-		}
+		blockOutputs.resize(sequence.size());
+		blockDoutDt.resize(sequence.size());
 	}
-
-
-	if (so->total.algSize > 0)
+	for (index_t kk = 0; kk < sequence.size(); ++kk)
 	{
-		algElements(input, sD, resid, sMode);
-		for (index_t ii = 0; ii < so->total.algSize; ++ii)
-		{
-			resid[so->algOffset + ii] -= sD.state[so->algOffset + ii];
-		}
+		basicBlock *blk = blocks[sequence[kk]];
+		blockOutputs[kk] = blk->getBlockOutput(sD, sMode);
+		blockDoutDt[kk] = (blk->checkFlag(differential_output)) ? blk->getBlockDoutDt(sD, sMode) : 0.0;
 	}
+	
+	seqID = sD.seqID;
+}
 
+double blockSequence::step(coreTime ttime, double input)
+{
+	//compute a core sample time then cycle through all the objects at that sampling rate
+	input = input + bias;
+	double drate = (input - prevInput) / (ttime - prevTime);
+	while (prevTime < ttime)
+	{
+		coreTime newTime = std::max(ttime, prevTime + sampleTime);
+		double blockInput = prevInput + drate*(newTime - prevTime);
+		for (auto &blkIn : sequence)
+		{
+			blockInput = blocks[blkIn]->step(ttime, blockInput);
+		}
+		prevTime = newTime;
+	}
+	return basicBlock::step(ttime, input);
+	
+}
+
+void blockSequence::residElements(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
+{
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	double in = input+bias;
+	double indt = didt;
+	for (size_t ii=0;ii<cnt;++ii)
+	{
+		blocks[sequence[ii]]->residElements(in, indt, sD, resid, sMode);
+		in = blockOutputs[sequence[ii]];
+		indt = blockDoutDt[sequence[ii]];
+	}
+	limiterResidElements(in, indt, sD, resid, sMode);
+	
 }
 
 void blockSequence::derivElements(double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-	if (opFlags[differential_input])
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	double in = input+bias;
+	double indt = didt;
+	for (size_t ii = 0; ii < cnt; ++ii)
 	{
-		auto offset = offsets.getDiffOffset(sMode) + limiter_diff;
-		double ival = input + bias;
-		deriv[offset] = K * didt;
-
-		if (limiter_diff > 0)
-		{
-			return basicBlock::derivElements(input, didt, sD, deriv, sMode);
-		}
+		blocks[sequence[ii]]->derivElements(in, indt, sD, deriv, sMode);
+		in = blockOutputs[sequence[ii]];
+		indt = blockDoutDt[sequence[ii]];
 	}
+	basicBlock::derivElements(in, indt, sD, deriv, sMode);
 }
 
 void blockSequence::algElements(double input, const stateData &sD, double update[], const solverMode &sMode)
 {
-	if (!opFlags[differential_input])
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	double in = input+bias;
+	for (size_t ii = 0; ii<cnt; ++ii)
 	{
-		auto offset = offsets.getAlgOffset(sMode) + limiter_alg;
-		double ival = input + bias;
-		update[offset] = K ;
-		//printf("db %f intput=%f val=%f dbstate=%d\n", sD.time, ival, update[offset], static_cast<int>(dbstate));
-		if (limiter_alg > 0)
-		{
-			return basicBlock::algElements(input, sD, update, sMode);
-		}
+		blocks[sequence[ii]]->algElements(in, sD, update, sMode);
+		in = blockOutputs[sequence[ii]];
 	}
+	basicBlock::algElements(input, sD, update, sMode);
 }
 
-index_t blockSequence::findIndex(const std::string &field, const solverMode &sMode) const
-{
-	return kNullLocation;
-}
 
 void blockSequence::jacElements(double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
-	if ((!opFlags[differential_input]) && (hasAlgebraic(sMode)))
+
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	double in = input+bias;
+	double indt = didt;
+	index_t aLoc = argLoc;
+	for (size_t ii = 0; ii<cnt; ++ii)
 	{
-		auto offset = offsets.getAlgOffset(sMode) + limiter_alg;
-		ad.assign(offset, offset, -1.0);
-		double dido = K ;
-
-		if (argLoc != kNullLocation)
-		{
-			ad.assign(offset, argLoc, dido);
-		}
-		if (limiter_alg > 0)
-		{
-			basicBlock::jacElements(input, didt, sD, ad, argLoc, sMode);
-		}
+		blocks[sequence[ii]]->jacElements(in, indt, sD, ad, aLoc, sMode);
+		in = blockOutputs[sequence[ii]];
+		indt = blockDoutDt[sequence[ii]];
+		aLoc = blocks[sequence[ii]]->getOutputLoc(sMode,0);
 	}
-	else if ((opFlags[differential_input]) && (hasDifferential(sMode)))
-	{
-		auto offset = offsets.getDiffOffset(sMode) + limiter_diff;
-		ad.assign(offset, offset, -sD.cj);
-		double dido = K ;
+	basicBlock::jacElements(in, indt, sD, ad, aLoc, sMode);
 
-		if (argLoc != kNullLocation)
-		{
-			ad.assign(offset, argLoc, dido * sD.cj);
-		}
-
-		if (limiter_diff > 0)
-		{
-			basicBlock::jacElements(input, didt, sD, ad, argLoc, sMode);
-		}
-	}
+	
 }
 
 
-void blockSequence::rootTest(const IOdata &args, const stateData &sD, double root[], const solverMode &sMode)
+void blockSequence::rootTest(const IOdata &inputs, const stateData &sD, double root[], const solverMode &sMode)
 {
-
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	IOdata inAct{ inputs.size() > 0 ? inputs[0] + bias : kNullVal,getRateInput(inputs) };
+	
+	for (size_t ii = 0; ii<cnt; ++ii)
+	{
+		blocks[sequence[ii]]->rootTest(inAct, sD, root, sMode);
+		inAct[0] = blockOutputs[sequence[ii]];
+		inAct[1] = blockDoutDt[sequence[ii]];
+	}
+	basicBlock::rootTest(inAct, sD, root, sMode);
 	
 
 }
 
 
-void blockSequence::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void blockSequence::rootTrigger(coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
-	
+	size_t cnt = sequence.size();
+	IOdata inAct{ inputs.size() > 0 ? inputs[0] + bias : kNullVal,getRateInput(inputs) };
+
+	for (size_t ii = 0; ii<cnt; ++ii)
+	{
+		blocks[sequence[ii]]->rootTrigger(ttime,inAct, rootMask, sMode);
+		inAct[0] = blockOutputs[sequence[ii]];
+		inAct[1] = blockDoutDt[sequence[ii]];
+	}
+	basicBlock::rootTrigger(ttime,inAct, rootMask, sMode);
 }
 
-change_code blockSequence::rootCheck(const IOdata &args, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
+change_code blockSequence::rootCheck(const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level)
 {
 	change_code ret = change_code::no_change;
-	
+	updateLocalCache(noInputs, sD, sMode);
+	size_t cnt = sequence.size();
+	IOdata inAct{ inputs.size() > 0 ? inputs[0] + bias : kNullVal,getRateInput(inputs) };
+
+	for (size_t ii = 0; ii<cnt; ++ii)
+	{
+		auto lret=blocks[sequence[ii]]->rootCheck(inAct, sD, sMode,level);
+		inAct[0] = blockOutputs[sequence[ii]];
+		inAct[1] = blockDoutDt[sequence[ii]];
+		ret = std::max(ret, lret);
+	}
+	auto lret=basicBlock::rootCheck(inAct, sD, sMode,level);
+	ret = std::max(ret, lret);
 	return ret;
 }
 
 void blockSequence::setFlag(const std::string &flag, bool val)
 {
-	auto sfnd = flag.find_last_of(":?");
-	if (sfnd != std::string::npos)
-	{
-		auto blk = findBlock(flag.substr(0, sfnd));
-		if (blk)
-		{
-			blk->setFlag(flag.substr(sfnd + 1, std::string::npos), val);
-		}
-		else
-		{
-			throw(unrecognizedParameter());
-		}
-	}
-	else if (flag == "differential_input")
+	if (flag == "differential_input")
 	{
 		opFlags.set(differential_inputActual, val);
 	}
@@ -249,20 +301,7 @@ void blockSequence::setFlag(const std::string &flag, bool val)
 // set parameters
 void blockSequence::set(const std::string &param, const std::string &val)
 {
-	auto sfnd = param.find_last_of(":?");
-	if (sfnd != std::string::npos)
-	{
-		auto blk = findBlock(param.substr(0, sfnd));
-		if (blk)
-		{
-			blk->set(param.substr(sfnd + 1, std::string::npos), val);
-		}
-		else
-		{
-			throw(unrecognizedParameter());
-		}
-	}
-	else if (param == "sequence")
+	if (param == "sequence")
 	{
 
 	}
@@ -276,18 +315,9 @@ void blockSequence::set(const std::string &param, const std::string &val)
 void blockSequence::set(const std::string &param, double val, gridUnits::units_t unitType)
 {
 
-	auto sfnd = param.find_last_of(":?");
-	if (sfnd != std::string::npos)
+	if (param[0] == '#')
 	{
-		auto blk = findBlock(param.substr(0, sfnd));
-		if (blk)
-		{
-			blk->set(param.substr(sfnd + 1, std::string::npos), val,unitType);
-		}
-		else
-		{
-			throw(unrecognizedParameter());
-		}
+
 	}
 	else
 	{
@@ -308,7 +338,7 @@ double blockSequence::subBlockOutput(index_t blockNum) const
 
 double blockSequence::subBlockOutput(const std::string &blockname) const
 {
-	auto blk = findBlock(blockname);
+	auto blk = static_cast<basicBlock *>(find(blockname));
 	if (blk)
 	{
 		return blk->getBlockOutput();
@@ -316,29 +346,29 @@ double blockSequence::subBlockOutput(const std::string &blockname) const
 	return kNullVal;
 }
 
-basicBlock *blockSequence::findBlock(const std::string &blockname) const
+coreObject* blockSequence::getSubObject(const std::string & typeName, index_t num) const
 {
-	if (blockname.compare(0, 6, "block#") == 0)
-	{
-		index_t b = numeric_conversion<index_t>(blockname.substr(7),kNullLocation);
-		if ((b != kNullLocation) && (b < blocks.size()))
+	if (typeName=="block")
+	{		
+		if (num < blocks.size())
 		{
-			return blocks[b];
+			return blocks[num];
 		}
 	}
-	else
+	return gridObject::getSubObject(typeName, num);
+}
+
+coreObject * blockSequence::findByUserID(const std::string & typeName, index_t searchID) const
+{
+	if (typeName == "block")
 	{
 		for (auto &blk : blocks)
 		{
-			if (!blk)
-			{
-				continue;
-			}
-			if ((blockname == blk->getName())|| (blockname == blk->getOutputName()))
+			if (blk->getUserID() == searchID)
 			{
 				return blk;
 			}
 		}
 	}
-	return nullptr;
+	return gridObject::findByUserID(typeName, searchID);
 }

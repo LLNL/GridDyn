@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
  */
 
 #include "loadModels/otherLoads.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
 
@@ -39,7 +39,7 @@ coreObject *gridFileLoad::clone (coreObject *obj) const
 }
 
 
-void gridFileLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void gridFileLoad::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   currIndex = 0;
@@ -55,7 +55,7 @@ void gridFileLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fla
     }
   if (!found)
     {
-      for (index_t kk = 0; (kk < schedLoad.cols) && (kk < 8); ++kk)
+      for (index_t kk = 0; (kk < schedLoad.columns()) && (kk < 8); ++kk)
         {
           columnkey[kk] = kk;
         }
@@ -67,9 +67,9 @@ void gridFileLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fla
 
 }
 
-void gridFileLoad::updateA (gridDyn_time time)
+void gridFileLoad::updateA (coreTime time)
 {
-  while (time>= schedLoad.time[currIndex])
+  while (time>= schedLoad.time(currIndex))
     {
       ++currIndex;
       if (currIndex >= count)
@@ -84,19 +84,19 @@ void gridFileLoad::updateA (gridDyn_time time)
     }
 
   double diffrate = 0;
-  double val;
-  prevTime = schedLoad.time[currIndex];
-  auto dt = (currIndex < count - 1) ? (schedLoad.time[currIndex + 1] - prevTime) : maxTime;
-  for (count_t pp = 0; pp < schedLoad.cols; ++pp)
+
+  prevTime = schedLoad.time(currIndex);
+  auto dt = (currIndex < count - 1) ? (schedLoad.time(currIndex + 1) - prevTime) : maxTime;
+  for (count_t pp = 0; pp < schedLoad.columns(); ++pp)
     {
       if (columnkey[pp] < 0)
         {
           continue;
         }
-      val = schedLoad.data[pp][currIndex] * scaleFactor;
+      double val = schedLoad.data(pp,currIndex) * scaleFactor;
       if (currIndex < count - 1)
         {
-          diffrate = (opFlags[use_step_change_flag]) ? 0.0 : (schedLoad.data[pp][currIndex + 1] * scaleFactor - val) / dt;
+          diffrate = (opFlags[use_step_change_flag]) ? 0.0 : (schedLoad.data(pp,currIndex + 1) * scaleFactor - val) / dt;
         }
       else
         {
@@ -163,20 +163,20 @@ void gridFileLoad::updateA (gridDyn_time time)
   lastTime = prevTime;
   if (!opFlags[use_step_change_flag])
     {
-	  gridRampLoad::updateLocalCache(emptyArguments, stateData(time), cLocalSolverMode);
+	  gridRampLoad::updateLocalCache(noInputs, stateData(time), cLocalSolverMode);
     }
   lastUpdateTime = time;
-  nextUpdateTime = (currIndex == count - 1) ? maxTime : schedLoad.time[currIndex + 1];
+  nextUpdateTime = (currIndex == count - 1) ? maxTime : schedLoad.time(currIndex + 1);
 }
 
-void gridFileLoad::timestep (gridDyn_time ttime, const IOdata &args,const solverMode &sMode)
+void gridFileLoad::timestep (coreTime ttime, const IOdata &inputs,const solverMode &sMode)
 {
   if (ttime >= nextUpdateTime)
     {
       updateA (ttime);
     }
 
-  gridRampLoad::timestep (ttime, args, sMode);
+  gridRampLoad::timestep (ttime, inputs, sMode);
 }
 
 
@@ -201,7 +201,7 @@ void gridFileLoad::setFlag (const std::string &param, bool val)
     }
   else
     {
-      gridLoad::setFlag (param, val);
+      zipLoad::setFlag (param, val);
     }
 
 }
@@ -221,8 +221,9 @@ void gridFileLoad::set (const std::string &param,  const std::string &val)
     }
   else if (param.compare (0, 6, "column") == 0)
     {
-      int col = trailingStringInt (param, -1);
-      auto sp = splitlineTrim (val);
+      int col = stringOps::trailingStringInt (param, -1);
+      auto sp = stringOps::splitline(val);
+	  stringOps::trim(sp);
       if (col >= 0)
         {
           if (columnkey.size () < col + sp.size ())
@@ -271,7 +272,7 @@ void gridFileLoad::set (const std::string &param,  const std::string &val)
 
   else
     {
-      gridLoad::set (param, val);
+      zipLoad::set (param, val);
     }
 
 }
@@ -290,35 +291,31 @@ void gridFileLoad::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      gridLoad::set (param,val,unitType);
+      zipLoad::set (param,val,unitType);
     }
 }
 
 count_t gridFileLoad::loadFile ()
 {
   schedLoad.loadFile(fname);
-  if (schedLoad.count > 0)
+  if (schedLoad.size() > 0)
     {
-      schedLoad.addData (schedLoad.time.back () + 365.0 * kDayLength,schedLoad.data.back ());
+      schedLoad.addData (schedLoad.lastTime () + 365.0 * kDayLength,schedLoad.lastData());
 	  if (inputUnits != gridUnits::defUnit)
 	  {
 		  double scalar = gridUnits::unitConversion(1.0, inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
-		  for (index_t ii = 0; ii < schedLoad.cols; ++ii)
-		  {
-			  std::transform(schedLoad.data[ii].begin(), schedLoad.data[ii].end(), schedLoad.data[ii].begin(),
-				  [=](double val) {return val*scalar; });
-		  }
+		  schedLoad.scaleData(scalar);
 	  }
     }
   else
     {
-      schedLoad.addData (365.0 * kDayLength,Psched);
+      schedLoad.addData (365.0 * kDayLength,getP());
     }
-  if (columnkey.size() < schedLoad.cols)
+  if (columnkey.size() < schedLoad.columns())
   {
-	  columnkey.resize(schedLoad.cols, -1);
+	  columnkey.resize(schedLoad.columns(), -1);
   }
-  return schedLoad.count;
+  return schedLoad.size();
 }
 
 

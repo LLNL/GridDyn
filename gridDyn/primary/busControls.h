@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,12 +10,11 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
+#pragma once
 #ifndef BUSCONTROLS_H_
 #define BUSCONTROLS_H_
 
-#include "gridDynTypes.h"
-#include <vector>
+#include "gridDynDefinitions.h"
 
 class gridSecondary;
 class acBus;
@@ -70,8 +69,8 @@ public:
   bool hasVoltageAdjustments (index_t sid) const;
   bool hasPowerAdjustments (index_t sid) const;
 
-  double getAdjustableCapacityUp (gridDyn_time time) const;
-  double getAdjustableCapacityDown (gridDyn_time time) const;
+  double getAdjustableCapacityUp (coreTime time) const;
+  double getAdjustableCapacityDown (coreTime time) const;
 
   void addPowerControlObject (gridObject * obj,bool update);
   void addVoltageControlObject (gridObject *obj, bool update);
@@ -126,8 +125,8 @@ public:
 	bool hasAdjustments() const;
 	bool hasAdjustments(index_t sid) const;
 
-	double getAdjustableCapacityUp(gridDyn_time time) const;
-	double getAdjustableCapacityDown(gridDyn_time time) const;
+	double getAdjustableCapacityUp(coreTime time) const;
+	double getAdjustableCapacityDown(coreTime time) const;
 
 	void addControlObject(gridObject *obj, bool update);
 

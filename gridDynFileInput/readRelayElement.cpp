@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "readerElement.h"
 #include "relays/gridRelay.h"
 #include "gridBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "gridArea.h"
 
@@ -27,10 +27,10 @@ static const IgnoreListType relayIgnoreElements {
 static const std::string relayComponentName = "relay";
 
 // "aP" is the XML element passed from the reader
-gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject)
+gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject)
 {
 
-  auto riScope = ri->newScope ();
+  auto riScope = ri.newScope ();
 
   // check the rest of the elements
 
@@ -43,7 +43,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
     {
       if (searchObject)
         {
-          searchObject = searchObject->find ("root");
+          searchObject = searchObject->getRoot();
         }
     }
 
@@ -62,7 +62,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
                 {
                   relay = static_cast<gridRelay *> (coreObjectFactory::instance ()->createObject (relayComponentName, "bus"));
                 }
-              else if (dynamic_cast<gridLoad *> (keyObject))
+              else if (dynamic_cast<zipLoad *> (keyObject))
                 {
                   relay = static_cast<gridRelay *> (coreObjectFactory::instance ()->createObject (relayComponentName, "load"));
                 }
@@ -79,7 +79,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
   std::string objname = getElementField (element, "target", defMatchType);
   if (!objname.empty ())
     {
-      objname = ri->checkDefines (objname);
+      objname = ri.checkDefines (objname);
       targetObj = locateObject (objname, searchObject);
       if (targetObj == nullptr)
         {
@@ -102,7 +102,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
         }
       else if (searchObject)
         {
-          objname = ri->checkDefines (objname);
+          objname = ri.checkDefines (objname);
           targetObj = locateObject (objname, searchObject);
         }
       if (targetObj)
@@ -117,7 +117,7 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
         }
       else if (searchObject)
         {
-          objname = ri->checkDefines (objname);
+          objname = ri.checkDefines (objname);
           targetObj = locateObject (objname, searchObject);
         }
       if (targetObj)
@@ -130,6 +130,6 @@ gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInf
 
   LEVELPRINT (READER_NORMAL_PRINT, "loaded relay " << relay->getName ());
 
-  ri->closeScope (riScope);
+  ri.closeScope (riScope);
   return relay;
 }

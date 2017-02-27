@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -25,7 +25,7 @@
 #include "gridBus.h"
 #include "gridArea.h"
 #include "linkModels/gridLink.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "relays/gridRelay.h"
 #include "submodels/gridDynGenModel.h"
@@ -40,27 +40,28 @@
 
 using namespace readerConfig;
 
-static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo *, coreObject * parent) >> loadFunctionMap
+#define READERSIGNATURE [](std::shared_ptr<readerElement> &cd, readerInfo &ri, coreObject *parent)
+static const std::map < std::string, std::function < coreObject *(std::shared_ptr<readerElement> &, readerInfo &, coreObject * parent) >> loadFunctionMap
 {
   /* *INDENT-OFF* */
-  {"genmodel", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynGenModel *)(nullptr), "genmodel", ri, parent);}},
-  {"exciter", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynExciter *)(nullptr), "exciter", ri, parent);}},
-  {"governor", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynGovernor *)(nullptr), "governor", ri, parent);}},
-  {"pss", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridDynPSS *)(nullptr), "pss", ri, parent);}},
-  {"source", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (gridSource *)(nullptr), "source", ri, parent);}},
-  {"scheduler", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, parent);}},
-  { "agc", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, parent); } },
-  { "reservedispatcher", [](std::shared_ptr<readerElement> &cd, readerInfo *ri,coreObject *parent){return ElementReader(cd, (reserveDispatcher *)(nullptr), "reservedispatcher", ri, parent); } },
-  {"controlblock", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader (cd, (basicBlock *)(nullptr), "controlblock", ri, parent);}},
-  {"generator", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, parent); }},
-  {"load", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, parent); } },
-  {"bus", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readBusElement (cd, ri, parent);}},
-  {"relay", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readRelayElement (cd, ri, parent);}},
-  {"area", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){return readAreaElement (cd, ri, parent);}},
-  {"link", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){ return readLinkElement (cd, ri, parent, false);}},
-  { "econ", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){readEconElement(cd, ri, parent);return parent;} },
-  {"array", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){readArrayElement (cd, ri, parent);return parent;}},
-  {"if", [](std::shared_ptr<readerElement> &cd, readerInfo *ri, coreObject *parent){loadConditionElement(cd, ri, parent); return parent; }}
+  {"genmodel", READERSIGNATURE{return ElementReader (cd, (gridDynGenModel *)(nullptr), "genmodel", ri, parent);}},
+  {"exciter", READERSIGNATURE{return ElementReader (cd, (gridDynExciter *)(nullptr), "exciter", ri, parent);}},
+  {"governor", READERSIGNATURE{return ElementReader (cd, (gridDynGovernor *)(nullptr), "governor", ri, parent);}},
+  {"pss", READERSIGNATURE{return ElementReader (cd, (gridDynPSS *)(nullptr), "pss", ri, parent);}},
+  {"source", READERSIGNATURE{return ElementReader (cd, (gridSource *)(nullptr), "source", ri, parent);}},
+  {"scheduler", READERSIGNATURE{return ElementReader(cd, (scheduler *)(nullptr), "scheduler", ri, parent);}},
+  { "agc", READERSIGNATURE{return ElementReader(cd, (AGControl *)(nullptr), "agc", ri, parent); } },
+  { "reservedispatcher", READERSIGNATURE{return ElementReader(cd, (reserveDispatcher *)(nullptr), "reservedispatcher", ri, parent); } },
+  {"controlblock", READERSIGNATURE{return ElementReader (cd, (basicBlock *)(nullptr), "controlblock", ri, parent);}},
+  {"generator", READERSIGNATURE{return ElementReader(cd, (gridDynGenerator *)(nullptr), "generator", ri, parent); }},
+  {"load", READERSIGNATURE{return ElementReader(cd, (gridLoad *)(nullptr), "load", ri, parent); } },
+  {"bus", READERSIGNATURE{return readBusElement (cd, ri, parent);}},
+  {"relay", READERSIGNATURE{return readRelayElement (cd, ri, parent);}},
+  {"area", READERSIGNATURE{return readAreaElement (cd, ri, parent);}},
+  {"link", READERSIGNATURE{ return readLinkElement (cd, ri, parent, false);}},
+  { "econ", READERSIGNATURE{readEconElement(cd, ri, parent);return parent;} },
+  {"array", READERSIGNATURE{readArrayElement (cd, ri, parent);return parent;}},
+  {"if", READERSIGNATURE{loadConditionElement(cd, ri, parent); return parent; }}
   /* *INDENT-ON* */
 };
 
@@ -68,7 +69,7 @@ static const IgnoreListType customIgnore {
   "args","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9","arg0"
 };
 
-void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
+void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject)
 {
   //read areas first to set them up for other things to call
   if (element->hasElement ("area"))
@@ -114,22 +115,30 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, co
       else
         {
           //std::cout<<"library model :"<<fname<<":\n";
-          auto obname = ri->objectNameTranslate (fname);
-
+          auto obname = ri.objectNameTranslate (fname);
+		  if (obname == "collector")
+		  {
+			  loadCollectorElement(element, parentObject, ri);
+		  }
+		  // event
+		  else if (obname == "event")
+		  {
+			  loadEventElement(element, parentObject, ri);
+		  }
           auto rval = loadFunctionMap.find (obname);
           if (rval != loadFunctionMap.end ())
             {
               coreObject *obj = rval->second (element, ri, parentObject);
-              if ((obj->getParent () == nullptr) && (obj != parentObject))
+              if ((obj->isRoot()) && (obj != parentObject))
                 {
                   WARNPRINT (READER_WARN_IMPORTANT, obj->getName () << " not owned by any other object");
                 }
             }
-          else if (ri->isCustomElement (obname))
+          else if (ri.isCustomElement (obname))
             {
 
-              auto customElementPair = ri->getCustomElement (obname);
-              auto scopeID = ri->newScope ();
+              auto customElementPair = ri.getCustomElement (obname);
+              auto scopeID = ri.newScope ();
               loadDefines (element, ri);
               char argVal = '1';
               std::string argName = "arg";
@@ -139,14 +148,14 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, co
                   auto av = getElementField (element, argName);
                   if (!av.empty ())
                     {
-                      ri->addDefinition (argName, av);
+                      ri.addDefinition (argName, av);
                     }
                   else
                     {
                       av = getElementField (customElementPair.first, argName);
                       if (!av.empty ())
                         {
-                          ri->addDefinition (argName, av);
+                          ri.addDefinition (argName, av);
                         }
                       else
                         {
@@ -156,7 +165,7 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, co
                   argName.pop_back ();
                 }
               loadElementInformation (parentObject,customElementPair.first, obname, ri, customIgnore);
-              ri->closeScope (scopeID);
+              ri.closeScope (scopeID);
             }
         }
       element->moveToNextSibling ();

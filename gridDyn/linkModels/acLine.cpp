@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,14 +15,14 @@
 #include "linkModels/acLine.h"
 #include "gridBus.h"
 #include "gridArea.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "vectorOps.hpp"
-#include "objectInterpreter.h"
-#include "gridCoreTemplates.h"
+#include "core/objectInterpreter.h"
+#include "core/coreObjectTemplates.h"
 #include "simulation/contingency.h"
 #include "stringOps.h"
 #include "matrixDataCompact.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <complex>
 #include <cmath>
@@ -85,11 +85,6 @@ coreObject *acLine::clone(coreObject *obj) const
 }
 
 
-acLine::~acLine()
-{
-
-}
-
 void acLine::pFlowObjectInitializeB()
 {
 	updateLocalCache();
@@ -102,7 +97,7 @@ void acLine::pFlowCheck(std::vector<violation> &Violation_vector)
 	if (angle < minAngle)
 	{
 		violation V;
-		V.m_objectName = name;
+		V.m_objectName = getName();
 		V.violationCode = MINIMUM_ANGLE_EXCEEDED;
 		V.level = angle;
 		V.limit = minAngle;
@@ -120,7 +115,7 @@ void acLine::pFlowCheck(std::vector<violation> &Violation_vector)
 	else if (angle > maxAngle)
 	{
 		violation V;
-		V.m_objectName = name;
+		V.m_objectName = getName();
 		V.violationCode = MAXIMUM_ANGLE_EXCEEDED;
 		V.level = angle;
 		V.limit = maxAngle;
@@ -166,10 +161,10 @@ double acLine::quickupdateP()
 }
 
 
-void acLine::timestep(const gridDyn_time ttime, const solverMode &)
+void acLine::timestep(const coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 
-	if (!enabled)
+	if (!isEnabled())
 	{
 		return;
 
@@ -428,7 +423,7 @@ double  acLine::get(const std::string &param, units_t unitType) const
 	return val;
 }
 
-int acLine::fixRealPower(double power, index_t mterminal, index_t fixedTerminal, units_t unitType)
+int acLine::fixRealPower(double power, index_t measureTerminal, index_t fixedTerminal, units_t unitType)
 {
 	Pset = unitConversion(power, unitType, puMW, systemBasePower);
 	updateLocalCache();
@@ -439,7 +434,7 @@ int acLine::fixRealPower(double power, index_t mterminal, index_t fixedTerminal,
 	}
 	if (fixedTerminal == 0)
 	{
-		if (mterminal == 1)
+		if (measureTerminal == 1)
 		{
 
 		}
@@ -472,7 +467,7 @@ static IOlocs aLoc{
 	0,1
 };
 
-int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fixedTerminal, gridUnits::units_t unitType)
+int acLine::fixPower(double rPower, double qPower, index_t measureTerminal, index_t fixedTerminal, gridUnits::units_t unitType)
 {
 	double valp = unitConversion(rPower, unitType, puMW, systemBasePower);
 	double valq = unitConversion(qPower, unitType, puMW, systemBasePower);
@@ -483,16 +478,16 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	double atol = 1e-7;
 	double vtol = 1e-7;
 	int ret = 0;
-	if ((mterminal == B1->getID()) || (mterminal <= 1))
+	if ((measureTerminal == B1->getID()) || (measureTerminal <= 1))
 	{
-		mterminal = 1;
+		measureTerminal = 1;
 		atol = B1->get("atol") / 2;
 		vtol = B1->get("vtol") / 2;
 
 	}
-	else if ((mterminal == B2->getID()) || (mterminal == 2))
+	else if ((measureTerminal == B2->getID()) || (measureTerminal == 2))
 	{
-		mterminal = 2;
+		measureTerminal = 2;
 		atol = B2->get("atol") / 2;
 		vtol = B2->get("vtol") / 2;
 	}
@@ -504,7 +499,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	{
 		vtol = 1e-5;
 	}
-	else if (mterminal > 2)
+	else if (measureTerminal > 2)
 	{
 		LOG_WARNING("invalid measure terminal identification");
 		return ret;
@@ -526,13 +521,13 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 		fixedTerminal = (static_cast<int> (B2->getType()) > static_cast<int> (B1->getType())) ? 2 : 1;
 
 	}
-	else if (mterminal > 2)
+	else if (measureTerminal > 2)
 	{
 		LOG_WARNING("invalid fixed terminal identification");
 		return ret;
 	}
 	ang = asin(-valp / b / (v1 * v2 / tap));
-	if (mterminal == 1)
+	if (measureTerminal == 1)
 	{
 		if (fixedTerminal == 1)
 		{
@@ -559,7 +554,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	linkInfo.v1 = v1;
 	linkInfo.v2 = v2;
 	ang = asin(-valp / b / (v1 * v2 / tap));
-	if (mterminal == 1)
+	if (measureTerminal == 1)
 	{
 		linkInfo.theta1 = ang;
 		linkInfo.theta2 = -ang;
@@ -572,7 +567,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
 	DEFAULTPOWERCOMP();
 	// basePowerComp ();
-	double err = (mterminal == 1) ? (std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq)) : (std::abs(linkFlows.P2 - valp) + std::abs(linkFlows.Q2 - valq));
+	double err = (measureTerminal == 1) ? (std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq)) : (std::abs(linkFlows.P2 - valp) + std::abs(linkFlows.Q2 - valq));
 	double pErr = err;
 
 	matrixDataCompact<2, 2> ad;
@@ -584,15 +579,15 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	while (aboveTol)
 	{
 		ad.clear();
-		if (mterminal == fixedTerminal)
+		if (measureTerminal == fixedTerminal)
 		{
-			outputPartialDerivatives(mterminal, emptyStateData, ad, cLocalSolverMode);
+			outputPartialDerivatives(measureTerminal, emptyStateData, ad, cLocalSolverMode);
 		}
 		else
 		{
-			ioPartialDerivatives(mterminal, emptyStateData, ad, aLoc, cLocalSolverMode);
+			ioPartialDerivatives(measureTerminal, emptyStateData, ad, aLoc, cLocalSolverMode);
 		}
-		if (mterminal == 1)
+		if (measureTerminal == 1)
 		{
 			dP = valp - linkFlows.P1;
 			dQ = valq - linkFlows.Q1;
@@ -625,7 +620,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 			v1 += dV;
 			linkInfo.v1 = v1;
 		}
-		if (mterminal == 1)
+		if (measureTerminal == 1)
 		{
 			if (fixedTerminal == 1)
 			{
@@ -654,7 +649,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 		//update the Vmx term
 		linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
 		DEFAULTPOWERCOMP();
-		if (mterminal == 1)
+		if (measureTerminal == 1)
 		{
 			dP = valp - linkFlows.P1;
 			dQ = valq - linkFlows.Q1;
@@ -695,7 +690,7 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 	}
 	if (fixedTerminal == 2)
 	{
-		double newAng = (mterminal == 2) ? (B2->getAngle() - ang + tapAngle) : (ang + B2->getAngle() + tapAngle);
+		double newAng = (measureTerminal == 2) ? (B2->getAngle() - ang + tapAngle) : (ang + B2->getAngle() + tapAngle);
 
 		B1->set("angle", newAng);
 		B1->set("voltage", v1);
@@ -707,14 +702,14 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 		{
 			LOG_WARNING("high voltage");
 		}
-		double newAng = (mterminal == 1) ? (B1->getAngle() - ang - tapAngle) : (ang + B1->getAngle() - tapAngle);
+		double newAng = (measureTerminal == 1) ? (B1->getAngle() - ang - tapAngle) : (ang + B1->getAngle() - tapAngle);
 		B2->set("angle", newAng);
 		B2->set("voltage", v2);
 		ret = B2->propogatePower(false);
 	}
 
 	updateLocalCache();
-	if (mterminal == 1)
+	if (measureTerminal == 1)
 	{
 		err = std::abs(linkFlows.P1 - valp) + std::abs(linkFlows.Q1 - valq);
 	}
@@ -726,11 +721,11 @@ int acLine::fixPower(double rPower, double qPower, index_t mterminal, index_t fi
 }
 
 
-void acLine::ioPartialDerivatives(index_t busId, const stateData &, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void acLine::ioPartialDerivatives(index_t busId, const stateData &, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
 	// check if line is enabled
 
-	if (!(enabled))
+	if (!(isEnabled()))
 	{
 		return;
 	}
@@ -749,8 +744,8 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData &, matrixData<d
 			swOpenDeriv();
 		}
 	}
-	auto voltageLoc = argLocs[voltageInLocation];
-	auto angleLoc = argLocs[angleInLocation];
+	auto voltageLoc = inputLocs[voltageInLocation];
+	auto angleLoc = inputLocs[angleInLocation];
 
 	if ((busId == 2) || (busId == B2->getID()))
 	{
@@ -791,7 +786,7 @@ void acLine::ioPartialDerivatives(index_t busId, const stateData &, matrixData<d
 
 }
 
-void acLine::outputPartialDerivatives(const stateData &, matrixData<double> &, const solverMode &)
+void acLine::outputPartialDerivatives(const IOdata & /*inputs*/, const stateData &, matrixData<double> &, const solverMode &)
 {
 	//there are theoretically 4 output for a standard ac line,  but no internal states therefore if this function is called from an external
 	//entity there are no output partial derivatives
@@ -866,6 +861,12 @@ void acLine::outputPartialDerivatives(index_t busId, const stateData &, matrixDa
 	}
 }
 
+
+count_t acLine::outputDependencyCount(index_t /*num*/, const solverMode &/*sMode*/) const
+{
+	return 2;
+}
+
 // set admittance values y := g + jb
 void acLine::setAdmit()
 {
@@ -877,7 +878,7 @@ void acLine::setAdmit()
 
 void acLine::disable()
 {
-	if (enabled == false)
+	if (!isEnabled())
 	{
 		return;
 	}
@@ -911,19 +912,19 @@ double acLine::getMaxTransfer() const
 	}
 }
 
-void acLine::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void acLine::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	prevTime = ttime;
 	stateData sD(ttime, state, dstate_dt);
 
 	if (sMode.approx[decoupled])
 	{ //recompute power with new state updates for the decoupled system
-		updateLocalCache(sD, sMode);
+		updateLocalCache(noInputs, sD, sMode);
 		constLinkInfo = linkInfo;      //update the constant linkInfo
 		constLinkComp = linkComp;
 		linkInfo.seqID = 0;
 		//update the cache twice to get the correct values with the decoupled mode
-		updateLocalCache(sD, sMode);
+		updateLocalCache(noInputs, sD, sMode);
 	}
 	else if (sMode.approx[linear])
 	{
@@ -952,7 +953,7 @@ void acLine::setState(gridDyn_time ttime, const double state[], const double dst
 	}
 	else  //the other states are normal
 	{
-		updateLocalCache(sD, sMode);
+		updateLocalCache(noInputs, sD, sMode);
 		constLinkInfo = linkInfo;      //update the constant linkInfo
 		constLinkComp = linkComp;
 	}
@@ -967,12 +968,12 @@ double acLine::getAngle(const double state[], const solverMode &sMode) const
 	return t1 - t2-tapAngle;
 }
 
-change_code acLine::rootCheck(const stateData &sD, const solverMode &sMode, check_level_t level)
+change_code acLine::rootCheck(const IOdata &/*inputs*/, const stateData &sD, const solverMode &sMode, check_level_t level)
 {
 	auto ret = change_code::no_change;
 	if (level == check_level_t::complete_state_check)
 	{
-		updateLocalCache(sD, sMode);
+		updateLocalCache(noInputs,sD, sMode);
 		if (std::abs(linkInfo.theta1) > maxAngle)
 		{
 			LOG_WARNING("max angle 1 exceeded");
@@ -984,13 +985,13 @@ change_code acLine::rootCheck(const stateData &sD, const solverMode &sMode, chec
 	}
 	return ret;
 }
-void acLine::updateLocalCache(const stateData &sD, const solverMode &sMode)
+void acLine::updateLocalCache(const IOdata &, const stateData &sD, const solverMode &sMode)
 {
-	if (!enabled)
+	if (!isEnabled())
 	{
 		return;
 	}
-	if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
+	if (!sD.updateRequired(linkInfo.seqID))
 	{
 		return;  //already computed
 	}
@@ -1017,7 +1018,7 @@ void acLine::updateLocalCache(const stateData &sD, const solverMode &sMode)
 void acLine::updateLocalCache()
 {
 	//set everything to 0
-	if (!enabled)
+	if (!isEnabled())
 	{
 		return;
 	}

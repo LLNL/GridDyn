@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,6 +12,7 @@
 */
 
 #include "submodels/gridControlBlocks.h"
+#include "core/coreObjectTemplates.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
 
@@ -34,59 +35,48 @@ controlBlock::controlBlock (double t1,double t2, const std::string &objName) : b
 
 coreObject *controlBlock::clone (coreObject *obj) const
 {
-  controlBlock *nobj;
-  if (obj == nullptr)
+	controlBlock *nobj = cloneBase<controlBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new controlBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<controlBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
-
   nobj->m_T2 = m_T2;
-  nobj->m_T1 = m_T2;
+  nobj->m_T1 = m_T1;
   return nobj;
 }
 //set up the number of states
-void controlBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void controlBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   if (opFlags[differential_input])
     {
       opFlags.set (differential_output);
     }
-  basicBlock::objectInitializeA (time0, flags);
+  basicBlock::dynObjectInitializeA (time0, flags);
 
-  offsets.local->local.diffSize += 1;
-  offsets.local->local.jacSize += 6;
+  offsets.local().local.diffSize += 1;
+  offsets.local().local.jacSize += 6;
 }
 // initial conditions
-void controlBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void controlBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
   if (opFlags[has_limits])
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     }
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      m_state[limiter_alg + 1] = K * (1.0 - m_T2 / m_T1) * (args[0] + bias);
-      m_state[limiter_alg] = K * (args[0] + bias);
+      m_state[limiter_alg + 1] = K * (1.0 - m_T2 / m_T1) * (inputs[0] + bias);
+      m_state[limiter_alg] = K * (inputs[0] + bias);
 
       fieldSet[0] = m_state[0];
-      prevInput = args[0] + bias;
+      prevInput = inputs[0] + bias;
     }
   else
     {
-      m_state[limiter_alg] = outputSet[0];
-      m_state[limiter_alg + 1] = (1.0 - m_T2 / m_T1) * outputSet[0] / K;
-      fieldSet[0] = outputSet[0] / K - bias;
-      prevInput = outputSet[0] / K;
+      m_state[limiter_alg] = desiredOutput[0];
+      m_state[limiter_alg + 1] = (1.0 - m_T2 / m_T1) * desiredOutput[0] / K;
+      fieldSet[0] = desiredOutput[0] / K - bias;
+      prevInput = desiredOutput[0] / K;
     }
 
 }
@@ -167,7 +157,7 @@ void controlBlock::jacElements (double input, double didt, const stateData &sD, 
 
 }
 
-double controlBlock::step (gridDyn_time ttime, double inputA)
+double controlBlock::step (coreTime ttime, double inputA)
 {
 
   double dt = ttime - prevTime;

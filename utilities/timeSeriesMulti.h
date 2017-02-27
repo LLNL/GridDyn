@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,28 +15,30 @@
 #define TIMESERIESMULTI_H_
 
 #include "timeSeries.h"
-//TODO make the members private
+
 template <typename dataType=double, typename timeType=double>
 class timeSeriesMulti
 {
 public:
 	std::string description;  //!< a description of the time series
-	std::vector<timeType> time;	//!< a vector of times associated with the data
-	std::vector<std::vector<dataType> > data;  //!< a 2d vector of data to store the time series information
-	fsize_t cols = 1;		//!< the number of columns of data
-	fsize_t count = 0;	//!< the current data location
-	fsize_t capacity = 0;	//!< the total capacity of the time series
+private:
+	std::vector<timeType> m_time;	//!< a vector of times associated with the m_data
+	std::vector<std::vector<dataType> > m_data;  //!< a 2d vector of m_data to store the time series information
 	std::vector<std::string> fields;	//!< container for all the strings associated with the different columns
+	fsize_t cols = 1;		//!< the number of columns of m_data
+	fsize_t count = 0;	//!< the current m_data location
+	fsize_t capacity = 0;	//!< the total capacity of the time series
+	
 public:
 	timeSeriesMulti()
 	{
-		data.resize(1);
+		m_data.resize(1);
 		fields.resize(1);
 	}
 	explicit timeSeriesMulti(fsize_t numCols)
 	{
 		cols = 1;
-		data.resize(1);
+		m_data.resize(1);
 		setCols(numCols);
 	}
 	timeSeriesMulti(fsize_t numCols, fsize_t numRows)
@@ -50,116 +52,239 @@ public:
 	{
 		loadFile(fname);
 	}
-	/** add a data point to the time series
+
+	const std::vector<std::string> &getFields() const
+	{
+		return fields;
+	}
+
+	const std::string getField(fsize_t index) const
+	{
+		return fields[index];
+	}
+
+	void setField(fsize_t index, std::string newField)
+	{
+		ensureSizeAtLeast(fields, index + 1);
+		fields[index] = std::move(newField);
+	}
+
+	void setFields(const std::vector<std::string> &newFields)
+	{
+		for (size_t ii = 0; (ii < cols) && (ii < newFields.size()); ++ii)
+		{
+			fields[ii] = newFields[ii];
+		}
+	}
+
+	void setField(std::vector<std::string> &&newFields)
+	{
+		if (newFields.size() == cols)
+		{
+			fields = std::move(newFields);
+		}
+	}
+	/** add a m_data point to the time series
 	@param[in] t the time
 	@param[in] point the value
-	@param[in] column the column to add the data to column 0 for default
-	@return true if the data was successfully added
+	@param[in] column the column to add the m_data to column 0 for default
+	@throw out_of_range if the column is not valid
 	*/
-	bool addData(timeType t, dataType point, unsigned int column = 0)
+	void addData(timeType t, dataType point, unsigned int column = 0)
 	{
 		if (column >= cols)
 		{
-			return false;
+			throw(std::out_of_range("specified column > dataset size"));
 		}
-		if (count > 0)
+		if ((count == 0)|| (t - m_time[count - 1] > timeType(0.0)))
 		{
-			if (t - time[count - 1] > timeType(0.0))
-			{
-				time.push_back(t);
-				++count;
-			}
-		}
-		else
-		{
-			time.push_back(t);
+			
+			m_time.push_back(t);
 			++count;
+
 		}
-		data[column].push_back(point);
-
-		return true;
-
+		
+		m_data[column].push_back(point);
 	}
-	/** add a vector of data points to the time series
+	/** add a vector of m_data points to the time series
 	@param[in] t the time
 	@param[in] ndata the vector of values
-	@param[in] column the column to start adding the data to column 0 for default
-	@return true if the data was successfully added
+	@param[in] column the column to start adding the m_data to column 0 for default
+	@throw invalidDataSize if the data is not sized correctly
 	*/
-	bool addData(timeType t, std::vector<dataType> &ndata, unsigned int column = 0)
+	void addData(timeType t, const std::vector<dataType> &ndata, unsigned int column = 0)
 	{
 		if (ndata.size() + column > cols)
 		{
-			return false;
+			throw(invalidDataSize());
 		}
 		if (count > 0)
 		{
-			if (t - time[count - 1] > timeType(0.0))
+			if (t - m_time[count - 1] > timeType(0.0))
 			{
-				time.push_back(t);
+				m_time.push_back(t);
 				++count;
 			}
 		}
 		else
 		{
-			time.push_back(t);
+			m_time.push_back(t);
 			++count;
 		}
-		auto dv = data.begin() + column;
+		auto dv = m_data.begin() + column;
 		for (auto newDataPoint : ndata)
 		{
 			dv->push_back(newDataPoint);
 			++dv;
 		}
 
-		return true;
+		
 	}
-	/** add a time series of data points
-	@param[in] ndata the vector of values
-	@param[in] column the column the data represents
-	@return true if the data was successfully added
+	/** add a time series of m_data points
+	@param[in] ndata the vector of values must be the same size as the rest of the data
+	@param[in] column the column the m_data represents
+	@throw invalidDataSize if the data is not sized correctly
 	*/
-	bool addData(std::vector<dataType> &ndata, unsigned int column)
+	void addData(const std::vector<dataType> &ndata, unsigned int column)
 	{
 		if (ndata.size() != count)
 		{
-			return false;
+			throw(invalidDataSize());
 		}
 		if (column >= cols)
 		{
 			setCols(column);
 		}
-		data[column] = ndata;
-		return true;
+		m_data[column] = ndata;
+	
 	}
-	/** add a vector of data points and the time vector
+
+	/** add a time series of m_data points
+	@param[in] ndata the vector of values must be the same size as the rest of the data
+	@param[in] column the column the m_data represents
+	@throw invalidDataSize if the data is not sized correctly
+	*/
+	void addData(std::vector<dataType> &&ndata, unsigned int column)
+	{
+		if (ndata.size() != count)
+		{
+			throw(invalidDataSize());
+		}
+		if (column >= cols)
+		{
+			setCols(column);
+		}
+		m_data[column] = std::move(ndata);
+
+	}
+	/** add a vector of m_data points and the time vector
 	@param[in] ntime the vector of times
 	@param[in] ndata the vector of values
-	@param[in] column the column to start adding the data to column 0 for default
-	@return true if the data was successfully added
+	@param[in] column the column to start adding the m_data to column 0 for default
+	@throw invalidDataSize if the sizes of the time and data are not equal
 	*/
-	bool addData(std::vector<timeType> &ntime, std::vector<dataType> &ndata, unsigned int column = 0)
+	void addData(const std::vector<timeType> &ntime, const std::vector<dataType> &ndata, unsigned int column = 0)
 	{
 		if (ntime.size() != ndata.size())
 		{
-			return false;
+			throw(invalidDataSize());
 		}
 		if (column >= cols)
 		{
 			setCols(column);
 		}
-		time = ntime;
+		m_time = ntime;
 
-		data[column] = ndata;
+		m_data[column] = ndata;
 		count = static_cast<fsize_t> (ntime.size());
-		return true;
+	}
+	/** add a vector of m_data points and the time vector
+	@param[in] ntime the vector of times
+	@param[in] ndata the vector of values
+	@param[in] column the column to start adding the m_data to column 0 for default
+	@throw invalidDataSize if the sizes of the time and data are not equal
+	*/
+	void addData(std::vector<timeType> &&ntime, std::vector<dataType> &&ndata, unsigned int column = 0)
+	{
+		if (ntime.size() != ndata.size())
+		{
+			throw(invalidDataSize());
+		}
+		if (column >= cols)
+		{
+			setCols(column);
+		}
+		m_time = std::move(ntime);
 
+		m_data[column] = std::move(ndata);
+		count = static_cast<fsize_t> (ntime.size());
+	}
+
+	void updateData(fsize_t column, fsize_t row, dataType newValue)
+	{
+		if ((column < cols) && (row < count))
+		{
+			m_data[column][row] = newValue;
+		}
+		else
+		{
+			throw(std::out_of_range("invalid element specification"));
+		}
+	}
+	fsize_t size() const noexcept
+	{
+		return count;
+	}
+
+	fsize_t columns() const noexcept
+	{
+		return cols;
+	}
+	/** @brief get a vector for the time*/
+	const std::vector<timeType> &time() const
+	{
+		return m_time;
+	}
+	/** @brief get an element of the time*/
+	timeType time(fsize_t index) const
+	{
+		return m_time[index];
+	}
+
+	timeType lastTime() const
+	{
+		return m_time[count - 1];
+	}
+	/** @brief get a vector for the m_data*/
+	const std::vector<dataType> &data(fsize_t index) const
+	{
+		return m_data[index];
+	}
+
+	/** @brief get an element of the time*/
+	dataType data(fsize_t col_index, fsize_t row_index) const
+	{
+		return m_data[col_index][row_index];
+	}
+
+	dataType lastData(fsize_t index) const
+	{
+		return m_data[index][count - 1];
+	}
+	std::vector<dataType> lastData() const
+	{
+		std::vector<dataType> b(cols);
+		for (fsize_t ii = 0; ii < cols; ++ii)
+		{
+			b[ii] = m_data[ii][count - 1];
+		}
+		return b;
 	}
 
 	void resize(fsize_t newSize)
 	{
-		time.resize(newSize, timeType(0.0));
-		for (auto &dk : data)
+		m_time.resize(newSize, timeType(0.0));
+		for (auto &dk : m_data)
 		{
 			dk.resize(newSize, dataType(0.0));
 		}
@@ -168,9 +293,9 @@ public:
 
 	void reserve(fsize_t newCapacity)
 	{
-		time.reserve(newCapacity);
+		m_time.reserve(newCapacity);
 		capacity = newCapacity;
-		for (auto &dk : data)
+		for (auto &dk : m_data)
 		{
 			dk.reserve(newCapacity);
 		}
@@ -180,18 +305,18 @@ public:
 	{
 
 		fields.resize(newCols);
-		data.resize(newCols);
+		m_data.resize(newCols);
 		for (size_t kk = cols; kk < newCols; ++kk)
 		{
-			data[kk].reserve(std::max(capacity, count));
-			data[kk].resize(count);
+			m_data[kk].reserve(std::max(capacity, count));
+			m_data[kk].resize(count);
 		}
 		cols = newCols;
 	}
 	void clear()
 	{
-		time.clear();
-		for (auto &dk : data)
+		m_time.clear();
+		for (auto &dk : m_data)
 		{
 			dk.clear();
 		}
@@ -200,7 +325,29 @@ public:
 
 	const std::vector<dataType> &operator[](size_t kk) const
 	{
-		return data[kk];
+		return m_data[kk];
+	}
+
+	void scaleData(fsize_t col, dataType factor)
+	{
+		if (col < cols)
+		{
+			std::transform(m_data[col].begin(), m_data[col].end(), m_data[col].begin(),
+				[factor](dataType val) {return val*factor; });
+		}
+		else
+		{
+			throw(std::out_of_range("invalid column specification"));
+		}
+	}
+
+	void scaleData(dataType factor)
+	{
+		for (auto &dc:m_data)
+		{
+			std::transform(dc.begin(), dc.end(), dc.begin(),
+				[factor](dataType val) {return val*factor; });
+		}
 	}
 	/** @brief load a file into the time series
 	automatically detect the file type based on extension
@@ -209,7 +356,7 @@ public:
 	*/
 	void loadFile(const std::string &filename)
 	{
-		std::string ext = filename.substr(filename.length() - 3);
+		std::string ext = convertToLowerCase(filename.substr(filename.length() - 3));
 		if ((ext == "csv") || (ext == "txt"))
 		{
 			loadTextFile(filename);
@@ -248,7 +395,7 @@ public:
 		fio.read((char *)(&nc), sizeof(fsize_t));
 		fio.read((char *)(&rcount), sizeof(fsize_t));
 
-		setCols(rcount - 1);       //update the number of columns the file contains the time, then the data columns
+		setCols(rcount - 1);       //update the number of columns the file contains the time, then the m_data columns
 		resize(nc);       // update the size
 
 
@@ -258,20 +405,14 @@ public:
 		for (fsize_t cc = 0; cc < cols; cc++)
 		{
 			fio.read((char *)(&len), 1);
-			if ((len > 0)&&(len<=256))
+			if (len > 0)
 			{
 				fio.read(dbuff.data(), len);
 				fields[cc] = std::string(dbuff.data(), len);
 			}
-			else if (len > 256)
-			{
-				fio.read(dbuff.data(), 256);
-				fields[cc] = std::string(dbuff.data(), 256);
-				fio.seekg(len - 256, std::ifstream::ios_base::cur);
-			}
 		}
 	
-		//allocate a buffer to store the read data
+		//allocate a buffer to store the read m_data
 		std::vector<double> buf(nc);
 		fio.read((char *)(buf.data()), nc * sizeof(double));
 		
@@ -282,8 +423,8 @@ public:
 		}
 		for (fsize_t cc = 0; cc < cols; cc++)
 		{
-			fio.read((char *)(data[cc].data()), nc * sizeof(dataType));
-			//data[cc] = std::vector<double>(buf, buf + nc);
+			fio.read((char *)(m_data[cc].data()), nc * sizeof(dataType));
+			//m_data[cc] = std::vector<double>(buf, buf + nc);
 		}
 		fio.read((char *)(&nc), sizeof(fsize_t));
 		fsize_t ocount = count;
@@ -299,8 +440,8 @@ public:
 			fio.read((char *)(buf.data() + ocount), nc * sizeof(double));
 			for (fsize_t cc = 0; cc < cols; cc++)
 			{
-				fio.read((char *)(data[cc].data() + ocount), nc * sizeof(dataType));
-				//data[cc] = std::vector<double>(buf, buf + nc);
+				fio.read((char *)(m_data[cc].data() + ocount), nc * sizeof(dataType));
+				//m_data[cc] = std::vector<double>(buf, buf + nc);
 			}
 			ocount += nc;
 			//read the next character
@@ -308,7 +449,7 @@ public:
 			
 		}
 
-		time = vectorConvert<timeType>(std::move(buf));
+		m_time = vectorConvert<timeType>(std::move(buf));
 
 		fio.close();
 
@@ -317,7 +458,6 @@ public:
 	void loadTextFile(const std::string &filename)
 	{
 		std::ifstream fio(filename.c_str(), std::ios::in);
-		unsigned int kk;
 		if (!fio)
 		{
 			throw(fileNotFoundError());
@@ -340,11 +480,11 @@ public:
 			std::getline(fio, line);
 		}
 
-		auto colnames = splitline(line, ',');
+		auto colnames = stringOps::splitline(line, ',');
 		setCols(static_cast<fsize_t> (colnames.size()) - 1);
-		for (kk = 1; kk < colnames.size(); ++kk)
+		for (fsize_t kk = 1; kk < colnames.size(); ++kk)
 		{
-			fields[kk - 1] = removeChar(colnames[kk], '"');
+			fields[kk - 1] = stringOps::removeQuotes(colnames[kk]);
 		}
 		clear();
 		timeType timeV;
@@ -352,7 +492,7 @@ public:
 		{
 			auto svc = str2vector(line, -1e48, ",");
 			timeV = svc[0];
-			for (kk = 1; kk < svc.size(); ++kk)
+			for (fsize_t kk = 1; kk < svc.size(); ++kk)
 			{
 				addData(timeV, svc[kk], kk - 1);
 			}
@@ -378,7 +518,7 @@ public:
 				fio.write(description.c_str(), temp);
 			}
 
-			//now write the size of the data
+			//now write the size of the m_data
 			temp = count;
 			fio.write((const char *)&temp, sizeof(fsize_t));
 			temp = cols + 1;
@@ -413,14 +553,14 @@ public:
 		if (count > 0)
 		{
 			
-			for (auto &t : time)
+			for (auto &t : m_time)
 			{
 				double tr = static_cast<double>(t);
 				fio.write((const char *)(&tr), sizeof(double));
 			}
 			for (fsize_t cc = 0; cc < cols; cc++)
 			{
-				fio.write((const char *)(data[cc].data()), count * sizeof(dataType));
+				fio.write((const char *)(m_data[cc].data()), count * sizeof(dataType));
 			}
 		}
 
@@ -435,7 +575,7 @@ public:
 		{
 			throw(fileNotFoundError());
 		}
-		std::string ndes = characterReplace(description, '\n', "\n#");
+		std::string ndes = stringOps::characterReplace(description, '\n', "\n#");
 
 		if (!append)
 		{
@@ -452,10 +592,10 @@ public:
 		}
 		for (size_t rr = 0; rr < count; rr++)
 		{
-			fio << std::setprecision(5) << time[rr];
+			fio << std::setprecision(5) << m_time[rr];
 			for (size_t kk = 0; kk < cols; ++kk)
 			{
-				fio << ',' << std::setprecision(precision) << data[kk][rr];
+				fio << ',' << std::setprecision(precision) << m_data[kk][rr];
 			}
 			fio << '\n';
 		}
@@ -468,60 +608,60 @@ private:
 
 //comparison functions
 template <typename dataType, typename timeType>
-dataType compare(timeSeries<dataType,timeType> *ts1, timeSeries<dataType, timeType> *ts2)
+dataType compare(const timeSeries<dataType,timeType> &ts1, const timeSeries<dataType, timeType> &ts2)
 {
-	return compareVec(ts1->data, ts2->data);
+	return compareVec(ts1.data(), ts2.data());
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeries<dataType, timeType> *ts1, timeSeries<dataType, timeType> *ts2, int cnt)
+dataType compare(const timeSeries<dataType, timeType> &ts1, const timeSeries<dataType, timeType> &ts2, int cnt)
 {
-	return compareVec(ts1->data, ts2->data, cnt);
+	return compareVec(ts1.data(), ts2.data(), cnt);
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeries<dataType, timeType> *ts2, int stream)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeries<dataType, timeType> &ts2, int stream)
 {
 
-	return compareVec(ts1->data[stream], ts2->data);
+	return compareVec(ts1[stream], ts2.data());
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeries<dataType, timeType> *ts2, int stream, int cnt)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeries<dataType, timeType> &ts2, int stream, int cnt)
 {
-	return compareVec(ts1->data[stream], ts2->data, cnt);
+	return compareVec(ts1[stream], ts2.data(), cnt);
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeriesMulti<dataType, timeType> *ts2)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeriesMulti<dataType, timeType> &ts2)
 {
-	double diff = 0;
-	int cnt = std::min(ts1->cols, ts2->cols);
+	dataType diff(0);
+	auto cnt = std::min(ts1.columns(), ts2.columns());
 
-	for (int kk = 0; kk < cnt; ++kk)
+	for (decltype(cnt) kk = 0; kk < cnt; ++kk)
 	{
-		diff += compareVec(ts1->data[kk], ts2->data[kk]);
+		diff += compareVec(ts1[kk], ts2[kk]);
 	}
 
 	return diff;
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeriesMulti<dataType, timeType> *ts2, int stream)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeriesMulti<dataType, timeType> &ts2, int stream)
 {
-	return compareVec(ts1->data[stream], ts2->data[stream]);
+	return compareVec(ts1[stream], ts2[stream]);
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeriesMulti<dataType, timeType> *ts2, int stream1, int stream2)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeriesMulti<dataType, timeType> &ts2, int stream1, int stream2)
 {
-	return compareVec(ts1->data[stream1], ts2->data[stream2]);
+	return compareVec(ts1[stream1], ts2[stream2]);
 }
 
 template <typename dataType, typename timeType>
-dataType compare(timeSeriesMulti<dataType, timeType> *ts1, timeSeriesMulti<dataType, timeType> *ts2, int stream1, int stream2, int cnt)
+dataType compare(const timeSeriesMulti<dataType, timeType> &ts1, const timeSeriesMulti<dataType, timeType> &ts2, int stream1, int stream2, int cnt)
 {
-	return compareVec(ts1->data[stream1], ts2->data[stream2], cnt);
+	return compareVec(ts1[stream1], ts2[stream2], cnt);
 }
 
 #endif

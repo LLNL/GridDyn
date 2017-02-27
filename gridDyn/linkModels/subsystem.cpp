@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,15 +13,15 @@
 
 // headers
 #include "vectorOps.hpp"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "linkModels/gridLink.h"
 #include "linkModels/subsystem.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "relays/gridRelay.h"
-#include "objectInterpreter.h"
-#include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectInterpreter.h"
+#include "stringConversion.h"
+#include "core/coreExceptions.h"
 #include <cmath>
 #include <complex>
 
@@ -35,10 +35,8 @@ subsystem::subsystem (const std::string &objName) : gridLink (objName)
   resize (2);
   cterm[0] = 1;
   cterm[1] = 2;
-  subarea.setParent (this);
-  subarea.setOwner (nullptr, this);       //set the owner to this so nothing deletes it
-
-  subObjectList.push_back (&subarea);       //add the subarea to the subobject list to take advantage of the code in gridPrimary.
+  subarea.addOwningReference();
+  addSubObject(&subarea); //add the subArea to the subObject list to take advantage of the code in gridObject.
 }
 
 subsystem::subsystem (count_t terminals, const std::string &objName) : gridLink (objName)
@@ -51,10 +49,9 @@ subsystem::subsystem (count_t terminals, const std::string &objName) : gridLink 
       cterm[0] = 1;
       cterm[1] = 2;
     }
-  subarea.setParent (this);
-  subarea.setOwner (nullptr,this);  //set the owner to this so nothing deletes it
-
-  subObjectList.push_back (&subarea);  //add the subarea to the subobject list to take advantage of the code in gridPrimary.
+ 
+  subarea.addOwningReference();
+  addSubObject(&subarea); //add the subArea to the subObject list to take advantage of the code in gridObject.
 }
 
 coreObject *subsystem::clone (coreObject *obj) const
@@ -64,7 +61,6 @@ coreObject *subsystem::clone (coreObject *obj) const
     {
       return obj;
     }
-  subarea.clone (&(sub->subarea));
 
   sub->resize (m_terminals);
   sub->cterm = cterm;
@@ -74,12 +70,6 @@ coreObject *subsystem::clone (coreObject *obj) const
   return sub;
 }
 
-// destructor
-subsystem::~subsystem ()
-{
-
-
-}
 
 void subsystem::add (coreObject *obj)
 {
@@ -147,8 +137,8 @@ void subsystem::reset (reset_levels level)
   subarea.reset (level);
 }
 
-// initializeB states
-void subsystem::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+// dynInitializeB states
+void subsystem::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   //make sure the buses are set to the right terminal
@@ -170,14 +160,14 @@ void subsystem::updateLocalCache ()
   subarea.updateLocalCache ();
 }
 
-void subsystem::updateLocalCache (const stateData &sD, const solverMode &sMode)
+void subsystem::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
-  subarea.updateLocalCache (sD,sMode);
+  subarea.updateLocalCache (inputs, sD,sMode);
 }
 
-change_code subsystem::powerFlowAdjust (unsigned long flags, check_level_t level)
+change_code subsystem::powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level)
 {
-  return subarea.powerFlowAdjust (flags, level);
+  return subarea.powerFlowAdjust (inputs, flags, level);
 }
 
 void subsystem::pFlowCheck (std::vector<violation> &Violation_vector)
@@ -186,14 +176,14 @@ void subsystem::pFlowCheck (std::vector<violation> &Violation_vector)
   subarea.pFlowCheck (Violation_vector);
 }
 
-// initializeB states for dynamic solution
-void subsystem::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+// dynInitializeB states for dynamic solution
+void subsystem::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   return subarea.dynInitializeA (time0, flags);
 }
 
 
-void subsystem::converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
+void subsystem::converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol)
 {
   subarea.converge (ttime, state, dstate_dt, sMode, mode, tol);
 }
@@ -214,10 +204,10 @@ void subsystem::set (const std::string &param,  const std::string &val)
 {
 
   std::string iparam;
-  int num = trailingStringInt (param, iparam, -1);
+  int num = stringOps::trailingStringInt (param, iparam, -1);
   if (iparam == "bus")
     {
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
       if (bus)
         {
           if (num > static_cast<int> (m_terminals))
@@ -246,7 +236,7 @@ void subsystem::set (const std::string &param,  const std::string &val)
     }
   else if (param == "from")
     {
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
       if (bus)
         {
           updateBus (bus, 1);
@@ -259,7 +249,7 @@ void subsystem::set (const std::string &param,  const std::string &val)
     }
   else if (param == "to")
     {
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
       if (bus)
         {
           updateBus (bus, 2);
@@ -275,7 +265,7 @@ void subsystem::set (const std::string &param,  const std::string &val)
       index_t term1 = kNullLocation;
       if (pos1 != std::string::npos)
         {
-          term1 = indexRead (val.substr (pos1 + 1),0);
+          term1 = numeric_conversion<index_t> (val.substr (pos1 + 1),0);
         }
       gridLink *lnk = dynamic_cast<gridLink *> (locateObject (val, this,false));
       if (lnk)
@@ -342,24 +332,7 @@ void subsystem::set (const std::string &param,  const std::string &val)
 void subsystem::set (const std::string &param, double val, units_t unitType)
 {
 
-  if (param == "basepower")
-    {
-      systemBasePower = unitConversion (val, unitType, MW);
-
-      subarea.set (param, systemBasePower);
-    }
-  else if ((param == "basefrequency") || (param == "basefreq"))
-    {
-      //the defunit in this case should be Hz since that is what everyone assumes but we
-      //need it in rps NOTE: we only do this assumed conversion for an area/simulation
-      if (unitType == defUnit)
-        {
-          unitType = Hz;
-        }
-      m_baseFreq = unitConversionFreq (val, unitType, rps);
-      subarea.set (param, systemBasePower);
-    }
-  else if (param == "terminals")
+  if (param == "terminals")
     {
       resize (static_cast<count_t> (val));
     }
@@ -391,10 +364,10 @@ double subsystem::get (const std::string &param, units_t unitType) const
 
 
 
-void subsystem::timestep (const gridDyn_time ttime, const solverMode &sMode)
+void subsystem::timestep (const coreTime ttime, const IOdata & inputs, const solverMode &sMode)
 {
 
-  subarea.timestep (ttime, sMode);
+  subarea.timestep (ttime, inputs, sMode);
   prevTime = ttime;
 }
 
@@ -416,7 +389,7 @@ double subsystem::getLoss () const
 
 
 // pass the solution
-void subsystem::setState (const gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void subsystem::setState (const coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 
   subarea.setState (ttime, state, dstate_dt, sMode);
@@ -470,20 +443,20 @@ bool subsystem::isConnected () const
   return con;
 }
 
-int subsystem::fixRealPower (double power, index_t mterminal, index_t /*fixedterminal*/, gridUnits::units_t unitType)
+int subsystem::fixRealPower (double power, index_t measureTerminal, index_t /*fixedterminal*/, gridUnits::units_t unitType)
 {
-  if (mterminal <= m_terminals)
+  if (measureTerminal <= m_terminals)
     {
-      return terminalLink[mterminal - 1]->fixRealPower (power, cterm[mterminal - 1],unitType);
+      return terminalLink[measureTerminal - 1]->fixRealPower (power, cterm[measureTerminal - 1],unitType);
     }
   return 0;
 }
 
-int subsystem::fixPower (double rPower, double qPower, index_t mterminal, index_t /*fixedterminal*/, gridUnits::units_t unitType)
+int subsystem::fixPower (double rPower, double qPower, index_t measureTerminal, index_t /*fixedterminal*/, gridUnits::units_t unitType)
 {
-  if (mterminal <= m_terminals)
+  if (measureTerminal <= m_terminals)
     {
-      return terminalLink[mterminal - 1]->fixPower (rPower,qPower, cterm[mterminal - 1], unitType);
+      return terminalLink[measureTerminal - 1]->fixPower (rPower,qPower, cterm[measureTerminal - 1], unitType);
     }
   return 0;
 }
@@ -693,11 +666,11 @@ double subsystem::getMaxTransfer () const
 }
 
 
-// initializeB power flow
+// dynInitializeB power flow
 
 
 //for computing all the Jacobian elements at once
-void subsystem::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void subsystem::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   if  (busId <= 0)
     {
@@ -707,7 +680,7 @@ void subsystem::ioPartialDerivatives (index_t busId, const stateData &sD, matrix
     {
       if ((busId == kk + 1) || (busId == terminalBus[kk]->getID ()))
         {
-          terminalLink[kk]->ioPartialDerivatives (cterm[kk],sD,ad,argLocs,sMode);
+          terminalLink[kk]->ioPartialDerivatives (cterm[kk],sD,ad,inputLocs,sMode);
           break;
         }
     }
@@ -729,7 +702,7 @@ void subsystem::outputPartialDerivatives (index_t busId, const stateData &sD, ma
     }
 }
 
-IOdata subsystem::getOutputs (const stateData &sD, const solverMode &sMode) const
+IOdata subsystem::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
   return getOutputs (1, sD, sMode);
 }

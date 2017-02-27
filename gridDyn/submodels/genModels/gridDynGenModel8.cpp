@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 #include <cmath>
 
@@ -34,17 +34,17 @@ coreObject *gridDynGenModel8::clone (coreObject *obj) const
   return gd;
 }
 
-void gridDynGenModel8::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynGenModel8::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->local.diffSize = 8;
-  offsets.local->local.algSize = 2;
-  offsets.local->local.jacSize = 47;
+  offsets.local().local.diffSize = 8;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.jacSize = 47;
 
 }
 // initial conditions
-void gridDynGenModel8::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGenModel8::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  computeInitialAngleAndCurrent (args, outputSet, Rs, Xq - Xl);
+  computeInitialAngleAndCurrent (inputs, desiredOutput, Rs, Xq - Xl);
   double *gm = m_state.data ();
 
   // Edp and Eqp  and Edpp
@@ -73,7 +73,7 @@ void gridDynGenModel8::objectInitializeB (const IOdata &args, const IOdata &outp
 
 }
 
-void gridDynGenModel8::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void gridDynGenModel8::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -86,11 +86,11 @@ void gridDynGenModel8::derivative (const IOdata &args, const stateData &sD, doub
   // const double *gmp = Loc.dstateLoc;
 
   double *rvd = Loc.destDiffLoc;
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   //Get the exciter field
-  double Eft = args[genModelEftInLocation];
-  double Pmt = args[genModelPmechInLocation];
+  double Eft = inputs[genModelEftInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
 
 
   double qrat = Tqopp * (Xqpp + Xl) / (Tqop * (Xqp + Xl));
@@ -115,7 +115,7 @@ void gridDynGenModel8::derivative (const IOdata &args, const stateData &sD, doub
 
 }
 
-void gridDynGenModel8::residual (const IOdata &args, const stateData &sD, double resid[],  const solverMode &sMode)
+void gridDynGenModel8::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
 
@@ -125,7 +125,7 @@ void gridDynGenModel8::residual (const IOdata &args, const stateData &sD, double
 
   double *rva = Loc.destLoc;
   double *rvd = Loc.destDiffLoc;
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   if (hasAlgebraic (sMode))
     {
@@ -135,7 +135,7 @@ void gridDynGenModel8::residual (const IOdata &args, const stateData &sD, double
     }
   if (hasDifferential (sMode))
     {
-      derivative (args, sD, resid, sMode);
+      derivative (inputs, sD, resid, sMode);
       /// delta
       rvd[0] -= gmp[0];
       rvd[1] -= gmp[1];
@@ -151,26 +151,26 @@ void gridDynGenModel8::residual (const IOdata &args, const stateData &sD, double
 }
 
 
-void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData &sD,
+void gridDynGenModel8::jacobianElements (const IOdata &inputs, const stateData &sD,
                                          matrixData<double> &ad,
-                                         const IOlocs &argLocs, const solverMode &sMode)
+                                         const IOlocs &inputLocs, const solverMode &sMode)
 {
   // ad.assign (arrayIndex, RowIndex, ColIndex, value) const
   Lp Loc = offsets.getLocations (sD,nullptr, sMode, this);
 
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
   const double *gm = Loc.algStateLoc;
   const double *gmd = Loc.diffStateLoc;
 //  const double *gmp = Loc.dstateLoc;
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   auto refAlg = Loc.algOffset;
   auto refDiff = Loc.diffOffset;
 
 
-  auto VLoc = argLocs[voltageInLocation];
-  auto TLoc = argLocs[angleInLocation];
+  auto VLoc = inputLocs[voltageInLocation];
+  auto TLoc = inputLocs[angleInLocation];
 
 
 
@@ -230,7 +230,7 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData &sD
   ad.assign (refDiff + 1, refDiff + 6, -0.5  * gm[1] / H);
   ad.assign (refDiff + 1, refDiff + 7, 0.5  * gm[0] / H);
 
-  ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);           // governor: Pm
+  ad.assignCheckCol (refDiff + 1, inputLocs[genModelPmechInLocation], -kVal);           // governor: Pm
 
   double qrat = Tqopp * (Xqpp - Xl) / (Tqop * (Xqp - Xl));
   double drat = Tdopp * (Xdpp - Xl) / (Tdop * (Xdp - Xl));
@@ -250,10 +250,10 @@ void gridDynGenModel8::jacobianElements (const IOdata &args, const stateData &sD
   ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD.cj);
 
 
-  if (argLocs[genModelEftInLocation] != kNullLocation)      //check if exciter exists
+  if (inputLocs[genModelEftInLocation] != kNullLocation)      //check if exciter exists
     {
-      ad.assign (refDiff + 3, argLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
-      ad.assign (refDiff + 5, argLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
+      ad.assign (refDiff + 3, inputLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
+      ad.assign (refDiff + 5, inputLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
     }
   //Edpp
   if (hasAlgebraic (sMode))

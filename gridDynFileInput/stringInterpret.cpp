@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,27 +12,29 @@
 */
 
 #include "functionInterpreter.h"
-#include "stringOps.h"
+#include "stringConversion.h"
+#include "string_viewConversion.h"
 #include "gridDynFileInput.h"
 
 #include <cmath>
 #include <cctype>
 
-double interpretStringBlock (const std::string &command, readerInfo *ri);
+double interpretStringBlock (const std::string &command, readerInfo &ri);
 
-void interpretStringBlock (const std::string &command, readerInfo *ri, std::vector<double> &outputs);
+void interpretStringBlock (const std::string &command, readerInfo &ri, std::vector<double> &outputs);
 
-double addSubStringBlocks (const std::string &command, readerInfo *ri, size_t rlc);
-double multDivStringBlocks (const std::string &command, readerInfo *ri, size_t rlc);
+double addSubStringBlocks (const std::string &command, readerInfo &ri, size_t rlc);
+double multDivStringBlocks (const std::string &command, readerInfo &ri, size_t rlc);
 size_t pChunckEnd (const std::string &cmd, size_t start);
 
-double InterpretFunction (const std::string &cmdString, readerInfo *ri);
-double InterpretFunction (const std::string &cmdString, double val, readerInfo *ri);
-double InterpretFunction (const std::string &cmdString, double val1,double val2, readerInfo *ri);
+double InterpretFunction (const std::string &cmdString, readerInfo &ri);
+double InterpretFunction (const std::string &cmdString, double val, readerInfo &ri);
+double InterpretFunction (const std::string &cmdString, double val1,double val2, readerInfo &ri);
 
-double stringBlocktoDouble (const std::string &block, readerInfo *ri);
+double stringBlocktoDouble (const std::string &block, readerInfo &ri);
 
-double interpretString (std::string command, readerInfo *ri)
+using namespace stringOps;
+double interpretString (std::string command, readerInfo &ri)
 {
   size_t rlc, rlcp = 0;
   //check for functions
@@ -82,7 +84,8 @@ double interpretString (std::string command, readerInfo *ri)
               auto cloc = fcallstr.find_first_of (',');
               if (cloc != std::string::npos)
                 {
-                  auto args = splitlineBracketTrim (fcallstr, ",");
+                  auto args = splitlineBracket(fcallstr, ",");
+				  trim(args);
                   if (args.size () == 2)
                     {
                       double v1 = stringBlocktoDouble (args[0], ri);
@@ -122,16 +125,16 @@ double interpretString (std::string command, readerInfo *ri)
   return val;
 }
 
-double interpretStringBlock (const std::string &command, readerInfo *ri)
+double interpretStringBlock (const std::string &command, readerInfo &ri)
 {
-  double val = doubleReadComplete (command, std::nan ("0"));
+  double val = numeric_conversionComplete<double> (command, std::nan ("0"));
   if (std::isnan (val))
     {
-      std::string ncommand = ri->checkDefines (command);
+      std::string ncommand = ri.checkDefines (command);
       //iterate the process until the variable is no longer modified and still fails conversion to numerical
       if (ncommand != command)
         {
-          val = doubleReadComplete (command, std::nan ("0"));
+          val = numeric_conversionComplete<double>(command, std::nan ("0"));
           if (std::isnan (val))
             {
               val = interpretString (ncommand, ri);
@@ -141,9 +144,10 @@ double interpretStringBlock (const std::string &command, readerInfo *ri)
   return val;
 }
 
-void interpretStringBlock (const std::string &command, readerInfo *ri, std::vector<double> &outputs)
+void interpretStringBlock (const std::string &command, readerInfo &ri, std::vector<double> &outputs)
 {
-  auto strSplit = splitlineTrim (command);
+  auto strSplit = splitline (command);
+  trim(strSplit);
   outputs.resize (strSplit.size ());
   for (size_t kk = 0; kk < strSplit.size (); ++kk)
     {
@@ -151,7 +155,7 @@ void interpretStringBlock (const std::string &command, readerInfo *ri, std::vect
     }
 }
 
-double addSubStringBlocks (const std::string &command, readerInfo *ri, size_t rlc)
+double addSubStringBlocks (const std::string &command, readerInfo &ri, size_t rlc)
 {
 
 
@@ -168,7 +172,7 @@ double addSubStringBlocks (const std::string &command, readerInfo *ri, size_t rl
 
 }
 
-double multDivStringBlocks (const std::string &command, readerInfo *ri, size_t rlc)
+double multDivStringBlocks (const std::string &command, readerInfo &ri, size_t rlc)
 {
 
 
@@ -223,14 +227,14 @@ size_t pChunckEnd (const std::string &cmd, size_t start)
 }
 
 
-double InterpretFunction (const std::string &cmdString, readerInfo *ri)
+double InterpretFunction (const std::string &cmdString, readerInfo &ri)
 {
   auto fval = evalFunction (cmdString);
 
   //if we still didn't find any function check if there is a redefinition
-  if ((std::isnan (fval)) && (ri))
+  if (std::isnan (fval))
     {
-      auto rep = ri->checkDefines (cmdString);
+      auto rep = ri.checkDefines (cmdString);
       if (rep != cmdString)
         {
           fval = evalFunction (rep);                      //don't let it iterate more than once
@@ -240,14 +244,14 @@ double InterpretFunction (const std::string &cmdString, readerInfo *ri)
 }
 
 
-double InterpretFunction (const std::string &cmdString, double val, readerInfo *ri)
+double InterpretFunction (const std::string &cmdString, double val, readerInfo &ri)
 {
   auto fval = evalFunction (cmdString, val);
 
   //if we still didn't find any function check if there is a redefinition
-  if ((std::isnan (fval)) && (ri))
+  if (std::isnan (fval))
     {
-      auto rep = ri->checkDefines (cmdString);
+      auto rep = ri.checkDefines (cmdString);
       if (rep != cmdString)
         {
           fval = evalFunction (rep, val);                      //don't let it iterate more than once
@@ -256,14 +260,14 @@ double InterpretFunction (const std::string &cmdString, double val, readerInfo *
   return fval;
 }
 
-double InterpretFunction (const std::string &cmdString, double val1, double val2, readerInfo *ri)
+double InterpretFunction (const std::string &cmdString, double val1, double val2, readerInfo &ri)
 {
   auto fval = evalFunction (cmdString, val1, val2);
 
   //if we still didn't find any function check if there is a redefinition
-  if ((std::isnan (fval)) && (ri))
+  if (std::isnan (fval))
     {
-      auto rep = ri->checkDefines (cmdString);
+      auto rep = ri.checkDefines (cmdString);
       if (rep != cmdString)
         {
           fval = evalFunction (rep, val1,val2);                      //don't let it iterate more than once
@@ -272,9 +276,9 @@ double InterpretFunction (const std::string &cmdString, double val1, double val2
   return fval;
 }
 
-double stringBlocktoDouble (const std::string &block, readerInfo *ri)
+double stringBlocktoDouble (const std::string &block, readerInfo &ri)
 {
-  if (!isdigit (block[0]))       //if the first character is not a digit then go to the string interpreter
+  if (nonNumericFirstCharacter(block))       //if the first character is not a digit then go to the string interpreter
     {
       return interpretString (block, ri);
     }

@@ -2,7 +2,7 @@
 /*
  * -----------------------------------------------------------------
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,21 +18,16 @@
 
 #include "gridDyn.h"
 
-#include "GhostSwingBusManager.h"
+#include "coupling/GhostSwingBusManager.h"
 #include "gridDynFileInput.h"
-#include "objectInterpreter.h"
-#include "gridDynFederatedScheduler.h"
+#include "core/objectInterpreter.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "griddyn-tracer.h"
-#include "collector.h"
+#include "measurement/collector.h"
 #include "stringOps.h"
 #include "workQueue.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 
-#ifdef GRIDDYN_HAVE_FSKIT
-#include "fskit/ptrace.h"
-#endif
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -43,60 +38,19 @@
 #include <iostream>
 #include <iomanip>
 
-extern "C" {
-
-/*
- * This is a C interface for running GridDyn.
- */
-int griddyn_runner_main (int argc, char *argv[])
-{
-  GRIDDYN_TRACER ("GridDyn::griddyn_runner_main");
-  
-#ifdef GRIDDYN_HAVE_ETRACE
-  std::stringstream program_trace_filename;
-  program_trace_filename << "etrace/" << "program_trace."
-                         << std::setw (6) << std::setfill ('0') << 0 << ".etrace";
-  init_tracefile (program_trace_filename.str ().c_str ());
-
-#endif
-
-  auto GridDyn = std::make_shared<GriddynRunner> ();
-
-#ifdef GRIDDYN_HAVE_FSKIT
-  // Not running with FSKIT.
-  std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler (nullptr);
-  GridDyn->Initialize (argc, argv, scheduler);
-#else
-  GridDyn->Initialize (argc, argv);
-  GridDyn->simInitialize();
-#endif
-
-  GridDyn->Run ();
-
-  GridDyn->Finalize ();
-
-  return 0;
-}
-
-}
 
 
 namespace po = boost::program_options;
 
-#ifdef GRIDDYN_HAVE_FSKIT
-int GriddynRunner::Initialize (int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
-{
-  if (scheduler)
-    {
-      GriddynFederatedScheduler::Initialize (scheduler);
-    }
-#else
+using namespace stringOps;
+
+GriddynRunner::GriddynRunner() = default;
+
+GriddynRunner::~GriddynRunner() = default;
+
 int GriddynRunner::Initialize (int argc, char *argv[])
 {
-#endif
 
-  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Initialize");
- 
   m_startTime = std::chrono::high_resolution_clock::now ();
 
   m_gds = std::make_shared<gridDynSimulation> ();
@@ -108,20 +62,8 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 
   gridDynSimulation::setInstance (m_gds.get ()); // peer to gridDynSimulation::GetInstance ();
 
-  //check for an MPI run setup
-  bool isMpiCountMode = false;
-  for (int ii = 0; ii < argc; ++ii)
-    {
-      if (!strcmp ("--mpicount", argv[ii]))
-        {
-          isMpiCountMode = true;
-        }
-    }
+     GhostSwingBusManager::Initialize (&argc, &argv);
 
-  if (!isMpiCountMode)
-    {
-      GhostSwingBusManager::Initialize (&argc, &argv);
-    }
 
   po::variables_map vm;
   int ret = argumentParser (argc, argv, vm);
@@ -134,15 +76,12 @@ int GriddynRunner::Initialize (int argc, char *argv[])
 
   readerInfo ri;
   //load any relevant issue into the readerInfo structure
-  loadXMLinfo (vm, &ri);
-  if ((ret = processCommandArguments (m_gds, &ri, vm)) != 0)
+  loadXMLinfo (vm, ri);
+  if ((ret = processCommandArguments (m_gds, ri, vm)) != 0)
     {
       return ret;
     }
-  if (isMpiCountMode)
-    {
-      return 0;
-    }
+  
   m_gds->log (nullptr, print_level::summary, griddyn_version_string);
   m_stopTime = std::chrono::high_resolution_clock::now ();
   std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
@@ -166,14 +105,12 @@ void GriddynRunner::simInitialize()
 
 void GriddynRunner::Run (void)
 {
-  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Run");
-
   m_gds->run ();
 }
 
-gridDyn_time GriddynRunner::Step (gridDyn_time time)
+coreTime GriddynRunner::Step (coreTime time)
 {
-  gridDyn_time actual = time;
+  coreTime actual = time;
   if (m_gds)
     {
       if (eventMode)
@@ -201,7 +138,7 @@ gridDyn_time GriddynRunner::Step (gridDyn_time time)
   return actual;
 }
 
-gridDyn_time GriddynRunner::getNextEvent () const
+coreTime GriddynRunner::getNextEvent () const
 {
   return m_gds->getEventTime ();
 }
@@ -217,8 +154,6 @@ void GriddynRunner::StopRecording ()
 
 void GriddynRunner::Finalize (void)
 {
-  GRIDDYN_TRACER ("GridDyn::GriddynRunner::Finalize");
-
   StopRecording ();
 
   if (!m_isMpiCountMode)
@@ -227,7 +162,7 @@ void GriddynRunner::Finalize (void)
     }
 }
 
-int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo *ri, po::variables_map &vm)
+int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo &ri, po::variables_map &vm)
 {
 
   if (vm.count ("quiet"))
@@ -258,7 +193,7 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
   if (vm.count ("log-file") > 0)
     {
       std::string log_file = vm["log-file"].as<std::string> ();
-      ri->checkDefines (log_file);
+      ri.checkDefines (log_file);
       gds->set ("logfile", log_file);
     }
 
@@ -267,7 +202,7 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
       stringVec flagstrings = vm["file-flags"].as<stringVec > ();
       for (auto &str : flagstrings)
         {
-          ri->flags = addflags (ri->flags, str);
+          ri.flags = addflags (ri.flags, str);
         }
     }
 	if (vm.count("threads"))
@@ -277,13 +212,13 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
 	}
    std::string grid_file = vm["input"].as<std::string> ();
 
-  loadFile (gds.get (), grid_file, ri);
+  loadFile (gds.get (), grid_file, &ri);
   if (vm.count ("import"))
     {
       auto importList = vm["import"].as<stringVec > ();
       for (auto &iF : importList)
         {
-          loadFile (gds.get (), iF, ri);
+          loadFile (gds.get (), iF, &ri);
         }
     }
 
@@ -297,6 +232,10 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
       gds->countMpiObjects (true);
       return 0;
     }
+  else if (vm.count("buildfmu"))
+  {
+
+  }
   else
     {
 
@@ -307,13 +246,15 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
       std::cout << "area count =" << areas << " buses=" << buses << " links= " << links << " gens= " << gens << '\n';
     }
 
+  
   //set any flags used by the system
   if (vm.count ("flags"))
     {
       stringVec flagstrings = vm["flags"].as<stringVec > ();
       for (auto &str : flagstrings)
         {
-          auto fstr = splitlineTrim (str);
+          auto fstr = splitline(str);
+		  trim(fstr);
           for (auto &flag : fstr)
             {
               makeLowerCase (flag);
@@ -364,13 +305,13 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo 
     {
 
       std::string pFlowOut = vm["powerflow-output"].as<std::string> ();
-      ri->checkDefines (pFlowOut);
+      ri.checkDefines (pFlowOut);
       gds->set ("powerflowfile", pFlowOut);
     }
   if (vm.count ("jac-output"))
     {
       std::string JacOut = vm["jac-output"].as<std::string> ();
-      ri->checkDefines (JacOut);
+      ri.checkDefines (JacOut);
       captureJacState (gds.get (),JacOut, gds->getSolverMode ("pflow"));
     }
 
@@ -419,6 +360,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
 	  ("config-file", po::value<std::string>(), "specify a configuration file to use")
 	  ("config-file-output", po::value<std::string>(), "file to store current configuration options")
 	  ("mpicount", "setup for an MPI run")
+	  ("buildfmu","build an fmu to run the given configuration")
 	  ("version", "print version string")
 	  ("test", "run a test program[ignored in many cases]");
 
@@ -443,7 +385,9 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
 	  ("define,D", po::value < std::vector < std::string >>(), "definition strings for the element file readers")
 	  ("translate,T", po::value < std::vector < std::string >>(), "translation strings for the element file readers")
 	  ("warn,w", po::value<int>(), "specify warning level output 0=all, 1=important,2=none")
-	  ("threads", po::value<int>(), "specify the number of worker threads to use if multithreading is enabled");
+	  ("threads", po::value<int>(), "specify the number of worker threads to use if multithreading is enabled")
+	  ("xml", po::value<std::string>(), "the xml reader to use: 1 for tinyxml, 2 for tinyxml2")
+	  ("match-type", po::value<std::string>(), "the default parameter name matching algorithm to use for xml[exact|capital*|any] ");
 
   hidden.add_options ()
     ("input", po::value<std::string> (), "input file");
@@ -525,40 +469,49 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map)
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-void loadXMLinfo (po::variables_map &vm_map, readerInfo *ri)
+void loadXMLinfo (po::variables_map &vm_map, readerInfo &ri)
 {
   if (vm_map.count ("dir"))
     {
       auto dirList = vm_map["dir"].as<stringVec > ();
-      for (auto dirname : dirList)
+      for (const auto &dirname : dirList)
         {
-          ri->addDirectory (dirname);
+          ri.addDirectory (dirname);
         }
     }
 
   if (vm_map.count ("define"))
     {
       auto deflist = vm_map["define"].as<stringVec > ();
-      for (auto defstr : deflist)
+      for (const auto &defstr : deflist)
 
         {
           auto N = defstr.find_first_of ('=');
           auto def = trim (defstr.substr (0, N));
           auto rep = trim (defstr.substr (N + 1));
-          ri->addLockedDefinition (def, rep);
+          ri.addLockedDefinition (def, rep);
         }
     }
 
   if (vm_map.count ("translate"))
     {
       auto translist = vm_map["translate"].as<stringVec > ();
-      for (auto transstr : translist)
+      for (const auto &transstr : translist)
         {
           auto N = transstr.find_first_of ('=');
           auto tran = trim (transstr.substr (0, N));
           auto rep = trim (transstr.substr (N + 1));
-          ri->addTranslate (tran, rep);
+          ri.addTranslate (tran, rep);
         }
     }
-
+  //set the default XML reader to use
+  if (vm_map.count("xml"))
+  {
+	  readerConfig::setDefaultXMLReader(convertToLowerCase(vm_map["xml"].as<std::string>()));
+  }
+  //set the default match type to use
+  if (vm_map.count("match-type"))
+  {
+	  readerConfig::setDefaultMatchType(convertToLowerCase(vm_map["match-type"].as<std::string>()));
+  }
 }

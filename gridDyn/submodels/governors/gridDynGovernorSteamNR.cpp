@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -29,8 +29,8 @@ gridDynGovernorSteamNR::gridDynGovernorSteamNR (const std::string &objName) : gr
   Pmax  = kBigNum;
   Pmin  = 0;
   Pset    = 0;
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.jacSize = 5;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.jacSize = 5;
 }
 
 coreObject *gridDynGovernorSteamNR::clone (coreObject *obj) const
@@ -69,20 +69,21 @@ gridDynGovernorSteamNR::~gridDynGovernorSteamNR ()
 }
 
 // initial conditions
-void gridDynGovernorSteamNR::objectInitializeB (const IOdata & /*args*/, const IOdata &outputSet, IOdata & /*inputSet*/)
+void gridDynGovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata & /*inputSet*/)
 {
 
   auto offset = offsets.getAlgOffset (cLocalSolverMode);
   m_state[offset + 1] = 0;
-  m_state[offset + offset] = outputSet[0];
-  Pset = ((gridDynGenerator *)parent)->getPset ();
+  m_state[offset + offset] = desiredOutput[0];
+
+  Pset = ((gridDynGenerator *)getParent())->getPset();
 
 
 }
 
 
 // residual
-void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData &, double resid[],  const solverMode &sMode)
+void gridDynGovernorSteamNR::residual (const IOdata & /*inputs*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset]   = 0;
@@ -90,7 +91,7 @@ void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData 
 }
 
 
-void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {

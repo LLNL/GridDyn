@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -20,6 +20,7 @@
 /** @brief intermediate class for implementing a containing matrix data
 @details class is abstract and cannot be instantiated on its own meant to help some 
 other classes that do things to the input before transmitting it.  
+uses a pointer so it can be reassigned later
 */
 template<class Y = double>
 class matrixDataContainer : public matrixData<Y>
@@ -31,7 +32,7 @@ public:
 	{};
 	/** @brief constructor
 	*/
-	matrixDataContainer(matrixData<Y> &input)
+	explicit matrixDataContainer(matrixData<Y> &input)
 	{
 		setArray(&input);
 	};
@@ -41,7 +42,7 @@ public:
 		ad->clear();
 	};
 
-	void assign(index_t row, index_t col, Y num) = 0;
+	void assign(index_t row, index_t col, Y num) override = 0;
 
 	count_t size() const override
 	{
@@ -58,35 +59,16 @@ public:
 		return ad->capacity();
 	};
 
-	index_t rowIndex(index_t N) const override
+	matrixElement<Y> element(index_t N) const override
 	{
-		return ad->rowIndex(N);
-	};
-
-	index_t colIndex(index_t N) const override
-	{
-		return ad->colIndex(N);
-	};
-
-	Y val(index_t N) const override
-	{
-		return ad->val(N);
-	};
+		return ad->element(N);
+	 }
 
 	void compact() override
 	{
 		ad->compact();
 	}
 
-	virtual matrixIterator<Y> begin() const override
-	{
-		return ad->begin();
-	}
-
-	virtual matrixIterator<Y> end() const override
-	{
-		return ad->end();
-	}
 
 	void start() override
 	{

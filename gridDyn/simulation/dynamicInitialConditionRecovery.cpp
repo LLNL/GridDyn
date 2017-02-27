@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -86,7 +86,7 @@ int dynamicInitialConditionRecovery::lowVoltageCheck ()
 {
   stateData sD (sim->getCurrentTime (), solver->state_data (), solver->deriv_data ());
 
-  sim->rootCheck (sD, solver->getSolverMode (), check_level_t::low_voltage_check);
+  sim->rootCheck (noInputs, sD, solver->getSolverMode (), check_level_t::low_voltage_check);
 
   int mmatch = JacobianCheck (sim, solver->getSolverMode ());
   if (mmatch != 0)
@@ -126,7 +126,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
           sim->handleRootChange (solver->getSolverMode (), solver);
           stateData sD (sim->getCurrentTime (), solver->state_data (), solver->deriv_data());
 
-          change_code ret = sim->rootCheck (sD, solver->getSolverMode (), check_level_t::complete_state_check);
+          change_code ret = sim->rootCheck (noInputs, sD, solver->getSolverMode (), check_level_t::complete_state_check);
           sim->handleRootChange (solver->getSolverMode (), solver);
           if (ret > change_code::no_change)
             {
@@ -144,7 +144,7 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
       else
         {
 		  stateData sD(sim->getCurrentTime(), solver->state_data(), solver->deriv_data());
-          change_code ret = sim->rootCheck (sD, solver->getSolverMode (), check_level_t::reversable_only);
+          change_code ret = sim->rootCheck (noInputs, sD, solver->getSolverMode (), check_level_t::reversable_only);
           sim->handleRootChange (solver->getSolverMode (), solver);
           if (ret > change_code::non_state_change)
             {
@@ -172,8 +172,8 @@ int dynamicInitialConditionRecovery::dynamicFix2 ()
 int dynamicInitialConditionRecovery::dynamicFix3 ()
 {
 
-  gridDyn_time timeCurr = sim->getCurrentTime ();
-  sim->timestep (timeCurr + 0.001, solver->getSolverMode ());
+  coreTime timeCurr = sim->getCurrentTime ();
+  sim->timestep (timeCurr + 0.001, noInputs, solver->getSolverMode ());
   sim->dynamicCheckAndReset (solver->getSolverMode ());
   /*if (retval == 4)
   {

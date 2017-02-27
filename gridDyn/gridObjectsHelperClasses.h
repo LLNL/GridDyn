@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,18 +10,16 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef GRIDOBJECTHELPERCLASSES_H_
 #define GRIDOBJECTHELPERCLASSES_H_
 
-#include "gridDynVectorTypes.h"
+#include "gridDynDefinitions.h"
+#include "solvers/solverMode.h"
 #include <bitset>
 
-const static std::uint64_t flagMask = 0x3FE;  //!< general flag mask for convenience to mask out flags that typically cascade to parents
+constexpr static std::uint64_t flagMask = 0x3FE;  //!< general flag mask for convenience to mask out flags that typically cascade to parents
 
-#define FLAG_NOT_FOUND (1)
-#define FLAG_NOT_EDITABLE (2)
-#define FLAG_FOUND (0)
 
 /** @brief  an enumeration of flags in the opFlags bitset for gridObject
 */
@@ -38,7 +36,7 @@ enum operation_flags
   has_powerflow_adjustments = 4,        //!<flag indicating if an object has voltage adjustments for power flow
   preEx_requested = 5,        //!<flag indicating if an object requests pre-execution
   uses_bus_frequency = 6,        //!<flag indicating if an object uses bus frequency calculation
-  has_pflow_states = 7,           //!< indicator if the object has pflow states if in question
+  has_pflow_states = 7,           //!< indicator if the object has power flow states if in question
   has_dyn_states = 8,             //!< indicator if the object has dynamic states if in question
   has_differential_states = 9,       //!< indicator if the object has differential states
   not_cloneable = 10,				//!< flag indicating that an object should not be cloned
@@ -97,15 +95,14 @@ enum operation_flags
   //Various informative flags that can be used in some situations
   disconnected = 49, //!< flag indicating that the object is disconnected
   differential_output = 50, //!< flag that the model has a differential state variable that is the primary output
-  no_gridobject_set = 51,  //!< flag indicating skipping of the coreObject set function for parent setting without fault
+  no_gridobject_set = 51,  //!< flag indicating skipping of the coreObject set function for parent setting without throwing an error
   being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some large objects with components allocated in larger fashion so we skip over some steps in object removal
+  separate_processing =53, //!< flag indicating that the object math functions will be handled by the parent object and should be ski[[ed by the gridObject Model
+  /*flags 54-63 are intended for object capabilities*/
 
-  /*flags 53-63 are intended for object capabilities*/
-
-  multipart_calculation_capable = 53,  //!< flag indicating the object is capable of using pre and post execution functions
-  extra_capability_flag1 = 54,
-  extra_capability_flag2 = 55,
-  extra_capability_flag3 = 56,
+  multipart_calculation_capable = 54,  //!< flag indicating the object is capable of using pre and post execution functions
+  extra_capability_flag1 = 55,
+  extra_capability_flag2 = 56,
   dc_only = 57,                       //!<flag indicating the object must be attached to a DC bus
   dc_capable = 58,                    //!<flag indicating the object can be attached to a DC bus
   dc_terminal2 = 59,                      //!<flag indicating the terminal 2 must be a DC bus
@@ -114,6 +111,11 @@ enum operation_flags
   three_phase_terminal2 = 63,           //!<flag indicating the terminal 2 must be attached to a 3 phase bus
 
 
+};
+/** alternate names for some of the flags*/
+enum operation_flag_overloads
+{
+	sampled_only = no_dyn_states,
 };
 
 /** @brief enumeration of possible convergence modes
@@ -222,8 +224,6 @@ inline bool anyChangeFlags (std::bitset<64> flags)
 
 #define SINGLE_STEP_REQUIRED 2001                       //!< indicator that an object requires single step updates
 #define SINGLE_STEP_NOT_REQUIRED 2002           //!< indicator that an object no longer requires single step updates
-#define UPDATE_REQUIRED 2010                            //!< indicator that an object is using an update function
-#define UPDATE_NOT_REQUIRED 2011                        //!< indicator that an object is no longer using an update function
 
 /** @brief define the reset levels
 */
@@ -250,9 +250,8 @@ enum class check_level_t
   complete_state_check = 4,
 };
 
-#include <vector>
-#include "solvers/solverMode.h"
-/** @brief helper struct for containing sizes to group the data*/
+
+/** @brief helper class for containing sizes to group the data*/
 class stateSizes
 {
 public:
@@ -271,7 +270,7 @@ public:
   void reset ();
   /** reset just the sizes related to states to 0*/
   void stateReset ();
-  /** reset the root counter and and Jacobian sizes to 0*/
+  /** reset the root counter and Jacobian sizes to 0*/
   void rootAndJacobianReset ();
   /** add another stateSizes object to this one
   @param[in] arg the stateSizes object to combine*/
@@ -283,6 +282,8 @@ public:
   /** add just the root and Jacobian information
   @param[in] arg the update to add to the calling object*/
   void addRootAndJacobianSizes (const stateSizes &arg);
+
+  count_t totalSize() const;
 };
 
 /**
@@ -293,7 +294,7 @@ class solverOffsets
 {
 
 public:
-  solverMode sMode = cLocalSolverMode;         //!<pointer to the reference sMode
+  solverMode sMode = cLocalSolverMode;         //!<the reference solverMode
   index_t aOffset = kNullLocation;     //!< Location for the voltage offset
   index_t vOffset = kNullLocation;     //!< Location for the Angle offset
   index_t algOffset = kNullLocation;      //!< location for generic offsets
@@ -383,7 +384,7 @@ public:
 class Lp
 {
 public:
-  gridDyn_time time = timeZero;                                              //!< time
+  coreTime time = timeZero;                                              //!< time
   count_t algOffset = kNullLocation;    //!< data offset for algebraic components
   count_t diffOffset = kNullLocation;   //!< data offset for differential components
   const double *algStateLoc = nullptr;  //!< location of algebraic state variables
@@ -400,17 +401,20 @@ public:
 class stateData
 {
 public:
-  gridDyn_time time = 0.0;                    //!< time corresponding to the state data
+  coreTime time = 0.0;                    //!< time corresponding to the state data
   const double *state = nullptr;        //!< the current state guess
   const double *dstate_dt = nullptr;    //!< the state time derivative array
   const double *fullState = nullptr;    //!< the full state data (for cases where state contains only differential or algebraic components)
   const double *diffState = nullptr;    //!< the differential state data (for cases where state contains only algebraic components)
   const double *algState = nullptr;     //!< the algebraic state data (for cases where state contains only differential components)
+  double *scratch1 = nullptr;			//!< scratch space the objects can use for calculations (if not null it should be the same size as state
+  double *scratch2 = nullptr;			//!< scratch space the objects can use for calculations (if not null it should be the same size as state
   double cj = 1.0;                      //!< a number used in Jacobian calculations if there is a derivative used in the calculations
-  gridDyn_time altTime = 0.0;			//!< the time corresponding to the other part of the state
-	count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
+  coreTime altTime = 0.0;			//!< the time corresponding to the other part of the state
+  count_t seqID = 0;                    //!< a sequence id to differentiate between subsequent state data objects
   index_t pairIndex = kNullLocation;                                //!< the index of the mode the paired data comes from
-  stateData (gridDyn_time sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
+  index_t stateSize = 0;				//!< the size of the state vector, if at zero the information is presumed to come from another source
+  stateData (coreTime sTime = 0.0, const double *sstate = nullptr, const double *ndstate_dt = nullptr, count_t cseq = 0) : time (sTime), state (sstate), dstate_dt (ndstate_dt), seqID (cseq)
   {
   }
   bool empty() const
@@ -420,6 +424,10 @@ public:
   bool updateRequired(count_t checkID) const
   {
 	  return ((checkID != seqID) || (seqID == 0)||(empty()));
+  }
+  bool hasScratch() const
+  {
+	  return (scratch1 != nullptr);
   }
 };
 
@@ -434,11 +442,11 @@ class gridObject;
 class offsetTable
 {
 private:
-  std::vector<solverOffsets> offsetContainer;       //!< a vector of containers for offsets corresponding to the different solver modes
-  index_t paramOffset = kNullLocation; //!<offset for storing parameters in an array //TODO this should be part of the offset container
+  //std::vector<solverOffsets> offsetContainer;       //!< a vector of containers for offsets corresponding to the different solver modes
+	boost::container::small_vector<solverOffsets, 6> offsetContainer; //!< a vector of containers for offsets corresponding to the different solver modes
+	index_t paramOffset = kNullLocation; //!<offset for storing parameters in an array //TODO this should be part of the offset container
   count_t cSize;                    //!< the current size of the offsetContainer
 public:
-  solverOffsets *local;  //!< a pointer to local state information for code simplification usually points to the first element in offsetContainer
   /** @brief constructor
   */
   offsetTable ();
@@ -476,6 +484,19 @@ public:
   */
   void setOffset (index_t newOffset, const solverMode &sMode);
 
+ 
+  /**get a pointer the offsets for the local mode
+  */
+  solverOffsets &local() //local is always the first element
+  {
+	  return offsetContainer.front();
+  }
+  /**get a const pointer to the local mode of operations
+  */
+  const solverOffsets &local() const//local is always the first element
+  {
+	  return offsetContainer.front();
+  }
   /** @brief get the offsets for a solverMode
   *@param[in] sMode the solverMode we are interested in
   *@return a pointer to a solverOffsets object

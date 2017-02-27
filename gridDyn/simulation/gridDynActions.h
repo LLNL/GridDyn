@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,11 +15,12 @@
 #define GRIDDYN_ACTIONS_H_
 
 
-#include "gridDynTypes.h"
-#include <string>
+#include "gridDynDefinitions.h"
 
 
-/** @brief class to define action and parameters for Griddyn operations
+//TODO:: use variant and string_view
+
+/** @brief class to define action and parameters for GridDyn operations
 */
 class gridDynAction
 {
@@ -32,10 +33,9 @@ public:
     set,                            //!< set a parameter
     setsolver,                  //!< set a parameter in the solver
     setall,                     //!< set a parameter in all the models of a particular type
-    settime,                        //!< set the time of the solver
     print,                    //!< print a variable
     initialize,                  //!< initialize the models
-    powerflow,                 //!< run a powerflow
+    powerflow,                 //!< run a power flow
     reset,                  //!< reset the models
     iterate,                 //!< perform an iterative power flow
     eventmode,                 //!< run in event Mode
@@ -47,7 +47,7 @@ public:
     save,                  //!< save the results
     load,                 //!< load a state into the simulation
     add,                 //!< add a model to the simulation
-    rollback,                 //!< rollback the simulation to a particular timepoint
+    rollback,                 //!< rollback the simulation to a particular time point
     checkpoint,                 //!< checkpoint the complete system state
     contingency,                  //!< perform a contingency analysis
     continuation                  //!< perform a continuation analysis
@@ -61,10 +61,13 @@ public:
 
   /** @brief constructor*/
   gridDynAction ();
-
+  /** @brief constructor taking a command
+  @param[in] action command
+  */
+  gridDynAction(gd_action_t action);
   /** @brief constructor with action string
   @param[in] operation  a string containing the information for a specific action*/
-  explicit gridDynAction (const std::string &operation);
+  gridDynAction (const std::string &operation);
 
   /** @brief fill an actions parameters based on a string
   @param[in] operation  a string containing the information for a specific action*/

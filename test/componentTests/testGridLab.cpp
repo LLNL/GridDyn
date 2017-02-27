@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "GhostSwingBusManager.h"
+#include "coupling/GhostSwingBusManager.h"
 #include "loadModels/gridLabDLoad.h"
 #include <cstdio>
 
@@ -30,19 +30,19 @@ BOOST_AUTO_TEST_CASE (gridlab_test1)
   GhostSwingBusManager::Initialize (&argc, nullptr);
   GhostSwingBusManager::SetDebug (false);
   std::string fname = std::string (GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile(fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   int glb = gds->countMpiObjects ();
   BOOST_CHECK_EQUAL (glb, 1);
 
   gds->pFlowInitialize ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
 
 
   gds->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-  gridLoad *ld = static_cast<gridLoad *> (gds->find ("bus2::gload1"));
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  zipLoad *ld = static_cast<zipLoad *> (gds->find ("bus2::gload1"));
 
   BOOST_REQUIRE (ld != nullptr);
   double val = ld->get ("p");
@@ -69,19 +69,19 @@ BOOST_AUTO_TEST_CASE (gridlab_test2)
   GhostSwingBusManager::Initialize (&argc, nullptr);
   GhostSwingBusManager::SetDebug (false);
   std::string fname = std::string (GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod3x.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile(fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   int glb = gds->countMpiObjects ();
   BOOST_CHECK_EQUAL (glb, 3);
 
   gds->pFlowInitialize ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
 
 
   gds->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-  gridLoad *ld = static_cast<gridLoad *> (gds->find ("bus2::gload2"));
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  zipLoad *ld = static_cast<zipLoad *> (gds->find ("bus2::gload2"));
 
   //P = 0.27 Q = -0.1 Ir = 0.34 Iq = -0.13
   BOOST_REQUIRE (ld != nullptr);
@@ -109,19 +109,19 @@ BOOST_AUTO_TEST_CASE (gridlab_test3)
   GhostSwingBusManager::Initialize (&argc, nullptr);
   GhostSwingBusManager::SetDebug (false);
   std::string fname = std::string (GRIDLAB_TEST_DIRECTORY "Simple_3Bus_mod3x_current.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile(fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   int glb = gds->countMpiObjects ();
   BOOST_CHECK_EQUAL (glb, 3);
 
   gds->pFlowInitialize ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
 
 
   gds->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-  gridLoad *ld = static_cast<gridLoad *> (gds->find ("bus2::gload2"));
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  zipLoad *ld = static_cast<zipLoad *> (gds->find ("bus2::gload2"));
 
   //P = 0.27 Q = -0.1 Ir = 0.34 Iq = -0.13
   BOOST_REQUIRE (ld != nullptr);
@@ -151,8 +151,8 @@ BOOST_AUTO_TEST_CASE (test_gridlabArray)
   GhostSwingBusManager::SetDebug (false);
   readerInfo ri;
   ri.keepdefines = true;
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname,&ri));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile (fname, &ri);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   int glb = gds->countMpiObjects ();
   int cnt = 60;
@@ -168,10 +168,10 @@ BOOST_AUTO_TEST_CASE (test_gridlabArray)
     }
   BOOST_CHECK_EQUAL (glb, cnt);
   gds->powerflow ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 BOOST_AUTO_TEST_SUITE_END ()

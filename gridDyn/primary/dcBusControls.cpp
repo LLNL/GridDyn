@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -48,7 +48,7 @@ bool dcBusControls::hasAdjustments(index_t sid) const
 
 
 
-double dcBusControls::getAdjustableCapacityUp(gridDyn_time time) const
+double dcBusControls::getAdjustableCapacityUp(coreTime time) const
 {
 	double cap = 0.0;
 
@@ -67,7 +67,7 @@ double dcBusControls::getAdjustableCapacityUp(gridDyn_time time) const
 	return cap;
 }
 
-double dcBusControls::getAdjustableCapacityDown(gridDyn_time time) const
+double dcBusControls::getAdjustableCapacityDown(coreTime time) const
 {
 	double cap = 0.0;
 
@@ -295,19 +295,19 @@ void dcBusControls::unmergeBus(dcBus *mbus)
 	{
 		if (mbus->checkFlag(dcBus::bus_flags::slave_bus))
 		{
-			if (mbus->busController.masterBus->getID() == masterBus->getID())
+			if (isSameObject(mbus->busController.masterBus,masterBus))
 			{
 				masterBus->unmergeBus(mbus);
 			}
 		}
-		else if (masterBus->getID() == mbus->getID())
+		else if (isSameObject(masterBus,mbus))
 		{
 			mbus->unmergeBus(controlledBus); //flip it around so this bus is unmerged from mbus
 		}
 	}
 	else//in the masterbus
 	{
-		if ((mbus->checkFlag(dcBus::bus_flags::slave_bus)) && (controlledBus->getID() == mbus->busController.masterBus->getID()))
+		if ((mbus->checkFlag(dcBus::bus_flags::slave_bus)) && (isSameObject(controlledBus,mbus->busController.masterBus)))
 		{
 			for (auto &eb : slaveBusses)
 			{
@@ -321,7 +321,7 @@ void dcBusControls::unmergeBus(dcBus *mbus)
 
 void dcBusControls::checkMerge()
 {
-	if (!controlledBus->enabled)
+	if (!controlledBus->isEnabled())
 	{
 		return;
 	}

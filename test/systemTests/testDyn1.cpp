@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_genModel)
 {
   std::string fname = std::string (DYN1_TEST_DIRECTORY "test_dynSimple1.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
 
   gds->pFlowInitialize ();
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_Exciter)
 
 
   std::string fname = std::string (DYN1_TEST_DIRECTORY "test_2m4bDyn_ss_ext_only.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
 
   gds->pFlowInitialize ();
@@ -88,25 +88,26 @@ BOOST_AUTO_TEST_CASE (dyn_test_Exciter)
   BOOST_CHECK_EQUAL (retval,0);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 
-  std::vector<double> st = gds->getState (cDaeSolverMode);
+  auto st = gds->getState (cDaeSolverMode);
 
 
   BOOST_CHECK_EQUAL (st.size (),22u);
   if (st.size() != 22)
   {
-	  printStateNames(gds, cDaeSolverMode);
+	  printStateNames(gds.get(), cDaeSolverMode);
   }
 
+  runResidualCheck(gds, cDaeSolverMode);
+  
+  runJacobianCheck(gds, cDaeSolverMode);
+
   gds->run (0.25);
-  int errs = JacobianCheck (gds,cDaeSolverMode);
-  if (errs > 0)
-    {
-      printStateNames (gds, cDaeSolverMode);
-    }
+  runJacobianCheck (gds,cDaeSolverMode);
+
   gds->run ();
 
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
-  std::vector<double> st2 = gds->getState (cDaeSolverMode);
+  auto st2 = gds->getState (cDaeSolverMode);
 
   //check for stability
   auto diff = countDiffsIgnoreCommon(st, st2, 0.0001);
@@ -119,7 +120,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleCase)
 {
 
   std::string fname = std::string (DYN1_TEST_DIRECTORY "test_2m4bDyn_ss.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
 
   gds->pFlowInitialize ();
@@ -156,19 +157,19 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleCase)
 BOOST_AUTO_TEST_CASE (dyn_test_infinite_bus)
 {
   std::string fname = std::string (DYN1_TEST_DIRECTORY "test_inf_bus.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile(fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
   infiniteBus *bus = dynamic_cast<infiniteBus *>(gds->getBus (0));
   BOOST_CHECK (bus!=nullptr);
   gds->pFlowInitialize();
-  int mmatch=JacobianCheck(gds,cPflowSolverMode);
-  BOOST_CHECK(mmatch==0);
+  runJacobianCheck(gds,cPflowSolverMode);
+
   gds->powerflow ();
   std::vector<double> st = gds->getState ();
 
 
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds->getState (cDaeSolverMode);
 
   BOOST_CHECK_CLOSE (st2[0], st[0],0.001);

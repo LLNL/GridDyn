@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,11 +12,13 @@
 */
 
 #include "submodels/otherBlocks.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
 #include "stringConversion.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
+#include "valueLimiter.h"
+#include "rampLimiter.h"
 
 //object factory statements
 static typeFactory<basicBlock> bbof ("controlblock", stringVec { "basic", "gain" }, "basic");
@@ -30,9 +32,6 @@ static childTypeFactory<lutBlock,basicBlock> lutbof ("controlblock", stringVec {
 static childTypeFactory<derivativeBlock,basicBlock> derbof ("controlblock", stringVec { "der", "derivative", "deriv" });
 static childTypeFactory<filteredDerivativeBlock,basicBlock> fderbof ("controlblock", stringVec { "fder", "filtered_deriv","filtered_derivative" });
 
-static const stringVec stNames {
-  "output", "test"
-};
 
 basicBlock::basicBlock (const std::string &objName) : gridSubModel (objName)
 {
@@ -44,6 +43,8 @@ basicBlock::basicBlock (double gain, const std::string &objName) : gridSubModel 
 {
   m_inputSize = 1;
 }
+
+basicBlock::~basicBlock() = default;
 
 coreObject *basicBlock::clone (coreObject *obj) const
 {
@@ -62,103 +63,155 @@ coreObject *basicBlock::clone (coreObject *obj) const
   nobj->resetLevel = resetLevel;
   nobj->limiter_alg = limiter_alg;
   nobj->limiter_diff = limiter_diff;
+  nobj->outputName = outputName;
   return nobj;
 }
 
-void basicBlock::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void basicBlock::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->reset ();
+	auto &lcinfo = offsets.local();
+  lcinfo.reset ();
   offsets.unload ();       //unload all the offsets
-  offsets.local->local.jacSize = 2;
+  
+  lcinfo.local.jacSize = 2;
   if (!opFlags[use_state])
     {
-      if (opFlags[differential_input])
-        {
-          offsets.local->local.diffSize = 1;
-          opFlags.set (differential_output);
-        }
-      else
-        {
-          offsets.local->local.algSize = 1;
-        }
+	  if (opFlags[use_direct])
+	  {//In use direct mode it just processes the input also ignore the gain and bias
+		  lcinfo.local.jacSize = 0;
+	  }
+	  else
+	  {
+		  if (opFlags[differential_input])
+		  {
+			  lcinfo.local.diffSize = 1;
+			  opFlags.set(differential_output);
+		  }
+		  else
+		  {
+			  lcinfo.local.algSize = 1;
+		  }
+	  }
+      
     }
   else if (opFlags[differential_output])
     {
-      offsets.local->local.diffSize = 1;
+	  lcinfo.local.diffSize = 1;
     }
   else
     {
-      offsets.local->local.algSize = 1;
+	  lcinfo.local.algSize = 1;
     }
   limiter_alg = 0;
   limiter_diff = 0;
+
+  if (resetLevel < 0)
+  {
+	  resetLevel = computeDefaultResetLevel();
+  }
   if (opFlags[use_block_limits])
     {
-      if (resetLevel < 0)
-        {
-          resetLevel = (Omin > -kHalfBigNum) ? ((Omax < kHalfBigNum) ? (Omax - Omin) * 0.001 : std::abs (Omin) * 0.001) : std::abs (Omax) * 0.001;
-        }
+      
 
       if (opFlags[differential_output])
         {
-          ++offsets.local->local.diffRoots;
-          ++offsets.local->local.diffSize;
+          ++(lcinfo.local.diffRoots);
+          ++(lcinfo.local.diffSize);
           limiter_diff = 1;
         }
       else
         {
-          ++offsets.local->local.algRoots;
-          ++offsets.local->local.algSize;
+          ++(lcinfo.local.algRoots);
+          ++(lcinfo.local.algSize);
           limiter_alg = 1;
         }
-      offsets.local->local.jacSize += 2;
-
+	  lcinfo.local.jacSize += 2;
+	  vLimiter = std::make_unique<valueLimiter>(Omin,Omax);
+	  vLimiter->setResetLevel(resetLevel);
     }
   if ((opFlags[use_ramp_limits])&& (opFlags[differential_output]))  //ramp limits only work with a differential output state before the limiters
     {
-      ++offsets.local->local.diffSize;
+	 
+      ++lcinfo.local.diffSize;
 
-      ++offsets.local->local.diffRoots;
+      ++lcinfo.local.diffRoots;
 
       ++limiter_diff;
-      offsets.local->local.jacSize += 2;
+	  lcinfo.local.jacSize += 2;
+	  rLimiter = std::make_unique<rampLimiter>(rampMin, rampMax);
+	  rLimiter->setResetLevel(resetLevel);
     }
   if (limiter_alg + limiter_diff > 0)
     {
       opFlags[has_limits] = true;
     }
+  if (opFlags[differential_input])
+  {
+	  m_inputSize = 2;
+  }
+  
+}
 
+double basicBlock::getRateInput(const IOdata &inputs) const
+{
+	return (inputs.size() > 1) ? inputs[1] : 0.0;
+}
+
+double basicBlock::computeDefaultResetLevel()
+{
+	double rlevel = 0.001;
+	if (Omax < kHalfBigNum)
+	{
+		if (Omin > -kHalfBigNum)
+		{
+			rlevel = (Omax - Omin) * 0.001;
+		}
+		else
+		{
+			rlevel = std::abs(Omax) * 0.001;
+		}
+	}
+	else if(Omin > -kHalfBigNum)
+	{
+		rlevel = std::abs(Omin) * 0.001;
+	}
+	
+	return rlevel;
 }
 // initial conditions
-void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void basicBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
 
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      prevInput = (args[0] + bias);
+      prevInput = (inputs[0] + bias);
       if (!opFlags[use_state])
         {
-          m_state[limiter_alg + limiter_diff] = (prevInput) * K;
-          if (opFlags[use_ramp_limits])
-            {
-              m_state[limiter_diff - 1] = m_state[limiter_diff];
-            }
-          if (opFlags[use_block_limits])
-            {
-              basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-              m_state[0] = valLimit (m_state[1], Omin, Omax);
-            }
+		  if (!opFlags[use_direct])
+		  {
+			  m_state[limiter_alg + limiter_diff] = (prevInput)* K;
+			  if (opFlags[use_ramp_limits])
+			  {
+				  m_state[limiter_diff - 1] = m_state[limiter_diff];
+			  }
+			  if (opFlags[use_block_limits])
+			  {
+				  basicBlock::rootCheck(inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+				  m_state[0] = vLimiter->clampOutput(m_state[1]);
+			  }
+		  }
+          
         }
       else
         {
           if (opFlags[use_ramp_limits])
             {
-              index_t diffOffset = offsets.local->local.algSize + limiter_diff;
+              index_t diffOffset = offsets.local().local.algSize + limiter_diff;
               m_state[diffOffset - 1] = m_state[diffOffset];
               if (opFlags[use_block_limits])
                 {
-                  basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-                  m_state[0] = valLimit (m_state[diffOffset - 1], Omin, Omax);
+                  basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+				  m_state[0] = vLimiter->clampOutput(m_state[diffOffset - 1]);
                 }
             }
           else
@@ -167,14 +220,14 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
                 {
                   if (opFlags[differential_output])
                     {
-                      index_t diffOffset = offsets.local->local.algSize;
-                      basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-                      m_state[0] = valLimit (m_state[diffOffset], Omin, Omax);
+                      index_t diffOffset = offsets.local().local.algSize;
+                      basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+                      m_state[0] = vLimiter->clampOutput(m_state[diffOffset]);
                     }
                   else
                     {
-                      basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-                      m_state[0] = valLimit (m_state[1], Omin, Omax);
+                      basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+					  m_state[0]=vLimiter->clampOutput(m_state[1]);
                     }
 
                 }
@@ -186,10 +239,10 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
     }
   else
     {
-      m_state[0] = outputSet[0];
+      m_state[0] = desiredOutput[0];
       if (opFlags[use_block_limits])
         {
-          m_state[0] = valLimit (m_state[0], Omin, Omax);
+		  m_state[0] = vLimiter->clampOutput(m_state[0]);
         }
 
       if (!opFlags[use_state])
@@ -224,7 +277,7 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
                   if (opFlags[differential_output])
                     {
                       index_t diffOffset = offsets.getDiffOffset (cLocalSolverMode) + limiter_diff;
-                      basicBlock::rootCheck (args, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+                      basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
                       m_state[diffOffset] = m_state[0];
                     }
                   else
@@ -244,14 +297,14 @@ void basicBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet,
 }
 
 
-void basicBlock::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void basicBlock::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
-  step (ttime, args[0]);
+  step (ttime, inputs[0]);
 }
 
 static IOdata kNullVec;
 
-double basicBlock::step (gridDyn_time ttime, double input)
+double basicBlock::step (coreTime ttime, double input)
 {
 
   if (!opFlags[use_state])
@@ -264,24 +317,20 @@ double basicBlock::step (gridDyn_time ttime, double input)
             {
               int offset = offsets.getDiffOffset (cLocalSolverMode);
               double ramp = (m_state[offset + 1] - m_state[offset]) / (ttime - prevTime);
-              if ((ramp <= rampMax) && (ramp >= rampMin))
+			  double cramp = rLimiter->clampOutputRamp(ramp);
+              if (cramp==ramp)
                 {
                   m_state[offset] = m_state[offset + 1];
                 }
-              else if (ramp > rampMax)
+              else 
                 {
-                  m_state[offset] += rampMax * (ttime - prevTime);
+                  m_state[offset] += cramp * (ttime - prevTime);
                 }
-              else
-                {
-                  m_state[offset] += rampMin * (ttime - prevTime);
-                }
-
             }
           else
             {
-              rootCheck (kNullVec, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-              m_state[0] = valLimit (m_state[1], Omin, Omax);
+			  rootCheck({ input }, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
+              m_state[0] = vLimiter->clampOutput (m_state[1]);
             }
         }
     }
@@ -291,18 +340,15 @@ double basicBlock::step (gridDyn_time ttime, double input)
         {
           int offset = offsets.getDiffOffset (cLocalSolverMode);
           double ramp = (m_state[offset + 1] - m_state[offset]) / (ttime - prevTime);
-          if ((ramp <= rampMax) && (ramp >= rampMin))
+		  double cramp = rLimiter->clampOutputRamp(ramp);
+		  if (cramp == ramp)
             {
               m_state[offset] = m_state[offset + 1];
             }
-          else if (ramp > rampMax)
-            {
-              m_state[offset] += rampMax * (ttime - prevTime);
-            }
-          else
-            {
-              m_state[offset] += rampMin * (ttime - prevTime);
-            }
+		  else
+		  {
+			  m_state[offset] += ramp * (ttime - prevTime);
+		  }
         }
       else
         {
@@ -310,7 +356,7 @@ double basicBlock::step (gridDyn_time ttime, double input)
             {
               auto offset = opFlags[differential_output] ? (offsets.getDiffOffset (cLocalSolverMode)) + 1 : 1;
               rootCheck (kNullVec, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
-              m_state[offset - 1] = valLimit (m_state[offset], Omin, Omax);
+              m_state[offset - 1] = vLimiter->clampOutput (m_state[offset]);
             }
 
         }
@@ -320,25 +366,41 @@ double basicBlock::step (gridDyn_time ttime, double input)
   return m_state[offset];
 }
 
-double basicBlock::getBlockOutput (const stateData &sD, const solverMode &sMode)
+double basicBlock::getBlockOutput (const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc = offsets.getLocations (sD, sMode, this);
   return opFlags[differential_output] ? *Loc.diffStateLoc : *Loc.algStateLoc;
 }
 
-double basicBlock::getBlockOutput ()
+double basicBlock::getBlockOutput () const
 {
   auto offset = opFlags[differential_output] ? (offsets.getDiffOffset (cLocalSolverMode)) : 0;
   return m_state[offset];
 }
 
+double basicBlock::getBlockDoutDt(const stateData &sD, const solverMode &sMode) const
+{
+	if (opFlags[differential_output])
+	{
+		Lp Loc = offsets.getLocations(sD, sMode, this);
+		return *Loc.dstateLoc;
+	}
+	return 0.0;
+	
+}
+
+double basicBlock::getBlockDoutDt() const
+{
+	if (opFlags[differential_output])
+	{
+		auto offset = opFlags[differential_output] ? (offsets.getDiffOffset(cLocalSolverMode)) : 0;
+		return m_dstate_dt[offset];
+	}
+	return 0.0;
+}
+
 void basicBlock::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
-  if ((opFlags[differential_output]) && (!hasDifferential (sMode)))
-    {
-      return;
-    }
-
   auto so = offsets.getOffsets (sMode);
   if (so->total.diffSize > 0)
     {
@@ -355,17 +417,115 @@ void basicBlock::residElements (double input, double didt, const stateData &sD, 
       algElements (input, sD, resid, sMode);
       for (index_t ii = 0; ii < so->total.algSize; ++ii)
         {
+		  
           resid[so->algOffset + ii] -= sD.state[so->algOffset + ii];
+		  /*if ((vLimiter) && (vLimiter->isActive()))
+		  {
+			  printf("%d:%d:%f input=%f , state=%f resid=%f\n", sD.seqID, ii,static_cast<double>(sD.time), input, sD.state[so->algOffset + ii], resid[so->algOffset + ii]);
+		  }
+		  */
         }
     }
 
 }
 
-// residual
-void basicBlock::residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode)
+void basicBlock::limiterResidElements(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
-  residElements (args[0],(args.size () > 1) ? args[1] : 0.0, sD, resid, sMode);
+	if (opFlags[differential_output])
+	{
+		auto offset = offsets.getDiffOffset(sMode) + limiter_diff;
+		double testVal = getTestRate(didt, sD.dstate_dt[offset]);
+		
+		if (limiter_diff > 0)
+		{
+			if (opFlags[use_ramp_limits])
+			{
+				--offset;
+				resid[offset] = rLimiter->deriv(testVal);
+				testVal = resid[offset];
+				resid[offset] -= sD.dstate_dt[offset];
+			}
+			if (opFlags[use_block_limits])
+			{
+				resid[offset - 1] = vLimiter->deriv(testVal)-sD.dstate_dt[offset-1];
 
+			}
+		}
+	}
+	else
+	{
+		auto offset = offsets.getAlgOffset(sMode) + limiter_alg;
+		double testVal = getTestValue(input, sD.state[offset]);
+		if (opFlags[has_limits])
+		{
+			resid[offset - 1] = vLimiter->output(testVal)-sD.state[offset-1];
+		}
+	}
+	
+
+	auto so = offsets.getOffsets(sMode);
+	if (so->total.diffSize > 0)
+	{
+		derivElements(input, didt, sD, resid, sMode);
+		for (index_t ii = 0; ii < so->total.diffSize; ++ii)
+		{
+			resid[so->diffOffset + ii] -= sD.dstate_dt[so->diffOffset + ii];
+		}
+	}
+
+
+	if (so->total.algSize > 0)
+	{
+		algElements(input, sD, resid, sMode);
+		for (index_t ii = 0; ii < so->total.algSize; ++ii)
+		{
+			resid[so->algOffset + ii] -= sD.state[so->algOffset + ii];
+		}
+	}
+
+}
+// residual
+void basicBlock::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
+{
+  residElements (inputs[0],getRateInput(inputs), sD, resid, sMode);
+
+}
+
+bool basicBlock::hasValueState() const
+{
+	return (!((opFlags[use_state]) || (opFlags[use_direct])));
+}
+
+double basicBlock::getTestValue(double input, double currentState) const
+{
+	double testVal;
+	if (opFlags[use_state])
+	{
+		testVal = currentState;
+	}
+	else if (opFlags[use_direct])
+	{
+		testVal = input*K;
+	}
+	else
+	{
+		testVal = (input + bias) * K;
+	}
+	return testVal;
+}
+
+double basicBlock::getTestRate(double didt, double currentStateRate) const
+{
+	double testRate;
+	if (opFlags[use_state])
+	{
+		testRate = currentStateRate;
+	}
+	else 
+	{
+		testRate = didt*K;
+	}
+	return testRate;
 }
 
 void basicBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
@@ -374,89 +534,56 @@ void basicBlock::algElements (double input, const stateData &sD, double update[]
     {
       return;
     }
-  auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
-
-  if (!opFlags[use_state])
-    {
-      update[offset] = (input + bias) * K;
-    }
+  
+  auto offset = offsets.getAlgOffset(sMode) + limiter_alg;
+  double testVal = getTestValue(input, sD.state[offset]);
+  if (hasValueState())
+  {
+	  update[offset] = testVal;
+	  testVal = sD.state[offset]; //need to alter the testVal for the next check otherwise the residual fails to check properly
+  }
   if (opFlags[has_limits])
-    {
-      --offset;
-      if (opFlags[outside_lim])
-        {
-          if (opFlags[trigger_high])
-            {
-              update[offset] = Omax;
-            }
-          else
-            {
-              update[offset] = Omin;
-            }
-        }
-      else
-        {
-          update[offset] = sD.state[offset + 1];
-        }
-    }
+  {
+	  update[offset - 1] = vLimiter->output(testVal);
+  }
+  
 }
 
-void basicBlock::algebraicUpdate (const IOdata &args, const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
+void basicBlock::algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
 {
-  algElements (args[0],  sD, update, sMode);
+  algElements (inputs[0],  sD, update, sMode);
 }
 
 void basicBlock::derivElements (double /*input*/, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-  if (opFlags[differential_output])
-    {
-      auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-      if (!opFlags[use_state])
-        {
-          deriv[offset] = didt * K;
-        }
-      if (limiter_diff > 0)
-        {
+	if (opFlags[differential_output])
+	{
 
-          if (opFlags[use_ramp_limits])
-            {
-              --offset;
-              if (opFlags[ramp_limit_triggered])
-                {
-                  if (opFlags[ramp_limit_triggered_high])
-                    {
-                      deriv[offset] = rampMax;
-                    }
-                  else
-                    {
-                      deriv[offset] = rampMin;
-                    }
-                }
-              else
-                {
-                  deriv[offset] = sD.dstate_dt[offset + 1];
-                }
-            }
-          if (opFlags[use_block_limits])
-            {
-              --offset;
-              if (opFlags[outside_lim])
-                {
-                  deriv[offset] = 0;
-                }
-              else
-                {
-                  deriv[offset] = sD.dstate_dt[offset + 1];
-                }
-            }
-        }
-    }
+		auto offset = offsets.getDiffOffset(sMode) + limiter_diff;
+		double testVal = getTestRate(didt, sD.dstate_dt[offset]);
+		if (hasValueState())
+		{
+			deriv[offset] = testVal;
+		}
+		if (limiter_diff > 0)
+		{
+			if (opFlags[use_ramp_limits])
+			{
+				--offset;
+				deriv[offset] = rLimiter->output(testVal);
+				testVal = deriv[offset];
+			}
+			if (opFlags[use_block_limits])
+			{
+				deriv[offset - 1] = vLimiter->deriv(testVal);
+			}
+		}
+	}
 }
 // residual
-void basicBlock::derivative (const IOdata &args, const stateData &sD, double deriv[], const solverMode &sMode)
+void basicBlock::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-  derivElements (args[0], (args.size () > 1) ? args[1] : 0.0,sD, deriv, sMode);
-
+  derivElements (inputs[0], getRateInput(inputs),sD, deriv, sMode);
 }
 
 
@@ -466,7 +593,7 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
   if ((opFlags[differential_output]) && (hasDifferential (sMode)))
     {
       auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-      if (!opFlags[use_state])
+      if (hasValueState())
         {
           ad.assignCheckCol (offset, argLoc, K * sD.cj);
           ad.assign (offset, offset, -sD.cj);
@@ -477,20 +604,29 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
             {
               --offset;
               ad.assign (offset, offset, -sD.cj);
-
-              if (!opFlags[ramp_limit_triggered])
-                {
-                  ad.assign (offset, offset + 1, sD.cj);
-                }
+			  if (opFlags[use_direct])
+			  {
+				  ad.assignCheckCol(offset, argLoc, K*sD.cj*rLimiter->DoutDin());
+			  }
+			  else
+			  {
+				  ad.assign(offset, offset + 1, sD.cj*rLimiter->DoutDin());
+			  }
+			  
             }
           if (opFlags[use_block_limits])
             {
               --offset;
               ad.assign (offset, offset, -sD.cj);
-              if (!opFlags[outside_lim])
-                {
-                  ad.assign (offset, offset + 1, sD.cj);
-                }
+
+			  if ((opFlags[use_direct])&&(!opFlags[use_ramp_limits]))
+			  {
+				  ad.assignCheckCol(offset, argLoc, K*sD.cj*vLimiter->DoutDin());
+			  }
+			  else
+			  {
+				  ad.assign(offset, offset + 1, sD.cj*vLimiter->DoutDin());
+			  }
             }
         }
     }
@@ -498,32 +634,52 @@ void basicBlock::jacElements (double /*input*/, double /*didt*/, const stateData
   if ((!opFlags[differential_output]) && (hasAlgebraic (sMode)))
     {
       auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
-      if (!opFlags[use_state])
+      if (hasValueState())
         {
           ad.assignCheckCol (offset, argLoc, K);
-          ad.assign (offset, offset, -1);
+          ad.assign (offset, offset, -1.0);
         }
       if (limiter_alg > 0)
         {
           --offset;
-          ad.assign (offset, offset, -1);
-          if (!opFlags[outside_lim])
-            {
-              ad.assign (offset, offset + 1, 1.0);
-            }
+          ad.assign (offset, offset, -1.0);
+		  if (opFlags[use_direct])
+		  {
+			  ad.assign(offset, argLoc, K*vLimiter->DoutDin());
+		  }
+		  else
+		  {
+			  ad.assign(offset, offset + 1, vLimiter->DoutDin());
+		  }
+         
         }
     }
 }
 
 
-void basicBlock::jacobianElements (const IOdata & args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void basicBlock::jacobianElements (const IOdata & inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-  jacElements  (args[0], (args.size () > 1) ? args[1] : 0.0,sD, ad, argLocs[0], sMode);
+  jacElements  (inputs[0], getRateInput(inputs),sD, ad, inputLocs[0], sMode);
 
 }
 
+double basicBlock::getLimiterTestValue(double input, const stateData &sD, const solverMode &sMode)
+{
 
-void basicBlock::rootTest (const IOdata & /*args*/, const stateData &sD, double root[], const solverMode &sMode)
+	auto offset= (opFlags[differential_output])?offsets.getDiffOffset(sMode): offsets.getAlgOffset(sMode);
+	auto stateVal = (sD.empty()) ? m_state[1] : sD.state[offset + 1];
+	if (hasValueState() || opFlags[use_ramp_limits])
+	{
+		return stateVal;
+	}
+	else
+	{
+		return getTestValue(input, stateVal);
+	}
+	
+}
+
+void basicBlock::rootTest (const IOdata & inputs, const stateData &sD, double root[], const solverMode &sMode)
 {
   if (!opFlags[has_limits])
     {
@@ -531,50 +687,23 @@ void basicBlock::rootTest (const IOdata & /*args*/, const stateData &sD, double 
     }
   int rootOffset = offsets.getRootOffset (sMode);
   if (opFlags[use_ramp_limits])
-    {
-      auto doffset = offsets.getDiffOffset (sMode);
-      if (opFlags[ramp_limit_triggered])
-        {
-          if (opFlags[ramp_limit_triggered_high])
-            {
-              root[rootOffset] = sD.state[doffset + 1] - sD.state[doffset] + resetLevel;
-            }
-          else
-            {
-              root[rootOffset] = sD.state[doffset] - sD.state[doffset + 1] + resetLevel;
-            }
-        }
-      else
-        {
-          double val = sD.dstate_dt[doffset];
-          root[rootOffset] = std::min (rampMax - val, val - rampMin);
-        }
-      ++rootOffset;
-    }
+  {
+	  auto doffset = offsets.getDiffOffset(sMode) + limiter_diff;
+	  double testRate = getTestRate(inputs[1], sD.dstate_dt[doffset]);
+	  double testVal = getTestValue(inputs[0], sD.state[doffset]);
+	  root[rootOffset] = rLimiter->limitCheck(sD.state[doffset], testVal, testRate);
+	  ++rootOffset;
+  }
+
   if (opFlags[use_block_limits])
     {
-      auto offset = offsets.getAlgOffset (sMode);
-      double val = sD.state[offset];
-      if (opFlags[outside_lim])
-        {
-          if (opFlags[trigger_high])
-            {
-              root[rootOffset] = val - Omax + resetLevel;
-            }
-          else
-            {
-              root[rootOffset] = Omin - val + resetLevel;
-            }
-        }
-      else
-        {
-          root[rootOffset] = std::min (Omax - val, val - Omin);
-        }
+	  double val = getLimiterTestValue(inputs[0], sD, sMode);
+	  root[rootOffset] = vLimiter->limitCheck(val);
     }
 
 }
 
-change_code basicBlock::rootCheck (const IOdata & /*args*/, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
+change_code basicBlock::rootCheck (const IOdata & inputs, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
 {
   change_code ret = change_code::no_change;
   if (!opFlags[has_limits])
@@ -584,89 +713,33 @@ change_code basicBlock::rootCheck (const IOdata & /*args*/, const stateData &sD,
   const double *st = ((!sD.empty()) ? sD.state : m_state.data ());
   const double *dst = ((!sD.empty()) ? sD.dstate_dt : m_dstate_dt.data ());
   if (opFlags[use_ramp_limits])
-    {
-      auto doffset = offsets.getDiffOffset (sMode);
-      if (opFlags[ramp_limit_triggered])
-        {
-          if (opFlags[ramp_limit_triggered_high])
-            {
-              if (st[doffset + 1] - st[doffset] + resetLevel < 0.0)
-                {
-                  m_state[doffset] = m_state[doffset + 1];
-                  m_dstate_dt[doffset] = m_dstate_dt[doffset + 1];
-                  LOG_DEBUG ("return to within ramp limits");
-                  alert (this, JAC_COUNT_INCREASE);
-                  opFlags.reset (ramp_limit_triggered);
-                  ret = change_code::jacobian_change;
-                }
-
-            }
-          else
-            {
-              if (st[doffset] - st[doffset + 1] + resetLevel < 0.0)
-                {
-                  m_state[doffset] = m_state[doffset + 1];
-                  m_dstate_dt[doffset] = m_dstate_dt[doffset + 1];
-                  LOG_DEBUG ("return to within ramp limits");
-                  alert (this, JAC_COUNT_INCREASE);
-                  opFlags.reset (ramp_limit_triggered);
-                  ret = change_code::jacobian_change;
-                }
-            }
-        }
-      else
-        {
-          double val = dst[doffset];
-          if (val > rampMax)
-            {
-              opFlags.set (ramp_limit_triggered);
-              opFlags.set (ramp_limit_triggered_high);
-              m_dstate_dt[doffset] = rampMax;
-              LOG_DEBUG ("upper ramp limit hit");
-              alert (this, JAC_COUNT_DECREASE);
-              ret = change_code::jacobian_change;
-            }
-          else if (val < rampMin)
-            {
-              opFlags.set (ramp_limit_triggered);
-              m_dstate_dt[doffset] = rampMin;
-              LOG_DEBUG ("lower ramp limit hit");
-              alert (this, JAC_COUNT_DECREASE);
-              ret = change_code::jacobian_change;
-            }
-        }
-    }
+  {
+		  auto doffset = offsets.getDiffOffset(sMode);
+		  double testRate = getTestRate(getRateInput(inputs), dst[doffset]);
+		  double testVal = getTestValue(inputs[0], st[doffset]);
+		  double vval = rLimiter->limitCheck(st[doffset], testVal, testRate);
+		  if (vval < 0.0)
+		  {
+			  rLimiter->changeLimitActivation(testRate);
+			  ret = change_code::non_state_change;
+		  }
+  }
   if (opFlags[use_block_limits])
-    {
-      double val = opFlags[differential_output] ? st[offsets.getDiffOffset (sMode)] : st[1];
-      if (opFlags[outside_lim])
-        {
-          if ((val < Omax - resetLevel) && (val > Omin + resetLevel))
-            {
-              opFlags.reset (trigger_high);
-              opFlags.reset (outside_lim);
-              LOG_NORMAL ("return to within limits");
-              alert (this, JAC_COUNT_INCREASE);
-              ret = change_code::jacobian_change;
-            }
-        }
-      else if ((val > Omax) || (val < Omin))
-        {
-          opFlags.set (outside_lim);
-          LOG_NORMAL ("limit hit");
-          alert (this, JAC_COUNT_DECREASE);
-          if (val >= Omax)
-            {
-              opFlags.set (trigger_high);
-            }
-          ret = change_code::jacobian_change;
-        }
-    }
+  {
+	  double val = getLimiterTestValue(inputs[0], sD, sMode);
+		  double vval = vLimiter->limitCheck(val);
+		  if (vval < 0.0)
+		  {
+			  vLimiter->changeLimitActivation(val);
+			  ret = change_code::non_state_change;
+		  }
+	  }
+
   return ret;
 
 }
 
-void basicBlock::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
+void basicBlock::rootTrigger (coreTime /*ttime*/, const IOdata & inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!opFlags[has_limits])
     {
@@ -676,27 +749,13 @@ void basicBlock::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, c
 
   if (opFlags[use_ramp_limits])
     {
-      if (rootMask[roffset])
-        {
-          auto doffset = offsets.getDiffOffset (cLocalSolverMode);
-          if (opFlags[ramp_limit_triggered])
-            {
-
-              m_state[doffset] = m_state[doffset + 1];
-              m_dstate_dt[doffset] = m_dstate_dt[doffset + 1];
-              LOG_DEBUG ("return to within ramp limits");
-              alert (this, JAC_COUNT_INCREASE);
-            }
-          else
-            {
-              double val = m_dstate_dt[doffset];
-              opFlags.set (ramp_limit_triggered_high, (val >= rampMax - resetLevel));
-              m_dstate_dt[doffset] = m_dstate_dt[doffset + 1];
-              LOG_DEBUG ("ramp limit hit");
-              alert (this, JAC_COUNT_DECREASE);
-            }
-          opFlags.flip (ramp_limit_triggered);
-        }
+	  if (rootMask[roffset])
+	  {
+		  auto doffset = offsets.getDiffOffset(cLocalSolverMode);
+		  double testRate = getTestRate(getRateInput(inputs), m_dstate_dt[doffset]);
+		  rLimiter->changeLimitActivation(testRate);
+		  //ret = change_code::non_state_change;
+	  }
       ++roffset;
     }
   if (opFlags[use_block_limits])
@@ -705,46 +764,11 @@ void basicBlock::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, c
         {
           return;
         }
-      if (opFlags[outside_lim])
-        {
-          m_state[0] = (opFlags[differential_output]) ? m_state[offsets.getDiffOffset (cLocalSolverMode)] : m_state[1];
-          LOG_DEBUG ("return to within limits");
-          alert (this, JAC_COUNT_INCREASE);
-        }
-      else
-        {
-          opFlags.set (trigger_high, (m_state[0] >= Omax - resetLevel));
-          m_state[0] = valLimit (m_state[0], Omin, Omax);
-          LOG_DEBUG ("limit hit");
-          alert (this, JAC_COUNT_DECREASE);
-        }
-      opFlags.flip (outside_lim);
+	  double val = getLimiterTestValue(inputs.empty()?m_state[0]:inputs[0], emptyStateData, sMode);
+	 
+	  vLimiter->changeLimitActivation(val);
+	  m_state[0] = vLimiter->output(val);
     }
-}
-
-index_t basicBlock::findIndex (const std::string &field, const solverMode &sMode) const
-{
-  index_t ret = kInvalidLocation;
-  if (field == "out")
-    {
-      ret = offsets.getAlgOffset (sMode);
-    }
-  else if (field == "block_limit")
-    {
-      if (opFlags[use_block_limits])
-        {
-          if (opFlags[differential_output])
-            {
-              ret = offsets.getDiffOffset (sMode);
-            }
-          else
-            {
-              ret = offsets.getAlgOffset (sMode);
-              ret = (ret != kNullLocation) ? ret + 1 : ret;
-            }
-        }
-    }
-  return ret;
 }
 
 void basicBlock::setFlag (const std::string &flag, bool val)
@@ -767,7 +791,7 @@ void basicBlock::setFlag (const std::string &flag, bool val)
           if (opFlags[simplified] != val)              //this is probably not the best thing to be changing after initialization
             {
               opFlags[simplified] = val;
-              objectInitializeA (prevTime, 0);
+              dynObjectInitializeA (prevTime, 0);
               alert (this, STATE_COUNT_CHANGE);
               LOG_WARNING ("changing object state computations during simulation triggers solver reset");
             }
@@ -777,6 +801,13 @@ void basicBlock::setFlag (const std::string &flag, bool val)
           opFlags[simplified] = val;
         }
     }
+  else if (flag == "use_direct")
+  {
+	  if (!opFlags[dyn_initialized])
+	  {
+		  opFlags[use_direct] = val;
+	  }
+  }
   else if (flag == "differential_input")
     {
       if (!opFlags[dyn_initialized])
@@ -797,6 +828,8 @@ void basicBlock::setFlag (const std::string &flag, bool val)
     }
 
 }
+
+
 // set parameters
 void basicBlock::set (const std::string &param,  const std::string &val)
 {
@@ -819,57 +852,48 @@ void basicBlock::set (const std::string &param, double val, gridUnits::units_t u
   else if ((param == "omax") || (param == "max"))
     {
       Omax = val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_block_limits);
-        }
+	  valLimiterUpdate();
+      
     }
   else if ((param == "omin") || (param == "min"))
     {
       Omin = val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_block_limits);
-        }
+	  valLimiterUpdate();
     }
   else if (param == "limit")
     {
       Omax = val;
       Omin = -val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_block_limits);
-        }
+	  valLimiterUpdate();
     }
   else if (param == "rampmax")
     {
       rampMax = val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_ramp_limits);
-        }
+	  rampLimiterUpdate();
     }
   else if (param == "rampmin")
     {
       rampMin = val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_ramp_limits);
-        }
+	  rampLimiterUpdate();
     }
   else if (param == "ramplimit")
     {
       rampMin = -val;
       rampMax = val;
-      if (!opFlags[dyn_initialized])
-        {
-          opFlags.set (use_ramp_limits);
-        }
+	  rampLimiterUpdate();
     }
 
   else if (param == "resetlevel")
     {
       resetLevel = val;
+	  if (vLimiter)
+	  {
+		  vLimiter->setResetLevel(val);
+	  }
+	  if (rLimiter)
+	  {
+		  rLimiter->setResetLevel(val);
+	  }
     }
   else
     {
@@ -878,44 +902,84 @@ void basicBlock::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
+double basicBlock::get(const std::string &param, gridUnits::units_t unitType) const
+{
+	if (param == "maxstepsize")
+	{
+		return kBigNum;
+	}
+	else
+	{
+		return gridSubModel::get(param, unitType);
+	}
+}
 
-std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
+void basicBlock::valLimiterUpdate()
+{
+	if (!opFlags[dyn_initialized])
+	{
+		opFlags.set(use_block_limits);
+	}
+	else
+	{
+		if (vLimiter)
+		{
+			vLimiter->setLimits(Omin, Omax);
+		}
+	}
+}
+
+void basicBlock::rampLimiterUpdate()
+{
+	if (!opFlags[dyn_initialized])
+	{
+		opFlags.set(use_ramp_limits);
+	}
+	else
+	{
+		if (rLimiter)
+		{
+			rLimiter->setLimits(rampMin, rampMax);
+		}
+	}
+}
+std::unique_ptr<basicBlock> make_block (const std::string &blockstr)
 {
   auto posp1 = blockstr.find_first_of ('(');
   auto posp2 = blockstr.find_last_of (')');
   auto fstr = blockstr.substr (0, posp1 - 1);
   auto argstr = blockstr.substr (posp1 + 1, posp2 - posp1 - 1);
 
-  auto args = str2vector (argstr,kNullVal);
+  auto inputs = str2vector (argstr,kNullVal);
   auto tail = blockstr.substr (posp2 + 2);
-  auto tailArgs = splitlineTrim (tail);
-
+  auto tailArgs = stringOps::splitline (tail);
+  stringOps::trim(tailArgs);
   double gain = 1.0;
   posp1 = fstr.find_first_of ('*');
-  std::shared_ptr<basicBlock> ret;
+  std::unique_ptr<basicBlock> ret;
   if (posp1 == std::string::npos)
     {
       makeLowerCase (fstr);
     }
   else
     {
-      gain = doubleRead (fstr);           //purposely not using doubleReadComplete to just get the first number
+      gain = numeric_conversion (fstr,1.0);           //purposely not using numeric_conversionComplete to just get the first number
       fstr = convertToLowerCase (fstr.substr (posp1 + 1));
 
     }
   if (fstr == "basic")
     {
-      ret = std::make_shared<basicBlock> (gain);
+      ret = std::make_unique<basicBlock> (gain);
     }
   else if ((fstr == "der") || (fstr == "derivative"))
     {
-      if (args.empty ())
+      if (inputs.empty ())
         {
-          ret = std::make_shared<derivativeBlock> ();
+          ret = std::make_unique<derivativeBlock> ();
         }
       else
         {
-          ret = std::make_shared<derivativeBlock> (args[0]);
+          ret = std::make_unique<derivativeBlock> (inputs[0]);
         }
       if (gain != 1.0)
         {
@@ -924,21 +988,21 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
     }
   else if ((fstr == "integral")||(fstr == "integrator"))
     {
-      ret = std::make_shared<integralBlock> (gain);
+      ret = std::make_unique<integralBlock> (gain);
     }
   else if (fstr == "control")
     {
-      if (args.empty ())
+      if (inputs.empty ())
         {
-          ret = std::make_shared<controlBlock> ();
+          ret = std::make_unique<controlBlock> ();
         }
-      else if (args.size () == 1)
+      else if (inputs.size () == 1)
         {
-          ret = std::make_shared<controlBlock> (args[0]);
+          ret = std::make_unique<controlBlock> (inputs[0]);
         }
       else
         {
-          ret = std::make_shared<controlBlock> (args[0],args[1]);
+          ret = std::make_unique<controlBlock> (inputs[0],inputs[1]);
         }
       if (gain != 1.0)
         {
@@ -947,13 +1011,13 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
     }
   else if (fstr == "delay")
     {
-      if (args.empty ())
+      if (inputs.empty ())
         {
-          ret = std::make_shared<delayBlock> ();
+          ret = std::make_unique<delayBlock> ();
         }
       else
         {
-          ret = std::make_shared<delayBlock> (args[0]);
+          ret = std::make_unique<delayBlock> (inputs[0]);
         }
       if (gain != 1.0)
         {
@@ -962,13 +1026,13 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
     }
   else if (fstr == "deadband")
     {
-      if (args.empty ())
+      if (inputs.empty ())
         {
-          ret = std::make_shared<deadbandBlock> ();
+          ret = std::make_unique<deadbandBlock> ();
         }
       else
         {
-          ret = std::make_shared<deadbandBlock> (args[0]);
+          ret = std::make_unique<deadbandBlock> (inputs[0]);
         }
       if (gain != 1.0)
         {
@@ -978,20 +1042,20 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
   else if (fstr == "pid")
     {
       double p = 1.0, i = 0.0, d = 0.0;
-      if (args.size () > 0)
+      if (inputs.size () > 0)
         {
-          p = args[0];
+          p = inputs[0];
         }
       if (tailArgs.size () > 1)
         {
-          i = args[1];
+          i = inputs[1];
         }
-      if (args.size () > 2)
+      if (inputs.size () > 2)
         {
-          d = args[2];
+          d = inputs[2];
         }
 
-      ret = std::make_shared<pidBlock> (p,i,d);
+      ret = std::make_unique<pidBlock> (p,i,d);
       if (gain != 1.0)
         {
           ret->set ("gain", gain);
@@ -1001,11 +1065,11 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
     {
       if (argstr.empty ())
         {
-          ret = std::make_shared<functionBlock> ();
+          ret = std::make_unique<functionBlock> ();
         }
       else
         {
-          ret = std::make_shared<functionBlock> (argstr);
+          ret = std::make_unique<functionBlock> (argstr);
         }
       if (gain != 1.0)
         {
@@ -1029,7 +1093,7 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
           else
             {
               std::string param = ta.substr (0, eloc);
-              double val = doubleReadComplete (ta.substr (eloc + 1), kNullVal);
+              double val = numeric_conversionComplete (ta.substr (eloc + 1), kNullVal);
               if (val == kNullVal)
                 {
                   ret->set (param, ta.substr (eloc + 1));
@@ -1046,5 +1110,22 @@ std::shared_ptr<basicBlock> make_block (const std::string &blockstr)
 
 stringVec basicBlock::localStateNames () const
 {
-	return{ outputName,"test" };
+	stringVec stNames;
+	if (opFlags[use_block_limits])
+	{
+		stNames.push_back("block_limits");
+	}
+	if (opFlags[use_ramp_limits])
+	{
+		stNames.push_back("ramp_limits");
+	}
+	if (hasValueState())
+	{
+		stNames.push_back("test");
+	}
+	if (!stNames.empty())
+	{
+		stNames[0] = outputName;
+	}
+	return stNames;
 }

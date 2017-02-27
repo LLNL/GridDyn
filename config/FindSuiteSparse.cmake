@@ -133,10 +133,15 @@ macro(SuiteSparse_FIND_COMPONENTS )
 
 		## Special case: CXSparse library is named "libcxsparse.*" but headers are "cs.h":
 		SET(suitesparseComp_ALT "${suitesparseComp}") # Alternative names
-		if("${suitesparseComp}" STREQUAL "CXSPARSE")
+		if("${suitesparseCompUC}" STREQUAL "CXSPARSE")
 			SET(suitesparseComp_ALT "cs") # Alternative name of CXSparse
 		endif()
 
+		## Special case: suitesparseconfig library is named "libsuitesparseconfig.*" but headers are "SuiteSparse_config.h":
+		if("${suitesparseCompUC}" STREQUAL "SUITESPARSECONFIG")
+			SET(suitesparseComp_ALT "SuiteSparse_config") # Alternative name of suitesparseconfig
+		endif()
+		
 		## try to find include dir (looking for very important header file)
 		find_path(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR	
 			NAMES 			${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
@@ -312,6 +317,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	else()
 		if(DEFINED SuiteSparse_BLAS_DIR)
 			mark_as_advanced(SuiteSparse_BLAS_DIR)
+			mark_as_advanced(SuiteSparse_BLAS_LIBRARY)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_BLAS_LIBRARY})
 	endif()
@@ -336,6 +342,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	else()
 		if(DEFINED SuiteSparse_LAPACK_DIR)
 			mark_as_advanced(SuiteSparse_LAPACK_DIR)
+			mark_as_advanced(SuiteSparse_LAPACK_LIBRARY)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_LAPACK_LIBRARY})
 	endif()

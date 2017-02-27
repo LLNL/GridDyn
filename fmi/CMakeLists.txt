@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,8 +12,8 @@ set(fmiImport_sources
 	fmi_import/fmiImport.cpp
 	fmi_import/fmiInfo.cpp
 	fmi_import/fmi2Object.cpp
-	fmi_import/fmi2ME.cpp
-	fmi_import/fmi2CoSim.cpp
+	fmi_import/fmi2ModelExchangeObject.cpp
+	fmi_import/fmi2CoSimObject.cpp
 	fmi_import/fmiVariableSet.cpp
 	fmi_import/fmiEnumDefinitions.cpp
 	
@@ -44,7 +44,7 @@ set(fmiImport_headers
 	fmi_import/fmiInfo.h
 	fmi_import/fmiImport.h
 	fmi_import/fmiObjects.h
-	
+	fmi_import/fmiEnumDefinitions.h
 	)
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
@@ -61,15 +61,14 @@ ENDIF(UNIX)
 
 add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
 
-
 source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
 source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)

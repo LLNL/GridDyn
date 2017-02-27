@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -32,23 +32,23 @@ public:
   dcLink (const std::string &objName = "dclink_$");
   dcLink (double rP,double Lp, const std::string &objName = "dclink_$");
   //gridLink(double max_power,gridBus *bus1, gridBus *bus2);
-  virtual ~dcLink ();
+
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void updateBus (gridBus *bus, index_t busnumber) override;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
   virtual double getMaxTransfer () const override;
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual void timestep (gridDyn_time ttime,const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   virtual double quickupdateP () override
   {
@@ -58,15 +58,16 @@ public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  //initializeB dynamics
-  //virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags);
-  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  //dynInitializeB dynamics
+  //virtual void dynObjectInitializeA (coreTime time0, unsigned long flags);
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   virtual void outputPartialDerivatives  (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   //for computing all the Jacobian elements at once
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
   virtual int fixRealPower (double power, index_t  terminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;

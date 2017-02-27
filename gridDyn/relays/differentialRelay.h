@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -42,13 +42,13 @@ public:
 
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long) override;
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 protected:
-  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time actionTime) override;
-  virtual void conditionTriggered (index_t conditionNum, gridDyn_time triggerTime) override;
-  virtual void conditionCleared (index_t conditionNum, gridDyn_time triggerTime) override;
+  virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime actionTime) override;
+  virtual void conditionTriggered (index_t conditionNum, coreTime triggerTime) override;
+  virtual void conditionCleared (index_t conditionNum, coreTime triggerTime) override;
 
 };
 

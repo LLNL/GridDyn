@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,22 +16,22 @@
 #include "matrixData.h"
 #include "functionInterpreter.h"
 #include "stringOps.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 functionBlock::functionBlock () : basicBlock ("functionBlock_#")
 {
-  offsets.local->local.algSize = 2;
-  offsets.local->local.diffSize = 0;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.diffSize = 0;
   opFlags.set (use_state);
-  offsets.local->local.jacSize = 3;
+  offsets.local().local.jacSize = 3;
 }
 
 functionBlock::functionBlock (const std::string &fname) : basicBlock ("functionBlock_#")
 {
-  offsets.local->local.algSize = 2;
-  offsets.local->local.diffSize = 0;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.diffSize = 0;
   opFlags.set (use_state);
-  offsets.local->local.jacSize = 3;
+  offsets.local().local.jacSize = 3;
   setFunction (fname);
 }
 
@@ -43,29 +43,31 @@ coreObject *functionBlock::clone (coreObject *obj) const
       return obj;
     }
   nobj->fptr = fptr;
+  nobj->gain = gain;
+  nobj->bias = bias;
   return nobj;
 }
 
 
 // initial conditions
-void functionBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void functionBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
 
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
       if (opFlags[uses_constantarg])
         {
-          m_state[limiter_alg] = K * fptr2 (gain * (args[0] + bias),arg2);
+          m_state[limiter_alg] = K * fptr2 (gain * (inputs[0] + bias),arg2);
         }
       else
         {
-          m_state[limiter_alg] = K * fptr (gain * (args[0] + bias));
+          m_state[limiter_alg] = K * fptr (gain * (inputs[0] + bias));
         }
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     }
   else
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
 
     }
 
@@ -117,7 +119,7 @@ void functionBlock::jacElements (double input, double didt, const stateData &sD,
 
 }
 
-double functionBlock::step (gridDyn_time ttime, double input)
+double functionBlock::step (coreTime ttime, double input)
 {
   if (opFlags[uses_constantarg])
     {
@@ -187,20 +189,20 @@ void functionBlock::setFunction (const std::string &fname)
 }
 
 /*
-double functionBlock::currentValue(const IOdata &args, const stateData &sD, const solverMode &sMode) const
+double functionBlock::currentValue(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc;
   offsets.getLocations(sD, sMode, &Loc, this);
   double val = Loc.algStateLoc[1];
-  if (!args.empty())
+  if (!inputs.empty())
   {
     if (opFlags[uses_constantarg])
     {
-      val = fptr2(gain*(args[0] + bias), arg2);
+      val = fptr2(gain*(inputs[0] + bias), arg2);
     }
     else
     {
-      val = fptr(gain*(args[0] + bias));
+      val = fptr(gain*(inputs[0] + bias));
     }
   }
   return basicBlock::currentValue({ val }, sD, sMode);

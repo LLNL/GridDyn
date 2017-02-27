@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -27,23 +27,48 @@ gridDynSimulationTestFixture::gridDynSimulationTestFixture()
 
 gridDynSimulationTestFixture::~gridDynSimulationTestFixture()
 {
-  if (gds)
-    {
-      delete gds;
-    }
 
-  if (gds2)
-    {
-      delete gds2;
-    }
+}
+
+std::ostream& operator<<(std::ostream& os, const gridDynSimulation::gridState_t state)
+{
+	switch (state)
+	{
+	case gridDynSimulation::gridState_t::STARTUP:
+		os << "startup";
+		break;
+	case gridDynSimulation::gridState_t::INITIALIZED:
+		os << "initialized";
+		break;
+	case gridDynSimulation::gridState_t::POWERFLOW_COMPLETE:
+		os << "powerflow_complete";
+		break;
+	case gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED:
+		os << "dynamic init";
+		break;
+	case gridDynSimulation::gridState_t::DYNAMIC_PARTIAL:
+		os << "dynamic partial";
+		break;
+	case gridDynSimulation::gridState_t::DYNAMIC_COMPLETE:
+		os << "dynamic complete";
+		break;
+	case gridDynSimulation::gridState_t::GD_ERROR:
+		os << "error";
+		break;
+	case gridDynSimulation::gridState_t::HALTED:
+		os << "halted";
+		break;
+	}
+
+	return os;
 }
 
 void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 {
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
+	gds = readSimXMLFile(fileName);
 	gds->consolePrintLevel = print_level::no_print;
 	gds->run();
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 
 
@@ -51,9 +76,9 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName,
 {
 	readerConfig::setPrintMode(0);
 	int retval = 0;
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
-	BOOST_REQUIRE(readerConfig::warnCount == 0);
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
+	gds = readSimXMLFile(fileName);
+	BOOST_REQUIRE_EQUAL(readerConfig::warnCount,0);
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::STARTUP);
 	switch (finalState)
 	{
 	case gridDynSimulation::gridState_t::STARTUP:
@@ -75,7 +100,7 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName,
 		return;
 	default:
 		gds->run();
-		BOOST_CHECK(gds->currentProcessState() == finalState);
+		BOOST_CHECK_EQUAL(gds->currentProcessState(),finalState);
 		return;
 	}
 }
@@ -83,13 +108,13 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName,
 void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileName, gridDynSimulation::gridState_t finalState)
 {
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
-	BOOST_REQUIRE(readerConfig::warnCount == 0);
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
+	gds = readSimXMLFile(fileName);
+	BOOST_REQUIRE_EQUAL(readerConfig::warnCount,0);
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::STARTUP);
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::INITIALIZED);
-	BOOST_REQUIRE_EQUAL(runJacobianCheck(gds, cPflowSolverMode), 0);
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::INITIALIZED);
+	runJacobianCheck(gds, cPflowSolverMode);
 
 	if (finalState == gridDynSimulation::gridState_t::INITIALIZED)
 	{
@@ -97,55 +122,48 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	}
 	gds->powerflow();
 
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	if (finalState == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE)
 	{
 		return;
 	}
 	gds->dynInitialize();
-	auto mmatch = runResidualCheck(gds, cDaeSolverMode);
-	BOOST_REQUIRE(mmatch == 0);
-	mmatch = runJacobianCheck(gds, cDaeSolverMode);
-	BOOST_REQUIRE(mmatch == 0);
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	runResidualCheck(gds, cDaeSolverMode);
+	
+	runJacobianCheck(gds, cDaeSolverMode);
+	
+	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	if (finalState == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
 	{
 		return;
 	}
 	retval = gds->run();
-	BOOST_REQUIRE(retval == 0);
+	BOOST_REQUIRE_EQUAL(retval,0);
 	if (gds->hasDynamics())
 	{
-		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 	}
 	else
 	{
-		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	}
 }
 
 void gridDynSimulationTestFixture::dynamicInitializationCheck(const std::string &fileName)
 {
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fileName));
+	gds = readSimXMLFile(fileName);
 
 	int  retval = gds->dynInitialize();
 
 	BOOST_CHECK_EQUAL(retval, 0);
 
-	int mmatch = JacobianCheck(gds, cDaeSolverMode);
-	if (mmatch > 0)
-	{
-		printStateNames(gds, cDaeSolverMode);
-	}
-	BOOST_REQUIRE_EQUAL(mmatch, 0);
-	mmatch = residualCheck(gds, cDaeSolverMode);
-	if (mmatch > 0)
-	{
-		printStateNames(gds, cDaeSolverMode);
-	}
+	int mmatch = runJacobianCheck(gds, cDaeSolverMode);
 
+	BOOST_REQUIRE_EQUAL(mmatch, 0);
+	mmatch = runResidualCheck(gds, cDaeSolverMode);
+	
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 }
 
@@ -181,52 +199,74 @@ glbconfig::~glbconfig()
 }
 
 
-int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode)
+int runJacobianCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode,bool checkRequired)
 {
-	int mmatch = JacobianCheck(gds, sMode);
+	int mmatch = JacobianCheck(gds.get(), sMode);
 	if (mmatch > 0)
 	{
-		printStateNames(gds, sMode);
+		printStateNames(gds.get(), sMode);
+		if (checkRequired)
+		{
+			BOOST_REQUIRE_EQUAL(mmatch, 0);
+		}
 	}
 	return mmatch;
 }
 
-int runJacobianCheck(gridDynSimulation *gds, const solverMode &sMode, double tol)
+int runJacobianCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, double tol, bool checkRequired)
 {
-	int mmatch = JacobianCheck(gds, sMode,tol);
+	int mmatch = JacobianCheck(gds.get(), sMode,tol);
 	if (mmatch > 0)
 	{
-		printStateNames(gds, sMode);
+		printStateNames(gds.get(), sMode);
+		if (checkRequired)
+		{
+			BOOST_REQUIRE_EQUAL(mmatch, 0);
+		}
 	}
 	return mmatch;
 }
 
-int runResidualCheck(gridDynSimulation *gds, const solverMode &sMode)
+int runResidualCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, bool checkRequired)
 {
-	int mmatch = residualCheck(gds, sMode);
+	int mmatch = residualCheck(gds.get(), sMode);
 	if (mmatch > 0)
 	{
-		printStateNames(gds, sMode);
+		printStateNames(gds.get(), sMode);
+		if (checkRequired)
+		{
+			BOOST_REQUIRE_EQUAL(mmatch, 0);
+		}
+	}
+	
+	return mmatch;
+}
+
+int runDerivativeCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, bool checkRequired)
+{
+	int mmatch = derivativeCheck(gds.get(), gds->getCurrentTime(),sMode);
+	if (mmatch > 0)
+	{
+		printStateNames(gds.get(), sMode);
+		if (checkRequired)
+		{
+			BOOST_REQUIRE_EQUAL(mmatch, 0);
+		}
 	}
 	return mmatch;
 }
 
-int runDerivativeCheck(gridDynSimulation *gds, const solverMode &sMode)
+int runAlgebraicCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, bool checkRequired)
 {
-	int mmatch = derivativeCheck(gds, gds->getCurrentTime(),sMode);
+	int mmatch = algebraicCheck(gds.get(), gds->getCurrentTime(), sMode);
 	if (mmatch > 0)
 	{
-		printStateNames(gds, sMode);
-	}
-	return mmatch;
-}
-
-int runAlgebraicCheck(gridDynSimulation *gds, const solverMode &sMode)
-{
-	int mmatch = algebraicCheck(gds, gds->getCurrentTime(), sMode);
-	if (mmatch > 0)
-	{
-		printStateNames(gds, sMode);
+		printStateNames(gds.get(), sMode);
+		if (checkRequired)
+		{
+			BOOST_REQUIRE_EQUAL(mmatch, 0);
+		}
+		
 	}
 	return mmatch;
 }

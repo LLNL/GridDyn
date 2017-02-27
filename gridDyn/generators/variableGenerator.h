@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -36,16 +36,16 @@ public:
     source_loc = 5, control_block_loc = 6
   };
   /** @brief default constructor*/
-  variableGenerator (const std::string &objName = "varGen_$");
+  explicit variableGenerator (const std::string &objName = "varGen_$");
   variableGenerator (dynModel_t dynModel, const std::string &objName = "varGen_$");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
   /** @brief destructor method*/
   virtual ~variableGenerator ();
 protected:
-  // virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  // virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -55,15 +55,15 @@ public:
   virtual void add (gridSubModel *obj) override;
 
 
-  virtual void residual (const IOdata &args, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
 
-  virtual double getAdjustableCapacityUp  (gridDyn_time /*time*/ = maxTime) const override
+  virtual double getAdjustableCapacityUp  (coreTime /*time*/ = maxTime) const override
   {
     return 0.0;
   }                                                                                    //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (gridDyn_time /*time*/ = maxTime) const override
+  virtual double getAdjustableCapacityDown (coreTime /*time*/ = maxTime) const override
   {
     return 0.0;
   }                                                                                      //get the available adjustment Up within the specified timeframe
@@ -73,7 +73,7 @@ public:
   virtual coreObject * find (const std::string &object) const override;
   virtual coreObject * getSubObject (const std::string &type, index_t num) const override;
 protected:
-	virtual double pSetControlUpdate(const IOdata &args, const stateData &sD, const solverMode &sMode) override;
+	virtual double pSetControlUpdate(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 	virtual index_t pSetLocation(const solverMode &sMode) override;
 };
 

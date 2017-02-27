@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -81,7 +81,6 @@ public:
     normal = 0,fixAngle = 1,fixVoltage = 2,dynSLK = 3
   };
   int Network = 0;                               //!<  the network a bus belongs to for labeling purposes
-  int zone = 1;                                  //!< zone control for some reporting purposes for labeling purposes
 protected:
   std::vector<gridLoad *> attachedLoads;                                             //!<  list of all the loads
   std::vector<gridLink *> attachedLinks;                                             //!< list of the attached links
@@ -90,7 +89,7 @@ protected:
 
   double angle = 0.0;                                   //!< [rad]     voltage angle
   double voltage = 1.0;                                 //!< [puV]    per unit voltage magnitude
-  double baseVoltage = defaultBaseVoltage;                             //!< [kV]    base voltage level
+  double baseVoltage = 120;                             //!< [kV]    base voltage level
   busType type = busType::PQ;                                   //!< [busType] bus type: PV, PQ, or slack/swing
   dynBusType dynType = dynBusType::normal;                     //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types as for power flow but for dynamic simulations
 
@@ -98,7 +97,7 @@ protected:
   double Vtol = -1.0;                         //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
   double Atol = -1.0;                         //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
   double freq = 1.0;       //!<[puHz] estimated actual frequency
-  gridDyn_time lowVtime = negTime;	//!< the last time a low voltage alert was triggered
+  coreTime lowVtime = negTime;	//!< the last time a low voltage alert was triggered
   IOdata outputs;   //!< the current output values
   IOlocs outLocs;   //!< the current output locations
 public:
@@ -109,8 +108,7 @@ public:
   @param[in] angle the initial angle
   */
   gridBus (double voltage, double angle, const std::string &objName = "bus_$");
-  /** @brief destructor*/
-  virtual ~gridBus ();
+
 
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
@@ -133,25 +131,20 @@ public:
   //deal with control alerts
   virtual void alert (coreObject *, int code) override;
 
-  // initializeB
-  virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
-  virtual void setOffset (index_t offset, const solverMode &sMode) override;
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
-
-  virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
+  // dynInitializeB
 protected:
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 public:
-  virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;      //only applicable in pFlow
+  virtual change_code powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level) override;      //only applicable in pFlow
   /** @brief  adjust the power levels of the contained adjustable secondary objects
   @param[in] adjustment the amount of the adjustment requested*/
   virtual void powerAdjust (double adjustment);
   virtual void reset (reset_levels level = reset_levels::minimal) override;
-  //initializeB dynamics
+  //dynInitializeB dynamics
 protected:
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeB (IOdata &outputSet) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 public:
   virtual void disable () override;
   /** @brief  disconnect the bus*/
@@ -170,36 +163,31 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // solver functions
-  virtual void preEx (const stateData &sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData &sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData &sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
   virtual void voltageUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
-  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
+  virtual void converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
 
   /** @brief  return the last error in the real power*/
   virtual double lastError () const;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
 public:
-  void timestep (gridDyn_time ttime, const solverMode &sMode) override;
+  void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+ 
   /** @brief a faster function to set the voltage and angle of a bus*
   @param[in] Vnew  the new voltage
   @param[in] Anew  the new angle
   */
   virtual void setVoltageAngle (double Vnew, double Anew);
-  //for identifying which variables are algebraic vs differential
-  virtual void getVariableType (double sdata[], const solverMode &sMode) override;       //only applicable in DAE mode
-  virtual void getTols (double tols[], const solverMode &sMode) override;
-  // dynamic simulation
-  virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
+  
   /** @brief function to propagate a network value to all connected buses
   @param[in] network the new network number
   @param[in,out] bstk  a queue containing the stack of buses that have yet to be checked
@@ -340,13 +328,13 @@ public:
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
+  virtual double getAdjustableCapacityUp (coreTime time = maxTime) const;
   /** @brief get the available controllable upward adjustments within a time period
   @ details this means power production or load reduction
   @param[in] time  the time period within which to do the adjustments
   * @return the reactive link power
   **/
-  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
+  virtual double getAdjustableCapacityDown (coreTime time = maxTime) const;
   /** @brief the dPdf partial derivative  (may be deprecated in the future)
   * @return the $\frac{\partial P}{\partial f}$
   **/
@@ -376,7 +364,7 @@ public:
   **/
   virtual double getSched () const;
 
-  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
+  virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual IOlocs getOutputLocs  (const solverMode &sMode) const override;
 
   /** @brief get a const ref to the outputs*/
@@ -385,7 +373,7 @@ public:
   */
   virtual const IOlocs &getOutputLocsRef () const;
 
-  virtual double getOutput (const stateData &sD, const solverMode &sMode, index_t outNum = 0) const override;
+  virtual double getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outNum = 0) const override;
   /** @brief get the voltage
   * @param[in] state the system state
   @param[in] sMode the corresponding solverMode to the state
@@ -417,9 +405,9 @@ public:
   **/
   virtual double getFreq (const stateData &sD, const solverMode &sMode) const;
 
-  virtual void rootTest (const stateData &sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const stateData &sD, const solverMode &sMode,  check_level_t level) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode,  check_level_t level) override;
 
 
   friend bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink, bool printDiff);
@@ -445,7 +433,7 @@ public:
 
 protected:
   /** @brief
-  @param[in] sD  the statedata to compute the Error for
+  @param[in] sD  the statDdata to compute the Error for
   @param[in] sMode the solverMode corresponding to the stateData
   @return the error in the power balance equations
   */

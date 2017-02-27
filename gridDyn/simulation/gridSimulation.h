@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,6 @@
 #define GRID_SIMULATION_H_
 
 // libraries
-#include <list>
 #include <fstream>
 
 // header files
@@ -47,7 +46,7 @@ class functionEventAdapter;
  GridSimulation is a base simulation class its intention is to handle some of the basic
 simulation bookkeeping tasks that would be common to all simulations in GridDyn including things like
 logging, errors,  recording, and a few other topics.  Doesn't really do anything much as far as simulating goes
-the class isn't abstract but it is intended to be built upon
+the class isn't abstract but it is intended to be built upon for more usable simulation objects
 */
 class gridSimulation : public gridArea
 {
@@ -72,7 +71,7 @@ protected:
 
   std::string stateFile;                                        //!<record file for the state
   std::string recordDirectory;                                  //!<folder location for storing recorded files
-  gridDyn_time state_record_period = negTime;                            //!<how often to record the state
+  coreTime state_record_period = negTime;                            //!<how often to record the state
 
 
   std::ofstream logFileStream;  //!< logging file stream
@@ -82,40 +81,33 @@ protected:
   gridState_t pState = gridState_t::STARTUP;                    //!< the system state keeps track of which state the solver is in
   int errorCode = GS_NO_ERROR;                                  //!< for storage of an ERROR code if one exists (intended to be expandable to children objects so using int instead of enum)
   count_t alertCount = 0;                                       //!< count the number of alerts
-  count_t eventCount = 0;                                       //!< count the number of events that are added
-  count_t relayCount = 0;                                       //!< count of the number of relays added
   count_t warnCount = 0;                                        //!<  count the number of warnings from objects
   count_t errorCount = 0;                                       //!<count the number of logged warnings
   // ---------------- clock ----------------
 
-  gridDyn_time startTime = timeZero;                                           //!< [s]  start time
-  gridDyn_time stopTime = timeZero;                                            //!< [s]  end time
-  gridDyn_time currentTime = negTime;                                       //!< [s]  current time
-  gridDyn_time stepTime = 0.05;                                           //!< [s]  time step
-  gridDyn_time timeReturn = timeZero;                                          //!< [s]  time returned by the solver
-  gridDyn_time nextStopTime = negTime;                                   //!< next time to stop the dynamic Simulation
+  coreTime startTime = timeZero;                                           //!< [s]  start time
+  coreTime stopTime = timeZero;                                            //!< [s]  end time
+  coreTime currentTime = negTime;                                       //!< [s]  current time
+  coreTime stepTime = coreTime(0.05);                                           //!< [s]  time step
+  coreTime timeReturn = timeZero;                                          //!< [s]  time returned by the solver
+  coreTime nextStopTime = negTime;                                   //!< next time to stop the dynamic Simulation
 
-  gridDyn_time minUpdateTime = 0.0001;                                    //!<minimum time period to go between updates; for the hybrid simultaneous partitioned solution
-  gridDyn_time maxUpdateTime = maxTime;                                   //!<(s) max time period to go between updates
+  coreTime minUpdateTime = coreTime(0.0001);                                    //!<minimum time period to go between updates; for the hybrid simultaneous partitioned solution
+  coreTime maxUpdateTime = maxTime;                                   //!<(s) max time period to go between updates
   double absTime = 0;                                               //!< [s] seconds in unix time of the system start time;
 
 
   // ---------------- recorders ----------------
-  gridDyn_time recordStart = negTime;                                         //!< [s]  recorder start time
-  gridDyn_time recordStop = maxTime;                                          //!< [s]  recorder stop time
+  coreTime recordStart = negTime;                                         //!< [s]  recorder start time
+  coreTime recordStop = maxTime;                                          //!< [s]  recorder stop time
   std::vector < std::shared_ptr < collector >> collectorList;               //!< vector storing recorder objects
-  gridDyn_time nextRecordTime = maxTime;                             //!<time for the next set of recorders
+  coreTime nextRecordTime = maxTime;                             //!<time for the next set of recorders
 
-  gridDyn_time lastStateRecordTime = negTime;                      //!<last time the full state was recorded
+  coreTime lastStateRecordTime = negTime;                      //!<last time the full state was recorded
 
   // ----------------timestepP -----------------
-  std::shared_ptr<eventQueue> EvQ;       //!< the event queue for the simulation system
-  /** @brief storage location for shared_ptrs to coreObjects
-   the direct pointer to the object will get passed to the system but the ownership will be changed so it won't be deleted by the normal means
-  this allows storage of shared_ptrs to modeled objects but also other objects that potentially act as storage containers, do periodic updates, generate alerts or
-  interact with other simulations
-  */
-  std::vector<std::shared_ptr<coreObject> > extraObjects;
+  std::unique_ptr<eventQueue> EvQ;       //!< the event queue for the simulation system
+  
 public:
   /** @brief constructor*/
   explicit gridSimulation (const std::string &objName = "sim_#");
@@ -146,7 +138,6 @@ public:
 
   // add components
   using gridArea::add;       //use the add function of gridArea
-  virtual void addsp (std::shared_ptr<coreObject> obj) override;
   /** @brief function to add collectors to the system
   @param[in] col the collector to add into the simulation
   */
@@ -156,9 +147,9 @@ public:
   */
   virtual void add (std::shared_ptr<gridEvent> evnt);
   /** @brief function to add a list of events to the system
-  @param[in] elist a list of events to add in
+  @param[in] elist a vector of events to add in
   */
-  virtual void add (std::list < std::shared_ptr < gridEvent >> elist);
+  virtual void add (const std::vector < std::shared_ptr < gridEvent >> &elist);
   /** @brief function to add an event Adapter to the event Queue
   @param[in] eA the eventAdpater to add
   */
@@ -172,12 +163,14 @@ public:
   @param[in] collectorName  the name of the recorder to find
   @return a shared_ptr to the recorder that was found or an empty shared ptr*/
   std::shared_ptr<collector> findCollector (const std::string &collectorName);
+  /** @brief get all the objects from the event Queue */
+  void getEventObjects(std::vector<coreObject *> &obj) const;
 
 /** @brief run the simulator
 @param[in] finishTime  the time to run to
 @return return code 0 for success other for failure
 */
-  virtual int run (gridDyn_time finishTime = negTime);
+  virtual int run (coreTime finishTime = negTime);
   /** @brief have the simulator step forward in time
   @return return code 0 for success other for failure
   */
@@ -201,7 +194,7 @@ public:
    * \brief Gets the current simulation time.
    * \return a double representing the current simulation time, in seconds.
    */
-  gridDyn_time getCurrentTime () const
+  coreTime getCurrentTime () const
   {
     return currentTime;
   }
@@ -210,7 +203,7 @@ public:
    * \brief Gets the simulation start time.
    * \return a double representing the simulation start time, in seconds.
    */
-  gridDyn_time getStartTime () const
+  coreTime getStartTime () const
   {
     return startTime;
   }
@@ -219,7 +212,7 @@ public:
   * \brief gets the next event time.
   * \return a double representing the next scheduled event in GridDyn.
   */
-  gridDyn_time getEventTime () const;
+  coreTime getEventTime () const;
 };
 
 /** @brief find an object that has the same properties as obj1 located int the tree from src in the tree given by sec

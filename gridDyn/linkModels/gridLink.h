@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -63,7 +63,7 @@ public:
     fixed_target_power = object_flag3,  //!< flag indicating if the power flow was fixed
 	network_connected=object_flag4, //!< indicates if a link ties the buses together in connected network
   };
-  int zone = 1;  //!< publicly accessible loss zone indicator not used internally
+  
 protected:
   double ratingA = kBigNum;        //!< [puA] the long term rating of the link
   double ratingB = kBigNum;        //!< [puA] the short term rating of the link
@@ -117,26 +117,27 @@ public:
   virtual bool isConnected () const override;
 
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData &sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
+
   /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or another
-   performs the calculations necessary to get the power at the mterminal to be a certain value
-  @param[in] power  the desired real power flow as measured by mterminal
-  @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
+   performs the calculations necessary to get the power at the measureTerminal to be a certain value
+  @param[in] power  the desired real power flow as measured by measureTerminal
+  @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by default
   @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
-  virtual int fixRealPower (double power, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit);
+  virtual int fixRealPower (double power, index_t  measureTerminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit);
   /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
-   performs the calculations necessary to get the power at the mterminal to be a certain value
-  @param[in] rPower  the desired real power flow as measured by mterminal
-  @param[in] rPower  the desired reactive power flow as measured by mterminal
-  @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
+   performs the calculations necessary to get the power at the measureTerminal to be a certain value
+  @param[in] rPower  the desired real power flow as measured by measureTerminal
+  @param[in] rPower  the desired reactive power flow as measured by measureTerminal
+  @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by default
   @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
-  virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit);
+  virtual int fixPower (double rPower, double qPower, index_t  measureTerminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit);
   /** @brief propagate a network number to all connected buses
    checks if a link actually connects the two buses in an AC sense, then checks if a bus is already part of the specified network and if not it adds it to the queue
   @param[in] network  the new network number
@@ -145,16 +146,16 @@ public:
   virtual void followNetwork (int network, std::queue<gridBus *> &bstk);
   /** @brief update one of the link terminals with a new bus
   @param[in] bus  the new bus to connect to
-  @param[in] busnumber  1 for from,  2 for "to"
+  @param[in] busNumber  1 for from,  2 for "to"
   */
-  virtual void updateBus (gridBus *bus,index_t busnumber);
+  virtual void updateBus (gridBus *bus,index_t busNumber);
   /** @brief check for any violations of link limits or other factors based on power flow results
    checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
   @param[out] Violation_vector --a list of all the violations any new violations get added to the result
   */
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
 
-  virtual void timestep (gridDyn_time ttime,const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime,const IOdata &inputs, const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -240,6 +241,8 @@ public:
   {
     return 2;
   }
+
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
   /** @brief get the max transfer capacity
   * @return the max capacity
   */
@@ -255,30 +258,30 @@ public:
   coreObject * getSubObject (const std::string &typeName, index_t num) const override;
 
 
-  // initializeB power flow
+  // dynInitializeB power flow
 protected:
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 public:
   /** @brief check if two buses should be merged and the line effects ignored
   */
   virtual void checkMerge ()
   {
   }
-  //initializeB dynamics
+  //dynInitializeB dynamics
 protected:
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 public:
   //for computing all the Jacobian elements at once
+	using gridObject::ioPartialDerivatives;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode);
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode);
-
-  virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  using gridObject::outputPartialDerivatives;
   virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
 
   //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual IOdata getOutputs (const stateData &sD, const solverMode &sMode) const override;
+  virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual IOdata getOutputs (index_t busId, const stateData &sD, const solverMode &sMode) const;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
 protected:
   /** @brief deal with any effects of a switch change

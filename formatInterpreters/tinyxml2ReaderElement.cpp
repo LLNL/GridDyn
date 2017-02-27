@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #include "tinyxml2ReaderElement.h"
 #include "tinyxml2/tinyxml2.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 
 using namespace tinyxml2;
@@ -127,10 +127,10 @@ double tinyxml2ReaderElement::getValue () const
       auto cText = element->GetText ();
       if (cText)
         {
-          double val = doubleReadComplete (std::string (cText), readerNullVal);
+          double val = numeric_conversionComplete (std::string (cText), readerNullVal);
           return val;
         }
-      //double ret = doubleReadComplete(element->GetText(false), kNullVal);
+      //double ret = numeric_conversionComplete(element->GetText(false), kNullVal);
       //return ret;
     }
   return readerNullVal;
@@ -149,7 +149,7 @@ std::string tinyxml2ReaderElement::getText () const
   return "";
 }
 
-std::string tinyxml2ReaderElement::getMultiText (const std::string sep) const
+std::string tinyxml2ReaderElement::getMultiText (const std::string &sep) const
 {
   std::string ret = "";
   if (element)
@@ -259,7 +259,7 @@ double tinyxml2ReaderElement::getAttributeValue (const std::string &attributeNam
       auto c = element->Attribute (attributeName.c_str ());
       if (c)
         {
-          double val = doubleReadComplete (std::string (c), readerNullVal);
+          double val = numeric_conversionComplete (std::string (c), readerNullVal);
           return val;
         }
     }

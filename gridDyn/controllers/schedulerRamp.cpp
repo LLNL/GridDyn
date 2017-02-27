@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "reserveDispatcher.h"
 #include "timeSeries.h"
 #include "comms/schedulerMessage.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "stringOps.h"
 
 schedulerRamp::schedulerRamp (const std::string &objName) : scheduler (objName)
@@ -63,7 +63,7 @@ void schedulerRamp::setTarget (double target)
 }
 
 
-void schedulerRamp::setTarget (gridDyn_time time, double target)
+void schedulerRamp::setTarget (coreTime time, double target)
 {
 
   insertTarget (tsched(time, target));
@@ -75,7 +75,7 @@ void schedulerRamp::setTarget (gridDyn_time time, double target)
 
 
 
-void schedulerRamp::updateA (gridDyn_time time)
+void schedulerRamp::updateA (coreTime time)
 {
   double dt = (time - prevTime);
 
@@ -106,7 +106,7 @@ void schedulerRamp::updateA (gridDyn_time time)
 
 }
 
-double schedulerRamp::predict (gridDyn_time time)
+double schedulerRamp::predict (coreTime time)
 {
   double dt = (time - prevTime);
   if (dt == 0)
@@ -119,16 +119,16 @@ double schedulerRamp::predict (gridDyn_time time)
 }
 
 
-void schedulerRamp::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void schedulerRamp::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  scheduler::objectInitializeA (time0, flags);
+  scheduler::dynObjectInitializeA (time0, flags);
   prevTime = time0 - 0.001;
   lastTargetTime = time0 - 0.001;
 }
 
-void schedulerRamp::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void schedulerRamp::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  scheduler::objectInitializeB (args, outputSet, inputSet);
+  scheduler::dynObjectInitializeB (inputs, desiredOutput, inputSet);
   if (reserveAvail > 0)
     {
       //if (resDispatch==NULL)
@@ -201,12 +201,12 @@ double schedulerRamp::getRamp (double *tRem) const
   return ramp;
 }
 
-double schedulerRamp::getMax (const gridDyn_time /*time*/) const
+double schedulerRamp::getMax (const coreTime /*time*/) const
 {
   return Pmax;
 }
 
-double schedulerRamp::getMin (gridDyn_time /*time*/) const
+double schedulerRamp::getMin (coreTime /*time*/) const
 {
   return Pmin;
 }
@@ -378,7 +378,7 @@ void schedulerRamp::updatePTarget ()
   double rempower = 0.0;
   double remtime = 0.0;
   double target;
-  gridDyn_time time;
+  coreTime time;
   double td2;
   double rampLimitUp;
 

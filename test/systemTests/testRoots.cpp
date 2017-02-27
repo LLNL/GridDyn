@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE (root_test1)
 
   std::string fname = std::string (ROOTS_TEST_DIRECTORY "test_roots1.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
 
 //	gds->consolePrintLevel=0;
@@ -62,12 +62,12 @@ which requires the updates to control system logic
 BOOST_AUTO_TEST_CASE(test_governor_roots)
 {
   std::string fname = std::string(ROOTS_TEST_DIRECTORY "test_gov_limit3.xml");
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  gds = readSimXMLFile(fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
   gds->consolePrintLevel = print_level::no_print;
   gds->set("recorddirectory", ROOTS_TEST_DIRECTORY);
   gds->run();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   
   std::string recname = std::string(ROOTS_TEST_DIRECTORY "rootDisplay.dat");
   timeSeriesMulti<> ts3;

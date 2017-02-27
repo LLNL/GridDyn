@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,17 +16,11 @@
 #define GRIDDYN_GRIDDYN_RUNNER_H
 
 #include "griddyn-config.h"
-#include "gridDynTypes.h"
+#include "gridDynDefinitions.h"
 #include <chrono>
 #include <memory>
 
 class gridDynSimulation;
-
-#ifdef GRIDDYN_HAVE_FSKIT
-namespace fskit {
-class GrantedTimeWindowScheduler;
-}
-#endif
 
 //forward declaration for boost::program_options::variables_map
 namespace boost {
@@ -43,20 +37,21 @@ class variables_map;
 class GriddynRunner
 {
 public:
+	/** constructor*/
+	GriddynRunner();
+	/** Destructor*/
+	virtual ~GriddynRunner();
   /**
    * Initialize a simulation run from command line arguments.
    */
-#ifdef GRIDDYN_HAVE_FSKIT
-  int Initialize (int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);
-#else
-  int Initialize (int argc, char *argv[]);
-#endif
 
+  virtual int Initialize (int argc, char *argv[]);
+  /** initialization the simulation object so it is ready to run*/
   void simInitialize();
   /**
    * Run simulation to completion
    */
-  void Run (void);
+  virtual void Run (void);
 
   /**
    * Run simulation up to provided time.   Simulation may
@@ -65,22 +60,27 @@ public:
    * @param time maximum time simulation may advance to.
    * @return time simulation successfully advanced to.
    */
-  gridDyn_time Step (gridDyn_time time);
+  virtual coreTime Step (coreTime time);
 
   /**
    * Get the next GridDyn Event time
    *
    * @return the next event time
    */
-  gridDyn_time getNextEvent () const;
+  coreTime getNextEvent () const;
 
-  void Finalize (void);
+  virtual void Finalize (void);
   /** get a pointer to the simulation object*/
   std::shared_ptr<gridDynSimulation> getSim() const
   {
 	  return m_gds;
   }
-private:
+
+  std::shared_ptr<gridDynSimulation> &getSim()
+  {
+	  return m_gds;
+  }
+protected:
   /**
    * Get the next GridDyn Event time
    *
@@ -97,13 +97,23 @@ private:
 };
 
 class readerInfo;
-
+/** process the command line arguments for GridDyn and load them in a program Variables Map
+@param[in] argc the number arguments
+@param[in] argv the arguments
+@param[in] vm_map the variable map to store the input arguments
+*/
 int argumentParser (int argc, char *argv[], boost::program_options::variables_map &vm_map);
 
-void loadXMLinfo (boost::program_options::variables_map &vm_map, readerInfo *ri);
+/** load information from the input arguments to the reader Info Structures for file interpretation
+@param[in] vm_map the structure containing the input arguments
+@param[in] ri the file reader informational structure*/
+void loadXMLinfo (boost::program_options::variables_map &vm_map, readerInfo &ri);
 
 
-
-int processCommandArguments (std::shared_ptr<gridDynSimulation> gds, readerInfo *ri, boost::program_options::variables_map &vm);
+/** process the command line arguments
+@param[in] gds the simulation object
+@param[in] ri the file reader informational structure
+@param[in] vm the arguments structure*/
+int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo &ri, boost::program_options::variables_map &vm);
 #endif
 

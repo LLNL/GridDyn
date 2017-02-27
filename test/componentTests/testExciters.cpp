@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,7 +17,7 @@
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "vectorOps.hpp"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
 
 #include <cmath>
@@ -32,18 +32,18 @@ BOOST_AUTO_TEST_CASE (root_exciter_test)
   std::string fname = std::string (EXCITER_TEST_DIRECTORY "test_root_exciter.xml");
 
   readerConfig::setPrintMode (0);
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   int retval = gds->dynInitialize ();
   BOOST_CHECK_EQUAL (retval, 0);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 
   std::vector<double> st = gds->getState ();
 
 
 
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds->getState ();
 
   //check for stability
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 	for (auto &excname : exclist)
 	{
 
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 		
 
 		int retval = gds->dynInitialize();
-		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 
 		BOOST_CHECK_EQUAL(retval, 0);
 
@@ -111,8 +111,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 		gds->getVoltage(volt2);
 		BOOST_CHECK((volt2[0] > 0.95) && (volt2[0] < 1.00));
 		BOOST_CHECK((volt2[1] > 0.95) && (volt2[1] < 1.000));
-		delete gds;
-		gds = nullptr;
+
 		//check for stability
 	}
 
@@ -137,7 +136,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 	//exclist.insert(exclist.begin(), "none");
 	for (auto &excname : exclist)
 	{
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
@@ -180,8 +179,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 		gds->getVoltage(volt2);
 		BOOST_CHECK((volt2[0] > 1.00) && (volt2[0] < 1.05));
 		BOOST_CHECK((volt2[1] > 0.99) && (volt2[1] < 1.04));
-		delete gds;
-		gds = nullptr;
+
 		//check for stability
 	}
 
@@ -211,7 +209,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 			//TODO: this doesn't work for now (unknown)
 			continue;
 		}
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
@@ -255,8 +253,6 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 		gds->getVoltage(volt2);
 		BOOST_CHECK((volt2[0] > 0.98) && (volt2[0] < 1.02));
 		BOOST_CHECK((volt2[1] > 0.97) && (volt2[1] < 1.02));
-		delete gds;
-		gds = nullptr;
 		//check for stability
 	}
 
@@ -286,7 +282,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test4)
 			//TODO: this doesn't work for now (unknown)
 			continue;
 		}
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
@@ -329,8 +325,6 @@ BOOST_AUTO_TEST_CASE(basic_stability_test4)
 		gds->getVoltage(volt2);
 		BOOST_CHECK((volt2[0] > 0.98) && (volt2[0] < 1.02));
 		BOOST_CHECK((volt2[1] > 0.97) && (volt2[1] < 1.02));
-		delete gds;
-		gds = nullptr;
 		//check for stability
 	}
 
@@ -357,7 +351,7 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 	for (auto &excname : exclist)
 	{
 
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);
@@ -411,7 +405,7 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 	for (auto &excname : exclist)
 	{
 
-		gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("exciter", excname);

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #include "contingency.h"
 #include "gridDyn.h"
-#include "recorder_events/gridEvent.h"
+#include "events/gridEvent.h"
 #include "vectorOps.hpp"
 
 #include <sstream>
@@ -106,19 +106,17 @@ contingency_mode_t getContingencyMode(const std::string &mode)
 
 }
 
-int contingency::contingencyCount = 0;
+std::atomic_int contingency::contingencyCount(0);
 
 contingency::contingency():future_ret(promise_val.get_future())
 {
-  ++contingencyCount;
-  id = contingencyCount;
+  id=++contingencyCount;
   name = "contingency_" + std::to_string (id);
 }
 
 contingency::contingency(gridDynSimulation *sim, std::shared_ptr<gridEvent> ge):gds(sim), future_ret(promise_val.get_future())
 {
-	++contingencyCount;
-	id = contingencyCount;
+	id=++contingencyCount;
 	name = "contingency_" + std::to_string(id);
 	eventList.resize(1);
 	eventList[0].push_back(ge);
@@ -129,7 +127,7 @@ contingency::contingency(gridDynSimulation *sim, std::shared_ptr<gridEvent> ge):
 void contingency::execute()
 {
 	gridDynSimulation *contSim = static_cast<gridDynSimulation *>(gds->clone());
-	contSim->set("printLevel", 0);
+	contSim->set("printlevel", 0);
 	for (auto &ev : eventList[0])
 	{
 		ev->updateObject(contSim, object_update_mode::match);
@@ -196,10 +194,7 @@ void contingency::setContingencyRoot(gridDynSimulation *gdSim)
 
 void contingency::add(std::shared_ptr<gridEvent> ge, index_t stage)
 {
-	if (eventList.size()<=stage)
-	{
-		eventList.resize(stage + 1);
-	}
+	ensureSizeAtLeast(eventList, stage + 1);
 	eventList[stage].push_back(ge);
 }
 
@@ -300,7 +295,7 @@ void contingency::getObjects(std::vector<coreObject *> &objects) const
 void contingency::updateObject(coreObject *newObj, object_update_mode mode)
 {
 	//update all the events
-	for (size_t kk = 0; kk<eventList.size(); ++kk)
+	for (index_t kk = 0; kk<eventList.size(); ++kk)
 	{
 		for (auto &evnt : eventList[kk])
 		{

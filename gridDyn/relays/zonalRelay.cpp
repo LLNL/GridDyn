@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,15 +12,15 @@
 */
 
 #include "zonalRelay.h"
-#include "gridCondition.h"
+#include "measurement/gridCondition.h"
 #include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
-#include "gridEvent.h"
-#include "gridCoreTemplates.h"
+#include "events/gridEvent.h"
+#include "core/coreObjectTemplates.h"
 #include "stringConversion.h"
-#include "core/gridDynExceptions.h"
-
+#include "core/coreExceptions.h"
+#include <algorithm>
 
 #include <boost/format.hpp>
 
@@ -43,7 +43,7 @@ coreObject *zonalRelay::clone (coreObject *obj) const
   nobj->m_zoneLevels = m_zoneLevels;
   nobj->m_zoneDelays = m_zoneDelays;
   nobj->m_resetMargin = m_resetMargin;
-
+  nobj->autoName = autoName;
   nobj->m_condition_level = m_condition_level;
   return nobj;
 }
@@ -78,16 +78,11 @@ void zonalRelay::set (const std::string &param,  const std::string &val)
 		  }
 	  }
       set ("zones", dvals.size ());
-      auto zL = m_zoneLevels.begin ();
-      for (auto level : dvals)
-        {
-          *zL = level;
-          ++zL;
-        }
+	  m_zoneLevels = std::move(dvals);
     }
   else if (param == "delay")
     {
-      auto dvals = str2vector<gridDyn_time> (val,negTime);
+      auto dvals = str2vector<coreTime> (val,negTime);
       if (dvals.size () != m_zoneDelays.size ())
         {
 		  throw(invalidParameterValue());
@@ -100,12 +95,7 @@ void zonalRelay::set (const std::string &param,  const std::string &val)
 			  throw(invalidParameterValue());
 		  }
 	  }
-      auto zL = m_zoneDelays.begin ();
-      for (auto ld : dvals)
-        {
-          *zL = ld;
-          ++zL;
-        }
+	  m_zoneDelays = std::move(dvals);
     }
   else
     {
@@ -223,22 +213,9 @@ double zonalRelay::get (const std::string &param, gridUnits::units_t unitType) c
   return val;
 }
 
-void zonalRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void zonalRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  if (autoName > 0)
-    {
-      std::string newName = generateAutoName (autoName);
-      if (!newName.empty ())
-        {
-          if (newName != name)
-            {
-              name = newName;
-              alert (this, OBJECT_NAME_CHANGE);
-            }
-        }
-	  cManager.set("name", name);
-    }
-
+  
   double baseImpedance = m_sourceObject->get ("impedance");
   for (index_t kk = 0; kk < m_zones; ++kk)
     {
@@ -254,11 +231,11 @@ void zonalRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
       setResetMargin (kk, m_resetMargin * 1.0 / (m_zoneLevels[kk] * baseImpedance));
     }
 
-  auto ge = std::make_shared<gridEvent> ();
+  auto ge = std::make_unique<gridEvent> ();
   ge->setTarget (m_sinkObject,"switch" + std::to_string(m_terminal));
   ge->setValue(1.0);
 
-  add (ge);
+  add (std::move(ge));
   for (index_t kk = 0; kk < m_zones; ++kk)
     {
       setActionTrigger (kk, 0, m_zoneDelays[kk]);
@@ -294,11 +271,11 @@ void zonalRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d taken terminal %d") %  conditionNum % ActionNum % m_terminal).str ());
 
-  if (opFlags.test (use_commLink))
+  if (opFlags[use_commLink])
     {
       auto P = std::make_shared<relayMessage> (relayMessage::BREAKER_TRIP_EVENT);
       if (ActionNum == 0)
@@ -316,14 +293,14 @@ void zonalRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_co
     }
 }
 
-void zonalRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
+void zonalRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d triggered terminal %d") % conditionNum % m_terminal).str ());
   if (conditionNum < m_condition_level)
     {
       m_condition_level = conditionNum;
     }
-  if (opFlags.test (use_commLink))
+  if (opFlags[use_commLink])
     {
       if (conditionNum > m_condition_level)
         {
@@ -347,7 +324,7 @@ void zonalRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*trigge
 
 }
 
-void zonalRelay::conditionCleared (index_t conditionNum, gridDyn_time /*triggerTime*/)
+void zonalRelay::conditionCleared (index_t conditionNum, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d cleared terminal %d ") % conditionNum  % m_terminal).str ());
   for (index_t kk = 0; kk < m_zones; ++kk)
@@ -403,6 +380,24 @@ void zonalRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<com
       }
     }
 
+}
+
+std::string zonalRelay::generateCommName()
+{
+	if (autoName > 0)
+	{
+		std::string newName = generateAutoName(autoName);
+		if (!newName.empty())
+		{
+			if (newName != getName())
+			{
+				setName(newName);
+			}
+			return newName;
+
+		}
+	}
+	return getName();
 }
 
 std::string zonalRelay::generateAutoName (int code)

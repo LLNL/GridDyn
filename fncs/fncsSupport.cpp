@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,30 +16,30 @@
 #include <sstream>
 
 
-#ifdef FULLCPP14
+#ifdef HAVE_VARIABLE_TEMPLATES
 
-fncs::time gd2fncsTime(gridDyn_time evntTime)
+fncs::time gd2fncsTime(coreTime evntTime)
 {
 	return static_cast<fncs::time>(evntTime*fncsTickPerSecond<double>);
 }
 
-gridDyn_time fncs2gdTime(fncs::time ftime)
+coreTime fncs2gdTime(fncs::time ftime)
 {
 	double val = static_cast<double>(ftime / fncsTickPerSecond<int>); //this gets the decimal should be integer division
 	val += (static_cast<double>(ftime % fncsTickPerSecond<int>)/ fncsTickPerSecond<double>);
 	return val;
 }
 #else
-fncs::time gd2fncsTime(gridDyn_time evntTime)
+fncs::time gd2fncsTime(coreTime evntTime)
 {
 	return static_cast<fncs::time>(static_cast<double>(evntTime)*fncsTickPerSecond_f);
 }
 
-gridDyn_time fncs2gdTime(fncs::time ftime)
+coreTime fncs2gdTime(fncs::time ftime)
 {
 	double val = static_cast<double>(ftime / fncsTickPerSecond_i); //this gets the decimal should be integer division
 	val += (static_cast<double>(ftime % fncsTickPerSecond_i) / fncsTickPerSecond_i);
-	return gridDyn_time(val);
+	return coreTime(val);
 }
 #endif
 
@@ -109,7 +109,7 @@ std::string fncsRegister::type2string(dataType dtype)
 	{
 	case dataType::fncsDouble:
 	default:
-		return "double";
+			return "double";
 	case dataType::fncsComplex:
 		return "complex";
 	case dataType::fncsInteger:

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,12 +15,12 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "gridBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "objectFactoryTemplates.h"
-#include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
+#include "stringConversion.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -29,7 +29,7 @@
 
 
 using namespace gridUnits;
-
+using namespace stringOps;
 
 void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);
 void ptiReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &opt);
@@ -61,7 +61,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
   gridDynGenerator *gen;
   index_t index;
   size_t pos;
-  basicReaderInfo opt (&bri);
+  basicReaderInfo opt (bri);
 
   /*load up the factories*/
   if (busfactory == nullptr)
@@ -103,8 +103,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
   if (std::getline (file, line))
     {
       pos = line.find_first_of (',');
-      temp1 = line.substr (0, pos);
-      trimString (temp1);
+      temp1 = trim(line.substr (0, pos));
       parentObject->set ("name", temp1);
     }
   // get the second comment line and ignore it
@@ -124,8 +123,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
             }
           //get the index
           pos = line.find_first_of (",");
-          temp1 = line.substr (0, pos);
-          trimString (temp1);
+          temp1 = trim(line.substr (0, pos));
           index = std::stoul (temp1);
 
           if (index > busList.size ())
@@ -178,8 +176,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
             }
           //get the bus index
           pos = line.find_first_of (",");
-          temp1 = line.substr (0, pos);
-          trimString (temp1);
+          temp1 = trim(line.substr (0, pos));
           index = std::stoul (temp1);
 
           if (index > busList.size ())
@@ -218,8 +215,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
             }
           //get the bus index
           pos = line.find_first_of (',');
-          temp1 = line.substr (0, pos);
-          trimString (temp1);
+          temp1 = trim(line.substr (0, pos));
           index = std::stoul (temp1);
 
           if (index > busList.size ())
@@ -258,8 +254,7 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
             }
           //get the bus index
           pos = line.find_first_of (",");
-          temp1 = line.substr (0, pos);
-          trimString (temp1);
+          temp1 = trim(line.substr (0, pos));
           index = std::stoul (temp1);
 
           if (index > busList.size ())
@@ -413,15 +408,15 @@ void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
       temp = "swing";
       break;
     case 4:
-      bus->enabled = false;
+      bus->disable();
       temp = "PQ";
     }
   bus->set ("type", temp);
   //skip the load flow area and loss zone for now
   //skip the owner information
   //get the voltage and angle specifications
-  paramRead (strvec[7], vm);
-  paramRead (strvec[8], va);
+   vm = numeric_conversion<double>(strvec[7],0.0);
+   va = numeric_conversion<double>(strvec[8],0.0);
   if (va != 0)
     {
       bus->set ("angle", va / 180 * kPI);
@@ -452,13 +447,13 @@ void ptiReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo & /*opt
   status = std::stoi (strvec[2]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[5], p);
-  paramRead (strvec[6], q);
+   p = numeric_conversion<double>(strvec[5],0.0);
+   q = numeric_conversion<double>(strvec[6],0.0);
   if (p != 0.0)
     {
       ld->set ("p", p, MW);
@@ -468,8 +463,8 @@ void ptiReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo & /*opt
       ld->set ("q", q, MVAR);
     }
   //get the constant current part of the load
-  paramRead (strvec[7], p);
-  paramRead (strvec[8], q);
+   p = numeric_conversion<double>(strvec[7],0.0);
+   q = numeric_conversion<double>(strvec[8],0.0);
   if (p != 0.0)
     {
       ld->set ("ip", p, MW);
@@ -480,8 +475,8 @@ void ptiReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo & /*opt
     }
   //get the impedance part of the load
   //note:: in PU power units, need to convert to Pu resistance
-  paramRead (strvec[9], p);
-  paramRead (strvec[10], q);
+   p = numeric_conversion<double>(strvec[9],0.0);
+   q = numeric_conversion<double>(strvec[10],0.0);
   if (p != 0.0)
     {
       ld->set ("r", p, MW);
@@ -514,13 +509,13 @@ void ptiReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &
   status = std::stoi (strvec[2]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[3], p);
-  paramRead (strvec[4], q);
+   p = numeric_conversion<double>(strvec[3],0.0);
+   q = numeric_conversion<double>(strvec[4],0.0);
   if (p != 0.0)
     {
       ld->set ("yp", p, MW);
@@ -536,30 +531,25 @@ void ptiReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &
 
 void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo & /*opt*/)
 {
-  std::string temp;
-  std::string prefix;
-  double p;
-  double q;
-  double V;
+
   int rbus;
-  int status;
 
   auto strvec = splitline (line);
 
   //get the load index and name
-  temp = strvec[1];
-  prefix = gen->getParent ()->getName () + "_Gen_" + temp;
+  std::string temp = trim(strvec[1]);
+  std::string prefix = gen->getParent ()->getName () + "_Gen_" + temp;
   gen->set ("name", prefix);
   //get the status
-  status = std::stoi (strvec[14]);
+  auto status = std::stoi (strvec[14]);
   if (status == 0)
     {
-      gen->enabled = false;
+      gen->disable();
     }
 
   //get the power generation
-  paramRead (strvec[2], p);
-  paramRead (strvec[3], q);
+   double p = numeric_conversion<double>(strvec[2],0.0);
+   double q = numeric_conversion<double>(strvec[3],0.0);
   if (p != 0.0)
     {
       gen->set ("p", p, MW);
@@ -569,8 +559,8 @@ void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
       gen->set ("q", q, MVAR);
     }
   //get the Qmax and Qmin
-  paramRead (strvec[4], p);
-  paramRead (strvec[5], q);
+   p = numeric_conversion<double>(strvec[4],0.0);
+   q = numeric_conversion<double>(strvec[5],0.0);
   if (p != 0.0)
     {
       gen->set ("qmax", p, MW);
@@ -579,12 +569,12 @@ void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
     {
       gen->set ("qmin", q, MVAR);
     }
-  paramRead (strvec[6], V);
+   double V = numeric_conversion<double>(strvec[6],0.0);
   if (V > 0)
     {
       gen->set ("vset", V);
     }
-  paramRead (strvec[7], rbus);
+   rbus = numeric_conversion<int>(strvec[7],0);
 
   if (rbus != 0)
     {
@@ -635,20 +625,20 @@ void ptiReadBranch (coreObject *parentObject, const std::string &line, std::vect
   status = std::stoi (strvec[13]);
   if (status == 0)
     {
-      lnk->enabled = false;
+      lnk->disable();
     }
 
   //skip the load flow area and loss zone and circuit for now
 
   //get the branch impedance
 
-  paramRead (strvec[3], R);
-  paramRead (strvec[4], X);
+   R = numeric_conversion<double>(strvec[3],0.0);
+   X = numeric_conversion<double>(strvec[4],0.0);
 
   lnk->set ("r", R);
   lnk->set ("x", X);
   //get line capacitance
-  paramRead (strvec[5], val);
+   val = numeric_conversion<double>(strvec[5],0.0);
   lnk->set ("b", val);
 
   //TODO get the other parameters (not critical for power flow)
@@ -742,20 +732,20 @@ int ptiReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
 
   //get the branch impedance
 
-  paramRead (strvec2[0], R);
-  paramRead (strvec2[1], X);
+   R = numeric_conversion<double>(strvec2[0],0.0);
+   X = numeric_conversion<double>(strvec2[1],0.0);
 
   lnk->set ("r", R);
   lnk->set ("x", X);
   //get line capacitance
-  paramRead (strvec[5], val);
+   val = numeric_conversion<double>(strvec[5],0.0);
   lnk->set ("b", val);
 
 
   status = std::stoi (strvec[11]);
   if (status == 0)
     {
-      lnk->enabled = false;
+      lnk->disable();
     }
   else if (status > 1)
     {
@@ -765,12 +755,12 @@ int ptiReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
 
   //TODO get the other parameters (not critical for power flow)
 
-  paramRead (strvec3[0], val);
+   val = numeric_conversion<double>(strvec3[0],0.0);
   if (val != 0)
     {
       lnk->set ("tap", val);
     }
-  paramRead (strvec3[2], val);
+   val = numeric_conversion<double>(strvec3[2],0.0);
   if (val != 0)
     {
       lnk->set ("tapangle", val);

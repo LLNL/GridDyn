@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "fncsSource.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
 #include "fncsLibrary.h"
@@ -41,9 +41,9 @@ coreObject *fncsSource::clone(coreObject *obj) const
 }
 
 
-void fncsSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
+void fncsSource::dynObjectInitializeA(coreTime time0, unsigned long flags)
 {
-	rampSource::objectInitializeA(time0, flags);
+	rampSource::dynObjectInitializeA(time0, flags);
 
 	if (updatePeriod == maxTime)
 	{
@@ -56,7 +56,7 @@ void fncsSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
 }
 
 
-void fncsSource::updateA(gridDyn_time time)
+void fncsSource::updateA(coreTime time)
 {
 	if (time < nextUpdateTime)
 	{
@@ -110,7 +110,7 @@ void fncsSource::updateA(gridDyn_time time)
 
 }
 
-void fncsSource::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void fncsSource::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 	while (ttime >= nextUpdateTime)
 	{
@@ -118,7 +118,7 @@ void fncsSource::timestep(gridDyn_time ttime, const IOdata &args, const solverMo
 		updateB();
 	}
 
-	rampSource::timestep(ttime, args, sMode);
+	rampSource::timestep(ttime, inputs, sMode);
 }
 
 
@@ -131,9 +131,9 @@ void fncsSource::setFlag(const std::string &param, bool val)
 	}
 	else if (param == "predictive")
 	{
-		opFlags.set(use_ramp, val);
-		opFlags.set(predictive_ramp, val);
-	}
+			opFlags.set(use_ramp, val);
+			opFlags.set(predictive_ramp, val);
+		}
 	else if (param == "interpolate")
 	{
 		opFlags.set(use_ramp, val);
@@ -172,10 +172,10 @@ void fncsSource::set(const std::string &param, const std::string &val)
 		outputUnits = gridUnits::getUnits(val);
 		updateSubscription();
 		
-	}
+		}
 	else
 	{
-		//no reason to set the ramps in fncs load so go to gridLoad instead
+		//no reason to set the ramps in fncs load so go to zipLoad instead
 		gridSource::set(param, val);
 	}
 

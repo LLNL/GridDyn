@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,18 +15,22 @@
 #define YAMLREADERELEMENT_H_
 
 #include "readerElement.h"
-#include "yaml-cpp/yaml.h"
+
 #include <memory>
+#include <vector>
+namespace YAML
+{
+	class Node;
+}
 
-
+class yamlElement;
 /** @brief class defines a reader element around the yaml-cpp reader*/
 class yamlReaderElement : public readerElement
 {
 public:
 	yamlReaderElement();
-	yamlReaderElement(const std::string &filename);
+	explicit yamlReaderElement(const std::string &filename);
 
-	virtual ~yamlReaderElement() override;
 
 	std::shared_ptr<readerElement> clone() const override;
 
@@ -38,7 +42,7 @@ public:
 	virtual std::string getName() const override;
 	virtual double getValue() const override;
 	virtual std::string getText() const override;
-	virtual std::string getMultiText(const std::string sep = " ") const override;
+	virtual std::string getMultiText(const std::string &sep = " ") const override;
 
 	virtual bool hasAttribute(const std::string &attributeName) const override;
 	virtual bool hasElement(const std::string &elementName) const override;
@@ -70,40 +74,13 @@ private:
 	bool isAttribute(const YAML::Node &testValue) const;
 	bool isElement(const YAML::Node &testValue) const;
 private:
-	class yamlElement
-	{
-	public:
-		int elementIndex = 0;
-		std::string name;
-		unsigned int arrayIndex = 0;
-		yamlElement()
-		{
-		}
-		yamlElement(YAML::Node vElement, std::string newName);
-		void clear();
-		const YAML::Node getElement() const
-		{
-			return (arraytype) ? element[arrayIndex] : element;
-		}
-		size_t count() const
-		{
-			return (arraytype) ? element.size() : 1;
-		}
-		bool isNull() const
-		{
-			return (arraytype) ? element[arrayIndex].IsNull() : element.IsNull();
-		}
-	private:
-		YAML::Node element;
-		bool arraytype = false;
+	
 
-	};
-
-	YAML::Node doc;             //!<document root
-	std::vector<yamlElement> parents;
-	yamlElement current;
-	YAML::const_iterator attIterator;
-
+	std::shared_ptr<YAML::Node> doc;             //!<document root
+	std::vector<std::shared_ptr<yamlElement>> parents;			//!< stack of the parent objects
+	std::shared_ptr<yamlElement> current;		//!< the current object
+	//YAML::const_iterator attIterator;	//!< an iterator for looping through attributes
+	int iteratorCount = 0;
 	std::vector<std::shared_ptr<yamlReaderElement> > bookmarks;
 };
 

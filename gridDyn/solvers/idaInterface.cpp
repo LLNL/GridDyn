@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -21,6 +21,9 @@
 #include <sundials/sundials_math.h>
 #include "core/helperTemplates.h"
 #include "simulation/gridDynSimulationFileOps.h"
+#include "sundialsMatrixData.h"
+#include "matrixDataFilter.h"
+#include "matrixCreation.h"
 
 #ifdef KLU_ENABLE
 #include <ida/ida_klu.h>
@@ -53,7 +56,7 @@ idaInterface::idaInterface (gridDynSimulation *gds, const solverMode& sMode) : s
 idaInterface::~idaInterface ()
 {
   // clear variables for IDA to use
-  if (initialized)
+  if (flags[initialized_flag])
     {
       IDAFree (&solverMem);
     }
@@ -77,8 +80,7 @@ void idaInterface::allocate (count_t stateCount, count_t numRoots)
     {
       return;
     }
-  initialized = false;
-
+  flags.reset(initialized_flag);
   a1.setRowLimit (stateCount);
   a1.setColLimit (stateCount);
 
@@ -100,6 +102,7 @@ void idaInterface::allocate (count_t stateCount, count_t numRoots)
 void idaInterface::setMaxNonZeros (count_t nonZeroCount)
 {
 	maxNNZ = nonZeroCount;
+	jacCallCount = 0;
   a1.reserve (nonZeroCount);
   a1.clear ();
 }
@@ -118,6 +121,10 @@ double idaInterface::get (const std::string &param) const
     {
       val = icCount;
     }
+  else if (param == "nliterations")
+  {
+	  IDAGetNumNonlinSolvIters(solverMem, &val);
+  }
   else if (param == "jac calls")
     {
 #ifdef KLU_ENABLE
@@ -138,7 +145,7 @@ double idaInterface::get (const std::string &param) const
 // output solver stats
 void idaInterface::logSolverStats (print_level logLevel, bool iconly) const
 {
-  if (!initialized)
+  if (!flags[initialized_flag])
     {
       return;
     }
@@ -242,44 +249,25 @@ void idaInterface::logErrorWeights (print_level logLevel) const
 
 /* *INDENT-OFF* */
 static const std::map<int, std::string> idaRetCodes {
-  {IDA_MEM_NULL, "The solver memory argument was NULL"
-  },
-  {IDA_ILL_INPUT, "One of the function inputs is illegal"
-  },
-  {IDA_NO_MALLOC, "The solver memory was not allocated by a call to IDAMalloc"
-  },
-  {IDA_TOO_MUCH_WORK, "The solver took mxstep internal steps but could not reach tout"
-  },
-  {IDA_TOO_MUCH_ACC, "The solver could not satisfy the accuracy demanded by the user for some internal step"
-  },
-  {IDA_ERR_FAIL, "Error test failures occurred too many times during one internal time step or minimum step size was reached"
-  },
-  {IDA_CONV_FAIL, "Convergence test failures occurred too many times during one internal time step or minimum step size was reached"
-  },
-  {IDA_LINIT_FAIL, "The linear solver's initialization function failed"
-  },
-  {IDA_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"
-  },
-  {IDA_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"
-  },
-  {IDA_RES_FAIL, "The user - provided residual function failed in an unrecoverable manner"
-  },
-  {IDA_CONSTR_FAIL, "12	The inequality constraints were violated and the solver was unable to recover"
-  },
-  {IDA_MEM_FAIL, "14	A memory allocation failed"
-  },
-  {IDA_BAD_T, "The time t is outside the last step taken"
-  },
-  {IDA_BAD_EWT, "Zero value of some error weight component"
-  },
-  {IDA_FIRST_RES_FAIL, "The user - provided residual function failed recoverably on the first call"
-  },
-  {IDA_LINESEARCH_FAIL, "The line search failed"
-  },
-  {IDA_NO_RECOVERY, "The residual function, linear solver setup function, or linear solver solve function had a recoverable failure, but IDACalcIC could not recover"
-  },
-  {IDA_RTFUNC_FAIL, "The rootfinding function failed in an unrecoverable manner"
-  },
+  {IDA_MEM_NULL, "The solver memory argument was NULL"},
+  {IDA_ILL_INPUT, "One of the function inputs is illegal"},
+  {IDA_NO_MALLOC, "The solver memory was not allocated by a call to IDAMalloc"},
+  {IDA_TOO_MUCH_WORK, "The solver took mxstep internal steps but could not reach tout"},
+  {IDA_TOO_MUCH_ACC, "The solver could not satisfy the accuracy demanded by the user for some internal step"},
+  {IDA_ERR_FAIL, "Error test failures occurred too many times during one internal time step or minimum step size was reached"},
+  {IDA_CONV_FAIL, "Convergence test failures occurred too many times during one internal time step or minimum step size was reached"},
+  {IDA_LINIT_FAIL, "The linear solver's initialization function failed"},
+  {IDA_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"},
+  {IDA_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"},
+  {IDA_RES_FAIL, "The user - provided residual function failed in an unrecoverable manner"},
+  {IDA_CONSTR_FAIL, "12	The inequality constraints were violated and the solver was unable to recover"},
+  {IDA_MEM_FAIL, "14	A memory allocation failed"},
+  {IDA_BAD_T, "The time t is outside the last step taken"},
+  {IDA_BAD_EWT, "Zero value of some error weight component"},
+  {IDA_FIRST_RES_FAIL, "The user - provided residual function failed recoverably on the first call"},
+  {IDA_LINESEARCH_FAIL, "The line search failed"},
+  {IDA_NO_RECOVERY, "The residual function, linear solver setup function, or linear solver solve function had a recoverable failure, but IDACalcIC could not recover"},
+  {IDA_RTFUNC_FAIL, "The rootfinding function failed in an unrecoverable manner"},
   {IDA_REP_RES_ERR, "The user-provided residual function repeatedly returned a recoverable error flag, but the solver was unable to recover"},
   {IDA_MEM_FAIL, "Memory Allocation failed"},
   {IDA_BAD_K, "Bad K"},
@@ -287,15 +275,15 @@ static const std::map<int, std::string> idaRetCodes {
 };
 /* *INDENT-ON* */
 
-void idaInterface::initialize (gridDyn_time t0)
+void idaInterface::initialize (coreTime t0)
 {
-  if (!allocated)
+  if (!flags[allocated_flag])
     {
 	  throw(InvalidSolverOperation());
     }
   auto jsize = m_gds->jacSize (mode);
 
-  // initializeB IDA - Sundials
+  // dynInitializeB IDA - Sundials
 
   int retval = IDASetUserData (solverMem, static_cast<void *>(this));
   check_flag(&retval, "IDASetUserData", 1);
@@ -322,7 +310,7 @@ void idaInterface::initialize (gridDyn_time t0)
   retval = IDASetMaxNumSteps (solverMem, 1500);
   check_flag(&retval, "IDASetMaxNumSteps", 1);
 #ifdef KLU_ENABLE
-  if (dense)
+  if (flags[dense_flag])
     {
       retval = IDADense (solverMem, svsize);
 	  check_flag(&retval, "IDADense", 1);
@@ -334,7 +322,7 @@ void idaInterface::initialize (gridDyn_time t0)
   else
     {
 
-      retval = IDAKLU (solverMem, svsize, jsize);
+      retval = IDAKLU (solverMem, svsize, jsize,CSR_MAT);
 	  check_flag(&retval, "IDAKLU", 1);
 
       retval = IDASlsSetSparseJacFn (solverMem, idaJacSparse);
@@ -365,14 +353,14 @@ void idaInterface::initialize (gridDyn_time t0)
 
   setConstraints ();
   solveTime = t0;
-  initialized = true;
+  flags.set(initialized_flag);
 
 }
 
 void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
 #ifdef KLU_ENABLE
-  if (dense)
+  if (flags[dense_flag])
     {
 	  return;
     }
@@ -381,6 +369,8 @@ void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
       int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
       int retval = IDAKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
 	  check_flag(&retval, "IDAKLUReInit", 1);
+	  jacCallCount = 0;
+	  
     }
 #endif
 }
@@ -401,7 +391,7 @@ void idaInterface::setRootFinding (count_t numRoots)
 
 #define SHOW_MISSING_ELEMENTS 0
 
-int idaInterface::calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes initCondMode, bool constraints)
+int idaInterface::calcIC (coreTime t0, coreTime tstep0, ic_modes initCondMode, bool constraints)
 {
   int retval;
   ++icCount;
@@ -409,9 +399,9 @@ int idaInterface::calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes initCon
   if (initCondMode == ic_modes::fixed_masked_and_deriv) //mainly for use upon startup from steady state
     {
       //do a series of steps to ensure the original algebraic states are fixed and the derivatives are fixed
-      useMask = true;
+	  flags.set(useMask_flag);
       loadMaskElements ();
-      if (!dense)
+      if (!flags[dense_flag])
         {
           sparseReInit (sparse_reinit_modes::refactor);
         }
@@ -436,7 +426,7 @@ int idaInterface::calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes initCon
                       tempState[me] = lstate[me];
                     }
 
-                  if (!dense)
+                  if (!flags[dense_flag])
                     {
                       sparseReInit (sparse_reinit_modes::refactor);
                     }
@@ -467,8 +457,8 @@ int idaInterface::calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes initCon
               return retval;
             }
         }
-      useMask = false;
-      if (!dense)
+	  flags.reset(useMask_flag);
+      if (!flags[dense_flag])
         {
           sparseReInit (sparse_reinit_modes::refactor);
         }
@@ -520,7 +510,7 @@ void idaInterface::getCurrentData ()
   check_flag(&retval, "IDAGetConsistentIC", 1);
 }
 
-int idaInterface::solve (gridDyn_time tStop, gridDyn_time &tReturn, step_mode stepMode)
+int idaInterface::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode)
 {
   assert (rootCount == m_gds->rootSize (mode));
   ++solverCallCount;
@@ -582,7 +572,7 @@ int idaFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, N_Vector resid,
   idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
   //printf("time=%f\n", ttime);
   int ret = sd->m_gds->residualFunction (ttime, NVECTOR_DATA (sd->use_omp, state), NVECTOR_DATA (sd->use_omp, dstate_dt), NVECTOR_DATA (sd->use_omp, resid), sd->mode);
-  if (sd->useMask)
+  if (sd->flags[useMask_flag])
     {
       double *lstate = NVECTOR_DATA (sd->use_omp, state);
       double *lresid = NVECTOR_DATA (sd->use_omp, resid);
@@ -591,7 +581,7 @@ int idaFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, N_Vector resid,
           lresid[v] = 100.0 * (lstate[v] - sd->tempState[v]);
         }
     }
-	if (sd->fileCapture)
+	if (sd->flags[fileCapture_flag])
 	{
 		if (!sd->stateFile.empty())
 		{
@@ -613,100 +603,17 @@ int idaRootFunc (realtype ttime, N_Vector state, N_Vector dstate_dt, realtype *g
 }
 
 #define CHECK_JACOBIAN 0
-int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, N_Vector /*resid*/, DlsMat J, void *user_data, N_Vector /*tmp1*/, N_Vector /*tmp2*/, N_Vector /*tmp3*/)
+int idaJacDense (long int Neq, realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, N_Vector /*resid*/, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-  idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
-
-  assert (Neq == static_cast<int> (sd->svsize));
-  _unused(Neq);
-  matrixDataSparse<double> &a1 = (sd->a1);
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
-
-
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v,kNullLocation);
-          a1.assign (v,v,100);
-        }
-      a1.filter ();
-    }
-
-  //assign the elements
-  for (index_t kk = 0; kk < a1.size (); ++kk)
-    {
-      DENSE_ELEM (J, a1.rowIndex (kk), a1.colIndex (kk)) += a1.val (kk);
-      //DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) += DENSE_ELEM (J, a1->rowIndex (kk), a1->colIndex (kk)) + a1->val (kk);
-    }
-
-    #if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n",me);
-    }
-    #endif
-  return FUNCTION_EXECUTION_SUCCESS;
+	return sundialsJacDense(Neq, ttime, cj, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
 }
 
 //#define CAPTURE_JAC_FILE
 
 #ifdef KLU_ENABLE
-int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, N_Vector /*resid*/, SlsMat J, void *user_data, N_Vector, N_Vector, N_Vector )
+int idaJacSparse (realtype ttime, realtype cj, N_Vector state, N_Vector dstate_dt, N_Vector /*resid*/, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
-
-  idaInterface *sd = reinterpret_cast<idaInterface *> (user_data);
-
-  matrixDataSparse<double> &a1 = sd->a1;
-
-  sd->m_gds->jacobianFunction (ttime, NVECTOR_DATA(sd->use_omp, state), NVECTOR_DATA(sd->use_omp, dstate_dt), a1,cj, sd->mode);
-  a1.sortIndexCol ();
-  if (sd->useMask)
-    {
-      for (auto &v : sd->maskElements)
-        {
-          a1.translateRow (v,kNullLocation);
-          a1.assign (v, v,1);
-        }
-      a1.filter ();
-      a1.sortIndexCol ();
-    }
-  a1.compact ();
-
-  SlsSetToZero (J);
-
-  count_t colval = 0;
-  J->colptrs[0] = colval;
-  for (index_t kk = 0; kk < a1.size (); ++kk)
-    {
-      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk), a1->colIndex(kk));
-      if (a1.colIndex (kk) > colval)
-        {
-          colval++;
-          J->colptrs[colval] = static_cast<int> (kk);
-        }
-      J->data[kk] = a1.val (kk);
-      J->rowvals[kk] = a1.rowIndex (kk);
-    }
-  J->colptrs[colval + 1] = static_cast<int> (a1.size ());
-
-if (sd->fileCapture)
-  {
-	  if (!sd->jacFile.empty())
-	  {
-		  long int val = 0;
-		  IDAGetNumNonlinSolvIters(sd->solverMem, &val);
-		  writeArray(sd->solveTime, 1, val, sd->mode.offsetIndex, a1, sd->jacFile);
-	  }
-  }
-#if (CHECK_JACOBIAN > 0)
-  auto mv = findMissing (a1);
-  for (auto &me : mv)
-    {
-      printf ("no entries for element %d\n", me);
-    }
-#endif
-  return 0;
+	return sundialsJacSparse(ttime, cj, state, dstate_dt, J, user_data, tmp1, tmp2, tmp3);
+  
 }
 #endif

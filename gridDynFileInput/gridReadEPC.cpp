@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,29 +15,33 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "primary/acBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
+#include "stringConversion.h"
 #include "stringOps.h"
-
+#include "string_viewOps.h"
+#include "string_viewConversion.h"
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
+#include <functional>
 
 
 
 using namespace gridUnits;
+using namespace utilities::string_viewOps;
+using utilities::string_view;
 
+void epcReadBus (gridBus *bus, string_view line, double base, const basicReaderInfo &bri);
+void epcReadLoad (zipLoad *ld, string_view line, double base);
+void epcReadFixedShunt (zipLoad *ld, string_view line, double base);
+void epcReadGen (gridDynGenerator *gen, string_view line, double base);
+void epcReadBranch (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
+void epcReadTX (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
 
-void epcReadBus (gridBus *bus, std::string line, double base, const basicReaderInfo &bri);
-void epcReadLoad (gridLoad *ld, std::string line, double base);
-void epcReadFixedShunt (gridLoad *ld, std::string line, double base);
-void epcReadGen (gridDynGenerator *gen, std::string line, double base);
-void epcReadBranch (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
-void epcReadTX (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri);
-
-double epcReadSolutionParamters (coreObject *parentObject, std::string line);
+double epcReadSolutionParamters (coreObject *parentObject, string_view line);
 
 bool nextLine (std::ifstream &file, std::string &line)
 {
@@ -51,7 +55,7 @@ bool nextLine (std::ifstream &file, std::string &line)
             {
               continue;
             }
-          trimString (line);
+		  stringOps::trimString(line);
           if (line.empty ()) //continue over empty lines
             {
               continue;
@@ -78,36 +82,94 @@ bool nextLine (std::ifstream &file, std::string &line)
   return ret;
 }
 
-int getSectionCount (std::string &line)
+int getSectionCount (string_view line)
 {
   auto bbegin = line.find_first_of ("[");
   int cnt = -1;
-  if (bbegin != std::string::npos)
+  if (bbegin != string_view::npos)
     {
       auto bend = line.find_first_of ("]", bbegin);
-      paramRead (line.substr (bbegin + 1, (bend - bbegin - 1)), cnt);
+	  cnt = numeric_conversion<int>(line.substr(bbegin + 1, (bend - bbegin - 1)), 0);
     }
   return cnt;
 }
 
-int getLineIndex (std::string &line)
+int getLineIndex (string_view line)
 {
-  int index = -1;
   trimString (line);
   auto pos = line.find_first_not_of ("0123456789");
-  paramRead (line.substr (0, pos), index, -1);
+  int index = numeric_conversion<int>(line.substr(0, pos), -1);
   return index;
+}
+
+
+void ProcessSection(std::string line, std::ifstream &file, std::function<void(string_view)> Func)
+{
+	int cnt = getSectionCount(line);
+
+	int bcount = 0;
+	if (cnt < 0)
+	{
+		cnt = kBigINT;
+	}
+	while (bcount < cnt)
+	{
+		nextLine(file, line);
+		int index = getLineIndex(line);
+		if (index < 0)
+		{
+		}
+		++bcount;
+		Func(line);
+	}
+}
+
+template <class X>
+void ProcessSectionObject(std::string line, std::ifstream &file, const std::string &oname, std::vector<gridBus *> &busList, std::function<void(X*, string_view)> Func)
+{
+	int cnt = getSectionCount(line);
+
+	int bcount = 0;
+	if (cnt < 0)
+	{
+		cnt = kBigINT;
+	}
+	while (bcount < cnt)
+	{
+		nextLine(file, line);
+		int index = getLineIndex(line);
+		if (index < 0)
+		{
+		}
+		++bcount;
+
+		if (index > static_cast<int> (busList.size()))
+		{
+			std::cerr << "Invalid bus number for "<<oname<<" " << index << '\n';
+		}
+		if (busList[index - 1] == nullptr)
+		{
+			std::cerr << "Invalid bus number for "<<oname<<" " << index << '\n';
+
+		}
+		else
+		{
+			auto obj = new X();
+			busList[index - 1]->add(obj);
+			Func(obj, line);
+
+		}
+
+	}
 }
 
 void loadEPC (coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
-  std::string line;        //line storage
+  
   std::string temp1;        //temporary storage for substrings
   std::string pref2;       // temp storage to 2nd order prefix.
   std::vector<gridBus *> busList;
-  gridLoad *ld;
-  gridDynGenerator *gen;
   int index;
   double base = 100;
   int cnt, bcount;
@@ -116,10 +178,10 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
   First card in file.
   */
 
-
+  std::string line;        //line storage
   while (nextLine (file, line))
     {
-      auto tokens = splitline (line, " \t");
+      auto tokens = split (line, " \t");
       trimString (tokens[0]);
       if (tokens[0] == "title")
         {
@@ -207,7 +269,7 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
           nextLine (file, line);
           while (line[0] != '!')
             {
-              if (line.substr (0, 5) == "sbase")
+              if (line.compare (0, 5,"sbase")==0)
                 {
                   base = epcReadSolutionParamters (parentObject, line);
                 }
@@ -220,159 +282,28 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
         }
       else if (tokens[0] == "branch")
         {
-          cnt = getSectionCount (line);
-
-          bcount = 0;
-          if (cnt < 0)
-            {
-              cnt = kBigINT;
-            }
-          while (bcount < cnt)
-            {
-              nextLine (file, line);
-              index = getLineIndex (line);
-              if (index < 0)
-                {
-                }
-              ++bcount;
-              epcReadBranch (parentObject, line, base, busList, bri);
-            }
+		  ProcessSection(line, file, [&](string_view config) {epcReadBranch(parentObject, config, base, busList, bri); });
         }
       else if (tokens[0] == "transformer")
         {
-          cnt = getSectionCount (line);
-
-          bcount = 0;
-          if (cnt < 0)
-            {
-              cnt = kBigINT;
-            }
-          while (bcount < cnt)
-            {
-              nextLine (file, line);
-              index = getLineIndex (line);
-              if (index < 0)
-                {
-                }
-              ++bcount;
-              epcReadTX (parentObject, line, base, busList, bri);
-            }
+		  ProcessSection(line, file, [&](string_view config) {epcReadTX(parentObject, config, base, busList, bri); });
         }
       else if (tokens[0] == "generator")
         {
-          cnt = getSectionCount (line);
-
-          bcount = 0;
-          if (cnt < 0)
-            {
-              cnt = kBigINT;
-            }
-          while (bcount < cnt)
-            {
-              nextLine (file, line);
-              index = getLineIndex (line);
-              if (index < 0)
-                {
-                }
-              ++bcount;
-
-              if (index > static_cast<int> (busList.size ()))
-                {
-                  std::cerr << "Invalid bus number for generator " << index << '\n';
-                }
-              if (busList[index - 1] == nullptr)
-                {
-                  std::cerr << "Invalid bus number for generator " << index << '\n';
-
-                }
-              else
-                {
-                  gen = new gridDynGenerator ();
-                  busList[index - 1]->add (gen);
-                  epcReadGen (gen, line, base);
-
-                }
-
-            }
+		  ProcessSectionObject<gridDynGenerator>(line, file, "generator", busList, [base](gridDynGenerator *gen, string_view config) {epcReadGen(gen, config, base); });
         }
       else if (tokens[0] == "load")
         {
-          cnt = getSectionCount (line);
-
-          bcount = 0;
-          if (cnt < 0)
-            {
-              cnt = kBigINT;
-            }
-          while (bcount < cnt)
-            {
-              nextLine (file, line);
-              index = getLineIndex (line);
-              if (index < 0)
-                {
-                }
-              ++bcount;
-
-              if (index > static_cast<int> (busList.size ()))
-                {
-                  std::cerr << "Invalid bus number for load " << index << '\n';
-                }
-              if (busList[index - 1] == nullptr)
-                {
-                  std::cerr << "Invalid bus number for load " << index << '\n';
-
-                }
-              else
-                {
-                  ld = new gridLoad ();
-                  busList[index - 1]->add (ld);
-                  epcReadLoad (ld, line, base);
-
-                }
-
-            }
-
+		  ProcessSectionObject<zipLoad>(line, file, "load", busList, [base](zipLoad *ld, string_view config) {epcReadLoad(ld, config, base); });
         }
       else if (tokens[0] == "shunt")
         {
-          cnt = getSectionCount (line);
-
-          bcount = 0;
-          if (cnt < 0)
-            {
-              cnt = kBigINT;
-            }
-          while (bcount < cnt)
-            {
-              nextLine (file, line);
-              index = getLineIndex (line);
-              if (index < 0)
-                {
-                }
-              ++bcount;
-
-              if (index > static_cast<int> (busList.size ()))
-                {
-                  std::cerr << "Invalid bus number for shunt " << index << '\n';
-                }
-              if (busList[index - 1] == nullptr)
-                {
-                  std::cerr << "Invalid bus number for shunt" << index << '\n';
-
-                }
-              else
-                {
-                  ld = new gridLoad ();
-                  busList[index - 1]->add (ld);
-                  epcReadFixedShunt (ld, line, base);
-
-                }
-
-            }
+		  ProcessSectionObject<zipLoad>(line, file, "shunt", busList, [base](zipLoad *ld, string_view config) {epcReadFixedShunt(ld, config, base); });
+          
         }
       else
         {
-          //unknown section
+		  std::cerr << "unrecognized token" << tokens[0] << '\n';
         }
     }
   file.close ();
@@ -408,10 +339,10 @@ sbase
 System base, MVA
 */
 
-double epcReadSolutionParamters (coreObject *parentObject, std::string line)
+double epcReadSolutionParamters (coreObject *parentObject, string_view line)
 {
-  auto tokens = splitline (line, " ",delimiter_compression::on);
-  double val = doubleRead (tokens[1]);
+  auto tokens = split (line, " ",delimiter_compression::on);
+  double val = numeric_conversion (tokens[1],0.0);
   if (tokens[0] == "tap")
     {
 
@@ -450,31 +381,26 @@ double epcReadSolutionParamters (coreObject *parentObject, std::string line)
   return val;
 }
 
-void epcReadBus (gridBus *bus, std::string line, double /*base*/, const basicReaderInfo &bri)
+void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicReaderInfo &bri)
 {
-  std::string temp, temp2;
-  double bv;
-  double vm;
-  double va;
-  int type;
 
-  auto strvec = splitlineBracket (line," :",delimiter_compression::on);
+  auto strvec = splitlineBracket (line," :",default_bracket_chars,delimiter_compression::on);
   //get the bus name
-  temp = strvec[0];
-  temp2 = strvec[1];
+  auto temp = strvec[0];
+  std::string temp2 = strvec[1].to_string();
 
   if (bri.prefix.empty ())
     {
       if (temp2.empty ())      //12 spaces is default value which would all get trimmed
         {
-          temp2 = "BUS_" + temp;
+          temp2 = "BUS_" + temp.to_string();
         }
     }
   else
     {
       if (temp2.empty ())      //12 spaces is default value which would all get trimmed
         {
-          temp2 = bri.prefix + '_' + temp;
+          temp2 = bri.prefix + '_' + temp.to_string();
         }
       else
         {
@@ -484,21 +410,14 @@ void epcReadBus (gridBus *bus, std::string line, double /*base*/, const basicRea
   bus->setName (temp2);
 
   //get the baseVoltage
-  bv = std::stod (strvec[2]);
+  double bv = numeric_conversion<double>(strvec[2],-1.0);
   if (bv > 0.0)
     {
       bus->set ("basevoltage", bv);
     }
 
-  //get the bus type
-  if (strvec[3].empty ())
-    {
-      type = 1;
-    }
-  else
-    {
-      type = std::stoi (strvec[3]);
-    }
+
+   int type = numeric_conversion<int> (strvec[3],1);
 
   switch (type)
     {
@@ -517,17 +436,17 @@ void epcReadBus (gridBus *bus, std::string line, double /*base*/, const basicRea
       break;
 
     }
-  bus->set ("type", temp);
+  bus->set ("type", temp.to_string());
   //skip the load flow area and loss zone for now
   //skip the owner information
   //get the voltage and angle specifications
-  paramRead (strvec[4], vm);
+  double vm = numeric_conversion<double>(strvec[4],0.0);
   if (vm != 0)
     {
       bus->set ("vtarget", vm);
     }
-  paramRead (strvec[5], vm);
-  paramRead (strvec[6], va);
+   vm = numeric_conversion<double>(strvec[5],0.0);
+  double va = numeric_conversion<double>(strvec[6],0.0);
   if (va != 0)
     {
       bus->set ("angle", va, deg);
@@ -537,8 +456,8 @@ void epcReadBus (gridBus *bus, std::string line, double /*base*/, const basicRea
       bus->set ("voltage", vm);
     }
 
-  paramRead (strvec[9], vm);
-  paramRead (strvec[10], va);
+   vm = numeric_conversion<double>(strvec[9],0.0);
+   va = numeric_conversion<double>(strvec[10],0.0);
   if (va != 0)
     {
       bus->set ("vmin", va);
@@ -551,7 +470,7 @@ void epcReadBus (gridBus *bus, std::string line, double /*base*/, const basicRea
 
 }
 
-void epcReadLoad (gridLoad *ld, std::string line, double /*base*/)
+void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
 {
   std::string temp;
   std::string prefix;
@@ -560,33 +479,33 @@ void epcReadLoad (gridLoad *ld, std::string line, double /*base*/)
   int status;
 
 
-  auto strvec = splitlineBracket (line, " :", delimiter_compression::on);
+  auto strvec = splitlineBracket (line, " :", default_bracket_chars,delimiter_compression::on);
 
   //get the load index and name
   prefix = ld->getParent ()->getName () + "_Load";
   if (!strvec[3].empty ())
     {
-      prefix += '_' + strvec[3];
+      prefix += '_' + strvec[3].to_string();
     }
   if (!strvec[4].empty ())
     {
-      ld->setName (strvec[4]);
+      ld->setName (strvec[4].to_string());
     }
   else
     {
       ld->setName (prefix);
     }
   //get the status
-  status = std::stoi (strvec[5]);
+  status = toIntSimple(strvec[5]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[6], p);
-  paramRead (strvec[7], q);
+   p = numeric_conversion<double>(strvec[6],0.0);
+   q = numeric_conversion<double>(strvec[7],0.0);
   if (p != 0.0)
     {
       ld->set ("p", p, MW);
@@ -596,8 +515,8 @@ void epcReadLoad (gridLoad *ld, std::string line, double /*base*/)
       ld->set ("q", q, MVAR);
     }
   //get the constant current part of the load
-  paramRead (strvec[8], p);
-  paramRead (strvec[9], q);
+   p = numeric_conversion<double>(strvec[8],0.0);
+   q = numeric_conversion<double>(strvec[9],0.0);
   if (p != 0.0)
     {
       ld->set ("ip", p, MW);
@@ -608,8 +527,8 @@ void epcReadLoad (gridLoad *ld, std::string line, double /*base*/)
     }
   //get the impedance part of the load
   //note:: in PU power units, need to convert to Pu resistance
-  paramRead (strvec[10], p);
-  paramRead (strvec[11], q);
+   p = numeric_conversion<double>(strvec[10],0.0);
+   q = numeric_conversion<double>(strvec[11],0.0);
   if (p != 0.0)
     {
       ld->set ("r", p, MW);
@@ -622,7 +541,7 @@ void epcReadLoad (gridLoad *ld, std::string line, double /*base*/)
 
 }
 
-void epcReadFixedShunt (gridLoad *ld, std::string line, double /*base*/)
+void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
 {
   std::string temp;
   std::string prefix;
@@ -631,17 +550,17 @@ void epcReadFixedShunt (gridLoad *ld, std::string line, double /*base*/)
   int status;
 
 
-  auto strvec = splitlineBracket (line, " :", delimiter_compression::on);
+  auto strvec = splitlineBracket (line, " :",default_bracket_chars, delimiter_compression::on);
 
   //get the load index and name
   prefix = ld->getParent ()->getName () + "_Shunt";
   if (!strvec[7].empty ())
     {
-      prefix += '_' + strvec[7];
+      prefix += '_' + trim(strvec[7]).to_string();
     }
   if (!strvec[9].empty ())
     {
-      ld->setName (strvec[9]);
+      ld->setName (trim(strvec[9]).to_string());
     }
   else
     {
@@ -650,16 +569,16 @@ void epcReadFixedShunt (gridLoad *ld, std::string line, double /*base*/)
 
 
   //get the status
-  status = std::stoi (strvec[10]);
+  status = toIntSimple (strvec[10]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[13], p);
-  paramRead (strvec[14], q);
+   p = numeric_conversion<double>(strvec[13],0.0);
+   q = numeric_conversion<double>(strvec[14],0.0);
   if (p != 0.0)
     {
       ld->set ("yp", p, puMW);
@@ -673,26 +592,20 @@ void epcReadFixedShunt (gridLoad *ld, std::string line, double /*base*/)
 }
 
 
-void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
+void epcReadGen (gridDynGenerator *gen, string_view	 line, double /*base*/)
 {
-  std::string temp;
-  std::string prefix;
-  double p;
-  double q;
-  int rbus;
-  int status;
 
-  auto strvec = splitlineBracket (line, " :", delimiter_compression::on);
+  auto strvec = splitlineBracket (line, " :",default_bracket_chars, delimiter_compression::on);
 
   //get the gen index and name
-  prefix = gen->getParent ()->getName () + "_Gen";
+  std::string prefix = gen->getParent ()->getName () + "_Gen";
   if (!strvec[3].empty ())
     {
-      prefix += '_' + strvec[3];
+      prefix += '_' + strvec[3].to_string();
     }
   if (!strvec[4].empty ())
     {
-      gen->setName (strvec[5]);
+      gen->setName (trim(strvec[5]).to_string());
     }
   else
     {
@@ -701,15 +614,15 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
 
 
   //get the status
-  status = std::stoi (strvec[5]);
+  int status = toIntSimple (strvec[5]);
   if (status == 0)
     {
-      gen->enabled = false;
+      gen->disable();
     }
 
   //get the power generation
-  paramRead (strvec[13], p);
-  paramRead (strvec[16], q);
+   double p = numeric_conversion<double>(strvec[13],0.0);
+   double q = numeric_conversion<double>(strvec[16],0.0);
   if (p != 0.0)
     {
       gen->set ("p", p, MW);
@@ -719,8 +632,8 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
       gen->set ("q", q, MVAR);
     }
   //get the Pmax and Pmin
-  paramRead (strvec[14], p);
-  paramRead (strvec[15], q);
+   p = numeric_conversion<double>(strvec[14],0.0);
+   q = numeric_conversion<double>(strvec[15],0.0);
   if (p != 0.0)
     {
       gen->set ("pmax", p, MW);
@@ -730,8 +643,8 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
       gen->set ("pmin", q, MW);
     }
   //get the Qmax and Qmin
-  paramRead (strvec[17], p);
-  paramRead (strvec[18], q);
+   p = numeric_conversion<double>(strvec[17],0.0);
+   q = numeric_conversion<double>(strvec[18],0.0);
   if (p != 0.0)
     {
       gen->set ("qmax", p, MVAR);
@@ -741,18 +654,17 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
       gen->set ("qmin", q, MVAR);
     }
   //get the machine base
-  double mb;
-  paramRead (strvec[19], mb);
+   double mb = numeric_conversion<double>(strvec[19],0.0);
   gen->set ("mbase", mb);
 
-  paramRead (strvec[22], mb);
+   mb = numeric_conversion<double>(strvec[22],0.0);
   gen->set ("rs", mb);
 
-  paramRead (strvec[23], mb);
+   mb = numeric_conversion<double>(strvec[23],0.0);
   gen->set ("xs", mb);
 
 
-  paramRead (strvec[6], rbus);
+   int rbus = numeric_conversion<int>(strvec[6],0);
 
   if (rbus != 0)
     {
@@ -763,20 +675,19 @@ void epcReadGen (gridDynGenerator *gen, std::string line, double /*base*/)
 }
 
 
-void epcReadBranch (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
+void epcReadBranch (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
   std::string temp2;
   gridBus *bus1, *bus2;
   gridLink *lnk;
-  int ind1, ind2;
-  double R, X;
   double val;
   int status;
 
-  auto strvec = splitlineBracket (line, " :",delimiter_compression::on);
+  auto strvec = splitlineBracket (line, " :",default_bracket_chars,delimiter_compression::on);
 
-  std::string temp = strvec[0];
-  ind1 = std::stoi (temp);
+  std::string temp = trim(strvec[0]).to_string();
+  
+  int ind1 = std::stoi (temp);
   if (bri.prefix.empty ())
     {
       temp2 = temp + "_to_";
@@ -786,8 +697,8 @@ void epcReadBranch (coreObject *parentObject, std::string line, double base, std
       temp2 = bri.prefix + '_' + temp + "_to_";
     }
 
-  temp = strvec[3];
-  ind2 = std::stoi (temp);
+  temp = trim(strvec[3]).to_string();
+  int ind2 = std::stoi (temp);
 
   temp2 = temp2 + temp;
   bus1 = busList[ind1 - 1];
@@ -795,11 +706,11 @@ void epcReadBranch (coreObject *parentObject, std::string line, double base, std
 
   if (!strvec[8].empty ())
     {
-      lnk = new gridLink (strvec[8]);
+      lnk = new acLine (strvec[8].to_string());
     }
   else
     {
-      lnk = new gridLink (temp2);
+      lnk = new acLine (temp2);
     }
 
 
@@ -810,14 +721,14 @@ void epcReadBranch (coreObject *parentObject, std::string line, double base, std
 
   parentObject->add (lnk);
   //get the branch parameters
-  status = std::stoi (strvec[9]);
+  status =toIntSimple (strvec[9]);
   if (status == 0)
     {
-      lnk->enabled = false;
+      lnk->disable();
     }
 
-  paramRead (strvec[10], R);
-  paramRead (strvec[11], X);
+   double R = numeric_conversion<double>(strvec[10],0.0);
+   double X = numeric_conversion<double>(strvec[11],0.0);
 
   lnk->set ("r", R);
   lnk->set ("x", X);
@@ -830,28 +741,28 @@ void epcReadBranch (coreObject *parentObject, std::string line, double base, std
 
 
   //get line capacitance
-  paramRead (strvec[12], val);
+   val = numeric_conversion<double>(strvec[12],0.0);
   if (val != 0)
     {
       lnk->set ("b", val);
     }
-  paramRead (strvec[13], val);
+   val = numeric_conversion<double>(strvec[13],0.0);
   if (val != 0)
     {
       lnk->set ("ratinga", val);
     }
-  paramRead (strvec[14], val);
+   val = numeric_conversion<double>(strvec[14],0.0);
   if (val != 0)
     {
       lnk->set ("ratingb", val);
     }
-  paramRead (strvec[15], val);
+   val = numeric_conversion<double>(strvec[15],0.0);
   if (val != 0)
     {
       lnk->set ("erating", val);
     }
 
-  paramRead (strvec[18], val);
+   val = numeric_conversion<double>(strvec[18],0.0);
   if (val != 0)
     {
       lnk->set ("length", val,km);
@@ -859,9 +770,9 @@ void epcReadBranch (coreObject *parentObject, std::string line, double base, std
 
 }
 
-void epcReadTX (coreObject *parentObject, std::string line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
+void epcReadTX (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
-  std::string temp, temp2;
+  std::string temp2;
   gridBus *bus1, *bus2;
   gridLink *lnk;
   int code;
@@ -871,9 +782,9 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
   int status;
   int cbus;
 
-  auto strvec = splitlineBracket (line, " :",delimiter_compression::on);
+  auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 
-  temp = strvec[0];
+  auto temp = trim(strvec[0]).to_string();
   ind1 = std::stoi (temp);
   if (bri.prefix.empty ())
     {
@@ -884,20 +795,20 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
       temp2 = bri.prefix + "_tx_" + temp + "_to_";
     }
 
-  temp = strvec[3];
+  temp = trim(strvec[3]).to_string();
   ind2 = std::stoi (temp);
 
   temp2 = temp2 + temp;
   bus1 = busList[ind1 - 1];
   bus2 = busList[ind2 - 1];
 
-  code = std::stoi (strvec[9]);
+  code = numeric_conversion<int> (strvec[9],1);
   switch (code)
     {
     case 1:
     case 11:
       code = 1;
-      lnk = new gridLink ();
+      lnk = new acLine ();
       // lnk->set ("type", "transformer");
       break;
     case 2:
@@ -929,7 +840,7 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
 
   if (!strvec[7].empty ())
     {
-      lnk->setName (strvec[8]);
+      lnk->setName (trim(strvec[8]).to_string());
     }
   else
     {
@@ -939,17 +850,17 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
 
   parentObject->add (lnk);
   //get the branch parameters
-  status = std::stoi (strvec[9]);
+  status = toIntSimple (strvec[9]);
   if (status == 0)
     {
-      lnk->enabled = false;
+      lnk->disable();
     }
 
   double tbase = base;
-  paramRead (strvec[22], tbase);
+   tbase = numeric_conversion<double>(strvec[22],0.0);
   //primary and secondary winding resistance
-  paramRead (strvec[23], R);
-  paramRead (strvec[24], X);
+   R = numeric_conversion<double>(strvec[23],0.0);
+   X = numeric_conversion<double>(strvec[24],0.0);
 
   lnk->set ("r", R * tbase / base);
   lnk->set ("x", X * tbase / base);
@@ -963,28 +874,28 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
 
   //get line capacitance
 
-  paramRead (strvec[35], val);
+   val = numeric_conversion<double>(strvec[35],0.0);
   if (val != 0)
     {
       lnk->set ("ratinga", val);
     }
-  paramRead (strvec[36], val);
+   val = numeric_conversion<double>(strvec[36],0.0);
   if (val != 0)
     {
       lnk->set ("ratingb", val);
     }
-  paramRead (strvec[37], val);
+   val = numeric_conversion<double>(strvec[37],0.0);
   if (val != 0)
     {
       lnk->set ("erating", val);
     }
 
-  paramRead (strvec[45], val);
+   val = numeric_conversion<double>(strvec[45],0.0);
   if (val != 0)
     {
       lnk->set ("tap", val);
     }
-  paramRead (strvec[32], val);
+   val = numeric_conversion<double>(strvec[32],0.0);
   if (val != 0)
     {
       lnk->set ("tapangle", val, deg);
@@ -992,13 +903,13 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
   //now get the stuff for the adjustable transformers
   if (code > 1)
     {
-      paramRead (strvec[10], cbus);
+	  cbus = numeric_conversion<int>(strvec[10], 0);
       if (cbus != 0)
         {
           static_cast<adjustableTransformer *> (lnk)->setControlBus (busList[cbus - 1]);
         }
-      paramRead (strvec[40], R);
-      paramRead (strvec[41], X);
+       R = numeric_conversion<double>(strvec[40],0.0);
+       X = numeric_conversion<double>(strvec[41],0.0);
       if (code == 4)
         {
           lnk->set ("maxtapangle", R, deg);
@@ -1009,8 +920,8 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
           lnk->set ("maxtap", R);
           lnk->set ("mintap", X);
         }
-      paramRead (strvec[42], R);
-      paramRead (strvec[43], X);
+       R = numeric_conversion<double>(strvec[42],0.0);
+       X = numeric_conversion<double>(strvec[43],0.0);
       if (code == 4)
         {
           lnk->set ("pmax", R, MW);
@@ -1026,7 +937,7 @@ void epcReadTX (coreObject *parentObject, std::string line, double base, std::ve
           lnk->set ("vmax", R);
           lnk->set ("vmin", X);
         }
-      paramRead (strvec[44], R);
+       R = numeric_conversion<double>(strvec[44],0.0);
       if (code == 4)
         {
           lnk->set ("stepsize", R,deg);

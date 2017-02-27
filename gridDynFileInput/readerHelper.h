@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,11 +10,11 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef READERHELPER_H_
 #define READERHELPER_H_
 
-#include "gridDynVectorTypes.h"
+#include "gridDynDefinitions.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -34,14 +34,14 @@ class coreObject;
 class basicReaderInfo;
 
 
-void paramStringProcess (gridParameter *param, readerInfo *ri);
+void paramStringProcess (gridParameter *param, readerInfo &ri);
 
 double convertBV (std::string &bv);
 
-typedef std::vector<std::vector<double> > mArray;
+using mArray= std::vector<std::vector<double> >;
 
 
-double interpretString (std::string command, readerInfo *ri);
+double interpretString (std::string command, readerInfo &ri);
 
 
 // NOTE:PT I am leaving these as size_t since they are part of file reading and text location types and spread across multiple files
@@ -55,52 +55,5 @@ void loadMatPower (coreObject *parentObject, const std::string &filetext, std::s
 void loadMatDyn (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
 void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri);
 
-//TODO::PT replace the calls of these functions with those from stringOps.h
-
-inline void paramRead (const std::string &V, double &val, double def = 0.0)
-{
-  size_t pos;
-  try
-    {
-      val = std::stod (V, &pos);
-
-      while (pos < V.length ())
-        {
-          if (!(isspace (V[pos])))
-            {
-              val = def;
-              break;
-            }
-          ++pos;
-        }
-    }
-  catch (std::invalid_argument)
-    {
-      val = def;
-    }
-}
-
-inline void paramRead (const std::string &V, int &val, int def = 0)
-{
-  size_t pos;
-  try
-    {
-      val = std::stoi (V, &pos);
-
-      while (pos < V.length ())
-        {
-          if (!(isspace (V[pos])))
-            {
-              val = def;
-              break;
-            }
-          ++pos;
-        }
-    }
-  catch (std::invalid_argument)
-    {
-      val = def;
-    }
-}
 
 #endif

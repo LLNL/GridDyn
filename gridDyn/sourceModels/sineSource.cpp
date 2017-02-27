@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #include "sourceTypes.h"
 
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include <cmath>
 
 /*
@@ -48,15 +48,15 @@ coreObject *sineSource::clone (coreObject *obj) const
 }
 
 
-void sineSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void sineSource::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   lastCycle = time0 - phase / (frequency * 2.0 * kPI);
-  pulseSource::objectInitializeA (time0,flags);
-  computeOutput (time0);
+  pulseSource::dynObjectInitializeA (time0,flags);
+  updateOutput (time0);
 }
 
 
-double sineSource::computeOutput (gridDyn_time ttime) const
+double sineSource::computeOutput (coreTime ttime) const
 {
 
   
@@ -87,7 +87,7 @@ double sineSource::computeOutput (gridDyn_time ttime) const
 
 }
 
-void sineSource::updateOutput (gridDyn_time ttime)
+void sineSource::updateOutput (coreTime ttime)
 {
 
   
@@ -120,9 +120,7 @@ void sineSource::updateOutput (gridDyn_time ttime)
     }
  
     m_output = baseValue + (mult * addComponent);
-
   prevTime = ttime;
-  lastTime = ttime;
 }
 
 

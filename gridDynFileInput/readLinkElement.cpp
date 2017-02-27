@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,10 +17,10 @@
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
 
-#include "objectInterpreter.h"
+#include "core/objectInterpreter.h"
 
 #include "linkModels/gridLink.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "gridBus.h"
 
 using namespace readerConfig;
@@ -30,10 +30,10 @@ static const IgnoreListType linkIgnoreElements {
 };
 static const std::string linkComponentName = "link";
 // aP is the link element
-gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject, bool warnlink)
+gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject, bool warnlink)
 {
 
-  auto riScope = ri->newScope ();
+  auto riScope = ri.newScope ();
 
   //run the boilerplate code to setup the object
   gridLink *lnk = ElementReaderSetup (element, (gridLink *)nullptr, linkComponentName, ri, searchObject);
@@ -50,7 +50,7 @@ gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo 
     }
   else if (searchObject)
     {
-      busname = ri->checkDefines (busname);
+      busname = ri.checkDefines (busname);
       auto obj = locateObject (busname, searchObject);
       auto bus = dynamic_cast<gridBus *> (obj);
       if (bus)
@@ -82,7 +82,7 @@ gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo 
     }
   else if (searchObject)
     {
-      busname = ri->checkDefines (busname);
+      busname = ri.checkDefines (busname);
       auto obj = locateObject (busname, searchObject);
       auto bus = dynamic_cast<gridBus *> (obj);
       if (bus)
@@ -109,6 +109,6 @@ gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo 
 
   LEVELPRINT (READER_NORMAL_PRINT, "loaded link " << lnk->getName ());
 
-  ri->closeScope (riScope);
+  ri.closeScope (riScope);
   return lnk;
 }

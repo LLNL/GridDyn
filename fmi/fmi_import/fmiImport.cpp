@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,8 +15,6 @@
 #include "fmiObjects.h"
 #include "zipUtilities.h"
 
-#include <memory>
-#include "basicDefs.h"
 #include "stringOps.h"
 #include <map>
 #include <boost/dll/shared_library.hpp>
@@ -31,10 +29,8 @@ fmiLibrary::fmiLibrary()
 	information = std::make_shared<fmiInfo>();
 }
 
-fmiLibrary::fmiLibrary(const std::string &fmupath)
+fmiLibrary::fmiLibrary(const std::string &fmupath):fmiLibrary()
 {
-	information = std::make_shared<fmiInfo>();
-
 	loadFMU(fmupath);
 }
 
@@ -49,10 +45,7 @@ fmiLibrary::fmiLibrary(const std::string &fmupath, const std::string &extractPat
 	loadInformation();
 }
 
-fmiLibrary::~fmiLibrary()
-{
-	
-}
+fmiLibrary::~fmiLibrary() = default;
 
 void fmiLibrary::close()
 {
@@ -157,6 +150,25 @@ void fmiLibrary::loadInformation()
 	}
 }
 
+
+std::string  fmiLibrary::getTypes()
+{
+	if (isSoLoaded())
+	{
+		return std::string(baseFunctions.fmi2GetTypesPlatform());
+	}
+	return "";
+}
+
+std::string  fmiLibrary::getVersion()
+{
+	if (isSoLoaded())
+	{
+		return std::string(baseFunctions.fmi2GetVersion());
+	}
+	return "";
+}
+
 int fmiLibrary::extract()
 {
 	int ret = unzip(fmuName.string(), extractDirectory.string());
@@ -172,7 +184,7 @@ int fmiLibrary::extract()
 
 
 
-std::shared_ptr<fmi2ME> fmiLibrary::createModelExchangeObject(const std::string &name)
+std::unique_ptr<fmi2ModelExchangeObject> fmiLibrary::createModelExchangeObject(const std::string &name)
 {
 	if (soMeLoaded)
 	{
@@ -181,7 +193,7 @@ std::shared_ptr<fmi2ME> fmiLibrary::createModelExchangeObject(const std::string 
 			makeCallbackFunctions();
 		}
 		auto comp = baseFunctions.fmi2Instantiate(name.c_str(), fmi2ModelExchange, information->getString("guid").c_str(), resourceDir.string().c_str(), reinterpret_cast<fmi2CallbackFunctions *>(callbacks.get()), fmi2False, fmi2False);
-		auto meobj = std::make_shared<fmi2ME>(comp,information,commonFunctions,MEFunctions);
+		auto meobj = std::make_unique<fmi2ModelExchangeObject>(comp,information,commonFunctions,ModelExchangeFunctions);
 		++mecount;
 		return meobj;
 	}
@@ -189,7 +201,7 @@ std::shared_ptr<fmi2ME> fmiLibrary::createModelExchangeObject(const std::string 
 	return nullptr;
 }
 
-std::shared_ptr<fmi2CoSim> fmiLibrary::createCoSimulationObject(const std::string &name)
+std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject(const std::string &name)
 {
 	if (soCoSimLoaded)
 	{
@@ -198,7 +210,7 @@ std::shared_ptr<fmi2CoSim> fmiLibrary::createCoSimulationObject(const std::strin
 			makeCallbackFunctions();
 		}
 		auto comp = baseFunctions.fmi2Instantiate(name.c_str(), fmi2CoSimulation, information->getString("guid").c_str(), resourceDir.string().c_str(), reinterpret_cast<fmi2CallbackFunctions *>(callbacks.get()), fmi2False, fmi2False);
-		auto csobj = std::make_shared<fmi2CoSim>(comp,information, commonFunctions, CoSimFunctions);
+		auto csobj = std::make_unique<fmi2CoSimObject>(comp,information, commonFunctions, CoSimFunctions);
 		++cosimcount;
 		return csobj;
 	}
@@ -228,7 +240,7 @@ void fmiLibrary::loadSharedLibrary(fmutype_t type)
 		//Only load one or the other
 		if (checkFlag(modelExchangeCapable) && type!=fmutype_t::cosimulation)
 		{
-			loadMEFunctions();
+			loadModelExchangeFunctions();
 			soMeLoaded = true;
 			soCoSimLoaded = false;
 		}
@@ -285,16 +297,18 @@ path fmiLibrary::findSoPath(fmutype_t type)
 			return "";
 		}
 	}
+	if (sizeof(void *) == 8)
+	{
 #ifdef _WIN32
-	sopath /= "win64";
-	sopath/=identifier + ".dll";
+		sopath /= "win64";
+		sopath /= identifier + ".dll";
 #else 
 #ifdef MACOS
-        sopath /= "darwin64";
-	sopath/= identifier + ".so";
+	sopath /= "darwin64";
+	sopath /= identifier + ".so";
 #else
 	sopath /= "linux64";
-	sopath/= identifier + ".so";
+	sopath /= identifier + ".so";
 #endif
 #endif
 
@@ -302,20 +316,23 @@ path fmiLibrary::findSoPath(fmutype_t type)
 	{
 		return sopath;
 	}
-	//try the alternate paths
-	sopath = extractDirectory / "binaries";
+	}
+	else
+	{
 #ifdef _WIN32
-	sopath /= "win32";
-	sopath /=identifier + ".dll";
+		sopath /= "win32";
+		sopath /= identifier + ".dll";
 #else 
 #ifdef MACOS
-        sopath /= "darwin32";
-	sopath /=identifier + ".so";
+		sopath /= "darwin32";
+		sopath /= identifier + ".so";
 #else
-	sopath /= "linux32";
-	sopath /= identifier + ".so";
+		sopath /= "linux32";
+		sopath /= identifier + ".so";
 #endif
 #endif
+	}
+	
 	if (exists(sopath))
 	{
 		return sopath;
@@ -373,25 +390,25 @@ void fmiLibrary::loadCommonFunctions()
 	/* Getting partial derivatives */
 	commonFunctions->fmi2GetDirectionalDerivative = lib->get<fmi2GetDirectionalDerivativeTYPE>("fmi2GetDirectionalDerivative");
 }
-void fmiLibrary::loadMEFunctions()
+void fmiLibrary::loadModelExchangeFunctions()
 {
-	MEFunctions = std::make_shared<fmiMEFunctions>();
+	ModelExchangeFunctions = std::make_shared<fmiModelExchangeFunctions>();
 
-	MEFunctions->lib = lib;
-	MEFunctions->fmi2EnterEventMode = lib->get<fmi2EnterEventModeTYPE>("fmi2EnterEventMode");
-	MEFunctions->fmi2NewDiscreteStates = lib->get<fmi2NewDiscreteStatesTYPE>("fmi2NewDiscreteStates");
-	MEFunctions->fmi2EnterContinuousTimeMode = lib->get<fmi2EnterContinuousTimeModeTYPE>("fmi2EnterContinuousTimeMode");
-	MEFunctions->fmi2CompletedIntegratorStep = lib->get<fmi2CompletedIntegratorStepTYPE>("fmi2CompletedIntegratorStep");
+	ModelExchangeFunctions->lib = lib;
+	ModelExchangeFunctions->fmi2EnterEventMode = lib->get<fmi2EnterEventModeTYPE>("fmi2EnterEventMode");
+	ModelExchangeFunctions->fmi2NewDiscreteStates = lib->get<fmi2NewDiscreteStatesTYPE>("fmi2NewDiscreteStates");
+	ModelExchangeFunctions->fmi2EnterContinuousTimeMode = lib->get<fmi2EnterContinuousTimeModeTYPE>("fmi2EnterContinuousTimeMode");
+	ModelExchangeFunctions->fmi2CompletedIntegratorStep = lib->get<fmi2CompletedIntegratorStepTYPE>("fmi2CompletedIntegratorStep");
 
 	/* Providing independent variables and re-initialization of caching */
-	MEFunctions->fmi2SetTime = lib->get<fmi2SetTimeTYPE>("fmi2SetTime");
-	MEFunctions->fmi2SetContinuousStates = lib->get<fmi2SetContinuousStatesTYPE>("fmi2SetContinuousStates");
+	ModelExchangeFunctions->fmi2SetTime = lib->get<fmi2SetTimeTYPE>("fmi2SetTime");
+	ModelExchangeFunctions->fmi2SetContinuousStates = lib->get<fmi2SetContinuousStatesTYPE>("fmi2SetContinuousStates");
 
 	/* Evaluation of the model equations */
-	MEFunctions->fmi2GetDerivatives = lib->get<fmi2GetDerivativesTYPE>("fmi2GetDerivatives");
-	MEFunctions->fmi2GetEventIndicators = lib->get<fmi2GetEventIndicatorsTYPE>("fmi2GetEventIndicators");
-	MEFunctions->fmi2GetContinuousStates = lib->get<fmi2GetContinuousStatesTYPE>("fmi2GetContinuousStates");
-	MEFunctions->fmi2GetNominalsOfContinuousStates = lib->get<fmi2GetNominalsOfContinuousStatesTYPE>("fmi2GetNominalsOfContinuousStates");
+	ModelExchangeFunctions->fmi2GetDerivatives = lib->get<fmi2GetDerivativesTYPE>("fmi2GetDerivatives");
+	ModelExchangeFunctions->fmi2GetEventIndicators = lib->get<fmi2GetEventIndicatorsTYPE>("fmi2GetEventIndicators");
+	ModelExchangeFunctions->fmi2GetContinuousStates = lib->get<fmi2GetContinuousStatesTYPE>("fmi2GetContinuousStates");
+	ModelExchangeFunctions->fmi2GetNominalsOfContinuousStates = lib->get<fmi2GetNominalsOfContinuousStatesTYPE>("fmi2GetNominalsOfContinuousStates");
 }
 void fmiLibrary::loadCoSimFunctions()
 {

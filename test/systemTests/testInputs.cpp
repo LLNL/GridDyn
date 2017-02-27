@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -60,7 +60,7 @@ std::vector<double> Q2;
 
 for (const auto &mp : baseCDFcase)
   {
-  gds = new gridDynSimulation();
+  gds = std::make_unique<gridDynSimulation>();
   std::string fname;
   if (mp.first.length() > 25)
     {
@@ -71,8 +71,8 @@ for (const auto &mp : baseCDFcase)
       fname = std::string(IEEE_TEST_DIRECTORY) + mp.first;
     }
 
-  loadFile(gds, fname);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  loadFile(gds.get(), fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
   //gds->set("consoleprintlevel", "trace");
   int count=gds->getInt("totalbuscount");
   BOOST_CHECK_EQUAL(count, mp.second[0]);
@@ -91,7 +91,7 @@ for (const auto &mp : baseCDFcase)
   gds->getAngle(ang1);
   BOOST_CHECK(ct == ang1.size());
   gds->pFlowInitialize();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::INITIALIZED);
   gds->updateLocalCache();
   gds->getBusGenerationReal(P1);
   gds->getBusGenerationReactive(Q1);
@@ -104,7 +104,7 @@ for (const auto &mp : baseCDFcase)
   {
     std::cout << fname << " did not complete power flow calculation" << '\n';
   }
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
   gds->getVoltage(volts2);
   gds->getAngle(ang2);
@@ -191,7 +191,7 @@ for (const auto &mp : baseCDFcase)
   {
     std::cout << fname << " did not complete power flow calculation 2" << '\n';
   }
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
   gds->getVoltage(volts1);
   gds->getAngle(ang1);
@@ -203,9 +203,6 @@ for (const auto &mp : baseCDFcase)
   
   BOOST_CHECK_EQUAL(vdiff, 0);
   BOOST_CHECK_EQUAL(adiff, 0);
-
-  delete gds;
-  gds = nullptr;
 
   }
 	
@@ -231,10 +228,10 @@ std::vector<double> ang2;
 
 for (const auto &mp : compareCases)
   {
-  gds = new gridDynSimulation();
+  gds = std::make_unique<gridDynSimulation>();
   
   std::string fname = std::string(IEEE_TEST_DIRECTORY) + mp[0];
-  loadFile(gds, fname);
+  loadFile(gds.get(), fname);
 
   int bcount=gds->getInt("totalbuscount");
 
@@ -252,13 +249,13 @@ for (const auto &mp : compareCases)
     {
     std::string fname2 = mp[ns];
 	std::string nf = mp[ns];
-    gds2 = new gridDynSimulation();
+    gds2 = std::make_unique<gridDynSimulation>();
     if (fname2.size() < 25)
       {
       fname2 = std::string(IEEE_TEST_DIRECTORY) + nf;
       }
 
-    loadFile(gds2, fname2);
+    loadFile(gds2.get(), fname2);
 
     int count=gds2->getInt("totalbuscount");
     BOOST_CHECK_EQUAL(count, bcount);
@@ -310,11 +307,9 @@ for (const auto &mp : compareCases)
       }
     BOOST_CHECK_EQUAL(vdiff, 0);
     BOOST_CHECK_EQUAL(adiff, 0);
-    delete gds2;
-    gds2 = nullptr;
+
     }
-  delete gds;
-  gds = nullptr;
+
   }
   }
 
@@ -338,10 +333,10 @@ for (const auto &mp : executionCases)
   {
   auto fname = mp.first;
 
-  gds = new gridDynSimulation();
+  gds = std::make_unique<gridDynSimulation>();
 
-  loadFile(gds, fname);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  loadFile(gds.get(), fname);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   if (mp.second[1] > 0)
     {
@@ -362,16 +357,15 @@ for (const auto &mp : executionCases)
   if (mp.second[0] == 0)
     {
     gds->powerflow();
-    BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+    BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
     }
   else if (mp.second[0] == 1)
     {
     gds->run();
     //gds->captureJacState("dynCap.dat", true);
-    BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+    BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
     }
-  delete gds;
-  gds = nullptr;
+
   }
 
 

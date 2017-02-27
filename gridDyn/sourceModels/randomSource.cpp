@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,17 +14,17 @@
 #include "sourceTypes.h"
 #include "gridRandom.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
-#include "gridCoreTemplates.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.h"
 #include <iostream>
 #include <cassert>
 
-randomSource::randomSource (const std::string &objName, double startVal) : rampSource (objName,startVal),mean_L(startVal)
+randomSource::randomSource (const std::string &objName, double startVal) : rampSource (objName,startVal),param1_L(startVal)
 {
-  timeGenerator = std::make_unique<gridRandom> (gridRandom::dist_type_t::constant);
-  valGenerator = std::make_unique<gridRandom> (gridRandom::dist_type_t::constant);
+
 }
 
+randomSource::~randomSource() = default;
 
 coreObject *randomSource::clone (coreObject *obj) const
 {
@@ -33,20 +33,18 @@ coreObject *randomSource::clone (coreObject *obj) const
     {
 	  return obj;
     }
-  src->min_t = min_t;
-  src->max_t = max_t;
-  src->min_L = min_L;
-  src->max_L = max_L;
-  src->mean_t = mean_t;
-  src->mean_L = mean_L;
-  src->scale_t = scale_t;
-  src->stdev_L = stdev_L;
+  src->param1_t = param1_t;
+  src->param2_t = param2_t;
+  src->param1_L = param1_L;
+  src->param2_L = param2_L;
   src->opFlags.reset (triggered_flag);
   src->zbias = zbias;
   src->opFlags.reset (object_armed_flag);
   src->keyTime = keyTime;
-  src->timeGenerator->setDistribution (timeGenerator->getDistribution ());
-  src->valGenerator->setDistribution (valGenerator->getDistribution ());
+  src->timeDistribution = timeDistribution;
+  src->valDistribution = valDistribution;
+  src->timeGenerator = std::make_unique<gridRandom>(timeDistribution, param1_t, param2_t);
+  src->valGenerator = std::make_unique<gridRandom>(valDistribution, param1_L, param2_L);
   return src;
 }
 
@@ -56,14 +54,25 @@ void randomSource::set (const std::string &param,  const std::string &val)
 
   if ((param == "trigger_dist")|| (param == "time_dist"))
     {
-      auto v2 = convertToLowerCase (val);
-      timeGenerator->setDistribution (getDist (v2));
+      timeDistribution = convertToLowerCase (val);
+	  if (opFlags[dyn_initialized])
+	  {
+		  timeGenerator->setDistribution(getDist(timeDistribution));
+	  }
+      
     }
   else if ((param == "size_dist")||(param == "change_dist"))
     {
-      auto v2 = convertToLowerCase (val);
-      valGenerator->setDistribution (getDist (v2));
+      valDistribution = convertToLowerCase (val);
+	  if (opFlags[dyn_initialized])
+	  {
+		  valGenerator->setDistribution(getDist(valDistribution));
+	  }
     }
+  else if (param == "seed")
+  {
+	  gridRandom::setSeed();
+  }
   else
     {
       gridSource::set (param, val);
@@ -84,10 +93,18 @@ void randomSource::setFlag (const std::string &flag, bool val)
   if (flag == "interpolate")
     {
       opFlags.set (interpolate_flag, val);
+	  if (val == false)
+	  {
+		  mp_dOdt = 0.0;
+	  }
     }
   else if (flag == "step")
     {
       opFlags.set (interpolate_flag, !val);
+	  if (val)
+	  {
+		  mp_dOdt = 0.0;
+	  }
     }
   else if (flag == "repeated")
     {
@@ -116,20 +133,21 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
         }
       else
         {
-          min_t = val;
+          param1_t = val;
+		  timeParamUpdate();
         }
     }
   else if (param == "max_t")
     {
-      max_t = val;
+      param2_t = val;
     }
-  else if (param == "min_l")
+  else if ((param == "min_l")||(param=="param1_l")|| (param == "mean_l"))
     {
-      min_L = val;
+      param1_L = val;
     }
-  else if (param == "max_l")
+  else if ((param == "max_l") || (param == "param2_l")||(param == "stdev_l"))
     {
-      max_L = val;
+      param2_L = val;
     }
   else if (param == "mean_t")
     {
@@ -141,12 +159,8 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
         }
       else
         {
-          mean_t = val;
+          param1_t = val;
         }
-    }
-  else if (param == "mean_l")
-    {
-      mean_L = val;
     }
   else if (param == "scale_t")
     {
@@ -157,29 +171,20 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
         }
       else
         {
-          scale_t = val;
+          param2_t = val;
         }
     }
-  else if (param == "stdev_l")
+  else if (param=="param1_t")
     {
-      stdev_L = val;
+      param1_t = val;
     }
-
-  else if (param == "interpolate")
-    {
-      opFlags.set (interpolate_flag, (val > 0));
-    }
-  else if (param == "repeated")
-    {
-      opFlags.set (repeated_flag, (val > 0));
-    }
-  else if (param == "proportional")
-    {
-      opFlags.set (proportional_flag, (val > 0));
-    }
+  else if (param == "param2_t")
+  {
+	  param2_t = val;
+  }
   else if (param == "seed")
     {
-      timeGenerator->setSeed (static_cast<int> (val));
+      gridRandom::setSeed (static_cast<int> (val));
     }
   else
     {
@@ -189,18 +194,20 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
 
 }
 
-void randomSource::reset ()
+void randomSource::reset (reset_levels /*level*/)
 {
 	opFlags.reset(triggered_flag);
 	opFlags.reset(object_armed_flag);
 	offset = 0.0;
 }
 
-void randomSource::objectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
+void randomSource::dynObjectInitializeA (coreTime time0, unsigned long /*flags*/)
 {
 	reset();
       keyTime = time0;
-	  gridDyn_time triggerTime = time0 + ntime ();
+	  timeGenerator = std::make_unique<gridRandom>(timeDistribution, param1_t, param2_t);
+	  valGenerator = std::make_unique<gridRandom>(valDistribution, param1_L, param2_L);
+	  coreTime triggerTime = time0 + ntime ();
 
       if (opFlags[interpolate_flag])
         {
@@ -211,13 +218,17 @@ void randomSource::objectInitializeA (gridDyn_time time0, unsigned long /*flags*
 }
 
 
-void randomSource::updateOutput(gridDyn_time time)
+void randomSource::updateOutput(coreTime time)
 {
-	updateA(time);
+	if (time >= nextUpdateTime)
+	{
+		updateA(time);
+	}
+	
 	rampSource::updateOutput(time);
 }
 
-void randomSource::updateA (gridDyn_time time)
+void randomSource::updateA (coreTime time)
 {
   if (time < nextUpdateTime)
     {
@@ -273,70 +284,92 @@ void randomSource::updateA (gridDyn_time time)
 }
 
 
-gridDyn_time randomSource::ntime ()
+coreTime randomSource::ntime ()
 {
-  gridDyn_time triggerTime = maxTime;
-  switch (timeGenerator->getDistribution ())
-    {
-    case gridRandom::dist_type_t::constant:
-      triggerTime = mean_t;
-      break;
-    case  gridRandom::dist_type_t::uniform:
-      triggerTime = timeGenerator->getNewValue (min_t, max_t);
-      break;
-    case  gridRandom::dist_type_t::exponential:
-      triggerTime = timeGenerator->getNewValue (mean_t, 0.0);
-      break;
-    case gridRandom::dist_type_t::normal:
-      //mean_t and stdev_t are the location and scale parameter respectively
-      triggerTime = exp (mean_t + scale_t * timeGenerator->getNewValue ());
-      break;
-    default:
-      assert (false);
-    }
-  return triggerTime;
+  coreTime newTime = maxTime;
+  do
+  {
+	  newTime = timeGenerator->generate();
+  } while (newTime < 0.0);
+  
+  
+  return newTime;
 }
 
 double randomSource::nval ()
 {
-  double nextVal = 0.0;
-  switch (valGenerator->getDistribution ())
-    {
-    case  gridRandom::dist_type_t::constant:
-      nextVal = mean_L;
-      break;
-    case  gridRandom::dist_type_t::uniform:
-      nextVal = valGenerator->getNewValue (min_L, max_L) - (max_L - min_L) * zbias * (offset);
-      break;
-    case  gridRandom::dist_type_t::exponential:      //load varies in a biexponential pattern
-      nextVal = valGenerator->getNewValue () + offset / mean_L * zbias - 0.5;
-
-      break;
-    case  gridRandom::dist_type_t::normal:
-      nextVal = valGenerator->getNewValue (mean_L, stdev_L) - stdev_L * zbias * (offset);
-      break;
-    default:
-      assert (false);
-    }
-
+  double nextVal = valGenerator->generate();
+  nextVal -= computeBiasAdjust();
+ 
   offset = offset + nextVal;
   return nextVal;
 }
 
-void randomSource::nextStep (gridDyn_time triggerTime)
+void randomSource::nextStep (coreTime triggerTime)
 {
-  double rval;
-  double nextVal;
 
-  rval = nval ();
-  nextVal = (opFlags[proportional_flag]) ? m_output + rval * m_output : m_output + rval;
-  mp_dOdt = (nextVal - m_output) / (triggerTime - keyTime);
+  double rval = nval ();
+  double nextVal = (opFlags[proportional_flag]) ? m_output + rval * m_output : m_output + rval;
+  if (opFlags[interpolate_flag])
+  {
+	  mp_dOdt = (nextVal - m_output) / (triggerTime - keyTime);
+  }
+  else
+  {
+	  mp_dOdt = 0.0;
+  }
 
 }
 
 
-void randomSource::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void randomSource::timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
-	updateA(ttime);
-	rampSource::timestep(ttime, args, sMode);
+	while (ttime >= nextUpdateTime)
+	{
+		updateA(nextUpdateTime);
+	}
+	
+	rampSource::timestep(ttime, inputs, sMode);
+}
+
+
+void randomSource::timeParamUpdate()
+{
+	if (opFlags[dyn_initialized])
+	{
+		timeGenerator->setParameters(param1_t, param2_t);
+	}
+}
+void randomSource::valParamUpdate()
+{
+	if (opFlags[dyn_initialized])
+	{
+		valGenerator->setParameters(param1_L, param2_L);
+	}
+}
+
+double randomSource::computeBiasAdjust()
+{
+	if (zbias == 0.0)
+	{
+		return 0.0;
+	}
+	double bias = 0.0;
+	switch (valGenerator->getDistribution())
+	{
+	case  gridRandom::dist_type_t::uniform:
+		bias = -(param2_L - param1_L) * zbias * (offset);
+		break;
+	case  gridRandom::dist_type_t::exponential:      //load varies in a biexponential pattern
+		bias=offset / param1_L * zbias - 0.5;
+
+		break;
+	case  gridRandom::dist_type_t::normal:
+		bias =  - param2_L * zbias * (offset);
+		break;
+	default:
+		break;
+		
+	}
+	return bias;
 }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,10 +10,11 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef _SOLVER_INTERFACE_H_
 #define _SOLVER_INTERFACE_H_
-#include "basicDefs.h"
+
+#include "core/helperObject.h"
 #include "gridObjectsHelperClasses.h"
 
 #include <vector>
@@ -27,16 +28,16 @@ enum class solver_print_level
 
 class gridDynSimulation;
 
-
+/** error class for throwing solver exceptions*/
 class solverException : public std::exception
 {
 protected:
 	int errorCode;  //<!* the actual solver Error Code
 public:
-	solverException(int code = 0) :errorCode(code) {};
+	explicit solverException(int code = 0) :errorCode(code) {};
 	virtual const char *what() const noexcept override
 	{
-		return "solver Exception";
+		return (std::string("solver Exception:error code=")+std::to_string(errorCode)).c_str();
 	}
 	/** return the full name of the object that threw the exception*/
 	int code() const noexcept
@@ -45,27 +46,51 @@ public:
 	}
 };
 
+/** error class for throwing an invalid solver operation exception from a solver
+*/
 class InvalidSolverOperation : public solverException
 {
 protected:
-	int errorCode;  //<!* the actual solver Error Code
 public:
-	InvalidSolverOperation(int code = 0) :solverException(code) {};
+	explicit InvalidSolverOperation(int code = 0) :solverException(code) {};
 	virtual const char *what() const noexcept override
 	{
-		return "invalid solver operation";
+		return (std::string("invalid solver operation:error code=") + std::to_string(errorCode)).c_str();
 	}
 };
 
+//solver return codes from the solve and initIC functions
 #define SOLVER_ROOT_FOUND 2
 #define SOLVER_INVALID_STATE_ERROR (-36)
 #define SOLVER_INITIAL_SETUP_ERROR (-38)
 #define SOLVER_CONVERGENCE_ERROR (-12)
+
+enum solver_flags:int
+{
+	dense_flag = 0,													//!< if the solver should use a dense or sparse version
+ constantJacobian_flag = 1,										//!< if the solver should just keep a constant Jacobian
+useMask_flag = 2,                                                                        //!< if the solver should use a mask to filter out specific states
+parallel_flag = 3,                                                                        //!< if the solver should use a parallel version
+locked_flag = 4,                                                                          //!< if the solverMode is locked from further updates
+use_omp_flag = 5,                                     //!<flag indicating whether to use omp data constructs
+allocated_flag = 6,                                                                      //!< if the solver has been allocated
+initialized_flag = 7,                                                 //!< flag indicating if these vectors have been initialized
+fileCapture_flag = 8,
+use_newton_flag=11,
+use_bdf_flag = 12,
+extra_solver_flag1=16,
+extra_solver_flag2 = 17,
+extra_solver_flag3 = 18,
+extra_solver_flag4 = 19,
+extra_solver_flag5 = 20,
+extra_solver_flag6 = 21,
+extra_solver_flag7 = 22,
+};
 /** @brief class defining the data related to a specific solver
  the solverInterface class is the base class for solvers for the GridDyn power systems program
 a particular solverInterface class will contain the interface and calls necessary to implement a particular solver methodology
 */
-class solverInterface
+class solverInterface: public helperObject
 {
 public:
   /** @brief enumeration of solver call modes*/
@@ -90,8 +115,7 @@ public:
   std::vector<int> rootsfound;            //!< mask vector for which roots were found
   bool printResid = false;                 //!< flag telling the interface to print the residual values to the screen (used for debugging)
 protected:
-	std::string name;                        //!< nickname for the solver
-  std::string lastErrorString = "";             //!< string containing the last error
+  std::string lastErrorString;             //!< string containing the last error
   int lastErrorCode = 0;                        //!< the last error Code
 
   // solver outputs
@@ -107,24 +131,13 @@ protected:
   count_t max_iterations = 10000;                                    //!< the maximum number of iterations in the solver loop
   solverMode mode;                                                        //!< to the solverMode
   double tolerance = 1e-8;												//!<the default solver tolerance
-  gridDyn_time solveTime = negTime;                            //!< storage for the time the solver is called
-	//TODO:convert to a bitset instead of all the flags
-  bool dense = false;													//!< if the solver should use a dense or sparse version
-  bool constantJacobian = false;										//!< if the solver should just keep a constant Jacobian
-  bool useMask = false;                                                                         //!< if the solver should use a mask to filter out specific states
-  bool parallel = false;                                                                        //!< if the solver should use a parallel version
-  bool locked = false;                                                                          //!< if the solverMode is locked from further updates
-  bool use_omp = false;                                     //!<flag indicating whether to use omp data constructs
-  bool allocated = false;                                                                       //!< if the solver has been allocated
-  bool initialized = false;                                                 //!< flag indicating if these vectors have been initialized
-  bool fileCapture = false;							//!< flag requesting that the residual and Jacobian should be captured to a file
+  coreTime solveTime = negTime;                            //!< storage for the time the solver is called
   std::string jacFile;						//!< the file to write the Jacobian to 
   std::string stateFile;					//!< the file to write the state and residual to
-  void *solverMem = nullptr;                                                            //!< the memory used by a specific solver internally
   gridDynSimulation *m_gds = nullptr;                                           //!< pointer the gridDynSimulation object used
   count_t svsize = 0;                                                                           //!< the state size
   count_t nnz = 0;                                                                           //!< the actual number of non-zeros in a Jacobian
-
+  std::bitset<32> flags;				//!< flags for the solver
 public:
   /** @brief default constructor
    * @param[in] objName  the name of the solver
@@ -137,8 +150,6 @@ public:
   */
   solverInterface (gridDynSimulation *gds, const solverMode& sMode);
 
-  /** @brief destructor*/
-  virtual ~solverInterface ();
   /** @brief make a copy of the solver interface
   @param[in] si a shared ptr to an existing interface that data should be copied to
   @param[in] fullCopy set to true to initialize and copy over all data to the new object
@@ -178,16 +189,16 @@ public:
 
   /** @brief allocate the memory for the solver
   @param[in] size  the size of the state vector
-  @param[in] numroots  the number of root functions in the solution
+  @param[in] numRoots  the number of root functions in the solution
   @return the function status
   */
-  virtual void allocate (count_t size, count_t numroots = 0);
+  virtual void allocate (count_t size, count_t numRoots = 0);
 
   /** @brief initialize the solver to time t0
   @param[in] t0  the time for the initialization
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
-  virtual void initialize (gridDyn_time t0);
+  virtual void initialize (coreTime t0);
 
   /** @brief reinitialize the sparse components
   @param[in] mode the reinitialization mode
@@ -205,7 +216,7 @@ public:
   @param[in] constraints  flag indicating that constraints should be used
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
-  virtual int calcIC (gridDyn_time t0, gridDyn_time tstep0, ic_modes mode, bool constraints);
+  virtual int calcIC (coreTime t0, coreTime tstep0, ic_modes mode, bool constraints);
   /** @brief get the current solution
    usually called after a call to CalcIC to get the calculated conditions
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
@@ -224,33 +235,26 @@ public:
   @param[in] param  a string with the desired name of the parameter or result
   @return the value of the requested parameter
   */
-  virtual double get (const std::string & param) const;
+  virtual double get (const std::string & param) const override;
   /** @brief set a string parameter in the solver
   @param[in] param  a string with the desired name of the parameter
   @param[in] val the value of the property to set
-  @return a value indicating success  PARAMETER_FOUND if param was a valid parameter,  PARAMETER_NOT_FOUND if invalid,  INVALID_PARAMETER_VALUE if bad value
   */
-  virtual void set (const std::string &param, const std::string &val);
+  virtual void set (const std::string &param, const std::string &val) override;
   
 	/** @brief set a numerical parameter on a solver
   @param[in] param  a string with the desired name of the parameter
   @param[in] val the value of the property to set
-  @return a value indicating success  PARAMETER_FOUND if param was a valid parameter,  PARAMETER_NOT_FOUND if invalid,  INVALID_PARAMETER_VALUE if bad value
   */
-  virtual void set (const std::string &param, double val);
+  virtual void set (const std::string &param, double val) override;
   
-	/** get the name of the solver*/
-	const std::string &getName() const
-	{
-		return name;
-	}
-	/** set the name of the solver*/
-	void setName(std::string newName)
-	{
-		name = newName;
-	}
+  /** @brief set a flag parameter on a solver
+  @param[in] flag  a string with the name of the flag to set
+  @param[in] val the value of the property to set
+  */
+  virtual void setFlag(const std::string &flag, bool val=true) override;
 	/** get the last time the solver was called*/
-	gridDyn_time getSolverTime() const
+	coreTime getSolverTime() const
 	{
 		return solveTime;
 	}
@@ -260,7 +264,7 @@ public:
   @param[in] stepMode  the step mode
   @return the function success status  FUNCTION_EXECUTION_SUCCESS on success
   */
-  virtual int solve (gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal);
+  virtual int solve (coreTime tStop, coreTime & tReturn, step_mode stepMode = step_mode::normal);
   /** @brief resize the storage array for the Jacobian
   @param[in] size  the number of elements to potentially store
   */
@@ -270,7 +274,7 @@ public:
   */
   bool isInitialized () const
   {
-    return initialized;
+    return flags[initialized_flag];
   }
 
   /** @brief helper function to log specific solver stats
@@ -283,13 +287,7 @@ public:
   */
   virtual void logErrorWeights (print_level logLevel) const;
 
-  /** @brief get the dedicated memory space of the solver
-  @return a void pointer to the memory location of the solver specific memory
-  */
-  void * getSolverMem () const
-  {
-    return solverMem;
-  }
+  
   /** @brief get the state size
   @return the state size
   */
@@ -313,7 +311,7 @@ public:
 
   void lock ()
   {
-    locked = true;
+    flags.set(locked_flag);
   }
 
   void setIndex (index_t newIndex)
@@ -340,7 +338,7 @@ public:
   virtual void setSimulationData (const solverMode& sMode);
 
   
-
+  void setApproximation(const std::string &approx);
   /** @brief load up masks to the states
     masks isolate specific values and don't let the solver alter them  for newton based solvers this implies overriding specific information in the Jacobian calculations and the residual calculations
   @param[in] msk  the indices of the state elements to fix
@@ -418,13 +416,13 @@ public:
   const double * deriv_data() const override;
   const double * type_data() const override;
   virtual void allocate (count_t size, count_t numroots = 0) override;
-  virtual void initialize (gridDyn_time t0) override;
+  virtual void initialize (coreTime t0) override;
 
   virtual double get (const std::string & param) const override;
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val) override;
 
-  virtual int solve (gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal) override;
+  virtual int solve (coreTime tStop, coreTime & tReturn, step_mode stepMode = step_mode::normal) override;
 };
 
 /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
@@ -436,7 +434,7 @@ private:
 	std::vector<double> deriv;  //!< temp state data location 1
 	std::vector<double> state2;  //!< temp state data location 2
 	std::vector<double> type;                     //!< type data
-	gridDyn_time deltaT = 0.005;  //!< the default time step
+	coreTime deltaT = 0.005;  //!< the default time step
 public:
 	/** @brief default constructor*/
 	explicit basicOdeSolver(const std::string &objName = "basicOde");
@@ -455,26 +453,26 @@ public:
 	const double * deriv_data() const override;
 	const double * type_data() const override;
 	virtual void allocate(count_t size, count_t numroots = 0) override;
-	virtual void initialize(gridDyn_time t0) override;
+	virtual void initialize(coreTime t0) override;
 
 	virtual double get(const std::string & param) const override;
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val) override;
 
-	virtual int solve(gridDyn_time tStop, gridDyn_time & tReturn, step_mode stepMode = step_mode::normal) override;
+	virtual int solve(coreTime tStop, coreTime & tReturn, step_mode stepMode = step_mode::normal) override;
 };
 
 /** @brief make a solver from a particular mode
 @param[in] gds  the gridDynSimulation to link to
 @param[in] sMode the solverMode to construct the solverInterface from
-@return a shared_ptr to a solverInterface object
+@return a unique_ptr to a solverInterface object
 */
-std::shared_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode);
+std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode);
 /** @brief make a solver from a string
 @param[in] type the type of solverInterface to create
-@return a shared_ptr to a solverInterface object
+@return a unique_ptr to a solverInterface object
 */
-std::shared_ptr<solverInterface> makeSolver (const std::string &type);
+std::unique_ptr<solverInterface> makeSolver (const std::string &type, const std::string &name="");
 
 
 #endif

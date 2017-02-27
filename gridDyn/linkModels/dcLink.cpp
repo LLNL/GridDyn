@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,8 +16,8 @@
 #include "gridArea.h"
 #include "vectorOps.hpp"
 #include "primary/dcBus.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 #include <cstring>
@@ -36,9 +36,6 @@ dcLink::dcLink (double rP, double Lp, const std::string &objName) : gridLink (ob
   opFlags.set(network_connected);
 }
 
-dcLink::~dcLink ()
-{
-}
 
 coreObject *dcLink::clone (coreObject *obj) const
 {
@@ -54,10 +51,10 @@ coreObject *dcLink::clone (coreObject *obj) const
 }
 
 
-void  dcLink::timestep (gridDyn_time /*ttime*/, const solverMode & /*sMode*/)
+void  dcLink::timestep (coreTime /*ttime*/, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
 {
 
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
 
@@ -80,7 +77,7 @@ void dcLink::updateBus (gridBus *bus, index_t busnumber)
     }
   else
     {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
     }
 }
 
@@ -133,10 +130,10 @@ void  dcLink::set (const std::string &param, double val, units_t unitType)
   
 }
 
-void dcLink::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void dcLink::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   gridLink::pFlowObjectInitializeA (time0,flags);
-  if (enabled)
+  if (isEnabled())
     {
       if (opFlags[fixed_target_power])
         {
@@ -147,7 +144,7 @@ void dcLink::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
 
 void dcLink::pFlowObjectInitializeB ()
 {
-  if (enabled)
+  if (isEnabled())
     {
       updateLocalCache ();
       if (opFlags[fixed_target_power])
@@ -158,7 +155,7 @@ void dcLink::pFlowObjectInitializeB ()
 
 }
 
-void dcLink::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void dcLink::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
   m_dstate_dt.resize (1);
   m_state.resize (1);
@@ -215,32 +212,32 @@ void dcLink::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
 }
 
 
-void dcLink::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void dcLink::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   // check if line is enabled
-  updateLocalCache  (sD,sMode);
-  if (!(enabled))
+  updateLocalCache  (noInputs,sD,sMode);
+  if (!(isEnabled()))
     {
       return;
     }
 
   if ((busId == 2) || (busId == B2->getID ()))
     {
-      ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], -Idc);
+      ad.assignCheckCol (PoutLocation, inputLocs[voltageInLocation], -Idc);
     }
   else
     {
-      ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], Idc);
+      ad.assignCheckCol (PoutLocation, inputLocs[voltageInLocation], Idc);
     }
 }
 
 void dcLink::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }
-  updateLocalCache (sD, sMode);
+  updateLocalCache (noInputs,sD, sMode);
 
   double P1V2 = 0.0, P2V1 = 0.0;
   if (!isDynamic (sMode))
@@ -295,15 +292,19 @@ void dcLink::outputPartialDerivatives (index_t busId, const stateData &sD, matri
 
 }
 
+count_t dcLink::outputDependencyCount(index_t num, const solverMode & /*sMode*/) const
+{
+	return (num==PoutLocation)?1:0;
+}
 
-void dcLink::jacobianElements (const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
+void dcLink::jacobianElements (const IOdata &/*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
 
       int B1Voffset = B1->getOutputLoc(sMode, voltageInLocation);
       int B2Voffset = B2->getOutputLoc(sMode, voltageInLocation);
-      updateLocalCache (sD, sMode);
+      updateLocalCache (noInputs, sD, sMode);
       if (isDynamic (sMode))
         {
           auto offset = offsets.getDiffOffset (sMode);
@@ -316,7 +317,7 @@ void dcLink::jacobianElements (const stateData &sD, matrixData<double> &ad, cons
           auto offset = offsets.getAlgOffset (sMode);
           ad.assignCheckCol (offset, B1Voffset, 1);
           ad.assignCheckCol (offset, B2Voffset, -1);
-          if (opFlags.test (fixed_target_power))
+          if (opFlags[fixed_target_power])
             {
               ad.assignCheckCol (offset,B1Voffset,-Pset / (linkInfo.v1 * linkInfo.v1));
               ad.assign (offset,offset,-1);
@@ -325,11 +326,11 @@ void dcLink::jacobianElements (const stateData &sD, matrixData<double> &ad, cons
     }
 }
 
-void dcLink::residual (const stateData &sD, double resid[], const solverMode &sMode)
+void dcLink::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
-      updateLocalCache (sD,sMode);
+      updateLocalCache (inputs, sD,sMode);
       if (isDynamic (sMode))
         {
           auto offset = offsets.getDiffOffset (sMode);
@@ -338,7 +339,7 @@ void dcLink::residual (const stateData &sD, double resid[], const solverMode &sM
       else
         {
           auto offset = offsets.getAlgOffset (sMode);
-          if (opFlags.test (fixed_target_power))
+          if (opFlags[fixed_target_power])
             {
               resid[offset] = (linkInfo.v1 - linkInfo.v2) + Pset / linkInfo.v1 - sD.state[offset];
             }
@@ -350,7 +351,7 @@ void dcLink::residual (const stateData &sD, double resid[], const solverMode &sM
     }
 }
 
-void dcLink::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void dcLink::setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -371,7 +372,7 @@ void dcLink::setState (gridDyn_time ttime, const double state[], const double ds
   prevTime = ttime;
 }
 
-void dcLink::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void dcLink::guess (const coreTime /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (stateSize (sMode) > 0)
     {
@@ -394,20 +395,20 @@ void dcLink::getStateName (stringVec &stNames, const solverMode &sMode, const st
 {
   if (stateSize (sMode) > 0)
     {
-      std::string prefix2 = prefix + name + ':';
+      std::string prefix2 = prefix + getName() + ':';
       auto offset = (isDynamic (sMode)) ? offsets.getDiffOffset (sMode) : offsets.getAlgOffset (sMode);
       stNames[offset] = prefix2 + "idc";
     }
 }
 
-void  dcLink::updateLocalCache (const stateData &sD, const solverMode &sMode)
+void  dcLink::updateLocalCache (const IOdata &, const stateData &sD, const solverMode &sMode)
 {
-  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
+	if (!sD.updateRequired(linkInfo.seqID))
     {
       return;
     }
 
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
@@ -444,7 +445,7 @@ void  dcLink::updateLocalCache ()
 
   std::memset (&linkInfo, 0, sizeof(linkInfo));
 
-  if (enabled)
+  if (isEnabled())
     {
       linkInfo.v1 = B1->getVoltage ();
       linkInfo.v2 = B2->getVoltage ();
@@ -453,13 +454,13 @@ void  dcLink::updateLocalCache ()
     }
 }
 
-int dcLink::fixRealPower (double power,index_t mterminal,index_t fixedTerminal,gridUnits::units_t unitType)
+int dcLink::fixRealPower (double power,index_t measureTerminal,index_t fixedTerminal,gridUnits::units_t unitType)
 {
   int ret = 0;
   opFlags.set (fixed_target_power);
 	if (fixedTerminal==0)
 	{
-		fixedTerminal = mterminal;
+		fixedTerminal = measureTerminal;
 	}
   Pset = unitConversion (power,unitType,puMW,systemBasePower);
   if ((fixedTerminal == 2) || (fixedTerminal == B2->getID ()))

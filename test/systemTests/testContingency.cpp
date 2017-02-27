@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -30,7 +30,7 @@ using namespace boost::filesystem;
 BOOST_AUTO_TEST_CASE(contingency_test1)
 {
 	std::string fname = contingency_test_directory + "contingency_test1.xml";
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->run();
 	BOOST_CHECK(exists("contout.csv"));
 	remove("contout.csv");
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(contingency_test1)
 BOOST_AUTO_TEST_CASE(contingency_test2)
 {
 	std::string fname = contingency_test_directory + "contingency_test2.xml";
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->set("printlevel", 0);
 	gds->run();
 	
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(contingency_test2)
 BOOST_AUTO_TEST_CASE(contingency_test3)
 {
 	std::string fname = contingency_test_directory + "contingency_test3.xml";
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->set("printlevel", 0);
 	gds->run();
 	

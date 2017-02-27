@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,11 +10,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
+#pragma once
 #ifndef DISPATCHER_H_
 #define DISPATCHER_H_
-
-#include "basicDefs.h"
 
 #include "submodels/gridControlBlocks.h"
 
@@ -42,10 +40,10 @@ public:
   virtual ~dispatcher ();
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   void moveSchedulers (dispatcher *dis);
-  virtual double initialize (gridDyn_time time0,double dispatch);
+  virtual double initialize (coreTime time0,double dispatch);
 
-  virtual double updateP (gridDyn_time time,double required,double targetTime);
-  virtual double testP (gridDyn_time time,double required,double targetTime);
+  virtual double updateP (coreTime time,double required,double targetTime);
+  virtual double testP (coreTime time,double required,double targetTime);
   double currentValue ()
   {
     return totalDispatch;

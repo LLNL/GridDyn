@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -23,12 +23,12 @@ using namespace readerConfig;
 static const IgnoreListType ignoreConditionVariables {
   "condition"
 };
-bool checkCondition (const std::string &cond, readerInfo *ri, coreObject *parentObject);
+bool checkCondition (const std::string &cond, readerInfo &ri, coreObject *parentObject);
 // "aP" is the XML element passed from the reader
-void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *parentObject)
+void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject)
 {
 
-  auto riScope = ri->newScope ();
+  auto riScope = ri.newScope ();
 
   loadDefines (element, ri);
   loadDirectories (element, ri);
@@ -39,7 +39,7 @@ void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *
   if (!condString.empty ())
     {
       //deal with &gt for > and &lt for < if necessary
-      condString = xmlCharacterCodeReplace (condString);
+      condString = stringOps::xmlCharacterCodeReplace (condString);
       eval = checkCondition (condString, ri, parentObject);
 
     }
@@ -60,13 +60,14 @@ void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *
 
     }
 
-  ri->closeScope (riScope);
+  ri.closeScope (riScope);
 
 }
 
 
-bool checkCondition (const std::string &cond, readerInfo *ri, coreObject * /*parentObject*/)
+bool checkCondition (const std::string &cond, readerInfo &ri, coreObject * /*parentObject*/)
 {
+	using namespace stringOps;
   size_t pos = cond.find_first_of ("><=!");
   bool eval = false;
   char A, B;
@@ -92,8 +93,8 @@ bool checkCondition (const std::string &cond, readerInfo *ri, coreObject * /*par
 
   if (std::isnan (aval) && (std::isnan (bval)))
     {    //do a string comparison
-      std::string astr = ri->checkDefines (BlockA);
-      std::string bstr = ri->checkDefines (BlockB);
+      std::string astr = ri.checkDefines (BlockA);
+      std::string bstr = ri.checkDefines (BlockB);
       if (A == '>')
         {
           if (B == '=')
