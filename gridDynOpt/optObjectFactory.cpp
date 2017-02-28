@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -86,7 +86,7 @@ gridOptObject *optComponentFactory::makeObject (const std::string &type)
     }
 }
 
-gridOptObject *optComponentFactory::makeObject (gridCoreObject *obj)
+gridOptObject *optComponentFactory::makeObject (coreObject *obj)
 {
   gridOptObject *oo;
 
@@ -176,7 +176,7 @@ gridOptObject *coreOptObjectFactory::createObject (const std::string &optType, c
     }
 }
 
-gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, gridCoreObject *obj)
+gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, coreObject *obj)
 {
   gridOptObject *oo;
   auto mfind = m_factoryMap.find (optType);
@@ -191,7 +191,7 @@ gridOptObject * coreOptObjectFactory::createObject (const std::string &optType, 
     }
 }
 
-gridOptObject *coreOptObjectFactory::createObject (gridCoreObject *obj)
+gridOptObject *coreOptObjectFactory::createObject (coreObject *obj)
 {
   if (m_defaultType.empty ())
     {
@@ -275,7 +275,7 @@ void coreOptObjectFactory::setDefaultType (const std::string defType)
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &optType, const std::string &typeName, count_t numObjects, gridCoreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &optType, const std::string &typeName, count_t numObjects, coreObject *obj)
 {
   auto mfind = m_factoryMap.find (optType);
   if (mfind != m_factoryMap.end ())
@@ -288,7 +288,7 @@ void coreOptObjectFactory::prepObjects (const std::string &optType, const std::s
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, gridCoreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, coreObject *obj)
 {
   if (m_defaultType.empty ())
     {

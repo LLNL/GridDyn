@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -49,21 +49,21 @@ private:
 	double Faa = 0.0;
 public:
 	txLifeSpan(const std::string &objName="txlifeSpan_$");
-	gridCoreObject * clone(gridCoreObject *obj=nullptr) const override;
+	coreObject * clone(coreObject *obj=nullptr) const override;
 	virtual void setFlag(const std::string &flag, bool val=true) override;
 	virtual void set (const std::string &param, const std::string &val) override;
 
 	virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void add(gridCoreObject *obj) override final;
+	virtual void add(coreObject *obj) override final;
 	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-	virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-	virtual void dynObjectInitializeB(IOdata &outputSet) override;
+	virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
+	virtual void dynObjectInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 
-	virtual void timestep(gridDyn_time ttime, const solverMode &sMode) override;
-	virtual void updateA(gridDyn_time time) override;
+	virtual void timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
+	virtual void updateA(coreTime time) override;
 
-	void actionTaken(index_t conditionNum, index_t ActionNum, change_code actionReturn, gridDyn_time /*actionTime*/) override;
+	void actionTaken(index_t conditionNum, index_t ActionNum, change_code actionReturn, coreTime /*actionTime*/) override;
 };
 
 

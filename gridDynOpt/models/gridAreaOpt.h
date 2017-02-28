@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,10 +16,10 @@
 
 
 // headers
-#include "basicDefs.h"
+
 #include "gridOptObjects.h"
 
-#include "gridCoreList.h"
+#include "core/coreObjectList.h"
 // forward classes
 
 
@@ -42,31 +42,31 @@ protected:
   std::vector<gridOptObject *> objectList;
   gridArea *area = nullptr;
 
-  gridCoreList optObList;                //a search index for object names
+  coreObjectList optObList;                //a search index for object names
 public:
   gridAreaOpt (const std::string &objName = "");
-  gridAreaOpt (gridCoreObject *obj, const std::string &objName = "");
+  gridAreaOpt (coreObject *obj, const std::string &objName = "");
   ~gridAreaOpt ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
 
-  void add (gridCoreObject *obj) override;
+  void add (coreObject *obj) override;
   void add (gridAreaOpt *pl);
   void add (gridBusOpt *gen);
   void add (gridLinkOpt *lnk);
   void add (gridRelayOpt *rel);
 
   // remove components
-  void remove (gridCoreObject *obj) override;
+  void remove (coreObject *obj) override;
   void remove (gridAreaOpt *pl);
   void remove (gridBusOpt *gen);
   void remove (gridLinkOpt *lnk);
   void remove (gridRelayOpt *rel);
 
-  virtual void objectInitializeA (unsigned long flags) override;
+  virtual void dynObjectInitializeA (unsigned long flags) override;
   virtual void loadSizes (const optimMode &oMode) override;
-  virtual void setValues (const optimData *oD, const optimMode &oMode) override;
+  virtual void setValues (const optimData &oD, const optimMode &oMode) override;
   //for saving the state
   virtual void guess (double ttime, double val[], const optimMode &oMode) override;
   virtual void getTols (double tols[], const optimMode &oMode) override;
@@ -74,15 +74,15 @@ public:
 
   virtual void valueBounds (double ttime, double upLimit[], double lowerLimit[], const optimMode &oMode) override;
 
-  virtual void linearObj (const optimData *oD, vectData<double> *linObj, const optimMode &oMode) override;
-  virtual void quadraticObj (const optimData *oD, vectData<double> *linObj, vectData<double> *quadObj, const optimMode &oMode) override;
+  virtual void linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode) override;
+  virtual void quadraticObj (const optimData &oD, vectData<double> &linObj, vectData<double> &quadObj, const optimMode &oMode) override;
 
-  virtual double objValue (const optimData *oD, const optimMode &oMode) override;
-  virtual void gradient (const optimData *oD, double deriv[], const optimMode &oMode) override;
-  virtual void jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode) override;
-  virtual void getConstraints (const optimData *oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
-  virtual void constraintValue (const optimData *oD, double cVals[], const optimMode &oMode) override;
-  virtual void constraintJacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode) override;
+  virtual double objValue (const optimData &oD, const optimMode &oMode) override;
+  virtual void gradient (const optimData &oD, double deriv[], const optimMode &oMode) override;
+  virtual void jacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode) override;
+  virtual void getConstraints (const optimData &oD, matrixData<double> &cons, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
+  virtual void constraintValue (const optimData &oD, double cVals[], const optimMode &oMode) override;
+  virtual void constraintJacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode) override;
 
   virtual void getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix = "") override;
 
@@ -98,16 +98,16 @@ public:
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  virtual bool isMember (gridCoreObject *obj) const;
+  virtual bool isMember (coreObject *obj) const;
   // find components
 
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
 
   virtual gridOptObject * getBus (index_t index) const override;
   virtual gridOptObject * getArea (index_t index) const override;
-  virtual gridOptObject * getRelay (index_t index) const;
+  virtual gridOptObject * getRelay (index_t index) const override;
   virtual gridOptObject * getLink (index_t index) const override;
 protected:
 };

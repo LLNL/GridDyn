@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -43,11 +43,7 @@ zmqCommunicator::zmqCommunicator(std::uint64_t id):gridCommunicator(id)
 
 }
 
-zmqCommunicator::~zmqCommunicator()
-{
-
-}
-
+zmqCommunicator::~zmqCommunicator() = default;
 
 std::shared_ptr<gridCommunicator> zmqCommunicator::clone(std::shared_ptr<gridCommunicator> comm) const
 {
@@ -90,7 +86,7 @@ void zmqCommunicator::transmit(std::uint64_t destID, std::shared_ptr<commMessage
 	txmsg.send(*txSocket);
 }
 
-void zmqCommunicator::addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message)
+void zmqCommunicator::addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> & /*message*/)
 {
 	if (!flags[no_transmit_source])
 	{
@@ -259,5 +255,5 @@ void zmqCommunicator::messageHandler(const multipart_t &msg)
 	gdMsg->loadString(msgString);
 
 	//call the lower level receive function
-	receive(0, getName(), gdMsg);
+	receive(0, getName(), std::move(gdMsg));
 }

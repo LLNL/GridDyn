@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -54,11 +54,12 @@ BOOST_AUTO_TEST_CASE(gen_test_remote2b)
   detailedStageCheck(fname, gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 }
 
+#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE(gen_test_isoc)
 {
 	std::string fname = std::string(GEN_TEST_DIRECTORY "test_isoc2.xml");
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 	gds->set("recorddirectory", GEN_TEST_DIRECTORY);
 
@@ -66,12 +67,13 @@ BOOST_AUTO_TEST_CASE(gen_test_isoc)
 
 	std::string recname = std::string(GEN_TEST_DIRECTORY "datafile.dat");
 	timeSeriesMulti<> ts3(recname);
+	BOOST_REQUIRE(ts3.size() > 30);
+	BOOST_CHECK(ts3.data(0,30) < 0.995);
+	BOOST_CHECK(ts3[0].back() > 1.0);
 
-	BOOST_CHECK(ts3.data[0][30] < 0.995);
-	BOOST_CHECK(ts3.data[0].back() > 1.0);
-
-	BOOST_CHECK((ts3.data[1][0] - ts3.data[1].back()) > 0.199);
+	BOOST_CHECK((ts3.data(1,0) - ts3[1].back()) > 0.199);
 	remove(recname.c_str());
 
 }
+#endif
 BOOST_AUTO_TEST_SUITE_END()

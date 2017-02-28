@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,6 @@
 
 // headers
 #include "gridObjects.h"
-#include "primary/listMaintainer.h"
 
 // forward classes
 class gridDynSimulation;
@@ -24,9 +23,11 @@ class gridRelay;
 class gridLink;
 class gridBus;
 class gridDynGenerator;
-class gridCoreList;
+class gridSource;
+class coreObjectList;
+class listMaintainer;
 
-/** @brief class implmenting a power system area
+/** @brief class implementing a power system area
  the area class acts as a container for other primary objects including areas
 it also acts as focal point for wide area controls such as AGC and can compute other functions and statistics across a wide area
 */
@@ -42,7 +43,7 @@ public:
   };
   
 
-protected:
+private:
   std::vector<gridBus *> m_Buses;              //!< list of buses contained in a the area
   std::vector<gridLink *> m_Links;          //!< links completely inside the area
   std::vector<gridLink *> m_externalLinks;    //!< links going to other areas
@@ -51,64 +52,76 @@ protected:
 
   std::vector<gridPrimary *> primaryObjects; //!< list of all the primary objects in the area
   //this is done to break apart the headers
-  std::unique_ptr<gridCoreList> obList;      //a search index for object names
+  std::unique_ptr<coreObjectList> obList;      //a search index for object names
 
   std::vector<gridPrimary *> rootObjects;//!< list of objects with roots
-  std::vector<gridPrimary *> pFlowAdjustObjects;  //!< list of objects with Pflow checks
-  std::vector<std::shared_ptr<gridPrimary>> objectHolder;  //!< storage location for shared ptrs to an object
-  listMaintainer opObjectLists;
+  std::vector<gridPrimary *> pFlowAdjustObjects;  //!< list of objects with power flow checks
+/** @brief storage location for shared_ptrs to coreObjects
+the direct pointer to the object will get passed to the system but the ownership will be changed so it won't be deleted by the normal means
+this allows storage of shared_ptrs to modeled objects but also other objects that potentially act as storage containers, do periodic updates, generate alerts or
+interact with other simulations
+*/
+  std::vector<std::shared_ptr<coreObject>> objectHolder;  //!< storage location for shared pointers to an object
+
+  //std::vector<gridSource *> signalsSources;	//!< sources for the area outputs
+
+  std::unique_ptr<listMaintainer> opObjectLists; //!< 
+  double fTarget = 1.0;                 //!<[puHz] a target frequency
   int masterBus = -1;                   //!< the master bus for frequency calculations purposes
-  int zone = 1;                                 //!< the zone of the area
-  double fTarget=1.0;                 //!<[puHz] a target frequency
+  
 public:
   /** @brief the default constructor*/
   explicit gridArea (const std::string &objName = "area_$");
   /** @brief the default destructor*/
   virtual ~gridArea ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
+
+  virtual void updateObjectLinkages(coreObject *newRoot) override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief add a bus to the area
   @param[in] bus  the bus to add
-  @return success indicator  OBJECT_ADD_SUCCESS(0) const on success
+  @throw objectAddFailure on add failure typically duplicated names
   */
   virtual void add (gridBus *bus);
   /** @brief add a link to the area
   @param[in] lnk  the link to add
-  @return success indicator  OBJECT_ADD_SUCCESS(0) on success
+  @throw objectAddFailure on add failure typically duplicated names
   */
   virtual void add (gridLink *lnk);
   /** @brief add an area to the area
   @param[in] area  the area to add
-  @return success indicator  OBJECT_ADD_SUCCESS(0) on success
+  @throw objectAddFailure on add failure typically duplicated names
   */
   virtual void add (gridArea *area);
   /** @brief add a relay to the area
   @param[in] relay  the relay to add
-  @return success indicator  OBJECT_ADD_SUCCESS(0) on success
+ @throw objectAddFailure on add failure typically duplicated names
   */
   virtual void add (gridRelay *relay);
+
+  virtual void addsp(std::shared_ptr<coreObject> obj) override;
+
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   /** @brief remove a bus from the area
   @param[in] bus  the bus to remove
-  @return success indicator  OBJECT_REMOVE_SUCCESS(0) const on success
+
   */
   virtual void remove (gridBus *bus);
   /** @brief remove a link from the area
   @param[in] lnk  the link to remove
-  @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
+ 
   */
   virtual void remove (gridLink *lnk);
   /** @brief remove an area from the area
   @param[in] area  the area to remove
-  @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
+ 
   */
   virtual void remove (gridArea *area);
   /** @brief remove a relay from the area
   @param[in] relay  the relay to remove
-  @return success indicator  OBJECT_REMOVE_SUCCESS(0) on success
   */
   virtual void remove (gridRelay *relay);
 
@@ -123,7 +136,7 @@ public:
   @return a point to the generator or nullptr
   */
   virtual gridDynGenerator * getGen (index_t x);     //
-  // initializeB
+  // dynInitializeB
 
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
   virtual void setOffset (index_t offset, const solverMode &sMode) override;
@@ -132,23 +145,22 @@ public:
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
 
 protected:
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
-  //initializeB dynamics
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeB (IOdata &outputSet) override;
+  //dynInitializeB dynamics
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 
 public:
-  virtual void setTime (gridDyn_time time) override;
 
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   //TODO:: Pt make this do something
   /** @brief update the angles may be deprecated
   @param[in] time the time to update to
   */
-  virtual void updateTheta (gridDyn_time time);
+  virtual void updateTheta (coreTime time);
 
   // parameter set functions
   virtual void setFlag (const std::string &flag, bool val) override;
@@ -162,37 +174,37 @@ public:
   @param[in] obj  the object to check
   @return true if the object is a member false if not
   */
-  virtual bool isMember (gridCoreObject *obj) const;
+  virtual bool isMember (coreObject *obj) const;
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
   // solver functions
 
-  virtual void alert (gridCoreObject *obj, int code) override;
+  virtual void alert (coreObject *obj, int code) override;
 
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
-  virtual void preEx (const stateData *sD, const solverMode &sMode) override;
-  virtual void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void algebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
 
-  virtual void delayedResidual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void delayedDerivative (const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void delayedJacobian (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void delayedAlgebraicUpdate (const stateData *sD, double update[], const solverMode &sMode, double alpha) override;
+  virtual void delayedResidual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void delayedDerivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void delayedJacobian (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void delayedAlgebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
 
 
 
-  virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
+  virtual change_code powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level) override;
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   //for identifying which variables are algebraic vs differential
   virtual void getVariableType (double sdata[], const solverMode &sMode) override;
   virtual void getTols (double tols[], const solverMode &sMode) override;
   // dynamic simulation
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
 
   /** @brief try to do a local converge on the solution
    to be replaced by the algebraic update function soon
@@ -204,16 +216,16 @@ public:
   @param[in] tol  the tolerance to converge to
   
   */
-  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
+  virtual void converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode, double tol) override;
   virtual void updateLocalCache () override;
 
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
   virtual void reset (reset_levels level) override;
   //root finding functions
-  virtual void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode,  check_level_t level) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode,  check_level_t level) override;
   //grab information
   /** @brief get a vector of voltage from the attached buses
   @param[out] V the vector to put the bus  voltages
@@ -319,12 +331,12 @@ public:
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Up
   */
-  double getAdjustableCapacityUp (gridDyn_time time = maxTime) const;
+  double getAdjustableCapacityUp (coreTime time = maxTime) const;
   /** @brief get the total adjustable Capacity Down for the area within a certain time frame
   @param[in] time  the time within which to make the adjustment
   @return athe total adjustable capacity Down
   */
-  double getAdjustableCapacityDown (gridDyn_time time = maxTime) const;
+  double getAdjustableCapacityDown (coreTime time = maxTime) const;
   /** @brief get the total loss for contained links
   @return the total area loss
   */
@@ -354,7 +366,7 @@ public:
   @param[in] sMode the solverMode corresponding to the state data
   @return the average angle
   */
-  double getAvgAngle (const stateData *sD, const solverMode &sMode) const;
+  double getAvgAngle (const stateData &sD, const solverMode &sMode) const;
   
 
   /** @brief get the average frequency for the area
@@ -373,7 +385,7 @@ public:
   */
   void getVoltageStates (double vStates[], const solverMode &sMode) const;
   void getAngleStates (double aStates[],const solverMode &sMode) const;
-  double getMasterAngle (const stateData *sD, const solverMode &sMode) const;
+  double getMasterAngle (const stateData &sD, const solverMode &sMode) const;
   virtual void updateFlags (bool dynOnly = false) override;
   /** @brief  get a vector of buses of the area
   @param[out] busList  a vector of buses
@@ -390,14 +402,13 @@ public:
   count_t getLinkVector(std::vector<gridLink *> &linkList, index_t start = 0) const;
 private:
 
-  static std::atomic<count_t> areaCount;  //!< basic counter for the areas to compute an id
+  static std::atomic<count_t> areaCounter;  //!< basic counter for the areas to compute an id
 
   template<class X>
   friend void addObject (gridArea *area, X* obj, std::vector<X *> &objVector);
 
   template<class X>
   friend void removeObject (gridArea *area, X* obj, std::vector<X *> &objVector);
-
 
 };
 
@@ -410,4 +421,5 @@ private:
 @return a pointer to an area on the second tree that matches the area based on name and location
 */
 gridArea * getMatchingArea (gridArea *area, gridPrimary *src, gridPrimary *sec);
+
 #endif

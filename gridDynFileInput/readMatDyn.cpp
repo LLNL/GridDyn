@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,13 +14,13 @@
 
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
-#include "gridEvent.h"
+#include "events/gridEvent.h"
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGovernor.h"
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "linkModels/gridLink.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "gridBus.h"
 #include "gridDyn.h"
 #include "stringOps.h"
@@ -30,15 +30,15 @@
 #include <memory>
 
 using namespace gridUnits;
+using namespace stringOps;
 
 
+void loadGenExcArray (coreObject *parentObject, mArray &Exc, std::vector<gridDynGenerator *> &genList);
+void loadGenDynArray (coreObject *parentObject, mArray &Gen, std::vector<gridDynGenerator *> &genList);
+void loadGenGovArray (coreObject *parentObject, mArray &Gov, std::vector<gridDynGenerator *> &genList);
 
-void loadGenExcArray (gridCoreObject *parentObject, mArray &Exc, std::vector<gridDynGenerator *> &genList);
-void loadGenDynArray (gridCoreObject *parentObject, mArray &Gen, std::vector<gridDynGenerator *> &genList);
-void loadGenGovArray (gridCoreObject *parentObject, mArray &Gov, std::vector<gridDynGenerator *> &genList);
 
-
-void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
+void loadMatDyn (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
 {
   mArray M1;
 
@@ -58,7 +58,7 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
       B = filetext.find_first_of ('=', A);
       C = filetext.find_first_of (";\n", A);
       tstr = filetext.substr (B + 1, C - B - 1);
-      double freq = doubleRead (tstr);
+      double freq = numeric_conversion (tstr,kNullVal);
       parentObject->set ("basefreq", freq);
     }
   //get the timestep parameter
@@ -68,7 +68,7 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
       B = filetext.find_first_of ('=', A);
       C = filetext.find_first_of (";\n", A);
       tstr = filetext.substr (B + 1, C - B - 1);
-      double val = doubleRead (tstr);
+      double val = numeric_conversion (tstr,kNullVal);
       parentObject->set ("timestep", val);
     }
   //get the stoptime parameter
@@ -78,7 +78,7 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
       B = filetext.find_first_of ('=', A);
       C = filetext.find_first_of (";\n", A);
       tstr = filetext.substr (B + 1, C - B - 1);
-      double val = doubleRead (tstr);
+      double val = numeric_conversion (tstr,kNullVal);
       parentObject->set ("timestop", val);
     }
   A = filetext.find (Tline[0],D);     //gen
@@ -115,24 +115,21 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
           return;
         }
       //now we load the existing components of our generator onto the existing one
-      gridCoreObject *obj = ngen->getSubObject ("exciter", 0);
+      coreObject *obj = ngen->getSubObject ("exciter", 0);
       if (obj)
         {
-          obj->setOwner (nullptr,gen);               //transfer ownership
           gen->add (obj);
         }
 
       obj = ngen->getSubObject ("genmodel", 0);
       if (obj)
         {
-          obj->setOwner (nullptr, gen);               //transfer ownership
           gen->add (obj);
         }
 
       obj = ngen->getSubObject ("governor", 0);
       if (obj)
         {
-          obj->setOwner (nullptr, gen);               //transfer ownership
           gen->add (obj);
         }
 
@@ -146,13 +143,13 @@ void loadMatDyn (gridCoreObject *parentObject, const std::string &filetext, cons
   index_t b = static_cast<index_t> (parentObject->get ("loadcount"));
   for (index_t kk = 1; kk <= b; kk++)
     {
-      auto ld = static_cast<gridLoad *> (parentObject->findByUserID ("load", kk));
-      ld->set ("converttoimpedance", 1);
+      auto ld = static_cast<zipLoad *> (parentObject->findByUserID ("load", kk));
+      ld->set ("converttoimpedance", 1);//TODO:: change this so it doesn't do a dynamic allocation
     }
 
 }
 
-void loadGenDynArray (gridCoreObject * /*parentObject*/, mArray &Gen, std::vector<gridDynGenerator *> &genList)
+void loadGenDynArray (coreObject * /*parentObject*/, mArray &Gen, std::vector<gridDynGenerator *> &genList)
 {
   gridDynGenerator *gen = nullptr;
   gridDynExciter *exc;
@@ -237,7 +234,7 @@ void loadGenDynArray (gridCoreObject * /*parentObject*/, mArray &Gen, std::vecto
 10 Urmin, lower voltage limit
 11 Urmax, upper voltage limit
 */
-void loadGenExcArray (gridCoreObject * /*parentObject*/, mArray &excData, std::vector<gridDynGenerator *> &genList)
+void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vector<gridDynGenerator *> &genList)
 {
 
   /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
@@ -279,7 +276,7 @@ void loadGenExcArray (gridCoreObject * /*parentObject*/, mArray &excData, std::v
 8 Pmax, maximal turbine output
 9 Pmin, minimal turbine output
 */
-void loadGenGovArray(gridCoreObject * /*parentObject*/, mArray &govData, std::vector<gridDynGenerator *> &genList)
+void loadGenGovArray(coreObject * /*parentObject*/, mArray &govData, std::vector<gridDynGenerator *> &genList)
 {
 
 	gridDynGenerator *gen = nullptr;
@@ -314,7 +311,7 @@ void loadGenGovArray(gridCoreObject * /*parentObject*/, mArray &govData, std::ve
 
 
 //read matdyn Event files
-void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
+void loadMatDynEvent(coreObject *parentObject, const std::string &filetext, const basicReaderInfo &)
 {
 	
 	mArray::size_type kk;
@@ -324,7 +321,7 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 	gridLink *lnk;
 	int ind;
 	mArray event1,M1;
-	gridSimulation *gds = dynamic_cast<gridSimulation *>(parentObject->find("root"));
+	gridSimulation *gds = dynamic_cast<gridSimulation *>(parentObject->getRoot());
 	if (gds == nullptr)
 	{ //cant make events if we don't have access to the simulation
 		return;
@@ -350,13 +347,13 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 		readMatlabArray(filetext, B + 1, M1);
 		for (kk = 0; kk < M1.size(); ++kk)
 		{
-			evnt = std::make_shared<gridEvent>(M1[kk][0]);
+			evnt = std::make_unique<gridEvent>(M1[kk][0]);
 			ind = static_cast<int>(M1[kk][1]);
 			bus = static_cast<gridBus *>(parentObject->findByUserID("bus",ind));
 			ld = bus->getLoad();
 			if (!(ld))
 			{
-				ld = new gridLoad();
+				ld = new zipLoad();
 				bus->add(ld);
 			}
 			switch (static_cast<int>(M1[kk][2]))
@@ -380,7 +377,7 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 			default:
 				break;
 			}
-			gds->add(evnt);
+			gds->add(std::move(evnt));
 		}
 	//	loadGenExcArray(parentObject, M1, genList);
 	}
@@ -392,7 +389,7 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 		readMatlabArray(filetext, B + 1, M1);
 		for (const auto &lc:M1)
 		{
-			evnt = std::make_shared<gridEvent>(lc[0]);
+			evnt = std::make_unique<gridEvent>(lc[0]);
 			
 			ind = static_cast<int>(lc[1]);
 			lnk = static_cast<gridLink *>(parentObject->findByUserID("link",ind));
@@ -425,7 +422,7 @@ void loadMatDynEvent(gridCoreObject *parentObject, const std::string &filetext, 
 			default:
 				break;
 			}
-			gds->add(evnt);
+			gds->add(std::move(evnt));
 		}
 	}
 }

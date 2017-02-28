@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -22,7 +22,7 @@
 #include "gridBus.h"
 #include "simulation/diagnostics.h"
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 #include "fmi_models/fmiLoad.h"
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml1)
 	std::string fname = std::string(FMI_TEST_DIRECTORY "fmimotorload_test1.xml");
 
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
@@ -175,9 +175,9 @@ BOOST_AUTO_TEST_CASE(fmi_xml1)
 		BOOST_REQUIRE_EQUAL(mmatch, 0);
 	gds->powerflow();
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	gds->dynInitialize();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	std::vector<double> v;
 	gds->getVoltage(v);
 	mmatch = residualCheck(gds,cDaeSolverMode);
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml1)
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 
 	gds->run();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml2)
 	std::string fname = std::string(FMI_TEST_DIRECTORY "fmiload_test2.xml");
 
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
@@ -220,9 +220,9 @@ BOOST_AUTO_TEST_CASE(fmi_xml2)
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 	gds->powerflow();
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	gds->dynInitialize();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	std::vector<double> v;
 	gds->getVoltage(v);
 	mmatch = residualCheck(gds,cDaeSolverMode);
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml2)
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 
 	gds->run();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml3)
 	std::string fname = std::string(FMI_TEST_DIRECTORY "fmiload_test3.xml");
 
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
@@ -266,9 +266,9 @@ BOOST_AUTO_TEST_CASE(fmi_xml3)
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 	gds->powerflow();
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	gds->dynInitialize();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	std::vector<double> v;
 	gds->getVoltage(v);
 	mmatch = residualCheck(gds,cDaeSolverMode);
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(fmi_xml3)
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 
 	gds->run();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(fmi_array)
 	std::string fname = std::string(FMI_TEST_DIRECTORY "block_grid.xml");
 
 	readerConfig::setPrintMode(0);
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
@@ -315,9 +315,9 @@ BOOST_AUTO_TEST_CASE(fmi_array)
 	}
 	gds->powerflow();
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	gds->dynInitialize();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	std::vector<double> v;
 	gds->getVoltage(v);
 

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "dispatcher.h"
 #include "comms/gridCommunicator.h"
 #include "comms/schedulerMessage.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 using namespace gridUnits;
 
@@ -45,27 +45,27 @@ bool operator!= (const tsched &td1, const tsched &td2)
 {
   return (td1.time != td2.time);
 }
-bool operator< (const tsched &td1, double timeC)
+bool operator< (const tsched &td1, coreTime timeC)
 {
   return (td1.time < timeC);
 }
-bool operator<= (const tsched &td1, double timeC)
+bool operator<= (const tsched &td1, coreTime timeC)
 {
   return (td1.time <= timeC);
 }
-bool operator> (const tsched &td1, double timeC)
+bool operator> (const tsched &td1, coreTime timeC)
 {
   return (td1.time > timeC);
 }
-bool operator>= (const tsched &td1, double timeC)
+bool operator>= (const tsched &td1, coreTime timeC)
 {
   return (td1.time >= timeC);
 }
-bool operator== (const tsched &td1, double timeC)
+bool operator== (const tsched &td1, coreTime timeC)
 {
   return (td1.time == timeC);
 }
-bool operator!= (const tsched &td1, double timeC)
+bool operator!= (const tsched &td1, coreTime timeC)
 {
   return (td1.time != timeC);
 }
@@ -83,7 +83,7 @@ scheduler::scheduler (double initialValue, const std::string &objName) : schedul
 
 
 
-gridCoreObject *scheduler::clone (gridCoreObject *obj) const
+coreObject *scheduler::clone (coreObject *obj) const
 {
   scheduler *nobj = cloneBase<scheduler, gridSource> (this, obj);
   if (nobj == nullptr)
@@ -109,7 +109,7 @@ void scheduler::setTarget (double target)
 }
 
 
-void scheduler::setTarget (gridDyn_time time, double target)
+void scheduler::setTarget (coreTime time, double target)
 {
 
   insertTarget (tsched (time, target));
@@ -135,19 +135,20 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
   if (pTarget.front ().time != nextUpdateTime)
     {
       nextUpdateTime = (pTarget.front ()).time;
-      parent->alert (this, UPDATE_TIME_CHANGE);
+      alert (this, UPDATE_TIME_CHANGE);
     }
 }
 
 void scheduler::setTarget (const std::string &filename)
 {
-  timeSeries<double,gridDyn_time> targets;
-  targets.loadBinaryFile (filename);
+  timeSeries<double,coreTime> targets;
+  targets.loadFile (filename);
   
   std::list<tsched> flist;
-  for (index_t kk = 0; kk < targets.count; ++kk)
+  for (index_t kk = 0; kk < targets.size(); ++kk)
     {
-      flist.push_back (tsched (targets.time[kk], targets.data[kk]));
+      //flist.push_back (tsched (targets.time(kk), targets.data(kk)));
+	  flist.emplace_back(targets.time(kk), targets.data(kk));
       //setTarget(targets.time[kk],targets.data[kk]);
     }
   flist.sort ();
@@ -155,25 +156,14 @@ void scheduler::setTarget (const std::string &filename)
   if (pTarget.front ().time != nextUpdateTime)
     {
       nextUpdateTime = (pTarget.front ()).time;
-      parent->alert (this, UPDATE_TIME_CHANGE);
+      alert (this, UPDATE_TIME_CHANGE);
     }
 
 }
 
-void scheduler::setTime (gridDyn_time time)
-{
 
-  gridDyn_time timeshift = time - prevTime;
-  for (auto &pt : pTarget)
-    {
-      pt.time += timeshift;
-    }
-  nextUpdateTime += timeshift;
-  alert (this,UPDATE_TIME_CHANGE);
-  prevTime = time;
-}
 
-void scheduler::updateA (gridDyn_time time)
+void scheduler::updateA (coreTime time)
 {
   auto dt = (time - prevTime);
   if (dt == timeZero)
@@ -209,7 +199,7 @@ void scheduler::updateA (gridDyn_time time)
   lastUpdateTime = time;
 }
 
-double scheduler::predict (gridDyn_time time)
+double scheduler::predict (coreTime time)
 {
   double out = m_output;
   if (time >= nextUpdateTime)
@@ -228,7 +218,7 @@ double scheduler::predict (gridDyn_time time)
 }
 
 
-void scheduler::objectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
+void scheduler::dynObjectInitializeA (coreTime time0, unsigned long /*flags*/)
 {
 	commLink = cManager.build();
 
@@ -238,22 +228,22 @@ void scheduler::objectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
   prevTime = time0;
 }
 
-void scheduler::objectInitializeB (const IOdata & /*args*/, const IOdata &outputSet, IOdata & /*fieldSet*/)
+void scheduler::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata & /*fieldSet*/)
 {
 
 
-  if (outputSet[0] > Pmax)
+  if (desiredOutput[0] > Pmax)
     {
-      Pmax = outputSet[0];
+      Pmax = desiredOutput[0];
     }
-  else if (outputSet[0] < Pmin)
+  else if (desiredOutput[0] < Pmin)
     {
-      Pmin = outputSet[0];
+      Pmin = desiredOutput[0];
     }
 
   //try to register to a dispatcher
 
-  PCurr = outputSet[0];
+  PCurr = desiredOutput[0];
   m_output = PCurr;
 }
 
@@ -265,12 +255,12 @@ double scheduler::getTarget () const
 }
 
 
-double scheduler::getMax(gridDyn_time /*time*/) const
+double scheduler::getMax(coreTime /*time*/) const
 {
 	return Pmax;
 }
 
-double scheduler::getMin(gridDyn_time /*time*/) const
+double scheduler::getMin(coreTime /*time*/) const
 {
 	return Pmin;
 }
@@ -410,16 +400,12 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
 
 void scheduler::dispatcherLink ()
 {
-	if (parent)
-	{
-		auto    dispatch = static_cast<dispatcher *> (parent->find("dispatcher"));
+
+		auto    dispatch = static_cast<dispatcher *> (getParent()->find("dispatcher"));
 		if (dispatch)
 		{
 			dispatch->add(this);
 		}
-	}
-  
-
 }
 
 

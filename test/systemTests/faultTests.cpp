@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,7 +17,7 @@
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "vectorOps.hpp"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
 #include "submodels/gridDynGenModel.h"
 #include "submodels/gridDynExciter.h"
@@ -42,13 +42,13 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 
 	
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	coreObject *obj = nullptr;
 	
 	auto genlist = cof->getTypeNames("genmodel");
 
 	for (auto &gname : genlist)
 	{
-		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gds->consolePrintLevel = print_level::no_print;
 		obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
@@ -66,8 +66,6 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 		}
 		else
 		{
-			delete gds;
-			gds = nullptr;
 			continue;
 		}
 		
@@ -87,8 +85,6 @@ BOOST_AUTO_TEST_CASE(fault_test1)
 		gds->getVoltage(volts);
 		
 		BOOST_CHECK_MESSAGE(volts[1] > 0.96,"Model "<<gname<<" voltage issue v="<<volts[1]);
-		delete gds;
-		gds = nullptr;
 	}
 }
 
@@ -104,7 +100,7 @@ BOOST_AUTO_TEST_CASE(fault_test2)
 	for (auto &gname : genlist)
 	{
 		
-		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gds->consolePrintLevel = print_level::no_print;
 		auto obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
@@ -138,8 +134,6 @@ BOOST_AUTO_TEST_CASE(fault_test2)
 		gds->getVoltage(volts);
 
 		BOOST_CHECK_MESSAGE(volts[1] > 0.96, "Model " << gname << " voltage issue v=" << volts[1]);
-		delete gds;
-		gds = nullptr;
 	}
 }
 //#endif
@@ -156,7 +150,7 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 	for (auto &gname : genlist)
 	{
 		
-		gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+		gds = readSimXMLFile(fname);
 		gds->consolePrintLevel = print_level::no_print;
 		auto obj = cof->createObject("genmodel", gname);
 		BOOST_REQUIRE(obj != nullptr);
@@ -193,8 +187,6 @@ BOOST_AUTO_TEST_CASE(fault_test3)
 		gds->getVoltage(volts);
 
 		BOOST_CHECK_MESSAGE(volts[1] > 0.96, "Model " << gname << " voltage issue v=" << volts[1]);
-		delete gds;
-		gds = nullptr;
 	}
 }
 
@@ -202,24 +194,16 @@ BOOST_AUTO_TEST_CASE(geco_fault_case)
 {
 	std::string fname = fault_test_directory + "geco_fault_uncoupled.xml";
 
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::debug;
 	int  retval = gds->dynInitialize();
 
 	BOOST_CHECK_EQUAL(retval, 0);
 
-	int mmatch = JacobianCheck(gds, cDaeSolverMode);
-	if (mmatch > 0)
-	{
-		printStateNames(gds, cDaeSolverMode);
-	}
+	int mmatch = runJacobianCheck(gds, cDaeSolverMode);
+	
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
-	mmatch = residualCheck(gds, cDaeSolverMode);
-	if (mmatch > 0)
-	{
-		printStateNames(gds, cDaeSolverMode);
-	}
-
+	mmatch = runResidualCheck(gds, cDaeSolverMode);
 
 	gds->run();
 	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -234,7 +218,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_dynamic)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault2.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::trace;
 	gds->consolePrintLevel = print_level::warning;
 
@@ -257,7 +241,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse)
 	//test a fuse
 	std::string fname = fault_test_directory + "link_fault_fuse.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<fuse *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
@@ -280,7 +264,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse2)
 	//test whether fuses are working properly
 	std::string fname = fault_test_directory + "link_fault_fuse2.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::debug;
 	auto obj = dynamic_cast<gridLink *>(gds->find("bus8_to_bus9"));
 	BOOST_REQUIRE(obj != nullptr);
@@ -302,7 +286,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_fuse3)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault_fuse3.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::debug;
 	//auto obj = dynamic_cast<gridLink *>(gds->find("bus2_to_bus3"));
 	gds->dynInitialize();
@@ -330,7 +314,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault_breaker.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
@@ -353,7 +337,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker2)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault_breaker2.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
@@ -376,7 +360,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker3)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault_breaker3.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);
@@ -399,7 +383,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_breaker4)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = fault_test_directory + "link_fault_breaker4.xml";
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel = print_level::warning;
 	auto obj = dynamic_cast<breaker *>(gds->getRelay(0));
 	BOOST_REQUIRE(obj != nullptr);

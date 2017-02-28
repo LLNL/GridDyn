@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,13 +17,13 @@
 #include "readerHelper.h"
 #include "readerElement.h"
 #include "elementReaderTemplates.hpp"
-
+#include "core/helperObject.h"
 #include <boost/filesystem.hpp>
 #include <sstream>
 
 using namespace readerConfig;
 
-void loadElementInformation (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo *ri, const IgnoreListType &ignoreList)
+void loadElementInformation (coreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo &ri, const IgnoreListType &ignoreList)
 {
   objSetAttributes (obj, element, objectName, ri, ignoreList);
   readImports (element, ri, obj, false);
@@ -36,7 +36,7 @@ void loadElementInformation (gridCoreObject *obj, std::shared_ptr<readerElement>
 }
 
 static const std::string importString ("import");
-void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject, bool finalFlag)
+void readImports (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject, bool finalFlag)
 {
   if (element->hasElement (importString) == false)
     {
@@ -44,7 +44,7 @@ void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridC
     }
 
   //run any source files
-  auto bflags = ri->flags;
+  auto bflags = ri.flags;
   element->bookmark ();
   element->moveToFirstChild (importString);
   while (element->isValid ())
@@ -66,7 +66,7 @@ void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridC
       std::string flags = getElementField (element, "flags", defMatchType);
       if (!flags.empty ())
         {
-          ri->flags = addflags (ri->flags, flags);
+          ri.flags = addflags (ri.flags, flags);
         }
       std::string sourceFile = getElementField (element, "file", defMatchType);
       if (sourceFile.empty ())
@@ -76,35 +76,35 @@ void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridC
         }
 
       //check through the files to find the right location
-      ri->checkFileParam (sourceFile,true);
+      ri.checkFileParam (sourceFile,true);
 
       boost::filesystem::path sourcePath (sourceFile);
       std::string prefix = getElementField (element,"prefix",match_type::capital_case_match);
       //get the prefix if any
       if (prefix.empty ())
         {
-          prefix = ri->prefix;
+          prefix = ri.prefix;
         }
-      else if (!(ri->prefix.empty ()))
+      else if (!(ri.prefix.empty ()))
         {
-          prefix = ri->prefix + '_' + prefix;
+          prefix = ri.prefix + '_' + prefix;
         }
 
       //check for type override
       std::string ext = convertToLowerCase (getElementField (element, "filetype", defMatchType));
 
-      std::swap (prefix, ri->prefix);
+      std::swap (prefix, ri.prefix);
       if (ext.empty ())
         {
-          loadFile (parentObject, sourceFile, ri);
+          loadFile (parentObject, sourceFile, &ri);
         }
       else
         {
-          loadFile (parentObject, sourceFile, ri, ext);
+          loadFile (parentObject, sourceFile, &ri, ext);
         }
-      std::swap (prefix, ri->prefix);
+      std::swap (prefix, ri.prefix);
 
-      ri->flags = bflags;
+      ri.flags = bflags;
       element->moveToNextSibling (importString);                    // next import file
     }
   element->restore ();
@@ -156,7 +156,7 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
 
   if (param == nullptr)
     {
-      ret = new gridParameter ();  //TODO:  PT this may not be the best thing to do
+      ret = new gridParameter ();  //TODO:  PT this definitely not the best thing to do here
     }
   else
     {
@@ -255,10 +255,10 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
 static const IgnoreListType keywords {
   "type", "ref", "number","index", "retype","name","define","library","import","area","bus","link","load","exciter",
   "source","governor","controlblock", "pss", "simulation","generator","array","relay", "parent", "genmodel", "line", "solver",
-  "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom", "purpose"
+  "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom", "purpose", "event", "collector"
 };
 
-void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
+void objSetAttributes (coreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo &ri, const IgnoreListType &ignoreList)
 {
 
   auto att = aP->getFirstAttribute ();
@@ -293,22 +293,22 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
       else if (fname.find ("file") != std::string::npos)
         {
           std::string strVal = att.getText ();
-          ri->checkFileParam (strVal);
+          ri.checkFileParam (strVal);
 		  gridParameter po(fname, strVal);
 		  objectParameterSet(typeName, obj, po);
         }
       else if ((fname.find ("workdir") != std::string::npos) || (fname.find ("directory") != std::string::npos))
         {
           std::string strVal = att.getText ();
-          ri->checkDirectoryParam (strVal);
+          ri.checkDirectoryParam (strVal);
 		  gridParameter po(fname, strVal);
 		  objectParameterSet(typeName, obj, po);
         }
       else if ((fname == "flag") || (fname == "flags"))     //read the flags parameter
         {
 
-          auto v = splitlineTrim (att.getText ());
-
+          auto v = stringOps::splitline(att.getText ());
+		  stringOps::trim(v);
           for (auto &temp : v)
             {
               makeLowerCase (temp);                         //make the flags lower case
@@ -347,7 +347,7 @@ void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
 }
 
 
-void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList)
+void paramLoopElement (coreObject *obj, std::shared_ptr<readerElement> &aP, const std::string &typeName, readerInfo &ri, const IgnoreListType &ignoreList)
 {
 
   gridParameter param;
@@ -362,8 +362,8 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
           aP->moveToNextSibling ();
           continue;
         }
-      ifind = ri->getIgnoreList ().find (fname);
-      if (ifind != ri->getIgnoreList ().end ())
+     ifind = ri.getIgnoreList ().find (fname);
+      if (ifind != ri.getIgnoreList ().end ())
         {
           aP->moveToNextSibling ();
           continue;
@@ -374,16 +374,6 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
           aP->moveToNextSibling ();
           continue;
         }
-	  //TODO:: PT move the event and recorder loading to a separate function
-      if ((fname == "recorder")||(fname=="collector"))
-        {
-          loadCollectorElement (aP, obj, ri);
-        }
-      // event
-      else if ((fname == "event")||(fname=="player"))
-        {
-          loadEventElement (aP, obj, ri);
-        }
       else           //get all the parameter fields
         {
           getElementParam (aP, &param);
@@ -393,18 +383,19 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
                 {
                   if (param.field.find ("file") != std::string::npos)
                     {
-                      ri->checkFileParam (param.strVal);
+                      ri.checkFileParam (param.strVal);
                       objectParameterSet (typeName, obj, param);
                     }
                   else if ((param.field.find ("workdir") != std::string::npos) || (param.field.find ("directory") != std::string::npos))
                     {
-                      ri->checkDirectoryParam (param.strVal);
+                      ri.checkDirectoryParam (param.strVal);
                       objectParameterSet (typeName, obj, param);
                     }
                   else if ((fname == "flag") || (fname == "flags"))                 //read the flags parameter
                     {
                       paramStringProcess (&param, ri);
-                      auto v = splitlineTrim (param.strVal);
+                      auto v = stringOps::splitline (param.strVal);
+					  stringOps::trim(v);
                       for (auto &temp : v)
                         {
                           makeLowerCase (temp);                                     //make the flags lower case
@@ -437,38 +428,48 @@ void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &aP, 
 }
 
 
-void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo *)
+void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo &)
 {
   if (sim->hasElement ("configuration"))
     {
       sim->bookmark ();
       sim->moveToFirstChild ("configuration");
       auto cfgAtt = sim->getFirstAttribute ();
+	  
       while (cfgAtt.isValid ())
         {
-          if ((cfgAtt.getName () == "matching") || (cfgAtt.getName () == "match_type"))
+		  auto cfgname = convertToLowerCase(cfgAtt.getName());
+          if ((cfgname == "matching") || (cfgname == "match_type"))
             {
               readerConfig::setDefaultMatchType (cfgAtt.getText ());
             }
-          else if (cfgAtt.getName () == "printlevel")
+          else if (cfgname == "printlevel")
             {
               readerConfig::setPrintMode (cfgAtt.getText ());
             }
+		  else if ((cfgname == "xmlreader") || (cfgname == "xml"))
+		  {
+			  readerConfig::setDefaultXMLReader(cfgAtt.getText());
+		  }
           cfgAtt = sim->getNextAttribute ();
         }
 
       sim->moveToFirstChild ();
       while (sim->isValid ())
         {
-          std::string fname = sim->getName ();
+          std::string fname = convertToLowerCase(sim->getName ());
           if ((fname == "matching") || (fname == "match_type"))
             {
               readerConfig::setDefaultMatchType (sim->getText ());
             }
           else if (fname == "printlevel")
             {
-              readerConfig::setPrintMode (cfgAtt.getText ());
+              readerConfig::setPrintMode (sim->getText());
             }
+		  else if ((fname == "xmlreader") || (fname == "xml"))
+		  {
+			  readerConfig::setDefaultXMLReader(sim->getText());
+		  }
           sim->moveToNextSibling ();
         }
 
@@ -476,4 +477,141 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo *)
     }
 
 
+}
+
+void setAttributes(helperObject *obj, std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo &ri, const IgnoreListType &ignoreList)
+{
+	using namespace readerConfig;
+	auto att = element->getFirstAttribute();
+
+	while (att.isValid())
+	{
+		std::string fname = convertToLowerCase(att.getName());
+
+		auto ifind = ignoreList.find(fname);
+		if (ifind != ignoreList.end())
+		{
+			att = element->getNextAttribute();
+			continue;
+		}
+		try
+		{
+			if (fname.find("file") != std::string::npos)
+			{
+				std::string strVal = att.getText();
+				ri.checkFileParam(strVal);
+				LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << strVal);
+				obj->set(fname, strVal);
+			}
+			else
+			{
+				double val = att.getValue();
+				if (val != kNullVal)
+				{
+					LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << val);
+					obj->set(fname, val);
+				}
+				else
+				{
+					gridParameter po(fname, att.getText());
+					paramStringProcess(&po, ri);
+					if (po.stringType == true)
+					{
+						obj->set(po.field, po.strVal);
+						LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.strVal);
+					}
+					else
+					{
+						obj->set(po.field, po.value);
+						LEVELPRINT(READER_VERBOSE_PRINT, componentName << ": setting " << fname << " to " << po.value);
+					}
+				}
+			}
+		}
+		catch (const unrecognizedParameter &)
+		{
+			WARNPRINT(READER_WARN_ALL, "unknown " << componentName << " parameter " << fname);
+		}
+		catch (const invalidParameterValue &)
+		{
+			WARNPRINT(READER_WARN_ALL, "value for " << componentName << " parameter " << fname << " (" << att.getText() << ") is invalid");
+		}
+
+		att = element->getNextAttribute();
+	}
+
+}
+
+void setParams(helperObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo &ri, const IgnoreListType &ignoreList)
+{
+	using namespace readerConfig;
+
+	gridParameter param;
+
+	element->moveToFirstChild();
+	while (element->isValid())
+	{
+		std::string fname = convertToLowerCase(element->getName());
+		auto ifind = ignoreList.find(fname);
+		if (ifind != ignoreList.end())
+		{
+			element->moveToNextSibling();
+			continue;
+		}
+
+
+		getElementParam(element, &param);
+		if (param.valid)
+		{
+			try
+			{
+				if (param.stringType == true)
+				{
+					if (param.field.find("file") != std::string::npos)
+					{
+						ri.checkFileParam(param.strVal);
+						LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " file to " << param.strVal);
+						obj->set(param.field, param.strVal);
+					}
+					else
+					{
+
+						paramStringProcess(&param, ri);
+						if (param.stringType == true)
+						{
+							LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.strVal);
+							obj->set(param.field, param.strVal);
+						}
+						else
+						{
+							LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.value);
+							obj->set(param.field, param.value);
+						}
+					}
+				}
+				else
+				{
+					LEVELPRINT(READER_VERBOSE_PRINT, typeName << ":setting " << obj->getName() << " " << param.field << " to " << param.value);
+					obj->set(param.field, param.value);
+				}
+			}
+			catch (const unrecognizedParameter &)
+			{
+				WARNPRINT(READER_WARN_ALL, "unknown " << typeName << " parameter " << param.field);
+			}
+			catch (const invalidParameterValue &)
+			{
+				if (param.stringType == true)
+				{
+					WARNPRINT(READER_WARN_ALL, "value for " << typeName << " parameter " << param.field << " (" << param.strVal << ") is invalid");
+				}
+				else
+				{
+					WARNPRINT(READER_WARN_ALL, "value for " << typeName << " parameter " << param.field << " (" << param.value << ") is invalid");
+				}
+			}
+		}
+		element->moveToNextSibling();
+	}
+	element->moveToParent();
 }

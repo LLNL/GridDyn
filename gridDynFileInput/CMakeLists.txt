@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,10 +17,6 @@ set (reader_sources
 	gridDynRunner.cpp
 	gridParameter.cpp
 	readerInfo.cpp
-	)
-
-	set (xml_sources
-	readXMLfile.cpp
 	)
 
 set(elementReader_sources
@@ -43,7 +39,7 @@ set(elementReader_sources
 	objectLoadHelperFunctions.cpp
 	)
 
-set(otherfileInput_sources
+set(formattedfileInput_sources
 	gridDynReadCDF.cpp
 	gridDynReadRAW.cpp
 	gridDynReadDYR.cpp
@@ -56,6 +52,7 @@ set(otherfileInput_sources
 	gridDynReadCSV.cpp
 	readMatlabData.cpp
 	loadGDZ.cpp
+	readXMLfile.cpp
 	)
 	
 set(fileInput_headers
@@ -74,35 +71,24 @@ set (fileInput_sources
 	${xml_sources}
 	${reader_sources}
 	${elementReader_sources}
-	${otherfileInput_sources}
+	${formattedfileInput_sources}
 	${fileInput_headers}
 	)
 add_library(gridDynFileInput STATIC ${fileInput_sources})
 
-source_group("XML"  FILES ${xml_sources})
 source_group("Elements"  FILES  ${elementReader_sources})
-source_group("OthersFormats"  FILES  ${otherfileInput_sources})
+source_group("formatSpecific"  FILES  ${formattedfileInput_sources})
 source_group("general" FILES ${reader_sources})
 
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
+INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynOpt)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)
-
-IF(LOAD_EXTRA_MODELS)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extraModels)
-ENDIF(LOAD_EXTRA_MODELS)
-
-IF (FMI_ENABLE)
- INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/fmi)
- INCLUDE_DIRECTORIES(${FMI_INCLUDE_DIR})
-ENDIF(FMI_ENABLE)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})

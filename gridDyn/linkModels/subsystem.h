@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2015, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -46,12 +46,11 @@ public:
 
   subsystem (const std::string &objName = "subsystem_$");
   /** @brief the destructor*/
-  virtual ~subsystem ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   // remove components
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
 
   //get component models
@@ -59,19 +58,18 @@ public:
   virtual gridLink * getLink (index_t x) const override;
   virtual gridRelay * getRelay (index_t x) const  override;
   virtual gridArea * getArea (index_t x) const override;
-  // initializeB
+  // dynInitializeB
 
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
-  //initializeB dynamics
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void setTime (gridDyn_time time) override;
+  //dynInitializeB dynamics
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   /** @brief relic of something not used to my knowledge*/
-  virtual void updateTheta (gridDyn_time /*time*/)
+  virtual void updateTheta (coreTime /*time*/)
   {
   }
 
@@ -83,15 +81,15 @@ public:
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
   // find components
-  virtual gridCoreObject * find (const std::string &objname) const override;
-  virtual gridCoreObject * getSubObject (const std::string &typeName, index_t num) const override;
-  virtual gridCoreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
+  virtual coreObject * find (const std::string &objname) const override;
+  virtual coreObject * getSubObject (const std::string &typeName, index_t num) const override;
+  virtual coreObject * findByUserID (const std::string &typeName, index_t searchID) const override;
   // solver functions
 
 
-  virtual change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
+  virtual change_code powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level) override;
 
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   //for identifying which variables are algebraic vs differential
   /** @brief do a local converge on the components in the area
    a wrapper around the area->converge function
@@ -102,9 +100,9 @@ public:
   @param[in] tol  the tolerance to do the convergence
   @param[in] mode the mode of convergence
   */
-  virtual void converge (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::block_iteration, double tol = 0.01) override;
+  virtual void converge (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode, converge_mode mode = converge_mode::block_iteration, double tol = 0.01) override;
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
   virtual void reset (reset_levels level) override;
   //root finding functions
@@ -125,8 +123,8 @@ public:
   //is connected
   virtual bool isConnected () const override;
 
-  virtual int fixRealPower (double power, index_t mterminal, index_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int fixPower (double rPower, double qPower, index_t mterminal, index_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual int fixRealPower (double power, index_t measureTerminal, index_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual int fixPower (double rPower, double qPower, index_t measureTerminal, index_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void followNetwork (int network,std::queue<gridBus *> &stk) override;
   virtual void updateBus (gridBus *bus, index_t busnumber) override;
@@ -155,16 +153,16 @@ public:
   virtual double getMaxTransfer () const override;
 
 
-  // initializeB power flow
+  // dynInitializeB power flow
 
 
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives  (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives  (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
 
-  //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual IOdata getOutputs (const stateData *sD, const solverMode &sMode) override;
-  virtual IOdata getOutputs (index_t busId, const stateData *sD, const solverMode &sMode) override;
+  //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
+  virtual IOdata getOutputs (const IOdata & inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual IOdata getOutputs (index_t busId, const stateData &sD, const solverMode &sMode) const override;
   //TODO:: PT add the other getOutput functions
 protected:
   /** @brief get a vector with pointers to all the buses

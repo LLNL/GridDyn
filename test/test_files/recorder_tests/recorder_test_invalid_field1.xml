@@ -59,8 +59,8 @@
       <load name="load3" type="pulse">
          <P>1.500</P>
          <Q>0</Q>
-        <period>6</period>
-		<amplitude>0.4</amplitude>
+        <p:period>6</p:period>
+		<p:amplitude>0.4</p:amplitude>
 		<recorder>
 		<field>humidity</field>
 		<period>1</period>

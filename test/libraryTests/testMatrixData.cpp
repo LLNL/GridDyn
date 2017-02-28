@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,12 +16,13 @@
 
 
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
-#include "gridDynTypes.h"
+#include "gridDynDefinitions.h"
 #include "matrixDataSparseSM.h"
 #include "matrixDataSparse.h"
+#include "matrixOps.h"
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <iostream>
@@ -220,5 +221,31 @@ BOOST_AUTO_TEST_CASE(test_sparse_matrix)
 	BOOST_CHECK_CLOSE((*it2).data,5.1,0.0000001);
 	++itbegin;
 	BOOST_CHECK(itbegin == itend);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_sparse_matrix_multiply)
+{
+	matrixDataSparse<double> testMatrix;
+	testMatrix.setColLimit(10);
+	testMatrix.setRowLimit(10);
+	for (int ii = 0; ii < 10; ++ii)
+	{
+		testMatrix.assign(ii, ii, static_cast<double>(ii));
+	}
+	
+	std::vector<double> v(10, 1.0);
+	auto res = matrixDataMultiply(testMatrix, v.data());
+	BOOST_CHECK(res.size() == 10);
+
+	int ecount = 0;
+	for (int kk = 0; kk < 10; ++kk)
+	{
+		if (std::abs(res[kk] - static_cast<double>(kk)) > 0.000000001)
+		{
+			++ecount;
+		}
+	}
+	BOOST_CHECK(ecount == 0);
 }
 BOOST_AUTO_TEST_SUITE_END()

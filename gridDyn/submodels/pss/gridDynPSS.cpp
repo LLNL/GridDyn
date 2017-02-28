@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "submodels/gridDynPSS.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include <cmath>
 
 
@@ -25,7 +25,7 @@ gridDynPSS::gridDynPSS (const std::string &objName) : gridSubModel (objName)
 
 }
 
-gridCoreObject *gridDynPSS::clone (gridCoreObject *obj) const
+coreObject *gridDynPSS::clone (coreObject *obj) const
 {
   gridDynPSS *pss;
   if (obj == nullptr)
@@ -52,14 +52,14 @@ gridDynPSS::~gridDynPSS ()
 }
 
 // initial conditions
-void gridDynPSS::objectInitializeB (const IOdata & /*args*/, const IOdata & /*outputSet*/, IOdata & /*fieldSet*/)
+void gridDynPSS::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata & /*fieldSet*/)
 {
 
 }
 
 
 // residual
-void gridDynPSS::residual (const IOdata & /*args*/, const stateData *, double /*resid*/ [],  const solverMode &)
+void gridDynPSS::residual (const IOdata & /*inputs*/, const stateData &, double /*resid*/ [],  const solverMode &)
 {
 
 }
@@ -71,7 +71,7 @@ index_t gridDynPSS::findIndex (const std::string & /*field*/, const solverMode &
 
 void gridDynPSS::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  return coreObject::set (param, val);
 }
 
 // set parameters
@@ -79,14 +79,14 @@ void gridDynPSS::set (const std::string &param, double val, gridUnits::units_t u
 {
 
   {
-    gridCoreObject::set (param,val,unitType);
+    coreObject::set (param,val,unitType);
   }
 
 }
 
-void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
+void gridDynPSS::jacobianElements (const IOdata & /*inputs*/, const stateData &,
                                    matrixData<double> &,
-                                   const IOlocs & /*argLocs*/, const solverMode &sMode)
+                                   const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -95,7 +95,7 @@ void gridDynPSS::jacobianElements (const IOdata & /*args*/, const stateData *,
 }
 
 
-void gridDynPSS::derivative (const IOdata & /*args*/, const stateData *, double /*deriv*/[], const solverMode &)
+void gridDynPSS::derivative (const IOdata & /*inputs*/, const stateData &, double /*deriv*/[], const solverMode &)
 {
 
 }

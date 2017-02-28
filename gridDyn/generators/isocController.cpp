@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,8 +14,8 @@
 #include "isocController.h"
 #include "generators/gridDynGenerator.h"
 
-#include "objectFactoryTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
 #include "vectorOps.hpp"
 
 #include <algorithm>
@@ -26,7 +26,7 @@ isocController::isocController(const std::string &objName) : gridSubModel(objNam
 }
 
 
-gridCoreObject *isocController::clone(gridCoreObject *obj) const
+coreObject *isocController::clone(coreObject *obj) const
 {
 	isocController *nobj;
 	if (obj == nullptr)
@@ -39,11 +39,11 @@ gridCoreObject *isocController::clone(gridCoreObject *obj) const
 		if (nobj == nullptr)
 		{
 			//if we can't cast the pointer clone at the next lower m_output
-			gridCoreObject::clone(obj);
+			coreObject::clone(obj);
 			return obj;
 		}
 	}
-	gridCoreObject::clone(nobj);
+	coreObject::clone(nobj);
 	nobj->db = db;
 	nobj->upStep = upStep;
 	nobj->downStep = downStep;
@@ -55,28 +55,28 @@ gridCoreObject *isocController::clone(gridCoreObject *obj) const
 	return nobj;
 }
 
-void isocController::objectInitializeA(gridDyn_time time0, unsigned long /*flags*/)
+void isocController::dynObjectInitializeA(coreTime time0, unsigned long /*flags*/)
 {
-	gen = dynamic_cast<gridDynGenerator *>(parent);
+	gen = dynamic_cast<gridDynGenerator *>(getParent());
 	updatePeriod = upPeriod;
 	nextUpdateTime = time0 + upPeriod;
 	opFlags.set(has_updates);
 	integratorLevel = 0;
 }
 
-void isocController::objectInitializeB(const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void isocController::dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-	if (args.size() > 0)
+	if (inputs.size() > 0)
 	{
-		lastFreq = args[0];
+		lastFreq = inputs[0];
 		if (lastFreq < -db)
 		{
 			updatePeriod = downPeriod;
 		}
 	}
-	if (outputSet.size() > 0)
+	if (desiredOutput.size() > 0)
 	{
-		m_output = outputSet[0];
+		m_output = desiredOutput[0];
 		fieldSet[0] = 0;
 	}
 	else
@@ -99,7 +99,7 @@ void isocController::setLimits(double maxV, double minV)
 
 
 
-void isocController::updateA(gridDyn_time time)
+void isocController::updateA(coreTime time)
 {
 	if (time < nextUpdateTime)
 	{
@@ -136,10 +136,10 @@ void isocController::updateA(gridDyn_time time)
 	//printf("t=%f,output=%f\n", time, m_output);
 }
 
-void isocController::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &)
+void isocController::timestep(coreTime ttime, const IOdata &inputs, const solverMode &)
 {
 	prevTime = ttime;
-	lastFreq = args[0];
+	lastFreq = inputs[0];
 	while (nextUpdateTime <= ttime)
 	{
 		updateA(ttime);
@@ -213,7 +213,7 @@ void isocController::deactivate()
 	nextUpdateTime = maxTime;
 }
 
-void isocController::activate(gridDyn_time time)
+void isocController::activate(coreTime time)
 {
 	nextUpdateTime = time + upPeriod;
 }

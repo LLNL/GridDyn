@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -61,7 +61,7 @@ public:
     values.resize (size);
     return 0;
   }
-  virtual void objectInitializeA (double /*t0*/)
+  virtual void dynObjectInitializeA (double /*t0*/)
   {
 
   }
@@ -110,7 +110,7 @@ public:
 
 
   int allocate (count_t size) override;
-  void objectInitializeA (double t0) override;
+  void dynObjectInitializeA (double t0) override;
 };
 
 std::shared_ptr<optimizerInterface> makeOptimizer (gridDynOptimization *gdo, const optimMode &oMode);

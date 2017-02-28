@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -35,13 +35,13 @@ private:
 public:
   /** @brief default constructor*/
   longLine (const std::string &objName = "longLine_$" );
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  virtual void add (gridCoreObject *obj) final override;  //there shouldn't be any additional adds
+  virtual void add (coreObject *obj) final override;  //there shouldn't be any additional adds
   // remove components
-  virtual void remove (gridCoreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
+  virtual void remove (coreObject *obj) final override; //there shouldn't be any removes all models are controlled internally
 
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

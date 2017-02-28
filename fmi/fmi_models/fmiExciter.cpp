@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,11 +13,11 @@
 
 
 #include "fmiExciter.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "fmiMESubModel.h"
 #include "gridBus.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 fmiExciter::fmiExciter(std::string objName):gridDynExciter(objName)
 {
@@ -29,7 +29,7 @@ fmiExciter::~fmiExciter()
 	//fmisub gets deleted from the object
 }
 
-gridCoreObject * fmiExciter::clone(gridCoreObject *obj) const
+coreObject * fmiExciter::clone(coreObject *obj) const
 {
 	fmiExciter *nobj = cloneBase<fmiExciter, gridDynExciter>(this, obj);
 	if (!(nobj))
@@ -49,6 +49,7 @@ gridCoreObject * fmiExciter::clone(gridCoreObject *obj) const
 
 void fmiExciter::setupFmiIo()
 {
+	using namespace stringOps;
 	auto ostrings = fmisub->getOutputNames();
 	auto istrings = fmisub->getInputNames();
 	std::string v_in_string;
@@ -99,14 +100,14 @@ void fmiExciter::setupFmiIo()
 	fmisub->set("outputs", e_out_string);
 }
 
-void fmiExciter::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void fmiExciter::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 	if ((fmisub) && (fmisub->isLoaded())) //check to make sure the fmi is loaded
 	{
 		setupFmiIo();
 		SET_CONTROLFLAG(flags, force_constant_pflow_initialization);
-		fmisub->initializeA(time0, flags);
-		gridDynExciter::objectInitializeA(time0, flags);
+		fmisub->dynInitializeA(time0, flags);
+		gridDynExciter::dynObjectInitializeA(time0, flags);
 	}
 	else
 	{
@@ -114,18 +115,18 @@ void fmiExciter::objectInitializeA (gridDyn_time time0, unsigned long flags)
 	}
 }
 
-void fmiExciter::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata & /*inputSet*/)
+void fmiExciter::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata & /*inputSet*/)
 {
 	if ((fmisub) && (fmisub->isLoaded())) //check to make sure the fmi is loaded
 	{
 		IOdata outset;
-		fmisub->initializeB(args, outset, outset);
+		fmisub->dynInitializeB(inputs, outset, outset);
 		opFlags.set(pFlow_initialized);
 	}
 	else
 	{
 		IOdata inSet(3);
-		fmisub->initializeB(args, outputSet, inSet);
+		fmisub->dynInitializeB(inputs, desiredOutput, inSet);
 		opFlags.set(dyn_initialized);
 	}
 }
@@ -137,13 +138,12 @@ void fmiExciter::set (const std::string &param, const std::string &val)
 	{
 		if (fmisub)
 		{
-			delete fmisub;
-			subObjectList.clear();
+			remove(fmisub);
+			
 		}
-		fmisub = new fmiMESubModel(name);
+		fmisub = new fmiMESubModel(getName());
 		fmisub->set("fmu", val);
-		subObjectList.push_back(fmisub);
-		fmisub->setParent(this);
+		addSubObject(fmisub);
 	}
 	else if (param == "v_in")
 	{
@@ -226,7 +226,7 @@ void fmiExciter::getParameterStrings(stringVec &pstr, paramStringType pstype) co
 		gridSubModel::getParameterStrings(pstr, paramStringType::numeric);
 		pstr.push_back("#");
 		fmisub->getParameterStrings(pstr, paramStringType::localstr);
-		gridSubModel::getParameterStrings(pstr, paramStringType::string);
+		gridSubModel::getParameterStrings(pstr, paramStringType::str);
 		break;
 	case paramStringType::localnum:
 		fmisub->getParameterStrings(pstr, paramStringType::localnum);
@@ -241,9 +241,9 @@ void fmiExciter::getParameterStrings(stringVec &pstr, paramStringType pstype) co
 		fmisub->getParameterStrings(pstr, paramStringType::localnum);
 		gridSubModel::getParameterStrings(pstr, paramStringType::numeric);
 		break;
-	case paramStringType::string:
+	case paramStringType::str:
 		fmisub->getParameterStrings(pstr, paramStringType::localstr);
-		gridSubModel::getParameterStrings(pstr, paramStringType::string);
+		gridSubModel::getParameterStrings(pstr, paramStringType::str);
 		break;
 	case paramStringType::flags:
 		fmisub->getParameterStrings(pstr, paramStringType::localflags);
@@ -252,42 +252,42 @@ void fmiExciter::getParameterStrings(stringVec &pstr, paramStringType pstype) co
 	}
 }
 
-void fmiExciter::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void fmiExciter::residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-	fmisub->residual(args, sD, resid, sMode);
+	fmisub->residual(inputs, sD, resid, sMode);
 }
 
-void fmiExciter::derivative(const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void fmiExciter::derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-	fmisub->derivative(args, sD, deriv, sMode);
+	fmisub->derivative(inputs, sD, deriv, sMode);
 }
 
-void fmiExciter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void fmiExciter::outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
-	fmisub->outputPartialDerivatives(args, sD, ad, sMode);
+	fmisub->outputPartialDerivatives(inputs, sD, ad, sMode);
 }
-void fmiExciter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-	fmisub->ioPartialDerivatives (args, sD, ad, argLocs, sMode);
+	fmisub->ioPartialDerivatives (inputs, sD, ad, inputLocs, sMode);
 }
-void fmiExciter::jacobianElements(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void fmiExciter::jacobianElements(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
-	fmisub->jacobianElements (args, sD, ad, argLocs, sMode);
-}
-
-void fmiExciter::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
-{
-	fmisub->rootTest(args, sD, roots, sMode);
-}
-void fmiExciter::rootTrigger(gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
-{
-	fmisub->rootTrigger(ttime, args, rootMask, sMode);
+	fmisub->jacobianElements (inputs, sD, ad, inputLocs, sMode);
 }
 
-void fmiExciter::setState(gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void fmiExciter::rootTest(const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
+{
+	fmisub->rootTest(inputs, sD, roots, sMode);
+}
+void fmiExciter::rootTrigger(coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
+{
+	fmisub->rootTrigger(ttime, inputs, rootMask, sMode);
+}
+
+void fmiExciter::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
 	fmisub->setState(ttime, state, dstate_dt, sMode);
-	auto out = fmisub->getOutputs({}, nullptr, cLocalSolverMode);
+	auto out = fmisub->getOutputs({}, emptyStateData, cLocalSolverMode);
 	
 }
 
@@ -296,12 +296,12 @@ index_t fmiExciter::findIndex(const std::string &field, const solverMode &sMode)
 	return fmisub->findIndex(field, sMode);
 }
 
-void fmiExciter::timestep(gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void fmiExciter::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 	prevTime = ttime;
-	fmisub->timestep(ttime, args, sMode);
+	fmisub->timestep(ttime, inputs, sMode);
 }
-IOdata fmiExciter::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata fmiExciter::getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-	return fmisub->getOutputs(args, sD, sMode);
+	return fmisub->getOutputs(inputs, sD, sMode);
 }

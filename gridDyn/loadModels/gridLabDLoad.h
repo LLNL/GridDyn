@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -34,31 +34,31 @@ public:
 
   virtual ~gridLabDLoad ();
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
   virtual void pFlowObjectInitializeB () override;
 
-  virtual void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual void preEx (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual void preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
-  virtual void updateA (gridDyn_time time) override;
-  virtual double updateB () override;
+  virtual void updateA (coreTime time) override;
+  virtual coreTime updateB () override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
   /** @brief return a count of the number of MPI objects the load requires*/
-  int mpiCount ();
-  virtual void updateLocalCache (const IOdata & args, const stateData *sD, const solverMode &sMode) override;
+  int mpiCount () const;
+  virtual void updateLocalCache (const IOdata & inputs, const stateData &sD, const solverMode &sMode) override;
 private:
   // double abstime;
   double m_mult = 1.0;                  //!< a load multiplier
@@ -74,13 +74,13 @@ private:
   double Vprev;  //!< storage for recent voltage call
   double Thprev;  //!< storage for recent phase call (phase is not really used yet)
   double triggerBound = 1.5;    //!< the bounds on the voltage in terms of the spread determining when to generate a new calculation
-  gridDyn_time m_lastCallTime = negTime;
+  coreTime m_lastCallTime = negTime;
   void gridLabDInitialize (void);
-  void runGridLabA (gridDyn_time ttime, const IOdata &args);
+  void runGridLabA (coreTime ttime, const IOdata &inputs);
   std::vector<double> runGridLabB (bool unbalancedAlert);
-  void run2GridLabA (gridDyn_time ttime, const IOdata &args);
+  void run2GridLabA (coreTime ttime, const IOdata &inputs);
   std::vector<double> run2GridLabB (bool unbalancedAlert);
-  void run3GridLabA (gridDyn_time ttime, const IOdata &args);
+  void run3GridLabA (coreTime ttime, const IOdata &inputs);
   std::vector<double> run3GridLabB (bool unbalancedAlert);
 
 
@@ -102,8 +102,8 @@ private:
   coupling_mode_t dynCoupling = coupling_mode_t::trigger; //!< the coupling dynamic mode
   coupling_detail_t cDetail = coupling_detail_t::triple; //!< the detail of the check
   index_t lastSeqID = kNullLocation;
-  std::vector < std::unique_ptr < gridLoad >> dummy_load; //!<a dummy load for testing without MPI
-  std::vector < std::unique_ptr < gridLoad >> dummy_load_forward;  //!< the dummy load for forward projection
+  std::vector < std::unique_ptr < zipLoad >> dummy_load; //!<a dummy load for testing without MPI
+  std::vector < std::unique_ptr < zipLoad >> dummy_load_forward;  //!< the dummy load for forward projection
 #ifndef HAVE_MPI
   void run_dummy_load (index_t kk, VoltageMessage* vm, CurrentMessage* cm);
   void run_dummy_load_forward (index_t kk, VoltageMessage* vm, CurrentMessage* cm);

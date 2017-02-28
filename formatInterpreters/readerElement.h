@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,6 +16,9 @@
 
 #include <string>
 #include <memory>
+#include <exception>
+
+
 
 const double readerNullVal(-1.345e48);
 /** @brief simple class for containing an attribute */
@@ -44,7 +47,26 @@ public:
   }
 };
 
-/** @brief class for wrapping various document readers for use in the reader function for Griddyn
+class elementParseException :public std::exception
+{
+private:
+	std::string estr = "parse error\n";
+public:
+	explicit elementParseException(const std::string &str) :estr(str)
+	{
+
+	}
+	explicit elementParseException(const char *str) :estr(str)
+	{
+
+	}
+	const char *what() const noexcept override
+	{
+		return estr.c_str();
+	}
+};
+
+/** @brief class for wrapping various document readers for use in the reader function for abstracting various file types
  readerElement is a abstract virtual class requiring an instantiation for implementation
 */
 class readerElement
@@ -69,9 +91,9 @@ public:
   virtual double getValue () const = 0;
   virtual std::string getText () const = 0;
   /** @brief get all the text in an element even if they are in multiple sections
-  @param[in] sep the separator to place between multiple sections of text
+  @param[in] separator the separator to place between multiple sections of text
   @return all the text in  string*/
-  virtual std::string getMultiText (const std::string sep = " ") const = 0;
+  virtual std::string getMultiText (const std::string &separator = " ") const = 0;
 
   virtual bool hasAttribute (const std::string &attributeName) const = 0;
   virtual bool hasElement (const std::string &elementName) const = 0;

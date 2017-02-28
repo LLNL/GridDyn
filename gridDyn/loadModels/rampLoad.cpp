@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,24 +14,24 @@
 #include "loadModels/otherLoads.h"
 #include "gridBus.h"
 #include "vectorOps.hpp"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 #include <ctime>
 
 using namespace gridUnits;
-gridRampLoad::gridRampLoad (const std::string &objName) : gridLoad (objName)
+gridRampLoad::gridRampLoad (const std::string &objName) : zipLoad (objName)
 {
 
 }
 
-gridRampLoad::gridRampLoad (double rP, double qP, const std::string &objName) : gridLoad (rP,qP,objName)
+gridRampLoad::gridRampLoad (double rP, double qP, const std::string &objName) : zipLoad (rP,qP,objName)
 {
 }
 
-gridCoreObject *gridRampLoad::clone (gridCoreObject *obj) const
+coreObject *gridRampLoad::clone (coreObject *obj) const
 {
-  gridRampLoad *ld = cloneBase<gridRampLoad, gridLoad> (this, obj);
+  gridRampLoad *ld = cloneBase<gridRampLoad, zipLoad> (this, obj);
   if (ld == nullptr)
     {
       return obj;
@@ -48,16 +48,11 @@ gridCoreObject *gridRampLoad::clone (gridCoreObject *obj) const
   return ld;
 }
 
-// destructor
-gridRampLoad::~gridRampLoad ()
-{
-}
-
 
 // set properties
 void gridRampLoad::set (const std::string &param,  const std::string &val)
 {
-  gridLoad::set (param, val);
+  zipLoad::set (param, val);
 }
 
 void gridRampLoad::set (const std::string &param, double val, units_t unitType)
@@ -94,7 +89,7 @@ void gridRampLoad::set (const std::string &param, double val, units_t unitType)
         }
       else
         {
-          gridLoad::set (param, val, unitType);
+          zipLoad::set (param, val, unitType);
         }
     }
   else if (param.length () == 5)
@@ -138,55 +133,51 @@ void gridRampLoad::set (const std::string &param, double val, units_t unitType)
         }
       else
         {
-          gridLoad::set (param, val, unitType);
+          zipLoad::set (param, val, unitType);
         }
     }
 
   else
     {
-      gridLoad::set (param, val, unitType);
+      zipLoad::set (param, val, unitType);
     }
 
 }
 
-
-void gridRampLoad::loadUpdate (gridDyn_time ttime)
+void gridRampLoad::updateLocalCache(const IOdata & /*inputs*/, const stateData &sD, const solverMode &)
 {
-  double tdiff = ttime - lastTime;
-  if (tdiff == 0.0)
+  auto tdiff = sD.time - lastTime;
+  if (tdiff == timeZero)
     {
       return;
     }
-  P = P + dPdt * tdiff;
-  Q = Q + dQdt * tdiff;
+  if (dPdt != 0.0)
+  {
+	  setP(getP() + dPdt * tdiff);
+  }
+  if (dQdt != 0.0)
+  {
+	  setQ(getQ() + dQdt * tdiff);
+  }
+  
   if ((drdt != 0) || (dxdt != 0))
     {
-      r = r + drdt * tdiff;
-      x = x + dxdt * tdiff;
-      Yp = r / (r * r + x * x);
-      Yq = x / (r * r + x * x);
+      setr(getr() + drdt * tdiff);
+      setx(getx() + dxdt * tdiff);
     }
   else if ((dYpdt != 0.0) || (dYqdt != 0.0))
     {
-      Yp = Yp + dYpdt * tdiff;
-      Yq = Yq + dYqdt * tdiff;
-      if (Yq == 0)
-        {
-          r = 1 / Yp;
-          x = 0;
-        }
-      else
-        {
-          double rat = (Yp / Yq);
-          x = rat / Yp / (1 + rat);
-          r = x * rat;
-        }
+      setYp(getYp() + dYpdt * tdiff);
+      setYq(getYq() + dYqdt * tdiff);
     }
+  if ((dIpdt != 0) || (dIqdt != 0))
+  {
+	  setIp(getIp() + dIpdt * tdiff);
+	  setIq(getIq() + dIqdt * tdiff);
+  }
+  
 
-  Ip = Ip + dIpdt * tdiff;
-  Iq = Iq + dIqdt * tdiff;
-
-  lastTime = ttime;
+  lastTime = sD.time;
 }
 
 void gridRampLoad::clearRamp ()

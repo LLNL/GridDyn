@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,9 +13,9 @@
 
 #include "submodels/otherGovernors.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
-#include "objectFactoryTemplates.h"
-#include "gridCoreTemplates.h"
+#include "core/coreExceptions.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "matrixDataSparse.h"
 
@@ -41,16 +41,14 @@ gridDynGovernor::gridDynGovernor (const std::string &objName) : gridSubModel (ob
   // default values
   cb.set ("bias", -1.0);
   dbb.set ("k", -K);
-  dbb.setParent (this);
-  cb.setParent (this);
-  delay.setParent (this);
+ 
   // since they are members vs dynamic we set the blocks to own themselves
-  dbb.setOwner (nullptr, &dbb);
-  cb.setOwner (nullptr, &cb);
-  delay.setOwner (nullptr, &delay);
+  dbb.addOwningReference();
+  cb.addOwningReference();
+  delay.addOwningReference();
 }
 
-gridCoreObject *gridDynGovernor::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernor::clone (coreObject *obj) const
 {
   gridDynGovernor *gov = cloneBase<gridDynGovernor, gridSubModel> (this, obj);
   if (!gov)
@@ -67,6 +65,7 @@ gridCoreObject *gridDynGovernor::clone (gridCoreObject *obj) const
   gov->Wref = Wref;
   gov->deadbandHigh = deadbandHigh;
   gov->deadbandLow = deadbandLow;
+  gov->machineBasePower = machineBasePower;
   cb.clone (&(gov->cb));
   dbb.clone (&(gov->dbb));
 
@@ -80,7 +79,7 @@ gridDynGovernor::~gridDynGovernor ()
 
 }
 
-void gridDynGovernor::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void gridDynGovernor::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   prevTime = time0;
   if (Wref < 0)
@@ -89,46 +88,46 @@ void gridDynGovernor::objectInitializeA (gridDyn_time time0, unsigned long flags
     }
   if (!opFlags[ignore_throttle])
     {
-      subObjectList.push_back (&delay);    //delay block comes first to set the first state as the output
+      addSubObject(&delay);    //delay block comes first to set the first state as the output
     }
   if (!opFlags[ignore_filter])
     {
-      subObjectList.push_back (&cb);
+      addSubObject(&cb);
     }
   if (!opFlags[ignore_deadband])
     {
-      subObjectList.push_back (&dbb);
+      addSubObject(&dbb);
     }
-  gridSubModel::objectInitializeA (time0, flags);
+  gridSubModel::dynObjectInitializeA (time0, flags);
 
 }
 // initial conditions
 static IOdata kNullVec;
 
-void gridDynGovernor::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void gridDynGovernor::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      fieldSet[0] = args[govOmegaInLocation];
-      cb.initializeB (fieldSet, kNullVec, fieldSet);
-      dbb.initializeB (fieldSet, kNullVec, fieldSet);
+      fieldSet[0] = inputs[govOmegaInLocation];
+      cb.dynInitializeB (fieldSet, kNullVec, fieldSet);
+      dbb.dynInitializeB (fieldSet, kNullVec, fieldSet);
       double omP = fieldSet[0];
 
       fieldSet[0] = Pset + omP;
-      delay.initializeB (fieldSet, kNullVec, fieldSet);
+      delay.dynInitializeB (fieldSet, kNullVec, fieldSet);
       fieldSet[0] = Pset + omP;
     }
   else
     {
 
-      double P = outputSet[0];
-      fieldSet[0] = args[govOmegaInLocation];
-      cb.initializeB (fieldSet, kNullVec, fieldSet);
-      dbb.initializeB (fieldSet, kNullVec, fieldSet);
+      double P = desiredOutput[0];
+      fieldSet[0] = inputs[govOmegaInLocation];
+      cb.dynInitializeB (fieldSet, kNullVec, fieldSet);
+      dbb.dynInitializeB (fieldSet, kNullVec, fieldSet);
       double omP = fieldSet[0];
 
       fieldSet[0] = P;
-      delay.initializeB (kNullVec, fieldSet, fieldSet);
+      delay.dynInitializeB (kNullVec, fieldSet, fieldSet);
       fieldSet.resize (2);
       fieldSet[1] = Pset = P - omP;
     }
@@ -137,37 +136,37 @@ void gridDynGovernor::objectInitializeB (const IOdata &args, const IOdata &outpu
 }
 
 // residual
-void gridDynGovernor::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGovernor::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
-  cb.residElements (args[govOmegaInLocation], 0,sD, resid, sMode);
+  cb.residElements (inputs[govOmegaInLocation], 0,sD, resid, sMode);
   dbb.residElements (cb.getBlockOutput (sD,sMode), 0,sD, resid, sMode);
-  delay.residElements (dbb.getBlockOutput (sD,sMode) + args[govpSetInLocation], 0,sD, resid,sMode);
+  delay.residElements (dbb.getBlockOutput (sD,sMode) + inputs[govpSetInLocation], 0,sD, resid,sMode);
 
 }
 
-void gridDynGovernor::timestep (gridDyn_time ttime,  const IOdata &args,const solverMode &)
+void gridDynGovernor::timestep (coreTime ttime,  const IOdata &inputs,const solverMode &)
 {
-  double out = cb.step (ttime, args[govOmegaInLocation]);
+  double out = cb.step (ttime, inputs[govOmegaInLocation]);
 
   out = dbb.step (ttime, out);
-  delay.step (ttime, out + args[govpSetInLocation]);
+  delay.step (ttime, out + inputs[govpSetInLocation]);
 
 }
 
-void gridDynGovernor::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGovernor::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   IOdata i {
-    args[govOmegaInLocation]
+    inputs[govOmegaInLocation]
   };                                                         //deadband doesn't have any derivatives
   cb.derivative (i, sD, deriv, sMode);
-  i[0] = dbb.getOutput (i, sD, sMode) + args[govpSetInLocation];       //gain from deadband +Pset
+  i[0] = dbb.getOutput (i, sD, sMode) + inputs[govpSetInLocation];       //gain from deadband +Pset
   delay.derivative (i, sD, deriv, sMode);
 }
 
 
-void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad,  const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernor::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad,  const IOlocs &inputLocs, const solverMode &sMode)
 {
-  cb.jacElements  (args[govOmegaInLocation], 0,sD, ad, argLocs[govOmegaInLocation], sMode);
+  cb.jacElements  (inputs[govOmegaInLocation], 0,sD, ad, inputLocs[govOmegaInLocation], sMode);
 
 
   matrixDataSparse<double> kp;
@@ -177,19 +176,20 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 
   out = dbb.getOutput (kNullVec, sD, sMode);
   wloc = dbb.getOutputLoc(sMode);
-  delay.jacElements (out + args[govpSetInLocation], 0,sD, kp, 0, sMode);
+  delay.jacElements (out + inputs[govpSetInLocation], 0,sD, kp, 0, sMode);
 
-  if (argLocs[govpSetInLocation] != kNullLocation)
+  if (inputLocs[govpSetInLocation] != kNullLocation)
     {
       for (index_t pp = 0; pp < kp.size (); ++pp)
         {
-          if (kp.colIndex (pp) == 0)
+		  auto el = kp.element(pp);
+          if (el.col == 0)
             {
-              ad.assign (kp.rowIndex (pp), wloc, kp.val (pp));
+              ad.assign (el.row, wloc, el.data);
             }
           else
             {
-              ad.assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
+              ad.assign (el.row, el.col, el.data);
             }
         }
     }
@@ -197,14 +197,15 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
     {
       for (index_t pp = 0; pp < kp.size (); ++pp)
         {
-          if (kp.colIndex (pp) == 0)
+		  auto el = kp.element(pp);
+          if (el.col == 0)
             {
-              ad.assign (kp.rowIndex (pp), wloc, kp.val (pp));
-              ad.assign (kp.rowIndex (pp), argLocs[govpSetInLocation], kp.val (pp));
+              ad.assign (el.row, wloc, el.data);
+              ad.assign (el.row, inputLocs[govpSetInLocation], el.data);
             }
           else
             {
-              ad.assign (kp.rowIndex (pp), kp.colIndex (pp), kp.val (pp));
+              ad.assign (el.row, el.col, el.data);
             }
         }
 
@@ -236,7 +237,7 @@ void gridDynGovernor::jacobianElements (const IOdata &args, const stateData *sD,
 }
 
 
-void gridDynGovernor::rootTest (const IOdata & /*args*/, const stateData *sD, double root[],  const solverMode &sMode)
+void gridDynGovernor::rootTest (const IOdata & /*inputs*/, const stateData &sD, double root[],  const solverMode &sMode)
 {
   IOdata i {
     cb.getOutput (kNullVec, sD, sMode)

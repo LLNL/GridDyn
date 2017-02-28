@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,11 +10,11 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
+#pragma once
 #ifndef RESERVEDISPATCHER_H_
 #define RESERVEDISPATCHER_H_
 
-#include "gridCore.h"
+#include "gridObjects.h"
 #include "vectorOps.hpp"
 
 #include <vector>
@@ -24,7 +24,7 @@ class schedulerRamp;
 
 /** in development object to manage the dispatch of reserve generation
 */
-class reserveDispatcher : public gridCoreObject
+class reserveDispatcher : public coreObject
 {
 public:
 protected:
@@ -32,8 +32,8 @@ protected:
   double thresholdStop = kBigNum;
   double currDispatch = 0.0;
   double reserveAvailable = 0.0;
-  gridDyn_time dispatchTime = negTime;
-  gridDyn_time dispatchInterval = 60.0 * 5.0;
+  coreTime dispatchTime = negTime;
+  coreTime dispatchInterval = 60.0 * 5.0;
 
   count_t schedCount;
   std::vector<schedulerRamp *> schedList;
@@ -41,27 +41,27 @@ protected:
   std::vector<double> resUsed;
 
 public:
-  reserveDispatcher (const std::string &objName = "reserveDispatch_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  explicit reserveDispatcher (const std::string &objName = "reserveDispatch_#");
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~reserveDispatcher ();
 
 
-  virtual double initializeA (gridDyn_time time0,double dispatch);
+  virtual double dynInitializeA (coreTime time0,double dispatch);
 
   void moveSchedulers (reserveDispatcher *rD);
-  void setTime (gridDyn_time time) override;
-  virtual double updateP (gridDyn_time time,double pShort);
-  virtual double testP (gridDyn_time time,double pShort);
+
+  virtual double updateP (coreTime time,double pShort);
+  virtual double testP (coreTime time,double pShort);
   double getOutput (index_t /*num*/ = 0)
   {
     return currDispatch;
   }
 
   virtual void add (schedulerRamp *sched);
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
 
   virtual void remove (schedulerRamp *sched);
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;

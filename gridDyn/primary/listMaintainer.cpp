@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,6 +12,7 @@
 */
 
 #include "gridArea.h"
+#include "listMaintainer.h"
 
 void fillList(const solverMode &sMode, std::vector<gridPrimary *> &list, std::vector<gridPrimary *> &partlist, const std::vector<gridPrimary *> &possObj);
 
@@ -87,52 +88,87 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		}
 	}
 
-	void listMaintainer::preEx(const stateData *sD, const solverMode &sMode)
+	void listMaintainer::preEx(const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 	{
 		for (auto &obj : preExObjs)
 		{
-			obj->preEx(sD, sMode);
+			obj->preEx(inputs,sD, sMode);
 		}
 	}
 
-	void listMaintainer::jacobianElements(const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+	void listMaintainer::jacobianElements(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 	{
 		if (!isListValid(sMode))
 		{
 			return;
 		}
+#ifdef HAVE_OPENMP
+		if (parJac)
+		{
+			auto &vz = partialLists[sMode.offsetIndex];
+			int sz = static_cast<int>(vz.size());
+#pragma omp parallel for
+			for (int kk = 0; kk < sz; ++kk)
+			{
+				vz[kk]->jacobianElements(inputs, sD, ad,inputLocs, sMode);
+			}
+		}
+		else
+		{
+			for (auto &obj : partialLists[sMode.offsetIndex])
+			{
+				obj->jacobianElements(inputs, sD, ad,inputLocs, sMode);
+			}
+		}
+
+#else
 		for (auto &obj : partialLists[sMode.offsetIndex])
 		{
-			obj->jacobianElements(sD, ad, sMode);
+			obj->jacobianElements(inputs, sD, ad,inputLocs, sMode);
 		}
+#endif
+		
 	}
 
-	void listMaintainer::residual(const stateData *sD, double resid[], const solverMode &sMode)
+	void listMaintainer::residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 	{
 		if (!isListValid(sMode))
 		{
 			return;
 		}
 		
-		
-		for (auto &obj : partialLists[sMode.offsetIndex])
+#ifdef HAVE_OPENMP
+		if (parResid)
 		{
-			obj->residual(sD, resid, sMode);
+			auto &vz = partialLists[sMode.offsetIndex];
+			int sz = static_cast<int>(vz.size());
+			#pragma omp parallel for
+			for (int kk = 0; kk < sz; ++kk)
+			{
+				vz[kk]->residual(inputs, sD, resid, sMode);
+			}
+		}
+		else
+		{
+			for (auto &obj : partialLists[sMode.offsetIndex])
+			{
+				obj->residual(inputs, sD, resid, sMode);
+			}
 		}
 		
+#else
+		for (auto &obj : partialLists[sMode.offsetIndex])
+		{
+			obj->residual(inputs, sD, resid, sMode);
+		}
+#endif
 		
 		/*
-		auto &vz = partialLists[sMode.offsetIndex];
-		int sz = static_cast<int>(vz.size());
-		#pragma omp parallel for
-		for (int kk = 0; kk < sz; ++kk)
-		{
-			vz[kk]->residual(sD, resid, sMode);
-		}
+		
 		*/
 	}
 
-	void listMaintainer::algebraicUpdate(const stateData *sD, double update[], const solverMode &sMode, double alpha)
+	void listMaintainer::algebraicUpdate(const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha)
 	{
 		if (!isListValid(sMode))
 		{
@@ -140,52 +176,73 @@ listMaintainer::listMaintainer(): objectLists(4),partialLists(4),sModeLists(4)
 		}
 		for (auto &obj : partialLists[sMode.offsetIndex])
 		{
-			obj->algebraicUpdate(sD, update, sMode,alpha);
+			obj->algebraicUpdate(inputs, sD, update, sMode,alpha);
 		}
 	}
 
-	void listMaintainer::derivative(const stateData *sD, double deriv[], const solverMode &sMode)
+	void listMaintainer::derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 	{
 		if (!isListValid(sMode))
 		{
 			return;
 		}
+#ifdef HAVE_OPENMP
+		if (parResid)
+		{
+			auto &vz = partialLists[sMode.offsetIndex];
+			int sz = static_cast<int>(vz.size());
+#pragma omp parallel for
+			for (int kk = 0; kk < sz; ++kk)
+			{
+				vz[kk]->derivative(inputs, sD, deriv, sMode);
+			}
+		}
+		else
+		{
+			for (auto &obj : partialLists[sMode.offsetIndex])
+			{
+				obj->derivative(inputs, sD, deriv, sMode);
+			}
+		}
+
+#else
 		for (auto &obj : partialLists[sMode.offsetIndex])
 		{
-			obj->derivative(sD,  deriv, sMode);
+			obj->derivative(inputs, sD, deriv, sMode);
 		}
+#endif
 	}
 
 
-	void listMaintainer::delayedResidual(const stateData *sD, double resid[], const solverMode &sMode)
+	void listMaintainer::delayedResidual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 	{
 		for (auto &obj : preExObjs)
 		{
-			obj->delayedResidual(sD, resid, sMode);
+			obj->delayedResidual(inputs, sD, resid, sMode);
 		}
 	}
-	void listMaintainer::delayedDerivative(const stateData *sD, double deriv[], const solverMode &sMode)
+	void listMaintainer::delayedDerivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 	{
 	
 		for (auto &obj : preExObjs)
 		{
-			obj->delayedDerivative(sD, deriv, sMode);
+			obj->delayedDerivative(inputs, sD, deriv, sMode);
 		}
 	}
 
-	void listMaintainer::delayedJacobian(const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+	void listMaintainer::delayedJacobian(const IOdata &inputs, const stateData &sD, matrixData<double> &ad,const IOlocs &inputLocs, const solverMode &sMode)
 	{
 		for (auto &obj : preExObjs)
 		{
-			obj->delayedJacobian(sD, ad, sMode);
+			obj->delayedJacobian(inputs, sD, ad,inputLocs, sMode);
 		}
 	}
 
-	void listMaintainer::delayedAlgebraicUpdate(const stateData *sD, double update[], const solverMode &sMode, double alpha)
+	void listMaintainer::delayedAlgebraicUpdate(const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha)
 	{
 		for (auto &obj : preExObjs)
 		{
-			obj->delayedAlgebraicUpdate(sD, update, sMode, alpha);
+			obj->delayedAlgebraicUpdate(inputs, sD, update, sMode, alpha);
 		}
 	}
 

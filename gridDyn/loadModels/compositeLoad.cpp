@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,26 +12,26 @@
  */
 
 #include "loadModels/compositeLoad.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
-#include "objectFactoryTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
 #include "stringConversion.h"
 
 #include <cmath>
 
 static typeFactory<compositeLoad> glfld ("load", stringVec {"composite","cluster","group"});
 
-
-compositeLoad::compositeLoad (const std::string &objName) : gridLoad (objName)
+using namespace stringOps;
+compositeLoad::compositeLoad (const std::string &objName) : zipLoad (objName)
 {
-  add (new gridLoad (name + "sub"));
+  add (new zipLoad (getName() + "sub"));
 
 }
 
-gridCoreObject * compositeLoad::clone (gridCoreObject *obj) const
+coreObject * compositeLoad::clone (coreObject *obj) const
 {
-  compositeLoad *nobj = cloneBase<compositeLoad, gridLoad> (this, obj);
+  compositeLoad *nobj = cloneBase<compositeLoad, zipLoad> (this, obj);
   if (!(nobj))
     {
       return obj;
@@ -47,7 +47,7 @@ gridCoreObject * compositeLoad::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void compositeLoad::add (gridLoad *ld)
+void compositeLoad::add (zipLoad *ld)
 {
   if (ld->locIndex != kNullLocation)
     {
@@ -57,35 +57,35 @@ void compositeLoad::add (gridLoad *ld)
           fraction.resize (ld->locIndex + 1,-1);
         }
       subLoads[ld->locIndex] = ld;
-      ld->setParent (this);
-      subObjectList.push_back (ld);//don't care what order subObjectList is in
+	  addSubObject(ld);
+      
     }
   else
     {
       subLoads.push_back (ld);
-      subObjectList.push_back (ld);
       fraction.push_back (-1.0);
-      ld->setParent (this);
       ld->locIndex = static_cast<index_t> (subLoads.size ()) - 1;
+	  addSubObject(ld);
     }
 }
 
-void compositeLoad::add (gridCoreObject *obj)
+void compositeLoad::add (coreObject *obj)
 {
-  gridLoad *ld = dynamic_cast<gridLoad *> (obj);
+  zipLoad *ld = dynamic_cast<zipLoad *> (obj);
   if (ld)
     {
       return add (ld);
     }
   else
     {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
     }
 }
 
-void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void compositeLoad::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  gridLoad::pFlowInitializeA (time0,flags);
+	//TODO::Need to rethink this objects
+  zipLoad::pFlowInitializeA (time0,flags);
   if (consumeSimpleLoad)
     {
 
@@ -96,12 +96,12 @@ void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fl
         {
           return;
         }
-      gridLoad *sLoad = nullptr;
-      gridLoad *testLoad = nullptr;
+      zipLoad *sLoad = nullptr;
+      zipLoad *testLoad = nullptr;
       double mxP = 0;
       for (int kk = 0; kk < nLoads; ++kk)
         {
-          testLoad = static_cast<gridLoad *> (parent->getSubObject ("load",kk));
+          testLoad = static_cast<zipLoad *> (getParent()->getSubObject ("load",kk));
           if (testLoad->getID () == getID ())
             {
               continue;
@@ -118,23 +118,23 @@ void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fl
         }
       //do a first pass of loading
       double rem = 1.0;
-      P = ((compositeLoad *)sLoad)->P;              //so this composite load function has direct access to the gridLoad variables seems a little odd to need to do this but seems to be a requirement in C++
-      Q = ((compositeLoad *)sLoad)->Q;
-      Ip = ((compositeLoad *)sLoad)->Ip;
-      Iq = ((compositeLoad *)sLoad)->Iq;
-      Yp = ((compositeLoad *)sLoad)->Yp;
-      Yq = ((compositeLoad *)sLoad)->Yq;
+      setP(((compositeLoad *)sLoad)->getP());              //so this composite load function has direct access to the zipLoad variables seems a little odd to need to do this but seems to be a requirement in C++
+      setQ(((compositeLoad *)sLoad)->getQ());
+      setIp(((compositeLoad *)sLoad)->getIp());
+      setIq(((compositeLoad *)sLoad)->getIq());
+      setYp(((compositeLoad *)sLoad)->getYp());
+      setYq(((compositeLoad *)sLoad)->getYq());
 
       for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
           if (fraction[nn] > 0)
             {
-              subLoads[nn]->set ("p", P * fraction[nn]);
-              subLoads[nn]->set ("q", Q * fraction[nn]);
-              subLoads[nn]->set ("ip", Ip * fraction[nn]);
-              subLoads[nn]->set ("iq", Iq * fraction[nn]);
-              subLoads[nn]->set ("yp", Yp * fraction[nn]);
-              subLoads[nn]->set ("yq", Yq * fraction[nn]);
+              subLoads[nn]->set ("p", getP() * fraction[nn]);
+              subLoads[nn]->set ("q", getQ() * fraction[nn]);
+              subLoads[nn]->set ("ip", getIp() * fraction[nn]);
+              subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+              subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+              subLoads[nn]->set ("yq", getYq() * fraction[nn]);
               rem -= fraction[nn];
             }
         }
@@ -153,13 +153,13 @@ void compositeLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long fl
             {
               if (fraction[nn] < 0)
                 {
-                  subLoads[nn]->set ("p", P * mxP);
-                  subLoads[nn]->set ("q", Q * mxP);
-                  subLoads[nn]->set ("ip", Ip * mxP);
-                  subLoads[nn]->set ("iq", Iq * mxP);
-                  subLoads[nn]->set ("yp", Yp * mxP);
+                  subLoads[nn]->set ("p", getP() * mxP);
+                  subLoads[nn]->set ("q", getQ() * mxP);
+                  subLoads[nn]->set ("ip", getIp() * mxP);
+                  subLoads[nn]->set ("iq", getIq() * mxP);
+                  subLoads[nn]->set ("yp", getYp() * mxP);
 
-                  subLoads[nn]->set ("yq", Yq * mxP);
+                  subLoads[nn]->set ("yq", getYq() * mxP);
                   fraction[nn] = mxP;
                 }
             }
@@ -181,7 +181,7 @@ void compositeLoad::pFlowObjectInitializeB ()
     }
 }
 
-void compositeLoad::dynObjectInitializeA (gridDyn_time time, unsigned long flags)
+void compositeLoad::dynObjectInitializeA (coreTime time, unsigned long flags)
 {
   for (auto &ld : subLoads)
     {
@@ -189,13 +189,13 @@ void compositeLoad::dynObjectInitializeA (gridDyn_time time, unsigned long flags
     }
 }
 
-void compositeLoad::dynObjectInitializeB (const IOdata &args, const IOdata &outputSet)
+void compositeLoad::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-  IOdata out = outputSet;
+  IOdata out = desiredOutput;
 
   for (auto &ld : subLoads)
     {
-      ld->dynInitializeB (args,out);
+      ld->dynInitializeB (inputs,out,fieldSet);
 
     }
 }
@@ -209,8 +209,9 @@ void compositeLoad::set (const std::string &param,  const std::string &val)
   double frac = -1.0;
   if (iparam == "subload")
     {
-      gridLoad *Ld;
-      auto strSplit = splitlineTrim (val);
+      zipLoad *Ld;
+      auto strSplit = splitline(val);
+	  trim(strSplit);
       auto load_factory = coreObjectFactory::instance ()->getFactory ("load");
       size_t nn = 0;
       while (nn < strSplit.size ())
@@ -218,7 +219,7 @@ void compositeLoad::set (const std::string &param,  const std::string &val)
           if (load_factory->isValidType (strSplit[nn]))
             {
 
-              Ld = static_cast<gridLoad *> (load_factory->makeObject (strSplit[nn]));
+              Ld = static_cast<zipLoad *> (load_factory->makeObject (strSplit[nn]));
               Ld->locIndex = num;
               add (Ld);
               ++nn;
@@ -265,22 +266,22 @@ void compositeLoad::set (const std::string &param,  const std::string &val)
             }
           fraction[nn + 1] = fval[nn];
         }
-      if (opFlags.test (pFlow_initialized))
+      if (opFlags[pFlow_initialized])
         {
           for (size_t nn = 0; nn < subLoads.size (); ++nn)
             {
-              subLoads[nn]->set ("p", P * fraction[nn]);
-              subLoads[nn]->set ("q", Q * fraction[nn]);
-              subLoads[nn]->set ("ir", Ip * fraction[nn]);
-              subLoads[nn]->set ("iq", Iq * fraction[nn]);
-              subLoads[nn]->set ("yp", Yp * fraction[nn]);
-              subLoads[nn]->set ("Yq", Yq * fraction[nn]);
+              subLoads[nn]->set ("p", getP() * fraction[nn]);
+              subLoads[nn]->set ("q", getQ() * fraction[nn]);
+              subLoads[nn]->set ("ir", getIp() * fraction[nn]);
+              subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+              subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+              subLoads[nn]->set ("Yq", getYq() * fraction[nn]);
             }
         }
     }
   else
     {
-      gridLoad::set (param,val);
+      zipLoad::set (param,val);
     }
   
 }
@@ -314,104 +315,104 @@ void compositeLoad::set (const std::string &param, double val, gridUnits::units_
     }
   else
     {
-      gridLoad::set (param, val,unitType);
+      zipLoad::set (param, val,unitType);
     }
   if ((reallocate)&&(opFlags[pFlow_initialized]))
     {
       for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
-          subLoads[nn]->set ("p", P * fraction[nn]);
-          subLoads[nn]->set ("q", Q * fraction[nn]);
-          subLoads[nn]->set ("ir", Ip * fraction[nn]);
-          subLoads[nn]->set ("iq", Iq * fraction[nn]);
-          subLoads[nn]->set ("yp", Yp * fraction[nn]);
-          subLoads[nn]->set ("yq", Yq * fraction[nn]);
+          subLoads[nn]->set ("p", getP() * fraction[nn]);
+          subLoads[nn]->set ("q", getQ() * fraction[nn]);
+          subLoads[nn]->set ("ir", getIp() * fraction[nn]);
+          subLoads[nn]->set ("iq", getIq() * fraction[nn]);
+          subLoads[nn]->set ("yp", getYp() * fraction[nn]);
+          subLoads[nn]->set ("yq", getYq() * fraction[nn]);
         }
     }
 
 }
 
-void compositeLoad::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void compositeLoad::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
       if (ld->stateSize (sMode) > 0)
         {
-          ld->residual (args, sD,resid,sMode);
+          ld->residual (inputs, sD,resid,sMode);
         }
     }
 }
 
-void compositeLoad::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void compositeLoad::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
       if (ld->diffSize (sMode) > 0)
         {
-          ld->derivative (args, sD, deriv, sMode);
+          ld->derivative (inputs, sD, deriv, sMode);
         }
     }
 }
 
-void compositeLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void compositeLoad::outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
       if (ld->stateSize (sMode) > 0)
         {
-          ld->outputPartialDerivatives (args, sD, ad, sMode);
+          ld->outputPartialDerivatives (inputs, sD, ad, sMode);
         }
     }
 }
 
-void compositeLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
-      ld->ioPartialDerivatives (args, sD, ad, argLocs,sMode);
+      ld->ioPartialDerivatives (inputs, sD, ad, inputLocs,sMode);
     }
 }
 
-void compositeLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void compositeLoad::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   for  (auto &ld : subLoads)
     {
       if (ld->stateSize (sMode) > 0)
         {
-          ld->jacobianElements (args, sD, ad,argLocs,sMode);
+          ld->jacobianElements (inputs, sD, ad,inputLocs,sMode);
         }
     }
 }
 
-void compositeLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void compositeLoad::timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
   for (auto &ld : subLoads)
     {
-      ld->timestep (ttime,args, sMode);
+      ld->timestep (ttime,inputs, sMode);
     }
 }
 
-double compositeLoad::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double compositeLoad::getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
-          rp += ld->getRealPower (args, sD, sMode);
+          rp += ld->getRealPower (inputs, sD, sMode);
         }
     }
   return rp;
 }
 
-double compositeLoad::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double compositeLoad::getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
-          rp += ld->getReactivePower (args, sD, sMode);
+          rp += ld->getReactivePower (inputs, sD, sMode);
         }
     }
   return rp;
@@ -422,7 +423,7 @@ double compositeLoad::getRealPower (double V) const
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
           rp += ld->getRealPower (V);
         }
@@ -435,7 +436,7 @@ double compositeLoad::getReactivePower (double V) const
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
           rp += ld->getReactivePower (V);
         }
@@ -448,7 +449,7 @@ double compositeLoad::getRealPower () const
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
           rp += ld->getRealPower ();
         }
@@ -461,7 +462,7 @@ double compositeLoad::getReactivePower () const
   double rp = 0;
   for (auto &ld : subLoads)
     {
-      if (ld->enabled)
+      if (ld->isConnected())
         {
           rp += ld->getReactivePower ();
         }

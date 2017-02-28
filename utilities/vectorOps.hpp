@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -65,14 +65,32 @@ KEY_QUAL M signn (M x)
 template<class X>
 X sum (const std::vector<X> &a)
 {
-  X sum_of_vector = std::accumulate (a.begin (),a.end (),0.0);
+  X sum_of_vector = std::accumulate (a.cbegin (),a.cend (),0.0);
   return sum_of_vector;
+}
+
+template <class X>
+void ensureSizeAtLeast(std::vector<X> &a, size_t minRequiredSize)
+{
+	if (a.size() < minRequiredSize)
+	{
+		a.resize(minRequiredSize);
+	}
+}
+
+template <class X>
+void ensureSizeAtLeast(std::vector<X> &a, size_t minRequiredSize, const X &defArg)
+{
+	if (a.size() < minRequiredSize)
+	{
+		a.resize(minRequiredSize,defArg);
+	}
 }
 
 template<class X>
 X mean (const std::vector<X> &a)
 {
-  X sum_of_vector = std::accumulate (a.begin (), a.end (), 0.0);
+  X sum_of_vector = std::accumulate (a.begin (), a.end (), X(0));
   if (!a.empty ())
     {
       sum_of_vector /= static_cast<X> (a.size ());
@@ -84,7 +102,7 @@ X mean (const std::vector<X> &a)
 template<class X>
 X absSum (const std::vector<X> &a)
 {
-  X sum_of_vector = std::accumulate (a.begin (), a.end (), 0.0, [](X a1, X a2) -> X {
+  X sum_of_vector = std::accumulate (a.begin (), a.end (), X(0), [](X a1, X a2) -> X {
     return a1 + std::abs (a2);
   });
   return sum_of_vector;
@@ -94,25 +112,28 @@ X absSum (const std::vector<X> &a)
 template<class X>
 X absMax (const std::vector<X> &a)
 {
-  auto result = std::minmax_element (a.begin (), a.end ());
-  return std::max (std::abs (*(result.first)),std::abs (*(result.second)));
+  //auto result = std::minmax_element (a.begin (), a.end ());
+  //return std::max (std::abs (*(result.first)),std::abs (*(result.second)));
+
+  X max_of_vector = std::accumulate(a.begin(), a.end(), X(0), [](X a1, X a2) -> X {
+	  return a1>=std::abs(a2)?a1:std::abs(a2);
+  });
+  return max_of_vector;
 }
 
 template<class X>
-X absMaxLoc (const std::vector<X> &a, int &loc)
+std::pair<X,int> absMaxLoc (const std::vector<X> &a)
 {
   auto result = std::minmax_element (a.begin (), a.end ());
   X a1 = std::abs (*(result.first));
   X a2 = std::abs (*(result.second));
   if (a1 > a2)
     {
-      loc = result.first - a.begin ();
-      return a1;
+      return std::make_pair(a1, result.first - a.begin());
     }
   else
     {
-      loc = result.second - a.begin ();
-      return a2;
+      return std::make_pair(a2, result.second - a.begin());
     }
 }
 
@@ -124,46 +145,45 @@ X absMin (const std::vector<X> &a)
 }
 
 template<class X>
-X absMinLoc (const std::vector<X> &a, int &loc)
+std::pair<X, int> absMinLoc (const std::vector<X> &a)
 {
   auto result = std::minmax_element (a.begin (), a.end ());
   X a1 = std::abs (*(result.first));
   X a2 = std::abs (*(result.second));
   if (a1 <= a2)
     {
-      loc = result.first - a.begin ();
-      return a1;
+      int loc = result.first - a.begin ();
+      return std::make_pair(a1,loc);
     }
   else
     {
-      loc = result.second - a.begin ();
-      return a2;
+      int loc = result.second - a.begin ();
+      return std::make_pair(a2,loc);
     }
 }
 
 template<class X>
-X maxLoc (const std::vector<X> &a, int &loc)
+std::pair<X, int> maxLoc (const std::vector<X> &a)
 {
   auto result = std::max_element (a.begin (), a.end ());
   X a1 = *(result);
-  loc = result - a.begin ();
-  return a1;
+  return std::make_pair(a1, result - a.begin());
 }
 
 template<class X>
-X minLoc (const std::vector<X> &a, int &loc)
+std::pair<X, int> minLoc (const std::vector<X> &a)
 {
   auto result = std::min_element (a.begin (), a.end ());
   X a1 = *(result);
-  loc = result - a.begin ();
-  return a1;
+  return std::make_pair(a1, result - a.begin());
 }
 
 
+
 template<class X>
-X absMaxDiffLoc(const std::vector<X> &a, const std::vector<X> &b, int &loc)
+std::pair<X, int> absMaxDiffLoc(const std::vector<X> &a, const std::vector<X> &b)
 {
-	loc = -1;
+	int loc = -1;
 	X mdiff = 0;
 	auto cnt = (std::min)(a.size(), b.size());
 	auto abeg = a.begin();
@@ -180,15 +200,20 @@ X absMaxDiffLoc(const std::vector<X> &a, const std::vector<X> &b, int &loc)
 		++acur;
 		++bcur;
 	}
-	return mdiff;
+	return std::make_pair(mdiff,loc);
+}
+
+template<class X>
+X absMaxDiff(const std::vector<X> &a, const std::vector<X> &b)
+{
+	auto res = absMaxDiffLoc(a, b);
+	return res.first;
 }
 
 template<class X>
 X product (const std::vector<X> &a)
 {
-  X prod_of_vector = std::accumulate (a.begin (), a.end (), 0.0, [](X a1, X a2) -> X {
-    return a1 * a2;
-  });
+	X prod_of_vector = std::accumulate(a.begin(), a.end(), X(0), [](X a1, X a2) {return a1*a2; });
   return prod_of_vector;
 }
 
@@ -235,17 +260,25 @@ X median (std::vector<X> &a)
 }
 
 template<class X>
+X median(const std::vector<X> &a)
+{
+	std::vector<X> b = a; //copy the vector
+	return median(b);
+
+}
+
+template<class X>
 std::vector<X> diff (std::vector<X> &a)
 {
   auto cnt = a.size ();
   std::vector<X> d (cnt);
-  std::adjacent_difference (a.begin (), a.end (), d.begin ());
+  std::adjacent_difference (a.cbegin (), a.cend (), d.begin ());
   return d;
 }
 
 //finding index values to meet conditions
 template<class X>
-auto vecFindeq (const std::vector<X> &a, X match)->std::vector<decltype (a.size ())>
+auto vecFindeq (const std::vector<X> &a, X match)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -261,7 +294,7 @@ auto vecFindeq (const std::vector<X> &a, X match)->std::vector<decltype (a.size 
 }
 
 template<class X>
-auto vecFindne (const std::vector<X> &a, X match)->std::vector<decltype (a.size ())>
+auto vecFindne (const std::vector<X> &a, X match)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -277,7 +310,7 @@ auto vecFindne (const std::vector<X> &a, X match)->std::vector<decltype (a.size 
 }
 
 template<class X>
-auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)->std::vector<decltype (a.size ())>
+auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   cnt = std::min (end, cnt);
@@ -295,7 +328,7 @@ auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)->std
 
 
 template<class X>
-auto vecFindlt (const std::vector<X> &a, X val)->std::vector<decltype (a.size ())>
+auto vecFindlt (const std::vector<X> &a, X val)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -311,7 +344,7 @@ auto vecFindlt (const std::vector<X> &a, X val)->std::vector<decltype (a.size ()
 }
 
 template<class X>
-auto vecFindlte (const std::vector<X> &a, X val)->std::vector<decltype (a.size ())>
+auto vecFindlte (const std::vector<X> &a, X val)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -327,7 +360,7 @@ auto vecFindlte (const std::vector<X> &a, X val)->std::vector<decltype (a.size (
 }
 
 template<class X>
-auto vecFindgt (const std::vector<X> &a, X val)->std::vector<decltype (a.size ())>
+auto vecFindgt (const std::vector<X> &a, X val)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -343,7 +376,7 @@ auto vecFindgt (const std::vector<X> &a, X val)->std::vector<decltype (a.size ()
 }
 
 template<class X>
-auto vecFindgte (const std::vector<X> &a, X val)->std::vector<decltype (a.size ())>
+auto vecFindgte (const std::vector<X> &a, X val)//->std::vector<decltype (a.size ())>
 {
   auto cnt = a.size ();
   std::vector<decltype (cnt)> locs;
@@ -553,9 +586,10 @@ template<class X>
 X compareVec (const std::vector<X> &a, const std::vector<X> &b)
 {
   X sum_of_diff = 0;
-  typename std::vector<X>::size_type cnt = (std::min)(a.size (), b.size ());
+  using stype_t = typename std::vector<X>::size_type;
+  stype_t cnt = (std::min)(a.size (), b.size ());
 
-  for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+  for (stype_t ii = 0; ii < cnt; ++ii)
     {
       sum_of_diff += std::abs (a[ii] - b[ii]);
     }
@@ -597,10 +631,10 @@ X compareVec (const std::vector<X> &a, const std::vector<X> &b,
 template<class X>
 auto countDiffs(const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)->typename std::vector<X>::size_type
 {
-	
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size())-cnt;
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size())-cnt;
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if (std::abs(a[ii] - b[ii]) > maxAllowableDiff)
 		{
@@ -613,16 +647,16 @@ auto countDiffs(const std::vector<X> &a, const std::vector<X> &b, X maxAllowable
 template<class X>
 auto countDiffsIgnoreCommon(const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)->typename std::vector<X>::size_type
 {
-
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size()) - cnt;
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size()) - cnt;
 	if (cnt<3)
 	{
 		return 0;
 	}
 	X commonDiff1 = a[0] - b[0];
 	X commonDiff2 = a[1] - b[1];
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if (std::abs(a[ii] - b[ii]) > maxAllowableDiff)
 		{
@@ -642,10 +676,10 @@ auto countDiffsIgnoreCommon(const std::vector<X> &a, const std::vector<X> &b, X 
 template<class X>
 auto countDiffs(const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff, X maxFracDiff)->typename std::vector<X>::size_type
 {
-
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size()) - cnt;
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size()) - cnt;
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if ((std::abs(a[ii] - b[ii]) > maxAllowableDiff)&& (std::abs(a[ii] - b[ii]) > maxFracDiff*std::abs(a[ii])))
 		{
@@ -658,10 +692,10 @@ auto countDiffs(const std::vector<X> &a, const std::vector<X> &b, X maxAllowable
 template<class X>
 auto countDiffsIfValid(const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)->typename std::vector<X>::size_type
 {
-
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size()) - cnt;
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size()) - cnt;
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if ((std::abs(a[ii] - b[ii]) > maxAllowableDiff)&&(a[ii]!=0))
 		{
@@ -676,10 +710,10 @@ auto countDiffsCallback(const std::vector<X> &a, const std::vector<X> &b,
 	X maxAllowableDiff, 
 	std::function<void(typename std::vector<X>::size_type,X, X)> &f)->typename std::vector<X>::size_type
 {
-
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size()) - cnt;
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size()) - cnt;
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if (std::abs(a[ii] - b[ii]) > maxAllowableDiff)
 		{
@@ -695,10 +729,10 @@ auto countDiffsIfValidCallback(const std::vector<X> &a, const std::vector<X> &b,
 	X maxAllowableDiff,
 	std::function<void(typename std::vector<X>::size_type, X, X)> &f)->typename std::vector<X>::size_type
 {
-
-	typename std::vector<X>::size_type cnt = (std::min)(a.size(), b.size());
-	typename std::vector<X>::size_type diffs = (std::max)(a.size(), b.size()) - cnt;
-	for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
+	using stype_t = typename std::vector<X>::size_type;
+	stype_t cnt = (std::min)(a.size(), b.size());
+	stype_t diffs = (std::max)(a.size(), b.size()) - cnt;
+	for (stype_t ii = 0; ii < cnt; ++ii)
 	{
 		if ((std::abs(a[ii] - b[ii]) > maxAllowableDiff) && (a[ii] != 0))
 		{
@@ -726,7 +760,7 @@ namespace vectorConvertDetail
 	template< typename X, typename Y>
 	std::vector<X> vectorConvertActual(std::vector<Y> &&dvec, std::true_type)
 	{
-		std::vector<X> ret(dvec);
+		std::vector<X> ret(std::move(dvec));
 		return ret;
 	}
 

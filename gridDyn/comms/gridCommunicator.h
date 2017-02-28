@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,17 +10,16 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef _GRID_COMMUNICATOR__
 #define _GRID_COMMUNICATOR__
 
-#include <string>
+#include "core/helperObject.h"
+#include "core/coreDefinitions.h"
 #include <cstdint>
 #include <functional>
-#include <memory>
-#include <vector>
 #include <queue>
-#include <atomic>
+#include <memory>
 
 class commMessage;
 
@@ -28,19 +27,16 @@ class commMessage;
 /**
 @brief base class for communicator object
 */
-class gridCommunicator
+class gridCommunicator:public helperObject
 {
 
 public:
   bool autoPingEnabled = true;       //!< control for automatic ping enable
   gridCommunicator ();
-  explicit gridCommunicator (std::string name);
-  gridCommunicator (std::string name, std::uint64_t id);
+  explicit gridCommunicator (const std::string &name);
+  gridCommunicator (const std::string &name, std::uint64_t id);
   explicit gridCommunicator (std::uint64_t id);
 
-  virtual ~gridCommunicator ()
-  {
-  }
   /** function to clone the communicator
   @param[in] obj an object to copy data to
   @return a shared ptr to a new communicator
@@ -77,26 +73,19 @@ public:
   //ping functions
   void ping (std::uint64_t destID);
   void ping (const std::string &destName);
-  double getLastPingTime () const;
+  coreTime getLastPingTime () const;
 
-  void setName (std::string newName)
-  {
-    m_commName = newName;
-  }
-  void setID (std::uint64_t newID)
+  
+  void setCommID (std::uint64_t newID)
   {
     m_id = newID;
   }
 
-  const std::string &getName () const
-  {
-    return m_commName;
-  }
-  std::uint64_t getID () const
+  std::uint64_t getCommID () const
   {
     return m_id;
   }
-  typedef std::function<void (std::uint64_t, std::shared_ptr<commMessage>)> rxMessageCallback_t;
+  using rxMessageCallback_t=std::function<void (std::uint64_t, std::shared_ptr<commMessage>)> ;
   void registerReceiveCallback (rxMessageCallback_t newAction)
   {
     m_rxCallbackMessage = newAction;
@@ -107,18 +96,16 @@ public:
   virtual void initialize();
 
   virtual void disconnect();
-  virtual void set(const std::string &param, const std::string &val);
-  virtual void set(const std::string &param, double val);
-  virtual void setFlag(const std::string &param, bool val);
+  virtual void set(const std::string &param, const std::string &val) override;
+  virtual void set(const std::string &param, double val) override;
+  virtual void setFlag(const std::string &param, bool val) override;
 private:
-  static std::atomic<std::uint64_t> g_counterId;       //!< id counter
   std::uint64_t m_id;           //!< individual comm id
-  std::string m_commName;       //!< name for a string
   rxMessageCallback_t m_rxCallbackMessage;       //!< call back action from parent object
-  double lastPingSend = 0;
-  double lastReplyRX = 0;
+  coreTime lastPingSend = timeZero;
+  coreTime lastReplyRX = timeZero;
   std::queue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;
 };
 
-std::shared_ptr<gridCommunicator> makeCommunicator (const std::string &commType, const std::string &commName, const std::uint64_t id);
+std::unique_ptr<gridCommunicator> makeCommunicator (const std::string &commType, const std::string &commName, const std::uint64_t id);
 #endif

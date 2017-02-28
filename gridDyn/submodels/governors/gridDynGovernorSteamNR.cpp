@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -29,11 +29,11 @@ gridDynGovernorSteamNR::gridDynGovernorSteamNR (const std::string &objName) : gr
   Pmax  = kBigNum;
   Pmin  = 0;
   Pset    = 0;
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.jacSize = 5;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.jacSize = 5;
 }
 
-gridCoreObject *gridDynGovernorSteamNR::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorSteamNR::clone (coreObject *obj) const
 {
   gridDynGovernorSteamNR *gov;
   if (obj == nullptr)
@@ -45,11 +45,11 @@ gridCoreObject *gridDynGovernorSteamNR::clone (gridCoreObject *obj) const
       gov = dynamic_cast<gridDynGovernorSteamNR *> (obj);
       if (gov == nullptr)
         {
-          gridCoreObject::clone (obj);
+          coreObject::clone (obj);
           return obj;
         }
     }
-  gridCoreObject::clone (gov);
+  coreObject::clone (gov);
   gov->K     = K;
   gov->T1    = T1;
   gov->T2    = T2;
@@ -69,20 +69,21 @@ gridDynGovernorSteamNR::~gridDynGovernorSteamNR ()
 }
 
 // initial conditions
-void gridDynGovernorSteamNR::objectInitializeB (const IOdata & /*args*/, const IOdata &outputSet, IOdata & /*inputSet*/)
+void gridDynGovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata & /*inputSet*/)
 {
 
   auto offset = offsets.getAlgOffset (cLocalSolverMode);
   m_state[offset + 1] = 0;
-  m_state[offset + offset] = outputSet[0];
-  Pset = ((gridDynGenerator *)parent)->getPset ();
+  m_state[offset + offset] = desiredOutput[0];
+
+  Pset = ((gridDynGenerator *)getParent())->getPset();
 
 
 }
 
 
 // residual
-void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData *, double resid[],  const solverMode &sMode)
+void gridDynGovernorSteamNR::residual (const IOdata & /*inputs*/, const stateData &, double resid[],  const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   resid[offset]   = 0;
@@ -90,7 +91,7 @@ void gridDynGovernorSteamNR::residual (const IOdata & /*args*/, const stateData 
 }
 
 
-void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad,  const IOlocs & /*argLocs*/, const solverMode &sMode)
+void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad,  const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if  (isAlgebraicOnly (sMode))
     {
@@ -109,7 +110,7 @@ void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const st
       ad.assign ( refI, omegaLoc, -K * T2 / (T1 * T3));
       nn++;
     }
-  ad.assign (refI,refI,-1 / T3 - sD->cj);
+  ad.assign (refI,refI,-1 / T3 - sD.cj);
   ad.assign (refI,refI + 1,-K / T3);
   nn += 2;
   // X
@@ -119,7 +120,7 @@ void gridDynGovernorSteamNR::jacobianElements (const IOdata & /*args*/, const st
       nn++;
     }
 
-  ad.assign (refI + 1,refI + 1,-1 / T1 - sD->cj);
+  ad.assign (refI + 1,refI + 1,-1 / T1 - sD.cj);
 
 }
 
@@ -141,7 +142,7 @@ index_t gridDynGovernorSteamNR::findIndex (const std::string &field, const solve
 // set parameters
 void gridDynGovernorSteamNR::set (const std::string &param,  const std::string &val)
 {
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 }
 
 void gridDynGovernorSteamNR::set (const std::string &param, double val, gridUnits::units_t unitType)

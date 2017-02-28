@@ -5,6 +5,7 @@
 # ZMQ_INCLUDE_DIR, where to find zmq.h
 # ZMQ_LIBRARY, the library needed to use ZMQ
 # ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
+# ZMQ_SHARED_LIB the shared library that needs to be associated with the executable
 set(ZMQ_FOUND 0)
 
   set(ZMQ_REGISTRY_PATH
@@ -30,20 +31,22 @@ if (MSVC)
   # Replace dots with underscores
   string(REGEX REPLACE "\\." "_" ZMQ_NAME ${ZMQ_NAME})
   # Get Visual studio version number
-  set(_VS_VERSIONS "140" "120")
+  set(_VS_VERSIONS "140" "141")
   if (${ZMQ_NAME} MATCHES "registry") # if key was not found, the string "registry" is returned
-    set(_ZMQ_VERSIONS "4_1_5" "4_1_4" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0" "3_2_5")
+    set(_ZMQ_VERSIONS "4_2_1" "4_2_0" "4_1_5" "4_1_4" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0")
     set(ZMQ_LIBRARY_NAME)
-    foreach(ver ${_ZMQ_VERSIONS})
-      foreach(vs ${_VS_VERSIONS})
-        list(APPEND ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ver}")
-      endforeach()
-    endforeach()
+	
+		foreach(ver ${_ZMQ_VERSIONS})
+			foreach(vs ${_VS_VERSIONS})
+				list(APPEND ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ver}")
+			endforeach()
+		endforeach()
   else()
     # Format ZMQ library file name
-    foreach(vs ${_VS_VERSIONS})
-      set(ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ZMQ_NAME}")
-    endforeach()
+	
+		foreach(vs ${_VS_VERSIONS})
+			set(ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ZMQ_NAME}")
+		endforeach()
   endif()
 endif()
 find_library(ZMQ_LIBRARY
@@ -64,7 +67,9 @@ if (ZMQ_INCLUDE_DIR AND ZMQ_LIBRARY AND NOT ZMQ_LIBRARY-NOTFOUND)
   message(STATUS "Found ZMQ library: ${ZMQ_LIBRARY}")
   message(STATUS "Found ZMQ headers: ${ZMQ_INCLUDE_DIR}")
 else()
+IF(NOT ZMQ_FIND_QUIETLY)
   message(SEND_ERROR "Could not find ZMQ libraries/headers! Please install ZMQ with libraries and headers")
+  ENDIF(NOT ZMQ_FIND_QUIETLY)
 endif()
 # show the ZMQ_INCLUDE_DIR and ZMQ_LIBRARY variables only in the advanced view
 mark_as_advanced(ZMQ_ROOT_DIR ZMQ_INCLUDE_DIR ZMQ_LIBRARY ZMQ_FOUND)

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,9 +12,9 @@
 */
 
 #include "gridParameter.h"
-#include "stringOps.h"
-#include "basicDefs.h"
-#include "gridDynTypes.h"
+#include "stringConversion.h"
+#include "gridDynDefinitions.h"
+#include "core/coreExceptions.h"
 
 gridParameter::gridParameter()
 {
@@ -40,20 +40,20 @@ void gridParameter::reset()
 	applyIndex.resize(0);
 }
 
-int gridParameter::fromString(const std::string &str)
+void gridParameter::fromString(const std::string &str)
 {
 	valid = false;
 	size_t rlc = str.find_last_of('=');
 	if (rlc == std::string::npos)
 	{
-		return FUNCTION_EXECUTION_FAILURE;
+		throw(invalidParameterValue());
 	}
 	valid = true;
 	field = str.substr(0, rlc);
-	trimString(field);
+	stringOps::trimString(field);
 	//now read the value
 	strVal = str.substr(rlc + 1);
-	value = doubleReadComplete(strVal, kNullVal);
+	value = numeric_conversionComplete(strVal, kNullVal);
 	stringType = (value == kNullVal);
 
 	rlc = field.find_first_of('(');
@@ -63,5 +63,4 @@ int gridParameter::fromString(const std::string &str)
 		paramUnits = gridUnits::getUnits(field.substr(rlc + 1, rlc2 - rlc - 1));
 		field = field.substr(0, rlc);
 	}
-	return FUNCTION_EXECUTION_SUCCESS;
 }

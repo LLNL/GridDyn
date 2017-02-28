@@ -155,12 +155,12 @@ namespace zmq
     #ifdef ZMQ_CPP11
     inline int poll(zmq_pollitem_t const* items, size_t nitems, std::chrono::milliseconds timeout)
     {
-        return poll(items, nitems, timeout.count() );
+        return poll(items, nitems, static_cast<long>(timeout.count()));
     }
 
     inline int poll(std::vector<zmq_pollitem_t> const& items, std::chrono::milliseconds timeout)
     {
-        return poll(items.data(), items.size(), timeout.count() );
+        return poll(items.data(), items.size(), static_cast<long>(timeout.count()));
     }
 
     inline int poll(std::vector<zmq_pollitem_t> const& items, long timeout_ = -1)
@@ -377,6 +377,16 @@ namespace zmq
             std::string b(other->data<char>(), other->size());
             return a == b;
         }
+
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 0, 8)
+        inline const char* gets(const char *property_)
+        {
+            const char* value = zmq_msg_gets (&msg, property_);
+            if (value == NULL)
+                throw error_t ();
+            return value;
+        }
+#endif
 
     private:
         //  The underlying message
@@ -625,6 +635,16 @@ namespace zmq
             return(ptr != NULL);
         }
         
+		inline size_t send(std::string const& msg, int flags_ = 0)
+		{
+			int nbytes = zmq_send(ptr, (void *)msg.c_str(), msg.size(), flags_);
+			if (nbytes >= 0)
+				return (size_t)nbytes;
+			if (zmq_errno() == EAGAIN)
+				return 0;
+			throw error_t();
+		}
+
         inline size_t send (const void *buf_, size_t len_, int flags_ = 0)
         {
             int nbytes = zmq_send (ptr, buf_, len_, flags_);
@@ -788,6 +808,14 @@ namespace zmq
                 case ZMQ_EVENT_DISCONNECTED:
                     on_event_disconnected(*event, address.c_str());
                     break;
+#ifdef ZMQ_BUILD_DRAFT_API
+                case ZMQ_EVENT_HANDSHAKE_FAILED:
+                    on_event_handshake_failed(*event, address.c_str());
+                    break;
+                case ZMQ_EVENT_HANDSHAKE_SUCCEED:
+                    on_event_handshake_succeed(*event, address.c_str());
+                    break;
+#endif
                 default:
                     on_event_unknown(*event, address.c_str());
                     break;
@@ -816,6 +844,8 @@ namespace zmq
         virtual void on_event_closed(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
         virtual void on_event_close_failed(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
         virtual void on_event_disconnected(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
+        virtual void on_event_handshake_failed(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+        virtual void on_event_handshake_succeed(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
         virtual void on_event_unknown(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
     private:
         void* socketPtr;

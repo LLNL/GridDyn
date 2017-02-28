@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -11,7 +11,75 @@
 * LLNS Copyright End
 */
 
-#include "charMappers.h"
+#include "charMapper.h"
+
+charMapper<bool> numericMapper()
+{
+	charMapper<bool> nm(false);
+	nm.addKey('0', true);
+	nm.addKey('1', true);
+	nm.addKey('2', true);
+	nm.addKey('3', true);
+	nm.addKey('4', true);
+	nm.addKey('5', true);
+	nm.addKey('6', true);
+	nm.addKey('7', true);
+	nm.addKey('8', true);
+	nm.addKey('9', true);
+	nm.addKey('+', true);
+	nm.addKey('-', true);
+	nm.addKey(' ', true);
+	nm.addKey('e', true);
+	nm.addKey('E', true);
+	nm.addKey('.', true);
+	return nm;
+}
+
+charMapper<bool> numericStartMapper()
+{
+	charMapper<bool> nm(false);
+	nm.addKey('0', true);
+	nm.addKey('1', true);
+	nm.addKey('2', true);
+	nm.addKey('3', true);
+	nm.addKey('4', true);
+	nm.addKey('5', true);
+	nm.addKey('6', true);
+	nm.addKey('7', true);
+	nm.addKey('8', true);
+	nm.addKey('9', true);
+	nm.addKey('+', true);
+	nm.addKey('-', true);
+	nm.addKey(' ', true);
+	nm.addKey('\t', true);
+	nm.addKey('.', true);
+	nm.addKey('\n', true);
+	nm.addKey('\r', true);
+	nm.addKey('\0', true);
+	return nm;
+}
+
+charMapper<bool> numericEndMapper()
+{
+	charMapper<bool> nm(false);
+	nm.addKey('0', true);
+	nm.addKey('1', true);
+	nm.addKey('2', true);
+	nm.addKey('3', true);
+	nm.addKey('4', true);
+	nm.addKey('5', true);
+	nm.addKey('6', true);
+	nm.addKey('7', true);
+	nm.addKey('8', true);
+	nm.addKey('9', true);
+	nm.addKey(' ', true);
+	nm.addKey('\t', true);
+	nm.addKey('\n', true);
+	nm.addKey('\r', true);
+	nm.addKey('\0', true);
+	return nm;
+}
+
 
 charMapper<unsigned char> base64Mapper()
 {
@@ -69,5 +137,24 @@ charMapper<unsigned char> hexMapper()
 		dMap.addKey(c, val);
 		++val;
 	}
+	return dMap;
+}
+
+
+charMapper<unsigned char> pairMapper()
+{
+	charMapper<unsigned char> dMap(0);
+	for (unsigned char ii = 0; ii < 255; ++ii)
+	{
+		dMap.addKey(ii, ii);
+	}
+	dMap.addKey('(', ')');
+	dMap.addKey('<', '>');
+	dMap.addKey('[', ']');
+	dMap.addKey('{', '}');
+	dMap.addKey(')', '(');
+	dMap.addKey('>', '<');
+	dMap.addKey(']', '[');
+	dMap.addKey('}', '{');
 	return dMap;
 }

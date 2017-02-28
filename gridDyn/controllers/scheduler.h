@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -42,13 +42,13 @@ protected:
 public:
   scheduler (const std::string &objName = "scheduler_#", double initialValue=0.0);
   scheduler(double initialValue, const std::string &objName = "scheduler_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~scheduler ();
 
-  virtual void updateA (gridDyn_time time) override;
-  virtual double predict (gridDyn_time time);
+  virtual void updateA (coreTime time) override;
+  virtual double predict (coreTime time);
 
-  virtual void setTarget (gridDyn_time time, double target);
+  virtual void setTarget (coreTime time, double target);
   virtual void setTarget (double target);
   virtual void setTarget (const std::string &filename);
   virtual void setTarget (std::vector<double> &time, std::vector<double> &target);
@@ -58,24 +58,23 @@ public:
     return PCurr;
   }
 protected:
-  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void setFlag(const std::string &flag, bool val=true) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
-  virtual void setTime (gridDyn_time time) override;
   /** tie the scheduler to a dispatcher */
   virtual void dispatcherLink ();
   /** get the maximum available power withing a specified time window
   @param[in] time the time window to make the power
   */
-  virtual double getMax(gridDyn_time time = maxTime) const;
+  virtual double getMax(coreTime time = maxTime) const;
   /** get the low power level available withing a specified time window
   @param[in] time the time window to make the power level
   */
-  virtual double getMin(gridDyn_time time = maxTime) const;
+  virtual double getMin(coreTime time = maxTime) const;
 protected:
   virtual void insertTarget (tsched ts);
   void clearSchedule ();
@@ -100,10 +99,10 @@ protected:
 	
   double rampUp = kBigNum;  //!< maximum ramp rate in the up direction
   double rampDown = kBigNum; //!< maximum ramp rate in the down direction
-  gridDyn_time rampTime = 20.0 * 60.0;  //!< the ramp window
+  coreTime rampTime = 20.0 * 60.0;  //!< the ramp window
   double dPdt = 0.0;                      //!< the actual ramp rate
   double PRampCurr = 0.0;         //!< the current scheduled ramp rate
-  gridDyn_time lastTargetTime = negTime;  //!< the time of the last scheduled target power level
+  coreTime lastTargetTime = negTime;  //!< the time of the last scheduled target power level
 
   double ramp10Up = kBigNum;            //!<[puMW] The 10 minute maximum up ramp
   double ramp30Up = kBigNum;            //!< the 30 minute maximum up ramp
@@ -114,27 +113,25 @@ protected:
   //spinning reserve capacity
   double reserveAvail = 0.0;                      //!< the amount of reserve power in the generator
   double reserveUse = 0.0;                        //!< the amount of reserve power to use
-  gridDyn_time reserveRampTime = 15.0 * 60.0;     //!< the time window the object has to meet the reserve
+  coreTime reserveRampTime = 15.0 * 60.0;     //!< the time window the object has to meet the reserve
   double reserveAct = 0.0;                        //!< the actual current reserve
   double reservePriority = 0.0;           //!< the priority level of the reserve
 
 
 public:
-  schedulerRamp (const std::string &objName = "schedulerRamp_#");
+  explicit schedulerRamp (const std::string &objName = "schedulerRamp_#");
   schedulerRamp (double initialValue, const std::string &objName = "schedulerRamp_#");
-  virtual ~schedulerRamp ()
-  {
-  }
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  void setTarget (gridDyn_time time, double target) override;
+
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
+  void setTarget (coreTime time, double target) override;
   void setTarget (double target) override;
   void setTarget (const std::string &filename) override;
 
-  virtual void updateA (gridDyn_time time) override;
-  virtual double predict (gridDyn_time time) override;
+  virtual void updateA (coreTime time) override;
+  virtual double predict (coreTime time) override;
 
-  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 
   virtual double getRamp (double *tRem) const;
   virtual double getRamp () const;
@@ -157,8 +154,8 @@ public:
     return reserveAvail;
   }
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = maxTime) const override;
-  virtual double getMin (gridDyn_time time = maxTime) const override;
+  virtual double getMax (coreTime time = maxTime) const override;
+  virtual double getMin (coreTime time = maxTime) const override;
 protected:
   virtual void updatePTarget ();
   virtual void insertTarget (tsched ts) override;
@@ -189,10 +186,10 @@ private:
 
 
 public:
-  schedulerReg (const std::string &objName = "schedulerReg_#");
+  explicit schedulerReg (const std::string &objName = "schedulerReg_#");
   schedulerReg (double initialValue, const std::string &objName = "schedulerReg_#");
   schedulerReg (double initialValue,double initialReg, const std::string &objName = "schedulerReg_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   ~schedulerReg ();
   void setReg (double regLevel);
 
@@ -217,11 +214,11 @@ public:
     return regEnabled;
   }
 
-  void updateA (gridDyn_time time) override;
-  double predict (gridDyn_time time) override;
+  void updateA (coreTime time) override;
+  double predict (coreTime time) override;
 
-  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 
   double getRamp (double *tRem) const override;
 
@@ -232,8 +229,8 @@ public:
 
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void dispatcherLink () override;
-  virtual double getMax (gridDyn_time time = maxTime) const override;
-  virtual double getMin (gridDyn_time time = maxTime) const override;
+  virtual double getMax (coreTime time = maxTime) const override;
+  virtual double getMin (coreTime time = maxTime) const override;
 
 protected:
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;

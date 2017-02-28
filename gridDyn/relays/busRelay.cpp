@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,10 +12,10 @@
 */
 
 #include "busRelay.h"
-#include "gridCondition.h"
-#include "eventQueue.h"
-#include "gridEvent.h"
-#include "gridCoreTemplates.h"
+#include "measurement/gridCondition.h"
+#include "events/eventQueue.h"
+#include "events/gridEvent.h"
+#include "core/coreObjectTemplates.h"
 
 #include <boost/format.hpp>
 
@@ -23,9 +23,10 @@
 busRelay::busRelay (const std::string&objName) : gridRelay (objName)
 {
   opFlags.set (continuous_flag);
+  opFlags.set(power_flow_checks_flag);  //enable power flow checks for busRelay
 }
 
-gridCoreObject *busRelay::clone (gridCoreObject *obj) const
+coreObject *busRelay::clone (coreObject *obj) const
 {
 	busRelay *nobj = cloneBase<busRelay, gridRelay>(this, obj);
 	if (nobj == nullptr)
@@ -122,15 +123,15 @@ void busRelay::set (const std::string &param, double val, gridUnits::units_t uni
 
 }
 
-void busRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void busRelay::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
-
-  auto ge = std::make_shared<gridEvent> (0.0);
-
+	
+  auto ge = std::make_unique<gridEvent> (0.0);
+  
   ge->setValue(0.0);
   ge->setTarget (m_sinkObject,"status");
 
-  add (ge);
+  add (std::move(ge));
 
   add (make_condition ("voltage", "<", cutoutVoltage, m_sourceObject));
   setActionTrigger (0, 0, voltageDelay);
@@ -146,12 +147,12 @@ void busRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
     }
 
 
-  gridRelay::dynObjectInitializeA (time0,flags);
+  gridRelay::pFlowObjectInitializeA (time0,flags);
 
 }
 
 
-void busRelay::actionTaken (index_t conditionNum, index_t /*ActionNum*/, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void busRelay::actionTaken (index_t conditionNum, index_t /*ActionNum*/, change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
   if (conditionNum == 0)
     {

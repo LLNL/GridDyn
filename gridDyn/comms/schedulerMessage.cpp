@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,6 @@
 
 #include "stringConversion.h"
 #include "comms/schedulerMessage.h"
-#include "gridDynTypes.h"
 #include <cstring>
 
 static dMessageFactory<schedulerMessage, BASE_SCHEDULER_MESSAGE_NUMBER, BASE_SCHEDULER_MESSAGE_NUMBER + 16> dmf ("scheduler");
@@ -63,7 +62,7 @@ std::string schedulerMessage::toString (int modifiers) const
 
 void schedulerMessage::loadString (const std::string &fromString)
 {
-  auto strV = splitline (fromString, ':');
+  auto strV = stringOps::splitline (fromString, ':');
   auto lstr = convertToUpperCase (strV[0]);
 
   std::vector<double> targets;

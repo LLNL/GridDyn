@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 
 #define PARAMETER_OPERATOR_H_
 
-#include "gridCore.h"
+#include "coreObject.h"
 
 #include <type_traits>
 
@@ -41,11 +41,11 @@ public:
   {
     return false;
   }
-  virtual double get (const gridCoreObject *, gridUnits::units_t) const
+  virtual double get (const coreObject *, gridUnits::units_t) const
   {
     return kNullVal;
   }
-  virtual void set (gridCoreObject *, double, gridUnits::units_t)
+  virtual void set (coreObject *, double, gridUnits::units_t)
   {
   }
   virtual const stringVec &setNames () const
@@ -61,7 +61,7 @@ public:
 template<class A>
 class simpleParamOperator : public baseParamOperator
 {
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
 public:
   typedef double (A::*paramPtr);
   stringVec paramNames;
@@ -87,13 +87,13 @@ public:
   {
     return true;
   }
-  virtual void set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
+  virtual void set (coreObject *obj, double val, gridUnits::units_t unitType) override
   {
     static_cast<A *> (obj)->*param = val;
     return 0;
   }
 
-  virtual double get (const gridCoreObject *obj, gridUnits::units_t unitType) const override
+  virtual double get (const coreObject *obj, gridUnits::units_t unitType) const override
   {
     return static_cast<const A *> (obj)->*param;
   }
@@ -111,7 +111,7 @@ public:
 template<class A>
 class paramOperator : public baseParamOperator
 {
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
 public:
   typedef double (A::*paramPtr);
   stringVec paramNames;
@@ -137,7 +137,7 @@ public:
     return true;
   }
 
-  virtual void set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
+  virtual void set (coreObject *obj, double val, gridUnits::units_t unitType) override
   {
 
     if (defUnits != gridUnits::defUnit)
@@ -156,7 +156,7 @@ public:
     return 0;
   }
 
-  virtual double get (const gridCoreObject *obj, gridUnits::units_t unitType) const override
+  virtual double get (const coreObject *obj, gridUnits::units_t unitType) const override
   {
     if (defUnits != gridUnits::defUnit)
       {
@@ -182,7 +182,7 @@ public:
 template<class A>
 class paramLimitOperator : public paramOperator<A>
 {
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
 public:
   double upperLimit = kBigNum;
   double lowerLimit = -kBigNum;
@@ -200,7 +200,7 @@ public:
 
   };
 
-  virtual void set (gridCoreObject *obj, double val, gridUnits::units_t unitType) override
+  virtual void set (coreObject *obj, double val, gridUnits::units_t unitType) override
   {
     double v2 = (defUnits != gridUnits::defUnit) ? unitConversion (val, unitType, defUnits, obj->systemBasePower) : val;
     if (val == kNullVal)
@@ -237,11 +237,11 @@ public:
   {
     return paramOp->isGettable ();
   }
-  double get (const gridCoreObject *obj, gridUnits::units_t unitType) const
+  double get (const coreObject *obj, gridUnits::units_t unitType) const
   {
     return paramOp->get (obj, unitType);
   }
-  void set (gridCoreObject *obj, double val, gridUnits::units_t unitType)
+  void set (coreObject *obj, double val, gridUnits::units_t unitType)
   {
     paramOp->set (obj, val, unitType);
   }
@@ -260,8 +260,8 @@ template<class A, class B>
 class objParamHelper
 {
   static_assert (std::is_base_of<B, A>::value, "classes A and B must have parent child relationship");
-  static_assert (std::is_base_of<gridCoreObject, B>::value, "classes must be inherited from gridCoreObject");
-  static_assert (std::is_base_of<gridCoreObject, A>::value, "classes must be inherited from gridCoreObject");
+  static_assert (std::is_base_of<coreObject, B>::value, "classes must be inherited from coreObject");
+  static_assert (std::is_base_of<coreObject, A>::value, "classes must be inherited from coreObject");
 public:
   objParamHelper ()
   {

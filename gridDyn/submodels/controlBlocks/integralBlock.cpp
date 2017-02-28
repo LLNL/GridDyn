@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "submodels/gridControlBlocks.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 integralBlock::integralBlock (const std::string &objName) : basicBlock (objName)
 {
@@ -28,7 +28,7 @@ integralBlock::integralBlock (double gain, const std::string &objName) : basicBl
   opFlags.set (use_state);
 }
 
-gridCoreObject *integralBlock::clone (gridCoreObject *obj) const
+coreObject *integralBlock::clone (coreObject *obj) const
 {
   integralBlock *nobj = cloneBase<integralBlock, basicBlock> (this, obj);
   if (nobj == nullptr)
@@ -41,28 +41,28 @@ gridCoreObject *integralBlock::clone (gridCoreObject *obj) const
 
 
 // initial conditions
-void integralBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void integralBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
   index_t loc = limiter_diff;
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
       m_state[loc] = iv;
       if (limiter_diff > 0)
         {
-          basicBlock::objectInitializeB (args, outputSet,fieldSet);
+          basicBlock::dynObjectInitializeB (inputs, desiredOutput,fieldSet);
         }
-      m_dstate_dt[loc] = K * (args[0] + bias);
+      m_dstate_dt[loc] = K * (inputs[0] + bias);
     }
   else
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     }
 
 }
 
 
 // residual
-void integralBlock::residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode)
+void integralBlock::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -70,12 +70,12 @@ void integralBlock::residElements (double input, double didt, const stateData *s
       return;
     }
   auto offset = offsets.getDiffOffset (sMode);
-  resid[offset] = (K * (input + bias) - sD->dstate_dt[offset]);
+  resid[offset] = (K * (input + bias) - sD.dstate_dt[offset]);
   basicBlock::residElements (input, didt, sD, resid, sMode);
 
 }
 
-void integralBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void integralBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   deriv[offset + limiter_diff ] = K * (input + bias);
@@ -86,7 +86,7 @@ void integralBlock::derivElements (double input, double didt, const stateData *s
 }
 
 
-void integralBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void integralBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if (isAlgebraicOnly (sMode))
     {
@@ -96,11 +96,11 @@ void integralBlock::jacElements (double input, double didt, const stateData *sD,
   //use the ad.assign Macro defined in basicDefs
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
   ad.assignCheck (offset, argLoc, K);
-  ad.assign (offset, offset, -sD->cj);
+  ad.assign (offset, offset, -sD.cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 
-double integralBlock::step (gridDyn_time ttime, double inputA)
+double integralBlock::step (coreTime ttime, double inputA)
 {
 
   double dt = ttime - prevTime;
@@ -138,7 +138,7 @@ void integralBlock::set (const std::string &param, double val, gridUnits::units_
     {
       if (val != 0)
         {
-          K = 1 / val;
+          K = 1.0 / val;
         }
     }
   else

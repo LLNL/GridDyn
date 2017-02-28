@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -67,7 +67,6 @@ public:
     genmodel_loc = 1, exciter_loc = 2, governor_loc = 3,pss_loc = 4, pset_loc=5, vset_loc=6, isoc_control=7,
   };
   static std::atomic<count_t> genCount;      //!< generator count
-  double baseVoltage = 120;             //!< [V] base voltage
 protected:
   double Qmax = kBigNum;              //!< [pu mbase] max steady state reactive power values for Power flow analysis
   double Qmin = -kBigNum;             //!< [pu mbase] min steady state reactive power values for Power flow analysis
@@ -76,7 +75,6 @@ protected:
   double participation = 1.0;          //!< [%]a participation factor used in auto allocating load.
   double vRegFraction = 1.0;                 //!< [%]  fraction of output reactive power to maintain voltage regulation
   double machineBasePower = 100;                          //!< MW the internal base power of the generator;
-  gridBus *bus = nullptr;                                               //!< pointer to the parent bus (usually just a cast of the parent object
   gridDynGenModel *genModel = nullptr;              //!< generator model
   gridDynExciter *ext = nullptr;                    //!< exciter model
   gridDynGovernor *gov = nullptr;                   //!< governor model
@@ -110,24 +108,21 @@ public:
   @param[in] dynModel  a string with the dynmodel description*/
   gridDynGenerator (dynModel_t dynModel, const std::string &objName = "gen_$");
   explicit gridDynGenerator (const std::string &objName = "gen_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
-  /** @brief destructor*/
-  virtual ~gridDynGenerator ();
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
 
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
-
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;       //for saving the state
-  virtual void guess (gridDyn_time ttime, double state[],double dstate_dt[], const solverMode &sMode) override;               //for initial setting of the state
-
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;       //for saving the state
+  virtual void guess (coreTime ttime, double state[],double dstate_dt[], const solverMode &sMode) override;               //for initial setting of the state
+  virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
 
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   /** @brief additional add function specific to subModels
   @param[in] a submodel to add 
   @throw unrecognizedObjectError is object is not valid*/
@@ -135,23 +130,25 @@ public:
 
   void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual void alert (gridCoreObject *object, int code) override;
-  virtual void algebraicUpdate (const IOdata &args,const stateData *sD, double update[],const solverMode &sMode, double alpha) override;
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[],const solverMode &sMode) override;
-  virtual IOdata getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual void alert (coreObject *object, int code) override;
+  virtual void algebraicUpdate (const IOdata &inputs,const stateData &sD, double update[],const solverMode &sMode, double alpha) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[],const solverMode &sMode) override;
+  virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
 
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
+
+  virtual void jacobianElements  (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck ( const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck ( const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
   /** @brief get the generator states
   @return a double pointer to the states*/
   double * getStates ()
@@ -168,8 +165,8 @@ public:
   {
     return Pset;
   }
-  virtual double getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-  virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual double getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual double getRealPower () const override;
   virtual double getReactivePower () const override;
   /** @brief function to set the generator capability curve
@@ -179,42 +176,42 @@ public:
   */
   virtual void setCapabilityCurve (std::vector<double> Ppts, std::vector<double> Qminpts, std::vector<double> Qmaxpts);
 
-  virtual IOdata predictOutputs (double ptime, const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual IOdata predictOutputs (coreTime predTime, const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
 
-  virtual double getAdjustableCapacityUp (gridDyn_time time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
-  virtual double getAdjustableCapacityDown (gridDyn_time time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityUp (coreTime time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
+  virtual double getAdjustableCapacityDown (coreTime time = maxTime) const override;       //get the available adjustment Up within the specified timeframe
 /** @brief get the maximum generation attainable in a specific amount of time
 @param[in] time  the time window to achieve the generation
 @return the max real power*/
-  virtual double getPmax (gridDyn_time time = maxTime) const;
+  virtual double getPmax (coreTime time = maxTime) const;
   /** @brief get the maximum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the max reactive power*/
-  virtual double getQmax (gridDyn_time time = maxTime,double Ptest = -kBigNum ) const;
+  virtual double getQmax (coreTime time = maxTime,double Ptest = -kBigNum ) const;
   /** @brief get the minimum real generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @return the max real power*/
-  virtual double getPmin (gridDyn_time time = maxTime) const;
+  virtual double getPmin (coreTime time = maxTime) const;
   /** @brief get the minimum reactive generation attainable in a specific amount of time
   @param[in] time  the time window to achieve the generation
   @param[in] Ptest the real power output corresponding to the desired attainable generation
   @return the min reactive power*/
-  virtual double getQmin (gridDyn_time time = maxTime, double Ptest = -kBigNum) const;
+  virtual double getQmin (coreTime time = maxTime, double Ptest = -kBigNum) const;
   /** @brief adjust the output generation by the specified amount
   @param[in] adjustment the value of the desired adjustment
   */
   virtual void powerAdjust (double adjustment);
-  virtual change_code powerFlowAdjust (const IOdata &args, unsigned long flags, check_level_t level) override;      //only applicable in pFlow
+  virtual change_code powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level) override;      //only applicable in pFlow
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual gridCoreObject * find (const std::string &object) const override;
-  virtual gridCoreObject * getSubObject (const std::string &type, index_t num) const override;
-  virtual double getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const;
-  virtual double getAngle (const stateData *sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const;
+  virtual coreObject * find (const std::string &object) const override;
+  virtual coreObject * getSubObject (const std::string &type, index_t num) const override;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *FreqOffset = nullptr) const;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *AngleOffset = nullptr) const;
 protected:
   virtual void updateFlags (bool dynOnly = false) override;
-  virtual double pSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode);
-  virtual double vSetControlUpdate(const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual double pSetControlUpdate(const IOdata &inputs, const stateData &sD, const solverMode &sMode);
+  virtual double vSetControlUpdate(const IOdata &inputs, const stateData &sD, const solverMode &sMode);
   virtual index_t pSetLocation(const solverMode &sMode);
   virtual index_t vSetLocation(const solverMode &sMode);
 
@@ -239,11 +236,11 @@ public:
   subModelInputs subInputs;
   subModelInputLocs subInputLocs;
 
-  virtual void generateSubModelInputs (const IOdata &args, const stateData *sD, const solverMode &sMode);
-  virtual void generateSubModelInputLocs (const IOlocs &argLocs, const stateData *sD, const solverMode &sMode);
+  virtual void generateSubModelInputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode);
+  virtual void generateSubModelInputLocs (const IOlocs &inputLocs, const stateData &sD, const solverMode &sMode);
 
   gridSubModel * replaceSubObject (gridSubModel *newObject, gridSubModel *oldObject,index_t newIndex);
-  void setRemoteBus (gridCoreObject *newRemoteBus);
+  void setRemoteBus (coreObject *newRemoteBus);
 
   void buildDynModel (dynModel_t dynModel);
   

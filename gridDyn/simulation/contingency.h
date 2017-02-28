@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 
 #include "workQueue.h"
 #include "core/objectOperatorInterface.h"
-#include "gridDynTypes.h"
+#include "gridDynDefinitions.h"
 #include <future>
 #include <vector>
 #include <memory>
@@ -86,8 +86,9 @@ const extraContingencyInfo emptyExtraInfo;
 */
 class contingency: public basicWorkBlock,objectOperatorInterface
 {
+private:
+	static std::atomic_int contingencyCount;         //!<static variable counting the number of created lines
 public:
-  static int contingencyCount;         //!<static variable counting the number of created lines
   std::string  name;			//!< contingency name
   int id;						//!< contingency id
   bool completed = false;		//!< boolean indicator if the contingency was run
@@ -136,11 +137,11 @@ public:
   void reset();
   void wait() const;
 
-  gridCoreObject *getObject() const override;
+  coreObject *getObject() const override;
 
-  void getObjects(std::vector<gridCoreObject *> &objects) const override;
+  void getObjects(std::vector<coreObject *> &objects) const override;
 
- void updateObject(gridCoreObject *newObj, object_update_mode mode = object_update_mode::match) override;
+ void updateObject(coreObject *newObj, object_update_mode mode = object_update_mode::match) override;
 
   std::shared_ptr<contingency> clone(std::shared_ptr<contingency> con=nullptr) const;
 

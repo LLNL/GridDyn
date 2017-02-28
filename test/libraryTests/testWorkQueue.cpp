@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -20,6 +20,9 @@
 
 BOOST_AUTO_TEST_SUITE(workQueue_tests)
 
+//some tests only make sense if multithreading is enabled
+
+#ifndef DISABLE_MULTITHREADING
 BOOST_AUTO_TEST_CASE(workQueue_test1)
 {
 	int check = workQueue::getWorkerCount();
@@ -41,11 +44,11 @@ BOOST_AUTO_TEST_CASE(workQueue_test1)
 	wq = workQueue::instance(5);
 	check = workQueue::getWorkerCount();
 	BOOST_CHECK(check == 5);
-	std::vector<decltype(make_workBlock(fk))> blocks(10);
+	std::vector<decltype(make_shared_workBlock(fk))> blocks(10);
 	std::vector<std::shared_ptr<basicWorkBlock>> bblocks(10);
 	for (size_t kk = 0; kk < 10; ++kk)
 	{
-		blocks[kk] = make_workBlock(fk);
+		blocks[kk] = make_shared_workBlock(fk);
 		bblocks[kk] = blocks[kk];
 	}
 	wq->addWorkBlock(bblocks);
@@ -61,13 +64,15 @@ BOOST_AUTO_TEST_CASE(workQueue_test1)
 	wq->destroyWorkerQueue();
 }
 
+#endif
+
 BOOST_AUTO_TEST_CASE(workQueue_test2)
 {
 	//Test a zero worker count
 	auto wq = workQueue::instance(0);
 	std::function<void()> fk = [] {std::this_thread::sleep_for(std::chrono::milliseconds(110));};
 	
-	auto b1 = make_workBlock(fk);
+	auto b1 = make_shared_workBlock(fk);
 	auto start_t = std::chrono::high_resolution_clock::now();
 	wq->addWorkBlock(b1);
 	auto stop_t = std::chrono::high_resolution_clock::now();
@@ -92,7 +97,7 @@ BOOST_AUTO_TEST_CASE(workQueue_test2)
 	BOOST_CHECK(elapsed_time.count() >= 0.125);
 
 	wq->destroyWorkerQueue();
-
+#ifndef DISABLE_MULTITHREADING
 	wq = workQueue::instance(1);
 	b1->reset();
 	start_t = std::chrono::high_resolution_clock::now();
@@ -102,8 +107,10 @@ BOOST_AUTO_TEST_CASE(workQueue_test2)
 	// verifying the block was run immediately
 	BOOST_CHECK(elapsed_time.count() < 0.05);
 	wq->destroyWorkerQueue();
+#endif
 }
 
+#ifndef DISABLE_MULTITHREADING
 BOOST_AUTO_TEST_CASE(workQueue_test3)
 {
 	//Test a queue priority mechanisms
@@ -120,7 +127,7 @@ BOOST_AUTO_TEST_CASE(workQueue_test3)
 	auto mp = [&order] {order.push_back(2); };
 	auto lp = [&order] {order.push_back(3); };
 	wq->setPriorityRatio(3);
-	wq->addWorkBlock(b1,workQueue::workPriority::high);
+	wq->addWorkBlock(std::move(b1),workQueue::workPriority::high);
 	
 	wq->addWorkBlock(make_workBlock(lp), workQueue::workPriority::low);
 	wq->addWorkBlock(make_workBlock(lp), workQueue::workPriority::low);
@@ -155,4 +162,7 @@ BOOST_AUTO_TEST_CASE(workQueue_test3)
 	}
 	BOOST_CHECK_MESSAGE(cdiff == 0, "Execution out of order");
 }
+
+#endif
+
 BOOST_AUTO_TEST_SUITE_END()

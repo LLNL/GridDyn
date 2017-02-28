@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,10 +13,9 @@
 
 #include "loadModels/motorLoad.h"
 #include "gridBus.h"
-#include "objectFactory.h"
 #include "vectorOps.hpp"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include <iostream>
 
 using namespace gridUnits;
@@ -30,7 +29,7 @@ motorLoad3::motorLoad3 (const std::string &objName) : motorLoad (objName)
 
 }
 
-gridCoreObject *motorLoad3::clone (gridCoreObject *obj) const
+coreObject *motorLoad3::clone (coreObject *obj) const
 {
   motorLoad3 *ld = cloneBase<motorLoad3, motorLoad> (this, obj);
   if (ld == nullptr)
@@ -42,7 +41,7 @@ gridCoreObject *motorLoad3::clone (gridCoreObject *obj) const
 }
 
 
-void motorLoad3::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void motorLoad3::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
 //setup the parameters
   x0 = x + xm;
@@ -50,13 +49,13 @@ void motorLoad3::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags
   T0p = (x1 + xm) / (m_baseFreq * r1);
   scale = mBase / systemBasePower;
   m_state.resize (5,0);
-  if (opFlags.test (init_transient))
+  if (opFlags[init_transient])
     {
       m_state[2] = init_slip;
     }
-  else if (P > -kHalfBigNum)
+  else if (Pmot > -kHalfBigNum)
     {
-      m_state[2] = computeSlip (P / scale);
+      m_state[2] = computeSlip (Pmot / scale);
     }
   else
     {
@@ -64,8 +63,6 @@ void motorLoad3::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags
       opFlags.set (init_transient);
     }
 
-  Vpqmin = -1.0;
-  Vpqmax = kBigNum;
   gridLoad::pFlowObjectInitializeA (time0, flags);
   converge ();
 
@@ -81,12 +78,11 @@ void motorLoad3::converge ()
   double slip = m_state[2];
   double Qtest = qPower (V, m_state[2]);
   double im,ir;
-  double Vr,Vm;
   double er,em;
 
-  Vr = -V *Vcontrol* sin (theta);
-  Vm = V * Vcontrol * cos (theta);
-  solve2x2 (Vr,Vm,Vm,-Vr,P / scale,Qtest,ir,im);
+  double Vr = -V *Vcontrol* sin (theta);
+  double Vm = V * Vcontrol * cos (theta);
+  solve2x2 (Vr,Vm,Vm,-Vr,Pmot / scale,Qtest,ir,im);
   double err = 10;
   double slipp = slip;
   int ccnt = 0;
@@ -98,7 +94,7 @@ void motorLoad3::converge ()
       em = Vm - r * im - xp * ir;
       slipp = (er + (x0 - xp) * im) / T0p / m_baseFreq / em;
       dslip = slipp - slip;
-      if (P > 0)
+      if (Pmot > 0)
         {
           if (slipp < 0)
             {
@@ -133,16 +129,16 @@ void motorLoad3::converge ()
 
 }
 
-void motorLoad3::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void motorLoad3::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
 
 }
 
-void motorLoad3::dynObjectInitializeB (const IOdata &args, const IOdata & /*outputSet*/)
+void motorLoad3::dynObjectInitializeB (const IOdata &inputs, const IOdata & /*desiredOutput*/, IOdata &/*fieldSet*/)
 {
-  if (opFlags.test (init_transient))
+  if (opFlags[init_transient])
     {
-      derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+      derivative (inputs, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
     }
 
 }
@@ -202,7 +198,7 @@ void motorLoad3::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      gridLoad::set (param, val);
+      motorLoad::set (param, val);
     }
 
 }
@@ -222,26 +218,26 @@ void motorLoad3::set (const std::string &param, double val, gridUnits::units_t u
 
 }
 
-void motorLoad3::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void motorLoad3::setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
-  gridSecondary::setState (ttime,state,dstate_dt,sMode);
+  gridObject::setState (ttime,state,dstate_dt,sMode);
 }
 
-void motorLoad3::guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode)
+void motorLoad3::guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode)
 {
-  gridSecondary::guess (ttime,state,dstate_dt,sMode);
+  gridObject::guess (ttime,state,dstate_dt,sMode);
 }
 
 // residual
-void motorLoad3::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void motorLoad3::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
       Lp Loc = offsets.getLocations (sD, resid, sMode, this);
 
 
-      double V = args[voltageInLocation];
-      double theta = args[angleInLocation];
+      double V = inputs[voltageInLocation];
+      double theta = inputs[angleInLocation];
       const double *gm = Loc.algStateLoc;
       const double *gmd = Loc.diffStateLoc;
       const double *gmp = Loc.dstateLoc;
@@ -263,24 +259,24 @@ void motorLoad3::residual (const IOdata &args, const stateData *sD, double resid
         {
           return;
         }
-      derivative (args, sD, resid, sMode);
+      derivative (inputs, sD, resid, sMode);
       //Get the exciter field
 
       // delta
       rvd[0] -= gmp[0];
       rvd[1] -= gmp[1];
       rvd[2] -= gmp[2];
-      // printf("t=%f:motor state a1=%f a2=%f, d1=%f, d2=%f,d3=%f\n", sD->time, gm[0], gm[1], gmd[0], gmd[1], gmd[2]);
-      // printf("t=%f:motor resid a1=%e a2=%e, d1=%e, d2=%e,d3=%e\n",sD->time,rva[0],rva[1],rvd[0],rvd[1],rvd[2]);
-      // printf("t=%f, V=%f, ir=%f, im=%f, r1=%e, r2=%e\n",sD->time,V,gm[0],gm[1],rva[0],rva[1]);
+      // printf("t=%f:motor state a1=%f a2=%f, d1=%f, d2=%f,d3=%f\n", sD.time, gm[0], gm[1], gmd[0], gmd[1], gmd[2]);
+      // printf("t=%f:motor resid a1=%e a2=%e, d1=%e, d2=%e,d3=%e\n",sD.time,rva[0],rva[1],rvd[0],rvd[1],rvd[2]);
+      // printf("t=%f, V=%f, ir=%f, im=%f, r1=%e, r2=%e\n",sD.time,V,gm[0],gm[1],rva[0],rva[1]);
     }
   else
     {
       auto offset = offsets.getAlgOffset (sMode);
-      const double V = args[voltageInLocation];
-      double theta = args[angleInLocation];
+      const double V = inputs[voltageInLocation];
+      double theta = inputs[angleInLocation];
 
-      const double *gm = sD->state + offset;
+      const double *gm = sD.state + offset;
       double *rv = resid + offset;
       double Vr, Vm;
 
@@ -295,7 +291,7 @@ void motorLoad3::residual (const IOdata &args, const stateData *sD, double resid
       double slip = gm[2];
       // printf("angle=%f, slip=%f\n",theta,slip);
       // slip
-      if (opFlags.test (init_transient))
+      if (opFlags[init_transient])
         {
           rv[2] = slip - m_state[2];
         }
@@ -315,7 +311,7 @@ void motorLoad3::residual (const IOdata &args, const stateData *sD, double resid
 
 void motorLoad3::getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
 {
-  std::string prefix2 = prefix + name;
+  std::string prefix2 = prefix + getName();
   if (isDynamic (sMode))
     {
       if (isAlgebraicOnly (sMode))
@@ -343,25 +339,25 @@ void motorLoad3::getStateName (stringVec &stNames, const solverMode &sMode, cons
 }
 
 
-void motorLoad3::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void motorLoad3::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
   stateData sD(ttime,m_state.data());
-  derivative (args, &sD, m_dstate_dt.data (), cLocalSolverMode);
+  derivative (inputs, sD, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[2] += dt * m_dstate_dt[2];
   m_state[3] += dt * m_dstate_dt[3];
   m_state[4] += dt * m_dstate_dt[4];
   prevTime = ttime;
-  updateCurrents (args, &sD, cLocalSolverMode);
+  updateCurrents (inputs, sD, cLocalSolverMode);
 }
 
-void motorLoad3::updateCurrents (const IOdata &args, const stateData *sD, const solverMode &sMode)
+void motorLoad3::updateCurrents (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
 
 
-  Lp Loc = offsets.getLocations (sD, const_cast<double *> (sD->state), sMode, this);
-  double V = args[voltageInLocation];
-  double theta = args[angleInLocation];
+  Lp Loc = offsets.getLocations (sD, const_cast<double *> (sD.state), sMode, this);
+  double V = inputs[voltageInLocation];
+  double theta = inputs[angleInLocation];
 
   double vr, vm;
   vr = -V*Vcontrol*sin (theta);
@@ -371,7 +367,7 @@ void motorLoad3::updateCurrents (const IOdata &args, const stateData *sD, const 
 
 }
 
-void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, double deriv[], const solverMode &sMode)
+void motorLoad3::derivative (const IOdata & /*inputs*/, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
   const double *ast = Loc.algStateLoc;
@@ -380,7 +376,7 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
   //Get the exciter field
   double slip = dst[0];
 
-  //if (sD->time>=1.0)
+  //if (sD.time>=1.0)
   // {
   //  mechPower(slip);
   //}
@@ -395,7 +391,7 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
       double Te = dst[1] * ast[0] + dst[2] * ast[1];
       dv[0] = (mechPower (slip) - Te) / (2 * H);
     }
-  // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD->time, slip,mechPower(slip), Te,dv[0] );
+  // printf("t=%f, slip=%f mp=%f, te=%f, dslip=%e\n", sD.time, slip,mechPower(slip), Te,dv[0] );
   // Edp and Eqp
   dv[1] = m_baseFreq * slip * dst[2] - (dst[1] + (x0 - xp) * ast[1]) / T0p;
   dv[2] = -m_baseFreq * slip * dst[1] - (dst[2] - (x0 - xp) * ast[0]) / T0p;
@@ -403,11 +399,11 @@ void motorLoad3::derivative (const IOdata & /*args*/, const stateData *sD, doubl
 }
 
 
-void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad3::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   index_t refAlg,refDiff;
   const double *gm,*dst;
-  double cj = sD->cj;
+  double cj = sD.cj;
   if  (isDynamic (sMode))
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -422,15 +418,15 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matr
       auto offset = offsets.getAlgOffset (sMode);
       refAlg = offset;
       refDiff = offset + 2;
-      gm = sD->state + offset;
-      dst = sD->state + offset + 2;
+      gm = sD.state + offset;
+      dst = sD.state + offset + 2;
       cj = 0;
     }
 
-  double V = args[voltageInLocation];
-  double theta = args[angleInLocation];
-  auto VLoc = argLocs[voltageInLocation];
-  auto TLoc = argLocs[angleInLocation];
+  double V = inputs[voltageInLocation];
+  double theta = inputs[angleInLocation];
+  auto VLoc = inputLocs[voltageInLocation];
+  auto TLoc = inputLocs[angleInLocation];
 
   double Vr = -V *Vcontrol* sin (theta);
   double Vm = V * Vcontrol * cos (theta);
@@ -517,13 +513,13 @@ void motorLoad3::jacobianElements (const IOdata &args, const stateData *sD, matr
 
 }
 
-void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void motorLoad3::outputPartialDerivatives (const IOdata &inputs, const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
 
 
   auto refAlg = offsets.getAlgOffset (sMode);
-  double V = args[voltageInLocation];
-  double theta = args[angleInLocation];
+  double V = inputs[voltageInLocation];
+  double theta = inputs[angleInLocation];
 
   double vr, vm;
   vr = -V*Vcontrol*sin (theta);
@@ -544,13 +540,18 @@ void motorLoad3::outputPartialDerivatives (const IOdata &args, const stateData *
 
 }
 
-void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+count_t motorLoad3::outputDependencyCount(index_t /*num*/, const solverMode & /*sMode*/) const
+{
+	return 2;
+}
+
+void motorLoad3::ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD, sMode, this);
 
-  double V = args[voltageInLocation];
-  double angle = args[angleInLocation];
+  double V = inputs[voltageInLocation];
+  double angle = inputs[angleInLocation];
   double vr, vm;
   vr = -V*Vcontrol*sin (angle);
   vm = V * Vcontrol * cos (angle);
@@ -563,10 +564,10 @@ void motorLoad3::ioPartialDerivatives (const IOdata &args, const stateData *sD, 
   //P=vr*m_state[0] + vm*m_state[1];
 
   //Q=vm*m_state[0] - vr*m_state[1];
-  ad.assignCheckCol (PoutLocation, argLocs[angleInLocation], -ir * vm + vr * im);
-  ad.assignCheckCol (PoutLocation, argLocs[voltageInLocation], ir * vr / V + vm * im / V);
-  ad.assignCheckCol (QoutLocation, argLocs[angleInLocation], vr * ir + vm * im);
-  ad.assignCheckCol (QoutLocation, argLocs[voltageInLocation], vm * ir / V - vr * im / V);
+  ad.assignCheckCol (PoutLocation, inputLocs[angleInLocation], -ir * vm + vr * im);
+  ad.assignCheckCol (PoutLocation, inputLocs[voltageInLocation], ir * vr / V + vm * im / V);
+  ad.assignCheckCol (QoutLocation, inputLocs[angleInLocation], vr * ir + vm * im);
+  ad.assignCheckCol (QoutLocation, inputLocs[voltageInLocation], vm * ir / V - vr * im / V);
 
 }
 
@@ -639,7 +640,7 @@ index_t motorLoad3::findIndex (const std::string &field, const solverMode &sMode
 }
 
 
-void motorLoad3::rootTest (const IOdata & /*args*/, const stateData *sD, double roots[], const solverMode &sMode)
+void motorLoad3::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   auto ro = offsets.getRootOffset (sMode);
@@ -647,7 +648,7 @@ void motorLoad3::rootTest (const IOdata & /*args*/, const stateData *sD, double 
     {
       double Te = Loc.diffStateLoc[1] * Loc.algStateLoc[0] + Loc.diffStateLoc[2] * Loc.algStateLoc[1];
       roots[ro] = Te - mechPower (1.0);
-     // printf ("[%f]look power =%f\n",sD->time,roots[ro]);
+     // printf ("[%f]look power =%f\n",sD.time,roots[ro]);
     }
   else
     {
@@ -657,7 +658,7 @@ void motorLoad3::rootTest (const IOdata & /*args*/, const stateData *sD, double 
     }
 }
 
-void motorLoad3::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void motorLoad3::rootTrigger (coreTime /*ttime*/, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!rootMask[offsets.getRootOffset (sMode)])
     {
@@ -665,7 +666,7 @@ void motorLoad3::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const 
     }
   if (opFlags[stalled])
     {
-      if (args[voltageInLocation] > 0.5)
+      if (inputs[voltageInLocation] > 0.5)
         {
           opFlags.reset (stalled);
           alert (this, JAC_COUNT_INCREASE);
@@ -676,7 +677,7 @@ void motorLoad3::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const 
     {
       opFlags.set (stalled);
       alert (this, JAC_COUNT_DECREASE);
-		if (args[voltageInLocation]<0.25)
+		if (inputs[voltageInLocation]<0.25)
 		{
 			alert(this, POTENTIAL_FAULT_CHANGE);
 		}
@@ -684,7 +685,7 @@ void motorLoad3::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const 
     }
 }
 
-change_code motorLoad3::rootCheck (const IOdata & /*args*/, const stateData *sD, const solverMode &sMode, check_level_t /*level*/)
+change_code motorLoad3::rootCheck (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
 {
   if (opFlags[stalled])
     {
@@ -710,9 +711,8 @@ double motorLoad3::getRealPower () const
       v = bus->getVoltage ();
       ang = bus->getAngle ();
     }
-  double vr,vm;
-  vr = -v*Vcontrol*sin (ang);
-  vm = v * Vcontrol * cos (ang);
+  double vr = -v*Vcontrol*sin (ang);
+  double vm = v * Vcontrol * cos (ang);
   double Ptemp = vr * m_state[0] + vm * m_state[1];
   return Ptemp * scale;
 }
@@ -725,45 +725,43 @@ double motorLoad3::getReactivePower () const
       v = bus->getVoltage ();
       ang = bus->getAngle ();
     }
-  double vr, vm;
-  vr = -v*Vcontrol*sin (ang);
-  vm = v * Vcontrol * cos (ang);
+  double vr = -v*Vcontrol*sin (ang);
+  double vm = v * Vcontrol * cos (ang);
   double Qtemp = vm * m_state[0] - vr * m_state[1];
 
   return Qtemp * scale;
 }
 
-double motorLoad3::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double motorLoad3::getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-  const double V = args[voltageInLocation];
-  double A = args[angleInLocation];
-  double Vr, Vm;
-
-  Vr = -V *Vcontrol* sin (A);
-  Vm = V * Vcontrol * cos (A);
-
-
-  auto offset = offsets.getAlgOffset (sMode);
-  double im = sD->state[offset + 1];
-  double ir = sD->state[offset];
-  double Ptemp = Vr * ir + Vm * im;
-
-
-  return Ptemp * scale;
-}
-
-double motorLoad3::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
-{
-  const double V = args[voltageInLocation];
-  double A = args[angleInLocation];
+  const double V = inputs[voltageInLocation];
+  double A = inputs[angleInLocation];
 
   double Vr = -V *Vcontrol* sin (A);
   double Vm = V * Vcontrol * cos (A);
 
 
   auto offset = offsets.getAlgOffset (sMode);
-  double im = sD->state[offset + 1];
-  double ir = sD->state[offset];
+  double im = sD.state[offset + 1];
+  double ir = sD.state[offset];
+  double Ptemp = Vr * ir + Vm * im;
+
+
+  return Ptemp * scale;
+}
+
+double motorLoad3::getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
+{
+  const double V = inputs[voltageInLocation];
+  double A = inputs[angleInLocation];
+
+  double Vr = -V *Vcontrol* sin (A);
+  double Vm = V * Vcontrol * cos (A);
+
+
+  auto offset = offsets.getAlgOffset (sMode);
+  double im = sD.state[offset + 1];
+  double ir = sD.state[offset];
   double Qtemp = Vm * ir - Vr * im;
 
   return Qtemp * scale;
@@ -773,9 +771,9 @@ double motorLoad3::getReactivePower (const IOdata &args, const stateData *sD, co
 double motorLoad3::getRealPower (double V) const
 {
   double  ang = (bus) ? bus->getAngle () : 0.0;
-  double vr, vm;
-  vr = -V*Vcontrol*sin (ang);
-  vm = V * Vcontrol * cos (ang);
+
+  double vr = -V*Vcontrol*sin (ang);
+  double vm = V * Vcontrol * cos (ang);
   double Ptemp = vr * m_state[0] + vm * m_state[1];
   return Ptemp * scale;
 }
@@ -784,9 +782,8 @@ double motorLoad3::getReactivePower (double V) const
 {
   double  ang = (bus) ? bus->getAngle () : 0.0;
 
-  double vr, vm;
-  vr = -V*Vcontrol*sin (ang);
-  vm = V * Vcontrol * cos (ang);
+  double vr = -V*Vcontrol*sin (ang);
+  double vm = V * Vcontrol * cos (ang);
   double Qtemp = vm * m_state[0] - vr * m_state[1];
 
   return Qtemp * scale;

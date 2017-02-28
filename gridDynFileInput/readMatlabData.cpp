@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,12 +16,14 @@
 #include "readerHelper.h"
 
 
-#include "stringOps.h"
+#include "stringConversion.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-void loadMFile(gridCoreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
+using namespace stringOps;
+
+void loadMFile(coreObject *parentObject, const std::string &filename, const basicReaderInfo &bri)
 {
 	std::ifstream infile(filename.c_str(), std::ios::in);
 	std::stringstream strStream;
@@ -44,7 +46,7 @@ void loadMFile(gridCoreObject *parentObject, const std::string &filename, const 
 			func = 0;
 		}
 		size_t A = filetext.find_first_of('=', func + 9);
-		std::string bname = trim(filetext.substr(func + 9, A - func - 9));
+		std::string bname = stringOps::trim(filetext.substr(func + 9, A - func - 9));
 		
 		size_t B = filetext.find(bname + ".bus");
 		if (B != std::string::npos)
@@ -143,14 +145,14 @@ void readMatlabArray(const std::string &text, size_t start, mArray &matA)
 	while (C != std::string::npos)
 	{
 		std::string line = Adat.substr(D, C - D);
-		trimString(line);
+		stringOps::trimString(line);
 		if (line.empty())
 		{
 			D = C + 1;
 			C = Adat.find_first_of(";]", D);
 			continue;
 		}
-		stringVec Tline = splitline(line, "\t\n ",delimiter_compression::on);
+		stringVec Tline = splitline(line, whiteSpaceCharacters,delimiter_compression::on);
 		M.resize(Tline.size());
 		size_t offset = 0;
 		for (size_t kk = 0; kk < Tline.size(); ++kk)
@@ -165,7 +167,7 @@ void readMatlabArray(const std::string &text, size_t start, mArray &matA)
 				offset++;
 				continue;
 			}
-			M[kk - offset] = doubleRead(Tline[kk],0.0);
+			M[kk - offset] = numeric_conversion(Tline[kk],0.0);
 		}
 		M.resize(Tline.size() - offset);
 		matA.push_back(M);

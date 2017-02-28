@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -26,7 +26,7 @@ deadbandBlock::deadbandBlock (double db, const std::string &objName) : basicBloc
   opFlags.set (use_state);
 }
 
-gridCoreObject *deadbandBlock::clone (gridCoreObject *obj) const
+coreObject *deadbandBlock::clone (coreObject *obj) const
 {
   deadbandBlock *nobj;
   if (obj == nullptr)
@@ -53,13 +53,13 @@ gridCoreObject *deadbandBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void deadbandBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void deadbandBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  basicBlock::objectInitializeA (time0,flags);
+  basicBlock::dynObjectInitializeA (time0,flags);
   if (deadbandLow < deadbandHigh)     //this means it was set to some value
     {
       opFlags[has_roots] = true;
-      offsets.local->local.algRoots++;
+      offsets.local().local.algRoots++;
       opFlags.set (has_alg_roots);
       opFlags[uses_deadband] = true;
     }
@@ -74,17 +74,17 @@ void deadbandBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
 
 }
 // initial conditions
-void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void deadbandBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
 
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
       m_state[limiter_alg] = deadbandLevel;
-      rootCheck (args,nullptr,cLocalSolverMode, check_level_t::reversable_only);
-      m_state[limiter_alg] = K * computeValue (args[0] + bias);
+      rootCheck (inputs,emptyStateData,cLocalSolverMode, check_level_t::reversable_only);
+      m_state[limiter_alg] = K * computeValue (inputs[0] + bias);
       if (limiter_alg > 0)
         {
-          basicBlock::rootCheck (args,nullptr,cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (inputs,emptyStateData,cLocalSolverMode, check_level_t::reversable_only);
         }
     }
 
@@ -92,7 +92,7 @@ void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
     {
       if (limiter_alg > 0)
         {
-          basicBlock::rootCheck (args, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
         }
       dbstate = deadbandstate_t::normal;
       double ival = m_state[limiter_alg] / K;
@@ -142,7 +142,7 @@ void deadbandBlock::objectInitializeB (const IOdata &args, const IOdata &outputS
 
 }
 
-double deadbandBlock::computeValue (double input)
+double deadbandBlock::computeValue (double input) const
 {
   double out = input;
   switch (dbstate)
@@ -191,7 +191,7 @@ double deadbandBlock::computeValue (double input)
   return out;
 }
 
-double deadbandBlock::computeDoutDin (double input)
+double deadbandBlock::computeDoutDin (double input) const
 {
   double out = 0.0;
   switch (dbstate)
@@ -229,9 +229,9 @@ double deadbandBlock::computeDoutDin (double input)
     }
   return out;
 }
-double deadbandBlock::step (gridDyn_time ttime, double input)
+double deadbandBlock::step (coreTime ttime, double input)
 {
-  rootCheck ({ input }, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+  rootCheck ({ input }, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
   m_state[limiter_alg] = K * computeValue (input + bias);
   if (limiter_alg > 0)
     {
@@ -242,11 +242,11 @@ double deadbandBlock::step (gridDyn_time ttime, double input)
       prevTime = ttime;
       m_output = m_state[0];
     }
-
+ // printf("deadband input=%f, step out=%f, check out =%f\n",input, m_state[0], m_state[limiter_alg]);
   return m_state[0];
 }
 
-void deadbandBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void deadbandBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   if (opFlags[differential_input])
     {
@@ -261,14 +261,14 @@ void deadbandBlock::derivElements (double input, double didt, const stateData *s
     }
 }
 
-void deadbandBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void deadbandBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   if (!opFlags[differential_input])
     {
       auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
       double ival = input + bias;
       update[offset] = K * computeValue (ival);
-      //printf("db %f intput=%f val=%f dbstate=%d\n", sD->time, ival, update[offset], static_cast<int>(dbstate));
+      //printf("db %f intput=%f val=%f dbstate=%d\n", sD.time, ival, update[offset], static_cast<int>(dbstate));
       if (limiter_alg > 0)
         {
           return basicBlock::algElements (input, sD, update, sMode);
@@ -277,7 +277,7 @@ void deadbandBlock::algElements (double input, const stateData *sD, double updat
 }
 
 
-void deadbandBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void deadbandBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((!opFlags[differential_input])&& (hasAlgebraic (sMode)))
     {
@@ -297,12 +297,12 @@ void deadbandBlock::jacElements (double input, double didt, const stateData *sD,
   else if ((opFlags[differential_input]) && (hasDifferential (sMode)))
     {
       auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
-      ad.assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD.cj);
       double dido = K * computeDoutDin (input + bias);
 
       if (argLoc != kNullLocation)
         {
-          ad.assign (offset, argLoc, dido * sD->cj);
+          ad.assign (offset, argLoc, dido * sD.cj);
         }
 
       if (limiter_diff > 0)
@@ -313,18 +313,18 @@ void deadbandBlock::jacElements (double input, double didt, const stateData *sD,
 }
 
 
-void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double root[], const solverMode &sMode)
+void deadbandBlock::rootTest (const IOdata &inputs, const stateData &sD, double root[], const solverMode &sMode)
 {
 
   if (limiter_alg + limiter_diff > 0)
     {
-      basicBlock::rootTest (args,sD,root,sMode);
+      basicBlock::rootTest (inputs,sD,root,sMode);
     }
   if (opFlags[uses_deadband])
     {
       int rootOffset = offsets.getRootOffset (sMode) + limiter_alg + limiter_diff;
 
-      double ival = args[0] + bias;
+      double ival = inputs[0] + bias;
       // double prevInput = ival;
       switch (dbstate)
         {
@@ -338,21 +338,21 @@ void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double ro
         case deadbandstate_t::outside:
           if (opFlags[dbtrigger_high])
             {
-              root[rootOffset] = ival - resetHigh;
+              root[rootOffset] = ival - resetHigh+tolerance;
             }
           else
             {
-              root[rootOffset] = resetLow - ival;
+              root[rootOffset] = resetLow - ival+tolerance;
             }
           break;
         case deadbandstate_t::shifted:
           if (opFlags[dbtrigger_high])
             {
-              root[rootOffset] = ival - deadbandHigh;
+              root[rootOffset] = ival - deadbandHigh+tolerance;
             }
           else
             {
-              root[rootOffset] = deadbandLow - ival;
+              root[rootOffset] = deadbandLow - ival+tolerance;
             }
           break;
           break;
@@ -360,21 +360,21 @@ void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double ro
         case deadbandstate_t::rampup:
           if (opFlags[dbtrigger_high])
             {
-              root[rootOffset] = std::min (deadbandHigh + rampUpband - ival, ival - deadbandHigh);
+              root[rootOffset] = std::min (deadbandHigh + rampUpband - ival, ival - deadbandHigh)+tolerance;
             }
           else
             {
-              root[rootOffset] = std::min (deadbandLow - ival, ival - deadbandLow - rampUpband);
+              root[rootOffset] = std::min (deadbandLow - ival, ival - deadbandLow - rampUpband)+tolerance;
             }
           break;
         case deadbandstate_t::rampdown:
           if (opFlags[dbtrigger_high])
             {
-              root[rootOffset] = std::min (ival - resetHigh - rampDownband, resetHigh - ival);
+              root[rootOffset] = std::min (ival - resetHigh - rampDownband, resetHigh - ival)+tolerance;
             }
           else
             {
-              root[rootOffset] = std::min (ival - resetLow, resetLow + rampDownband - ival);
+              root[rootOffset] = std::min (ival - resetLow, resetLow + rampDownband - ival)+tolerance;
             }
           break;
         }
@@ -384,22 +384,22 @@ void deadbandBlock::rootTest (const IOdata &args, const stateData *sD, double ro
 }
 
 
-void deadbandBlock::rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void deadbandBlock::rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   auto rootOffset = offsets.getRootOffset (sMode);
   if (limiter_alg + limiter_diff > 0)
     {
       if (rootMask[rootOffset])
         {
-          basicBlock::rootTrigger (ttime, args, rootMask, sMode);
+          basicBlock::rootTrigger (ttime, inputs, rootMask, sMode);
         }
       else if (rootMask[rootOffset + limiter_alg + limiter_diff - 1])
         {
-          basicBlock::rootTrigger (ttime, args, rootMask, sMode);
+          basicBlock::rootTrigger (ttime, inputs, rootMask, sMode);
         }
       rootOffset += limiter_alg + limiter_diff;
     }
-
+ // auto cstate = dbstate;
   if (opFlags[uses_deadband])
     {
 
@@ -463,22 +463,28 @@ void deadbandBlock::rootTrigger (gridDyn_time ttime, const IOdata &args, const s
         {
           opFlags.reset (dbtrigger_high);
         }
+	  m_state[limiter_alg] = computeValue(prevInput);
+	 // if (dbstate != cstate)
+	 // {
+	//	  printf("rt--%f, %d::change deadband state from %d to %d\n", static_cast<double>(ttime), getUserID(), static_cast<int>(cstate), static_cast<int>(dbstate));
+	 // }
     }
+  
 }
 
-change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t /*level*/)
+
+change_code deadbandBlock::rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
 {
   change_code ret = change_code::no_change;
   auto cstate = dbstate;
   if (opFlags[uses_deadband])
     {
-      double ival = args[0] + bias;
+      double ival = inputs[0] + bias;
       switch (dbstate)
         {
         case deadbandstate_t::normal:
-          if (std::min (deadbandHigh - ival, ival - deadbandLow) < 0)
+          if (std::min (deadbandHigh - ival, ival - deadbandLow) < -tolerance)
             {
-              ret = change_code::parameter_change;
               if (opFlags[uses_shiftedoutput])
                 {
                   dbstate = deadbandstate_t::shifted;
@@ -491,7 +497,7 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
                 {
                   dbstate = deadbandstate_t::outside;
                 }
-              if (ival > deadbandHigh)
+              if (ival >= deadbandHigh)
                 {
                   opFlags.set (dbtrigger_high);
                 }
@@ -511,7 +517,6 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
                       if (ival < resetHigh - rampDownband)
                         {
                           dbstate = deadbandstate_t::normal;
-                          ret = change_code::parameter_change;
                         }
                       else
                         {
@@ -521,7 +526,6 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
                   else
                     {
                       dbstate = deadbandstate_t::normal;
-                      ret = change_code::parameter_change;
                     }
                 }
             }
@@ -534,7 +538,6 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
                       if (ival > resetLow + rampDownband)
                         {
                           dbstate = deadbandstate_t::normal;
-                          ret = change_code::parameter_change;
                         }
                       else
                         {
@@ -544,40 +547,37 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
                   else
                     {
                       dbstate = deadbandstate_t::normal;
-                      ret = change_code::parameter_change;
                     }
                 }
             }
           break;
         case deadbandstate_t::shifted:
-          if ((ival < deadbandHigh)&&(ival > deadbandLow))
+          if ((ival < deadbandHigh-tolerance)&&(ival > deadbandLow+tolerance))
             {
               dbstate = deadbandstate_t::normal;
-              ret = change_code::parameter_change;
             }
           break;
 
         case deadbandstate_t::rampup:
           if (opFlags[dbtrigger_high])
             {
-              if (ival > deadbandHigh + rampUpband)
+              if (ival > deadbandHigh + rampUpband+tolerance)
                 {
                   dbstate = deadbandstate_t::outside;
 
                 }
-              else if (ival < deadbandHigh)
+              else if (ival < deadbandHigh-tolerance)
                 {
                   dbstate = deadbandstate_t::normal;
-                  ret = change_code::parameter_change;
                 }
             }
           else
             {
-              if (ival < deadbandLow - rampUpband)
+              if (ival < deadbandLow - rampUpband-tolerance)
                 {
                   dbstate = deadbandstate_t::outside;
                 }
-              else if (ival > deadbandLow)
+              else if (ival > deadbandLow+tolerance)
                 {
                   dbstate = deadbandstate_t::normal;
                   ret = change_code::parameter_change;
@@ -587,41 +587,44 @@ change_code deadbandBlock::rootCheck (const IOdata &args, const stateData *sD, c
         case deadbandstate_t::rampdown:
           if (opFlags[dbtrigger_high])
             {
-              if (ival > deadbandHigh + rampDownband)
+              if (ival > deadbandHigh + rampDownband+tolerance)
                 {
                   dbstate = deadbandstate_t::outside;
 
                 }
-              else if (ival < deadbandHigh)
+              else if (ival < deadbandHigh-tolerance)
                 {
                   dbstate = deadbandstate_t::normal;
-                  ret = change_code::parameter_change;
                 }
             }
           else
             {
-              if (ival < deadbandLow - rampDownband)
+              if (ival < deadbandLow - rampDownband-tolerance)
                 {
                   dbstate = deadbandstate_t::outside;
                 }
-              else if (ival > deadbandLow)
+              else if (ival > deadbandLow+tolerance)
                 {
                   dbstate = deadbandstate_t::normal;
-                  ret = change_code::parameter_change;
                 }
             }
           break;
         }
-
+		if (dbstate != cstate)
+		{
+			ret = change_code::parameter_change;
+		//	printf("%f, %d::change deadband state from %d to %d from %f\n", static_cast<double>(sD.time), getUserID(), static_cast<int>(cstate), static_cast<int>(dbstate), ival);
+		}
     }
+	
   if (limiter_alg > 0)
     {
-      auto iret = basicBlock::rootCheck (args, sD, sMode, check_level_t::reversable_only);
+      auto iret = basicBlock::rootCheck (inputs, sD, sMode, check_level_t::reversable_only);
       ret = std::max (ret,iret);
     }
   if (cstate != dbstate)  //we may run through multiple categories so we need to do this recursively
     {
-      auto iret = rootCheck (args,sD,sMode, check_level_t::reversable_only);
+      auto iret = rootCheck (inputs,sD,sMode, check_level_t::reversable_only);
       ret = std::max (ret, iret);
     }
   return ret;
@@ -686,6 +689,10 @@ void deadbandBlock::set (const std::string &param, double val, gridUnits::units_
           deadbandHigh = deadbandLevel + val;
         }
     }
+  else if (param == "tolerance")
+  {
+	  tolerance = val;
+  }
   else if ((param == "deadbandlow") || (param == "dblow")||(param == "low"))
     {
       if (val < deadbandLevel)

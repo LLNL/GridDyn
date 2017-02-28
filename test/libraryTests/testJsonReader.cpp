@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 
 
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 #include "jsonReaderElement.h"
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(jsonElementReader_test3)
 	BOOST_CHECK_CLOSE(main->getAttributeValue("voltage"), 1.01, 0.0000001);
 	//traverse to the parent
 	main->moveToParent();
-	//retore and check if we are in the generator again
+	//restore and check if we are in the generator again
 	main->restore();
 	BOOST_CHECK_CLOSE(main->getAttributeValue("p"), 0.7160, 0.0000001);
 

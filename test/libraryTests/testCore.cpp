@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -20,21 +20,21 @@
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGovernor.h"
 #include "loadModels/otherLoads.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "testHelper.h"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 using namespace gridUnits;
 BOOST_AUTO_TEST_SUITE(core_tests)
 
 
-BOOST_AUTO_TEST_CASE (gridCoreObject_test)
+BOOST_AUTO_TEST_CASE (coreObject_test)
 {
 
-  gridCoreObject *obj1 = new gridCoreObject ();
-  gridCoreObject *obj2 = new gridCoreObject ();
+  coreObject *obj1 = new coreObject ();
+  coreObject *obj2 = new coreObject ();
 
   BOOST_CHECK_EQUAL (obj1->getName().compare ("object_"+std::to_string(obj1->getID())),0);
 
@@ -43,8 +43,11 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
   BOOST_CHECK (obj2->getID()>obj1->getID());
   //check if the name setting is working
   std::string name1 = "test_object";
-  obj1->set ("name",name1);
+  obj1->setName(name1);
   BOOST_CHECK_EQUAL (obj1->getName().compare (name1),0);
+
+  obj1->setName("test_object");
+  BOOST_CHECK_EQUAL(obj1->getName().compare("test_object"), 0);
 
   double ntime = 1;
   obj1->set ("nextupdatetime",ntime);
@@ -56,13 +59,13 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 
   BOOST_CHECK (compareUpdates (obj2,obj1));
 
-  gridCoreObject *obj3 = nullptr;
+  coreObject *obj3 = nullptr;
   obj3 = obj1->clone (obj3);
 
   //check the copy constructor
   BOOST_CHECK_EQUAL (obj3->getNextUpdateTime(),ntime);
   BOOST_CHECK_EQUAL(obj3->getName().compare ("test_object"),0);
-  BOOST_CHECK (obj3->getParent() == nullptr);
+  BOOST_CHECK (obj3->isRoot());
 
   ntime = 3;
   obj1->set ("nextupdatetime",ntime);
@@ -88,7 +91,6 @@ BOOST_AUTO_TEST_CASE (gridCoreObject_test)
 BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
 {
 
-  
   gridDynGenModel *gm = new gridDynGenModel4 ();
   auto id = gm->getID();
   BOOST_CHECK_EQUAL (gm->getName().compare ("genModel4_"+std::to_string(id)),0);
@@ -98,7 +100,7 @@ BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
 
   gm->setName("namebbghs");
   BOOST_CHECK_EQUAL(gm->getName().compare("namebbghs"), 0);
-  gm->initializeA(timeZero, 0);
+  gm->dynInitializeA(timeZero, 0);
   BOOST_CHECK_EQUAL(gm->stateSize(cLocalSolverMode), 6u);
   gm->set ("h",4.5);
   gm->setOffset (0, cLocalSolverMode);
@@ -113,7 +115,7 @@ BOOST_AUTO_TEST_CASE (gridDynExciter_test)
   std::string temp1 = "exciter 2";
   ex->set ("name",temp1);
   BOOST_CHECK_EQUAL (ex->getName().compare (temp1),0);
-  ex->initializeA(0.0, 0);
+  ex->dynInitializeA(0.0, 0);
   BOOST_CHECK_EQUAL(ex->stateSize(cLocalSolverMode), 3u);
   ex->set ("tf",4.5) ;
   ex->setOffset (0, cLocalSolverMode);
@@ -129,7 +131,7 @@ BOOST_AUTO_TEST_CASE (gridDynGovernor_test)
   std::string temp1 = "gov 2";
   gov->set ("name",temp1);
   BOOST_CHECK_EQUAL (gov->getName().compare (temp1),0);
-  gov->initializeA(timeZero, 0);
+  gov->dynInitializeA(timeZero, 0);
   BOOST_CHECK_EQUAL (gov->stateSize (cLocalSolverMode), 4u);
   gov->set ("t1",4.5);
   gov->setOffset(0, cLocalSolverMode);
@@ -172,16 +174,16 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
 BOOST_AUTO_TEST_CASE (object_factory_test)
 {
   auto cof = coreObjectFactory::instance ();
-  gridCoreObject *obj = cof->createObject ("load", "basic");
-  gridLoad *ld = dynamic_cast<gridLoad *> (obj);
+  coreObject *obj = cof->createObject ("load", "basic");
+  zipLoad *ld = dynamic_cast<zipLoad *> (obj);
   BOOST_CHECK (ld != nullptr);
   delete ld;
-  gridSineLoad *gsL = dynamic_cast<gridSineLoad *> (cof->createObject ("load", "sine"));
+  sourceLoad *gsL = dynamic_cast<sourceLoad *> (cof->createObject ("load", "sine"));
   BOOST_CHECK (gsL != nullptr);
   delete gsL;
 
   obj = cof->createObject("load");
-  ld = dynamic_cast<gridLoad *> (obj);
+  ld = dynamic_cast<zipLoad *> (obj);
   BOOST_CHECK(ld != nullptr);
 
 
@@ -189,7 +191,7 @@ BOOST_AUTO_TEST_CASE (object_factory_test)
 
 BOOST_AUTO_TEST_CASE(gridDynTime_tests)
 {
-	gridDyn_time rt(34.123141512);
+	coreTime rt(34.123141512);
 
 	double dval = static_cast<double>(rt);
 	BOOST_CHECK_CLOSE(dval, 34.123141512, 0.0000001);

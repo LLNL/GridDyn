@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,11 +15,11 @@
 #include "linkModels/acLine.h"
 #include "gridBus.h"
 #include "vectorOps.hpp"
-#include "objectInterpreter.h"
-#include "gridCoreTemplates.h"
+#include "core/objectInterpreter.h"
+#include "core/coreObjectTemplates.h"
 #include "stringOps.h"
 #include "matrixData.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <iostream>
 #include <cmath>
@@ -41,7 +41,7 @@ adjustableTransformer::adjustableTransformer (double rP, double xP, const std::s
 
 }
 
-gridCoreObject *adjustableTransformer::clone (gridCoreObject *obj) const
+coreObject *adjustableTransformer::clone (coreObject *obj) const
 {
   adjustableTransformer *lnk = cloneBase<adjustableTransformer, acLine> (this, obj);
   if (lnk == nullptr)
@@ -157,7 +157,7 @@ void adjustableTransformer::set (const std::string &param,  const std::string &v
     }
   else if ((param == "bus")|| (param == "controlbus"))
     {
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
 
       if (bus)
         {
@@ -210,14 +210,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
           else
             {
               controlNum = cbnum;
-              if (parent)
-                {
-                  controlBus = static_cast<gridBus *> (parent->findByUserID ("bus", cbnum));
-                }
-              else
-                {
-                  controlNum = cbnum;
-                }
+              controlBus = static_cast<gridBus *> (getParent()->findByUserID ("bus", cbnum));
             }
         }
       else if (val > 1.5)
@@ -596,7 +589,7 @@ void  adjustableTransformer::setControlBus (index_t busnumber)
     }
   else
     {
-      auto cb = parent->findByUserID ("bus", busnumber);
+      auto cb = getParent()->findByUserID ("bus", busnumber);
       if (cb)
         {
           controlBus = static_cast<gridBus *> (cb);
@@ -628,7 +621,7 @@ void adjustableTransformer::followNetwork (int network, std::queue<gridBus *> &s
     }
 }
 
-void adjustableTransformer::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void adjustableTransformer::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   if (cMode != control_mode_t::manual_control)
@@ -649,7 +642,7 @@ void adjustableTransformer::pFlowObjectInitializeA (gridDyn_time time0, unsigned
                 }
               else if (!controlName.empty ())
                 {
-                  gridCoreObject *obj = locateObject (controlName,parent);
+                  coreObject *obj = locateObject (controlName,getParent());
                   if (obj)
                     {
                       controlBus = dynamic_cast<gridBus *> (obj);
@@ -777,7 +770,7 @@ void adjustableTransformer::getStateName (stringVec &stNames, const solverMode &
 {
   if (stateSize (sMode) > 0)
     {
-      std::string prefix2 = prefix + name + ':';
+      std::string prefix2 = prefix + getName() + ':';
       if (isDynamic (sMode))
         {
         }
@@ -800,91 +793,92 @@ void adjustableTransformer::getStateName (stringVec &stNames, const solverMode &
 
 void adjustableTransformer::reset (reset_levels level)
 {
-  double midTap;
-  double ttap;
-  adjCount = 0;
-  oCount = 0;
+	
   if (level == reset_levels::full)
     {
-
+	  adjCount = 0;
+	  oCount = 0;
       switch (cMode)
         {
         case control_mode_t::manual_control:
           break;
         case control_mode_t::voltage_control:
-          if ((Vmin <= 0.8) && (Vmax >= 1.2))                       //check to make sure the actual controls are effectively disabled
+          if ((Vmin <= 0.8) && (Vmax >= 1.2))                       //check to make sure the actual controls are not effectively disabled
             {
               break;
             }
         //purposeful fall through
         case control_mode_t::MVar_control:
-          midTap = (minTap + maxTap) / 2.0;
-          if (opFlags[continuous_flag])
-            {
-              tap = midTap;
-              tap0 = tap;
+		{
+			double midTap = (minTap + maxTap) / 2.0;
+			if (opFlags[continuous_flag])
+			{
+				tap = midTap;
+				tap0 = tap;
 
-            }
-          else
-            {
-              ttap = tap;
-              //making sure we stay in the bounds with the quanitization from the current point
-              if (ttap >= midTap)
-                {
-                  while (ttap > midTap)
-                    {
-                      ttap -= stepSize;
-                    }
-                  tap = ((midTap - ttap) < (ttap + stepSize - midTap)) ? ttap : (ttap + stepSize);
-                }
-              else
-                {
-                  while (ttap < midTap)
-                    {
-                      ttap += stepSize;
-                    }
-                  tap = ((ttap - midTap) < (midTap - ttap + stepSize)) ? ttap : (ttap - stepSize);
-                }
-              tap0 = tap;
-            }
+			}
+			else
+			{
+				double ttap = tap;
+				//making sure we stay in the bounds with the quantization from the current point
+				if (ttap >= midTap)
+				{
+					while (ttap > midTap)
+					{
+						ttap -= stepSize;
+					}
+					tap = ((midTap - ttap) < (ttap + stepSize - midTap)) ? ttap : (ttap + stepSize);
+				}
+				else
+				{
+					while (ttap < midTap)
+					{
+						ttap += stepSize;
+					}
+					tap = ((ttap - midTap) < (midTap - ttap + stepSize)) ? ttap : (ttap - stepSize);
+				}
+				tap0 = tap;
+			}
+		}
           break;
         case control_mode_t::MW_control:
+		{
+			double midTap = (minTapAngle + maxTapAngle) / 2.0;
+			if (opFlags[continuous_flag])
+			{
+				tapAngle = midTap;
+				tapAngle0 = tapAngle;
 
-          midTap = (minTapAngle + maxTapAngle) / 2.0;
-          if (opFlags[continuous_flag])
-            {
-              tapAngle = midTap;
-              tapAngle0 = tapAngle;
-
-            }
-          else
-            {
-              ttap = tapAngle;
-              //making sure we stay in the bounds with the quanitization from the current point
-              if (ttap >= midTap)
-                {
-                  while (ttap > midTap)
-                    {
-                      ttap -= stepSize;
-                    }
-                  tapAngle = ((midTap - ttap) < (ttap + stepSize - midTap)) ? ttap : (ttap + stepSize);
-                }
-              else
-                {
-                  while (ttap < midTap)
-                    {
-                      ttap += stepSize;
-                    }
-                  tapAngle = ((ttap - midTap) < (midTap - ttap + stepSize)) ? ttap : (ttap - stepSize);
-                }
-              tapAngle0 = tapAngle;
-            }
+			}
+			else
+			{
+				double ttap = tapAngle;
+				//making sure we stay in the bounds with the quantization from the current point
+				if (ttap >= midTap)
+				{
+					while (ttap > midTap)
+					{
+						ttap -= stepSize;
+					}
+					tapAngle = ((midTap - ttap) < (ttap + stepSize - midTap)) ? ttap : (ttap + stepSize);
+				}
+				else
+				{
+					while (ttap < midTap)
+					{
+						ttap += stepSize;
+					}
+					tapAngle = ((ttap - midTap) < (midTap - ttap + stepSize)) ? ttap : (ttap - stepSize);
+				}
+				tapAngle0 = tapAngle;
+			}
+		}
           break;
         }
     }
 }
 
-change_code adjustableTransformer::powerFlowAdjust (unsigned long flags, check_level_t /*level*/)
+change_code adjustableTransformer::powerFlowAdjust (const IOdata & /*inputs*/, unsigned long flags, check_level_t /*level*/)
 {
   if (CHECK_CONTROLFLAG (flags, no_link_adjustments))
     {
@@ -1085,7 +1079,7 @@ change_code adjustableTransformer::powerFlowAdjust (unsigned long flags, check_l
   return ret;
 }
 
-void adjustableTransformer::guess (gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void adjustableTransformer::guess (coreTime /*time*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1108,62 +1102,40 @@ void adjustableTransformer::guess (gridDyn_time /*ttime*/, double state[], doubl
     }
 }
 
-IOdata adjustableTransformer::getOutputs (index_t busId, const stateData *sD, const solverMode &sMode)
-{
-
-  if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
-    {
-      auto offset = offsets.getAlgOffset (sMode);
-      if (cMode == control_mode_t::MW_control)
-        {
-          tapAngle = sD->state[offset];
-        }
-      else
-        {
-          tap = sD->state[offset];
-        }
-    }
-  else if ((isDynamic (sMode)) && (opFlags[has_dyn_states]))
-    {
-
-    }
-  return acLine::getOutputs (busId,sD, sMode);
-}
-
-void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void adjustableTransformer::ioPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   if  ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
       auto offset = offsets.getAlgOffset (sMode);
       if (cMode == control_mode_t::MW_control)
         {
-          tapAngle = sD->state[offset];
+          tapAngle = sD.state[offset];
         }
       else
         {
-          tap = sD->state[offset];
+          tap = sD.state[offset];
         }
     }
   else if ((isDynamic (sMode)) && (opFlags[has_dyn_states]))
     {
 
     }
-  return acLine::ioPartialDerivatives (busId,sD,ad,argLocs,sMode);
+  return acLine::ioPartialDerivatives (busId,sD,ad,inputLocs,sMode);
 }
 
-void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void adjustableTransformer::outputPartialDerivatives (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
       auto offset = offsets.getAlgOffset (sMode);
       if (cMode == control_mode_t::MW_control)
         {
-          tapAngle = sD->state[offset];
+          tapAngle = sD.state[offset];
           tapAnglePartial (busId,sD,ad,sMode);
         }
       else
         {
-          tap = sD->state[offset];
+          tap = sD.state[offset];
           tapPartial (busId,sD,ad,sMode);
         }
     }
@@ -1174,7 +1146,7 @@ void adjustableTransformer::outputPartialDerivatives (index_t busId, const state
   return acLine::outputPartialDerivatives (busId, sD, ad, sMode);
 }
 
-void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void adjustableTransformer::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
 
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1182,11 +1154,11 @@ void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<do
       auto offset = offsets.getAlgOffset (sMode);
       if (cMode == control_mode_t::MW_control)
         {
-          tapAngle = sD->state[offset];
+          tapAngle = sD.state[offset];
         }
       else
         {
-          tap = sD->state[offset];
+          tap = sD.state[offset];
         }
       if (opFlags[at_limit])
         {
@@ -1214,7 +1186,7 @@ void adjustableTransformer::jacobianElements (const stateData *sD, matrixData<do
     }
 }
 
-void adjustableTransformer::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void adjustableTransformer::residual (const IOdata &/*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
 {
   double v1;
 
@@ -1228,11 +1200,11 @@ void adjustableTransformer::residual (const stateData *sD, double resid[], const
             {
               if (tap > tap0)
                 {
-                  resid[offset] = sD->state[offset] - maxTap;
+                  resid[offset] = sD.state[offset] - maxTap;
                 }
               else
                 {
-                  resid[offset] = sD->state[offset] - minTap;
+                  resid[offset] = sD.state[offset] - minTap;
                 }
 
             }
@@ -1247,38 +1219,38 @@ void adjustableTransformer::residual (const stateData *sD, double resid[], const
             {
               if (tapAngle > tapAngle0)
                 {
-                  resid[offset] = sD->state[offset] - maxTapAngle;
+                  resid[offset] = sD.state[offset] - maxTapAngle;
                 }
               else
                 {
-                  resid[offset] = sD->state[offset] - minTapAngle;
+                  resid[offset] = sD.state[offset] - minTapAngle;
                 }
 
             }
           else
             {
-              tapAngle = sD->state[offset];
-              updateLocalCache (sD, sMode);
+              tapAngle = sD.state[offset];
+              updateLocalCache (noInputs, sD, sMode);
               resid[offset] = linkFlows.P1 - Ptarget;
             }
           break;
         case control_mode_t::MVar_control:
-          tap = sD->state[offset];
+          tap = sD.state[offset];
           if (opFlags[at_limit])
             {
               if (tap > tap0)
                 {
-                  resid[offset] = sD->state[offset] - maxTap;
+                  resid[offset] = sD.state[offset] - maxTap;
                 }
               else
                 {
-                  resid[offset] = sD->state[offset] - minTap;
+                  resid[offset] = sD.state[offset] - minTap;
                 }
 
             }
           else
             {
-              updateLocalCache (sD, sMode);
+              updateLocalCache (noInputs, sD, sMode);
               resid[offset] = linkFlows.Q2 - Qtarget;
             }
 
@@ -1293,7 +1265,7 @@ void adjustableTransformer::residual (const stateData *sD, double resid[], const
     }
 }
 
-void adjustableTransformer::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void adjustableTransformer::setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode);
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
@@ -1332,7 +1304,7 @@ void adjustableTransformer::setState (gridDyn_time ttime, const double state[], 
 }
 
 
-void adjustableTransformer::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void adjustableTransformer::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   return acLine::dynObjectInitializeA (time0,flags);
@@ -1344,20 +1316,20 @@ void adjustableTransformer::updateLocalCache ()
 {
   acLine::updateLocalCache ();
 }
-void adjustableTransformer::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void adjustableTransformer::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
   if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
     {
       auto offset = offsets.getAlgOffset (sMode);
       if (cMode == control_mode_t::MW_control)
         {
-          tapAngle = sD->state[offset];
+          tapAngle = sD.state[offset];
         }
       else
         {
-          tap = sD->state[offset];
+          tap = sD.state[offset];
         }
-      acLine::updateLocalCache (sD,sMode);
+      acLine::updateLocalCache (inputs,sD,sMode);
     }
   else if ((isDynamic (sMode)) && (opFlags[has_dyn_states]))
     {
@@ -1365,11 +1337,24 @@ void adjustableTransformer::updateLocalCache (const stateData *sD, const solverM
     }
   else
     {
-      acLine::updateLocalCache (sD, sMode);
+      acLine::updateLocalCache (inputs, sD, sMode);
     }
 }
 
-void adjustableTransformer::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
+
+count_t adjustableTransformer::outputDependencyCount(index_t /*num*/, const solverMode &sMode) const
+{
+	if ((!(isDynamic(sMode))) && (opFlags[has_pflow_states]))
+	{
+		return 3;
+	}
+	else
+	{
+		return 2;
+	}
+}
+
+void adjustableTransformer::rootTest (const IOdata &/*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
   double controlVoltage;
 
@@ -1382,13 +1367,13 @@ void adjustableTransformer::rootTest (const stateData *sD, double roots[], const
       roots[rootOffset] = std::min (Vmax - controlVoltage, controlVoltage - Vmin);
       break;
     case control_mode_t::MW_control:
-      tap = sD->state[offset];
-      updateLocalCache (sD, sMode);
+      tap = sD.state[offset];
+      updateLocalCache (noInputs, sD, sMode);
       roots[rootOffset] = std::min (Pmax - linkFlows.P1, linkFlows.P1 - Pmin);
       break;
     case control_mode_t::MVar_control:
-      tap = sD->state[offset];
-      updateLocalCache (sD, sMode);
+      tap = sD.state[offset];
+      updateLocalCache (noInputs, sD, sMode);
       roots[rootOffset] = std::min (Qmax - linkFlows.Q2, linkFlows.Q2 - Qmin);
       break;
     default:
@@ -1396,7 +1381,7 @@ void adjustableTransformer::rootTest (const stateData *sD, double roots[], const
     }
 }
 
-void adjustableTransformer::rootTrigger (gridDyn_time /*ttime*/, const std::vector<int> & /*rootMask*/, const solverMode &)
+void adjustableTransformer::rootTrigger (coreTime /*ttime*/, const IOdata &/*inputs*/, const std::vector<int> & /*rootMask*/, const solverMode &)
 {
   double v1;
   switch (cMode)
@@ -1441,9 +1426,9 @@ void adjustableTransformer::rootTrigger (gridDyn_time /*ttime*/, const std::vect
 }
 
 
-void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }
@@ -1483,11 +1468,11 @@ void  adjustableTransformer::tapAnglePartial (index_t busId, const stateData *, 
 
 }
 
-void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void  adjustableTransformer::tapPartial (index_t busId, const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
 
 
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }
@@ -1536,9 +1521,9 @@ void  adjustableTransformer::tapPartial (index_t busId, const stateData *, matri
 }
 
 
-void adjustableTransformer::MWJac (const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void adjustableTransformer::MWJac (const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }
@@ -1581,14 +1566,14 @@ void adjustableTransformer::MWJac (const stateData *, matrixData<double> &ad, co
 
 }
 
-void adjustableTransformer::MVarJac (const stateData *, matrixData<double> &ad, const solverMode &sMode)
+void adjustableTransformer::MVarJac (const stateData &, matrixData<double> &ad, const solverMode &sMode)
 {
   double v1, v2;
   double sinTheta1, cosTheta1, sinTheta2, cosTheta2;
   double temp;
   double tvg, tvb;
 
-  if (!(enabled))
+  if (!(isEnabled()))
     {
       return;
     }

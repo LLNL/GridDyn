@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -38,6 +38,7 @@ set (testLibrary_sources
 	libraryTests/testCore.cpp
 	libraryTests/testXML.cpp
 	libraryTests/testStringOps.cpp
+	libraryTests/testString_viewOps.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 	libraryTests/libraryTests.cpp
@@ -49,7 +50,11 @@ set (testLibrary_sources
 	libraryTests/testMatrixData.cpp
 	libraryTests/testWorkQueue.cpp
 	libraryTests/testZipUtilities.cpp
+	libraryTests/testStringConversion.cpp
+	libraryTests/testString_viewConversion.cpp
 	)
+
+	list(APPEND testLibrary_sources ${optional_library_test_files})
 
 set(testSystem_sources
 	systemTests/testSystem.cpp
@@ -93,13 +98,12 @@ add_executable(testComponents ${testComponent_sources} ${testMain_headers})
 add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
+INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynFileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)
 
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
@@ -123,10 +127,15 @@ ADD_DEFINITIONS(-DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}")
 ADD_DEFINITIONS(-DGRIDDYNSERVER_LOCATION="${GRIDYNSERVER_BINARY_LOC}")
 ADD_DEFINITIONS(-DGRIDDYNINSTALL_LOCATION="${CMAKE_INSTALL_PREFIX}")
 
-
+foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
+add_custom_command(TARGET testComponents POST_BUILD        # Adds a post-build event to testComponents
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        "${keyfile}"      # <--this is in-file
+        $<TARGET_FILE_DIR:testComponents>)                 # <--this is out-file path
+endforeach(keyfile)
 
 target_link_libraries(testLibrary gridDynCombined)
-target_link_libraries(testComponents gridDynCombined)
+target_link_libraries(testComponents ${executable_only_components} gridDynCombined)
 target_link_libraries(testSystem gridDynCombined)
 target_link_libraries(testExtra gridDynCombined)
 

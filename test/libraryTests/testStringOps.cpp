@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,7 +18,9 @@
 
 #include <iostream>
 
-BOOST_AUTO_TEST_SUITE(utility_tests)
+using namespace stringOps;
+
+BOOST_AUTO_TEST_SUITE(stringop_tests)
 
 /** test conversion to lower case*/
 BOOST_AUTO_TEST_CASE(convert_to_lower_case_test)
@@ -133,16 +135,15 @@ BOOST_AUTO_TEST_CASE(splitline_test1)
 	std::string test1 = "alpha, bravo, charlie";
 	auto testres = splitline(test1);
 
-	BOOST_CHECK(testres.size()==3);
+	BOOST_REQUIRE(testres.size()==3);
 	BOOST_CHECK(testres[0] == "alpha");
 	BOOST_CHECK(testres[1] == " bravo");
 	BOOST_CHECK(testres[2] == " charlie");
 
 
-	std::string test2 = "alpha, bravo, charlie";
 	testres = splitline(test1,", ",delimiter_compression::on);
 
-	BOOST_CHECK(testres.size() == 3);
+	BOOST_REQUIRE(testres.size() == 3);
 	BOOST_CHECK(testres[0] == "alpha");
 	BOOST_CHECK(testres[1] == "bravo");
 	BOOST_CHECK(testres[2] == "charlie");
@@ -155,7 +156,7 @@ BOOST_AUTO_TEST_CASE(splitline_test2)
 	std::string test1 = "alpha, bravo,;, charlie,";
 	auto testres = splitline(test1);
 
-	BOOST_CHECK(testres.size() == 6);
+	BOOST_REQUIRE(testres.size() == 6);
 	BOOST_CHECK(testres[2].empty());
 	BOOST_CHECK(testres[3].empty());
 	BOOST_CHECK(testres[5].empty());
@@ -164,7 +165,7 @@ BOOST_AUTO_TEST_CASE(splitline_test2)
 	std::string test2 = "alpha, bravo,;, charlie,";
 	testres = splitline(test1, ";, ", delimiter_compression::on);
 
-	BOOST_CHECK(testres.size() == 4);
+	BOOST_REQUIRE(testres.size() == 4);
 	BOOST_CHECK(testres[3].empty());
 
 }
@@ -173,11 +174,139 @@ BOOST_AUTO_TEST_CASE(splitline_test2)
 BOOST_AUTO_TEST_CASE(splitline_test3)
 {
 	std::string test1 = " alpha,   bravo ; charlie ";
-	auto testres = splitlineTrim(test1);
-
-	BOOST_CHECK(testres.size() == 3);
+	auto testres = splitline(test1);
+	trim(testres);
+	BOOST_REQUIRE(testres.size() == 3);
 	BOOST_CHECK(testres[0] == "alpha");
 	BOOST_CHECK(testres[1] == "bravo");
 	BOOST_CHECK(testres[2] == "charlie");
+}
+
+/**remove quotes test test*/
+BOOST_AUTO_TEST_CASE(removeQuotes_test)
+{
+	std::string test1 = "\'remove quotes\'";
+	auto testres = removeQuotes(test1);
+	
+	BOOST_CHECK(testres == "remove quotes");
+	std::string test2 = "\"remove quotes \"";
+	testres = removeQuotes(test2);
+
+	BOOST_CHECK(testres == "remove quotes ");
+
+	std::string test3 = "\"remove quotes \'";
+	testres = removeQuotes(test3);
+
+	BOOST_CHECK(testres == "\"remove quotes \'");
+
+	std::string test4 = "   \" remove quotas \"  ";
+	testres = removeQuotes(test4);
+
+	BOOST_CHECK(testres == " remove quotas ");
+}
+
+BOOST_AUTO_TEST_CASE(appendInteger_tests)
+{
+	std::string str1 = "tail_";
+	appendInteger(str1, 456u);
+	BOOST_CHECK(str1 == "tail_456");
+
+	std::string str2 = "tail_";
+	appendInteger(str2, 0);
+	BOOST_CHECK(str2 == "tail_0");
+
+	std::string str3 = "tail";
+	appendInteger(str3, -34);
+	BOOST_CHECK(str3 == "tail-34");
+
+	std::string str4 = "tail";
+	appendInteger(str4, 12345678ull);
+	BOOST_CHECK(str4 == "tail12345678");
+
+	//only use the integer part of the number if it is less than 1,000,000,000
+	std::string str5 = "num=";
+	appendInteger(str5, 98.2341);
+	BOOST_CHECK(str5 == "num=98");
+
+	//the result here is not well defined so this check is mainly to make sure it didn't crash
+	std::string str6 = "num=";
+	appendInteger(str6, 45e34);
+	BOOST_CHECK(str6 != "num=");
+
+	std::string str7 = "long num_";
+	appendInteger(str7, 1234567890123456ll);
+	BOOST_CHECK(str7 == "long num_1234567890123456");
+
+	std::string str8 = "long num_";
+	appendInteger(str8, -1234567890123ll);
+	BOOST_CHECK(str8 == "long num_-1234567890123");
+}
+
+BOOST_AUTO_TEST_CASE(splitLineQuotes_tests)
+{
+	std::string test1 = "454, 345, happy; frog";
+	auto testres = splitlineQuotes(test1);
+	trim(testres);
+	BOOST_REQUIRE(testres.size() == 4);
+	BOOST_CHECK(testres[0] == "454");
+	BOOST_CHECK(testres[1] == "345");
+	BOOST_CHECK(testres[2] == "happy");
+	BOOST_CHECK(testres[3] == "frog");
+	std::string test2 = " \'alpha,   bravo\' ; charlie ";
+	auto testres2 = splitlineQuotes(test2);
+	trim(testres2);
+	BOOST_REQUIRE(testres2.size() == 2);
+	BOOST_CHECK(testres2[0] == "\'alpha,   bravo\'");
+	BOOST_CHECK(testres2[1] == "charlie");
+
+	std::string test3 = " \"test1\",\'test2\' ; \"charlie\",";
+	auto testres3 = splitlineQuotes(test3);
+	trim(testres3);
+	BOOST_REQUIRE(testres3.size() == 4);
+	BOOST_CHECK(testres3[0] == "\"test1\"");
+	BOOST_CHECK(testres3[1] == "\'test2\'");
+	BOOST_CHECK(testres3[2] == "\"charlie\"");
+	BOOST_CHECK(testres3[3].empty());
+
+	testres3 = splitlineQuotes(test3,default_delim_chars,default_quote_chars,delimiter_compression::on);
+	BOOST_REQUIRE(testres3.size() == 3);
+
+
+	std::string test4 = "\"'part1' and,; 'part2'\",\"34,45,56\"";
+	auto testres4 = splitlineQuotes(test4);
+	BOOST_REQUIRE(testres4.size() == 2);
+	BOOST_CHECK(testres4[1] == "\"34,45,56\"");
+
+	std::string test5 = "\"part1'\" and \"part2\",\"34,45,56\"";
+	auto testres5 = splitlineQuotes(test5);
+	BOOST_REQUIRE(testres5.size() == 2);
+	BOOST_CHECK(testres5[1] == "\"34,45,56\"");
+}
+
+
+BOOST_AUTO_TEST_CASE(splitLineBracket_tests)
+{
+	std::string test1 = "(454, 345), happy; frog";
+	auto testres = splitlineBracket(test1);
+	trim(testres);
+	BOOST_REQUIRE(testres.size() == 3);
+	BOOST_CHECK(testres[0] == "(454, 345)");
+	BOOST_CHECK(testres[1] == "happy");
+	BOOST_CHECK(testres[2] == "frog");
+	std::string test2 = " \'alpha,   bravo\' ; charlie ";
+	//the default bracket split should recognize strings as well
+	auto testres2 = splitlineBracket(test2);
+	trim(testres2);
+	BOOST_REQUIRE(testres2.size() == 2);
+	BOOST_CHECK(testres2[0] == "\'alpha,   bravo\'");
+	BOOST_CHECK(testres2[1] == "charlie");
+
+	std::string test3 = "$45,34,45$;$23.45,34,23.3$";
+	auto testres3 = splitlineBracket(test3, ";,","$");
+	trim(testres3);
+	BOOST_REQUIRE(testres3.size() == 2);
+	BOOST_CHECK(testres3[0] == "$45,34,45$");
+	BOOST_CHECK(testres3[1] == "$23.45,34,23.3$");
+
 }
 BOOST_AUTO_TEST_SUITE_END()

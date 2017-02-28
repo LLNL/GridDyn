@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -30,9 +30,10 @@ zmqReactor::zmqReactor(const std::string &reactorName, const std::string &contex
 
 }
 
+static const int zero(0);
+
 zmqReactor::~zmqReactor()
 {
-	unsigned int zero(0);
 	{ //scope for the lock
 		std::lock_guard<std::mutex> lock(queueLock);
 		updates.emplace(reactorInstruction::terminate, "");
@@ -58,7 +59,6 @@ std::shared_ptr<zmqReactor> zmqReactor::getReactorInstance(const std::string &re
 
 void zmqReactor::addSocket(const zmqSocketDescriptor &desc)
 {
-	unsigned int zero(0);
 	{ //scope for the lock
 		std::lock_guard<std::mutex> lock(queueLock);
 		updates.emplace(reactorInstruction::newSocket, desc);
@@ -69,7 +69,6 @@ void zmqReactor::addSocket(const zmqSocketDescriptor &desc)
 
 void zmqReactor::modifySocket(const zmqSocketDescriptor &desc)
 {
-	int zero(0);
 	{ //scope for the lock
 		std::lock_guard<std::mutex> lock(queueLock);
 		updates.emplace(reactorInstruction::modify, desc);
@@ -79,7 +78,6 @@ void zmqReactor::modifySocket(const zmqSocketDescriptor &desc)
 
 void zmqReactor::closeSocket(const std::string &socketName)
 {
-	unsigned int zero(0);
 	{ //scope for the lock
 		std::lock_guard<std::mutex> lock(queueLock);
 		updates.emplace(reactorInstruction::close, socketName);
@@ -163,7 +161,7 @@ void zmqReactor::reactorLoop()
 		if (val > 0)
 		{
 			//do the callbacks for any socket with a message received
-			for (size_t kk = 1; kk < socketCount; ++kk)
+			for (int kk = 1; kk < socketCount; ++kk)
 			{
 				if (socketPolls[kk].revents &ZMQ_POLLIN)
 				{
@@ -173,7 +171,7 @@ void zmqReactor::reactorLoop()
 			//deal with any socket updates as triggered by a message on socket 0
 			if (socketPolls[0].revents & ZMQ_POLLIN)
 			{
-				auto sz=sockets[0].recv(&messageCode, sizeof(unsigned int), 0); //clear the message
+				sockets[0].recv(&messageCode, sizeof(unsigned int), 0); //clear the message
 				while (!updates.empty())
 				{
 					auto socketop = updates.front();
@@ -187,7 +185,7 @@ void zmqReactor::reactorLoop()
 					{
 					case reactorInstruction::close:
 						index = findSocketByName(socketop.second.name,socketNames);
-						if (index < sockets.size())
+						if (index < static_cast<int>(sockets.size()))
 						{
 							sockets[index].close();
 							sockets.erase(sockets.begin() + index);
@@ -210,7 +208,7 @@ void zmqReactor::reactorLoop()
 						break;
 					case reactorInstruction::modify:
 						index = findSocketByName(socketop.second.name, socketNames);
-						if (index < sockets.size())
+						if (index < static_cast<int>(sockets.size()))
 						{
 							socketop.second.modifySocket(sockets[index]);
 						}

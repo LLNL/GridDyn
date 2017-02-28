@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 
 #include "stringOps.h"
 
-#include <map>
+#include "mapOps.h"
 #include <utility>
 
 //disable a funny warning (bug in visual studio 2015)
@@ -67,14 +67,14 @@ namespace gridUnits {
 
 /* *INDENT-OFF* */
 static std::map< std::string, units_t > name2Unit {
-	{"mw", MW},
-	{"mvar", MVAR}, {"mva", MVAR},
-  {"amp", Amp}, {"a", Amp},
-  {"v", Volt}, {"volt", Volt},
+	{"mw", MW},{ "mws", MW },
+	{"mvar", MVAR}, {"mva", MVAR},{ "mvars", MVAR },
+  {"amp", Amp}, {"a", Amp},{ "amps", Amp },
+  {"v", Volt}, {"volt", Volt},{ "volts", Volt },
   {"kv", kV},
   {"kw", kW},
-  {"w", Watt}, {"watt", Watt},
-  {"ohm", Ohm},
+  {"w", Watt}, {"watt", Watt},{ "watts", Watt },
+  {"ohm", Ohm},{ "ohms", Ohm },
   {"hz", Hz}, {"1/s", Hz}, {"cps", Hz},
   {"rad/s", rps}, {"rps", rps},
   {"rpm", rpm}, {"rev/min", rpm},
@@ -90,17 +90,17 @@ static std::map< std::string, units_t > name2Unit {
   {"pu",pu},
   {"puohm", puOhm},
   {"pua", puA},
-  {"m", meter}, {"meter", meter},
-  {"mi", mile}, {"mile", mile},
+  {"m", meter}, {"meter", meter},{ "meters", meter },
+  {"mi", mile}, {"mile", mile},{ "miles", mile },
   {"ft", ft}, {"feet", ft}, {"foot", ft},
-  {"km", km}, {"kilometer", km},
-  {"deg", deg}, {"degree", deg},
-  {"rad", rad}, {"radian", rad},
-  {"s", sec}, {"sec", sec}, {"second", sec},
-  {"min", min}, {"minute", min},
-  {"hr", hour}, {"hour", hour},
-  { "day", day },
-  {"week", week}, {"wk", week},
+  {"km", km}, {"kilometer", km},{ "kilometers", km },
+  {"deg", deg}, {"degree", deg},{ "degrees", deg },
+  {"rad", rad}, {"radian", rad},{ "radians", rad },
+  {"s", sec}, {"sec", sec}, {"second", sec},{ "seconds", sec },
+  {"min", min}, {"minute", min},{ "minutes", min },
+  {"hr", hour}, {"hour", hour},{ "hours", hour },
+  { "day", day },{ "days", day },
+  {"week", week}, {"wk", week},{ "weeks", week },
   {"$", cost}, {"cost", cost},
   {"$/hr", Cph}, {"cph", Cph},
   {"$/mwh", CpMWh}, {"cpmwh", CpMWh},
@@ -168,41 +168,23 @@ const static std::map<units_t, std::string> unit2Name {
 };
 
 /* *INDENT-ON* */
-//function to convert a string to a unit enum value
+//function to convert a string to a unit enumeration value
 
 std::string to_string (units_t unitType)
 {
-  std::string output;
-  auto res = unit2Name.find (unitType);
-  if (res != unit2Name.end ())
-    {
-      output = res->second;
-    }
-  return output;
+	return mapFind(unit2Name, unitType, std::string("unknown"));
 }
 
 units_t getUnits (const std::string &unitString, units_t defValue)
 {
 
-  units_t retUnit = defValue;
   if (unitString.empty ())
     {
-      return retUnit;
+      return defValue;
     }
   auto unitName = convertToLowerCase (unitString);
-  if (unitName.length () > 1)
-    {
-      if (unitName.back () == 's')
-        {
-          unitName.pop_back ();
-        }
-    }
-  auto res = name2Unit.find (unitName);
-  if (res != name2Unit.end ())
-    {
-      retUnit = res->second;
-    }
-  return retUnit;
+  return mapFind(name2Unit, unitName, defValue);
+  
 
 }
 
@@ -258,10 +240,15 @@ static const std::map<units_t, units_type_t> unit2Type {
   std::make_pair (K, temperature)
 };
 
+inline bool conversionNotNeeded(const units_t in, const units_t out)
+{
+	return ((in == defUnit)||(in == out) || (out == defUnit));
+}
+
 double unitConversionPower (double val, const units_t in, const units_t out, double basePower, double baseVoltage)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+  if (conversionNotNeeded(in,out))
     {
       return val;
     }
@@ -457,7 +444,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
 
 double unitConversionTemperature (double val, const units_t in, const units_t out)
 {
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+  if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -503,7 +490,7 @@ double unitConversionTemperature (double val, const units_t in, const units_t ou
 double unitConversionTime (double val, const units_t in, const units_t out)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit)||(out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -616,7 +603,7 @@ double unitConversionAngle (double val, const units_t in, const units_t out)
 {
   //check if no conversion is needed
 
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -642,7 +629,7 @@ double unitConversionAngle (double val, const units_t in, const units_t out)
 double unitConversionDistance (double val, const units_t in, const units_t out)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -650,7 +637,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
   switch (in)
     {
     case km:
-      val = val * 1000;
+      ret = val * 1000;
     case meter:
       switch (out)
         {
@@ -670,7 +657,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
 			break;
         }
     case mile:
-      val = val * 5280;
+      ret = val * 5280;
     case ft:
       switch (out)
         {
@@ -691,7 +678,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
 double unitConversionFreq (double val, const units_t in, const units_t out, double baseFreq)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -774,7 +761,7 @@ double unitConversionFreq (double val, const units_t in, const units_t out, doub
 double unitConversionCost (double val, const units_t in, const units_t out, double basePower)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
@@ -838,18 +825,14 @@ double unitConversionCost (double val, const units_t in, const units_t out, doub
 double unitConversion (double val, const units_t in, const units_t out, double basePower, double baseVoltage)
 {
   //check if no conversion is needed
-  if ((in == out) || (in == defUnit) || (out == defUnit))
+	if (conversionNotNeeded(in, out))
     {
       return val;
     }
   double ret = badConversion;
 
-  units_type_t utype = deftype;
-  auto res = unit2Type.find (in);
-  if (res != unit2Type.end ())
-    {
-      utype = res->second;
-    }
+  units_type_t utype = mapFind(unit2Type,in,deftype);
+  
   //switch over possible conversions
   switch (utype)
     {
@@ -857,13 +840,13 @@ double unitConversion (double val, const units_t in, const units_t out, double b
       ret = unitConversionPower (val, in, out, basePower, baseVoltage);
       break;
     case rotation:
-      if (basePower == 50)
+      if (basePower == 50.0)
         {
-          ret = unitConversionFreq (val, in, out, 50);
+          ret = unitConversionFreq (val, in, out, 50.0);
         }
       else
         {
-          ret = unitConversionFreq (val, in, out, 60);
+          ret = unitConversionFreq (val, in, out, 60.0);
         }
       break;
     // distance Units

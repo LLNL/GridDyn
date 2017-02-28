@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,14 +12,15 @@
 */
 
 #include "txThermalModel.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 #include "linkModels/gridLink.h"
 #include "submodels/gridControlBlocks.h"
-#include "recorder_events/gridGrabbers.h"
-#include "recorder_events/gridCondition.h"
-#include "recorder_events/gridEvent.h"
-#include "core/gridDynExceptions.h"
+#include "measurement/grabberSet.h"
+#include "measurement/gridGrabbers.h"
+#include "measurement/gridCondition.h"
+#include "events/gridEvent.h"
+#include "core/coreExceptions.h"
 #include "stringOps.h"
 
 #include <cmath>
@@ -30,7 +31,7 @@ txThermalModel::txThermalModel(const std::string &objName):sensor(objName)
 	outputNames = { "ambient", "top_oil", "hot_spot" }; //preset the outputNames
 }
 
-gridCoreObject * txThermalModel::clone(gridCoreObject *obj) const
+coreObject * txThermalModel::clone(coreObject *obj) const
 {
 	txThermalModel *nobj = cloneBase<txThermalModel, sensor>(this, obj);
 	if (!(nobj))
@@ -44,7 +45,7 @@ gridCoreObject * txThermalModel::clone(gridCoreObject *obj) const
 		nobj->Tgr = Tgr;
 		nobj->mp_LR = mp_LR;
 		nobj->mp_n = mp_n;
-		nobj->mp_m = mp_n;
+		nobj->mp_m = mp_m;
 		nobj->ambientTemp = ambientTemp;
 		nobj->dTempdt = dTempdt;
 		nobj->rating = rating;
@@ -54,6 +55,7 @@ gridCoreObject * txThermalModel::clone(gridCoreObject *obj) const
 		nobj->alarmTemp1 = alarmTemp1;
 		nobj->alarmTemp2 = alarmTemp2;
 		nobj->cutoutTemp = cutoutTemp;
+		nobj->alarmDelay = alarmDelay;
 	return nobj;
 }
 
@@ -235,12 +237,12 @@ double txThermalModel::get(const std::string & param, gridUnits::units_t unitTyp
 	return sensor::get(param, unitType);
 }
 
-void txThermalModel::add(gridCoreObject * /*obj*/)
+void txThermalModel::add(coreObject * /*obj*/)
 {
-	throw(invalidObjectException(this));
+	throw(unrecognizedObjectException(this));
 }
 
-void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void txThermalModel::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 	if (!(m_sourceObject))
 	{
@@ -249,7 +251,7 @@ void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long fla
 
 	if (updatePeriod > kHalfBigNum)
 	{        //set the period to the period of the simulation to at least 1/5 the winding time constant
-		double pstep = parent->find("root")->get("steptime");
+		double pstep = getRoot()->get("steptime");
 		if (pstep < 0)
 		{
 			pstep = 1.0;
@@ -311,41 +313,40 @@ void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long fla
 			sensor::add(b1);
 			sensor::add(b2);
 			auto g1 = std::make_shared<customGrabber>();
-			g1->setGrabberFunction("ambient", [this](gridCoreObject *)->double {return ambientTemp; });
-			sensor::add(g1, nullptr);
+			g1->setGrabberFunction("ambient", [this](coreObject *)->double {return ambientTemp; });
+			sensor::add(g1);
 
-			outputSize = (outputSize > 3) ? outputSize : 3;
+			m_outputSize = (m_outputSize > 3) ? m_outputSize : 3;
 
 
-			outputMode.resize(outputSize);
-			outputs.resize(outputSize);
-			outGrabber.resize(outputSize, nullptr);
-			outGrabberSt.resize(outputSize, nullptr);
+			outputMode.resize(m_outputSize);
+			outputs.resize(m_outputSize);
+			outGrabbers.resize(m_outputSize, nullptr);
 			outputMode[0] = outputMode_t::direct;
 			outputMode[1] = outputMode_t::block;
 			outputs[0] = 3;  //the first input was setup as the current, second as the loss, 3rd as attached
 			outputs[1] = 0;
 			sensor::set("output2", "block0+block1");
 			auto c1 = make_condition("output1", ">", alarmTemp1, this);
-			gridRelay::add(c1);
+			gridRelay::add(std::move(c1));
 			c1 = make_condition("output1", ">", alarmTemp2, this);
-			gridRelay::add(c1);
+			gridRelay::add(std::move(c1));
 			c1 = make_condition("output1", ">", cutoutTemp, this);
-			gridRelay::add(c1);
+			gridRelay::add(std::move(c1));
 			
 			gridRelay::set("action", "alarm temperature_alarm1");
 			gridRelay::set("action", "alarm temperature_alarm2");
-			auto ge = std::make_shared<gridEvent>();
+			auto ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject,"switch1");
 			ge->setValue(1.0);
 
-			gridRelay::add(ge);
-			ge = std::make_shared<gridEvent>();
+			gridRelay::add(std::move(ge));
+			ge = std::make_unique<gridEvent>();
 
 			ge->setTarget(m_sinkObject, "switch2");
 			ge->setValue(1.0);
 
-			gridRelay::add(ge);
+			gridRelay::add(std::move(ge));
 			//add the triggers
 			setActionTrigger(0, 0, alarmDelay);
 			setActionTrigger(1, 1, alarmDelay);
@@ -370,10 +371,10 @@ void txThermalModel::dynObjectInitializeA (gridDyn_time time0, unsigned long fla
 	return sensor::dynObjectInitializeA(time0, flags);
 }
 
-void txThermalModel::dynObjectInitializeB(IOdata &outputSet)
+void txThermalModel::dynObjectInitializeB(const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet)
 {
-	dataSources[0]->gain = 1.0 / rating;
-	dataSources[1]->gain = 1.0 / Plossr;
+	dataSources[0]->setGain(1.0 / rating);
+	dataSources[1]->setGain(1.0 / Plossr);
 
 	double I = dataSources[0]->grabData();
 
@@ -386,22 +387,22 @@ void txThermalModel::dynObjectInitializeB(IOdata &outputSet)
 		double DTgu = DThs*pow(K2, mp_m);
 
 		iset[0] = DTtou + ambientTemp;
-		filterBlocks[0]->initializeB(iset, iset, iset);//I don't care what the result is so I use the same vector for all inputs
+		filterBlocks[0]->dynInitializeB(iset, iset, iset);//I don't care what the result is so I use the same vector for all inputs
 		iset[0] = DTgu;
-		filterBlocks[1]->initializeB(iset, iset, iset);
+		filterBlocks[1]->dynInitializeB(iset, iset, iset);
 	}
 	else
 	{
 		iset[0] = ambientTemp;
-		filterBlocks[0]->initializeB(iset, iset, iset);
+		filterBlocks[0]->dynInitializeB(iset, iset, iset);
 		iset[0] = 0;
-		filterBlocks[1]->initializeB(iset, iset, iset);
+		filterBlocks[1]->dynInitializeB(iset, iset, iset);
 	}
-	return gridRelay::dynObjectInitializeB(outputSet);//skip over sensor::initializeB since the filter blocks are initialized here.
+	return gridRelay::dynObjectInitializeB(inputs,desiredOutput,fieldSet);//skip over sensor::dynInitializeB since the filter blocks are initialized here.
 }
 
 
-void txThermalModel::updateA(gridDyn_time time)
+void txThermalModel::updateA(coreTime time)
 {
 	double dt = time - prevTime;
 	
@@ -446,7 +447,7 @@ void txThermalModel::updateA(gridDyn_time time)
 	gridRelay::updateA(time);
 }
 
-void txThermalModel::timestep(gridDyn_time ttime, const solverMode &)
+void txThermalModel::timestep(coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 	updateA(ttime);
 }

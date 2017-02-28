@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,8 +15,8 @@
 #include "vectorOps.hpp"
 #include "matrixData.h"
 #include "stringConversion.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 
 transferFunctionBlock::transferFunctionBlock(const std::string &newName) : basicBlock(newName), a(2, 1), b(2, 0)
@@ -43,7 +43,7 @@ transferFunctionBlock::transferFunctionBlock (std::vector<double> Acoef, std::ve
   opFlags.set (use_state);
 }
 
-gridCoreObject *transferFunctionBlock::clone (gridCoreObject *obj) const
+coreObject *transferFunctionBlock::clone (coreObject *obj) const
 {
 	transferFunctionBlock *nobj = cloneBase<transferFunctionBlock, basicBlock>(this, obj);
   if (nobj == nullptr)
@@ -56,7 +56,7 @@ gridCoreObject *transferFunctionBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 //set up the number of states
-void transferFunctionBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void transferFunctionBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   if (b.back () == 0)
     {
@@ -67,44 +67,44 @@ void transferFunctionBlock::objectInitializeA (gridDyn_time time0, unsigned long
     {
       extraOutputState = true;
     }
-  basicBlock::objectInitializeA (time0, flags);
-  offsets.local->local.jacSize += static_cast<count_t> (3 * (a.size () - 2) + 1);
-  offsets.local->local.diffSize += static_cast<count_t> (a.size ()) - 2;
+  basicBlock::dynObjectInitializeA (time0, flags);
+  offsets.local().local.jacSize += static_cast<count_t> (3 * (a.size () - 2) + 1);
+  offsets.local().local.diffSize += static_cast<count_t> (a.size ()) - 2;
   if (extraOutputState)
     {
-      offsets.local->local.diffSize += 1;
-      offsets.local->local.jacSize += 3;
+      offsets.local().local.diffSize += 1;
+      offsets.local().local.jacSize += 3;
     }
 
 }
 // initial conditions
-void transferFunctionBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void transferFunctionBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      //	m_state[2] = (1.0 - m_T2 / m_T1) * (args[0] + bias);
-      m_state[1] = (args[0] + bias);
+      //	m_state[2] = (1.0 - m_T2 / m_T1) * (inputs[0] + bias);
+      m_state[1] = (inputs[0] + bias);
       m_state[0] = m_state[1] * K;
       if (opFlags[has_limits])
         {
-          basicBlock::rootCheck (args, nullptr, cLocalSolverMode, check_level_t::reversable_only);
+          basicBlock::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
           m_state[0] = valLimit (m_state[0], Omin, Omax);
         }
       fieldSet[0] = m_state[0];
-      prevInput = args[0] + bias;
+      prevInput = inputs[0] + bias;
     }
   else
     {
-      m_state[0] = outputSet[0];
-      //	m_state[1] = (1.0 - m_T2 / m_T1) * outputSet[0] / K;
-      fieldSet[0] = outputSet[0] - bias;
-      prevInput = outputSet[0] / K;
+      m_state[0] = desiredOutput[0];
+      //	m_state[1] = (1.0 - m_T2 / m_T1) * desiredOutput[0] / K;
+      fieldSet[0] = desiredOutput[0] - bias;
+      prevInput = desiredOutput[0] / K;
     }
 }
 
 
 // residual
-void transferFunctionBlock::residElements (double input, double didt, const stateData *sD, double resid[], const solverMode &sMode)
+void transferFunctionBlock::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, resid, sMode, this);
   if (extraOutputState)
@@ -124,11 +124,11 @@ void transferFunctionBlock::residElements (double input, double didt, const stat
 
 }
 
-void transferFunctionBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void transferFunctionBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 //  auto offset = offsets.getDiffOffset (sMode);
 // auto Aoffset = offsets.getAlgOffset (sMode);
-//deriv[offset + limiter_diff] = K*(input + bias - sD->state[Aoffset + limiter_alg]) / m_T1;
+//deriv[offset + limiter_diff] = K*(input + bias - sD.state[Aoffset + limiter_alg]) / m_T1;
   if (opFlags[use_ramp_limits])
     {
       basicBlock::derivElements (input, didt, sD, deriv, sMode);
@@ -136,7 +136,7 @@ void transferFunctionBlock::derivElements (double input, double didt, const stat
 }
 
 
-void transferFunctionBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void transferFunctionBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   ad.assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
@@ -154,10 +154,10 @@ void transferFunctionBlock::jacElements (double input, double didt, const stateD
 
   //ad.assignCheck(Loc.diffOffset, argLoc, 1 / m_T1);
 //	ad.assign(Loc.diffOffset, Loc.algOffset + 1, -1 / m_T1);
-  ad.assign (Loc.diffOffset, Loc.diffOffset, -sD->cj);
+  ad.assign (Loc.diffOffset, Loc.diffOffset, -sD.cj);
 }
 
-double transferFunctionBlock::step (gridDyn_time ttime, double inputA)
+double transferFunctionBlock::step (coreTime ttime, double inputA)
 {
 
   double dt = ttime - prevTime;
@@ -245,7 +245,7 @@ void transferFunctionBlock::set (const std::string &param, double val, gridUnits
 
   //param   = gridDynSimulation::toLower(param);
   std::string pstr;
-  int num = trailingStringInt (param, pstr, -1);
+  int num = stringOps::trailingStringInt (param, pstr, -1);
   if (pstr.length () == 1)
     {
       switch (pstr[0])

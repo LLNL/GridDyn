@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -64,24 +64,23 @@ protected:
   std::shared_ptr<gridCommunicator> comms;
 public:
   AGControl (const std::string &objName = "AGC_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual ~AGControl ();
 
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 
 
-  void setTime (gridDyn_time time) override;
-  virtual void updateA (gridDyn_time time) override;
+  virtual void updateA (coreTime time) override;
 
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   double getOutput (index_t /*num*/ = 0) const override
   {
     return reg;
   }
-  virtual void add (gridCoreObject *obj) override;
+  virtual void add (coreObject *obj) override;
   virtual void add (schedulerReg *sched);
-  virtual void remove (gridCoreObject *obj) override;
+  virtual void remove (coreObject *obj) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
@@ -119,13 +118,13 @@ protected:
         double batReg;
 public:
         AGControlBattery();
-        virtual gridCoreObject *clone(gridCoreObject *obj = NULL, bool copyName = false) const;
+        virtual coreObject *clone(coreObject *obj = NULL, bool copyName = false) const;
         virtual ~AGControlBattery();
 
 
-        virtual double objectInitializeA (gridDyn_time time0,double freq0,double tiedev0);
+        virtual double dynObjectInitializeA (coreTime time0,double freq0,double tiedev0);
 
-        virtual double updateA(gridDyn_time time, double freq, double tiedev);
+        virtual double updateA(coreTime time, double freq, double tiedev);
 
         virtual void addGen(schedulerReg *sched);
         virtual void removeSched(schedulerReg *sched);

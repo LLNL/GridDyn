@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,15 +18,16 @@
 
 #define APPROXIMATION_LEVELS (9)
 
-
-typedef struct linkComputedInformation
+/** class defining some computed information for links*/
+class linkC
 {
+public:
   double cosTheta1 = 0.0;                                   //!<  cos theta1
   double cosTheta2 = 0.0;                                   //!<  cos theta2
   double sinTheta1 = 0.0;                                   //!<  sin theta1
   double sinTheta2 = 0.0;                                   //!<  sin theta2
   double Vmx = 0.0;                                                 //!< computed parameter
-} linkC;
+};
 
 /** @brief structure containing information on the partial derivatives for the the link
 the seqID is also the index of the state data it was calculated from*/
@@ -82,8 +83,7 @@ protected:
   linkF constLinkFlows;                                               //!< holder for previous steady state link flows
   linkPart LinkDeriv;                                                 //!< holder for computed derivative information
 
-  //this is the weirdest C++ syntax for a typedef,  but as far as I can tell I need to do it to create a array of member function pointers still not clear how this actually works
-  typedef void (acLine::*glMP)();
+  using glMP = void(acLine::*)();
   glMP flowCalc[APPROXIMATION_LEVELS];                //!< function pointers to power flow calculations
   glMP derivCalc[APPROXIMATION_LEVELS];                //!< function objects to the derivative calculations
 
@@ -97,8 +97,8 @@ public:
   */
   acLine (double rP, double xP, const std::string &objName = "acline_$");
   /** @brief virtual destructor*/
-  virtual ~acLine ();
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
 
   /** @brief get the current tap value
@@ -118,24 +118,25 @@ public:
 
   void disable () override;
   /** @brief allow the real power flow to be fixed by adjusting the properties of one bus or another
-   performs the calculations necessary to get the power at the mterminal to be a certain value
-  @param[in] power  the desired real power flow as measured by mterminal
-  @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
+   performs the calculations necessary to get the power at the measureTerminal to be a certain value
+  @param[in] power  the desired real power flow as measured by measureTerminal
+  @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by default
   @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
-  virtual int fixRealPower (double power, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual int fixRealPower (double power, index_t  measureTerminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  
   /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
-   performs the calculations necessary to get the power at the mterminal to be a certain value
-  @param[in] rPower  the desired real power flow as measured by mterminal
-  @param[in] rPower  the desired reactive power flow as measured by mterminal
-  @param[in] mterminal  the measrure terminal-either a terminal number (1 or higher) or a busID,  1 by default
+   performs the calculations necessary to get the power at the measureTerminal to be a certain value
+  @param[in] rPower  the desired real power flow as measured by measureTerminal
+  @param[in] rPower  the desired reactive power flow as measured by measureTerminal
+  @param[in] measureTerminal  the measure terminal-either a terminal number (1 or higher) or a busID,  1 by default
   @param[in] fixedTerminal -the terminal that doesn't change (terminal number or busID) if 0 both are changed or 1 is selected based on busTypes
   @param[in] unitType -- the units related to power
   @return 0 for success, some other number for failure
   */
-  virtual int fixPower (double rPower, double qPower, index_t  mterminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual int fixPower (double rPower, double qPower, index_t  measureTerminal, index_t  fixedTerminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   /** @brief check for any violations of link limits or other factors based on power flow results
    checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
@@ -144,9 +145,9 @@ public:
   virtual void pFlowCheck (std::vector<violation> &Violation_vector) override;
   virtual void pFlowObjectInitializeB() override;
   virtual void updateLocalCache () override;
-  virtual void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
-  virtual void timestep (gridDyn_time ttime, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
   /** @brief do a quick update  (may be deprecated)
   * @return the power transfer
   */
@@ -168,16 +169,16 @@ public:
 
   //for computing all the Jacobian elements at once
 
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
 
-  virtual void outputPartialDerivatives (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-
+  virtual void outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
   virtual double getMaxTransfer () const override;
-  //virtual void busResidual(index_t busId, const stateData *sD, double *Fp, double *Fq, const solverMode &sMode);
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  //virtual void busResidual(index_t busId, const stateData &sD, double *Fp, double *Fq, const solverMode &sMode);
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
-  virtual change_code rootCheck (const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
 protected:
   void setAdmit ();
@@ -252,8 +253,8 @@ protected:
   /** @brief load information into the linkInfo structure
   @param[in] sD  the state Data
   @param[in] sMode the corresponding solver Mode*/
-  void loadLinkInfo (const stateData *sD, const solverMode &sMode);
-  /** @brief load the approximation functions in the bizarely defined array above*/
+  void loadLinkInfo (const stateData &sD, const solverMode &sMode);
+  /** @brief load the approximation functions in the bizarrely defined array above*/
   void loadApproxFunctions ();
 
   void switchChange (int switchNum) override;
@@ -344,10 +345,7 @@ public:
   */
   adjustableTransformer (double rP, double xP, const std::string &objName = "adjTX_$");
   //!< @brief destructor
-  ~adjustableTransformer ()
-  {
-  }
-  gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  coreObject * clone (coreObject *obj = nullptr) const override;
 
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   void set (const std::string &param, const std::string &val) override;
@@ -358,63 +356,62 @@ public:
   @param[in] cBus  the specified control Bus*/
   void setControlBus (gridBus *cBus);
   /**@ brief set the control bus to a specified bus number
-  @param[in] busnumber-- this can be 1 or 2 for already attached buses or the user id of a bus in which cases the parent of the link is searched for the bus*/
-  void setControlBus (index_t  busnumber = 2);
+  @param[in] busNumber-- this can be 1 or 2 for already attached buses or the user id of a bus in which cases the parent of the link is searched for the bus*/
+  void setControlBus (index_t  busNumber = 2);
 
 
-  change_code powerFlowAdjust (unsigned long flags, check_level_t level) override;
+  change_code powerFlowAdjust (const IOdata &inputs, unsigned long flags, check_level_t level) override;
   void reset (reset_levels level) override;
 
   void updateLocalCache () override;
-  void updateLocalCache (const stateData *sD, const solverMode &sMode) override;
+  void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
-  virtual IOdata getOutputs (index_t  busId, const stateData *sD, const solverMode &sMode) override;
-
-  void jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   //for computing all the Jacobian elements at once
-  virtual void ioPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void outputPartialDerivatives (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual void ioPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
 
-  void residual (const stateData *sD, double resid[], const solverMode &sMode) override;
-  void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-  void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   void loadSizes (const solverMode &sMode, bool dynOnly) override;
 protected:
-  void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  void dynObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
+  void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  void dynObjectInitializeA (coreTime time0, unsigned long flags) override;
 
 public:
-  void rootTest (const stateData *sD, double roots[], const solverMode &sMode) override;
-  void rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual void followNetwork (int network, std::queue<gridBus *> &bstk) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;
 protected:
   /** @brief compute the Jacobian elements based on the MW control
-  @param[in] sD  the statedata of the current state of the system
+  @param[in] sD  the stateData of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MWJac (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void MWJac (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the Jacobian elements based on the MVar control
-  @param[in] sD  the statedata of the current state of the system
+  @param[in] sD  the stateData of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void MVarJac (const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void MVarJac (const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap angle
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
-  @param[in] sD  the statedata of the current state of the system
+  @param[in] sD  the stateData of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapAnglePartial (index_t  busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void tapAnglePartial (index_t  busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief compute the partial derivatives of the power flows based on the tap setting
   @param[in] busId the id of the calling bus either 1 or 2 or a busID of one of the attached buses
-  @param[in] sD  the statedata of the current state of the system
+  @param[in] sD  the stateData of the current state of the system
   @param[out] ad the matrixData object to store the Jacobian information
   @param[in]  the solverMode corresponding to the stateData
   */
-  void tapPartial (index_t busId, const stateData *sD, matrixData<double> &ad, const solverMode &sMode);
+  void tapPartial (index_t busId, const stateData &sD, matrixData<double> &ad, const solverMode &sMode);
   /** @brief do any stepped adjustments  based on voltage control from the power flow calculations
   @return change_code::no_change if nothing was done,  PARAMETER_ADJUSTMENT if the tap changer was stepped
   */

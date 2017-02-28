@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -21,12 +21,12 @@
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGenModel.h"
 #include "linkModels/gridLink.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "vectorOps.hpp"
 #include <iostream>
 
-//test case for gridCoreObject object
+//test case for coreObject object
 
 #include "testHelper.h"
 
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE (xml_test1)
 {
   //test the loading of a single bus
   std::string fname = xmlTestDirectory+ "test_xmltest1.xml";
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = readSimXMLFile (fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   int count = gds->getInt("totalbuscount");
   BOOST_CHECK_EQUAL (count,1);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE (xml_test2)
   //test the loading of 3 buses one of each type
 
   std::string fname = xmlTestDirectory + "test_xmltest2.xml";
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = readSimXMLFile (fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   int count = gds->getInt("totalbuscount");
   BOOST_CHECK_EQUAL (count,4);
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE (xml_test3)
 {
   //testt the loading of links
   std::string fname = xmlTestDirectory + "test_xmltest3.xml";
-  gds = (gridDynSimulation *)readSimXMLFile (fname);
+  gds = readSimXMLFile (fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   int count = gds->getInt("totalbuscount");
   BOOST_CHECK_EQUAL (count,9);
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE (xml_test4)
 
   std::string fname = xmlTestDirectory + "test_xmltest4.xml";
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   count=gds->getInt ("totalbuscount");
   BOOST_CHECK_EQUAL (count,1);
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE (xml_test4)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("exciter");
   BOOST_REQUIRE (obj != nullptr);
@@ -203,11 +203,11 @@ BOOST_AUTO_TEST_CASE (xml_test5)
 
   std::string fname = xmlTestDirectory + "test_xmltest5.xml";
 
-  gds = new gridDynSimulation ();
+  gds = std::make_unique<gridDynSimulation> ();
 
   readerInfo ri;
 
-  loadFile(gds, fname, &ri);
+  loadFile(gds.get(), fname, &ri);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   count=gds->getInt ("totalbuscount");
   BOOST_CHECK_EQUAL (count,1);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE (xml_test5)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = ri.findLibraryObject ("ex1");
   BOOST_REQUIRE (obj != nullptr);
@@ -244,11 +244,11 @@ BOOST_AUTO_TEST_CASE (xml_test6)
 
   std::string fname = xmlTestDirectory + "test_xmltest6.xml";
 
-  gds = new gridDynSimulation ();
+  gds = std::make_unique<gridDynSimulation> ();
 
   readerInfo ri;
 
-  loadFile(gds, fname, &ri);
+  loadFile(gds.get(), fname, &ri);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   count=gds->getInt ("totalbuscount");
   BOOST_CHECK_EQUAL (count,1);
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE (xml_test6)
   BOOST_REQUIRE (gen != nullptr);
   gridDynGenModel *gm = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("genmodel");
   BOOST_REQUIRE (obj != nullptr);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE (xml_test7)
   int count;
 
   std::string fname = xmlTestDirectory + "test_xmltest7.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds->currentProcessState () ==gridDynSimulation::gridState_t::STARTUP);
   count=gds->getInt ("totalbuscount");
   BOOST_CHECK_EQUAL (count,1);
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE (xml_test7)
   gridDynGovernor *gov = nullptr;
   gridDynExciter *ext = nullptr;
 
-  gridCoreObject *obj = nullptr;
+  coreObject *obj = nullptr;
 
   obj = gen->find ("exciter");
   BOOST_REQUIRE (obj != nullptr);
@@ -317,15 +317,15 @@ BOOST_AUTO_TEST_CASE (xml_test7)
 BOOST_AUTO_TEST_CASE (xml_test_dynLib)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::no_print;
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
 
 
   fname = xmlTestDirectory + "test_2m4bDyn_lib.xml";
-  gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds2 = readSimXMLFile(fname);
   gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE (xml_test_dynLib)
 
   auto sdiffs = countDiffs(st, st2, 5e-5);
   
-  BOOST_CHECK_EQUAL (sdiffs, 0);
+  BOOST_CHECK_EQUAL (sdiffs, 0u);
 
 }
 
@@ -341,15 +341,15 @@ BOOST_AUTO_TEST_CASE (xml_test_dynLib)
 BOOST_AUTO_TEST_CASE (xml_test_maingen)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::no_print;
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
 
 
   fname = xmlTestDirectory + "test_2m4bDyn_mgen.xml";
-  gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds2 = readSimXMLFile(fname);
   gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE (xml_test_maingen)
 
   auto sdiffs = countDiffs(st, st2, 5e-5);
 
-  BOOST_CHECK_EQUAL(sdiffs, 0);
+  BOOST_CHECK_EQUAL(sdiffs, 0u);
 
 }
 
@@ -366,15 +366,15 @@ BOOST_AUTO_TEST_CASE (xml_test_maingen)
 BOOST_AUTO_TEST_CASE (xml_test_rload)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::no_print;
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
 
 
   fname = xmlTestDirectory + "test_2m4bDyn_rload.xml";
-  gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds2 = readSimXMLFile(fname);
   gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE (xml_test_rload)
 
   auto sdiffs = countDiffs(st, st2, 5e-5);
 
-  BOOST_CHECK_EQUAL(sdiffs, 0);
+  BOOST_CHECK_EQUAL(sdiffs, 0u);
 
 }
 
@@ -390,15 +390,15 @@ BOOST_AUTO_TEST_CASE (xml_test_rload)
 BOOST_AUTO_TEST_CASE (xml_test_source1)
 {
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::no_print;
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
 
 
   fname = xmlTestDirectory + "test_2m4bDyn_sep.xml";
-  gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds2 = readSimXMLFile(fname);
   gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
   BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE (xml_test_source1)
 
   auto sdiffs = countDiffs(st, st2, 5e-5);
 
-  BOOST_CHECK_EQUAL(sdiffs, 0);
+  BOOST_CHECK_EQUAL(sdiffs, 0u);
 
 }
 
@@ -416,12 +416,12 @@ BOOST_AUTO_TEST_CASE (xml_test8)
 
   std::string fname = xmlTestDirectory + "test_xmltest8.xml";
 
-  gds = new gridDynSimulation ();
+  gds = std::make_unique<gridDynSimulation> ();
 
   readerInfo ri;
 
-  loadFile(gds, fname, &ri);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
+  loadFile(gds.get(), fname, &ri);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
   BOOST_CHECK_EQUAL (readerConfig::warnCount, 0);
   BOOST_CHECK_EQUAL (ri.collectors.size (), 1u);
 
@@ -431,20 +431,20 @@ BOOST_AUTO_TEST_CASE (xml_test9)
 {
   //test the define functionality
   std::string fname = xmlTestDirectory + "test_2m4bDyn.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::no_print;
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (),gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st = gds->getState ();
 
 
 
   fname = xmlTestDirectory + "test_xmltest9.xml";
 
-  gds2 = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds2 = readSimXMLFile(fname);
   gds2->consolePrintLevel = print_level::no_print;
   gds2->run ();
-  BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds2->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds2->getState ();
 
 
@@ -460,10 +460,8 @@ BOOST_AUTO_TEST_CASE (test_bad_xml)
 {
   //test the define functionality
   std::string fname = xmlTestDirectory + "test_bad_xml.xml";
-  gridSimulation *b = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
-  gds = dynamic_cast<gridDynSimulation *> (b);
+  gds = readSimXMLFile(fname);
   BOOST_REQUIRE (gds == nullptr);
-  delete b;
   std::cout << "NOTE: this was supposed to have a failed file load to check error recovery\n";
 
 }
@@ -472,7 +470,7 @@ BOOST_AUTO_TEST_CASE (test_function_constants)
 {
   //test the define functionality
   std::string fname = xmlTestDirectory + "test_function_constant.xml";
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   gridBus *bus = gds->getBus (0);
   BOOST_CHECK_CLOSE (bus->getVoltage (), 1.0, 0.00001);
@@ -490,7 +488,7 @@ BOOST_AUTO_TEST_CASE(test_param_specs)
 {
     //test the define functionality
     std::string fname = xmlTestDirectory + "test_param_setting.xml";
-    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    gds = readSimXMLFile(fname);
 
     
     auto bus = gds->getBus(0);
@@ -522,15 +520,15 @@ BOOST_AUTO_TEST_CASE(test_custom_element1)
 {
     //test the define functionality
     std::string fname = xmlTestDirectory + "test_custom_element1.xml";
-    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    gds = readSimXMLFile(fname);
 
     int bc = gds->getInt("buscount");
-    BOOST_CHECK(bc == 10);
+    BOOST_CHECK_EQUAL(bc, 10);
     std::vector<double> V;
     gds->getVoltage(V);
     double mxv = *std::max_element(V.begin(), V.end());
     double mnv = *std::min_element(V.begin(), V.end());
-    BOOST_CHECK(mnv < mxv);
+    BOOST_CHECK_LT(mnv, mxv);
     
 }
 
@@ -539,15 +537,15 @@ BOOST_AUTO_TEST_CASE(test_custom_element2)
 {
     //test the define functionality
     std::string fname = xmlTestDirectory + "test_custom_element2.xml";
-    gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+    gds = readSimXMLFile(fname);
 
     int bc = gds->getInt("buscount");
-    BOOST_CHECK(bc == 7);
+    BOOST_CHECK_EQUAL(bc, 7);
     std::vector<double> V;
     gds->getVoltage(V);
     double mxv = *std::max_element(V.begin(), V.end());
     double mnv = *std::min_element(V.begin(), V.end());
-    BOOST_CHECK(mnv < mxv);
+    BOOST_CHECK_LT(mnv, mxv);
 
 }
 

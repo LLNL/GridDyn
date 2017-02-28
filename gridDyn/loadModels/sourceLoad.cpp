@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,21 +12,32 @@
 */
 
 #include "sourceModels/gridSource.h"
+#include "sourceModels/sourceTypes.h"
 #include "loadModels/otherLoads.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 #include <map>
 #include <cmath>
 
 
-sourceLoad::sourceLoad(const std::string &objName) :gridLoad(objName)
+sourceLoad::sourceLoad(const std::string &objName) :zipLoad(objName)
 {
 	sourceLink.fill(-1);
 }
 
-gridCoreObject * sourceLoad::clone(gridCoreObject *obj) const
+sourceLoad::sourceLoad(sourceType type, const std::string &objName):sourceLoad(objName)
 {
-	sourceLoad *nobj = cloneBase<sourceLoad, gridLoad>(this, obj);
+	sType = type;
+	//add the sources for P and Q
+	add(makeSource(p_source));
+	add(makeSource(q_source));
+		
+	
+}
+
+coreObject * sourceLoad::clone(coreObject *obj) const
+{
+	sourceLoad *nobj = cloneBase<sourceLoad, zipLoad>(this, obj);
 	if (nobj == nullptr)
 	{
 		return obj;
@@ -34,57 +45,21 @@ gridCoreObject * sourceLoad::clone(gridCoreObject *obj) const
 	nobj->sourceLink = sourceLink;
 	for (auto &src : sources)
 	{
-		nobj->add(src->clone());
+		if (src)
+		{
+			auto newsrc = static_cast<gridSource *>(src->clone());
+			newsrc->locIndex = src->locIndex;
+			nobj->add(newsrc);
+		}
 	}
 	return nobj;
 }
 
-void sourceLoad::add(gridCoreObject *obj)
-{
-	if (dynamic_cast<gridSource *>(obj))
-	{
-		add(static_cast<gridSource *>(obj));
-	}
-}
-
-
-void sourceLoad::add(gridSource *src)
-{
-	src->setParent(this);
-	src->setFlag("pflow_initialization", 1);
-	if (src->locIndex != kNullLocation)
-	{
-		if (sources.size() <= src->locIndex)
-		{
-			sources.resize(src->locIndex + 1);
-		}
-		sources[src->locIndex] = src;
-	}
-	else
-	{
-		src->locIndex = static_cast<int>(sources.size());
-		sources.push_back(src);
-	}
-	subObjectList.push_back(src);
-}
-
-void sourceLoad::set(const std::string &param, const std::string &val)
-{
-	if (param[0] == '#')
-	{
-
-	}
-	else
-	{
-		gridLoad::set(param, val);
-	}
-}
-
 static const std::map<std::string, int> source_lookup
 {
-	{"source",sourceLoad::p_source },
-	{"psource",sourceLoad::p_source},
-	{"p_source",sourceLoad::p_source },
+	{ "source",sourceLoad::p_source },
+	{ "psource",sourceLoad::p_source },
+	{ "p_source",sourceLoad::p_source },
 	{ "qsource",sourceLoad::q_source },
 	{ "q_source",sourceLoad::q_source },
 	{ "rsource",sourceLoad::r_source },
@@ -101,6 +76,7 @@ static const std::map<std::string, int> source_lookup
 	{ "iq_source",sourceLoad::iq_source },
 };
 
+
 static const std::map<std::string, int> sourcekey_lookup
 {
 	{ "p",sourceLoad::p_source },
@@ -115,25 +91,173 @@ static const std::map<std::string, int> sourcekey_lookup
 	{ "ip",sourceLoad::ip_source },
 	{ "iq",sourceLoad::iq_source },
 };
-	
 
-void sourceLoad::set(const std::string &param, double val, gridUnits::units_t unitType)
+static const std::map<std::string, int> source_match
 {
-	auto sfnd = param.find_last_of(":?");
+	{ "source",sourceLoad::p_source },
+	{ "psource",sourceLoad::p_source },
+	{ "p_source",sourceLoad::p_source },
+	{ "qsource",sourceLoad::q_source },
+	{ "q_source",sourceLoad::q_source },
+	{ "rsource",sourceLoad::r_source },
+	{ "r_source",sourceLoad::r_source },
+	{ "xsource",sourceLoad::x_source },
+	{ "x_source",sourceLoad::x_source },
+	{ "ypsource",sourceLoad::yp_source },
+	{ "yp_source",sourceLoad::yp_source },
+	{ "yqsource",sourceLoad::yq_source },
+	{ "yq_source",sourceLoad::yq_source },
+	{ "ipsource",sourceLoad::ip_source },
+	{ "ip_source",sourceLoad::ip_source },
+	{ "iqsource",sourceLoad::iq_source },
+	{ "iq_source",sourceLoad::iq_source },
+	{ "p",sourceLoad::p_source },
+	{ "q",sourceLoad::q_source },
+	{ "r",sourceLoad::r_source },
+	{ "x",sourceLoad::x_source },
+	{ "yp",sourceLoad::yp_source },
+	{ "zp",sourceLoad::yp_source },
+	{ "zr",sourceLoad::yp_source },
+	{ "yq",sourceLoad::yq_source },
+	{ "zq",sourceLoad::yq_source },
+	{ "ip",sourceLoad::ip_source },
+	{ "iq",sourceLoad::iq_source },
+};
+
+void sourceLoad::add(coreObject *obj)
+{
+	if (dynamic_cast<gridSource *>(obj))
+	{
+		add(static_cast<gridSource *>(obj));
+	}
+}
+
+
+void sourceLoad::add(gridSource *src)
+{
+	src->setParent(this);
+	src->setFlag("pflow_init_required", true);
+	if (src->locIndex != kNullLocation)
+	{
+		
+	}
+	else if (!src->m_purpose.empty())
+	{
+		auto ind = source_match.find(src->m_purpose);
+		if (ind != source_match.end())
+		{
+			src->locIndex = ind->second;
+		}
+		else
+		{
+			src->locIndex = static_cast<int>(sources.size());
+		}
+	}
+	else
+	{
+		src->locIndex = static_cast<int>(sources.size());
+	}
+
+	if (sources.size() <= src->locIndex)
+	{
+		sources.resize(src->locIndex + 1,nullptr);
+	}
+	if (sources[src->locIndex])
+	{
+		remove(sources[src->locIndex]);
+
+	}
+	sources[src->locIndex] = src;
+	if (src->locIndex < 8)
+	{
+		if (sourceLink[src->locIndex] < 0)
+		{
+			sourceLink[src->locIndex] = static_cast<int>(src->locIndex);
+		}
+	}
+	//now add to the subObjectList
+	addSubObject(src);
+}
+
+
+void sourceLoad::remove(coreObject *obj)
+{
+	if (dynamic_cast<gridSource *>(obj))
+	{
+		remove(static_cast<gridSource *>(obj));
+	}
+}
+
+void sourceLoad::remove(gridSource *obj)
+{
+	if ((obj->locIndex != kNullLocation) && (obj->locIndex < sources.size()))
+	{
+
+		if (isSameObject(sources[obj->locIndex],obj))
+		{
+			sources[obj->locIndex] = nullptr;
+			obj->setParent(nullptr);
+			for (auto &lnk : sourceLink)
+			{
+				if (lnk == static_cast<int>(obj->locIndex))
+				{
+					lnk = -1;
+				}
+			}
+			gridSecondary::remove(obj);
+		}
+	}
+
+}
+
+gridSource *sourceLoad::findSource(const std::string &srcname)
+{
+	auto ind = source_match.find(srcname);
+	if (ind != source_match.end())
+	{
+		int index = sourceLink[ind->second];
+		if (index < 0)
+		{
+			add(makeSource(static_cast<sourceLoad::sourceLoc>(ind->second)));
+		}
+		else if ((static_cast<int>(sources.size())<=index)||(!sources[index]))
+		{
+			//this may not actually do anything is the sType is set to other
+			add(makeSource(static_cast<sourceLoad::sourceLoc>(ind->second)));
+		}
+		return sources[index];
+	}
+	return nullptr;
+}
+
+gridSource *sourceLoad::findSource(const std::string &srcname) const
+{
+	auto ind = source_match.find(srcname);
+	if (ind != source_match.end())
+	{
+		int index = sourceLink[ind->second];
+		if (index < 0)
+		{
+			return nullptr;
+		}
+		else if ((static_cast<int>(sources.size()) <= index) || (!sources[index]))
+		{
+			return nullptr;
+		}
+		return sources[index];
+	}
+	return nullptr;
+}
+
+void sourceLoad::setFlag(const std::string &flag, bool val)
+{
+	auto sfnd = flag.find_last_of(":?");
 	if (sfnd != std::string::npos)
 	{
-		auto ind = source_lookup.find(param.substr(0, sfnd - 1));
-		if (ind != source_lookup.end())
+		auto src = findSource(flag.substr(0, sfnd));
+		if (src)
 		{
-			if ((static_cast<int>(sources.size()) < ind->second) && (sources[ind->second]))
-			{
-				sources[ind->second]->set(param.substr(sfnd + 1, std::string::npos), val, unitType);
-				return;
-			}
-			else
-			{
-				throw(unrecognizedParameter());
-			}
+			src->setFlag(flag.substr(sfnd + 1, std::string::npos), val);
 		}
 		else
 		{
@@ -142,7 +266,74 @@ void sourceLoad::set(const std::string &param, double val, gridUnits::units_t un
 	}
 	else
 	{
-		auto ind = source_lookup.find(param.substr(0, sfnd - 1));
+		zipLoad::setFlag(flag, val);
+	}
+}
+
+void sourceLoad::set(const std::string &param, const std::string &val)
+{
+	auto sfnd = param.find_last_of(":?");
+	if (sfnd != std::string::npos)
+	{
+		auto src = findSource(param.substr(0, sfnd));
+		if (src)
+		{
+			src->set(param.substr(sfnd + 1, std::string::npos), val);
+		}
+		else
+		{
+			throw(unrecognizedParameter());
+		}
+	}
+	else
+	{
+		zipLoad::set(param, val);
+	}
+}
+
+void sourceLoad::timestep(coreTime ttime, const IOdata &inputs, const solverMode &sMode)
+{
+	for (auto &src : getSubObjects())
+	{
+		static_cast<gridSource *>(src)->timestep(ttime, noInputs, sMode);
+	}
+	getSourceLoads();
+	prevTime = ttime;
+	zipLoad::timestep(ttime, inputs, sMode);
+}
+
+void sourceLoad::setState(coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+{
+	
+	for (auto &src : getSubObjects())
+	{
+		src->setState(ttime,state,dstate_dt,sMode);
+	}
+	getSourceLoads();
+	prevTime = ttime;
+}
+
+void sourceLoad::set(const std::string &param, double val, gridUnits::units_t unitType)
+{
+	auto sfnd = param.find_last_of(":?");
+	if (sfnd != std::string::npos)
+	{
+		if (sfnd != std::string::npos)
+		{
+			auto src = findSource(param.substr(0, sfnd));
+			if (src)
+			{
+				src->set(param.substr(sfnd + 1, std::string::npos), val,unitType);
+			}
+			else
+			{
+				throw(unrecognizedParameter());
+			}
+		}
+	}
+	else
+	{
+		auto ind = source_lookup.find(param.substr(0, sfnd));
 		if (ind != source_lookup.end())
 		{
 			if ((static_cast<int>(sources.size()) < ind->second) && (sources[ind->second]))
@@ -152,7 +343,6 @@ void sourceLoad::set(const std::string &param, double val, gridUnits::units_t un
 			else if (!opFlags[pFlow_initialized])
 			{
 				sourceLink[ind->second] = static_cast<int>(val);
-				
 			}
 			else
 			{
@@ -162,23 +352,23 @@ void sourceLoad::set(const std::string &param, double val, gridUnits::units_t un
 		}
 		else
 		{
-			auto keyind = sourcekey_lookup.find(param.substr(0, sfnd - 1));
+			auto keyind = sourcekey_lookup.find(param.substr(0, sfnd));
 
-			if (keyind != source_lookup.end())
+			if (keyind != sourcekey_lookup.end())
 			{
-				if ((static_cast<int>(sources.size()) < keyind->second) && (sources[keyind->second]))
+				if ((static_cast<int>(sources.size()) > keyind->second) && (sources[keyind->second]))
 				{
 					sources[keyind->second]->set("level", gridUnits::unitConversion(val, unitType, gridUnits::puMW, systemBasePower));
 					return;
 				}
 			}
-			gridLoad::set(param, val, unitType);
+			zipLoad::set(param, val, unitType);
 		}
 	}
 	
 }
 
-void sourceLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void sourceLoad::pFlowObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	//Do a check on the sources;
 	int fnd = 0;
@@ -198,41 +388,22 @@ void sourceLoad::pFlowObjectInitializeA(gridDyn_time time0, unsigned long flags)
 			LOG_WARNING("no source given at called index");
 		}
 	}
-	if (fnd == 0) //auto fill them if none were specified
-	{
-		for (int kk = 0; kk < 8; ++kk)
-		{
-			if (sources[kk])
-			{
-				sourceLink[kk] = kk;
-			}
-		}
-	}
 	gridSecondary::pFlowObjectInitializeA(time0, flags); //to initialize the submodels
 	
 	getSourceLoads();
 }
 
-void sourceLoad::dynObjectInitializeA(gridDyn_time time0, unsigned long flags)
+void sourceLoad::dynObjectInitializeA(coreTime time0, unsigned long flags)
 {
 	gridSecondary::dynObjectInitializeA(time0, flags);
 	getSourceLoads();
 }
 
-void sourceLoad::loadUpdate(gridDyn_time ttime)
+void sourceLoad::updateLocalCache(const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode)
 {
 	for (auto &src : sources)
 	{
-		src->sourceUpdate(ttime);
-	}
-	getSourceLoads();
-}
-
-void sourceLoad::loadUpdateForward(gridDyn_time ttime)
-{
-	for (auto &src : sources)
-	{
-		src->sourceUpdateForward(ttime);
+		src->updateLocalCache(noInputs,sD,sMode);
 	}
 	getSourceLoads();
 }
@@ -241,34 +412,66 @@ void sourceLoad::getSourceLoads()
 {
 	if (sourceLink[p_source] >= 0)
 	{
-		P = sources[sourceLink[p_source]]->getOutput();
+		setP(sources[sourceLink[p_source]]->getOutput());
 	}
 	if (sourceLink[q_source] >= 0)
 	{
-		Q = sources[sourceLink[q_source]]->getOutput();
+		setQ(sources[sourceLink[q_source]]->getOutput());
 	}
 	if (sourceLink[yp_source] >= 0)
 	{
-		Yp = sources[sourceLink[yp_source]]->getOutput();
+		setYp(sources[sourceLink[yp_source]]->getOutput());
 	}
 	if (sourceLink[yq_source] >= 0)
 	{
-		Yq = sources[sourceLink[yq_source]]->getOutput();
+		setYq(sources[sourceLink[yq_source]]->getOutput());
 	}
 	if (sourceLink[ip_source] >= 0)
 	{
-		Ip = sources[sourceLink[ip_source]]->getOutput();
+		setIp(sources[sourceLink[ip_source]]->getOutput());
 	}
 	if (sourceLink[iq_source] >= 0)
 	{
-		Iq = sources[sourceLink[iq_source]]->getOutput();
+		setIq(sources[sourceLink[iq_source]]->getOutput());
 	}
 	if (sourceLink[r_source] >= 0)
 	{
-		r = sources[sourceLink[r_source]]->getOutput();
+		setr(sources[sourceLink[r_source]]->getOutput());
 	}
 	if (sourceLink[x_source] >= 0)
 	{
-		x = sources[sourceLink[x_source]]->getOutput();
+		setx(sources[sourceLink[x_source]]->getOutput());
 	}
+}
+
+gridSource *sourceLoad::makeSource(sourceLoc loc)
+{
+	gridSource *src = nullptr;
+	switch (sType)
+	{
+	case sourceType::pulse:
+		src = new pulseSource();
+		break;
+	case sourceType::random:
+		src = new randomSource();
+		break;
+	case sourceType::sine:
+		src = new sineSource();
+		break;
+	case sourceType::other:
+	default:
+		return nullptr;
+	}
+	src->locIndex = static_cast<index_t>(loc);
+	return src;
+}
+
+coreObject *sourceLoad::find(const std::string &obj) const
+{
+	auto src = findSource(obj);
+	if (src == nullptr)
+	{
+		return gridObject::find(obj);
+	}
+	return src;
 }

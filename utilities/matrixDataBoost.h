@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -55,24 +55,11 @@ public:
 	/**
 	* @brief don't use this function
 	*/
-	index_t rowIndex(index_t N) const override
+	matrixElement<type> element(index_t N)
 	{
-		return 0;
+		return matrixElement < type();
 	}
-	/**
-	* @brief don't use this function
-	*/
-	index_t colIndex(index_t N) const override
-	{
-		return 0;
-	}
-	/**
-	* @brief don't use this function
-	*/
-	type val(index_t N) const override
-	{
-		return type(0);
-	}
+	
 
 	/**
 	* @brief don't use this function
@@ -94,11 +81,20 @@ public:
 		return m(rowN, colN);
 	}
 
+	auto begin() const
+	{
+		return matriIteratorBoost(this, 0);
+	}
+	auto end() const
+	{
+		return matriIteratorBoost(this, size());
+	}
+
 protected:
-	class matrixIteratorBoost :public matrixIteratorActual<type>
+	class matrixIteratorBoost
 	{
 	public:
-		explicit matrixIteratorBoost(const matrixDataBoost<type> *matrixData, index_t start = 0) :matrixIteratorActual<type>(matrixData, start), mDC(matrixData)
+		explicit matrixIteratorBoost(const matrixDataBoost<type> *matrixData, index_t start = 0) 
 		{
 			if (start == 0)
 			{
@@ -126,20 +122,11 @@ protected:
 			}
 
 		}
-		matrixIteratorBoost(const matrixIteratorBoost<type> *it2) :matrixIteratorActual<type>(it2->mDB), mDB(it2->mDB)
-		{
-			cptr = it2->cptr;
-			cptr2 = it2->cptr2;
-		}
+		
 
-		virtual matrixIteratorActual *clone() const override
-		{
-			return new matrixIteratorBoost(this);
-		}
 
-		virtual void increment() override
+		matrixIteratorBoost & operator++() override
 		{
-			matrixIteratorActual<type>::increment();
 			++cptr2;
 			if (cptr2==cptr2end)
 			{

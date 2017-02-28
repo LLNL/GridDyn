@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2014, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -52,6 +52,8 @@ set(gridSource_sources
 	sourceModels/sineSource.cpp
 	sourceModels/functionSource.cpp
 	sourceModels/commSource.cpp
+	sourceModels/blockSource.cpp
+	sourceModels/grabberSource.cpp
 	)
 
 set(exciter_sources
@@ -91,6 +93,12 @@ set (controlblock_sources
 	submodels/controlBlocks/lutBlock.cpp
 	submodels/controlBlocks/transferFunctionBlock.cpp
 	submodels/controlBlocks/filteredDerivativeBlock.cpp
+	submodels/controlBlocks/blockSequence.cpp
+	submodels/controlBlocks/blockSequence.h
+	submodels/controlBlocks/valueLimiter.cpp
+	submodels/controlBlocks/valueLimiter.h
+	submodels/controlBlocks/rampLimiter.cpp
+	submodels/controlBlocks/rampLimiter.h
 	submodels/otherBlocks.h
 	submodels/gridControlBlocks.h
 	)
@@ -120,16 +128,15 @@ set(load_headers
 	loadModels/gridLabDLoad.h
 	loadModels/svd.h
 	loadModels/compositeLoad.h
+	loadModels/zipLoad.h
+	loadModels/gridLoad3Phase.h
 	)
 	
 set(load_sources
 	${load_headers}
 	loadModels/gridLoad.cpp
-	loadModels/pulseLoad.cpp
 	loadModels/rampLoad.cpp
-	loadModels/sineLoad.cpp
 	loadModels/fileLoad.cpp
-	loadModels/randomLoad.cpp
 	loadModels/motorLoad.cpp
 	loadModels/motorLoad3.cpp
 	loadModels/motorLoad5.cpp
@@ -137,7 +144,9 @@ set(load_sources
 	loadModels/exponentialLoad.cpp
 	loadModels/compositeLoad.cpp
 	loadModels/sourceLoad.cpp
+	loadModels/zipLoad.cpp
 	loadModels/svd.cpp
+	loadModels/gridLoad3Phase.cpp
 	)
 
 set (link_headers
@@ -208,7 +217,9 @@ set(solver_sources
 	solvers/kinsolInterface.cpp
 	solvers/solverInterface.cpp
 	solvers/basicSolver.cpp
-	solvers/sundialsMatrixData.cpp
+	solvers/sundialsMatrixDataDense.cpp
+	solvers/sundialsMatrixDataSparseRow.cpp
+	solvers/sundialsMatrixDataSparseColumn.cpp
 	solvers/sundialsInterface.cpp
 	solvers/basicOdeSolver.cpp
 	)
@@ -230,37 +241,21 @@ IF (LOAD_ARKODE)
 ENDIF(LOAD_ARKODE)
 
 set (core_headers
-	basicDefs.h
-	gridDynTypes.h
-	gridDynVectorTypes.h
-	gridDyn_time.h
-	gridCore.h
 	gridObjects.h
 	parameterOperator.hpp
 	gridObjectsHelperClasses.h
-	objectFactory.h
-	objectFactoryTemplates.h
-	gridCoreList.h
-	gridCoreTemplates.h
-	core/objectOperatorInterface.h
-	core/helperTemplates.h
-	core/factoryTemplates.h
-	core/propertyBuffer.h
-	core/gridDynExceptions.h
+	numericEstimationFunctions.h
+	gridDynDefinitions.h
 	)
 
 set (core_sources
 	${core_headers}
-	gridCore.cpp
 	gridObjects.cpp
 	gridPrimary.cpp
 	gridSecondary.cpp
 	gridSubModel.cpp
 	gridObjectsHelperClasses.cpp
-	objectFactory.cpp
-	gridCoreList.cpp
-	core/propertyBuffer.cpp
-	core/gridDynExceptions.cpp
+	numericEstimationFunctions.cpp
 	)
 
 set(primary_headers
@@ -286,38 +281,44 @@ set(primary_sources
 	primary/listMaintainer.cpp
 	)
 
-set(re_headers
-	recorder_events/gridGrabbers.h
-	recorder_events/objectGrabbers.h
-	recorder_events/collector.h
-	recorder_events/gridEvent.h
-	recorder_events/stateGrabber.h
-	recorder_events/eventAdapters.h
-	recorder_events/eventQueue.h
-	recorder_events/gridCondition.h
-	recorder_events/objectInterpreter.h
-	recorder_events/eventInterface.h
+set(event_headers
+	events/gridEvent.h
+	events/eventAdapters.h
+	events/eventQueue.h
+	events/eventInterface.h
 	)
 	
-set(re_sources
-	${re_headers}
-	recorder_events/gridRecorder.cpp
-	recorder_events/gridEvent.cpp
-	recorder_events/gridGrabbers.cpp
-	recorder_events/grabberInterpreter.cpp
-	recorder_events/grabberInterpreter.hpp
-	recorder_events/stateGrabbers.cpp
-	recorder_events/eventAdapters.cpp
-	recorder_events/eventQueue.cpp
-	recorder_events/gridCondition.cpp
-	recorder_events/objectInterpreter.cpp
-	recorder_events/gridPlayer.cpp
-	recorder_events/interpolatingPlayer.cpp
-	recorder_events/compoundEvent.cpp
-	recorder_events/compoundEventPlayer.cpp
-	recorder_events/objectGrabbers.cpp
-	recorder_events/compoundCondition.cpp
-	recorder_events/collector.cpp
+set(event_sources
+	${event_headers}
+	events/gridEvent.cpp
+	events/eventAdapters.cpp
+	events/eventQueue.cpp
+	events/gridPlayer.cpp
+	events/interpolatingPlayer.cpp
+	events/compoundEvent.cpp
+	events/compoundEventPlayer.cpp
+	)	
+set(measurement_headers
+	measurement/gridGrabbers.h
+	measurement/objectGrabbers.h
+	measurement/collector.h
+	measurement/stateGrabber.h
+	measurement/gridCondition.h
+	measurement/grabberSet.h
+	)
+	
+set(measurement_sources
+	${measurement_headers}
+	measurement/gridRecorder.cpp
+	measurement/gridGrabbers.cpp
+	measurement/grabberInterpreter.cpp
+	measurement/grabberInterpreter.hpp
+	measurement/stateGrabbers.cpp
+	measurement/gridCondition.cpp
+	measurement/objectGrabbers.cpp
+	measurement/compoundCondition.cpp
+	measurement/collector.cpp
+	measurement/grabberSet.cpp
 	)	
 
 set (comm_headers
@@ -365,25 +366,7 @@ set (relay_sources
 	relays/differentialRelay.cpp
 	relays/controlRelay.cpp
 )
-IF(FSKIT_ENABLE)
-set (fskit_headers
-	fskit/fskitCommunicator.h
-	gridDynFederatedScheduler.h
-	)
 
-set(fskit_sources
-  ${fskit_headers}
-  fskit/fskitCommunicator.cpp
-  gridDynFederatedScheduler.cpp
-)
-ELSE (FSKIT_ENABLE)
-set(fskit_headers
-)
-
-set(fskit_sources
-
-)
-ENDIF(FSKIT_ENABLE)
 
 set (controller_headers
 	controllers/schedulerInfo.h
@@ -406,10 +389,10 @@ set (controller_sources
 	)
 
 set(sublibrary_files
-	${re_sources}
+	${event_sources}
+	${measurement_sources}
 	${griddynIO_sources}
 	${gridSource_sources}
-	${fskit_sources}
 	${controller_sources}
 	${comm_sources}
 	${solver_sources}
@@ -431,14 +414,14 @@ set(header_files
 	${solver_headers}
 	${controller_headers}
 	${comm_headers}
-	${re_headers}
+	${event_headers}
+	${measurement_headers}
 	${gridDynIO_headers}
 	${simulation_headers}
 	${submodel_headers}
 	${load_headers}
 	${relay_headers}
 	${generator_headers}
-	${fskit_headers}
 	)
 
 
@@ -449,7 +432,8 @@ source_group("exciters" FILES ${exciter_sources})
 source_group("governors" FILES ${gov_sources})
 source_group("genmodels" FILES ${genmodel_sources})
 source_group("links" FILES ${link_sources})
-source_group("recorder_events" FILES ${re_sources})
+source_group("events" FILES ${event_sources})
+source_group("measurement" FILES ${measurement_sources})
 source_group("generators" FILES ${generator_sources})
 source_group("gridSources" FILES ${gridSource_sources})
 source_group("simulation" FILES ${simulation_sources})
@@ -457,33 +441,23 @@ source_group("core" FILES ${core_sources})
 source_group("primary" FILES ${primary_sources})
 source_group("relays" FILES ${relay_sources})
 source_group("comms" FILES ${comm_sources})
-IF(FSKIT_ENABLE)
-source_group("fskit" FILES ${fskit_sources})
-ENDIF(FSKIT_ENABLE)
 source_group("controllers" FILES ${controller_sources})
 source_group("controlblocks" FILES ${controlblock_sources})
 source_group("solvers" FILES ${solver_sources})
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/core)
+INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 
-
-IF (FMI_ENABLE)
-	INCLUDE_DIRECTORIES(${FMI_INCLUDE_DIR})
-ENDIF(FMI_ENABLE)
-
 #create a griddyn_config.h file for program options
 
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/griddyn-config.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h)
 
 INSTALL(TARGETS gridDyn
 	LIBRARY DESTINATION lib

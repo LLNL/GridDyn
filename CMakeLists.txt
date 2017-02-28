@@ -11,9 +11,9 @@
 #project name
 project(GridDyn)
 
-#states that Cmake version > 3.3
-cmake_minimum_required(VERSION 3.3)
-cmake_policy(VERSION 3.3)
+#states that Cmake version > 3.4
+cmake_minimum_required(VERSION 3.4)
+cmake_policy(VERSION 3.4)
 
 #version number
 set(GridDyn_VERSION_MAJOR 0)
@@ -54,124 +54,10 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 ENDIF()
 
 
-
-#include(mergestaticlibs)
-
-# -------------------------------------------------------------
-# Sundials
-# -------------------------------------------------------------
-
 #-------------------------------------------------------------
-# Enable Cvode and Arkode modules
+# Setup compiler options and configurations
 #-------------------------------------------------------------
-OPTION(LOAD_CVODE "Enable CVODE Support" OFF)
-OPTION(LOAD_ARKODE "Enable ARKODE support" OFF)
-
-SHOW_VARIABLE(SUNDIALS_INSTALL_DIR PATH
-  "SUNDIALS library directory" "${SUNDIALS_LIBRARY_DIR}")
-find_package(SUNDIALS)
-
-set(external_library_list
-	${SUNDIALS_LIBRARIES}
-	)
-	
-set(external_link_directories ${SUNDIALS_LIBRARY_DIR})
-
-set(optional_component_test_files)
-set(optional_system_test_files)
-
-set(griddyn_optional_libraries )
-# -------------------------------------------------------------
-# Find (and test) the KLU libraries
-# -------------------------------------------------------------
-
-OPTION(KLU_ENABLE "Enable KLU support" ON)
-
-SHOW_VARIABLE(KLU_INSTALL_DIR PATH
-  "KLU library directory" "${KLU_INSTALL_DIR}")
-
-set(SuiteSparse_FOUND NO)
-
-if(KLU_ENABLE)
-IF(MSVC)
-set(SuiteSparse_USE_LAPACK_BLAS ON)
-ENDIF(MSVC)
-set(SuiteSparse_VERBOSE ON)
-  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
-
-  if(SuiteSparse_FOUND) 
-  INCLUDE_DIRECTORIES(SYSTEM ${SuiteSparse_INCLUDE_DIR})
-  list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
-  #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
-  else(SuiteSparse_FOUND)
-	message( FATAL_ERROR "KLU not functional - support will not be provided")
-	message( "Double check spelling specified libraries (search is case sensitive)")
-  endif(SuiteSparse_FOUND)
-
-endif(KLU_ENABLE)
-
-
-set (optional_library_key_headers )
-set (optional_library_functions )
-# -------------------------------------------------------------
-# FSKIT
-# -------------------------------------------------------------
-
-OPTION(FSKIT_ENABLE "Enable FSKIT support" OFF)
-
-IF(FSKIT_ENABLE)
-  find_package(FSKIT)
-  INCLUDE_DIRECTORIES(SYSTEM ${FSKIT_INCLUDE_DIR})
-  set(GRIDDYN_HAVE_FSKIT 1)
-ENDIF(FSKIT_ENABLE)
-
-# -------------------------------------------------------------
-# Enable MPI support?
-# -------------------------------------------------------------
-
-OPTION(MPI_ENABLE "Enable MPI support" OFF)
-
-IF(MPI_ENABLE)
-  find_package(MPI)
-  # SGS FIXME this should in configure.h somewhere perhaps?
-  ADD_DEFINITIONS(-DHAVE_MPI)
-ENDIF(MPI_ENABLE)
-
-# -------------------------------------------------------------
-# Enable OpenMP support?
-# -------------------------------------------------------------
-OPTION(OPENMP_ENABLE "Enable openMP support" ON)
-
-
-
-IF(OPENMP_ENABLE)
-  message(STATUS "****** finding OpenMP support")
-  FIND_PACKAGE(OpenMP)
-  IF(OPENMP_FOUND)
-    ADD_DEFINITIONS(-DHAVE_OPENMP)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CDD_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-  ELSE(OPENMP_FOUND)
-    message(STATUS "Disabling OpenMP support, could not determine compiler flags")
-	set(OPENMP_ENABLE FALSE)
-  ENDIF(OPENMP_FOUND)
-ELSE(OPENMP_ENABLE)
-  set(OPENMP_FOUND FALSE)
-ENDIF(OPENMP_ENABLE)
-
-IF (OPENMP_ENABLE)
-	OPTION(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
-	OPTION(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
-ENDIF(OPENMP_ENABLE)
-OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
-
-IF (NOT DISABLE_MULTITHREADING)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-list(APPEND external_library_list Threads::Threads)
-ENDIF(NOT DISABLE_MULTITHREADING)
-
+message(STATUS "setting up for ${CMAKE_CXX_COMPILER_ID}")
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
@@ -205,25 +91,233 @@ ENDIF(MSVC)
   ENDIF(MINGW)
 ENDIF(UNIX)
 
-#check for clang 3.4 and the fact that CMAKE_CXX_STANDARD doesn't work yet for that compiler
+#message(STATUS ${CMAKE_CXX_FLAGS})
+include(configGenerator)
 
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
-	add_compile_options(-std=c++1y)
-ELSE ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
+IF (VERSION_OPTION)
+	add_compile_options(${VERSION_OPTION})
+ELSE ()
 set(CMAKE_CXX_STANDARD 14)
-ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
+ENDIF ()
 
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>)
-ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1)
+include(ExternalProject)
+
+#########################################################################################
+
+#include(mergestaticlibs)
+# -------------------------------------------------------------
+# Enable OpenMP support?
+# -------------------------------------------------------------
+OPTION(OPENMP_ENABLE "Enable openMP support" ON)
+
+
+
+IF(OPENMP_ENABLE)
+  #message(STATUS "****** finding OpenMP support")
+  FIND_PACKAGE(OpenMP)
+  IF(OPENMP_FOUND)
+    ADD_DEFINITIONS(-DHAVE_OPENMP)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CDD_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  ELSE(OPENMP_FOUND)
+    message(STATUS "Disabling OpenMP support, could not determine compiler flags")
+	set(OPENMP_ENABLE FALSE)
+  ENDIF(OPENMP_FOUND)
+ELSE(OPENMP_ENABLE)
+  set(OPENMP_FOUND FALSE)
+ENDIF(OPENMP_ENABLE)
+
+IF (OPENMP_FOUND)
+	OPTION(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
+	OPTION(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
+ENDIF(OPENMP_FOUND)
+
+OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
+
+
+# -------------------------------------------------------------
+# Find multithreading headers and includes
+# -------------------------------------------------------------
+
+IF (NOT DISABLE_MULTITHREADING)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+list(APPEND external_library_list Threads::Threads)
+ENDIF(NOT DISABLE_MULTITHREADING)
+
+# -------------------------------------------------------------
+# Enable MPI support?
+# -------------------------------------------------------------
+
+OPTION(MPI_ENABLE "Enable MPI support" OFF)
+
+IF(MPI_ENABLE)
+  find_package(MPI)
+  # SGS FIXME this should in configure.h somewhere perhaps?
+  ADD_DEFINITIONS(-DHAVE_MPI)
+ENDIF(MPI_ENABLE)
+
+
+# -------------------------------------------------------------
+# Find (and test) the KLU libraries
+# -------------------------------------------------------------
+
+
+OPTION(KLU_ENABLE "Enable KLU support" ON)
+
+SHOW_VARIABLE(SuiteSparse_DIR PATH
+  "KLU library directory" "${SuiteSparse_DIR}")
+
+if(KLU_ENABLE)
+IF(MSVC)
+set(SuiteSparse_USE_LAPACK_BLAS ON)
+ENDIF(MSVC)
+set(SuiteSparse_VERBOSE OFF)
+set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
+  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
+  if(SuiteSparse_FOUND) 
+	list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+  #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
+  IF (AUTOBUILD_KLU)
+		OPTION(FORCE_KLU_REBUILD "force rebuild of KLU" OFF)
+		IF(FORCE_KLU_REBUILD)
+			include(BuildSuiteSparse)
+			build_suitesparse()
+			set(FORCE_KLU_REBUILD OFF CACHE BOOL "force rebuild of KLU" FORCE)
+		ENDIF(FORCE_KLU_REBUILD)
+	ENDIF(AUTOBUILD_KLU)
+  else(SuiteSparse_FOUND)
+	OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" OFF)
+	IF (AUTOBUILD_KLU)
+		include(BuildSuiteSparse)
+		build_suitesparse()
+		set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
+		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
+	ENDIF(AUTOBUILD_KLU)
+	if (SuiteSparse_FOUND)
+	   list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+	else()
+		message( FATAL_ERROR "KLU not functional - support will not be provided")
+		message( "Double check spelling specified libraries (search is case sensitive)")
+	endif()
+  endif(SuiteSparse_FOUND)
+
+endif(KLU_ENABLE)
+
+# -------------------------------------------------------------
+# Sundials
+# -------------------------------------------------------------
+
+SHOW_VARIABLE(SUNDIALS_DIR PATH
+  "SUNDIALS library directory" "${SUNDIALS_DIR}")
+  
+  set(SUNDIALS_FIND_QUIETLY ON)
+  
+  set(SUNDIALS_REQUIRED IDA KINSOL)
+  if (OPENMP_FOUND)
+  list(APPEND SUNDIALS_REQUIRED nvecopenmp)
+  endif(OPENMP_FOUND)
+   set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
+find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
+
+  if(SUNDIALS_FOUND) 
+	list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
+  OPTION(FORCE_SUNDIALS_REBUILD "force rebuild of sundials" OFF)
+	IF (AUTOBUILD_SUNDIALS)
+		
+		IF(FORCE_SUNDIALS_REBUILD)
+			include(BuildSundials)
+			build_sundials()
+			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
+		ENDIF(FORCE_SUNDIALS_REBUILD)
+	ELSE (AUTOBUILD_SUNDIALS)
+	   IF(FORCE_SUNDIALS_REBUILD)
+			include(BuildSundials)
+			build_sundials()
+			set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
+			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
+			set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
+			find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
+		ENDIF(FORCE_SUNDIALS_REBUILD)
+	ENDIF(AUTOBUILD_SUNDIALS)
+  else(SUNDIALS_FOUND)
+    OPTION(AUTOBUILD_SUNDIALS "enable Sundials to automatically download and build" OFF)
+    message(STATUS "abs=${AUTOBUILD_SUNDIALS}")
+    IF (AUTOBUILD_SUNDIALS)
+      include(BuildSundials)
+      build_sundials()
+      set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
+      find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
+    ENDIF(AUTOBUILD_SUNDIALS)
+  if (SUNDIALS_FOUND)
+    list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
+  else (SUNDIALS_FOUND)
+	message( FATAL_ERROR "sundials not found - unable to continue")
+	message( "Double check spelling specified libraries (search is case sensitive)")
+  endif(SUNDIALS_FOUND)
+  endif(SUNDIALS_FOUND)
+
+if (SUNDIALS_ARKODE_FOUND)
+set(LOAD_ARKODE TRUE)
+endif(SUNDIALS_ARKODE_FOUND)
+
+if (SUNDIALS_CVODE_FOUND)
+set(LOAD_CVODE TRUE)
+endif(SUNDIALS_CVODE_FOUND)
+
+set(optional_component_test_files)
+set(optional_system_test_files)
+
+set(griddyn_optional_libraries )
+
+
+
+
+set (optional_library_key_headers )
+set (optional_library_functions )
+
+# -------------------------------------------------------------
+# BOOST
+# -------------------------------------------------------------
+
+IF (MSVC)
+find_path(BOOST_TEST_PATH 
+			NAMES 			boost/version.hpp
+			PATHS		C:/boost_1_64_0
+						C:/boost_1_63_0
+						C:/boost_1_61_0
+						D:/boost_1_64_0
+						D:/boost_1_63_0
+						D:/boost_1_61_0
+						C:/boost/boost_1_64_0
+						C:/boost/boost_1_63_0
+						C:/boost/boost_1_61_0
+						D:/boost/boost_1_64_0
+						D:/boost/boost_1_63_0
+						D:/boost/boost_1_61_0
+						C:/local/boost_1_64_0
+						C:/local/boost_1_63_0
+						C:/local/boost_1_61_0
+						D:/local/boost_1_64_0
+						D:/local/boost_1_63_0
+						D:/local/boost_1_61_0
+		)
+		
+		if (BOOST_TEST_PATH)
+		set(BOOST_ROOT ${BOOST_TEST_PATH})
+		endif(BOOST_TEST_PATH)
+ENDIF(MSVC)
 
 SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
 
-IF(FSKIT_ENABLE)
+IF(MPI_ENABLE)
   find_package(Boost COMPONENTS program_options unit_test_framework filesystem serialization mpi system date_time REQUIRED)
-ELSE(FSKIT_ENABLE)
+ELSE(MPI_ENABLE)
   find_package(Boost COMPONENTS program_options unit_test_framework filesystem system date_time REQUIRED)
-ENDIF(FSKIT_ENABLE)
+ENDIF(MPI_ENABLE)
+
+mark_as_advanced(CLEAR BOOST_ROOT)
 
 message("Using Boost include files : ${Boost_INCLUDE_DIR}")
 message("Using Boost libraries ${Boost_LIBRARY_DIRS}")
@@ -232,21 +326,19 @@ list(APPEND external_library_list ${Boost_LIBRARIES})
   list(APPEND external_link_directories ${Boost_LIBRARY_DIRS})
 
 # -------------------------------------------------------------
-# Enable FMI support?
+# load the required subdirectories
 # -------------------------------------------------------------
 
-OPTION(FMI_ENABLE "Enable FMI support" OFF)
-# If FMI is enabled try to locate the libraries
-# link against them.
+add_subdirectory(formatInterpreters)
 
-IF (FMI_ENABLE)
-	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		set(FMI_ENABLE OFF)
-		message("FMI support requires BOOST 1.61 or higher")
-	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-	add_subdirectory(fmi)
-	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-ENDIF(FMI_ENABLE)
+add_subdirectory(core)
+#required for utilities library
+
+add_subdirectory(utilities)
+
+add_subdirectory(gridDyn)
+
+# now go into the optional stuff
 
 
 # -------------------------------------------------------------
@@ -256,14 +348,27 @@ ENDIF(FMI_ENABLE)
 OPTION(ZMQ_ENABLE "Enable ZMQ networking library" OFF)
 # If ZMQ library is enabled try to locate it and link against it
 
-IF (ZMQ_ENABLE)
+IF ((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
 
 SHOW_VARIABLE(ZMQ_LIBRARY_PATH PATH
   "path to the zmq libraries" "${ZMQ_LIBRARY_PATH}")
   
 SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
   "path to the zmq headers" "${ZMQ_INCLUDE_PATH}")
+  set(ZMQ_FIND_QUIETLY ON)
 find_package(ZMQ)
+
+if (NOT ZMQ_FOUND)
+OPTION(AUTOBUILD_ZMQ "enable ZMQ to automatically download and build" OFF)
+  IF (AUTOBUILD_ZMQ)
+  include(buildlibZMQ)
+  build_libzmq()
+  set(ZMQ_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+find_package(ZMQ)
+  ENDIF(AUTOBUILD_ZMQ)
+  
+endif(NOT ZMQ_FOUND)
+ 
 
 # ZMQ_INCLUDE_DIR, where to find zmq.h
 # ZMQ_LIBRARY, the library needed to use ZMQ
@@ -271,39 +376,18 @@ find_package(ZMQ)
 	if (ZMQ_FOUND)
 		add_subdirectory(zmqInterface)
 	else(ZMQ_FOUND)
-		message("unable to locate zmq library")
+		message(SEND_ERROR "unable to locate zmq library")
 	endif(ZMQ_FOUND)
-ENDIF(ZMQ_ENABLE)
+ENDIF((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
 
-# -------------------------------------------------------------
-# Enable FNCS executable
-# -------------------------------------------------------------
 
-OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
-# If FNCS_EXECUTABLE is load the fncs directory
-# link against them.
-
-IF (FNCS_EXECUTABLE)
-	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
-	IF(USE_DUMMY_FNCS)
-		HIDE_VARIABLE(FNCS_INSTALL_PATH)
-	ELSE(USE_DUMMY_FNCS)
-		SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
-  
-		find_package(FNCS)
-	ENDIF(USE_DUMMY_FNCS)
-	add_subdirectory(fncs)
-ELSE(FNCS_EXECUTABLE)
-	HIDE_VARIABLE(FNCS_INSTALL_PATH)
-	HIDE_VARIABLE(USE_DUMMY_FNCS)
-ENDIF(FNCS_EXECUTABLE)
 
 
 # -------------------------------------------------------------
 # Enable support for Plugins
 # -------------------------------------------------------------
 
-OPTION(ENABLE_PLUGINS "Enable support for plugin modules" ON)
+OPTION(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
 IF (ENABLE_PLUGINS)
 	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
@@ -327,6 +411,37 @@ if (LOAD_EXTRA_MODELS)
 ENDIF(LOAD_EXTRA_MODELS)
 
 # -------------------------------------------------------------
+# Enable FMI support?
+# -------------------------------------------------------------
+
+OPTION(FMI_ENABLE "Enable FMI support" OFF)
+# If FMI is enabled try to locate the libraries
+# link against them.
+
+IF (FMI_ENABLE)
+	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+		set(FMI_ENABLE OFF)
+		message("FMI support requires BOOST 1.61 or higher")
+	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+		add_subdirectory(fmi)
+	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+ENDIF(FMI_ENABLE)
+
+
+# -------------------------------------------------------------
+# FSKIT
+# -------------------------------------------------------------
+
+OPTION(FSKIT_ENABLE "Enable FSKIT support" OFF)
+
+IF(FSKIT_ENABLE)
+  find_package(FSKIT)
+  INCLUDE_DIRECTORIES(SYSTEM ${FSKIT_INCLUDE_DIR})
+  set(GRIDDYN_HAVE_FSKIT 1)
+  add_subdirectory(fskit)
+ENDIF(FSKIT_ENABLE)
+
+# -------------------------------------------------------------
 # Enable 64 bit indexing (enable to allow for more than 2^31 objects)--that would be a very big model
 # -------------------------------------------------------------
 
@@ -336,12 +451,12 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
  
 #OPTION(BUILD_SERVERMODE "Build GridDyn Server" OFF)
 IF (BUILD_SERVERMODE)
- #add_subdirectory(gridDynServer)
+ add_subdirectory(gridDynServer)
 ENDIF(BUILD_SERVERMODE)
 
 
 
-ADD_DEFINITIONS(-DTIXML_USE_TICPP)
+
 # ------------------------------------------------------------
 # Enable message logging
 # -------------------------------------------------------------
@@ -370,20 +485,50 @@ endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 
+# -------------------------------------------------------------
+# Enable FNCS executable
+# -------------------------------------------------------------
 
+OPTION(FNCS_EXECUTABLE "Enable the FNCS executable to be built" OFF)
+# If FNCS_EXECUTABLE is load the fncs directory
+# link against them.
+
+IF (FNCS_EXECUTABLE)
+	SHOW_VARIABLE(USE_DUMMY_FNCS BOOL "use a dummy fncs implementation if none is available" OFF)
+	IF(USE_DUMMY_FNCS)
+		HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
+		HIDE_VARIABLE(FNCS_INSTALL_PATH)
+		
+	ELSE(USE_DUMMY_FNCS)
+		SHOW_VARIABLE(USE_FNCS_SHARED_LIBRARY BOOL "used a dynamic shared library for the FNCS interface" OFF)
+		
+		IF(USE_FNCS_SHARED_LIBRARY)
+			SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
+			find_package(FNCS)
+		ELSE (USE_FNCS_SHARED_LIBRARY)
+			HIDE_VARIABLE(FNCS_INSTALL_PATH)
+			SHOW_VARIABLE(CZMQ_LIBRARY_PATH PATH  "path to the czmq libraries" "${CZMQ_LIBRARY_PATH}")
+            SHOW_VARIABLE(CZMQ_INCLUDE_PATH PATH  "path to the czmq headers" "${CZMQ_INCLUDE_PATH}")
+				find_package(CZMQ)
+				list(APPEND griddyn_optional_libraries ${CZMQ_LIBRARY})
+		ENDIF(USE_FNCS_SHARED_LIBRARY)
+		
+	ENDIF(USE_DUMMY_FNCS)
+	add_subdirectory(fncs)
+ELSE(FNCS_EXECUTABLE)
+	HIDE_VARIABLE(FNCS_INSTALL_PATH)
+	HIDE_VARIABLE(USE_DUMMY_FNCS)
+	HIDE_VARIABLE(USE_FNCS_SHARED_LIBRARY)
+ENDIF(FNCS_EXECUTABLE)
+
+
+FILE(GLOB KEY_LIBRARY_FILES  ${PROJECT_BINARY_DIR}/libs/bin/*)
+message(STATUS "key files ${KEY_LIBRARY_FILES}")
 # -------------------------------------------------------------
 # load the subdirectories
 # -------------------------------------------------------------
 
-add_subdirectory(formatInterpreters)
 
-add_subdirectory(core)
-
-add_subdirectory(utilities)
-#minizup is used as part of the utilities
-add_subdirectory(ThirdParty/Minizip)
-
-add_subdirectory(gridDyn)
 
 OPTION(OPTIMIZATION_ENABLE "Enable Optimization libraries" OFF)
 # If OPTIMIZATION is enabled try to locate the libraries
@@ -395,12 +540,27 @@ ENDIF(OPTIMIZATION_ENABLE)
 
 add_subdirectory(gridDynFileInput)
 
+add_subdirectory(coupling)
+
 add_subdirectory(gridDynCombined)
 
 add_subdirectory(gridDynMain)
 
-add_subdirectory(coupling)
+OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" OFF)
 
+IF(BUILD_SHARED_FMI_LIBRARY)
+	add_subdirectory(fmi_export)
+ENDIF(BUILD_SHARED_FMI_LIBRARY)
+
+# -------------------------------------------------------------
+# Enable clang analysis and formatting tools
+# -------------------------------------------------------------
+
+OPTION(ENABLE_CLANG_TOOLS "if clang is found enable some custom targets for clang formatting and tidy" OFF)
+
+if (ENABLE_CLANG_TOOLS)
+include(clang-cxx-dev-tools)
+endif(ENABLE_CLANG_TOOLS)
 # -------------------------------------------------------------
 # Enable testCore construction?
 # -------------------------------------------------------------
@@ -408,6 +568,8 @@ add_subdirectory(coupling)
 OPTION(TEST_ENABLE "Enable unit testing construction" ON)
 
 IF (TEST_ENABLE)
+
+#message("otcf:${optional_component_test_files}")
 add_subdirectory(test)
 #enable_testing()
 #add_test(NAME gridDynTest COMMAND testCore)
@@ -420,6 +582,7 @@ INSTALL(FILES ${efiles} DESTINATION examples)
 #SET(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
 #INSTALL(PROGRAMS ${binfiles} DESTINATION bin)
 
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION bin)
 
 
 

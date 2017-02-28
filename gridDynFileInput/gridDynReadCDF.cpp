@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,21 +15,22 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "primary/acBus.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "core/coreExceptions.h"
+#include "stringConversion.h"
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
 
 using namespace gridUnits;
+using namespace stringOps;
 
 void cdfReadBusLine (gridBus *bus,std::string line,double base, const basicReaderInfo &bri);
-void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList, const basicReaderInfo &bri);
+void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList, const basicReaderInfo &bri);
 
-void loadCDF (gridCoreObject *parentObject,const std::string &filename, const basicReaderInfo &bri)
+void loadCDF (coreObject *parentObject,const std::string &filename, const basicReaderInfo &bri)
 {
   std::ifstream file (filename.c_str (), std::ios::in);
   std::string line;        //line storage
@@ -203,13 +204,14 @@ Columns 124-127 Remote controlled bus number
 
 void cdfReadBusLine (gridBus *bus,std::string line,double base,const basicReaderInfo &bri)
 {
-  gridLoad *ld = nullptr;
+  zipLoad *ld = nullptr;
   gridDynGenerator *gen = nullptr;
 
   std::string temp = trim (line.substr (5,12));
   std::string temp2 = (temp.length () >= 11) ? trim (temp.substr (9, 3)) : "";
 
   removeQuotes (temp);
+  trim(temp);
   if (!(bri.prefix.empty ()))
     {
       if (temp.empty ())
@@ -237,7 +239,7 @@ void cdfReadBusLine (gridBus *bus,std::string line,double base,const basicReader
     }
   else if (!temp2.empty ())
     {
-      val = doubleRead (temp2,0.0);
+      val = numeric_conversion (temp2,0.0);
       if (val > 0)
         {
           bus->set ("basevoltage", val);
@@ -324,7 +326,7 @@ void cdfReadBusLine (gridBus *bus,std::string line,double base,const basicReader
 
   if ((P != 0)||(Q != 0))
     {
-      ld = new gridLoad (P / base,Q / base);
+      ld = new zipLoad (P / base,Q / base);
       bus->add (ld);
     }
   //get the shunt impedance
@@ -334,7 +336,7 @@ void cdfReadBusLine (gridBus *bus,std::string line,double base,const basicReader
     {
       if (ld == nullptr)
         {
-          ld = new gridLoad ();
+          ld = new zipLoad ();
           bus->add (ld);
         }
       if (P != 0)
@@ -430,7 +432,7 @@ Columns 113-119 Minimum voltage, MVAR or MW limit (F)
 Columns 120-126 Maximum voltage, MVAR or MW limit (F)
 */
 
-void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList,const basicReaderInfo &bri)
+void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::vector<gridBus *> busList,const basicReaderInfo &bri)
 {
   gridBus *bus1, *bus2;
   gridLink *lnk = nullptr;
@@ -449,14 +451,19 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
     }
 
   temp = line.substr (5, 4);
-  ind2 = intRead (temp);
+  ind2 = numeric_conversion<int> (temp,0);
 
-  temp2 = temp2 + temp;
+  temp2 = temp2 + trim(temp);
   bus1 = busList[ind1 - 1];
   bus2 = busList[ind2 - 1];
 
+  if (line[16] != '1')//check if there is a circuit indicator
+  {
+	  temp2.push_back('_');
+	  temp2.push_back(line[16]);
+  }
   //get the branch type
-  code = intRead (line.substr (18, 1));
+  code = numeric_conversion<int> (line.substr (18, 1),0);
   switch (code)
     {
     case 0:     //ac line
@@ -473,7 +480,7 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
       lnk = new adjustableTransformer ();
       lnk->set ("mode", "voltage");
       lnk->set ("basepower", base);
-      cbus = intRead (line.substr (68, 4));
+      cbus = numeric_conversion<int> (line.substr (68, 4),0);
       if (cbus > 0)
         {
           dynamic_cast<adjustableTransformer *> (lnk)->setControlBus (busList[cbus - 1]);
@@ -481,7 +488,7 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
       temp = line.substr (73, 1);
       if (temp[0] != ' ')
         {
-          cntrl = intRead (temp, 0);
+          cntrl = numeric_conversion<int> (temp, 0);
           if (cntrl != 0)
             {
               if (cntrl == 1)
@@ -496,14 +503,14 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
         }
 
       //get Vmin and Vmax
-      R = doubleRead (line.substr (112, 7), 0);
-      X = doubleRead (line.substr (119, 7), 0);
+      R = numeric_conversion (line.substr (112, 7), 0.0);
+      X = numeric_conversion (line.substr (119, 7), 0.0);
 
       lnk->set ("vmin", R);
       lnk->set ("vmax", X);
       //get tapMin and tapMax
-      R = doubleRead (line.substr (90, 7), 0);
-      X = doubleRead (line.substr (97, 7),0);
+      R = numeric_conversion (line.substr (90, 7), 0.0);
+      X = numeric_conversion (line.substr (97, 7),0.0);
       lnk->set ("mintap", R);
       lnk->set ("maxtap", X);
       break;
@@ -511,13 +518,13 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
       lnk = new adjustableTransformer ();
       lnk->set ("basepower", base);
       lnk->set ("mode", "mvar");
-      R = doubleRead (line.substr (112, 7), 0);
-      X = doubleRead (line.substr (119, 7), 0);
+      R = numeric_conversion (line.substr (112, 7), 0.0);
+      X = numeric_conversion (line.substr (119, 7), 0.0);
       lnk->set ("qmin", R,MW);
       lnk->set ("qmax", X,MW);
       //get tapMin and tapMax
-      R = doubleRead (line.substr (90, 7), 0);
-      X = doubleRead (line.substr (97, 7), 0);
+      R = numeric_conversion (line.substr (90, 7), 0.0);
+      X = numeric_conversion (line.substr (97, 7), 0.0);
       lnk->set ("mintap", R);
       lnk->set ("maxtap", X);
       break;
@@ -525,13 +532,13 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
       lnk = new adjustableTransformer ();
       lnk->set ("basepower", base);
       lnk->set ("mode", "mw");
-      R = doubleRead (line.substr (112, 7), 0);
-      X = doubleRead (line.substr (119, 7), 0);
+      R = numeric_conversion (line.substr (112, 7), 0.0);
+      X = numeric_conversion (line.substr (119, 7), 0.0);
       lnk->set ("pmin", R, MW);
       lnk->set ("pmax", X, MW);
       //get tapAngleMin and tapAngleMax
-      R = doubleRead (line.substr (90, 7), 0);
-      X = doubleRead (line.substr (97, 7), 0);
+      R = numeric_conversion (line.substr (90, 7), 0.0);
+      X = numeric_conversion (line.substr (97, 7), 0.0);
       lnk->set ("mintapangle", R,deg);
       lnk->set ("maxtapangle", X,deg);
       break;
@@ -553,7 +560,7 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
 	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
 	  std::string sub = lnk->getName();
 	  char m = 'a';
-	  while (lnk->getParent() == nullptr)
+	  while (lnk->isRoot())
 	  {
 		  lnk->setName(sub + '_' + m);
 		  m = m + 1;
@@ -574,8 +581,8 @@ void cdfReadBranch (gridCoreObject *parentObject,std::string line,double base,st
 
 
   //get the branch impedance
-  R = doubleRead (line.substr (19, 10), 0);
-  X = doubleRead (line.substr (29, 10), 0);
+  R = numeric_conversion (line.substr (19, 10), 0.0);
+  X = numeric_conversion (line.substr (29, 10), 0.0);
 
   lnk->set ("r",R);
   lnk->set ("x",X);

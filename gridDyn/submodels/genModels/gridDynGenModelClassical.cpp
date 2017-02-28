@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,9 +14,9 @@
 #include "submodels/gridDynGenModel.h"
 
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
-#include "gridCoreTemplates.h"
-#include "objectFactory.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/objectFactory.h"
 #include "gridBus.h"
 #include "matrixData.h"
 
@@ -32,16 +32,12 @@
 gridDynGenModelClassical::gridDynGenModelClassical (const std::string &objName) : gridDynGenModel (objName)
 {
   // default values
-  //TODO: PT the size information should be moved to an objectInitializeA function for all GenModels
   opFlags.set (internal_frequency_calculation);
   Xd = 0.85;
 }
 
-gridDynGenModelClassical::~gridDynGenModelClassical ()
-{
-}
 
-gridCoreObject *gridDynGenModelClassical::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModelClassical::clone (coreObject *obj) const
 {
   gridDynGenModelClassical *gd = cloneBase<gridDynGenModelClassical, gridDynGenModel> (this, obj);
   if (!(gd))
@@ -54,18 +50,18 @@ gridCoreObject *gridDynGenModelClassical::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModelClassical::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynGenModelClassical::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.algSize = 2;
-  offsets.local->local.jacSize = 18;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.jacSize = 18;
 
 }
 
 // initial conditions
-void gridDynGenModelClassical::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGenModelClassical::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  computeInitialAngleAndCurrent (args, outputSet, Rs, Xd);
+  computeInitialAngleAndCurrent (inputs, desiredOutput, Rs, Xd);
   double *gm = m_state.data ();
   double Eft = Vq + Rs * gm[1] - Xd * gm[0];
   // record Pm = Pset
@@ -75,12 +71,12 @@ void gridDynGenModelClassical::objectInitializeB (const IOdata &args, const IOda
   inputSet[3] = Eft * gm[1];
 }
 
-void gridDynGenModelClassical::computeInitialAngleAndCurrent (const IOdata &args, const IOdata &outputSet, double R1, double X1)
+void gridDynGenModelClassical::computeInitialAngleAndCurrent (const IOdata &inputs, const IOdata &desiredOutput, double R1, double X1)
 {
   double *gm = m_state.data ();
-  double V = args[voltageInLocation];
-  double theta = args[angleInLocation];
-  std::complex<double> SS (outputSet[0], -outputSet[1]);
+  double V = inputs[voltageInLocation];
+  double theta = inputs[angleInLocation];
+  std::complex<double> SS (desiredOutput[0], -desiredOutput[1]);
   std::complex<double> VV = std::polar (V, theta);
   std::complex<double> II = SS / conj (VV);
   gm[2] = std::arg (VV + std::complex<double> (R1, X1) * II);
@@ -98,25 +94,25 @@ void gridDynGenModelClassical::computeInitialAngleAndCurrent (const IOdata &args
   gm[1] = Idq.imag ();
 }
 
-void gridDynGenModelClassical::updateLocalCache (const IOdata &args, const stateData *sD, const solverMode &sMode)
+void gridDynGenModelClassical::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
-  if ((!sD) || (sD->seqID != seqId) || (sD->seqID == 0))
+  if (sD.updateRequired(seqId))
     {
       Lp Loc = offsets.getLocations (sD, sMode, this);
-      double V = args[voltageInLocation];
-      double angle = Loc.diffStateLoc[0] - args[angleInLocation];
+      double V = inputs[voltageInLocation];
+      double angle = Loc.diffStateLoc[0] - inputs[angleInLocation];
       Vq = V * cos (angle);
       Vd = -V*sin (angle);
-      seqId = (sD) ? sD->seqID : 0;
+	  seqId = sD.seqID;
     }
 }
 
-void gridDynGenModelClassical::algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double /*alpha*/)
+void gridDynGenModelClassical::algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
 {
 
   auto offset = offsets.getAlgOffset (sMode);
-  updateLocalCache (args, sD, sMode);
-  solve2x2 (Rs, (Xd), -(Xd), Rs, -Vd, args[genModelEftInLocation] - Vq, update[offset], update[offset + 1]);
+  updateLocalCache (inputs, sD, sMode);
+  solve2x2 (Rs, (Xd), -(Xd), Rs, -Vd, inputs[genModelEftInLocation] - Vq, update[offset], update[offset + 1]);
   m_output = -(update[offset + 1] * Vq + update[offset] * Vd);
 
 }
@@ -124,13 +120,13 @@ void gridDynGenModelClassical::algebraicUpdate (const IOdata &args, const stateD
 // residual
 
 
-void gridDynGenModelClassical::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void gridDynGenModelClassical::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations (sD, resid, sMode, this);
 
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   const double *gm = Loc.algStateLoc;
   const double *gmd = Loc.diffStateLoc;
@@ -141,8 +137,8 @@ void gridDynGenModelClassical::residual (const IOdata &args, const stateData *sD
 
 
   //Get the exciter field
-  double Eft = args[genModelEftInLocation];
-  double Pmt = args[genModelPmechInLocation];
+  double Eft = inputs[genModelEftInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
 
   /*
   rva[0] = Vd + Rs * gm[0] + (Xqp)* gm[1] - gmd[2];
@@ -185,13 +181,13 @@ void gridDynGenModelClassical::residual (const IOdata &args, const stateData *sD
 
 }
 
-void gridDynGenModelClassical::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGenModelClassical::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
   double *dv = Loc.destDiffLoc;
   //Get the exciter field
-  double Eft = args[genModelEftInLocation];
-  double Pmt = args[genModelPmechInLocation];
+  double Eft = inputs[genModelEftInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
 
   double omega = Loc.diffStateLoc[1] - 1.0;
   // Id and Iq
@@ -206,7 +202,7 @@ void gridDynGenModelClassical::derivative (const IOdata &args, const stateData *
 
 }
 
-double gridDynGenModelClassical::getFreq (const stateData *sD, const solverMode &sMode, index_t *FreqOffset) const
+double gridDynGenModelClassical::getFreq (const stateData &sD, const solverMode &sMode, index_t *FreqOffset) const
 {
   double omega = 1.0;
 
@@ -220,7 +216,7 @@ double gridDynGenModelClassical::getFreq (const stateData *sD, const solverMode 
       return omega;
     }
 
-  if (sD)
+  if (!sD.empty())
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
 
@@ -243,7 +239,7 @@ double gridDynGenModelClassical::getFreq (const stateData *sD, const solverMode 
 
 }
 
-double gridDynGenModelClassical::getAngle (const stateData *sD, const solverMode &sMode, index_t *angleOffset) const
+double gridDynGenModelClassical::getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset) const
 {
   double angle = kNullVal;
 
@@ -257,7 +253,7 @@ double gridDynGenModelClassical::getAngle (const stateData *sD, const solverMode
       return angle;
     }
 
-  if (sD)
+  if (!sD.empty())
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
 
@@ -280,12 +276,9 @@ double gridDynGenModelClassical::getAngle (const stateData *sD, const solverMode
 
 }
 
-IOdata gridDynGenModelClassical::getOutputs (const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridDynGenModelClassical::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
-
-  updateLocalCache (args, sD, sMode);
-
   IOdata out (2);
   out[PoutLocation] = -(Loc.algStateLoc[1] * Vq + Loc.algStateLoc[0] * Vd);
   out[QoutLocation] = -(Loc.algStateLoc[1] * Vd - Loc.algStateLoc[0] * Vq);
@@ -293,15 +286,15 @@ IOdata gridDynGenModelClassical::getOutputs (const IOdata &args, const stateData
 
 }
 
-double gridDynGenModelClassical::getOutput (const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut) const
+double gridDynGenModelClassical::getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t numOut) const
 {
   Lp Loc = offsets.getLocations (sD, sMode, this);
   double Vqtemp = Vq;
   double Vdtemp = Vd;
-  if ((!sD) || (sD->seqID != seqId) || (sD->seqID == 0))
+  if ((sD.empty()) || (sD.seqID != seqId) || (sD.seqID == 0))
     {
-      double V = args[voltageInLocation];
-      double angle = Loc.diffStateLoc[0] - args[angleInLocation];
+      double V = inputs[voltageInLocation];
+      double angle = Loc.diffStateLoc[0] - inputs[angleInLocation];
       Vqtemp = V * cos (angle);
       Vdtemp = -V*sin (angle);
     }
@@ -319,40 +312,40 @@ double gridDynGenModelClassical::getOutput (const IOdata &args, const stateData 
 }
 
 
-void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelClassical::ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
 
-  double V = args[voltageInLocation];
-  updateLocalCache (args, sD, sMode);
+  double V = inputs[voltageInLocation];
+  updateLocalCache (inputs, sD, sMode);
 
   const double *gm = Loc.algStateLoc;
 
-  if (argLocs[angleInLocation] != kNullLocation)
+  if (inputLocs[angleInLocation] != kNullLocation)
     {
-      ad.assign (PoutLocation, argLocs[angleInLocation], gm[1] * Vd - gm[0] * Vq);
-      ad.assign (QoutLocation, argLocs[angleInLocation], -gm[1] * Vq - gm[0] * Vd);
+      ad.assign (PoutLocation, inputLocs[angleInLocation], gm[1] * Vd - gm[0] * Vq);
+      ad.assign (QoutLocation, inputLocs[angleInLocation], -gm[1] * Vq - gm[0] * Vd);
     }
-  if (argLocs[voltageInLocation] != kNullLocation)
+  if (inputLocs[voltageInLocation] != kNullLocation)
     {
-      ad.assign (PoutLocation, argLocs[voltageInLocation], -gm[1] * Vq / V - gm[0] * Vd / V);
-      ad.assign (QoutLocation, argLocs[voltageInLocation], -gm[1] * Vd / V + gm[0] * Vq / V);
+      ad.assign (PoutLocation, inputLocs[voltageInLocation], -gm[1] * Vq / V - gm[0] * Vd / V);
+      ad.assign (QoutLocation, inputLocs[voltageInLocation], -gm[1] * Vd / V + gm[0] * Vq / V);
     }
 
 }
 
 
-void gridDynGenModelClassical::jacobianElements (const IOdata &args, const stateData *sD,
+void gridDynGenModelClassical::jacobianElements (const IOdata &inputs, const stateData &sD,
                                                  matrixData<double> &ad,
-                                                 const IOlocs &argLocs, const solverMode &sMode)
+                                                 const IOlocs &inputLocs, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD, sMode, this);
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
   const double *gm = Loc.algStateLoc;
-  auto VLoc = argLocs[voltageInLocation];
-  auto TLoc = argLocs[angleInLocation];
+  auto VLoc = inputLocs[voltageInLocation];
+  auto TLoc = inputLocs[angleInLocation];
   auto refAlg = Loc.algOffset;
   auto refDiff = Loc.diffOffset;
 
@@ -371,8 +364,8 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
       if (VLoc != kNullLocation)
         {
 
-          ad.assign (refAlg, VLoc, Vd / args[voltageInLocation]);
-          ad.assign (refAlg + 1, VLoc, Vq / args[voltageInLocation]);
+          ad.assign (refAlg, VLoc, Vd / inputs[voltageInLocation]);
+          ad.assign (refAlg + 1, VLoc, Vq / inputs[voltageInLocation]);
         }
 
       ad.assign (refAlg, refAlg, Rs);
@@ -382,7 +375,7 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
 
       ad.assign (refAlg + 1, refAlg, -(Xd));
       ad.assign (refAlg + 1, refAlg + 1, Rs);
-      ad.assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
+      ad.assignCheckCol (refAlg + 1, inputLocs[genModelEftInLocation], -1.0);
 
       if (isAlgebraicOnly (sMode))
         {
@@ -402,13 +395,13 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
   */
   // Id Differential
 
-  //ad.assignCheckCol (refAlg + 1, argLocs[genModelEftInLocation], -1.0);
+  //ad.assignCheckCol (refAlg + 1, inputLocs[genModelEftInLocation], -1.0);
   // delta
-  ad.assign (refDiff, refDiff, -sD->cj);
+  ad.assign (refDiff, refDiff, -sD.cj);
   ad.assign (refDiff, refDiff + 1, m_baseFreq);
   // omega
 
-  double Eft = args[genModelEftInLocation];
+  double Eft = inputs[genModelEftInLocation];
   //double Pe = (Eft+mp_Kp*(gmd[1] - 1.0))*gm[1];
 
   double kVal = -0.5 / H;
@@ -419,14 +412,14 @@ void gridDynGenModelClassical::jacobianElements (const IOdata &args, const state
     {
       ad.assign (refDiff + 1, refAlg + 1, kVal * (Eft + mp_Kw * (Loc.diffStateLoc[1] - 1.0)));
     }
-  ad.assign (refDiff + 1, refDiff + 1, kVal * (D + mp_Kw * gm[1]) - sD->cj);
+  ad.assign (refDiff + 1, refDiff + 1, kVal * (D + mp_Kw * gm[1]) - sD.cj);
 
-  ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);               // governor: Pm
-  ad.assignCheckCol (refDiff + 1, argLocs[genModelEftInLocation], kVal * gm[1]);               // exciter: Ef
+  ad.assignCheckCol (refDiff + 1, inputLocs[genModelPmechInLocation], -kVal);               // governor: Pm
+  ad.assignCheckCol (refDiff + 1, inputLocs[genModelEftInLocation], kVal * gm[1]);               // exciter: Ef
 
 }
 
-void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   auto refAlg = Loc.algOffset;
@@ -435,7 +428,7 @@ void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, con
 
   const double *gm = Loc.algStateLoc;
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
   if (hasAlgebraic (sMode))
     {
       //output P
@@ -456,20 +449,25 @@ void gridDynGenModelClassical::outputPartialDerivatives (const IOdata &args, con
 
 }
 
-static const stringVec genModelClassicNames {
+count_t gridDynGenModelClassical::outputDependencyCount(index_t /*num*/, const solverMode & /*sMode*/) const
+{
+	return 3;
+}
+
+static const stringVec genModelClassicStateNames {
   "id","iq","delta","freq"
 };
 
 stringVec gridDynGenModelClassical::localStateNames () const
 {
-  return genModelClassicNames;
+  return genModelClassicStateNames;
 }
 
 
 // set parameters
 void gridDynGenModelClassical::set (const std::string &param, const std::string &val)
 {
-  gridCoreObject::set (param, val);
+  coreObject::set (param, val);
 }
 
 void gridDynGenModelClassical::set (const std::string &param, double val, gridUnits::units_t unitType)

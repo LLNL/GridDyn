@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -30,7 +30,7 @@
 #if (COMPUTE_TIMES>0)
 #include <chrono>
 #endif
-//test case for gridCoreObject object
+//test case for coreObject object
 
 static const std::string validationTestDirectory(GRIDDYN_TEST_DIRECTORY "/validation_tests/");
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 
 	for (const auto &mp : compare_cases)
 	{
-		gds = new gridDynSimulation();
+		gds = std::make_unique<gridDynSimulation>();
 		gds->set("consoleprintlevel", "summary");
 		std::string fname;
 		if (mp.first.length() > 25)
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 			fname = validationTestDirectory + mp.first;
 		}
 
-		loadFile(gds, fname);
+		loadFile(gds.get(), fname);
 		gds->sourceFile = mp.first;
 		gds->setFlag("no_powerflow_adjustments");
 		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 
 		volts1.resize(cnt);
 		ang1.resize(cnt);
-		gds2 = new gridDynSimulation();
+		gds2 = std::make_unique<gridDynSimulation>();
 		if (mp.second.length() > 25)
 		{
 			fname = mp.second;
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 			fname = validationTestDirectory + mp.second;
 		}
 		gds2->set("consoleprintlevel", "summary");
-		loadFile(gds2, fname);
+		loadFile(gds2.get(), fname);
 		BOOST_REQUIRE(gds2->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 		gds2->pFlowInitialize();
 		cnt=gds2->getVoltage(volts2);
@@ -148,18 +148,14 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 		auto adiff = countDiffs(ang1, ang2, 5e-5);
 		if ((adiff > 0) || (vdiff > 0))
 		{
-			int maxvdiffbus;
-			double mvdiff = absMaxDiffLoc(volts1, volts2, maxvdiffbus);
-			int maxadiffbus;
-			double madiff = absMaxDiffLoc(ang1, ang2, maxadiffbus);
-			std::cout << mp.first << "max vdiff [" << maxvdiffbus << "] = " << mvdiff << "|| max adiff[" << maxadiffbus << "] = " << madiff << '\n';
+			auto mvdiff = absMaxDiffLoc(volts1, volts2);
+
+			auto madiff = absMaxDiffLoc(ang1, ang2);
+			std::cout << mp.first << "max vdiff [" << mvdiff.second << "] = " << mvdiff.first << "|| max adiff[" << madiff.second << "] = " << madiff.first << '\n';
 		}
 		BOOST_CHECK_EQUAL(vdiff, 0);
 		BOOST_CHECK_EQUAL(adiff, 0);
-		delete gds;
-		delete gds2;
-		gds2 = nullptr;
-		gds = nullptr;
+
 	}
 
 }
@@ -207,7 +203,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 
 	for (const auto &mp : compare_cases)
 	{
-		gds = new gridDynSimulation();
+		gds = std::make_unique<gridDynSimulation>();
 		gds->set("consoleprintlevel", "summary");
 		std::string fname;
 		if (mp.first.length() > 25)
@@ -219,7 +215,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 			fname = validationTestDirectory + mp.first;
 		}
 
-		loadFile(gds, fname);
+		loadFile(gds.get(), fname);
 		gds->setFlag("no_powerflow_adjustments");
 		gds->set("defpowerflow", "gauss-seidel");
 		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
@@ -250,7 +246,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		size_t maxadiffbus = 0;
 		double mvdiff = 0;
 		double madiff = 0;
-		gds2 = new gridDynSimulation();
+		gds2 = std::make_unique<gridDynSimulation>();
 		if (mp.second.length() > 25)
 		{
 			fname = mp.second;
@@ -260,7 +256,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 			fname = validationTestDirectory + mp.second;
 		}
 		gds2->set("consoleprintlevel", "summary");
-		loadFile(gds2, fname);
+		loadFile(gds2.get(), fname);
 		BOOST_REQUIRE(gds2->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 		gds2->pFlowInitialize();
 		cnt = gds2->getVoltage(volts2);
@@ -298,10 +294,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		}
 		BOOST_CHECK_EQUAL(vdiff, 0);
 		BOOST_CHECK_EQUAL(adiff, 0);
-		delete gds;
-		delete gds2;
-		gds2 = nullptr;
-		gds = nullptr;
+
 	}
 
 }
@@ -352,7 +345,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_withq)
 
 	for (const auto &mp : compare_cases)
 	{
-		gds = new gridDynSimulation();
+		gds = std::make_unique<gridDynSimulation>();
 		gds->set("consoleprintlevel", print_level::summary);
 		std::string fname;
 		if (mp.first.length() > 25)
@@ -441,10 +434,6 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_withq)
 		}
 		BOOST_CHECK_EQUAL(vdiff, 0);
 		BOOST_CHECK_EQUAL(adiff, 0);
-		delete gds;
-		delete gds2;
-		gds2 = nullptr;
-		gds = nullptr;
 	}
 
 }

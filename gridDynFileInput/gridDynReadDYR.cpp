@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "gridDynFileInput.h"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "submodels/gridDynGenModel.h"
 #include "submodels/gridDynExciter.h"
 #include "submodels/gridDynGovernor.h"
@@ -27,12 +27,12 @@
 
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance();
 
-void loadGENROU(gridCoreObject *parentObject, stringVec &tokens);
-void loadESDC1A(gridCoreObject *parentObject, stringVec &tokens);
-void loadTGOV1(gridCoreObject *parentObject, stringVec &tokens);
-void loadEXDC2(gridCoreObject *parentObject, stringVec &tokens);
+void loadGENROU(coreObject *parentObject, stringVec &tokens);
+void loadESDC1A(coreObject *parentObject, stringVec &tokens);
+void loadTGOV1(coreObject *parentObject, stringVec &tokens);
+void loadEXDC2(coreObject *parentObject, stringVec &tokens);
 
-void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basicReaderInfo &)
+void loadDYR(coreObject *parentObject,const std::string &filename,const basicReaderInfo &)
 {
   std::ifstream file(filename.c_str(), std::ios::in);
   std::string line,line2;  //line storage
@@ -45,7 +45,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
   }
   while (std::getline(file, line))
   {
-    trimString(line);
+    stringOps::trimString(line);
     if (line.empty())
     {
       continue;
@@ -54,7 +54,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
     {
     if (std::getline(file, line2))
       {
-      trimString(line2);
+      stringOps::trimString(line2);
       line += ' ' + line2;
       }
     else
@@ -62,7 +62,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
       break;
       }
     }
-    auto lineTokens = splitline(line," \t\n,",delimiter_compression::on);
+    auto lineTokens = stringOps::splitline(line," \t\n,",stringOps::delimiter_compression::on);
     //get rid of the '/' at the end of the last string
     auto lstr = lineTokens.back();
     lineTokens.pop_back();
@@ -72,7 +72,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
       lineTokens.push_back(lstr);
     }
     auto type = lineTokens[1];
-	trimString(type);
+	stringOps::trimString(type);
     if (type == "'GENROU'")
     {
       loadGENROU(parentObject, lineTokens);
@@ -97,7 +97,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 }
 
 
-  void loadGENROU(gridCoreObject *parentObject, stringVec &tokens)
+  void loadGENROU(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -127,7 +127,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   }
 
-  void loadESDC1A(gridCoreObject *parentObject, stringVec &tokens)
+  void loadESDC1A(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -144,7 +144,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
     {
       sm = static_cast<gridDynExciter *>(cof->createObject("exciter", "type1"));
     }
-    //TODO:: TR not implmented yet, no voltage compensation implemented
+    //TODO:: TR not implemented yet, no voltage compensation implemented
     //sm->set("tr", params[3]);
     sm->set("ka", params[4]);
     sm->set("ta", params[5]);
@@ -159,13 +159,13 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
     sm->set("te", params[11]);
     sm->set("kf", params[12]);
     sm->set("tf", params[13]);
-    //TODO I need to compute the saturation coeeficients to translate appropriately
+    //TODO I need to compute the saturation coefficients to translate appropriately
 
     gen->add(sm);
 
   }
 
-  void loadEXDC2(gridCoreObject *parentObject, stringVec &tokens)
+  void loadEXDC2(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -175,7 +175,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
     auto params = str2vector(tokens, kNullVal);
 
     gridDynExciter *sm = static_cast<gridDynExciter *>(cof->createObject("exciter", "dc2a"));
-    //TODO:: TR not implmented yet, no voltage compensation implemented
+    //TODO:: TR not implemented yet, no voltage compensation implemented
     //sm->set("tr", params[3]);
     sm->set("ka", params[4]);
     sm->set("ta", params[5]);
@@ -193,7 +193,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
 
   }
 
-  void loadTGOV1(gridCoreObject *parentObject, stringVec &tokens)
+  void loadTGOV1(coreObject *parentObject, stringVec &tokens)
   {
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
@@ -203,7 +203,7 @@ void loadDYR(gridCoreObject *parentObject,const std::string &filename,const basi
     auto params = str2vector(tokens, kNullVal);
 
     gridDynGovernor *sm = static_cast<gridDynGovernor *>(cof->createObject("governor", "tgov1"));
-    //TODO:: TR not implmented yet, no voltage compensation implemented
+    //TODO:: TR not implemented yet, no voltage compensation implemented
     //sm->set("tr", params[3]);
     sm->set("r", params[3]);
     sm->set("t1", params[4]);

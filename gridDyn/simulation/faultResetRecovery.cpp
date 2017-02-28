@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -105,7 +105,7 @@ int faultResetRecovery::faultResetFix1()
 	//auto err = JacobianCheck(sMode, -1, true);
 	//      dynamicSolverConvergenceTest(sMode, "convFile.dat",0,3);
 	double *states = solver->state_data();
-	gridDyn_time timeCurr = sim->getCurrentTime();
+	coreTime timeCurr = sim->getCurrentTime();
 	sim->guess(timeCurr, states, solver->deriv_data(), solver->getSolverMode());
 	std::vector<double> vstates(solver->size(), 0);
 	sim->getVoltageStates(vstates.data(), solver->getSolverMode());
@@ -132,7 +132,7 @@ int faultResetRecovery::faultResetFix2(reset_levels rlevel)
 	{
 		return retval;
 	}
-	gridDyn_time timeCurr = sim -> getCurrentTime();
+	coreTime timeCurr = sim -> getCurrentTime();
 	sim->guess(timeCurr, solver->state_data(), solver->deriv_data(), solver->getSolverMode());
 	//int mmatch = JacobianCheck(sim, solver->getSolverMode());
 	

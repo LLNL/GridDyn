@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,9 +12,9 @@
  */
 
 #include "svd.h"
-#include "objectFactoryTemplates.h"
-#include "gridCoreTemplates.h"
-#include "stringOps.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreObjectTemplates.h"
+#include "stringConversion.h"
 #include <cmath>
 
 static typeFactory<svd> svdld ("load", stringVec {"svd", "switched shunt","switchedshunt","ssd"});
@@ -37,7 +37,7 @@ svd::~svd ()
 {
 }
 
-gridCoreObject *svd::clone (gridCoreObject *obj) const
+coreObject *svd::clone (coreObject *obj) const
 {
   svd *ld = cloneBase<svd, gridRampLoad> (this, obj);
   if (ld == nullptr)
@@ -73,21 +73,19 @@ void svd::setLoad (double level, units_t unitType)
   int setLevel = checkSetting (dlevel);
   if (setLevel >= 0)
     {
-      Yq = dlevel;
-      x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+      setYq(dlevel);
     }
 
 }
 
 void svd::setLoad (double Plevel, double Qlevel, units_t unitType)
 {
-  Yp = unitConversion (Plevel,unitType,puMW,systemBasePower);
+  setYp(unitConversion (Plevel,unitType,puMW,systemBasePower));
   double dlevel = unitConversion (Qlevel, unitType, puMW, systemBasePower);
   int setLevel = checkSetting (dlevel);
   if (setLevel >= 0)
     {
-      Yq = dlevel;
-      x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+      setYq(dlevel);
     }
 }
 
@@ -144,14 +142,12 @@ void svd::updateSetting (int step)
   if (step <= 0)
     {
       currentStep = checkSetting (step);
-      Yq = Qlow;
-      x = kBigNum;
+      setYq(Qlow);
     }
   else if (step >= stepCount)
     {
       currentStep = stepCount;
-      Yq = Qhigh;
-      x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+      setYq(Qhigh);
     }
   else
     {
@@ -170,12 +166,11 @@ void svd::updateSetting (int step)
         }
       qlevel += (step - scount) * (*block).second;
       currentStep = step;
-      Yq = qlevel;
-      x = (Yp == 0) ? 1 / Yq : Yq / Yp * r;
+      setYq(qlevel);
     }
 }
 
-void svd::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void svd::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   if (opFlags[continuous_flag])
     {
@@ -192,28 +187,28 @@ void svd::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
           opFlags.set (has_powerflow_adjustments);
         }
     }
-  return gridLoad::pFlowObjectInitializeA (time0, flags);
+  return zipLoad::pFlowObjectInitializeA (time0, flags);
 }
 
-void svd::dynObjectInitializeA (gridDyn_time time0,  unsigned long flags)
+void svd::dynObjectInitializeA (coreTime time0,  unsigned long flags)
 {
-  return gridLoad::dynObjectInitializeA (time0, flags);
+  return zipLoad::dynObjectInitializeA (time0, flags);
 }
 
-void svd::dynObjectInitializeB (const IOdata & /*args*/, const IOdata & /*outputSet*/)
+void svd::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata &/*fieldSet*/)
 {
 
 }
 
-void svd::setState (gridDyn_time /*ttime*/, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
-{
-}
-
-void svd::guess (gridDyn_time /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode & /*sMode*/)
+void svd::setState (coreTime /*ttime*/, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
 {
 }
 
-change_code svd::powerFlowAdjust (const IOdata & /*args */, unsigned long /*flags*/, check_level_t /*level*/)
+void svd::guess (coreTime /*ttime*/, double /*state*/[], double /*dstate_dt*/[], const solverMode & /*sMode*/)
+{
+}
+
+change_code svd::powerFlowAdjust (const IOdata & /*inputs */, unsigned long /*flags*/, check_level_t /*level*/)
 {
   return change_code::no_change;
 }
@@ -231,11 +226,11 @@ void svd::set (const std::string &param,  const std::string &val)
 {
   if ((param == "blocks")||(param == "block"))
     {
-      auto bin = splitline (val);
+      auto bin = stringOps::splitline (val);
       for (size_t kk = 0; kk < bin.size () - 1; ++kk)
         {
-          int cnt = intRead (bin[kk]);
-          double bsize = doubleRead (bin[kk + 1]);
+          int cnt = numeric_conversion<int> (bin[kk],0);
+          double bsize = numeric_conversion (bin[kk + 1],0.0);
           if (cnt > 0)
             {
               addBlock (cnt,bsize);
@@ -270,7 +265,7 @@ void svd::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      gridLoad::set (param,val);
+      zipLoad::set (param,val);
     }
 
 
@@ -362,7 +357,7 @@ void svd::set (const std::string &param, double val, units_t unitType)
     }
   else
     {
-      gridLoad::set (param, val, unitType);
+      zipLoad::set (param, val, unitType);
     }
 
 
@@ -376,19 +371,19 @@ void svd::addBlock (int steps, double Qstep, gridUnits::units_t unitType)
   stepCount += steps;
 }
 
-void svd::residual (const IOdata & /*args*/, const stateData *, double /*resid*/[], const solverMode &)
+void svd::residual (const IOdata & /*inputs*/, const stateData &, double /*resid*/[], const solverMode &)
 {
 }
 
-void svd::derivative (const IOdata & /*args*/, const stateData *, double /*deriv*/[], const solverMode &)
+void svd::derivative (const IOdata & /*inputs*/, const stateData &, double /*deriv*/[], const solverMode &)
 {
 }
 
-void svd::outputPartialDerivatives (const IOdata & /*args*/, const stateData *, matrixData<double> &, const solverMode &)
+void svd::outputPartialDerivatives (const IOdata & /*inputs*/, const stateData &, matrixData<double> &, const solverMode &)
 {
 }
 
-void svd::jacobianElements (const IOdata & /*args*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode &)
+void svd::jacobianElements (const IOdata & /*inputs*/, const stateData &, matrixData<double> &, const IOlocs & /*inputLocs*/, const solverMode &)
 {
 }
 void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std::string & /*prefix*/) const
@@ -396,20 +391,20 @@ void svd::getStateName  (stringVec & /*stNames*/, const solverMode &, const std:
 
 }
 
-void svd::timestep (gridDyn_time /*ttime*/, const IOdata & /*args*/, const solverMode &)
+void svd::timestep (coreTime /*ttime*/, const IOdata & /*inputs*/, const solverMode &)
 {
   
 }
 
-void svd::rootTest (const IOdata & /*args*/, const stateData *, double /*roots*/[], const solverMode &)
+void svd::rootTest (const IOdata & /*inputs*/, const stateData &, double /*roots*/[], const solverMode &)
 {
 }
 
-void svd::rootTrigger (gridDyn_time /*ttime*/, const IOdata & /*args*/, const std::vector<int> & /*rootMask*/, const solverMode &)
+void svd::rootTrigger (coreTime /*ttime*/, const IOdata & /*inputs*/, const std::vector<int> & /*rootMask*/, const solverMode &)
 {
 }
 
-change_code svd::rootCheck ( const IOdata & /*args*/, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code svd::rootCheck ( const IOdata & /*inputs*/, const stateData &, const solverMode &, check_level_t /*level*/)
 {
   return change_code::no_change;
 }

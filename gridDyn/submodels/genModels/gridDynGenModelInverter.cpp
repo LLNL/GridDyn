@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,11 +14,11 @@
 
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "vectorOps.hpp"
 
 #include <cmath>
@@ -30,11 +30,7 @@ gridDynGenModelInverter::gridDynGenModelInverter (const std::string &objName) : 
 
 }
 
-gridDynGenModelInverter::~gridDynGenModelInverter ()
-{
-}
-
-gridCoreObject *gridDynGenModelInverter::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModelInverter::clone (coreObject *obj) const
 {
   gridDynGenModelInverter *gd = cloneBase<gridDynGenModelInverter, gridDynGenModel> (this, obj);
   if (!(gd))
@@ -48,20 +44,20 @@ gridCoreObject *gridDynGenModelInverter::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModelInverter::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynGenModelInverter::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
 
-  offsets.local->local.algSize = 1;
-  offsets.local->local.jacSize = 4;
-  offsets.local->local.algRoots = 1;
+  offsets.local().local.algSize = 1;
+  offsets.local().local.jacSize = 4;
+  offsets.local().local.algRoots = 1;
 
 }
 // initial conditions
-void gridDynGenModelInverter::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGenModelInverter::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
   double *gm = m_state.data ();
-  double V = args[voltageInLocation];
-  std::complex<double> outCurrent (outputSet[PoutLocation] / V, -outputSet[QoutLocation] / V);
+  double V = inputs[voltageInLocation];
+  std::complex<double> outCurrent (desiredOutput[PoutLocation] / V, -desiredOutput[QoutLocation] / V);
   auto Z = std::complex<double> (Rs, Xd);
   auto Em = Z * outCurrent + V;
 
@@ -80,12 +76,12 @@ void gridDynGenModelInverter::objectInitializeB (const IOdata &args, const IOdat
       loss = Vloss1 + Vloss2 + Vloss3;
     }
 
-  inputSet[genModelPmechInLocation] = outputSet[PoutLocation] + loss;             //Pmt
+  inputSet[genModelPmechInLocation] = desiredOutput[PoutLocation] + loss;             //Pmt
 
-  bus = static_cast<gridBus *> (parent->find ("bus"));
+  bus = static_cast<gridBus *> (find ("bus"));
 }
 
-void gridDynGenModelInverter::algebraicUpdate (const IOdata &args, const stateData *, double update[], const solverMode &sMode, double /*alpha*/)
+void gridDynGenModelInverter::algebraicUpdate (const IOdata &inputs, const stateData &, double update[], const solverMode &sMode, double /*alpha*/)
 {
 
   auto offset = offsets.getAlgOffset (sMode);
@@ -93,7 +89,7 @@ void gridDynGenModelInverter::algebraicUpdate (const IOdata &args, const stateDa
 
   //double angle = std::atan2(g, b);
 
-  double Pmt = args[genModelPmechInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
   if (opFlags[at_angle_limits])
     {
       if (Pmt > 0)
@@ -108,8 +104,8 @@ void gridDynGenModelInverter::algebraicUpdate (const IOdata &args, const stateDa
   else
     {
       //Get the exciter field
-      double V = args[voltageInLocation];
-      double Eft = args[genModelEftInLocation] + 1.0;
+      double V = inputs[voltageInLocation];
+      double Eft = inputs[genModelEftInLocation] + 1.0;
       if (Rs != 0.0)
         {
           double R = std::hypot (2.0 * g, b);
@@ -147,7 +143,7 @@ void gridDynGenModelInverter::algebraicUpdate (const IOdata &args, const stateDa
 // residual
 
 
-void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void gridDynGenModelInverter::residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
 
 	if (!hasAlgebraic(sMode))
@@ -157,8 +153,8 @@ void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, 
 	Lp Loc = offsets.getLocations(sD, resid, sMode, this);
 
 	double angle = *Loc.algStateLoc;
-	//printf("time=%f, angle=%f\n", sD->time, angle);
-	double Pmt = args[genModelPmechInLocation];
+	//printf("time=%f, angle=%f\n", sD.time, angle);
+	double Pmt = inputs[genModelPmechInLocation];
 	if (opFlags[at_angle_limits])
 	{
 		if (Pmt > 0)
@@ -173,9 +169,9 @@ void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, 
 	else
 	{
 		//Get the exciter field
-		double Eft = args[genModelEftInLocation] + 1.0;
+		double Eft = inputs[genModelEftInLocation] + 1.0;
 
-		double V = args[voltageInLocation];
+		double V = inputs[voltageInLocation];
 
 		double PnoR = Eft*V*b*sin(angle);
 		if (Rs != 0.0)
@@ -197,7 +193,7 @@ void gridDynGenModelInverter::residual(const IOdata &args, const stateData *sD, 
 }
 
 
-double gridDynGenModelInverter::getFreq(const stateData *sD, const solverMode &sMode, index_t *FreqOffset) const
+double gridDynGenModelInverter::getFreq(const stateData &sD, const solverMode &sMode, index_t *FreqOffset) const
 {
 	//there is no inertia in this gen model so it can't compute a frequency and must use the bus frequency
 	if (FreqOffset)
@@ -209,7 +205,7 @@ double gridDynGenModelInverter::getFreq(const stateData *sD, const solverMode &s
 
 }
 
-double gridDynGenModelInverter::getAngle(const stateData *sD, const solverMode &sMode, index_t *AngleOffset) const
+double gridDynGenModelInverter::getAngle(const stateData &sD, const solverMode &sMode, index_t *AngleOffset) const
 {
 	//there is no inertia in this gen model so it can't compute a frequency and must use the bus frequency
 	auto offset = offsets.getAlgOffset(sMode);
@@ -218,17 +214,17 @@ double gridDynGenModelInverter::getAngle(const stateData *sD, const solverMode &
 		*AngleOffset = offset;
 	}
 
-	return (sD) ? sD->state[offset] : m_state[0];
+	return (!sD.empty()) ? sD.state[offset] : m_state[0];
 
 }
 
-IOdata gridDynGenModelInverter::getOutputs(const IOdata &args, const stateData *sD, const solverMode &sMode)
+IOdata gridDynGenModelInverter::getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 
 	IOdata out(2);
-	double V = args[voltageInLocation];
-	double Eft = args[genModelEftInLocation] + 1.0;
+	double V = inputs[voltageInLocation];
+	double Eft = inputs[genModelEftInLocation] + 1.0;
 	double cAng = cos(Loc.algStateLoc[0]);
 	double sAng = sin(Loc.algStateLoc[0]);
 
@@ -249,13 +245,13 @@ double gridDynGenModelInverter::reactivePowerCompute(double V, double Ef, double
 	return V*V*b - V*Ef*b*cosA + V*Ef*g*sinA;
 }
 
-double gridDynGenModelInverter::getOutput(const IOdata &args, const stateData *sD, const solverMode &sMode, index_t numOut) const
+double gridDynGenModelInverter::getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t numOut) const
 {
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 	double cAng = cos(Loc.algStateLoc[0]);
 	double sAng = sin(Loc.algStateLoc[0]);
-	double V = args[voltageInLocation];
-	double Eft = args[genModelEftInLocation] + 1.0;
+	double V = inputs[voltageInLocation];
+	double Eft = inputs[genModelEftInLocation] + 1.0;
 
 	if (numOut == PoutLocation)
 	{
@@ -271,11 +267,11 @@ double gridDynGenModelInverter::getOutput(const IOdata &args, const stateData *s
 }
 
 
-void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 
-	double V = args[voltageInLocation];
+	double V = inputs[voltageInLocation];
 
 	double cAng = cos(Loc.algStateLoc[0]);
 	double sAng = sin(Loc.algStateLoc[0]);
@@ -284,25 +280,25 @@ void gridDynGenModelInverter::ioPartialDerivatives(const IOdata &args, const sta
 	//out[QoutLocation] = V*V*b - V*Eft*b*cAng + V*Eft*g*sAng;
 
 
-	if (argLocs[genModelEftInLocation] != kNullLocation)
+	if (inputLocs[genModelEftInLocation] != kNullLocation)
 	{
-		ad.assign(PoutLocation, argLocs[genModelEftInLocation], -V*g*cAng - V*b*sAng);
-		ad.assign(QoutLocation, argLocs[genModelEftInLocation], -V*b*cAng + V*g*sAng);
+		ad.assign(PoutLocation, inputLocs[genModelEftInLocation], -V*g*cAng - V*b*sAng);
+		ad.assign(QoutLocation, inputLocs[genModelEftInLocation], -V*b*cAng + V*g*sAng);
 	}
 
-	if (argLocs[voltageInLocation] != kNullLocation)
+	if (inputLocs[voltageInLocation] != kNullLocation)
 	{
-		double Eft = args[genModelEftInLocation] + 1.0;
-		ad.assign(PoutLocation, argLocs[voltageInLocation], 2.0*V*g - g*Eft*cAng - Eft*b*sAng);
-		ad.assign(QoutLocation, argLocs[voltageInLocation], 2.0*V*b - Eft*b*cAng + V*Eft*g*sAng);
+		double Eft = inputs[genModelEftInLocation] + 1.0;
+		ad.assign(PoutLocation, inputLocs[voltageInLocation], 2.0*V*g - g*Eft*cAng - Eft*b*sAng);
+		ad.assign(QoutLocation, inputLocs[voltageInLocation], 2.0*V*b - Eft*b*cAng + V*Eft*g*sAng);
 	}
 
 }
 
 
-void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateData *sD,
+void gridDynGenModelInverter::jacobianElements(const IOdata &inputs, const stateData &sD,
 	matrixData<double> &ad,
-	const IOlocs &argLocs, const solverMode &sMode)
+	const IOlocs &inputLocs, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
 	{
@@ -316,8 +312,8 @@ void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateDa
 	}
 	else
 	{
-		double V = args[voltageInLocation];
-		double Eft = args[genModelEftInLocation] + 1.0;
+		double V = inputs[voltageInLocation];
+		double Eft = inputs[genModelEftInLocation] + 1.0;
 		double cAng = cos(Loc.algStateLoc[0]);
 		double sAng = sin(Loc.algStateLoc[0]);
 
@@ -326,16 +322,16 @@ void gridDynGenModelInverter::jacobianElements(const IOdata &args, const stateDa
 
 		ad.assign(offset, offset, 2.0*V*Eft*g*sAng - V*Eft*b*cAng);
 
-		ad.assignCheckCol(offset, argLocs[genModelPmechInLocation], 1.0);
-		ad.assignCheckCol(offset, argLocs[genModelEftInLocation], -2.0*Eft*g - 2.0*V*g*cAng - V*b*sAng);
-		ad.assignCheckCol(offset, argLocs[voltageInLocation], -2.0*V*g - 2.0*Eft*g*cAng - Eft*b*sAng);
+		ad.assignCheckCol(offset, inputLocs[genModelPmechInLocation], 1.0);
+		ad.assignCheckCol(offset, inputLocs[genModelEftInLocation], -2.0*Eft*g - 2.0*V*g*cAng - V*b*sAng);
+		ad.assignCheckCol(offset, inputLocs[voltageInLocation], -2.0*V*g - 2.0*Eft*g*cAng - Eft*b*sAng);
 	}
 
 
 
 }
 
-void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
 	if (!hasAlgebraic(sMode))
 	{
@@ -343,8 +339,8 @@ void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const
 	}
 	Lp Loc = offsets.getLocations(sD, sMode, this);
 
-	double V = args[voltageInLocation];
-	double Eft = args[genModelEftInLocation] + 1.0;
+	double V = inputs[voltageInLocation];
+	double Eft = inputs[genModelEftInLocation] + 1.0;
 	double cAng = cos(Loc.algStateLoc[0]);
 	double sAng = sin(Loc.algStateLoc[0]);
 
@@ -356,6 +352,11 @@ void gridDynGenModelInverter::outputPartialDerivatives(const IOdata &args, const
 	ad.assign(QoutLocation, Loc.algOffset, V*Eft*b*sAng + V*Eft*g*cAng);
 
 
+}
+
+count_t gridDynGenModelInverter::outputDependencyCount(index_t /*num*/, const solverMode &/*sMode*/) const
+{
+	return 1;
 }
 
 static const stringVec genModelNames{ "angle" };
@@ -428,25 +429,25 @@ void gridDynGenModelInverter::reCalcImpedences()
 }
 
 
-void gridDynGenModelInverter::rootTest(const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void gridDynGenModelInverter::rootTest(const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
 
 	if (rootSize(sMode) > 0)
 	{
 		auto ro = offsets.getRootOffset(sMode);
 		auto so = offsets.getAlgOffset(sMode);
-		double angle = sD->state[so];
+		double angle = sD.state[so];
 		if (opFlags[at_angle_limits])
 		{
-			if (args[genModelPmechInLocation] > 0)
+			if (inputs[genModelPmechInLocation] > 0)
 			{
-				double pmax = -realPowerCompute(args[genModelEftInLocation], args[voltageInLocation], cos(maxAngle), sin(maxAngle));
-				roots[ro] = args[genModelPmechInLocation] + 0.0001 - pmax;
+				double pmax = -realPowerCompute(inputs[genModelEftInLocation], inputs[voltageInLocation], cos(maxAngle), sin(maxAngle));
+				roots[ro] = inputs[genModelPmechInLocation] + 0.0001 - pmax;
 			}
 			else
 			{
-				double pmin = -realPowerCompute(args[genModelEftInLocation], args[voltageInLocation], cos(minAngle), sin(minAngle));
-				roots[ro] = pmin - args[genModelPmechInLocation] + 0.0001;
+				double pmin = -realPowerCompute(inputs[genModelEftInLocation], inputs[voltageInLocation], cos(minAngle), sin(minAngle));
+				roots[ro] = pmin - inputs[genModelPmechInLocation] + 0.0001;
 			}
 
 		}
@@ -458,7 +459,7 @@ void gridDynGenModelInverter::rootTest(const IOdata &args, const stateData *sD, 
 	}
 }
 
-void gridDynGenModelInverter::rootTrigger(gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGenModelInverter::rootTrigger(coreTime /*ttime*/, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
 	if (rootSize(sMode) > 0)
 	{
@@ -470,14 +471,14 @@ void gridDynGenModelInverter::rootTrigger(gridDyn_time /*ttime*/, const IOdata &
 			{
 				opFlags.reset(at_angle_limits);
 				LOG_DEBUG("reset angle limit");
-				algebraicUpdate(args, nullptr, m_state.data(), sMode, 1.0);
+				algebraicUpdate(inputs, emptyStateData, m_state.data(), sMode, 1.0);
 
 			}
 			else
 			{
 				opFlags.set(at_angle_limits);
 				LOG_DEBUG("angle at limits");
-				if (args[genModelPmechInLocation] > 0)
+				if (inputs[genModelPmechInLocation] > 0)
 				{
 					m_state[0] = maxAngle;
 				}
@@ -491,7 +492,7 @@ void gridDynGenModelInverter::rootTrigger(gridDyn_time /*ttime*/, const IOdata &
 	}
 }
 
-change_code gridDynGenModelInverter::rootCheck(const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t /*level*/)
+change_code gridDynGenModelInverter::rootCheck(const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t /*level*/)
 {
 	if (rootSize(sMode) > 0)
 	{
@@ -499,25 +500,25 @@ change_code gridDynGenModelInverter::rootCheck(const IOdata &args, const stateDa
 		double angle = Loc.algStateLoc[0];
 		if (opFlags[at_angle_limits])
 		{
-			if (args[genModelPmechInLocation] > 0)
+			if (inputs[genModelPmechInLocation] > 0)
 			{
-				double pmax = -realPowerCompute(args[genModelEftInLocation], args[voltageInLocation], cos(maxAngle), sin(maxAngle));
-				if (args[genModelPmechInLocation] - pmax < -0.0001)
+				double pmax = -realPowerCompute(inputs[genModelEftInLocation], inputs[voltageInLocation], cos(maxAngle), sin(maxAngle));
+				if (inputs[genModelPmechInLocation] - pmax < -0.0001)
 				{
 					opFlags.reset(at_angle_limits);
 					LOG_DEBUG("reset angle limit-from root check");
-					algebraicUpdate(args, nullptr, m_state.data(), sMode, 1.0);
+					algebraicUpdate(inputs, emptyStateData, m_state.data(), sMode, 1.0);
 					return change_code::jacobian_change;
 				}
 			}
 			else
 			{
-				double pmin = -realPowerCompute(args[genModelEftInLocation], args[voltageInLocation], cos(minAngle), sin(minAngle));
-				if (pmin - args[genModelPmechInLocation] < -0.0001)
+				double pmin = -realPowerCompute(inputs[genModelEftInLocation], inputs[voltageInLocation], cos(minAngle), sin(minAngle));
+				if (pmin - inputs[genModelPmechInLocation] < -0.0001)
 				{
 					opFlags.reset(at_angle_limits);
 					LOG_DEBUG("reset angle limit- from root check");
-					algebraicUpdate(args, nullptr, m_state.data(), sMode, 1.0);
+					algebraicUpdate(inputs, emptyStateData, m_state.data(), sMode, 1.0);
 					return change_code::jacobian_change;
 				}
 			}
@@ -529,7 +530,7 @@ change_code gridDynGenModelInverter::rootCheck(const IOdata &args, const stateDa
 			{
 				opFlags.set(at_angle_limits);
 				LOG_DEBUG("angle at limit from check");
-				if (args[genModelPmechInLocation] > 0)
+				if (inputs[genModelPmechInLocation] > 0)
 				{
 					m_state[0] = maxAngle;
 				}

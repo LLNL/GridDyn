@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "vectorOps.hpp"
 
 #include <cmath>
@@ -28,7 +28,7 @@ gridDynGenModel5type2::gridDynGenModel5type2 (const std::string &objName) : grid
 
 }
 
-gridCoreObject *gridDynGenModel5type2::clone (gridCoreObject *obj) const
+coreObject *gridDynGenModel5type2::clone (coreObject *obj) const
 {
   gridDynGenModel5type2 *gd = cloneBase<gridDynGenModel5type2, gridDynGenModel5> (this, obj);
   if (gd == nullptr)
@@ -38,19 +38,19 @@ gridCoreObject *gridDynGenModel5type2::clone (gridCoreObject *obj) const
   return gd;
 }
 
-void gridDynGenModel5type2::objectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridDynGenModel5type2::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  offsets.local->local.diffSize = 5;
-  offsets.local->local.algSize = 2;
-  offsets.local->local.jacSize = 40;
+  offsets.local().local.diffSize = 5;
+  offsets.local().local.algSize = 2;
+  offsets.local().local.jacSize = 40;
 
 }
 
 // initial conditions
-void gridDynGenModel5type2::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGenModel5type2::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
   double *gm = m_state.data ();
-  computeInitialAngleAndCurrent (args, outputSet, Rs, Xq);
+  computeInitialAngleAndCurrent (inputs, desiredOutput, Rs, Xq);
 
   // Edp and Eqp  and Edpp
 
@@ -72,15 +72,15 @@ void gridDynGenModel5type2::objectInitializeB (const IOdata &args, const IOdata 
 
 }
 
-void gridDynGenModel5type2::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGenModel5type2::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
   const double *gm = Loc.algStateLoc;
   const double *gmd = Loc.diffStateLoc;
   double *dv = Loc.destDiffLoc;
   //Get the exciter field
-  double Eft = args[genModelEftInLocation];
-  double Pmt = args[genModelPmechInLocation];
+  double Eft = inputs[genModelEftInLocation];
+  double Pmt = inputs[genModelPmechInLocation];
 
   double drat = Tdopp * (Xdpp + Xl) / (Tdop * (Xqp + Xl));
   // Id and Iq
@@ -101,15 +101,15 @@ void gridDynGenModel5type2::derivative (const IOdata &args, const stateData *sD,
 }
 
 
-void gridDynGenModel5type2::algebraicUpdate (const IOdata &args, const stateData *sD, double update[], const solverMode &sMode, double /*alpha*/)
+void gridDynGenModel5type2::algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double /*alpha*/)
 {
   Lp Loc = offsets.getLocations (sD, update, sMode, this);
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
   solve2x2 (Rs, (Xqpp), -(Xdpp), Rs, Loc.diffStateLoc[2] - Vd, Loc.diffStateLoc[4] - Vq, Loc.destLoc[0], Loc.destLoc[1]);
   m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }
 
-void gridDynGenModel5type2::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynGenModel5type2::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
 
@@ -119,7 +119,7 @@ void gridDynGenModel5type2::residual (const IOdata &args, const stateData *sD, d
 
   double *rva = Loc.destLoc;
   double *rvd = Loc.destDiffLoc;
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
 
   // Id and Iq
@@ -131,7 +131,7 @@ void gridDynGenModel5type2::residual (const IOdata &args, const stateData *sD, d
 
   if (hasDifferential (sMode))
     {
-      derivative (args, sD, resid, sMode);
+      derivative (inputs, sD, resid, sMode);
       //Get the exciter field
 
       // delta
@@ -147,9 +147,9 @@ void gridDynGenModel5type2::residual (const IOdata &args, const stateData *sD, d
 
 
 
-void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateData *sD,
+void gridDynGenModel5type2::jacobianElements (const IOdata &inputs, const stateData &sD,
                                               matrixData<double> &ad,
-                                              const IOlocs &argLocs, const solverMode &sMode)
+                                              const IOlocs &inputLocs, const solverMode &sMode)
 {
   // ad.assign (arrayIndex, RowIndex, ColIndex, value) const
   Lp Loc = offsets.getLocations (sD, sMode, this);
@@ -158,11 +158,11 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
   auto refDiff = Loc.diffOffset;
   const double *gm = Loc.algStateLoc;
   const double *gmd = Loc.diffStateLoc;
-  double V = args[voltageInLocation];
-  auto VLoc = argLocs[voltageInLocation];
-  auto TLoc = argLocs[angleInLocation];
+  double V = inputs[voltageInLocation];
+  auto VLoc = inputLocs[voltageInLocation];
+  auto TLoc = inputLocs[angleInLocation];
 
-  updateLocalCache (args, sD, sMode);
+  updateLocalCache (inputs, sD, sMode);
 
 
   // P
@@ -203,7 +203,7 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
       ad.assign (refAlg + 1, refDiff + 4, -1.0);
     }
   // delta
-  ad.assign (refDiff, refDiff, -sD->cj);
+  ad.assign (refDiff, refDiff, -sD.cj);
   ad.assign (refDiff, refDiff + 1, m_baseFreq);
 
   // omega
@@ -213,11 +213,11 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
       ad.assign (refDiff + 1, refAlg, -0.5  * (gmd[2] + (Xdpp - Xqpp) * gm[1]) / H);
       ad.assign (refDiff + 1, refAlg + 1, -0.5  * (gmd[4] + (Xdpp - Xqpp) * gm[0]) / H);
     }
-  ad.assign (refDiff + 1, refDiff + 1, -0.5 *  D / H - sD->cj);
+  ad.assign (refDiff + 1, refDiff + 1, -0.5 *  D / H - sD.cj);
   ad.assign (refDiff + 1, refDiff + 2, -0.5  * gm[0] / H);
   ad.assign (refDiff + 1, refDiff + 4, -0.5  * gm[1] / H);
 
-  ad.assignCheckCol (refDiff + 1, argLocs[genModelPmechInLocation], -kVal);          // governor: Pm
+  ad.assignCheckCol (refDiff + 1, inputLocs[genModelPmechInLocation], -kVal);          // governor: Pm
 
 
   double drat = Tdopp * (Xdpp + Xl) / (Tdop * (Xqp + Xl));
@@ -227,19 +227,19 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
     {
       ad.assign (refDiff + 2, refAlg + 1, -(Xq - Xqpp) / Tqopp);
     }
-  ad.assign (refDiff + 2, refDiff + 2, -1 / Tqopp - sD->cj);
+  ad.assign (refDiff + 2, refDiff + 2, -1 / Tqopp - sD.cj);
 
   // Eqp
   if (hasAlgebraic (sMode))
     {
       ad.assign (refDiff + 3, refAlg, (Xd - Xdp - drat * (Xd - Xdp)) / Tdop);
     }
-  ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD->cj);
+  ad.assign (refDiff + 3, refDiff + 3, -1.0 / Tdop - sD.cj);
 
-  if (argLocs[genModelEftInLocation] != kNullLocation)        //check if exciter exists
+  if (inputLocs[genModelEftInLocation] != kNullLocation)        //check if exciter exists
     {
-      ad.assign (refDiff + 3, argLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
-      ad.assign (refDiff + 4, argLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
+      ad.assign (refDiff + 3, inputLocs[genModelEftInLocation], (1.0 - Taa / Tdop) / Tdop);       // exciter: Ef
+      ad.assign (refDiff + 4, inputLocs[genModelEftInLocation], Taa / Tdop / Tdopp);
     }
 
 
@@ -249,7 +249,7 @@ void gridDynGenModel5type2::jacobianElements (const IOdata &args, const stateDat
       ad.assign (refDiff + 4, refAlg, (Xdp - Xdpp + drat * (Xd - Xdp)) / Tdopp);
     }
   ad.assign (refDiff + 4, refDiff + 3, 1.0 / Tdopp);
-  ad.assign (refDiff + 4, refDiff + 4, -1.0 / Tdopp - sD->cj);
+  ad.assign (refDiff + 4, refDiff + 4, -1.0 / Tdopp - sD.cj);
 
 }
 

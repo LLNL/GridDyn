@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -10,11 +10,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef GD_OPT_OBJECT_FACTORY_H_
 #define GD_OPT_OBJECT_FACTORY_H_
 
-#include "gridCore.h"
 #include "gridOptObjects.h"
 #include <map>
 #include <vector>
@@ -37,22 +36,22 @@ public:
   optFactory (const stringVec & /*componentName*/, const std::string objName, int level = 0) : name (objName),m_level (level)
   {
   }
-  virtual gridOptObject * makeObject (gridCoreObject *obj) = 0;
+  virtual gridOptObject * makeObject (coreObject *obj) = 0;
   virtual gridOptObject * makeObject () = 0;
-  virtual void prepObjects (count_t /*count*/, gridCoreObject * /*obj*/)
+  virtual void prepObjects (count_t /*count*/, coreObject * /*obj*/)
   {
   }
   virtual count_t remainingPrepped () const
   {
     return 0;
   }
-  virtual bool testObject (gridCoreObject *)
+  virtual bool testObject (coreObject *)
   {
     return true;
   }
 };
 
-typedef std::map<std::string, optFactory *> optMap;
+using optMap= std::map<std::string, optFactory *>;
 
 class optComponentFactory
 {
@@ -64,7 +63,7 @@ public:
   optComponentFactory (const std::string typeName);
   ~optComponentFactory ();
   stringVec getObjNames ();
-  gridOptObject * makeObject (gridCoreObject *obj);
+  gridOptObject * makeObject (coreObject *obj);
   gridOptObject * makeObject (const std::string &objType);
   gridOptObject * makeObject ();
   void registerFactory (optFactory *optFac);
@@ -76,7 +75,7 @@ protected:
 };
 
 //create a high level object factory for the coreObject class
-typedef std::map<std::string, std::shared_ptr<optComponentFactory>> optfMap;
+using optfMap= std::map<std::string, std::shared_ptr<optComponentFactory>>;
 
 class coreOptObjectFactory
 {
@@ -93,15 +92,15 @@ public:
   stringVec getFactoryNames ();
   stringVec getObjNames (const std::string &typeName);
   gridOptObject * createObject (const std::string &optComponet, const std::string &objName);
-  gridOptObject * createObject (const std::string &optComponent, gridCoreObject *obj);
-  gridOptObject * createObject (gridCoreObject *obj);
+  gridOptObject * createObject (const std::string &optComponent, coreObject *obj);
+  gridOptObject * createObject (coreObject *obj);
   gridOptObject * createObject (const std::string &objName);
   std::shared_ptr<optComponentFactory> getFactory (const std::string &optComponent);
   bool isValidType (const std::string &obComponent);
   bool isValidObject (const std::string &optComponent, const std::string &objName);
   void setDefaultType (const std::string defComponent);
-  void prepObjects (const std::string &optComponent, const std::string &optName, count_t numObjects, gridCoreObject *baseObj);
-  void prepObjects (const std::string &objName, count_t numObjects, gridCoreObject *baseObj);
+  void prepObjects (const std::string &optComponent, const std::string &optName, count_t numObjects, coreObject *baseObj);
+  void prepObjects (const std::string &objName, count_t numObjects, coreObject *baseObj);
 private:
   coreOptObjectFactory ()
   {
@@ -114,10 +113,10 @@ private:
 
 /*** template class for opt object ownership*/
 template <class Ntype, class gdType>
-class gridOptObjectHolder : public gridCoreObject
+class gridOptObjectHolder : public coreObject
 {
   static_assert (std::is_base_of<gridOptObject, Ntype>::value, "opt class must have a base class of gridOptObject");
-  static_assert (std::is_base_of<gridCoreObject, gdType>::value, "gridDyn class must have base class type of gridCoreObject");
+  static_assert (std::is_base_of<coreObject, gdType>::value, "gridDyn class must have base class type of coreObject");
 private:
   std::vector<Ntype> objArray;
   count_t next = 0;
@@ -127,7 +126,7 @@ public:
   {
     for (auto &so : objArray)
       {
-        so.setOwner (nullptr,this);
+		so.addOwningReference();
       }
   }
   Ntype * getNext ()
@@ -156,7 +155,7 @@ template <class Ntype, class gdType>
 class optObjectFactory : public optFactory
 {
   static_assert (std::is_base_of<gridOptObject, Ntype>::value, "opt class must have a base class of gridOptObject");
-  static_assert (std::is_base_of<gridCoreObject, gdType>::value, "gridDyn class must have base class type of gridCoreObject");
+  static_assert (std::is_base_of<coreObject, gdType>::value, "gridDyn class must have base class type of coreObject");
 private:
   bool useBlock = false;
   gridOptObjectHolder<Ntype, gdType> *gOOH = nullptr;
@@ -187,7 +186,7 @@ public:
       }
   }
 
-  bool testObject (gridCoreObject *obj) override
+  bool testObject (coreObject *obj) override
   {
     if (dynamic_cast<gdType *> (obj))
       {
@@ -199,7 +198,7 @@ public:
       }
   }
 
-  gridOptObject * makeObject (gridCoreObject *obj) override
+  gridOptObject * makeObject (coreObject *obj) override
   {
     gridOptObject *ret = nullptr;
     if (useBlock)
@@ -241,7 +240,7 @@ public:
     return ret;
   }
 
-  Ntype * makeTypeObject (gridCoreObject *obj)
+  Ntype * makeTypeObject (coreObject *obj)
   {
     Ntype *ret = nullptr;
     if (useBlock)
@@ -264,9 +263,9 @@ public:
     return ret;
   }
 
-  virtual void prepObjects (count_t count, gridCoreObject *obj) override
+  virtual void prepObjects (count_t count, coreObject *obj) override
   {
-    auto root = obj->find ("root");
+    auto root = obj->getRoot();
     gOOH = new gridOptObjectHolder<Ntype,gdType> (count);
     root->add (gOOH);
     useBlock = true;

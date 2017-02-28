@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -19,8 +19,8 @@
 #include "vectorOps.hpp"
 #include "vectData.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 
 
@@ -38,20 +38,20 @@ gridGenOpt::gridGenOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridGenOpt::gridGenOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),gen (dynamic_cast<gridDynGenerator *> (obj))
+gridGenOpt::gridGenOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),gen (dynamic_cast<gridDynGenerator *> (obj))
 {
 
   if (gen)
     {
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = gen->getName ();
+          setName(gen->getName ());
         }
-      id = gen->getUserID ();
+      setUserID(gen->getUserID ());
     }
 }
 
-gridCoreObject *gridGenOpt::clone (gridCoreObject *obj) const
+coreObject *gridGenOpt::clone (coreObject *obj) const
 {
   gridGenOpt *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
   if (nobj == nullptr)
@@ -72,23 +72,23 @@ gridCoreObject *gridGenOpt::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void gridGenOpt::add (gridCoreObject *obj)
+void gridGenOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridDynGenerator *> (obj))
     {
       gen = static_cast<gridDynGenerator *> (obj);
-      name = gen->getName ();
-      id = gen->getUserID ();
+      setName( gen->getName ());
+      setUserID(gen->getUserID ());
     }
   else
   {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
   }
 }
 
-void gridGenOpt::objectInitializeA (unsigned long /*flags*/)
+void gridGenOpt::dynObjectInitializeA (unsigned long /*flags*/)
 {
-  bus = static_cast<gridBusOpt *> (parent->find ("bus"));
+		bus = static_cast<gridBusOpt *> (getParent()->find("bus"));
 
 }
 
@@ -114,7 +114,7 @@ void gridGenOpt::loadSizes (const optimMode &oMode)
 
 
 
-void gridGenOpt::setValues (const optimData *, const optimMode & /*oMode*/)
+void gridGenOpt::setValues (const optimData &, const optimMode & /*oMode*/)
 {
 }
 
@@ -175,7 +175,7 @@ void gridGenOpt::valueBounds (double ttime, double upperLimit[], double lowerLim
 
 }
 
-void gridGenOpt::linearObj (const optimData *, vectData<double> *linObj, const optimMode &oMode)
+void gridGenOpt::linearObj (const optimData &, vectData<double> &linObj, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   if (optFlags.test (piecewise_linear_cost))
@@ -184,16 +184,16 @@ void gridGenOpt::linearObj (const optimData *, vectData<double> *linObj, const o
     }
   else
     {
-      linObj->assign (0,Pcoeff[0] * oMode.period);
-      linObj->assign (oo->gOffset, Pcoeff[1] * oMode.period);
+      linObj.assign (0,Pcoeff[0] * oMode.period);
+      linObj.assign (oo->gOffset, Pcoeff[1] * oMode.period);
       if ((!(Qcoeff.empty ())) && (isAC (oMode)))
         {
-          linObj->assign (0, Qcoeff[0] * oMode.period);
-          linObj->assign (oo->qOffset, Qcoeff[1] * oMode.period);
+          linObj.assign (0, Qcoeff[0] * oMode.period);
+          linObj.assign (oo->qOffset, Qcoeff[1] * oMode.period);
         }
     }
 }
-void gridGenOpt::quadraticObj (const optimData *, vectData<double> *linObj, vectData<double> * quadObj, const optimMode &oMode)
+void gridGenOpt::quadraticObj (const optimData &, vectData<double> &linObj, vectData<double> & quadObj, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
   if (optFlags[piecewise_linear_cost])
@@ -202,29 +202,29 @@ void gridGenOpt::quadraticObj (const optimData *, vectData<double> *linObj, vect
     }
   else
     {
-      linObj->assign (0, Pcoeff[0] * oMode.period);
-      linObj->assign (oo->gOffset, Pcoeff[1] * oMode.period);
+      linObj.assign (0, Pcoeff[0] * oMode.period);
+      linObj.assign (oo->gOffset, Pcoeff[1] * oMode.period);
       if (Pcoeff.size () >= 2)
         {
-          quadObj->assign (oo->gOffset, Pcoeff[2] * oMode.period);
+          quadObj.assign (oo->gOffset, Pcoeff[2] * oMode.period);
         }
       if ((!(Qcoeff.empty ())) && (isAC (oMode)))
         {
-          linObj->assign (0, Qcoeff[0] * oMode.period);
-          linObj->assign (oo->qOffset, Qcoeff[1] * oMode.period);
+          linObj.assign (0, Qcoeff[0] * oMode.period);
+          linObj.assign (oo->qOffset, Qcoeff[1] * oMode.period);
           if (Qcoeff.size () >= 2)
             {
-              quadObj->assign (oo->qOffset, Qcoeff[2] * oMode.period);
+              quadObj.assign (oo->qOffset, Qcoeff[2] * oMode.period);
             }
         }
     }
 }
 
-double gridGenOpt::objValue (const optimData *oD, const optimMode &oMode)
+double gridGenOpt::objValue (const optimData &oD, const optimMode &oMode)
 {
   double cost = 0;
   optimOffsets *oo = offsets.getOffsets (oMode);
-  double P = oD->val[oo->gOffset];
+  double P = oD.val[oo->gOffset];
   if (optFlags[piecewise_linear_cost])
     {
 
@@ -255,7 +255,7 @@ double gridGenOpt::objValue (const optimData *oD, const optimMode &oMode)
         }
       if ((!(Qcoeff.empty ()))&&(isAC (oMode)))
         {
-          double Q = oD->val[oo->qOffset];
+          double Q = oD.val[oo->qOffset];
           kk = 0;
           for (auto pc : Qcoeff)
             {
@@ -271,10 +271,10 @@ double gridGenOpt::objValue (const optimData *oD, const optimMode &oMode)
   return cost;
 }
 
-void gridGenOpt::gradient (const optimData *oD, double deriv[], const optimMode &oMode)
+void gridGenOpt::gradient (const optimData &oD, double deriv[], const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
-  double P = oD->val[oo->gOffset];
+  double P = oD.val[oo->gOffset];
   double temp;
   if (optFlags[piecewise_linear_cost])
     {
@@ -306,7 +306,7 @@ void gridGenOpt::gradient (const optimData *oD, double deriv[], const optimMode 
       deriv[oo->gOffset] = temp;
       if ((!(Qcoeff.empty ())) && (isAC (oMode)))
         {
-          double Q = oD->val[oo->qOffset];
+          double Q = oD.val[oo->qOffset];
           klim = std::max (kmax, Qcoeff.size ());
           temp = 0;
           for (kk = 1; kk < klim; ++kk)
@@ -317,10 +317,10 @@ void gridGenOpt::gradient (const optimData *oD, double deriv[], const optimMode 
         }
     }
 }
-void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, const optimMode &oMode)
+void gridGenOpt::jacobianElements (const optimData &oD, matrixData<double> &ad, const optimMode &oMode)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
-  double P = oD->val[oo->gOffset];
+  double P = oD.val[oo->gOffset];
   double temp;
   if (optFlags[piecewise_linear_cost])
     {
@@ -355,7 +355,7 @@ void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, 
         }
       if ((!(Qcoeff.empty ())) && (isAC (oMode)))
         {
-          double Q = oD->val[oo->qOffset];
+          double Q = oD.val[oo->qOffset];
           klim = std::max (kmax, Qcoeff.size ());
           temp = 0;
           for (kk = 1; kk < klim; ++kk)
@@ -370,17 +370,17 @@ void gridGenOpt::jacobianElements (const optimData *oD, matrixData<double> &ad, 
     }
 }
 
-void gridGenOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridGenOpt::getConstraints (const optimData &, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
 
-void gridGenOpt::constraintValue (const optimData *, double /*cVals*/ [], const optimMode &)
+void gridGenOpt::constraintValue (const optimData &, double /*cVals*/ [], const optimMode &)
 {
 
 }
 
-void gridGenOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
+void gridGenOpt::constraintJacobianElements (const optimData &, matrixData<double> &, const optimMode &)
 {
 
 }
@@ -388,18 +388,11 @@ void gridGenOpt::constraintJacobianElements (const optimData *, matrixData<doubl
 void gridGenOpt::getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix)
 {
   optimOffsets *oo = offsets.getOffsets (oMode);
-  objNames[oo->gOffset] = prefix + name + ":PGen";
+  objNames[oo->gOffset] = prefix + getName() + ":PGen";
   if (isAC (oMode))
     {
-      objNames[oo->gOffset] = prefix + name + ":QGen";
+      objNames[oo->gOffset] = prefix + getName() + ":QGen";
     }
-}
-
-
-// destructor
-gridGenOpt::~gridGenOpt ()
-{
-
 }
 
 

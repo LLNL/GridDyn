@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -29,9 +29,13 @@ public:
   };
 
 protected:
+	double Pmot = -kBigNum;	//!< the mechanical power of the motor
+	double r = 0.01;	//!< the motor resistance
+	double x = 0.15;  //!< the motor impedance
   double r1 = 0.05;  //!< primary resistance on the motor
   double x1 = 0.15;  //!< primary inductance of the motor
-  double xm = 5;      //!< the inductive load of the motor
+  double xm = 5.0;      //!< the inductive load of the motor
+  double H = 3.0;  //!< the inertial constant on the motor
   double alpha = 1.0;  //!< alpha parameter for torque conversion
   double beta = 0;  //!< beta parameter for torque conversion
   double gamma = 0; //!< gamma parameter for torque conversion
@@ -49,31 +53,32 @@ public:
   explicit motorLoad (const std::string &objName = "motor_$");
 
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 protected:
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;     //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;     //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode & sMode) const override;
+  virtual void ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
   /** @brief compute the mechanical torque on the motor as a function of slip
   @param[in]  slip  the slip on the motor
@@ -87,10 +92,10 @@ public:
   double dmechds (double slip) const;
 
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual double getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-  virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual double getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual double getRealPower (double V) const override;
   virtual double getReactivePower (double V) const override;
   virtual double getRealPower () const override;
@@ -122,9 +127,10 @@ protected:
 class motorLoad3 : public motorLoad
 {
 protected:
-  double xp = 0;  //!< transient reactance of the motor
-  double T0p = 0; //!< transient time constant of the motor
-  double x0 = 0;  //!< x0 parameter
+  double xp = 0.0;  //!< transient reactance of the motor
+  double T0p = 0.0; //!< transient time constant of the motor
+  double x0 = 0.0;  //!< x0 parameter
+  
   //double theta=0;
 public:
   /** @brief constructor
@@ -133,40 +139,42 @@ public:
   motorLoad3 (const std::string &objName = "motor3_$");
 
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
 
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
+  virtual void dynObjectInitializeB (const IOdata & inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-  virtual void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
-  virtual void guess (gridDyn_time ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
+  virtual void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
+  virtual void guess (coreTime ttime, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;       //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;       //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-  virtual void outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode) override;
-  virtual void ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void jacobianElements  (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode) override;
+  virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
+
+  virtual void ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void jacobianElements  (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual double getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
-  virtual double getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual double getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
+  virtual double getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
   virtual double getRealPower (double V) const override;
   virtual double getReactivePower (double V) const override;
   virtual double getRealPower () const override;
   virtual double getReactivePower () const override;
-  virtual void updateCurrents (const IOdata &args, const stateData *sD, const solverMode &sMode);
+  virtual void updateCurrents (const IOdata &inputs, const stateData &sD, const solverMode &sMode);
 private:
   /** @brief estimate the initial state values of the motor
   */
@@ -200,33 +208,33 @@ public:
   explicit motorLoad5 (const std::string &objName = "motor5_$");
 
 
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
 protected:
-  virtual void pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags) override;
-  virtual void dynObjectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void dynObjectInitializeB (const IOdata &args, const IOdata &outputSet) override;
+  virtual void pFlowObjectInitializeA (coreTime time0, unsigned long flags) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 public:
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
 
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 
 
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
-  virtual void rootTrigger (gridDyn_time ttime, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode) override;
-  virtual change_code rootCheck (const IOdata &args, const stateData *sD, const solverMode &sMode, check_level_t level) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTrigger (coreTime ttime, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
+  virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-  virtual void jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode) override;
   virtual void getStateName  (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+  virtual void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
   //TODO:: change to algebraic update
-  virtual void updateCurrents (const IOdata &args, const stateData *sD, const solverMode &sMode) override;
+  virtual void updateCurrents (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 private:
   /** @brief estimate the initial state values of the motor
   */

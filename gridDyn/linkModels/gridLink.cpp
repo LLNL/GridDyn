@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,16 +15,16 @@
 #include "linkModels/acLine.h"
 #include "gridBus.h"
 #include "gridArea.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "vectorOps.hpp"
 #include "linkModels/dcLink.h"
-#include "objectInterpreter.h"
+#include "core/objectInterpreter.h"
 #include "acdcConverter.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "simulation/contingency.h"
 #include "stringOps.h"
 #include "matrixDataCompact.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <complex>
 #include <cmath>
@@ -55,14 +55,14 @@ std::atomic<count_t> gridLink::linkCount(0);
 gridLink::gridLink (const std::string &objName) : gridPrimary (objName)
 {
   // default values
-  id = ++linkCount;
+ setUserID(++linkCount);
   updateName ();
 
 
 
 }
 
-gridCoreObject *gridLink::clone (gridCoreObject *obj) const
+coreObject *gridLink::clone (coreObject *obj) const
 {
   gridLink *lnk = cloneBaseFactory<gridLink, gridPrimary> (this, obj, &glf);
   if (!(lnk))
@@ -134,7 +134,7 @@ void gridLink::pFlowCheck (std::vector<violation> &Violation_vector)
   double mva = std::max (getCurrent (0), getCurrent (1));
   if (mva > ratingA)
     {
-      violation V (name, MVA_EXCEED_RATING_A);
+      violation V (getName(), MVA_EXCEED_RATING_A);
       V.level = mva;
       V.limit = ratingA;
       V.percentViolation = (mva - ratingA) / ratingA * 100;
@@ -142,7 +142,7 @@ void gridLink::pFlowCheck (std::vector<violation> &Violation_vector)
     }
   if (mva > ratingB)
     {
-      violation V (name, MVA_EXCEED_RATING_B);
+      violation V (getName(), MVA_EXCEED_RATING_B);
 
       V.level = mva;
       V.limit = ratingB;
@@ -151,7 +151,7 @@ void gridLink::pFlowCheck (std::vector<violation> &Violation_vector)
     }
   if (mva > Erating)
     {
-      violation V (name, MVA_EXCEED_ERATING);
+      violation V (getName(), MVA_EXCEED_ERATING);
       V.level = mva;
       V.limit = Erating;
       V.percentViolation = (mva - Erating) / Erating * 100;
@@ -166,10 +166,10 @@ double gridLink::quickupdateP ()
 }
 
 
-void gridLink::timestep (const gridDyn_time ttime, const solverMode &)
+void gridLink::timestep (const coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
 
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
 
@@ -205,7 +205,7 @@ void gridLink::set (const std::string &param,  const std::string &val)
   if ((param == "bus1")||(param == "from"))
     {
 
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
       
       if (bus)
         {
@@ -218,7 +218,7 @@ void gridLink::set (const std::string &param,  const std::string &val)
     }
   else if ((param == "bus2")||(param == "to"))
     {
-      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, parent));
+      gridBus *bus = dynamic_cast<gridBus *> (locateObject (val, getParent()));
       if (bus)
         {
           updateBus (bus, 2);
@@ -423,10 +423,6 @@ void gridLink::set (const std::string &param, double val, units_t unitType)
     {
       curcuitNum = static_cast<index_t> (val);
     }
-  else if (param == "zone")
-    {
-      zone = static_cast<int> (zone);
-    }
   else
     {
       gridPrimary::set (param, val, unitType);
@@ -434,7 +430,7 @@ void gridLink::set (const std::string &param, double val, units_t unitType)
 }
 
 
-gridCoreObject *gridLink::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridLink::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "bus")
     {
@@ -495,13 +491,9 @@ double  gridLink::get (const std::string &param, units_t unitType) const
     {
       val = lossFraction;
     }
-  else if (param == "curcuit")
+  else if (param == "circuit")
     {
       val = curcuitNum;
-    }
-  else if (param == "zone")
-    {
-      val = zone;
     }
   else
     {
@@ -510,7 +502,7 @@ double  gridLink::get (const std::string &param, units_t unitType) const
   return val;
 }
 
-void gridLink::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridLink::pFlowObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
   if (!B1)
     {
@@ -528,9 +520,9 @@ bool gridLink::isConnected () const
   return (!(opFlags[switch1_open_flag] || opFlags[switch2_open_flag]));
 }
 
-int gridLink::fixRealPower (double power, index_t mterminal,index_t /*fixedTerminal*/,units_t unitType)
+int gridLink::fixRealPower (double power, index_t measureTerminal,index_t /*fixedTerminal*/,units_t unitType)
 {
-  if (mterminal == 1)
+  if (measureTerminal == 1)
     {
       Pset = unitConversion (power, unitType, puMW, systemBasePower);
     }
@@ -547,18 +539,18 @@ static IOlocs aLoc {
   0,1
 };
 
-int gridLink::fixPower  (double rPower, double /*qPower*/, index_t mterminal, index_t fixedTerminal, gridUnits::units_t unitType)
+int gridLink::fixPower  (double rPower, double /*qPower*/, index_t measureTerminal, index_t fixedTerminal, gridUnits::units_t unitType)
 {
-  return fixRealPower (rPower, mterminal, fixedTerminal, unitType);
+  return fixRealPower (rPower, measureTerminal, fixedTerminal, unitType);
 }
 
-void gridLink::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridLink::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
   if ((B1 == nullptr) || (B2 == nullptr))
     {
       disable ();
     }
-  else if ((!B1->enabled) || (!B2->enabled))
+  else if ((!B1->isEnabled()) || (!B2->isEnabled()))
     {
       disable ();
     }
@@ -581,28 +573,30 @@ void gridLink::computePowers ()
 
 }
 
-void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const IOlocs & /*argLocs*/, const solverMode & /*sMode*/)
+void gridLink::ioPartialDerivatives (index_t /*busId*/, const stateData &, matrixData<double> &, const IOlocs & /*inputLocs*/, const solverMode & /*sMode*/)
 {
 
 
 }
 
-void gridLink::outputPartialDerivatives (const stateData *, matrixData<double> &, const solverMode &)
-{
 
-}
-
-void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData *, matrixData<double> &, const solverMode &)
+void gridLink::outputPartialDerivatives (index_t /*busId*/, const stateData &, matrixData<double> &, const solverMode &)
 {
 
 
 }
-IOdata gridLink::getOutputs (const stateData *sD, const solverMode &sMode)
+
+count_t gridLink::outputDependencyCount(index_t /*num*/, const solverMode &/*sMode*/) const
+{
+	return 0;
+}
+
+IOdata gridLink::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
   return getOutputs (1,sD,sMode);
 }
 
-IOdata gridLink::getOutputs (index_t busId, const stateData *, const solverMode &)
+IOdata gridLink::getOutputs (index_t busId, const stateData &, const solverMode &) const
 {
   // set from/to buses
   IOdata out {
@@ -623,7 +617,7 @@ IOdata gridLink::getOutputs (index_t busId, const stateData *, const solverMode 
 
 void gridLink::disable ()
 {
-  if (enabled == false)
+  if (!isEnabled())
     {
       return;
     }
@@ -635,15 +629,15 @@ void gridLink::disable ()
     {
       alert (this, JAC_COUNT_CHANGE);
     }
-  enabled = false;
-  if ((B1) && (B1->enabled))
+  coreObject::disable();
+  if ((B1) && (B1->isEnabled()))
     {
       if (!(B1->checkCapable ()))
         {
           B1->disable ();
         }
     }
-  if ((B2) && (B2->enabled))
+  if ((B2) && (B2->isEnabled()))
     {
       if (!(B2->checkCapable ()))
         {
@@ -701,19 +695,19 @@ double gridLink::getVoltage (index_t busId) const
     }
 }
 
-void gridLink::setState (gridDyn_time ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
+void gridLink::setState (coreTime ttime, const double /*state*/[], const double /*dstate_dt*/[], const solverMode &)
 {
   prevTime = ttime;
 
 }
 
-void gridLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
+void gridLink::updateLocalCache (const IOdata &, const stateData &sD, const solverMode &sMode)
 {
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if ((linkInfo.seqID == sD.seqID) && (sD.seqID != 0))
     {
       return;            //already computed
     }
@@ -724,13 +718,13 @@ void gridLink::updateLocalCache (const stateData *sD, const solverMode &sMode)
 
   linkInfo.theta1 = t1 - t2;
   linkInfo.theta2 = t2 - t1;
-  linkInfo.seqID = sD->seqID;
+  linkInfo.seqID = sD.seqID;
 
 }
 
 void gridLink::updateLocalCache ()
 {
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
@@ -879,11 +873,11 @@ double gridLink::getImagCurrent (index_t busId) const
 gridLink * getMatchingLink (gridLink *lnk, gridPrimary *src, gridPrimary *sec)
 {
   gridLink *L2 = nullptr;
-  if (lnk->getParent () == nullptr)
+  if (lnk->isRoot())
     {
       return nullptr;
     }
-  if (lnk->getParent ()->getID () == src->getID ())    //if this is true then things are easy
+  if (isSameObject(lnk->getParent (),src))    //if this is true then things are easy
     {
       L2 = sec->getLink (lnk->locIndex);
     }

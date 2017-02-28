@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,6 +17,8 @@
 
 std::shared_ptr<workQueue> workQueue::pInstance;
 
+std::mutex workQueue::instanceLock;
+
 workQueue::workQueue(int threadCount):numWorkers(threadCount)
 {
 #ifdef DISABLE_MULTITHREADING
@@ -24,7 +26,7 @@ workQueue::workQueue(int threadCount):numWorkers(threadCount)
 #else
 	if (numWorkers < 0)
 	{
-		numWorkers = static_cast<int>(std::thread::hardware_concurrency());
+		numWorkers = static_cast<int>(std::thread::hardware_concurrency())+1;
 	}
 	threadpool.resize(numWorkers);
 	for (int kk = 0; kk < numWorkers; ++kk)
@@ -96,7 +98,7 @@ void workQueue::addWorkBlock(std::vector<std::shared_ptr<basicWorkBlock>> &newWo
 {
 	if (numWorkers > 0)
 	{
-		{
+		{ //new scope block for the mutex
 			std::lock_guard<std::mutex> lock(queueLock);
 			switch (priority)
 			{
@@ -189,7 +191,13 @@ std::shared_ptr<workQueue> workQueue::instance(int threadCount)
 {
 	if (!pInstance)
 	{
-		pInstance = std::shared_ptr<workQueue>(new workQueue(threadCount));
+		//this is to ensure we don't create it multiple times resulting in some weird condition or just a waste of resources
+
+		std::lock_guard<std::mutex> creationLock(instanceLock);
+		if (!pInstance)
+		{
+			pInstance = std::shared_ptr<workQueue>(new workQueue(threadCount));
+		}
 	}
 	return pInstance;
 }
@@ -205,12 +213,18 @@ int workQueue::getWorkerCount()
 
 void workQueue::destroyWorkerQueue()
 {
+	auto tempPtr = pInstance;
+	if (tempPtr == pInstance)
+	{
+		std::lock_guard<std::mutex> creationLock(instanceLock);
+		pInstance = nullptr;
+	}
 	halt = true;
 	workToDoHigh = decltype(workToDoHigh)();
 	workToDoMed = decltype(workToDoMed)();
 	workToDoLow = decltype(workToDoLow)();
 	queueCondition.notify_all();
-	pInstance = nullptr;
+	
 }
 
 void workQueue::workerLoop()

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,11 +16,15 @@
 
 #include <memory>
 #include <string>
-#include "gridDynTypes.h"
+#include "core/coreDefinitions.h"
 
 class gridDynSimulation;
 class solverMode;
 class solverInterface;
+class coreObject;
+
+template<class X>
+class matrixData;
 
 const double resid_check_tol = 1e-5;
 const double jac_check_tol = 1e-5;
@@ -54,20 +58,38 @@ int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double resid
 @param[in] useStateNames  set to true to collect and print state names (vs numbers) for any mismatch on the Jacobian check
 @return the number of mismatches
 */
-int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
+int residualCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
 
-double checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd, int *loc = nullptr);
+std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd);
 
-double checkResid (gridDynSimulation *gds, gridDyn_time time, const std::shared_ptr<solverInterface> &sd, int *loc = nullptr);
+std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<solverInterface> &sd);
 
-double checkResid (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, int *loc = nullptr);
+std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const solverMode &sMode);
 
-int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
+int algebraicCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
 
-int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double derivTol = resid_check_tol, bool useStateNames = false);
+int derivativeCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double derivTol = resid_check_tol, bool useStateNames = false);
 
 /** @brief do a convergence test on the solver
 */
 void dynamicSolverConvergenceTest (gridDynSimulation *gds, const solverMode &sMode, const std::string &file, unsigned int pts = 100000, int mode = 0);
+
+/** @brief print out the structure and count of the Jacobian entries and counts
+@param[in] ad the matrix data object to analyze
+@param[in] gds the gridDynSimulation object to work with
+@param[in] the solver mode in use
+*/
+void jacobianAnalysis(matrixData<double> &ad, gridDynSimulation *gds, const solverMode &sMode, int level);
+
+
+
+/** @brief check object equivalence 
+@details checks if the objects are equivalent in function and if instructed spits out messages of the differences
+@param[in] obj1 the first object to compare
+@param[in] obj2 the second object to compare
+@param[in] printMessage bool indicating that messages should be printed
+@return true if the objects are deemed equivalent*/
+
+bool checkObjectEquivalence(const coreObject *obj1, const coreObject *obj2, bool printMessage = true);
 
 #endif

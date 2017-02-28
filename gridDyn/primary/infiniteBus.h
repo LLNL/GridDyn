@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -38,10 +38,10 @@ public:
   *@param[in] objName  the name of the infinite bus object
   */
   infiniteBus (double startVoltage, double startAngle,const std::string &objName = "infbus_$");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   // add components
-  void timestep (gridDyn_time ttime, const solverMode &sMode) override;
-  void setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  void timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
+  void setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -51,13 +51,13 @@ public:
 
   virtual double getVoltage (const double state[], const solverMode &sMode) const override;
   virtual double getAngle (const double state[], const solverMode &sMode) const override;
-  virtual double getVoltage (const stateData *sD, const solverMode &sMode) const override;
-  virtual double getAngle (const stateData *sD, const solverMode &sMode) const override;
-  virtual double getFreq (const stateData *sD, const solverMode &sMode) const override;
+  virtual double getVoltage (const stateData &sD, const solverMode &sMode) const override;
+  virtual double getAngle (const stateData &sD, const solverMode &sMode) const override;
+  virtual double getFreq (const stateData &sD, const solverMode &sMode) const override;
 
 
 protected:
-  void updateVoltageAngle (gridDyn_time ttime);
+  void updateVoltageAngle (coreTime ttime);
 };
 
 #endif

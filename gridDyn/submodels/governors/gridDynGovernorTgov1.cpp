@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "submodels/otherGovernors.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
@@ -27,15 +27,15 @@ gridDynGovernorTgov1::gridDynGovernorTgov1 (const std::string &objName) : gridDy
   T1 = 0.5;
   T2 = 1.0;
   T3 = 1.0;
-  offsets.local->local.diffSize = 2;
-  offsets.local->local.algSize = 1;
-  offsets.local->local.jacSize = 10;
+  offsets.local().local.diffSize = 2;
+  offsets.local().local.algSize = 1;
+  offsets.local().local.jacSize = 10;
   opFlags.set (ignore_deadband);
   opFlags.set (ignore_filter);
   opFlags.set (ignore_throttle);
 }
 
-gridCoreObject *gridDynGovernorTgov1::clone (gridCoreObject *obj) const
+coreObject *gridDynGovernorTgov1::clone (coreObject *obj) const
 {
   gridDynGovernorTgov1 *gov = cloneBase<gridDynGovernorTgov1, gridDynGovernorIeeeSimple> (this, obj);
   if (!gov)
@@ -53,22 +53,22 @@ gridDynGovernorTgov1::~gridDynGovernorTgov1 ()
 }
 
 // initial conditions
-void gridDynGovernorTgov1::objectInitializeB (const IOdata & /*args*/, const IOdata &outputSet, IOdata &inputSet)
+void gridDynGovernorTgov1::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata &inputSet)
 {
 
-  m_state[2] = outputSet[PoutLocation];
-  m_state[1] = outputSet[PoutLocation];
-  m_state[0] = outputSet[PoutLocation];
-  inputSet[govpSetInLocation] = outputSet[PoutLocation];
+  m_state[2] = desiredOutput[PoutLocation];
+  m_state[1] = desiredOutput[PoutLocation];
+  m_state[0] = desiredOutput[PoutLocation];
+  inputSet[govpSetInLocation] = desiredOutput[PoutLocation];
 
 }
 
 
 // residual
-void gridDynGovernorTgov1::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void gridDynGovernorTgov1::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
   Lp Loc = offsets.getLocations (sD,resid, sMode, this);
   Loc.destLoc[0] = Loc.algStateLoc[0] - Loc.diffStateLoc[0] + Dt * (omega - 1.0);
 
@@ -77,20 +77,20 @@ void gridDynGovernorTgov1::residual (const IOdata &args, const stateData *sD, do
       return;
     }
 
-  derivative (args, sD, resid, sMode);
+  derivative (inputs, sD, resid, sMode);
 
   Loc.destDiffLoc[0] -= Loc.dstateLoc[0];
   Loc.destDiffLoc[1] -= Loc.dstateLoc[1];
 
 }
 
-void gridDynGovernorTgov1::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynGovernorTgov1::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations (sD,deriv, sMode, this);
 
   const double *gs = Loc.diffStateLoc;
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
 
   if (opFlags[p_limited])
     {
@@ -98,27 +98,27 @@ void gridDynGovernorTgov1::derivative (const IOdata &args, const stateData *sD, 
     }
   else
     {
-      Loc.destDiffLoc[1] = (-gs[1] + args[govpSetInLocation] - K * (omega - 1.0) ) / T1;
+      Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] - K * (omega - 1.0) ) / T1;
     }
 
   Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
 }
 
-void gridDynGovernorTgov1::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void gridDynGovernorTgov1::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
-  gridDynGovernorTgov1::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+  gridDynGovernorTgov1::derivative (inputs, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
   double dt = ttime - prevTime;
   m_state[1] += dt * m_dstate_dt[1];
   m_state[2] += dt * m_dstate_dt[2];
-  //double omega = getControlFrequency (args);
-  double omega = args[govOmegaInLocation];
+  //double omega = getControlFrequency (inputs);
+  double omega = inputs[govOmegaInLocation];
   m_state[0] =  m_state[1] - Dt * (omega - 1.0);
 
   prevTime = ttime;
 
 }
 
-void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void gridDynGovernorTgov1::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
 
   Lp Loc = offsets.getLocations  (sD,nullptr, sMode,  this);
@@ -129,7 +129,7 @@ void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stat
 
 
 
-  bool linkOmega = (argLocs[govOmegaInLocation] != kNullLocation);
+  bool linkOmega = (inputLocs[govOmegaInLocation] != kNullLocation);
 
   /*
   if (opFlags.test (uses_deadband))
@@ -144,7 +144,7 @@ void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stat
   // Pm
   if (linkOmega)
     {
-      ad.assign (Loc.algOffset, argLocs[govOmegaInLocation], Dt );
+      ad.assign (Loc.algOffset, inputLocs[govOmegaInLocation], Dt );
     }
 
   ad.assign (Loc.algOffset, Loc.algOffset, 1);
@@ -156,41 +156,41 @@ void gridDynGovernorTgov1::jacobianElements (const IOdata & /*args*/, const stat
 
   if (opFlags[p_limited])
     {
-      ad.assign (refI + 1, refI + 1, sD->cj);
+      ad.assign (refI + 1, refI + 1, sD.cj);
       ad.assign (refI + 1, refI, 1 / T3);
-      ad.assign (refI + 1, refI + 1, -1 / T3 - sD->cj);
+      ad.assign (refI + 1, refI + 1, -1 / T3 - sD.cj);
     }
   else
     {
-      ad.assignCheckCol (refI + 1, argLocs[govpSetInLocation], 1 / T1);
-      ad.assign (refI + 1, refI + 1, -1 / T1 - sD->cj);
+      ad.assignCheckCol (refI + 1, inputLocs[govpSetInLocation], 1 / T1);
+      ad.assign (refI + 1, refI + 1, -1 / T1 - sD.cj);
       if (linkOmega)
         {
-          ad.assign (refI + 1, argLocs[govOmegaInLocation], -K / (T1));
+          ad.assign (refI + 1, inputLocs[govOmegaInLocation], -K / (T1));
         }
 
       ad.assign (refI, refI + 1, (1 + T2 / T1) / T3);
-      ad.assignCheckCol (refI, argLocs[govpSetInLocation], -T2 / T1 / T3);
+      ad.assignCheckCol (refI, inputLocs[govpSetInLocation], -T2 / T1 / T3);
       if (linkOmega)
         {
-          ad.assign (refI, argLocs[govOmegaInLocation], K * T2 / (T1) / T3);
+          ad.assign (refI, inputLocs[govOmegaInLocation], K * T2 / (T1) / T3);
         }
-      ad.assign (refI, refI, -1 / T3 - sD->cj);
+      ad.assign (refI, refI, -1 / T3 - sD.cj);
 
     }
 
-  // Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * (-gs[1] + args[govpSetInLocation] - K * (omega - Wref) / m_baseFreq) / T1) / T3;
+  // Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * (-gs[1] + inputs[govpSetInLocation] - K * (omega - Wref) / m_baseFreq) / T1) / T3;
 
 
 }
 
-void gridDynGovernorTgov1::rootTest (const IOdata &args, const stateData *sD, double root[], const solverMode &sMode)
+void gridDynGovernorTgov1::rootTest (const IOdata &inputs, const stateData &sD, double root[], const solverMode &sMode)
 {
 
   int rootOffset = offsets.getRootOffset (sMode);
   /* if (opFlags.test (uses_deadband))
      {
-       gridDynGovernor::rootTest (args, sD, root, sMode);
+       gridDynGovernor::rootTest (inputs, sD, root, sMode);
        ++rootOffset;
      }*/
   if (opFlags[uses_plimits])
@@ -202,9 +202,9 @@ void gridDynGovernorTgov1::rootTest (const IOdata &args, const stateData *sD, do
 
       if (opFlags[p_limited])
         {
-          //double omega = getControlFrequency (args);
-          double omega = args[govOmegaInLocation];
-          root[rootOffset] = (-Pmech + args[govpSetInLocation] - K * (omega - 1.0)) / T1;
+          //double omega = getControlFrequency (inputs);
+          double omega = inputs[govOmegaInLocation];
+          root[rootOffset] = (-Pmech + inputs[govpSetInLocation] - K * (omega - 1.0)) / T1;
         }
       else
         {
@@ -219,14 +219,14 @@ void gridDynGovernorTgov1::rootTest (const IOdata &args, const stateData *sD, do
 
 }
 
-void gridDynGovernorTgov1::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridDynGovernorTgov1::rootTrigger (coreTime /*ttime*/, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   /*if (opFlags.test (uses_deadband))
     {
       if (rootMask[rootOffset])
         {
-          gridDynGovernor::rootTrigger (ttime, args, rootMask, sMode);
+          gridDynGovernor::rootTrigger (ttime, inputs, rootMask, sMode);
         }
       ++rootOffset;
     }
@@ -255,7 +255,7 @@ void gridDynGovernorTgov1::rootTrigger (gridDyn_time /*ttime*/, const IOdata &ar
               opFlags.set (p_limited);
               alert (this, JAC_COUNT_DECREASE);
             }
-          derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+          derivative (inputs, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
         }
       ++rootOffset;
     }

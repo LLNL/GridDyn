@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2014, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,18 +15,18 @@
 #define GRIDDYNREADELEMENT_H_
 
 // headers
-#include "basicDefs.h"
+
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
-#include <string>
 #include <unordered_set>
 #include <memory>
 class gridParameter;
+class helperObject;
 
 //struct for holding and passing the information in Element reader files
 class readerInfo;
-class gridCoreObject;
-class gridLoad;
+class coreObject;
+class zipLoad;
 class gridDynGenerator;
 class gridArea;
 class gridLink;
@@ -42,40 +42,45 @@ class gridSubModel;
 //forward declarations
 class readerElement;
 
-gridBus * readBusElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
-gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
+gridBus * readBusElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr);
+gridRelay * readRelayElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr);
 
-//gridLoad * readLoadElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
-//gridDynGenerator * readGeneratorElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
-gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr, bool warnlink = true);
-gridArea * readAreaElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
-gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr, gridSimulation *gs = nullptr);
+//zipLoad * readLoadElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr);
+//gridDynGenerator * readGeneratorElement (std::shared_ptr<readerElement> &element, readerInfo *ri, coreObject *searchObject = nullptr);
+gridLink * readLinkElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr, bool warnlink = true);
+gridArea * readAreaElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr);
+gridSimulation * readSimulationElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr, gridSimulation *gs = nullptr);
 
-gridCoreObject * readEconElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *searchObject = nullptr);
-void readArrayElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject);
-void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject);
-void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject);
+coreObject * readEconElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject = nullptr);
+void readArrayElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject);
+void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject);
+void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject);
 
-void readImports (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject, bool finalFlag);
+void readImports (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject, bool finalFlag);
 
-void loadDefines (std::shared_ptr<readerElement> &element, readerInfo *ri); //NOTE: defined in readLibraryElement.cpp
-void loadDirectories (std::shared_ptr<readerElement> &element, readerInfo *ri); //NOTE: defined in readLibraryElement.cpp
-void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo *ri); //NOTE: defined in readLibraryElement.cpp
-void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo *ri); //NOTE: defined in readLibraryElement.cpp
+void loadDefines (std::shared_ptr<readerElement> &element, readerInfo &ri); //NOTE: defined in readLibraryElement.cpp
+void loadDirectories (std::shared_ptr<readerElement> &element, readerInfo &ri); //NOTE: defined in readLibraryElement.cpp
+void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo &ri); //NOTE: defined in readLibraryElement.cpp
+void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo &ri); //NOTE: defined in readLibraryElement.cpp
 
-void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo *ri, gridDynSimulation *parentObject);
-void readLibraryElement (std::shared_ptr<readerElement> &element,readerInfo *ri);
+void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri, gridDynSimulation *parentObject);
+void readLibraryElement (std::shared_ptr<readerElement> &element,readerInfo &ri);
 
-typedef std::unordered_set<std::string> IgnoreListType;
 
-void loadElementInformation (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo *ri, const IgnoreListType &ignoreList);
+using IgnoreListType= std::unordered_set<std::string>;
+//using IgnoreListType = boost::container::flat_set<std::string>;
 
-void objSetAttributes (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList);
+void loadElementInformation (coreObject *obj, std::shared_ptr<readerElement> &element, const std::string &objectName, readerInfo &ri, const IgnoreListType &ignoreList);
 
-void paramLoopElement (gridCoreObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo *ri, const IgnoreListType &ignoreList);
+void objSetAttributes (coreObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo &ri, const IgnoreListType &ignoreList);
 
-int loadEventElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri);
-int loadCollectorElement (std::shared_ptr<readerElement> &element, gridCoreObject *obj, readerInfo *ri);
+void paramLoopElement (coreObject *obj, std::shared_ptr<readerElement> &element, const std::string &typeName, readerInfo &ri, const IgnoreListType &ignoreList);
+
+void setParams(helperObject *obj, std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo &ri, const IgnoreListType &ignoreList);
+void setAttributes(helperObject *obj, std::shared_ptr<readerElement> &element, const std::string &componentName, readerInfo &ri, const IgnoreListType &ignoreList);
+
+int loadEventElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo &ri);
+int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo &ri);
 
 gridParameter * getElementParam (const std::shared_ptr<readerElement> &element,gridParameter *param = nullptr);
 
@@ -86,17 +91,19 @@ std::string getElementAttribute (std::shared_ptr<readerElement> &element, const 
 std::string getElementFieldOptions (std::shared_ptr<readerElement> &element, const stringVec &names, readerConfig::match_type matching = readerConfig::match_type::strict_case_match);
 stringVec getElementFieldMultiple (std::shared_ptr<readerElement> &element, std::string ename, readerConfig::match_type matching = readerConfig::match_type::strict_case_match);
 
-void setIndex (std::shared_ptr<readerElement> &element, gridCoreObject *mobj, readerInfo *ri);
-std::string getObjectName (std::shared_ptr<readerElement> &element, readerInfo *ri);
+void setIndex (std::shared_ptr<readerElement> &element, coreObject *mobj, readerInfo &ri);
+std::string getObjectName (std::shared_ptr<readerElement> &element, readerInfo &ri);
 
-gridCoreObject* getParent (std::shared_ptr<readerElement> &element, readerInfo *ri, gridCoreObject *parentObject, const std::string &alternateName = "");
+coreObject* getParent (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject, const std::string &alternateName = "");
 
+//This set of constants and functions is to allow templating of the object type but getting an alternative string for the 
+//parent type 
 const std::string emptyString = "";
 const std::string areaTypeString = "area";
 const std::string busTypeString = "bus";
 
 
-inline const std::string &parentSearchComponent (gridCoreObject *)
+inline const std::string &parentSearchComponent (coreObject *)
 {
   return emptyString;
 }

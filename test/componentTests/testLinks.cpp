@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "gridEvent.h"
+#include "events/gridEvent.h"
 
 #include "linkModels/acLine.h"
 #include "gridBus.h"
@@ -36,10 +36,10 @@ BOOST_AUTO_TEST_CASE(link_test1_simple)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	BOOST_CHECK_EQUAL(readerConfig::warnCount, 0);
 	gds->powerflow();
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	std::vector<double> v;
 	gds->getVoltage(v);
   
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(link_test1_dynamic)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 	gds->consolePrintLevel=print_level::warning;
 	auto g1 = std::make_shared<gridEvent>();
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(link_test1_dynamic)
 	gds->getVoltage(v);
 	BOOST_CHECK(std::all_of(v.begin(), v.end(), [](double a){return (a > 0.95); }));
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::warning;
 	gds->powerflow();
 
@@ -168,19 +168,19 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow)
 	std::vector<double> v2;
 	gds->getVoltage(v2);
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	obj->set("fault", -1.0);
 	gds->powerflow();
 
 	
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	std::vector<double> v3;
 	gds->getVoltage(v3);
 	BOOST_CHECK(std::all_of(v.begin(), v.end(), [](double a){return (a > 0.95); }));
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	auto mm = countDiffs(v3, v, 0.0001);
 	
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow2)
 	//test a bunch of different link parameters to make sure all the solve properly
 	std::string fname = std::string(LINK_TEST_DIRECTORY "link_test1.xml");
 
-	gds = static_cast<gridDynSimulation *>(readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
   gds->consolePrintLevel = print_level::warning;
 	gds->powerflow();
   
@@ -211,19 +211,19 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow2)
 	gds->getVoltage(v2);
 	BOOST_CHECK(std::all_of(v2.begin(), v2.end(), [](double a){return (a >-1e-8); }));
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	obj->set("fault", -1.0);
 	gds->powerflow();
 
 
 
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	std::vector<double> v3;
 	gds->getVoltage(v3);
 	BOOST_CHECK(std::all_of(v.begin(), v.end(), [](double a){return (a > 0.95); }));
-	BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	auto mm = countDiffs(v3, v, 0.0001);
 	BOOST_CHECK_EQUAL(mm, 0);

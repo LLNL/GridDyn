@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,11 +12,14 @@
 */
 
 #include "breaker.h"
-#include "gridCondition.h"
+#include "measurement/gridCondition.h"
 
-#include "gridEvent.h"
-#include "gridCoreTemplates.h"
+#include "events/gridEvent.h"
+#include "core/coreObjectTemplates.h"
 #include "linkModels/gridLink.h"
+#include "measurement/gridGrabbers.h"
+#include "measurement/stateGrabber.h"
+#include "measurement/grabberSet.h"
 #include "gridBus.h"
 #include "matrixDataSparse.h"
 
@@ -32,7 +35,7 @@ breaker::breaker (const std::string&objName) : gridRelay (objName)
   opFlags.reset (no_dyn_states);
 }
 
-gridCoreObject *breaker::clone (gridCoreObject *obj) const
+coreObject *breaker::clone (coreObject *obj) const
 {
   breaker *nobj = cloneBase<breaker, gridRelay> (this, obj);
   if (!(nobj))
@@ -46,7 +49,7 @@ gridCoreObject *breaker::clone (gridCoreObject *obj) const
   nobj->recloseTime1 = recloseTime1;
   nobj->recloseTime2 = recloseTime2;
   nobj->recloserTap = recloserTap;
-
+  nobj->recloserResetTime = recloserResetTime;
   nobj->lastRecloseTime = -lastRecloseTime;
   nobj->maxRecloseAttempts = maxRecloseAttempts;
   nobj->limit = limit;
@@ -136,7 +139,7 @@ void breaker::set (const std::string &param, double val, gridUnits::units_t unit
     }
 }
 
-void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void breaker::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   auto ge = std::make_shared<gridEvent> ();
@@ -146,7 +149,7 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
       add (make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject));
       ge->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
 	  ge->setValue(1.0);
-      //action 2 to reclose switch
+      //action 2 to re-close switch
       ge2->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
 	  ge2->setValue(0.0);
       bus = static_cast<gridLink *> (m_sourceObject)->getBus (m_terminal);
@@ -158,39 +161,40 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
       opFlags.set (nonlink_source_flag);
       ge->setTarget (m_sinkObject,"status");
 	  ge->setValue(0.0);
-      //action 2 to reenable object
+      //action 2 to re-enable object
       ge2->setTarget (m_sinkObject,"status");
 	  ge2->setValue(0.0);
       bus = static_cast<gridBus *> (m_sourceObject->find ("bus"));
     }
 
-  add (ge);
-  add (ge2);
+  add (std::move(ge));
+  add (std::move(ge2));
   //now make the gridCondition for the I2T condition
   auto gc = std::make_shared<gridCondition> ();
   auto gc2 = std::make_shared<gridCondition> ();
 
-  auto cg = std::make_shared<customGrabber> ();
-  cg->setGrabberFunction ("I2T", [this](gridCoreObject *){
+  auto cg = std::make_unique<customGrabber> ();
+  cg->setGrabberFunction ("I2T", [this](coreObject *){
     return cTI;
   });
 
-  auto cgst = std::make_shared<customStateGrabber> (this);
-  cgst->setGrabberFunction ([ ](gridCoreObject *obj, const stateData *sD, const solverMode &sMode) -> double {
-    return sD->state[static_cast<breaker *>(obj)->offsets.getDiffOffset (sMode)];
+  auto cgst = std::make_unique<customStateGrabber> (this);
+  cgst->setGrabberFunction ([ ](coreObject *obj, const stateData &sD, const solverMode &sMode) -> double {
+    return sD.state[static_cast<breaker *>(obj)->offsets.getDiffOffset (sMode)];
   });
 
-  gc->setConditionLHS(cg, cgst);
+  auto gset = std::make_shared<grabberSet>(std::move(cg), std::move(cgst));
+  gc->setConditionLHS(gset);
 
-  gc2->setConditionLHS(cg, cgst);
+  gc2->setConditionLHS(std::move(gset));  //done with gset don't need it after this point
 
   gc->setConditionRHS (1.0);
   gc2->setConditionRHS (-0.5);
   gc->setComparison (comparison_type::gt);
   gc2->setComparison (comparison_type::lt);
 
-  add (gc);
-  add (gc2);
+  add (std::move(gc));
+  add (std::move(gc2));
   setConditionState (1, condition_states::disabled);
   setConditionState (2, condition_states::disabled);
 
@@ -199,7 +203,7 @@ void breaker::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void breaker::conditionTriggered (index_t conditionNum, gridDyn_time triggeredTime)
+void breaker::conditionTriggered (index_t conditionNum, coreTime triggeredTime)
 {
   if (conditionNum == 0)
     {
@@ -245,7 +249,7 @@ void breaker::conditionTriggered (index_t conditionNum, gridDyn_time triggeredTi
     }
 }
 
-void breaker::updateA (gridDyn_time time)
+void breaker::updateA (coreTime time)
 {
   if (opFlags[breaker_tripped_flag])
     {
@@ -290,10 +294,10 @@ void breaker::loadSizes (const solverMode &sMode, bool dynOnly)
 
 }
 
-void breaker::timestep (gridDyn_time ttime, const solverMode &)
+void breaker::timestep (coreTime ttime, const IOdata & /*inputs*/, const solverMode &)
 {
   prevTime = ttime;
-  if (limit < kBigNum / 2)
+  if (limit < kBigNum / 2.0)
     {
       double val = getConditionValue (0);
       if (val > limit)
@@ -306,30 +310,30 @@ void breaker::timestep (gridDyn_time ttime, const solverMode &)
 
 }
 
-void breaker::jacobianElements (const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void breaker::jacobianElements (const IOdata & /*inputs*/, const stateData &sD, matrixData<double> &ad, const IOlocs & /*inputLocs*/, const solverMode &sMode)
 {
   if (useCTI)
     {
       matrixDataSparse<double> d;
       IOdata out;
       auto Voffset = bus->getOutputLoc (sMode,voltageInLocation);
-      auto args = bus->getOutputs (sD, sMode);
-      auto argLocs = bus->getOutputLocs (sMode);
+      auto inputs = bus->getOutputs (noInputs,sD, sMode);
+      auto inputLocs = bus->getOutputLocs (sMode);
       if (opFlags[nonlink_source_flag])
         {
           gridSecondary *gs = static_cast<gridSecondary *> (m_sourceObject);
-          out = gs->getOutputs (args, sD, sMode);
-          gs->outputPartialDerivatives (args, sD, d, sMode);
-          gs->ioPartialDerivatives (args, sD, d, argLocs, sMode);
+          out = gs->getOutputs (inputs, sD, sMode);
+          gs->outputPartialDerivatives (inputs, sD, d, sMode);
+          gs->ioPartialDerivatives (inputs, sD, d, inputLocs, sMode);
         }
       else
         {
           gridLink *lnk = static_cast<gridLink *> (m_sourceObject);
           int bid = bus->getID ();
-          lnk->updateLocalCache (sD, sMode);
+          lnk->updateLocalCache (noInputs,sD, sMode);
           out = lnk->getOutputs (bid, sD, sMode);
           lnk->outputPartialDerivatives (bid, sD, d, sMode);
-          lnk->ioPartialDerivatives (bid, sD, d, argLocs, sMode);
+          lnk->ioPartialDerivatives (bid, sD, d, inputLocs, sMode);
         }
 
       auto offset = offsets.getDiffOffset (sMode);
@@ -364,17 +368,17 @@ void breaker::jacobianElements (const stateData *sD, matrixData<double> &ad, con
       ad.merge (d);
 
 
-      ad.assign (offset, offset, -sD->cj);
+      ad.assign (offset, offset, -sD.cj);
 
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      ad.assign (offset,offset,sD->cj);
+      ad.assign (offset,offset,sD.cj);
     }
 }
 
-void breaker::setState (gridDyn_time ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
+void breaker::setState (coreTime ttime, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
 {
   if (useCTI)
     {
@@ -384,16 +388,16 @@ void breaker::setState (gridDyn_time ttime, const double state[], const double /
   prevTime = ttime;
 }
 
-void breaker::residual (const stateData *sD, double resid[], const solverMode &sMode)
+void breaker::residual (const IOdata & /*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (useCTI)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      const double *dst = sD->dstate_dt + offset;
+      const double *dst = sD.dstate_dt + offset;
 
       if (!opFlags[nonlink_source_flag])
         {
-          static_cast<gridPrimary *> (m_sourceObject)->updateLocalCache (sD, sMode);
+          static_cast<gridLink *> (m_sourceObject)->updateLocalCache (noInputs, sD, sMode);
         }
       double I1 = getConditionValue (0,sD,sMode);
       double temp;
@@ -411,16 +415,16 @@ void breaker::residual (const stateData *sD, double resid[], const solverMode &s
         }
 
 
-      // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD->time, I1, offset, 1.0 / (recloserTap / temp + minClearingTime),sD->state[offset]);
+      // printf("tt=%f::I1=%f, r[%d]=%f, stv=%f\n", sD.time, I1, offset, 1.0 / (recloserTap / temp + minClearingTime),sD.state[offset]);
     }
   else if (stateSize (sMode) > 0)
     {
       auto offset = offsets.getDiffOffset (sMode);
-      resid[offset] = sD->dstate_dt[offset];
+      resid[offset] = sD.dstate_dt[offset];
     }
 }
 
-void breaker::guess (const gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void breaker::guess (const coreTime /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (useCTI)
     {
@@ -459,16 +463,16 @@ void breaker::getStateName (stringVec &stNames, const solverMode &sMode, const s
         }
       if (prefix.empty ())
         {
-          stNames[offset] = name + ":trigger_proximity";
+          stNames[offset] = getName() + ":trigger_proximity";
         }
       else
         {
-          stNames[offset] = prefix + "::" + name + ":trigger_proximity";
+          stNames[offset] = prefix + "::" + getName() + ":trigger_proximity";
         }
     }
 }
 
-void breaker::tripBreaker (gridDyn_time time)
+void breaker::tripBreaker (coreTime time)
 {
   alert (this, BREAKER_TRIP_CURRENT);
   LOG_NORMAL ("breaker " + std::to_string (m_terminal) + " tripped on " + m_sourceObject->getName ());
@@ -492,7 +496,7 @@ void breaker::tripBreaker (gridDyn_time time)
 }
 
 
-void breaker::resetBreaker (gridDyn_time time)
+void breaker::resetBreaker (coreTime time)
 {
   ++recloseAttempts;
   lastRecloseTime = time;

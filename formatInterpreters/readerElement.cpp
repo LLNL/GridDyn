@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "readerElement.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 
 readerAttribute::readerAttribute ()
@@ -33,12 +33,13 @@ void readerAttribute::set (std::string attName, std::string attText)
 
 double readerAttribute::getValue () const
 {
-  return doubleReadComplete (text, readerNullVal);
+  return numeric_conversion<double>(text, readerNullVal);
 }
 
+constexpr long long nullLong = (long long)(0x8000'0000'0000'0000);
 long long readerAttribute::getInt() const
 {
-	return longlongReadComplete(text, readerNullVal);
+	return numeric_conversion<long long>(text,nullLong );
 }
 
 readerElement::~readerElement ()

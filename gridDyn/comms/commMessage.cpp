@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 */
 
 #include "commMessage.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 static dMessageFactory<commMessage,0,0xFFFFFFF0> dmf ("message");
 
@@ -54,7 +54,10 @@ void commMessage::loadString (const std::string &fromString)
 
 std::string commMessage::encodeTypeInString() const
 {
-	return "[" + std::to_string(m_messageType) + "]";
+	std::string retString("[");
+	appendInteger(retString,m_messageType);
+	retString.push_back(']');
+	return retString;
 }
 
 std::uint32_t commMessage::extractMessageType(const std::string &messageString)
@@ -65,7 +68,7 @@ std::uint32_t commMessage::extractMessageType(const std::string &messageString)
 		return static_cast<std::uint32_t>(unknownMessageType);
 	}
 	auto b2 = messageString.find_first_of(']', b1);
-	std::uint32_t val = intReadComplete(messageString.substr(b1 + 1, b2 - b1 - 1),0xFFFFFFFF);
+	std::uint32_t val = numeric_conversionComplete<std::uint32_t>(messageString.substr(b1 + 1, b2 - b1 - 1),0xFFFFFFFF);
 	return val;
 }
 
@@ -76,9 +79,9 @@ std::shared_ptr<coreMessageFactory> coreMessageFactory::instance ()
   return factory;
 }
 
-void coreMessageFactory::registerFactory (const std::string  name, messageFactory *mf)
+void coreMessageFactory::registerFactory (std::string name, messageFactory *mf)
 {
-  auto ret = m_factoryMap.insert (std::pair < std::string,  messageFactory *> (name, mf));
+  auto ret = m_factoryMap.emplace (std::move(name), mf);
   if (ret.second == false)
     {
       ret.first->second = mf;
@@ -87,7 +90,7 @@ void coreMessageFactory::registerFactory (const std::string  name, messageFactor
 
 void coreMessageFactory::registerFactory (messageFactory *mf)
 {
-  auto ret = m_factoryMap.insert (std::pair < std::string, messageFactory *> (mf->name, mf));
+  auto ret = m_factoryMap.emplace (mf->name, mf);
   if (ret.second == false)
     {
       ret.first->second = mf;
@@ -99,7 +102,7 @@ messageFactory *coreMessageFactory::getFactory (const std::string &fname)
   auto mfind = m_factoryMap.find (fname);
   if (mfind != m_factoryMap.end ())
     {
-      return m_factoryMap[fname];
+      return mfind->second;
     }
   else
     {
@@ -140,12 +143,12 @@ std::vector<std::string> coreMessageFactory::getMessageTypeNames ()
 
 
 
-std::shared_ptr<commMessage> coreMessageFactory::createMessage (const std::string &messType)
+std::unique_ptr<commMessage> coreMessageFactory::createMessage (const std::string &messType)
 {
   auto mfind = m_factoryMap.find (messType);
   if (mfind != m_factoryMap.end ())
     {
-      auto obj = m_factoryMap[messType]->makeMessage ();
+      auto obj = mfind->second->makeMessage ();
       return obj;
     }
   else
@@ -154,12 +157,12 @@ std::shared_ptr<commMessage> coreMessageFactory::createMessage (const std::strin
     }
 }
 
-std::shared_ptr<commMessage> coreMessageFactory::createMessage (const std::string &messType, std::uint32_t code)
+std::unique_ptr<commMessage> coreMessageFactory::createMessage (const std::string &messType, std::uint32_t code)
 {
   auto mfind = m_factoryMap.find (messType);
   if (mfind != m_factoryMap.end ())
     {
-      auto obj = m_factoryMap[messType]->makeMessage (code);
+      auto obj = mfind->second->makeMessage (code);
       return obj;
     }
   else
@@ -169,7 +172,7 @@ std::shared_ptr<commMessage> coreMessageFactory::createMessage (const std::strin
 }
 
 //always find the narrowest range that valid
-std::shared_ptr<commMessage> coreMessageFactory::createMessage (std::uint32_t type)
+std::unique_ptr<commMessage> coreMessageFactory::createMessage (std::uint32_t type)
 {
   std::uint32_t crange = 0xFFFFFFFF;
   messageFactory *cfact = nullptr;
@@ -208,7 +211,4 @@ coreMessageFactory::coreMessageFactory ()
 
 }
 
-coreMessageFactory::~coreMessageFactory ()
-{
-
-}
+coreMessageFactory::~coreMessageFactory() = default;

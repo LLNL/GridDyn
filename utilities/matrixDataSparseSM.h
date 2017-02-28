@@ -1,8 +1,7 @@
-#pragma once
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -11,25 +10,21 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
+#pragma once
 #ifndef _MATRIX_DATA_SPARSESM_H_
 #define _MATRIX_DATA_SPARSESM_H_
 
 #include "matrixData.h"
+#include "matrixDataOrdering.h"
 #include <vector>
-#include <utility>
 #include <algorithm>
 #include <array>
 #include <iterator>
 #include <type_traits>
 #include <cassert>
 
-/** @brief enumeration specifying sparse ordering patterns*/
-enum class sparse_ordering
-{
-	row_ordered = 0,
-	column_ordered = 1,
-};
+
+
 
 /** @brief simple class for compute the keyIndex from a row and column and inverting it*/
 template <class X, sparse_ordering M>
@@ -50,8 +45,8 @@ public:
 		return static_cast<index_t>(key & mask);
 	}
 private:
-	static const unsigned int vshift = 4 * sizeof(X);
-	static const X mask = (X(1) << vshift) - 1;
+	static constexpr unsigned int vshift = 4 * sizeof(X);
+	static constexpr X mask = (X(1) << vshift) - 1;
 };
 
 template <class X>
@@ -73,8 +68,8 @@ public:
 	}
 
 private:
-	static const unsigned int vshift = 4 * sizeof(X);
-	static const X mask = (X(1) << vshift) - 1;
+	static constexpr unsigned int vshift = 4 * sizeof(X);
+	static constexpr X mask = (X(1) << vshift) - 1;
 };
 
 
@@ -142,27 +137,27 @@ to make the sorting faster when done
 the template parameter K indicates that the structure should use 2^K vectors for data storage
 the space allocated is approximately 2x that used in the single column structure
 */
-template <count_t K, class X=std::uint32_t, class Y=double,sparse_ordering M=sparse_ordering::column_ordered>
+template <count_t K, class X=std::uint32_t, class Y=double,sparse_ordering M=sparse_ordering::row_ordered>
 class matrixDataSparseSMB : public matrixData<Y>
 {
 	
 	static_assert (std::is_integral<X>::value, "class X must be of integral type");
 	static_assert (std::is_unsigned<X>::value, "class X must be of an unsigned type");
-	typedef std::pair<X, Y> pLoc;
+	using pLoc= std::pair<X, Y>;
 private:
 	keyCompute<X, M> key_computer;    //!< object that generators the keys and extracts row and column information
 	std::array<std::vector<pLoc>,(1<<K)> dVec;         //!< the vector of pairs containing the data			
 	count_t sortCount = 0;			//!< count of the last sort operation
 	blockCompute<K, M> block_computer;  //!< object that generates the appropriate block index;
-	decltype(dVec[0].begin()) cptr; //!< ptr to the beginning of the sequence;
-	decltype(dVec[0].end()) iend; //!< ptr to the end of the current sequence;
+	decltype(dVec[0].cbegin()) cptr; //!< ptr to the beginning of the sequence;
+	decltype(dVec[0].cend()) iend; //!< ptr to the end of the current sequence;
 	int ci = 0;						//!< indicator of which vector of the array we are sequencing on;
 public:
 	/** @brief constructor 
 	  the actual storage space used is approx 2x startCount due to expected unevenness in the array
 	@param[in] startCount  the number of elements to reserve
 	*/
-	matrixDataSparseSMB(index_t startCount = 1000)
+	explicit matrixDataSparseSMB(index_t startCount = 1000)
 	{
 		for (auto &dvk : dVec)
 		{
@@ -230,7 +225,7 @@ public:
 	void sortIndex()
 	{
 		//std::sort(dVec.begin(), dVec.end(), compareLocSM);
-		auto fp = [](pLoc A, pLoc B) {return (A.first < B.first); };
+		auto fp = [](const pLoc &A, const pLoc &B) {return (A.first < B.first); };
 		for (auto &dvk : dVec)
 		{
 			std::sort(dvk.begin(), dvk.end(), fp);
@@ -277,7 +272,7 @@ public:
 		sortCount = size();
 	}
 
-	index_t rowIndex(index_t N) const override
+	matrixElement<Y> element(index_t N) const override
 	{
 		int ii = 0;
 		size_t sz1 = 0;
@@ -289,46 +284,18 @@ public:
 			sz2+= dVec[ii].size();
 		}
 		assert(ii < (1 << K));
-		return (key_computer.row(dVec[ii][N-sz1].first));
+		return{ key_computer.row(dVec[ii][N - sz1].first),key_computer.col(dVec[ii][N - sz1].first),dVec[ii][N - sz1].second };
 
-	}
-	index_t colIndex(index_t N) const override
-	{
-		int ii = 0;
-		size_t sz1 = 0;
-		size_t sz2 = dVec[0].size();
-		while (N >= sz2)
-		{
-			sz1 += dVec[ii].size();
-			++ii;
-			sz2 += dVec[ii].size();
-		}
-		assert(ii < (1 << K));
-		return (key_computer.row(dVec[ii][N - sz1].first));
-	}
-	Y val(index_t N) const override
-	{
-		int ii = 0;
-		size_t sz1 = 0;
-		size_t sz2 = dVec[0].size();
-		while (N >= sz2)
-		{
-			sz1 += dVec[ii].size();
-			++ii;
-			sz2 += dVec[ii].size();
-		}
-		assert(ii < (1 << K));
-		return (dVec[ii][N - sz1].second);
-	}
-
-	virtual matrixIterator<Y> begin() const override
-	{
-		return matrixIterator<Y>(new matrixIteratorSM(*this,0));
 	}
 	
-	virtual matrixIterator<Y> end() const override
+	auto begin() const
 	{
-		return matrixIterator<Y>(new matrixIteratorSM(*this, size()));
+		return matrixIteratorSM(*this,0);
+	}
+	
+	auto end() const 
+	{
+		return matrixIteratorSM(*this, size());
 	}
 	void start() override
 	{
@@ -342,8 +309,8 @@ public:
 				break;
 			}
 		}
-		cptr = dVec[ci].begin();
-		iend = dVec[ci].end();
+		cptr = dVec[ci].cbegin();
+		iend = dVec[ci].cend();
 	}
 
 	matrixElement<Y> next() override
@@ -364,8 +331,8 @@ public:
 						break;
 					}
 				}
-				cptr = dVec[ci].begin();
-				iend = dVec[ci].end();
+				cptr = dVec[ci].cbegin();
+				iend = dVec[ci].cend();
 			}
 		}
 		return tp;
@@ -418,10 +385,10 @@ public:
 		}
 	}
 protected:
-	class matrixIteratorSM:public matrixIteratorActual<Y>
+	class matrixIteratorSM
 	{
 	public:
-		explicit matrixIteratorSM(const matrixDataSparseSMB<K,X,Y,M> &matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData,start), mDS(&matrixData)
+		explicit matrixIteratorSM(const matrixDataSparseSMB<K,X,Y,M> &matrixData, index_t start = 0)
 		{
 			if (start==0)
 			{
@@ -435,8 +402,8 @@ protected:
 						break;
 					}
 				}
-				cptr = mDS->dVec[ci].begin();
-				iend = mDS->dVec[ci].end();
+				cptr = mDS->dVec[ci].cbegin();
+				iend = mDS->dVec[ci].cend();
 			}
 			else if (start == mDS->size())
 			{
@@ -449,28 +416,17 @@ protected:
 						//if everything is empty just go back to the last one
 						ci = static_cast<count_t>(mDS->dVec.size() - 1);
 					}
-					cptr = mDS->dVec[ci].end();
-					iend = mDS->dVec[ci].end();
+					cptr = mDS->dVec[ci].cend();
+					iend = mDS->dVec[ci].cend();
 				}
 
 			}
 			
 		}
-		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS), it2->ci), mDS(it2->mDS)
-		{
-			ci = it2->ci;
-			cptr = it2 -> cptr;
-			iend = it2->iend;
-		}
 
-		virtual matrixIteratorActual<Y> *clone() const override
+		matrixIteratorSM &operator++()
 		{
-			return new matrixIteratorSM(this);
-		}
-
-		virtual void increment() override
-		{
-			matrixIteratorActual<Y>::increment();
+			
 			++cptr;
 			if (cptr == iend)
 			{
@@ -486,20 +442,21 @@ protected:
 							break;
 						}
 					}
-					cptr = mDS->dVec[ci].begin();
-					iend = mDS->dVec[ci].end();
+					cptr = mDS->dVec[ci].cbegin();
+					iend = mDS->dVec[ci].cend();
 				}
 			}
+			return *this;
 		}
 
-		virtual matrixElement<Y> operator*() const override
+		matrixElement<Y> operator*() const
 		{
 			return{ mDS->key_computer.row(cptr->first), mDS->key_computer.col(cptr->first), cptr->second };
 		}
 	private:
 		const matrixDataSparseSMB<K, X, Y, M> *mDS=nullptr;
-		decltype(mDS->dVec[0].begin()) cptr; //!< ptr to the beginning of the sequence;
-		decltype(mDS->dVec[0].end()) iend; //!< ptr to the end of the current sequence;
+		decltype(mDS->dVec[0].cbegin()) cptr; //!< ptr to the beginning of the sequence;
+		decltype(mDS->dVec[0].cend()) iend; //!< ptr to the end of the current sequence;
 		int ci = 0;						//!< indicator of which vector of the array we are sequencing on;	
 
 	};
@@ -516,10 +473,10 @@ class matrixDataSparseSMB<0,X,Y,M> : public matrixData<Y>
 	static_assert (std::is_integral<X>::value, "class X must be of integral type");
 	static_assert (std::is_unsigned<X>::value, "class X must be of an unsigned type");
 private:
-	typedef std::pair<X, Y> pLoc;
+	using pLoc= std::pair<X, Y>;
 	std::vector<pLoc> dVec;         //!< the vector of pairs containing the data			
 	count_t sortCount = 0;			//!< count of the last sort operation
-	decltype(dVec.begin()) cptr; //!< ptr to the beginning of the sequence;
+	decltype(dVec.cbegin()) cptr; //!< ptr to the beginning of the sequence;
 	keyCompute<X, M> key_computer;    //!< object that generators the keys and extracts row and column information
 
 public:
@@ -603,34 +560,25 @@ public:
 
 	}
 
-	index_t rowIndex(index_t N) const override
+	matrixElement<Y> element(index_t N) const override
 	{
-		return (key_computer.row(dVec[N].first));
+		return{ key_computer.row(dVec[N].first), key_computer.col(dVec[N].first) ,dVec[N].second };
+	}
+	
+
+	auto begin() const
+	{
+		return matrixIteratorSM(this, 0);
 	}
 
-	index_t colIndex(index_t N) const override
+	auto end() const
 	{
-		return (key_computer.col(dVec[N].first));
-	}
-
-	Y val(index_t N) const override
-	{
-		return dVec[N].second;
-	}
-
-	virtual matrixIterator<Y> begin() const override
-	{
-		return matrixIterator<Y>(new matrixIteratorSM(this, 0));
-	}
-
-	virtual matrixIterator<Y> end() const override
-	{
-		return matrixIterator<Y>(new matrixIteratorSM(this, size()));
+		return matrixIteratorSM(this, size());
 	}
 
 	void start() override
 	{
-		cptr = dVec.begin();
+		cptr = dVec.cbegin();
 	}
 
 	matrixElement<Y> next() override
@@ -642,7 +590,7 @@ public:
 
 	bool moreData() override
 	{
-		return (cptr != dVec.end());
+		return (cptr != dVec.cend());
 	}
 
 	/** @brief check if the sparse array is sorted
@@ -658,8 +606,8 @@ public:
 		index_t cmp = key_computer.keyGen(rowN,colN);
 		if (isSorted())
 		{
-			auto res = std::lower_bound(dVec.begin(), dVec.end(), std::make_pair(cmp, 0), [](pLoc A, pLoc B) {return (A.first < B.first); });
-			if (res == dVec.end())
+			auto res = std::lower_bound(dVec.cbegin(), dVec.cend(), std::make_pair(cmp, 0), [](pLoc A, pLoc B) {return (A.first < B.first); });
+			if (res == dVec.cend())
 			{
 				return Y(0);
 			}
@@ -685,42 +633,31 @@ public:
 			return Y(0);
 		}
 	}
-	class matrixIteratorSM :public matrixIteratorActual<Y>
+	class matrixIteratorSM 
 	{
 	public:
-		explicit matrixIteratorSM(const matrixDataSparseSMB<0, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(*matrixData, start), mDS(matrixData)
+		explicit matrixIteratorSM(const matrixDataSparseSMB<0, X, Y, M> *matrixData, index_t start = 0)
 		{
 			if (start == 0)
 			{
-				cptr = mDS->dVec.begin();
+				cptr = mDS->dVec.cbegin();
 			}
 			else if (start<mDS->size())
 			{
-				cptr = mDS->dVec.begin() + start;
+				cptr = mDS->dVec.cbegin() + start;
 			}
 			else 
 			{			
-				cptr = mDS->dVec.end();
+				cptr = mDS->dVec.cend();
 			}
 
 		}
-		matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS)), mDS(it2->mDS)
-		{
-			cptr = it2->cptr;
-		}
 
-		virtual matrixIteratorActual<Y> *clone() const override
-		{
-			return new matrixIteratorSM(this);
-		}
-
-		virtual void increment() override
+		matrixIteratorSM &operator++()
 		{
 			++cptr;
-			matrixIteratorActual<Y>::increment();
 		}
 		
-
 
 		virtual matrixElement<Y> operator*() const override
 		{
@@ -728,7 +665,7 @@ public:
 		}
 	private:
 		const matrixDataSparseSMB<0, X, Y, M> *mDS = nullptr;
-		decltype(mDS->dVec.begin()) cptr; //!< ptr to the beginning of the sequence;	
+		decltype(mDS->dVec.cbegin()) cptr; //!< ptr to the beginning of the sequence;	
 
 	};
 };
@@ -746,13 +683,13 @@ class matrixDataSparseSMB<1,X,Y,M> : public matrixData<Y>
 	
 	static_assert (std::is_integral<X>::value, "class X must be of integral type");
 	static_assert (std::is_unsigned<X>::value, "class X must be of an unsigned type");
-	typedef std::pair<X, Y> pLoc;
+	using pLoc=std::pair<X, Y>;
 private:
 	std::array<std::vector<pLoc>, 2> dVec;         //!< the vector of pairs containing the data			
 	count_t sortCount = 0;			//!< count of the last sort operation
 
-	decltype(dVec[0].begin()) cptr; //!< ptr to the beginning of the sequence;
-	decltype(dVec[0].end()) iend; //!< ptr to the end of the current sequence;
+	decltype(dVec[0].cbegin()) cptr; //!< iterator to the beginning of the sequence;
+	decltype(dVec[0].cend()) iend; //!< iterator to the end of the current sequence;
 	int ci = 0;						//!< indicator of which vector of the array we are sequencing on;
 	keyCompute<X, M> key_computer;    //!< object that generators the keys and extracts row and column information
 	blockCompute<1, M> block_computer;    //!< object that generators the appropriate block to use
@@ -812,7 +749,7 @@ public:
 	void sortIndex()
 	{
 		//std::sort(dVec.begin(), dVec.end(), compareLocSM);
-		auto fp = [](pLoc A, pLoc B) {return (A.first < B.first); };
+		auto fp = [](const pLoc &A, const pLoc &B) {return (A.first < B.first); };
 
 			std::sort(dVec[0].begin(), dVec[0].end(), fp);
 			std::sort(dVec[1].begin(), dVec[1].end(), fp);
@@ -856,34 +793,30 @@ public:
 
 	}
 
-	index_t rowIndex(index_t N) const override
+	virtual matrixElement<Y> element(index_t N) const override
 	{
-		return static_cast<index_t>(key_computer.row((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].first : dVec[0][N].first));
+		matrixElement<Y> ret;
+		ret.row = static_cast<index_t>(key_computer.row((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].first : dVec[0][N].first));
+		ret.col= static_cast<index_t>(key_computer.col((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].first : dVec[0][N].first));
+		ret.data= ((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].second : dVec[0][N].second);
+		return ret;
+	}
+	
 
-	}
-	index_t colIndex(index_t N) const override
+	auto begin() const
 	{
-		return static_cast<index_t>(key_computer.col((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].first : dVec[0][N].first));
-	}
-	Y val(index_t N) const override
-	{
-		return ((N >= dVec[0].size()) ? dVec[1][N - dVec[0].size()].second : dVec[0][N].second);
-	}
-
-	virtual matrixIterator<Y> begin() const override
-	{
-		return matrixIterator<Y>(new matrixIteratorSM(this, 0));
+		return matrixIteratorSM(this, 0);
 	}
 
-	virtual matrixIterator<Y> end() const override
+	auto end() const
 	{
-		return matrixIterator<Y>(new matrixIteratorSM(this, size()));
+		return matrixIteratorSM(this, size());
 	}
 
 	void start() override
 	{
-		cptr = dVec[0].begin();
-		iend = dVec[0].end();
+		cptr = dVec[0].cbegin();
+		iend = dVec[0].cend();
 		ci = 0;
 	}
 
@@ -896,8 +829,8 @@ public:
 			++ci;
 			if (ci < 2)
 			{
-				cptr = dVec[1].begin();
-				iend = dVec[1].end();
+				cptr = dVec[1].cbegin();
+				iend = dVec[1].cend();
 			}
 		}
 		return tp;
@@ -922,8 +855,8 @@ public:
 		int I = block_computer.blockIndexGen(rowN,colN);
 		if (isSorted())
 		{
-			auto res = std::lower_bound(dVec[I].begin(), dVec[I].end(), std::make_pair(cmp, 0), [](pLoc A, pLoc B) {return (A.first < B.first); });
-			if (res == dVec[I].end())
+			auto res = std::lower_bound(dVec[I].cbegin(), dVec[I].cend(), std::make_pair(cmp, 0), [](pLoc A, pLoc B) {return (A.first < B.first); });
+			if (res == dVec[I].cend())
 			{
 				return Y(0.0);
 			}
@@ -950,52 +883,42 @@ public:
 		}
 	}
 	protected:
-		class matrixIteratorSM :public matrixIteratorActual<Y>
+		class matrixIteratorSM 
 		{
 		public:
-			explicit matrixIteratorSM(const matrixDataSparseSMB<1, X, Y, M> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(*matrixData, start), mDS(matrixData)
+			explicit matrixIteratorSM(const matrixDataSparseSMB<1, X, Y, M> *matrixData, index_t start = 0)
 			{
 				if (start == 0)
 				{
 					ci = 0;
 					
-					cptr = mDS->dVec[0].begin();
-					iend = mDS->dVec[0].end();
+					cptr = mDS->dVec[0].cbegin();
+					iend = mDS->dVec[0].cend();
 				}
 				else if (start == mDS->size())
 				{
 					ci = 1;
-					cptr = mDS->dVec[1].end();
-					iend = mDS->dVec[1].end();
+					cptr = mDS->dVec[1].cend();
+					iend = mDS->dVec[1].cend();
 				}
 
 			}
-			matrixIteratorSM(const matrixIteratorSM *it2) :matrixIteratorActual<Y>(*(it2->mDS), it2->ci), mDS(it2->mDS)
-			{
-				ci = it2->ci;
-				cptr = it2->cptr;
-				iend = it2->iend;
-			}
 
-			virtual matrixIteratorActual<Y> *clone() const override
+			matrixIteratorSM &operator++()
 			{
-				return new matrixIteratorSM(this);
-			}
-
-			virtual void increment() override
-			{
-				matrixIteratorActual<Y>::increment();
+				
 				++cptr;
 				if (cptr == iend)
 				{
 					++ci;
 					if (ci < 2)
 					{
-						cptr = mDS->dVec[1].begin();
-						iend = mDS->dVec[1].end();
+						cptr = mDS->dVec[1].cbegin();
+						iend = mDS->dVec[1].cend();
 					}
 
 				}
+				return &this;
 			}
 
 			virtual matrixElement<Y> operator*() const override
@@ -1004,8 +927,8 @@ public:
 			}
 		private:
 			const matrixDataSparseSMB<1, X, Y, M> *mDS = nullptr;
-			decltype(mDS->dVec[0].begin()) cptr; //!< ptr to the beginning of the sequence;
-			decltype(mDS->dVec[0].end()) iend; //!< ptr to the end of the current sequence;
+			decltype(mDS->dVec[0].cbegin()) cptr; //!< ptr to the beginning of the sequence;
+			decltype(mDS->dVec[0].cend()) iend; //!< ptr to the end of the current sequence;
 			int ci = 0;						//!< indicator of which vector of the array we are sequencing on;	
 
 		};

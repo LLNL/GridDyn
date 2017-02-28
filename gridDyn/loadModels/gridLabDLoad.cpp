@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,12 +13,12 @@
 
 #include "loadModels/gridLabDLoad.h"
 #include "gridBus.h"
-#include "GhostSwingBusManager.h"
+#include "coupling/GhostSwingBusManager.h"
 #include "vectorOps.hpp"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "stringOps.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 #include <iostream>
@@ -27,7 +27,7 @@
 //#define SGS_DEBUG
 
 static typeFactory<gridLabDLoad> gfgld ("load", stringVec { "gridlabd", "gridlab"});
-//constant for rotating a complext number by +120 and -120 degrees
+//constants for rotating a complex number by +120 and -120 degrees
 static const std::complex<double> rotp120 (-0.5, sqrt (3.0) / 2.0);
 static const std::complex<double> rotn120 (-0.5, -sqrt (3.0) / 2.0);
 
@@ -72,7 +72,7 @@ void gridLabDLoad::gridLabDInitialize (void)
             {
               if (!(dummy_load[kk]))
                 {
-                  dummy_load[kk] = std::unique_ptr<gridLoad> (new gridLoad (0.3, 0.1,"dummy"));
+                  dummy_load[kk] = std::make_unique<zipLoad> (0.3, 0.1,"dummy");
                   dummy_load[kk]->set ("yp", 0.15);
                   dummy_load[kk]->set ("yq", 0.192);
                   dummy_load[kk]->set ("ip", 0.22);
@@ -83,7 +83,7 @@ void gridLabDLoad::gridLabDInitialize (void)
         });
               if (opFlags[dual_mode_flag])
                 {
-                  dummy_load_forward[kk] = std::unique_ptr<gridLoad> (static_cast<gridLoad *> (dummy_load[kk]->clone ()));
+                  dummy_load_forward[kk] = std::unique_ptr<zipLoad> (static_cast<zipLoad *> (dummy_load[kk]->clone ()));
                 }
             }
 #endif
@@ -92,7 +92,7 @@ void gridLabDLoad::gridLabDInitialize (void)
 
 }
 
-gridCoreObject *gridLabDLoad::clone (gridCoreObject *obj) const
+coreObject *gridLabDLoad::clone (coreObject *obj) const
 {
   gridLabDLoad *ld = cloneBase<gridLabDLoad, gridRampLoad> (this, obj);
   if (ld == nullptr)
@@ -115,11 +115,11 @@ gridCoreObject *gridLabDLoad::clone (gridCoreObject *obj) const
         {
           if (dummy_load[kk])
             {
-              ld->dummy_load[kk].reset (static_cast<gridLoad*> (dummy_load[kk]->clone (nullptr)));
+              ld->dummy_load[kk].reset (static_cast<zipLoad*> (dummy_load[kk]->clone (nullptr)));
               ld->dummy_load[kk]->setParent (ld);
               if (opFlags[dual_mode_flag])
                 {
-                  ld->dummy_load_forward[kk].reset (static_cast<gridLoad *> (dummy_load[kk]->clone ()));
+                  ld->dummy_load_forward[kk].reset (static_cast<zipLoad *> (dummy_load[kk]->clone ()));
                   ld->dummy_load_forward[kk]->setParent (ld);
                 }
             }
@@ -141,9 +141,9 @@ gridCoreObject *gridLabDLoad::clone (gridCoreObject *obj) const
   return ld;
 }
 
-void gridLabDLoad::add (gridCoreObject *obj)
+void gridLabDLoad::add (coreObject *obj)
 {
-  if (dynamic_cast<gridLoad *> (obj))
+  if (dynamic_cast<zipLoad *> (obj))
     {
       for (size_t kk = 0; kk < dummy_load.size (); ++kk)
         {
@@ -151,34 +151,33 @@ void gridLabDLoad::add (gridCoreObject *obj)
             {
               continue;
             }
-          dummy_load[kk].reset (static_cast<gridLoad *> (obj));
+          dummy_load[kk].reset (static_cast<zipLoad *> (obj));
           obj->setParent (this);
           if (opFlags[dual_mode_flag])
             {
-              dummy_load_forward[kk].reset (static_cast<gridLoad *> (obj->clone ()));
+              dummy_load_forward[kk].reset (static_cast<zipLoad *> (obj->clone ()));
               dummy_load_forward[kk]->setParent (this);
             }
         }
-      if (obj->getParent () == nullptr)
+      if (obj->isRoot())
         {
-          dummy_load.push_back (std::unique_ptr<gridLoad> (static_cast<gridLoad *> (obj)));
+          dummy_load.push_back (std::unique_ptr<zipLoad> (static_cast<zipLoad *> (obj)));
           obj->setParent (this);
           if (opFlags[dual_mode_flag])
             {
-              dummy_load_forward.push_back (std::unique_ptr<gridLoad> (static_cast<gridLoad *> (obj->clone ())));
+              dummy_load_forward.push_back (std::unique_ptr<zipLoad> (static_cast<zipLoad *> (obj->clone ())));
               dummy_load_forward.back ()->setParent ( this);
             }
         }
     }
   else
     {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
     }
 }
 
-void gridLabDLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
+void gridLabDLoad::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  bus = dynamic_cast<gridBus *> (parent);
   if (opFlags[file_sent_flag] == false)
     {
       gridLabDInitialize ();
@@ -186,7 +185,7 @@ void gridLabDLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*f
   m_lastCallTime = time0;
   updateA (time0);
   opFlags[preEx_requested] = true;
-
+  gridRampLoad::pFlowObjectInitializeA(time0, flags);
 
 }
 
@@ -196,14 +195,14 @@ void gridLabDLoad::pFlowObjectInitializeB ()
 
 }
 
-void gridLabDLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void gridLabDLoad::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   switch (dynCoupling)
     {
     case coupling_mode_t::none:
       opFlags.reset (preEx_requested);
-      offsets.local->local.algRoots = 0;
+      offsets.local().local.algRoots = 0;
       break;
     case coupling_mode_t::interval:
       opFlags.reset (preEx_requested);
@@ -213,7 +212,7 @@ void gridLabDLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /
       break;
     case coupling_mode_t::trigger:
       opFlags.reset (preEx_requested);
-      offsets.local->local.algRoots = 1;
+      offsets.local().local.algRoots = 1;
       break;
 
     case coupling_mode_t::full:
@@ -224,11 +223,11 @@ void gridLabDLoad::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /
     {
 
     }
-
+  gridRampLoad::dynObjectInitializeA(time0, flags);
 }
 
 
-void gridLabDLoad::dynObjectInitializeB (const IOdata & /*args*/, const IOdata & /*outputSet*/)
+void gridLabDLoad::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata &/*fieldSet*/)
 {
   if (opFlags[dual_mode_flag])
     {
@@ -239,12 +238,12 @@ void gridLabDLoad::dynObjectInitializeB (const IOdata & /*args*/, const IOdata &
 
 
 
-void gridLabDLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void gridLabDLoad::timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
 
 
-  double V = args[voltageInLocation];
-  double th = args[angleInLocation];
+  double V = inputs[voltageInLocation];
+  double th = inputs[angleInLocation];
 #ifndef HAVE_MPI
   //if we have a dummy load progress it in time appropriately
   for (auto &dl : dummy_load)
@@ -253,7 +252,7 @@ void gridLabDLoad::timestep (gridDyn_time ttime, const IOdata &args, const solve
         {
           if (dl->currentTime () < ttime)
             {
-              dl->timestep (ttime, args, sMode);
+              dl->timestep (ttime, inputs, sMode);
             }
         }
     }
@@ -264,7 +263,7 @@ void gridLabDLoad::timestep (gridDyn_time ttime, const IOdata &args, const solve
         {
           if (dl->currentTime () < ttime)
             {
-              dl->timestep (ttime, args, sMode);
+              dl->timestep (ttime, inputs, sMode);
             }
         }
     }
@@ -274,30 +273,30 @@ void gridLabDLoad::timestep (gridDyn_time ttime, const IOdata &args, const solve
 
   if (cDetail == coupling_detail_t::single)
     {
-      runGridLabA (ttime, args);
+      runGridLabA (ttime, inputs);
     }
   else if (cDetail == coupling_detail_t::VDep)
     {
-      run2GridLabA (ttime, args);
+      run2GridLabA (ttime, inputs);
     }
   else
     {
-      run3GridLabA (ttime, args);
+      run3GridLabA (ttime, inputs);
     }
   Vprev = V;
   Thprev = th;
   prevTime = ttime;
 }
 
-void gridLabDLoad::updateA (gridDyn_time ttime)
+void gridLabDLoad::updateA (coreTime ttime)
 {
 
 
   double V = bus->getVoltage ();
   double th = bus->getAngle ();
-  IOdata args (2);
-  args[voltageInLocation] = V;
-  args[angleInLocation] = th;
+  IOdata inputs (2);
+  inputs[voltageInLocation] = V;
+  inputs[angleInLocation] = th;
 #ifndef HAVE_MPI
   //if we have a dummy load progress it in time appropriately
   for (auto &dl : dummy_load)
@@ -306,7 +305,7 @@ void gridLabDLoad::updateA (gridDyn_time ttime)
         {
           if (dl->currentTime () < ttime)
             {
-              dl->timestep (ttime, args, cLocalSolverMode);
+              dl->timestep (ttime, inputs, cLocalSolverMode);
             }
         }
     }
@@ -317,7 +316,7 @@ void gridLabDLoad::updateA (gridDyn_time ttime)
         {
           if (dl->currentTime () < ttime)
             {
-              dl->timestep (ttime, args, cLocalSolverMode);
+              dl->timestep (ttime, inputs, cLocalSolverMode);
             }
         }
     }
@@ -325,30 +324,30 @@ void gridLabDLoad::updateA (gridDyn_time ttime)
 
   if (cDetail == coupling_detail_t::single)
     {
-      runGridLabA (ttime, args);
+      runGridLabA (ttime, inputs);
     }
   else if (cDetail == coupling_detail_t::VDep)
     {
-      run2GridLabA (ttime, args);
+      run2GridLabA (ttime, inputs);
     }
   else
     {
-      run3GridLabA (ttime, args);
+      run3GridLabA (ttime, inputs);
     }
   Vprev = V;
   Thprev = th;
   prevTime = ttime;
 }
 
-double gridLabDLoad::updateB ()
+coreTime gridLabDLoad::updateB ()
 {
   switch (cDetail)
     {
     case coupling_detail_t::single:
       {
         auto res = runGridLabB (false);
-        P = res[0];
-        Q = res[1];
+        setP(res[0]);
+        setQ(res[1]);
         if (res.size () == 4)
           {
             double diff = res[2] - res[0];
@@ -362,10 +361,10 @@ double gridLabDLoad::updateB ()
     case coupling_detail_t::VDep:
       {
         auto LV = run2GridLabB (false);
-        P = LV[0];
-        Q = LV[1];
-        Ip = LV[2];
-        Iq = LV[3];
+        setP(LV[0]);
+        setQ(LV[1]);
+        setIp(LV[2]);
+        setIq(LV[3]);
         if (LV.size () == 8)
           {
             double diff = LV[4] - LV[0];
@@ -385,28 +384,13 @@ double gridLabDLoad::updateB ()
         auto LV = run3GridLabB (false);
         //printf("t=%f deltaP=%e deltaQ=%e deltaIr=%e deltaIq=%e deltaZr=%e deltaZq=%e\n", prevTime, P - LV[0], Q - LV[1], Ir - LV[2], Iq - LV[3], Yp - LV[4], Yq - LV[5]);
 
-        P = LV[0];
-        Q = LV[1];
-        Ip = LV[2];
-        Iq = LV[3];
-        Yp = LV[4];
-        Yq = LV[5];
-        if (Yq == 0)
-          {
-            x = kBigNum;
-          }
-        else
-          {
-            x = 1 / ((Yp * Yp / (Yq * Yq) + 1) * Yq);
-          }
-        if (Yp == 0)
-          {
-            r = kBigNum;
-          }
-        else
-          {
-            r = (Yq == 0) ? 1 / Yp : Yp / Yq * x;
-          }
+        setP(LV[0]);
+        setQ(LV[1]);
+        setIp(LV[2]);
+        setIq(LV[3]);
+        setYp(LV[4]);
+        setYq(LV[5]);
+        
         if (LV.size () == 12)
           {
             double diff = LV[6] - LV[0];
@@ -431,6 +415,7 @@ double gridLabDLoad::updateB ()
     default:
       assert (false);
     }
+  lastTime = prevTime;
   if (prevTime >= nextUpdateTime)
     {
       nextUpdateTime += updatePeriod;
@@ -438,14 +423,14 @@ double gridLabDLoad::updateB ()
   return nextUpdateTime;
 }
 
-void gridLabDLoad::preEx (const IOdata &args, const stateData *sD, const solverMode &sMode)
+void gridLabDLoad::preEx (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
-  if ((lastSeqID == sD->seqID) && (sD->seqID != 0))
+  if ((lastSeqID == sD.seqID) && (sD.seqID != 0))
     {
       return;
     }
-  lastSeqID = sD->seqID;
-  double V = args[voltageInLocation];
+  lastSeqID = sD.seqID;
+  double V = inputs[voltageInLocation];
 
   coupling_mode_t mode;
   if (!isDynamic (sMode))
@@ -460,15 +445,15 @@ void gridLabDLoad::preEx (const IOdata &args, const stateData *sD, const solverM
     {
       if (cDetail == coupling_detail_t::single)
         {
-          runGridLabA (sD->time, args);
+          runGridLabA (sD.time, inputs);
         }
       else if (cDetail == coupling_detail_t::VDep)
         {
-          run2GridLabA (sD->time, args);
+          run2GridLabA (sD.time, inputs);
         }
       else
         {
-          run3GridLabA (sD->time, args);
+          run3GridLabA (sD.time, inputs);
         }
     }
   else
@@ -477,14 +462,14 @@ void gridLabDLoad::preEx (const IOdata &args, const stateData *sD, const solverM
         {
           if ((V > Vprev + 0.5 * spread) || (V < Vprev - 0.5 * spread))
             {
-              runGridLabA (sD->time, args);
+              runGridLabA (sD.time, inputs);
             }
         }
       else if (cDetail == coupling_detail_t::VDep)
         {
           if ((V > Vprev + spread) || (V < Vprev - spread))
             {
-              run2GridLabA (sD->time, args);
+              run2GridLabA (sD.time, inputs);
             }
 
         }
@@ -492,41 +477,41 @@ void gridLabDLoad::preEx (const IOdata &args, const stateData *sD, const solverM
         {
           if ((V > Vprev + 1.5 * spread) || (V < Vprev - 1.5 * spread))
             {
-              run3GridLabA (sD->time, args);
+              run3GridLabA (sD.time, inputs);
             }
         }
     }
 }
 
-void gridLabDLoad::updateLocalCache (const IOdata &, const stateData *, const solverMode &)
+void gridLabDLoad::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
   if (opFlags[waiting_flag])
     {
       updateB ();
     }
+  gridRampLoad::updateLocalCache(inputs, sD, sMode);
 }
 
-void gridLabDLoad::runGridLabA (gridDyn_time ttime, const IOdata &args)
+void gridLabDLoad::runGridLabA (coreTime ttime, const IOdata &inputs)
 {
   assert (opFlags[waiting_flag] == false);      //this should not happen;
   LOG_TRACE ("calling gridlab load 1A");
   GhostSwingBusManager::cvec Vg (3);
 
-  double dt = ttime - m_lastCallTime;
+  auto dt = ttime - m_lastCallTime;
   unsigned int tInt = 0;
   //get the right timer interval
-  if (dt > (1.0 - kSmallTime))
+  if (dt > (timeOneSecond))
     {
-      tInt = static_cast<unsigned int> (dt + kSmallTime);
+      tInt = dt.seconds();
       m_lastCallTime += static_cast<double> (tInt);
     }
 
   //define the A values
-  double V1;
-  Vprev = args[voltageInLocation];
-  Thprev = args[angleInLocation];
+  Vprev = inputs[voltageInLocation];
+  Thprev = inputs[angleInLocation];
   //static double *res=new double[8];
-  V1 = args[voltageInLocation] * baseVoltage * 1000.0;    //baseVoltage is in KV  we ignore the angle since it shouldn't matter
+  double V1 = inputs[voltageInLocation] * baseVoltage * 1000.0;    //baseVoltage is in KV  we ignore the angle since it shouldn't matter
   Vg[0] = std::complex<double> (V1,0);
   Vg[1] = Vg[0] * rotn120;
   Vg[2] = Vg[0] * rotp120;
@@ -551,7 +536,7 @@ void gridLabDLoad::runGridLabA (gridDyn_time ttime, const IOdata &args)
 
 std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
 {
-  LOG_TRACE ("calling gridlab load 1B");
+  LOG_TRACE ("calling gridlab-d load 1B");
   assert (opFlags[waiting_flag]);      //this should not happen;
   GhostSwingBusManager::cvec Ig (3);
   GhostSwingBusManager::cvec Ig2 (3);
@@ -614,7 +599,7 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
     {
       if (((P1 / retP) > (1.1 / 3.0)) || ((P1 / retP) < (0.9 / 3.0)))
         {
-          parent->alert (this, UNBALANCED_LOAD_ALERT);
+          alert (this, UNBALANCED_LOAD_ALERT);
         }
     }
 
@@ -623,25 +608,25 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
   /* *INDENT-ON* */
 }
 
-void gridLabDLoad::run2GridLabA (gridDyn_time ttime, const IOdata &args)
+void gridLabDLoad::run2GridLabA (coreTime ttime, const IOdata &inputs)
 {
   assert (opFlags[waiting_flag] == false);      //this should not happen;
   LOG_TRACE ("calling gridlab load 2A");
   GhostSwingBusManager::cvec Vg (6);
 
-  double dt = ttime - m_lastCallTime;
-  unsigned int tInt = 0;
+  auto dt = ttime - m_lastCallTime;
+  long long int tInt = 0;
   //get the right timer interval
-  if (dt > (1.0 - kSmallTime))
+  if (dt > timeOneSecond)
     {
-      tInt = static_cast<unsigned int> (dt + kSmallTime);
+      tInt = dt.seconds();
       m_lastCallTime += static_cast<double> (tInt);
     }
 
   //define the A values
-  double V = args[voltageInLocation];
-  Vprev = args[voltageInLocation];
-  Thprev = args[angleInLocation];
+  double V = inputs[voltageInLocation];
+  Vprev = inputs[voltageInLocation];
+  Thprev = inputs[angleInLocation];
 
   Vg[3] = std::complex<double> (V * baseVoltage * 1000.0, 0);
   Vg[4] = Vg[3] * rotn120;
@@ -672,7 +657,7 @@ void gridLabDLoad::run2GridLabA (gridDyn_time ttime, const IOdata &args)
 std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
 {
   assert (opFlags[waiting_flag]);      //this should not happen;
-  LOG_TRACE ("calling gridlab load 2B");
+  LOG_TRACE ("calling gridlab-d load 2B");
   //Model linear dependence on V
   GhostSwingBusManager::cvec Ig (6);
   GhostSwingBusManager::cvec Ig2 (6);
@@ -722,10 +707,10 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
   std::complex<double> S2 = Vg[3] * Ig[3] + Vg[4] * Ig[4] + Vg[5] * Ig[5];
   #endif
   double scale = m_mult / (systemBasePower * 1000000.0);
-  double P1 = S1.real () * scale;       //basepower is MW
-  double P2 = S2.real () * scale;       //basepower is MW
-  double Q1 = S1.imag () * scale;       //basepower is MW
-  double Q2 = S2.imag () * scale;       //basepower is MW
+  double P1 = S1.real () * scale;       //basePower is MW
+  double P2 = S2.real () * scale;       //basePower is MW
+  double Q1 = S1.imag () * scale;       //basePower is MW
+  double Q2 = S2.imag () * scale;       //basePower is MW
 
   double V2 = V;        //baseVoltage is in KV  we ignore the angle since it shouldn't matter
   double V1 = V * (1.0 + spread);
@@ -749,33 +734,33 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
       #endif
       if (((P1 / S1.real ()) > (1.1 / 3.0)) || ((P1 / S1.real ()) < (0.9 / 3.0)))
         {
-          parent->alert ( this, UNBALANCED_LOAD_ALERT);
+          alert ( this, UNBALANCED_LOAD_ALERT);
         }
     }
   return retP;
 }
 
-void gridLabDLoad::run3GridLabA (gridDyn_time ttime, const IOdata &args)
+void gridLabDLoad::run3GridLabA (coreTime ttime, const IOdata &inputs)
 {
 
   assert (opFlags[waiting_flag] == false);    //this should not happen;
-  LOG_TRACE ("calling gridlab load 3A");
+  LOG_TRACE ("calling gridLab-d load 3A");
 
   GhostSwingBusManager::cvec Vg (9);
-  double dt = ttime - m_lastCallTime;
-  unsigned int tInt = 0;
+  auto dt = ttime - m_lastCallTime;
+  long long int tInt = 0;
   //get the right timer interval
-  if (dt > (1.0 - kSmallTime))
+  if (dt > timeOneSecond)
     {
-      tInt = static_cast<unsigned int> (dt + kSmallTime);
+      tInt = dt.seconds();
       m_lastCallTime += static_cast<double> (tInt);
     }
 
-  double V = args[voltageInLocation];
-  Vprev = args[voltageInLocation];
-  Thprev = args[angleInLocation];
+  double V = inputs[voltageInLocation];
+  Vprev = inputs[voltageInLocation];
+  Thprev = inputs[angleInLocation];
 
-  //send the current voltage as the last in the serioes
+  //send the current voltage as the last in the series
   Vg[6] = std::complex<double> (V * baseVoltage * 1000.0, 0); //baseVoltage is in KV  we ignore the angle since it shouldn't matter
   Vg[7] = Vg[6] * rotn120;
   Vg[8] = Vg[6] * rotp120;
@@ -812,7 +797,7 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
   assert (opFlags[waiting_flag]);      //this should not happen;
 
-  LOG_TRACE ("calling gridlab load 3B");
+  LOG_TRACE ("calling gridLab-d load 3B");
   GhostSwingBusManager::cvec Ig (9);
   GhostSwingBusManager::cvec Ig2 (9);
   GhostSwingBusManager::cvec Vg (9);
@@ -878,16 +863,16 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
       if (((P1 / S1.real ()) > (1.05 / 3.0)) || ((P1 / S1.real ()) < (0.95 / 3.0)))
         {
-          parent->alert (this, UNBALANCED_LOAD_ALERT);
+          alert (this, UNBALANCED_LOAD_ALERT);
         }
     }
   double scale = m_mult / (systemBasePower * 1000000.0);
-  P1 = S1.real () * scale;       //basepower is MW
-  double P2 = S2.real () * scale;       //basepower is MW
-  double P3 = S3.real () * scale;       //basepower is MW
-  double Q1 = S1.imag () * scale;       //basepower is MW
-  double Q2 = S2.imag () * scale;       //basepower is MW
-  double Q3 = S3.imag () * scale;       //basepower is MW
+  P1 = S1.real () * scale;       //basePower is MW
+  double P2 = S2.real () * scale;       //basePower is MW
+  double P3 = S3.real () * scale;       //basePower is MW
+  double Q1 = S1.imag () * scale;       //basePower is MW
+  double Q2 = S2.imag () * scale;       //basePower is MW
+  double Q3 = S3.imag () * scale;       //basePower is MW
 
   double V3 = V;
   double V1 = V + spread;
@@ -999,8 +984,7 @@ void gridLabDLoad::set (const std::string &param,  const std::string &val)
 
   if (param.compare (0,4,"file") == 0)
     {
-      numstr = param.substr (4);
-      num = intRead (numstr, -1);
+	  num = stringOps::trailingStringInt(param, numstr, -1);
       if (num >= 0)
         {
           if (num > static_cast<int> (gridlabDfile.size ()))
@@ -1028,7 +1012,7 @@ void gridLabDLoad::set (const std::string &param,  const std::string &val)
   else if (param.compare (0,7,"workdir") == 0)
     {
       numstr = param.substr (7);
-      num = intRead (numstr, -1);
+      num = numeric_conversion<int> (numstr, -1);
       if (num >= 0)
         {
           if (num > static_cast<int> (gridlabDfile.size ()))
@@ -1117,7 +1101,7 @@ void gridLabDLoad::set (const std::string &param,  const std::string &val)
     }
   else
     {
-      gridLoad::set (param, val);
+      zipLoad::set (param, val);
     }
 
 }
@@ -1174,24 +1158,24 @@ void gridLabDLoad::set (const std::string &param, double val, gridUnits::units_t
     }
   else
     {
-      gridLoad::set (param, val, unitType);
+      zipLoad::set (param, val, unitType);
     }
 
 }
 
 //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
-void gridLabDLoad::rootTest (const IOdata &args, const stateData *, double roots[], const solverMode &sMode)
+void gridLabDLoad::rootTest (const IOdata &inputs, const stateData &, double roots[], const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
   roots[rootOffset] = spread * triggerBound - std::abs (V - Vprev);
 
   //printf("time=%f root =%12.10f\n", ttime,roots[rootOffset]);
 
 }
 
-void gridLabDLoad::rootTrigger (gridDyn_time ttime, const IOdata & /*args*/, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridLabDLoad::rootTrigger (coreTime ttime, const IOdata & /*inputs*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   int rootOffset = offsets.getRootOffset (sMode);
   if (rootMask[rootOffset])
@@ -1201,21 +1185,19 @@ void gridLabDLoad::rootTrigger (gridDyn_time ttime, const IOdata & /*args*/, con
     }
 }
 
-#define GETTIME(x) ((x) ? (x->time) : prevTime)
-
-change_code gridLabDLoad::rootCheck ( const IOdata &args, const stateData *sD, const solverMode &, check_level_t /*level*/)
+change_code gridLabDLoad::rootCheck ( const IOdata &inputs, const stateData &sD, const solverMode &, check_level_t /*level*/)
 {
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
   if (std::abs (V - Vprev) > spread * triggerBound)
     {
-      updateA (GETTIME (sD));
+      updateA ((sD.empty()) ? (sD.time) : prevTime);
       updateB ();
       return change_code::parameter_change;
     }
   return change_code::no_change;
 }
 
-int gridLabDLoad::mpiCount ()
+int gridLabDLoad::mpiCount () const
 {
   int cnt = 0;
   if (opFlags[dual_mode_flag])
@@ -1253,8 +1235,8 @@ void gridLabDLoad::run_dummy_load (index_t kk, VoltageMessage* vm, CurrentMessag
     {
       vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
-      rP = dummy_load[kk]->getRealPower ({ vtest / baseVoltage / 1000 },nullptr,cLocalSolverMode);
-      rQ = dummy_load[kk]->getReactivePower ( { vtest / baseVoltage / 1000 }, nullptr, cLocalSolverMode);
+      rP = dummy_load[kk]->getRealPower ({ vtest / baseVoltage / 1000 },emptyStateData,cLocalSolverMode);
+      rQ = dummy_load[kk]->getReactivePower ( { vtest / baseVoltage / 1000 }, emptyStateData, cLocalSolverMode);
       vcom = std::complex<double> (vtest, 0);
       power = std::complex<double> (rP, rQ) / 3.0;
       ctest = power * (dummy_load[kk]->get("basepower")) * 1000000.0 / vcom;
@@ -1284,8 +1266,8 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage* vm, Curre
     {
       vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
-      rP = dummy_load_forward[kk]->getRealPower ( { vtest / baseVoltage / 1000 }, nullptr, cLocalSolverMode);
-      rQ = dummy_load_forward[kk]->getReactivePower ({ vtest / baseVoltage / 1000 }, nullptr, cLocalSolverMode);
+      rP = dummy_load_forward[kk]->getRealPower ( { vtest / baseVoltage / 1000 }, emptyStateData, cLocalSolverMode);
+      rQ = dummy_load_forward[kk]->getReactivePower ({ vtest / baseVoltage / 1000 }, emptyStateData, cLocalSolverMode);
       vcom = std::complex<double> (vtest, 0);
       power = std::complex<double> (rP, rQ) / 3.0;
       ctest = power * (dummy_load_forward[kk]->get("basepower")) * 1000000.0 / vcom;

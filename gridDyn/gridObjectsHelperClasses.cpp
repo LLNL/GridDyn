@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -94,6 +94,12 @@ void stateSizes::addRootAndJacobianSizes (const stateSizes &arg)
   jacSize += arg.jacSize;
 }
 
+
+count_t stateSizes::totalSize() const
+{
+	return vSize + aSize + algSize + diffSize;
+
+}
 solverOffsets::solverOffsets (const solverOffsets *no)
 {
   std::memcpy (this, no, sizeof(solverOffsets));
@@ -339,20 +345,18 @@ void solverOffsets::setOffset (index_t newOffset)
 offsetTable::offsetTable () : offsetContainer (6),cSize (6)
 {
   //most simulations use the first 2 and powerflow(3) and likely dynamic DAE(4)  and often 5 and 6 for dynamic partitioned
-  local = offsetContainer.data ();
   offsetContainer[0].sMode = cLocalSolverMode;
   offsetContainer[1].sMode = cLocalbSolverMode;
 }
 
 offsetTable::offsetTable (const offsetTable &oTable) : offsetContainer (oTable.offsetContainer), cSize (oTable.cSize)
 {
-  local = offsetContainer.data ();
+
 }
 
 offsetTable &offsetTable::operator= (const offsetTable &oTable)
 {
   offsetContainer = oTable.offsetContainer;
-  local = offsetContainer.data ();
   cSize = oTable.cSize;
   return *this;
 }
@@ -382,7 +386,6 @@ solverOffsets * offsetTable::getOffsets (const solverMode &sMode)
       offsetContainer.resize (sMode.offsetIndex + 1);
       offsetContainer[sMode.offsetIndex].sMode = sMode;
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   return &(offsetContainer[sMode.offsetIndex]);
 }
@@ -402,7 +405,6 @@ void offsetTable::setOffsets (const solverOffsets &newOffsets, const solverMode 
     {
       offsetContainer.resize (sMode.offsetIndex + 1);
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].setOffsets (newOffsets);
@@ -415,7 +417,6 @@ void offsetTable::setOffset (index_t newOffset, const solverMode &sMode)
     {
       offsetContainer.resize (sMode.offsetIndex + 1);
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].setOffset (newOffset);
@@ -428,7 +429,6 @@ void offsetTable::setAlgOffset (index_t newOffset, const solverMode &sMode)
     {
       offsetContainer.resize (sMode.offsetIndex + 1);
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].algOffset = newOffset;
@@ -441,7 +441,6 @@ void offsetTable::setDiffOffset (index_t newOffset, const solverMode &sMode)
       offsetContainer.resize (sMode.offsetIndex + 1);
 
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].diffOffset = newOffset;
@@ -454,7 +453,6 @@ void offsetTable::setVOffset (index_t newOffset, const solverMode &sMode)
       offsetContainer.resize (sMode.offsetIndex + 1);
 
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].vOffset = newOffset;
@@ -466,7 +464,6 @@ void offsetTable::setAOffset (index_t newOffset, const solverMode &sMode)
     {
       offsetContainer.resize (sMode.offsetIndex + 1);
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].aOffset = newOffset;
@@ -479,7 +476,6 @@ void offsetTable::setRootOffset (index_t newOffset, const solverMode &sMode)
       offsetContainer.resize (sMode.offsetIndex + 1);
 
       cSize = sMode.offsetIndex + 1;
-      local = offsetContainer.data ();
     }
   offsetContainer[sMode.offsetIndex].sMode = sMode;
   offsetContainer[sMode.offsetIndex].rootOffset = newOffset;
@@ -606,9 +602,10 @@ void offsetTable::localUpdateAll (bool dynOnly)
         {
           if (isDynamic (so.sMode))
             {
-              so.total.algRoots = so.local.algRoots = local->local.algRoots;
-              so.total.diffRoots = so.local.diffRoots = local->local.diffRoots;
-              so.total.jacSize = so.local.jacSize = local->local.jacSize;
+			  auto &lc = local();
+              so.total.algRoots = so.local.algRoots = lc.local.algRoots;
+              so.total.diffRoots = so.local.diffRoots = lc.local.diffRoots;
+              so.total.jacSize = so.local.jacSize = lc.local.jacSize;
               so.rjLoaded = true;
             }
         }
@@ -617,7 +614,7 @@ void offsetTable::localUpdateAll (bool dynOnly)
     {
       for (auto &so : offsetContainer)
         {
-          so.local = local->local;
+          so.local = local().local;
           so.localLoad (true);
         }
     }

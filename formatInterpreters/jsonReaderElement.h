@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,19 +15,22 @@
 #define JSONREADERELEMENT_H_
 
 #include "readerElement.h"
-#include "json/json-forwards.h"
-#include "json/json.h"
 #include <memory>
+#include <vector>
 
+namespace Json
+{
+	class Value;
+}
 
-/** @brief class defines a reader element around the ticpp element XML reader*/
+class jsonElement;
+
+/** @brief class defines a reader element around the json cpp reader*/
 class jsonReaderElement : public readerElement
 {
 public:
   jsonReaderElement ();
-  jsonReaderElement (const std::string &filename);
-
-  virtual ~jsonReaderElement () override;
+  explicit jsonReaderElement (const std::string &filename);
 
   std::shared_ptr<readerElement> clone () const override;
 
@@ -39,7 +42,7 @@ public:
   virtual std::string getName () const override;
   virtual double getValue () const override;
   virtual std::string getText () const override;
-  virtual std::string getMultiText (const std::string sep = " ") const override;
+  virtual std::string getMultiText (const std::string &sep = " ") const override;
 
   virtual bool hasAttribute (const std::string &attributeName) const override;
   virtual bool hasElement (const std::string &elementName) const override;
@@ -68,42 +71,12 @@ public:
   virtual void restore () override;
 private:
   void clear ();
-  bool isAttribute (const Json::Value &testValue) const;
-  bool isElement (const Json::Value &testValue) const;
 private:
-  class jsonElement
-  {
-public:
-    int elementIndex = 0;
-    std::string name;
-    Json::ArrayIndex arrayIndex = 0;
-    jsonElement ()
-    {
-    }
-    jsonElement (Json::Value vElement, std::string newName);
-    void clear ();
-    const Json::Value &getElement () const
-    {
-      return (arraytype) ? element[arrayIndex] : element;
-    }
-    Json::ArrayIndex count () const
-    {
-      return (arraytype) ? element.size () : Json::ArrayIndex (1);
-    }
-    bool isNull () const
-    {
-      return (arraytype) ? element[arrayIndex].isNull () : element.isNull ();
-    }
-private:
-    Json::Value element = Json::nullValue;
-    bool arraytype = false;
-
-  };
-
+  
   std::shared_ptr<Json::Value> doc;             //!<document root
-  std::vector<jsonElement> parents;
-  jsonElement current;
-  Json::ValueConstIterator attIterator;
+  std::vector<std::shared_ptr<jsonElement>> parents;
+  std::shared_ptr<jsonElement> current;
+  int iteratorCount = 0;
 
   std::vector<std::shared_ptr<jsonReaderElement> > bookmarks;
 };

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,15 +12,15 @@
 */
 
 #include "differentialRelay.h"
-#include "gridCondition.h"
+#include "measurement/gridCondition.h"
 #include "timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
-#include "eventQueue.h"
-#include "gridEvent.h"
+#include "events/eventQueue.h"
+#include "events/gridEvent.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 
 differentialRelay::differentialRelay (const std::string&objName) : gridRelay (objName)
@@ -28,7 +28,7 @@ differentialRelay::differentialRelay (const std::string&objName) : gridRelay (ob
   opFlags.set (continuous_flag);
 }
 
-gridCoreObject *differentialRelay::clone (gridCoreObject *obj) const
+coreObject *differentialRelay::clone (coreObject *obj) const
 {
   differentialRelay *nobj = cloneBase<differentialRelay, gridRelay> (this, obj);
   if (!(nobj))
@@ -128,7 +128,7 @@ void differentialRelay::set (const std::string &param, double val, gridUnits::un
 
 }
 
-void differentialRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void differentialRelay::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   //if the target object is a link of some kind
   if (dynamic_cast<gridLink *> (m_sourceObject))
@@ -176,13 +176,13 @@ void differentialRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned lon
       opFlags.reset (link_mode);
     }
 
-
+  //using make shared here since we need a shared object and it won't get translated 
   auto ge = std::make_shared<gridEvent> ();
   ge->setTarget (m_sinkObject,"connected");
   ge->setValue(0.0);
   //action 2 to reenable object
 
-  add (ge);
+  add (std::move(ge));
   if ((opFlags[relative_differential_flag]) && (opFlags[link_mode]) && (m_minLevel > 0))
     {
       setActionMultiTrigger ({ 0, 1 }, 0, m_delayTime);
@@ -195,7 +195,7 @@ void differentialRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned lon
   gridRelay::pFlowObjectInitializeA (time0, flags);
 }
 
-void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
   LOG_NORMAL ("Relay Tripped");
 
@@ -210,7 +210,7 @@ void differentialRelay::actionTaken (index_t ActionNum, index_t /*conditionNum*/
 
 }
 
-void differentialRelay::conditionTriggered (index_t /*conditionNum*/, gridDyn_time /*triggerTime*/)
+void differentialRelay::conditionTriggered (index_t /*conditionNum*/, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ("differential condition met");
   if (opFlags.test (use_commLink))
@@ -222,7 +222,7 @@ void differentialRelay::conditionTriggered (index_t /*conditionNum*/, gridDyn_ti
 
 }
 
-void differentialRelay::conditionCleared (index_t /*conditionNum*/, gridDyn_time /*triggerTime*/)
+void differentialRelay::conditionCleared (index_t /*conditionNum*/, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ("differential condition cleared");
 

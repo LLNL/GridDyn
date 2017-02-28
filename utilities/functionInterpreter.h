@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,6 +18,7 @@
 #include <functional>
 #include <vector>
 #include <string>
+
 
 /** @brief enumeration of the different function types*/
 enum class function_type
@@ -52,12 +53,21 @@ double evalFunction(const std::string &ftest, double val);
 */
 double evalFunction(const std::string &ftest, double val1, double val2);
 
+/** @brief evaluate a function named by a string with 3 arguments
+@param[in] ftest the function name to evaluate
+@param[in] val1 the first argument value of the function
+@param[in] val2 the second argument value of the function
+@param[in] val3 the third argument value of the function
+@return the evaluated function or nan;
+*/
+double evalFunction(const std::string &ftest, double val1, double val2, double val3);
+
 /** @brief evaluate a function named by a string with 1 array argument
 @param[in] ftest the function name to evaluate
 @param[in] arr the array argument for evaluation
 @return the evaluated function or nan;
 */
-double evalFunction(const std::string &ftest, std::vector<double> arr);
+double evalFunction(const std::string &ftest, const std::vector<double> &arr);
 
 /** @brief evaluate a function named by a string with 2 array arguments
 @param[in] ftest the function name to evaluate
@@ -65,7 +75,7 @@ double evalFunction(const std::string &ftest, std::vector<double> arr);
 @param[in] arr2 the second array argument for evaluation
 @return the evaluated function or nan;
 */
-double evalFunction(const std::string &ftest, std::vector<double> arr1, std::vector<double> arr2);
+double evalFunction(const std::string &ftest, const std::vector<double> &arr1, const std::vector<double> &arr2);
 
 /** @brief check if a string represents a valid function 
 @param[in] ftest the function name to tests
@@ -92,17 +102,23 @@ std::function<double(double)> get1ArgFunction(const std::string &funcName);
 */
 std::function<double(double, double)> get2ArgFunction(const std::string &funcName);
 
+/** @brief find a three argument function and return the corresponding lambda function
+@param[in] funcName the function name
+@return a std::Function with the appropriate function
+*/
+std::function<double(double, double,double)> get3ArgFunction(const std::string &funcName);
+
 /** @brief find a function with a single array as an argument and return the corresponding lambda function
 @param[in] funcName the function name
 @return a std::Function implementing the appropriate function
 */
-std::function<double(std::vector<double>)> getArrayFunction(const std::string &funcName);
+std::function<double(const std::vector<double> &)> getArrayFunction(const std::string &funcName);
 
 /** @brief find a function with a two arrays as arguments and return the corresponding lambda function
 @param[in] funcName the function name
 @return a std::Function implementing the appropriate function
 */
-std::function<double(std::vector<double>, std::vector<double>)> get2ArrayFunction(const std::string &funcName);
+std::function<double(const std::vector<double> &, const std::vector<double> &)> get2ArrayFunction(const std::string &funcName);
 
 
 #endif

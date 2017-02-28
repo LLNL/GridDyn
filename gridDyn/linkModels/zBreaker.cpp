@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,25 +13,24 @@
 
 // headers
 #include "linkModels/zBreaker.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "gridBus.h"
 #include "stringOps.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 
-#include <cstring>
 
 using namespace gridUnits;
 
-static typeFactory<zBreaker> glf ("link", stringVec { "zbreaker", "zline"});
+static typeFactory<zBreaker> glf ("link", stringVec { "zbreaker", "zline","busbreaker"});
 
 zBreaker::zBreaker (const std::string &objName) : gridLink (objName)
 {
 	opFlags.set(network_connected);
 }
 
-gridCoreObject * zBreaker::clone (gridCoreObject *obj) const
+coreObject * zBreaker::clone (coreObject *obj) const
 {
   zBreaker *lnk = cloneBase<zBreaker, gridLink> (this, obj);
   if (lnk == nullptr)
@@ -45,21 +44,9 @@ gridCoreObject * zBreaker::clone (gridCoreObject *obj) const
 void zBreaker::set (const std::string &param, const std::string &val)
 {
 
-  if (param == "status")
+	if (param[0] == '#')
     {
-      auto nval = convertToLowerCase (val);
-      if ((nval == "in") || (nval == "closed") || (nval == "connected"))
-        {
-          switchMode (0,false);
-        }
-      else if ((nval == "out")||(nval == "open")||(nval == "disconnected"))
-        {
-          switchMode (0, true);
-        }
-      else
-        {
-		  throw(invalidParameterValue());
-        }
+      
     }
   else
     {
@@ -70,9 +57,9 @@ void zBreaker::set (const std::string &param, const std::string &val)
 void zBreaker::set (const std::string &param, double val, units_t unitType)
 {
 
-  if (param == "status")
+	if (param[0] == '#')
     {
-      switchMode (0, (val > 0.1));
+      
     }
   else
     {
@@ -81,35 +68,21 @@ void zBreaker::set (const std::string &param, double val, units_t unitType)
 
 }
 
-void zBreaker::pFlowObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void zBreaker::switchChange(int /*switchNum*/)
 {
-  if (isConnected ())
-    {
-      if (!merged)
-        {
-          merge ();
-        }
-    }
-  else if (merged)
-    {
-      unmerge ();
-    }
+	coordinateMergeStatus();
+}
+
+
+void zBreaker::pFlowObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
+{
+	coordinateMergeStatus();
 
 }
 
-void zBreaker::dynObjectInitializeA (gridDyn_time /*time0*/, unsigned long /*flags*/)
+void zBreaker::dynObjectInitializeA (coreTime /*time0*/, unsigned long /*flags*/)
 {
-  if (isConnected ())
-    {
-      if (!merged)
-        {
-          merge ();
-        }
-    }
-  else if (merged)
-    {
-      unmerge ();
-    }
+	coordinateMergeStatus();
 
 }
 
@@ -129,14 +102,7 @@ void zBreaker::switchMode (index_t /*num*/, bool mode)
         {
           alert (this, POTENTIAL_FAULT_CHANGE);
         }
-      if (isConnected ())
-        {
-          merge ();
-        }
-      else
-        {
-          unmerge ();
-        }
+	  coordinateMergeStatus();
     }
 
 
@@ -156,25 +122,25 @@ void zBreaker::switchMode (index_t /*num*/, bool mode)
 
 void zBreaker::updateLocalCache ()
 {
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
   linkInfo.v1 = B1->getVoltage ();
   linkInfo.v2 = linkInfo.v1;
 }
-void zBreaker::updateLocalCache (const stateData *sD, const solverMode &)
+void zBreaker::updateLocalCache (const IOdata &,const stateData &sD, const solverMode &)
 {
-  if (!enabled)
+  if (!isEnabled())
     {
       return;
     }
-  if ((linkInfo.seqID == sD->seqID) && (sD->seqID != 0))
+  if (!sD.updateRequired(linkInfo.seqID))
     {
       return;
     }
   std::memset (&linkInfo, 0, sizeof(linkI));
-  linkInfo.seqID = sD->seqID;
+  linkInfo.seqID = sD.seqID;
   linkInfo.v1 = B1->getVoltage ();
   linkInfo.v2 = linkInfo.v1;
 }
@@ -184,15 +150,18 @@ double zBreaker::quickupdateP ()
   return 0;
 }
 
-void zBreaker::checkMerge ()
+void zBreaker::coordinateMergeStatus ()
 {
   if (isConnected ())
     {
-      merge ();
+	  if (!merged)
+	  {
+		  merge();
+	  }
     }
-  else
+  else if (merged)
     {
-      merged = false;
+	  unmerge();
     }
 }
 void zBreaker::merge ()
@@ -205,4 +174,21 @@ void zBreaker::unmerge ()
 {
   B1->unmergeBus (B2);
   merged = false;
+}
+
+
+void zBreaker::ioPartialDerivatives(index_t  /*busId*/, const stateData &, matrixData<double> &, const IOlocs & /*inputLocs*/, const solverMode &)
+{
+}
+void zBreaker::outputPartialDerivatives(index_t  /*busId*/, const stateData &, matrixData<double> &, const solverMode &)
+{
+}
+
+int zBreaker::fixRealPower(double /*power*/, index_t  /*measureTerminal*/, index_t  /*fixedTerminal*/, gridUnits::units_t)
+{
+	return 1;
+}
+int zBreaker::fixPower(double /*rPower*/, double /*qPower*/, index_t  /*measureTerminal*/, index_t  /*fixedTerminal*/, gridUnits::units_t)
+{
+	return 1;
 }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,11 +12,15 @@
 */
 
 #include "gridDynActions.h"
-#include "basicDefs.h"
-#include "core/gridDynExceptions.h"
-#include "stringOps.h"
+#include "core/coreExceptions.h"
+#include "stringConversion.h"
 
 gridDynAction::gridDynAction()
+{
+
+}
+
+gridDynAction::gridDynAction(gd_action_t action) :command(action)
 {
 
 }
@@ -40,7 +44,7 @@ void gridDynAction::reset()
 void gridDynAction::process(const std::string &operation)
 {
 	/* (s) string,  (d) double,  (i) int, (X)* optional, (s|d|i), string or double or int*/
-	auto ssep = splitline(operation, " ",delimiter_compression::on); 
+	auto ssep = stringOps::splitline(operation, " ",stringOps::delimiter_compression::on); 
 	size_t sz = ssep.size();
 	for (size_t kk = 0; kk < sz; ++kk)
 	{
@@ -66,7 +70,7 @@ void gridDynAction::process(const std::string &operation)
 		{
 			command = gd_action_t::set;
 			string1 = ssep[1];
-			val_double = doubleRead(ssep[2], kNullVal);
+			val_double = numeric_conversion(ssep[2], kNullVal);
 			if (val_double == kNullVal)
 			{
 				string2 = ssep[2];
@@ -82,7 +86,7 @@ void gridDynAction::process(const std::string &operation)
 		command = gd_action_t::setall;
 		if (sz >= 4)
 		{
-			double test = doubleRead(ssep[3], kNullVal);
+			double test = numeric_conversion(ssep[3], kNullVal);
 			if (test == kNullVal)
 			{
 				throw(invalidParameterValue());
@@ -102,7 +106,7 @@ void gridDynAction::process(const std::string &operation)
 		if (sz >= 3)
 		{
 			string1 = ssep[1];
-			val_int = intRead(ssep[2], -435);//-435 is some random number with no meaning outside this call
+			val_int = numeric_conversion<int>(ssep[2], -435);//-435 is some random number with no meaning outside this call
 			if (val_int == -435)
 			{
 				string1 = ssep[2];
@@ -112,24 +116,6 @@ void gridDynAction::process(const std::string &operation)
 		{
 			throw(invalidParameterValue());
 		}
-	}
-	else if (cmd == "settime") //settime newtime(d)
-	{
-		command = gd_action_t::settime;
-		if (sz >= 2)
-		{
-			double test = doubleRead(ssep[1], kNullVal);
-			if (test == kNullVal)
-			{
-				throw(invalidParameterValue());
-			}
-			val_double = test;
-		}
-		else
-		{
-			throw(invalidParameterValue());
-		}
-
 	}
 	else if (cmd == "print") //print parameter(s) setstring(s)
 	{
@@ -161,10 +147,10 @@ void gridDynAction::process(const std::string &operation)
 		command = gd_action_t::eventmode;
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[1], kNullVal);
+			val_double = numeric_conversion(ssep[1], kNullVal);
 			if (sz > 2)
 			{
-				val_double2 = doubleRead(ssep[2], kNullVal);
+				val_double2 = numeric_conversion(ssep[2], kNullVal);
 			}
 		}
 	}
@@ -186,7 +172,7 @@ void gridDynAction::process(const std::string &operation)
 				command = gd_action_t::dynamicDAE;
 				if (sz > 2)
 				{
-					val_double = doubleRead(ssep[2], kNullVal);
+					val_double = numeric_conversion(ssep[2], kNullVal);
 				}
 			}
 			else if ((ssep[1]=="part")||(ssep[1]=="partitioned"))
@@ -194,11 +180,11 @@ void gridDynAction::process(const std::string &operation)
 				command = gd_action_t::dynamicPart;
 				if (sz > 2)
 				{
-					val_double = doubleRead(ssep[2], kNullVal);
+					val_double = numeric_conversion(ssep[2], kNullVal);
 				}
 				if (sz > 3)
 				{
-					val_double2 = doubleRead(ssep[3], kNullVal);
+					val_double2 = numeric_conversion(ssep[3], kNullVal);
 				}
 			}
 			else if (ssep[1] == "decoupled")
@@ -206,16 +192,16 @@ void gridDynAction::process(const std::string &operation)
 				command = gd_action_t::dynamicDecoupled;
 				if (sz > 2)
 				{
-					val_double = doubleRead(ssep[2], kNullVal);
+					val_double = numeric_conversion(ssep[2], kNullVal);
 				}
 				if (sz > 3)
 				{
-					val_double2 = doubleRead(ssep[3], kNullVal);
+					val_double2 = numeric_conversion(ssep[3], kNullVal);
 				}
 			}
 			else
 			{
-				double test=doubleRead(ssep[2], kNullVal);
+				double test=numeric_conversion(ssep[2], kNullVal);
 				if (test == kNullVal)
 				{
 					throw(invalidParameterValue());
@@ -223,7 +209,7 @@ void gridDynAction::process(const std::string &operation)
 				else if (sz > 2)
 				{
 					val_double = test;
-					val_double2 = doubleRead(ssep[3], kNullVal);
+					val_double2 = numeric_conversion(ssep[3], kNullVal);
 				}
 				command = gd_action_t::dynamicDAE;
 			}
@@ -236,7 +222,7 @@ void gridDynAction::process(const std::string &operation)
 
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[2], kNullVal);
+			val_double = numeric_conversion(ssep[2], kNullVal);
 		}
 
 	}
@@ -246,10 +232,10 @@ void gridDynAction::process(const std::string &operation)
 
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[2], kNullVal);
+			val_double = numeric_conversion(ssep[2], kNullVal);
 			if (sz >2)
 			{
-				val_double2 = doubleRead(ssep[3], kNullVal);
+				val_double2 = numeric_conversion(ssep[3], kNullVal);
 			}
 		}
 
@@ -260,10 +246,10 @@ void gridDynAction::process(const std::string &operation)
 
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[2], kNullVal);
+			val_double = numeric_conversion(ssep[2], kNullVal);
 			if (sz >2)
 			{
-				val_double2 = doubleRead(ssep[3], kNullVal);
+				val_double2 = numeric_conversion(ssep[3], kNullVal);
 			}
 		}
 
@@ -272,7 +258,7 @@ void gridDynAction::process(const std::string &operation)
 	{
 		if (sz > 1)
 		{
-			int test_int = intRead(ssep[1], -435);
+			int test_int = numeric_conversion<int>(ssep[1], -435);
 			if (test_int == -435)
 			{
 				throw(invalidParameterValue());
@@ -291,10 +277,10 @@ void gridDynAction::process(const std::string &operation)
 		if (sz > 1)
 		{
 			
-			val_double = doubleRead(ssep[2], kNullVal);
+			val_double = numeric_conversion(ssep[2], kNullVal);
 			if (sz > 2)
 			{
-				val_double2 = doubleRead(ssep[3], kNullVal);
+				val_double2 = numeric_conversion(ssep[3], kNullVal);
 			}
 		}
 
@@ -304,7 +290,7 @@ void gridDynAction::process(const std::string &operation)
 		
 		if (sz > 1)
 		{
-			double test = doubleRead(ssep[1], kNullVal);
+			double test = numeric_conversion(ssep[1], kNullVal);
 			if (test == kNullVal)
 			{
 				throw(invalidParameterValue());
@@ -331,7 +317,7 @@ void gridDynAction::process(const std::string &operation)
 		}
 		command = gd_action_t::save;
 	}
-	else if (cmd == "load") //load subect(s) file(s)
+	else if (cmd == "load") //load subject(s) file(s)
 	{
 		
 		if (sz > 2)
@@ -367,7 +353,7 @@ void gridDynAction::process(const std::string &operation)
 		command = gd_action_t::rollback;
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[1], kNullVal);
+			val_double = numeric_conversion(ssep[1], kNullVal);
 			if (val_double == kNullVal)
 			{
 				string1 = ssep[1];
@@ -384,7 +370,7 @@ void gridDynAction::process(const std::string &operation)
 		command = gd_action_t::checkpoint;
 		if (sz > 1)
 		{
-			val_double = doubleRead(ssep[1], kNullVal);
+			val_double = numeric_conversion(ssep[1], kNullVal);
 			if (val_double == kNullVal)
 			{
 				string1 = ssep[1];

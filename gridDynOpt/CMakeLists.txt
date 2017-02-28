@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -63,12 +63,10 @@ source_group("models" FILES ${opt_model_sources})
 
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynOpt/models)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
 
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,9 +12,9 @@
 */
 
 #include "submodels/gridControlBlocks.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 #include "matrixData.h"
-
+#include "core/coreObjectTemplates.h"
 #include <cmath>
 
 delayBlock::delayBlock (const std::string &objName) : basicBlock (objName)
@@ -52,29 +52,19 @@ delayBlock::delayBlock (double t1, double gain, const std::string &objName) : ba
 
 }
 
-gridCoreObject *delayBlock::clone (gridCoreObject *obj) const
+coreObject *delayBlock::clone (coreObject *obj) const
 {
-  delayBlock *nobj;
-  if (obj == nullptr)
+	delayBlock *nobj = cloneBase<delayBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new delayBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<delayBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
   nobj->m_T1 = m_T1;
 
   return nobj;
 }
 
-void delayBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void delayBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   if ((m_T1 < kMin_Res)||(opFlags[simplified]))
     {
@@ -83,23 +73,23 @@ void delayBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
       opFlags.reset (use_state);
     }
 
-  basicBlock::objectInitializeA (time0, flags);
+  basicBlock::dynObjectInitializeA (time0, flags);
 }
 
-void delayBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void delayBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  basicBlock::objectInitializeB (args,outputSet,inputSet);
-  if (args.empty ())
+  basicBlock::dynObjectInitializeB (inputs,desiredOutput,inputSet);
+  if (inputs.empty ())
     {
-      m_state[limiter_diff] = outputSet[0];
+      m_state[limiter_diff] = desiredOutput[0];
     }
   else
     {
-      m_state[limiter_diff] = K * (args[0] + bias);
+      m_state[limiter_diff] = K * (inputs[0] + bias);
     }
 }
 
-double delayBlock::step (gridDyn_time ttime, double inputA)
+double delayBlock::step (coreTime ttime, double inputA)
 {
   if (opFlags[simplified])
     {
@@ -148,11 +138,11 @@ double delayBlock::step (gridDyn_time ttime, double inputA)
   return out;
 }
 
-void delayBlock::derivElements (double input, double didt, const stateData *sD, double deriv[], const solverMode &sMode)
+void delayBlock::derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
-  deriv[offset] =  (K * (input + bias) - sD->state[offset]) / m_T1;
+  deriv[offset] =  (K * (input + bias) - sD.state[offset]) / m_T1;
   if (limiter_diff > 0)
     {
       basicBlock::derivElements (input, didt, sD, deriv, sMode);
@@ -160,7 +150,7 @@ void delayBlock::derivElements (double input, double didt, const stateData *sD, 
 }
 
 
-void delayBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void delayBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if ((isAlgebraicOnly (sMode))||(opFlags[simplified]))
     {
@@ -169,7 +159,7 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ma
     }
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
   ad.assignCheck (offset, argLoc, K / m_T1);
-  ad.assign (offset, offset, -1.0 / m_T1 - sD->cj);
+  ad.assign (offset, offset, -1.0 / m_T1 - sD.cj);
   basicBlock::jacElements (input,didt, sD,ad,argLoc,sMode);
 }
 
@@ -177,7 +167,7 @@ void delayBlock::jacElements (double input, double didt, const stateData *sD, ma
 // set parameters
 void delayBlock::set (const std::string &param,  const std::string &val)
 {
-  return gridCoreObject::set (param, val);
+  return coreObject::set (param, val);
 }
 
 void delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)

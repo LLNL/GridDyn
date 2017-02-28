@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -22,6 +22,7 @@
 #include "matrixDataSparse.h"
 #include "units.h"
 #include "contingency.h"
+#include "core/coreExceptions.h"
 #include <boost/filesystem.hpp>
 
 #include <fstream>
@@ -79,7 +80,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fname)
   FILE *fp = fopen (fname.c_str (), "w");
   if (fp == nullptr)
     {
-      return;
+	  throw(fileOperationError("unable to open file " + fname));
     }
   double basePower = gds->get ("basepower");
   fprintf (fp, "basepower=%f\n", basePower);
@@ -126,7 +127,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fname)
   FILE *fp = fopen (fname.c_str (), "w");
   if (fp == nullptr)
     {
-      return;
+	  throw(fileOperationError("unable to open file " + fname));
     }
   double basePower = gds->get ("basepower");
   fprintf (fp, "%s basepower=%f\n", gds->getName ().c_str (), basePower);
@@ -446,12 +447,12 @@ void savePowerFlowCdf (gridDynSimulation *gds, const std::string &fname)
   FILE *fp = fopen (fname.c_str (), "w");
   if (fp == nullptr)
     {
-      return;
+	  throw(fileOperationError("unable to open file " + fname));
     }
 
   double basePower = gds->get ("basepower");
   //Title Data
-  fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", ("GridDyn " + griddyn_version).c_str (), static_cast<int> (basePower),gds->getName ().c_str ());
+  fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", ("GridDyn " + std::string(griddyn_version)).c_str (), static_cast<int> (basePower),gds->getName ().c_str ());
 
   //Bus Data
   fprintf (fp, "BUS DATA FOLLOWS\n");
@@ -759,25 +760,25 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fname, const so
   if (fname.empty ())
     {
       auto stateFile = gds->getString ("statefile");
-	  auto s=writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, stateFile,append);
-	  if ((s == FUNCTION_EXECUTION_SUCCESS)&&(hasDifferential(iMode)))
+	  writeVector(gds->getCurrentTime(), index, STATE_INFORMATION, iMode.offsetIndex, dsize, statedata, stateFile,append);
+	  if (hasDifferential(iMode))
 	  {
-		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), stateFile);
+		  writeVector(gds->getCurrentTime(), index, DERIVATIVE_INFORMATION, iMode.offsetIndex, dsize, sd->deriv_data(), stateFile);
 	  }
 	  
     }
   else
     {
-	  auto s = writeVector(gds->getCurrentTime(), index, 0, iMode.offsetIndex, dsize, statedata, fname, append);
-	  if ((s == FUNCTION_EXECUTION_SUCCESS) && (hasDifferential(iMode)))
+	  writeVector(gds->getCurrentTime(), index, STATE_INFORMATION, iMode.offsetIndex, dsize, statedata, fname, append);
+	  if (hasDifferential(iMode))
 	  {
-		  writeVector(gds->getCurrentTime(), index, 1, iMode.offsetIndex, dsize, sd->deriv_data(), fname);
+		  writeVector(gds->getCurrentTime(), index, DERIVATIVE_INFORMATION, iMode.offsetIndex, dsize, sd->deriv_data(), fname);
 	  }
     }
 }
 
 
-int writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
+void writeVector(coreTime time, std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -790,7 +791,7 @@ int writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std:
 	}
 	if (!bFile.is_open())
 	{
-		return (FUNCTION_EXECUTION_FAILURE);
+		throw(fileOperationError("unable to open file " + filename));
 	}
 	code &= 0x0000FFFF; //make sure we don't change the data type
 	bFile.write((char *)(&time), sizeof(double));
@@ -799,10 +800,9 @@ int writeVector(gridDyn_time time, std::uint32_t code, std::uint32_t index, std:
 	bFile.write((char *)(&key), sizeof(std::uint32_t));
 	bFile.write((char *)(&numElements), sizeof(std::uint32_t));
 	bFile.write((char *)(data), sizeof(double) * numElements);
-	return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int writeArray(gridDyn_time time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
+void writeArray(coreTime time, std::uint32_t code,std::uint32_t index, std::uint32_t key, matrixData<double> &a1, const std::string&filename, bool append)
 {
 	std::ofstream  bFile;
 	if (append)
@@ -815,7 +815,7 @@ int writeArray(gridDyn_time time, std::uint32_t code,std::uint32_t index, std::u
 	}
 	if (!bFile.is_open())
 	{
-		return FUNCTION_EXECUTION_FAILURE;
+		throw(fileOperationError("unable to open file " + filename));
 	}
 	code &= 0x0000FFFF;
 	code |= 0x00010000;
@@ -831,7 +831,6 @@ int writeArray(gridDyn_time time, std::uint32_t code,std::uint32_t index, std::u
 		auto el = a1.next();
 		bFile.write((char *)(&el), sizeof(matrixElement<double>));
 	}
-	return FUNCTION_EXECUTION_SUCCESS;
 }
 
 void loadState (gridDynSimulation *gds, const std::string &fname, const solverMode &sMode)
@@ -843,7 +842,8 @@ void loadState (gridDynSimulation *gds, const std::string &fname, const solverMo
       if (stateFile.empty ())
         {
           std::cerr << "no file specified" << std::endl;
-          return;
+		  gds->log(gds, print_level::error, "no state file specified");
+		  throw(invalidFileName());
         }
       else
         {
@@ -853,8 +853,9 @@ void loadState (gridDynSimulation *gds, const std::string &fname, const solverMo
 
   if (!boost::filesystem::exists (filePath))
     {
-      std::cerr << "file does not exist" << std::endl;
-      return;
+
+	  gds->log(gds, print_level::error, "file does not exist");
+	  throw(invalidFileName());
     }
 
   std::string ext = convertToLowerCase (filePath.extension ().string ());
@@ -898,7 +899,7 @@ void loadStateBinary (gridDynSimulation *gds, const std::string &fname, const so
   if (!bFile.is_open ())
     {
       gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
-      return;
+	  throw(fileOperationError("unable to open file " + fname));
     }
   unsigned int dsize;
   bFile.read ((char *)(&dsize), sizeof(int));
@@ -1031,6 +1032,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
   if (!bFile.is_open ())
     {
       gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
+	  throw(fileOperationError("unable to open file " + fname));
     }
 //writing the state vector
   const solverMode &sMode = gds->getCurrentMode (iMode);
@@ -1040,7 +1042,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 
   sD.cj = 10000;
 
-  gds->jacobianElements (&sD, ad, sMode);
+  gds->jacobianElements (noInputs, sD, ad,noInputLocs, sMode);
 
   stringVec stateNames;
   gds->getStateName (stateNames, sMode);
@@ -1064,12 +1066,10 @@ void captureJacState (gridDynSimulation *gds, const std::string &fname,const sol
 
   for (index_t kk = 0; kk < dsize; ++kk)
     {
-      index_t r = ad.rowIndex (kk);
-      index_t c = ad.colIndex (kk);
-      double val = ad.val (kk);
-      bFile.write ((char *)(&r), sizeof(index_t));
-      bFile.write ((char *)(&c), sizeof(index_t));
-      bFile.write ((char *)(&val), sizeof(double));
+	  auto el = ad.element(kk);
+      bFile.write ((char *)(&(el.row)), sizeof(index_t));
+      bFile.write ((char *)(&(el.col)), sizeof(index_t));
+      bFile.write ((char *)(&(el.data)), sizeof(double));
     }
 
   bFile.close ();
@@ -1084,23 +1084,24 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
   if (!bFile.is_open ())
     {
       gds->log (gds, print_level::error, "Unable to open file for writing:" + fname);
+	  throw(fileOperationError("unable to open file " + fname));
     }
   //writing the state vector
   const solverMode &sMode = gds->getCurrentMode (iMode);
-  auto sd = gds->getSolverInterface (sMode);
+  auto solverInterface = gds->getSolverInterface (sMode);
 
   matrixDataSparse<double> ad;
 
-  stateData sD (gds->getCurrentTime (), sd->state_data (), sd->deriv_data ());
+  stateData sD (gds->getCurrentTime (), solverInterface->state_data (), solverInterface->deriv_data ());
 
   sD.cj = 10000;
-  gds->jacobianElements (&sD, ad, sMode);
+  gds->jacobianElements (noInputs, sD, ad,noInputLocs, sMode);
 
 
   stringVec stateNames;
   gds->getStateName (stateNames, sMode);
 
-  count_t dsize = sd->size ();
+  count_t dsize = solverInterface->size ();
   bFile.write ((char *)(&dsize), sizeof(count_t));
   for (auto &stN : stateNames)
     {
@@ -1114,12 +1115,10 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fname,const solver
 
   for (unsigned kk = 0; kk < dsize; ++kk)
     {
-      index_t r = ad.rowIndex (kk);
-      index_t c = ad.colIndex (kk);
-      double val = ad.val (kk);
-      bFile.write ((char *)(&r), sizeof(index_t));
-      bFile.write ((char *)(&c), sizeof(index_t));
-      bFile.write ((char *)(&val), sizeof(double));
+	  auto el = ad.element(kk);
+	  bFile.write((char *)(&(el.row)), sizeof(index_t));
+	  bFile.write((char *)(&(el.col)), sizeof(index_t));
+	  bFile.write((char *)(&(el.data)), sizeof(double));
     }
 }
 

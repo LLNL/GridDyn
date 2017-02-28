@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,8 +12,8 @@
 */
 
 #include "submodels/otherBlocks.h"
-#include "core/gridDynExceptions.h"
-#include "objectFactory.h"
+#include "core/coreExceptions.h"
+#include "core/objectFactory.h"
 #include "matrixData.h"
 
 #include <cmath>
@@ -32,7 +32,7 @@ filteredDerivativeBlock::filteredDerivativeBlock (double t1, double t2,const std
   opFlags.set (differential_output);
 }
 
-gridCoreObject *filteredDerivativeBlock::clone (gridCoreObject *obj) const
+coreObject *filteredDerivativeBlock::clone (coreObject *obj) const
 {
   filteredDerivativeBlock *nobj;
   if (obj == nullptr)
@@ -54,34 +54,34 @@ gridCoreObject *filteredDerivativeBlock::clone (gridCoreObject *obj) const
   return nobj;
 }
 
-void filteredDerivativeBlock::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void filteredDerivativeBlock::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  basicBlock::objectInitializeA (time0, flags);
-  offsets.local->local.diffSize++;
-  offsets.local->local.jacSize += 2;
+  basicBlock::dynObjectInitializeA (time0, flags);
+  offsets.local().local.diffSize++;
+  offsets.local().local.jacSize += 2;
 
 }
 
-void filteredDerivativeBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void filteredDerivativeBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
   index_t loc = limiter_diff;              //can't have a ramp limiter
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      m_state[loc + 1] = K * (args[0] + bias);
+      m_state[loc + 1] = K * (inputs[0] + bias);
       m_state[loc] = 0;
       if (limiter_diff > 0)
         {
-          basicBlock::objectInitializeB (args, outputSet, fieldSet);
+          basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
         }
     }
   else
     {
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
-      m_state[loc] = outputSet[0];
-      m_dstate_dt[loc + 1] = outputSet[0];
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
+      m_state[loc] = desiredOutput[0];
+      m_dstate_dt[loc + 1] = desiredOutput[0];
       if (std::abs (m_dstate_dt[loc + 1]) < 1e-7)
         {
-          m_state[loc + 1] = K * (args[0] + bias);
+          m_state[loc + 1] = K * (inputs[0] + bias);
         }
       else
         {
@@ -91,7 +91,7 @@ void filteredDerivativeBlock::objectInitializeB (const IOdata &args, const IOdat
 
 }
 
-double filteredDerivativeBlock::step (gridDyn_time ttime, double inputA)
+double filteredDerivativeBlock::step (coreTime ttime, double inputA)
 {
 
   index_t loc = limiter_diff;
@@ -117,12 +117,12 @@ double filteredDerivativeBlock::step (gridDyn_time ttime, double inputA)
           in = in + (input - prevInput) / dt * tstep;
           der1 = K / m_T1 * ((pin + in) / 2.0 - ival);
           ival = ival + der1 * tstep;
-          ival2 = ival2 + (der1 - ival2) / m_T2;
+          ival2 = ival2 + (der1 - ival2) / m_T2*tstep;
           ct += tstep;
           pin = in;
         }
       m_state[loc + 1] = ival + K / m_T1 * ((pin + input) / 2.0 - ival) * (ttime - ct + tstep);
-      m_state[loc] = ival2 + (K / m_T1 * ((pin + input) / 2.0 - ival) - ival2) / m_T2;
+      m_state[loc] = ival2 + (K / m_T1 * ((pin + input) / 2.0 - ival) - ival2) / m_T2* (ttime - ct + tstep);
     }
   prevInput = input;
   double out;
@@ -140,15 +140,15 @@ double filteredDerivativeBlock::step (gridDyn_time ttime, double inputA)
 }
 
 
-void filteredDerivativeBlock::derivElements (double input, double /*didt*/, const stateData *sD, double deriv[], const solverMode &sMode)
+void filteredDerivativeBlock::derivElements (double input, double /*didt*/, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
-  deriv[offset + 1] = (K * (input + bias) - sD->state[offset + 1]) / m_T1;
-  deriv[offset] = (sD->dstate_dt[offset + 1] - sD->state[offset]) / m_T2;
+  deriv[offset + 1] = (K * (input + bias) - sD.state[offset + 1]) / m_T1;
+  deriv[offset] = (sD.dstate_dt[offset + 1] - sD.state[offset]) / m_T2;
 }
 
-void filteredDerivativeBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void filteredDerivativeBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
   if (!hasDifferential (sMode))
     {
@@ -157,10 +157,10 @@ void filteredDerivativeBlock::jacElements (double input, double didt, const stat
   auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
 
   ad.assignCheckCol (offset + 1, argLoc, K / m_T1);
-  ad.assign (offset + 1, offset + 1, -1 / m_T1 - sD->cj);
+  ad.assign (offset + 1, offset + 1, -1 / m_T1 - sD.cj);
 
-  ad.assign (offset, offset + 1, sD->cj / m_T2);
-  ad.assign (offset, offset, -1 / m_T2 - sD->cj);
+  ad.assign (offset, offset + 1, sD.cj / m_T2);
+  ad.assign (offset, offset, -1 / m_T2 - sD.cj);
 
   if (limiter_diff > 0)
     {

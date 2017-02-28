@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,9 +12,9 @@
 */
 
 #include "loadRelay.h"
-#include "gridCondition.h"
-#include "gridEvent.h"
-#include "gridCoreTemplates.h"
+#include "measurement/gridCondition.h"
+#include "events/gridEvent.h"
+#include "core/coreObjectTemplates.h"
 
 #include <boost/format.hpp>
 
@@ -23,7 +23,7 @@ loadRelay::loadRelay (const std::string&objName) : gridRelay (objName)
   // opFlags.set(continuous_flag);
 }
 
-gridCoreObject *loadRelay::clone (gridCoreObject *obj) const
+coreObject *loadRelay::clone (coreObject *obj) const
 {
   loadRelay *nobj = cloneBase<loadRelay, gridRelay> (this, obj);
   if (nobj == nullptr)
@@ -33,6 +33,9 @@ gridCoreObject *loadRelay::clone (gridCoreObject *obj) const
 
   nobj->cutoutVoltage = cutoutVoltage;
   nobj->cutoutFrequency = cutoutFrequency;
+  nobj->voltageDelay = voltageDelay;
+  nobj->frequencyDelay = frequencyDelay;
+  nobj->offTime = offTime;
   return nobj;
 }
 
@@ -102,7 +105,7 @@ void loadRelay::set (const std::string &param, double val, gridUnits::units_t un
 
 }
 
-void loadRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void loadRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
 
   auto ge = std::make_shared<gridEvent> ();
@@ -110,7 +113,7 @@ void loadRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
   ge->setTarget (m_sinkObject, "status");
   ge->setValue(0.0);
 
-  add (ge);
+  add (std::move(ge));
 
   if (cutoutVoltage < 2.0)
     {
@@ -127,7 +130,7 @@ void loadRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
 }
 
 
-void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, gridDyn_time /*actionTime*/)
+void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d action %d") %  conditionNum % ActionNum).str ());
   /*
@@ -160,7 +163,7 @@ void loadRelay::actionTaken (index_t ActionNum, index_t conditionNum, change_cod
   */
 }
 
-void loadRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*triggerTime*/)
+void loadRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d triggered") % conditionNum).str ());
   /*
@@ -200,7 +203,7 @@ void loadRelay::conditionTriggered (index_t conditionNum, gridDyn_time /*trigger
   */
 }
 
-void loadRelay::conditionCleared (index_t conditionNum, gridDyn_time /*triggerTime*/)
+void loadRelay::conditionCleared (index_t conditionNum, coreTime /*triggerTime*/)
 {
   LOG_NORMAL ((boost::format ("condition %d cleared") % conditionNum ).str ());
   /*for (size_t kk = 0; kk < m_zones; ++kk)

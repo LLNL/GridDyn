@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,12 +13,12 @@
 
 // headers
 #include "gridLoadOpt.h"
-#include "loadModels/gridLoad.h"
+#include "loadModels/zipLoad.h"
 #include "gridBusOpt.h"
 #include "optObjectFactory.h"
 #include "vectorOps.hpp"
 #include "vectData.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 #include <utility>
@@ -27,26 +27,26 @@
 
 using namespace gridUnits;
 
-static optObjectFactory<gridLoadOpt, gridLoad> opLoad ("basic", "load");
+static optObjectFactory<gridLoadOpt, zipLoad> opLoad ("basic", "load");
 
 gridLoadOpt::gridLoadOpt (const std::string &objName) : gridOptObject (objName)
 {
 
 }
 
-gridLoadOpt::gridLoadOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),load (dynamic_cast<gridLoad *> (obj))
+gridLoadOpt::gridLoadOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),load (dynamic_cast<zipLoad *> (obj))
 {
   if (load)
     {
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = load->getName ();
+          setName(load->getName ());
         }
-      id = load->getUserID ();
+      setUserID(load->getUserID ());
     }
 }
 
-gridCoreObject *gridLoadOpt::clone (gridCoreObject *obj) const
+coreObject *gridLoadOpt::clone (coreObject *obj) const
 {
   gridLoadOpt *nobj;
   if (obj == nullptr)
@@ -74,20 +74,20 @@ gridCoreObject *gridLoadOpt::clone (gridCoreObject *obj) const
 }
 
 
-void gridLoadOpt::add (gridCoreObject *obj)
+void gridLoadOpt::add (coreObject *obj)
 {
-  if (dynamic_cast<gridLoad *> (obj))
+  if (dynamic_cast<zipLoad *> (obj))
     {
-      load = static_cast<gridLoad *> (obj);
-      if (name.empty ())
+      load = static_cast<zipLoad *> (obj);
+      if (getName().empty ())
         {
-          name = load->getName ();
+          setName(load->getName ());
         }
-      id = load->getUserID ();
+      setUserID(load->getUserID ());
     }
   else
   {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
   }
 }
 
@@ -126,14 +126,14 @@ count_t gridLoadOpt::constraintSize (const optimMode &oMode)
   return objs;
 }
 
-void gridLoadOpt::objectInitializeA (unsigned long /*flags*/)
+void gridLoadOpt::dynObjectInitializeA (unsigned long /*flags*/)
 {
 
 
 }
 
 
-void gridLoadOpt::setValues (const optimData *, const optimMode &)
+void gridLoadOpt::setValues (const optimData &, const optimMode &)
 {
 }
 //for saving the state
@@ -157,38 +157,38 @@ void gridLoadOpt::valueBounds (double /*ttime*/, double /*upperLimit*/[], double
 
 }
 
-void gridLoadOpt::linearObj (const optimData *, vectData<double> * /*linObj*/, const optimMode &)
+void gridLoadOpt::linearObj (const optimData &, vectData<double> & /*linObj*/, const optimMode &)
 {
 
 }
-void gridLoadOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/, vectData<double> * /*quadObj*/, const optimMode &)
+void gridLoadOpt::quadraticObj (const optimData &, vectData<double> & /*linObj*/, vectData<double> & /*quadObj*/, const optimMode &)
 {
 
 }
 
-void gridLoadOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
+void gridLoadOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &)
 {
 }
-void gridLoadOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
+void gridLoadOpt::constraintJacobianElements (const optimData &, matrixData<double> &, const optimMode &)
 {
 }
 
-double gridLoadOpt::objValue (const optimData *, const optimMode &)
+double gridLoadOpt::objValue (const optimData &, const optimMode &)
 {
   double cost = 0;
 
   return cost;
 }
 
-void gridLoadOpt::gradient (const optimData *, double /*deriv*/[], const optimMode &)
+void gridLoadOpt::gradient (const optimData &, double /*deriv*/[], const optimMode &)
 {
 
 }
-void gridLoadOpt::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
+void gridLoadOpt::jacobianElements (const optimData &, matrixData<double> &, const optimMode &)
 {
 
 }
-void gridLoadOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridLoadOpt::getConstraints (const optimData &, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }

@@ -13,13 +13,9 @@
 
 #cmakedefine OPTIMIZATION_ENABLE
 
-#cmakedefine GRIDDYN_HAVE_FSKIT
-
 #cmakedefine ENABLE_64_BIT_INDEXING
 
 #cmakedefine ENABLE_EXPERIMENTAL_TEST_CASES
-
-#cmakedefine LOAD_EXTRA_MODELS
 
 #cmakedefine LOAD_CVODE
 
@@ -32,5 +28,7 @@
 #cmakedefine TRACE_LOG_ENABLE
 
 #cmakedefine DISABLE_MULTITHREADING
+
+#cmakedefine YAML_FOUND
 
 #endif

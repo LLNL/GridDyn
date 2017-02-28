@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -17,7 +17,7 @@
 // headers
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
-#include "GhostSwingBusManager.h"
+#include "coupling/GhostSwingBusManager.h"
 #include "gridDynRunner.h"
 
 #include "libraryLoader.h"
@@ -31,6 +31,7 @@
 #include "fncsSupport.h"
 #include "fncsLibrary.h"
 #include "test/fncsTest.h"
+#include <exception>
 
 
 //using namespace boost;
@@ -40,18 +41,10 @@ namespace po = boost::program_options;
 // main
 int main (int argc, char *argv[])
 {
-
 	loadLibraries();
 	loadFNCSLibrary();
 
-  std::shared_ptr<gridDynSimulation> gds = std::make_shared<gridDynSimulation> ();
-
-  GhostSwingBusManager::Initialize(&argc, &argv);
-  if (!gds)
-    {
-      return (-5);  //TODO:: PT make this something meaningful
-    }
-
+  //
   po::variables_map fncsOptions;
 
   po::options_description fncsOp("fncs options");
@@ -75,32 +68,16 @@ int main (int argc, char *argv[])
 	}
 	return 0;
   }
+  GriddynRunner gdr;
 
-  po::variables_map vm;
-  int ret = argumentParser (argc, argv, vm);
-  if (ret)
-    {
-      return ret;
-    }
-
-
-  //create the simulation
-
-  readerInfo ri;
-  //load any relevant issue into the readerInfo structure
-  loadXMLinfo (vm, &ri);
-  if ((ret = processCommandArguments (gds, &ri, vm)) != 0)
-    {
-      return ret;
-    }
-  
-  gds->log (nullptr, print_level::summary, griddyn_version_string);
+  gdr.Initialize(argc, argv);
   
 
   fncs::time time_granted = 0; /* the time step FNCS has allowed us to process */
   fncs::time time_desired = 0; /* the time step we would like to go to next */
  
   zplInfo info;
+  auto gds = gdr.getSim();
   info.name = gds->getName();
   if (fncsOptions.count("broker"))
   {
@@ -115,26 +92,44 @@ int main (int argc, char *argv[])
 
 
   auto configString=fncsRegister::instance()->makeZPLConfig(info);
-
+  printf("%s\n", configString.c_str());
   fncs::initialize(configString);
 
-  /* unless FNCS detects another simulator terminates early, the
-  * this simulator will run from time step 0 to time step 9 */
-
-  gridDyn_time stop_time = gds->get("stoptime");
+  gdr.simInitialize();
+  coreTime stop_time = gds->get("stoptime");
 
 
-  gds->dynInitialize(0.0);
   while (gds->getCurrentTime() < stop_time)
   {
-	  auto evntTime = gds->getEventTime();
+	  auto evntTime = gdr.getNextEvent();
 	  time_desired = gd2fncsTime(evntTime);
-	  gds->run();
+	  printf("eventTime=%f\n", static_cast<double>(evntTime));
 
 	  time_granted = fncs::time_request(time_desired);
+	  printf("grantTime=%llu\n", static_cast<unsigned long long>(time_granted));
+	  //check if the granted time is too small to do anything about
+	  if (time_granted < time_desired)
+	  {
+		  if (fncs2gdTime(time_granted) - gds->getCurrentTime() < 0.00001)
+		  {
+			  continue;
+		  }
+	  }
+	  
+	  try
+	  {
+		gdr.Step(fncs2gdTime(time_granted));
+	  }
+	  catch (const std::runtime_error &re)
+	  {
+		  printf("execution error in GridDyn: %s\n", re.what());
+		  fncs::die();
+		  gdr.Finalize();
+		  return (-1);
+	  }
   }
-
-      GhostSwingBusManager::Instance ()->endSimulation ();
+  fncs::finalize();
+  gdr.Finalize();
   return 0;
 }
 

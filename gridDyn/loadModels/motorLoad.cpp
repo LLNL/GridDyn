@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,10 +13,10 @@
 
 #include "loadModels/motorLoad.h"
 #include "gridBus.h"
-#include "objectFactoryTemplates.h"
-#include "gridCoreTemplates.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "matrixData.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <iostream>
 #include <cmath>
@@ -35,24 +35,23 @@ static const double cSmallDiff = 1e-7;
 motorLoad::motorLoad (const std::string &objName) : gridLoad (objName)
 {
   // default values
-  P = -kBigNum;
-  H = 3;
-  x = 0.15;
-  r = 0.01;
-  opFlags.set (no_pqvoltage_limit);
   opFlags.set (has_dyn_states);
 }
 
-gridCoreObject *motorLoad::clone (gridCoreObject *obj) const
+coreObject *motorLoad::clone (coreObject *obj) const
 {
   motorLoad *ld = cloneBase<motorLoad, gridLoad> (this, obj);
   if (!(ld))
     {
       return obj;
     }
+  ld->r = r;
+  ld->x = x;
+  ld->Pmot = Pmot;
   ld->r1 = r1;
   ld->x1 = x1;
   ld->xm = xm;
+  ld->H = H;
   ld->a = a;
   ld->b = b;
   ld->c = c;
@@ -61,7 +60,7 @@ gridCoreObject *motorLoad::clone (gridCoreObject *obj) const
   return ld;
 }
 
-void motorLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void motorLoad::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
 {
   m_state.resize (1);
   if (opFlags[init_transient])
@@ -84,26 +83,23 @@ void motorLoad::pFlowObjectInitializeA (gridDyn_time time0, unsigned long flags)
       m_state[0] = 0.03;
     }
   scale = mBase / systemBasePower;
-  //these parameters need to be ignored for the time being
-  Vpqmin = -1.0;
-  Vpqmax = kBigNum;
   return gridLoad::pFlowObjectInitializeA (time0,flags);
 }
 
-void motorLoad::dynObjectInitializeA (gridDyn_time time0, unsigned long flags)
+void motorLoad::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   opFlags.set (has_roots);
   return gridLoad::dynObjectInitializeA (time0, flags);
 }
 
-void motorLoad::dynObjectInitializeB (const IOdata & /*args*/, const IOdata & /*outputSet*/)
+void motorLoad::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata & /*fieldSet*/)
 {
 
   m_dstate_dt[0] = 0;
 
   if (opFlags[init_transient])
     {
-      P = mechPower (m_state[0]);
+      Pmot=mechPower (m_state[0]);
     }
   else
     {
@@ -189,13 +185,13 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
           H = val;
           break;
         case 'p':
-          P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+          Pmot = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
           if (mBase < 0)
             {
-              mBase = P * systemBasePower;
-              scale = P;
+              mBase = Pmot * systemBasePower;
+              scale = Pmot;
             }
-          alpha = P / scale;
+          alpha = Pmot / scale;
           a = alpha - b - c;
           slipCheck = true;
           break;
@@ -273,13 +269,13 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
     {
       if (opFlags[stalled])
         {
-          rootCheck (bus->getOutputs (nullptr,cLocalSolverMode),nullptr,cLocalSolverMode, check_level_t::reversable_only);
+          rootCheck (bus->getOutputs (noInputs,emptyStateData,cLocalSolverMode),emptyStateData,cLocalSolverMode, check_level_t::reversable_only);
         }
     }
 
 }
 
-void motorLoad::setState (gridDyn_time ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
+void motorLoad::setState (coreTime ttime, const double state[], const double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -300,7 +296,7 @@ void motorLoad::setState (gridDyn_time ttime, const double state[], const double
   prevTime = ttime;
 }
 
-void motorLoad::guess (gridDyn_time /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
+void motorLoad::guess (coreTime /*ttime*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -319,23 +315,23 @@ void motorLoad::guess (gridDyn_time /*ttime*/, double state[], double dstate_dt[
 }
 
 // residual
-void motorLoad::residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode)
+void motorLoad::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
 	  if (hasDifferential(sMode))
 	  {
-		  derivative(args, sD, resid, sMode);
+		  derivative(inputs, sD, resid, sMode);
 		  auto offset = offsets.getDiffOffset(sMode);
-		  resid[offset] -= sD->dstate_dt[offset];
+		  resid[offset] -= sD.dstate_dt[offset];
 	  }
     }
   else if (!opFlags[init_transient])
     {
       auto offset = offsets.getAlgOffset (sMode);
-      double slip = sD->state[offset];
-      resid[offset] = mechPower (slip) - rPower (args[voltageInLocation], slip);
-      // printf("slip=%f mpower=%f, rPower=%f\n", slip, mechPower(slip), rPower(args[voltageInLocation], slip));
+      double slip = sD.state[offset];
+      resid[offset] = mechPower (slip) - rPower (inputs[voltageInLocation], slip);
+      // printf("slip=%f mpower=%f, rPower=%f\n", slip, mechPower(slip), rPower(inputs[voltageInLocation], slip));
     }
 
 }
@@ -350,12 +346,12 @@ void motorLoad::getStateName (stringVec &stNames, const solverMode &sMode, const
         }
 
       auto offset = offsets.getDiffOffset (sMode);
-      stNames[offset] = prefix + name + ":slip";
+      stNames[offset] = prefix + getName() + ":slip";
     }
   else if (!opFlags[init_transient])
     {
       auto offset = offsets.getAlgOffset (sMode);
-      stNames[offset] = prefix + name + ":slip";
+      stNames[offset] = prefix + getName() + ":slip";
     }
   else
     {
@@ -363,64 +359,64 @@ void motorLoad::getStateName (stringVec &stNames, const solverMode &sMode, const
     }
 
 }
-void motorLoad::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &)
+void motorLoad::timestep (coreTime ttime, const IOdata &inputs, const solverMode &)
 {
   double dt = ttime - prevTime;
-  motorLoad::derivative (args, nullptr, m_dstate_dt.data (), cLocalSolverMode);
+  motorLoad::derivative (inputs, emptyStateData, m_dstate_dt.data (), cLocalSolverMode);
   m_state[0] += dt * m_dstate_dt[0];
 }
 
-void motorLoad::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void motorLoad::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
-  double slip = (sD) ? sD->state[offset] : m_state[0];
-  double V = args[voltageInLocation];
+  double slip = (!sD.empty()) ? sD.state[offset] : m_state[0];
+  double V = inputs[voltageInLocation];
 
   deriv[offset] = (opFlags[stalled]) ? 0 : (0.5 / H * (mechPower (slip) - rPower (V * Vcontrol, slip)));
 
 
 }
 
-void motorLoad::jacobianElements (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+void motorLoad::jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
 {
   if  (isDynamic (sMode))
     {
 	  if (hasDifferential(sMode))
 	  {
 		  auto offset = offsets.getDiffOffset(sMode);
-		  double slip = sD->state[offset];
-		  double V = args[voltageInLocation];
+		  double slip = sD.state[offset];
+		  double V = inputs[voltageInLocation];
 		  if (opFlags[stalled])
 		  {
-			  ad.assign(offset, offset, -sD->cj);
+			  ad.assign(offset, offset, -sD.cj);
 		  }
 		  else
 		  {
-			  ad.assignCheck(offset, argLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
+			  ad.assignCheck(offset, inputLocs[voltageInLocation], -(1.0 / H) * (V * Vcontrol * Vcontrol * r1 * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1))));
 			  //this is a really ugly looking derivative so I am computing it numerically
 			  double test1 = 0.5 / H * (mechPower(slip) - rPower(V, slip));
 			  double test2 = 0.5 / H * (mechPower(slip + cSmallDiff) - rPower(V * Vcontrol, slip + cSmallDiff));
-			  ad.assign(offset, offset, (test2 - test1) / cSmallDiff - sD->cj);
+			  ad.assign(offset, offset, (test2 - test1) / cSmallDiff - sD.cj);
 		  }
 	  }
     }
   else if (!opFlags[init_transient])
     {
       int offset = offsets.getAlgOffset (sMode);
-      double slip = sD->state[offset];
-      double V = args[voltageInLocation];
+      double slip = sD.state[offset];
+      double V = inputs[voltageInLocation];
 
       double t1 = rPower (V * Vcontrol, slip);
       double t3 = rPower (V * Vcontrol, slip + cSmallDiff);
       ad.assign (offset, offset, dmechds (slip) - (t3 - t1) / cSmallDiff);
 
 
-      ad.assignCheck (offset,argLocs[voltageInLocation],-2 * t1 / V);
+      ad.assignCheck (offset,inputLocs[voltageInLocation],-2 * t1 / V);
 
     }
 }
 
-void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const solverMode &sMode)
+void motorLoad::outputPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const solverMode &sMode)
 {
   if (isDynamic (sMode))
     {
@@ -430,8 +426,8 @@ void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *s
         }
 
       auto offset = offsets.getDiffOffset (sMode);
-      double slip = sD->state[offset];
-      double V = args[voltageInLocation];
+      double slip = sD.state[offset];
+      double V = inputs[voltageInLocation];
 
       ad.assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
 
@@ -440,19 +436,25 @@ void motorLoad::outputPartialDerivatives (const IOdata &args, const stateData *s
   else if (!opFlags[init_transient])
     {
       auto offset = offsets.getAlgOffset (sMode);
-      double slip = sD->state[offset];
-      double V = args[voltageInLocation];
+      double slip = sD.state[offset];
+      double V = inputs[voltageInLocation];
       ad.assign (QoutLocation, offset, scale * (qPower (V * Vcontrol, slip + cSmallDiff) - qPower (V * Vcontrol, slip)) / cSmallDiff);
       ad.assign (PoutLocation, offset, scale * (rPower (V * Vcontrol, slip + cSmallDiff) - rPower (V * Vcontrol, slip)) / cSmallDiff);
     }
 }
 
-void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, matrixData<double> &ad, const IOlocs &argLocs, const solverMode &sMode)
+count_t motorLoad::outputDependencyCount(index_t /*num*/, const solverMode & /*sMode*/) const
 {
-  if  (argLocs[voltageInLocation] != kNullLocation)
+	return 1;
+}
+
+
+void motorLoad::ioPartialDerivatives (const IOdata &inputs, const stateData &sD, matrixData<double> &ad, const IOlocs &inputLocs, const solverMode &sMode)
+{
+  if  (inputLocs[voltageInLocation] != kNullLocation)
     {
       double slip = m_state[0];
-      double V = args[voltageInLocation];
+      double V = inputs[voltageInLocation];
       if (isDynamic (sMode))
         {
           Lp Loc = offsets.getLocations  (sD, sMode, this);
@@ -460,11 +462,11 @@ void motorLoad::ioPartialDerivatives (const IOdata &args, const stateData *sD, m
         }
       else if (!opFlags[init_transient])
         {
-          slip = sD->state[offsets.getAlgOffset (sMode)];
+          slip = sD.state[offsets.getAlgOffset (sMode)];
         }
       double temp = V * slip / (r1 * r1 + slip * slip * (x + x1) * (x + x1));
-      ad.assign (PoutLocation, argLocs[voltageInLocation], scale * (2 * r1 * temp));
-      ad.assign (QoutLocation, argLocs[voltageInLocation], scale * (2 * V / xm + 2 * slip * (x + x1) * temp));
+      ad.assign (PoutLocation, inputLocs[voltageInLocation], scale * (2 * r1 * temp));
+      ad.assign (QoutLocation, inputLocs[voltageInLocation], scale * (2 * V / xm + 2 * slip * (x + x1) * temp));
     }
 }
 
@@ -480,14 +482,14 @@ index_t motorLoad::findIndex (const std::string &field, const solverMode &sMode)
 
 
 
-void motorLoad::rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode)
+void motorLoad::rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
   Lp Loc = offsets.getLocations  (sD, sMode, this);
   double slip = Loc.diffStateLoc[0];
   auto ro = offsets.getRootOffset (sMode);
   if (opFlags[stalled])
     {
-      roots[ro] = rPower (args[voltageInLocation] * Vcontrol, 1.0) - mechPower (1.0);
+      roots[ro] = rPower (inputs[voltageInLocation] * Vcontrol, 1.0) - mechPower (1.0);
     }
   else
     {
@@ -495,7 +497,7 @@ void motorLoad::rootTest (const IOdata &args, const stateData *sD, double roots[
     }
 }
 
-void motorLoad::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const std::vector<int> &rootMask, const solverMode &sMode)
+void motorLoad::rootTrigger (coreTime /*ttime*/, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   if (!rootMask[offsets.getRootOffset (sMode)])
     {
@@ -503,7 +505,7 @@ void motorLoad::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const s
     }
   if (opFlags[stalled])
     {
-      if (args[voltageInLocation] > 0.5)
+      if (inputs[voltageInLocation] > 0.5)
         {
           opFlags.reset (stalled);
           alert (this,JAC_COUNT_INCREASE);
@@ -518,11 +520,11 @@ void motorLoad::rootTrigger (gridDyn_time /*ttime*/, const IOdata &args, const s
     }
 }
 
-change_code motorLoad::rootCheck (const IOdata &args, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code motorLoad::rootCheck (const IOdata &inputs, const stateData &, const solverMode &, check_level_t /*level*/)
 {
   if (opFlags[stalled])
     {
-      if (rPower (args[voltageInLocation] * Vcontrol, 1.0) - mechPower (1.0) > 0)
+      if (rPower (inputs[voltageInLocation] * Vcontrol, 1.0) - mechPower (1.0) > 0)
         {
           opFlags.reset (stalled);
           alert (this, JAC_COUNT_INCREASE);
@@ -551,56 +553,56 @@ double motorLoad::getReactivePower () const
   return qPower (V * Vcontrol, slip) * scale;
 }
 
-double motorLoad::getRealPower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double motorLoad::getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-  const double V = args[voltageInLocation];
+  const double V = inputs[voltageInLocation];
 
-  //double Ptemp;
+  double Ptemp;
   if (isDynamic (sMode))
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
 
       double slip = Loc.diffStateLoc[0];
-      Pout = rPower (V * Vcontrol, slip);
+      Ptemp = rPower (V * Vcontrol, slip);
     }
   else if (opFlags[init_transient])
     {
       double slip = m_state[0];
-      Pout = rPower (V * Vcontrol,slip);
+      Ptemp = rPower (V * Vcontrol,slip);
     }
   else
     {
       auto offset = offsets.getAlgOffset (sMode);
-      double slip = sD->state[offset];
-      Pout = rPower (V * Vcontrol, slip);
+      double slip = sD.state[offset];
+      Ptemp = rPower (V * Vcontrol, slip);
     }
 
-  return Pout * scale;
+  return Ptemp * scale;
 }
 
-double motorLoad::getReactivePower (const IOdata &args, const stateData *sD, const solverMode &sMode)
+double motorLoad::getReactivePower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-  double V = args[voltageInLocation];
-  // double Qtemp;
+  double V = inputs[voltageInLocation];
+  double Qtemp;
   if (isDynamic (sMode))
     {
       Lp Loc = offsets.getLocations  (sD, sMode, this);
 
       double slip = Loc.diffStateLoc[0];
-      Qout = qPower (V, slip);
+      Qtemp = qPower (V, slip);
     }
   else if (opFlags[init_transient])
     {
       double slip = m_state[0];
-      Qout = qPower (V * Vcontrol, slip);
+      Qtemp = qPower (V * Vcontrol, slip);
     }
   else
     {
       auto offset = offsets.getAlgOffset (sMode);
-      double slip = sD->state[offset];
-      Qout = qPower (V * Vcontrol,slip);
+      double slip = sD.state[offset];
+      Qtemp = qPower (V * Vcontrol,slip);
     }
-  return Qout * scale;
+  return Qtemp * scale;
 
 }
 

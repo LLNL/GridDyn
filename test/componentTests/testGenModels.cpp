@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,12 +16,12 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
 #include "vectorOps.hpp"
 
 #include <cmath>
-//test case for gridCoreObject object
+//test case for coreObject object
 
 
 #define GENMODEL_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/genmodel_tests/"
@@ -32,23 +32,23 @@ BOOST_AUTO_TEST_CASE (model_test1)
 {
   std::string fname = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   int retval = gds->dynInitialize ();
   BOOST_CHECK_EQUAL (retval, 0);
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 
   std::vector<double> st = gds->getState ();
   auto mmatch = runResidualCheck(gds, cDaeSolverMode);
   BOOST_REQUIRE_EQUAL(mmatch, 0);
   //gds->saveJacobian(std::string(GENMODEL_TEST_DIRECTORY "mjac5.bin"));
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
   std::vector<double> st2 = gds->getState ();
 
   auto cdiff = countDiffs(st, st2, 0.001, 0.01);
  
-  BOOST_CHECK_EQUAL (cdiff, 0);
+  BOOST_CHECK_EQUAL (cdiff, 0u);
 
 }
 
@@ -57,17 +57,16 @@ BOOST_AUTO_TEST_CASE (model_test2)  //Jacobian code check
   std::string fname = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
 
   gridDynGenerator *gen = gds->getGen (0);
   auto cof = coreObjectFactory::instance ();
-  gridCoreObject *obj = nullptr;
   auto genlist = cof->getTypeNames ("genmodel");
 
   for (auto &gname : genlist)
     {
-      obj = cof->createObject ("genmodel", gname);
+      auto obj = cof->createObject ("genmodel", gname);
       BOOST_CHECK (obj != nullptr);
       gen->add (obj);
 
@@ -91,17 +90,16 @@ BOOST_AUTO_TEST_CASE(model_test2_withr)  //Jacobian code check
 	std::string fname = std::string(GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
 
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 
 	gridDynGenerator *gen = gds->getGen(0);
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
 	auto genlist = cof->getTypeNames("genmodel");
 
 	for (auto &gname : genlist)
 	{
-		obj = cof->createObject("genmodel", gname);
+		auto obj = cof->createObject("genmodel", gname);
 		BOOST_CHECK(obj != nullptr);
 		//just set the resistance to make sure the models can handle that parameter
 		obj->set("r", 0.001);
@@ -124,18 +122,18 @@ BOOST_AUTO_TEST_CASE(model_test2_alg_diff_tests)  //test the algebraic updates a
 	std::string fname = std::string(GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
 
-	gds = static_cast<gridDynSimulation *> (readSimXMLFile(fname));
+	gds = readSimXMLFile(fname);
 
 
 	gridDynGenerator *gen = gds->getGen(0);
 	auto cof = coreObjectFactory::instance();
-	gridCoreObject *obj = nullptr;
+	
 	auto genlist = cof->getTypeNames("genmodel");
 
 	for (auto &gname : genlist)
 	{
 
-		obj = cof->createObject("genmodel", gname);
+		auto obj = cof->createObject("genmodel", gname);
 		BOOST_CHECK(obj != nullptr);
 		//just set the resistance to make sure the models can handle that parameter
 		obj->set("r", 0.001);
@@ -164,10 +162,10 @@ BOOST_AUTO_TEST_CASE (model_test3)  //Jacobian code check
 {
   std::string fname = std::string (GENMODEL_TEST_DIRECTORY "test_model2.xml");
 
-  gds = static_cast<gridDynSimulation *> (readSimXMLFile (fname));
+  gds = readSimXMLFile(fname);
 
   gds->run ();
-  BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+  BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 
 }
 

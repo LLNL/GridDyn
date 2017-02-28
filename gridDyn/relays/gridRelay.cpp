@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -20,18 +20,18 @@
 #include "sensor.h"
 #include "differentialRelay.h"
 #include "controlRelay.h"
-#include "objectFactoryTemplates.h"
-#include "gridCondition.h"
-#include "stateGrabber.h"
-#include "eventAdapters.h"
-#include "gridEvent.h"
+#include "core/objectFactoryTemplates.h"
+#include "measurement/gridCondition.h"
+#include "measurement/stateGrabber.h"
+#include "events/eventAdapters.h"
+#include "events/gridEvent.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "stringOps.h"
 #include "core/propertyBuffer.h"
-#include "core/gridDynExceptions.h"
-
+#include "core/coreExceptions.h"
+#include <stdexcept>
 #include <boost/format.hpp>
 
 using namespace gridUnits;
@@ -52,13 +52,13 @@ std::atomic<count_t> gridRelay::relayCount(0);
 gridRelay::gridRelay (const std::string &objName) : gridPrimary (objName)
 {
   // default values
-  id = ++relayCount;
+  setUserID(++relayCount);
   updateName();
   opFlags.set (no_pflow_states);
   opFlags.set (no_dyn_states);
 }
 
-gridCoreObject * gridRelay::clone (gridCoreObject *obj) const
+coreObject * gridRelay::clone (coreObject *obj) const
 {
   gridRelay *nobj = cloneBase<gridRelay, gridPrimary> (this, obj);
   if (!(nobj))
@@ -102,17 +102,26 @@ gridCoreObject * gridRelay::clone (gridCoreObject *obj) const
   nobj->condChecks = condChecks;
   nobj->multiConditionTriggers = multiConditionTriggers;
 
-  nobj->cManager = cManager;  //TODO:: this isn't correct yet
- 
+  nobj->cManager = cManager; 
+  if (nobj->m_sourceObject == nullptr)
+  {
+	  nobj->m_sourceObject = m_sourceObject;
+  }
+  if (nobj->m_sinkObject == nullptr)
+  {
+	  nobj->m_sinkObject = m_sinkObject;
+  }
   return nobj;
 }
 
-gridRelay::~gridRelay ()
+
+void gridRelay::updateObjectLinkages(coreObject *newRoot)
 {
-	
+	updateObject(newRoot, object_update_mode::match);
+	gridObject::updateObjectLinkages(newRoot);
 }
 
-void gridRelay::add (gridCoreObject *obj)
+void gridRelay::add (coreObject *obj)
 {
   m_sourceObject = obj;
   m_sinkObject = obj;
@@ -120,7 +129,7 @@ void gridRelay::add (gridCoreObject *obj)
 
 void gridRelay::add (std::shared_ptr<gridCondition> gc)
 {
-  conditions.push_back (gc);
+  conditions.push_back (std::move(gc));
   actionTriggers.resize (conditions.size ());
   actionDelays.resize (conditions.size ()); //!<the periods of time in which the condition must be true for an action to occur
   cStates.resize (conditions.size (),condition_states::active); //!< a vector of states for the conditions
@@ -130,30 +139,30 @@ void gridRelay::add (std::shared_ptr<gridCondition> gc)
 
 void gridRelay::add (std::shared_ptr<gridEvent> ge)
 {
-  actions.push_back (std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (ge));
+  actions.emplace_back (std::make_unique<eventTypeAdapter<std::shared_ptr<gridEvent>>> (std::move(ge)));
 }
 /**
 *add an EventAdapter to the system
 **/
 void gridRelay::add (std::shared_ptr<eventAdapter> geA)
 {
-  actions.push_back (geA);
+  actions.emplace_back (std::move(geA));
 }
 
 
-void gridRelay::setSource (gridCoreObject *obj)
+void gridRelay::setSource (coreObject *obj)
 {
   m_sourceObject = obj;
 }
 /**
 * set the relay sink object
 */
-void gridRelay::setSink (gridCoreObject *obj)
+void gridRelay::setSink (coreObject *obj)
 {
   m_sinkObject = obj;
 }
 
-void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber, gridDyn_time delayTime)
+void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber, coreTime delayTime)
 {
   if (conditionNumber >= conditions.size ())
     {
@@ -178,7 +187,7 @@ void gridRelay::setActionTrigger (index_t conditionNumber, index_t actionNumber,
 
 }
 
-void gridRelay::setActionMultiTrigger (std::vector<index_t> multi_conditions, index_t actionNumber, gridDyn_time delayTime)
+void gridRelay::setActionMultiTrigger (const IOlocs &multi_conditions, index_t actionNumber, coreTime delayTime)
 {
   if (actionNumber >= actions.size ())
     {
@@ -230,7 +239,7 @@ double gridRelay::getConditionValue (index_t conditionNumber) const
   return conditions[conditionNumber]->getVal (1);
 }
 
-double gridRelay::getConditionValue (index_t conditionNumber, const stateData *sD, const solverMode &sMode) const
+double gridRelay::getConditionValue (index_t conditionNumber, const stateData &sD, const solverMode &sMode) const
 {
   if (conditionNumber >= conditions.size ())
     {
@@ -316,43 +325,37 @@ std::shared_ptr<eventAdapter> gridRelay::getAction (index_t actionNumber)
 
 
 
-int gridRelay::updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber)
+void gridRelay::updateAction (std::shared_ptr<gridEvent> ge, index_t actionNumber)
 {
   if (actionNumber >= actions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
-  actions[actionNumber] = std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (ge);
-  return LOADED;
+  actions[actionNumber] = std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (std::move(ge));
 }
 
-int gridRelay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
+void gridRelay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
 {
   if (actionNumber >= actions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
-  actions[actionNumber] = geA;
-  return LOADED;
+  actions[actionNumber] = std::move(geA);
 }
 
-int gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t conditionNumber)
+void gridRelay::updateCondition (std::shared_ptr<gridCondition> gc, index_t conditionNumber)
 {
   if (conditionNumber >= conditions.size ())
     {
-      return NOT_LOADED;
+	  throw(invalidParameterValue());
     }
-  conditions[conditionNumber] = gc;
+  conditions[conditionNumber] = std::move(gc);
   cStates[conditionNumber] = condition_states::active;
   conditionTriggerTimes[conditionNumber] = negTime;
   updateRootCount (true);
-  return LOADED;
 }
 
-void gridRelay::setTime (gridDyn_time time)
-{
-  prevTime = time;
-}
+
 void gridRelay::resetRelay ()
 {
 }
@@ -361,7 +364,7 @@ void gridRelay::set (const std::string &param,  const std::string &val)
 {
   if (param == "condition")
     {
-        add (make_condition (val, m_sourceObject?m_sourceObject:parent));
+        add (make_condition (val, m_sourceObject?m_sourceObject:getParent()));
     }
   else if (param == "action")
     {
@@ -372,23 +375,15 @@ void gridRelay::set (const std::string &param,  const std::string &val)
           if (e)
             {
               isAlarm = true;
-              add (e);
+              add (std::move(e));
             }
 
         }
       if (!isAlarm)
         {
-            add (make_event (val, m_sinkObject?m_sinkObject:parent));
+            add (make_event (val, m_sinkObject?m_sinkObject:getParent()));
         }
 
-    }
-  else if (param == "flags")
-    {
-      auto flagid = splitlineTrim (val);
-      for (auto &flg : flagid)
-        {
-          setFlag (flg, true);
-        }
     }
   else
     {
@@ -408,11 +403,13 @@ void gridRelay::set (const std::string &param, double val, units_t unitType)
 
   if ((param == "samplingperiod")||(param == "ts")||(param=="sampleperiod"))
     {
-      gridCoreObject::set ("period", val, unitType);
+      coreObject::set ("period", val, unitType);
+	  m_nextSampleTime = timeZero;
     }
   else if ((param == "rate") || (param == "fs") || (param == "samplerate"))
   {
-	  gridCoreObject::set("period", 1.0/unitConversion(val,unitType,Hz));
+	  coreObject::set("period", 1.0/unitConversion(val,unitType,Hz));
+	  m_nextSampleTime = timeZero;
   }
   else
     {
@@ -432,10 +429,18 @@ void gridRelay::setFlag (const std::string &flag, bool val)
   if (flag == "continuous")
     {
       opFlags.set (continuous_flag, val);
+	  if (!val)
+	  {
+		  m_nextSampleTime = (prevTime < timeZero) ? timeZero : prevTime;
+	  }
     }
   else if (flag == "sampled")
     {
       opFlags.set (continuous_flag, !val);
+	  if (val)
+	  {
+		m_nextSampleTime = (prevTime < timeZero) ? timeZero : prevTime;
+	  }
     }
   else if ((flag == "comm_enabled") || (flag == "comms") || (flag == "usecomms"))
     {
@@ -463,9 +468,9 @@ void gridRelay::setFlag (const std::string &flag, bool val)
     }
 }
 
-void gridRelay::updateA (gridDyn_time time)
+void gridRelay::updateA (coreTime time)
 {
-  auto ncond = condChecks;
+  auto ncond = condChecks; //the condition triggers may change the number of conditions so the array needs to be copied first
   condChecks.clear ();
   nextUpdateTime = maxTime;
   if (opFlags[continuous_flag])
@@ -481,14 +486,14 @@ void gridRelay::updateA (gridDyn_time time)
               nextUpdateTime = cond.testTime;
             }
         }
-
-      for (index_t kk = 0; kk < conditions.size (); ++kk)
+	  auto cz = conditions.size();
+      for (index_t kk = 0; kk < cz; ++kk)
         {
           if (cStates[kk] == condition_states::active)
             {
               if (conditions[kk]->checkCondition ())
                 {
-                  triggerCondition (kk, time, 0.0);
+                  triggerCondition (kk, time, timeZero);
 
                 }
             }
@@ -509,15 +514,16 @@ void gridRelay::updateA (gridDyn_time time)
             }
         }
 
-      if (time + kSmallTime >= m_nextSampleTime)
+      if (time >= m_nextSampleTime)
         {
-          for (index_t kk = 0; kk < conditions.size (); ++kk)
+		  auto cz = conditions.size();
+          for (index_t kk = 0; kk < cz; ++kk)
             {
               if (cStates[kk] == condition_states::active)
                 {
                   if (conditions[kk]->checkCondition ())
                     {
-                      triggerCondition (kk, time, 0.0);
+                      triggerCondition (kk, time, timeZero);
                     }
                 }
             }
@@ -530,19 +536,48 @@ void gridRelay::updateA (gridDyn_time time)
   lastUpdateTime = time;
 }
 
+std::string gridRelay::generateCommName()
+{
+	return getName();
+}
 
-void gridRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
+void gridRelay::pFlowObjectInitializeA (coreTime time0, unsigned long /*flags*/)
 {
   if ((opFlags[use_commLink]) && (!(commLink)))
     {
+	  if (cManager.getName().empty())
+	  {
+		  cManager.setName(generateCommName());
+	  }
 	  commLink = cManager.build();
 	  
       if (commLink)
         {
-		  commLink->initialize();
-          commLink->registerReceiveCallback ([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
-        receiveMessage (sourceID, message);
-      });
+		  try
+		  {
+			  commLink->initialize();
+			  commLink->registerReceiveCallback([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
+				  receiveMessage(sourceID, message); });
+		  }
+		  catch (const std::invalid_argument &)
+		  {
+			  LOG_WARNING("initial commlink name failed trying full object Name");
+			  cManager.setName(fullObjectName(this));
+			  try
+			  {
+				  commLink->initialize();
+				  commLink->registerReceiveCallback([this](std::uint64_t sourceID, std::shared_ptr<commMessage> message) {
+					  receiveMessage(sourceID, message); });
+			  }
+			  catch (const std::invalid_argument &)
+			  {
+				  LOG_WARNING("unable to initialize comm link");
+				  commLink = nullptr;
+				  opFlags.reset(use_commLink);
+			  }
+		  }
+          
+      
         }
       else
         {
@@ -565,7 +600,7 @@ void gridRelay::pFlowObjectInitializeA (gridDyn_time time0, unsigned long /*flag
 }
 
 
-void gridRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long /*flags*/)
+void gridRelay::dynObjectInitializeA (coreTime time0, unsigned long /*flags*/)
 {
   if (opFlags[continuous_flag])
     {
@@ -575,10 +610,10 @@ void gridRelay::dynObjectInitializeA (gridDyn_time time0, unsigned long /*flags*
     {
       if (updatePeriod == maxTime)
         {        //set the period to the period of the simulation
-          updatePeriod = parent->find ("root")->get ("steptime");
+          updatePeriod = getRoot()->get ("steptime");
           if (updatePeriod < timeZero)
             {
-              updatePeriod = timeOne;
+              updatePeriod = timeOneSecond;
             }
         }
       m_nextSampleTime = nextUpdateTime = time0 + updatePeriod;
@@ -609,25 +644,30 @@ change_code gridRelay::triggerAction (index_t actionNumber)
 
 void gridRelay::updateRootCount (bool alertChange)
 {
-  auto prevRoots = offsets.local->local.algRoots;
-  offsets.local->local.algRoots = 0;
+	//get a reference to the local roots count for simplification
+	auto &localRoots = offsets.local().local.algRoots;
+	//store a copy of 
+  auto prevRoots = localRoots;
+  
+  localRoots = 0; //reset the local roots
   conditionsWithRoots.clear ();
   for (index_t kk = 0; kk < cStates.size (); ++kk)
     {
+
       if (cStates[kk] == condition_states::active)
         {
-          ++offsets.local->local.algRoots;
+          ++localRoots;
           conditionsWithRoots.push_back (kk);
         }
       else if ((cStates[kk] == condition_states::triggered) && (opFlags[resettable_flag]))
         {
-          ++offsets.local->local.algRoots;
+		  ++localRoots;
           conditionsWithRoots.push_back (kk);
         }
     }
-  if (prevRoots != offsets.local->local.algRoots)
+  if (prevRoots != localRoots)
     {
-      if (offsets.local->local.algRoots > 0)
+      if (localRoots > 0)
         {
           opFlags.set (has_alg_roots);
           opFlags.set (has_roots);
@@ -645,18 +685,19 @@ void gridRelay::updateRootCount (bool alertChange)
 
 }
 
-change_code gridRelay::powerFlowAdjust (unsigned long /*flags*/, check_level_t level)
+change_code gridRelay::powerFlowAdjust (const IOdata &/*inputs*/, unsigned long /*flags*/, check_level_t level)
 {
   change_code ret = change_code::no_change;
   if (level >= check_level_t::full_check)
     {
-      for (index_t kk = 0; kk < conditions.size (); ++kk)
+	  auto cz = conditions.size();
+      for (index_t kk = 0; kk < cz; ++kk)
         {
           if (cStates[kk] == condition_states::active)
             {
               if (conditions[kk]->checkCondition ())
                 {
-                  triggerCondition (kk, prevTime, kBigNum);
+				  ret = std::max(triggerCondition(kk, prevTime, maxTime), ret);
                 }
             }
         }
@@ -665,7 +706,7 @@ change_code gridRelay::powerFlowAdjust (unsigned long /*flags*/, check_level_t l
 }
 
 
-void gridRelay::rootTest (const stateData *sD, double roots[], const solverMode &sMode)
+void gridRelay::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
   auto ro = offsets.getRootOffset (sMode);
   for (auto condNum : conditionsWithRoots)
@@ -675,7 +716,7 @@ void gridRelay::rootTest (const stateData *sD, double roots[], const solverMode 
     }
 }
 
-void gridRelay::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMask, const solverMode &sMode)
+void gridRelay::rootTrigger (coreTime ttime, const IOdata & /*inputs*/, const std::vector<int> &rootMask, const solverMode &sMode)
 {
   auto ro = offsets.getRootOffset (sMode);
   //Because conditionsWithRoots can change on a condition Trigger leading to an actionTaken
@@ -687,7 +728,7 @@ void gridRelay::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMas
         {
           if (rootMask[ro])
             {
-              triggerCondition (conditionToCheck, ttime,0.0);
+              triggerCondition (conditionToCheck, ttime,timeZero);
             }
           ++ro;
         }
@@ -709,11 +750,11 @@ void gridRelay::rootTrigger (gridDyn_time ttime, const std::vector<int> &rootMas
 
 }
 
-change_code gridRelay::rootCheck (const stateData *sD, const solverMode &, check_level_t /*level*/)
+change_code gridRelay::rootCheck (const IOdata & /*inputs*/, const stateData &sD, const solverMode &, check_level_t /*level*/)
 {
   count_t prevTrig = triggerCount;
   count_t prevAct = actionsTakenCount;
-  gridDyn_time ctime = (sD) ? (sD->time) : prevTime;
+  coreTime ctime = (!sD.empty()) ? (sD.time) : prevTime;
   updateA (ctime);
   if ((triggerCount > prevTrig) || (actionsTakenCount > prevAct))
     {
@@ -731,7 +772,7 @@ void gridRelay::clearCondChecks (index_t condNum)
 {
   auto cc = condChecks;
   condChecks.resize (0);
-  gridDyn_time mTime = nextUpdateTime;
+  coreTime mTime = nextUpdateTime;
   for (auto &cond : cc)
     {
       if (cond.conditionNum != condNum)
@@ -751,18 +792,18 @@ void gridRelay::clearCondChecks (index_t condNum)
 
 }
 
-std::shared_ptr<eventAdapter> gridRelay::make_alarm (const std::string &val)
+std::unique_ptr<eventAdapter> gridRelay::make_alarm (const std::string &val)
 {
   auto lc = convertToLowerCase (val);
   if (lc.compare (0, 5, "alarm") == 0)
     {
       auto codeStr = lc.substr (6);
-      std::uint32_t code = intRead (codeStr, std::uint32_t (-1));
+      std::uint32_t code = numeric_conversion<std::uint32_t> (codeStr, std::uint32_t (-1));
       if (code == std::uint32_t (-1))
         {
           code = getAlarmCode (codeStr);
         }
-      return std::make_shared<functionEventAdapter> ([ = ]() {
+      return std::make_unique<functionEventAdapter> ([ this,code ]() {
       return (sendAlarm (code) == FUNCTION_EXECUTION_SUCCESS) ? change_code::no_change : change_code::execution_failure;
     });
     }
@@ -782,15 +823,14 @@ int gridRelay::sendAlarm (std::uint32_t code)
 {
   if (commLink)
     {
-      auto m = std::make_shared<relayMessage> (relayMessage::ALARM_TRIGGER_EVENT, code);
-	  cManager.send(m);
+	  cManager.send(std::make_unique<relayMessage>(relayMessage::ALARM_TRIGGER_EVENT, code));
       
       return FUNCTION_EXECUTION_SUCCESS;
     }
   return FUNCTION_EXECUTION_FAILURE;
 }
 
-change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time conditionTriggerTime,gridDyn_time ignoreDelayTime)
+change_code gridRelay::triggerCondition (index_t conditionNum, coreTime conditionTriggerTime,coreTime minimumDelayTime)
 {
   change_code eventReturn = change_code::no_change;
   cStates[conditionNum] = condition_states::triggered;
@@ -801,7 +841,7 @@ change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time cond
   conditionTriggered (conditionNum, conditionTriggerTime);
   for (index_t mm = 0; mm < actionTriggers[conditionNum].size (); ++mm)
     {
-      if (actionDelays[conditionNum][mm] <= ignoreDelayTime)
+      if (actionDelays[conditionNum][mm] <= minimumDelayTime)
         {
           auto iret = executeAction (actionTriggers[conditionNum][mm], conditionNum, conditionTriggerTime);
           if (iret > eventReturn)
@@ -811,7 +851,7 @@ change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time cond
         }
       else
         {
-          condChecks.push_back ({ conditionNum, mm, conditionTriggerTime + actionDelays[conditionNum][mm] });
+          condChecks.emplace_back (conditionNum, mm, conditionTriggerTime + actionDelays[conditionNum][mm]);
           if (opFlags[has_updates])
             {
               nextUpdateTime = std::min (nextUpdateTime, conditionTriggerTime + actionDelays[conditionNum][mm]);
@@ -826,7 +866,7 @@ change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time cond
             }
         }
     }
-  auto iret = multiConditionCheckExecute (conditionNum, conditionTriggerTime, ignoreDelayTime);
+  auto iret = multiConditionCheckExecute (conditionNum, conditionTriggerTime, minimumDelayTime);
   if (iret > eventReturn)
     {
       eventReturn = iret;
@@ -835,7 +875,7 @@ change_code gridRelay::triggerCondition (index_t conditionNum, gridDyn_time cond
 }
 
 
-change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, gridDyn_time actionTime)
+change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, coreTime actionTime)
 {
   auto eventReturn = actions[actionNum]->execute (actionTime);
   ++actionsTakenCount;
@@ -843,7 +883,7 @@ change_code gridRelay::executeAction (index_t actionNum, index_t conditionNum, g
   return eventReturn;
 }
 
-change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, gridDyn_time conditionTriggerTime, gridDyn_time ignoreDelayTime)
+change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, coreTime conditionTriggerTime, coreTime ignoreDelayTime)
 {
   change_code eventReturn = change_code::no_change;
   //now check the multiCondition triggers
@@ -870,7 +910,7 @@ change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, gridDyn
             }
           else
             {
-              condChecks.push_back ({ conditionNum, mct.actionNum, conditionTriggerTime + mct.delayTime, true });
+              condChecks.emplace_back (conditionNum, mct.actionNum, conditionTriggerTime + mct.delayTime, true );
               nextUpdateTime = std::min (nextUpdateTime, conditionTriggerTime + mct.delayTime);
               alert (this, UPDATE_TIME_CHANGE);
             }
@@ -880,7 +920,7 @@ change_code gridRelay::multiConditionCheckExecute (index_t conditionNum, gridDyn
 }
 
 
-change_code gridRelay::evaluateCondCheck (condCheckTime &cond, gridDyn_time checkTime)
+change_code gridRelay::evaluateCondCheck (condCheckTime &cond, coreTime checkTime)
 {
   change_code eventReturn = change_code::no_change;
   if (checkTime + kSmallTime >= cond.testTime)
@@ -898,7 +938,7 @@ change_code gridRelay::evaluateCondCheck (condCheckTime &cond, gridDyn_time chec
           else               //it was a multiCondition trigger
             {
               bool all_triggered = true;
-              gridDyn_time trigDelay = multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
+              coreTime trigDelay = multiConditionTriggers[cond.conditionNum][cond.actionNum].delayTime;
               for (auto &cnum : multiConditionTriggers[cond.conditionNum][cond.actionNum].multiConditions)
                 {
                   if (cStates[cnum] != condition_states::triggered)
@@ -946,12 +986,12 @@ change_code gridRelay::evaluateCondCheck (condCheckTime &cond, gridDyn_time chec
 }
 
 #ifdef DEBUG_LOG_ENABLE
-void gridRelay::actionTaken ( index_t ActionNum, index_t conditionNum, change_code actionReturn, gridDyn_time /*actionTime*/)
+void gridRelay::actionTaken ( index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime /*actionTime*/)
 {
   LOG_DEBUG ((boost::format ("action %d taken based on condition %d  with return code %d") % ActionNum % conditionNum  % static_cast<int> (actionReturn)).str ());
 
 }
-void gridRelay::conditionTriggered (index_t conditionNum, gridDyn_time timeTriggered)
+void gridRelay::conditionTriggered (index_t conditionNum, coreTime timeTriggered)
 {
   if (conditionTriggerTimes[conditionNum] > timeZero)
     {
@@ -963,7 +1003,7 @@ void gridRelay::conditionTriggered (index_t conditionNum, gridDyn_time timeTrigg
     }
 
 }
-void gridRelay::conditionCleared (index_t conditionNum, gridDyn_time timeTriggered)
+void gridRelay::conditionCleared (index_t conditionNum, coreTime timeTriggered)
 {
   if (conditionTriggerTimes[conditionNum] > timeZero)
     {
@@ -993,11 +1033,18 @@ void gridRelay::conditionCleared (index_t /*conditionNum*/, double /*timeTrigger
 #endif
 
 
-void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
+void gridRelay::updateObject(coreObject *obj, object_update_mode mode)
 {
 	if (mode == object_update_mode::direct)
 	{
-		setSource(obj);
+		if (m_sourceObject)
+		{
+			setSource(obj);
+		}
+		if (m_sinkObject)
+		{
+			setSink(obj);
+		}
 	}
 	else if (mode==object_update_mode::match)
 	{
@@ -1007,7 +1054,7 @@ void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
 		}
 		if (m_sinkObject)
 		{
-			setSink(findMatchingObject(m_sourceObject, obj));
+			setSink(findMatchingObject(m_sinkObject, obj));
 		}
 		for (auto &cond : conditions)
 		{
@@ -1020,7 +1067,7 @@ void gridRelay::updateObject(gridCoreObject *obj, object_update_mode mode)
 	}
 }
 
-gridCoreObject * gridRelay::getObject() const
+coreObject * gridRelay::getObject() const
 {
 	if (m_sourceObject)
 	{
@@ -1033,7 +1080,7 @@ gridCoreObject * gridRelay::getObject() const
 	return nullptr;
 }
 
-void gridRelay::getObjects(std::vector<gridCoreObject *> &objects) const
+void gridRelay::getObjects(std::vector<coreObject *> &objects) const
 {
 	if (m_sourceObject)
 	{
@@ -1047,8 +1094,8 @@ void gridRelay::getObjects(std::vector<gridCoreObject *> &objects) const
 	{
 		cond->getObjects(objects);
 	}
-	//for (auto &act : actions)
-	//{
-		//act->getObjects(objects);
-	//}
+	for (auto &act : actions)
+	{
+		act->getObjects(objects);
+	}
 }

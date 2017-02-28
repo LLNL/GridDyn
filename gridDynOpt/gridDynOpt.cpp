@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,12 +13,12 @@
 
 #include "gridDynOpt.h"
 #include "models/gridAreaOpt.h"
-#include "objectFactoryTemplates.h"
+#include "core/objectFactoryTemplates.h"
 #include "optObjectFactory.h"
 #include "gridOptObjects.h"
 #include "stringOps.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 //system headers
 
 
@@ -42,7 +42,7 @@ gridDynOptimization::~gridDynOptimization ()
   delete areaOpt;
 }
 
-gridCoreObject *gridDynOptimization::clone (gridCoreObject *obj) const
+coreObject *gridDynOptimization::clone (coreObject *obj) const
 {
   gridDynOptimization *sim = cloneBase<gridDynOptimization, gridDynSimulation> (this, obj);
   if (sim == nullptr)
@@ -88,7 +88,8 @@ void gridDynOptimization::set (const std::string &param,  const std::string &val
 
   if (param == "flags")
     {
-      auto v = splitline (val);
+      auto v = stringOps::splitline (val);
+	  stringOps::trim(v);
       for (auto &flagstr : v)
         {
           setFlag (flagstr, true);
@@ -208,7 +209,7 @@ double gridDynOptimization::get (const std::string &param, gridUnits::units_t un
 }
 
 
-gridCoreObject * gridDynOptimization::find (const std::string &objname) const
+coreObject * gridDynOptimization::find (const std::string &objname) const
 {
   if (objname == "optroot")
     {
@@ -225,7 +226,7 @@ gridCoreObject * gridDynOptimization::find (const std::string &objname) const
 
 }
 
-gridCoreObject * gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
+coreObject * gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName.substr (0, 3) == "opt")
     {
@@ -236,7 +237,7 @@ gridCoreObject * gridDynOptimization::getSubObject (const std::string &typeName,
       return gridDynSimulation::getSubObject (typeName, num);
     }
 }
-gridCoreObject * gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject * gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName.substr (0, 3) == "opt")
     {
@@ -249,11 +250,11 @@ gridCoreObject * gridDynOptimization::findByUserID (const std::string &typeName,
 }
 
 
-gridOptObject * gridDynOptimization::getOptData (gridCoreObject *obj)
+gridOptObject * gridDynOptimization::getOptData (coreObject *obj)
 {
   if (obj)
     {
-      gridCoreObject *nobj = areaOpt->find (obj->getName ());
+      coreObject *nobj = areaOpt->find (obj->getName ());
       if (nobj)
         {
           return static_cast<gridOptObject *> (nobj);
@@ -269,7 +270,7 @@ gridOptObject * gridDynOptimization::getOptData (gridCoreObject *obj)
     }
 }
 
-gridOptObject *gridDynOptimization::makeOptObjectPath (gridCoreObject *obj)
+gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
 {
   gridOptObject *oo = getOptData (obj);
   if (oo)
@@ -278,7 +279,7 @@ gridOptObject *gridDynOptimization::makeOptObjectPath (gridCoreObject *obj)
     }
   else
     {
-      if (obj->getParent ())
+      if (!(obj->isRoot()))
         {
           auto oop = makeOptObjectPath (obj->getParent ());
           oo = coreOptObjectFactory::instance ()->createObject (obj);

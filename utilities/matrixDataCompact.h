@@ -2,7 +2,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -60,20 +60,10 @@ public:
 	void setColLimit(index_t /*limit*/) final override
 	{}
 
-	index_t rowIndex(index_t N) const override
+	matrixElement<Y> element(index_t N) const override
 	{
-		return (N % R);
-	};
-
-	index_t colIndex(index_t N) const override
-	{
-		return N / R;  //integer division
-	};
-
-	Y val(index_t N) const override
-	{
-		return dVec[N];
-	};
+		return{ N%R, N / R, dVec[N] };
+	}
 
 	void start() override
 	{
@@ -100,11 +90,19 @@ public:
 		return dVec[colN*R + rowN];
 	};
 
+	auto begin()
+	{
+		return matrixIteratorCompact(this, 0);
+	}
+	auto end()
+	{
+		return matrixIteratorCompact(this, R*C);
+	}
 protected:
-	class matrixIteratorCompact :public matrixIteratorActual<Y>
+	class matrixIteratorCompact
 	{
 	public:
-		explicit matrixIteratorCompact(const matrixDataCompact<R,C,Y> *matrixData, index_t start = 0) :matrixIteratorActual<Y>(matrixData, start), mDC(matrixData)
+		explicit matrixIteratorCompact(const matrixDataCompact<R,C,Y> *matrixData, index_t start = 0):counter(start)
 		{
 			if (start==mDC->size())
 			{
@@ -113,37 +111,29 @@ protected:
 			}
 
 		}
-		matrixIteratorCompact(const matrixIteratorCompact *it2) :matrixIteratorActual<Y>(it2->mDC,it2->currentElement), mDC(it2->mDC)
-		{
-			Rctr = it2->Rctr;
-			Cctr = it2->Cctr;
-		}
 
-		virtual matrixIteratorActual<Y> *clone() const override
+		virtual matrixIteratorCompact& operator++()
 		{
-			return new matrixIteratorCompact(this);
-		}
-
-		virtual void increment() override
-		{
-			matrixIteratorActual<Y>::increment();
+			++counter;
 			++Rctr;
 			if (Rctr == R)
 			{
 				Rctr = 0;
 				++Cctr;
 			}
+			return *this;
 		}
 
 
-		virtual matrixElement<Y> operator*() const override
+		virtual matrixElement<Y> operator*() const
 		{
-			return{ Rctr,Cctr,mDC->dVec[matrixIteratorActual<Y>::currentElement] };
+			return{ Rctr,Cctr,mDC->dVec[counter] };
 		}
 	private:
 		const matrixDataCompact<R, C, Y> *mDC = nullptr;
 		index_t Rctr = 0;
 		index_t Cctr = 0;
+		index_t counter;
 
 	};
 };

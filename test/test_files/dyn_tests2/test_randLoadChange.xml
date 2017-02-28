@@ -59,10 +59,10 @@
       <load name="load3" type="random">
          <P>1.500</P>
          <Q>0</Q>
-        <min_t>4</min_t>
-        <max_t>8</max_t>
-        <mean_L>-0.2</mean_L>
-        <time_dist>uniform</time_dist>
+        <p:min_t>4</p:min_t>
+        <p:max_t>8</p:max_t>
+        <p:mean_L>-0.2</p:mean_L>
+        <p:time_dist>uniform</p:time_dist>
       </load>
    </bus>
    <bus name="bus4">

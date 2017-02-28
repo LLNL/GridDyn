@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,16 +15,15 @@
 #include "gridArea.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
-#include "gridEvent.h"
-#include "collector.h"
+#include "events/gridEvent.h"
+#include "measurement/collector.h"
 #include "relays/gridRelay.h"
-#include "eventQueue.h"
-#include "loadModels/gridLoad.h"
+#include "events/eventQueue.h"
+#include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
 #include "stringOps.h"
-#include "gridCoreList.h"
-#include "gridCoreTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreObjectTemplates.h"
+#include "core/coreExceptions.h"
 
 #include <map>
 #include <utility>
@@ -34,7 +33,7 @@
 
 gridSimulation::gridSimulation (const std::string &objName) : gridArea (objName)
 {
-  EvQ = std::make_shared<eventQueue> ();
+  EvQ = std::make_unique<eventQueue> ();
 }
 
 gridSimulation::~gridSimulation ()
@@ -42,7 +41,7 @@ gridSimulation::~gridSimulation ()
   opFlags.set (being_deleted);       //set this flag to handle some unusual circumstances with extra objects
 }
 
-gridCoreObject *gridSimulation::clone (gridCoreObject *obj) const
+coreObject *gridSimulation::clone (coreObject *obj) const
 {
 	gridSimulation *sim = cloneBase<gridSimulation, gridArea>(this, obj);
 	if (!sim)
@@ -68,7 +67,7 @@ gridCoreObject *gridSimulation::clone (gridCoreObject *obj) const
   sim->maxUpdateTime = maxUpdateTime;                                                                           //(s) max time period to go between updates
   sim->absTime = absTime;                                                                                       // [s] seconds in unix time;
 
-  EvQ->clone(sim->EvQ);
+  EvQ->clone(sim->EvQ.get());
   sim->EvQ->mapObjectsOnto(sim);
   //TODO:: mapping the collectors
   return sim;
@@ -80,79 +79,41 @@ void gridSimulation::setErrorCode (int ecode)
   pState = ((ecode == GS_NO_ERROR) ? pState : gridState_t::GD_ERROR), errorCode = ecode;
 }
 
-void gridSimulation::addsp (std::shared_ptr<gridCoreObject> obj)
-{
-  gridCoreObject *gco = obj.get ();
-  obj->setOwner (nullptr, gco);       //set an ownership loop so the object would never get deleted in another way
-  if (std::dynamic_pointer_cast<gridObject>(obj))
-  {
-	  try
-	  {
-		  gridArea::add(gco);       //add the object to the regular system
-		  extraObjects.push_back(obj);
-	  }
-	  catch (const invalidObjectException &)
-	  {
-		  extraObjects.push_back(obj);
-		  obj->locIndex = static_cast<index_t> (extraObjects.size()) - 1;
-		  obj->setParent(this);
-		  obList->insert(gco);
-		  if (obj->getNextUpdateTime() < kHalfBigNum)               //check if the object has updates
-		  {
-			  EvQ->insert(gco);
-		  }
-	  }
-  }
-  else
-  {
-	  extraObjects.push_back(obj);
-	  obj->locIndex = static_cast<index_t> (extraObjects.size()) - 1;
-	  obj->setParent(this);
-	  obList->insert(gco);
-	  if (obj->getNextUpdateTime() < kHalfBigNum)               //check if the object has updates
-	  {
-		  EvQ->insert(gco);
-	  }
-  }
-  
-  
-}
-
-
 void gridSimulation::add (std::shared_ptr<collector> col)
 {
-  collectorList.push_back (col);
+  
   if (!recordDirectory.empty ())
     {
      col->set ("directory", recordDirectory);
     }
   EvQ->insert (col);
+  collectorList.push_back(std::move(col));
 }
 
 void gridSimulation::add (std::shared_ptr<gridEvent> evnt)
 {
-  ++eventCount;
-  EvQ->insert (evnt);
+  EvQ->insert (std::move(evnt));
 }
 
 void gridSimulation::add (std::shared_ptr<eventAdapter> eA)
 {
-  ++eventCount;
-  EvQ->insert (eA);
+  EvQ->insert (std::move(eA));
 }
 
-void gridSimulation::add (std::list<std::shared_ptr<gridEvent> > elist)
+void gridSimulation::add (const std::vector<std::shared_ptr<gridEvent> > &elist)
 {
   for (auto &ev : elist)
     {
-      ++eventCount;
       EvQ->insert (ev);
-
     }
 }
 
+void gridSimulation::getEventObjects(std::vector<coreObject *> &objV) const
+{
+	EvQ->getEventObjects(objV);
+}
 
-int gridSimulation::run (gridDyn_time /*finishTime*/)
+int gridSimulation::run (coreTime /*finishTime*/)
 {
   return FUNCTION_EXECUTION_FAILURE;
 }
@@ -319,18 +280,7 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     }
   else
     {
-	  try
-	  {
-		  gridArea::set(param, val, unitType);
-	  }
-	  catch (gridDynException &)
-	  {
-		  if (m_Areas.size() == 1)
-		  {
-			  m_Areas[0]->set(param, val, unitType);
-		  }
-	  }
-      
+		gridArea::set(param, val, unitType);
     }
 
 
@@ -340,22 +290,22 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
 // find collector
 std::shared_ptr<collector> gridSimulation::findCollector (const std::string &collectorName)
 {
-  for (auto &col : collectorList)
-    {
-      if (collectorName == col->getName())
-        {
-          return col;
-        }
+	for (auto &col : collectorList)
+	{
+		if (collectorName == col->getName())
+		{
+			return col;
+		}
 
-          if (collectorName == col->getSinkName())
-            {
-              return col;
-            }
-    }
+		if (collectorName == col->getSinkName())
+		{
+			return col;
+		}
+	}
   return nullptr;
 }
 
-void gridSimulation::log (gridCoreObject *object, print_level level, const std::string &message)
+void gridSimulation::log (coreObject *object, print_level level, const std::string &message)
 {
   if ((level > consolePrintLevel) && (level > logPrintLevel))
     {
@@ -433,7 +383,7 @@ static const std::map<int, std::string> alertStrings {
 };
 /* *INDENT-ON* */
 
-void gridSimulation::alert (gridCoreObject *object, int code)
+void gridSimulation::alert (coreObject *object, int code)
 {
 
 
@@ -492,7 +442,7 @@ double gridSimulation::get (const std::string &param, gridUnits::units_t unitTyp
     }
   else if (param == "eventcount")
     {
-      ival = eventCount;
+      ival = EvQ->size()-1;
     }
   else if (param == "warncount")
     {
@@ -544,7 +494,7 @@ double gridSimulation::get (const std::string &param, gridUnits::units_t unitTyp
 //TODO:: this really shouldn't be a function,  but still debating alternative approaches to the need it addressed
 void gridSimulation::resetObjectCounters ()
 {
-  gridLoad::loadCount = 0;
+  zipLoad::loadCount = 0;
  // gridArea::areaCount = 0;
   gridBus::busCount = 0;
   gridLink::linkCount = 0;
@@ -553,12 +503,12 @@ void gridSimulation::resetObjectCounters ()
 }
 
 
-gridDyn_time gridSimulation::getEventTime () const
+coreTime gridSimulation::getEventTime () const
 {
   return EvQ->getNextTime ();
 }
 
-gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gridPrimary *sec)
+coreObject * findMatchingObject (coreObject *obj1, gridPrimary *src, gridPrimary *sec)
 {
   
   if (!obj1)
@@ -569,7 +519,7 @@ gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gri
     {
       return sec;
     }
-  gridCoreObject *obj2 = nullptr;
+  coreObject *obj2 = nullptr;
   if (dynamic_cast<gridSecondary *> (obj1))             //we know it is a gen or load so it parent should be a bus
     {
       gridBus *bus = dynamic_cast<gridBus *> (obj1->getParent ());
@@ -580,7 +530,7 @@ gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gri
             {
               obj2 = bus2->getGen (obj1->locIndex);
             }
-          else if (dynamic_cast<gridLoad *> (obj1))
+          else if (dynamic_cast<zipLoad *> (obj1))
             {
               obj2 = bus2->getLoad (obj1->locIndex);
             }
@@ -600,9 +550,9 @@ gridCoreObject * findMatchingObject (gridCoreObject *obj1, gridPrimary *src, gri
     }
   else               //now we get ugly we are gridSecondary Object
     {
-      gridCoreObject *pobj = findMatchingObject (obj1->getParent (), src, sec);
+      coreObject *pobj = findMatchingObject (obj1->getParent (), src, sec);
       if (pobj)
-        {//this is and internal string sequence, likely won't be documented
+        {//this is an internal string sequence, likely won't be documented
           obj2 = pobj->getSubObject ("submodelcode", obj1->locIndex);
         }
 

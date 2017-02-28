@@ -79,14 +79,14 @@
       <load name="load3" type="pulse">
          <P>1.500</P>
          <Q>0</Q>
-        <period>6</period>
+        <p:period>6</p:period>
 		<recorder>
 		<field>power</field>
 		<period>1</period>
 		<file>loadrec.dat</file>
 		</recorder>
 		
-		<amplitude>0.4</amplitude>
+		<p:amplitude>0.4</p:amplitude>
 		
       </load>
    </bus>

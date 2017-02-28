@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -21,17 +21,17 @@
 #include "gridRandom.h"
 #include <cassert>
 
-double checkResid (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, int *loc)
+std::pair<double,int> checkResid (gridDynSimulation *gds, coreTime time, const solverMode &sMode)
 {
-  return checkResid (gds, time, gds->getSolverInterface (sMode), loc);
+  return checkResid (gds, time, gds->getSolverInterface (sMode));
 }
 
-double checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd, int *loc)
+std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd)
 {
-  return checkResid (gds, gds->getCurrentTime (), sd, loc);
+  return checkResid (gds, gds->getCurrentTime (), sd);
 }
 
-double checkResid (gridDynSimulation *gds, gridDyn_time time, const std::shared_ptr<solverInterface> &sd, int *loc)
+std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<solverInterface> &sd)
 {
   const solverMode &sMode = sd->getSolverMode ();
   std::vector<double> resid;
@@ -39,7 +39,7 @@ double checkResid (gridDynSimulation *gds, gridDyn_time time, const std::shared_
   auto kSize = sd->size ();
   resid.resize (kSize, 0);
   double *state = sd->state_data ();
-  assert (kSize == gds->stateSize (sMode));
+  assert (kSize == const_cast<const gridDynSimulation *>(gds)->stateSize (sMode));
   if (!isAlgebraicOnly (sMode))
     {
       dstate_dt = sd->deriv_data ();
@@ -63,8 +63,8 @@ double checkResid (gridDynSimulation *gds, gridDyn_time time, const std::shared_
       ++sdata;
       ++rb;
     }
-  double ret = (loc) ? (absMaxLoc (resid, *loc)) : (absMax (resid));
-  return ret;
+  return absMaxLoc(resid);
+ 
 }
 
 
@@ -95,7 +95,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
   double *state = sd->state_data ();
   double *dstate = sd->deriv_data ();
 
-  gridDyn_time timeCurr = gds->getCurrentTime ();
+  coreTime timeCurr = gds->getCurrentTime ();
   if ((gds->currentProcessState () <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)&&(timeCurr<=gds->getStartTime()))
     {
       gds->guess (timeCurr, state, dstate, sd->getSolverMode());
@@ -128,17 +128,17 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
   stateData sD (timeCurr, nstate.data (), ndstate.data ());
   if (sMode.pairedOffsetIndex != kNullLocation)
     {
-      gds->fillExtraStateData (&sD, sMode);
+      gds->fillExtraStateData (sD, sMode);
     }
   if (isDifferentialOnly (sMode))
     {
       sD.cj = 0.0;
-      gds->derivative (&sD, resid.data (), sMode);
+      gds->derivative (noInputs, sD, resid.data (), sMode);
     }
   else
     {
       sD.cj = 100;
-      gds->residual (&sD, resid.data (), sMode);
+      gds->residual (noInputs, sD, resid.data (), sMode);
     }
 
   gds->jacobianFunction (timeCurr, nstate.data (), ndstate.data (), ad, sD.cj, sMode);
@@ -154,11 +154,11 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       nstate[kk] += delta;
       if (isDifferentialOnly (sMode))
         {
-          gds->derivative (&sD, resid2.data (), sMode);
+          gds->derivative (noInputs, sD, resid2.data (), sMode);
         }
       else
         {
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (noInputs, sD, resid2.data (), sMode);
         }
 
       //find the changed elements
@@ -173,11 +173,11 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       nstate[kk] += delta2;
       if (isDifferentialOnly (sMode))
         {
-          gds->derivative (&sD, resid2.data (), sMode);
+          gds->derivative (noInputs, sD, resid2.data (), sMode);
         }
       else
         {
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (noInputs, sD, resid2.data (), sMode);
         }
 
       for (index_t pp = 0; pp < nsize; ++pp)
@@ -192,7 +192,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
       if (isDAE (sMode))
         {
           ndstate[kk] += delta;
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (noInputs, sD, resid2.data (), sMode);
           //find the changed elements
           for (index_t pp = 0; pp < nsize; ++pp)
             {
@@ -203,7 +203,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
             }
           ndstate[kk] -= delta;
           ndstate[kk] += delta2;
-          gds->residual (&sD, resid2.data (), sMode);
+          gds->residual (noInputs, sD, resid2.data (), sMode);
           for (index_t pp = 0; pp < nsize; ++pp)
             {
               if (std::abs (resid[pp] - resid2[pp]) > delta2 * jactol / 2)
@@ -222,11 +222,13 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
 
   tad2.compact ();
 
+  ad.start();
   for (index_t nn = 0; nn < ad.size (); ++nn)
     {
-      index_t rowk = ad.rowIndex (nn);
-      index_t colk = ad.colIndex (nn);
-      double val1 = ad.val (nn);
+	  auto el = ad.next();
+      index_t rowk = el.row;
+      index_t colk = el.col;
+      double val1 = el.data;
       double val2 = tad.at (rowk, colk);
       double val3 = tad2.at (rowk, colk);
 
@@ -266,14 +268,17 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
         }
     }
 
+  tad.start();
+
   for (index_t nn = 0; nn < tad.size (); ++nn)
     {
-      index_t rowk = tad.rowIndex (nn);
-      index_t colk = tad.colIndex (nn);
+	  auto el = tad.next();
+      index_t rowk = el.row;
+      index_t colk = el.col;
 
 
       double val1 = ad.at (rowk, colk);
-      double val2 = tad.val (nn);
+      double val2 = el.data;
       double val3 = tad2.at (rowk, colk);
       if (val1 != 0)
         {
@@ -309,7 +314,7 @@ int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double resid
   return residualCheck (gds, gds->getCurrentTime (), sMode, residTol, useStateNames);
 }
 
-int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double residTol, bool useStateNames)
+int residualCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double residTol, bool useStateNames)
 {
   if (isDynamic (sMode))
     {
@@ -332,7 +337,7 @@ int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &
   auto sd = gds->getSolverInterface (sMode);
   double *state = sd->state_data ();
   size_t nsize = sd->size ();
-  assert (nsize == gds->stateSize (sMode));
+  assert (nsize == const_cast<const gridDynSimulation *>(gds)->stateSize (sMode));
   if (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED)
     {
       //sMode must be power flow or dc power flow to get here
@@ -348,7 +353,7 @@ int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &
 
   sD.dstate_dt = (isDAE (sMode)) ? sd->deriv_data () : nullptr;
 
-  gds->residual (&sD, resid.data (), sMode);
+  gds->residual (noInputs, sD, resid.data (), sMode);
   for (size_t kk = 0; kk < nsize; ++kk)
     {
       if (std::abs (resid[kk]) > residTol)
@@ -368,7 +373,7 @@ int residualCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &
 }
 
 
-int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double algtol, bool useStateNames)
+int algebraicCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double algtol, bool useStateNames)
 {
   if (isDynamic (sMode))
     {
@@ -391,7 +396,7 @@ int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode 
   auto sd = gds->getSolverInterface (sMode);
   double *state = sd->state_data ();
   size_t nsize = sd->size ();
-  assert (nsize == gds->stateSize (sMode));
+  assert (nsize == const_cast<const gridDynSimulation *>(gds)->stateSize (sMode));
   if (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED)
     {
       //sMode must be power flow or dc power flow to get here
@@ -410,7 +415,7 @@ int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode 
   stateData sD (time, sd->state_data ());
   sD.dstate_dt = (isDAE (sMode)) ? sd->deriv_data () : nullptr;
 
-  gds->algebraicUpdate (&sD, update.data (), sMode,1.0);
+  gds->algebraicUpdate (noInputs, sD, update.data (), sMode,1.0);
   std::vector<double> vtype (nsize);
 
   gds->getVariableType (vtype.data (), sMode);
@@ -439,9 +444,9 @@ int algebraicCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode 
 }
 
 
-int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode &sMode, double derivtol, bool useStateNames)
+int derivativeCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double derivtol, bool useStateNames)
 {
-  if (isDynamic (sMode))
+  if (hasDifferential (sMode))
     {
       if (gds->currentProcessState () < gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
         {
@@ -462,7 +467,7 @@ int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode
   auto sd = gds->getSolverInterface (sMode);
   double *state = sd->state_data ();
   size_t nsize = sd->size ();
-  assert (nsize == gds->stateSize (sMode));
+  assert (nsize == const_cast<const gridDynSimulation *>(gds)->stateSize (sMode));
   if (gds->currentProcessState () == gridDynSimulation::gridState_t::INITIALIZED)
     {
       //sMode must be power flow or dc power flow to get here
@@ -478,10 +483,9 @@ int derivativeCheck (gridDynSimulation *gds, gridDyn_time time, const solverMode
     {
       derivtol = resid_check_tol;
     }
-  stateData sD (time, sd->state_data ());
-  sD.dstate_dt = (hasDifferential (sMode)) ? sd->deriv_data () : nullptr;
+  stateData sD (time, sd->state_data (), sd->deriv_data());
 
-  gds->derivative (&sD, deriv.data (), sMode);
+  gds->derivative (noInputs, sD, deriv.data (), sMode);
   std::vector<double> vtype (nsize);
 
   gds->getVariableType (vtype.data (), sMode);
@@ -584,11 +588,11 @@ void dynamicSolverConvergenceTest(gridDynSimulation *gds, const solverMode &sMod
 		break;
 	case 1://random points
 	{
-		gridRandom rng(gridRandom::dist_type_t::uniform);
+		gridRandom rng(gridRandom::dist_type_t::uniform,0.0,1.51);
 		std::vector<double> rvals(cvs);
 		for (index_t kk = 0; kk < pts; ++kk)
 		{
-			rng.getNewValues(0, 1.51, rvals, static_cast<count_t> (cvs));
+			rng.getNewValues(rvals, static_cast<count_t> (cvs));
 			for (size_t jj = 0; jj < cvs; ++jj)
 			{
 				state[vsi[jj]] = rvals[jj];
@@ -662,4 +666,206 @@ void dynamicSolverConvergenceTest(gridDynSimulation *gds, const solverMode &sMod
 
 	sd->set("printLevel", tempLevel);
 	std::copy(baseState.begin(), baseState.begin() + ssize, state);
+}
+
+std::vector<int> getRowCounts(matrixData<double> &ad)
+{
+	std::vector<int> rowcnt(ad.rowLimit());
+	int sz = static_cast<int> (ad.size());
+	ad.start();
+	int ii = 0;
+	while (ii < sz)
+	{
+		auto el = ad.next();
+		++rowcnt[el.row];
+		++ii;
+	}
+	return rowcnt;
+}
+
+std::vector<index_t> getLocalStates(const gridObject *obj,const solverMode &sMode)
+{
+	std::vector<index_t> st;
+	auto off=obj->getOffsets(sMode);
+	for (index_t ii = 0; ii < off->local.algSize; ++ii)
+	{
+		st.push_back(off->algOffset + ii);
+	}
+	for (index_t ii = 0; ii < off->local.diffSize; ++ii)
+	{
+		st.push_back(off->diffOffset + ii);
+	}
+	for (index_t ii = 0; ii < off->local.vSize; ++ii)
+	{
+		st.push_back(off->vOffset + ii);
+	}
+	for (index_t ii = 0; ii < off->local.aSize; ++ii)
+	{
+		st.push_back(off->aOffset + ii);
+	}
+	return st;
+}
+
+//helper class for aggregating information
+class objectCountInfo
+{
+public:
+	std::string name;
+	count_t totalStates=0;
+	count_t localStates=0;
+	count_t localJacListed=0;
+	count_t totalJacListed=0;
+	count_t localJacActual=0;
+	count_t totalJacActual=0;
+	std::vector<objectCountInfo> subObjectInfo;
+};
+/** function to get the actual Jacobian information about an object*/
+objectCountInfo getObjectInformation(const gridObject *obj, const solverMode &sMode, const std::vector<int> &rowCount)
+{
+	objectCountInfo objI;
+	objI.name = obj->getName();
+	objI.totalStates = obj->stateSize(sMode);
+	
+	auto lcStates = getLocalStates(obj, sMode);
+	objI.localStates = static_cast<count_t>(lcStates.size());
+	objI.totalJacListed = obj->jacSize(sMode);
+	for (auto &st : lcStates)
+	{
+		objI.localJacActual += rowCount[st];
+	}
+
+	auto subobj = obj->getSubObject("subobject", 0);
+	int ii=0;
+	while (subobj != nullptr)
+	{
+		objI.subObjectInfo.push_back(getObjectInformation(static_cast<gridObject *>(subobj), sMode, rowCount));
+		++ii;
+		subobj = obj->getSubObject("subobject", ii);
+	}
+	objI.localJacListed = objI.totalJacListed;
+	objI.totalJacActual = objI.localJacActual;
+	for (auto &sui : objI.subObjectInfo)
+	{
+		objI.localJacListed -= sui.totalJacListed;
+		objI.totalJacActual += sui.totalJacActual;
+	}
+	return objI;
+
+}
+
+void printObjCountInfo(const objectCountInfo &oi, int clevel, int maxLevel)
+{
+	for (int ii = 0; ii < clevel;++ii)
+	{
+		printf("  ");
+	}
+	printf("%s:: st %d(%d) list %d(%d) NNZ %d(%d)\n", oi.name.c_str(),
+		oi.totalStates, oi.localStates, oi.totalJacListed, oi.localJacListed,
+		oi.totalJacActual, oi.localJacActual);
+	if (clevel < maxLevel)
+	{
+		for (auto &soi : oi.subObjectInfo)
+		{
+			printObjCountInfo(soi, clevel + 1, maxLevel);
+		}
+	}
+}
+
+void jacobianAnalysis(matrixData<double> &ad, gridDynSimulation *gds, const solverMode &sMode, int level)
+{
+	auto rc = getRowCounts(ad);
+	auto oi = getObjectInformation(gds, sMode, rc);
+	printObjCountInfo(oi, 0, level);
+
+}
+
+
+bool checkObjectEquivalence(const coreObject *obj1, const coreObject *obj2, bool printMessage)
+{
+	if (!((obj1) && (obj2)))
+	{
+		if (printMessage)
+		{
+			printf("at least one object is null\n");
+		}
+		return false;
+	}
+	if (typeid(*obj1) != typeid(*obj2))
+	{
+		if (printMessage)
+		{
+			printf("object 1 name (%s) not matching type of object 2(%s)\n", obj1->getName().c_str(), obj2->getName().c_str());
+		}
+		return false;
+	}
+	if (obj1->getName() != obj2->getName())
+	{
+		if (printMessage)
+		{
+			printf("object 1 name (%s) not matching object 2(%s)\n", obj1->getName().c_str(), obj2->getName().c_str());
+		}
+		return false;
+	}
+	if (obj1->getParent())
+	{
+		if (obj2->getParent())
+		{
+			if (obj1->getParent()->getName() != obj2->getParent()->getName())
+			{	//these do not affect equivalence but should be noted
+				if (printMessage)
+				{
+					printf("object 1 (%s) has a different parent than object 2(%s)\n", obj1->getName().c_str(), obj2->getName().c_str());
+				
+				}
+			}
+		}
+		else
+		{
+			if (printMessage)
+			{
+				printf("object 1 (%s) has a different parent than object 2(%s)\n", obj1->getName().c_str(), obj2->getName().c_str());
+			}
+			
+		}
+	}
+	if (obj1== obj2)
+	{//these do not affect equivalence but should be noted
+		if (printMessage)
+		{
+			printf("object 1 and object 2 (%s) have same id\n", obj1->getName().c_str());
+		}
+		return true;
+	}
+	if (obj1->get("subobjectcount") != obj2->get("subobjectcount"))
+	{
+		if (printMessage)
+		{
+			printf("object 1 (%s) has a different number of subobjects than object 2(%s)\n", obj1->getName().c_str(), obj2->getName().c_str());
+		}
+		return false;
+	}
+	int ii = 0;
+	coreObject *sub1 = obj1->getSubObject("subobject", ii);
+	bool result = true;
+	while (sub1)
+	{
+		coreObject *sub2 = obj2->find(sub1->getName());
+		if (!(sub2))
+		{
+			if (printMessage)
+			{
+				printf("object 2 (%s) does not have a subobject named %s\n", obj1->getName().c_str(), sub1->getName().c_str());
+			}
+			continue;
+		}
+		auto res = checkObjectEquivalence(sub1, sub2, printMessage);
+		++ii;
+		sub1 = obj1->getSubObject("subobject", ii);
+		if (!res)
+		{
+			result = false;
+		}
+	}
+	
+	return result;
 }

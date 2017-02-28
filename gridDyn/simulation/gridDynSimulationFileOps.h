@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -154,7 +154,7 @@ void loadPowerFlowCSV (gridDynSimulation *gds, const std::string &fname);
 */
 struct dataInfo
 {
-	gridDyn_time time = 0.0;
+	coreTime time = 0.0;
 	std::uint32_t code = 0;
 	std::uint32_t index = 0;
 	std::uint32_t key = 0;
@@ -180,10 +180,10 @@ then write data (NumElements*8 Bytes);
 @param[in] data the data to write to the file
 @param[in] filename the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)
-@return (0) is successful  (-1) if unable to open file
+@throw fileOperationError if the file cannot be opened
 */
 
-int writeVector(gridDyn_time time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
+void writeVector(coreTime time,  std::uint32_t code, std::uint32_t index, std::uint32_t key, std::uint32_t numElements, const double *data, const std::string&filename, bool append=true);
 
 /** @brief write a array to a file
 encodes a header into the file
@@ -196,10 +196,11 @@ then write data in triplets (4byte row, 4 byte col, 8 byte double data)
 @param[in] a1 the Jacobian data to write to the file
 @param[in] filename the name of the file
 @param[in] append indicator if the file should be appended or overwritten(def true)
-@return (0) is successful  (-1) if unable to open file
+@throw fileOperationError if the file cannot be opened
 */
 
-int writeArray(gridDyn_time time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
+#define JACOBIAN_DATA 1
+void writeArray(coreTime time, std::uint32_t code, std::uint32_t index,  std::uint32_t key,  matrixData<double> &a1, const std::string&filename, bool append = true);
 
 class contingency;
 

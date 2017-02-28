@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -16,6 +16,7 @@
 #include "timeSeries.h"
 #include "matrixData.h"
 #include "stringConversion.h"
+#include "core/coreObjectTemplates.h"
 #include <utility>
 
 lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
@@ -24,26 +25,16 @@ lutBlock::lutBlock (const std::string &objName) : basicBlock (objName)
 }
 
 
-gridCoreObject *lutBlock::clone (gridCoreObject *obj) const
+coreObject *lutBlock::clone (coreObject *obj) const
 {
-  lutBlock *nobj;
-  if (obj == nullptr)
+	lutBlock *nobj = cloneBase<lutBlock, basicBlock>(this, obj);
+  if (nobj == nullptr)
     {
-      nobj = new lutBlock ();
+	  return obj;
     }
-  else
-    {
-      nobj = dynamic_cast<lutBlock *> (obj);
-      if (nobj == nullptr)
-        {
-          basicBlock::clone (obj);
-          return obj;
-        }
-    }
-  basicBlock::clone (nobj);
   nobj->lut = lut;
   nobj->b = b;
-  nobj->m = 0;
+  nobj->m = m;
   nobj->vlower = vlower;
   nobj->vupper = vupper;
   nobj->lindex = lindex;
@@ -52,24 +43,24 @@ gridCoreObject *lutBlock::clone (gridCoreObject *obj) const
 
 
 // initial conditions
-void lutBlock::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &fieldSet)
+void lutBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
 
-  if (outputSet.empty ())
+  if (desiredOutput.empty ())
     {
-      m_state[limiter_alg] = K * computeValue (args[0] + bias);
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      m_state[limiter_alg] = K * computeValue (inputs[0] + bias);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     }
   else
     {
       //TOOD:: PT figure out how to invert the lookup table
-      basicBlock::objectInitializeB (args, outputSet, fieldSet);
+      basicBlock::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
 
     }
 
 }
 
-void lutBlock::algElements (double input, const stateData *sD, double update[], const solverMode &sMode)
+void lutBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
   update[offset] = K * computeValue (input + bias);
@@ -79,13 +70,13 @@ void lutBlock::algElements (double input, const stateData *sD, double update[], 
     }
 }
 
-void lutBlock::jacElements (double input, double didt, const stateData *sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
+void lutBlock::jacElements (double input, double didt, const stateData &sD, matrixData<double> &ad, index_t argLoc, const solverMode &sMode)
 {
 
   auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
   //use the ad.assign Macro defined in basicDefs
   // ad.assign(arrayIndex, RowIndex, ColIndex, value)
-  ad.assignCheck (offset, argLoc, K * m);
+  ad.assignCheckCol (offset, argLoc, K * m);
   ad.assign (offset, offset, -1);
   if (limiter_alg > 0)
     {
@@ -103,11 +94,11 @@ void lutBlock::set (const std::string &param,  const std::string &val)
     {
       auto v2 = str2vector (val,-kBigNum,";,:");
       lut.clear ();
-      lut.push_back (std::make_pair (-kBigNum,0.0));
-      lut.push_back (std::make_pair (kBigNum,0.0));
+      lut.emplace_back (-kBigNum,0.0);
+      lut.emplace_back (kBigNum,0.0);
       for (size_t mm = 0; mm < v2.size (); mm += 2)
         {
-          lut.push_back (std::make_pair (v2[mm],v2[mm + 1]));
+          lut.emplace_back (v2[mm],v2[mm + 1]);
         }
       sort (lut.begin (),lut.end ());
       lut[0].second = lut[1].second;
@@ -118,7 +109,7 @@ void lutBlock::set (const std::string &param,  const std::string &val)
       auto v2 = str2vector (val, -kBigNum, ";,:");
       for (size_t mm = 0; mm < v2.size (); mm += 2)
         {
-          lut.push_back (std::make_pair (v2[mm], v2[mm + 1]));
+          lut.emplace_back (v2[mm], v2[mm + 1]);
         }
       sort (lut.begin (), lut.end ());
       lut[0].second = lut[1].second;
@@ -130,11 +121,11 @@ void lutBlock::set (const std::string &param,  const std::string &val)
       timeSeries<> ts (temp);
      
       lut.clear ();
-      lut.push_back (std::make_pair (-kBigNum, 0.0));
-      lut.push_back (std::make_pair (kBigNum, 0.0));
-      for (size_t pp = 0; pp < ts.count; ++pp)
+      lut.emplace_back (-kBigNum, 0.0);
+      lut.emplace_back (kBigNum, 0.0);
+      for (index_t pp = 0; pp < ts.size(); ++pp)
         {
-          lut.push_back (std::make_pair (ts.time[pp], ts.data[pp]));
+          lut.emplace_back (ts.time(pp), ts.data(pp));
         }
       sort (lut.begin (), lut.end ());
       lut[0].second = lut[1].second;
@@ -161,7 +152,7 @@ void lutBlock::set (const std::string &param, double val, gridUnits::units_t uni
 
 }
 
-double lutBlock::step (gridDyn_time ttime, double input)
+double lutBlock::step (coreTime ttime, double input)
 {
 
   m_state[limiter_alg] = K * computeValue (input + bias);
@@ -209,14 +200,14 @@ double lutBlock::computeValue (double input)
 }
 
 /*
-double lutBlock::currentValue(const IOdata &args, const stateData *sD, const solverMode &sMode) const
+double lutBlock::currentValue(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
   Lp Loc;
   offsets.getLocations(sD, sMode, &Loc, this);
   double val = Loc.algStateLoc[1];
-  if (!args.empty())
+  if (!inputs.empty())
   {
-    val=computeValue(args[0]+bias);
+    val=computeValue(inputs[0]+bias);
   }
   return basicBlock::currentValue({ val }, sD, sMode);
 }

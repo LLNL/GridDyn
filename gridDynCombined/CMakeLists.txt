@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -52,6 +52,7 @@ link_directories(${external_link_directories})
 
 set(gd_library_list
 gridDyn
+coreObjects
 coupling_static_lib
 utilities
 formatInterpreter
@@ -60,12 +61,12 @@ formatInterpreter
 
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/formatInterpreters)
+INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynFileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/coupling)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn/recorder_events)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 #Merge_static_libs(gridDynCombined ${gd_library_list} ${external_library_list})

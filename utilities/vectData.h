@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2014, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,15 +15,13 @@
 #define _SPARSE_VECTOR_DATA_H_
 
 
-//TODO make this into a template
-
 #include <cstdint>
 #ifdef ENABLE_64_BIT_INDEXING
-typedef std::uint64_t index_t;
-typedef std::uint64_t count_t;
+using index_t=std::uint64_t;
+using count_t=std::uint64_t;
 #else
-typedef std::uint32_t index_t;
-typedef std::uint32_t count_t;
+using index_t=std::uint32_t;
+using count_t=std::uint32_t;
 #endif
 
 #include <vector>
@@ -40,9 +38,9 @@ template <class Y = double>
 class vectData
 {
 public:
-	typedef std::pair<index_t, Y> vLoc;
+	using vLoc=std::pair<index_t, Y>;
 private:
-	static bool compareLocVectData(vLoc A, vLoc B)
+	static bool compareLocVectData(const vLoc &A, const vLoc &B)
 	{
 		return (A.first < B.first);
 	}
@@ -166,11 +164,11 @@ public:
   }
   /**
   * get the number nonzero of elements in each row
-  * @return a vector of ints with the column counts
+  * @return a vector of integers with the column counts
   */
 
-  Y find (index_t rowN)
-  {  //NOTE: function assumes vectdata is sorted and compacted
+  Y at (index_t rowN)
+  {  //NOTE: function assumes vectData is sorted and compacted
 	  auto res = std::lower_bound(dVec.begin(), dVec.end(), vLoc(rowN, Y(0.0)), compareLocVectData);
 	  if (res == dVec.end())
 	  {
@@ -185,7 +183,9 @@ public:
 		  return Y(0.0);
 	  }
   }
-  void scale (Y factor, index_t start = 0, count_t count = 0x0FFFFFFFF)
+
+
+  void scale (Y factor, index_t start = 0, count_t count = 0x7FFFFFFF)
   {
 	  if (start >= dVec.size())
 	  {

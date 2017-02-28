@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,10 +12,10 @@
 */
 
 #include "sourceModels/otherSources.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "comms/gridCommunicator.h"
 #include "comms/controlMessage.h"
-#include "eventQueue.h"
+#include "events/eventQueue.h"
 #include "gridDyn.h"
 
 commSource::commSource(const std::string &objName):rampSource(objName)
@@ -23,7 +23,7 @@ commSource::commSource(const std::string &objName):rampSource(objName)
 	opFlags.set(has_updates);
 }
 
-gridCoreObject * commSource::clone(gridCoreObject *obj) const
+coreObject * commSource::clone(coreObject *obj) const
 {
 	commSource *cs = cloneBase<commSource, rampSource>(this, obj);
 	if (cs == nullptr)
@@ -34,9 +34,9 @@ gridCoreObject * commSource::clone(gridCoreObject *obj) const
 	return cs;
 }
 
-void commSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
+void commSource::dynObjectInitializeA(coreTime time0, unsigned long flags)
 {
-	rootSim = dynamic_cast<gridSimulation *> (parent->find("root"));
+	rootSim = dynamic_cast<gridSimulation *> (getRoot());
 	commLink = cManager.build();
 
 	if (commLink)
@@ -46,7 +46,7 @@ void commSource::objectInitializeA(gridDyn_time time0, unsigned long flags)
 			receiveMessage(sourceID, message);
 		});
 	}
-	rampSource::objectInitializeA(time0, flags);
+	rampSource::dynObjectInitializeA(time0, flags);
 }
 
 void commSource::setLevel(double val)
@@ -124,7 +124,7 @@ void commSource::setFlag(const std::string &flag, bool val)
 	
 }
 
-void commSource::updateA(gridDyn_time time)
+void commSource::updateA(coreTime time)
 {
 	if (time > nextUpdateTime)
 	{

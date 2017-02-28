@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #include "tinyxmlReaderElement.h"
 #include "ticpp/ticpp.h"
-#include "stringOps.h"
+#include "stringConversion.h"
 
 
 tinyxmlReaderElement::tinyxmlReaderElement ()
@@ -127,7 +127,7 @@ double tinyxmlReaderElement::getValue () const
 {
   if (element)
     {
-      double ret = doubleReadComplete (element->GetText (false), readerNullVal);
+      double ret = numeric_conversionComplete (element->GetText (false), readerNullVal);
       return ret;
     }
   return readerNullVal;
@@ -142,7 +142,7 @@ std::string tinyxmlReaderElement::getText () const
   return "";
 }
 
-std::string tinyxmlReaderElement::getMultiText (const std::string sep) const
+std::string tinyxmlReaderElement::getMultiText (const std::string &sep) const
 {
   if (element)
     {
@@ -248,7 +248,7 @@ double tinyxmlReaderElement::getAttributeValue (const std::string &attributeName
 {
   if (element)
     {
-      return doubleReadComplete (element->GetAttribute (attributeName), readerNullVal);
+      return numeric_conversionComplete (element->GetAttribute (attributeName), readerNullVal);
     }
   return readerNullVal;
 }

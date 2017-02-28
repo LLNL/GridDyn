@@ -1,0 +1,9 @@
+{
+  global:
+    fncs_*;
+    _fncs_*;
+    extern "C++" {
+        fncs::*;
+    };
+  local: *;
+};

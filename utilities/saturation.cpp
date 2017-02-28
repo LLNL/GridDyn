@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -64,19 +64,22 @@ void saturation::setParam (double S1, double S2)
 
 void saturation::setParam (double V1, double S1, double V2, double S2)
 {
-  double ssv;
   switch (type)
     {
    
     case satType_t::quadratic:
-      ssv = sqrt (S1 / S2);
-      A = -(V2 * ssv - V1) / (V1 - ssv);
-      B = S1 / ((V1 - A) * (V1 - A));
+	{
+		double ssv = sqrt(S1 / S2);
+		A = -(V2 * ssv - V1) / (V1 - ssv);
+		B = S1 / ((V1 - A) * (V1 - A));
+	}
       break;
     case satType_t::scaled_quadratic:
-      ssv = sqrt ((S1 * V1) / (S2 * V2));
-      A = -(V2 * ssv - V1) / (V1 - ssv);
-      B = S1 / ((V1 - A) * (V1 - A));
+	{
+		double ssv = sqrt((S1 * V1) / (S2 * V2));
+		A = -(V2 * ssv - V1) / (V1 - ssv);
+		B = S1 / ((V1 - A) * (V1 - A));
+	}
       break;
     case satType_t::exponential:
       A = log (S1 / S2) / log (V1 / V2);

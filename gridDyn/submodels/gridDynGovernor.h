@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -55,28 +55,28 @@ protected:
 public:
   /** @brief constructor*/
   explicit gridDynGovernor (const std::string &objName = "gov_#");
-  virtual gridCoreObject * clone (gridCoreObject *obj = nullptr) const override;
+  virtual coreObject * clone (coreObject *obj = nullptr) const override;
   /** @brief destructor*/
   virtual ~gridDynGovernor ();
-  virtual void objectInitializeA (gridDyn_time time, unsigned long flags) override;
-  virtual void objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet) override;
+  virtual void dynObjectInitializeA (coreTime time, unsigned long flags) override;
+  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   virtual void setFlag (const std::string &flag, bool val) override;
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
-  virtual void residual (const IOdata &args, const stateData *sD, double resid[], const solverMode &sMode) override;
-  virtual void derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode) override;
-  virtual void jacobianElements (const IOdata &args, const stateData *sD,
+  virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
+  virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void jacobianElements (const IOdata &inputs, const stateData &sD,
                                  matrixData<double> &ad,
-                                 const IOlocs &argLocs, const solverMode &sMode) override;
-  virtual void timestep  (gridDyn_time ttime, const IOdata &args, const solverMode &sMode) override;
+                                 const IOlocs &inputLocs, const solverMode &sMode) override;
+  virtual void timestep  (coreTime ttime, const IOdata &inputs, const solverMode &sMode) override;
 
-  virtual void rootTest (const IOdata &args, const stateData *sD, double roots[], const solverMode &sMode) override;
+  virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
 
 protected:
-  //virtual void setTime(gridDyn_time time){prevTime=time;};
+  //virtual void setTime(coreTime time){prevTime=time;};
 };
 
 #endif //GRIDGOVERNOR_H_

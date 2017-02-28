@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,10 +12,10 @@
 */
 
 #include "gridDyn.h"
-#include "gridEvent.h"
+#include "events/gridEvent.h"
 
 #include "vectorOps.hpp"
-#include "eventQueue.h"
+#include "events/eventQueue.h"
 #include "gridBus.h"
 #include "solvers/solverInterface.h"
 #include "simulation/diagnostics.h"
@@ -126,17 +126,17 @@ int gridDynSimulation::powerflow ()
                     {
                       if (controlFlags[first_run_limits_only])
                         {
-                          AdjustmentChanges = powerFlowAdjust (0, check_level_t::reversable_only);
+                          AdjustmentChanges = powerFlowAdjust (noInputs,0, check_level_t::reversable_only);
                         }
                       else
                         {
-                          AdjustmentChanges = powerFlowAdjust (lower_flags (controlFlags), check_level_t::reversable_only);
+                          AdjustmentChanges = powerFlowAdjust (noInputs,lower_flags (controlFlags), check_level_t::reversable_only);
                         }
 
                     }
                   else
                     {
-                      AdjustmentChanges = powerFlowAdjust (lower_flags (controlFlags), check_level_t::reversable_only);
+                      AdjustmentChanges = powerFlowAdjust (noInputs, lower_flags (controlFlags), check_level_t::reversable_only);
                     }
 
                   if (AdjustmentChanges > change_code::non_state_change)
@@ -145,7 +145,7 @@ int gridDynSimulation::powerflow ()
                     }
                   if (AdjustmentChanges == change_code::no_change)                             //if there was no adjustable changes  check if there was any non-reversable checks
                     {
-                      AdjustmentChanges = powerFlowAdjust (lower_flags (controlFlags), check_level_t::full_check);
+                      AdjustmentChanges = powerFlowAdjust (noInputs, lower_flags (controlFlags), check_level_t::full_check);
                       if (AdjustmentChanges > change_code::no_change)
                         {
                           checkNetwork (network_check_type::simplified);
@@ -308,7 +308,7 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode,change_code change)
 
 //we initialize all the objects in the simulation and the default solverInterface
 //all other solver data objects would be initialized by a reInitPFlow(xxx) call;
-int gridDynSimulation::pFlowInitialize (gridDyn_time time0)
+int gridDynSimulation::pFlowInitialize (coreTime time0)
 {
   if (time0 == negTime)
     {
@@ -326,7 +326,7 @@ int gridDynSimulation::pFlowInitialize (gridDyn_time time0)
   auto pFlowData = getSolverInterface (*defPowerFlowMode);
   const solverMode &sm = pFlowData->getSolverMode();
   defPowerFlowMode = &sm;
-  // initializeB
+  // dynInitializeB
   //this->savePowerFlowXML("testflow.xml");
   //check the network to ensure we have a solvable power flow
 
@@ -363,7 +363,9 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
   double cPower = 0;
   double availPower = 0;
   std::vector<double> avail;
-  avail.reserve (m_Buses.size ());
+  std::vector<gridBus *> gbusses;
+  getBusVector(gbusses);
+  avail.reserve (gbusses.size ());
   auto pv = prevSlkGen.begin ();
   for (auto &bus : slkBusses)
     {
@@ -384,10 +386,10 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
   if (cPower > 0)
     {
 
-      for (auto &bus : m_Buses)
+      for (auto &bus : gbusses)
         {
 
-          if ((bus->enabled) && (bus->getAdjustableCapacityUp () > 0))
+          if ((bus->isEnabled()) && (bus->getAdjustableCapacityUp () > 0))
             {
 			  double maxGen = bus->getMaxGenReal();
 			  double participation = bus->get("participation");
@@ -407,9 +409,9 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
     }
   else
     {
-      for (auto &bus :m_Buses)
+      for (auto &bus : gbusses)
         {
-          if ((bus->enabled) && (bus->getAdjustableCapacityDown () > 0))
+          if ((bus->isEnabled()) && (bus->getAdjustableCapacityDown () > 0))
             {
 			  double maxGen = bus->getMaxGenReal();
 			  double participation = bus->get("participation");
@@ -428,11 +430,11 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
     }
 
   availPower = sum (avail);
-  for (size_t kk = 0; kk < m_Buses.size (); ++kk)
+  for (size_t kk = 0; kk < gbusses.size (); ++kk)
     {
       if (avail[kk] > 0.0)
         {
-          m_Buses[kk]->powerAdjust (avail[kk] / availPower * cPower);
+		  gbusses[kk]->powerAdjust (avail[kk] / availPower * cPower);
         }
 
     }
@@ -465,7 +467,7 @@ void gridDynSimulation::pFlowSensitivityAnalysis ()
 }
 
 
-int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_step)
+int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
 {
   if (t_end == negTime)
     {
@@ -498,7 +500,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
       bool powerflow_executed = false;
       currentTime = nextEvent;
       //advance the time
-      timestep (currentTime, *defPowerFlowMode);
+      timestep (currentTime, noInputs,*defPowerFlowMode);
       //execute any events
       ret = EvQ->executeEventsAonly (currentTime);
       //run the power flow
@@ -536,7 +538,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
   //if necessary do one last power flow this should only happen rarely
   if (currentTime < t_end - kSmallTime)
     {
-      timestep (t_end, cLocalSolverMode);
+      timestep (t_end, noInputs, cLocalSolverMode);
       pret = powerflow ();
       if (pret != FUNCTION_EXECUTION_SUCCESS)
         {
@@ -547,7 +549,7 @@ int gridDynSimulation::eventDrivenPowerflow (gridDyn_time t_end, gridDyn_time t_
   return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state[], double update[], const solverMode &sMode, double alpha)
+int gridDynSimulation::algUpdateFunction (coreTime ttime, const double state[], double update[], const solverMode &sMode, double alpha)
 {
   ++evalCount;
   stateData sD(ttime,state);
@@ -570,8 +572,8 @@ int gridDynSimulation::algUpdateFunction (gridDyn_time ttime, const double state
       sD.fullState = solverInterfaces[defDAEMode->offsetIndex]->state_data ();
     }
   //call the area based function to handle the looping
-  preEx (&sD, sMode);
-  algebraicUpdate (&sD, update, sMode, alpha);
-  delayedAlgebraicUpdate (&sD, update, sMode, alpha);
+  preEx (noInputs,sD, sMode);
+  algebraicUpdate (noInputs, sD, update, sMode, alpha);
+  delayedAlgebraicUpdate (noInputs, sD, update, sMode, alpha);
   return FUNCTION_EXECUTION_SUCCESS;
 }

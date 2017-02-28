@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,9 +14,9 @@
 #include "readerInfo.h"
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
-#include "recorder_events/collector.h"
+#include "measurement/collector.h"
 #include "readerElement.h"
-#include "gridCore.h"
+#include "core/coreObject.h"
 
 
 #include <boost/filesystem.hpp>
@@ -31,24 +31,12 @@ basicReaderInfo::basicReaderInfo ()
 {
 }
 
-
-basicReaderInfo::basicReaderInfo (const basicReaderInfo *bri) : base (bri->base),
-                                                                basefreq (bri->basefreq), flags (bri->flags),
-                                                                version (bri->version), prefix (bri->prefix)
-{
-
-}
-
-basicReaderInfo::~basicReaderInfo ()
-{
-}
-
 readerInfo::readerInfo ()
 {
   loadDefaultDefines ();
 }
 
-readerInfo::readerInfo (const basicReaderInfo *bri) : basicReaderInfo (*bri)
+readerInfo::readerInfo (const basicReaderInfo &bri) : basicReaderInfo (bri)
 {
 
 }
@@ -121,7 +109,7 @@ void readerInfo::closeScope (scopeID scopeToClose)
 }
 
 
-void readerInfo::addDefinition (std::string def, std::string replacement)
+void readerInfo::addDefinition (const std::string &def, const std::string &replacement)
 {
   auto search = lockDefines.find (def);
   if (search == lockDefines.end ())
@@ -144,26 +132,26 @@ void readerInfo::addDefinition (std::string def, std::string replacement)
 }
 
 
-void readerInfo::addTranslate (std::string def, std::string component)
+void readerInfo::addTranslate (const std::string &def, const std::string &component)
 {
   objectTranslations[def] = component;
   parameterIgnoreStrings.insert (def);
 }
 
-void readerInfo::addTranslate (std::string def, std::string component, std::string type)
+void readerInfo::addTranslate (const std::string &def, const std::string &component, const std::string &type)
 {
   objectTranslations[def] = component;
   objectTranslationsType[def] = type;
   parameterIgnoreStrings.insert (def);
 }
 
-void readerInfo::addTranslateType (std::string def, std::string type)
+void readerInfo::addTranslateType (const std::string &def, const std::string &type)
 {
   objectTranslationsType[def] = type;
 }
 
 
-void readerInfo::addLockedDefinition (std::string def, std::string replacement)
+void readerInfo::addLockedDefinition (const std::string &def, const std::string &replacement)
 {
 
   auto search = lockDefines.find (def);
@@ -175,33 +163,35 @@ void readerInfo::addLockedDefinition (std::string def, std::string replacement)
 
 }
 
-void readerInfo::replaceLockedDefinition (std::string def, std::string replacement)
+void readerInfo::replaceLockedDefinition (const std::string &def, const std::string &replacement)
 {
   defines[def] = replacement;
   lockDefines[def] = replacement;
 }
 
-std::string readerInfo::checkDefines (const std::string input)
+std::string readerInfo::checkDefines (std::string input)
 {
-  std::string out = input;
+  std::string out=input; //compiler had better optimize this
   int repcnt = 0;
   bool rep (true);
   while (rep)
     {
+	  rep = false;
       ++repcnt;
       if (repcnt > 15)
         {
           WARNPRINT (READER_WARN_IMPORTANT, "probable definition recursion in " << input << "currently " << out);
-          rep = false;
+		  continue;
         }
       auto search = defines.find (out);
       if (search != defines.end ())
         {
           out = search->second;
-          continue;
+		  rep = true;
+          continue; //continue outer loop
         }
       auto pos1 = out.find_first_of ('$');
-      if (pos1 != std::string::npos)
+      while (pos1 != std::string::npos)
         {
           auto pos2 = out.find_first_of ('$', pos1 + 1);
           if (pos2 != std::string::npos)
@@ -210,35 +200,52 @@ std::string readerInfo::checkDefines (const std::string input)
               search = defines.find (temp);
               if (search != defines.end ())
                 {
-                  out = out.substr (0, pos1) + search->second + out.substr (pos2 + 1);
-                  continue;
+                  //out = out.substr (0, pos1) + search->second + out.substr (pos2 + 1);
+				  out.replace(pos1, pos2-pos1+1, search->second);
+				  rep = true;
+                  break; //break out of inner loop
                 }
               else
                 {
                   //try a recursive interpretation of the string block to convert a numeric result back into a string
-                  double val = interpretString (temp, this);
+                  double val = interpretString (temp, *this);
                   if (!std::isnan (val))
                     {
                       if (std::abs (trunc (val) - val) < 1e-9)
-                        {
-                          out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) + out.substr (pos2 + 1);
+                        { 
+                          //out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) + out.substr (pos2 + 1);
+						  out.replace(pos1, pos2-pos1+1, std::to_string(static_cast<int> (val)));
                         }
                       else
                         {
-                          out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 + 1);
+                          //out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 + 1);
+						  auto str = std::to_string(val);
+						  while (str.back() == '0')  //remove trailing zeros
+						  {
+							  str.pop_back();
+						  }
+						  out.replace(pos1, pos2-pos1+1, str);
+						  
                         }
-                      continue;
+					  rep = true;
+                      break;//break out of inner loop
                     }
                 }
+			  pos1 = pos2;
             }
+		  else
+		  {
+			  break;
+		  }
+		  
         }
-      rep = false;
+      
     }
   return out;
 }
 
 
-std::string readerInfo::objectNameTranslate (const std::string input)
+std::string readerInfo::objectNameTranslate (const std::string &input)
 {
   std::string out = input;
   int repcnt = 0;
@@ -262,7 +269,7 @@ std::string readerInfo::objectNameTranslate (const std::string input)
   return out;
 }
 
-bool readerInfo::addLibraryObject (gridCoreObject *obj, std::vector<gridParameter> &pobjs)
+bool readerInfo::addLibraryObject (coreObject *obj, std::vector<gridParameter> &pobjs)
 {
   auto retval = library.find (obj->getName ());
   if (retval == library.end ())
@@ -278,7 +285,7 @@ bool readerInfo::addLibraryObject (gridCoreObject *obj, std::vector<gridParamete
 
 }
 
-gridCoreObject *readerInfo::findLibraryObject (const std::string &ename) const
+coreObject *readerInfo::findLibraryObject (const std::string &ename) const
 {
   auto retval = library.find (ename);
   if (retval == library.end ())
@@ -292,7 +299,7 @@ gridCoreObject *readerInfo::findLibraryObject (const std::string &ename) const
 }
 
 const std::string libraryLabel = "library";
-gridCoreObject *readerInfo::makeLibraryObject (const std::string &ename, gridCoreObject *mobj)
+coreObject *readerInfo::makeLibraryObject (const std::string &ename, coreObject *mobj)
 {
   auto retval = library.find (ename);
   if (retval == library.end ())
@@ -302,13 +309,14 @@ gridCoreObject *readerInfo::makeLibraryObject (const std::string &ename, gridCor
     }
   else
     {
-      gridCoreObject *obj = retval->second.first->clone (mobj);
+      coreObject *obj = retval->second.first->clone (mobj);
       for (auto &po : retval->second.second)
         {
-          paramStringProcess (&po, this);
+          paramStringProcess (&po, *this);
           objectParameterSet (libraryLabel, obj, po);
 
         }
+	  obj->updateName();
       return obj;
     }
 }
@@ -479,7 +487,7 @@ const std::pair<std::shared_ptr<readerElement>, int > readerInfo::getCustomEleme
 	return retval->second;
 }
 
-const std::unordered_set<std::string> &readerInfo::getIgnoreList() const
+const ignoreListType &readerInfo::getIgnoreList() const
 {
 	return parameterIgnoreStrings;
 }

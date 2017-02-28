@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,7 +13,7 @@
 
 #include "scheduler.h"
 #include "AGControl.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include "comms/schedulerMessage.h"
 
 #include <cstdio>
@@ -37,7 +37,7 @@ schedulerReg::schedulerReg (double initialValue,double initialReg,const std::str
   rampTime = 600;
 }
 
-gridCoreObject *schedulerReg::clone (gridCoreObject *obj) const
+coreObject *schedulerReg::clone (coreObject *obj) const
 {
   schedulerReg *nobj = cloneBase<schedulerReg, schedulerRamp> (this, obj);
   if (nobj == nullptr)
@@ -93,7 +93,7 @@ void schedulerReg::setReg (double regLevel)
 }
 
 
-void schedulerReg::updateA (gridDyn_time time)
+void schedulerReg::updateA (coreTime time)
 {
   double dt = (time - prevTime);
 
@@ -121,7 +121,7 @@ void schedulerReg::updateA (gridDyn_time time)
 
 }
 
-double schedulerReg::predict (gridDyn_time time)
+double schedulerReg::predict (coreTime time)
 {
   double dt = (time - prevTime);
   if (dt == 0)
@@ -144,9 +144,9 @@ double schedulerReg::predict (gridDyn_time time)
   return retout;
 }
 
-void schedulerReg::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void schedulerReg::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
-  schedulerRamp::objectInitializeA (time0, flags);
+  schedulerRamp::dynObjectInitializeA (time0, flags);
   pr = (m_Base >= kHalfBigNum) ? regMax : m_Base;
 
   if ((regUpFrac > 0) | (regDownFrac > 0))
@@ -158,10 +158,10 @@ void schedulerReg::objectInitializeA (gridDyn_time time0, unsigned long flags)
     }
 }
 
-void schedulerReg::objectInitializeB (const IOdata &args, const IOdata &outputSet, IOdata &inputSet)
+void schedulerReg::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &inputSet)
 {
-  schedulerRamp::objectInitializeB (args, outputSet, inputSet);
-  double AGClevel = (outputSet.size () > 2) ? outputSet[2] : 0;
+  schedulerRamp::dynObjectInitializeB (inputs, desiredOutput, inputSet);
+  double AGClevel = (desiredOutput.size () > 2) ? desiredOutput[2] : 0;
   if (AGClevel > regUpFrac * pr)
     {
       regCurr = regUpFrac * pr;
@@ -201,12 +201,12 @@ double schedulerReg::getRamp (double *tRem) const
 
 }
 
-double schedulerReg::getMax (const gridDyn_time /*time*/) const
+double schedulerReg::getMax (const coreTime /*time*/) const
 {
   return Pmax;
 }
 
-double schedulerReg::getMin (gridDyn_time /*time*/) const
+double schedulerReg::getMin (coreTime /*time*/) const
 {
   return Pmin;
 }

@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -76,19 +76,20 @@ void basicSolver::allocate (count_t stateCount, count_t numRoots)
 		tempState1.resize(stateCount);
 		tempState2.resize(stateCount);
 		svsize = stateCount;
-		initialized = false;
-		allocated = true;
+
+		flags.reset(initialized_flag);
+		flags.set(allocated_flag);
 		rootsfound.resize(numRoots);
 	}
 }
 
-void basicSolver::initialize (gridDyn_time /*time0*/)
+void basicSolver::initialize (coreTime /*time0*/)
 {
-  if (!allocated)
+  if (!flags[allocated_flag])
     {
 	  throw(InvalidSolverOperation(-2));
     }
-  initialized = true;
+  flags.set(initialized_flag);
   solverCallCount = 0;
 }
 
@@ -100,7 +101,7 @@ double basicSolver::get (const std::string & param) const
     }
   else if (param == "iterations")
     {
-      return 0;
+      return static_cast<double>(iterations);
     }
   else
     {
@@ -148,7 +149,7 @@ void basicSolver::set (const std::string &param, double val)
 
 void cleanOscillations (const std::vector<double> &s1, const std::vector<double> &s2, std::vector<double> &s3, double conv);
 
-int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mode /*stepMode*/)
+int basicSolver::solve (coreTime tStop, coreTime & /*tReturn*/, step_mode /*stepMode*/)
 {
   double md = 1.0;
   iterations = 0;
@@ -158,8 +159,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
         {
           m_gds->algUpdateFunction (tStop, state.data (), tempState1.data (), mode, alpha);
           ++iterations;
-          int loc;
-          md = absMaxDiffLoc (state, tempState1, loc);
+          md = absMaxDiff (state, tempState1);
           //printf("Iteration %d max change=%f\n", iterations, md);
           if (md <= tolerance)
             {
@@ -168,7 +168,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
             }
           m_gds->algUpdateFunction (tStop, tempState1.data (), tempState2.data (), mode, alpha);
           ++iterations;
-          md = absMaxDiffLoc (tempState1, tempState2, loc);
+          md = absMaxDiff(tempState1, tempState2);
           //printf("Iteration %d max change=%f\n", iterations, md);
           if (md <= tolerance)
             {
@@ -178,7 +178,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
           cleanOscillations (state, tempState1, tempState2, 0.15);
           m_gds->algUpdateFunction (tStop, tempState2.data (), state.data (), mode, alpha);
           ++iterations;
-          md = absMaxDiffLoc (tempState2, state, loc);
+          md = absMaxDiff(tempState2, state);
 
           if (iterations > max_iterations)
             {
@@ -197,8 +197,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
           tempState1 = state;
           m_gds->algUpdateFunction (tStop, tempState1.data (), tempState1.data (), mode, alpha);
           ++iterations;
-          int loc;
-          md = absMaxDiffLoc (state, tempState1, loc);
+          md = absMaxDiff(state, tempState1);
           //printf("Iteration %d max change=%f\n", iterations, md);
           if (md <= tolerance)
             {
@@ -208,7 +207,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
           tempState2 = tempState1;
           m_gds->algUpdateFunction (tStop, tempState2.data (), tempState2.data (), mode, alpha);
           ++iterations;
-          md = absMaxDiffLoc (tempState1, tempState2, loc);
+          md = absMaxDiff(tempState1, tempState2);
           //printf("Iteration %d max change=%f\n", iterations, md);
           if (md <= tolerance)
             {
@@ -219,7 +218,7 @@ int basicSolver::solve (gridDyn_time tStop, gridDyn_time & /*tReturn*/, step_mod
           state = tempState2;
           m_gds->algUpdateFunction (tStop, state.data (), state.data (), mode, alpha);
           ++iterations;
-          md = absMaxDiffLoc (tempState2, state, loc);
+          md = absMaxDiff(tempState2, state);
           if (iterations > max_iterations)
             {
               break;

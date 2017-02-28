@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
   * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -20,7 +20,7 @@
 #include "optObjectFactory.h"
 #include "vectorOps.hpp"
 #include "vectData.h"
-#include "core/gridDynExceptions.h"
+#include "core/coreExceptions.h"
 
 #include <cmath>
 #include <utility>
@@ -35,20 +35,20 @@ gridLinkOpt::gridLinkOpt (const std::string &objName) : gridOptObject (objName)
 
 }
 
-gridLinkOpt::gridLinkOpt (gridCoreObject *obj, const std::string &objName) : gridOptObject (objName),link (dynamic_cast<gridLink *> (obj))
+gridLinkOpt::gridLinkOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),link (dynamic_cast<gridLink *> (obj))
 {
 
   if (link)
     {
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = link->getName ();
+          setName(link->getName ());
         }
-      id = link->getUserID ();
+      setUserID(link->getUserID ());
     }
 }
 
-gridCoreObject *gridLinkOpt::clone (gridCoreObject *obj) const
+coreObject *gridLinkOpt::clone (coreObject *obj) const
 {
   gridLinkOpt *nobj;
   if (obj == nullptr)
@@ -77,7 +77,7 @@ gridCoreObject *gridLinkOpt::clone (gridCoreObject *obj) const
 
 
 
-void gridLinkOpt::objectInitializeA (unsigned long /*flags*/)
+void gridLinkOpt::dynObjectInitializeA (unsigned long /*flags*/)
 {
 
 
@@ -110,34 +110,34 @@ void gridLinkOpt::loadSizes (const optimMode &oMode)
 
 
 
-void gridLinkOpt::add (gridCoreObject *obj)
+void gridLinkOpt::add (coreObject *obj)
 {
   if (dynamic_cast<gridLink *> (obj))
     {
 
       link = static_cast<gridLink *> (obj);
-      if (name.empty ())
+      if (getName().empty ())
         {
-          name = link->getName ();
+          setName(link->getName ());
         }
-      id = link->getUserID ();
+      setUserID(link->getUserID ());
     }
   else
   {
-	  throw(invalidObjectException(this));
+	  throw(unrecognizedObjectException(this));
   }
 
 }
 
 
 
-void gridLinkOpt::remove (gridCoreObject *)
+void gridLinkOpt::remove (coreObject *)
 {
 
   
 }
 
-void gridLinkOpt::setValues (const optimData *, const optimMode &)
+void gridLinkOpt::setValues (const optimData &, const optimMode &)
 {
 }
 //for saving the state
@@ -161,38 +161,38 @@ void gridLinkOpt::valueBounds (double /*ttime*/, double /*upperLimit*/[], double
 
 }
 
-void gridLinkOpt::linearObj (const optimData *, vectData<double> * /*linObj*/, const optimMode &)
+void gridLinkOpt::linearObj (const optimData &, vectData<double> & /*linObj*/, const optimMode &)
 {
 
 }
-void gridLinkOpt::quadraticObj (const optimData *, vectData<double> * /*linObj*/, vectData<double> * /*quadObj*/, const optimMode &)
+void gridLinkOpt::quadraticObj (const optimData &, vectData<double> & /*linObj*/, vectData<double> & /*quadObj*/, const optimMode &)
 {
 
 }
 
-void gridLinkOpt::constraintValue (const optimData *, double /*cVals*/[], const optimMode &)
+void gridLinkOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &)
 {
 }
-void gridLinkOpt::constraintJacobianElements (const optimData *, matrixData<double> &, const optimMode &)
+void gridLinkOpt::constraintJacobianElements (const optimData &, matrixData<double> &, const optimMode &)
 {
 }
 
-double gridLinkOpt::objValue (const optimData *, const optimMode &)
+double gridLinkOpt::objValue (const optimData &, const optimMode &)
 {
   double cost = 0;
 
   return cost;
 }
 
-void gridLinkOpt::gradient (const optimData *, double /*deriv*/[], const optimMode &)
+void gridLinkOpt::gradient (const optimData &, double /*deriv*/[], const optimMode &)
 {
 
 }
-void gridLinkOpt::jacobianElements (const optimData *, matrixData<double> &, const optimMode &)
+void gridLinkOpt::jacobianElements (const optimData &, matrixData<double> &, const optimMode &)
 {
 
 }
-void gridLinkOpt::getConstraints (const optimData *, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridLinkOpt::getConstraints (const optimData &, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
@@ -204,7 +204,7 @@ void gridLinkOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const
 
 void gridLinkOpt::disable ()
 {
-  enabled = false;
+	coreObject::disable();
 
 }
 
@@ -259,9 +259,9 @@ void gridLinkOpt::set (const std::string &param, double val, units_t unitType)
 
 
 
-gridCoreObject *gridLinkOpt::find (const std::string &objname) const
+coreObject *gridLinkOpt::find (const std::string &objname) const
 {
-  if ((objname == this->name) || (objname == "link"))
+  if ((objname == getName()) || (objname == "link"))
     {
       return const_cast<gridLinkOpt *> (this);
     }
@@ -273,22 +273,11 @@ gridCoreObject *gridLinkOpt::find (const std::string &objname) const
     {
       return B2;
     }
-  if (objname == "root")
-    {
-      if (parent)
-        {
-          return (parent->find (objname));
-        }
-      else
-        {
-          return const_cast<gridLinkOpt *> (this);
-        }
-    }
 
-  return (parent->find (objname));
+  return (coreObject::find (objname));
 }
 
-gridCoreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num) const
 {
   if (typeName == "bus")
     {
@@ -304,7 +293,7 @@ gridCoreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t 
   return nullptr;
 }
 
-gridCoreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
   if (typeName == "bus")
     {
@@ -342,7 +331,7 @@ gridOptObject *gridLinkOpt::getBus (index_t x) const
 
 gridOptObject *gridLinkOpt::getArea (index_t /*index*/) const
 {
-  return dynamic_cast<gridOptObject *> (parent);
+  return dynamic_cast<gridOptObject *> (getParent());
 }
 
 

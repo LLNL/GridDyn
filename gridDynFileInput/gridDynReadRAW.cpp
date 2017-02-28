@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -19,8 +19,8 @@
 #include "linkModels/acLine.h"
 #include "gridBus.h"
 #include "generators/gridDynGenerator.h"
-#include "objectFactoryTemplates.h"
-#include "core/gridDynExceptions.h"
+#include "core/objectFactoryTemplates.h"
+#include "core/coreExceptions.h"
 #include "stringOps.h"
 #include "gridDyn.h"
 
@@ -32,19 +32,19 @@
 #include <cmath>
 
 using namespace gridUnits;
-
+using namespace stringOps;
 
 int getPSSversion (const std::string &line);
 void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);
 void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &opt);
 void rawReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &opt);
 void rawReadGen (gridDynGenerator *gen,  const std::string &line, basicReaderInfo &opt);
-void rawReadBranch (gridCoreObject *parentObject, const std::string &line,std::vector<gridBus *> &busList, basicReaderInfo &opt);
-int rawReadTX (gridCoreObject *parentObject, stringVec &txlines,  std::vector<gridBus *> &busList, basicReaderInfo &opt);
-void rawReadSwitchedShunt (gridCoreObject *parentObject,  const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt);
-void rawReadTXadj (gridCoreObject *parentObject, const std::string &line,  basicReaderInfo &opt);
+void rawReadBranch (coreObject *parentObject, const std::string &line,std::vector<gridBus *> &busList, basicReaderInfo &opt);
+int rawReadTX (coreObject *parentObject, stringVec &txlines,  std::vector<gridBus *> &busList, basicReaderInfo &opt);
+void rawReadSwitchedShunt (coreObject *parentObject,  const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt);
+void rawReadTXadj (coreObject *parentObject, const std::string &line,  basicReaderInfo &opt);
 
-int rawReadDCLine (gridCoreObject *parentObject,  stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt);
+int rawReadDCLine (coreObject *parentObject,  stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt);
 
 
 enum sections
@@ -98,7 +98,7 @@ gridBus * findBus (std::vector<gridBus *> &busList, const std::string &line)
 
 }
 
-void loadRAW (gridCoreObject *parentObject,const std::string &filename,const basicReaderInfo &bri)
+void loadRAW (coreObject *parentObject,const std::string &filename,const basicReaderInfo &bri)
 {
 
   std::ifstream file (filename.c_str (), std::ios::in);
@@ -106,7 +106,7 @@ void loadRAW (gridCoreObject *parentObject,const std::string &filename,const bas
   std::string temp1;        //temporary storage for substrings
   std::string pref2;       // temp storage to 2nd order prefix.
   std::vector<gridBus *> busList;
-  basicReaderInfo opt (&bri);
+  basicReaderInfo opt (bri);
   gridLoad *ld;
   gridDynGenerator *gen;
   gridBus *bus;
@@ -491,7 +491,6 @@ sections findSectionType (const std::string &line)
 
 void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
 {
-  std::string temp,temp2;
   double bv;
   double vm;
   double va;
@@ -499,11 +498,8 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
 
   auto strvec = splitline (line);
   //get the bus name
-  temp = strvec[0];
-  trimString (temp);
-  temp2 = strvec[1];
-  //check for quotes on the name
-  removeQuotes (temp2);
+  auto temp = trim(strvec[0]);
+  auto temp2 = trim(removeQuotes(strvec[1]));
 
   if (opt.prefix.empty ())
     {
@@ -555,11 +551,11 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
       temp = "swing";
       break;
     case 4:
-      bus->enabled = false;
+      bus->disable();
       temp = "PQ";
 	  break;
 	default:
-		bus->enabled = false;
+		bus->disable();
     }
   bus->set ("type",temp);
 
@@ -568,29 +564,29 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
       //skip the load flow area and loss zone for now
       //skip the owner information
       //get the voltage and angle specifications
-      paramRead (strvec[7], vm);
-      paramRead (strvec[8], va);
+       vm = numeric_conversion<double>(strvec[7],0.0);
+       va = numeric_conversion<double>(strvec[8],0.0);
       if (strvec.size () > 10)
         {
-          paramRead (strvec[9], bv);
+           bv = numeric_conversion<double>(strvec[9],0.0);
           bus->set ("vmax", bv);
-          paramRead (strvec[10], bv);
+           bv = numeric_conversion<double>(strvec[10],0.0);
           bus->set ("vmin", bv);
         }
     }
   else
     {
       //get the zone information
-      paramRead (strvec[7], vm);
+       vm = numeric_conversion<double>(strvec[7],0.0);
       bus->set ("zone",vm);
 
-      paramRead (strvec[8], vm);
-      paramRead (strvec[9], va);
+       vm = numeric_conversion<double>(strvec[8],0.0);
+       va = numeric_conversion<double>(strvec[9],0.0);
       //load the fixed shunt data
       double p, q;
 
-      paramRead (strvec[4], p);
-      paramRead (strvec[5], q);
+       p = numeric_conversion<double>(strvec[4],0.0);
+       q = numeric_conversion<double>(strvec[5],0.0);
       if ((p != 0) || (q != 0))
         {
           auto ld = ldfactory->makeTypeObject ();
@@ -620,8 +616,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
 
 void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &)
 {
-  std::string temp;
-  std::string prefix;
+
   double p;
   double q;
   int status;
@@ -629,22 +624,22 @@ void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &)
   auto strvec = splitline (line);
 
   //get the load index and name
-  temp = strvec[1];
-  removeQuotes (temp);
-  prefix = ld->getParent ()->getName () + "_load_" + temp;
+  auto temp = trim(removeQuotes(strvec[1]));
+
+  auto prefix = ld->getParent ()->getName () + "_load_" + temp;
   ld->setName (prefix);
 
   //get the status
   status = std::stoi (strvec[2]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[5],p);
-  paramRead (strvec[6],q);
+  p = numeric_conversion<double>(strvec[5],0.0);
+  q = numeric_conversion<double>(strvec[6],0.0);
   if (p != 0.0)
     {
       ld->set ("p", p, MW);
@@ -654,8 +649,8 @@ void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &)
       ld->set ("q", q, MVAR);
     }
   //get the constant current part of the load
-  paramRead (strvec[7],p);
-  paramRead (strvec[8],q);
+  p = numeric_conversion<double>(strvec[7],0.0);
+  q = numeric_conversion<double>(strvec[8],0.0);
   if (p != 0.0)
     {
       ld->set ("ip", p, MW);
@@ -665,8 +660,8 @@ void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &)
       ld->set ("iq", q, MVAR);
     }
   //get the impedance part of the load
-  paramRead (strvec[9],p);
-  paramRead (strvec[10],q);
+  p = numeric_conversion<double>(strvec[9],0.0);
+  q = numeric_conversion<double>(strvec[10],0.0);
   if (p != 0.0)
     {
       ld->set ("yp", p, MW);
@@ -681,7 +676,6 @@ void rawReadLoad (gridLoad *ld, const std::string &line, basicReaderInfo &)
 
 void rawReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &)
 {
-  std::string temp;
   std::string prefix;
   double p;
   double q;
@@ -690,8 +684,7 @@ void rawReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &
   auto strvec = splitline (line);
 
   //get the load index and name
-  temp = strvec[1];
-  removeQuotes (temp);
+  auto temp = trim(removeQuotes(strvec[1]));
   prefix = ld->getParent ()->getName () + "_shunt_" + temp;
   ld->setName ( prefix);
 
@@ -699,13 +692,13 @@ void rawReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &
   status = std::stoi (strvec[2]);
   if (status == 0)
     {
-      ld->enabled = false;
+      ld->disable();
     }
   //skip the area and zone information for now
 
   //get the constant power part of the load
-  paramRead (strvec[3],p);
-  paramRead (strvec[4],q);
+  p = numeric_conversion<double>(strvec[3],0.0);
+  q = numeric_conversion<double>(strvec[4],0.0);
   if (p != 0.0)
     {
       ld->set ("yp", p, MW);
@@ -721,8 +714,6 @@ void rawReadFixedShunt (gridLoad *ld, const std::string &line, basicReaderInfo &
 
 void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo &opt)
 {
-  std::string temp;
-  std::string prefix;
 
   double p;
   double q;
@@ -734,22 +725,20 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
   auto strvec = splitline (line);
 
   //get the load index and name
-  temp = strvec[1];
-  removeQuotes (temp);
+  auto temp = trim(removeQuotes(strvec[1]));
 
-
-  prefix = gen->getParent ()->getName () + "_Gen_" + temp;
+  auto prefix = gen->getParent ()->getName () + "_Gen_" + temp;
   gen->setName (prefix);
   //get the status
   status = std::stoi (strvec[14]);
   if (status == 0)
     {
-      gen->enabled = false;
+      gen->disable();
     }
 
   //get the power generation
-  paramRead (strvec[2],p);
-  paramRead (strvec[3],q);
+  p = numeric_conversion<double>(strvec[2],0.0);
+  q = numeric_conversion<double>(strvec[3],0.0);
   if (p != 0.0)
     {
       gen->set ("p", p, MW);
@@ -759,8 +748,8 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
       gen->set ("q", q, MVAR);
     }
   //get the Qmax and Qmin
-  paramRead (strvec[4],p);
-  paramRead (strvec[5],q);
+  p = numeric_conversion<double>(strvec[4],0.0);
+  q = numeric_conversion<double>(strvec[5],0.0);
   if (p != 0.0)
     {
       gen->set ("qmax", p, MW);
@@ -769,7 +758,7 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
     {
       gen->set ("qmin", q, MVAR);
     }
-  paramRead (strvec[6],V);
+  V = numeric_conversion<double>(strvec[6],0.0);
   if (V > 0)
     {
       double vp = gen->getParent ()->get ("vtarget");
@@ -786,7 +775,7 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
           gen->set ("vtarget", vp);
         }
     }
-  paramRead (strvec[7], rbus);
+   rbus = numeric_conversion<int>(strvec[7],0);
 
   if (rbus != 0)
     {
@@ -794,20 +783,20 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
       gen->add (remoteBus);
     }
 
-  paramRead (strvec[8], mb);
+   mb = numeric_conversion<double>(strvec[8],0.0);
   gen->set ("mbase", mb);
 
   double r, x;
-  paramRead (strvec[9], r);
+   r = numeric_conversion<double>(strvec[9],0.0);
   gen->set ("rs", r);
 
-  paramRead (strvec[10], x);
+   x = numeric_conversion<double>(strvec[10],0.0);
   gen->set ("xs", x);
 
   if (!CHECK_CONTROLFLAG (opt.flags,ignore_step_up_transformer))
     {
-      paramRead (strvec[11],r);
-      paramRead (strvec[12], x);
+      r = numeric_conversion<double>(strvec[11],0.0);
+       x = numeric_conversion<double>(strvec[12],0.0);
       if ((r != 0)||(x != 0)) //need to add a step up transformer
         {
           gridBus *oBus = static_cast<gridBus *> (gen->getParent ());
@@ -822,11 +811,11 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
 
 
 
-          if (!gen->enabled)
+          if (!gen->isEnabled())
             {
               nBus->disable ();
             }
-          if (!oBus->enabled)
+          if (!oBus->isEnabled())
             {
               nBus->disable ();
             }
@@ -843,17 +832,17 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
               nBus->setName ( oBus->getName () + '_' + gen->getName () + "_TXBUS");
             }
           //get the tap ratio
-          paramRead (strvec[13],r);
+          r = numeric_conversion<double>(strvec[13],0.0);
           lnk->set ("tap",r);
           //match the voltage and angle of the other bus
           nBus->setVoltageAngle (oBus->getVoltage () * r, oBus->getAngle ());
           gen->add (oBus);
           //get the power again for the generator
-          paramRead (strvec[2], p);
-          paramRead (strvec[3], q);
+           p = numeric_conversion<double>(strvec[2],0.0);
+           q = numeric_conversion<double>(strvec[3],0.0);
           //now adjust the newBus angle and Voltage to match the power flows
           lnk->fixPower (-p,-q, 1,1, MVAR);
-          if (!gen->enabled)
+          if (!gen->isEnabled())
             {
               nBus->disable ();
             }
@@ -862,7 +851,7 @@ void rawReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
 }
 
 
-void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
+void rawReadBranch (coreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
 {
   auto strvec = splitline (line);
 
@@ -929,7 +918,7 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
 	  //must be a parallel branch
 	  std::string sub = lnk->getName();
 	  char m = 'a';
-	  while (lnk->getParent() == nullptr)
+	  while (lnk->isRoot())
 	  {
 		  lnk->setName(sub + '_' + m);
 		  m = m + 1;
@@ -948,13 +937,13 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
   }
   
 
-  double R = doubleRead (strvec[3]);
-  double X = doubleRead (strvec[4]);
+  double R = numeric_conversion (strvec[3],0.0);
+  double X = numeric_conversion (strvec[4],0.0);
   //get line impedances and resistance
   lnk->set ("r", R);
   lnk->set ("x", X);
   //get line capacitance
-  double val = doubleRead (strvec[5]);
+  double val = numeric_conversion (strvec[5],0.0);
   lnk->set ("b", val);
 
   int status;
@@ -963,7 +952,7 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
       status = std::stoi (strvec[13]);
       if (status == 0)
         {
-          lnk->enabled = false;
+          lnk->disable();
         }
     }
   else
@@ -971,16 +960,16 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
       status = std::stoi (strvec[15]);
       if (status == 0)
         {
-          lnk->enabled = false;
+          lnk->disable();
         }
     }
   if (opt.version <= 26)  //transformers described in this section and in TX adj section
     {
-      val = doubleRead (strvec[9]);
+      val = numeric_conversion (strvec[9],0.0);
       if (val != 0.0)
         {
           lnk->set ("tap",val);
-          paramRead (strvec[10],val);
+          val = numeric_conversion<double>(strvec[10],0.0);
           if (val != 0)
             {
               lnk->set ("tapAngle",val,deg);
@@ -997,7 +986,7 @@ void rawReadBranch (gridCoreObject *parentObject, const std::string &line, std::
   //TODO get the other parameters (not critical for power flow)
 }
 
-void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicReaderInfo &opt)
+void rawReadTXadj (coreObject *parentObject, const std::string &line, basicReaderInfo &opt)
 {
   std::string temp, temp2;
   acLine *lnk;
@@ -1051,12 +1040,13 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
 
   adjustableTransformer *adjTX = new adjustableTransformer ();
   lnk->clone (adjTX);
+  lnk->addOwningReference();
   parentObject->remove (lnk);
   adjTX->updateBus (lnk->getBus (1),1);
   adjTX->updateBus (lnk->getBus (2),2);
   lnk->updateBus (nullptr,1);
   lnk->updateBus (nullptr,2);
-  condDelete (lnk,0);
+  removeReference(lnk);
   parentObject->add (adjTX);
   Ta = adjTX->getTapAngle ();
   if (Ta != 0)
@@ -1073,7 +1063,7 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
   //get the control bus
   if (code != 3)
     {
-      paramRead (strvec[3], cind);
+       cind = numeric_conversion<int>(strvec[3],0);
       if (cind > 0)
         {
           if (cind == ind1)
@@ -1108,8 +1098,8 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
         }
     }
   //
-  paramRead (strvec[4],mx);
-  paramRead (strvec[5],mn);
+  mx = numeric_conversion<double>(strvec[4],0.0);
+  mn = numeric_conversion<double>(strvec[5],0.0);
   if ((mx - mn > 1.0)&&(code != 3))
     {
       adjTX->set ("mode", "mw");
@@ -1140,8 +1130,8 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
       adjTX->set ("maxtap", mx);
       adjTX->set ("mintap", mn);
     }
-  paramRead (strvec[6], mx);
-  paramRead (strvec[7], mn);
+   mx = numeric_conversion<double>(strvec[6],0.0);
+   mn = numeric_conversion<double>(strvec[7],0.0);
   if ((mx - mn > 1.0) && (code == 1))
     {
       adjTX->set ("mode", "mvar");
@@ -1173,7 +1163,7 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
     }
   if (code != 3) //get the stepsize
     {
-      paramRead (strvec[8], val);
+       val = numeric_conversion<double>(strvec[8],0.0);
       if (val != 0)
         {
           //abs required since for some reason the file can have negative step sizes
@@ -1185,39 +1175,34 @@ void rawReadTXadj (gridCoreObject *parentObject, const std::string &line, basicR
           adjTX->set ("stepmode","continuous");
         }
     }
-  paramRead (strvec[9],cind);
+  cind = numeric_conversion<int>(strvec[9], 0);
   if (cind != 0)
     {
-      parentObject->log (parentObject, print_level::warning, "tranformer impedance tables not implmented yet ");
+      parentObject->log (parentObject, print_level::warning, "transformer impedance tables not implemented yet ");
     }
-  paramRead (strvec[10],cind);
+  cind = numeric_conversion<int>(strvec[10], 0);
   {
     if (cind == 0)
       {
         adjTX->set ("no_pflow_adjustments",1);
       }
   }
-  paramRead (strvec[11], mx);
-  paramRead (strvec[12], mn);
+   mx = numeric_conversion<double>(strvec[11],0.0);
+   mn = numeric_conversion<double>(strvec[12],0.0);
   if ((mx != 0)||(mn != 0))
     {
-      parentObject->log (parentObject, print_level::warning, "load drop compensation not implmented yet ");
+      parentObject->log (parentObject, print_level::warning, "load drop compensation not implemented yet ");
     }
 
 }
 
-int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt)
+int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus *> &busList, basicReaderInfo &opt)
 {
   int tline = 4;
-  std::string temp, temp2;
+  std::string temp2;
   gridBus *bus1, *bus2;
   //gridBus *bus3;
   acLine *lnk = nullptr;
-  int code;
-  int ind1, ind2,ind3;
-  int cbus;
-  double R, X;
-  double val;
   int status;
 
   stringVec strvec,strvec2,strvec3,strvec4,strvec5;
@@ -1227,14 +1212,14 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   strvec3 = splitline (txlines[2]);
   strvec4 = splitline (txlines[3]);
 
-  temp = strvec[0];
+  auto temp = strvec[0];
 
-  ind1 = std::stoi (temp);
+  int ind1 = std::stoi (temp);
   temp = strvec[1];
-  ind2 = std::stoi (temp);
+  int ind2 = std::stoi (temp);
 
   temp = strvec[2];
-  ind3 = std::stoi (temp);
+  int ind3 = std::stoi (temp);
   if (ind3 != 0)
     {
       tline = 5;
@@ -1259,7 +1244,7 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   temp2 = temp2 + trim(strvec[1]);
   bus1 = busList[ind1 - 1];
   bus2 = busList[ind2 - 1];
-  code = std::stoi (strvec3[6]);
+  int code = std::stoi (strvec3[6]);
   // SGS FIXME!!!!
   // Code is negative in PJM version 30 raw file....hack to make it in valid range.
   switch (abs (code))
@@ -1297,7 +1282,7 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
 	  //must be a parallel branch
 	  std::string sub = lnk->getName();
 	  char m = 'a';
-	  while (lnk->getParent() == nullptr)
+	  while (lnk->isRoot())
 	  {
 		  lnk->setName(sub + '_' + m);
 		  m = m + 1;
@@ -1319,8 +1304,8 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
 
   //get the branch impedance
 
-  paramRead (strvec2[0],R);
-  paramRead (strvec2[1],X);
+  double R = numeric_conversion<double>(strvec2[0],0.0);
+  double X = numeric_conversion<double>(strvec2[1],0.0);
 
   lnk->set ("r", R);
   lnk->set ("x", X);
@@ -1330,7 +1315,7 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   status = std::stoi (strvec[11]);
   if (status == 0)
     {
-      lnk->enabled = false;
+      lnk->disable();
     }
   else if (status > 1)
     {
@@ -1338,14 +1323,14 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
     }
 
 
-  //TODO get the other parameters (not critical for power flow)
+  //TODO:PT get the other parameters (not critical for power flow)
 
-  paramRead (strvec3[0],val);
+  double val = numeric_conversion<double>(strvec3[0],0.0);
   if (val != 0)
     {
       lnk->set ("tap", val);
     }
-  paramRead (strvec3[2],val);
+  val = numeric_conversion<double>(strvec3[2],0.0);
   if (val != 0)
     {
       lnk->set ("tapangle", val,deg);
@@ -1354,13 +1339,13 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   // SGS set this for adjustable transformers....is this correct?
   if (abs (code) > 0)
     {
-      paramRead (strvec3[7], cbus);
+	  int cbus = numeric_conversion<int>(strvec3[7], 0);
       if (cbus != 0)
         {
           static_cast<adjustableTransformer *> (lnk)->setControlBus (busList[cbus - 1]);
         }
-      paramRead (strvec3[8], R);
-      paramRead (strvec3[9], X);
+       R = numeric_conversion<double>(strvec3[8],0.0);
+       X = numeric_conversion<double>(strvec3[9],0.0);
       if (code == 3)
         {
           lnk->set ("maxtapangle", R,deg);
@@ -1371,8 +1356,8 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
           lnk->set ("maxtap", R);
           lnk->set ("mintap", X);
         }
-      paramRead (strvec3[10], R);
-      paramRead (strvec3[11], X);
+       R = numeric_conversion<double>(strvec3[10],0.0);
+       X = numeric_conversion<double>(strvec3[11],0.0);
       if (code == 3)
         {
           lnk->set ("pmax", R, MW);
@@ -1388,7 +1373,7 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
           lnk->set ("vmax", R);
           lnk->set ("vmin", X);
         }
-      paramRead (strvec3[12], R);
+       R = numeric_conversion<double>(strvec3[12],0.0);
       if (code != 3)
         {
           lnk->set ("nsteps", R);
@@ -1397,12 +1382,12 @@ int rawReadTX (gridCoreObject *parentObject, stringVec &txlines, std::vector<gri
   return tline;
 }
 
-int rawReadDCLine (gridCoreObject * /*parentObject*/, stringVec & /*txlines*/, std::vector<gridBus *> & /*busList*/, basicReaderInfo &)
+int rawReadDCLine (coreObject * /*parentObject*/, stringVec & /*txlines*/, std::vector<gridBus *> & /*busList*/, basicReaderInfo &)
 {
   return 0;
 }
 
-void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
+void rawReadSwitchedShunt (coreObject *parentObject, const std::string &line, std::vector<gridBus *> &busList, basicReaderInfo &opt)
 {
   auto strvec = splitline (line);
 
@@ -1425,15 +1410,13 @@ void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line
       ld = new svd ();
       busList[index - 1]->add (ld);
     }
-  int mode;
-  paramRead (strvec[1],mode);
-  double low,high;
 
-  paramRead (strvec[2],high);
-  paramRead (strvec[3],low);
+  int mode = numeric_conversion<int>(strvec[1],0);
+  double high = numeric_conversion<double>(strvec[2],0.0);
+  double low = numeric_conversion<double>(strvec[3],0.0);
   //get the controlled bus
-  int cbus;
-  paramRead (strvec[4],cbus,-1);
+  int cbus = numeric_conversion<int>(strvec[4], -1);
+
   if (cbus < 0)
     {
       trimString (strvec[4]);
@@ -1477,7 +1460,7 @@ void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line
           ld->setControlBus (rbus);
         }
 
-      paramRead (strvec[5],temp,0);
+	  temp = numeric_conversion<double>(strvec[5], 0.0);
       if (temp > 0)
         {
           ld->set ("participation",temp / 100.0);
@@ -1491,7 +1474,7 @@ void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line
         {
           ld->setControlBus (rbus);
         }
-      paramRead (strvec[5], temp, 0);
+	  temp = numeric_conversion<double>(strvec[5], 0.0);
       if (temp > 0)
         {
           ld->set ("participation", temp / 100.0);
@@ -1557,8 +1540,8 @@ void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line
   size_t ksize = strvec.size () - 1;
   for (size_t kk = start + 1; kk < ksize; kk += 2)
     {
-      paramRead (strvec[kk],cnt);
-      paramRead (strvec[kk + 1],block);
+      cnt = numeric_conversion<int>(strvec[kk],0);
+      block = numeric_conversion<double>(strvec[kk + 1],0.0);
       if ((cnt > 0)&&(block != 0))
         {
           ld->addBlock (cnt,-block,MVAR);
@@ -1569,7 +1552,7 @@ void rawReadSwitchedShunt (gridCoreObject *parentObject, const std::string &line
         }
     }
   //set the initial value
-  paramRead (strvec[start],temp);
+  temp = numeric_conversion<double>(strvec[start], 0.0);
 
   ld->set ("yq",-temp,MVAR);
 

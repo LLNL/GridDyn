@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2015, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -13,8 +13,7 @@
 
 #include "fmiLibraryManager.h"
 #include "fmiImport.h"
-
-std::shared_ptr<fmiLibraryManager> fmiLibraryManager::s_instance;
+#include "fmiObjects.h"
 
 std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string &libFile)
 {
@@ -41,13 +40,13 @@ std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string &lib
 	}
 }
 
-std::shared_ptr<fmi2ME> fmiLibraryManager::createModelExchangeObject(const std::string &fmuIdentifier, std::string &ObjectName)
+std::unique_ptr<fmi2ModelExchangeObject> fmiLibraryManager::createModelExchangeObject(const std::string &fmuIdentifier, const std::string &ObjectName)
 {
 	auto Lib = getLibrary(fmuIdentifier);
 	return Lib->createModelExchangeObject(ObjectName);
 }
 
-std::shared_ptr<fmi2CoSim> fmiLibraryManager::createCoSimulationObject(const std::string &fmuIdentifier, const std::string &ObjectName)
+std::unique_ptr<fmi2CoSimObject> fmiLibraryManager::createCoSimulationObject(const std::string &fmuIdentifier, const std::string &ObjectName)
 {
 	auto Lib = getLibrary(fmuIdentifier);
 	return Lib->createCoSimulationObject(ObjectName);
@@ -63,12 +62,9 @@ void fmiLibraryManager::addShortCut(const std::string &name, const std::string &
 	quickReferenceLibraries.emplace(name, fmuLocation);
 }
 
-std::shared_ptr<fmiLibraryManager> fmiLibraryManager::instance()
+fmiLibraryManager& fmiLibraryManager::instance()
 {
-	if (!(s_instance))
-	{
-		s_instance = std::shared_ptr<fmiLibraryManager>(new fmiLibraryManager());
-	}
+	static fmiLibraryManager s_instance;
 	return s_instance;
 }
 
@@ -77,3 +73,5 @@ fmiLibraryManager::fmiLibraryManager()
 {
 
 }
+
+fmiLibraryManager::~fmiLibraryManager() = default;

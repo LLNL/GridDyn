@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
-* Copyright (c) 2016, Lawrence Livermore National Security
+* Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@
 #include "fncsSupport.h"
 #include "fncsTest.h"
 #include "fncsLibrary.h"
-#include "objectFactory.h"
+#include "core/objectFactory.h"
 #include "fncsSource.h"
 #include "fncsLoad.h"
 #include "gridBus.h"
@@ -26,9 +26,9 @@
 
 bool timeConversionCheck()
 {
-	gridDyn_time val = 4.5234235;
+	coreTime val = 4.5234235;
 	auto fncsTime = gd2fncsTime(val);
-	gridDyn_time ret = fncs2gdTime(fncsTime);
+	coreTime ret = fncs2gdTime(fncsTime);
 	
 	return (std::abs(val - ret) < 0.0000001);
 
@@ -96,7 +96,7 @@ bool testComplexConversion()
 bool testFNCSsource()
 {
 	fncs::clear();
-	gridCoreObject *obj = coreObjectFactory::instance()->createObject("source", "fncs", "fncsSource");
+	coreObject *obj = coreObjectFactory::instance()->createObject("source", "fncs", "fncsSource");
 
 	if (!dynamic_cast<fncsSource *>(obj))
 	{
@@ -108,11 +108,11 @@ bool testFNCSsource()
 	fncs::publish("sourceTestVal", "4.345");
 	src->set("period", 1.0);
 	
-	src->initializeA(timeZero, 0);
+	src->dynInitializeA(timeZero, 0);
 	IOdata out;
-	src->initializeB(emptyArguments, emptyArguments, out);
+	src->dynInitializeB(noInputs, noInputs, out);
 	
-	src->timestep(1.0, emptyArguments,cLocalbSolverMode);
+	src->timestep(1.0, noInputs,cLocalbSolverMode);
 
 	if (std::abs(src->getOutput(0) - 4.345) > 0.0000001)
 	{
@@ -120,15 +120,15 @@ bool testFNCSsource()
 		return false;
 	}
 	fncs::publish("sourceTestVal", "6.0");
-	src->timestep(2.0, emptyArguments, cLocalbSolverMode);
+	src->timestep(2.0, noInputs, cLocalbSolverMode);
 	if (std::abs(src->getOutput(0) - 6.0) > 0.0000001)
 	{
 		return false;
 	}
 	src->setFlag("predictive", true);
 	fncs::publish("sourceTestVal", "7.0");
-	src->timestep(3.0, emptyArguments, cLocalbSolverMode);
-	src->timestep(3.5, emptyArguments, cLocalbSolverMode);
+	src->timestep(3.0, noInputs, cLocalbSolverMode);
+	src->timestep(3.5, noInputs, cLocalbSolverMode);
 	double val = src->getOutput(0);
 	if (std::abs(src->getOutput(0) - 7.5) > 0.0000001) //checking if interpolating is working properly
 	{
@@ -137,7 +137,7 @@ bool testFNCSsource()
 	}
 
 	src->setFlag("step", true);
-	src->timestep(4.2, emptyArguments, cLocalbSolverMode);
+	src->timestep(4.2, noInputs, cLocalbSolverMode);
 	val = src->getOutput(0);
 	if (std::abs(src->getOutput(0) - 7.0) > 0.0000001) //checking if interpolating is working properly
 	{
@@ -145,10 +145,10 @@ bool testFNCSsource()
 		return false;
 	}
 	src->setFlag("interpolate", true);
-	src->timestep(5.0, emptyArguments, cLocalbSolverMode);
+	src->timestep(5.0, noInputs, cLocalbSolverMode);
 	fncs::publish("sourceTestVal", "6.0");
-	src->timestep(6.0, emptyArguments, cLocalbSolverMode);
-	src->timestep(6.3, emptyArguments, cLocalbSolverMode);
+	src->timestep(6.0, noInputs, cLocalbSolverMode);
+	src->timestep(6.3, noInputs, cLocalbSolverMode);
 
 	val = src->getOutput(0);
 	if (std::abs(src->getOutput(0) - 6.7) > 0.0000001) //checking if interpolating is working properly

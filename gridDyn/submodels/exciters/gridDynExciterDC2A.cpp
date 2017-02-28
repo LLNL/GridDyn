@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 #include "matrixData.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 #include <cmath>
 
 // only differences from dc1a are gains and voltage limit is a function of terminal voltage
@@ -37,11 +37,11 @@ gridDynExciterDC2A::gridDynExciterDC2A (const std::string &objName) : gridDynExc
   Bex = 1.1435;
   Vrmin = -4.9;
   Vrmax = 4.95;
-  offsets.local->local.jacSize = 15;
+  offsets.local().local.jacSize = 15;
 }
 
 //cloning function
-gridCoreObject *gridDynExciterDC2A::clone (gridCoreObject *obj) const
+coreObject *gridDynExciterDC2A::clone (coreObject *obj) const
 {
   gridDynExciterDC2A *gdE = cloneBase<gridDynExciterDC2A, gridDynExciterDC1A> (this, obj);
   if (gdE == nullptr)
@@ -54,49 +54,49 @@ gridCoreObject *gridDynExciterDC2A::clone (gridCoreObject *obj) const
 
 
 // residual
-void gridDynExciterDC2A::residual (const IOdata &args, const stateData *sD, double resid[],  const solverMode &sMode)
+void gridDynExciterDC2A::residual (const IOdata &inputs, const stateData &sD, double resid[],  const solverMode &sMode)
 {
 
   if (isAlgebraicOnly (sMode))
     {
       return;
     }
-  gridDynExciterDC1A::residual (args, sD, resid, sMode);      // use DC1A but overwrite if we are at a limiter
-  if (opFlags.test (outside_vlim))
+  gridDynExciterDC1A::residual (inputs, sD, resid, sMode);      // use DC1A but overwrite if we are at a limiter
+  if (opFlags[outside_vlim])
     {
       //auto offset = offsets.getAlgOffset(sMode);
-      if (opFlags.test (etrigger_high))
+      if (opFlags[etrigger_high])
         {
-          // resid[offset + 1] = state[offset + 1] - args[voltageInLocation]*Vrmax;
+          // resid[offset + 1] = state[offset + 1] - inputs[voltageInLocation]*Vrmax;
         }
       else
         {
-          //resid[offset + 1] = state[offset + 1] - args[voltageInLocation]*Vrmin;
+          //resid[offset + 1] = state[offset + 1] - inputs[voltageInLocation]*Vrmin;
 
         }
     }
 }
 
-void gridDynExciterDC2A::derivative (const IOdata &args, const stateData *sD, double deriv[], const solverMode &sMode)
+void gridDynExciterDC2A::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
 
   if (isAlgebraicOnly (sMode))
     {
       return;
     }
-  gridDynExciterDC1A::derivative (args, sD, deriv, sMode);      // use DC1A but overwrite if we are at a limiter
-  if (opFlags.test (outside_vlim))
+  gridDynExciterDC1A::derivative (inputs, sD, deriv, sMode);      // use DC1A but overwrite if we are at a limiter
+  if (opFlags[outside_vlim])
     {
       auto offset = offsets.getDiffOffset (sMode);
-      if (opFlags.test (etrigger_high))
+      if (opFlags[etrigger_high])
         {
-          //deriv[offset + 1] = state[offset + 1] - args[voltageInLocation] * Vrmax;
+          //deriv[offset + 1] = state[offset + 1] - inputs[voltageInLocation] * Vrmax;
           deriv[offset + 1] = 0;
         }
       else
         {
           deriv[offset + 1] = 0;
-          //deriv[offset + 1] = state[offset + 1] - args[voltageInLocation] * Vrmin;
+          //deriv[offset + 1] = state[offset + 1] - inputs[voltageInLocation] * Vrmin;
         }
     }
 }
@@ -105,7 +105,7 @@ void gridDynExciterDC2A::derivative (const IOdata &args, const stateData *sD, do
 void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, double cj, matrixData<double> &ad)
 {
   ad.assign (refLoc, refLoc, 1);
-  if (opFlags.test (etrigger_high))
+  if (opFlags[etrigger_high])
     {
       //ad.assign(refLoc, VLoc, -Vrmax);
       ad.assign (refLoc, VLoc, cj);
@@ -118,13 +118,13 @@ void gridDynExciterDC2A::limitJacobian (double /*V*/, int VLoc, int refLoc, doub
 
 }
 
-void gridDynExciterDC2A::rootTest (const IOdata &args, const stateData *sD, double roots[],  const solverMode &sMode)
+void gridDynExciterDC2A::rootTest (const IOdata &inputs, const stateData &sD, double roots[],  const solverMode &sMode)
 {
   auto offset = offsets.getDiffOffset (sMode);
   int rootOffset = offsets.getRootOffset (sMode);
-  const double *es = sD->state + offset;
-  double V = args[voltageInLocation];
-  if (opFlags.test (outside_vlim))
+  const double *es = sD.state + offset;
+  double V = inputs[voltageInLocation];
+  if (opFlags[outside_vlim])
     {
       roots[rootOffset] = ((Vref - V) - es[0] * Kf / Tf + es[3]) * Ka * Tc / Tb + es[2] * (Tb - Tc) * Ka / Tb - es[1];
     }
@@ -138,11 +138,11 @@ void gridDynExciterDC2A::rootTest (const IOdata &args, const stateData *sD, doub
     }
 }
 
-change_code gridDynExciterDC2A::rootCheck ( const IOdata &args, const stateData *, const solverMode &, check_level_t /*level*/)
+change_code gridDynExciterDC2A::rootCheck ( const IOdata &inputs, const stateData &, const solverMode &, check_level_t /*level*/)
 {
 
   double *es = m_state.data ();
-  double V = args[voltageInLocation];
+  double V = inputs[voltageInLocation];
   change_code ret = change_code::no_change;
   if (opFlags[outside_vlim])
     {

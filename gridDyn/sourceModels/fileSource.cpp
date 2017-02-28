@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
    * LLNS Copyright Start
- * Copyright (c) 2016, Lawrence Livermore National Security
+ * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,8 +12,7 @@
 */
 
 #include "sourceTypes.h"
-#include "stringOps.h"
-#include "gridCoreTemplates.h"
+#include "core/coreObjectTemplates.h"
 
 fileSource::fileSource (const std::string filename, int column) : rampSource ("filesource_#")
 {
@@ -24,7 +23,7 @@ fileSource::fileSource (const std::string filename, int column) : rampSource ("f
 
 }
 
-gridCoreObject *fileSource::clone (gridCoreObject *obj) const
+coreObject *fileSource::clone (coreObject *obj) const
 {
   fileSource *nobj = cloneBase<fileSource, rampSource> (this, obj);
   if (nobj == nullptr)
@@ -46,7 +45,7 @@ int fileSource::setFile (const std::string filename, index_t column)
   return count;
 }
 
-void fileSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
+void fileSource::dynObjectInitializeA (coreTime time0, unsigned long flags)
 {
   index_t ii;
   ii = 0;
@@ -55,44 +54,44 @@ void fileSource::objectInitializeA (gridDyn_time time0, unsigned long flags)
     {
       double abstime0 = get ("abstime0");
 
-      while (schedLoad.time[ii] < abstime0)
+      while (schedLoad.time(ii) < abstime0)
         {
           ++ii;
-          if (ii >= schedLoad.count)
+          if (ii >= schedLoad.size())
             {            //this should never happen
-              ii = schedLoad.count;
+              ii = schedLoad.size();
               break;
             }
         }
       currIndex = ii;
-      nextUpdateTime = schedLoad.time[currIndex];
-      timestep (time0,{},cLocalSolverMode);
+      nextUpdateTime = schedLoad.time(currIndex);
+      timestep (time0,noInputs,cLocalSolverMode);
 
     }
   else
     {
-      if (schedLoad.time[currIndex] < time0)
+      if (schedLoad.time(currIndex) < time0)
         {
-          while (schedLoad.time[currIndex] < time0)
+          while (schedLoad.time(currIndex) < time0)
             {
               currIndex++;
             }
           currIndex = currIndex - 1;
-          nextUpdateTime = schedLoad.time[currIndex];
-          timestep (time0,{},cLocalSolverMode);
+          nextUpdateTime = schedLoad.time(currIndex);
+          timestep (time0,noInputs,cLocalSolverMode);
         }
 
     }
-  return rampSource::objectInitializeA (time0,flags);
+  return rampSource::dynObjectInitializeA (time0,flags);
 
 }
 
-void fileSource::updateA (gridDyn_time time)
+void fileSource::updateA (coreTime time)
 {
-  while (time >= schedLoad.time[currIndex])
+  while (time >= schedLoad.time(currIndex))
     {
-      m_output = schedLoad.data[currIndex];
-      prevTime = schedLoad.time[currIndex];
+      m_output = schedLoad.data(currIndex);
+      prevTime = schedLoad.time(currIndex);
       currIndex++;
       if (currIndex >= count)
         {        //this should never happen since the last time should be very large
@@ -101,49 +100,56 @@ void fileSource::updateA (gridDyn_time time)
           break;
         }
 
-      if (opFlags.test (use_step_change_flag))
+      if (opFlags[use_step_change_flag])
         {
           mp_dOdt = 0;
         }
       else
         {
-          double diff = schedLoad.data[currIndex] - m_output;
-          double dt = schedLoad.time[currIndex] - schedLoad.time[currIndex - 1];
+          double diff = schedLoad.data(currIndex) - m_output;
+          double dt = schedLoad.time(currIndex) - schedLoad.time(currIndex - 1);
           mp_dOdt = diff / dt;
         }
 
-      nextUpdateTime = schedLoad.time[currIndex];
+      nextUpdateTime = schedLoad.time(currIndex);
     }
 }
 
-void fileSource::timestep (gridDyn_time ttime, const IOdata &args, const solverMode &sMode)
+void fileSource::timestep (coreTime ttime, const IOdata &inputs, const solverMode &sMode)
 {
   if (ttime > nextUpdateTime)
     {
       updateA (ttime);
     }
 
-  rampSource::timestep (ttime, args, sMode);
+  rampSource::timestep (ttime, inputs, sMode);
 }
 
 
-void fileSource::setTime (gridDyn_time time)
+void fileSource::setFlag(const std::string &flag, bool val)
 {
-  if (opFlags[use_absolute_time_flag])
-    {
-      timestep (time, {},cLocalSolverMode);
-    }
-  else
-    {
-      double dt = time - prevTime;
-      for (index_t kk = 0; kk < count; ++kk)
-        {
-          schedLoad.time[kk] += dt;
-        }
-    }
+	if (flag == "absolute")
+	{
+		opFlags.set(use_absolute_time_flag,val);
+	}
+	else if (flag == "relative")
+	{
+		opFlags.set(use_absolute_time_flag,!val);
+	}
+	else if (flag == "step")
+	{
+		opFlags.set(use_step_change_flag,val);
+	}
+	else if (flag == "interpolate")
+	{
+		opFlags.set(use_step_change_flag,!val);
+	}
+	else
+	{
+		rampSource::setFlag(flag,val);
+	}
 
 }
-
 void fileSource::set (const std::string &param,  const std::string &val)
 {
  
@@ -151,37 +157,6 @@ void fileSource::set (const std::string &param,  const std::string &val)
     {
       setFile (val,0);
     }
-  if ((param == "flags") || (param == "mode"))
-    {
-
-      stringVec flgs = splitlineTrim (val);
-      for (auto &str : flgs)
-        {
-          //TODO:: PT convert to setFlags function
-          makeLowerCase (str);
-          if (str == "absolute")
-            {
-              opFlags.set (use_absolute_time_flag);
-            }
-          else if (str == "relative")
-            {
-              opFlags.reset (use_absolute_time_flag);
-            }
-          else if (str == "step")
-            {
-              opFlags.set (use_step_change_flag);
-            }
-          else if (str == "interpolate")
-            {
-              opFlags.reset (use_step_change_flag);
-            }
-          else
-            {
-              rampSource::set ("flags", str);
-            }
-        }
-    }
-
   else
     {
       gridSource::set (param, val);
@@ -211,13 +186,13 @@ int fileSource::loadFile ()
     {
       schedLoad.loadBinaryFile (fname,m_column);
     }
-  if (schedLoad.count > 0)
+  if (schedLoad.size() > 0)
     {
-      schedLoad.addData (schedLoad.time.back () + 365.0 * kDayLength,schedLoad.data.back ());
+      schedLoad.addData (schedLoad.lastTime() + 365.0 * kDayLength,schedLoad.lastData ());
     }
   else
     {
       schedLoad.addData (365.0 * kDayLength,m_output);
     }
-  return schedLoad.count;
+  return schedLoad.size();
 }
