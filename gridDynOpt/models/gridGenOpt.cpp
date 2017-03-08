@@ -16,9 +16,9 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBusOpt.h"
 #include "optObjectFactory.h"
-#include "vectorOps.hpp"
-#include "vectData.h"
-#include "matrixData.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/vectData.h"
+#include "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 

@@ -17,7 +17,7 @@
 #include "gridDyn.h"
 #include "fmi_import/fmiImport.h"
 #include "fmi_import/fmiObjects.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "fmiGDinfo.h"
 #include "gridBus.h"
 #include "simulation/diagnostics.h"

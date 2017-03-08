@@ -57,6 +57,7 @@ set(utilities_headers
 	matrixDataFilter.h
 	functionInterpreter.h
 	workQueue.h
+	simpleQueue.h
 	zipUtilities.h
 	base64.h
 	stringConversion.h
@@ -100,9 +101,6 @@ build_minizip()
 find_package(MiniZip)
 endif (NOT MINIZIP_FOUND)
 
-
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF (ENABLE_64_BIT_INDEXING)
 add_definitions(-DENABLE_64_BIT_INDEXING)
 ENDIF(ENABLE_64_BIT_INDEXING)

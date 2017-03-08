@@ -32,7 +32,7 @@ protected:
   coreTime frequencyDelay = timeZero;		//!<[s] the delay on the frequency tripping
   coreTime offTime = maxTime;			//!<[s] the time before the load comes back on line if the trip cause has been corrected
 public:
-  loadRelay (const std::string &objName = "loadRelay_$");
+  explicit loadRelay (const std::string &objName = "loadRelay_$");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual void set (const std::string &param,  const std::string &val) override;

@@ -14,7 +14,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "gridDynDefinitions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <type_traits>
 #include <iostream>
 

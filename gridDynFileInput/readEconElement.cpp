@@ -12,7 +12,7 @@
 */
 
 #include "readElement.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "readerHelper.h"
 #include "gridDynFileInput.h"
 #include "core/objectInterpreter.h"
@@ -22,7 +22,7 @@
 #include "models/gridAreaOpt.h"
 #include "gridDynOpt.h"
 #include "optObjectFactory.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 
 using namespace readerConfig;

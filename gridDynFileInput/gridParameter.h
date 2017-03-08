@@ -14,7 +14,7 @@
 #ifndef GRIDPARAMETER_H_
 #define GRIDPARAMETER_H_
 
-#include "units.h"
+#include "utilities/units.h"
 #include <string>
 #include <vector>
 /** @brief helper class for representing a parameter of various types

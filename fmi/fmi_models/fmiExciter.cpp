@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.h"
 #include "fmiMESubModel.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 fmiExciter::fmiExciter(std::string objName):gridDynExciter(objName)

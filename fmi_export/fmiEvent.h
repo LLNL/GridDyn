@@ -14,11 +14,11 @@
 #ifndef _FMI_EVENT_H_
 #define _FMI_EVENT_H_
 
-#include "events/gridEvent.h"
+#include "events/reversibleEvent.h"
 
 class fmiCoordinator;
 /** class to manage the inputs for an FMI configuration in GridDyn*/
-class fmiEvent : public gridEvent
+class fmiEvent : public reversibleEvent
 {
 public:
 	enum class fmiEventType
@@ -44,6 +44,7 @@ public:
 	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+	virtual coreObject *getOwner() const override;
 	friend class fmiCoordinator;
 private:
 	/** function to find the fmi coordinator so we can connect to that*/

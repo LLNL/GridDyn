@@ -12,7 +12,7 @@
 */
 
 #include "fmiInfo.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "tinyxml2ReaderElement.h"
 
 fmiInfo::fmiInfo()

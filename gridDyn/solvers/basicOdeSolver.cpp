@@ -14,7 +14,7 @@
 #include "solverInterface.h"
 #include "gridDyn.h"
 #include "core/helperTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
 

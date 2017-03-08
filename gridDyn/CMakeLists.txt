@@ -286,6 +286,7 @@ set(event_headers
 	events/eventAdapters.h
 	events/eventQueue.h
 	events/eventInterface.h
+	events/reversibleEvent.h
 	)
 	
 set(event_sources
@@ -297,6 +298,7 @@ set(event_sources
 	events/interpolatingPlayer.cpp
 	events/compoundEvent.cpp
 	events/compoundEventPlayer.cpp
+	events/reversibleEvent.cpp
 	)	
 set(measurement_headers
 	measurement/gridGrabbers.h
@@ -445,11 +447,8 @@ source_group("controllers" FILES ${controller_sources})
 source_group("controlblocks" FILES ${controlblock_sources})
 source_group("solvers" FILES ${solver_sources})
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 

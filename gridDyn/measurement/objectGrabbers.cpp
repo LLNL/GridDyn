@@ -20,8 +20,8 @@
 #include "generators/gridDynGenerator.h"
 #include "relays/gridRelay.h"
 #include "relays/sensor.h"
-#include "stringOps.h"
-#include "mapOps.h"
+#include "utilities/stringOps.h"
+#include "utilities/mapOps.h"
 #include "solvers/solverMode.h"
 #include <map>
 

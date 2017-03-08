@@ -51,18 +51,18 @@ if (NOT JSONCPP_FOUND)
   ## Check for the release library
 
   find_library (JSONCPP_LIBRARIES_RELEASE
-    NAMES json jsoncpp
+    NAMES jsoncpp json 
     HINTS ${JSONCPP_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES lib64 lib
     )
 
  ##_____________________________________________________________________________
   ## Check for a debug version
 
   find_library (JSONCPP_LIBRARIES_DEBUG 
-    NAMES json jsoncpp jsoncppd
+    NAMES jsoncpp json jsoncppd jsond
     HINTS ${JSONCPP_ROOT_DIR}/debug ${CMAKE_INSTALL_PREFIX}/debug
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES lib64 lib
     )
 
 IF(JSONCPP_LIBRARIES_DEBUG)

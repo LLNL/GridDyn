@@ -15,7 +15,7 @@
 #ifndef _MATRIX_DATA_CONTAINER_H_
 #define _MATRIX_DATA_CONTAINER_H_
 
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 /** @brief intermediate class for implementing a containing matrix data
 @details class is abstract and cannot be instantiated on its own meant to help some 

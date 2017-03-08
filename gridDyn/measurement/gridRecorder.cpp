@@ -12,8 +12,8 @@
 */
 
 #include "collector.h"
-#include "timeSeries.h"
-#include "stringOps.h"
+#include "utilities/timeSeries.h"
+#include "utilities/stringOps.h"
 #include "core/objectInterpreter.h"
 #include "core/helperTemplates.h"
 #include "core/coreExceptions.h"

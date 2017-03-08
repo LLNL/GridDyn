@@ -15,7 +15,7 @@
 #define SOURCE_TYPES_H_
 
 #include "sourceModels/gridSource.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 
 /**@brief defines a ramping source
 */

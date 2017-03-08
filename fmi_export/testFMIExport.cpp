@@ -20,8 +20,9 @@
 #include "fmi_export/fmiCoordinator.h"
 #include "fmi_export/loadFMIExportObjects.h"
 #include "fmi_import/fmiImport.h"
+#include "gridDyn/loadModels/gridLoad3Phase.h"
 #include "gridDynFileInput.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "gridBus.h"
 #include "simulation/diagnostics.h"
 #include "readerInfo.h"
@@ -211,4 +212,69 @@ BOOST_AUTO_TEST_CASE(load_griddyn_fmu)
 	b2 = nullptr;
 }
 
+
+BOOST_AUTO_TEST_CASE(test_fmi_runner2)
+{
+	auto runner = std::make_unique<fmiRunner>("testsim", fmi_test_directory+"/three_phase_fmu", nullptr);
+
+	runner->simInitialize();
+	runner->UpdateOutputs();
+
+	auto bus = static_cast<gridBus*>(runner->getSim()->getSubObject("bus",11));
+
+	auto ld = dynamic_cast<gridLoad3Phase *>(bus->getLoad(0));
+	BOOST_REQUIRE(ld != nullptr);
+
+	auto ret=runner->Step(10);
+	BOOST_CHECK_EQUAL(ret, 10.0);
+
+	auto val1 = runner->Get(8);
+	auto val2 = runner->Get(9);
+	auto val3 = runner->Get(10);
+	BOOST_CHECK_GT(val1, 2000.0);
+	BOOST_CHECK_LT(val1, 3000.0);
+	BOOST_CHECK_GT(val2, 2000.0);
+	BOOST_CHECK_LT(val2, 3000.0);
+	BOOST_CHECK_GT(val3, 2000.0);
+	BOOST_CHECK_LT(val3, 3000.0);
+	auto val4 = runner->Get(11);
+	auto val5 = runner->Get(12);
+	auto val6 = runner->Get(13);
+	BOOST_CHECK_GT(val4, -2000.0);
+	BOOST_CHECK_GT(val5, -2000.0);
+	BOOST_CHECK_GT(val6, -2000.0);
+	auto time = 20.0;
+	for (int ii = 1; ii < 4; ++ii)
+	{
+		runner->Set(ii, 100.0);
+		ret = runner->Step(time);
+		time += 10.0;
+
+		auto val1b = runner->Get(8);
+		auto val2b = runner->Get(9);
+		auto val3b = runner->Get(10);
+		BOOST_CHECK_GT(std::abs(val1b - val1),0.00001);
+		BOOST_CHECK_GT(std::abs(val2b - val2), 0.00001);
+		BOOST_CHECK_GT(std::abs(val3b - val3), 0.00001);
+		val1 = val1b;
+		val2 = val2b;
+		val3 = val3b;
+	}
+	for (int ii = 4; ii < 7; ++ii)
+	{
+		runner->Set(ii, 0.0+(ii-3)*120.0);
+		ret = runner->Step(time);
+		time += 10.0;
+
+		auto val1b = runner->Get(7);
+		auto val2b = runner->Get(8);
+		auto val3b = runner->Get(9);
+		BOOST_CHECK_GT(std::abs(val1b - val1), 0.00001);
+		BOOST_CHECK_GT(std::abs(val2b - val2), 0.00001);
+		BOOST_CHECK_GT(std::abs(val3b - val3), 0.00001);
+		val1 = val1b;
+		val2 = val2b;
+		val3 = val3b;
+	}
+}
 BOOST_AUTO_TEST_SUITE_END()

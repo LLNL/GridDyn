@@ -12,7 +12,7 @@
 */
 
 // headers
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactoryTemplates.h"
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
@@ -21,7 +21,7 @@
 #include "primary/dcBus.h"
 #include "linkModels/acdcConverter.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 
 using namespace gridUnits;

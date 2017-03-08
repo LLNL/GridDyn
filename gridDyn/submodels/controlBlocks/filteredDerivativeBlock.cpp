@@ -14,7 +14,7 @@
 #include "submodels/otherBlocks.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactory.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 #include <cmath>
 #include <algorithm>

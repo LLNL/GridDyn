@@ -30,7 +30,7 @@
 #include "simulation/gridSimulation.h"
 #endif
 
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <cstdlib>
 

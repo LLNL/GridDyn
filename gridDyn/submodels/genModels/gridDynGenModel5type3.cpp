@@ -14,7 +14,7 @@
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
 
 #include <cmath>

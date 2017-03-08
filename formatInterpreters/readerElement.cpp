@@ -12,7 +12,7 @@
 */
 
 #include "readerElement.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 
 readerAttribute::readerAttribute ()

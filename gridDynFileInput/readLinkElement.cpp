@@ -13,7 +13,7 @@
 
 #include "readElement.h"
 #include "readerHelper.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
 

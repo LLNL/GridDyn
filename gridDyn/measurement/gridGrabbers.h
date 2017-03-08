@@ -15,7 +15,7 @@
 #define GRID_GRABBER_H_
 
 #include "core/objectOperatorInterface.h"
-#include "units.h"
+#include "utilities/units.h"
 #include "gridDynDefinitions.h"
 #include <functional>
 #include <memory>
@@ -50,7 +50,7 @@ protected:
   std::function<void(coreObject *, std::vector<double> &)> fptrV; //!< operation function to grab a vector of data
   std::function<void(coreObject *, stringVec &)> fptrN;  //!< function to grab a vector of strings corresponding to the vector of data
 public:
-	gridGrabber(const std::string &fld = "");
+	explicit gridGrabber(const std::string &fld = "");
 
 	gridGrabber(const std::string &fld, coreObject *obj);
 

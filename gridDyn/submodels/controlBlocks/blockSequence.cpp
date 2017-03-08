@@ -13,10 +13,10 @@
 
 #include "submodels/controlBlocks/blockSequence.h"
 #include "core/coreExceptions.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 blockSequence::blockSequence(const std::string &objName) : basicBlock(objName)
 {

@@ -13,7 +13,7 @@
 
 #include "tinyxmlReaderElement.h"
 #include "ticpp/ticpp.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 
 tinyxmlReaderElement::tinyxmlReaderElement ()

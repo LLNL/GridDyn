@@ -75,6 +75,8 @@ std::unique_ptr<gridDynSimulation> readSimXMLFile (const std::string &filename, 
 
 std::uint32_t addflags (std::uint32_t iflags, const std::string &flags);
 
+void loadFile(std::unique_ptr<gridDynSimulation> &gds, const std::string &filename, readerInfo *ri = nullptr, std::string ext = "");
+
 void loadFile (coreObject *parentObject, const std::string &filename, readerInfo *ri = nullptr, std::string ext = "");
 
 void loadGDZ(coreObject *parentObject, const std::string &fileName, readerInfo &ri);

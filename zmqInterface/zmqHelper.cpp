@@ -13,7 +13,7 @@
 
 #include "zmqHelper.h"
 #include <cppzmq/zmq.hpp>
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include <map>
 
 using namespace zmq;

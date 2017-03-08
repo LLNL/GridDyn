@@ -49,7 +49,7 @@ public:
   @param[in] valGrabber the grabber for the LHS of the equation
   @param[in] valGrabberSt the state portion of the grabber for the LHS of the equation
   */
-  gridCondition(std::shared_ptr<grabberSet> valGrabber = nullptr);
+  explicit gridCondition(std::shared_ptr<grabberSet> valGrabber = nullptr);
   virtual ~gridCondition();
 
   virtual std::shared_ptr<gridCondition> clone(std::shared_ptr<gridCondition> gc = nullptr) const;

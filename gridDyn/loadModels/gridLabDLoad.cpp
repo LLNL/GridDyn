@@ -14,9 +14,9 @@
 #include "loadModels/gridLabDLoad.h"
 #include "gridBus.h"
 #include "coupling/GhostSwingBusManager.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactoryTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 

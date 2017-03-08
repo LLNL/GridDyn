@@ -14,10 +14,10 @@
 #ifndef GRIDDYN_COLLECTOR_H_
 #define GRIDDYN_COLLECTOR_H_
 
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 #include "events/eventInterface.h"
 #include "core/helperObject.h"
-#include "units.h"
+#include "utilities/units.h"
 #include "core/objectOperatorInterface.h"
 #include <memory>
 
@@ -145,7 +145,11 @@ public:
 		warningCount = 0;
 	}
 protected:
+	/** callback intended more for child classes to indicate that a dataPoint has been added*/
 	virtual void dataPointAdded(const collectorPoint& cp);
+	/** get a column number, the requested column is a request only
+	*@param[in] requestedColumn the column that is being requested
+	@return the actual column granted*/
 	int getColumn(int requestedColumn);
 
 	void updateColumns(int requestedColumn);

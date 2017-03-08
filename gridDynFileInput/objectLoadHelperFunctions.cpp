@@ -11,9 +11,9 @@
 * LLNS Copyright End
 */
 
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "gridDynDefinitions.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreObject.h"
 #include "readerHelper.h"
 #include "readElement.h"

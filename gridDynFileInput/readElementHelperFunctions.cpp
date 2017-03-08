@@ -12,8 +12,8 @@
 */
 
 #include "readElement.h"
-#include "stringOps.h"
-#include "readerElement.h"
+#include "utilities/stringOps.h"
+#include "formatInterpreters/readerElement.h"
 
 using namespace readerConfig;
 std::string findElementName (std::shared_ptr<readerElement> &el, const std::string &ename, readerConfig::match_type matching)

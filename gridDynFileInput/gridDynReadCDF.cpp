@@ -19,7 +19,7 @@
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
@@ -75,7 +75,7 @@ Column  46-73   Case identification (A) */
       trimString (temp1);
       if (bri.prefix.empty ())
         {
-          parentObject->set ("name",temp1);
+          parentObject->setName(temp1);
         }
     }
   //loop over the sections
@@ -228,7 +228,7 @@ void cdfReadBusLine (gridBus *bus,std::string line,double base,const basicReader
       temp = "BUS_" + std::to_string (bus->getUserID ());
     }
 
-  bus->set ("name",temp);      //set the name
+  bus->setName(temp);      //set the name
   //skip the load flow area and loss zone for now
   //get the baseVoltage
   temp = line.substr (76,6);
@@ -437,7 +437,7 @@ void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::v
   gridBus *bus1, *bus2;
   gridLink *lnk = nullptr;
   int code;
-  int cntrl = 0;
+  //int cntrl = 0;
   int cbus = 0;
   int ind1,ind2;
   double R,X;
@@ -488,7 +488,7 @@ void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::v
       temp = line.substr (73, 1);
       if (temp[0] != ' ')
         {
-          cntrl = numeric_conversion<int> (temp, 0);
+          auto cntrl = numeric_conversion<int> (temp, 0);
           if (cntrl != 0)
             {
               if (cntrl == 1)
@@ -550,35 +550,10 @@ void cdfReadBranch (coreObject *parentObject,std::string line,double base,std::v
 
   lnk->updateBus (bus1,1);
   lnk->updateBus (bus2,2);
-  lnk->set ("name",temp2);
-  try
-  {
-	  parentObject->add(lnk);
-  }
-  catch (const objectAddFailure &)
-  {
-	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
-	  std::string sub = lnk->getName();
-	  char m = 'a';
-	  while (lnk->isRoot())
-	  {
-		  lnk->setName(sub + '_' + m);
-		  m = m + 1;
-		  try
-		  {
-			  parentObject->add(lnk);
-		  }
-		  catch (const objectAddFailure &e)
-		  {
-			  if (m > 'z')
-			  {
-				  throw(e);
-			  }
-		  }
-	  }
-  }
+  lnk->setName(temp2);
+  addToParentRename(lnk, parentObject);
+  
   //skip the load flow area and loss zone and circuit for now TODO:: PT Fix this when area controls are put in place
-
 
   //get the branch impedance
   R = numeric_conversion (line.substr (19, 10), 0.0);

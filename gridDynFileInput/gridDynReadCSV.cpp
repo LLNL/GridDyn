@@ -14,7 +14,7 @@
 
 #include "gridDynFileInput.h"
 #include "core/objectFactory.h"
-#include "stringConversion.h"
+#include "utilities/string_viewConversion.h"
 #include "core/objectInterpreter.h"
 #include "core/coreExceptions.h"
 #include "gridBus.h"
@@ -22,6 +22,7 @@
 #include "relays/gridRelay.h"
 #include "gridArea.h"
 #include "readerHelper.h"
+#include "utilities/stringOps.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -29,7 +30,7 @@
 
 using namespace gridUnits;
 using namespace readerConfig;
-using namespace stringOps;
+using namespace utilities::string_viewOps;
 
 enum mode_state
 {
@@ -47,23 +48,13 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
     }
   std::string line;        //line storage
   int lineNumber = 0;
-  std::string temp1;        //temporary storage for substrings
-  stringVec lineTokens;
   stringVec headers;
   std::vector<int> skipToken;
   std::vector<units_t> units;
   std::string ObjectMode;
-  coreObject *obj = nullptr;
   int typekey = -1;
   int refkey = -1;
-  std::string type;
-  std::string ref;
   std::string field;
-  double val;
-  int ret;
-  std::string str;
-  gridBus *bus = nullptr;
-  coreObject *obj2 = nullptr;
   mode_state mState = read_header;
 
 
@@ -85,8 +76,8 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
         }
       if (mState == read_header)
         {
-          headers = splitline(line);
-		  trim(headers);
+          headers = stringOps::splitline(line);
+		  stringOps::trim(headers);
           ObjectMode = headers[0];
           makeLowerCase (ObjectMode);
           //translate a few mode possibilities
@@ -122,7 +113,7 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
           int nn = 0;
           for (auto &tk : headers)
             {
-              trimString (tk);
+              stringOps::trimString (tk);
 
               if (tk.empty ())
                 {
@@ -149,7 +140,7 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                     {
                       std::string uname = tk.substr (p + 1, tk.length () - 2 - p);
                       units[nn] = getUnits (uname);
-                      tk = trim(tk.substr (0, p));
+                      tk = stringOps::trim(tk.substr (0, p));
                     }
                 }
               ++nn;
@@ -164,34 +155,35 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
         }
       else
         {
-          lineTokens = splitline (line);
+          auto lineTokens = split (line);
           if (lineTokens.size () != headers.size ())
             {
               fprintf (stderr, "line %d length does not match section header\n", lineNumber);
               return;
             }
           //check the identifier
-          ref = (refkey >= 0) ? trim ( lineTokens[refkey]) : "";
-          type = (typekey >= 0) ? trim (lineTokens[typekey]) : "";
+          auto ref = (refkey >= 0) ? trim ( lineTokens[refkey]) : "";
+          auto type = (typekey >= 0) ? trim (lineTokens[typekey]) : "";
           //find or create the object
           int index = numeric_conversion<int> (lineTokens[0], -2);
+		  coreObject *obj=nullptr;
           if (index >= 0)
             {
               obj = parentObject->findByUserID (ObjectMode, index);
             }
           else if (index == -2)
             {
-              obj = locateObject (str,parentObject);
+              obj = locateObject (trim(lineTokens[0]).to_string(),parentObject);
             }
           if (refkey >= 0)
             {
-              obj = ri.makeLibraryObject (ref, obj);
+              obj = ri.makeLibraryObject (ref.to_string(), obj);
             }
 
           if (!(obj))
             {
 
-              obj = cof->createObject (ObjectMode, type);
+              obj = cof->createObject (ObjectMode, type.to_string());
               if (obj)
                 {
                   if (index > 0)
@@ -200,7 +192,7 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                     }
                   else if (index == -2)
                     {
-                      obj->setName ( str);
+                      obj->setName (lineTokens[0].to_string());
                     }
                 }
             }
@@ -231,34 +223,33 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                 {
                   skipToken[kk] = 4;
                 }
-              makeLowerCase (field);
               if (field == "type")
                 {
                   if (ObjectMode == "bus")
                     {
-                      str = trim(lineTokens[kk]);
-                      obj->set ("type", lineTokens[kk]);
+                      auto str = trim(lineTokens[kk]);
+                      obj->set ("type", str.to_string());
                     }
                 }
               else if ((field == "name") || (field == "description"))
                 {
-                  str = trim(lineTokens[kk]);
+                  auto str = trim(lineTokens[kk]).to_string();
                   str = ri.checkDefines (str);
                   obj->set (field, str);
                 }
-              else if ((field.substr (0,2) == "to") && (ObjectMode == "link"))
+              else if ((field.compare(0,2,"to") == 0) && (ObjectMode == "link"))
                 {
-                  str = lineTokens[kk];
+                  auto str = trim(lineTokens[kk]).to_string();
 
                   str = ri.checkDefines (str);
-				  val = numeric_conversion(str, kBigNum);
+				  double val = numeric_conversion(str, kBigNum);
+				  gridBus *bus = nullptr;
                   if (val < kHalfBigNum)
                     {
                       bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", static_cast<int> (val)));
                     }
                   else
                     {
-                      trimString (str);
                       bus = static_cast<gridBus *> (locateObject (str, parentObject));
                     }
                   if (bus)
@@ -267,18 +258,17 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                     }
 
                 }
-              else if ((field.substr (0,4) == "from") && (ObjectMode == "link"))
+              else if ((field.compare (0,4,"from")==0) && (ObjectMode == "link"))
                 {
-                  str = lineTokens[kk];
-                  str = ri.checkDefines (str);
-				  val = numeric_conversion(str, kBigNum);
+                  auto str = ri.checkDefines (trim(lineTokens[kk]).to_string());
+				  double val = numeric_conversion(str, kBigNum);
+				  gridBus *bus = nullptr;
                   if (val < kHalfBigNum)
                     {
                       bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", static_cast<int> (val)));
                     }
                   else
                     {
-                      trimString (str);
                       bus = static_cast<gridBus *> (locateObject (str, parentObject));
                     }
                   if (bus)
@@ -294,9 +284,9 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
               else if ((field == "bus") && ((ObjectMode == "load")||(ObjectMode == "gen" )))
                 {
 
-                  str = lineTokens[kk];
-                  str = ri.checkDefines (str);
-				  val = numeric_conversion(str, kBigNum);
+                  auto str = ri.checkDefines (lineTokens[kk].to_string());
+				  double val = numeric_conversion(str, kBigNum);
+				  gridBus *bus = nullptr;
                   if (val < kHalfBigNum)
                     {
                       bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", static_cast<int> (val)));
@@ -317,9 +307,8 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
               else if (((field == "target")||(field == "sink")||(field == "source")) && (ObjectMode == "relay"))
                 {
 
-                  str = lineTokens[kk];
-                  str = ri.checkDefines (str);
-                  obj2 = locateObject (str, parentObject);
+                  auto str = ri.checkDefines (lineTokens[kk].to_string());
+                  auto obj2 = locateObject (str, parentObject);
                   if (obj2)
                     {
                       if (field != "sink")
@@ -338,7 +327,7 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                 }
               else if (field == "file")
                 {
-                  str = lineTokens[kk];
+                  auto str = lineTokens[kk].to_string();
                   ri.checkFileParam (str);
 				  gridParameter po(field, str);
 
@@ -346,7 +335,7 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                 }
               else if (field == "workdir")
                 {
-                  str = lineTokens[kk];
+                  auto str = lineTokens[kk].to_string();
                   ri.checkDirectoryParam (str);
 				  gridParameter po(field, str);
 				  
@@ -354,9 +343,8 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                 }
               else
                 {
-                  str = lineTokens[kk];
-                  str = ri.checkDefines (str);
-                  val = numeric_conversion (str, kBigNum);
+                  auto str = ri.checkDefines (trim(lineTokens[kk]).to_string());
+                  double val = numeric_conversion (str, kBigNum);
 				  
                   if (val < kHalfBigNum)
                     {
@@ -367,14 +355,13 @@ void loadCSV (coreObject *parentObject,const std::string &filename, readerInfo &
                     }
                   else
                     {
-                      trimString (str);                          //check for empty string and if so ignore it
                       if (str.empty ())
                         {
                           continue;
                         }
                       gridParameter po (field, str);
                       paramStringProcess (&po, ri);
-					  ret=objectParameterSet(std::to_string(lineNumber), obj, po);
+					  auto ret=objectParameterSet(std::to_string(lineNumber), obj, po);
                       
                       if (ret != 0)
                         {

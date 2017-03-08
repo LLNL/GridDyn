@@ -15,7 +15,7 @@
 #include "core/coreExceptions.h"
 #include "gridBus.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 #include <iostream>
 #include <cmath>
@@ -51,8 +51,7 @@ coreObject *gridLoad::clone (coreObject *obj) const
     {
       return obj;
     }
-  nobj->P = P;
-  nobj->Q = Q;
+  nobj->setLoad(P, Q); //use the set load function in case we are cloning from a basic object to a higher level object
   nobj->pfq = pfq;
   return nobj;
 }
@@ -242,11 +241,6 @@ void gridLoad::set (const std::string &param, double val, units_t unitType)
     {
       pfq = val;
       opFlags.set (use_power_factor_flag);
-    }
-  // SGS added to set the base voltage 2015-01-30
-  else if ((param == "basevoltage") || (param == "base vol"))
-    {
-      baseVoltage = val;
     }
   else
     {

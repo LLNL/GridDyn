@@ -13,7 +13,7 @@
 
 #include "differentialRelay.h"
 #include "measurement/gridCondition.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
 #include "events/eventQueue.h"
@@ -139,18 +139,18 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, unsigned long fl
           if (tap != 1.0)
             {
               std::string c1 = std::to_string (tap) + "*current1";
-              add (make_condition ("abs(" + c1 + "-current2)/max(abs(" + c1 + "),abs(current2))", ">", m_max_differential, m_sourceObject));
+              add (std::shared_ptr<gridCondition>(make_condition ("abs(" + c1 + "-current2)/max(abs(" + c1 + "),abs(current2))", ">", m_max_differential, m_sourceObject)));
               if (m_minLevel > 0)
                 {
-                  add (make_condition ("max(abs(" + c1 + "),abs(current2))", ">", m_minLevel, m_sourceObject));
+                  add (std::shared_ptr<gridCondition>(make_condition ("max(abs(" + c1 + "),abs(current2))", ">", m_minLevel, m_sourceObject)));
                 }
             }
           else
             {
-              add (make_condition ("abs(current1-current2)/max(abs(current1),abs(current2))", ">", m_max_differential, m_sourceObject));
+              add (std::shared_ptr<gridCondition>(make_condition ("abs(current1-current2)/max(abs(current1),abs(current2))", ">", m_max_differential, m_sourceObject)));
               if (m_minLevel > 0)
                 {
-                  add (make_condition ("max(abs(current1),abs(current2))", ">", m_minLevel, m_sourceObject));
+                  add (std::shared_ptr<gridCondition>(make_condition ("max(abs(current1),abs(current2))", ">", m_minLevel, m_sourceObject)));
                 }
             }
 
@@ -159,11 +159,11 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, unsigned long fl
         {
           if (tap != 1.0)
             {
-              add (make_condition ("abs(" + std::to_string (tap) + "*current1-current2)", ">", m_max_differential, m_sourceObject));
+              add (std::shared_ptr<gridCondition>(make_condition ("abs(" + std::to_string (tap) + "*current1-current2)", ">", m_max_differential, m_sourceObject)));
             }
           else
             {
-              add (make_condition ("abs(current1-current2)", ">", m_max_differential, m_sourceObject));
+              add (std::shared_ptr<gridCondition>(make_condition ("abs(current1-current2)", ">", m_max_differential, m_sourceObject)));
             }
         }
       opFlags.set (link_mode);
@@ -171,7 +171,7 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, unsigned long fl
     }
   else if (dynamic_cast<gridBus *> (m_sourceObject))
     {
-      add (make_condition ("abs(load)", "<=", m_max_differential, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("abs(load)", "<=", m_max_differential, m_sourceObject)));
       opFlags.set (bus_mode);
       opFlags.reset (link_mode);
     }

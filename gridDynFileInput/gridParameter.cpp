@@ -12,7 +12,7 @@
 */
 
 #include "gridParameter.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "gridDynDefinitions.h"
 #include "core/coreExceptions.h"
 

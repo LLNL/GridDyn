@@ -21,7 +21,7 @@
 #include "linkModels/acLine.h"
 #include "gridBus.h"
 #include "simulation/diagnostics.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 //#include <crtdbg.h>
 //test case for link objects
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow)
 
 	auto mm = countDiffs(v3, v, 0.0001);
 	
-	BOOST_CHECK_EQUAL(mm, 0);
+	BOOST_CHECK_EQUAL(mm, 0u);
 
 }
 
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(link_test_fault_powerflow2)
 	BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	auto mm = countDiffs(v3, v, 0.0001);
-	BOOST_CHECK_EQUAL(mm, 0);
+	BOOST_CHECK_EQUAL(mm, 0u);
 
 }
 

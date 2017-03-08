@@ -17,7 +17,7 @@
 #include "griddyn-config.h"
 #include "optHelperClasses.h"
 
-#include "vectData.h"
+#include "utilities/vectData.h"
 #include <string>
 #include <vector>
 #include <memory>

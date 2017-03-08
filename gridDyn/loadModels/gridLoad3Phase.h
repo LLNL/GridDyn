@@ -37,7 +37,7 @@ private:
 	double Qa=0.0; //!<[pu] A Phase reactive power
 	double Qb=0.0; //!<[pu] B Phase reactive power
 	double Qc=0.0; //!<[pu] C Phase reactive power
-
+	double multiplier = 1.0; //!< phase multiplier for amplifying current inputs
 public:
 	explicit gridLoad3Phase(const std::string &objName = "load_$");
 	gridLoad3Phase(double rP, double rQ, const std::string &objName = "load_$");

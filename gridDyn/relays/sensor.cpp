@@ -12,7 +12,7 @@
 */
 
 #include "sensor.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "events/gridEvent.h"
 #include "submodels/gridControlBlocks.h"
 #include "measurement/grabberSet.h"
@@ -21,10 +21,10 @@
 #include "comms/controlMessage.h"
 #include "measurement/gridCondition.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixDataSparse.h"
-#include "matrixDataTranslate.h"
+#include "utilities/matrixDataSparse.h"
+#include "utilities/matrixDataTranslate.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <boost/format.hpp>
 
@@ -166,7 +166,7 @@ void sensor::addsp (std::shared_ptr<coreObject> obj)
 {
   if (std::dynamic_pointer_cast<basicBlock> (obj))
     {
-      add (std::move(std::static_pointer_cast<basicBlock> (obj)));
+      add (std::static_pointer_cast<basicBlock> (obj));
     }
   else
     {
@@ -267,7 +267,7 @@ void sensor::set (const std::string &param,  const std::string &val)
     }
   else if (param == "condition")
     {
-      add (make_condition (val, this));
+       add (std::shared_ptr<gridCondition>(make_condition (val, this)));
     }
   else if (iparam == "filter")
     {

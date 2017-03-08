@@ -15,7 +15,7 @@
 #define COREOBJECT_H_
 
 #include "coreDefinitions.h"
-#include "units.h"
+#include "utilities/units.h"
 
 //common libraries in all code
 //library for printf debug statements
@@ -39,8 +39,10 @@ enum class paramStringType
 
 typedef void gridPositionInfo;
 
-/** @brief      base class for a majority of GridDyn Objects
- Base class for all gridDyn objects class includes common properties for all objects such as name, updates
+class helperObject;
+
+/** @brief      base class for a building simulation objects
+ Base class for all main simulation objects class includes common properties for all objects such as name, updates
 and some common functionality that unifies all objects that are part of the simulation including object ownership, updates, set and get functions, search features,
 alert and logging functions
 **/
@@ -134,17 +136,21 @@ public:
   /**
   * @brief adds an object to another object for instance adding a load to the bus.
   * @param[in] obj the object to add
-  * throws and exception if the object is invalid or cannot be added
+  * throws an exception if the object is invalid or cannot be added
   */
   virtual void add (coreObject * obj);
 
   /**
   * @brief adds a shared ptr object.
   * @param[in] obj the object to add
-  * throws and exception if the object is invalid or cannot be added
+  * throws an exception if the object is invalid or cannot be added
   */
   virtual void addsp (std::shared_ptr<coreObject> obj);
-
+  /** @brief add a helperObject to the object
+  @param[in] obj shared_ptr to a helper object
+  *throws an exception if the object is invalid or cannot be added
+  */
+  virtual void addHelper(std::shared_ptr<helperObject> obj);
   /**
   * @brief remove an object from the calling object
   * @param[in] obj the object to remove

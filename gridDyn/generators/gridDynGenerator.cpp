@@ -20,14 +20,14 @@
 #include "submodels/otherGovernors.h"
 #include "isocController.h"
 #include "core/objectFactoryTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectInterpreter.h"
 #include "controllers/scheduler.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "variableGenerator.h"
 #include "core/coreExceptions.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 
 //#include <set>
 /*

@@ -14,16 +14,18 @@
 #ifndef _FMI_RUNNER_H_
 #define _FMI_RUNNER_H_
 
-#include "gridDynRunner.h"
+#include "gridDynFileInput/gridDynRunner.h"
 #include "fmi/FMI2/fmi2FunctionTypes.h"
 
 class fmiCoordinator;
 class readerInfo;
-
+/** fmiRunner is the execution object for executing under an fmi context
+it inherits from gridDynRunner and adds some extra features necessary for executing under an fMI
+*/
 class fmiRunner : public GriddynRunner
 {
 	private:
-		std::shared_ptr<fmiCoordinator> coord;
+		std::shared_ptr<fmiCoordinator> coord; //!< the coordinator object for managing object that manage the fmi inputs and outputs
 public:
 	fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions);
 
@@ -31,17 +33,18 @@ public:
 	virtual int Initialize(int argc, char *argv[]) final;
 	
 
-	virtual void Run(void);
-
+	virtual void Run(void) override;
+	/** update the FMI outputs*/
 	void UpdateOutputs();
 
-	virtual coreTime Step(coreTime time);
+	virtual coreTime Step(coreTime time) override;
 
-	virtual void Finalize(void);
+	virtual void Finalize(void) override;
 
 	std::uint64_t GetID() const;
 
-	virtual void Set(index_t vr, double val);
+	virtual bool Set(index_t vr, double val);
+	virtual bool SetString(index_t vr, const char *s);
 	virtual double Get(index_t vr);
 
 };

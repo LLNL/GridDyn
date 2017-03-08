@@ -14,7 +14,7 @@
 #include "gridDyn.h"
 #include "events/gridEvent.h"
 
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "events/eventQueue.h"
 #include "gridBus.h"
 #include "solvers/solverInterface.h"

@@ -13,7 +13,7 @@
 
 #include "loadModels/otherLoads.h"
 #include "gridBus.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 

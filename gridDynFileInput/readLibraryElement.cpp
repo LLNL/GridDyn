@@ -15,7 +15,7 @@
 #include "readerHelper.h"
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 
 
 #include <map>

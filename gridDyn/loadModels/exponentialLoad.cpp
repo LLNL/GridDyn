@@ -13,8 +13,8 @@
 
 #include "loadModels/otherLoads.h"
 #include "gridBus.h"
-#include "stringOps.h"
-#include "matrixData.h"
+#include "utilities/stringOps.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
 #include <cmath>
 

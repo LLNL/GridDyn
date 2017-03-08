@@ -19,7 +19,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
 
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <fstream>
 #include <iostream>

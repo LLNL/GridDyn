@@ -15,7 +15,7 @@
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
 #include "gridObjects.h"
-#include "valuePredictor.h"
+#include "utilities/valuePredictor.h"
 
 grabberSet::grabberSet(const std::string &fld, coreObject *obj, bool step_only)
 {

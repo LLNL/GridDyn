@@ -13,7 +13,7 @@
 
 #include "yamlReaderElement.h"
 #include "yamlElement.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>

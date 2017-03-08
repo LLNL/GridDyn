@@ -13,7 +13,6 @@
 
 #include "readElement.h"
 #include "elementReaderTemplates.hpp"
-#include "readerElement.h"
 #include "relays/gridRelay.h"
 #include "gridBus.h"
 #include "loadModels/zipLoad.h"

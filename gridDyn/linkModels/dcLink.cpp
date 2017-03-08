@@ -14,7 +14,7 @@
 #include "linkModels/dcLink.h"
 #include "gridBus.h"
 #include "gridArea.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "primary/dcBus.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"

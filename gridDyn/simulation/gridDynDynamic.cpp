@@ -14,7 +14,7 @@
 
 #include "gridDyn.h"
 
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "events/eventQueue.h"
 #include "gridBus.h"
 #include "solvers/solverInterface.h"
@@ -22,7 +22,7 @@
 #include "faultResetRecovery.h"
 #include "dynamicInitialConditionRecovery.h"
 #include "simulation/diagnostics.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 //system libraries
 #include <algorithm>
 #include <cassert>

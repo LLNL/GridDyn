@@ -18,9 +18,9 @@
 #include "gridDynFileInput.h"
 #include "core/objectInterpreter.h"
 #include "readerHelper.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "readElement.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 const IgnoreListType emptyIgnoreList {};

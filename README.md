@@ -16,9 +16,6 @@ capabilities, and flexibility will continue to improve as projects making use of
 We expect there are still many issues so any bug reports or fixes are welcome.   
  And hopefully even in its current state and as the software improves the broader power systems research community will find it useful.
 
-
-**The public library is initial construction phases and likely will have some issues as we finalize the release and get it working over the next week or so**
-
 Documentation
 ----------------
 

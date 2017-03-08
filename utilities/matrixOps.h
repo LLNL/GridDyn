@@ -13,9 +13,9 @@
 #pragma once
 #ifndef MATRIX_OPS_H
 #define MATRIX_OPS_H
-#include <vector>
-#include "matrixData.h"
 
+#include  "matrixData.h"
+#include <vector>
 /** multiply a matrix data object by a vector
 @details assumes vec has the appropriate size otherwise undefined behavior will occur
 @param[in] ad the matrix to multiply size MxN

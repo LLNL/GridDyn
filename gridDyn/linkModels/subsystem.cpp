@@ -12,7 +12,7 @@
 */
 
 // headers
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactoryTemplates.h"
 #include "linkModels/gridLink.h"
 #include "linkModels/subsystem.h"
@@ -20,7 +20,7 @@
 #include "gridBus.h"
 #include "relays/gridRelay.h"
 #include "core/objectInterpreter.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "core/coreExceptions.h"
 #include <cmath>
 #include <complex>

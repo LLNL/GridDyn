@@ -13,14 +13,14 @@
 
 #include "controlRelay.h"
 #include "core/coreExceptions.h"
-#include "timeSeries.h"
+//#include "utilities/timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/controlMessage.h"
 #include "simulation/gridSimulation.h"
 #include "events/eventQueue.h"
 #include "events/gridEvent.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 #include <boost/format.hpp>
 
@@ -144,7 +144,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           else
             {
               auto fea = generateSetEvent (prevTime + actionDelay, sourceID, m);
-              rootSim->add (std::move(fea));
+              rootSim->add (std::shared_ptr<eventAdapter>(std::move(fea)));
             }
         }
       else
@@ -154,7 +154,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           commLink->transmit (sourceID, std::move(gres));
           //make the event
           auto fea = generateSetEvent (m->m_time, sourceID, m);
-          rootSim->add (std::move(fea));
+          rootSim->add (std::shared_ptr<eventAdapter>(std::move(fea)));
 
         }
       break;
@@ -171,7 +171,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           else
             {
               auto fea = generateGetEvent (prevTime + measureDelay, sourceID, m);
-              rootSim->add (std::move(fea));
+              rootSim->add (std::shared_ptr<eventAdapter>(std::move(fea)));
             }
         }
       else
@@ -180,7 +180,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
           gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
           commLink->transmit (sourceID, std::move(gres));
           auto fea = generateGetEvent (m->m_time,sourceID,m);
-          rootSim->add (std::move(fea));
+          rootSim->add (std::shared_ptr<eventAdapter>(std::move(fea)));
         }
       break;
     case controlMessage::GET_MULTIPLE:
@@ -278,7 +278,7 @@ change_code controlRelay::executeAction (index_t index)
           gres->m_field = cact.field;
           gres->m_value = val;
           gres->m_time = prevTime;
-          commLink->transmit (cact.sourceID, std::move(gres));
+          commLink->transmit (cact.sourceID, std::shared_ptr<commMessage>(std::move(gres)));
           return change_code::no_change;
         }
       else
@@ -290,7 +290,7 @@ change_code controlRelay::executeAction (index_t index)
 			  {
 				  auto gres = std::make_unique<controlMessage>(controlMessage::SET_SUCCESS);
 				  gres->m_actionID = cact.actionID;
-				  commLink->transmit(cact.sourceID, std::move(gres));
+				  commLink->transmit(cact.sourceID, std::shared_ptr<commMessage>(std::move(gres)));
 			  }
 			  return change_code::parameter_change;
 		  }
@@ -300,7 +300,7 @@ change_code controlRelay::executeAction (index_t index)
 			  {
 				  auto gres = std::make_unique<controlMessage>(controlMessage::SET_FAIL);
 				  gres->m_actionID = cact.actionID;
-				  commLink->transmit(cact.sourceID, std::move(gres));
+				  commLink->transmit(cact.sourceID, std::shared_ptr<commMessage>(std::move(gres)));
 			  }
 			  return change_code::execution_failure;
 		 }

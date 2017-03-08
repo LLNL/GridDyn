@@ -13,11 +13,11 @@
 
 #include "acdcConverter.h"
 #include "gridArea.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "primary/dcBus.h"
 #include "submodels/otherBlocks.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 #include "core/coreExceptions.h"
 
 

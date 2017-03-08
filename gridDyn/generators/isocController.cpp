@@ -16,7 +16,7 @@
 
 #include "core/objectFactoryTemplates.h"
 #include "core/coreExceptions.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <algorithm>
 

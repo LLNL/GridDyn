@@ -25,6 +25,7 @@
 #endif
 
 
+class coreObject;
 /** @brief      base class for helper objects
  Base class for all helper objects the main purpose is to deal with names and 
  give a common interface for the various helper objects in GridDyn
@@ -111,6 +112,11 @@ public:
   {
 	  return m_oid;
   }
+  /** 
+  @brief get an expected or actual owner of the helperObject
+  @return the actual or targeted owner of the helperObject
+  */
+  virtual coreObject *getOwner() const;
   protected:
 	  virtual void nameUpdate();
 	  

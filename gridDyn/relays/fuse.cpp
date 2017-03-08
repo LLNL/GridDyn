@@ -18,7 +18,7 @@
 #include "linkModels/gridLink.h"
 #include "gridBus.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 #include "measurement/gridGrabbers.h"
 #include "measurement/stateGrabber.h"
 #include "measurement/grabberSet.h"
@@ -119,7 +119,7 @@ void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
 
   if (dynamic_cast<gridLink *> (m_sourceObject))
     {
-      add (make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject)));
       ge->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
 	  ge->setValue(1.0);
       bus = static_cast<gridLink *> (m_sourceObject)->getBus (m_terminal);
@@ -127,7 +127,7 @@ void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
     }
   else
     {
-      add (make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject)));
       opFlags.set (nonlink_source_flag);
       ge->setTarget (m_sinkObject,"status");
 	  ge->setValue(0.0);
@@ -160,8 +160,8 @@ void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
   gc->setComparison (comparison_type::gt);
   gc2->setComparison (comparison_type::lt);
 
-  add (std::move(gc));
-  add (std::move(gc2));
+  add (std::shared_ptr<gridCondition>(std::move(gc)));
+  add (std::shared_ptr<gridCondition>(std::move(gc2)));
   setConditionState (1,condition_states::disabled);
   setConditionState (2, condition_states::disabled);
 
@@ -171,7 +171,7 @@ void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
   auto ge2 = std::make_unique<functionEventAdapter> ([this]() {
     return setupFuseEvaluation ();
   });
-  add (std::move(ge2));
+  add (std::shared_ptr<functionEventAdapter>(std::move(ge2)));
   if (mp_I2T <= 0.0)
     {
       setActionTrigger (0, 1, 0.0);
@@ -185,7 +185,7 @@ void fuse::dynObjectInitializeA (coreTime time0, unsigned long flags)
   auto ge3 = std::make_unique<functionEventAdapter> ([this]() {
     return blowFuse ();
   });
-  add (std::move(ge3));
+  add (std::shared_ptr<functionEventAdapter>(std::move(ge3)));
   setActionTrigger (1, 2, 0.0);
 
   gridRelay::dynObjectInitializeA (time0, flags);

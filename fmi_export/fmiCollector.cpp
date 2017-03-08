@@ -83,6 +83,12 @@ const std::string &fmiCollector::getSinkName() const
 	}
 }
 
+
+coreObject *fmiCollector::getOwner() const
+{
+	return coord;
+}
+
 void fmiCollector::dataPointAdded(const collectorPoint& cp)
 {
 	if (!coord)

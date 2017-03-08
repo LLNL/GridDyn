@@ -16,14 +16,12 @@
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "solvers/solverInterface.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/coreExceptions.h"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#ifdef ALLOW_DATA_TEST_CASES
 #include <boost/test/data/test_case.hpp>
-#endif
 #include <cstdio>
 #include <iostream>
 
@@ -228,8 +226,8 @@ BOOST_AUTO_TEST_CASE (pflow_test30_no_limit)
   {
 	  printBusResultDeviations(volts1, volts2, ang1, ang2);
   }
-  BOOST_CHECK_EQUAL(vdiff, 0);
-  BOOST_CHECK_EQUAL(adiff, 0);
+  BOOST_CHECK_EQUAL(vdiff, 0u);
+  BOOST_CHECK_EQUAL(adiff, 0u);
 
   //check that the reset works correctly
   gds->reset(reset_levels::voltage_angle);
@@ -248,8 +246,8 @@ BOOST_AUTO_TEST_CASE (pflow_test30_no_limit)
   auto vdiff2 = countDiffs(volts1, volts2, 0.0005);
   auto adiff2 = countDiffs(volts1, volts2, 0.0009);
 
-  BOOST_CHECK_EQUAL(vdiff2, 0);
-  BOOST_CHECK_EQUAL(adiff2, 0);
+  BOOST_CHECK_EQUAL(vdiff2, 0u);
+  BOOST_CHECK_EQUAL(adiff2, 0u);
 
 }
 
@@ -278,7 +276,7 @@ BOOST_AUTO_TEST_CASE (test_pFlow_padjust)
   gds->getBusGenerationReal (P2);
 	//there should be 2 generators that had their real power levels adjusted instead of just the swing bus
   auto cnt = countDiffs(P2, P1, 0.0002);
-  BOOST_CHECK_EQUAL(cnt, 2);
+  BOOST_CHECK_EQUAL(cnt, 2u);
 
 
 }
@@ -309,7 +307,7 @@ BOOST_AUTO_TEST_CASE (pflow_test_dcflow)
   auto ns= makeSolver("kinsol");
   ns->setName("dcflow");
   ns->set("mode", "dc, algebraic");
-  gds->add(std::move(ns));
+  gds->add(std::shared_ptr<solverInterface>(std::move(ns)));
 
   auto smode = gds->getSolverMode("dcflow");
   gds->set("defpowerflow", "dcflow");
@@ -418,36 +416,33 @@ BOOST_AUTO_TEST_CASE(pflow_test_line_modes)
 
   static stringVec approx_modes{ "normal","simple","decoupled","fast_decoupled","simplified_decoupled","small_angle","small_angle_decoupled","small_angle_simplified","linear", };
 
-//static stringVec approx_modes{ "small_angle_decoupled" };
-#ifdef ALLOW_DATA_TEST_CASES
 namespace data = boost::unit_test::data;
 
-//this test case should be moved towards requiring fixture support withe _F version but I don't want to mandate boost 1.61 yet
-BOOST_DATA_TEST_CASE(pflow_test_line_modes, data::make(approx_modes),approx)
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture,pflow_test_line_modes, data::make(approx_modes),approx)
 {
-	auto gdsb = std::make_unique<gridDynSimulation>();
+	gds = std::make_unique<gridDynSimulation>();
 	std::string fname = ieee_test_directory+"ieee30_no_limit.cdf";
 
-	loadCDF(gdsb.get(), fname);
+	loadCDF(gds.get(), fname);
 
-	BOOST_REQUIRE_EQUAL (gdsb->currentProcessState () ,gridDynSimulation::gridState_t::STARTUP);
+	BOOST_REQUIRE_EQUAL (gds->currentProcessState () ,gridDynSimulation::gridState_t::STARTUP);
 
 
-	int count = gdsb->getInt("totalbuscount");
+	int count = gds->getInt("totalbuscount");
 	BOOST_CHECK_EQUAL(count, 30);
 	//check the linkcount
-	count = gdsb->getInt("totallinkcount");
+	count = gds->getInt("totallinkcount");
 	BOOST_CHECK_EQUAL(count, 41);
 	std::vector<double> volts1;
 	std::vector<double> ang1;
 	std::vector<double> volts2;
 	std::vector<double> ang2;
 
-	gdsb->getVoltage(volts1);
-	gdsb->getAngle(ang1);
+	gds->getVoltage(volts1);
+	gds->getAngle(ang1);
 
 		auto ns = makeSolver("kinsol");
-		ns->set("name", approx);
+		ns->setName(approx);
 		try
 		{
 			ns->set("approx", approx);
@@ -458,11 +453,11 @@ BOOST_DATA_TEST_CASE(pflow_test_line_modes, data::make(approx_modes),approx)
 		}
 
 		
-		gdsb->add(std::move(ns));
-		auto smode = gdsb->getSolverMode(approx);
-		gdsb->set("defpowerflow", approx);
-		gdsb->pFlowInitialize(0.0);
-		BOOST_REQUIRE_EQUAL (gdsb->currentProcessState () ,gridDynSimulation::gridState_t::INITIALIZED);
+		gds->add(std::shared_ptr<solverInterface>(std::move(ns)));
+		auto smode = gds->getSolverMode(approx);
+		gds->set("defpowerflow", approx);
+		gds->pFlowInitialize(0.0);
+		BOOST_REQUIRE_EQUAL (gds->currentProcessState () ,gridDynSimulation::gridState_t::INITIALIZED);
 		int errors;
 			if (approx == "small_angle_decoupled")
 			{
@@ -471,18 +466,17 @@ BOOST_DATA_TEST_CASE(pflow_test_line_modes, data::make(approx_modes),approx)
 				for the calculation of the decoupled quantities but are saved with the full trig calculation.  in the small angle
 				approximation this is not done so there is a small error when evaluating the Jacobian right after the power flow initialization
 				since the approximation has not yet been made.  All other modes and times do not have this issue*/
-				errors = runJacobianCheck(gdsb, smode,0.05,false);
+				errors = runJacobianCheck(gds, smode,0.05,false);
 			}
 			else
 			{
-				errors=runJacobianCheck(gdsb, smode,false);
+				errors=runJacobianCheck(gds, smode,false);
 			}
 		BOOST_REQUIRE_MESSAGE(errors==0, "Errors in " << approx << " mode");
 
-		gdsb->powerflow();
-		BOOST_REQUIRE_EQUAL(gdsb->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+		gds->powerflow();
+		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 }
-#endif 
 
 BOOST_AUTO_TEST_SUITE_END ()

@@ -12,8 +12,8 @@
 */
 
 #include "sourceTypes.h"
-#include "gridRandom.h"
-#include "stringOps.h"
+#include "utilities/gridRandom.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.h"
 #include <iostream>

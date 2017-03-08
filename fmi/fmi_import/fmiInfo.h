@@ -15,7 +15,7 @@
 #define FMI_INFORMATION_H_
 
 
-#include "matrixDataOrdered.h"
+#include "utilities/matrixDataOrdered.h"
 #include "FMI2/fmi2TypesPlatform.h"
 #include "fmiEnumDefinitions.h"
 

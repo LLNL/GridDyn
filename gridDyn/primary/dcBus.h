@@ -17,7 +17,7 @@
 // headers
 #include "gridBus.h"
 #include "busControls.h"
-#include "matrixDataTranslate.h"
+#include "utilities/matrixDataTranslate.h"
 
 // forward classes
 

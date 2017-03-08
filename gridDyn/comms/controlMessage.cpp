@@ -12,7 +12,7 @@
 */
 #include "comms/controlMessage.h"
 #include "gridDynDefinitions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 static dMessageFactory<controlMessage, BASE_CONTROL_MESSAGE_NUMBER, BASE_CONTROL_MESSAGE_NUMBER+16> dmf("control");
 

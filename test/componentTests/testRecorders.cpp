@@ -18,7 +18,7 @@
 #include "testHelper.h"
 #include "measurement/collector.h"
 #include "events/gridEvent.h"
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 #include <cstdio>
 #include <cmath>
 

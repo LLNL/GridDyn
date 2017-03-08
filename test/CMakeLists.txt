@@ -52,6 +52,7 @@ set (testLibrary_sources
 	libraryTests/testZipUtilities.cpp
 	libraryTests/testStringConversion.cpp
 	libraryTests/testString_viewConversion.cpp
+	libraryTests/simpleQueueTests.cpp
 	)
 
 	list(APPEND testLibrary_sources ${optional_library_test_files})
@@ -101,7 +102,6 @@ INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynFileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)

@@ -15,7 +15,7 @@
 #define RESERVEDISPATCHER_H_
 
 #include "gridObjects.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <vector>
 

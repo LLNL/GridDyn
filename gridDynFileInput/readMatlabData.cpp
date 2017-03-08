@@ -16,7 +16,7 @@
 #include "readerHelper.h"
 
 
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>

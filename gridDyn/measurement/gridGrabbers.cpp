@@ -20,9 +20,9 @@
 #include "gridArea.h"
 #include "gridBus.h"
 #include "simulation/gridSimulation.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "grabberInterpreter.hpp"
-#include "functionInterpreter.h"
+#include "utilities/functionInterpreter.h"
 #include "objectGrabbers.h"
 #include "core/helperTemplates.h"
 #include "core/coreExceptions.h"
@@ -562,9 +562,8 @@ opGrabber::opGrabber ()
 {
 }
 
-opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGrabber> ggb2, std::string op)
+opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGrabber> ggb2, std::string op):op_name(op)
 {
-  op_name = op;
   if (ggb1)
     {
       bgrabber1 = ggb1;
@@ -573,18 +572,18 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
     {
       bgrabber2 = ggb2;
     }
-  if (isFunctionName (op, function_type::arg2))
+  if (isFunctionName (op_name, function_type::arg2))
     {
-      opptr = get2ArgFunction (op);
+      opptr = get2ArgFunction (op_name);
       vectorGrab = bgrabber1->vectorGrab;
       if ((bgrabber1->loaded)&&(bgrabber2->loaded))
         {
           loaded = true;
         }
     }
-  else if (isFunctionName (op, function_type::vect_arg2))
+  else if (isFunctionName (op_name, function_type::vect_arg2))
     {
-      opptrV = get2ArrayFunction (op);
+      opptrV = get2ArrayFunction (op_name);
       vectorGrab = false;
      
     }

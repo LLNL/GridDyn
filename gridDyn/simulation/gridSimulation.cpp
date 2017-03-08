@@ -21,7 +21,7 @@
 #include "events/eventQueue.h"
 #include "loadModels/zipLoad.h"
 #include "generators/gridDynGenerator.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 
@@ -140,10 +140,11 @@ void gridSimulation::saveRecorders ()
     }
 }
 
+static const std::string consoleprint("consoleprintlevel");
 void gridSimulation::set (const std::string &param,  const std::string &val)
 {
   std::string temp;
-  if (param == "recorddirectory")
+  if ((param == "recorddirectory")||(param=="outputdirectory"))
     {
       recordDirectory = val;
       for (auto col : collectorList)
@@ -157,7 +158,7 @@ void gridSimulation::set (const std::string &param,  const std::string &val)
 	  logPrintLevel = stringToPrintLevel(temp);
      
     }
-  else if (param == "consoleprintlevel")
+  else if (param == consoleprint)
     {
       temp = convertToLowerCase (val);
 	  consolePrintLevel = stringToPrintLevel(temp);
@@ -236,7 +237,7 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
 	   consolePrintLevel = testLevel;
 	  logPrintLevel = testLevel;
   }
-  else if (param == "consoleprintlevel")
+  else if (param == consoleprint)
     {
 	  auto testLevel = static_cast<print_level> (static_cast<int>(val));
 	  if ((testLevel > print_level::trace) || (testLevel < print_level::no_print))

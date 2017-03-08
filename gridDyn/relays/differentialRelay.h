@@ -33,7 +33,7 @@ protected:
   double m_max_differential = 0.2; //!< the maximum allowable differential
   double m_minLevel = 0.01; //!< the minimum absolute level to trigger for relative differential mode
 public:
-  differentialRelay (const std::string &objName = "diffRelay_$");
+  explicit differentialRelay (const std::string &objName = "diffRelay_$");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
   virtual bool getFlag (const std::string &param) const override;

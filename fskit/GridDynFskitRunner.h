@@ -21,6 +21,7 @@ namespace fskit
 }
 class GriddynFskitRunner : public GriddynRunner
 {
+public:
 	GriddynFskitRunner();
 
 	int Initialize(int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler);

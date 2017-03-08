@@ -14,7 +14,7 @@
 #include "contingency.h"
 #include "gridDyn.h"
 #include "events/gridEvent.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <sstream>
 #include <map>

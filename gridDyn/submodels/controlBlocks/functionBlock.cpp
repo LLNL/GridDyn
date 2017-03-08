@@ -12,10 +12,10 @@
 */
 
 #include "submodels/otherBlocks.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
-#include "functionInterpreter.h"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
+#include "utilities/functionInterpreter.h"
+#include "utilities/stringOps.h"
 #include "core/coreObjectTemplates.h"
 
 functionBlock::functionBlock () : basicBlock ("functionBlock_#")

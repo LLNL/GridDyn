@@ -17,10 +17,10 @@
 #include "core/coreObjectTemplates.h"
 #include "fmi_import/fmiLibraryManager.h"
 #include "fmi_import/fmiObjects.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
 #include "outputEstimator.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 #include <algorithm>

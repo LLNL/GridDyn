@@ -17,7 +17,7 @@
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 
-#include <vectorOps.hpp>
+#include "utilities/vectorOps.hpp"
 #include <utility>
 #include <iostream>
 #include <cstdio>

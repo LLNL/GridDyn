@@ -14,7 +14,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include "string_viewOps.h"
+#include "utilities/string_viewOps.h"
 
 #include <iostream>
 

@@ -21,7 +21,7 @@
 #include "gridBus.h"
 #include "solvers/solverInterface.h"
 
-#include <vectorOps.hpp>
+#include "utilities/vectorOps.hpp"
 #include <map>
 #include <utility>
 #include <iostream>
@@ -205,58 +205,5 @@ BOOST_AUTO_TEST_CASE(dynamic_scalable_test)
 
 }
 
-#ifdef ENABLE_IN_DEVELOPMENT_CASES
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
-//test pjm case
-BOOST_AUTO_TEST_CASE(test_pjm_pflow)
-{
 
-	std::string fname = std::string(OTHER_TEST_DIRECTORY "pf.output.raw");
-	gds = std::make_unique<gridDynSimulation>();
-	readerInfo ri;
-	ri.flags = addflags(0, "ignore_step_up_transformers");
-	loadFile(gds, fname, &ri);
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
-	std::vector<double> gv1, gv2;
-	gds->getVoltage(gv1);
-	gds->pFlowInitialize();
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::INITIALIZED);
-	int mmatch = residualCheck(gds, cPflowSolverMode, 0.2, true);
-	if (mmatch>0)
-	{
-		printf("Mmatch failures=%d\n", mmatch);
-	}
-	//BOOST_REQUIRE(mmatch == 0);
-
-
-
-	gds->powerflow();
-	BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
-	gds->getVoltage(gv2);
-	BOOST_REQUIRE(gv1.size() == gv2.size());
-	int diffc = 0;
-	double bdiff = 0;
-	count_t bdiffi = 0;
-	for (size_t kk = 0; kk<gv1.size(); ++kk)
-	{
-		if (std::abs(gv1[kk] - gv2[kk])>0.0015)
-		{
-			++diffc;
-			// printf("vstate %d, %f to %f\n",kk,gv1[kk],gv2[kk]);
-			if (std::abs(gv1[kk] - gv2[kk])>bdiff)
-			{
-				bdiff = std::abs(gv1[kk] - gv2[kk]);
-				bdiffi = kk;
-			}
-		}
-	}
-	 BOOST_CHECK(diffc==0);
-	 if (diffc>0)
-	 {
-	  printf("%d diffs, difference bus %d orig=%f, result=%f\n",diffc, bdiffi,gv1[bdiffi],gv2[bdiffi]);
-	}
-}
-
-#endif
-#endif
 	BOOST_AUTO_TEST_SUITE_END()

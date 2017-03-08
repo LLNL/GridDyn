@@ -12,8 +12,8 @@
 */
 
 #include "sourceTypes.h"
-#include "vectorOps.hpp"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/stringOps.h"
 #include "core/coreObjectTemplates.h"
 #include <cmath>
 

@@ -13,12 +13,13 @@
 
 #include "gridEvent.h"
 #include "gridDyn.h"
-#include "units.h"
+#include "utilities/units.h"
 #include "core/objectInterpreter.h"
 #include "core/factoryTemplates.h"
 #include "core/coreExceptions.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
+#include "reversibleEvent.h"
 #include <sstream>
 
 #include <string>
@@ -31,7 +32,7 @@ static childClassFactory<compoundEvent,gridEvent> cmpdEvnt(std::vector<std::stri
 static childClassFactory<compoundEventPlayer,gridEvent > cmpdEvntPlay(std::vector<std::string>{ "compoundplayer", "multifile", "multiplayer" });
 
 static childClassFactory<interpolatingPlayer,gridEvent> interpPlay(std::vector<std::string>{ "interpolating", "interp","interpolated"});
-
+static childClassFactory<reversibleEvent, gridEvent> revEvnt(std::vector<std::string>{"reversible", "undo", "rollback"});
 
 gridEvent::gridEvent(const std::string &objName):helperObject(objName),triggerTime(maxTime)
 {
@@ -196,7 +197,7 @@ void gridEvent::set(const std::string &param, const std::string &val)
 
 	if (param == "field")
 	{
-		loadField(m_obj, val);
+		setTarget(m_obj, val);
 	}
 	else if (param == "units")
 	{
@@ -224,9 +225,22 @@ void gridEvent::setTime (coreTime time)
 void gridEvent::setValue (double val, gridUnits::units_t newUnits)
 {
   value = val;
-  if (unitType != gridUnits::defUnit)
+  if (newUnits != gridUnits::defUnit)
   {
-	  unitType = newUnits;
+	  if (unitType == gridUnits::defUnit)
+	  {
+		  unitType = newUnits;
+	  }
+	  else
+	  {
+		  value = unitConversion(value, newUnits, unitType, m_obj->get("basepower"));
+		  if (value == kNullVal)
+		  {
+			  value = val;
+			  unitType = newUnits;
+		  }
+	  }
+	  
   }
 }
 
@@ -555,6 +569,8 @@ std::unique_ptr<gridEvent> make_event (gridEventInfo &gdEI, coreObject *rootObje
 		ev = std::make_unique<interpolatingPlayer>(gdEI, rootObject);
 		break;
 	case event_types::reversible:
+		ev = std::make_unique<reversibleEvent>(gdEI, rootObject);
+		break;
 	case event_types::toggle:
 		break;
 	default:

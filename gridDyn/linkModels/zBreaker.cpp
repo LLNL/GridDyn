@@ -15,7 +15,7 @@
 #include "linkModels/zBreaker.h"
 #include "core/coreObjectTemplates.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 #include "core/objectFactoryTemplates.h"

@@ -21,12 +21,12 @@
 
 #include "acBus.h"
 #include "core/objectFactoryTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "submodels/gridControlBlocks.h"
 #include "simulation/contingency.h"
 #include "core/coreExceptions.h"
 //#include "matrixDataSparse.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 
 #include <iostream>

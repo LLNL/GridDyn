@@ -18,11 +18,11 @@
 #include "linkModels/gridLink.h"
 #include "dcBus.h"
 #include "core/objectFactoryTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.h"
-#include "matrixDataCompact.h"
+#include "utilities/matrixDataCompact.h"
 #include "core/coreExceptions.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 #include <iostream>
 

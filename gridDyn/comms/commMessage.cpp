@@ -12,7 +12,7 @@
 */
 
 #include "commMessage.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 static dMessageFactory<commMessage,0,0xFFFFFFF0> dmf ("message");
 

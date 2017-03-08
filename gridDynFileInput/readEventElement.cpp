@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
-   * LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,138 +9,153 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
+#include "elementReaderTemplates.hpp"
+#include "formatInterpreters/readerElement.h"
 #include "readElement.h"
 #include "readerHelper.h"
-#include "readerElement.h"
-#include "elementReaderTemplates.hpp"
 
 #include "events/gridEvent.h"
-#include "units.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
+#include "utilities/units.h"
 #include <iostream>
 
 using namespace readerConfig;
 
-static const std::string eventNameString("event");
+static const std::string eventNameString ("event");
 
-static const IgnoreListType eventIgnoreStrings{
-	"file","name", "column","value","va", "units","description","period",
-	"time","t","offset", "units", "gain", "bias", "field", "target", "type"
-};
+static const IgnoreListType eventIgnoreStrings{"file",        "name",   "column", "value",  "va",     "units",
+                                               "description", "period", "time",   "t",      "offset", "units",
+                                               "gain",        "bias",   "field",  "target", "type"};
 
-void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo &ri,coreObject *obj)
+void readEventElement (std::shared_ptr<readerElement> &aP, gridEventInfo &gdEI, readerInfo &ri, coreObject *obj)
 {
-	if (aP->getName() != "event")
-	{
-		gdEI.type = aP->getName();
-	}
-  //get the event strings that may be present
-auto eventString = aP->getMultiText (", ");
-	if (!eventString.empty())
-	{
-		gdEI.loadString(eventString, obj);
-	}
-
-	//check for the field attributes
-	std::string name = getElementField(aP, "name", defMatchType);
-	if (!name.empty())
-	{
-		name = ri.checkDefines(name);
-		gdEI.name = name;
-	}
-
-	//check for the field attributes
-	std::string type = getElementField(aP, "type", defMatchType);
-	if (!type.empty())
-	{
-		gdEI.type = ri.checkDefines(type);
-	}
-
-  //check for the field attributes
-  auto targetList = getElementFieldMultiple (aP, "target", defMatchType);
-  for (auto &ss:targetList)
+    if (aP->getName () != "event")
     {
-      ss = ri.checkDefines (ss);
-	  gdEI.targetObjs.push_back(locateObject(ss, obj));
+        gdEI.type = aP->getName ();
+    }
+    // get the event strings that may be present
+    auto eventString = aP->getMultiText (", ");
+    if (!eventString.empty ())
+    {
+        gdEI.loadString (eventString, obj);
     }
 
-  auto fieldList = getElementFieldMultiple (aP, "field", defMatchType);
-  for (auto &ss : fieldList)
-  {
-	  ss = ri.checkDefines(ss);
-	  gdEI.fieldList.push_back(ss);
-  }
-  auto unitList = getElementFieldMultiple(aP, "units", defMatchType);
-  for (auto &ss : unitList)
-  {
-	  ss = ri.checkDefines(ss);
-	  gdEI.units.push_back(gridUnits::getUnits(ss));
-  }
- 
-  gdEI.description = getElementField (aP, "description", defMatchType);
-
-  std::string field = getElementField (aP, "period", defMatchType);
-  if (!field.empty ())
+    // check for the field attributes
+    std::string name = getElementField (aP, "name", defMatchType);
+    if (!name.empty ())
     {
-      gdEI.period = interpretString (field,ri);
+        name = ri.checkDefines (name);
+        gdEI.name = name;
     }
 
-  field = getElementFieldOptions (aP, { "t","time" }, defMatchType);
-  if (!field.empty ())
+    // check for the field attributes
+    std::string type = getElementField (aP, "type", defMatchType);
+    if (!type.empty ())
     {
-      gdEI.time = str2vector<coreTime> (field,negTime);
+        gdEI.type = ri.checkDefines (type);
     }
 
-  field = getElementFieldOptions (aP, { "value","val" }, defMatchType);
-  if (!field.empty ())
+    // check for the field attributes
+    auto targetList = getElementFieldMultiple (aP, "target", defMatchType);
+    for (auto &ss : targetList)
     {
-      gdEI.value = str2vector (field, kNullVal);
+        ss = ri.checkDefines (ss);
+        gdEI.targetObjs.push_back (locateObject (ss, obj));
     }
 
-  name = getElementField (aP, "file", defMatchType);
-  if (!name.empty ())
+    auto fieldList = getElementFieldMultiple (aP, "field", defMatchType);
+    for (auto &ss : fieldList)
     {
-      ri.checkFileParam (name);
-      gdEI.file = name;
+        ss = ri.checkDefines (ss);
+        gdEI.fieldList.push_back (ss);
+    }
+    auto unitList = getElementFieldMultiple (aP, "units", defMatchType);
+    for (auto &ss : unitList)
+    {
+        ss = ri.checkDefines (ss);
+        gdEI.units.push_back (gridUnits::getUnits (ss));
     }
 
-  field = getElementField (aP, "column", defMatchType);
-  if (!field.empty ())
+    gdEI.description = getElementField (aP, "description", defMatchType);
+
+    std::string field = getElementField (aP, "period", defMatchType);
+    if (!field.empty ())
     {
-      gdEI.columns.push_back(static_cast<int> (interpretString (field, ri)));
+        gdEI.period = interpretString (field, ri);
     }
 
+    field = getElementFieldOptions (aP, {"t", "time"}, defMatchType);
+    if (!field.empty ())
+    {
+        gdEI.time = str2vector<coreTime> (field, negTime);
+    }
 
+    field = getElementFieldOptions (aP, {"value", "val"}, defMatchType);
+    if (!field.empty ())
+    {
+        gdEI.value = str2vector (field, kNullVal);
+    }
+
+    name = getElementField (aP, "file", defMatchType);
+    if (!name.empty ())
+    {
+        ri.checkFileParam (name);
+        gdEI.file = name;
+    }
+
+    field = getElementField (aP, "column", defMatchType);
+    if (!field.empty ())
+    {
+        gdEI.columns.push_back (static_cast<int> (interpretString (field, ri)));
+    }
 }
 
 
 int loadEventElement (std::shared_ptr<readerElement> &element, coreObject *obj, readerInfo &ri)
 {
 
-  int ret = FUNCTION_EXECUTION_SUCCESS;
-  element->bookmark ();
-  gridEventInfo gdEI;
-  readEventElement (element,gdEI,ri,obj);
-  auto gdE = make_event (gdEI, obj);
-  if (!gdE)
-  {
-	  WARNPRINT(READER_WARN_IMPORTANT, "unable to create an event of type " << gdEI.type );
-	  return FUNCTION_EXECUTION_FAILURE;
-  }
-  setAttributes(gdE.get(), element, eventNameString, ri, eventIgnoreStrings);
-  setParams(gdE.get(), element, eventNameString, ri, eventIgnoreStrings);
+    int ret = FUNCTION_EXECUTION_SUCCESS;
+    element->bookmark ();
+    gridEventInfo gdEI;
+    readEventElement (element, gdEI, ri, obj);
+    auto gdE = make_event (gdEI, obj);
+    if (!gdE)
+    {
+        WARNPRINT (READER_WARN_IMPORTANT, "unable to create an event of type " << gdEI.type);
+        return FUNCTION_EXECUTION_FAILURE;
+    }
+    setAttributes (gdE.get (), element, eventNameString, ri, eventIgnoreStrings);
+    setParams (gdE.get (), element, eventNameString, ri, eventIgnoreStrings);
 
-  if (!(gdE->isArmed ()))
+    if (!(gdE->isArmed ()))
     {
-      WARNPRINT (READER_WARN_IMPORTANT, "event for " << gdEI.name << ":unable to load event");
-      ret = FUNCTION_EXECUTION_FAILURE;
+        WARNPRINT (READER_WARN_IMPORTANT, "event for " << gdEI.name << ":unable to load event");
+        ret = FUNCTION_EXECUTION_FAILURE;
     }
-  else
+    else
     {
-      ri.events.push_back (std::move(gdE));
+        auto owner = gdE->getOwner ();
+        if (owner)
+        {  // check if the event has a specified owner
+            auto spE = std::shared_ptr<gridEvent> (std::move (gdE));
+            try
+            {  // this could throw in which case we can't move the object into it first
+                owner->addHelper (spE);
+            }
+            catch (const objectAddFailure &)
+            {
+                WARNPRINT (READER_WARN_IMPORTANT,
+                           "Event: " << gdE->getName () << " unable to be added to " << owner->getName ());
+                ri.events.push_back (std::move (spE));
+            }
+        }
+        else
+        {  // if it doesn't just put it on the stack and deal with it later
+            ri.events.push_back (std::move (gdE));
+        }
     }
-  element->restore ();
-  return ret;
+    element->restore ();
+    return ret;
 }

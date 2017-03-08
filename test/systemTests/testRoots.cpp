@@ -16,8 +16,8 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "vectorOps.hpp"
-#include "timeSeries.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/timeSeries.h"
 #include <cstdio>
 //test case for coreObject object
 

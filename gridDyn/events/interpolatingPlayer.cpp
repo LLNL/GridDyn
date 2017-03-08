@@ -12,11 +12,11 @@
 */
 
 #include "gridEvent.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "gridDyn.h"
-#include "units.h"
+#include "utilities/units.h"
 #include "core/objectInterpreter.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/helperTemplates.h"
 #include "core/coreExceptions.h"
 #include <sstream>

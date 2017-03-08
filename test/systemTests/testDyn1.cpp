@@ -19,7 +19,7 @@
 #include "primary/infiniteBus.h"
 #include "testHelper.h"
 #include "simulation/diagnostics.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 //test case for coreObject object
 
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_genModel)
   //check for stability
   BOOST_REQUIRE_EQUAL (st.size (),st2.size ());
   auto diffs = countDiffs(st, st2, 0.0001);
-  BOOST_CHECK_EQUAL(diffs, 0);
+  BOOST_CHECK_EQUAL(diffs, 0u);
 
 
 }

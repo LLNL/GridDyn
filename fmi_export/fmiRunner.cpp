@@ -15,7 +15,7 @@
 #include "fmi/FMI2/fmi2Functions.h"
 #include "fmiCoordinator.h"
 #include "gridDyn.h"
-#include "gridDynFileInput.h"
+#include "gridDynFileInput/gridDynFileInput.h"
 #include "boost/filesystem.hpp"
 #include "loadFMIExportObjects.h"
 
@@ -80,9 +80,15 @@ std::uint64_t fmiRunner::GetID() const
 }
 
 
-void fmiRunner::Set(index_t vr, double val)
+bool fmiRunner::Set(index_t vr, double val)
 {
-	coord->sendInput(vr, val);
+	return coord->sendInput(vr, val);
+}
+
+
+bool fmiRunner::SetString(index_t vr, const char *s)
+{
+	return coord->sendInput(vr, s);
 }
 
 double fmiRunner::Get(index_t vr)

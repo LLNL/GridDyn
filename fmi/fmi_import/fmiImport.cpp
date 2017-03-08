@@ -13,9 +13,9 @@
 
 #include "fmiImport.h"
 #include "fmiObjects.h"
-#include "zipUtilities.h"
+#include "utilities/zipUtilities.h"
 
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include <map>
 #include <boost/dll/shared_library.hpp>
 #include <boost/dll/import.hpp>
@@ -305,7 +305,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
 #else 
 #ifdef MACOS
 	sopath /= "darwin64";
-	sopath /= identifier + ".so";
+	sopath /= identifier + ".dylib";
 #else
 	sopath /= "linux64";
 	sopath /= identifier + ".so";
@@ -325,7 +325,7 @@ path fmiLibrary::findSoPath(fmutype_t type)
 #else 
 #ifdef MACOS
 		sopath /= "darwin32";
-		sopath /= identifier + ".so";
+		sopath /= identifier + ".dylib";
 #else
 		sopath /= "linux32";
 		sopath /= identifier + ".so";

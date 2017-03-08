@@ -66,12 +66,19 @@ set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
 ###########################################
 set(JSONCPP_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 
+if (UNIX)
+   # Redhat has a libjson installed in /lib64 that conflicts; force a build of local jsoncpp
+   build_jsoncpp()
+   find_package(JsonCPP)	
+else(UNIX)
 find_package(JsonCPP)
 
 if (NOT JSONCPP_FOUND)
 build_jsoncpp()
 find_package(JsonCPP)
 endif (NOT JSONCPP_FOUND)
+endif (UNIX)
+
 
 ###########################################
 # building ticpp
@@ -103,8 +110,8 @@ endif (NOT TINYXML2_FOUND)
 add_library(formatInterpreter STATIC ${elementReader_files})
 
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
-
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include/)
 
 IF (YAML_FOUND)
 list(APPEND external_library_list ${YAML_LIBRARIES})
@@ -114,7 +121,7 @@ list(APPEND external_library_list ${JSONCPP_LIBRARIES} ${TICPP_LIBRARIES} ${TINY
 
 set (external_library_list ${external_library_list} PARENT_SCOPE)
 
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include/)
+
 
 
 INSTALL(TARGETS formatInterpreter

@@ -14,7 +14,7 @@
 #include "busControls.h"
 #include "dcBus.h"
 #include "linkModels/dcLink.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 
 dcBusControls::dcBusControls(dcBus *busToControl):controlledBus(busToControl)

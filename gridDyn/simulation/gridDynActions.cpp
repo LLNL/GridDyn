@@ -13,7 +13,7 @@
 
 #include "gridDynActions.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 gridDynAction::gridDynAction()
 {

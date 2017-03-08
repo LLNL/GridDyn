@@ -18,7 +18,7 @@
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "sourceModels/sourceTypes.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include <cstdio>
 
 #define SOURCE_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/source_tests/"

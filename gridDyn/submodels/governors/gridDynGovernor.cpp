@@ -17,7 +17,7 @@
 #include "core/objectFactoryTemplates.h"
 #include "core/coreObjectTemplates.h"
 #include "gridBus.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 
 
 //Create the component factories for the various governors
@@ -36,7 +36,7 @@ static childTypeFactory<gridDynGovernorTgov1, gridDynGovernor> gfgov5 ("governor
 
 using namespace gridUnits;
 
-gridDynGovernor::gridDynGovernor (const std::string &objName) : gridSubModel (objName), dbb ("deadbad"),cb (T1,"filter"), delay (T3,"outFilter")
+gridDynGovernor::gridDynGovernor (const std::string &objName) : gridSubModel (objName), dbb ("deadband"),cb (T1,"filter"), delay (T3,"outFilter")
 {
   // default values
   cb.set ("bias", -1.0);

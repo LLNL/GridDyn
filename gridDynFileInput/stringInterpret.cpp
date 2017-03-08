@@ -11,9 +11,9 @@
  * LLNS Copyright End
 */
 
-#include "functionInterpreter.h"
-#include "stringConversion.h"
-#include "string_viewConversion.h"
+#include "utilities/functionInterpreter.h"
+#include "utilities/stringConversion.h"
+#include "utilities/string_viewConversion.h"
 #include "gridDynFileInput.h"
 
 #include <cmath>

@@ -19,7 +19,7 @@
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -278,7 +278,7 @@ void pspReadBus (gridBus *bus, std::string line, double base, const basicReaderI
         }
     }
 
-  bus->set ("name", temp);      //set the name
+  bus->setName( temp);      //set the name
 
   //get the baseVoltage
   temp = line.substr (18, 3);
@@ -474,7 +474,6 @@ void pspReadBranch (coreObject *parentObject, std::string line, std::string line
   gridBus *bus1, *bus2;
   gridLink *lnk;
   int ind1, ind2;
-  double R, X;
   double val;
   bool istransformer = false;
   std::string temp = line.substr (0, 4);
@@ -533,49 +532,22 @@ void pspReadBranch (coreObject *parentObject, std::string line, std::string line
 	  
   }
   lnk->setName (temp2);
-  try
-  {
-	  parentObject->add(lnk);
-  }
-  catch (const objectAddFailure &)
-  {
-	  //must be a parallel branch  TODO:: use circuit information or something else to avoid repeated try catch
-	  std::string sub = lnk->getName();
-	  char m = 'a';
-	  while (lnk->isRoot())
-	  {
-		  lnk->setName(sub + '_' + m);
-		  m = m + 1;
-		  try
-		  {
-			  parentObject->add(lnk);
-		  }
-		  catch (const objectAddFailure &e)
-		  {
-			  if (m > 'z')
-			  {
-				  throw(e);
-			  }
-		  }
-	  }
-  }
- 
+  addToParentRename(lnk, parentObject);
+  
   //skip the load flow area and loss zone and circuit for now
 
   //get the branch type
-  temp = line.substr (6, 1);
-  trimString (temp);
+  temp = trim(line.substr (6, 1));
 
 
   //get the branch impedance
-  R = 0, X = 0;
   temp = line.substr (17, 6);
-  R = numeric_conversion<double>(temp, 0.0);
+  auto R = numeric_conversion<double>(temp, 0.0);
   temp = line.substr (23, 6);
-  X = numeric_conversion<double>(temp, 0.0);
+  auto X = numeric_conversion<double>(temp, 0.0);
 
-  lnk->set ("r", R / 100);
-  lnk->set ("x", X / 100);
+  lnk->set ("r", R / 100.0);
+  lnk->set ("x", X / 100.0);
   //get line capacitance
   temp = line.substr (29, 6);
   val = numeric_conversion<double>(temp,0.0);
@@ -588,13 +560,13 @@ void pspReadBranch (coreObject *parentObject, std::string line, std::string line
       val = numeric_conversion<double>(temp,0.0);
       if (val > 0.0)
         {
-          lnk->set ("tap", val / 1000);
+          lnk->set ("tap", val / 1000.0);
         }
       //tapAngle
       val = numeric_conversion (trim (line.substr (50, 5)),0.0);
       if (val != 0.0)
         {
-          lnk->set ("tapangle", val / 1000);
+          lnk->set ("tapangle", val / 1000.0);
         }
     }
 }

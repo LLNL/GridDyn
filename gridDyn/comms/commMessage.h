@@ -39,14 +39,16 @@ public:
 		replyMessageType = 2,
 		unknownMessageType = 0xFFFFFFFF,
   };
+	//default constructor
   commMessage ()
   {
   }
+  /**constructor from a message type */
   commMessage (std::uint32_t type) : m_messageType (type)
   {
   }
   virtual ~commMessage() = default;
-
+  /** get the message type*/
   std::uint32_t getMessageType(void) const
   {
 	  return m_messageType;
@@ -85,7 +87,7 @@ class messageFactory
 {
 public:
   std::string  name;
-  messageFactory (const std::string & typeName) : name (typeName)
+  explicit messageFactory (const std::string & typeName) : name (typeName)
   {
   }
   virtual ~messageFactory() = default;
@@ -139,7 +141,7 @@ class dMessageFactory : public messageFactory
 {
   static_assert (std::is_base_of<commMessage, Messagetype>::value, "factory class must have commMessage as base");
 public:
-  dMessageFactory (const std::string &typeName) : messageFactory (typeName)
+  explicit dMessageFactory (const std::string &typeName) : messageFactory (typeName)
   {
     coreMessageFactory::instance ()->registerFactory (typeName, this);
   }

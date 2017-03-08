@@ -26,6 +26,7 @@ set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
 include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/gridDyn)
 include_directories(${MPI_INCLUDE_PATH})
 
 add_library(coupling_static_lib STATIC ${shared_sources} ${shared_headers})

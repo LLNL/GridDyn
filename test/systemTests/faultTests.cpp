@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
 #include "submodels/gridDynGenModel.h"

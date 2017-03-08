@@ -15,7 +15,6 @@
 #include "readElement.h"
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
-#include "readerElement.h"
 #include <cstdio>
 #include <iterator>
 #include <map>

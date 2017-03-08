@@ -18,8 +18,8 @@
 #include "testHelper.h"
 #include "submodels/gridControlBlocks.h"
 #include "relays/gridRelay.h"
-#include "vectorOps.hpp"
-#include "timeSeriesMulti.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/timeSeriesMulti.h"
 #include "core/objectFactory.h"
 #include "simulation/diagnostics.h"
 #include <cstdio>

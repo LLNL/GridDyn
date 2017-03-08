@@ -15,7 +15,7 @@
 #include "generators/gridDynGenerator.h"
 #include "core/objectFactory.h"
 #include "gridBus.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
 
 using namespace gridUnits;

@@ -19,10 +19,9 @@
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
-#include "stringOps.h"
-#include "string_viewOps.h"
-#include "string_viewConversion.h"
+#include "utilities/stringConversion.h"
+#include "utilities/stringOps.h"
+#include "utilities/string_viewConversion.h"
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
@@ -98,10 +97,28 @@ int getLineIndex (string_view line)
 {
   trimString (line);
   auto pos = line.find_first_not_of ("0123456789");
-  int index = numeric_conversion<int>(line.substr(0, pos), -1);
-  return index;
+  return numeric_conversion<int>(line.substr(0, pos), -1);
 }
 
+void ignoreSection(std::string line, std::ifstream &file)
+{
+	int cnt = getSectionCount(line);
+
+	int bcount = 0;
+	if (cnt < 0)
+	{
+		cnt = kBigINT;
+	}
+	while (bcount < cnt)
+	{
+		nextLine(file, line);
+		int index = getLineIndex(line);
+		if (index < 0)
+		{
+		}
+		++bcount;
+	}
+}
 
 void ProcessSection(std::string line, std::ifstream &file, std::function<void(string_view)> Func)
 {
@@ -194,7 +211,16 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
                 }
               title += temp1;
             }
-          parentObject->set ("name", title);
+		  if (title.size() > 50)
+		  {
+			  parentObject->setName(stringOps::trim(title.substr(0, 50)));
+			  parentObject->setDescription(title);
+		  }
+		  else
+		  {
+			  parentObject->setName(title);
+		  }
+          
         }
       else if (tokens[0] == "comments")
         {
@@ -207,9 +233,10 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
                 }
               comments += temp1;
             }
+		  stringOps::trimString(comments);
           if (!comments.empty ())
             {
-              parentObject->set ("description", comments);
+              parentObject->set ("description", parentObject->getDescription()+comments);
             }
         }
       else if (tokens[0] == "bus")
@@ -301,9 +328,53 @@ void loadEPC (coreObject *parentObject, const std::string &filename, const basic
 		  ProcessSectionObject<zipLoad>(line, file, "shunt", busList, [base](zipLoad *ld, string_view config) {epcReadFixedShunt(ld, config, base); });
           
         }
+	  else if (tokens[0] == "svd")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "area")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "zone")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "interface")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "z")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "dc")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "gcd")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "owner")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "transaction")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "qtable")
+	  {
+		  ignoreSection(line, file);
+	  }
+	  else if (tokens[0] == "end")
+	  {
+		  break;
+	  }
       else
         {
-		  std::cerr << "unrecognized token" << tokens[0] << '\n';
+		  std::cerr << "unrecognized token " << tokens[0] << '\n';
         }
     }
   file.close ();
@@ -387,7 +458,7 @@ void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicRea
   auto strvec = splitlineBracket (line," :",default_bracket_chars,delimiter_compression::on);
   //get the bus name
   auto temp = strvec[0];
-  std::string temp2 = strvec[1].to_string();
+  std::string temp2 = trim(removeQuotes(strvec[1])).to_string();
 
   if (bri.prefix.empty ())
     {
@@ -456,6 +527,12 @@ void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicRea
       bus->set ("voltage", vm);
     }
 
+  //auto area = numeric_conversion<int>(strvec[7], 0);
+  auto zone = numeric_conversion<int>(strvec[8], 0);
+  if (zone != 0)
+  {
+	  bus->set("zone", static_cast<double>(zone));
+  }
    vm = numeric_conversion<double>(strvec[9],0.0);
    va = numeric_conversion<double>(strvec[10],0.0);
   if (va != 0)
@@ -474,10 +551,6 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
 {
   std::string temp;
   std::string prefix;
-  double p;
-  double q;
-  int status;
-
 
   auto strvec = splitlineBracket (line, " :", default_bracket_chars,delimiter_compression::on);
 
@@ -496,7 +569,7 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
       ld->setName (prefix);
     }
   //get the status
-  status = toIntSimple(strvec[5]);
+  int status = toIntSimple(strvec[5]);
   if (status == 0)
     {
       ld->disable();
@@ -504,8 +577,8 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
   //skip the area and zone information for now
 
   //get the constant power part of the load
-   p = numeric_conversion<double>(strvec[6],0.0);
-   q = numeric_conversion<double>(strvec[7],0.0);
+   double p = numeric_conversion<double>(strvec[6],0.0);
+   double q = numeric_conversion<double>(strvec[7],0.0);
   if (p != 0.0)
     {
       ld->set ("p", p, MW);
@@ -545,10 +618,6 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
 {
   std::string temp;
   std::string prefix;
-  double p;
-  double q;
-  int status;
-
 
   auto strvec = splitlineBracket (line, " :",default_bracket_chars, delimiter_compression::on);
 
@@ -569,7 +638,7 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
 
 
   //get the status
-  status = toIntSimple (strvec[10]);
+  int status = toIntSimple (strvec[10]);
   if (status == 0)
     {
       ld->disable();
@@ -577,8 +646,8 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
   //skip the area and zone information for now
 
   //get the constant power part of the load
-   p = numeric_conversion<double>(strvec[13],0.0);
-   q = numeric_conversion<double>(strvec[14],0.0);
+   double p = numeric_conversion<double>(strvec[13],0.0);
+   double q = numeric_conversion<double>(strvec[14],0.0);
   if (p != 0.0)
     {
       ld->set ("yp", p, puMW);
@@ -599,13 +668,13 @@ void epcReadGen (gridDynGenerator *gen, string_view	 line, double /*base*/)
 
   //get the gen index and name
   std::string prefix = gen->getParent ()->getName () + "_Gen";
-  if (!strvec[3].empty ())
+  if (!trim(removeQuotes(strvec[3])).empty ())
     {
       prefix += '_' + strvec[3].to_string();
     }
-  if (!strvec[4].empty ())
+  if (!trim(removeQuotes(strvec[4])).empty ())
     {
-      gen->setName (trim(strvec[5]).to_string());
+      gen->setName (trim(removeQuotes(strvec[4])).to_string());
     }
   else
     {
@@ -674,44 +743,61 @@ void epcReadGen (gridDynGenerator *gen, string_view	 line, double /*base*/)
 
 }
 
+/** function to generate a name for a line based on the input data*/
+std::string generateLineName(const utilities::string_viewVector &svec, const std::string &prefix)
+{
+	std::string temp = trim(removeQuotes(svec[1])).to_string();
+	std::string temp2;
+	if (temp.empty())
+	{
+		temp = trim(svec[0]).to_string();
+	}
+	if (prefix.empty())
+	{
+		temp2 = temp + "_to_";
+	}
+	else
+	{
+		temp2 = prefix + '_' + temp + "_to_";
+	}
+
+	temp = trim(removeQuotes(svec[4])).to_string();
+	if (temp.empty())
+	{
+		temp = trim(svec[3]).to_string();
+	}
+	temp2 = temp2 + temp;
+	if (trim(svec[7]) != "1")
+	{
+		temp2.push_back('_');
+		temp2.push_back(trim(svec[7])[0]);
+	}
+	return temp2;
+}
 
 void epcReadBranch (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
-  std::string temp2;
-  gridBus *bus1, *bus2;
-  gridLink *lnk;
-  double val;
-  int status;
 
   auto strvec = splitlineBracket (line, " :",default_bracket_chars,delimiter_compression::on);
 
-  std::string temp = trim(strvec[0]).to_string();
+  //get the name of the from bus
   
-  int ind1 = std::stoi (temp);
-  if (bri.prefix.empty ())
-    {
-      temp2 = temp + "_to_";
-    }
-  else
-    {
-      temp2 = bri.prefix + '_' + temp + "_to_";
-    }
+  
+  int ind1 = numeric_conversion<int>(strvec[0],0);
+ 
+  int ind2 = numeric_conversion<int>(strvec[3], 0);
+  
+  gridBus *bus1 = busList[ind1 - 1];
+  gridBus *bus2 = busList[ind2 - 1];
 
-  temp = trim(strvec[3]).to_string();
-  int ind2 = std::stoi (temp);
-
-  temp2 = temp2 + temp;
-  bus1 = busList[ind1 - 1];
-  bus2 = busList[ind2 - 1];
-
+  //check the circuit identifier
+  auto name = generateLineName(strvec, bri.prefix);
+  auto lnk = new acLine(name);
   if (!strvec[8].empty ())
     {
-      lnk = new acLine (strvec[8].to_string());
+      //this might have something to do with path info
     }
-  else
-    {
-      lnk = new acLine (temp2);
-    }
+
 
 
   //set the base power to that used this model
@@ -719,9 +805,9 @@ void epcReadBranch (coreObject *parentObject, string_view line, double base, std
   lnk->updateBus (bus1, 1);
   lnk->updateBus (bus2, 2);
 
-  parentObject->add (lnk);
+  addToParentRename(lnk, parentObject);
   //get the branch parameters
-  status =toIntSimple (strvec[9]);
+  int status =toIntSimple (strvec[9]);
   if (status == 0)
     {
       lnk->disable();
@@ -741,7 +827,7 @@ void epcReadBranch (coreObject *parentObject, string_view line, double base, std
 
 
   //get line capacitance
-   val = numeric_conversion<double>(strvec[12],0.0);
+   double val = numeric_conversion<double>(strvec[12],0.0);
   if (val != 0)
     {
       lnk->set ("b", val);
@@ -772,61 +858,52 @@ void epcReadBranch (coreObject *parentObject, string_view line, double base, std
 
 void epcReadTX (coreObject *parentObject, string_view line, double base, std::vector<gridBus *> &busList, const basicReaderInfo &bri)
 {
-  std::string temp2;
-  gridBus *bus1, *bus2;
+
   gridLink *lnk;
   int code;
-  int ind1, ind2;
-  double R, X;
   double val;
   int status;
   int cbus;
 
   auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
+  //get the name of the from bus
 
-  auto temp = trim(strvec[0]).to_string();
-  ind1 = std::stoi (temp);
-  if (bri.prefix.empty ())
-    {
-      temp2 = "tx_" + temp + "_to_";
-    }
-  else
-    {
-      temp2 = bri.prefix + "_tx_" + temp + "_to_";
-    }
 
-  temp = trim(strvec[3]).to_string();
-  ind2 = std::stoi (temp);
+  int ind1 = numeric_conversion<int>(strvec[0], 0);
 
-  temp2 = temp2 + temp;
-  bus1 = busList[ind1 - 1];
-  bus2 = busList[ind2 - 1];
+  int ind2 = numeric_conversion<int>(strvec[3], 0);
 
+  gridBus *bus1 = busList[ind1 - 1];
+  gridBus *bus2 = busList[ind2 - 1];
+
+  //check the circuit identifier
+
+  auto name = generateLineName(strvec, (bri.prefix.empty())?"TX_":(bri.prefix+"_TX_"));
   code = numeric_conversion<int> (strvec[9],1);
   switch (code)
     {
     case 1:
     case 11:
       code = 1;
-      lnk = new acLine ();
+      lnk = new acLine (name);
       // lnk->set ("type", "transformer");
       break;
     case 2:
     case 12:
       code = 2;
-      lnk = new adjustableTransformer ();
+      lnk = new adjustableTransformer (name);
       lnk->set ("mode", "voltage");
       break;
     case 3:
     case 13:
       code = 3;
-      lnk = new adjustableTransformer ();
+      lnk = new adjustableTransformer (name);
       lnk->set ("mode", "mvar");
       break;
     case 4:
     case 14:
       code = 4;
-      lnk = new adjustableTransformer ();
+      lnk = new adjustableTransformer (name);
       lnk->set ("mode", "mw");
       break;
     default:
@@ -840,15 +917,11 @@ void epcReadTX (coreObject *parentObject, string_view line, double base, std::ve
 
   if (!strvec[7].empty ())
     {
-      lnk->setName (trim(strvec[8]).to_string());
-    }
-  else
-    {
-      lnk->setName (temp2);
+      //lnk->setName (trim(strvec[8]).to_string());
     }
 
 
-  parentObject->add (lnk);
+  addToParentRename(lnk,parentObject);
   //get the branch parameters
   status = toIntSimple (strvec[9]);
   if (status == 0)
@@ -859,8 +932,8 @@ void epcReadTX (coreObject *parentObject, string_view line, double base, std::ve
   double tbase = base;
    tbase = numeric_conversion<double>(strvec[22],0.0);
   //primary and secondary winding resistance
-   R = numeric_conversion<double>(strvec[23],0.0);
-   X = numeric_conversion<double>(strvec[24],0.0);
+  double R = numeric_conversion<double>(strvec[23],0.0);
+  double X = numeric_conversion<double>(strvec[24],0.0);
 
   lnk->set ("r", R * tbase / base);
   lnk->set ("x", X * tbase / base);

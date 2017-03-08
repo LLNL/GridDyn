@@ -574,4 +574,20 @@ BOOST_AUTO_TEST_CASE(simple_3phase_load_test)
 	BOOST_CHECK_SMALL(res[2], 0.0000001);
 }
 
+
+BOOST_AUTO_TEST_CASE(secondary_3phase_load_test)
+{
+	auto ld3 = std::make_unique<gridLoad3Phase>();
+
+	ld3->setLoad(5.0, 1.0);
+	
+	
+	ld3->set("imaga", 3.0);
+	auto Pa = ld3->get("pa");
+	ld3->set("imaga", 6.0);
+	auto Pa2 = ld3->get("pa");
+	BOOST_CHECK_CLOSE(Pa*2.0, Pa2, 0.00001);
+
+
+}
 BOOST_AUTO_TEST_SUITE_END()

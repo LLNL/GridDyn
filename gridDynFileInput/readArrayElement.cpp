@@ -15,8 +15,8 @@
 #include "readerHelper.h"
 #include "gridDynFileInput.h"
 #include "elementReaderTemplates.hpp"
-#include "readerElement.h"
-#include "stringConversion.h"
+
+#include "utilities/stringConversion.h"
 #include <numeric>
 
 using namespace readerConfig;

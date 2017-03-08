@@ -131,15 +131,15 @@ void busRelay::pFlowObjectInitializeA (coreTime time0, unsigned long flags)
   ge->setValue(0.0);
   ge->setTarget (m_sinkObject,"status");
 
-  add (std::move(ge));
+  add (std::shared_ptr<gridEvent>(std::move(ge)));
 
-  add (make_condition ("voltage", "<", cutoutVoltage, m_sourceObject));
+  add (std::shared_ptr<gridCondition>(make_condition ("voltage", "<", cutoutVoltage, m_sourceObject)));
   setActionTrigger (0, 0, voltageDelay);
   if ((cutoutVoltage > 2.0)||(cutoutVoltage <= 0))
     {
       setConditionState (0,condition_states::disabled);
     }
-  add (make_condition ("frequency", "<", cutoutFrequency, m_sourceObject));
+  add (std::shared_ptr<gridCondition>(make_condition ("frequency", "<", cutoutFrequency, m_sourceObject)));
   setActionTrigger (1, 0, frequencyDelay);
   if ((cutoutFrequency > 2.0) || (cutoutFrequency <= 0))
     {
