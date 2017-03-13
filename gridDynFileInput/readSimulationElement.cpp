@@ -133,7 +133,8 @@ gridSimulation *readSimulationElement (std::shared_ptr<readerElement> &element,
                 }
                 catch (const objectAddFailure &)
                 {
-					WARNPRINT(READER_WARN_IMPORTANT, "Collector: " << col->getName() << " unable to be added to " << owner->getName());
+                    WARNPRINT (READER_WARN_IMPORTANT,
+                               "Collector: " << col->getName () << " unable to be added to " << owner->getName ());
                     simulation->add (col);
                 }
             }
@@ -177,7 +178,8 @@ bool isMasterObject (const coreObject *searchObject, const gridSimulation *gs)
 {
     if (searchObject)
     {
-        return (gs)?(isSameObject (searchObject, gs)):false;
+        return (gs) ? (isSameObject (searchObject, gs)) : false;
     }
-    return (gs) ? (gs->isRoot ()) : false;  // The last false could be either if both are null
+    return (gs) ? (gs->isRoot ()) : true;
+    // return true if both are null since any new object would then be master
 }

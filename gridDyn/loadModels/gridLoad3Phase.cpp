@@ -27,7 +27,7 @@ using namespace gridUnits;
 
 /** multiplier constants for representation change*/
 static constexpr std::complex<double> alpha0 = std::complex<double>(1.0, 0);
-static const std::complex<double> alpha = std::polar(1.0, 2.0*kPI / 3.0);
+static const std::complex<double> alpha = std::polar(1.0, -2.0*kPI / 3.0);
 static const std::complex<double> alpha2 = alpha*alpha;
 
 gridLoad3Phase::gridLoad3Phase(const std::string &objName) : gridLoad(objName)
@@ -93,7 +93,7 @@ static const stringVec locStrStrings{
 };
 
 static const stringVec flagStrings{
-	
+	"use_abs_angle"
 };
 
 void gridLoad3Phase::getParameterStrings(stringVec &pstr, paramStringType pstype) const
@@ -103,10 +103,14 @@ void gridLoad3Phase::getParameterStrings(stringVec &pstr, paramStringType pstype
 
 void gridLoad3Phase::setFlag(const std::string &flag, bool val)
 {
-	if (flag.front() =='#')
+	if ((flag=="ignore_phase")||(flag=="ignorevoltagephase"))
 	{
-		
+		opFlags.set(use_abs_angle, !val);
 
+	}
+	else if (flag == "use_abs_angle")
+	{
+		opFlags.set(use_abs_angle, val);
 	}
 	else
 	{
@@ -129,6 +133,11 @@ void gridLoad3Phase::set(const std::string &param, const std::string &val)
 
 }
 
+double gridLoad3Phase::getBaseAngle() const
+{
+	return (opFlags[use_abs_angle]) ? bus->getAngle(): 0.0;
+
+}
 //simple template class for selecting the an appropriate value based on Phase
 template <class X>
 X phaseSelector(char phase, X valA, X valB, X valC, X def)
@@ -163,7 +172,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		}
 		case 'a':
 		{
-			double A = bus->getAngle();
+			double A = getBaseAngle();
 			double phaseAngle = phaseSelector(param[1],A, A + 2.0*kPI / 3.0, A + 4.0*kPI / 3.0, kNullVal);
 			return unitConversion(phaseAngle, rad, unitType, systemBasePower, baseVoltage);
 		}
@@ -175,13 +184,13 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 	{
 		if (param.compare(0, 2, "vi") == 0) //get the real part of the voltage
 		{
-			auto Vc = std::polar(bus->getVoltage(), bus->getAngle());
+			auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
 			Vc = Vc*phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
 			return unitConversion(Vc.real(), puV, unitType, systemBasePower, baseVoltage);
 		}
 		else if (param.compare(0, 2, "vj") == 0) //get the reactive part of the voltage
 		{
-			auto Vc = std::polar(bus->getVoltage(), bus->getAngle());
+			auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
 			Vc = Vc*phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
 			return unitConversion(Vc.imag(), puV, unitType, systemBasePower, baseVoltage);
 		}
@@ -192,7 +201,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		{
 		case 'a':
 		{
-			auto va = std::polar(bus->getVoltage(), bus->getAngle());
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
 			auto sa = std::complex<double>(Pa, Qa);
 			auto ia = sa / va;
 			return unitConversion(std::abs(ia)/multiplier, puA,unitType, systemBasePower, baseVoltage);
@@ -202,7 +211,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		break;
 		case 'b':
 		{
-			auto vb = std::polar(bus->getVoltage(), bus->getAngle())*alpha;
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
 			auto sb = std::complex<double>(Pb, Qb);
 			auto ib = sb / vb;
 
@@ -211,7 +220,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		break;
 		case 'c':
 		{
-			auto vc = std::polar(bus->getVoltage(), bus->getAngle())*alpha2;
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
 			auto sc = std::complex<double>(Pc, Qc);
 			auto ic = sc / vc;
 
@@ -226,7 +235,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		{
 		case 'a':
 		{
-			auto va = std::polar(bus->getVoltage(), bus->getAngle());
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
 			auto sa = std::complex<double>(Pa, Qa);
 			auto ia = sa / va;
 			return unitConversion(std::arg(ia), rad, unitType);
@@ -234,7 +243,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		break;
 		case 'b':
 		{
-			auto vb = std::polar(bus->getVoltage(), bus->getAngle())*alpha;
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
 			auto sb = std::complex<double>(Pb, Qb);
 			auto ib = sb / vb;
 			return unitConversion(std::arg(ib), rad, unitType);
@@ -242,7 +251,7 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		break;
 		case 'c':
 		{
-			auto vc = std::polar(bus->getVoltage(), bus->getAngle())*alpha2;
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
 			auto sc = std::complex<double>(Pc, Qc);
 			auto ic = sc / vc;
 			return unitConversion(std::arg(ic), rad, unitType);
@@ -306,7 +315,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 		{
 		case 'a':
 		{
-			auto va = std::polar(bus->getVoltage(), bus->getAngle());
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
 			auto sa = std::complex<double>(Pa, Qa);
 			auto ia = sa / va;
 
@@ -319,7 +328,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			break;
 		case 'b':
 		{
-			auto vb = std::polar(bus->getVoltage(), bus->getAngle())*alpha;
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
 			auto sb = std::complex<double>(Pb, Qb);
 			auto ib = sb / vb;
 			
@@ -331,7 +340,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			break;
 		case 'c':
 		{
-			auto vc = std::polar(bus->getVoltage(), bus->getAngle())*alpha2;
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
 			auto sc = std::complex<double>(Pc, Qc);
 			auto ic = sc / vc;
 			
@@ -349,7 +358,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 		{
 		case 'a':
 		{
-			auto va = std::polar(bus->getVoltage(), bus->getAngle());
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
 			auto sa = std::complex<double>(Pa, Qa);
 			auto ia = sa / va;
 			auto newia = std::polar(std::abs(ia), unitConversion(val, unitType, rad));
@@ -360,7 +369,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			break;
 		case 'b':
 		{
-			auto vb = std::polar(bus->getVoltage(), bus->getAngle())*alpha;
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
 			auto sb = std::complex<double>(Pb, Qb);
 			auto ib = sb / vb;
 			auto newib = std::polar(std::abs(ib), unitConversion(val, unitType, rad));
@@ -371,7 +380,7 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			break;
 		case 'c':
 		{
-			auto vc = std::polar(bus->getVoltage(), bus->getAngle())*alpha2;
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
 			auto sc = std::complex<double>(Pc, Qc);
 			auto ic = sc / vc;
 			auto newic = std::polar(std::abs(ic), unitConversion(val, unitType, rad));

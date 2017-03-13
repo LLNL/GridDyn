@@ -92,7 +92,7 @@ double fmiCoordinator::getOutput (index_t vr)
     }
     auto res3 = std::lower_bound (inputVR.begin (), inputVR.end (), vrInputPair (vr, inputSet ()),
                                   [](const auto &vp1, const auto &vp2) { return (vp1.first < vp2.first); });
-    if ((res3 != paramVR.end ()) && (res2->first == vr))
+    if ((res3 != inputVR.end ()) && (res3->first == vr))
     {
         return res3->second.evnt->query ();
     }

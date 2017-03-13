@@ -29,7 +29,11 @@ I-constant current, P- constant Power
 */
 class gridLoad3Phase : public gridLoad
 {
-
+public:
+	enum load_flags
+	{
+		use_abs_angle = object_flag5,
+	};
 private:
 	double Pa=0.0;  //!<[pu] A Phase real power
 	double Pb=0.0; //!<[pu] B Phase real power
@@ -86,6 +90,8 @@ public:
 	void setQa(double val);
 	void setQb(double val);
 	void setQc(double val);
+private:
+	double getBaseAngle() const;
 
 };
 

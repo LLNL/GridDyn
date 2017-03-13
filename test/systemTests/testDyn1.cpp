@@ -185,6 +185,12 @@ BOOST_AUTO_TEST_CASE(dyn_test_mbase)
   detailedStageCheck(fname, gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 
-
+/*
+BOOST_AUTO_TEST_CASE(dyn_test_griddyn39)
+{
+    std::string fname = std::string(DYN1_TEST_DIRECTORY "test_griddyn39.xml");
+	detailedStageCheck(fname, gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+}
+*/
 
 BOOST_AUTO_TEST_SUITE_END ()

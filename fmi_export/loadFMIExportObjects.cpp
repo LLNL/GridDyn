@@ -15,7 +15,7 @@
 #include "core/factoryTemplates.h"
 #include "fmiCollector.h"
 #include "fmiEvent.h"
-#include "readerInfo.h"
+#include "gridDynFileInput/readerInfo.h"
 
 static childClassFactory<fmiCollector, collector>
   fmiColFac (std::vector<std::string>{"fmioutput", "fmicollector"});

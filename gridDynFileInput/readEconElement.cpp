@@ -17,14 +17,14 @@
 #include "gridDynFileInput.h"
 #include "core/objectInterpreter.h"
 
+#ifdef OPTIMIZATION_ENABLE
+#include "gridDynOpt/gridOptObjects.h"
+#include "gridDynOpt/models/gridAreaOpt.h"
+#include "gridDynOpt/gridDynOpt.h"
+#include "gridDynOpt/optObjectFactory.h"
+#endif
 
-#include "gridOptObjects.h"
-#include "models/gridAreaOpt.h"
-#include "gridDynOpt.h"
-#include "optObjectFactory.h"
 #include "utilities/stringOps.h"
-
-
 using namespace readerConfig;
 // aP is the link element
 

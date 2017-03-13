@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (workQueue_test1)
     std::sort (res.begin (), res.end ());
     auto last = std::unique (res.begin (), res.end ());
     res.erase (last, res.end ());
-    BOOST_CHECK_EQUAL (res.size (), 5);
+    BOOST_CHECK_EQUAL (res.size (), 5u);
     wq->destroyWorkerQueue ();
 }
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE (workQueue_test3)
     {
         std::this_thread::sleep_for (std::chrono::milliseconds (40));
     }
-    BOOST_CHECK_EQUAL (order.size (), 14);
+    BOOST_CHECK_EQUAL (order.size (), 14u);
     std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int cdiff = 0;
     for (size_t kk = 0; kk < 14; ++kk)

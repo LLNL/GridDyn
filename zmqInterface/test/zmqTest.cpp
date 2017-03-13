@@ -19,11 +19,17 @@
 #include "zmqContextManager.h"
 #include "zmqHelper.h"
 #include "zmqReactor.h"
+#include "dimeCollector.h"
+#include "gridDynFileInput.h"
 
 #include <chrono>
 #include <thread>
 
+
+static const std::string zmq_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/zmq_tests/");
+
 BOOST_FIXTURE_TEST_SUITE(zmq_tests, gridDynSimulationTestFixture)
+
 
 using namespace zmq;
 
@@ -180,10 +186,21 @@ BOOST_AUTO_TEST_CASE(test_reactorB)
 	sock1.send(mess3.c_str(), mess3.size(), 0);
 	sock1.send(mess2.c_str(), mess2.size(), 0);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	BOOST_CHECK(count1 == 2);
-	BOOST_CHECK(count2 == 4);
+	BOOST_CHECK_EQUAL(count1,2);
+	BOOST_CHECK_EQUAL(count2,4);
 
 }
 
+
+BOOST_AUTO_TEST_CASE(dime_collector_test)
+{
+	loadZMQLibrary();
+	auto fname = zmq_test_directory + "dime_test39bus.xml";
+	gds = readSimXMLFile(fname);
+
+	auto v = gds->findCollector("dime1");
+	auto dimec = std::dynamic_pointer_cast<dimeCollector>(v);
+	BOOST_CHECK(dimec);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
