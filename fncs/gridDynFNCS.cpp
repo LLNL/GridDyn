@@ -90,6 +90,7 @@ int main (int argc, char *argv[])
   info.minTimeStep = 1;
   info.minTimeStepUnits = "us";
 
+
   auto configString=fncsRegister::instance()->makeZPLConfig(info);
   printf("%s\n", configString.c_str());
   fncs::initialize(configString);
