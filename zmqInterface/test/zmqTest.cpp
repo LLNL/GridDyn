@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(load_zmq_context_manager)
 	auto testContextManager = zmqContextManager::getContextPointer("context1");
 	BOOST_CHECK(testContextManager->getName() == "context1");
 	auto defaultContext = zmqContextManager::getContextPointer();
-	BOOST_CHECK(defaultContext->getName()=="default");
+	BOOST_CHECK(defaultContext->getName()=="");
 
 	auto &alternativeContext = zmqContextManager::getContext("context1");
 	//make sure these two methods point at the same thing
