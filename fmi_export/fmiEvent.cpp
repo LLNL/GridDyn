@@ -100,7 +100,14 @@ void fmiEvent::findCoordinator()
 				if (!isSameObject(fmiCont,coord))
 				{
 					coord = static_cast<fmiCoordinator *>(fmiCont);
-					coord->registerInput(getName(),this);
+					if (eventType == fmiEventType::input)
+					{
+						coord->registerInput(getName(), this);
+					}
+					else
+					{
+						coord->registerParameter(getName(), this);
+					}
 				}
 			}
 

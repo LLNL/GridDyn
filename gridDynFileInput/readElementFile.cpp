@@ -252,7 +252,7 @@ gridParameter * getElementParam (const std::shared_ptr<readerElement> &element, 
 }
 
 static const IgnoreListType keywords {
-  "type", "ref", "number","index", "retype","name","define","library","import","area","bus","link","load","exciter",
+  "type", "ref", "number","index", "retype","name","define","library","import","area","bus","link","load","exciter","if",
   "source","governor","controlblock", "pss", "simulation","generator","array","relay", "parent", "genmodel", "line", "solver",
   "agc", "reserve", "reservedispatch", "dispatch","econ","configuration", "custom", "purpose", "event", "collector"
 };

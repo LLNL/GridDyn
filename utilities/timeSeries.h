@@ -31,6 +31,12 @@ class fileNotFoundError : public std::exception
     virtual const char *what () const noexcept override { return "file not found"; }
 };
 
+class openFileError : public std::exception
+{
+public:
+	virtual const char *what() const noexcept override { return "unable to open file"; }
+};
+
 class fileLoadFailure : public std::exception
 {
   public:

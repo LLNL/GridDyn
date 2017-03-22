@@ -71,7 +71,9 @@ license you like.
 
 
 
-#include "json.h"
+
+
+#include "json/json.h"
 
 #ifndef JSON_IS_AMALGAMATION
 #error "Compile with -I PATH_TO_JSON_DIRECTORY"
@@ -89,12 +91,6 @@ license you like.
 
 #ifndef LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 #define LIB_JSONCPP_JSON_TOOL_H_INCLUDED
-
-//disabling some spurious unreachable code warnings in visual studio
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4702)
-#endif
 
 /* This header provides common string manipulation support, such as UTF-8,
  * portable conversion from/to string...
@@ -2166,7 +2162,7 @@ Value& CharReaderBuilder::operator[](JSONCPP_STRING key)
 // static
 void CharReaderBuilder::strictMode(Json::Value* settings)
 {
-//!<[CharReaderBuilderStrictMode]
+//! [CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
@@ -2176,12 +2172,12 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
-//!<[CharReaderBuilderStrictMode]
+//! [CharReaderBuilderStrictMode]
 }
 // static
 void CharReaderBuilder::setDefaults(Json::Value* settings)
 {
-//!<[CharReaderBuilderDefaults]
+//! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
   (*settings)["allowComments"] = true;
   (*settings)["strictRoot"] = false;
@@ -2192,7 +2188,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
-//!<[CharReaderBuilderDefaults]
+//! [CharReaderBuilderDefaults]
 }
 
 //////////////////////////////////
@@ -5215,14 +5211,14 @@ Value& StreamWriterBuilder::operator[](JSONCPP_STRING key)
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
 {
-  //!<[StreamWriterBuilderDefaults]
+  //! [StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
   (*settings)["precision"] = 17;
-  //!<[StreamWriterBuilderDefaults]
+  //! [StreamWriterBuilderDefaults]
 }
 
 JSONCPP_STRING writeString(StreamWriter::Factory const& builder, Value const& root) {
@@ -5240,10 +5236,6 @@ JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
 }
 
 } // namespace Json
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_writer.cpp

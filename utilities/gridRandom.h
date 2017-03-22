@@ -80,12 +80,13 @@ class gridRandom
     double param2 = 1.0;
 };
 
-
+/** class describing a random distribution which takes two parameters
+*/
 template <class DIST>
 class randomDistributionObject2 : public distributionObject
 {
   private:
-    DIST dist;
+    DIST dist; //!< the actual distribution object
 
   public:
     randomDistributionObject2 () {}
@@ -96,11 +97,12 @@ class randomDistributionObject2 : public distributionObject
     virtual void updateParameters (double param1, double param2) override { dist = DIST (param1, param2); }
 };
 
+/** template class describing a random distribution which takes 1 parameter*/
 template <class DIST>
 class randomDistributionObject1 : public distributionObject
 {
   private:
-    DIST dist;
+    DIST dist; //!< the actual distribution object
 
   public:
     randomDistributionObject1 () {}
@@ -110,6 +112,7 @@ class randomDistributionObject1 : public distributionObject
     virtual void updateParameters (double param1, double) override { dist = DIST (param1); }
 };
 
+/** a template specialization for a making a constant look like a random distribution*/
 template <>
 class randomDistributionObject1<void> : public distributionObject
 {

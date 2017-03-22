@@ -459,7 +459,7 @@ class timeSeriesMulti
                            std::ios::out | std::ios::binary | ((append) ? (std::ios::app) : (std::ios::trunc)));
         if (!fio)
         {
-            throw (fileNotFoundError ());
+            throw (openFileError());
         }
         if (!append)
         {
@@ -526,7 +526,7 @@ class timeSeriesMulti
         std::ofstream fio (filename.c_str (), std::ios::out | ((append) ? (std::ios::app) : (std::ios::trunc)));
         if (!fio)
         {
-            throw (fileNotFoundError ());
+            throw (openFileError());
         }
         std::string ndes = stringOps::characterReplace (description, '\n', "\n#");
 

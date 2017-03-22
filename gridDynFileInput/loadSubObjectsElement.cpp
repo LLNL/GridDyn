@@ -39,6 +39,8 @@
 
 using namespace readerConfig;
 
+
+//TODO:: clang format doesn't work well on this figure out how to turn it off
 #define READERSIGNATURE [](std::shared_ptr<readerElement> & cd, readerInfo & ri, coreObject * parent)
 static const std::
   map<std::string, std::function<coreObject *(std::shared_ptr<readerElement> &, readerInfo &, coreObject *parent)>>

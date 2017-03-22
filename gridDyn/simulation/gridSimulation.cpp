@@ -131,11 +131,11 @@ void gridSimulation::saveRecorders ()
 	  try
 	  {
 		  col->flush();
-		  LOG_SUMMARY("collector successfully flushed to :" + col->getSinkName());
+		  LOG_NORMAL("collector successfully flushed to :" + col->getSinkName());
 	  }
-      catch(const invalidFileName &)
+      catch(const std::exception &e)
         {
-          LOG_ERROR ("unable to open file for writing " + col->getSinkName ());
+          LOG_ERROR ("unable to flush collector" + col->getSinkName ()+":"+std::string(e.what()));
         }
     }
 }

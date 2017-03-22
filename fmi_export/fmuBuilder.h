@@ -25,14 +25,15 @@ class fmiCoordinator;
 class fmuBuilder
 {
 private:
-	const std::string fmuLoc;
-	std::vector<unsigned int> vrs;
-	std::shared_ptr<fmiCoordinator> coord;
+	const std::string fmuLoc; //!< location to place the FMU
+	std::vector<unsigned int> vrs; //!< the value references
+	std::shared_ptr<fmiCoordinator> coord; //!< coordinator to maintain organize everything
 public:
 
 	fmuBuilder();
 	fmuBuilder(const std::string &fmuLocation);
-
+	/** build the FMU at the given location 
+	@param[in] fmuLocation optional argument to specify the location to build the FMU*/
 	void MakeFmu(const std::string &fmuLocation="");
 	friend class fmiCoordinator;
 };

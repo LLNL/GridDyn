@@ -21,6 +21,7 @@ tinyxmlReaderElement.cpp
 tinyxmlReaderElement.h
 readerElement.h
 readerElement.cpp
+jsoncpp.cpp
 )
 
 
@@ -29,7 +30,6 @@ readerElement.cpp
 
 include(buildYAML)
 include(buildTinyXML2)
-include(buildJsonCPP)
 include(buildTICPP)
 
 ###########################################
@@ -61,24 +61,6 @@ set (optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
 ENDIF(YAML_FOUND)
 
 set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
-###########################################
-# building jsoncpp
-###########################################
-set(JSONCPP_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
-
-if (UNIX)
-   # Redhat has a libjson installed in /lib64 that conflicts; force a build of local jsoncpp
-   build_jsoncpp()
-   find_package(JsonCPP)	
-else(UNIX)
-find_package(JsonCPP)
-
-if (NOT JSONCPP_FOUND)
-build_jsoncpp()
-find_package(JsonCPP)
-endif (NOT JSONCPP_FOUND)
-endif (UNIX)
-
 
 ###########################################
 # building ticpp
@@ -117,7 +99,7 @@ IF (YAML_FOUND)
 list(APPEND external_library_list ${YAML_LIBRARIES})
 ENDIF(YAML_FOUND)
 
-list(APPEND external_library_list ${JSONCPP_LIBRARIES} ${TICPP_LIBRARIES} ${TINYXML2_LIBRARIES})
+list(APPEND external_library_list ${TICPP_LIBRARIES} ${TINYXML2_LIBRARIES})
 
 set (external_library_list ${external_library_list} PARENT_SCOPE)
 

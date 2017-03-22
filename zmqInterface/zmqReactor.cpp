@@ -18,6 +18,8 @@ std::vector<std::shared_ptr<zmqReactor>> zmqReactor::reactors;
 
 using namespace zmq;
 
+static std::mutex reactorCreationLock;
+
 zmqReactor::zmqReactor(const std::string &reactorName, const std::string &context):name(reactorName)
 {
 	contextManager = zmqContextManager::getContextPointer(context);
@@ -34,16 +36,31 @@ static const int zero(0);
 
 zmqReactor::~zmqReactor()
 {
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
+	terminateReactor();
+}
+
+void zmqReactor::terminateReactor()
+{
+	if (reactorLoopRunning)
+	{
 		updates.emplace(reactorInstruction::terminate, "");
+		notifier->send(&zero, sizeof(int));
+		loopThread.join();
 	}
-	notifier->send(&zero, sizeof(int));
-	loopThread.join();
+	std::lock_guard<std::mutex> creationLock(reactorCreationLock);
+	for (auto rct = reactors.begin(); rct != reactors.end(); ++rct)
+	{
+		if ((*rct)->name == name)
+		{
+			reactors.erase(rct);
+			break;
+		}
+	}
 }
 
 std::shared_ptr<zmqReactor> zmqReactor::getReactorInstance(const std::string &reactorName, const std::string &contextName)
 {
+	std::lock_guard<std::mutex> creationLock(reactorCreationLock);
 	for (auto &rct : reactors)
 	{
 		if (rct->getName() == reactorName)
@@ -52,6 +69,7 @@ std::shared_ptr<zmqReactor> zmqReactor::getReactorInstance(const std::string &re
 		}
 	}
 	//if it doesn't find a matching name make a new one with the appropriate name
+	//can't use make_shared since constructor is private
 	auto newReactor = std::shared_ptr<zmqReactor>(new zmqReactor(reactorName,contextName));
 	reactors.push_back(newReactor);
 	return newReactor;
@@ -59,39 +77,29 @@ std::shared_ptr<zmqReactor> zmqReactor::getReactorInstance(const std::string &re
 
 void zmqReactor::addSocket(const zmqSocketDescriptor &desc)
 {
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::newSocket, desc);
-	}
+
+	updates.emplace(reactorInstruction::newSocket, desc);
 	notifier->send(&zero, sizeof(int));
 	
 }
 
 void zmqReactor::modifySocket(const zmqSocketDescriptor &desc)
 {
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::modify, desc);
-	}
+
+	updates.emplace(reactorInstruction::modify, desc);
 	notifier->send(&zero, sizeof(int));
 }
 
 void zmqReactor::closeSocket(const std::string &socketName)
 {
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::close, socketName);
-	}
+	updates.emplace(reactorInstruction::close, socketName);
 	notifier->send(&zero, sizeof(int));
 }
 
 void zmqReactor::addSocketBlocking(const zmqSocketDescriptor &desc)
 {
 	unsigned int one(1);
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::newSocket, desc);
-	}
+	updates.emplace(reactorInstruction::newSocket, desc);
 	notifier->send(&one, sizeof(int));
 	notifier->recv(&one, 4, 0);
 
@@ -100,10 +108,8 @@ void zmqReactor::addSocketBlocking(const zmqSocketDescriptor &desc)
 void zmqReactor::modifySocketBlocking(const zmqSocketDescriptor &desc)
 {
 	unsigned int one(1);
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::modify, desc);
-	}
+
+	updates.emplace(reactorInstruction::modify, desc);
 	notifier->send(&one, sizeof(int));
 	
 	notifier->recv(&one, 4, 0);
@@ -112,14 +118,13 @@ void zmqReactor::modifySocketBlocking(const zmqSocketDescriptor &desc)
 void zmqReactor::closeSocketBlocking(const std::string &socketName)
 {
 	unsigned int one(1);
-	{ //scope for the lock
-		std::lock_guard<std::mutex> lock(queueLock);
-		updates.emplace(reactorInstruction::close, socketName);
-	}
+	updates.emplace(reactorInstruction::close, socketName);
 	notifier->send(&one, sizeof(int));
 	notifier->recv(&one, 4, 0);
 }
-auto findSocketByName(const std::string &socketName, const std::vector<std::string> socketNames)
+
+//this is not a member function but a helper function for the reactorLoop
+auto findSocketByName(const std::string &socketName, const std::vector<std::string> &socketNames)
 {
 	int index = 0;
 	for (auto &nm : socketNames)
@@ -137,6 +142,7 @@ auto findSocketByName(const std::string &socketName, const std::vector<std::stri
 void zmqReactor::reactorLoop()
 {
 	//make the signaling socket
+	//use mostly local variables
 	std::vector<socket_t> sockets;
 	unsigned int messageCode = 0;
 
@@ -154,7 +160,7 @@ void zmqReactor::reactorLoop()
 	socketPolls[0].fd = 0;
 	socketPolls[0].events = ZMQ_POLLIN;
 	socketPolls[0].revents = 0;
-
+	reactorLoopRunning = true;
 	while (1)
 	{
 		int val = poll(socketPolls);
@@ -172,19 +178,14 @@ void zmqReactor::reactorLoop()
 			if (socketPolls[0].revents & ZMQ_POLLIN)
 			{
 				sockets[0].recv(&messageCode, sizeof(unsigned int), 0); //clear the message
-				while (!updates.empty())
+				auto socketop = updates.pop();
+				while (socketop)
 				{
-					auto socketop = updates.front();
-
-					{  //scoped lock for popping the queue;
-						std::lock_guard<std::mutex> lock(queueLock);
-						updates.pop();
-					}
 					int index;
-					switch (socketop.first)
+					switch ((*socketop).first)
 					{
 					case reactorInstruction::close:
-						index = findSocketByName(socketop.second.name,socketNames);
+						index = findSocketByName((*socketop).second.name,socketNames);
 						if (index < static_cast<int>(sockets.size()))
 						{
 							sockets[index].close();
@@ -196,9 +197,9 @@ void zmqReactor::reactorLoop()
 						}
 						break;
 					case reactorInstruction::newSocket:
-						sockets.push_back(socketop.second.makeSocket(contextManager->getContext()));
-						socketNames.push_back(socketop.second.name);
-						socketCallbacks.push_back(socketop.second.callback);
+						sockets.push_back((*socketop).second.makeSocket(contextManager->getContext()));
+						socketNames.push_back((*socketop).second.name);
+						socketCallbacks.push_back((*socketop).second.callback);
 						socketPolls.resize(socketPolls.size() + 1);
 						socketPolls.back().socket = sockets.back();
 						socketPolls.back().fd = 0;
@@ -207,15 +208,15 @@ void zmqReactor::reactorLoop()
 						++socketCount;
 						break;
 					case reactorInstruction::modify:
-						index = findSocketByName(socketop.second.name, socketNames);
+						index = findSocketByName((*socketop).second.name, socketNames);
 						if (index < static_cast<int>(sockets.size()))
 						{
-							socketop.second.modifySocket(sockets[index]);
+							(*socketop).second.modifySocket(sockets[index]);
 						}
 						//replace the callback if needed
-						if (socketop.second.callback) 
+						if ((*socketop).second.callback)
 						{
-							socketCallbacks[index] = socketop.second.callback;
+							socketCallbacks[index] = (*socketop).second.callback;
 						}
 						break;
 					case reactorInstruction::terminate:		
@@ -233,5 +234,6 @@ void zmqReactor::reactorLoop()
 			}
 		}
 	}
+	reactorLoopRunning = false;
 
 }

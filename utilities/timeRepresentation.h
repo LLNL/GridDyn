@@ -21,25 +21,51 @@
 #include <limits>
 #include <type_traits>
 
+// enumeration of different time units
+enum class timeUnits : int
+{
+    ps = 0,
+    ns = 1,
+    us = 2,
+    ms = 3,
+    s = 4,
+    sec = 5,
+    min = 6,
+    hr = 7,
+    day = 8,
+
+};
+
+/** defining doubles for time Multipliers*/
+constexpr double timeCountforward[16]{1e12, 1e9, 1e6, 1e3, 1.0, 1.0, 10.0 / 60.0, 1.0 / 3600.0, 1.0 / 86400.0};
+
+/** defining doubles for time Multipliers*/
+constexpr double timeCountReverse[16]{1e-12, 1e-9, 1e-6, 1e-3, 1.0, 1.0, 60.0, 3600.0, 86400.0};
+
+
 /** generate powers to two as a constexpr
 @param[in] exponent the power of 2 desired*/
-inline constexpr double pow2 (unsigned int exponent) { return (exponent == 0) ? 1.0 : (2.0 * pow2 (exponent - 1)); }
+inline constexpr double pow2 (unsigned int exponent)
+{
+    return (exponent == 0) ? 1.0 : (2.0 * pow2 (exponent - 1));
+}
 /** prototype class for representing time
 @details implements time as a count of 1/2^N seconds
 this is done for performance because many mathematical operations are needed on the time and this way
 it could be implemented using shift and masks for some conversions to floating point operations
 */
-template <unsigned int N, typename base = long long int> class integer_time
+template <unsigned int N, typename base = long long int>
+class integer_time
 {
     static_assert (N < 8 * sizeof (base), "N must be less than 16");
     static_assert (std::is_signed<base>::value, "base type must be signed");  // to allow negative numbers for time
-    private:
+  private:
     static constexpr base scalar = (1 << N);
     static constexpr base fracMask = ((1 << N) - 1);
     static constexpr double multiplier = pow2 (N);
     static constexpr double divisor = 1.0 / pow2 (N);
 
-    public:
+  public:
     using baseType = base;
     static constexpr baseType maxVal () noexcept { return (std::numeric_limits<baseType>::max) (); }
     static constexpr baseType minVal () noexcept { return (std::numeric_limits<baseType>::min) (); }
@@ -70,15 +96,15 @@ template <unsigned int N, typename base = long long int> class integer_time
     {
         return (static_cast<double> (val >> N) + static_cast<double> (fracMask & val) * divisor);
     }
+    /** convert the val to a count of the specified time units
+     @details really kind of awkward to do with this time representation so I just convert to a double first
+     */
+    static long long int toCount (baseType val, timeUnits units) noexcept
+    {
+        return static_cast<long long int> (toDouble (val) * timeCountforward[static_cast<int>(units)]);
+    }
     /** convert to an integer count in seconds */
     static long long int seconds (baseType val) noexcept { return static_cast<long long int> (val >> N); }
-    /** convert the val to a count of nanoseconds
-    @details really kind of awkward to do with this time representation so I just convert to a double first
-    */
-    static long long int nanoseconds (baseType val) noexcept
-    {
-        return static_cast<long long int> (toDouble (val) * 1e9);
-    }
 };
 
 
@@ -120,7 +146,8 @@ constexpr double fac10f[16]{1.0,
 @tparam N implying 10^N ticks per second
 @tparam base the type to use as a base
 */
-template <int N, typename base = long long int> class count_time
+template <int N, typename base = long long int>
+class count_time
 {
     static_assert (N < 16, "N must be less than 16");
     static_assert (N >= 0, "N must be greater than or equal to 0");
@@ -128,7 +155,7 @@ template <int N, typename base = long long int> class count_time
     static constexpr long long int iFactor = fac10[N];  //!< the integer multiplier factor
     static constexpr double dFactor = fac10f[N];  //!< the floating point multiplication factor
     static constexpr double ddivFactor = 1.0 / fac10f[N];  // the floating point division factor
-    public:
+  public:
     using baseType = base;
     static constexpr baseType maxVal () noexcept { return (std::numeric_limits<baseType>::max) (); }
     static constexpr baseType minVal () noexcept { return (std::numeric_limits<baseType>::min) (); }
@@ -142,17 +169,44 @@ template <int N, typename base = long long int> class count_time
     {
         return (static_cast<double> (val / iFactor) + static_cast<double> (val % iFactor) * ddivFactor);
     }
-    static long long int seconds (baseType val) noexcept { return static_cast<long long int> (val / iFactor); }
-    static long long int nanoseconds (baseType val) noexcept
+
+
+    static long long int toCount (baseType val, timeUnits units) noexcept
     {
-        return (N >= 9) ? static_cast<long long int> (val / fac10[N - 9]) :
-                          static_cast<long long int> (val * fac10[9 - N]);
+        switch (units)
+        {
+		case timeUnits::ps:
+            return (N >= 12) ? static_cast<long long int> (val / fac10[N - 12]) :
+                               static_cast<long long int> (val * fac10[12 - N]);
+        case timeUnits::ns:
+            return (N >= 9) ? static_cast<long long int> (val / fac10[N - 9]) :
+                              static_cast<long long int> (val * fac10[9 - N]);
+        case timeUnits::us:
+            return (N >= 6) ? static_cast<long long int> (val / fac10[N - 6]) :
+                              static_cast<long long int> (val * fac10[6 - N]);
+        case timeUnits::ms:
+            return (N >= 3) ? static_cast<long long int> (val / fac10[N - 3]) :
+                              static_cast<long long int> (val * fac10[3 - N]);
+        case timeUnits::s:
+        case timeUnits::sec:
+        default:
+            return seconds (val);
+        case timeUnits::min:
+            return static_cast<long long int> (val * 60);
+        case timeUnits::hr:
+            return static_cast<long long int> (val * 3600);
+        case timeUnits::day:
+            return static_cast<long long int> (val * 86400);
+        }
     }
+
+    static long long int seconds (baseType val) noexcept { return static_cast<long long int> (val / iFactor); }
 };
 
-template <typename base = double> class double_time
+template <typename base = double>
+class double_time
 {
-    public:
+  public:
     using baseType = base;
     static constexpr baseType convert (double t) noexcept { return t; }
 
@@ -160,23 +214,24 @@ template <typename base = double> class double_time
     static constexpr baseType maxVal () noexcept { return (1e49); }
     static constexpr baseType minVal () noexcept { return (-1.456e47); }
     static constexpr baseType zeroVal () noexcept { return 0.0; }
-    static constexpr long long int seconds (baseType val) noexcept { return static_cast<long long int> (val); }
-    static constexpr long long int nanoseconds (baseType val) noexcept
+    static long long int toCount (baseType val, timeUnits units) noexcept
     {
-        return static_cast<long long int> (val * 1e9);
+        return static_cast<long long int> (val * timeCountforward[static_cast<int>(units)]);
     }
+    static constexpr long long int seconds (baseType val) noexcept { return static_cast<long long int> (val); }
 };
 
 /** prototype class for representing time
 @details time representation class that has as a template argument a class that can define time as a number
 and has some required features
 */
-template <class Tconv> class timeRepresentation
+template <class Tconv>
+class timeRepresentation
 {
-    public:
+  public:
     using baseType = typename Tconv::baseType;
 
-    private:
+  private:
     baseType timecode;
 #ifdef _DEBUG
     // this is a debugging aid to display the time as a double when looking at debug output
@@ -188,11 +243,11 @@ template <class Tconv> class timeRepresentation
 #define DOUBLETIME
 #define DOUBLETIMEEXT(t)
 #endif
-    public:
+  public:
     // implicit conversion requested
     timeRepresentation (){};
 
-    private:
+  private:
 /** explicit means to generate a constexpr timeRepresentation at time 0, negTime and maxTime*/
 #ifdef _DEBUG
     constexpr explicit timeRepresentation (std::integral_constant<int, 0>) noexcept
@@ -202,12 +257,15 @@ template <class Tconv> class timeRepresentation
     constexpr explicit timeRepresentation (std::integral_constant<int, 1>) noexcept
         : timecode (Tconv::maxVal ()), dtime (1e49){};
 #else
-    constexpr explicit timeRepresentation (std::integral_constant<int, 0>) noexcept : timecode (Tconv::zeroVal ()){};
-    constexpr explicit timeRepresentation (std::integral_constant<int, -1>) noexcept : timecode (Tconv::minVal ()){};
-    constexpr explicit timeRepresentation (std::integral_constant<int, 1>) noexcept : timecode (Tconv::maxVal ()){};
+    constexpr explicit timeRepresentation (std::integral_constant<int, 0>) noexcept
+        : timecode (Tconv::zeroVal ()){};
+    constexpr explicit timeRepresentation (std::integral_constant<int, -1>) noexcept
+        : timecode (Tconv::minVal ()){};
+    constexpr explicit timeRepresentation (std::integral_constant<int, 1>) noexcept
+        : timecode (Tconv::maxVal ()){};
 #endif
 
-    public:
+  public:
 #ifdef _DEBUG
     constexpr timeRepresentation (double t) noexcept : timecode (Tconv::convert (t)), dtime (t) {}
 #else
@@ -232,6 +290,7 @@ template <class Tconv> class timeRepresentation
     }
     /** generate the time in seconds*/
     long long int seconds () const noexcept { return Tconv::seconds (timecode); }
+    long long int toCount (timeUnits units) const noexcept { return Tconv::toCount (timecode, units); }
     /** generate the time count in nanoseconds*/
     long long int nanoseconds () const noexcept { return Tconv::nanoseconds (timecode); }
     /** default copy operation*/
@@ -299,7 +358,8 @@ template <class Tconv> class timeRepresentation
         }
         else
         {
-            trep.timecode = Tconv::convert (std::fmod (Tconv::toDouble (timecode), Tconv::toDouble (other.timecode)));
+            trep.timecode =
+              Tconv::convert (std::fmod (Tconv::toDouble (timecode), Tconv::toDouble (other.timecode)));
         }
         DOUBLETIMEEXT (trep)
         return trep;
@@ -307,7 +367,6 @@ template <class Tconv> class timeRepresentation
 
     timeRepresentation &operator%= (const timeRepresentation &other) noexcept
     {
-
         if (std::is_integral<baseType>::value)
         {
             timecode = timecode % other.timecode;

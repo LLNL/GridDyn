@@ -20,7 +20,6 @@
 
 using namespace readerConfig;
 
-
 void loadDefaultObjectTranslations (readerInfo &ri);
 
 static const IgnoreListType simIgnoreFields{"version", "basepower"};
@@ -50,8 +49,6 @@ gridSimulation *readSimulationElement (std::shared_ptr<readerElement> &element,
     loadTranslations (element, ri);
     loadCustomSections (element, ri);
     gridSimulation *simulation = ElementReaderSetup (element, gs, "simulation", ri, searchObject);
-
-    //
 
     // load the simulation name and id
     std::string ename = getElementField (element, "name", defMatchType);
@@ -85,13 +82,10 @@ gridSimulation *readSimulationElement (std::shared_ptr<readerElement> &element,
         element->moveToParent ();
     }
 
-
     readImports (element, ri, simulation, false);
-
 
     // load all other objects besides bus and area
     loadSubObjects (element, ri, simulation);
-
 
     paramLoopElement (simulation, element, simulation->getName (), ri, simIgnoreFields);
 
@@ -171,6 +165,7 @@ void loadDefaultObjectTranslations (readerInfo &ri)
     ri.addTranslate ("gov", "governor");
     ri.addTranslate ("recorder", "collector");
     ri.addTranslate ("player", "event");
+    ri.addTranslate ("loop", "array");
 }
 
 

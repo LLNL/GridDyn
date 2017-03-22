@@ -24,8 +24,14 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include <type_traits>
 
 
+template<class T>
+struct is_shared_ptr : std::false_type {};
+
+template<class T>
+struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 /** @brief class for managing events of many types
  class is a wrapper around a number of different kinds of discrete events
 */

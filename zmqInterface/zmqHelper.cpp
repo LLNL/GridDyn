@@ -13,9 +13,8 @@
 
 #include "zmqHelper.h"
 #include <cppzmq/zmq.hpp>
-#include "utilities/stringOps.h"
 #include <map>
-
+#include <cctype>
 using namespace zmq;
 /*
 req = ZMQ_REQ,
@@ -67,7 +66,9 @@ socket_type socketTypeFromString(const std::string &socketType)
 	}
 	
 	/* try making it lower case*/
-	fnd = socketMap.find(convertToLowerCase(socketType));
+	std::string lowerCase(socketType);
+	std::transform(socketType.cbegin(), socketType.cend(), lowerCase.begin(), ::tolower);
+	fnd = socketMap.find(lowerCase);
 	if (fnd != socketMap.end())
 	{
 		return fnd->second;

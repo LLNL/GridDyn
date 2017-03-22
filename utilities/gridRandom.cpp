@@ -72,7 +72,7 @@ void gridRandom::setDistribution (dist_type_t dist)
 		dobj = std::make_unique<randomDistributionObject1<void>>(param1);
       break;
     case dist_type_t::exponential:
-		dobj = std::make_unique<randomDistributionObject1<std::exponential_distribution<double>>>(param1);
+		dobj = std::make_unique<randomDistributionObject1<std::exponential_distribution<double>>>(1.0/param1);
       break;
 	case dist_type_t::extreme_value:
 		dobj = std::make_unique<randomDistributionObject2<std::extreme_value_distribution<double>>>(param1,param2);
@@ -140,7 +140,7 @@ double gridRandom::randNumber (dist_type_t dist, double arg1, double arg2)
 		return s_evdist(s_gen, std::extreme_value_distribution<double>::param_type(arg1, arg2));
 		break;
     case dist_type_t::exponential:
-      return s_expdist (s_gen, std::exponential_distribution<double>::param_type(arg1));
+      return s_expdist (s_gen, std::exponential_distribution<double>::param_type(1.0/arg1));
       break;
     case dist_type_t::normal:
       return s_normdist (s_gen, std::normal_distribution<double>::param_type(arg1, arg2));
@@ -199,6 +199,7 @@ static const std::map<std::string, gridRandom::dist_type_t> distmap
 	{ "gamma", gridRandom::dist_type_t::gamma },
 	{ "normal", gridRandom::dist_type_t::normal },
 	{ "gaussian", gridRandom::dist_type_t::normal },
+	{ "guassian", gridRandom::dist_type_t::normal }, //common spelling mistake
 	{"uniform_int",gridRandom::dist_type_t::uniform_int},
 };
 

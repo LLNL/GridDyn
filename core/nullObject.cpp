@@ -28,7 +28,7 @@ nullObject::nullObject(const std::string &objName):coreObject(objName)
 }
 
 
-coreObject * nullObject::clone(coreObject *obj)
+coreObject * nullObject::clone(coreObject *obj) const
 {
 	if (obj)
 	{
