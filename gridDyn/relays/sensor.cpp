@@ -278,7 +278,7 @@ void sensor::set (const std::string &param,  const std::string &val)
             {
               blk->locIndex = num;
             }
-          add (std::move(blk));
+          add (std::shared_ptr<basicBlock>(std::move(blk)));
         }
       else
         {

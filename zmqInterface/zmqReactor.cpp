@@ -43,7 +43,7 @@ void zmqReactor::terminateReactor()
 {
 	if (reactorLoopRunning)
 	{
-		updates.emplace(reactorInstruction::terminate, "");
+		updates.emplace(reactorInstruction::terminate, zmqSocketDescriptor());
 		notifier->send(&zero, sizeof(int));
 		loopThread.join();
 	}
@@ -92,7 +92,7 @@ void zmqReactor::modifySocket(const zmqSocketDescriptor &desc)
 
 void zmqReactor::closeSocket(const std::string &socketName)
 {
-	updates.emplace(reactorInstruction::close, socketName);
+	updates.emplace(reactorInstruction::close, zmqSocketDescriptor(socketName));
 	notifier->send(&zero, sizeof(int));
 }
 
@@ -118,7 +118,7 @@ void zmqReactor::modifySocketBlocking(const zmqSocketDescriptor &desc)
 void zmqReactor::closeSocketBlocking(const std::string &socketName)
 {
 	unsigned int one(1);
-	updates.emplace(reactorInstruction::close, socketName);
+	updates.emplace(reactorInstruction::close, zmqSocketDescriptor(socketName));
 	notifier->send(&one, sizeof(int));
 	notifier->recv(&one, 4, 0);
 }

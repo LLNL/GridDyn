@@ -237,10 +237,10 @@ class matrixData
         a2.start ();
         for (index_t nn = 0; nn < count; ++nn)
         {
-            auto element = a2.next ();
-            if (element.row == origRow)
+            auto nextElement = a2.next ();
+            if (nextElement.row == origRow)
             {
-                assign (newRow, element.col, element.data);
+                assign (newRow, nextElement.col, nextElement.data);
             }
         }
     }

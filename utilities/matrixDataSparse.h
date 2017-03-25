@@ -356,20 +356,20 @@ class matrixDataSparse : public matrixData<Y>
         data.erase (rem, data.end ());
     }
 
-    void cascade (matrixDataSparse<Y> &a2, index_t element)
+    void cascade (matrixDataSparse<Y> &a2, index_t cascadeIndex)
     {
         auto term = data.size ();
         size_t nn = 0;
         Y keyval = Y (0);
         while (nn != term)
         {
-            if (data[nn].col == element)
+            if (data[nn].col == cascadeIndex)
             {
                 size_t mm = 0;
                 keyval = data[nn].data;
                 for (size_t kk = 0; kk < a2.data.size (); kk++)
                 {
-                    if (a2.data[kk].row == element)
+                    if (a2.data[kk].row == cascadeIndex)
                     {
                         if (mm == 0)
                         {
@@ -395,9 +395,9 @@ class matrixDataSparse : public matrixData<Y>
 
     void transpose ()
     {
-        for (auto &element : data)
+        for (auto &celement : data)
         {
-            std::swap (element.col, element.row);
+            std::swap (celement.col, celement.row);
             //	int t1 = std::get<adCol>(data[kk]);
             //	std::get<adCol>(data[kk]) = std::get<adRow>(data[kk]);
             //	std::get<adRow>(data[kk]) = t1;
@@ -489,13 +489,13 @@ std::vector<std::vector<index_t>> findRank (matrixDataSparse<Y> &ad)
     {
         vr.clear ();
         vq.clear ();
-        auto element = ad.element (pp);
-        while (element.row == kk)
+        auto nextElement = ad.element (pp);
+        while (nextElement.row == kk)
         {
-            vr.push_back (element.col);
-            vq.push_back (element.data);
+            vr.push_back (nextElement.col);
+            vq.push_back (nextElement.data);
             ++pp;
-            element = ad.element (pp);
+            nextElement = ad.element (pp);
         }
         qq = pp;
         for (index_t nn = kk + 1; nn < ad.rowLimit (); ++nn)
@@ -503,17 +503,17 @@ std::vector<std::vector<index_t>> findRank (matrixDataSparse<Y> &ad)
             vt.clear ();
             vtq.clear ();
             good = false;
-            if (element.col != vr[0])
+            if (nextElement.col != vr[0])
             {
                 good = true;
             }
-            while (element.row == nn)
+            while (nextElement.row == nn)
             {
 
                 if (!good)
                 {
-                    vt.push_back (element.col);
-                    vtq.push_back (element.data);
+                    vt.push_back (nextElement.col);
+                    vtq.push_back (nextElement.data);
                 }
                 ++qq;
 
@@ -521,7 +521,7 @@ std::vector<std::vector<index_t>> findRank (matrixDataSparse<Y> &ad)
                 {
                     break;
                 }
-                element = ad.element (qq);
+                nextElement = ad.element (qq);
             }
             if (!good)
             {
