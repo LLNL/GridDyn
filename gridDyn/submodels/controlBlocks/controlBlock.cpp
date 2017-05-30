@@ -13,8 +13,8 @@
 
 #include "submodels/gridControlBlocks.h"
 #include "core/coreObjectTemplates.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
 
 
 controlBlock::controlBlock (const std::string &objName) : basicBlock (objName)

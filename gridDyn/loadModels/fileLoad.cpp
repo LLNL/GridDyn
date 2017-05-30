@@ -14,9 +14,9 @@
 #include "loadModels/otherLoads.h"
 #include "core/coreObjectTemplates.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 
 gridFileLoad::gridFileLoad (const std::string &objName) : gridRampLoad (objName)

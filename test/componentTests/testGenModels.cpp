@@ -18,7 +18,7 @@
 #include "testHelper.h"
 #include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <cmath>
 //test case for coreObject object

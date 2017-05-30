@@ -11,7 +11,6 @@
  * LLNS Copyright End
 */
 #include "readElement.h"
-#include "readerElement.h"
 #include "readerHelper.h"
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"

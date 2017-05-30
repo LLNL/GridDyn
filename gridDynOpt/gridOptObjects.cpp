@@ -13,7 +13,7 @@
 
 #include "gridOptObjects.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include <cstdio>
 #include <iostream>
 

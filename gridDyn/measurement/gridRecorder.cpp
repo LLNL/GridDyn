@@ -12,8 +12,8 @@
 */
 
 #include "collector.h"
-#include "timeSeries.h"
-#include "stringOps.h"
+#include "utilities/timeSeries.h"
+#include "utilities/stringOps.h"
 #include "core/objectInterpreter.h"
 #include "core/helperTemplates.h"
 #include "core/coreExceptions.h"
@@ -35,7 +35,14 @@ gridRecorder::~gridRecorder ()
   //check to make sure there is no unrecorded data
   if (!filename.empty ())
     {
-      saveFile ();
+	  try
+	  {
+		  saveFile();
+	  }
+	  catch (const std::exception &e)  //no exceptions in a destructor
+	  {
+		  getObject()->log(getObject(), print_level::error, e.what());
+	  }
     }
 }
 
@@ -161,15 +168,17 @@ void gridRecorder::saveFile (const std::string &fname)
       bool append = (lastSaveTime > negTime);
 
       //create the file based on extension
-      if (bFile)
-        {
-          dataset.writeBinaryFile (savefileName.string (),append);
-        }
-      else
-        {
-          dataset.writeTextFile (savefileName.string (),precision,append);
-        }
-      lastSaveTime = triggerTime;
+		  if (bFile)
+		  {
+			  dataset.writeBinaryFile(savefileName.string(), append);
+		  }
+		  else
+		  {
+			  dataset.writeTextFile(savefileName.string(), precision, append);
+		  }
+		  lastSaveTime = triggerTime;
+	
+      
     }
   else
     {

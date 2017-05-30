@@ -13,7 +13,7 @@
 
 //test case for workQueue
 
-#include "zipUtilities.h"
+#include "utilities/zipUtilities.h"
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <fstream>

@@ -21,7 +21,7 @@
 #include "measurement/stateGrabber.h"
 #include "measurement/grabberSet.h"
 #include "gridBus.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 
 
 #include <boost/format.hpp>
@@ -146,7 +146,7 @@ void breaker::dynObjectInitializeA (coreTime time0, unsigned long flags)
   auto ge2 = std::make_shared<gridEvent> ();
   if (dynamic_cast<gridLink *> (m_sourceObject))
     {
-      add (make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject)));
       ge->setTarget (m_sinkObject, "switch" + std::to_string(m_terminal));
 	  ge->setValue(1.0);
       //action 2 to re-close switch
@@ -157,7 +157,7 @@ void breaker::dynObjectInitializeA (coreTime time0, unsigned long flags)
     }
   else
     {
-      add (make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject)));
       opFlags.set (nonlink_source_flag);
       ge->setTarget (m_sinkObject,"status");
 	  ge->setValue(0.0);

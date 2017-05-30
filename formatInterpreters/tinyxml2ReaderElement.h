@@ -32,7 +32,7 @@ class tinyxml2ReaderElement : public readerElement
 
 public:
   tinyxml2ReaderElement ();
-  tinyxml2ReaderElement (const std::string &filename);
+  explicit tinyxml2ReaderElement (const std::string &filename);
 
   tinyxml2ReaderElement (const tinyxml2::XMLElement *xmlElement, const tinyxml2::XMLElement *xmlParent);
 

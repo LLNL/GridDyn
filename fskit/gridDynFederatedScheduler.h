@@ -54,7 +54,7 @@ public:
   /*
    * GriddynRunnder initializes the federated scheduler.
    */
-  friend class GriddynRunner;
+  friend class GriddynFskitRunner;
 
 private:
   /**

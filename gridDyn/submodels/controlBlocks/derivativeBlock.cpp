@@ -14,7 +14,7 @@
 #include "submodels/gridControlBlocks.h"
 #include "core/objectFactory.h"
 #include "core/coreExceptions.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
 
 #include <cmath>

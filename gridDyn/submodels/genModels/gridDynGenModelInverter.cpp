@@ -17,9 +17,9 @@
 #include "core/coreExceptions.h"
 
 #include "gridBus.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <complex>

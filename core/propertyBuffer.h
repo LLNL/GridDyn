@@ -18,7 +18,7 @@
 #include <vector>
 #include <utility>
 #include <tuple>
-#include "units.h"
+#include "utilities/units.h"
 class coreObject;
 /** class for temporarily holding object properties if the object has delayed initialization or something to that effect
 @details includes storage for string, double, integer, and binary properties,  targeted at coreObjects and helper objects
@@ -36,11 +36,15 @@ public:
 	propertyBuffer(propertyBuffer &&buf);
 	propertyBuffer &operator=(const propertyBuffer &buf);
 	propertyBuffer &operator=(propertyBuffer &&buf);
-
+	/** add a string property to the buffer*/
 	void set(const std::string &param, const std::string &val);
+	/** add a double property to to the buffer*/
 	void set(const std::string &param, double val);
+	/** add a double property with units to the buffer*/
 	void set(const std::string &param, double val, gridUnits::units_t unitType);
+	/** add an integer property to the buffer*/
 	void set(const std::string &param, int val);
+	/** add a flag property to the buffer*/
 	void setFlag(const std::string &param, bool val=true);
 	/** remove a property from the buffers
 	@param[in] param the parameter to remove
@@ -76,7 +80,7 @@ public:
 		
 		
 	}
-
+	/** clear all properties from the buffer*/
 	void clear();
 
 };

@@ -212,6 +212,7 @@ static const std::map<units_t, units_type_t> unit2Type {
   std::make_pair (puMWph, electrical),
   std::make_pair (MWps, electrical),
   std::make_pair (puA, electrical),
+  std::make_pair(puV, electrical),
   std::make_pair (pu, electrical),
   std::make_pair (meter, distance),
   std::make_pair (mile, distance),

@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2016, Lawrence Livermore National Security
+# Copyright (c) 2017, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -53,6 +53,14 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source build is not supported. Please, use an empty directory for building the project.")
 ENDIF()
 
+OPTION(ENABLE_EXTRA_COMPILER_WARNINGS "disable compiler warning for GridDyn build" ON)
+
+SHOW_VARIABLE(COMPILER_OPTIMIZATION_LEVEL STRING
+  "set the optimization level for the compiler (not implemented yet)" "normal")
+
+  set(optimization_levels normal;high;machine;full)
+
+set_property(CACHE COMPILER_OPTIMIZATION_LEVEL PROPERTY STRINGS ${optimization_levels})
 
 #-------------------------------------------------------------
 # Setup compiler options and configurations
@@ -65,19 +73,23 @@ IF(UNIX)
   set(Boost_NO_BOOST_CMAKE ON)
 
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
+  if (ENABLE_EXTRA_COMPILER_WARNINGS)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
+  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
 ELSE(UNIX)
   IF(MINGW)
+  if (ENABLE_EXTRA_COMPILER_WARNINGS)
  add_compile_options(-Wall -pedantic)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
+  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
   ELSE(MINGW)
   set(Boost_USE_STATIC_LIBS ON)
 # -------------------------------------------------------------
@@ -86,7 +98,11 @@ ELSE(UNIX)
 IF(MSVC)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
   ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-  add_compile_options(-W4  /EHsc /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
+  add_compile_options(/EHsc)
+  if (ENABLE_EXTRA_COMPILER_WARNINGS)
+   add_compile_options(-W4 /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
+  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
+ 
 ENDIF(MSVC)
   ENDIF(MINGW)
 ENDIF(UNIX)
@@ -175,7 +191,7 @@ set(SuiteSparse_USE_LAPACK_BLAS ON)
 ENDIF(MSVC)
 set(SuiteSparse_VERBOSE OFF)
 set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
-  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
+  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
   if(SuiteSparse_FOUND) 
 	list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
   #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
@@ -193,7 +209,7 @@ set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
 		include(BuildSuiteSparse)
 		build_suitesparse()
 		set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
-		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF)
+		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
 	ENDIF(AUTOBUILD_KLU)
 	if (SuiteSparse_FOUND)
 	   list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
@@ -236,6 +252,7 @@ find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONEN
 			include(buildSundials)
 			build_sundials()
 			set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
+			set(SUNDIALS_LIBRARIES NOT_FOUND CACHE FORCE)
 			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
 			set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
 			find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)

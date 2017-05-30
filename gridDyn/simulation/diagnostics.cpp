@@ -16,9 +16,9 @@
 
 #include "solvers/solverInterface.h"
 
-#include "vectorOps.hpp"
-#include "matrixDataSparse.h"
-#include "gridRandom.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/matrixDataSparse.h"
+#include "utilities/gridRandom.h"
 #include <cassert>
 
 std::pair<double,int> checkResid (gridDynSimulation *gds, coreTime time, const solverMode &sMode)

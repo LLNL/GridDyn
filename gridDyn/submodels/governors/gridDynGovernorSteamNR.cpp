@@ -14,7 +14,7 @@
 #include "submodels/otherGovernors.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 
 gridDynGovernorSteamNR::gridDynGovernorSteamNR (const std::string &objName) : gridDynGovernorIeeeSimple (objName)

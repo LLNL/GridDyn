@@ -14,9 +14,9 @@
 #include "submodels/otherGenModels.h"
 #include "generators/gridDynGenerator.h"
 #include "gridBus.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include <cmath>
 
 gridDynGenModel3::gridDynGenModel3 (const std::string &objName) : gridDynGenModelClassical (objName)

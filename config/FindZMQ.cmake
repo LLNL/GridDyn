@@ -33,7 +33,7 @@ if (MSVC)
   # Get Visual studio version number
   set(_VS_VERSIONS "140" "141")
   if (${ZMQ_NAME} MATCHES "registry") # if key was not found, the string "registry" is returned
-    set(_ZMQ_VERSIONS "4_2_1" "4_2_0" "4_1_5" "4_1_4" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0")
+    set(_ZMQ_VERSIONS "4_2_2" "4_2_1" "4_2_0" "4_1_5" "4_1_4" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0")
     set(ZMQ_LIBRARY_NAME)
 	
 		foreach(ver ${_ZMQ_VERSIONS})

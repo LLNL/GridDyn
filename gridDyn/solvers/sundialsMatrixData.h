@@ -15,8 +15,8 @@
 #ifndef _MATRIX_DATA_SUNDIALS_H_
 #define _MATRIX_DATA_SUNDIALS_H_
 
-#include "matrixData.h"
-#include "matrixDataOrdering.h"
+#include  "utilities/matrixData.h"
+#include "utilities/matrixDataOrdering.h"
 #include "sundials/sundials_dense.h"
 #include "sundials/sundials_sparse.h"
 

@@ -21,7 +21,7 @@
 #include "generators/gridDynGenerator.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreExceptions.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "gridDyn.h"
 
 #include <fstream>
@@ -171,14 +171,14 @@ Column  46-73   Case identification (A) */
       pos = line.find_first_of (',');
       temp1 = line.substr (0,pos);
       trimString (temp1);
-      parentObject->set ("name",temp1);
+      parentObject->setName(temp1);
     }
   temp1 = line;
   // get the second comment line and ignore it
   std::getline (file,line);
   temp1 = temp1 + '\n' + line;
   //set the case description
-  parentObject->set ("description",temp1);
+  parentObject->setDescription(temp1);
   //get the bus data section
   //bus data doesn't have a header but it is always first
   int moreData = 1;
@@ -519,7 +519,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
           temp2 = opt.prefix + '_' + temp2;
         }
     }
-  bus->set ("name",temp2);
+  bus->setName(temp2);
 
   //get the baseVoltage
   bv = std::stod (strvec[2]);

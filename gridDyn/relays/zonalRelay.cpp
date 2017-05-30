@@ -13,12 +13,12 @@
 
 #include "zonalRelay.h"
 #include "measurement/gridCondition.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
 #include "events/gridEvent.h"
 #include "core/coreObjectTemplates.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "core/coreExceptions.h"
 #include <algorithm>
 
@@ -221,12 +221,12 @@ void zonalRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
     {
       if (opFlags[nondirectional_flag])
         {
-          add (make_condition ("abs(admittance" + std::to_string (m_terminal) + ")", ">=", 1.0 / (m_zoneLevels[kk] * baseImpedance), m_sourceObject));
+          add (std::shared_ptr<gridCondition>(make_condition ("abs(admittance" + std::to_string (m_terminal) + ")", ">=", 1.0 / (m_zoneLevels[kk] * baseImpedance), m_sourceObject)));
 
         }
       else
         {
-          add (make_condition ("admittance" + std::to_string (m_terminal), ">=", 1.0 / (m_zoneLevels[kk] * baseImpedance), m_sourceObject));
+          add (std::shared_ptr<gridCondition>(make_condition ("admittance" + std::to_string (m_terminal), ">=", 1.0 / (m_zoneLevels[kk] * baseImpedance), m_sourceObject)));
         }
       setResetMargin (kk, m_resetMargin * 1.0 / (m_zoneLevels[kk] * baseImpedance));
     }
@@ -235,7 +235,7 @@ void zonalRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
   ge->setTarget (m_sinkObject,"switch" + std::to_string(m_terminal));
   ge->setValue(1.0);
 
-  add (std::move(ge));
+  add (std::shared_ptr<gridEvent>(std::move(ge)));
   for (index_t kk = 0; kk < m_zones; ++kk)
     {
       setActionTrigger (kk, 0, m_zoneDelays[kk]);

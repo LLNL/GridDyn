@@ -44,7 +44,7 @@ extern "C" {
 
 #endif
 
-		auto GridDyn = std::make_shared<GridDynFskitRunner>();
+		auto GridDyn = std::make_shared<GriddynFskitRunner>();
 
 		// Not running with FSKIT.
 		std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler(nullptr);

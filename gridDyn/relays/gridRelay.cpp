@@ -28,7 +28,7 @@
 #include "comms/gridCommunicator.h"
 #include "comms/relayMessage.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/propertyBuffer.h"
 #include "core/coreExceptions.h"
 #include <stdexcept>
@@ -139,7 +139,7 @@ void gridRelay::add (std::shared_ptr<gridCondition> gc)
 
 void gridRelay::add (std::shared_ptr<gridEvent> ge)
 {
-  actions.emplace_back (std::make_unique<eventTypeAdapter<std::shared_ptr<gridEvent>>> (std::move(ge)));
+  actions.emplace_back (std::make_shared<eventTypeAdapter<std::shared_ptr<gridEvent>>> (std::move(ge)));
 }
 /**
 *add an EventAdapter to the system
@@ -364,7 +364,7 @@ void gridRelay::set (const std::string &param,  const std::string &val)
 {
   if (param == "condition")
     {
-        add (make_condition (val, m_sourceObject?m_sourceObject:getParent()));
+      add (std::shared_ptr<gridCondition>(make_condition (val, m_sourceObject?m_sourceObject:getParent())));
     }
   else if (param == "action")
     {
@@ -375,13 +375,13 @@ void gridRelay::set (const std::string &param,  const std::string &val)
           if (e)
             {
               isAlarm = true;
-              add (std::move(e));
+              add (std::shared_ptr<eventAdapter>(std::move(e)));
             }
 
         }
       if (!isAlarm)
         {
-            add (make_event (val, m_sinkObject?m_sinkObject:getParent()));
+          add (std::shared_ptr<gridEvent>(make_event (val, m_sinkObject?m_sinkObject:getParent())));
         }
 
     }
@@ -823,7 +823,8 @@ int gridRelay::sendAlarm (std::uint32_t code)
 {
   if (commLink)
     {
-	  cManager.send(std::make_unique<relayMessage>(relayMessage::ALARM_TRIGGER_EVENT, code));
+      auto m = std::make_shared<relayMessage> (relayMessage::ALARM_TRIGGER_EVENT, code);
+	  cManager.send(m);
       
       return FUNCTION_EXECUTION_SUCCESS;
     }

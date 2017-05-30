@@ -14,11 +14,11 @@
 // headers
 #include "linkModels/acLine.h"
 #include "gridBus.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectInterpreter.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
-#include "matrixData.h"
+#include "utilities/stringOps.h"
+#include  "utilities/matrixData.h"
 #include "core/coreExceptions.h"
 
 #include <iostream>

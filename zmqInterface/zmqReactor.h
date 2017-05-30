@@ -14,10 +14,12 @@
 #ifndef ZMQREACTOR_H_
 #define ZMQREACTOR_H_
 #include "zmqSocketDescriptor.h"
+#include "utilities/simpleQueue.h"
 #include <memory>
 #include <queue>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 class zmqContextManager;
 
@@ -39,14 +41,13 @@ private:
 	std::string name;
 	std::shared_ptr<zmqContextManager> contextManager;  //!< pointer the context the reactor is using
 
-	std::queue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
+	simpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
 
 	std::unique_ptr<zmq::socket_t> notifier;
 	std::thread loopThread;
-	std::mutex queueLock;
 	/** private constructor*/
 	zmqReactor(const std::string &reactorName, const std::string &context);
-	
+	std::atomic<bool> reactorLoopRunning{ false };
 public:
 	static std::shared_ptr<zmqReactor> getReactorInstance(const std::string &reactorName, const std::string &context="");
 
@@ -65,6 +66,8 @@ public:
 	{
 		return name;
 	}
+	void terminateReactor();
+
 private:
 	void reactorLoop();
 

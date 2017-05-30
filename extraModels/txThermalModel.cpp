@@ -21,7 +21,7 @@
 #include "measurement/gridCondition.h"
 #include "events/gridEvent.h"
 #include "core/coreExceptions.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 #include <cmath>
 
@@ -328,11 +328,11 @@ void txThermalModel::dynObjectInitializeA (coreTime time0, unsigned long flags)
 			outputs[1] = 0;
 			sensor::set("output2", "block0+block1");
 			auto c1 = make_condition("output1", ">", alarmTemp1, this);
-			gridRelay::add(std::move(c1));
+			gridRelay::add(std::shared_ptr<gridCondition>(std::move(c1)));
 			c1 = make_condition("output1", ">", alarmTemp2, this);
-			gridRelay::add(std::move(c1));
+			gridRelay::add(std::shared_ptr<gridCondition>(std::move(c1)));
 			c1 = make_condition("output1", ">", cutoutTemp, this);
-			gridRelay::add(std::move(c1));
+			gridRelay::add(std::shared_ptr<gridCondition>(std::move(c1)));
 			
 			gridRelay::set("action", "alarm temperature_alarm1");
 			gridRelay::set("action", "alarm temperature_alarm2");
@@ -340,13 +340,13 @@ void txThermalModel::dynObjectInitializeA (coreTime time0, unsigned long flags)
 			ge->setTarget(m_sinkObject,"switch1");
 			ge->setValue(1.0);
 
-			gridRelay::add(std::move(ge));
+			gridRelay::add(std::shared_ptr<gridEvent>(std::move(ge)));
 			ge = std::make_unique<gridEvent>();
 
 			ge->setTarget(m_sinkObject, "switch2");
 			ge->setValue(1.0);
 
-			gridRelay::add(std::move(ge));
+			gridRelay::add(std::shared_ptr<gridEvent>(std::move(ge)));
 			//add the triggers
 			setActionTrigger(0, 0, alarmDelay);
 			setActionTrigger(1, 1, alarmDelay);

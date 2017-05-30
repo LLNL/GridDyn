@@ -15,7 +15,7 @@
 #define READ_ELEMENT_FILE_H_
 
 #include "readElement.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "core/coreObject.h"
 #include "simulation/gridSimulation.h"
 #include "boost/filesystem.hpp"

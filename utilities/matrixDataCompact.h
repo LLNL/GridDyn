@@ -15,7 +15,7 @@
 #ifndef _MATRIX_DATA_COMPACT_H_
 #define _MATRIX_DATA_COMPACT_H_
 
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include <array>
 
 /** @brief class implementing a dense matrix geared for Jacobian entries

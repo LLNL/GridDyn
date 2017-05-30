@@ -159,20 +159,20 @@ void txLifeSpan::dynObjectInitializeA (coreTime time0, unsigned long flags)
 			auto ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "g");
 			ge->setValue(100.0);
-			gridRelay::add(std::move(ge));
+			gridRelay::add(std::shared_ptr<gridEvent>(std::move(ge)));
 
 			ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch1");
 			ge->setValue(1.0);
-			gridRelay::add(std::move(ge));
+			gridRelay::add(std::shared_ptr<gridEvent>(std::move(ge)));
 
 			ge = std::make_unique<gridEvent>();
 			ge->setTarget(m_sinkObject, "switch2");
 			ge->setValue(1.0);
-			gridRelay::add(std::move(ge));
+			gridRelay::add(std::shared_ptr<gridEvent>(std::move(ge)));
 
 			auto cond = make_condition("output0", "<", 0, this);
-			gridRelay::add(std::move(cond));
+			gridRelay::add(std::shared_ptr<gridCondition>(std::move(cond)));
 
 			setActionTrigger(0, 0);
 			if (!opFlags[no_disconnect])

@@ -14,10 +14,10 @@
 #include "scheduler.h"
 #include "AGControl.h"
 #include "reserveDispatcher.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "comms/schedulerMessage.h"
 #include "core/coreObjectTemplates.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 schedulerRamp::schedulerRamp (const std::string &objName) : scheduler (objName)
 {

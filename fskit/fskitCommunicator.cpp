@@ -29,6 +29,15 @@
 #define NS3_RANK 1
 #define NS3_SIMULATOR_NAME "ns3"
 
+// Why is default ctor needed?   
+FskitCommunicator::FskitCommunicator () :
+  LogicalProcess (
+                  fskit::GlobalLogicalProcessId (
+                                                 fskit::FederatedSimulatorId ("RAII-is-broken"), GRIDDYN_RANK,
+                                                 fskit::LocalLogicalProcessId ("RAII-is-broken")))
+{
+}
+
 FskitCommunicator::FskitCommunicator (std::string id)
   : gridCommunicator (id),
     LogicalProcess (
@@ -91,14 +100,25 @@ FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
   assert(m);
   eventMessage.Unpack(*m);
   std::string name = getName();
+//PT put in #def switch for 4.9 vs future 
+/*
   //using lambda capture to move the message to the lambda
   auto event = std::make_unique<functionEventAdapter>([this, message{std::move(m)}](){
 	  receive(0, getName(), std::move(message));
 	  return change_code::no_change;
   });
+*/
 
+
+  std::shared_ptr<commMessage> message = std::move(m);
+  //using lambda capture to move the message to the lambda
+  // unique ptr capture with message{std::move(m)} failed on gcc 4.9.3; build shared and capture the shared ptr.
+  auto event = std::make_unique<functionEventAdapter>([this, message](){
+      receive(0, getName(), message);
+      return change_code::no_change;
+  });
   event->m_nextTime = griddynTime;
-  gds->add(std::move(event));
+  gds->add(std::shared_ptr<eventAdapter>(std::move(event)));
 
   /*
   switch (eventMessage.GetEventType ())
@@ -206,13 +226,11 @@ FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
 void FskitCommunicator::transmit (const std::string & /*destName*/, std::shared_ptr<commMessage> message)
 {
   doTransmit (message);
-  return 0;
 }
 
 void FskitCommunicator::transmit (std::uint64_t /*destID*/, std::shared_ptr<commMessage> message)
 {
   doTransmit (message);
-  return 0;
 }
 
 void

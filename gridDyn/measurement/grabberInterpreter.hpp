@@ -14,10 +14,10 @@
 #ifndef GRABBER_INTERPRETER_H_
 #define GRABBER_INTERPRETER_H_
 
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include "core/objectInterpreter.h"
-#include "functionInterpreter.h"
+#include "utilities/functionInterpreter.h"
 #include <memory>
 #include <functional>
 #include <type_traits>
@@ -36,7 +36,7 @@ class grabberInterpreter
 private:
   std::function < std::unique_ptr<baseX> (const std::string &, coreObject *)> createX;
 public:
-  grabberInterpreter (std::function < std::unique_ptr<baseX> (const std::string &, coreObject *)> fc) : createX (fc)
+  explicit grabberInterpreter (std::function < std::unique_ptr<baseX> (const std::string &, coreObject *)> fc) : createX (fc)
   {
   }
   std::unique_ptr<baseX> interpretGrabberBlock (const std::string &command, coreObject *obj)

@@ -15,7 +15,7 @@
 #include "gridBus.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include "core/coreExceptions.h"
 
 #include <iostream>

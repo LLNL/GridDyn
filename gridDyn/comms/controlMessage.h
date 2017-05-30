@@ -51,7 +51,7 @@ public:
   std::string m_units;
   controlMessage() = default;
 
-  controlMessage(std::uint32_t type) : commMessage(type)
+  explicit controlMessage(std::uint32_t type) : commMessage(type)
   {
   }
   controlMessage (std::uint32_t type, std::string fld, double val, coreTime time) : commMessage (type), m_field (fld), m_value (val), m_time (time)

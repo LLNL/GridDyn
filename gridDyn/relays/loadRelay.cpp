@@ -117,12 +117,12 @@ void loadRelay::dynObjectInitializeA (coreTime time0, unsigned long flags)
 
   if (cutoutVoltage < 2.0)
     {
-      add (make_condition ("voltage", "<", cutoutVoltage, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("voltage", "<", cutoutVoltage, m_sourceObject)));
       setActionTrigger (0, 0, voltageDelay);
     }
   if (cutoutFrequency < 2.0)
     {
-      add (make_condition ("frequency", "<", cutoutFrequency, m_sourceObject));
+      add (std::shared_ptr<gridCondition>(make_condition ("frequency", "<", cutoutFrequency, m_sourceObject)));
       setActionTrigger (1, 0, frequencyDelay);
     }
 

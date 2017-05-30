@@ -14,7 +14,7 @@
 // headers
 #include "gridArea.h"
 #include "gridDyn.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactoryTemplates.h"
 #include "relays/gridRelay.h"
 #include "linkModels/gridLink.h"
@@ -416,9 +416,16 @@ gridDynGenerator *gridArea::getGen (index_t x)
 coreObject *gridArea::find (const std::string &objname) const
 {
   
+	coreObject *obj = obList->find(objname);
+	if (obj == nullptr)
+	{
+		auto rlc = objname.find_first_of(":/?@#$!%");
+		if (rlc != std::string::npos)
+		{
+			obj = locateObject(objname, this, false, false);
+		}
+	}
   
-  auto rlc = objname.find_first_of (":/?");
-  coreObject *obj = (rlc != std::string::npos) ? locateObject(objname, this, false) : obList->find(objname);
 
   if (obj == nullptr)
     {
@@ -471,12 +478,26 @@ void gridArea::setAll (const std::string &type, std::string param, double val, g
 		}
 		for (auto &obj : primaryObjects)
 		{
-			obj->set(param, val, unitType);
+			try
+			{
+				obj->set(param, val, unitType);
+			}
+			catch (const unrecognizedParameter &)
+			{
+				//we ignore this exception in this function
+			}
 		}
 	}
   if (type == "area")
     {
+	  try
+	  {
       set (param, val, unitType);
+	  }
+	  catch (const unrecognizedParameter &)
+	  {
+		  //we ignore this exception in this function
+	  }
       for (auto &area : m_Areas)
         {
           area->setAll (type, param, val, unitType);
@@ -486,21 +507,42 @@ void gridArea::setAll (const std::string &type, std::string param, double val, g
     {
       for (auto &bus : m_Buses)
         {
+		  try
+		  {
           bus->set (param, val, unitType);
+	  }
+	  catch (const unrecognizedParameter &)
+	  {
+		  //we ignore this exception in this function
+	  }
         }
     }
   else if (type == "link")
     {
       for (auto &lnk : m_Links)
         {
-          lnk->set (param, val, unitType);
+		  try
+		  {
+			  lnk->set(param, val, unitType);
+		  }
+		  catch (const unrecognizedParameter &)
+		  {
+			  //we ignore this exception in this function
+		  }
         }
     }
   else if (type == "relay")
     {
       for (auto &rel : m_Relays)
         {
-          rel->set (param, val, unitType);
+		  try
+		  {
+			rel->set (param, val, unitType);
+		}
+		catch (const unrecognizedParameter &)
+		{
+		  //we ignore this exception in this function
+		}
         }
     }
   else if ((type == "gen") || (type == "load") || (type == "generator")||(type=="secondary"))

@@ -13,7 +13,11 @@
 
 #include "GridDynFskitRunner.h"
 #include "gridDynFederatedScheduler.h"
-#include "GridDyn-tracer.h"
+#include "griddyn-tracer.h"
+
+GriddynFskitRunner::GriddynFskitRunner()
+{
+}
 
 int GriddynFskitRunner::Initialize(int argc, char *argv[], std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
 {

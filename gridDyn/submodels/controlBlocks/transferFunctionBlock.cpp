@@ -12,9 +12,9 @@
 */
 
 #include "submodels/otherBlocks.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
-#include "stringConversion.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
+#include "utilities/stringConversion.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 

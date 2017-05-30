@@ -18,7 +18,7 @@
 #include "testHelper.h"
 #include "measurement/collector.h"
 #include "events/gridEvent.h"
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 #include <cstdio>
 #include <cmath>
 
@@ -287,15 +287,14 @@ BOOST_AUTO_TEST_CASE (recorder_test6)
   BOOST_CHECK_EQUAL (readerConfig::warnCount, 0);
   gds->consolePrintLevel = print_level::no_print;
   gds->solverSet("dynamic", "printlevel", 0);
-  int val = gds->getInt("recordercount");
-  BOOST_CHECK_EQUAL (val, 2);
+  BOOST_CHECK_EQUAL (gds->getInt("recordercount"), 2);
   gds->set ("recorddirectory", collector_test_directory);
 
   gds->run ();
 
   std::string recname = std::string (RECORDER_TEST_DIRECTORY "busrec.dat");
-  timeSeriesMulti<> ts3;
-  ts3.loadBinaryFile (recname);
+  timeSeriesMulti<> ts3(recname);
+  //ts3.loadBinaryFile ;
   
 
   BOOST_CHECK_EQUAL (ts3.size(), 61u);

@@ -12,13 +12,13 @@
 */
 
 #include "readElement.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "readerHelper.h"
 #include "gridDynFileInput.h"
 #include "elementReaderTemplates.hpp"
 
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/objectInterpreter.h"
 
 #include "core/objectFactory.h"

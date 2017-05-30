@@ -158,7 +158,7 @@ public:
 	/** construct an fmilibrary object from the fmu path
 	@param[in] the path to the fmu 
 	*/
-	fmiLibrary(const std::string &fmupath);
+	explicit fmiLibrary(const std::string &fmupath);
 	/** construct an fmilibrary object from the fmu path
 	@param[in] the path to the fmu
 	@param[in] the extraction path for the fmu

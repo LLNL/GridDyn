@@ -69,10 +69,12 @@ public:
   std::vector < std::shared_ptr < collector >> collectors;         //!<stores the active recorders
   std::vector < std::shared_ptr < gridEvent >> events;          //!< store the captured events
   bool keepdefines = false;
+  bool captureFiles = false;
   using scopeID= std::uint64_t;
 private:
   std::unordered_map<std::string, std::string> defines;              //!<storages for string definitions
   std::vector<std::string > directories;              //!<stores a list of folders for finding files
+  std::vector<std::string> capturedFiles;			//!<store a list of all the files used
   std::unordered_map<std::string, std::string> objectTranslations;           //!<storage for object Translations
   std::unordered_map<std::string, std::string> objectTranslationsType;          //!<storage for the type associated with an object translation
   std::unordered_map < std::string, std::pair < coreObject *, std::vector<gridParameter >>> library;          //!< library objects

@@ -12,10 +12,10 @@
 */
 
 #include "readElement.h"
-#include "readerElement.h"
+
 #include "readerHelper.h"
 #include "elementReaderTemplates.hpp"
-
+#include "utilities/string_viewOps.h"
 #include <cmath>
 
 using namespace readerConfig;
@@ -23,7 +23,7 @@ using namespace readerConfig;
 static const IgnoreListType ignoreConditionVariables {
   "condition"
 };
-bool checkCondition (const std::string &cond, readerInfo &ri, coreObject *parentObject);
+bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *parentObject);
 // "aP" is the XML element passed from the reader
 void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject)
 {
@@ -64,21 +64,55 @@ void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo &
 
 }
 
-
-bool checkCondition (const std::string &cond, readerInfo &ri, coreObject * /*parentObject*/)
+template <class X>
+bool compare(const X &val1, const X &val2, char op1, char op2)
 {
-	using namespace stringOps;
+	switch (op1)
+	{
+	case '>':
+		return (op2 == '=') ? (val1 >= val2) : (val1 > val2);
+	case '<':
+		return (op2 == '=') ? (val1 <= val2) : (val1 < val2);
+	case '!':
+		return (val1 != val2);
+	case '=':
+		return (val1 == val2);
+	default:
+		throw(std::invalid_argument("invalid comparison operator"));
+	}
+}
+
+bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *parentObject)
+{
+	using utilities::string_view;
+	using namespace utilities::string_viewOps;
+	trim(cond);
+	bool rev = false;
+	if ((cond[0] == '!')||(cond[0]=='~'))
+	{
+		rev = true;
+		cond = cond.substr(1, string_view::npos);
+	}
   size_t pos = cond.find_first_of ("><=!");
   bool eval = false;
   char A, B;
-  std::string BlockA, BlockB;
+  string_view BlockA, BlockB;
 
-  if (pos == std::string::npos)
+  if (pos == string_view::npos)
     {
       A = '!';
       B = '=';
-      BlockA = cond;
+      BlockA = trim(cond);
       BlockB = "0";
+	  if (BlockA.compare(0, 6, "exists") == 0)
+	  {
+		  auto a1 = BlockA.find_first_of('(', 6);
+		  auto a2 = BlockA.find_last_of(')');
+		  auto check = BlockA.substr(a1+1, a2-a1-1);
+		  coreObject *obj = locateObject(check.to_string(), parentObject,false);
+		  return (rev)?(obj==nullptr):(obj != nullptr);
+	  }
+	  
     }
   else
     {
@@ -88,84 +122,39 @@ bool checkCondition (const std::string &cond, readerInfo &ri, coreObject * /*par
       BlockB = (B == '=') ? trim (cond.substr (pos + 2)) : trim (cond.substr (pos + 1));
     }
 
-  double aval = interpretString (BlockA, ri);
-  double bval = interpretString (BlockB, ri);
+	  double aval = interpretString(BlockA.to_string(), ri);
+	  double bval = interpretString(BlockB.to_string(), ri);
 
-  if (std::isnan (aval) && (std::isnan (bval)))
-    {    //do a string comparison
-      std::string astr = ri.checkDefines (BlockA);
-      std::string bstr = ri.checkDefines (BlockB);
-      if (A == '>')
-        {
-          if (B == '=')
-            {
-              eval = (astr >= bstr);
-            }
-          else
-            {
-              eval = (astr > bstr);
-            }
+	  if (std::isnan(aval) && (std::isnan(bval)))
+	  {    //do a string comparison
+		  std::string astr = ri.checkDefines(BlockA.to_string());
+		  std::string bstr = ri.checkDefines(BlockB.to_string());
 
-        }
-      else if (A == '<')
-        {
-          if (B == '=')
-            {
-              eval = (astr <= bstr);
-            }
-          else
-            {
-              eval = (astr < bstr);
-            }
-        }
-      else if (A == '=')
-        {
-          eval = (astr == bstr);
-        }
-      else
-        {
-          eval = (astr != bstr);
-        }
-    }
-  else if (std::isnan (aval) || (std::isnan (bval)))
-    {     //mixed string and number comparison
-      WARNPRINT (READER_WARN_IMPORTANT, "invalid comparison terms");
-    }
-  else
-    {
-      if (A == '>')
-        {
-          if (B == '=')
-            {
-              eval = (aval >= bval);
-            }
-          else
-            {
-              eval = (aval > bval);
-            }
-
-        }
-      else if (A == '<')
-        {
-          if (B == '=')
-            {
-              eval = (aval <= bval);
-            }
-          else
-            {
-              eval = (aval < bval);
-            }
-        }
-      else if (A == '=')
-        {
-          eval = (aval == bval);
-        }
-      else
-        {
-          eval = (aval != bval);
-        }
-    }
+		  try
+		  {
+			  eval = compare(astr, bstr, A, B);
+		  }
+		  catch (const std::invalid_argument &)
+		  {
+			  WARNPRINT(READER_WARN_IMPORTANT, "invalid comparison terms");
+		  }
+	  }
+	  else if (std::isnan(aval) || (std::isnan(bval)))
+	  {     //mixed string and number comparison
+		  WARNPRINT(READER_WARN_IMPORTANT, "invalid comparison terms");
+	  }
+	  else
+	  {
+		  try
+		  {
+			  eval = compare(aval, bval, A, B);
+		  }
+		  catch (const std::invalid_argument &)
+		  {
+			  WARNPRINT(READER_WARN_IMPORTANT, "invalid comparison operator");
+		  }
+	  }
 
 
-  return eval;
+  return (rev)?!eval:eval;
 }

@@ -20,6 +20,7 @@
 #include "zmqContextManager.h"
 #include <functional>
 #include <thread>
+#include <atomic>
 
 /** class building and managing a zmq proxy
 @details the proxy runs in its own thread managed by the proxy class
@@ -64,7 +65,7 @@ private:
 	zmqSocketDescriptor incoming;  //!< socketDescriptor for the incoming connection
 	zmqSocketDescriptor outgoing;	//!< socketDescriptor for the outgoing connection
 	std::thread proxyThread;	//!< the thread id for the proxy loop
-	bool proxyRunning = false;	//!< flag indicating the proxy has been started
+	std::atomic<bool> proxyRunning{ false };	//!< flag indicating the proxy has been started
 	/** private constructor*/
 	zmqProxyHub(const std::string &reactorName, const std::string &pairtype, const std::string &context);
 	/** loop for the proxy thread*/

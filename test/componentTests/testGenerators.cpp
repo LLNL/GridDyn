@@ -17,7 +17,7 @@
 #include "generators/gridDynGenerator.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 

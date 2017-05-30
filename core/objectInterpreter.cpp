@@ -12,7 +12,7 @@
  */
 
 
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "objectInterpreter.h"
 
 
@@ -53,7 +53,7 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
 }
 
 
-coreObject* locateObject (const std::string &Istring, const coreObject *rootObj, bool rootSearch)
+coreObject* locateObject (const std::string &Istring, const coreObject *rootObj, bool rootSearch, bool directFind)
 {
   coreObject *obj = nullptr;
   std::string mname = Istring;
@@ -84,7 +84,10 @@ coreObject* locateObject (const std::string &Istring, const coreObject *rootObj,
     }
   else
     {
-      obj = rootObj->find (mname);
+	  if ((mname != Istring) || (directFind))
+	  {
+		  obj = rootObj->find(mname);
+	  }  
       if (!(obj))
         {
           size_t rlc2 = mname.find_last_of ("#$!");

@@ -28,13 +28,12 @@ INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 
 INSTALL(TARGETS extraModelLibrary
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${extra_headers} DESTINATION include/gridDyn)
+INSTALL(FILES ${extra_headers} DESTINATION include/extraModels)
 
 list(APPEND griddyn_optional_libraries extraModelLibrary)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/extraModels)

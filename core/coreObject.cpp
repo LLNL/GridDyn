@@ -14,8 +14,8 @@
 #include "coreObject.h"
 #include "nullObject.h"
 #include "coreExceptions.h" 
-#include "dataDictionary.h"
-#include "stringOps.h"
+#include "utilities/dataDictionary.h"
+#include "utilities/stringOps.h"
 #include <cmath>
 #include <cassert>
 
@@ -112,6 +112,14 @@ void coreObject::addsp (std::shared_ptr<coreObject> obj)
 		throw(objectAddFailure(this));
 	}
 	
+}
+
+void coreObject::addHelper(std::shared_ptr<helperObject> obj)
+{
+	if (obj)
+	{
+		throw(objectAddFailure(this));
+	}
 }
 
 void coreObject::addOwningReference ()

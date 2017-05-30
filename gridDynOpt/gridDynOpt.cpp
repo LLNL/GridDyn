@@ -16,7 +16,7 @@
 #include "core/objectFactoryTemplates.h"
 #include "optObjectFactory.h"
 #include "gridOptObjects.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreObjectTemplates.h"
 #include "core/coreExceptions.h"
 //system headers

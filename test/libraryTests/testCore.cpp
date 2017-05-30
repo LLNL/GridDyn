@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE (gridDynGenModel_test)
   auto id = gm->getID();
   BOOST_CHECK_EQUAL (gm->getName().compare ("genModel4_"+std::to_string(id)),0);
   std::string temp1 = "gen_model 5";
-  gm->set ("name",temp1);
+  gm->setName(temp1);
   BOOST_CHECK_EQUAL (gm->getName().compare (temp1),0);
 
   gm->setName("namebbghs");
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE (gridDynExciter_test)
 
   gridDynExciter *ex = new gridDynExciterIEEEtype1 ();
   std::string temp1 = "exciter 2";
-  ex->set ("name",temp1);
+  ex->setName(temp1);
   BOOST_CHECK_EQUAL (ex->getName().compare (temp1),0);
   ex->dynInitializeA(0.0, 0);
   BOOST_CHECK_EQUAL(ex->stateSize(cLocalSolverMode), 3u);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE (gridDynGovernor_test)
 
   gridDynGovernor *gov = new gridDynGovernor ();
   std::string temp1 = "gov 2";
-  gov->set ("name",temp1);
+  gov->set("name",temp1);
   BOOST_CHECK_EQUAL (gov->getName().compare (temp1),0);
   gov->dynInitializeA(timeZero, 0);
   BOOST_CHECK_EQUAL (gov->stateSize (cLocalSolverMode), 4u);

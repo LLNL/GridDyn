@@ -14,7 +14,7 @@
 #include "gridDyn.h"
 #include "events/gridEvent.h"
 
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "events/eventQueue.h"
 #include "gridBus.h"
 #include "solvers/solverInterface.h"
@@ -495,7 +495,7 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
   //setup the periodic empty event in the queue
   EvQ->nullEventTime (currentTime + t_step, t_step);
   auto nextEvent = EvQ->getNextTime ();
-  while (nextEvent <= t_end - kSmallTime)
+  while (nextEvent <= t_end)
     {
       bool powerflow_executed = false;
       currentTime = nextEvent;
@@ -533,16 +533,6 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
             {
               EvQ->nullEventTime (nextEvent + t_step);
             }
-        }
-    }
-  //if necessary do one last power flow this should only happen rarely
-  if (currentTime < t_end - kSmallTime)
-    {
-      timestep (t_end, noInputs, cLocalSolverMode);
-      pret = powerflow ();
-      if (pret != FUNCTION_EXECUTION_SUCCESS)
-        {
-          return pret;
         }
     }
   currentTime = t_end;

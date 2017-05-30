@@ -13,11 +13,12 @@
 
 #include "loadModels/zipLoad.h"
 #include "loadModels/otherLoads.h"
+#include "gridLoad3Phase.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreExceptions.h"
 #include "gridBus.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 #include <iostream>
 #include <cmath>
@@ -37,7 +38,7 @@ static childTypeFactory<gridFileLoad, gridLoad> glfld("load", "file");
 static childTypeFactory<sourceLoad, gridLoad> srcld("load", stringVec{ "src","source" });
 static childTypeFactory<exponentialLoad, gridLoad> glexp("load", stringVec{ "exponential","exp" });
 static childTypeFactory<fDepLoad, gridLoad> glfd("load", "fdep");
-
+static childTypeFactory<gridLoad3Phase, gridLoad> gl3("load", stringVec{ "3phase","3p","threephase" });
 
 zipLoad::zipLoad(const std::string &objName) : gridLoad(objName)
 {
@@ -481,7 +482,7 @@ void zipLoad::set(const std::string &param, double val, units_t unitType)
 	}
 	else
 	{
-		gridSecondary::set(param, val, unitType);
+		gridLoad::set(param, val, unitType);
 	}
 }
 

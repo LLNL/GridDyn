@@ -13,13 +13,14 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/data/test_case.hpp>
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "gridBus.h"
 #include "linkModels/acLine.h"
 #include "testHelper.h"
 #include <cstdio>
-#include <vectorOps.hpp>
+#include "utilities/vectorOps.hpp"
 #include <map>
 #include <array>
 #include <utility>
@@ -32,21 +33,21 @@
 BOOST_FIXTURE_TEST_SUITE (input_tests, gridDynSimulationTestFixture)
 
 
-
-//TODO:: convert to a DATA TEST CASE
-BOOST_AUTO_TEST_CASE(test_power_flow_inputs)
-{
-  /* *INDENT-OFF* */
-const std::map<std::string, std::array<int, 2>> baseCDFcase{
-  { "ieee14_act.cdf", { { 14, 20 } } },
-  { "ieee30_act.cdf", { { 30, 41 } } },
-  { "ieee57_act.cdf", { { 57, 80 } } },
-  { "ieee118_act.cdf", { { 118, 186 } } },
-  { "ieee300.cdf", { { 300, 411 } } },
-  { "IEEE39.raw", { { 39, 46 } } },
-  { std::string(INPUT_TEST_DIRECTORY "testCSV5k.xml"), { { 5000, 6279 } } },
-  };
+namespace data = boost::unit_test::data;
+/* *INDENT-OFF* */
+static const std::vector<std::pair<std::string, std::array<int, 2>>> baseCDFcase{
+	{ "ieee14_act.cdf",{ { 14, 20 } } },
+	{ "ieee30_act.cdf",{ { 30, 41 } } },
+	{ "ieee57_act.cdf",{ { 57, 80 } } },
+	{ "ieee118_act.cdf",{ { 118, 186 } } },
+	{ "ieee300.cdf",{ { 300, 411 } } },
+	{ "IEEE39.raw",{ { 39, 46 } } },
+	{ std::string(INPUT_TEST_DIRECTORY "testCSV5k.xml"),{ { 5000, 6279 } } },
+};
 /* *INDENT-ON* */
+//BOOST_AUTO_TEST_CASE(test_power_flow_inputs)
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, test_power_flow_inputs, data::xrange(7), caseIndex)
+{
 
 std::vector<double> volts1;
 std::vector<double> ang1;
@@ -57,9 +58,8 @@ std::vector<double> P2;
 std::vector<double> Q1;
 std::vector<double> Q2;
 
+auto mp = baseCDFcase[caseIndex];
 
-for (const auto &mp : baseCDFcase)
-  {
   gds = std::make_unique<gridDynSimulation>();
   std::string fname;
   if (mp.first.length() > 25)
@@ -71,7 +71,7 @@ for (const auto &mp : baseCDFcase)
       fname = std::string(IEEE_TEST_DIRECTORY) + mp.first;
     }
 
-  loadFile(gds.get(), fname);
+  loadFile(gds, fname);
   BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
   //gds->set("consoleprintlevel", "trace");
   int count=gds->getInt("totalbuscount");
@@ -133,10 +133,10 @@ for (const auto &mp : baseCDFcase)
 	  std::cout << mp.first << " Q difference-- bus " << index + 1 << "::" << v1 << " vs. " << v2 << "::" << v1 - v1 << '\n';
   };
   auto qdiff = countDiffsIfValidCallback(Q1, Q2, 0.01,Qfunc);
-  BOOST_CHECK_EQUAL(vdiff, 0);
-  BOOST_CHECK_EQUAL(adiff, 0);
-  BOOST_CHECK_EQUAL(pdiff, 0);
-  BOOST_CHECK_EQUAL(qdiff, 0);
+  BOOST_CHECK_EQUAL(vdiff, 0u);
+  BOOST_CHECK_EQUAL(adiff, 0u);
+  BOOST_CHECK_EQUAL(pdiff, 0u);
+  BOOST_CHECK_EQUAL(qdiff, 0u);
   if (qdiff > 0)
   {
 	  printf("%f vs %f diff %f\n", sum(Q1), sum(Q2), sum(Q1) - sum(Q2));
@@ -201,37 +201,38 @@ for (const auto &mp : baseCDFcase)
   vdiff = countDiffs(volts1,volts2,0.0005);
   adiff = countDiffs(ang1, ang2, 0.0009);
   
-  BOOST_CHECK_EQUAL(vdiff, 0);
-  BOOST_CHECK_EQUAL(adiff, 0);
+  BOOST_CHECK_EQUAL(vdiff, 0u);
+  BOOST_CHECK_EQUAL(adiff, 0u);
 
-  }
 	
 }
 
-
-
-//TODO:: convert to a DATA TEST CASE
-BOOST_AUTO_TEST_CASE(compare_cases)
-{
-  /* *INDENT-OFF* */
-const std::vector<stringVec> compareCases{
-  { "ieee118_act.cdf", "ieee118.psp"/*, "IEEE 118 Bus.EPC"*/ },
-  { "ieee14_act.cdf", /*"IEEE 14 bus.epc",*/ "IEEE 14 bus.raw" },
-  { "IEEE39.raw", "ieee39_v29.raw" },
-  { "ieee30_no_limit.cdf", std::string(INPUT_TEST_DIRECTORY "testCSV.xml") },
-  };
+//if more checks are added the data::xrange(X) must be changed as well
+/* *INDENT-OFF* */
+static const std::vector<stringVec> compareCases{
+	{ "ieee118_act.cdf", "ieee118.psp", "IEEE 118 Bus.EPC" },
+	{ "ieee14_act.cdf", "IEEE 14 bus.epc", "IEEE 14 bus.raw" },
+	{ "IEEE39.raw", "ieee39_v29.raw" },
+	{ "ieee30_no_limit.cdf", std::string(INPUT_TEST_DIRECTORY "testCSV.xml") },
+};
 /* *INDENT-ON* */
+
+
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, compare_cases, data::xrange(4), caseIndex)
+{
+ 
+
+
 std::vector<double> volts1;
 std::vector<double> ang1;
 std::vector<double> volts2;
 std::vector<double> ang2;
 
-for (const auto &mp : compareCases)
-  {
   gds = std::make_unique<gridDynSimulation>();
   
-  std::string fname = std::string(IEEE_TEST_DIRECTORY) + mp[0];
-  loadFile(gds.get(), fname);
+  auto caseSet = compareCases[caseIndex];
+  std::string fname = std::string(IEEE_TEST_DIRECTORY) + caseSet[0];
+  loadFile(gds, fname);
 
   int bcount=gds->getInt("totalbuscount");
 
@@ -245,17 +246,17 @@ for (const auto &mp : compareCases)
   gds->getAngle(ang1);
 
   //now load the equivalent files
-  for (size_t ns=1;ns<mp.size();++ns)
+  for (size_t ns=1;ns<caseSet.size();++ns)
     {
-    std::string fname2 = mp[ns];
-	std::string nf = mp[ns];
+    std::string fname2 = caseSet[ns];
+	std::string nf = caseSet[ns];
     gds2 = std::make_unique<gridDynSimulation>();
     if (fname2.size() < 25)
       {
       fname2 = std::string(IEEE_TEST_DIRECTORY) + nf;
       }
 
-    loadFile(gds2.get(), fname2);
+    loadFile(gds2, fname2);
 
     int count=gds2->getInt("totalbuscount");
     BOOST_CHECK_EQUAL(count, bcount);
@@ -294,13 +295,13 @@ for (const auto &mp : compareCases)
 
       if (std::abs(volts1[kk] - volts2[kk])>0.0008)
         {
-        std::cout <<mp[0]<<" vs. "<< nf << " Voltage difference bus " << kk + 1 << "::" << volts1[kk] << " vs. " << volts2[kk] << '\n';
+        std::cout <<caseSet[0]<<" vs. "<< nf << " Voltage difference bus " << kk + 1 << "::" << volts1[kk] << " vs. " << volts2[kk] << '\n';
         vdiff++;
         }
 
       if (std::abs(ang1[kk] - ang2[kk]) > 0.0009)
         {
-        std::cout << mp[0] << " vs. " << nf << " Angle difference-- bus " << kk + 1 << "::" << ang1[kk] * 180.0 / kPI << " vs. " << ang2[kk] * 180.0 / kPI << "::" << std::abs(ang1[kk] - ang2[kk]) * 180.0 / kPI << " deg" << '\n';
+        std::cout << caseSet[0] << " vs. " << nf << " Angle difference-- bus " << kk + 1 << "::" << ang1[kk] * 180.0 / kPI << " vs. " << ang2[kk] * 180.0 / kPI << "::" << std::abs(ang1[kk] - ang2[kk]) * 180.0 / kPI << " deg" << '\n';
         adiff++;
         }
 
@@ -308,34 +309,33 @@ for (const auto &mp : compareCases)
     BOOST_CHECK_EQUAL(vdiff, 0);
     BOOST_CHECK_EQUAL(adiff, 0);
 
-    }
 
   }
   }
 
-
-  //TODO:: convert to a DATA TEST CASE
-BOOST_AUTO_TEST_CASE(input_execTest)
-{
-  /* *INDENT-OFF* */
-const std::map<std::string, std::array<int, 4>> executionCases{
-  { std::string(MATLAB_TEST_DIRECTORY "case4gs.m"), { { 0, 4, 4, 0 } } },
- // { std::string(MATLAB_TEST_DIRECTORY "d_003.m"), { { 0, 3, 3, 0 } } },
- // { std::string(INPUT_TEST_DIRECTORY "test_mat_dyn.xml"), { { 1, 9, 9, 2 } } },
-  { std::string(INPUT_TEST_DIRECTORY "test_2m4bDyn_inputchange.xml"), { { 1, 0, 0, 0 } } },
-  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic.xml"), { { 1, 39, 0, 0 } } },
-//  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic_relay.xml"), { { 1, 39, 0, 0 } } },
-  //{ std::string(INPUT_TEST_DIRECTORY "180busdyn_test.xml"),{ { 1, 179, 0, 1 } } },
-  };
+/* { filename , {buscount, linkcount, eventcount, 0=powerflow 1=dynamic}}*/
+/* *INDENT-OFF* */
+static const std::vector<std::pair<std::string, std::array<int, 4>>> executionCases{
+	{ std::string(MATLAB_TEST_DIRECTORY "case4gs.m"),{ { 0, 4, 4, 0 } } },
+	// { std::string(MATLAB_TEST_DIRECTORY "d_003.m"), { { 0, 3, 3, 0 } } },
+	// { std::string(INPUT_TEST_DIRECTORY "test_mat_dyn.xml"), { { 1, 9, 9, 2 } } },
+	{ std::string(INPUT_TEST_DIRECTORY "test_2m4bDyn_inputchange.xml"),{ { 1, 0, 0, 0 } } },
+	{ std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic.xml"),{ { 1, 39, 0, 0 } } },
+	//  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic_relay.xml"), { { 1, 39, 0, 0 } } },
+	//{ std::string(INPUT_TEST_DIRECTORY "180busdyn_test.xml"),{ { 1, 179, 0, 1 } } },
+};
 /* *INDENT-ON* */
+
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, input_execTest, data::xrange(3), caseIndex)
+{
+
 int count;
-for (const auto &mp : executionCases)
-  {
+auto mp = executionCases[caseIndex];
   auto fname = mp.first;
 
   gds = std::make_unique<gridDynSimulation>();
 
-  loadFile(gds.get(), fname);
+  loadFile(gds, fname);
   BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::STARTUP);
 
   if (mp.second[1] > 0)
@@ -366,7 +366,6 @@ for (const auto &mp : executionCases)
     BOOST_REQUIRE_EQUAL (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
     }
 
-  }
 
 
 }

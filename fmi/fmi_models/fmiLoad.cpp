@@ -17,7 +17,7 @@
 #include "fmiMESubModel.h"
 #include "core/coreObjectTemplates.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 fmiLoad::fmiLoad(std::string objName):zipLoad(objName)

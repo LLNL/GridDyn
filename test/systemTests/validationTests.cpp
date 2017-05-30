@@ -13,12 +13,13 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/data/test_case.hpp>
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
 #include "simulation/gridDynSimulationFileOps.h"
 
-#include <vectorOps.hpp>
+#include "utilities/vectorOps.hpp"
 #include <map>
 #include <utility>
 #include <iostream>
@@ -36,47 +37,61 @@ static const std::string validationTestDirectory(GRIDDYN_TEST_DIRECTORY "/valida
 
 #define INPUT_TEST_DIRECTORY (GRIDDYN_TEST_DIRECTORY "/input_tests/")
 
-BOOST_FIXTURE_TEST_SUITE (validation_tests, gridDynSimulationTestFixture)
+using file_pair_t = std::pair<std::string, std::string>;
 
+BOOST_TEST_DONT_PRINT_LOG_VALUE(file_pair_t)
 
+BOOST_FIXTURE_TEST_SUITE(validation_tests, gridDynSimulationTestFixture)
 
-
-BOOST_AUTO_TEST_CASE(matpower_validation_tests)
+std::ostream& operator<< (std::ostream& stream, const std::pair < std::string, std::string> &pr)
 {
-	/* *INDENT-OFF* */
-	const std::map<std::string, std::string> compare_cases{
-		{ "case4gs.m","case4gs_res.m" },
-		{ "case5.m","case5_res.m" },
-		{ "case6ww.m","case6ww_res.m" },
-		{ "case9.m","case9_res.m" },
-		{ "case9Q.m","case9Q_res.m" },
-		{ "case9target.m","case9target_res.m" },
-		{ "case14.m","case14_res.m" },
-		{ "case24_ieee_rts.m","case24_ieee_rts_res.m" },
-		{ "case30.m","case30_res.m" },
-		{ "case30pwl.m","case30pwl_res.m" },
-		{ "case30Q.m","case30Q_res.m" },
-		{ "case_ieee30.m","case_ieee30_res.m" },
-		{ "case39.m","case39_res.m" },
-		{ "case57.m","case57_res.m" },
-		{ "case89pegase.m","case89pegase_res.m" },
-		{ "case118.m","case118_res.m" },
-		{ "case300.m","case300_res.m" },
-		{ "case1354pegase.m","case1354pegase_res.m" },
-		{ "case2383wp.m","case2383wp_res.m" },
-		{ "case2736sp.m","case2736sp_res.m" },
-		{ "case2737sop.m","case2737sop_res.m" },
-		{ "case2746wop.m","case2746wop_res.m" },
-		{ "case2746wp.m","case2746wp_res.m" },
-		{ "case2869pegase.m","case2869pegase_res.m" },
-		{ "case3012wp.m","case3012wp_res.m" },
-		{ "case3120sp.m","case3120sp_res.m" },
-		{ "case3375wp.m","case3375wp_res.m" },
-		{ "case9241pegase.m","case9241pegase_res.m" },
-		
-	};
-	/* *INDENT-ON* */
+	stream << pr.first;
 
+	return stream;
+}
+
+/* *INDENT-OFF* */
+static const std::vector<file_pair_t> compare_cases{
+	{ "case4gs.m","case4gs_res.m" },
+	{ "case5.m","case5_res.m" },
+	{ "case6ww.m","case6ww_res.m" },
+	{ "case9.m","case9_res.m" },
+	{ "case9Q.m","case9Q_res.m" },
+	{ "case9target.m","case9target_res.m" },
+	{ "case14.m","case14_res.m" },
+	{ "case24_ieee_rts.m","case24_ieee_rts_res.m" },
+	{ "case30.m","case30_res.m" },
+	{ "case30pwl.m","case30pwl_res.m" },
+	{ "case30Q.m","case30Q_res.m" },
+	{ "case_ieee30.m","case_ieee30_res.m" },
+	{ "case39.m","case39_res.m" },
+	{ "case57.m","case57_res.m" },
+	{ "case89pegase.m","case89pegase_res.m" },
+	{ "case118.m","case118_res.m" },
+	{ "case300.m","case300_res.m" },
+	{ "case1354pegase.m","case1354pegase_res.m" },
+	{ "case2383wp.m","case2383wp_res.m" },
+	{ "case2736sp.m","case2736sp_res.m" },
+	{ "case2737sop.m","case2737sop_res.m" },
+	{ "case2746wop.m","case2746wop_res.m" },
+	{ "case2746wp.m","case2746wp_res.m" },
+	{ "case2869pegase.m","case2869pegase_res.m" },
+	{ "case3012wp.m","case3012wp_res.m" },
+	{ "case3120sp.m","case3120sp_res.m" },
+	{ "case3375wp.m","case3375wp_res.m" },
+	{ "case9241pegase.m","case9241pegase_res.m" },
+
+};
+/* *INDENT-ON* */
+
+
+namespace data = boost::unit_test::data;
+
+
+
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, matpower_validation_tests,data::make(compare_cases),test_case_pair)
+{
+	
 	std::vector<double> volts1;
 	std::vector<double> ang1;
 	std::vector<double> volts2;
@@ -86,22 +101,14 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 	std::chrono::duration<double> elapsed_time;
 #endif
 
-	for (const auto &mp : compare_cases)
-	{
 		gds = std::make_unique<gridDynSimulation>();
 		gds->set("consoleprintlevel", "summary");
 		std::string fname;
-		if (mp.first.length() > 25)
-		{
-			fname = mp.first;
-		}
-		else
-		{
-			fname = validationTestDirectory + mp.first;
-		}
 
-		loadFile(gds.get(), fname);
-		gds->sourceFile = mp.first;
+		fname = validationTestDirectory + test_case_pair.first;
+
+		loadFile(gds, fname);
+		gds->sourceFile = test_case_pair.first;
 		gds->setFlag("no_powerflow_adjustments");
 		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 #if (COMPUTE_TIMES>0)
@@ -111,7 +118,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 		
 		auto stop_t = std::chrono::high_resolution_clock::now();
 		elapsed_time = stop_t - start_t;
-		printf("%s completed in %f\n", mp.first.c_str(), elapsed_time.count());
+		printf("%s completed in %f\n", test_case_pair.first.c_str(), elapsed_time.count());
 #else
 		gds->powerflow();
 #endif
@@ -128,16 +135,10 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 		volts1.resize(cnt);
 		ang1.resize(cnt);
 		gds2 = std::make_unique<gridDynSimulation>();
-		if (mp.second.length() > 25)
-		{
-			fname = mp.second;
-		}
-		else
-		{
-			fname = validationTestDirectory + mp.second;
-		}
+
+		fname = validationTestDirectory + test_case_pair.second;
 		gds2->set("consoleprintlevel", "summary");
-		loadFile(gds2.get(), fname);
+		loadFile(gds2, fname);
 		BOOST_REQUIRE(gds2->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
 		gds2->pFlowInitialize();
 		cnt=gds2->getVoltage(volts2);
@@ -151,71 +152,64 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests)
 			auto mvdiff = absMaxDiffLoc(volts1, volts2);
 
 			auto madiff = absMaxDiffLoc(ang1, ang2);
-			std::cout << mp.first << "max vdiff [" << mvdiff.second << "] = " << mvdiff.first << "|| max adiff[" << madiff.second << "] = " << madiff.first << '\n';
+			std::cout << test_case_pair.first << "max vdiff [" << mvdiff.second << "] = " << mvdiff.first << "|| max adiff[" << madiff.second << "] = " << madiff.first << '\n';
 		}
-		BOOST_CHECK_EQUAL(vdiff, 0);
-		BOOST_CHECK_EQUAL(adiff, 0);
+		BOOST_CHECK_EQUAL(vdiff, 0u);
+		BOOST_CHECK_EQUAL(adiff, 0u);
 
-	}
 
 }
 
+
+/* *INDENT-OFF* */
+static const std::vector<file_pair_t> compare_cases_gs{
+	{ "case4gs.m","case4gs_res.m" },
+	{ "case5.m","case5_res.m" },
+	{ "case6ww.m","case6ww_res.m" },
+	//{ "case9.m","case9_res.m" },
+	//{ "case9Q.m","case9Q_res.m" },
+	//{ "case9target.m","case9target_res.m" },
+	{ "case14.m","case14_res.m" },
+	{ "case24_ieee_rts.m","case24_ieee_rts_res.m" },
+	{ "case30.m","case30_res.m" },
+	{ "case30pwl.m","case30pwl_res.m" },
+	{ "case30Q.m","case30Q_res.m" },
+	{ "case_ieee30.m","case_ieee30_res.m" },
+	{ "case39.m","case39_res.m" },
+	//{ "case57.m","case57_res.m" },
+	//{ "case89pegase.m","case89pegase_res.m" },
+	//{ "case118.m","case118_res.m" },
+	//{ "case300.m","case300_res.m" },
+	/*{ "case1354pegase.m","case1354pegase_res.m" },
+	{ "case2383wp.m","case2383wp_res.m" },
+	{ "case2736sp.m","case2736sp_res.m" },
+	{ "case2737sop.m","case2737sop_res.m" },
+	{ "case2746wop.m","case2746wop_res.m" },
+	{ "case2746wp.m","case2746wp_res.m" },
+	{ "case2869pegase.m","case2869pegase_res.m" },
+	{ "case3012wp.m","case3012wp_res.m" },
+	{ "case3120sp.m","case3120sp_res.m" },
+	{ "case3375wp.m","case3375wp_res.m" },
+	{ "case9241pegase.m","case9241pegase_res.m" },*/
+};
+/* *INDENT-ON* */
+
 //test cases with Gauss-Seidel solver
-BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
+BOOST_DATA_TEST_CASE_F(gridDynSimulationTestFixture, matpower_validation_tests_gs, data::make(compare_cases_gs), test_case_pair)
 {
-	/* *INDENT-OFF* */
-	const std::map<std::string, std::string> compare_cases{
-		{ "case4gs.m","case4gs_res.m" },
-		{ "case5.m","case5_res.m" },
-		{ "case6ww.m","case6ww_res.m" },
-		//{ "case9.m","case9_res.m" },
-		//{ "case9Q.m","case9Q_res.m" },
-		//{ "case9target.m","case9target_res.m" },
-		{ "case14.m","case14_res.m" },
-		{ "case24_ieee_rts.m","case24_ieee_rts_res.m" },
-		{ "case30.m","case30_res.m" },
-		{ "case30pwl.m","case30pwl_res.m" },
-		{ "case30Q.m","case30Q_res.m" },
-		{ "case_ieee30.m","case_ieee30_res.m" },
-		{ "case39.m","case39_res.m" },
-		//{ "case57.m","case57_res.m" },
-		//{ "case89pegase.m","case89pegase_res.m" },
-		//{ "case118.m","case118_res.m" },
-		//{ "case300.m","case300_res.m" },
-		/*{ "case1354pegase.m","case1354pegase_res.m" },
-		{ "case2383wp.m","case2383wp_res.m" },
-		{ "case2736sp.m","case2736sp_res.m" },
-		{ "case2737sop.m","case2737sop_res.m" },
-		{ "case2746wop.m","case2746wop_res.m" },
-		{ "case2746wp.m","case2746wp_res.m" },
-		{ "case2869pegase.m","case2869pegase_res.m" },
-		{ "case3012wp.m","case3012wp_res.m" },
-		{ "case3120sp.m","case3120sp_res.m" },
-		{ "case3375wp.m","case3375wp_res.m" },
-		{ "case9241pegase.m","case9241pegase_res.m" },*/
-	};
-	/* *INDENT-ON* */
+	
 
 	std::vector<double> volts1;
 	std::vector<double> ang1;
 	std::vector<double> volts2;
 	std::vector<double> ang2;
 
-	for (const auto &mp : compare_cases)
-	{
 		gds = std::make_unique<gridDynSimulation>();
 		gds->set("consoleprintlevel", "summary");
 		std::string fname;
-		if (mp.first.length() > 25)
-		{
-			fname = mp.first;
-		}
-		else
-		{
-			fname = validationTestDirectory + mp.first;
-		}
-
-		loadFile(gds.get(), fname);
+		
+			fname = validationTestDirectory + test_case_pair.first;
+		loadFile(gds, fname);
 		gds->setFlag("no_powerflow_adjustments");
 		gds->set("defpowerflow", "gauss-seidel");
 		BOOST_REQUIRE(gds->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
@@ -224,7 +218,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		gds->powerflow();
 		auto stop_t = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed_time = stop_t - start_t;
-		printf("%s completed in %f\n", mp.first.c_str(), elapsed_time.count());
+		printf("%s completed in %f\n", test_case_pair.first.c_str(), elapsed_time.count());
 #else
 		gds->powerflow();
 #endif
@@ -247,14 +241,8 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 		double mvdiff = 0;
 		double madiff = 0;
 		gds2 = std::make_unique<gridDynSimulation>();
-		if (mp.second.length() > 25)
-		{
-			fname = mp.second;
-		}
-		else
-		{
-			fname = validationTestDirectory + mp.second;
-		}
+
+			fname = validationTestDirectory + test_case_pair.second;
 		gds2->set("consoleprintlevel", "summary");
 		loadFile(gds2.get(), fname);
 		BOOST_REQUIRE(gds2->currentProcessState() == gridDynSimulation::gridState_t::STARTUP);
@@ -273,7 +261,7 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 			}
 			if (diff> 1e-3)
 			{
-				std::cout << mp.first << " Voltage difference bus " << kk + 1 << "::" << volts1[kk] << " vs. " << volts2[kk] << "::" << std::abs(volts1[kk] - volts2[kk]) << " puV\n";
+				std::cout << test_case_pair.first << " Voltage difference bus " << kk + 1 << "::" << volts1[kk] << " vs. " << volts2[kk] << "::" << std::abs(volts1[kk] - volts2[kk]) << " puV\n";
 				vdiff++;
 			}
 			diff = std::abs(ang1[kk] - ang2[kk]);
@@ -284,18 +272,17 @@ BOOST_AUTO_TEST_CASE(matpower_validation_tests_gs)
 			}
 			if (diff> 1e-3)
 			{
-				std::cout << mp.first << " Angle difference-- bus " << kk + 1 << "::" << ang1[kk] * 180.0 / kPI << " vs. " << ang2[kk] * 180.0 / kPI << "::" << std::abs(ang1[kk] - ang2[kk]) * 180.0 / kPI << " deg\n";
+				std::cout << test_case_pair.first << " Angle difference-- bus " << kk + 1 << "::" << ang1[kk] * 180.0 / kPI << " vs. " << ang2[kk] * 180.0 / kPI << "::" << std::abs(ang1[kk] - ang2[kk]) * 180.0 / kPI << " deg\n";
 				adiff++;
 			}
 		}
 		if ((adiff > 0) || (vdiff > 0))
 		{
-			std::cout << mp.first << "max vdiff [" << maxvdiffbus << "] = " << mvdiff << "|| max adiff[" << maxadiffbus << "] = " << madiff << '\n';
+			std::cout << test_case_pair.first << "max vdiff [" << maxvdiffbus << "] = " << mvdiff << "|| max adiff[" << maxadiffbus << "] = " << madiff << '\n';
 		}
-		BOOST_CHECK_EQUAL(vdiff, 0);
-		BOOST_CHECK_EQUAL(adiff, 0);
+		BOOST_CHECK_EQUAL(vdiff, 0u);
+		BOOST_CHECK_EQUAL(adiff, 0u);
 
-	}
 
 }
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES

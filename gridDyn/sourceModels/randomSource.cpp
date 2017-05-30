@@ -12,8 +12,8 @@
 */
 
 #include "sourceTypes.h"
-#include "gridRandom.h"
-#include "stringOps.h"
+#include "utilities/gridRandom.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.h"
 #include <iostream>
@@ -182,6 +182,10 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
   {
 	  param2_t = val;
   }
+  else if (param == "zbias")
+  {
+	  zbias = val;
+  }
   else if (param == "seed")
     {
       gridRandom::setSeed (static_cast<int> (val));
@@ -299,7 +303,7 @@ coreTime randomSource::ntime ()
 double randomSource::nval ()
 {
   double nextVal = valGenerator->generate();
-  nextVal -= computeBiasAdjust();
+  nextVal += computeBiasAdjust();
  
   offset = offset + nextVal;
   return nextVal;

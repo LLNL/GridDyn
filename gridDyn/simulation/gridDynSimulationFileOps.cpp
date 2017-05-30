@@ -16,11 +16,11 @@
 #include "gridBus.h"
 #include "linkModels/acLine.h"
 #include "solvers/solverInterface.h"
-#include "vectorOps.hpp"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/stringOps.h"
 #include "ticpp/ticpp.h"
-#include "matrixDataSparse.h"
-#include "units.h"
+#include "utilities/matrixDataSparse.h"
+#include "utilities/units.h"
 #include "contingency.h"
 #include "core/coreExceptions.h"
 #include <boost/filesystem.hpp>
@@ -358,6 +358,7 @@ void cdfLinkPrint (FILE *fp,int areaNum, acLine *lnk)
           type = 1;
           maxVal = 0;
           minVal = 0;
+		  break;
         case 1:
           type = 2;
           maxVal = alnk->get ("vmax");
@@ -365,6 +366,7 @@ void cdfLinkPrint (FILE *fp,int areaNum, acLine *lnk)
           minAdj = alnk->get ("mintap");
           maxAdj = alnk->get ("maxtap");
           ssize = alnk->get ("stepsize");
+		  break;
         case 2:
           type = 3;
           maxVal = alnk->get ("qmax", gridUnits::MW);
@@ -372,6 +374,7 @@ void cdfLinkPrint (FILE *fp,int areaNum, acLine *lnk)
           minAdj = alnk->get ("mintap");
           maxAdj = alnk->get ("maxtap");
           ssize = alnk->get ("stepsize");
+		  break;
         case 3:
           type = 4;
           maxVal = alnk->get ("pmax", gridUnits::MW);
@@ -379,6 +382,7 @@ void cdfLinkPrint (FILE *fp,int areaNum, acLine *lnk)
           minAdj = alnk->get ("mintapangle");
           maxAdj = alnk->get ("maxtapangle");
           ssize = alnk->get ("stepsize");
+		  break;
         }
       cbus = alnk->getInt ("controlbusid");
 

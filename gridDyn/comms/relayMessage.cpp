@@ -12,7 +12,7 @@
 */
 #include "comms/relayMessage.h"
 
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include <map>
 
 static dMessageFactory<relayMessage, BASE_RELAY_MESSAGE_NUMBER, BASE_RELAY_MESSAGE_NUMBER + 12> dmf ("relay");

@@ -18,7 +18,7 @@
 #include "gridArea.h"
 #include "gridBus.h"
 #include "simulation/gridSimulation.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "grabberInterpreter.hpp"
 #include "objectGrabbers.h"
 

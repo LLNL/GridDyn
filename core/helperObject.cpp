@@ -13,8 +13,8 @@
 
 #include "helperObject.h"
 #include "coreExceptions.h" 
-#include "dataDictionary.h"
-#include "stringOps.h"
+#include "utilities/dataDictionary.h"
+#include "utilities/stringOps.h"
 
 //start at 100 since there are some objects that use low numbers as a check for interface number and the id as secondary
 std::atomic<std::uint64_t> helperObject::s_obcnt(101);
@@ -84,6 +84,12 @@ std::atomic<std::uint64_t> helperObject::s_obcnt(101);
 	
 	void helperObject::nameUpdate()
 	{
+	}
+
+
+	coreObject *helperObject::getOwner() const
+	{
+		return nullptr;
 	}
 
 	void setMultipleFlags(helperObject *obj, const std::string &flags)

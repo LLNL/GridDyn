@@ -15,7 +15,7 @@
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "measurement/collector.h"
-#include "readerElement.h"
+#include "formatInterpreters/readerElement.h"
 #include "core/coreObject.h"
 
 
@@ -430,7 +430,14 @@ bool readerInfo::checkFileParam (std::string &strVal,  bool extra_find)
           ret = true;
         }
     }
-
+  //if for some reason we need to capture the files
+  if (captureFiles)
+  {
+	  if (ret)
+	  {
+		  capturedFiles.push_back(strVal);
+	  }
+  }
   return ret;
 
 

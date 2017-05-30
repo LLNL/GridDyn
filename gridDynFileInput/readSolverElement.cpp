@@ -12,12 +12,11 @@
 */
 
 #include "readElement.h"
-#include "readerElement.h"
 #include "elementReaderTemplates.hpp"
 #include "gridDynFileInput.h"
 #include "solvers/solverInterface.h"
 #include "gridDyn.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 
 using namespace readerConfig;
@@ -77,7 +76,7 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri,
                   sd = makeSolver (type);
                   if (sd)
                     {
-                      sd->set ("name", name);
+                      sd->setName( name);
                     }
                 }
             }
@@ -104,7 +103,7 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri,
         }
       if (!name.empty ())
         {
-          sd->set ("name", name);
+          sd->setName( name);
         }
     }
   std::string field = getElementField (element, "index", defMatchType);

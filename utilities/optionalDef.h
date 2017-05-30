@@ -21,7 +21,7 @@
 namespace utilities
 {
 	template <typename X>
-	using optional<X> = std::optional<X>;
+	using optional = std::optional<X>;
 }
 #else
 #ifdef HAVE_EXP_OPTIONAL
@@ -29,14 +29,14 @@ namespace utilities
 namespace utilities
 {
 	template<typename X>
-	using optional<X>= std::experimental::optional<X>;
+	using optional= std::experimental::optional<X>;
 }
 #else
 #include <boost/optional.hpp>
 namespace utilities
 {
 	template<typename X>
-	using optional<X> = boost::optional<X>;
+	using optional = boost::optional<X>;
 }
 
 #endif

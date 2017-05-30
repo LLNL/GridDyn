@@ -12,8 +12,8 @@
 * LLNS Copyright End
 */
 
-#include <../ThirdParty/Minizip/minizip.h>
-#include <../ThirdParty/Minizip/miniunz.h>
+#include <minizip/minizip.h>
+#include <minizip/miniunz.h>
 
 #include "zipUtilities.h"
 #include <boost/filesystem.hpp>

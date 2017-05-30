@@ -12,8 +12,8 @@
 */
 
 #include "fmiInfo.h"
-#include "stringConversion.h"
-#include "tinyxml2ReaderElement.h"
+#include "utilities/stringConversion.h"
+#include "formatInterpreters/tinyxml2ReaderElement.h"
 
 fmiInfo::fmiInfo()
 {

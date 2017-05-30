@@ -16,8 +16,8 @@
 #include "core/factoryTemplates.h"
 #include "core/coreExceptions.h"
 #include "gridDyn.h"
-#include "stringConversion.h"
-#include "mapOps.h"
+#include "utilities/stringConversion.h"
+#include "utilities/mapOps.h"
 #include <iostream>
 #include <new>
 

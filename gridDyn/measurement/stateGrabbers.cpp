@@ -20,11 +20,11 @@
 #include "generators/gridDynGenerator.h"
 #include "grabberInterpreter.hpp"
 #include "gridCondition.h"
-#include "matrixDataScale.h"
-#include "matrixDataTranslate.h"
+#include "utilities/matrixDataScale.h"
+#include "utilities/matrixDataTranslate.h"
 #include "core/helperTemplates.h"
 #include <algorithm>
-#include "mapOps.h"
+#include "utilities/mapOps.h"
 
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber> sgInterpret ([](const std::string &fld, coreObject *obj){
   return std::make_unique<stateGrabber> (fld, obj);

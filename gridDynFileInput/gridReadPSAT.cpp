@@ -20,7 +20,7 @@
 #include "linkModels/acLine.h"
 #include "generators/gridDynGenerator.h"
 #include "events/gridEvent.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 #ifdef OPTIMIZATION_ENABLE
 #include "gridDynOpt.h"

@@ -20,7 +20,7 @@
 #include "generators/gridDynGenerator.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -98,13 +98,13 @@ void loadPTI (coreObject *parentObject, const std::string &filename,const basicR
           parentObject->set ("systemBasePower", opt.base);
         }
       //temp1=line.substr(45,27);
-      //parentObject->set("name",&temp1);
+      //parentObject->setName(temp1);
     }
   if (std::getline (file, line))
     {
       pos = line.find_first_of (',');
       temp1 = trim(line.substr (0, pos));
-      parentObject->set ("name", temp1);
+      parentObject->setName(temp1);
     }
   // get the second comment line and ignore it
   std::getline (file, line);
@@ -377,7 +377,7 @@ void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
           temp2 = opt.prefix + '_' + temp2;
         }
     }
-  bus->set ("name", temp2);
+  bus->setName( temp2);
 
   //get the baseVoltage
   bv = std::stod (strvec[2]);
@@ -539,7 +539,7 @@ void ptiReadGen (gridDynGenerator *gen, const std::string &line, basicReaderInfo
   //get the load index and name
   std::string temp = trim(strvec[1]);
   std::string prefix = gen->getParent ()->getName () + "_Gen_" + temp;
-  gen->set ("name", prefix);
+  gen->setName( prefix);
   //get the status
   auto status = std::stoi (strvec[14]);
   if (status == 0)

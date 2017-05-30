@@ -15,9 +15,8 @@
 #include "readElementFile.h"
 #include "gridDyn.h"
 #include "readerHelper.h"
-#include "tinyxmlReaderElement.h"
-#include "tinyxml2ReaderElement.h"
-#include "jsonReaderElement.h"
+#include "formatInterpreters/tinyxmlReaderElement.h"
+#include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "elementReaderTemplates.hpp"
 
 #include <boost/filesystem.hpp>

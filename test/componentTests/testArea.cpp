@@ -19,7 +19,7 @@
 #include "core/coreExceptions.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include <cmath>
 //testP case for coreObject object
 

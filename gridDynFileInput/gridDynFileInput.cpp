@@ -17,12 +17,12 @@
 
 #include "readElement.h"
 
-#include "tinyxmlReaderElement.h"
-#include "tinyxml2ReaderElement.h"
-#include "jsonReaderElement.h"
-#include "yamlReaderElement.h"
+#include "formatInterpreters/tinyxmlReaderElement.h"
+#include "formatInterpreters/tinyxml2ReaderElement.h"
+#include "formatInterpreters/jsonReaderElement.h"
+#include "formatInterpreters/yamlReaderElement.h"
 #include "readElementFile.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 #include <boost/filesystem.hpp>
@@ -194,6 +194,11 @@ uint32_t addflags (uint32_t iflags, const std::string &flags)
   return oflags;
 }
 
+
+void loadFile(std::unique_ptr<gridDynSimulation> &gds, const std::string &filename, readerInfo *ri, std::string ext)
+{
+	loadFile(gds.get(), filename, ri, ext);
+}
 
 void loadFile (coreObject *parentObject, const std::string &filename, readerInfo *ri, std::string ext)
 {

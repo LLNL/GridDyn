@@ -14,8 +14,8 @@
 #include "sundialsInterface.h"
 
 #include "gridDyn.h"
-#include "vectorOps.hpp"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/stringOps.h"
 #include "core/helperTemplates.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "core/coreExceptions.h"

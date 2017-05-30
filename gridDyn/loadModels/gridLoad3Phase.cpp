@@ -15,7 +15,7 @@
 
 #include "gridBus.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 #include <iostream>
 #include <cmath>
@@ -26,7 +26,8 @@ static gridBus defBus(1.0, 0);
 using namespace gridUnits;
 
 /** multiplier constants for representation change*/
-static const std::complex<double> alpha = std::polar(1.0, 2.0*kPI / 3.0);
+static constexpr std::complex<double> alpha0 = std::complex<double>(1.0, 0);
+static const std::complex<double> alpha = std::polar(1.0, -2.0*kPI / 3.0);
 static const std::complex<double> alpha2 = alpha*alpha;
 
 gridLoad3Phase::gridLoad3Phase(const std::string &objName) : gridLoad(objName)
@@ -92,7 +93,7 @@ static const stringVec locStrStrings{
 };
 
 static const stringVec flagStrings{
-	
+	"use_abs_angle"
 };
 
 void gridLoad3Phase::getParameterStrings(stringVec &pstr, paramStringType pstype) const
@@ -102,10 +103,14 @@ void gridLoad3Phase::getParameterStrings(stringVec &pstr, paramStringType pstype
 
 void gridLoad3Phase::setFlag(const std::string &flag, bool val)
 {
-	if (flag.front() =='#')
+	if ((flag=="ignore_phase")||(flag=="ignorevoltagephase"))
 	{
-		
+		opFlags.set(use_abs_angle, !val);
 
+	}
+	else if (flag == "use_abs_angle")
+	{
+		opFlags.set(use_abs_angle, val);
 	}
 	else
 	{
@@ -128,6 +133,28 @@ void gridLoad3Phase::set(const std::string &param, const std::string &val)
 
 }
 
+double gridLoad3Phase::getBaseAngle() const
+{
+	return (opFlags[use_abs_angle]) ? bus->getAngle(): 0.0;
+
+}
+//simple template class for selecting the an appropriate value based on Phase
+template <class X>
+X phaseSelector(char phase, X valA, X valB, X valC, X def)
+{
+	switch (phase)
+	{
+	case 'a': case '1':
+		return valA;
+	case 'b': case '2':
+		return valB;
+	case 'c': case '3':
+		return valC;
+	default:
+		return def;
+	}
+}
+
 double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 {
 	if (param.length() == 2)
@@ -135,35 +162,111 @@ double gridLoad3Phase::get(const std::string &param, units_t unitType) const
 		switch (param[0])
 		{
 		case 'p':
-			switch (param[1])
-			{
-			case 'a':
-				return unitConversion(Pa, puMW, unitType, systemBasePower);
-			case 'b':
-				return unitConversion(Pb, puMW, unitType, systemBasePower);
-			case 'c':
-				return unitConversion(Pc, puMW, unitType, systemBasePower);
-			}
-			
-			break;
+			return unitConversion(phaseSelector(param[1], Pa, Pb, Pc, kNullVal), puMW, unitType, systemBasePower);
 		case 'q':
-		switch(param[1])
+			return unitConversion(phaseSelector(param[1], Qa, Qb, Qc, kNullVal), puMW, unitType, systemBasePower);
+		case 'v':
 		{
-		case 'a':
-			return unitConversion(Pa, puMW, unitType, systemBasePower);
-		case 'b':
-			return unitConversion(Pb, puMW, unitType, systemBasePower);
-		case 'c':
-			return unitConversion(Pc, puMW, unitType, systemBasePower);
+			double V = bus->getVoltage();
+			return unitConversion(V, puV, unitType, systemBasePower,baseVoltage);
 		}
-			break;
+		case 'a':
+		{
+			double A = getBaseAngle();
+			double phaseAngle = phaseSelector(param[1],A, A + 2.0*kPI / 3.0, A + 4.0*kPI / 3.0, kNullVal);
+			return unitConversion(phaseAngle, rad, unitType, systemBasePower, baseVoltage);
+		}
 		default:
 			break;
 		}
 	}
+	else if (param.length() == 3)
+	{
+		if (param.compare(0, 2, "vi") == 0) //get the real part of the voltage
+		{
+			auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
+			Vc = Vc*phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
+			return unitConversion(Vc.real(), puV, unitType, systemBasePower, baseVoltage);
+		}
+		else if (param.compare(0, 2, "vj") == 0) //get the reactive part of the voltage
+		{
+			auto Vc = std::polar(bus->getVoltage(), getBaseAngle());
+			Vc = Vc*phaseSelector(param[2], alpha0, alpha, alpha2, alpha0);
+			return unitConversion(Vc.imag(), puV, unitType, systemBasePower, baseVoltage);
+		}
+	}
+	else if (param.compare(0, 4, "imag") == 0)
+	{
+		switch (param[4])
+		{
+		case 'a':
+		{
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
+			auto sa = std::complex<double>(Pa, Qa);
+			auto ia = sa / va;
+			return unitConversion(std::abs(ia)/multiplier, puA,unitType, systemBasePower, baseVoltage);
+			
+		}
+
+		break;
+		case 'b':
+		{
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
+			auto sb = std::complex<double>(Pb, Qb);
+			auto ib = sb / vb;
+
+			return unitConversion(std::abs(ib) / multiplier, puA, unitType, systemBasePower, baseVoltage);
+		}
+		break;
+		case 'c':
+		{
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
+			auto sc = std::complex<double>(Pc, Qc);
+			auto ic = sc / vc;
+
+			return unitConversion(std::abs(ic) / multiplier, puA, unitType, systemBasePower, baseVoltage);
+		}
+		break;
+		}
+	}
+	else if (param.compare(0, 6, "iangle") == 0)
+	{
+		switch (param[6])
+		{
+		case 'a':
+		{
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
+			auto sa = std::complex<double>(Pa, Qa);
+			auto ia = sa / va;
+			return unitConversion(std::arg(ia), rad, unitType);
+		}
+		break;
+		case 'b':
+		{
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
+			auto sb = std::complex<double>(Pb, Qb);
+			auto ib = sb / vb;
+			return unitConversion(std::arg(ib), rad, unitType);
+		}
+		break;
+		case 'c':
+		{
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
+			auto sc = std::complex<double>(Pc, Qc);
+			auto ic = sc / vc;
+			return unitConversion(std::arg(ic), rad, unitType);
+		}
+		break;
+		}
+	}
+	else if (param == "multiplier")
+	{
+		return multiplier;
+	}
 	return gridLoad::get(param, unitType);
 
 }
+
 
 void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 {
@@ -176,13 +279,13 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			switch (param[1])
 			{
 			case 'a':
-				setPa(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setPa(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			case 'b':
-				setPb(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setPb(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			case 'c':
-				setPc(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setPc(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			}
 			break;
@@ -190,13 +293,13 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 			switch (param[1])
 			{
 			case 'a':
-				setQa(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setQa(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			case 'b':
-				setQb(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setQb(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			case 'c':
-				setQc(unitConversion(val, unitType, puMW, systemBasePower, baseVoltage));
+				setQc(unitConversion(val*multiplier, unitType, puMW, systemBasePower, baseVoltage));
 				break;
 			}
 			break;
@@ -205,6 +308,92 @@ void gridLoad3Phase::set(const std::string &param, double val, units_t unitType)
 		}
 		return;
 
+	}
+	else if (param.compare(0, 4, "imag") == 0)
+	{
+		switch (param[4])
+		{
+		case 'a':
+		{
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
+			auto sa = std::complex<double>(Pa, Qa);
+			auto ia = sa / va;
+
+			auto newia = std::polar(unitConversion(val, unitType, puA, systemBasePower, baseVoltage)*multiplier, std::arg(ia));
+			auto newP = newia*va;
+			setPa(newP.real());
+			setQa(newP.imag());
+		}
+			
+			break;
+		case 'b':
+		{
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
+			auto sb = std::complex<double>(Pb, Qb);
+			auto ib = sb / vb;
+			
+			auto newib = std::polar(unitConversion(val, unitType, puA, systemBasePower, baseVoltage)*multiplier, std::arg(ib));
+			auto newP = newib*vb;
+			setPb(newP.real());
+			setQb(newP.imag());
+		}
+			break;
+		case 'c':
+		{
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
+			auto sc = std::complex<double>(Pc, Qc);
+			auto ic = sc / vc;
+			
+			auto newic = std::polar(unitConversion(val, unitType, puA, systemBasePower, baseVoltage)*multiplier, std::arg(ic));
+			auto newP = newic*vc;
+			setPc(newP.real());
+			setQc(newP.imag());
+		}
+			break;
+		}
+	}
+	else if (param.compare(0, 6, "iangle") == 0)
+	{
+		switch (param[6])
+		{
+		case 'a':
+		{
+			auto va = std::polar(bus->getVoltage(), getBaseAngle());
+			auto sa = std::complex<double>(Pa, Qa);
+			auto ia = sa / va;
+			auto newia = std::polar(std::abs(ia), unitConversion(val, unitType, rad));
+			auto newP = newia*va;
+			setPa(newP.real());
+			setQa(newP.imag());
+		}
+			break;
+		case 'b':
+		{
+			auto vb = std::polar(bus->getVoltage(), getBaseAngle())*alpha;
+			auto sb = std::complex<double>(Pb, Qb);
+			auto ib = sb / vb;
+			auto newib = std::polar(std::abs(ib), unitConversion(val, unitType, rad));
+			auto newP = newib*vb;
+			setPb(newP.real());
+			setQb(newP.imag());
+		}
+			break;
+		case 'c':
+		{
+			auto vc = std::polar(bus->getVoltage(), getBaseAngle())*alpha2;
+			auto sc = std::complex<double>(Pc, Qc);
+			auto ic = sc / vc;
+			auto newic = std::polar(std::abs(ic), unitConversion(val, unitType, rad));
+			auto newP = newic*vc;
+			setPc(newP.real());
+			setQc(newP.imag());
+		}
+			break;
+		}
+	}
+	else if (param == "multiplier")
+	{
+		multiplier = val;
 	}
 	else
 	{

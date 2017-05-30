@@ -12,7 +12,7 @@
 */
 
 #include "sourceTypes.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.h"
 #include <ctime>
 

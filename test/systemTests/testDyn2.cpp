@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleEvent)
 
   auto diff = countDiffsIgnoreCommon(st, st2, 0.02);
   //check for stability
-  BOOST_CHECK_EQUAL (diff,0);
+  BOOST_CHECK_EQUAL (diff,0u);
 }
 
 BOOST_AUTO_TEST_CASE (dyn_test_simpleChunked)

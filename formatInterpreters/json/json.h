@@ -1921,7 +1921,7 @@ private:
  *line
  *       and then unindent and line break and print '}'.
  * - Array value:
- *     - if empty then prvoid [] without indent and line break
+ *     - if empty then print [] without indent and line break
  *     - if the array contains no object value, empty array or some other value
  *types,
  *       and all the values fit on one lines, then print the array on a single
@@ -1982,7 +1982,7 @@ private:
  line
  *       and then unindent and line break and print '}'.
  * - Array value:
- *     - if empty then prvoid [] without indent and line break
+ *     - if empty then print [] without indent and line break
  *     - if the array contains no object value, empty array or some other value
  types,
  *       and all the values fit on one lines, then print the array on a single

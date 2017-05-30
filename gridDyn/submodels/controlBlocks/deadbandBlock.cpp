@@ -12,9 +12,9 @@
 */
 
 #include "submodels/gridControlBlocks.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
+#include "utilities/stringOps.h"
 
 deadbandBlock::deadbandBlock (const std::string &objName) : basicBlock (objName)
 {

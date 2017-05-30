@@ -14,7 +14,7 @@
 #include "gridCondition.h"
 #include "grabberInterpreter.hpp"
 #include "grabberSet.h"
-#include "mapOps.h"
+#include "utilities/mapOps.h"
 
 std::unique_ptr<gridCondition> make_condition(const std::string &condString, coreObject *rootObject)
 {
@@ -128,7 +128,7 @@ std::unique_ptr<gridCondition> make_condition(const std::string &field, comparis
 	
 }
 
-gridCondition::gridCondition(std::shared_ptr<grabberSet> valGrabber):conditionA(valGrabber)
+gridCondition::gridCondition(std::shared_ptr<grabberSet> valGrabber):conditionA(std::move(valGrabber))
 {
 
 }
@@ -186,7 +186,7 @@ void gridCondition::updateObject(coreObject *obj, object_update_mode mode)
 	//Update object may throw an error if it does everything is fine
 	//if it doesn't then B update may throw an error in which case we need to rollback A for exception safety
 	//this would be very unusual to occur.  
-	coreObject *keyObject;
+	coreObject *keyObject=nullptr;
 	if (conditionA)
 	{
 		keyObject = conditionA->getObject();

@@ -17,9 +17,9 @@
 // headers
 #include "gridBus.h"
 #include "gridObjects.h"
-#include "matrixDataCompact.h"
+#include "utilities/matrixDataCompact.h"
 
-#include "matrixDataTranslate.h"
+#include "utilities/matrixDataTranslate.h"
 #include "primary/busControls.h"
 
 class basicBlock;

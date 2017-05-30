@@ -14,7 +14,7 @@
 #include "svd.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreObjectTemplates.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <cmath>
 
 static typeFactory<svd> svdld ("load", stringVec {"svd", "switched shunt","switchedshunt","ssd"});

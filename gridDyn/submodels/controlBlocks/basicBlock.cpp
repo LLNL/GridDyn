@@ -13,9 +13,9 @@
 
 #include "submodels/otherBlocks.h"
 #include "core/objectFactoryTemplates.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
-#include "stringConversion.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
+#include "utilities/stringConversion.h"
 #include "core/coreObjectTemplates.h"
 #include "valueLimiter.h"
 #include "rampLimiter.h"

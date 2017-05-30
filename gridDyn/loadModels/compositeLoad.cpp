@@ -16,7 +16,7 @@
 #include "gridBus.h"
 #include "core/objectFactoryTemplates.h"
 #include "core/coreExceptions.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 #include <cmath>
 

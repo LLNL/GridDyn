@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include "gridDynFileInput.h"
 #include "simulation/gridDynSimulationFileOps.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 static std::string pFlow_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(output_test1)
 	std::vector<double> st2 = gds2->getState(cPflowSolverMode);
 	
 	auto diff = countDiffs(st1, st2, 0.000001);
-	BOOST_CHECK_EQUAL(diff,0);
+	BOOST_CHECK_EQUAL(diff,0u);
 	remove("testout.cdf");
 }
 

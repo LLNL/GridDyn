@@ -14,93 +14,59 @@
 #include "zmqContextManager.h"
 
 #include <cppzmq/zmq.hpp>
+#include <mutex>
+#include <map>
 
-std::vector<std::shared_ptr<zmqContextManager>> zmqContextManager::contexts;
-std::shared_ptr<zmqContextManager> zmqContextManager::defContext;
+/** a storage system for the available core objects allowing references by name to the core
+*/
+std::map<std::string, std::shared_ptr<zmqContextManager>> zmqContextManager::contexts;
+
+/** we expect operations on core object that modify the map to be rare but we absolutely need them to be thread
+safe so we are going to use a lock that is entirely controlled by this file*/
+static std::mutex contextLock;
 
 std::shared_ptr<zmqContextManager> zmqContextManager::getContextPointer(const std::string &contextName)
 {
-	//check if it already exists
-	for (auto &v : contexts)
+	std::lock_guard<std::mutex> conlock(
+		contextLock);  // just to ensure that nothing funny happens if you try to get a context
+				   // while it is being constructed
+	auto fnd = contexts.find(contextName);
+	if (fnd != contexts.end())
 	{
-		if (v->getName() == contextName)
-		{
-			return v;
-		}
+		return fnd->second;
+	}
+	else
+	{ //can't use make_shared since it is a private constructor
+		auto newContext = std::shared_ptr<zmqContextManager>(new zmqContextManager(contextName));
+		contexts.emplace(contextName,newContext);
+		return newContext;
 	}
 	//if it doesn't make a new one with the appropriate name
-	auto newContext = std::shared_ptr<zmqContextManager>(new zmqContextManager(contextName));
-	contexts.push_back(newContext);
-	return newContext;
-}
-std::shared_ptr<zmqContextManager> zmqContextManager::getContextPointer()
-{
-	if (!(defContext))
-	{
-		defContext = std::shared_ptr<zmqContextManager>(new zmqContextManager("default"));
-		contexts.push_back(defContext);
-	}
 	
-	return defContext;
 }
 
 
 zmq::context_t &zmqContextManager::getContext(const std::string &contextName)
 {
-	//check if it already exists
-	for (auto &v : contexts)
-	{
-		if (v->getName() == contextName)
-		{
-			return v->getBaseContext();
-		}
-	}
-	//if it doesn't make a new one with the appropriate name
-	auto newContext = std::shared_ptr<zmqContextManager>(new zmqContextManager(contextName));
-	contexts.push_back(newContext);
-	return newContext->getBaseContext();
+	return getContextPointer(contextName)->getBaseContext();
 }
 
-zmq::context_t &zmqContextManager::getContext()
-{
-	if (!(defContext))
-	{
-		defContext = std::shared_ptr<zmqContextManager>(new zmqContextManager("default"));
-		contexts.push_back(defContext);
-	}
-
-	return defContext->getBaseContext();
-}
 void zmqContextManager::closeContext(const std::string &contextName)
 {
-	auto vbeg = contexts.begin();
-	auto vend = contexts.end();
-	while (vbeg != vend)
+	std::lock_guard<std::mutex> conlock(contextLock);
+	auto fnd = contexts.find(contextName);
+	if (fnd != contexts.end())
 	{
-		if ((*vbeg)->getName() == contextName)
-		{
-			contexts.erase(vbeg);
-			return;
-		}
+		contexts.erase(fnd);
 	}
 }
 
-void zmqContextManager::closeContext()
-{
-	closeContext("default");
-	defContext = nullptr;
-}
 
-zmqContextManager::~zmqContextManager()
-{
-	if (zcontext != nullptr)
-	{
-		delete zcontext;
-	}
-}
+zmqContextManager::~zmqContextManager() = default;
+
 
 
 zmqContextManager::zmqContextManager(const std::string &contextName):name(contextName)
 {
-	zcontext = new zmq::context_t();
+	zcontext = std::make_unique<zmq::context_t>();
 }

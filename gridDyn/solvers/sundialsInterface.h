@@ -15,7 +15,7 @@
 #define _SUNDIALS_SOLVER_INTERFACE_H_
 
 #include "solverInterface.h"
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 //SUNDIALS libraries
 #include "nvector/nvector_serial.h"
 #ifdef HAVE_OPENMP

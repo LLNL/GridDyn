@@ -13,7 +13,7 @@
 
 #include "tinyxml2ReaderElement.h"
 #include "tinyxml2/tinyxml2.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 
 using namespace tinyxml2;

@@ -23,7 +23,7 @@
 #include "loadModels/zipLoad.h"
 #include "gridBus.h"
 #include "gridDyn.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 #include <cstdlib>
 #include <iostream>

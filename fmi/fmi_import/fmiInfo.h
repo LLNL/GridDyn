@@ -15,7 +15,7 @@
 #define FMI_INFORMATION_H_
 
 
-#include "matrixDataOrdered.h"
+#include "utilities/matrixDataOrdered.h"
 #include "FMI2/fmi2TypesPlatform.h"
 #include "fmiEnumDefinitions.h"
 
@@ -165,7 +165,7 @@ private:
 	std::vector<int> inputs;	//!< a list of the inputs
 public:
 	fmiInfo();
-	fmiInfo(const std::string &xmlFile);
+	explicit fmiInfo(const std::string &xmlFile);
 	int loadFile(const std::string &xmlfile);
 	/** check if a given flag is set*/
 	bool checkFlag(fmuCapabilityFlags flag) const;
@@ -179,10 +179,15 @@ public:
 	double getReal(const std::string &field) const;
 	const variableInformation& getVariableInfo(const std::string &variableName) const;
 	const variableInformation& getVariableInfo(unsigned int index) const;
+	/** get a set of variables for the specified parameters*/
 	fmiVariableSet getReferenceSet(const std::vector<std::string > &variableList) const;
+	/** get a variable set with a single member*/
 	fmiVariableSet getVariableSet(const std::string &variable) const;
+	/** get a variable set with a single member based on index*/
 	fmiVariableSet getVariableSet(unsigned int index) const;
+	/** get a set of the current outputs*/
 	fmiVariableSet getOutputReference() const;
+	/** get a set of the current inputs*/
 	fmiVariableSet getInputReference() const;
 	/** get a list of variable names by type
 	@param[in] type the type of variable

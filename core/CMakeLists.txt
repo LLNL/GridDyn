@@ -40,10 +40,9 @@ set(coreObject_sources
 	
 	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
 	
-	INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/utilities)
 	INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
 	INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
-	
+	INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 	INSTALL(TARGETS coreObjects
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)

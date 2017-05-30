@@ -15,6 +15,7 @@
 #define _FMI_COORDINATOR_H_
 
 #include "core/coreObject.h"
+#include <mutex>
 
 class fmiEvent;
 class fmiCollector;
@@ -45,8 +46,9 @@ private:
 	std::vector <vrOutputPair>  outputVR;
 	std::vector<double> outputPoints;
 	std::vector<fmiCollector *> collectors;
-	index_t nextVR = 0;
-	
+	std::vector<std::shared_ptr<helperObject>> helpers;
+	std::atomic<index_t> nextVR=1;
+	std::mutex helperProtector;
 public:
 
 	explicit fmiCoordinator(const std::string &name = "");
@@ -55,7 +57,9 @@ public:
 
 	void registerOutput(const std::string &name,  int column, fmiCollector *col);
 
-	void sendInput(index_t vr, double val);
+	bool sendInput(index_t vr, double val);
+	bool sendInput(index_t vr, const char *s);
+
 	double getOutput(index_t vr);
 	void updateOutputs(coreTime time);
 	const std::string &getFMIName() const;
@@ -72,5 +76,6 @@ public:
 	{
 		return outputVR;
 	}
+	void addHelper(std::shared_ptr<helperObject> ho);
 };
 #endif

@@ -15,7 +15,7 @@
 #ifndef _MATRIX_DATA_BOOST_H_
 #define _MATRIX_DATA_BOOST_H_
 
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
 /** @brief class implementing an expandable sparse matrix based on the boost matrices geared for Jacobian entries*/

@@ -13,7 +13,7 @@
 
 #include "numericEstimationFunctions.h"
 #include "gridObjects.h"
-#include "matrixData.h"
+#include  "utilities/matrixData.h"
 
 //work in progress
 void numericJacobianCalculation(gridObject *obj, const IOdata & inputs, const stateData &sD, matrixData<double> &ad, const IOlocs & inputLocs, const solverMode & sMode)

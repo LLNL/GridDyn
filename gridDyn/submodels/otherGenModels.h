@@ -15,7 +15,7 @@
 #define OTHERGENMODEL_H_
 
 #include "submodels/gridDynGenModel.h"
-#include "saturation.h"
+#include "utilities/saturation.h"
 
 /** @brief model simulation implementing a simple inverter model
  the gridDynGenModel implements a very basic inverter model modeling the generator as a transmission line

@@ -16,7 +16,7 @@
 #include "gridDyn.h"
 #include "gridDynFileInput.h"
 #include "testHelper.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "core/objectFactory.h"
 #include "generators/gridDynGenerator.h"
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE (root_exciter_test)
 
   //check for stability
   auto diff = countDiffs(st, st2, 0.0001);
-  BOOST_CHECK_EQUAL (diff, 0);
+  BOOST_CHECK_EQUAL (diff, 0u);
 
 }
 
@@ -64,7 +64,6 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -75,7 +74,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
-		obj = cof->createObject("exciter", excname);
+		auto obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
 
@@ -95,10 +94,10 @@ BOOST_AUTO_TEST_CASE(basic_stability_test1)
 
 		BOOST_CHECK_EQUAL(retval, 0);
 
-		int badresid = runResidualCheck(gds, cDaeSolverMode);
+		int badresid = runResidualCheck(gds, cDaeSolverMode,false);
 
 		BOOST_REQUIRE_MESSAGE(badresid == 0,"exciter type "<<excname<<"resid issue\n");
-		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
+		int badjacobian = runJacobianCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "exciter type " << excname << "Jacobian issue\n");
 
 		std::vector<double> volt1;
@@ -129,8 +128,6 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability2.xml");
 
 	auto cof = coreObjectFactory::instance();
-	coreObject *obj = nullptr;
-
 	auto exclist = cof->getTypeNames("exciter");
 
 	//exclist.insert(exclist.begin(), "none");
@@ -139,7 +136,7 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
-		obj = cof->createObject("exciter", excname);
+		auto obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
 
@@ -159,9 +156,9 @@ BOOST_AUTO_TEST_CASE(basic_stability_test2)
 
 		BOOST_CHECK_EQUAL(retval, 0);
 
-		int badresid = runResidualCheck(gds, cDaeSolverMode);
+		int badresid = runResidualCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(badresid == 0, "Exciter " << excname << " residual issue");
-		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
+		int badjacobian = runJacobianCheck(gds, cDaeSolverMode,false);
 
 		BOOST_REQUIRE_MESSAGE(badjacobian == 0,"Exciter "<<excname<<" Jacobian issue");
 
@@ -232,10 +229,10 @@ BOOST_AUTO_TEST_CASE(basic_stability_test3)
 
 		BOOST_CHECK_EQUAL(retval, 0);
 
-		int badresid = runResidualCheck(gds, cDaeSolverMode);
+		int badresid = runResidualCheck(gds, cDaeSolverMode,false);
 
 		BOOST_REQUIRE_MESSAGE(badresid == 0, "Exciter " << excname << " residual issue");
-		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
+		int badjacobian = runJacobianCheck(gds, cDaeSolverMode,false);
 
 		BOOST_REQUIRE_MESSAGE(badjacobian == 0, "Exciter " << excname << " Jacobian issue");
 
@@ -305,10 +302,10 @@ BOOST_AUTO_TEST_CASE(basic_stability_test4)
 
 		BOOST_CHECK_EQUAL(retval, 0);
 
-		int badresid = runResidualCheck(gds, cDaeSolverMode);
+		int badresid = runResidualCheck(gds, cDaeSolverMode,false);
 
 		BOOST_REQUIRE_MESSAGE(badresid == 0, "Exciter " << excname << " residual issue");
-		int badjacobian = runJacobianCheck(gds, cDaeSolverMode);
+		int badjacobian = runJacobianCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(badjacobian == 0 , "Exciter " << excname << " residual issue");
 
 		std::vector<double> volt1;
@@ -343,7 +340,6 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -354,7 +350,7 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
-		obj = cof->createObject("exciter", excname);
+		auto obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
 
@@ -371,11 +367,11 @@ BOOST_AUTO_TEST_CASE(exciter_test2_alg_diff_tests)  //test the algebraic updates
 		int retval = gds->dynInitialize();
 
 		BOOST_CHECK_EQUAL(retval, 0);
-		auto mmatch = runResidualCheck(gds, cDaeSolverMode);
+		auto mmatch = runResidualCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " residual issue");
-		mmatch = runDerivativeCheck(gds, cDaeSolverMode);
+		mmatch = runDerivativeCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " derivative issue");
-		mmatch = runAlgebraicCheck(gds, cDaeSolverMode);
+		mmatch = runAlgebraicCheck(gds, cDaeSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " algebraic issue");
 	}
 
@@ -397,7 +393,6 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 	std::string fname = std::string(EXCITER_TEST_DIRECTORY "test_exciter_stability.xml");
 
 	auto cof = coreObjectFactory::instance();
-	coreObject *obj = nullptr;
 
 	auto exclist = cof->getTypeNames("exciter");
 
@@ -408,7 +403,7 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 		gds = readSimXMLFile(fname);
 		gridDynGenerator *gen = gds->getGen(0);
 		gds->consolePrintLevel = print_level::no_print;
-		obj = cof->createObject("exciter", excname);
+		auto obj = cof->createObject("exciter", excname);
 		BOOST_CHECK(obj != nullptr);
 		auto fnd = parameters.find(excname);
 
@@ -424,9 +419,9 @@ BOOST_AUTO_TEST_CASE(exciter_alg_diff_jacobian_tests)  //test the algebraic upda
 		int retval = gds->dynInitialize();
 
 		BOOST_CHECK_EQUAL(retval, 0);
-		auto mmatch = runJacobianCheck(gds, cDynDiffSolverMode);
+		auto mmatch = runJacobianCheck(gds, cDynDiffSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " Jacobian dynDiff issue");
-		mmatch = runJacobianCheck(gds, cDynAlgSolverMode);
+		mmatch = runJacobianCheck(gds, cDynAlgSolverMode,false);
 		BOOST_REQUIRE_MESSAGE(mmatch == 0, "Exciter " << excname << " Jacobian dynAlg issue");
 	}
 

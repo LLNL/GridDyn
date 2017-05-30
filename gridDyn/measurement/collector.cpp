@@ -12,9 +12,9 @@
 */
 
 #include "collector.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "events/gridEvent.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/objectInterpreter.h"
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
@@ -424,7 +424,7 @@ void collector::add(gridGrabberInfo *gdRI, coreObject *obj)
 			{
 				ggb->bias = gdRI->bias;
 				ggb->gain = gdRI->gain;
-				return add(std::move(ggb), gdRI->column);
+				return add(std::shared_ptr<gridGrabber>(std::move(ggb)), gdRI->column);
 			}
 			else
 			{
@@ -470,7 +470,7 @@ void collector::add(gridGrabberInfo *gdRI, coreObject *obj)
 					fldGrabbers[0]->outputUnits = gdRI->outputUnits;
 				}
 				//TODO:: PT incorporate state grabbers properly
-				add(std::move(fldGrabbers[0]), gdRI->column);
+				add(std::move(std::shared_ptr<gridGrabber>(std::move(fldGrabbers[0]))), gdRI->column);
 			}
 			else
 			{
@@ -479,11 +479,11 @@ void collector::add(gridGrabberInfo *gdRI, coreObject *obj)
 				{
 					if (ccol > 0)
 					{
-						add(std::move(ggb), ccol++);
+                                          add(std::shared_ptr<gridGrabber>(std::move(ggb)), ccol++);
 					}
 					else
 					{
-						add(std::move(ggb));
+                                          add(std::shared_ptr<gridGrabber>(std::move(ggb)));
 					}
 				}
 			}
@@ -514,7 +514,7 @@ void collector::add(const std::string &field, coreObject *obj)
 		auto fldGrabbers = makeGrabbers(field, obj);
 		for (auto &ggb : fldGrabbers)
 		{
-			add(std::move(ggb));
+                  add(std::shared_ptr<gridGrabber>(std::move(ggb)));
 		}
 		if (fldGrabbers.empty())
 		{

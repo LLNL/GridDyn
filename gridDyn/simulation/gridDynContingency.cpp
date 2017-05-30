@@ -13,7 +13,7 @@
 
 #include "gridDyn.h"
 #include "events/gridEvent.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "gridBus.h"
 #include "linkModels/gridLink.h"
 #include "simulation/diagnostics.h"
@@ -21,7 +21,7 @@
 #include "contingency.h"
 #include "generators/gridDynGenerator.h"
 #include "loadModels/zipLoad.h"
-#include "workQueue.h"
+#include "utilities/workQueue.h"
 
 //system headers
 

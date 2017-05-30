@@ -21,9 +21,9 @@
 #include "generators/gridDynGenerator.h"
 #include "loadModels/zipLoad.h"
 #include "optObjectFactory.h"
-#include "vectorOps.hpp"
-#include "vectData.h"
-#include "stringOps.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/vectData.h"
+#include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 
 #include <cmath>

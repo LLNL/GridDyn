@@ -16,7 +16,7 @@
 
 #include "zipLoad.h"
 
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 #include <array>
 
 class gridBus;

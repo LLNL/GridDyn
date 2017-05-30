@@ -13,11 +13,15 @@
 
 
 #include "zmqProxyHub.h"
+#include <mutex>
 
 std::vector<std::shared_ptr<zmqProxyHub>> zmqProxyHub::proxies;
 
+std::mutex proxyCreationMutex;
+
 std::shared_ptr<zmqProxyHub> zmqProxyHub::getProxy(const std::string &proxyName, const std::string &pairType, const std::string &contextName)
 {
+	std::lock_guard<std::mutex> proxyLock(proxyCreationMutex);
 	for (auto &rct : proxies)
 	{
 		if (rct->getName() == proxyName)
@@ -33,7 +37,6 @@ std::shared_ptr<zmqProxyHub> zmqProxyHub::getProxy(const std::string &proxyName,
 
 zmqProxyHub::~zmqProxyHub()
 {
-
 	stopProxy();
 }
 
@@ -55,7 +58,15 @@ void zmqProxyHub::stopProxy()
 		controllerSocket->send("TERMINATE", 9, 0);
 		proxyThread.join();
 	}
-	
+	std::lock_guard<std::mutex> proxyLock(proxyCreationMutex);
+	for (auto px=proxies.begin();px!=proxies.end();++px)
+	{
+		if ((*px)->name == name)
+		{
+			proxies.erase(px);
+			break;
+		}
+	}
 }
 
 void zmqProxyHub::modifyIncomingConnection(socket_ops op, const std::string &connection)

@@ -16,8 +16,8 @@
 #include "gridAreaOpt.h"
 #include "gridRelayOpt.h"
 #include "optObjectFactory.h"
-#include "vectorOps.hpp"
-#include "vectData.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/vectData.h"
 #include "relays/gridRelay.h"
 #include "core/coreExceptions.h"
 #include <cmath>

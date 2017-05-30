@@ -16,7 +16,7 @@
 
 #include "gridObjects.h"
 
-#include "matrixDataSparse.h"
+#include "utilities/matrixDataSparse.h"
 
 class basicBlock;
 

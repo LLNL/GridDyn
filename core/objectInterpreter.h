@@ -15,7 +15,7 @@
 #define OBJECT_INTERPRETER_H_
 
 #include "coreObject.h"
-#include "units.h"
+#include "utilities/units.h"
 
 /** @brief class for constructing some info about an object
  generally used for interpreting an object string with object and field references and possibly units as well
@@ -53,8 +53,9 @@ or type$ID  where type is the type of subObject and ID is the user ID of the obj
 @param[in] Istring the string containing the object name
 @param[in] rootObj the object where the search is started
 @param[in] rootSearch is set to true and the object can't be located from rootObj then the function will attempt to locate a root object and start the search over from there.
+@param[in] if direct find is set to false then the find function is not called unless the search string was modified to prevent recursion in some find calls
 */
-coreObject* locateObject (const std::string &Istring, const coreObject *rootObj, bool rootSearch = true);
+coreObject* locateObject (const std::string &Istring, const coreObject *rootObj, bool rootSearch = true, bool directfind=true);
 
 /** @brief locate a matching object in a new tree
 meant to target cloning operations where pointers need to be mapped to a new hierarchy

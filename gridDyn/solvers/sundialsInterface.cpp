@@ -16,10 +16,10 @@
 #include "core/factoryTemplates.h"
 #include <cstdio>
 #include <cassert>
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "sundialsMatrixData.h"
-#include "matrixDataFilter.h"
-#include "matrixCreation.h"
+#include "utilities/matrixDataFilter.h"
+#include "utilities/matrixCreation.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "gridDyn.h"
 #include "simulation/diagnostics.h"

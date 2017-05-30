@@ -14,7 +14,7 @@
 
 #include "gridDynFileInput.h"
 #include <boost/filesystem.hpp>
-#include "zipUtilities.h"
+#include "utilities/zipUtilities.h"
 
 using namespace boost::filesystem;
 

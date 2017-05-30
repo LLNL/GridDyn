@@ -13,7 +13,7 @@
 
 #include "jsonReaderElement.h"
 #include "jsonElement.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>

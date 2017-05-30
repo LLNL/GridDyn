@@ -106,21 +106,6 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			endif()
 		endif()
 	endif()
-
-	## special check for suitesparse component (allow to find on windows but not on linux because doesn't exist)
-	list(FIND SuiteSparse_FIND_COMPONENTS "suitesparse" ss_index)
-	if(${ss_index} MATCHES "-1")
-		## do nothing, the user didn't provide the suisparse componnent
-	else()
-		if(WIN32)
-			## do nothing, the user provide the suisparse componnent we will try to find
-		else()
-			list(REMOVE_AT SuiteSparse_FIND_COMPONENTS ${ss_index})
-			if(SuiteSparse_VERBOSE)
-				message(STATUS "   On this plateform : suitesparse lib doesn't exist (only on windows), so skip this component")
-			endif()
-		endif()
-	endif()
 		
 	## Look for each component the same way :
 	##  * For include dir the reference file is the <component>.h
@@ -146,14 +131,8 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		find_path(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR	
 			NAMES 			${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
 						${suitesparseComp}.hpp ${suitesparseCompLC}.hpp ${suitesparseCompUC}.hpp
-			PATHS			/opt/local/include
-						/usr/include
-						/usr/local/include
-						/usr/include/suitesparse
-						/usr/local/include/suitesparse
-						/usr/include/${suitesparseComp}
-						/usr/local/include/${suitesparseComp}
-						${SuiteSparse_DIR}/include
+						
+			HINTS		${SuiteSparse_DIR}/include
 						${SuiteSparse_DIR}/include/suitesparse
 						${SuiteSparse_DIR}/suitesparse/include
 						${SuiteSparse_DIR}/include/${suitesparseComp}
@@ -161,10 +140,22 @@ macro(SuiteSparse_FIND_COMPONENTS )
 						${${suitesparseCompUC}_DIR}/include
 						${${suitesparseCompUC}_DIR}/${suitesparseComp}/include
 						${${suitesparseCompUC}_DIR}
+						
+			PATHS			/opt/local/include
+						/usr/include
+						/usr/local/include
+						/usr/include/suitesparse
+						/usr/local/include/suitesparse
+						/usr/include/${suitesparseComp}
+						/usr/local/include/${suitesparseComp}
+						
 		)
 		## check if found
 		if(NOT SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR)
-			if (SuiteSparse_VERBOSE)
+			if("${suitesparseCompUC}" STREQUAL "CXSPARSE")
+				
+			elseif("${suitesparseCompUC}" STREQUAL "SUITESPARSECONFIG")
+			elseif (SuiteSparse_VERBOSE)
 				message(WARNING "   Failed to find ${suitesparseComp} :\nSuiteSparse_${suitesparseCompUC}_INCLUDE_DIR not found.\nCheck you write correctly the component name (case sensitive),\nor set the SuiteSparse_${suitesparseCompUC}_DIR to look inside")
 			endif()
 		else()
@@ -175,23 +166,25 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE 
 			NAMES 			lib${suitesparseComp} 	lib${suitesparseCompLC} lib${suitesparseCompUC}
 							${suitesparseComp} 		${suitesparseCompLC} 	${suitesparseCompUC}
+			HINTS			${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+							${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+							${${suitesparseCompUC}_DIR}
 			PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX} 		
 							/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 							/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${${suitesparseCompUC}_DIR}
+							
 			PATH_SUFFIXES	Release
 		)
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG 
 			NAMES 			${suitesparseComp}d		${suitesparseCompLC}d 		${suitesparseCompUC}d
 							lib${suitesparseComp}d 	lib${suitesparseCompLC}d 	lib${suitesparseCompUC}d
+			HINTS			${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+							${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+							${${suitesparseCompUC}_DIR}
 			PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX} 		
 							/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 							/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-							${${suitesparseCompUC}_DIR}
+							
 			PATH_SUFFIXES	Debug
 		)
 		
@@ -209,7 +202,10 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		
 		## check and append the and SuiteSparse_LIBRARIES list, and warn if not found (release and debug) otherwise
 		if(NOT SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE AND NOT SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
-			if (SuiteSparse_VERBOSE)
+			if("${suitesparseCompUC}" STREQUAL "CXSPARSE")
+				
+			elseif("${suitesparseCompUC}" STREQUAL "SUITESPARSECONFIG")
+			elseif (SuiteSparse_VERBOSE)
 			message(WARNING "   Failed to find ${suitesparseComp} :
 			Check you write correctly the component name (case sensitive),
 			or set the SuiteSparse_${suitesparseCompUC}_DIR to look inside,
@@ -300,12 +296,13 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	## try to find blas lib
 	find_library(SuiteSparse_BLAS_LIBRARY 
 		NAMES 			blas cblas libblas
+		HINTS			${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						${SuiteSparse_BLAS_DIR}
+						${ADDITIONAL_SEARCH_DIRS}
 		PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}		
 						/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-						${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-						${SuiteSparse_BLAS_DIR}
-						${ADDITIONAL_SEARCH_DIRS}
+						
 		PATH_SUFFIXES	Release Debug
 	)
 	if(NOT SuiteSparse_BLAS_LIBRARY)
@@ -325,12 +322,13 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	## try to find lapack lib
 	find_library(SuiteSparse_LAPACK_LIBRARY 
 		NAMES 			lapack liblapack
+		HINTS			${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						${SuiteSparse_LAPACK_DIR}
+						${ADDITIONAL_SEARCH_DIRS}
 		PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}		
 						/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-						${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
-						${SuiteSparse_LAPACK_DIR}
-						${ADDITIONAL_SEARCH_DIRS}
+						
 		PATH_SUFFIXES	Release Debug
 	)
 	if(NOT SuiteSparse_LAPACK_LIBRARY)

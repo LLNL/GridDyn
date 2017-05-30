@@ -13,8 +13,8 @@
 
 #include "gridDynFileInput.h"
 #include "readElement.h"
-#include "stringOps.h"
-#include "readerElement.h"
+#include "utilities/stringOps.h"
+#include "formatInterpreters/readerElement.h"
 #include "gridObjects.h"
 #include "core/objectInterpreter.h"
 #include "readerHelper.h"

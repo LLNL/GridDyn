@@ -14,7 +14,7 @@
 #include "busControls.h"
 #include "acBus.h"
 #include "linkModels/gridLink.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 
 busControls::busControls(acBus *busToControl):controlledBus(busToControl)

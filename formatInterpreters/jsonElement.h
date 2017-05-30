@@ -14,8 +14,16 @@
 
 #ifndef JSON_ELEMENT_H_
 #define JSON_ELEMENT_H_
-#include "json/json-forwards.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
 #include "json/json.h"
+#pragma warning(pop)
+#else
+#include "json/json.h"
+#endif
+
 class jsonElement
 {
 public:

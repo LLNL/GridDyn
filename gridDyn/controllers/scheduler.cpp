@@ -12,7 +12,7 @@
  */
 
 #include "scheduler.h"
-#include "timeSeries.h"
+#include "utilities/timeSeries.h"
 #include "dispatcher.h"
 #include "comms/gridCommunicator.h"
 #include "comms/schedulerMessage.h"

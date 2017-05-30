@@ -13,9 +13,9 @@
 
 #include "solverInterface.h"
 #include "gridDyn.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "core/helperTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 
 basicSolver::basicSolver(mode_t alg) :algorithm(alg)
 {

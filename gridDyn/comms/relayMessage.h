@@ -44,7 +44,8 @@ public:
   relayMessage ()
   {
   }
-  relayMessage (std::uint32_t type) : commMessage (type)
+  /** construct from type */
+  explicit relayMessage (std::uint32_t type) : commMessage (type)
   {
   }
   relayMessage (std::uint32_t type, std::uint32_t code) : commMessage (type), m_code (code)

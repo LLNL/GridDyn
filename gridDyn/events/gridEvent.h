@@ -10,7 +10,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#pragma once
 #ifndef GRIDDYN_EVENT_H_
 #define GRIDDYN_EVENT_H_
 
@@ -19,11 +19,11 @@
 
 #include "core/coreObject.h"
 #include "core/helperObject.h"
-#include "timeSeriesMulti.h"
+#include "utilities/timeSeriesMulti.h"
 
 #include "eventInterface.h"
 #include "core/objectOperatorInterface.h"
-#include "units.h"
+#include "utilities/units.h"
 
 #include <future>
 /** helper data class for holding information about an event during construction

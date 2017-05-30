@@ -14,7 +14,7 @@
 #include "gridObjects.h"
 #include "core/coreObjectTemplates.h"
 #include "core/objectInterpreter.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 #include "gridBus.h"
 #include <cstdio>
 #include <iostream>
@@ -124,7 +124,7 @@ void gridSecondary::set(const std::string &param, const std::string &val)
 
 void gridSecondary::set(const std::string &param, double val, gridUnits::units_t unitType)
 {
-	if ((param == "basevoltage") || (param == "basev")||(param=="bv"))
+	if ((param == "basevoltage") || (param == "basev")||(param=="bv")||(param=="base voltage"))
 	{
 		baseVoltage = gridUnits::unitConversion(val, unitType, gridUnits::kV);
 	}

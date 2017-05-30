@@ -19,9 +19,10 @@
 #include "fmi_export/fmiCollector.h"
 #include "fmi_export/fmiCoordinator.h"
 #include "fmi_export/loadFMIExportObjects.h"
-#include "fmi_import/fmiImport.h"
+#include "fmi/fmi_import/fmiImport.h"
+#include "gridDyn/loadModels/gridLoad3Phase.h"
 #include "gridDynFileInput.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "gridBus.h"
 #include "simulation/diagnostics.h"
 #include "readerInfo.h"
@@ -30,7 +31,7 @@
 
 #include "testHelper.h"
 #include "fmi_export/fmiRunner.h"
-#include "fmi_import/fmiObjects.h"
+#include "fmi/fmi_import/fmiObjects.h"
 
 static const std::string fmi_test_directory(GRIDDYN_TEST_DIRECTORY "/fmi_export_tests/");
 
@@ -127,16 +128,16 @@ BOOST_AUTO_TEST_CASE(test_fmi_runner)
 	runner->simInitialize();
 	runner->UpdateOutputs();
 
-	auto out = runner->Get(1);
+	auto out = runner->Get(2);
 	BOOST_CHECK_CLOSE(out, 0.5, 0.000001);
 
-	runner->Set(0, 0.6);
+	runner->Set(1, 0.6);
 	runner->Step(1.0);
-	out = runner->Get(1);
+	out = runner->Get(2);
 	BOOST_CHECK_CLOSE(out, 0.6, 0.00001);
-	runner->Set(0, 0.7);
+	runner->Set(1, 0.7);
 	runner->Step(2.0);
-	out = runner->Get(1);
+	out = runner->Get(2);
 	BOOST_CHECK_CLOSE(out, 0.7, 0.00001);
 	runner->Finalize();
 }
@@ -211,4 +212,78 @@ BOOST_AUTO_TEST_CASE(load_griddyn_fmu)
 	b2 = nullptr;
 }
 
+
+BOOST_AUTO_TEST_CASE(test_fmi_runner2)
+{
+	auto runner = std::make_unique<fmiRunner>("testsim", fmi_test_directory+"/three_phase_fmu", nullptr);
+	//auto runner = std::make_unique<fmiRunner>("testsim", "C:\\Users\\top1\\Documents\\codeProjects\\New folder\\resources", nullptr);
+	runner->simInitialize();
+	runner->UpdateOutputs();
+
+	auto bus = static_cast<gridBus*>(runner->getSim()->getSubObject("bus",11));
+
+	auto ld = dynamic_cast<gridLoad3Phase *>(bus->getLoad(0));
+	BOOST_REQUIRE(ld != nullptr);
+
+	auto ret=runner->Step(10);
+	BOOST_CHECK_EQUAL(ret, 10.0);
+
+	auto val1 = runner->Get(8);
+	auto val2 = runner->Get(9);
+	auto val3 = runner->Get(10);
+	BOOST_CHECK_GT(val1, 3500.0);
+	BOOST_CHECK_LT(val1, 5200.0);
+	BOOST_CHECK_GT(val2, 3500.0);
+	BOOST_CHECK_LT(val2, 5200.0);
+	BOOST_CHECK_GT(val3, 3500.0);
+	BOOST_CHECK_LT(val3, 5200.0);
+	auto val4 = runner->Get(11);
+	auto val5 = runner->Get(12);
+	auto val6 = runner->Get(13);
+	BOOST_CHECK_GT(val4, -2000.0);
+	BOOST_CHECK_GT(val5, -2000.0);
+	BOOST_CHECK_GT(val6, -2000.0);
+	auto time = 20.0;
+	for (int ii = 2; ii < 5; ++ii)
+	{
+		runner->Set(ii, 100.0);
+		ret = runner->Step(time);
+		time += 10.0;
+
+		auto val1b = runner->Get(8);
+		auto val2b = runner->Get(9);
+		auto val3b = runner->Get(10);
+		BOOST_CHECK_GT(std::abs(val1b - val1),0.00001);
+		BOOST_CHECK_GT(std::abs(val2b - val2), 0.00001);
+		BOOST_CHECK_GT(std::abs(val3b - val3), 0.00001);
+		val1 = val1b;
+		val2 = val2b;
+		val3 = val3b;
+		auto gb = runner->Get(ii);
+		BOOST_CHECK_SMALL(std::abs(gb-100.0), 0.5);  //this won't be that close since it is averaged across 3 phases
+	}
+	for (int ii = 5; ii < 8; ++ii)
+	{
+		runner->Set(ii, 0.0+(ii-5)*120.0);
+		ret = runner->Step(time);
+		time += 10.0;
+
+		auto val1b = runner->Get(8);
+		auto val2b = runner->Get(9);
+		auto val3b = runner->Get(10);
+		BOOST_CHECK_GT(std::abs(val1b - val1), 0.00001);
+		BOOST_CHECK_GT(std::abs(val2b - val2), 0.00001);
+		BOOST_CHECK_GT(std::abs(val3b - val3), 0.00001);
+		val1 = val1b;
+		val2 = val2b;
+		val3 = val3b;
+		auto gb = runner->Get(ii);
+		double diff = std::abs(gb - (0.0 + (ii - 5)*120.0));
+		if (diff > 359.5)
+		{
+			diff -= 360.0;
+		}
+		BOOST_CHECK_SMALL(diff, 0.1);
+	}
+}
 BOOST_AUTO_TEST_SUITE_END()

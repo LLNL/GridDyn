@@ -16,14 +16,14 @@
 #include "gridBus.h"
 #include "gridArea.h"
 #include "core/objectFactoryTemplates.h"
-#include "vectorOps.hpp"
+#include "utilities/vectorOps.hpp"
 #include "linkModels/dcLink.h"
 #include "core/objectInterpreter.h"
 #include "acdcConverter.h"
 #include "core/coreObjectTemplates.h"
 #include "simulation/contingency.h"
-#include "stringOps.h"
-#include "matrixDataCompact.h"
+#include "utilities/stringOps.h"
+#include "utilities/matrixDataCompact.h"
 #include "core/coreExceptions.h"
 
 #include <complex>

@@ -12,7 +12,7 @@
 */
 
 #include "gridParameter.h"
-#include "stringConversion.h"
+#include "utilities/string_viewConversion.h"
 #include "gridDynDefinitions.h"
 #include "core/coreExceptions.h"
 
@@ -42,25 +42,31 @@ void gridParameter::reset()
 
 void gridParameter::fromString(const std::string &str)
 {
+	using namespace utilities::string_viewOps;
+	utilities::string_view strv(str);
 	valid = false;
-	size_t rlc = str.find_last_of('=');
+	size_t rlc = strv.find_last_of('=');
 	if (rlc == std::string::npos)
 	{
 		throw(invalidParameterValue());
 	}
 	valid = true;
-	field = str.substr(0, rlc);
-	stringOps::trimString(field);
+	auto fld= trim(strv.substr(0, rlc));
+
 	//now read the value
-	strVal = str.substr(rlc + 1);
+	strVal = strv.substr(rlc + 1).to_string();
 	value = numeric_conversionComplete(strVal, kNullVal);
 	stringType = (value == kNullVal);
 
-	rlc = field.find_first_of('(');
-	if (rlc != std::string::npos)
+	rlc = fld.find_first_of('(');
+	if (rlc != string_view::npos)
 	{
-		size_t rlc2 = field.find_last_of(')');
-		paramUnits = gridUnits::getUnits(field.substr(rlc + 1, rlc2 - rlc - 1));
-		field = field.substr(0, rlc);
+		size_t rlc2 = fld.find_last_of(')');
+		paramUnits = gridUnits::getUnits(fld.substr(rlc + 1, rlc2 - rlc - 1).to_string());
+		field = fld.substr(0, rlc).to_string();
+	}
+	else
+	{
+		field = fld.to_string();
 	}
 }

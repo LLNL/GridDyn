@@ -13,11 +13,11 @@
 
 #include "gridObjects.h"
 #include "core/coreObjectTemplates.h"
-#include "matrixData.h"
+#include "utilities/matrixData.h"
 #include "core/coreExceptions.h"
-#include "stackInfo.h"
-#include "stringOps.h"
-#include "vectorOps.hpp"
+#include "utilities/stackInfo.h"
+#include "utilities/stringOps.h"
+#include "utilities/vectorOps.hpp"
 #include "core/objectInterpreter.h"
 #include <cstdio>
 #include <iostream>

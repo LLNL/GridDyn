@@ -17,6 +17,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <map>
 
 namespace zmq
 {
@@ -27,21 +28,17 @@ namespace zmq
 class zmqContextManager
 {
 private:
-	static std::vector<std::shared_ptr<zmqContextManager>> contexts; //!< container for pointers to all the available contexts
-	static std::shared_ptr<zmqContextManager> defContext;  //!< pointer to the default context
+	static std::map<std::string, std::shared_ptr<zmqContextManager>> contexts; //!< container for pointers to all the available contexts
 	std::string name;  //!< context name
-	zmq::context_t *zcontext=nullptr; //!< pointer to the actual context
+	std::unique_ptr<zmq::context_t> zcontext; //!< pointer to the actual context
 	zmqContextManager(const std::string &contextName);
 
 public:
-	static std::shared_ptr<zmqContextManager> getContextPointer(const std::string &contextName);
-	static std::shared_ptr<zmqContextManager> getContextPointer();
+	static std::shared_ptr<zmqContextManager> getContextPointer(const std::string &contextName="");
 
-	static zmq::context_t &getContext(const std::string &contextName);
-	static zmq::context_t &getContext();
+	static zmq::context_t &getContext(const std::string &contextName="");
 
-	static void closeContext(const std::string &contextName);
-	static void closeContext();
+	static void closeContext(const std::string &contextName="");
 
 	virtual ~zmqContextManager();
 

@@ -18,8 +18,8 @@
 #include "gridAreaOpt.h"
 #include "linkModels/gridLink.h"
 #include "optObjectFactory.h"
-#include "vectorOps.hpp"
-#include "vectData.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/vectData.h"
 #include "core/coreExceptions.h"
 
 #include <cmath>

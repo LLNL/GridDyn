@@ -23,8 +23,8 @@
 #include "core/objectInterpreter.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "measurement/collector.h"
-#include "stringOps.h"
-#include "workQueue.h"
+#include "utilities/stringOps.h"
+#include "utilities/workQueue.h"
 #include "core/coreExceptions.h"
 
 

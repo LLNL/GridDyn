@@ -14,8 +14,8 @@
 #include "gridObjects.h"
 #include <cstdio>
 #include <iostream>
-#include "matrixData.h"
-#include "stringOps.h"
+#include  "utilities/matrixData.h"
+#include "utilities/stringOps.h"
 
 
 gridSubModel::gridSubModel (const std::string &objName) : gridObject (objName)

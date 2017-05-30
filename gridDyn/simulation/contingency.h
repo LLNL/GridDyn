@@ -14,7 +14,7 @@
 #ifndef CONTINGENCY_H_
 #define CONTINGENCY_H_
 
-#include "workQueue.h"
+#include "utilities/workQueue.h"
 #include "core/objectOperatorInterface.h"
 #include "gridDynDefinitions.h"
 #include <future>

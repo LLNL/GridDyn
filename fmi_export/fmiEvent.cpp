@@ -15,7 +15,7 @@
 #include "fmiCoordinator.h"
 #include "core/helperTemplates.h"
 
-fmiEvent::fmiEvent(const std::string &newName, fmiEventType type):gridEvent(newName), eventType(type)
+fmiEvent::fmiEvent(const std::string &newName, fmiEventType type):reversibleEvent(newName), eventType(type)
 {
 
 }
@@ -25,14 +25,14 @@ fmiEvent::fmiEvent(fmiEventType type): eventType(type)
 
 }
 
-fmiEvent::fmiEvent(gridEventInfo &gdEI, coreObject *rootObject):gridEvent(gdEI,rootObject)
+fmiEvent::fmiEvent(gridEventInfo &gdEI, coreObject *rootObject):reversibleEvent(gdEI,rootObject)
 {
 	findCoordinator();
 }
 
 std::shared_ptr<gridEvent> fmiEvent::clone(std::shared_ptr<gridEvent> gE) const
 {
-	auto gp = cloneBase<fmiEvent, gridEvent>(this, gE);
+	auto gp = cloneBaseStack<fmiEvent, reversibleEvent,gridEvent>(this, gE);
 	if (!gp)
 	{
 		return gE;
@@ -55,18 +55,18 @@ void fmiEvent::set(const std::string &param, double val)
 
 void fmiEvent::set(const std::string &param, const std::string &val)
 {
-	gridEvent::set(param, val);
+	reversibleEvent::set(param, val);
 }
 
 void fmiEvent::updateEvent(gridEventInfo &gdEI, coreObject *rootObject)
 {
-	gridEvent::updateEvent(gdEI, rootObject);
+	reversibleEvent::updateEvent(gdEI, rootObject);
 	findCoordinator();
 }
 
 bool fmiEvent::setTarget(coreObject *gdo, const std::string &var)
 {
-	auto ret=gridEvent::setTarget(gdo, var);
+	auto ret=reversibleEvent::setTarget(gdo, var);
 	if (ret)
 	{
 		findCoordinator();
@@ -75,9 +75,15 @@ bool fmiEvent::setTarget(coreObject *gdo, const std::string &var)
 	
 }
 
+
+coreObject *fmiEvent::getOwner() const
+{
+	return coord;
+}
+
 void fmiEvent::updateObject(coreObject *gco, object_update_mode mode)
 {
-	gridEvent::updateObject(gco, mode);
+	reversibleEvent::updateObject(gco, mode);
 	findCoordinator();
 }
 
@@ -94,7 +100,14 @@ void fmiEvent::findCoordinator()
 				if (!isSameObject(fmiCont,coord))
 				{
 					coord = static_cast<fmiCoordinator *>(fmiCont);
-					coord->registerInput(getName(),this);
+					if (eventType == fmiEventType::input)
+					{
+						coord->registerInput(getName(), this);
+					}
+					else
+					{
+						coord->registerParameter(getName(), this);
+					}
 				}
 			}
 

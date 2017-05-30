@@ -13,10 +13,10 @@
 
 #include "submodels/controlBlocks/blockSequence.h"
 #include "core/coreExceptions.h"
-#include "vectorOps.hpp"
-#include "matrixData.h"
+#include "utilities/vectorOps.hpp"
+#include  "utilities/matrixData.h"
 #include "core/coreObjectTemplates.h"
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 
 blockSequence::blockSequence(const std::string &objName) : basicBlock(objName)
 {
@@ -157,11 +157,11 @@ double blockSequence::step(coreTime ttime, double input)
 	double drate = (input - prevInput) / (ttime - prevTime);
 	while (prevTime < ttime)
 	{
-		coreTime newTime = std::max(ttime, prevTime + sampleTime);
+		coreTime newTime = std::min(ttime, prevTime + sampleTime);
 		double blockInput = prevInput + drate*(newTime - prevTime);
 		for (auto &blkIn : sequence)
 		{
-			blockInput = blocks[blkIn]->step(ttime, blockInput);
+			blockInput = blocks[blkIn]->step(newTime, blockInput);
 		}
 		prevTime = newTime;
 	}

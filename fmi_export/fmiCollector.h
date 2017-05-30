@@ -39,6 +39,8 @@ public:
 	void set(const std::string &param, const std::string &val) override;
 
 	virtual const std::string &getSinkName() const override;
+
+	virtual coreObject *getOwner() const override;
 	friend class fmiCoordinator;
 protected:
 	virtual void dataPointAdded(const collectorPoint& cp) override;

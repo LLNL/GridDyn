@@ -18,12 +18,12 @@
 #include "gridRelayOpt.h"
 #include "gridArea.h"
 #include "optObjectFactory.h"
-#include "vectorOps.hpp"
-#include "vectData.h"
+#include "utilities/vectorOps.hpp"
+#include "utilities/vectData.h"
 #include "linkModels/gridLink.h"
 #include "core/coreExceptions.h"
 #include "gridBus.h"
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 
 using namespace gridUnits;
