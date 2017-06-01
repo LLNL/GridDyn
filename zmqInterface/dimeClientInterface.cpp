@@ -52,7 +52,7 @@ void dimeClientInterface::init()
 		
 	Json::Value outgoing;
 	outgoing["command"] = "connect";
-	outgoing["name"] = name;
+	outgoing["name"] = "griddyn";
 	outgoing["listen_to_events"] = false;
 		
 	Json::FastWriter fw;
@@ -92,8 +92,14 @@ void dimeClientInterface::sync()
 }
 	
 
-void encodeVariableMessage(Json::Value &data, double val)
+void encodeVariableMessage(Json::Value &data, Json::Value Varvgs,double t)
 {
+	Json::Value wr;
+	wr["k"] = "";
+	wr["t"] = t;
+	wr["vars"] = Varvgs;
+	wr["accurate"] = "";
+	Json::FastWriter fw;
 	Json::Value content;
 	content["stdout"] = "";
 	content["figures"] = "";
@@ -101,45 +107,71 @@ void encodeVariableMessage(Json::Value &data, double val)
 	
 	Json::Value response;
 	response["content"] = content;
-	response["result"] = val;
+	response["result"] = wr;
 	response["success"] = true;
-	data["args"] = response;
-	//response = { 'content': {'stdout': '', 'figures' : [], 'datadir' : '/tmp MatlabData/'}, 'result' : value, 'success' : True }
-	//	outgoing = { 'command': 'response', 'name' : self.name, 'meta' : {'var_name': var_name}, 'args' : self.matlab.json_encode(response) }
-
-	
+	data["args"] =fw.write(response);	
 }
-void dimeClientInterface::send_var(const std::string &varName, double val, const std::string &recipient)
+void encodeVarheader(Json::Value &data, Json::Value Varheader)
+{
+	Json::FastWriter fw;
+	Json::Value content;
+	content["stdout"] = "";
+	content["figures"] = "";
+	content["datadir"] = "/tmp MatlabData/";
+
+	Json::Value response;
+	response["content"] = content;
+	response["result"] = Varheader;
+	response["success"] = true;
+	data["args"] = fw.write(response);
+}
+void encodesysname(Json::Value &data, Json::Value sysname)
+{
+	Json::Value re;
+	re["Bus"] = sysname;
+	Json::FastWriter fw;
+	Json::Value content;
+	content["stdout"] = "";
+	content["figures"] = "";
+	content["datadir"] = "/tmp MatlabData/";
+
+	Json::Value response;
+	response["content"] = content;
+	response["result"] = re;
+	response["success"] = true;
+	data["args"] = fw.write(response);
+}
+void dimeClientInterface::send_var(double t,Json::Value Varvgs, const std::string &recipient)
 {
 	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
 	char buffer[10];
 
 	Json::Value outgoing;
+Json::FastWriter fw;
+    outgoing["command"] = (recipient.empty())?"broadcast":"send";
 
-	outgoing["command"] = (recipient.empty())?"broadcast":"send";
-
-	outgoing["name"] = name;
-	outgoing["args"] = varName;
-	Json::FastWriter fw;
+	outgoing["name"] = "griddyn";
+	outgoing["args"] = "";
+	
 
 	std::string out = fw.write(outgoing);
 
 	socket->send(out.c_str(), out.size());
 
 	auto sz = socket->recv(buffer, 10, 0);
-	
+
 	Json::Value outgoingData;
 	outgoingData["command"] = "response";
-	outgoingData["name"] = name;
+	outgoingData["name"] = "griddyn";
 	if (!recipient.empty())
 	{
-		outgoingData["meta"]["recipient_name"] = recipient;
+		outgoingData["meta"]["recipient_name"] = "SE";
 	}
 	
-	outgoingData["meta"]["var_name"] = varName;
-	encodeVariableMessage(outgoingData,val);
+	outgoingData["meta"]["var_name"] = "Varvgs";
+	encodeVariableMessage(outgoingData,Varvgs,t);
 
-	out = fw.write(outgoing);
+	out = fw.write(outgoingData);
 
 	socket->send(out.c_str(), out.size());
 	sz = socket->recv(buffer, 10, 0);
@@ -149,7 +181,86 @@ void dimeClientInterface::send_var(const std::string &varName, double val, const
 	}
 
 }
+void dimeClientInterface::send_varname(Json::Value Varheader,  const std::string &recipient)
+{
+	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
+	char buffer[10];
 
+	Json::Value outgoing;
+
+	outgoing["command"] = (recipient.empty()) ? "broadcast" : "send";
+
+	outgoing["name"] = "griddyn";
+	outgoing["args"] = "";
+	Json::FastWriter fw;
+
+	std::string out = fw.write(outgoing);
+
+	socket->send(out.c_str(), out.size());
+
+	auto sz = socket->recv(buffer, 10, 0);
+
+	Json::Value outgoingData;
+	outgoingData["command"] = "response";
+	outgoingData["name"] = "griddyn";
+	if (!recipient.empty())
+	{
+		outgoingData["meta"]["recipient_name"] = "SE";
+	}
+
+	outgoingData["meta"]["var_name"] = "Varheader";
+	encodeVarheader(outgoingData, Varheader);
+
+	out = fw.write(outgoingData);
+
+	socket->send(out.c_str(), out.size());
+	sz = socket->recv(buffer, 10, 0);
+	if (sz != 2)
+	{
+		throw(sendFailure());
+	}
+
+}
+void dimeClientInterface::send_sysname(Json::Value Sysname,  const std::string &recipient)
+{
+	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
+	char buffer[10];
+
+	Json::Value outgoing;
+
+	outgoing["command"] = (recipient.empty()) ? "broadcast" : "send";
+
+	outgoing["name"] = "griddyn";
+	outgoing["args"] = "";
+	Json::FastWriter fw;
+
+	std::string out = fw.write(outgoing);
+
+	socket->send(out.c_str(), out.size());
+
+	auto sz = socket->recv(buffer, 10, 0);
+
+	Json::Value outgoingData;
+	outgoingData["command"] = "response";
+	outgoingData["name"] = "griddyn";
+	if (!recipient.empty())
+	{
+		outgoingData["meta"]["recipient_name"] = "SE";
+	}
+
+	outgoingData["meta"]["var_name"] = "Sysname";
+	encodesysname(outgoingData, Sysname);
+
+	out = fw.write(outgoingData);
+
+	socket->send(out.c_str(), out.size());
+	sz = socket->recv(buffer, 10, 0);
+	if (sz != 2)
+	{
+		throw(sendFailure());
+	}
+
+}
 void dimeClientInterface::get_devices()
 {
 

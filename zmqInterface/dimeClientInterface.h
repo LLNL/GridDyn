@@ -10,6 +10,14 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#include "formatInterpreters/json/json.h"
+#pragma warning(pop)
+#else
+#include "formatInterpreters/json/json.h"
+#endif
 
 #ifndef DIME_CLIENT_INTERFACE_HEADER_
 #define DIME_CLIENT_INTERFACE_HEADER_
@@ -45,12 +53,12 @@ public:
 	void close();
 	/** sync with the server*/
 	void sync();
+	void send_var(double t,Json::Value Varvgs, const std::string & recipient);
+	void send_varname(Json::Value Varheader, const std::string & recipient);
+	void send_sysname(Json::Value Sysname, const std::string & recipient);
 	/** send a variable to server*/
-	void send_var(const std::string &varName, double val, const std::string &recipient="");
-	void broadcast(const std::string &varName, double val)
-	{
-		send_var(varName, val);
-	}
+	
+
 
 	void get_devices();
 private:

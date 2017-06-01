@@ -10,8 +10,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-
+#include "dimeCollector.h"
 #include "gridDynFileInput.h"
 #include "readerHelper.h"
 #include "loadModels/svd.h"
@@ -52,6 +51,8 @@ enum sections
   unknown, bus, branch, load, fixedShunt,generator, tx, switchedShunt, txadj
 };
 
+static coreTime cctime;
+static std::vector <std::string> sysname;
 
 //get the basic busFactory
 static typeFactory<gridBus> *busfactory = nullptr;
@@ -112,7 +113,7 @@ void loadRAW (coreObject *parentObject,const std::string &filename,const basicRe
   gridBus *bus;
   index_t index;
   size_t pos;
-
+  dimeCollector dimesysname;
   /*load up the factories*/
   if (busfactory == nullptr)
     {
@@ -227,6 +228,7 @@ Column  46-73   Case identification (A) */
       else
         {
           moreData = 0;
+		  dimesysname.send_sysname(sysname);
         }
     }
 
@@ -500,7 +502,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
   //get the bus name
   auto temp = trim(strvec[0]);
   auto temp2 = trim(removeQuotes(strvec[1]));
-
+  sysname.push_back(temp2);
   if (opt.prefix.empty ())
     {
       if (temp2.empty ())         //12 spaces is default value which would all get trimmed
