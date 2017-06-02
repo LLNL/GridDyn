@@ -326,6 +326,25 @@ void dimeCollector::send_sysname(std::vector<std::string> sysname)
   dime->send_sysname(Sysname,"SE");
 }
 
+void dimeCollector::send_sysparam(std::vector<std::string> sysparam)
+{
+
+	std::unique_ptr<dimeClientInterface> dime = std::make_unique<dimeClientInterface>("", "");
+	dime->init();
+
+	Json::Value Sysparam;
+	for (size_t kk = 0; kk < sysparam.size(); ++kk)
+	{
+		Json::Value wsysparam;
+		Json::Value wagain;
+		wsysparam.append(sysparam[kk]);
+		wagain.append(wsysparam);
+		Sysparam.append(wagain);
+	}
+	dime->send_sysparam(Sysparam, "SE");
+}
+
+
 void dimeCollector::set(const std::string &param, double val)
 {
 	

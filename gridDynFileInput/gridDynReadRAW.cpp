@@ -53,6 +53,7 @@ enum sections
 
 static coreTime cctime;
 static std::vector <std::string> sysname;
+static std::vector <std::string> sysparam;//###############
 
 //get the basic busFactory
 static typeFactory<gridBus> *busfactory = nullptr;
@@ -187,6 +188,7 @@ Column  46-73   Case identification (A) */
     {
       if (checkNextLine (file, line))
         {
+		  sysparam.push_back(line);
           //get the index
           pos = line.find_first_of (',');
           temp1 = line.substr (0,pos);
@@ -229,6 +231,7 @@ Column  46-73   Case identification (A) */
         {
           moreData = 0;
 		  dimesysname.send_sysname(sysname);
+		  dimesysname.send_sysparam(sysparam);
         }
     }
 

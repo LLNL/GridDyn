@@ -33,6 +33,7 @@ public:
 	virtual change_code trigger(coreTime time) override;
 
 	void send_sysname(std::vector<std::string> sysname);
+	void send_sysparam(std::vector<std::string> sysparam);
 
 	void set(const std::string &param, double val) override;
 	void set(const std::string &param, const std::string &val) override;
