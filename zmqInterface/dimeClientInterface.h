@@ -56,7 +56,7 @@ public:
 	void send_var(double t,Json::Value Varvgs, const std::string & recipient);
 	void send_varname(Json::Value Varheader, const std::string & recipient);
 	void send_sysname(Json::Value Sysname, const std::string & recipient);
-	void send_sysparam(Json::Value Sysparam, const std::string & recipient);
+	void send_sysparam(Json::Value Busd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline, const std::string & recipient);
 	/** send a variable to server*/
 	
 

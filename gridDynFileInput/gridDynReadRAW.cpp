@@ -53,7 +53,13 @@ enum sections
 
 static coreTime cctime;
 static std::vector <std::string> sysname;
-static std::vector <std::string> sysparam;//###############
+static std::vector <std::string> Busdata;//###############
+static std::vector <std::string> Loaddata;
+static std::vector <std::string> Branchdata;
+static std::vector <std::string> Transformerdata;
+static std::vector <std::string> Generatordata;
+static std::vector <std::string> Fixshuntdata;
+static std::vector <int> Baseinfor;
 
 //get the basic busFactory
 static typeFactory<gridBus> *busfactory = nullptr;
@@ -151,6 +157,8 @@ Column  46-73   Case identification (A) */
       if (res > 0)
         {
           parentObject->set ("basepower", opt.base);
+		  Baseinfor.push_back(opt.base);
+		  Baseinfor.push_back(opt.basefreq);
         }
       //temp1=line.substr(45,27);
       //parentObject->set("name",&temp1);
@@ -188,7 +196,7 @@ Column  46-73   Case identification (A) */
     {
       if (checkNextLine (file, line))
         {
-		  sysparam.push_back(line);
+		  Busdata.push_back(line);
           //get the index
           pos = line.find_first_of (',');
           temp1 = line.substr (0,pos);
@@ -231,7 +239,7 @@ Column  46-73   Case identification (A) */
         {
           moreData = 0;
 		  dimesysname.send_sysname(sysname);
-		  dimesysname.send_sysparam(sysparam);
+		  //dimesysname.send_sysparam(sysparam);
         }
     }
 
@@ -252,6 +260,7 @@ Column  46-73   Case identification (A) */
             {
               if (checkNextLine (file, line))
                 {
+				  Loaddata.push_back(line);
                   bus = findBus (busList, line);
                   if (bus)
                     {
@@ -275,6 +284,7 @@ Column  46-73   Case identification (A) */
             {
               if (checkNextLine (file, line))
                 {
+				  Generatordata.push_back(line);
                   bus = findBus (busList, line);
                   if (bus)
                     {
@@ -298,6 +308,7 @@ Column  46-73   Case identification (A) */
             {
               if (checkNextLine (file, line))
                 {
+				  Branchdata.push_back(line);
                   rawReadBranch (parentObject,  line,busList, opt);
                 }
               else
@@ -311,6 +322,7 @@ Column  46-73   Case identification (A) */
             {
               if (checkNextLine (file, line))
                 {
+				  Fixshuntdata.push_back(line);
                   bus = findBus (busList, line);
                   if (bus)
                     {
@@ -363,11 +375,16 @@ Column  46-73   Case identification (A) */
                 {
                   if (checkNextLine (file, line))
                     {
+
                       txlines[0] = line;
                       std::getline (file, txlines[1]);
                       std::getline (file, txlines[2]);
                       std::getline (file, txlines[3]);
                       std::getline (file, txlines[4]);
+					  Transformerdata.push_back(txlines[0]);
+					  Transformerdata.push_back(txlines[1]);
+					  Transformerdata.push_back(txlines[2]);
+					  Transformerdata.push_back(txlines[3]);
                     }
                   else
                     {
@@ -389,6 +406,10 @@ Column  46-73   Case identification (A) */
                   std::getline (file, txlines[2]);
                   std::getline (file, txlines[3]);
                   std::getline (file, txlines[4]);
+				  Transformerdata.push_back(txlines[0]);
+				  Transformerdata.push_back(txlines[1]);
+				  Transformerdata.push_back(txlines[2]);
+				  Transformerdata.push_back(txlines[3]);
                 }
               tline = rawReadTX (parentObject,  txlines, busList, opt);
             }
@@ -418,6 +439,7 @@ Column  46-73   Case identification (A) */
     }
 
   file.close ();
+  dimesysname.sendsysparam(Busdata,Loaddata,Generatordata,Branchdata,Transformerdata,Baseinfor);
 }
 
 

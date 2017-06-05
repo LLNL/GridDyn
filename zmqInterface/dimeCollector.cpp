@@ -23,6 +23,7 @@
 #include "dimeClientInterface.h"
 #include "core/helperTemplates.h"
 #include <string>
+#include <sstream>
 using namespace std;
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
@@ -326,13 +327,295 @@ void dimeCollector::send_sysname(std::vector<std::string> sysname)
   dime->send_sysname(Sysname,"SE");
 }
 
-void dimeCollector::send_sysparam(std::vector<std::string> sysparam)
+void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata,static std::vector<std::string> Branchdata,static std::vector<std::string> Transformerdata, std::vector<int> Baseinfor)
 {
 
 	std::unique_ptr<dimeClientInterface> dime = std::make_unique<dimeClientInterface>("", "");
 	dime->init();
+	Json::Value Busd;
+	Json::Value PQd;
+	Json::Value PVd;
+	Json::Value lined;
+	double arr[200][100];
+	int nbus = Busdata.size();
+	int nline = Branchdata.size() + (Transformerdata.size()/4);
 
-	Json::Value Sysparam;
+	for (size_t kk = 0; kk < Busdata.size(); ++kk)
+	{
+		std::string businter = Busdata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Busdata[kk].length(); ++ii)
+		{
+			if (businter.find(",") != string::npos)
+			{
+				int nu = businter.find_first_of(',');
+				std::string tempc = businter.substr(0, nu);
+				try
+				{
+					
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					arr[kk][op] = indexc;
+					businter = businter.substr(nu+1, Busdata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					businter = businter.substr(nu+1, Busdata[kk].length());
+					op = op + 1;
+					continue;
+				}
+				
+			}
+			else
+			{
+				double indexc = std::stoul(businter);
+				arr[kk][ii] = indexc;
+				break;
+			}
+		}
+	}
+	for (size_t kk = 0; kk < Busdata.size(); ++kk)
+	{
+		Json::Value Busk;
+		int num1[6] = { 0,2,7,8,4,5,};
+		for each(int i in num1)
+		{
+			Busk.append(arr[kk][i]);
+		}
+		Busd.append(Busk);
+	}
+
+	double pqrr[200][100];
+	for (size_t kk = 0; kk < Loaddata.size(); ++kk)
+	{
+		std::string loadinter = Loaddata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Loaddata[kk].length(); ++ii)
+		{
+			if (loadinter.find(",") != string::npos)
+			{
+				int nu = loadinter.find_first_of(',');
+				std::string tempc = loadinter.substr(0, nu);
+				try
+				{
+
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					pqrr[kk][op] = indexc;
+					loadinter = loadinter.substr(nu + 1, Loaddata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					loadinter = loadinter.substr(nu + 1, Loaddata[kk].length());
+					op = op + 1;
+					continue;
+				}
+
+			}
+			else
+			{
+				double indexc = std::stoul(loadinter);
+				pqrr[kk][ii] = indexc;
+				break;
+			}
+		}
+	}
+	for (size_t kk = 0; kk < Loaddata.size(); ++kk)
+	{
+		Json::Value PQk;
+		int pqidx = pqrr[kk][0];
+		double paramp = (pqrr[kk][5] + pqrr[kk][7] * arr[pqidx][7] + pqrr[kk][9] * (arr[pqidx][7])* (arr[pqidx][7])) / Baseinfor[0];
+		double paramq = (pqrr[kk][6] + pqrr[kk][8] * arr[pqidx][7] - pqrr[kk][10] * (arr[pqidx][7])* (arr[pqidx][7])) / Baseinfor[0];
+		double pqinter[9] = {pqidx,Baseinfor[0],arr[pqidx][2],paramp,paramq,1,1,1,1};
+		for (int ii=0;ii<9;++ii)
+		{
+			PQk.append(pqinter[ii]);
+		}
+		PQd.append(PQk);
+	}
+
+	double pvrr[200][100];
+	for (size_t kk = 0; kk < Generatordata.size(); ++kk)
+	{
+		std::string geninter = Generatordata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Generatordata[kk].length(); ++ii)
+		{
+			if (geninter.find(",") != string::npos)
+			{
+				int nu = geninter.find_first_of(',');
+				std::string tempc = geninter.substr(0, nu);
+				try
+				{
+
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					pvrr[kk][op] = indexc;
+					geninter = geninter.substr(nu + 1, Generatordata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					geninter = geninter.substr(nu + 1, Generatordata[kk].length());
+					op = op + 1;
+					continue;
+				}
+
+			}
+			else
+			{
+				double indexc = std::stoul(geninter);
+				pvrr[kk][ii] = indexc;
+				break;
+			}
+		}
+	}
+	for (size_t kk = 0; kk < Generatordata.size(); ++kk)
+	{
+		Json::Value PVk;
+		int pvidx = pvrr[kk][0];
+		double pg = (pvrr[kk][14] * pvrr[kk][2]) / Baseinfor[0];
+		double qmax = pvrr[kk][4] / Baseinfor[0];
+		double qmin = pvrr[kk][5] / Baseinfor[0];
+		double pvinter[11] = { pvidx,pvrr[kk][8],arr[pvidx][2],pg,arr[pvidx][7],qmax,qmin,1,1,1,pvrr[kk][14],};
+		for (int ii = 0; ii<11; ++ii)
+		{
+			PVk.append(pvinter[ii]);
+		}
+		PVd.append(PVk);
+	}
+
+	double branchrr[200][100];
+	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
+	{
+		std::string branchinter = Branchdata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Branchdata[kk].length(); ++ii)
+		{
+			if (branchinter.find(",") != string::npos)
+			{
+				int nu = branchinter.find_first_of(',');
+				std::string tempc = branchinter.substr(0, nu);
+				try
+				{
+
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					branchrr[kk][op] = indexc;
+					branchinter = branchinter.substr(nu + 1, Branchdata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					branchinter = branchinter.substr(nu + 1, Branchdata[kk].length());
+					op = op + 1;
+					continue;
+				}
+
+			}
+			else
+			{
+				double indexc = std::stoul(branchinter);
+				branchrr[kk][ii] = indexc;
+				break;
+			}
+		}
+	}
+	double transrr[500][100];
+	
+	for (size_t kk = 0; kk < Transformerdata.size(); ++kk)
+	{
+		std::string transinter = Transformerdata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Transformerdata[kk].length(); ++ii)
+		{
+			if (transinter.find(",") != string::npos)
+			{
+				int nu = transinter.find_first_of(',');
+				std::string tempc = transinter.substr(0, nu);
+				try
+				{
+
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					transrr[kk][op] = indexc;
+					transinter = transinter.substr(nu + 1, Transformerdata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					transinter = transinter.substr(nu + 1, Transformerdata[kk].length());
+					op = op + 1;
+					continue;
+				}
+
+			}
+			else
+			{
+				int jk = kk;
+				int mo = jk % 4;
+				if (mo == 0)
+				{
+					continue;
+				}
+				else
+				{
+					double indexc = std::stoul(transinter);
+					transrr[kk][ii] = indexc;
+					break;
+				}
+			}
+		}
+	}
+	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
+	{
+		Json::Value linek;
+		int lineidxfrom =branchrr[kk][0];
+		int lineidxto = branchrr[kk][1];
+		double rate_a = branchrr[kk][6];
+		double Vnl = arr[lineidxfrom][7];
+		double freq = Baseinfor[1];
+		double length = branchrr[kk][14];
+		double r = branchrr[kk][3];
+		double x = branchrr[kk][4];
+		double b = branchrr[kk][5];
+		double status = branchrr[kk][13];
+		double pvinter[16] = { lineidxfrom,lineidxto,rate_a,Vnl,freq,1121,length,r,x,b,1121,1121,1121,1121,1121,status };
+		for (int ii = 0; ii<16; ++ii)
+		{
+			linek.append(pvinter[ii]);
+		}
+		lined.append(linek);
+	}
+	for (size_t kk = 0; kk < (Transformerdata.size())/4; ++kk)
+	{
+		Json::Value linek;
+		int lineidxfrom = transrr[kk*4][0];
+		int lineidxto = transrr[kk*4][1];
+		double rate_a = branchrr[kk*4+2][3];
+		double Vnl = arr[lineidxfrom][7];
+		double freq = Baseinfor[1];
+		double r = branchrr[kk*4+1][0];
+		double x = branchrr[kk*4+1][1];
+		double b = branchrr[kk*4][8];
+		double u = branchrr[kk*4][11];
+		double pvinter[16] = { lineidxfrom,lineidxto,rate_a,Vnl,freq,1121,1121,r,x,b,1121,1121,1121,1121,1121,u };
+		for (int ii = 0; ii<16; ++ii)
+		{
+			linek.append(pvinter[ii]);
+		}
+		lined.append(linek);
+	}
+
+
+/*	Json::Value Sysparam;
 	for (size_t kk = 0; kk < sysparam.size(); ++kk)
 	{
 		Json::Value wsysparam;
@@ -341,7 +624,8 @@ void dimeCollector::send_sysparam(std::vector<std::string> sysparam)
 		wagain.append(wsysparam);
 		Sysparam.append(wagain);
 	}
-	dime->send_sysparam(Sysparam, "SE");
+	*/
+	dime->send_sysparam(Busd,PQd,PVd,lined,nbus,nline,"SE");
 }
 
 
