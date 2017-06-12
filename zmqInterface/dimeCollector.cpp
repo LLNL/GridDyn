@@ -327,7 +327,8 @@ void dimeCollector::send_sysname(std::vector<std::string> sysname)
   dime->send_sysname(Sysname,"SE");
 }
 
-void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata,static std::vector<std::string> Branchdata,static std::vector<std::string> Transformerdata, std::vector<int> Baseinfor)
+//void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector<int> Baseinfor)
+void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata, std::vector<int> Baseinfor)
 {
 
 	std::unique_ptr<dimeClientInterface> dime = std::make_unique<dimeClientInterface>("", "");
@@ -336,9 +337,14 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	Json::Value PQd;
 	Json::Value PVd;
 	Json::Value lined;
+	Json::Value Genroud;
+	Json::Value Fsd;
+	Json::Value Swd;
+	int swidx;
+	int swv;
 	double arr[200][100];
 	int nbus = Busdata.size();
-	int nline = Branchdata.size() + (Transformerdata.size()/4);
+	int nline = Branchdata.size() + (Transformerdata.size() / 4);
 
 	for (size_t kk = 0; kk < Busdata.size(); ++kk)
 	{
@@ -352,21 +358,21 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 				std::string tempc = businter.substr(0, nu);
 				try
 				{
-					
+
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
 					arr[kk][op] = indexc;
-					businter = businter.substr(nu+1, Busdata[kk].length());
+					businter = businter.substr(nu + 1, Busdata[kk].length());
 					op = op + 1;
 				}
 				catch (const std::exception&)
 				{
-					businter = businter.substr(nu+1, Busdata[kk].length());
+					businter = businter.substr(nu + 1, Busdata[kk].length());
 					op = op + 1;
 					continue;
 				}
-				
+
 			}
 			else
 			{
@@ -379,7 +385,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	for (size_t kk = 0; kk < Busdata.size(); ++kk)
 	{
 		Json::Value Busk;
-		int num1[6] = { 0,2,7,8,4,5,};
+		if (arr[kk][3]==3)
+		{
+			swidx = arr[kk][0];
+			swv= arr[kk][7];
+		}
+		int num1[6] = { 0,2,7,8,4,5, };
 		for each(int i in num1)
 		{
 			Busk.append(arr[kk][i]);
@@ -428,14 +439,17 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	{
 		Json::Value PQk;
 		int pqidx = pqrr[kk][0];
-		double paramp = (pqrr[kk][5] + pqrr[kk][7] * arr[pqidx][7] + pqrr[kk][9] * (arr[pqidx][7])* (arr[pqidx][7])) / Baseinfor[0];
-		double paramq = (pqrr[kk][6] + pqrr[kk][8] * arr[pqidx][7] - pqrr[kk][10] * (arr[pqidx][7])* (arr[pqidx][7])) / Baseinfor[0];
-		double pqinter[9] = {pqidx,Baseinfor[0],arr[pqidx][2],paramp,paramq,1,1,1,1};
-		for (int ii=0;ii<9;++ii)
+		double maxv = 1.1;
+		double minv = 0.9;
+		double paramp = (pqrr[kk][5] + pqrr[kk][7] * arr[pqidx - 1][7] + pqrr[kk][9] * (arr[pqidx - 1][7])* (arr[pqidx - 1][7]/*start from 0 so need -1*/)) / Baseinfor[0];
+		double paramq = (pqrr[kk][6] + pqrr[kk][8] * arr[pqidx - 1][7] - pqrr[kk][10] * (arr[pqidx - 1][7])* (arr[pqidx - 1][7])) / Baseinfor[0];
+		double pqinter[9] = { pqidx,Baseinfor[0],arr[pqidx - 1][2],paramp,paramq,maxv,minv,1,1 };
+		for (int ii = 0; ii < 9; ++ii)
 		{
 			PQk.append(pqinter[ii]);
 		}
 		PQd.append(PQk);
+
 	}
 
 	double pvrr[200][100];
@@ -482,14 +496,29 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		double pg = (pvrr[kk][14] * pvrr[kk][2]) / Baseinfor[0];
 		double qmax = pvrr[kk][4] / Baseinfor[0];
 		double qmin = pvrr[kk][5] / Baseinfor[0];
-		double pvinter[11] = { pvidx,pvrr[kk][8],arr[pvidx][2],pg,arr[pvidx][7],qmax,qmin,1,1,1,pvrr[kk][14],};
-		for (int ii = 0; ii<11; ++ii)
+		double maxv = 1.1;
+		double minv = 0.9;
+		double pvinter[11] = { pvidx,pvrr[kk][8],arr[pvidx - 1][2],pg,arr[pvidx - 1][7],qmax,qmin,maxv,minv,1,pvrr[kk][14] };
+		for (int ii = 0; ii < 11; ++ii)
 		{
 			PVk.append(pvinter[ii]);
 		}
 		PVd.append(PVk);
-	}
+		
+		if (pvidx == swidx)
+		{
+			double swinter[13]= { swidx,pvrr[kk][8],arr[pvidx - 1][2],swv,arr[pvidx - 1][7],qmax,qmin,maxv,minv,1,1,1,pvrr[kk][14] };
+			Json::Value swk;
+			Json::Value swkk;
+			for (int ii = 0; ii < 13; ++ii)
+			{
+				swk.append(swinter[ii]);
+			}
+			Swd.append(swk);
+			Swd.append(swkk);
+		}
 
+	}
 	double branchrr[200][100];
 	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
 	{
@@ -528,7 +557,7 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		}
 	}
 	double transrr[500][100];
-	
+
 	for (size_t kk = 0; kk < Transformerdata.size(); ++kk)
 	{
 		std::string transinter = Transformerdata[kk];
@@ -577,37 +606,37 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
 	{
 		Json::Value linek;
-		int lineidxfrom =branchrr[kk][0];
+		int lineidxfrom = branchrr[kk][0];
 		int lineidxto = branchrr[kk][1];
-		double rate_a = branchrr[kk][6];
-		double Vnl = arr[lineidxfrom][7];
+		double rate_c = branchrr[kk][8];
+		double Vnl = arr[lineidxfrom - 1][2];
 		double freq = Baseinfor[1];
 		double length = branchrr[kk][14];
 		double r = branchrr[kk][3];
 		double x = branchrr[kk][4];
 		double b = branchrr[kk][5];
 		double status = branchrr[kk][13];
-		double pvinter[16] = { lineidxfrom,lineidxto,rate_a,Vnl,freq,1121,length,r,x,b,1121,1121,1121,1121,1121,status };
-		for (int ii = 0; ii<16; ++ii)
+		double pvinter[16] = { lineidxfrom,lineidxto,rate_c,Vnl,freq,1121,length,r,x,b,1121,1121,1121,1121,1121,status };
+		for (int ii = 0; ii < 16; ++ii)
 		{
 			linek.append(pvinter[ii]);
 		}
 		lined.append(linek);
 	}
-	for (size_t kk = 0; kk < (Transformerdata.size())/4; ++kk)
+	for (size_t kk = 0; kk < (Transformerdata.size()) / 4; ++kk)
 	{
 		Json::Value linek;
-		int lineidxfrom = transrr[kk*4][0];
-		int lineidxto = transrr[kk*4][1];
-		double rate_a = branchrr[kk*4+2][3];
-		double Vnl = arr[lineidxfrom][7];
+		int lineidxfrom = transrr[kk * 4][0];
+		int lineidxto = transrr[kk * 4][1];
+		double rate_a = transrr[kk * 4 + 2][3];
+		double Vnl = arr[lineidxfrom - 1][7];
 		double freq = Baseinfor[1];
-		double r = branchrr[kk*4+1][0];
-		double x = branchrr[kk*4+1][1];
-		double b = branchrr[kk*4][8];
-		double u = branchrr[kk*4][11];
+		double r = transrr[kk * 4 + 1][0];
+		double x = transrr[kk * 4 + 1][1];
+		double b = transrr[kk * 4][8];
+		double u = transrr[kk * 4][11];
 		double pvinter[16] = { lineidxfrom,lineidxto,rate_a,Vnl,freq,1121,1121,r,x,b,1121,1121,1121,1121,1121,u };
-		for (int ii = 0; ii<16; ++ii)
+		for (int ii = 0; ii < 16; ++ii)
 		{
 			linek.append(pvinter[ii]);
 		}
@@ -615,19 +644,106 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	}
 
 
-/*	Json::Value Sysparam;
-	for (size_t kk = 0; kk < sysparam.size(); ++kk)
+	double fshuntrr[200][100];
+	for (size_t kk = 0; kk < Fixshuntdata.size(); ++kk)
 	{
-		Json::Value wsysparam;
-		Json::Value wagain;
-		wsysparam.append(sysparam[kk]);
-		wagain.append(wsysparam);
-		Sysparam.append(wagain);
-	}
-	*/
-	dime->send_sysparam(Busd,PQd,PVd,lined,nbus,nline,"SE");
-}
+		std::string fsinter = Fixshuntdata[kk];
+		int op = 0;
+		for (int ii = 0; ii < Fixshuntdata[kk].length(); ++ii)
+		{
+			if (fsinter.find(",") != string::npos)
+			{
+				int nu = fsinter.find_first_of(',');
+				std::string tempc = fsinter.substr(0, nu);
+				try
+				{
 
+					istringstream iss(tempc);
+					double indexc;
+					iss >> indexc;
+					fshuntrr[kk][op] = indexc;
+					fsinter = fsinter.substr(nu + 1, Fixshuntdata[kk].length());
+					op = op + 1;
+				}
+				catch (const std::exception&)
+				{
+					fsinter = fsinter.substr(nu + 1, Loaddata[kk].length());
+					op = op + 1;
+					continue;
+				}
+
+			}
+			else
+			{
+				double indexc = std::stoul(fsinter);
+				fshuntrr[kk][ii] = indexc;
+				break;
+			}
+		}
+	}
+	for (size_t kk = 0; kk < Fixshuntdata.size(); ++kk)
+	{
+		Json::Value fsk;
+		int fsidx = fshuntrr[kk][0];
+		double mva = Baseinfor[0];
+		double vn = arr[fsidx - 1][2];
+		double freq = Baseinfor[1];
+		double g = fshuntrr[kk][3] / mva;
+		double b= fshuntrr[kk][4] / mva;
+		double status = fshuntrr[kk][2];
+		double fsinter[7] = {fsidx,mva,vn,freq,g,b,status};
+		for (int ii = 0; ii < 7; ++ii)
+		{
+			fsk.append(fsinter[ii]);
+		}
+		Fsd.append(fsk);
+	}
+
+	double Genrourr[100][100];
+	for (size_t kk = 0; kk < Genroudata.size(); ++kk)
+	{
+		Json::Value Genrouk;
+		int genrouidx = Genroudata[kk][0];
+		double ra;
+		double sn;
+		for (size_t jj = 0; jj < Generatordata.size(); ++jj)
+		{
+			if (pvrr[jj][0] == genrouidx)
+			{
+				ra = pvrr[jj][9];
+				sn = pvrr[jj][8];
+			}
+		}
+		double vn = arr[genrouidx - 1][2];
+		double freq = Baseinfor[1];
+		double x1 = Genroudata[kk][14];
+
+		double xd = Genroudata[kk][9];
+		double xd1 = Genroudata[kk][11];
+		double xd2 = Genroudata[kk][13];
+		double td10 = Genroudata[kk][3];
+		double td20 = Genroudata[kk][4];
+		double xq = Genroudata[kk][10];
+		double xq1 = Genroudata[kk][12];
+		double xq2 = Genroudata[kk][13];
+		double tq10 = Genroudata[kk][5];
+		double tq20 = Genroudata[kk][6];
+		double M = 2 * Genroudata[kk][7];
+		double d = Genroudata[kk][8];
+
+
+		double genrouinter[] = { genrouidx,sn,vn,freq,6/*type*/,x1,ra,xd,xd1,xd2,td10,td20,xq,xq1,xq2,tq10,tq20,M,d,1121,1121,1121,1121,1121,1121,1121,1121,1 };
+		for (int ii = 0; ii < 28; ++ii)
+		{
+			Genrouk.append(genrouinter[ii]);
+		}
+		Genroud.append(Genrouk);
+	}
+
+	
+
+	dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud,Fsd,Swd, "SE");
+}
 
 void dimeCollector::set(const std::string &param, double val)
 {

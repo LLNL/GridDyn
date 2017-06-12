@@ -11,6 +11,8 @@
  * LLNS Copyright End
 */
 
+#include "gridDynReadRAW.cpp"
+#include "dimeCollector.h"
 #include "gridDynFileInput.h"
 #include "core/objectFactory.h"
 #include "submodels/gridDynGenModel.h"
@@ -26,7 +28,10 @@
 #include <cstdio>
 
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance();
+std::vector <std::vector<double>> Genroudata;
 
+static int i = 0;
+dimeCollector dimesysname;
 void loadGENROU(coreObject *parentObject, stringVec &tokens);
 void loadESDC1A(coreObject *parentObject, stringVec &tokens);
 void loadTGOV1(coreObject *parentObject, stringVec &tokens);
@@ -94,11 +99,15 @@ void loadDYR(coreObject *parentObject,const std::string &filename,const basicRea
       std::cout << "unknown object type " << type << '\n';
     }
   }
+ // dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata, Baseinfor);
+  dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata,Genroudata,Fixshuntdata,Baseinfor);
 }
 
 
   void loadGENROU(coreObject *parentObject, stringVec &tokens)
   {
+	 double interr[17];
+
     int id = std::stoi(tokens[0]);
     gridBus *bus = static_cast<gridBus *>(parentObject->findByUserID("bus", id));
     id = std::stoi(tokens[2]);
@@ -123,8 +132,13 @@ void loadDYR(coreObject *parentObject,const std::string &filename,const basicRea
     sm->set("s1", params[15]);
     sm->set("s12", params[16]);
     
+	//double interr[14] = { params[3] ,params[4] ,};
     gen->add(sm);
 
+	
+	Genroudata.push_back(params);
+
+	++i;
   }
 
   void loadESDC1A(coreObject *parentObject, stringVec &tokens)

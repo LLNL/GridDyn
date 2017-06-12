@@ -52,15 +52,17 @@ enum sections
 };
 
 static coreTime cctime;
-static std::vector <std::string> sysname;
-static std::vector <std::string> Busdata;//###############
-static std::vector <std::string> Loaddata;
-static std::vector <std::string> Branchdata;
-static std::vector <std::string> Transformerdata;
-static std::vector <std::string> Generatordata;
-static std::vector <std::string> Fixshuntdata;
-static std::vector <int> Baseinfor;
+std::vector <std::string> sysname;
 
+
+
+std::vector <std::string> Busdata;//###############
+std::vector <std::string> Loaddata;
+std::vector <std::string> Branchdata;
+std::vector <std::string> Transformerdata;
+std::vector <std::string> Generatordata;
+std::vector <std::string> Fixshuntdata;
+std::vector <int> Baseinfor;
 //get the basic busFactory
 static typeFactory<gridBus> *busfactory = nullptr;
 
@@ -439,7 +441,7 @@ Column  46-73   Case identification (A) */
     }
 
   file.close ();
-  dimesysname.sendsysparam(Busdata,Loaddata,Generatordata,Branchdata,Transformerdata,Baseinfor);
+
 }
 
 

@@ -141,8 +141,11 @@ void encodesysname(Json::Value &data, Json::Value sysname)
 	response["success"] = true;
 	data["args"] = fw.write(response);
 }
-void encodesysparam(Json::Value &data, Json::Value BUSd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline)
+void encodesysparam(Json::Value &data, Json::Value BUSd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline, Json::Value Genroud, Json::Value Fsd, Json::Value Swd)
 {
+
+
+
 	Json::Value re1;
 	re1["Bus"] = BUSd;
 	re1["PQ"] = PQd;
@@ -150,7 +153,10 @@ void encodesysparam(Json::Value &data, Json::Value BUSd, Json::Value PQd, Json::
 	re1["line"] = lined;
 	re1["nbus"] = nbus;
 	re1["nline"] = nline;
-	
+	re1["syn"] = Genroud;
+	re1["Fixshunt"] = Fsd;
+	re1["Sw"] = Swd;
+
 	Json::FastWriter fw;
 	Json::Value content;
 	content["stdout"] = "";
@@ -283,7 +289,7 @@ void dimeClientInterface::send_sysname(Json::Value Sysname,  const std::string &
 	}
 
 }
-void dimeClientInterface::send_sysparam(Json::Value BUSd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline, const std::string &recipient)
+void dimeClientInterface::send_sysparam(Json::Value BUSd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline, Json::Value Genroud, Json::Value Fsd, Json::Value Swd, const std::string &recipient)
 {
 	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
 	char buffer[10];
@@ -311,7 +317,7 @@ void dimeClientInterface::send_sysparam(Json::Value BUSd, Json::Value PQd, Json:
 	}
 
 	outgoingData["meta"]["var_name"] = "Sysparam";
-	encodesysparam(outgoingData, BUSd,PQd,PVd,lined,nbus,nline);
+	encodesysparam(outgoingData, BUSd,PQd,PVd,lined,nbus,nline,Genroud,Fsd,Swd);
 
 	out = fw.write(outgoingData);
 
