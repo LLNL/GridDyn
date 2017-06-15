@@ -28,7 +28,7 @@
 #include <cstdio>
 
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance();
-std::vector <std::vector<double>> Genroudata;
+static std::vector <std::vector<double>> Genroudata;
 
 static int i = 0;
 dimeCollector dimesysname;
@@ -100,7 +100,7 @@ void loadDYR(coreObject *parentObject,const std::string &filename,const basicRea
     }
   }
  // dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata, Baseinfor);
-  dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata,Genroudata,Fixshuntdata,Baseinfor);
+  dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata,Genroudata,Fixshuntdata,sysname,Baseinfor);
 }
 
 

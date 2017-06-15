@@ -25,6 +25,21 @@
 #include <string>
 #include <sstream>
 using namespace std;
+static Json::Value Busd;
+static Json::Value PQd;
+static Json::Value PVd;
+static Json::Value lined;
+static Json::Value Genroud;
+static Json::Value Fsd;
+static Json::Value Swd;
+static int swidx;
+static int swv;
+static int nbus;
+static int nline;
+
+static Json::Value Idxvgs;
+
+
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
 
@@ -57,11 +72,35 @@ std::shared_ptr<collector> dimeCollector::clone(std::shared_ptr<collector> gr) c
 	return nrec;
 }
 
+//Idxvgs encode;
+Json::Value idxvgsdoubleencod(int a, int b)
+{
+	Json::Value re;
+	for (int ii = a; ii <= b; ++ii)
+	{
+		Json::Value ninterk;
+		ninterk.append(ii);
+		re.append(ninterk);
+	}
+
+	return re;
+}
+int idxfindend(int a, int b)
+{
+	int newend = a + b;
+	return newend;
+
+}
+
+
 change_code dimeCollector::trigger(coreTime time)
 {
 	double t = time;
 	Json::Value Varvgs;
 	Json::Value Varheader;
+	
+	
+
 	if (!dime)
 	{
 		dime = std::make_unique<dimeClientInterface>(processName, server);
@@ -69,6 +108,9 @@ change_code dimeCollector::trigger(coreTime time)
 	}
 	auto out=collector::trigger(time);
 	//figure out what to do with the data
+
+
+#pragma region var and name compile
 	std::string strv = "V";
 	std::vector<double> voltagec;
 	std::vector<std::string> voltagename;
@@ -248,6 +290,10 @@ change_code dimeCollector::trigger(coreTime time)
 	}
 	std::vector<double> total;
 	std::vector<std::string> totalname;
+
+
+
+
 	total.insert(total.end(), voltagec.begin(), voltagec.end());
 	total.insert(total.end(), linepc.begin(), linepc.end());
 	total.insert(total.end(), freqc.begin(), freqc.end());
@@ -302,50 +348,106 @@ change_code dimeCollector::trigger(coreTime time)
 	}
 
 
-	dime->send_var(t,Varvgs,"SE");
-	dime->send_varname(Varheader,"SE");
+#pragma endregion
+
+
+#pragma region compile Idxvgs
+	int nbusvol = voltagec.size();
+	int nlinep = linepc.size();
+	int nbusfreq = freqc.size();
+	int nbustheta = anglec.size();
+	int nbusgenreactive = reactivec.size();
+	int nbusgenreal = realc.size();
+	int nbusloadreactive = loadreacc.size();
+	int nbusloadreal = loadrealc.size();
+	int nsynomega = omegac.size();
+	int nsyndelta = pfc.size();
+	int nlineI = Ic.size();
+	int nlineq = lineqc.size();
+	int nexcv = excc.size();
+	int nsyne1d = e1dc.size();
+	int nsyne2d = e2dc.size();
+	int nsyne1q = e1qc.size();
+	int nsyne2q = e2qc.size();
+
+
+	int linepend = idxfindend(nbusvol, nlinep);
+	int busfreqend = idxfindend(linepend, nbusfreq);
+	int busthetaend = idxfindend(busfreqend, nbustheta);
+	int busgenreactiveend = idxfindend(busthetaend, nbusgenreactive);
+	int busgenrealend = idxfindend(busgenreactiveend, nbusgenreal);
+	int busloadreactiveend = idxfindend(busgenrealend, nbusloadreactive);
+	int busloadrealend = idxfindend(busloadreactiveend, nbusloadreal);
+	int synomegaend = idxfindend(busloadrealend, nsynomega);
+	int syndeltaend = idxfindend(synomegaend, nsyndelta);
+	int LineIend = idxfindend(syndeltaend, nlineI);
+	int Lineqend = idxfindend(LineIend, nlineq);
+	int excend = idxfindend(Lineqend, nexcv);
+	int syne1d = idxfindend(excend, nsyne1d);
+	int syne2d = idxfindend(syne1d, nsyne2d);
+	int syne1q = idxfindend(syne2d, nsyne1q);
+	int syne2q = idxfindend(syne1q, nsyne2q);
+
+
+	Json::Value nbusvolk = idxvgsdoubleencod(1, nbusvol);
+	Json::Value nlinepk = idxvgsdoubleencod(nbusvol + 1, linepend);
+	Json::Value nbusfreqk = idxvgsdoubleencod(linepend + 1, busfreqend);
+	Json::Value nbusthetak = idxvgsdoubleencod(busfreqend + 1, busthetaend);
+	Json::Value nbusgenreactivek = idxvgsdoubleencod(busfreqend + 1, busgenreactiveend);
+	Json::Value nbusgenrealk = idxvgsdoubleencod(busgenreactiveend + 1, busgenrealend);
+	Json::Value nbusloadreactivelk = idxvgsdoubleencod(busgenrealend + 1, busloadreactiveend);
+	Json::Value nbusloadrealk = idxvgsdoubleencod(busloadreactiveend, busloadrealend);
+	Json::Value nsynomegaj = idxvgsdoubleencod(busloadrealend + 1, synomegaend);
+	Json::Value nsyndeltaj = idxvgsdoubleencod(synomegaend + 1, syndeltaend);
+	Json::Value nlineij = idxvgsdoubleencod(syndeltaend + 1, LineIend);
+	Json::Value nlineqj = idxvgsdoubleencod(LineIend + 1, Lineqend);
+	Json::Value nexc = idxvgsdoubleencod(Lineqend + 1, excend);
+	Json::Value ne1d = idxvgsdoubleencod(excend + 1, syne1d);
+	Json::Value ne2d = idxvgsdoubleencod(syne1d + 1, syne2d);
+	Json::Value ne1q = idxvgsdoubleencod(syne2d + 1, syne1q);
+	Json::Value ne2q = idxvgsdoubleencod(syne1q + 1, syne2q);
+
+
+
+#pragma endregion 
+	
+	dime->send_var(t, Varvgs, "SE");
+
+
+
+	if (t == 0)
+	{
+		dime->send_varname(Varheader, "SE");
+		dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q,"SE");
+		dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, "SE");
+	}
 	return out;
 }
 
 
 
-void dimeCollector::send_sysname(std::vector<std::string> sysname)
-{
-
-	std::unique_ptr<dimeClientInterface> dime=std::make_unique<dimeClientInterface>("", "");
-	dime->init();
-
-  Json::Value Sysname;
-  for (size_t kk = 0; kk < sysname.size(); ++kk)
-  {
-   Json::Value wsysname;
-   Json::Value wagain;
-   wsysname.append(sysname[kk]);
-   wagain.append(wsysname);
-   Sysname.append(wagain);
-  }
-  dime->send_sysname(Sysname,"SE");
-}
-
-//void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector<int> Baseinfor)
-void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata, std::vector<int> Baseinfor)
+void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata,std::vector <std::string> sysname,std::vector<int> Baseinfor)
 {
 
 	std::unique_ptr<dimeClientInterface> dime = std::make_unique<dimeClientInterface>("", "");
 	dime->init();
-	Json::Value Busd;
-	Json::Value PQd;
-	Json::Value PVd;
-	Json::Value lined;
-	Json::Value Genroud;
-	Json::Value Fsd;
-	Json::Value Swd;
-	int swidx;
-	int swv;
-	double arr[200][100];
-	int nbus = Busdata.size();
-	int nline = Branchdata.size() + (Transformerdata.size() / 4);
+	nbus = Busdata.size();
+	nline = Branchdata.size() + (Transformerdata.size() / 4);
 
+	Json::Value Sysname;
+	for (size_t kk = 0; kk < sysname.size(); ++kk)
+	{
+		Json::Value wsysname;
+		Json::Value wagain;
+		wsysname.append(sysname[kk]);
+		wagain.append(wsysname);
+		Sysname.append(wagain);
+	}
+	
+	dime->send_sysname(Sysname, "SE");
+
+
+	double arr[200][100];
 	for (size_t kk = 0; kk < Busdata.size(); ++kk)
 	{
 		std::string businter = Busdata[kk];
@@ -740,9 +842,9 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		Genroud.append(Genrouk);
 	}
 
-	
 
-	dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud,Fsd,Swd, "SE");
+
+	//dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud,Fsd,Swd, "SE");
 }
 
 void dimeCollector::set(const std::string &param, double val)

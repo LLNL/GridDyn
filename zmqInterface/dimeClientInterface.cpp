@@ -11,6 +11,7 @@
 * LLNS Copyright End
 */
 
+#include "dimeCollector.h"
 #include "dimeClientInterface.h"
 #include "zmqContextManager.h"
 
@@ -84,6 +85,32 @@ void dimeClientInterface::close()
 		socket->close();
 	}
 	socket = nullptr;
+}
+
+void dimeClientInterface::get_devices()
+{
+	auto context = zmqContextManager::getContextPointer();
+
+	char buffer[100];
+
+	socket = std::make_unique<zmq::socket_t>(context->getBaseContext(), zmq::socket_type::req);
+	socket->connect(address);
+
+	Json::Value outgoing;
+	outgoing["command"] = "get_devices";
+	outgoing["name"] = "griddyn";
+	outgoing["listen_to_events"] = false;
+
+	Json::FastWriter fw;
+
+	std::string out = fw.write(outgoing);
+	socket->send(out.c_str(), out.size());
+
+	Json::Value devlistj = socket->recv(buffer, 100, 0);
+	Json::Reader re;
+	std::string devlist ="123" ;
+	re.parse(devlist, devlistj);
+
 }
 	
 void dimeClientInterface::sync()
@@ -166,6 +193,53 @@ void encodesysparam(Json::Value &data, Json::Value BUSd, Json::Value PQd, Json::
 	Json::Value response;
 	response["content"] = content;
 	response["result"] = re1;
+	response["success"] = true;
+	data["args"] = fw.write(response);
+}
+void encodeIdxvgs(Json::Value &data, Json::Value nbusvolk, Json::Value nlinepk, Json::Value nbusfreqk, Json::Value nbusthetak, Json::Value nbusgenreactivek, Json::Value nbusgenrealk, Json::Value nbusloadreactivelk, Json::Value nbusloadrealk, Json::Value nsynomegaj, Json::Value nsyndeltaj, Json::Value nlineij, Json::Value nlineqj, Json::Value nexc, Json::Value ne1d, Json::Value ne2d, Json::Value ne1q, Json::Value ne2q)
+{
+	Json::Value wr;
+
+	Json::Value exc;
+	Json::Value syni;
+	Json::Value line;
+	Json::Value bus;
+
+	bus["V"] = nbusvolk;
+	bus["freq"] = nbusfreqk;
+	bus["loadp"] = nbusloadrealk;
+	bus["loadq"] = nbusloadreactivelk;
+	bus["genp"] = nbusgenrealk;
+	bus["genq"] = nbusgenreactivek;
+
+	line["I"] = nlineij;
+	line["p"] = nlinepk;
+	line["q"] = nlineqj;
+
+	syni["e1d"] = ne1d;
+	syni["e2d"] = ne2d;
+	syni["e1q"] = ne1q;
+	syni["e2q"] = ne2q;
+	syni["delta"] = nsyndeltaj;
+	syni["omega"] = nsynomegaj;
+
+	exc["vm"] = nexc;
+
+	wr["Syn"] = syni;
+	wr["Line"] = line;
+	wr["Bus"] = bus;
+	wr["exc"] = exc;
+
+
+	Json::FastWriter fw;
+	Json::Value content;
+	content["stdout"] = "";
+	content["figures"] = "";
+	content["datadir"] = "/tmp MatlabData/";
+
+	Json::Value response;
+	response["content"] = content;
+	response["result"] = wr;
 	response["success"] = true;
 	data["args"] = fw.write(response);
 }
@@ -329,7 +403,44 @@ void dimeClientInterface::send_sysparam(Json::Value BUSd, Json::Value PQd, Json:
 	}
 
 }
-void dimeClientInterface::get_devices()
+void dimeClientInterface::send_Idxvgs(Json::Value nbusvolk, Json::Value nlinepk, Json::Value nbusfreqk, Json::Value nbusthetak, Json::Value nbusgenreactivek, Json::Value nbusgenrealk, Json::Value nbusloadreactivelk, Json::Value nbusloadrealk, Json::Value nsynomegaj, Json::Value nsyndeltaj, Json::Value nlineij, Json::Value nlineqj, Json::Value nexc, Json::Value ne1d, Json::Value ne2d, Json::Value ne1q, Json::Value ne2q, const std::string &recipient)
 {
 
+	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
+	char buffer[10];
+
+	Json::Value outgoing;
+
+	outgoing["command"] = (recipient.empty()) ? "broadcast" : "send";
+
+	outgoing["name"] = "griddyn";
+	outgoing["args"] = "";
+	Json::FastWriter fw;
+
+	std::string out = fw.write(outgoing);
+
+	socket->send(out.c_str(), out.size());
+
+	auto sz = socket->recv(buffer, 10, 0);
+
+	Json::Value outgoingData;
+	outgoingData["command"] = "response";
+	outgoingData["name"] = "griddyn";
+	if (!recipient.empty())
+	{
+		outgoingData["meta"]["recipient_name"] = "SE";
+	}
+
+	outgoingData["meta"]["var_name"] = "Idxvgs";
+	encodeIdxvgs(outgoingData, nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q);
+	out = fw.write(outgoingData);
+
+	socket->send(out.c_str(), out.size());
+	sz = socket->recv(buffer, 10, 0);
+	if (sz != 2)
+	{
+		throw(sendFailure());
+	}
+
 }
+

@@ -32,8 +32,7 @@ public:
 
 	virtual change_code trigger(coreTime time) override;
 
-	void send_sysname(std::vector<std::string> sysname);
-	void sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata,std::vector<std::string> branchdata,std::vector<std::string> transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata, std::vector<int> Baseinfor);
+	void sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata,std::vector<std::string> branchdata,std::vector<std::string> transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata, std::vector <std::string> sysname, std::vector<int> Baseinfor);
 	//void sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> branchdata, std::vector<std::string> transformerdata,std::vector<int> Baseinfor);
 
 	void set(const std::string &param, double val) override;

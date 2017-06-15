@@ -52,10 +52,8 @@ enum sections
 };
 
 static coreTime cctime;
+
 std::vector <std::string> sysname;
-
-
-
 std::vector <std::string> Busdata;//###############
 std::vector <std::string> Loaddata;
 std::vector <std::string> Branchdata;
@@ -240,7 +238,7 @@ Column  46-73   Case identification (A) */
       else
         {
           moreData = 0;
-		  dimesysname.send_sysname(sysname);
+		  //dimesysname.send_sysname(sysname);
 		  //dimesysname.send_sysparam(sysparam);
         }
     }
