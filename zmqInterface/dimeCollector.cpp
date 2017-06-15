@@ -411,15 +411,20 @@ change_code dimeCollector::trigger(coreTime time)
 
 #pragma endregion 
 	
+	
+
+
+
+
 	dime->send_var(t, Varvgs, "SE");
 
 
 
 	if (t == 0)
 	{
-		dime->send_varname(Varheader, "SE");
-		dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q,"SE");
-		dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, "SE");
+		        dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
+		        dime->send_varname(Varheader, "");
+				dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, "SE");
 	}
 	return out;
 }

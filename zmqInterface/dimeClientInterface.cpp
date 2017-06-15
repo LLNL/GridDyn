@@ -87,37 +87,93 @@ void dimeClientInterface::close()
 	socket = nullptr;
 }
 
-void dimeClientInterface::get_devices()
-{
-	auto context = zmqContextManager::getContextPointer();
 
-	char buffer[100];
-
-	socket = std::make_unique<zmq::socket_t>(context->getBaseContext(), zmq::socket_type::req);
-	socket->connect(address);
-
-	Json::Value outgoing;
-	outgoing["command"] = "get_devices";
-	outgoing["name"] = "griddyn";
-	outgoing["listen_to_events"] = false;
-
-	Json::FastWriter fw;
-
-	std::string out = fw.write(outgoing);
-	socket->send(out.c_str(), out.size());
-
-	Json::Value devlistj = socket->recv(buffer, 100, 0);
-	Json::Reader re;
-	std::string devlist ="123" ;
-	re.parse(devlist, devlistj);
-
-}
 	
 void dimeClientInterface::sync()
 {
 
 }
 	
+std::vector<std::string> dimeClientInterface::get_devices()
+{
+	std::vector<std::string> dev_list;
+	char buffer[100];
+	Json::Value outgoing;
+	outgoing["command"] = "get_devices";
+	outgoing["name"] = "griddyn";
+
+	Json::FastWriter fw;
+
+	std::string out = fw.write(outgoing);
+	socket->send(out.c_str(), out.size());
+
+	socket->recv(buffer, 100, 0);
+	std::string devlist(buffer);
+	int nu = devlist.find_last_of('}');
+	std::string tempc = devlist.substr(0, nu);
+
+	Json::Reader re;
+	Json::Value devlistj;
+	re.parse(tempc, devlistj);
+	std::string finallist = fw.write(devlistj["response"]);
+	std::cout << finallist << std::endl;
+
+	while (1)
+	{
+		try
+		{
+			finallist.replace(finallist.find("["), 1, "");
+			finallist.replace(finallist.find("]"), 1, "");
+
+		}
+		catch (const std::exception&)
+		{
+		}
+
+		try
+		{
+			finallist.replace(finallist.find("\""), 1, "");
+
+		}
+		catch (const std::exception&)
+		{
+			finallist.replace(finallist.find("\n"), 1, "");
+			break;
+		}
+	}
+
+	while (1)
+	{
+
+		nu = finallist.find_first_of(',');
+		if (nu != -1)
+		{
+			tempc = finallist.substr(0, nu);
+			if (tempc=="griddyn")
+			{
+				finallist = finallist.substr(nu + 1, finallist.size());
+				continue;
+			}
+			dev_list.push_back(tempc);
+			finallist = finallist.substr(nu + 1, finallist.size());
+		}
+		else
+		{
+			dev_list.push_back(finallist);
+			break;
+		}
+
+	}
+
+
+
+	return dev_list;
+
+
+}
+
+
+
 
 void encodeVariableMessage(Json::Value &data, Json::Value Varvgs,double t)
 {
@@ -441,6 +497,12 @@ void dimeClientInterface::send_Idxvgs(Json::Value nbusvolk, Json::Value nlinepk,
 	{
 		throw(sendFailure());
 	}
+	
+	Sleep(1000);
+
+	std::vector<std::string> dev_list = get_devices();
+
+
 
 }
 
