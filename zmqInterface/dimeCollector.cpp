@@ -39,6 +39,7 @@ static int nline;
 
 static Json::Value Idxvgs;
 
+std::vector<double> idxreq;
 
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
@@ -93,6 +94,7 @@ int idxfindend(int a, int b)
 }
 
 
+//orgnize how to send to clients
 change_code dimeCollector::trigger(coreTime time)
 {
 	double t = time;
@@ -108,7 +110,6 @@ change_code dimeCollector::trigger(coreTime time)
 	}
 	auto out=collector::trigger(time);
 	//figure out what to do with the data
-
 
 #pragma region var and name compile
 	std::string strv = "V";
@@ -179,7 +180,7 @@ change_code dimeCollector::trigger(coreTime time)
 	std::vector<double> e2qc;
 	std::vector<std::string> e2qname;
 
-
+	//for each data determine who they are
 	for (size_t kk = 0; kk < points.size(); ++kk)
 	{
 		
@@ -410,27 +411,50 @@ change_code dimeCollector::trigger(coreTime time)
 
 
 #pragma endregion 
-	
-	
 
-
-
-
-	dime->send_var(t, Varvgs, "SE");
-
-
-
-	if (t == 0)
+#pragma region find request var
+	Json::Value reqvarheader;
+	Json::Value reqvar;
+	for (int ii = 0; ii < idxreq.size(); ++ii)
 	{
-		        dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
-		        dime->send_varname(Varheader, "");
-				dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, "SE");
+		Json::Value inter;
+		inter.append(total[idxreq[ii]]);
+		reqvar.append(inter);
+
+		Json::Value interh;
+		interh.append(totalname[idxreq[ii]]);
+		reqvarheader.append(inter);
 	}
+
+#pragma endregion
+
+
+	std::vector<std::string> dev_list =dime->get_devices();
+
+
+
+		for (int ii = 0; ii < dev_list.size(); ++ii)
+		{
+			if (t==0&&ii==0)
+			{
+				dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
+				dime->send_varname(Varheader, "");
+			}
+			Sleep(1000); 
+			dime->sync();
+			if (t==0)
+			{
+				dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, dev_list[ii]);
+			}
+			dime->send_reqvar(t, reqvar, reqvarheader, dev_list[ii]);
+			//dime->send_var(t, Varvgs,dev_list[ii]);
+		}
+
 	return out;
 }
 
 
-
+//compile the sysparam in order
 void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata,std::vector <std::string> sysname,std::vector<int> Baseinfor)
 {
 

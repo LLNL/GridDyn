@@ -60,6 +60,8 @@ public:
 	/** send a variable to server*/
 	void send_Idxvgs(Json::Value nbusvolk, Json::Value nlinepk, Json::Value nbusfreqk, Json::Value nbusthetak, Json::Value nbusgenreactivek, Json::Value nbusgenrealk, Json::Value nbusloadreactivelk, Json::Value nbusloadrealk, Json::Value nsynomegaj, Json::Value nsyndeltaj, Json::Value nlineij, Json::Value nlineqj, Json::Value nexc, Json::Value ne1d, Json::Value ne2d, Json::Value ne1q, Json::Value ne2q, const std::string &recipient);
 
+	void send_reqvar(double t,Json::Value reqvar, Json::Value reqvarheader, const std::string & recipient);
+
 
 	std::vector<std::string> get_devices();
 private:
