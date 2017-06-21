@@ -1,5 +1,17 @@
-#ifndef GRID_CONFIG_H
-#define GRID_CONFIG_H
+/*
+* LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
+#ifndef GRIDDYN_CONFIG_H
+#define GRIDDYN_CONFIG_H
+#pragma once
 
 #cmakedefine HAVE_MPI
 
@@ -11,9 +23,9 @@
 
 #cmakedefine FMI_ENABLE
 
-#cmakedefine OPTIMIZATION_ENABLE
+#cmakedefine BUILD_SHARED_FMI_LIBRARY
 
-#cmakedefine ENABLE_64_BIT_INDEXING
+#cmakedefine OPTIMIZATION_ENABLE
 
 #cmakedefine ENABLE_EXPERIMENTAL_TEST_CASES
 
@@ -27,8 +39,10 @@
 
 #cmakedefine TRACE_LOG_ENABLE
 
-#cmakedefine DISABLE_MULTITHREADING
-
 #cmakedefine YAML_FOUND
+
+#cmakedefine HELICS_EXECUTABLE
+
+#cmakedefine DIME_ENABLE
 
 #endif

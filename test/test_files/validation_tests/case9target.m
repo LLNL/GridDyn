@@ -5,7 +5,6 @@ function mpc = case9target
 %   Modified version of case9.m used as target for example CPF.
 
 %   MATPOWER
-%   $Id: case9target.m 2408 2014-10-22 20:41:33Z ray $
 
 %% MATPOWER Case Format : Version 2
 mpc.version = '2';

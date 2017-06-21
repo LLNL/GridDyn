@@ -105,6 +105,7 @@
 		<field>voltage</field>
 		<period>0.5</period>
 		<file>busVrec.dat</file>
+		<flag>vector_name</flag>
 		</recorder>
    <basepower>100</basepower>
    <timestart>0</timestart>

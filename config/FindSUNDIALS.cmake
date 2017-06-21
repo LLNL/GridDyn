@@ -112,13 +112,6 @@ macro(SUNDIALS_FIND_COMPONENTS )
 						${${sundialsCompUC}_DIR}/include
 						${${sundialsCompUC}_DIR}/${sundialsComp}/include
 						${${sundialsCompUC}_DIR}
-						/opt/local/include
-						/usr/include
-						/usr/local/include
-						/usr/include/sundials
-						/usr/local/include/sundials
-						/usr/include/${sundialsComp}
-						/usr/local/include/${sundialsComp}
 		)
 		## check if found
 		if(NOT SUNDIALS_${sundialsCompUC}_INCLUDE_DIR)
@@ -139,12 +132,6 @@ macro(SUNDIALS_FIND_COMPONENTS )
 							${${sundialsCompUC}_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${${sundialsCompUC}_DIR}/lib
 							${${sundialsCompUC}_DIR}
-							/opt/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/opt/local/lib
-							/usr/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/usr/lib
-							/usr/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/usr/local/lib
 							
 			PATH_SUFFIXES	Release
 		)
@@ -157,12 +144,6 @@ macro(SUNDIALS_FIND_COMPONENTS )
 							${${sundialsCompUC}_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${${sundialsCompUC}_DIR}/lib
 							${${sundialsCompUC}_DIR}
-							/opt/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/opt/local/lib
-							/usr/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/usr/lib
-							/usr/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
-							/usr/local/lib
 			PATH_SUFFIXES	Debug
 		)
 		

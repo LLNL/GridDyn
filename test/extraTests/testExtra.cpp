@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
@@ -10,7 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
 
 
 #ifndef _MSC_VER
@@ -25,4 +23,4 @@
 
 #include "testHelper.h"
 
-BOOST_GLOBAL_FIXTURE(glbconfig);
+BOOST_GLOBAL_FIXTURE (glbconfig);

@@ -1,5 +1,3 @@
-#pragma once
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
@@ -14,9 +12,10 @@
 
 #ifndef EXE_HELPER_HEADER_
 #define EXE_HELPER_HEADER_
+#pragma once
 
 #include <string>
-
+/** class designed to execute a run test of gridDynMain*/
 class exeTestRunner
 {
 private:

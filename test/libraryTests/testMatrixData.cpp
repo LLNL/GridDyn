@@ -1,6 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
- * LLNS Copyright Start
+* LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -14,10 +13,10 @@
 
 // test case for coreObject object
 
-#include "gridDynDefinitions.h"
+#include "gridDynDefinitions.hpp"
 #include "testHelper.h"
-#include "utilities/matrixDataSparse.h"
-#include "utilities/matrixDataSparseSM.h"
+#include "utilities/matrixDataSparse.hpp"
+#include "utilities/matrixDataSparseSM.hpp"
 #include "utilities/matrixOps.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
@@ -132,7 +131,7 @@ BOOST_AUTO_TEST_CASE (test_matrix_1)
     BOOST_CHECK (A.row == 0);
     BOOST_CHECK (A.data == 3.27);
     auto pcol = A.col;
-    for (size_t pp = 1; pp < bigMatrix.size (); ++pp)
+    for (index_t pp = 1; pp < bigMatrix.size (); ++pp)
     {
         A = bigMatrix.next ();
         if (A.col < pcol)
@@ -173,7 +172,7 @@ BOOST_AUTO_TEST_CASE (test_matrix_2)
     BOOST_CHECK (A.row == 0);
     BOOST_CHECK (A.data == 3.27);
     auto prow = A.row;
-    for (size_t pp = 1; pp < bigMatrix.size (); ++pp)
+    for (index_t pp = 1; pp < bigMatrix.size (); ++pp)
     {
         A = bigMatrix.next ();
         if (A.row < prow)
@@ -200,7 +199,7 @@ BOOST_AUTO_TEST_CASE (test_sparse_matrix)
 
     testMatrix.compact ();
     // should have compacted the two 6,7 element
-    BOOST_CHECK (testMatrix.size () == 3);
+    BOOST_CHECK_EQUAL (testMatrix.size (),3_ind);
 
     auto itend = testMatrix.end ();
     auto itbegin = testMatrix.begin ();
@@ -230,7 +229,7 @@ BOOST_AUTO_TEST_CASE (test_sparse_matrix_multiply)
 
     std::vector<double> v (10, 1.0);
     auto res = matrixDataMultiply (testMatrix, v.data ());
-    BOOST_CHECK (res.size () == 10);
+    BOOST_CHECK_EQUAL (res.size (),10u);
 
     int ecount = 0;
     for (int kk = 0; kk < 10; ++kk)

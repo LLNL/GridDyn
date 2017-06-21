@@ -1,6 +1,5 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
-   * LLNS Copyright Start
+* LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department 
  * of Energy by Lawrence Livermore National Laboratory in part under 
@@ -12,13 +11,15 @@
 */
 
 #include "testHelper.h"
-#include "loadModels/gridLoad.h"
-#include "gridDyn.h"
+#include "Load.h"
+#include "griddyn.h"
 #include "simulation/diagnostics.h"
-#include "gridDynFileInput.h"
+#include "fileInput.h"
 #include <iostream>
 #include <cmath>
 #include <boost/test/unit_test.hpp>
+
+using namespace griddyn;
 
 gridDynSimulationTestFixture::gridDynSimulationTestFixture()
 {
@@ -30,36 +31,72 @@ gridDynSimulationTestFixture::~gridDynSimulationTestFixture()
 
 }
 
-std::ostream& operator<<(std::ostream& os, const gridDynSimulation::gridState_t state)
+void gridDynSimulationTestFixture::checkState(griddyn::gridDynSimulation::gridState_t state)
+{
+	BOOST_CHECK_EQUAL(to_string(gds->currentProcessState()), to_string(state));
+}
+
+void gridDynSimulationTestFixture::requireState(griddyn::gridDynSimulation::gridState_t state)
+{
+	BOOST_REQUIRE_EQUAL(to_string(gds->currentProcessState()), to_string(state));
+}
+
+void gridDynSimulationTestFixture::checkState2(griddyn::gridDynSimulation::gridState_t state)
+{
+	BOOST_CHECK_EQUAL(to_string(gds2->currentProcessState()), to_string(state));
+}
+
+void gridDynSimulationTestFixture::requireState2(griddyn::gridDynSimulation::gridState_t state)
+{
+	BOOST_REQUIRE_EQUAL(to_string(gds2->currentProcessState()), to_string(state));
+}
+
+void checkStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDynSimulation::gridState_t state2)
+{
+	BOOST_CHECK_EQUAL(to_string(state1), to_string(state2));
+}
+
+void requireStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDynSimulation::gridState_t state2)
+{
+	BOOST_REQUIRE_EQUAL(to_string(state1), to_string(state2));
+}
+
+static const std::string startupString("startup");
+static const std::string initializedString("initialized");
+static const std::string pflowString("powerflow_complete");
+static const std::string dinitString("dynamic init");
+static const std::string dcompString("dynamic complete");
+static const std::string dpartString("dynamic partial");
+static const std::string errorString("error");
+static const std::string haltedString("halted");
+static const std::string ukString("unknown");
+const std::string &to_string(griddyn::gridDynSimulation::gridState_t state)
 {
 	switch (state)
 	{
 	case gridDynSimulation::gridState_t::STARTUP:
-		os << "startup";
-		break;
+		return startupString;
 	case gridDynSimulation::gridState_t::INITIALIZED:
-		os << "initialized";
-		break;
+		return initializedString;
 	case gridDynSimulation::gridState_t::POWERFLOW_COMPLETE:
-		os << "powerflow_complete";
-		break;
+		return pflowString;
 	case gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED:
-		os << "dynamic init";
-		break;
+		return dinitString;
 	case gridDynSimulation::gridState_t::DYNAMIC_PARTIAL:
-		os << "dynamic partial";
-		break;
+		return dpartString;
 	case gridDynSimulation::gridState_t::DYNAMIC_COMPLETE:
-		os << "dynamic complete";
-		break;
+		return dcompString;
 	case gridDynSimulation::gridState_t::GD_ERROR:
-		os << "error";
-		break;
+		return errorString;
 	case gridDynSimulation::gridState_t::HALTED:
-		os << "halted";
-		break;
+		return haltedString;
+	default:
+		return ukString;
 	}
-
+}
+std::ostream& operator<<(std::ostream& os, griddyn::gridDynSimulation::gridState_t state)
+{
+	os << to_string(state);
 	return os;
 }
 
@@ -68,7 +105,7 @@ void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 	gds = readSimXMLFile(fileName);
 	gds->consolePrintLevel = print_level::no_print;
 	gds->run();
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 
 
@@ -78,7 +115,7 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName,
 	int retval = 0;
 	gds = readSimXMLFile(fileName);
 	BOOST_REQUIRE_EQUAL(readerConfig::warnCount,0);
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::STARTUP);
+	requireState(gridDynSimulation::gridState_t::STARTUP);
 	switch (finalState)
 	{
 	case gridDynSimulation::gridState_t::STARTUP:
@@ -100,7 +137,7 @@ void gridDynSimulationTestFixture::simpleStageCheck(const std::string &fileName,
 		return;
 	default:
 		gds->run();
-		BOOST_CHECK_EQUAL(gds->currentProcessState(),finalState);
+		checkState(finalState);
 		return;
 	}
 }
@@ -110,10 +147,10 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	readerConfig::setPrintMode(0);
 	gds = readSimXMLFile(fileName);
 	BOOST_REQUIRE_EQUAL(readerConfig::warnCount,0);
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::STARTUP);
+	requireState(gridDynSimulation::gridState_t::STARTUP);
 	int retval = gds->pFlowInitialize();
 	BOOST_CHECK_EQUAL(retval, 0);
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::INITIALIZED);
+	requireState(gridDynSimulation::gridState_t::INITIALIZED);
 	runJacobianCheck(gds, cPflowSolverMode);
 
 	if (finalState == gridDynSimulation::gridState_t::INITIALIZED)
@@ -122,7 +159,7 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	}
 	gds->powerflow();
 
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+	requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
 	if (finalState == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE)
 	{
@@ -133,7 +170,7 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	
 	runJacobianCheck(gds, cDaeSolverMode);
 	
-	BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
+	requireState(gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	if (finalState == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
 	{
 		return;
@@ -142,11 +179,11 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	BOOST_REQUIRE_EQUAL(retval,0);
 	if (gds->hasDynamics())
 	{
-		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+		requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 	}
 	else
 	{
-		BOOST_REQUIRE_EQUAL(gds->currentProcessState(),gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+		requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 	}
 }
 

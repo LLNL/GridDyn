@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
@@ -11,60 +10,60 @@
 * LLNS Copyright End
 */
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/filesystem.hpp>
-#include "gridDyn.h"
-#include "gridDynFileInput.h"
+#include "griddyn.h"
+#include "fileInput.h"
 #include "testHelper.h"
+#include <boost/filesystem.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/unit_test.hpp>
 
-
+using namespace griddyn;
 /** these test cases test out the contingency capabilities in GridDyn
 */
 
-static const std::string contingency_test_directory(GRIDDYN_TEST_DIRECTORY "/contingency_tests/");
+static const std::string contingency_test_directory (GRIDDYN_TEST_DIRECTORY "/contingency_tests/");
 
-BOOST_FIXTURE_TEST_SUITE(contingency_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (contingency_tests, gridDynSimulationTestFixture)
 
 using namespace boost::filesystem;
-BOOST_AUTO_TEST_CASE(contingency_test1)
+BOOST_AUTO_TEST_CASE (contingency_test1)
 {
-	std::string fname = contingency_test_directory + "contingency_test1.xml";
-	gds = readSimXMLFile(fname);
-	gds->run();
-	BOOST_CHECK(exists("contout.csv"));
-	remove("contout.csv");
+    std::string fileName = contingency_test_directory + "contingency_test1.xml";
+    gds = readSimXMLFile (fileName);
+    gds->run ();
+    BOOST_CHECK (exists ("contout.csv"));
+    remove ("contout.csv");
 }
 
-BOOST_AUTO_TEST_CASE(contingency_test2)
+BOOST_AUTO_TEST_CASE (contingency_test2)
 {
-	std::string fname = contingency_test_directory + "contingency_test2.xml";
-	gds = readSimXMLFile(fname);
-	gds->set("printlevel", 0);
-	gds->run();
-	
-	BOOST_CHECK(exists("contout_load.csv"));
-	BOOST_CHECK(exists("contout_bus.csv"));
-	BOOST_CHECK(exists("contout_gen.csv"));
-	BOOST_CHECK(exists("contout_line.csv"));
-	remove("contout_load.csv");
-	remove("contout_bus.csv");
-	remove("contout_gen.csv");
-	remove("contout_line.csv");
+    std::string fileName = contingency_test_directory + "contingency_test2.xml";
+    gds = readSimXMLFile (fileName);
+    gds->set ("printlevel", 0);
+    gds->run ();
+
+    BOOST_CHECK (exists ("contout_load.csv"));
+    BOOST_CHECK (exists ("contout_bus.csv"));
+    BOOST_CHECK (exists ("contout_gen.csv"));
+    BOOST_CHECK (exists ("contout_line.csv"));
+    remove ("contout_load.csv");
+    remove ("contout_bus.csv");
+    remove ("contout_gen.csv");
+    remove ("contout_line.csv");
 }
 
-//Testing N-2 contingencies  TODO:: move to testExtra
+// Testing N-2 contingencies  TODO:: move to testExtra
 /*
 BOOST_AUTO_TEST_CASE(contingency_test3)
 {
-	std::string fname = contingency_test_directory + "contingency_test3.xml";
-	gds = readSimXMLFile(fname);
-	gds->set("printlevel", 0);
-	gds->run();
-	
-	BOOST_CHECK(exists("contout_N2.csv"));
-	remove("contout_N2.csv");
+    std::string fileName = contingency_test_directory + "contingency_test3.xml";
+    gds = readSimXMLFile(fileName);
+    gds->set("printlevel", 0);
+    gds->run();
+
+    BOOST_CHECK(exists("contout_N2.csv"));
+    remove("contout_N2.csv");
 }
 */
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END ()

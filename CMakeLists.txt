@@ -78,8 +78,12 @@ IF(UNIX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
   endif(ENABLE_EXTRA_COMPILER_WARNINGS)
 ELSE(UNIX)
   IF(MINGW)
@@ -87,15 +91,22 @@ ELSE(UNIX)
  add_compile_options(-Wall -pedantic)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
+  #this options produces lots of warning but is useful for checking ever once in a while with Clang GCC warnin notices with this aren't as useful
+  #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpadded>)
   endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-  ELSE(MINGW)
-  set(Boost_USE_STATIC_LIBS ON)
+  ENDIF(MINGW)
+  
 # -------------------------------------------------------------
 # Extra definitions for visual studio
 # -------------------------------------------------------------
 IF(MSVC)
+  set(Boost_USE_STATIC_LIBS ON)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
   ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
   add_compile_options(/EHsc)
@@ -104,7 +115,6 @@ IF(MSVC)
   endif(ENABLE_EXTRA_COMPILER_WARNINGS)
  
 ENDIF(MSVC)
-  ENDIF(MINGW)
 ENDIF(UNIX)
 
 #message(STATUS ${CMAKE_CXX_FLAGS})
@@ -343,61 +353,26 @@ list(APPEND external_library_list ${Boost_LIBRARIES})
   list(APPEND external_link_directories ${Boost_LIBRARY_DIRS})
 
 # -------------------------------------------------------------
+# global include directories
+# -------------------------------------------------------------
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty)
+INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
+# -------------------------------------------------------------
 # load the required subdirectories
 # -------------------------------------------------------------
 
-add_subdirectory(formatInterpreters)
+add_subdirectory(src/formatInterpreters)
 
-add_subdirectory(core)
+add_subdirectory(src/core)
 #required for utilities library
 
-add_subdirectory(utilities)
+add_subdirectory(src/utilities)
 
-add_subdirectory(gridDyn)
+add_subdirectory(src/griddyn)
 
 # now go into the optional stuff
-
-
-# -------------------------------------------------------------
-# Enable ZMQ interfacing
-# -------------------------------------------------------------
-
-OPTION(ZMQ_ENABLE "Enable ZMQ networking library" OFF)
-# If ZMQ library is enabled try to locate it and link against it
-
-IF ((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
-
-SHOW_VARIABLE(ZMQ_LIBRARY_PATH PATH
-  "path to the zmq libraries" "${ZMQ_LIBRARY_PATH}")
-  
-SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
-  "path to the zmq headers" "${ZMQ_INCLUDE_PATH}")
-  set(ZMQ_FIND_QUIETLY ON)
-find_package(ZMQ)
-
-if (NOT ZMQ_FOUND)
-OPTION(AUTOBUILD_ZMQ "enable ZMQ to automatically download and build" OFF)
-  IF (AUTOBUILD_ZMQ)
-  include(buildlibZMQ)
-  build_libzmq()
-  set(ZMQ_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
-find_package(ZMQ)
-  ENDIF(AUTOBUILD_ZMQ)
-  
-endif(NOT ZMQ_FOUND)
- 
-
-# ZMQ_INCLUDE_DIR, where to find zmq.h
-# ZMQ_LIBRARY, the library needed to use ZMQ
-# ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
-	if (ZMQ_FOUND)
-		add_subdirectory(zmqInterface)
-	else(ZMQ_FOUND)
-		message(SEND_ERROR "unable to locate zmq library")
-	endif(ZMQ_FOUND)
-ENDIF((ZMQ_ENABLE) OR (FNCS_EXECUTABLE))
-
-
 
 
 # -------------------------------------------------------------
@@ -424,23 +399,23 @@ OPTION(LOAD_EXTRA_MODELS "Compile and load extraModels" ON)
 # link against them.
 
 if (LOAD_EXTRA_MODELS)
-  add_subdirectory(extraModels)
+  add_subdirectory(src/extraModels)
 ENDIF(LOAD_EXTRA_MODELS)
 
 # -------------------------------------------------------------
 # Enable FMI support?
 # -------------------------------------------------------------
 
-OPTION(FMI_ENABLE "Enable FMI support" OFF)
+OPTION(FMI_ENABLE "Enable FMI support" ON)
 # If FMI is enabled try to locate the libraries
 # link against them.
 
 IF (FMI_ENABLE)
 	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		set(FMI_ENABLE OFF)
+		set(FMI_ENABLE OFF CACHE BOOL "Enable FMI Support" FORCE)
 		message("FMI support requires BOOST 1.61 or higher")
 	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
-		add_subdirectory(fmi)
+		add_subdirectory(src/fmi)
 	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(FMI_ENABLE)
 
@@ -455,7 +430,7 @@ IF(FSKIT_ENABLE)
   find_package(FSKIT)
   INCLUDE_DIRECTORIES(SYSTEM ${FSKIT_INCLUDE_DIR})
   set(GRIDDYN_HAVE_FSKIT 1)
-  add_subdirectory(fskit)
+  add_subdirectory(src/fskit)
 ENDIF(FSKIT_ENABLE)
 
 # -------------------------------------------------------------
@@ -468,7 +443,7 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
  
 #OPTION(BUILD_SERVERMODE "Build GridDyn Server" OFF)
 IF (BUILD_SERVERMODE)
- add_subdirectory(gridDynServer)
+ add_subdirectory(src/gridDynServer)
 ENDIF(BUILD_SERVERMODE)
 
 
@@ -518,7 +493,7 @@ IF (FNCS_EXECUTABLE)
 		
 	ELSE(USE_DUMMY_FNCS)
 		SHOW_VARIABLE(USE_FNCS_SHARED_LIBRARY BOOL "used a dynamic shared library for the FNCS interface" OFF)
-		
+		set(ZMQ_NEEDED ON)
 		IF(USE_FNCS_SHARED_LIBRARY)
 			SHOW_VARIABLE(FNCS_INSTALL_PATH PATH "path to the fncs installation" "${FNCS_LIBRARY_PATH}")
 			find_package(FNCS)
@@ -531,7 +506,7 @@ IF (FNCS_EXECUTABLE)
 		ENDIF(USE_FNCS_SHARED_LIBRARY)
 		
 	ENDIF(USE_DUMMY_FNCS)
-	add_subdirectory(fncs)
+	add_subdirectory(src/fncs)
 ELSE(FNCS_EXECUTABLE)
 	HIDE_VARIABLE(FNCS_INSTALL_PATH)
 	HIDE_VARIABLE(USE_DUMMY_FNCS)
@@ -539,6 +514,92 @@ ELSE(FNCS_EXECUTABLE)
 ENDIF(FNCS_EXECUTABLE)
 
 
+# -------------------------------------------------------------
+# Enable HELICS executable
+# -------------------------------------------------------------
+
+OPTION(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
+# If HELICS_EXECUTABLE is load the fncs directory
+# link against them.
+
+IF (HELICS_EXECUTABLE)
+	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
+	set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
+ELSE(HELICS_EXECUTABLE)
+	HIDE_VARIABLE(HELICS_INSTALL_PATH)
+ENDIF(HELICS_EXECUTABLE)
+
+# -------------------------------------------------------------
+# Enable ZMQ interfacing
+# -------------------------------------------------------------
+
+OPTION(DIME_ENABLE "Enable connection with Dime" OFF)
+
+IF (DIME_ENABLE)
+set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
+ENDIF(DIME_ENABLE)
+OPTION(ZMQ_ENABLE "Enable ZMQ networking library" ${ZMQ_NEEDED})
+# If ZMQ library is enabled try to locate it and link against it
+
+IF ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+
+SHOW_VARIABLE(ZMQ_LIBRARY_PATH PATH
+  "path to the zmq libraries" "${PROJECT_BINARY_DIR}/libs")
+  
+SHOW_VARIABLE(ZMQ_INCLUDE_PATH PATH
+  "path to the zmq headers" "${PROJECT_BINARY_DIR}/libs")
+  set(ZMQ_FIND_QUIETLY ON)
+find_package(ZMQ)
+
+if (NOT ZMQ_FOUND)
+OPTION(AUTOBUILD_ZMQ "enable ZMQ to automatically download and build" OFF)
+  IF (AUTOBUILD_ZMQ)
+  include(buildlibZMQ)
+  build_libzmq()
+  set(ZMQ_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+  find_package(ZMQ)
+  ENDIF(AUTOBUILD_ZMQ)
+  
+endif(NOT ZMQ_FOUND)
+ 
+  
+# ZMQ_INCLUDE_DIR, where to find zmq.h
+# ZMQ_LIBRARY, the library needed to use ZMQ
+# ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
+	if (ZMQ_FOUND)
+		add_subdirectory(src/zmqLib)
+	else(ZMQ_FOUND)
+		message(SEND_ERROR "unable to locate zmq library")
+	endif(ZMQ_FOUND)
+ENDIF((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+
+
+IF (HELICS_EXECUTABLE)
+	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
+	set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+	find_package(HELICS)
+	IF(NOT HELICS_FOUND)
+		OPTION(AUTOBUILD_HELICS "enable HELICS to automatically download and build" OFF)
+		IF(AUTOBUILD_HELICS)
+			include(buildHELICS)
+			build_helics()
+			set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+			find_package(HELICS)
+		ENDIF(AUTOBUILD_HELICS)
+	ELSE (NOT HELICS_FOUND)
+		OPTION(FORCE_HELICS_REBUILD "force rebuild of helics" OFF)
+		IF (AUTOBUILD_HELICS)
+			IF(FORCE_HELICS_REBUILD)
+				include(buildHELICS)
+				build_helics()
+				set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
+				set(FORCE_HELICS_REBUILD OFF CACHE BOOL "force rebuild of helics" FORCE)
+			ENDIF(FORCE_HELICS_REBUILD)
+		ENDIF(AUTOBUILD_HELICS)
+	ENDIF(NOT HELICS_FOUND)
+	
+	add_subdirectory(src/helics)
+ENDIF(HELICS_EXECUTABLE)
 FILE(GLOB KEY_LIBRARY_FILES  ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
 # -------------------------------------------------------------
@@ -551,24 +612,22 @@ OPTION(OPTIMIZATION_ENABLE "Enable Optimization libraries" OFF)
 # If OPTIMIZATION is enabled try to locate the libraries
 # link against them.
 IF(OPTIMIZATION_ENABLE)
-	add_subdirectory(gridDynOpt)
+	add_subdirectory(src/optimization)
 ENDIF(OPTIMIZATION_ENABLE)
 
+add_subdirectory(src/fileInput)
 
-add_subdirectory(gridDynFileInput)
+add_subdirectory(src/coupling)
 
-add_subdirectory(coupling)
+add_subdirectory(src/gridDynCombined)
 
-add_subdirectory(gridDynCombined)
-
-add_subdirectory(gridDynMain)
-
-OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" OFF)
+OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" ON)
 
 IF(BUILD_SHARED_FMI_LIBRARY)
-	add_subdirectory(fmi_export)
+	add_subdirectory(src/fmi_export)
 ENDIF(BUILD_SHARED_FMI_LIBRARY)
 
+add_subdirectory(src/gridDynMain)
 # -------------------------------------------------------------
 # Enable clang analysis and formatting tools
 # -------------------------------------------------------------

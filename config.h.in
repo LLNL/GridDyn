@@ -1,6 +1,6 @@
+#ifndef CONFIG_UTILITIES_H
+#define CONFIG_UTILITIES_H
 #pragma once
-#ifndef GCONFIG_H
-#define GCONFIG_H
 
 #cmakedefine HAVE_STRING_VIEW
 
@@ -18,7 +18,19 @@
 
 #cmakedefine HAVE_CONSTEXPR_IF
 
+#ifdef HAVE_CONSTEXPR_IF
+#define CONSTEXPR_IF constexpr if
+#else
+#define CONSTEXPR_IF /*disables code*/ if
+#endif
+
 #cmakedefine HAVE_FALLTHROUGH
+
+#ifdef HAVE_FALLTHROUGH
+#define FALLTHROUGH [[fallthrough]];
+#else
+#define FALLTHROUGH //fallthrough
+#endif
 
 #cmakedefine HAVE_UNUSED
 
@@ -26,10 +38,8 @@
 
 #cmakedefine HAVE_HYPOT3
 
-#ifdef HAVE_FALLTHROUGH
-#define FALLTHROUGH [[fallthrough]];
-#else
-#define FALLTHROUGH 
-#endif
+#cmakedefine ENABLE_64_BIT_INDEXING
 
-#endif
+#cmakedefine DISABLE_MULTITHREADING
+
+#endif //CONFIG_UTILITIES
