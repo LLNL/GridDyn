@@ -58,3 +58,4 @@ fmus
 /docs/latex
 /test/test_files/fmi_tests/test_fmus/Rectifier
 /test/test_files/zip_tests/rectifier/sources
+/test/test_files/fmi_export_tests/griddyn

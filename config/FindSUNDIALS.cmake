@@ -205,14 +205,17 @@ macro(SUNDIALS_FIND_COMPONENTS )
 	
 	
 	## set the final SUNDIALS_FOUND based on all previous components found (status)
-	foreach(componentToCheck ${SUNDIALS_FOUND_LIST})
+	foreach(sundialsComp ${SUNDIALS_FIND_COMPONENTS})
+		string(TOUPPER ${sundialsComp} sundialsCompUC)
 		set(SUNDIALS_FOUND ON)
 		if(SUNDIALS_VERBOSE)
-		MESSAGE(STATUS "final check: ${componentToCheck}")
+			MESSAGE(STATUS "final check: ${SUNDIALS_${sundialsCompUC}_FOUND}")
 		endif()
-		if(NOT ${componentToCheck})
+		if(NOT ${SUNDIALS_${sundialsCompUC}_FOUND}) 
+			if(${SUNDIALS_FIND_REQUIRED_${sundialsCompUC}}) #if the component was not found and is required
 			set(SUNDIALS_FOUND OFF)
-			break() ## one component not found is enought to failed
+				break() ## one required component not found is enough to fail
+			endif()
 		endif()
 	endforeach()
 endmacro()
