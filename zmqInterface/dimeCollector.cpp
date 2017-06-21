@@ -36,10 +36,9 @@ static int swidx;
 static int swv;
 static int nbus;
 static int nline;
-
+static std::vector<std::string> dev_list;
 static Json::Value Idxvgs;
-
-std::vector<double> idxreq;
+std::vector<std::string> devname;
 
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
@@ -412,42 +411,59 @@ change_code dimeCollector::trigger(coreTime time)
 
 #pragma endregion 
 
-#pragma region find request var
-	Json::Value reqvarheader;
-	Json::Value reqvar;
-	for (int ii = 0; ii < idxreq.size(); ++ii)
+
+
+	if (t == 0)
 	{
-		Json::Value inter;
-		inter.append(total[idxreq[ii]]);
-		reqvar.append(inter);
-
-		Json::Value interh;
-		interh.append(totalname[idxreq[ii]]);
-		reqvarheader.append(inter);
+	  dev_list = dime->get_devices();
 	}
-
-#pragma endregion
-
-
-	std::vector<std::string> dev_list =dime->get_devices();
-
 
 
 		for (int ii = 0; ii < dev_list.size(); ++ii)
 		{
 			if (t==0&&ii==0)
 			{
+				
 				dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
 				dime->send_varname(Varheader, "");
 			}
-			Sleep(1000); 
-			dime->sync();
-			if (t==0)
-			{
-				dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, dev_list[ii]);
-			}
-			dime->send_reqvar(t, reqvar, reqvarheader, dev_list[ii]);
-			//dime->send_var(t, Varvgs,dev_list[ii]);
+		    //	Sleep(1000); 
+
+#pragma region find request var
+
+
+				if (t == 0)
+				{
+					std::cout << "1" << std::endl;
+					devname.push_back(dime->sync());
+				}
+
+
+				Json::Value reqvarheader;
+				Json::Value reqvar;
+
+				for (int jj = 0; jj < idxreq[ii].size(); ++jj)
+				{
+					Json::Value inter;
+					inter.append(total[idxreq[ii][jj]]);
+					reqvar.append(inter);
+
+					Json::Value interh;
+					interh.append(totalname[idxreq[ii][jj]]);
+					reqvarheader.append(inter);
+				}
+				std::cout << "2" << std::endl;
+				if (t == 0)
+				{
+					dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, devname[ii]);
+				}
+
+				dime->send_reqvar(t, reqvar, reqvarheader, devname[ii]);
+
+				//dime->send_var(t, Varvgs,dev_list[ii]);
+
+#pragma endregion
+
 		}
 
 	return out;

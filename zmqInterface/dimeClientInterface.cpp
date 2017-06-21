@@ -14,6 +14,7 @@
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
 #include "zmqContextManager.h"
+#include <stdio.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -25,7 +26,7 @@
 #endif
 
 static std::vector<std::string> param;
-extern std::vector<double> idxreq;
+std::vector<std::vector<double>> idxreq;
 dimeClientInterface::dimeClientInterface(const std::string &dimeName, const std::string &dimeAddress):name(dimeName),address(dimeAddress)
 {
 	if (address.empty())
@@ -91,9 +92,11 @@ void dimeClientInterface::close()
 
 
 	
-void dimeClientInterface::sync()
+std::string dimeClientInterface::sync()
 {
-	char buffer[1000];
+	
+	std::string devname;
+	char buffer[100000];
 	Json::Value outgoing;
 	outgoing["command"] = "sync";
 	outgoing["name"] = "griddyn";
@@ -103,7 +106,7 @@ void dimeClientInterface::sync()
 
 	std::string out = fw.write(outgoing);
 	socket->send(out.c_str(), out.size());
-	auto sz = socket->recv(buffer, 1000, 0);
+	auto sz = socket->recv(buffer, 100000, 0);
 
 	if ((sz != 2) || (buffer[0] != 'O') || (buffer[1] != 'K'))
 	{
@@ -112,11 +115,9 @@ void dimeClientInterface::sync()
 		Json::Reader readreq;
 		readreq.parse(req, request);
 		
+		devname=request["func_args"][1].asString();
 
-		std::cout << buffer<< std::endl;
-		std::cout << request["func_args"][2]["param"][1]<< std::endl;
-		std::cout << request["func_args"][2]["vgsvaridx"]["data"] << std::endl;
-
+		std::vector<std::string>().swap(param);
 		for (int ii = 0; ii < request["func_args"][2]["param"].size(); ++ii)
 		{
 			param.push_back(request["func_args"][2]["param"][ii].asString());
@@ -138,7 +139,8 @@ void dimeClientInterface::sync()
 			memcpy(&idxreqinter[k], b, sizeof(b));
 			++k;
 		}
-		idxreq = idxreqinter;
+	
+		idxreq.push_back(idxreqinter);
 
 	}
 
@@ -147,7 +149,7 @@ void dimeClientInterface::sync()
 
 
 
-
+	return devname;
 }
 	
 

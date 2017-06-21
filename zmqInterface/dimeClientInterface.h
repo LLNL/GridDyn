@@ -25,7 +25,7 @@
 #include <string>
 #include <exception>
 #include <memory>
-
+extern std::vector<std::vector<double>> idxreq;
 class initFailure :public std::exception
 {
 public:
@@ -52,8 +52,8 @@ public:
 	/** close the connection*/
 	void close();
 	/** sync with the server*/
-	void sync();
-	void send_var(double t,Json::Value Varvgs, const std::string & recipient);
+	std::string sync();
+	//void send_var(double t,Json::Value Varvgs, const std::string & recipient);
 	void send_varname(Json::Value Varheader, const std::string & recipient);
 	void send_sysname(Json::Value Sysname, const std::string & recipient);
 	void send_sysparam(Json::Value Busd, Json::Value PQd, Json::Value PVd, Json::Value lined,int nbus,int nline, Json::Value Genroud, Json::Value Fsd, Json::Value Swd, const std::string & recipient);
