@@ -91,7 +91,7 @@ class with an additional capability of a totally custom function grabber call
 class customStateGrabber : public stateGrabber
 {
 public:
-	customStateGrabber() noexcept=default;
+	customStateGrabber() = default;
 	explicit customStateGrabber(gridComponent *comp);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const override;
   void setGrabberFunction (objStateGrabberFunction nfptr);
@@ -108,7 +108,7 @@ protected:
   std::function<double(double val)> opptr;		//!< function object
 
 public:
-	stateFunctionGrabber() noexcept = default;
+	stateFunctionGrabber() = default;
   stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
   virtual double grabData (const stateData &sD, const solverMode &sMode) override;
@@ -128,7 +128,7 @@ protected:
   std::function<double(double val1, double val2)> opptr;	//!< function pointer for a two argument function
 
 public:
-	stateOpGrabber() noexcept = default;
+	stateOpGrabber() = default;
   stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
   virtual double grabData (const stateData &sD, const solverMode &sMode) override;

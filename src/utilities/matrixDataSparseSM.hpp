@@ -183,17 +183,10 @@ class matrixDataSparseSMB : public matrixData<ValueT>
         return sz;
     }
 
-    void setColLimit (index_t lim) override
-    {
-        matrixData<ValueT>::colLim = lim;
-        block_computer.setMaxIndex (matrixData<ValueT>::rowLim, lim);
-    }
-
-    void setRowLimit (index_t lim) override
-    {
-        matrixData<ValueT>::rowLim = lim;
-        block_computer.setMaxIndex (lim, matrixData<ValueT>::colLim);
-    }
+	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) override
+	{
+		block_computer.setMaxIndex(newRowLimit, newColLimit);
+	}
 
     count_t capacity () const override
     {
@@ -638,16 +631,11 @@ class matrixDataSparseSMB<1, X, ValueT, M> : public matrixData<ValueT>
         dVec[1].reserve (reserveSize);
     }
     count_t size () const override { return static_cast<count_t> (dVec[0].size () + dVec[1].size ()); }
-    void setColLimit (index_t lim) override
-    {
-        block_computer.setMaxIndex (matrixData<ValueT>::rowLim, lim);
-        matrixData<ValueT>::colLim = lim;
-    }
-    void setRowLimit (index_t lim) override
-    {
-        block_computer.setMaxIndex (lim, matrixData<ValueT>::colLim);
-        matrixData<ValueT>::rowLim = lim;
-    }
+
+	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) override
+	{
+		block_computer.setMaxIndex(newRowLimit, newColLimit);
+	}
 
     count_t capacity () const override { return static_cast<count_t> (dVec[0].capacity () + dVec[1].capacity ()); }
     /**

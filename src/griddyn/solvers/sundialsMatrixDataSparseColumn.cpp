@@ -18,10 +18,9 @@ namespace griddyn
 {
 namespace solvers
 {
-sundialsMatrixDataSparseColumn::sundialsMatrixDataSparseColumn (SlsMat mat) : J (mat)
+sundialsMatrixDataSparseColumn::sundialsMatrixDataSparseColumn (SlsMat mat):matrixData<double>(static_cast<count_t> (mat->M), static_cast<count_t> (mat->N)), J (mat)
 {
-    rowLim = static_cast<count_t> (J->M);
-    colLim = static_cast<count_t> (J->N);
+
 }
 
 void sundialsMatrixDataSparseColumn::clear () { memset (J->data, 0, sizeof (realtype) * J->NNZ); }
@@ -45,17 +44,17 @@ void sundialsMatrixDataSparseColumn::assign (index_t row, index_t col, double nu
 void sundialsMatrixDataSparseColumn::setMatrix (SlsMat mat)
 {
     J = mat;
-    rowLim = static_cast<count_t> (J->M);
-    colLim = static_cast<count_t> (J->N);
+    setRowLimit(static_cast<count_t> (J->M));
+    setColLimit(static_cast<count_t> (J->N));
 }
 
-count_t sundialsMatrixDataSparseColumn::size () const { return static_cast<count_t> (J->indexptrs[colLim]); }
+count_t sundialsMatrixDataSparseColumn::size () const { return static_cast<count_t> (J->indexptrs[colLimit()]); }
 count_t sundialsMatrixDataSparseColumn::capacity () const { return static_cast<count_t> (J->NNZ); }
 matrixElement<double> sundialsMatrixDataSparseColumn::element (index_t N) const
 {
     matrixElement<double> ret;
     ret.row = static_cast<index_t> (J->indexvals[N]);
-    auto res = std::lower_bound (J->indexptrs, &(J->indexptrs[colLim]), static_cast<int> (N));
+    auto res = std::lower_bound (J->indexptrs, &(J->indexptrs[colLimit()]), static_cast<int> (N));
     ret.col = static_cast<index_t> (*res - 1);
     ret.data = J->data[N];
     return ret;
@@ -74,7 +73,7 @@ matrixElement<double> sundialsMatrixDataSparseColumn::next ()
     if (static_cast<int> (cur) >= J->indexptrs[ccol + 1])
     {
         ++ccol;
-        if (ccol > colLim)
+        if (ccol > colLimit())
         {
             --cur;
             --ccol;

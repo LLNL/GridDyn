@@ -15,7 +15,6 @@
 
 namespace griddyn
 {
-objInfo::objInfo() noexcept = default;
 objInfo::objInfo (const std::string &Istring, const coreObject *obj) { LoadInfo (Istring, obj); }
 void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
 {

@@ -17,7 +17,7 @@ namespace griddyn
 {
 namespace comms
 {
-commManager::commManager() noexcept = default;
+commManager::commManager() = default;
 commManager::commManager (const commManager &cm)
 {
     commName = cm.commName;
@@ -35,7 +35,7 @@ commManager::commManager (const commManager &cm)
     }
 }
 
-commManager::commManager (commManager &&cm) noexcept = default;
+commManager::commManager (commManager &&cm) = default;
 
 commManager &commManager::operator= (const commManager &cm)
 {
@@ -59,7 +59,7 @@ commManager &commManager::operator= (const commManager &cm)
     }
     return *this;
 }
-commManager &commManager::operator= (commManager &&cm) noexcept = default;
+commManager &commManager::operator= (commManager &&cm) = default;
 
 commManager::~commManager () = default;
 

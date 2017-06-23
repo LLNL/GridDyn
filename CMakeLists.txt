@@ -192,6 +192,10 @@ ENDIF(MPI_ENABLE)
 
 OPTION(KLU_ENABLE "Enable KLU support" ON)
 
+if(NOT DEFINED SuiteSparse_DIR)
+  set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to SuiteSparse/KLU")
+endif()
+
 SHOW_VARIABLE(SuiteSparse_DIR PATH
   "KLU library directory" "${SuiteSparse_DIR}")
 
@@ -200,7 +204,6 @@ IF(MSVC)
 set(SuiteSparse_USE_LAPACK_BLAS ON)
 ENDIF(MSVC)
 set(SuiteSparse_VERBOSE OFF)
-set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to suitesparse/KLU")
   find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
   if(SuiteSparse_FOUND) 
 	list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
@@ -235,6 +238,10 @@ endif(KLU_ENABLE)
 # Sundials
 # -------------------------------------------------------------
 
+if(NOT DEFINED SUNDIALS_DIR)
+  set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to SUNDIALS")
+endif()
+
 SHOW_VARIABLE(SUNDIALS_DIR PATH
   "SUNDIALS library directory" "${SUNDIALS_DIR}")
   
@@ -244,7 +251,6 @@ SHOW_VARIABLE(SUNDIALS_DIR PATH
   if (OPENMP_FOUND)
   list(APPEND SUNDIALS_REQUIRED nvecopenmp)
   endif(OPENMP_FOUND)
-  set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to sundials")
 find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
 
   if(SUNDIALS_FOUND) 

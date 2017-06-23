@@ -18,10 +18,9 @@ namespace griddyn
 {
 namespace solvers
 {
-sundialsMatrixDataSparseRow::sundialsMatrixDataSparseRow (SlsMat mat) : J (mat)
+sundialsMatrixDataSparseRow::sundialsMatrixDataSparseRow (SlsMat mat):matrixData<double>(static_cast<count_t> (mat->M), static_cast<count_t> (mat->N)),J (mat)
 {
-    rowLim = static_cast<count_t> (J->M);
-    colLim = static_cast<count_t> (J->N);
+
 }
 
 void sundialsMatrixDataSparseRow::clear () { memset (J->data, 0, sizeof (realtype) * J->NNZ); }
@@ -45,17 +44,17 @@ void sundialsMatrixDataSparseRow::assign (index_t row, index_t col, double num)
 void sundialsMatrixDataSparseRow::setMatrix (SlsMat mat)
 {
     J = mat;
-    rowLim = static_cast<count_t> (J->M);
-    colLim = static_cast<count_t> (J->N);
+    setRowLimit(static_cast<count_t> (J->M));
+    setColLimit(static_cast<count_t> (J->N));
 }
 
-count_t sundialsMatrixDataSparseRow::size () const { return static_cast<count_t> (J->indexptrs[rowLim]); }
+count_t sundialsMatrixDataSparseRow::size () const { return static_cast<count_t> (J->indexptrs[rowLimit()]); }
 count_t sundialsMatrixDataSparseRow::capacity () const { return static_cast<count_t> (J->NNZ); }
 matrixElement<double> sundialsMatrixDataSparseRow::element (index_t N) const
 {
     matrixElement<double> ret;
     ret.col = static_cast<index_t> (J->indexvals[N]);
-    auto res = std::lower_bound (J->indexptrs, &(J->indexptrs[rowLim]), static_cast<int> (N));
+    auto res = std::lower_bound (J->indexptrs, &(J->indexptrs[rowLimit()]), static_cast<int> (N));
     ret.row = static_cast<index_t> (*res - 1);
     ret.data = J->data[N];
     return ret;
@@ -74,7 +73,7 @@ matrixElement<double> sundialsMatrixDataSparseRow::next ()
     if (static_cast<int> (cur) >= J->indexptrs[crow + 1])
     {
         ++crow;
-        if (crow > rowLim)
+        if (crow > rowLimit())
         {
             --cur;
             --crow;
@@ -87,7 +86,7 @@ double sundialsMatrixDataSparseRow::at (index_t rowN, index_t colN) const
 {
     if (static_cast<int> (rowN) > J->M)
     {
-        return 0;
+        return 0.0;
     }
     int sti = J->indexptrs[rowN];
     int stp = J->indexptrs[rowN + 1];
@@ -98,7 +97,7 @@ double sundialsMatrixDataSparseRow::at (index_t rowN, index_t colN) const
             return J->data[kk];
         }
     }
-    return 0;
+    return 0.0;
 }
 }  // namespace solvers
 }  // namespace griddyn

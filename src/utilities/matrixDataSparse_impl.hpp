@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -20,8 +20,8 @@ void matrixDataSparse<ValueT>::assign (index_t row, index_t col, ValueT num)
 {
     assert (row != kNullLocation);
     assert (col != kNullLocation);
-    assert (row < matrixData<ValueT>::rowLim);
-    assert (col < matrixData<ValueT>::colLim);
+    assert (row < matrixData<ValueT>::rowLimit());
+    assert (col < matrixData<ValueT>::colLimit());
     // assert (std::isfinite (num));
     assert (static_cast<int> (row) >= 0);
     assert (static_cast<int> (col) >= 0);
@@ -184,8 +184,7 @@ template <typename ValueT>
 void matrixDataSparse<ValueT>::filter (index_t rowTest)
 {
     auto rem = std::remove_if (data_.begin (), data_.end (),
-                               [rowTest, clim = matrixData<ValueT>::colLim,
-                                rlim = matrixData<ValueT>::rowLim](const matrixElement<ValueT> &el) {
+                               [rowTest, clim = matrixData<ValueT>::colLimit (), rlim = matrixData<ValueT>::rowLimit ()](const matrixElement<ValueT> &el) {
                                    return ((el.row == rowTest) || (el.row >= rlim) || (el.col >= clim));
                                });
 
@@ -193,20 +192,20 @@ void matrixDataSparse<ValueT>::filter (index_t rowTest)
 }
 
 template <typename ValueT>
-void matrixDataSparse<ValueT>::cascade (matrixDataSparse<ValueT> &a2, index_t element)
+void matrixDataSparse<ValueT>::cascade (matrixDataSparse<ValueT> &a2, index_t elementIndex)
 {
     auto term = data_.size ();
     size_t nn = 0;
     ValueT keyval = ValueT{0};
     while (nn != term)
     {
-        if (data_[nn].col == element)
+        if (data_[nn].col == elementIndex)
         {
             size_t mm = 0;
             keyval = data_[nn].data;
             for (size_t kk = 0; kk < a2.data_.size (); kk++)
             {
-                if (a2.data_[kk].row == element)
+                if (a2.data_[kk].row == elementIndex)
                 {
                     if (mm == 0)
                     {

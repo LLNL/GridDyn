@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -138,20 +138,38 @@ class matrixData
      *  @return the max col value
      */
     count_t colLimit () const { return colLim; };
+private:
+	/**
+	*  @brief private function for derived classes to notify of a limitUpdate
+	*  @param[rowLimit] the new rowLimit
+	* @param[colLimit] the new colLimit
+	*/
+	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) { (void)(newRowLimit), void(newColLimit); }
+	/**
+	*  @brief get the number of points
+	*  @return the number of points
+	*/
+public:
     /**
      *  @brief set the maximum row count
      *  @param[in] limit the new row limit
      */
-    virtual void setRowLimit (index_t limit) { rowLim = limit; };
+    void setRowLimit (index_t limit)
+    {
+        rowLim = limit;
+        limitUpdate (rowLim, colLim);
+    };
     /**
      *  @brief set the maximum number of columns
      *  @param[in] limit the new column limit
      */
-    virtual void setColLimit (index_t limit) { colLim = limit; };
-    /**
-     *  @brief get the number of points
-     *  @return the number of points
-     */
+    void setColLimit (index_t limit)
+    {
+        colLim = limit;
+        limitUpdate (rowLim, colLim);
+    };
+
+ 
     virtual count_t size () const = 0;
     /**
      *  @brief get the current capacity
@@ -168,7 +186,7 @@ class matrixData
      *  @brief get the value at a specific location
      *  @param[in] rowN  the row number
      *  @param[in] colN  the column number
-    */
+     */
     virtual value_t at (index_t rowN, index_t colN) const = 0;
 
     /**
@@ -196,7 +214,7 @@ class matrixData
      *  return invalid row and column index;
      *
      *  @return a triple with the row/col/val of the first element
-    */
+     */
     virtual matrixElement<value_t> next () { return element (cur++); }
     /**
      *  @brief check if the data sequence is at its end
@@ -219,12 +237,12 @@ class matrixData
     }
 
     /**
-    *  @brief merge 2 matrixData structures together
-    *
-    *  @param[in] a2 the matrixData to merge in
-    *  @param[in] scale a double scaler for each of the elements in
-    *  the second matrix;
-    */
+     *  @brief merge 2 matrixData structures together
+     *
+     *  @param[in] a2 the matrixData to merge in
+     *  @param[in] scale a double scaler for each of the elements in
+     *  the second matrix;
+     */
     virtual void merge (matrixData<value_t> &a2, value_t scale)
     {
         count_t count = a2.size ();
@@ -255,9 +273,10 @@ class matrixData
         }
     }
 
-  protected:
+  private:
     index_t rowLim;  //!< the maximum row index
     index_t colLim;  //!< the maximum column index
+  protected:
     index_t cur = 0;  //!< the current element location for a next operation
 
   private:

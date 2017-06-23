@@ -49,8 +49,8 @@ class matrixDataContainer : public matrixData<ValueT>
     virtual void setArray (matrixData<ValueT> *newAd)
     {
         md = newAd;
-        matrixData<ValueT>::colLim = md->colLimit ();
-        matrixData<ValueT>::rowLim = md->rowLimit ();
+        matrixData<ValueT>::setColLimit( md->colLimit ());
+        matrixData<ValueT>::setRowLimit( md->rowLimit ());
     }
     /** set the matrixData object to translate to
     @param[in] newAd  the new matrixData object

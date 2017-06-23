@@ -34,26 +34,35 @@ class matrixDataCompact : public matrixData<ValueT>
     */
     matrixDataCompact () : matrixData<ValueT> (R, C){};
 
-    void clear () override { dVec.fill (0); };
-    void assign (index_t row, index_t col, ValueT num) override
+    virtual void clear () override { dVec.fill (0); };
+    virtual void assign (index_t row, index_t col, ValueT num) override
     {
         // in column major order
         dVec[col * R + row] += num;
     };
 
-    count_t size () const override { return R * C; };
-    count_t capacity () const override { return R * C; };
-    void setRowLimit (index_t /*limit*/) override final{};
-    void setColLimit (index_t /*limit*/) override final {}
-    matrixElement<ValueT> element (index_t N) const override { return {N % R, N / R, dVec[N]}; }
-    void start () override
+    virtual count_t size () const override { return R * C; };
+    virtual count_t capacity () const override { return R * C; };
+	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) final override
+	{//the row and col limits cannot change
+		if (newRowLimit != R)
+		{
+			matrixData<ValueT>::setRowLimit(R);
+		}
+		if (newColLimit != C)
+		{
+			matrixData<ValueT>::setColLimit(R);
+		}
+	}
+    virtual matrixElement<ValueT> element (index_t N) const override { return {N % R, N / R, dVec[N]}; }
+    virtual void start () override
     {
         matrixData<ValueT>::cur = 0;
         Rctr = 0;
         Cctr = 0;
     }
 
-    matrixElement<ValueT> next () override
+    virtual matrixElement<ValueT> next () override
     {
         matrixElement<ValueT> tp{Rctr, Cctr, dVec[matrixData<ValueT>::cur]};
         ++matrixData<ValueT>::cur;
@@ -66,7 +75,7 @@ class matrixDataCompact : public matrixData<ValueT>
         return tp;
     }
 
-    ValueT at (index_t rowN, index_t colN) const override { return dVec[colN * R + rowN]; };
+    virtual ValueT at (index_t rowN, index_t colN) const override { return dVec[colN * R + rowN]; };
     auto begin () { return matrixIteratorCompact (this, 0); }
     auto end () { return matrixIteratorCompact (this, R * C); }
 

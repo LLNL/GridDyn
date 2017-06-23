@@ -75,18 +75,12 @@ class matrixDataOrdered : public matrixData<ValueT>
         }
     }
 
-    virtual void setRowLimit (index_t limit) override
-    {
-        matrixData<ValueT>::rowLim = limit;
-        primary_max = keyOrder<index_t, M>::primary (matrixData<ValueT>::rowLim, matrixData<ValueT>::colLim);
-        dVec.resize (primary_max);
-    }
-    virtual void setColLimit (index_t limit) override
-    {
-        matrixData<ValueT>::colLim = limit;
-        primary_max = keyOrder<index_t, M>::primary (matrixData<ValueT>::rowLim, matrixData<ValueT>::colLim);
-        dVec.resize (primary_max);
-    }
+	virtual void updateLimits(index_t newRowLimit, index_t newColLimit)
+	{
+		primary_max = keyOrder<index_t, M>::primary(newRowLimit, newColLimit);
+		dVec.resize(primary_max);
+	}
+    
     virtual void reserve (count_t reserveSize) override
     {
         // dVec can't have size 0 since that case is taken by a different template specialization

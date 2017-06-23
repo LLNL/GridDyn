@@ -47,9 +47,9 @@ class matrixDataTranslate : public matrixDataContainer<ValueT>
     inline bool isValidRow (index_t row) const
     {
 #ifdef UNSIGNED_INDEXING
-        return ((row < CT) && (Trow[row] < matrixData<ValueT>::rowLim));
+        return ((row < CT) && (Trow[row] < matrixData<ValueT>::rowLimit()));
 #else
-        return ((row < CT) && (row >= 0) && (Trow[row] < matrixData<ValueT>::rowLim));
+        return ((row < CT) && (row >= 0) && (Trow[row] < matrixData<ValueT>::rowLimit()));
 #endif
     }
     void assign (index_t row, index_t col, ValueT num) override

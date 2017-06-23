@@ -527,7 +527,7 @@ source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIRS})
 
 #create a griddyn_config.h file for program options
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h)

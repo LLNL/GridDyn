@@ -417,7 +417,7 @@ void helicsCoordinator::updateSubscription(int32_t index, const std::string &sub
 
 }
 
-void helicsCoordinator::addHelper(std::shared_ptr<helperObject> ho)
+void helicsCoordinator::addHelper(std::shared_ptr<helperObject> /*ho*/)
 {
 	//std::lock_guard<std::mutex> hLock(helperProtector);
 	//helpers.push_back(std::move(ho));
@@ -528,6 +528,8 @@ void helicsCoordinator::sendDefault(const SubInfo &sub)
 		break;
 	case helicsValueType::helicsInteger:
 		vFed_->setDefaultValue(sub.id, getDefVal<int64_t>(sub.defaults));
+		break;
+	default:
 		break;
 	}
 }

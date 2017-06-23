@@ -172,6 +172,14 @@ int main (int argc, char *argv[])
         runner->Run ();
 #endif
     }
+	case execMode_t::buildgdz:
+		gds->log(nullptr, print_level::error,
+			std::string("GDZ builder not implemented yet"));
+		return (-4);
+	default:
+		gds->log(nullptr, print_level::error,
+			std::string("unknown execution mode"));
+		return (-4);
     break;
     };
 

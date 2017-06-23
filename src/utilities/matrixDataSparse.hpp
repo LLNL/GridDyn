@@ -211,9 +211,9 @@ class matrixDataSparse : public matrixData<ValueT>
     void merge (matrixDataSparse<ValueT> &a2) { data_.insert (data_.end (), a2.data_.begin (), a2.data_.end ()); }
     void transpose ()
     {
-        for (auto &element : data_)
+        for (auto &dataElement : data_)
         {
-            std::swap (element.col, element.row);
+            std::swap (dataElement.col, dataElement.row);
             //	int t1 = std::get<adCol>(data_[kk]);
             //	std::get<adCol>(data_[kk]) = std::get<adRow>(data_[kk]);
             //	std::get<adRow>(data_[kk]) = t1;
@@ -221,10 +221,10 @@ class matrixDataSparse : public matrixData<ValueT>
     }
     void diagMultiply (std::vector<ValueT> diag)
     {
-        for (size_t kk = 0; kk < data_.size (); kk++)
-        {
-            data_[kk].data *= diag[data_[kk].col];
-        }
+		for (auto &dataElement : data_)
+		{
+			dataElement.data *= diag[dataElement.col];
+		}
     }
 
     std::vector<ValueT> vectorMult (std::vector<ValueT> V);

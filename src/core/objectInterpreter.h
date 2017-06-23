@@ -30,7 +30,7 @@ public:
   gridUnits::units_t m_unitType = gridUnits::defUnit; //!< the units corresponding to the reference
 
   /** @brief default constructor*/
-  objInfo () noexcept;
+  objInfo () = default;
   /** @brief constructor with the string to interpret and a base object to begin the search process for
   @param[in] Istring the input string containing the object and field reference
   @param[in] obj the object used as the basis for the search if needed

@@ -33,7 +33,7 @@
 ##   * KINSOL
 ##   * ARKODE
 ##	 * NVECOPENMP
-##
+##   * NVECSERIAL
 ##
 ## How to use this file : 
 ##   (opt) set(SUNDIALS_VERBOSE ON)
@@ -101,10 +101,13 @@ macro(SUNDIALS_FIND_COMPONENTS )
 		string(TOLOWER ${sundialsComp} sundialsCompLC)
 		
 		## try to find include dir (looking for very important header file)
+		if(NOT ${sundialsCompUC} STREQUAL "NVECOPENMP" AND NOT ${sundialsCompUC} STREQUAL "NVECSERIAL")
 		find_path(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR	
 			NAMES 			${sundialsComp}.h ${sundialsCompLC}.h ${sundialsCompUC}.h 
 						sundials_${sundialsComp}.h sundials_${sundialsCompLC}.h SUNDIALS_${sundialsCompUC}.h 
-			PATHS		${SUNDIALS_DIR}/include
+							${sundialsComp}/${sundialsComp}.h ${sundialsCompLC}/${sundialsCompLC}.h ${sundialsCompUC}/${sundialsCompUC}.h 
+							sundials/sundials_${sundialsComp}.h sundials/sundials_${sundialsCompLC}.h sundials/SUNDIALS_${sundialsCompUC}.h
+				HINTS		${SUNDIALS_DIR}/include
 						${SUNDIALS_DIR}/include/sundials
 						${SUNDIALS_DIR}/sundials/include
 						${SUNDIALS_DIR}/include/${sundialsComp}
@@ -112,7 +115,35 @@ macro(SUNDIALS_FIND_COMPONENTS )
 						${${sundialsCompUC}_DIR}/include
 						${${sundialsCompUC}_DIR}/${sundialsComp}/include
 						${${sundialsCompUC}_DIR}
+				PATHS		/opt/local/include
+							/usr/include
+							/usr/local/include
+							/usr/include/sundials
+							/usr/local/include/sundials
+							/usr/include/${sundialsComp}
+							/usr/local/include/${sundialsComp}
 		)
+		else()
+			find_path(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR	
+				NAMES		nvector_serial.h nvector_openmp.h
+							nvector/nvector_serial.h nvector/nvector_openmp.h
+				HINTS		${SUNDIALS_DIR}/include
+							${SUNDIALS_DIR}/include/sundials
+							${SUNDIALS_DIR}/sundials/include
+							${SUNDIALS_DIR}/include/${sundialsComp}
+							${SUNDIALS_DIR}/${sundialsComp}/include
+							${${sundialsCompUC}_DIR}/include
+							${${sundialsCompUC}_DIR}/${sundialsComp}/include
+							${${sundialsCompUC}_DIR}
+				PATHS		/opt/local/include
+							/usr/include
+							/usr/local/include
+							/usr/include/sundials
+							/usr/local/include/sundials
+							/usr/include/${sundialsComp}
+							/usr/local/include/${sundialsComp}
+			)
+		endif()
 		## check if found
 		if(NOT SUNDIALS_${sundialsCompUC}_INCLUDE_DIR)
 			if (SUNDIALS_VERBOSE)
@@ -127,11 +158,14 @@ macro(SUNDIALS_FIND_COMPONENTS )
 			NAMES 			lib${sundialsComp} 	lib${sundialsCompLC} lib${sundialsCompUC}
 							${sundialsComp} 		${sundialsCompLC} 	${sundialsCompUC}
 							sundials_${sundialsComp} 		sundials_${sundialsCompLC} 	SUNDIALS_${sundialsCompUC}
-			PATHS 			${SUNDIALS_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+			HINTS 			${SUNDIALS_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${SUNDIALS_DIR}/lib
 							${${sundialsCompUC}_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${${sundialsCompUC}_DIR}/lib
 							${${sundialsCompUC}_DIR}
+			PATHS			/opt/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+							/usr/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+							/usr/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							
 			PATH_SUFFIXES	Release
 		)
@@ -139,11 +173,14 @@ macro(SUNDIALS_FIND_COMPONENTS )
 			NAMES 			${sundialsComp}d		${sundialsCompLC}d 		${sundialsCompUC}d
 							lib${sundialsComp}d 	lib${sundialsCompLC}d 	lib${sundialsCompUC}d
 							sundials_${sundialsComp}d		sundials_${sundialsCompLC}d 		SUNDIALS_${sundialsCompUC}d
-			PATHS 			${SUNDIALS_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+			HINTS 			${SUNDIALS_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${SUNDIALS_DIR}/lib
 							${${sundialsCompUC}_DIR}/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 							${${sundialsCompUC}_DIR}/lib
 							${${sundialsCompUC}_DIR}
+			PATHS			/opt/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+							/usr/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
+							/usr/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 			PATH_SUFFIXES	Debug
 		)
 		
