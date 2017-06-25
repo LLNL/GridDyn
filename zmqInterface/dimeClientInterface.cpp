@@ -16,6 +16,8 @@
 #include "zmqContextManager.h"
 #include <stdio.h>
 
+
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
@@ -96,54 +98,65 @@ std::string dimeClientInterface::sync()
 {
 	
 	std::string devname;
-	char buffer[100000];
-	Json::Value outgoing;
-	outgoing["command"] = "sync";
-	outgoing["name"] = "griddyn";
-	outgoing["args"] = ' ';
-
-	Json::FastWriter fw;
-
-	std::string out = fw.write(outgoing);
-	socket->send(out.c_str(), out.size());
-	auto sz = socket->recv(buffer, 100000, 0);
-
-	if ((sz != 2) || (buffer[0] != 'O') || (buffer[1] != 'K'))
+	int flg=1;
+	while (flg)
 	{
-		std::string req(buffer);
-		Json::Value request;
-		Json::Reader readreq;
-		readreq.parse(req, request);
 		
-		devname=request["func_args"][1].asString();
+		char buffer[100000];
+		Json::Value outgoing;
+		outgoing["command"] = "sync";
+		outgoing["name"] = "griddyn";
+		outgoing["args"] = ' ';
 
-		std::vector<std::string>().swap(param);
-		for (int ii = 0; ii < request["func_args"][2]["param"].size(); ++ii)
+		Json::FastWriter fw;
+
+		std::string out = fw.write(outgoing);
+		socket->send(out.c_str(), out.size());
+		auto sz = socket->recv(buffer, 100000, 0);
+		if ((sz != 2) || (buffer[0] != 'O') || (buffer[1] != 'K'))
 		{
-			param.push_back(request["func_args"][2]["param"][ii].asString());
+			std::string req(buffer);
+			Json::Value request;
+			Json::Reader readreq;
+			readreq.parse(req, request);
+
+			devname = request["func_args"][1].asString();
+
+			std::vector<std::string>().swap(param);
+			for (int ii = 0; ii < request["func_args"][2]["param"].size(); ++ii)
+			{
+				param.push_back(request["func_args"][2]["param"][ii].asString());
+			}
+			std::vector<double> idxreqinter;
+			std::string vgsidx = request["func_args"][2]["vgsvaridx"]["data"].asString();
+			std::string &v = vgsidx;
+			std::vector<uint8_t> xx = base64_decode(v);
+			const int s = xx.size();
+
+			for (int ii = 0; ii < xx.size() / 8; ++ii)
+				idxreqinter.push_back(0);
+			int size = xx.size() * 8;
+			int k = 0;
+
+			for (int ii = 0; ii < xx.size() / 8; ++ii)
+			{
+				uint8_t *b = &xx[ii * 8];
+				memcpy(&idxreqinter[k], b, sizeof(b));
+				++k;
+			}
+			
+			idxreq.push_back(idxreqinter);
+			flg = 0;
+			std::cout << "request for" << devname << " is received" << std::endl;
 		}
-		std::vector<double> idxreqinter;
-		std::string vgsidx = request["func_args"][2]["vgsvaridx"]["data"].asString();
-		std::string &v = vgsidx;
-        std::vector<uint8_t> xx = base64_decode(v);
-		const int s = xx.size();
-
-		for (int ii = 0; ii < xx.size() / 8; ++ii)
-			idxreqinter.push_back(0);
-		int size = xx.size() * 8;
-		int k = 0;
-
-		for (int ii = 0; ii < xx.size() / 8; ++ii)
+		if (flg == 1)
 		{
-			uint8_t *b = &xx[ii * 8];
-			memcpy(&idxreqinter[k], b, sizeof(b));
-			++k;
+			std::cout << "no clients sending request to griddyn" << std::endl;
+			std::cout << "sleep 2 sceconds then keep receiving" << std::endl;
+			Sleep(2000);
 		}
-	
-		idxreq.push_back(idxreqinter);
 
 	}
-
 
 	
 
@@ -157,6 +170,7 @@ std::string dimeClientInterface::sync()
 
 std::vector<std::string> dimeClientInterface::get_devices()
 {
+re0:
 	std::vector<std::string> dev_list;
 	char buffer[100];
 	Json::Value outgoing;
@@ -231,8 +245,13 @@ std::vector<std::string> dimeClientInterface::get_devices()
 		}
 		
 	}
-
-
+	if (dev_list.empty())
+	{
+		std::cout << "no client is connected" << std::endl;
+		std::cout << "sleep 2 second then keep calling" << std::endl;
+		Sleep(2000);
+		goto re0;	
+	}
 
 	return dev_list;
 

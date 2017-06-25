@@ -56,6 +56,7 @@ dimeCollector::~dimeCollector()
 	{
 		dime->close();
 	}
+	std::cout << "all requested vars at all time are sended" << std::endl;
 }
 
 std::shared_ptr<collector> dimeCollector::clone(std::shared_ptr<collector> gr) const
@@ -426,6 +427,7 @@ change_code dimeCollector::trigger(coreTime time)
 				
 				dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
 				dime->send_varname(Varheader, "");
+				std::cout << "boradcast is finished" << std::endl;
 			}
 		    //	Sleep(1000); 
 
@@ -434,7 +436,6 @@ change_code dimeCollector::trigger(coreTime time)
 
 				if (t == 0)
 				{
-					std::cout << "1" << std::endl;
 					devname.push_back(dime->sync());
 				}
 
@@ -452,14 +453,15 @@ change_code dimeCollector::trigger(coreTime time)
 					interh.append(totalname[idxreq[ii][jj]]);
 					reqvarheader.append(inter);
 				}
-				std::cout << "2" << std::endl;
 				if (t == 0)
 				{
 					dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, devname[ii]);
+					std::cout << "requested param is sended" << std::endl;
+					std::cout << "requested var is started to be sended" << std::endl;
 				}
 
 				dime->send_reqvar(t, reqvar, reqvarheader, devname[ii]);
-
+				
 				//dime->send_var(t, Varvgs,dev_list[ii]);
 
 #pragma endregion
@@ -919,3 +921,4 @@ const std::string &dimeCollector::getSinkName() const
 {
 	return server;
 }
+
