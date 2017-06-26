@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
@@ -12,27 +11,18 @@
 */
 
 
+// test case for coreObject object
 
-
-
-
-//test case for coreObject object
-
-#include "testHelper.h"
-#include "gridDynDefinitions.h"
+#include "gridDynDefinitions.hpp"
 #include "gridParameter.h"
-#include <boost/test/unit_test.hpp>
+#include "testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/unit_test.hpp>
 
 
-static const std::string xmlTestDirectory(GRIDDYN_TEST_DIRECTORY "/xml_tests/");
+static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 
-BOOST_AUTO_TEST_SUITE(gridParameter_tests)
+BOOST_AUTO_TEST_SUITE (gridParameter_tests)
 
-BOOST_AUTO_TEST_CASE(gridParameter_test1)
-{
-	
-
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE (gridParameter_test1) {}
+BOOST_AUTO_TEST_SUITE_END ()

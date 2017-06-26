@@ -14,7 +14,6 @@ function mpc = case2383wp
 %   permission of, Roman Korab <roman.korab@polsl.pl>.
 
 %   MATPOWER
-%   $Id: case2383wp.m 2408 2014-10-22 20:41:33Z ray $
 
 %% MATPOWER Case Format : Version 2
 mpc.version = '2';

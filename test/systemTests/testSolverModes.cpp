@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
@@ -11,22 +10,20 @@
 * LLNS Copyright End
 */
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-#include "gridDyn.h"
-#include "gridDynFileInput.h"
-#include "testHelper.h"
-#include "solvers/solverInterface.h"
+#include "griddyn.h"
+#include "fileInput.h"
 #include "simulation/diagnostics.h"
+#include "solvers/solverInterface.h"
+#include "testHelper.h"
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/unit_test.hpp>
 #include <cstdio>
 #include <iostream>
 
-
-static std::string solverMode_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/solvermode_tests/");
+using namespace griddyn;
+static std::string solverMode_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/solvermode_tests/");
 
 BOOST_FIXTURE_TEST_SUITE (solverMode_tests, gridDynSimulationTestFixture)
 
 
-
-
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END ()

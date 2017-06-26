@@ -1,0 +1,136 @@
+/*
+* LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
+
+#ifndef UTILITY_RANDOM_H_
+#define UTILITY_RANDOM_H_
+
+#include <memory>
+#include <random>
+/** abstract class defining a random distribution*/
+
+namespace utilities
+{
+class distributionObject
+{
+public:
+	explicit distributionObject() {};
+	virtual ~distributionObject() = default;
+	virtual double operator() () = 0;
+	virtual void updateParameters(double param1) = 0;
+	virtual void updateParameters(double param1, double param2) = 0;
+};
+
+/** class defining random number generation*/
+class gridRandom
+{
+private:
+	static std::mt19937 s_gen;  //!< generator  //May need to make a generator per thread
+	static std::uniform_real_distribution<double> s_udist;
+	static std::exponential_distribution<double> s_expdist;
+	static std::normal_distribution<double> s_normdist;
+	static std::lognormal_distribution<double> s_lnormdist;
+	static std::extreme_value_distribution<double> s_evdist;
+	static std::gamma_distribution<double> s_gammadist;
+	static std::uniform_int_distribution<int> s_uintdist;
+	static unsigned int actual_seed;
+	static bool seeded;
+
+public:
+	static void setSeed(unsigned int seed);
+	static void setSeed();
+	static unsigned int getSeed();
+	enum class dist_type_t
+	{
+		constant,
+		uniform,
+		exponential,
+		normal,
+		lognormal,
+		extreme_value,
+		gamma,
+		uniform_int,
+	};
+	explicit gridRandom(dist_type_t dist = dist_type_t::normal, double param1 = 0.0, double param2 = 1.0);
+	explicit gridRandom(const std::string &dist_name, double param1 = 0.0, double param2 = 1.0);
+
+	void setDistribution(dist_type_t dist);
+	dist_type_t getDistribution() const { return m_dist; }
+	double operator() ();
+	double generate();
+	void setParameters(double param1, double param2 = 1.0);
+	static double randNumber(dist_type_t dist);
+	static double randNumber(dist_type_t dist, double param1, double param2);
+
+	std::pair<double, double> getPair();
+	std::vector<double> getNewValues(size_t count);
+	void getNewValues(std::vector<double> &rvec, size_t count);
+
+	static decltype (s_gen) &getEngine() { return s_gen; };
+
+private:
+	std::unique_ptr<distributionObject> dobj;
+	dist_type_t m_dist;
+	double param1_ = 0.0;
+	double param2_ = 1.0;
+};
+
+/** class describing a random distribution which takes two parameters
+*/
+template <class DIST>
+class randomDistributionObject2 : public distributionObject
+{
+private:
+	DIST dist; //!< the actual distribution object
+
+public:
+	randomDistributionObject2() {}
+	explicit randomDistributionObject2(double param1) : dist(param1) {}
+	randomDistributionObject2(double param1, double param2) : dist(param1, param2) {}
+	virtual double operator() () override { return dist(gridRandom::getEngine()); }
+	virtual void updateParameters(double param1) override { dist = DIST(param1); }
+	virtual void updateParameters(double param1, double param2) override { dist = DIST(param1, param2); }
+};
+
+/** template class describing a random distribution which takes 1 parameter*/
+template <class DIST>
+class randomDistributionObject1 : public distributionObject
+{
+private:
+	DIST dist; //!< the actual distribution object
+
+public:
+	randomDistributionObject1() {}
+	explicit randomDistributionObject1(double param1) : dist(param1) {}
+	virtual double operator() () override { return dist(gridRandom::getEngine()); }
+	virtual void updateParameters(double param1) override { dist = DIST(param1); }
+	virtual void updateParameters(double param1, double /*unused*/) override { dist = DIST(param1); }
+};
+
+/** a template specialization for a making a constant look like a random distribution*/
+template <>
+class randomDistributionObject1<void> : public distributionObject
+{
+private:
+	double param1_ = 0.0;
+
+public:
+	randomDistributionObject1() {}
+	explicit randomDistributionObject1(double param1) : param1_(param1) {}
+	virtual double operator() () override { return param1_; }
+	virtual void updateParameters(double param1) override { param1_ = param1; }
+	virtual void updateParameters(double param1, double /*unused*/) override { param1_ = param1; }
+};
+
+gridRandom::dist_type_t getDist(const std::string &dist_name);
+
+}//namespace utilities
+#endif

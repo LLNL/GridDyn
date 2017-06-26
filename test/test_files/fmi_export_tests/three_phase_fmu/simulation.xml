@@ -5,7 +5,7 @@
 
 <load index=0 retype="3phase" bus="BUS#11">
 <basevoltage units="V">4200</basevoltage>
-<fmiparam field="multiplier"/>
+<fmiparam field="multiplier as multiplier"/>
 <fmiinput field="imaga(A) as Bus11_IA"/>
 <fmiinput field="imagb(A) as Bus11_IB"/>
 <fmiinput field="imagc(A) as Bus11_IC"/>

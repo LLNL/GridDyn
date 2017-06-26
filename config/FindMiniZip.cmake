@@ -40,10 +40,10 @@ if (NOT MINIZIP_FOUND)
 
   ##_____________________________________________________________________________
   ## Check for the header files
-
+  if (NOT NO_SYSTEM_MINIZIP)
   find_path (MINIZIP_INCLUDES
     NAMES minizip/minizip.h
-    HINTS ${MINIZIP_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
+    HINTS ${MINIZIP_ROOT_DIR}
     PATH_SUFFIXES include
     )
 
@@ -52,9 +52,29 @@ if (NOT MINIZIP_FOUND)
 
   find_library (MINIZIP_LIBRARIES
     NAMES libminizip minizip
-    HINTS ${MINIZIP_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
+    HINTS ${MINIZIP_ROOT_DIR}
     PATH_SUFFIXES lib
     )
+	else (NOT NO_SYSTEM_MINIZIP)
+	find_path (MINIZIP_INCLUDES
+    NAMES minizip/minizip.h
+    HINTS ${MINIZIP_ROOT_DIR}
+    PATH_SUFFIXES include
+	NO_SYSTEM_ENVIRONMENT_PATH
+	NO_CMAKE_SYSTEM_PATH
+    )
+
+  ##_____________________________________________________________________________
+  ## Check for the library
+
+  find_library (MINIZIP_LIBRARIES
+    NAMES libminizip minizip
+    HINTS ${MINIZIP_ROOT_DIR}
+    PATH_SUFFIXES lib
+	NO_SYSTEM_ENVIRONMENT_PATH
+	NO_CMAKE_SYSTEM_PATH
+    )
+	endif(NOT NO_SYSTEM_MINIZIP)
 
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found

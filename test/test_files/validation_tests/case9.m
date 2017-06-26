@@ -5,7 +5,6 @@ function mpc = case9
 %   Based on data from Joe H. Chow's book, p. 70.
 
 %   MATPOWER
-%   $Id: case9.m 2408 2014-10-22 20:41:33Z ray $
 
 %% MATPOWER Case Format : Version 2
 mpc.version = '2';

@@ -12,7 +12,7 @@
 
 #check for clang 3.4 and the fact that CMAKE_CXX_STANDARD doesn't work yet for that compiler
 
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   set(HAVE_VARIABLE_TEMPLATES ON)
   set(HAVE_EXP_STRING_VIEW ON)
   set(HAVE_EXP_OPTIONAL ON)
@@ -33,7 +33,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 	set(HAVE_UNUSED ON)
 	message(STATUS "gt 4.0 ${CMAKE_CXX_COMPILER_VERSION}")
   endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(HAVE_EXP_STRING_VIEW ON)
   set(HAVE_EXP_OPTIONAL ON)
   if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0)
@@ -49,12 +49,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(HAVE_HYPOT3 ON)
 	set(VERSION_OPTION -std=c++1z)
   endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
 #intel doesn't really have anything beyond the minimum
   if (CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 17.0)
   
   endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(STATUS "win_comp_version ${CMAKE_CXX_COMPILER_VERSION}")
   set(HAVE_VARIABLE_TEMPLATES ON)
 endif()

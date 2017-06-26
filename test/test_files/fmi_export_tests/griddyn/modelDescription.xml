@@ -1,52 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!-- See sections in
-     https://svn.modelica.org/fmi/branches/public/specifications/v2.0/FMI_for_ModelExchange_and_CoSimulation_v2.0.pdf
-     for details of XML elements -->
-
-<!-- TODO Philip: GUID needs to be associated with GridDyn (sec 2.2.4) -->
-<fmiModelDescription
-  fmiVersion="2.0"
-  modelName="GridDyn.simple"
-  guid="{82072fd0-2f55-4c42-b84c-e47ee14091d0}"
-  numberOfEventIndicators="0"
-  description="simple first cut at GridDyn FMI"
-  version="1.0">
-
-<!-- TODO Philip: determine if FMU supports variable communication step
-     sizes (i.e. step size for fmi2DoStep() doesn't need to be constant). -->
-<CoSimulation
-  modelIdentifier="fmiGridDynSharedLib"
-  canHandleVariableCommunicationStepSize="true"/>
-
-<!-- TODO Philip: verify these are the appropriate log categories (sec 2.2.4) Not USing logs at present-->
-<LogCategories>
-  <Category name="logAll"/>
-  <Category name="logError"/>
-  <Category name="logFmiCall"/>
-  <Category name="logEvent"/>
-</LogCategories>
-
-<ModelVariables>
-  <!-- Outputs from GridDyn to CymDIST -->
-  <!-- TODO Philip: need to set valueReference ("Identifier for variable value
-       in FMI2 function calls", see section 2.2.7), and initial guess for
-       voltage magnitudes and angle outputs. Not sure if start values are
-       strictly required for outputs like these. -->
-  <ScalarVariable name="power" valueReference="0"
-                  description="load power consumed"
-                  causality="input" variability="continuous">
-  </ScalarVariable>
-  <ScalarVariable name="load" valueReference="1"
-                  description="measurement of power at a bus"
-                  causality="output" variability="continuous">
-  </ScalarVariable>
- 
-</ModelVariables>
-
-<!-- TODO Philip: fill in ModelStructure if necessary (section 2.2.8). Not
-     sure if this is required for our purpose. -->
-<ModelStructure>
-</ModelStructure>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="2.0" modelName="test1" guid="{82072fd0-2f55-4c42-b84c-e47ee14091d0}" version="0.0.1">
+    <CoSimulation modelIdentifier="fmiGridDynSharedLib" canHandleVariableCommunicationStepSize="true"/>
+    <LogCategories>
+        <Category name="logError"/>
+        <Category name="logWarning"/>
+        <Category name="logSummary"/>
+        <Category name="logNormal"/>
+        <Category name="logDebug"/>
+    </LogCategories>
+    <ModelVariables>
+        <ScalarVariable name="run_asynchronously" valueReference="0" description="set to true to enable GridDyn to run Asynchronously" causality="parameter" variability="fixed">
+            <Boolean start="0"/>
+        </ScalarVariable>
+        <ScalarVariable name="record_directory" valueReference="1" description="set the directory to place GridDyn outputs" causality="parameter" variability="fixed">
+            <String start=""/>
+        </ScalarVariable>
+        <ScalarVariable name="power" valueReference="10" causality="input" variability="continuous">
+            <Real start="0.5"/>
+        </ScalarVariable>
+        <ScalarVariable name="load" valueReference="11" causality="output" variability="continuous">
+            <Real/>
+        </ScalarVariable>
+    </ModelVariables>
+    <ModelStructure>
+        <Outputs>
+            <Unknown index="4"/>
+        </Outputs>
+        <InitialUnknowns>
+            <Unknown index="4"/>
+        </InitialUnknowns>
+    </ModelStructure>
 </fmiModelDescription>

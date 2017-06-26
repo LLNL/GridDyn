@@ -17,11 +17,12 @@ find_path(ZMQ_ROOT_DIR
     include/zmq.h
   HINTS
     ${ZMQ_REGISTRY_PATH}
+	${ZMQ_INSTALL_PATH}
+	${ZMQ_INCLUDE_PATH}
   PATHS
     /usr
     /usr/local
-	${ZMQ_INSTALL_PATH}
-	${ZMQ_INCLUDE_PATH}
+	
 )
 find_path(ZMQ_INCLUDE_DIR zmq.h ${ZMQ_ROOT_DIR}/include)
 if (MSVC)
@@ -31,21 +32,22 @@ if (MSVC)
   # Replace dots with underscores
   string(REGEX REPLACE "\\." "_" ZMQ_NAME ${ZMQ_NAME})
   # Get Visual studio version number
-  set(_VS_VERSIONS "140" "141")
+  
+ 
+  message(STATUS "toolset =${CMAKE_VS_PLATFORM_TOOLSET}")
+
   if (${ZMQ_NAME} MATCHES "registry") # if key was not found, the string "registry" is returned
     set(_ZMQ_VERSIONS "4_2_2" "4_2_1" "4_2_0" "4_1_5" "4_1_4" "4_0_4" "4_0_3" "4_0_2" "4_0_1" "4_0_0")
     set(ZMQ_LIBRARY_NAME)
 	
 		foreach(ver ${_ZMQ_VERSIONS})
-			foreach(vs ${_VS_VERSIONS})
-				list(APPEND ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ver}")
-			endforeach()
+				list(APPEND ZMQ_LIBRARY_NAME "libzmq-${CMAKE_VS_PLATFORM_TOOLSET}-mt-${ver}")
 		endforeach()
   else()
     # Format ZMQ library file name
 	
 		foreach(vs ${_VS_VERSIONS})
-			set(ZMQ_LIBRARY_NAME "libzmq-v${vs}-mt-${ZMQ_NAME}")
+			set(ZMQ_LIBRARY_NAME "libzmq-v${CMAKE_VS_PLATFORM_TOOLSET}-mt-${ZMQ_NAME}")
 		endforeach()
   endif()
 endif()
@@ -54,13 +56,15 @@ find_library(ZMQ_LIBRARY
     zmq
 	libzmq
     ${ZMQ_LIBRARY_NAME}
+HINTS
+	"${ZMQ_ROOT_DIR}/lib"
+	"${ZMQ_INSTALL_DIR}/lib"
+	"${ZMQ_LIBRARY_PATH}"
   PATHS
     /lib
     /usr/lib
     /usr/local/lib
-    "${ZMQ_ROOT_DIR}/lib"
-	"${ZMQ_INSTALL_DIR}/lib"
-	"${ZMQ_LIBRARY_PATH}"
+    
 )
 if (ZMQ_INCLUDE_DIR AND ZMQ_LIBRARY AND NOT ZMQ_LIBRARY-NOTFOUND)
   set(ZMQ_FOUND 1)

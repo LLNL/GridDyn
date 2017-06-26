@@ -8,7 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-#project name
 set(testComponent_sources
 	componentTests/testComponents.cpp
 	componentTests/testLoads.cpp
@@ -53,6 +52,8 @@ set (testLibrary_sources
 	libraryTests/testStringConversion.cpp
 	libraryTests/testString_viewConversion.cpp
 	libraryTests/simpleQueueTests.cpp
+	libraryTests/testOperatingBounds.cpp
+	libraryTests/testValuePredictors.cpp
 	)
 
 	list(APPEND testLibrary_sources ${optional_library_test_files})
@@ -74,6 +75,7 @@ set(testSystem_sources
 	systemTests/testCloning.cpp
 	systemTests/faultTests.cpp
 	systemTests/testContingency.cpp
+	systemTests/testGridDynRunner.cpp
 	)
 
 	list(APPEND testSystem_sources ${optional_system_test_files})
@@ -82,6 +84,7 @@ set(testExtra_sources
 extraTests/testExtra.cpp
 extraTests/performanceTests.cpp
 extraTests/largeContingencyTests.cpp
+extraTests/largeInputTests.cpp
 testHelperFunctions.cpp
 exeTestHelper.cpp
 )	
@@ -99,17 +102,15 @@ add_executable(testComponents ${testComponent_sources} ${testMain_headers})
 add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynFileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/gridDynCombined)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
+
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
 
@@ -145,3 +146,4 @@ INSTALL(TARGETS testLibrary RUNTIME DESTINATION bin/test/)
 INSTALL(TARGETS testComponents RUNTIME DESTINATION bin/test/)
 INSTALL(TARGETS testSystem RUNTIME DESTINATION bin/test/)
 INSTALL(TARGETS testExtra RUNTIME DESTINATION bin/test/)
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION bin/test/)

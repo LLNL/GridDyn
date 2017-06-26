@@ -33,7 +33,7 @@ if(MSVC)
 endif(MSVC)
 
 include_directories(${ZLIB_INCLUDES})
-set(SOURCE
+set(SOURCES
   ioapi.c
   miniunz.c
   minizip.c
@@ -43,7 +43,7 @@ set(SOURCE
 )
 
 if(WIN32)
-    set(SOURCE ${SOURCE} iowin32.c)
+    set(SOURCES ${SOURCES} iowin32.c)
 endif(WIN32)
 
 set(HEADERS
@@ -59,7 +59,7 @@ if(WIN32)
     set(HEADERS ${HEADERS} iowin32.h)
 endif(WIN32)
 
-add_library(minizip ${SOURCE} ${HEADERS})
+add_library(minizip ${SOURCES} ${HEADERS})
 
 
 	install(TARGETS minizip
