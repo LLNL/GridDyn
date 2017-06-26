@@ -12,10 +12,10 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
-#include "formatInterpreters/json/json.h"
+#include "json/json.h"
 #pragma warning(pop)
 #else
-#include "formatInterpreters/json/json.h"
+#include "json/json.h"
 #endif
 
 #ifndef DIME_CLIENT_INTERFACE_HEADER_

@@ -12,15 +12,14 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
-#include "formatInterpreters/json/json.h"
+#include "json/json.h"
 #pragma warning(pop)
 #else
-#include "formatInterpreters/json/json.h"
+#include "json/json.h"
 #endif
 
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
-<<<<<<< HEAD:zmqInterface/dimeCollector.cpp
 #include "core/helperTemplates.h"
 #include <string>
 #include <sstream>

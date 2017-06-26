@@ -12,14 +12,9 @@
 #include "base64.h"  
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
-<<<<<<< HEAD:zmqInterface/dimeClientInterface.cpp
 #include "zmqContextManager.h"
 #include <stdio.h>
-
-
-=======
 #include "zmqLibrary/zmqContextManager.h"
->>>>>>> 935e202b8aa221f7f91286dd2837674c4aa82028:src/zmqlib/dimeClientInterface.cpp
 
 #ifdef _MSC_VER
 #pragma warning(push)

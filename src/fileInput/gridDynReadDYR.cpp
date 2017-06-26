@@ -9,7 +9,8 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
+#include "gridDynReadRAW.cpp"
+#include "dimeCollector.h"
 #include "core/objectFactory.hpp"
 #include "Generator.h"
 #include "gridBus.h"
@@ -23,10 +24,12 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-
+static std::vector <std::vector<double>> Genroudata;
+dimeCollector dimesysname;
 namespace griddyn
 {
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance ();
+
 
 void loadGENROU (coreObject *parentObject, stringVec &tokens);
 void loadESDC1A (coreObject *parentObject, stringVec &tokens);
@@ -94,6 +97,8 @@ void loadDYR (coreObject *parentObject, const std::string &fileName, const basic
         {
             std::cout << "unknown object type " << type << '\n';
         }
+dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata,Genroudata,Fixshuntdata,sysname,Baseinfor);
+
     }
 }
 
@@ -124,6 +129,7 @@ void loadGENROU (coreObject *parentObject, stringVec &tokens)
     sm->set ("s12", params[16]);
 
     gen->add (sm);
+    Genroudata.push_back(params);
 }
 
 void loadESDC1A (coreObject *parentObject, stringVec &tokens)

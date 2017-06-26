@@ -10,6 +10,7 @@
  * LLNS Copyright End
  */
 
+#include "dimeCollector.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
 #include "Generator.h"
@@ -74,6 +75,18 @@ enum sections
     switchedShunt,
     txadj
 };
+
+static coreTime cctime;
+
+std::vector <std::string> sysname;
+std::vector <std::string> Busdata;//###############
+std::vector <std::string> Loaddata;
+std::vector <std::string> Branchdata;
+std::vector <std::string> Transformerdata;
+std::vector <std::string> Generatordata;
+std::vector <std::string> Fixshuntdata;
+std::vector <int> Baseinfor;
+
 
 // get the basic busFactory
 static typeFactory<gridBus> *busfactory = nullptr;
@@ -166,7 +179,8 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
         if (res > 0)
         {
             parentObject->set ("basepower", opt.base);
-        }
+		  Baseinfor.push_back(opt.base);
+		  Baseinfor.push_back(opt.basefreq);        }
         // temp1=line.substr(45,27);
         // parentObject->set("name",&temp1);
         if (res > 2)
@@ -202,6 +216,7 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
     {
         if (checkNextLine (file, line))
         {
+		  Busdata.push_back(line);
             // get the index
             pos = line.find_first_of (',');
             temp1 = line.substr (0, pos);
@@ -273,6 +288,7 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
             {
                 if (checkNextLine (file, line))
                 {
+  Loaddata.push_back(line);
                     bus = findBus (busList, line);
                     if (bus != nullptr)
                     {
@@ -296,6 +312,7 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
             {
                 if (checkNextLine (file, line))
                 {
+Generatordata.push_back(line);
                     bus = findBus (busList, line);
                     if (bus != nullptr)
                     {
@@ -319,6 +336,7 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
             {
                 if (checkNextLine (file, line))
                 {
+ Branchdata.push_back(line);
                     rawReadBranch (parentObject, line, busList, opt);
                 }
                 else
@@ -332,6 +350,7 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
             {
                 if (checkNextLine (file, line))
                 {
+  Fixshuntdata.push_back(line);
                     bus = findBus (busList, line);
                     if (bus != nullptr)
                     {
@@ -389,7 +408,10 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
                         std::getline (file, txlines[2]);
                         std::getline (file, txlines[3]);
                         std::getline (file, txlines[4]);
-                    }
+					  Transformerdata.push_back(txlines[0]);
+					  Transformerdata.push_back(txlines[1]);
+					  Transformerdata.push_back(txlines[2]);
+					  Transformerdata.push_back(txlines[3]);                    }
                     else
                     {
                         moreData = false;
@@ -410,7 +432,10 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
                     std::getline (file, txlines[2]);
                     std::getline (file, txlines[3]);
                     std::getline (file, txlines[4]);
-                }
+				  Transformerdata.push_back(txlines[0]);
+				  Transformerdata.push_back(txlines[1]);
+				  Transformerdata.push_back(txlines[2]);
+				  Transformerdata.push_back(txlines[3]);                }
                 tline = rawReadTX (parentObject, txlines, busList, opt);
             }
             break;
@@ -521,7 +546,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
     // get the bus name
     auto temp = trim (strvec[0]);
     auto temp2 = trim (removeQuotes (strvec[1]));
-
+  sysname.push_back(temp2);
     if (opt.prefix.empty ())
     {
         if (temp2.empty ())  // 12 spaces is default value which would all get trimmed
