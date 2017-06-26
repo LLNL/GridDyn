@@ -15,7 +15,7 @@
 #include "zmqContextManager.h"
 #include <stdio.h>
 #include "zmqLibrary/zmqContextManager.h"
-
+#include<iostream>
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
@@ -126,7 +126,7 @@ std::string dimeClientInterface::sync()
 			std::vector<double> idxreqinter;
 			std::string vgsidx = request["func_args"][2]["vgsvaridx"]["data"].asString();
 			std::string &v = vgsidx;
-			std::vector<uint8_t> xx = base64_decode(v);
+			std::vector<uint8_t> xx =utilities:: base64_decode(v);
 			const int s = xx.size();
 
 			for (int ii = 0; ii < xx.size() / 8; ++ii)
@@ -574,7 +574,7 @@ void dimeClientInterface::send_Idxvgs(Json::Value nbusvolk, Json::Value nlinepk,
 	}
 	
 
-<<<<<<< HEAD:zmqInterface/dimeClientInterface.cpp
+
 
 
 
@@ -609,8 +609,7 @@ void dimeClientInterface::send_reqvar(double t,Json::Value reqvar,Json::Value re
 	outgoingData["meta"]["var_name"] = "Varvgs";
 	encodereqVariableMessage(outgoingData,reqvar,reqvarheader, t);
 
-=======
->>>>>>> 935e202b8aa221f7f91286dd2837674c4aa82028:src/zmqlib/dimeClientInterface.cpp
+
 	out = fw.write(outgoingData);
 
 	socket->send(out.c_str(), out.size());
@@ -687,6 +686,4 @@ void dimeClientInterface::send_var(double t, Json::Value Varvgs, const std::stri
 
 }
 */
-=======
-}
->>>>>>> 935e202b8aa221f7f91286dd2837674c4aa82028:src/zmqlib/dimeClientInterface.cpp
+

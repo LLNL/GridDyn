@@ -25,7 +25,8 @@
 #include <fstream>
 #include <iostream>
 static std::vector <std::vector<double>> Genroudata;
-dimeCollector dimesysname;
+
+griddyn::dimeLib::dimeCollector dimesysname;
 namespace griddyn
 {
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance ();
@@ -97,9 +98,10 @@ void loadDYR (coreObject *parentObject, const std::string &fileName, const basic
         {
             std::cout << "unknown object type " << type << '\n';
         }
-dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata,Genroudata,Fixshuntdata,sysname,Baseinfor);
+
 
     }
+	dimesysname.sendsysparam(Busdata, Loaddata, Generatordata, Branchdata, Transformerdata, Genroudata, Fixshuntdata, sysname, Baseinfor);
 }
 
 void loadGENROU (coreObject *parentObject, stringVec &tokens)

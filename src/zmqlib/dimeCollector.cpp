@@ -18,9 +18,10 @@
 #include "json/json.h"
 #endif
 
+#include <iostream>
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
-#include "core/helperTemplates.h"
+#include "core/helperTemplates.hpp"
 #include <string>
 #include <sstream>
 using namespace std;
@@ -38,9 +39,8 @@ static int nline;
 static std::vector<std::string> dev_list;
 static Json::Value Idxvgs;
 std::vector<std::string> devname;
-=======
 #include "core/helperTemplates.hpp"
->>>>>>> 935e202b8aa221f7f91286dd2837674c4aa82028:src/zmqlib/dimeCollector.cpp
+
 
 namespace griddyn
 {
@@ -500,13 +500,14 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	dime->send_sysname(Sysname, "SE");
 
 
-	double arr[200][100];
+	std::vector<std::vector<double>> arr;
 	for (size_t kk = 0; kk < Busdata.size(); ++kk)
 	{
 		std::string businter = Busdata[kk];
-		int op = 0;
+		std::vector<double> interv;
 		for (int ii = 0; ii < Busdata[kk].length(); ++ii)
 		{
+			
 			if (businter.find(",") != string::npos)
 			{
 				int nu = businter.find_first_of(',');
@@ -517,14 +518,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					arr[kk][op] = indexc;
+					interv.push_back(indexc);
 					businter = businter.substr(nu + 1, Busdata[kk].length());
-					op = op + 1;
 				}
 				catch (const std::exception&)
 				{
 					businter = businter.substr(nu + 1, Busdata[kk].length());
-					op = op + 1;
 					continue;
 				}
 
@@ -532,10 +531,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 			else
 			{
 				double indexc = std::stoul(businter);
-				arr[kk][ii] = indexc;
+				interv.push_back(indexc);
 				break;
 			}
+			
 		}
+		arr.push_back(interv);
 	}
 	for (size_t kk = 0; kk < Busdata.size(); ++kk)
 	{
@@ -553,9 +554,10 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		Busd.append(Busk);
 	}
 
-	double pqrr[200][100];
+	std::vector<std::vector<double>> pqrr;
 	for (size_t kk = 0; kk < Loaddata.size(); ++kk)
 	{
+		std::vector<double> interv;
 		std::string loadinter = Loaddata[kk];
 		int op = 0;
 		for (int ii = 0; ii < Loaddata[kk].length(); ++ii)
@@ -570,7 +572,7 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					pqrr[kk][op] = indexc;
+				    interv.push_back(indexc);
 					loadinter = loadinter.substr(nu + 1, Loaddata[kk].length());
 					op = op + 1;
 				}
@@ -585,10 +587,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 			else
 			{
 				double indexc = std::stoul(loadinter);
-				pqrr[kk][ii] = indexc;
+				interv.push_back(indexc);
 				break;
 			}
+
 		}
+		pqrr.push_back(interv);
 	}
 	for (size_t kk = 0; kk < Loaddata.size(); ++kk)
 	{
@@ -607,13 +611,15 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 
 	}
 
-	double pvrr[200][100];
+	std::vector<std::vector<double>> pvrr;
 	for (size_t kk = 0; kk < Generatordata.size(); ++kk)
 	{
 		std::string geninter = Generatordata[kk];
 		int op = 0;
+		std::vector<double> interv;
 		for (int ii = 0; ii < Generatordata[kk].length(); ++ii)
 		{
+
 			if (geninter.find(",") != string::npos)
 			{
 				int nu = geninter.find_first_of(',');
@@ -624,7 +630,7 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					pvrr[kk][op] = indexc;
+					interv.push_back(indexc);
 					geninter = geninter.substr(nu + 1, Generatordata[kk].length());
 					op = op + 1;
 				}
@@ -639,10 +645,13 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 			else
 			{
 				double indexc = std::stoul(geninter);
-				pvrr[kk][ii] = indexc;
+				interv.push_back(indexc);
+
 				break;
 			}
+	
 		}
+		pvrr.push_back(interv);
 	}
 	for (size_t kk = 0; kk < Generatordata.size(); ++kk)
 	{
@@ -674,13 +683,15 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		}
 
 	}
-	double branchrr[200][100];
+	std::vector<std::vector<double>> branchrr;
 	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
 	{
 		std::string branchinter = Branchdata[kk];
 		int op = 0;
+		std::vector <double> interv;
 		for (int ii = 0; ii < Branchdata[kk].length(); ++ii)
 		{
+			
 			if (branchinter.find(",") != string::npos)
 			{
 				int nu = branchinter.find_first_of(',');
@@ -691,7 +702,7 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					branchrr[kk][op] = indexc;
+					interv.push_back(indexc);
 					branchinter = branchinter.substr(nu + 1, Branchdata[kk].length());
 					op = op + 1;
 				}
@@ -706,19 +717,23 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 			else
 			{
 				double indexc = std::stoul(branchinter);
-				branchrr[kk][ii] = indexc;
+				interv.push_back(indexc);
 				break;
 			}
+			
 		}
+		branchrr.push_back(interv);
 	}
-	double transrr[500][100];
+	
+	std::vector<std::vector<double>> transrr;
 
 	for (size_t kk = 0; kk < Transformerdata.size(); ++kk)
 	{
 		std::string transinter = Transformerdata[kk];
-		int op = 0;
+		std::vector<double> interv;
 		for (int ii = 0; ii < Transformerdata[kk].length(); ++ii)
 		{
+
 			if (transinter.find(",") != string::npos)
 			{
 				int nu = transinter.find_first_of(',');
@@ -729,14 +744,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					transrr[kk][op] = indexc;
+					interv.push_back(indexc);
 					transinter = transinter.substr(nu + 1, Transformerdata[kk].length());
-					op = op + 1;
 				}
 				catch (const std::exception&)
 				{
 					transinter = transinter.substr(nu + 1, Transformerdata[kk].length());
-					op = op + 1;
 					continue;
 				}
 
@@ -752,11 +765,13 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 				else
 				{
 					double indexc = std::stoul(transinter);
-					transrr[kk][ii] = indexc;
+					interv.push_back(indexc);
 					break;
 				}
 			}
+
 		}
+		transrr.push_back(interv);
 	}
 	for (size_t kk = 0; kk < Branchdata.size(); ++kk)
 	{
@@ -799,11 +814,11 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	}
 
 
-	double fshuntrr[200][100];
+	std::vector<std::vector<double>> fshuntrr;
 	for (size_t kk = 0; kk < Fixshuntdata.size(); ++kk)
 	{
 		std::string fsinter = Fixshuntdata[kk];
-		int op = 0;
+		std::vector<double> interv;
 		for (int ii = 0; ii < Fixshuntdata[kk].length(); ++ii)
 		{
 			if (fsinter.find(",") != string::npos)
@@ -816,14 +831,12 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 					istringstream iss(tempc);
 					double indexc;
 					iss >> indexc;
-					fshuntrr[kk][op] = indexc;
+					interv.push_back(indexc);
 					fsinter = fsinter.substr(nu + 1, Fixshuntdata[kk].length());
-					op = op + 1;
 				}
 				catch (const std::exception&)
 				{
 					fsinter = fsinter.substr(nu + 1, Loaddata[kk].length());
-					op = op + 1;
 					continue;
 				}
 
@@ -831,10 +844,11 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 			else
 			{
 				double indexc = std::stoul(fsinter);
-				fshuntrr[kk][ii] = indexc;
+				interv.push_back(indexc);
 				break;
 			}
 		}
+		fshuntrr.push_back(interv);
 	}
 	for (size_t kk = 0; kk < Fixshuntdata.size(); ++kk)
 	{
@@ -854,7 +868,7 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 		Fsd.append(fsk);
 	}
 
-	double Genrourr[100][100];
+	//for Genrou
 	for (size_t kk = 0; kk < Genroudata.size(); ++kk)
 	{
 		Json::Value Genrouk;
@@ -928,8 +942,8 @@ const std::string &dimeCollector::getSinkName() const
 	return server;
 }
 
-<<<<<<< HEAD:zmqInterface/dimeCollector.cpp
-=======
+
+
 }//namespace dimeLib
 }//namespace griddyn
->>>>>>> 935e202b8aa221f7f91286dd2837674c4aa82028:src/zmqlib/dimeCollector.cpp
+
