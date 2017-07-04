@@ -53,6 +53,7 @@ public:
 	void close();
 	/** sync with the server*/
 	std::string sync();
+	void syncforcontrol();
 	//void send_var(double t,Json::Value Varvgs, const std::string & recipient);
 	void send_varname(Json::Value Varheader, const std::string & recipient);
 	void send_sysname(Json::Value Sysname, const std::string & recipient);

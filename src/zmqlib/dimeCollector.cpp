@@ -32,6 +32,8 @@ static Json::Value lined;
 static Json::Value Genroud;
 static Json::Value Fsd;
 static Json::Value Swd;
+static Json::Value Busnamed;
+
 static int swidx;
 static int swv;
 static int nbus;
@@ -430,21 +432,21 @@ change_code dimeCollector::trigger(coreTime time)
 		{
 			if (t==0&&ii==0)
 			{
-				
+				dime->send_sysname(Busnamed, "");
 				dime->send_Idxvgs(nbusvolk, nlinepk, nbusfreqk, nbusthetak, nbusgenreactivek, nbusgenrealk, nbusloadreactivelk, nbusloadrealk, nsynomegaj, nsyndeltaj, nlineij, nlineqj, nexc, ne1d, ne2d, ne1q, ne2q, "");
 				dime->send_varname(Varheader, "");
 				std::cout << "boradcast is finished" << std::endl;
 			}
-		    //	Sleep(1000); 
+		    //	Sleep(1000); //broadcast;
 
-#pragma region find request var
+// find request var
 
 
 				if (t == 0)
 				{
 					devname.push_back(dime->sync());
 				}
-
+				//sync req;
 
 				Json::Value reqvarheader;
 				Json::Value reqvar;
@@ -459,18 +461,24 @@ change_code dimeCollector::trigger(coreTime time)
 					interh.append(totalname[idxreq[ii][jj]]);
 					reqvarheader.append(inter);
 				}
+
 				if (t == 0)
 				{
 					dime->send_sysparam(Busd, PQd, PVd, lined, nbus, nline, Genroud, Fsd, Swd, devname[ii]);
 					std::cout << "requested param is sended" << std::endl;
 					std::cout << "requested var is started to be sended" << std::endl;
 				}
+				//send sysparam
+
+
 
 				dime->send_reqvar(t, reqvar, reqvarheader, devname[ii]);
 				
 				//dime->send_var(t, Varvgs,dev_list[ii]);
 
-#pragma endregion
+				dime->syncforcontrol();
+
+
 
 		}
 
@@ -487,17 +495,17 @@ void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<s
 	nbus = Busdata.size();
 	nline = Branchdata.size() + (Transformerdata.size() / 4);
 
-	Json::Value Sysname;
+
 	for (size_t kk = 0; kk < sysname.size(); ++kk)
 	{
 		Json::Value wsysname;
 		Json::Value wagain;
 		wsysname.append(sysname[kk]);
 		wagain.append(wsysname);
-		Sysname.append(wagain);
+	    Busnamed.append(wagain);
 	}
 	
-	dime->send_sysname(Sysname, "SE");
+
 
 
 	std::vector<std::vector<double>> arr;

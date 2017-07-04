@@ -27,6 +27,26 @@
 
 static std::vector<std::string> param;
 std::vector<std::vector<double>> idxreq;
+
+std::vector<double> decodeu8todouble(std::string u8)
+{
+	std::string &v = u8;
+	std::vector<uint8_t> xx = utilities::base64_decode(v);
+	std::vector<double> inter(xx.size()/8);
+	const int s = xx.size();
+
+	int size = xx.size() * 8;
+	int k = 0;
+
+	for (int ii = 0; ii < xx.size() / 8; ++ii)
+	{
+		uint8_t *b = &xx[ii * 8];
+		memcpy(&inter[k], b, sizeof(b));
+		++k;
+	}
+	return inter;
+}
+
 dimeClientInterface::dimeClientInterface(const std::string &dimeName, const std::string &dimeAddress):name(dimeName),address(dimeAddress)
 {
 	if (address.empty())
@@ -123,24 +143,11 @@ std::string dimeClientInterface::sync()
 			{
 				param.push_back(request["func_args"][2]["param"][ii].asString());
 			}
-			std::vector<double> idxreqinter;
-			std::string vgsidx = request["func_args"][2]["vgsvaridx"]["data"].asString();
-			std::string &v = vgsidx;
-			std::vector<uint8_t> xx =utilities:: base64_decode(v);
-			const int s = xx.size();
-
-			for (int ii = 0; ii < xx.size() / 8; ++ii)
-				idxreqinter.push_back(0);
-			int size = xx.size() * 8;
-			int k = 0;
-
-			for (int ii = 0; ii < xx.size() / 8; ++ii)
-			{
-				uint8_t *b = &xx[ii * 8];
-				memcpy(&idxreqinter[k], b, sizeof(b));
-				++k;
-			}
 			
+			std::string vgsidx = request["func_args"][2]["vgsvaridx"]["data"].asString();
+			std::vector<double> idxreqinter;
+
+			idxreqinter = decodeu8todouble(vgsidx);
 			idxreq.push_back(idxreqinter);
 			flg = 0;
 			std::cout << "request for" << devname << " is received" << std::endl;
@@ -160,7 +167,65 @@ std::string dimeClientInterface::sync()
 
 	return devname;
 }
+
+
+
+void dimeClientInterface::syncforcontrol()
+{
 	
+
+	int flg=1;
+
+
+		char buffer[100000];
+		Json::Value outgoing;
+		outgoing["command"] = "sync";
+		outgoing["name"] = "griddyn";
+		outgoing["args"] = "";
+
+		Json::FastWriter fw;
+		std::string out;
+		size_t sz;
+		Json::Value controlsigj;
+		Json::Reader r;
+		out = fw.write(outgoing);
+		socket->send(out.c_str(), out.size());
+		sz = socket->recv(buffer, 100000, 0);
+		std::string controlsig = static_cast<std::string>(buffer);
+		r.parse(controlsig, controlsigj);
+		while (controlsigj["func_args"][1] != "Event")
+		{
+				out = fw.write(outgoing);
+				socket->send(out.c_str(), out.size());
+				sz = socket->recv(buffer, 100000, 0);
+				if (sz == 2)
+					break;
+				std::string controlsig = static_cast<std::string>(buffer);
+				r.parse(controlsig, controlsigj);
+
+		}
+			if (controlsigj["func_args"][1] == "Event")
+			{
+				std::cout << "received control signal" << std::endl;
+				std::vector<std::string> signamev;
+				for (int ii = 0; ii != controlsigj["func_args"][2]["name"].size(); ++ii)
+				{
+					signamev.push_back(controlsigj["func_args"][2]["name"][ii].asString());
+				}
+				//std::string signame = controlsigj["func_args"][2]["name"].asString();
+				std::string id = controlsigj["func_args"][2]["id"]["data"].asString();
+				std::vector<double> idd = decodeu8todouble(id);
+				std::string action = controlsigj["func_args"][2]["action"]["data"].asString();
+				std::vector<double> actiond = decodeu8todouble(action);
+				std::string duration = controlsigj["func_args"][2]["duration"]["data"].asString();
+				std::vector<double> durationd = decodeu8todouble(duration);
+				std::string time = controlsigj["func_args"][2]["time"]["data"].asString();
+				std::vector<double> timed = decodeu8todouble(time);
+			}
+
+		
+//do something with the control signal;
+}	
 
 
 
