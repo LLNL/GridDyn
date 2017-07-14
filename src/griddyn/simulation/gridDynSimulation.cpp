@@ -1383,6 +1383,9 @@ void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t nonZero
     getSolverInterface(sMode)->setMaxNonZeros (nonZeros);
 }
 
+
+
+
 std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)
 {
     std::shared_ptr<solverInterface> solveD;

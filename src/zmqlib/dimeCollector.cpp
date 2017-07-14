@@ -25,6 +25,10 @@
 #include <string>
 #include <sstream>
 using namespace std;
+
+
+
+
 static Json::Value Busd;
 static Json::Value PQd;
 static Json::Value PVd;
@@ -475,8 +479,8 @@ change_code dimeCollector::trigger(coreTime time)
 				dime->send_reqvar(t, reqvar, reqvarheader, devname[ii]);
 				
 				//dime->send_var(t, Varvgs,dev_list[ii]);
-
-				dime->syncforcontrol();
+			 	auto sig = std::make_unique<controlsignal>();
+				dime->syncforcontrol(sig.get());
 
 
 

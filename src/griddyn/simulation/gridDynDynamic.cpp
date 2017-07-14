@@ -13,6 +13,8 @@
 
 #include "griddyn.h"
 
+#include "dimeClientinterface.h"
+
 #include "dynamicInitialConditionRecovery.h"
 #include "events/eventQueue.h"
 #include "faultResetRecovery.h"
@@ -51,6 +53,9 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
     {
         return retval;
     }
+	auto kk= getSolverInterface(tempSm);
+	auto j= kk->m_gds;
+	auto k=j->;
     auto dynData = getSolverInterface (tempSm);
     const solverMode &sm = dynData->getSolverMode ();
     if (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned)
@@ -461,7 +466,7 @@ int gridDynSimulation::dynamicPartitioned (coreTime tStop, coreTime tStep)
     int smStep = 0;
     while (currentTime < tStop)
     {
-        nextStopTime = std::min (tStop, nextEventTime);
+        nextStopTime = min(tStop, nextEventTime);
 
         if (nextStopTime - currentTime <
             tols.timeTol)  // if the interval is too small just advance the clock a little
@@ -645,11 +650,11 @@ int gridDynSimulation::step (coreTime nextStep, coreTime &timeActual)
             return retval;
         }
     }
-    nextStopTime = std::min (nextStep, EvQ->getNextTime ());
+    nextStopTime = min (nextStep, EvQ->getNextTime ());
     coreTime tStop;
     while (timeReturn < nextStep)
     {
-        tStop = std::min (nextStep, nextStopTime);
+        tStop = min (nextStep, nextStopTime);
 
         nextStopTime = nextStep;
         if (tStop - currentTime < tols.timeTol)  // if the interval is too small just advance the clock a little
@@ -675,7 +680,7 @@ int gridDynSimulation::step (coreTime nextStep, coreTime &timeActual)
                 }
             }  // this step does a reset of IDA if necessary
             tStop =
-              std::min (stopTime,
+              min (stopTime,
                         EvQ->getNextTime ());  // update the stopping time just in case the events have changed
             retval = runDynamicSolverStep (dynData, nextStopTime, timeReturn);
             currentTime = timeReturn;

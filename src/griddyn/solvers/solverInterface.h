@@ -137,11 +137,13 @@ class solverInterface : public helperObject
     coreTime solveTime = negTime;  //!< storage for the time the solver is called
     std::string jacFile;  //!< the file to write the Jacobian to
     std::string stateFile;  //!< the file to write the state and residual to
-    gridDynSimulation *m_gds = nullptr;  //!< pointer the gridDynSimulation object used
     count_t svsize = 0;  //!< the state size
     count_t nnz = 0;  //!< the actual number of non-zeros in a Jacobian
     std::bitset<32> flags;  //!< flags for the solver
-  public:
+public:
+	gridDynSimulation *m_gds = nullptr;  //!< pointer the gridDynSimulation object used
+
+
     /** @brief default constructor
      * @param[in] objName  the name of the solver
      */
