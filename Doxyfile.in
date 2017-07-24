@@ -31,7 +31,7 @@ PROJECT_NAME           = GridDyn
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = @GridDyn_VERSION_MAJOR@.@GridDyn_VERSION_MINOR@.@GridDyn_VERSION_PATCH@
+PROJECT_NUMBER         = @GRIDDYN_MAJOR@.@GRIDDYN_MINOR@.@GRIDDYN_PATCH@
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is
 # included in the documentation. The maximum height of the logo should not

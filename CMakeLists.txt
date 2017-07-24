@@ -16,8 +16,10 @@ cmake_minimum_required(VERSION 3.4)
 cmake_policy(VERSION 3.4)
 
 #version number
-set(GridDyn_VERSION_MAJOR 0)
-set(GridDyn_VERSION_MINOR 6)
+set(GRIDDYN_MAJOR 0)
+set(GRIDDYN_MINOR 6)
+set(GRIDDYN_PATCH 5)
+set(GRIDDYN_DATE 07-24-2017)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 

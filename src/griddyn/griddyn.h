@@ -16,10 +16,6 @@
 
 // debug
 //#define DEBUG_IDA
-#define GRIDDYN_MAJOR 0
-#define GRIDDYN_MINOR 5
-#define GRIDDYN_PATCH 5
-#define GRIDDYN_DATE "2017-01-20"
 
 
 // header files
@@ -28,7 +24,7 @@
 // libraries
 #include <queue>
 #include <functional>
-
+#include "griddyn-config.h"
 namespace griddyn
 {
 #define SINGLE (1)
