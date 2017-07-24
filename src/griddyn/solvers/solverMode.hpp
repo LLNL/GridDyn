@@ -63,6 +63,16 @@ enum class approxKeyMask : unsigned int
 #endif
 
 KEY_QUAL unsigned int indexVal (approxKeyMask key) { return static_cast<unsigned int> (key); }
+
+enum defindedSolverModes:index_t
+{
+	local_mode = 0,
+	power_flow = 1,
+	dae = 2,
+	dynamic_algebraic = 3,
+	dynamic_differential = 4,
+};
+
 /** @brief class defining how a specific solver operates and how to find information*/
 class solverMode
 {
@@ -82,7 +92,7 @@ class solverMode
   @param[in] index the index to put in offsetIndex*/
     explicit solverMode (index_t index);
     /**@brief solverMode default constructor*/
-	solverMode() = default;
+    solverMode () = default;
     bool operator== (const solverMode &b) const
     {
         return ((dynamic == b.dynamic) && (differential == b.differential) && (algebraic == b.algebraic) &&
@@ -100,12 +110,12 @@ inline void setLinkApprox (solverMode &sMode, approxKeyMask key)
 
 inline void setLinkApprox (solverMode &sMode, int val) { sMode.approx.set (val); }
 inline void setLinkApprox (solverMode &sMode, int val, bool setval) { sMode.approx.set (val, setval); }
-const solverMode cLocalSolverMode (0);
-const solverMode cLocalbSolverMode (1);
-const solverMode cPflowSolverMode (2);
-const solverMode cDaeSolverMode (3);
-const solverMode cDynAlgSolverMode (4);
-const solverMode cDynDiffSolverMode (5);
+
+const solverMode cLocalSolverMode (local_mode);
+const solverMode cPflowSolverMode (power_flow);
+const solverMode cDaeSolverMode (dae);
+const solverMode cDynAlgSolverMode (dynamic_algebraic);
+const solverMode cDynDiffSolverMode (dynamic_differential);
 
 const solverMode cEmptySolverMode;
 /**

@@ -74,27 +74,31 @@ IOdata grabberSource::getOutputs (const IOdata &inputs, const stateData &sD, con
 {
     return {gset->grabData (sD, sMode)};
 }
-double
-grabberSource::getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num) const
+double grabberSource::getOutput (const IOdata &inputs,
+                                 const stateData &sD,
+                                 const solverMode &sMode,
+                                 index_t outputNum) const
 {
-    if (num == 0)
+    if (outputNum == 0)
     {
         return gset->grabData (sD, sMode);
     }
     return kNullVal;
 }
 
-double grabberSource::getOutput (index_t num) const
+double grabberSource::getOutput (index_t outputNum) const
 {
-    if (num == 0)
+    if (outputNum == 0)
     {
         return gset->grabData ();
     }
     return kNullVal;
 }
 
-double
-grabberSource::getDoutdt (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num) const
+double grabberSource::getDoutdt (const IOdata &inputs,
+                                 const stateData &sD,
+                                 const solverMode &sMode,
+                                 index_t outputNum) const
 {
     return 0.0;
 }

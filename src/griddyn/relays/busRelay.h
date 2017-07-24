@@ -19,18 +19,18 @@ namespace griddyn
 namespace relays
 {
 /** relay object for bus protection can isolate a bus based on voltage or frequency
-with a controllable delay time
+with a controllable delay time operates on undervoltage and underfrequency
 */
 class busRelay : public Relay
 {
 public:
   enum busrelay_flags
   {
-    nondirectional_flag = object_flag10,
+    nondirectional_flag = object_flag10,  //!< specify that the relay is non directional
   };
 protected:
-  double cutoutVoltage = 0.0;		//!<[puV] low voltage limit
-  double cutoutFrequency = 0.0;		//!<[puHz] trip on low frequency
+  parameter_t cutoutVoltage = 0.0;		//!<[puV] low voltage limit
+  parameter_t cutoutFrequency = 0.0;		//!<[puHz] trip on low frequency
   coreTime voltageDelay = timeZero;		//!< [s] period of time the voltage must be below limit to activate
   coreTime frequencyDelay = timeZero;		//!< [s] period of time the frequency must be below limit to activate
 public:

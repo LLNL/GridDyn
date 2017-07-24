@@ -10,8 +10,8 @@
  * LLNS Copyright End
 */
 
-#ifndef GRIDDYNPSS_H_
-#define GRIDDYNPSS_H_
+#ifndef GRIDDYNSTABILIZER_H_
+#define GRIDDYNSTABILIZER_H_
 
 #include "gridSubModel.h"
 

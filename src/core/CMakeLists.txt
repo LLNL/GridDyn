@@ -13,6 +13,7 @@ cmake_minimum_required (VERSION 3.4)
 set(coreObject_headers
     propertyBuffer.h
 	coreDefinitions.hpp
+	coreProperties.hpp
 	objectFactory.hpp
 	objectFactoryTemplates.hpp
 	factoryTemplates.hpp
@@ -47,9 +48,10 @@ set(coreObject_sources
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
 
-
-
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 

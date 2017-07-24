@@ -79,8 +79,8 @@ public:
 
   virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
 
-protected:
-  //virtual void setTime(coreTime time){prevTime=time;};
+  virtual const std::vector<stringVec> &inputNames() const override;
+  virtual const std::vector<stringVec> &outputNames() const override;
 };
 
 }//namespace griddyn

@@ -15,13 +15,14 @@
 #pragma once 
 
 #include "core/coreObject.h"
-#include "gridObjectsHelperClasses.h"
+#include "gridComponentHelperClasses.h"
 
 #include <bitset>
 
 template<class Y>
 class matrixData;
 
+/** the primary namespace for the griddyn library*/
 namespace griddyn
 {
 //forward declare the template class matrixData
@@ -31,13 +32,13 @@ class violation;
 /** @brief base object for gridDynSimulations
 * the basic object for creating a power system encapsulating some common functions and data that is needed by all objects in the simulation
 * and defining some common methods for use by all objects.  This object is not really intended to be instantiated directly and is mostly a
-* common interface to inheriting objects gridPrimary, gridSecondary, and gridSubModel as it encapsulated common functionality between those objects
+* common interface to inheriting objects ::gridPrimary, ::gridSecondary, and ::gridSubModel as it encapsulated common functionality between those objects
 **/
 class gridComponent : public coreObject
 {
 
 protected:
-	std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false
+	std::bitset<64> opFlags;                    //!< operational flags these flags are designed to be normal false @see ::operation_flags
 	offsetTable offsets;              //!<a table of offsets for the different solver modes
 	count_t m_inputSize = 0;            //!< the required size of the inputs input
 	count_t m_outputSize = 0;            //!< the number of outputs the subModel produces
@@ -101,26 +102,28 @@ public:
   virtual void dynInitializeB(const IOdata &inputs, const IOdata & desiredOutput, IOdata &fieldSet);
 protected: //don't allow these functions to be called directly in the public interface
     /** @brief initialize local object for power flow part A
-	see pFlowInitializeA for more details
+	see gridComponent::pFlowInitializeA for more details
 	@param[in] time0 the time0 at which the power flow will take place
 	@param[in] flags  any flags indicating how the initialization or execution will take place
 	*/
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags);
 
 	/** @brief initialize local object for power flow part B
-	see pFlowInitializeB for more details
+	see gridComponent::pFlowInitializeB for more details
 	*/
 	virtual void pFlowObjectInitializeB();
 		   /** @brief initialize local object for dynamics part A
-	see dynInitializeA for more details
+	see gridComponent::dynInitializeA for more details
 	@param[in] time0 the time at which the power flow will take place
 	@param[in] flags  any flags indicating how the initialization or execution will take place
 	*/
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags);
 
 	/** @brief initialize local object for dynamics part B
-	see dynInitializeB for more details
-	@param[in]  the desired initial output of the gridPrimary
+	see gridComponent::dynInitializeB for more details
+	@param[in] inputs the initial inputs to an object (can be empty)
+	@param[in] desiredOutput the desired initial output of the component
+	@param[in] fieldSet either the computed inputs or outputs depending on which was defined
 	*/
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata & desiredOutput, IOdata &fieldSet);
 public:
@@ -141,12 +144,16 @@ public:
   @param[in] parent the identifier of the parent, it must match the objects parent
   */
   void parentSetFlag(index_t flagID, bool val, coreObject *checkParent);
-  virtual bool getFlag (const std::string &param) const override;
+  virtual bool getFlag (const std::string &flag) const override;
   virtual double get(const std::string &param, gridUnits::units_t unitType=gridUnits::defUnit) const override;
-  /** check if the parameter being get is for a subobject, determine which sub object and perform the setFlag operation*/
-  double subObjectGet(const std::string &param, gridUnits::units_t /*unitType*/) const;
+  /** check if the parameter being get is for a subobject, determine which sub object and perform the setFlag operation
+  @param[in] param the subobject string to query the value of 
+  @parma[in] unitType the type of units to convert the output to
+  @return a value corresponding to the request or a null value
+  */
+  double subObjectGet(const std::string &param, gridUnits::units_t unitType) const;
   /** add a grid object to the subObject container
-  @param obj the object to add
+  @param[in] comp the component to add
   */
   void addSubObject(gridComponent *comp);
   virtual void remove(coreObject *obj) override;
@@ -323,7 +330,7 @@ public:
   @return boolean true if the object is armed false if not
   */
   bool isArmed () const;
-
+  virtual bool isCloneable() const override;
   /** @brief convenience function for checking if the object has states
   @param[in] sMode  the solverMode to check
   @return boolean true if the object is armed false if not
@@ -442,6 +449,27 @@ public:
   @return a string vector of the local state names
   */
   virtual stringVec localStateNames() const;
+  /** @brief get a vector of input Names
+  @details the return data is a vector of vectors of string the first element of each vector is the typical input Name the others are alternatives
+  @return a const vector of stringVec containing the names +alternatives for the inputs*/
+  virtual const std::vector<stringVec> &inputNames() const;
+
+
+  /** @brief get the unit type for a particular input
+  @param[in] inputNum the index of the input to get the units for 
+  @return a unit value corresponding to the particular input*/
+  virtual gridUnits::units_t inputUnits(index_t inputNum) const;
+
+  /** @brief get the unit type for a particular output
+ @param[in] outputNum the index of the output to get the units for 
+  @return a unit value corresponding to the particular output*/
+  virtual gridUnits::units_t outputUnits(index_t outputNum) const;
+
+
+  /** @brief get a vector of output Names
+  @details the return data is a vector of vectors of string the first element of each vector is the typical output Name the others are alternatives
+  @return a const vector of stringVec containing the names +alternatives for the outputs*/
+  virtual const std::vector<stringVec> &outputNames() const;
 
   /******************************************
   Functions for mathematical updates
@@ -590,6 +618,12 @@ public:
   **/
   virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum = 0) const;
 
+  /** 
+  @brief find the index of an output given its name
+  @param[in] outputName the name of the output
+  @return the index number of the output
+  */
+  index_t lookupOutputIndex(const std::string &outName) const;
   /**
   *@brief get a single output based on local data
   @param[in] outputNum the index of the output being requested
@@ -661,10 +695,10 @@ public:
 };
 
 /** @brief display all the state names to the screen
-@param obj the object to display the states for
+@param comp the object to display the states for
 @param sMode the mode which to display the states for
 */
-void printStateNames (gridComponent *comp, const solverMode &sMode);
+void printStateNames (const gridComponent *comp, const solverMode &sMode);
 
 
 }//namespace griddyn

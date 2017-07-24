@@ -52,13 +52,13 @@ class pidBlock : public Block
     set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
-    virtual void derivElements (double input,
+    virtual void blockDerivative (double input,
                                 double didt,
                                 const stateData &sD,
                                 double deriv[],
                                 const solverMode &sMode) override;
     // only called if the genModel is not present
-    virtual void jacElements (double input,
+    virtual void blockJacobianElements (double input,
                               double didt,
                               const stateData &sD,
                               matrixData<double> &md,

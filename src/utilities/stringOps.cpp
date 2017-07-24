@@ -138,7 +138,7 @@ void trim (stringVector &input, const std::string &whitespace)
 static const std::string digits ("0123456789");
 int trailingStringInt (const std::string &input, std::string &output, int defNum)
 {
-    if (isdigit (input.back ()) == 0)
+    if ((input.empty())||(isdigit (input.back ()) == 0))
     {
         output = input;
         return defNum;

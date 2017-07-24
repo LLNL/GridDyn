@@ -87,7 +87,7 @@ void GovernorIeeeSimple::residual (const IOdata &inputs,
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
     derivative (inputs, sD, resid, sMode);
 
     Loc.destDiffLoc[0] -= Loc.dstateLoc[0];
@@ -99,7 +99,7 @@ void GovernorIeeeSimple::derivative (const IOdata &inputs,
                                             double deriv[],
                                             const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
     const double *gs = Loc.diffStateLoc;
     // double omega = getControlFrequency (inputs);
@@ -148,7 +148,7 @@ void GovernorIeeeSimple::jacobianElements (const IOdata & /*inputs*/,
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+    auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
     int refI = Loc.diffOffset;
     // use the md.assign Macro defined in basicDefs
@@ -219,7 +219,7 @@ void GovernorIeeeSimple::rootTest (const IOdata &inputs,
           */
     if (opFlags[uses_plimits])
     {
-        Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+        auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
         double Pmech = Loc.diffStateLoc[0];
 

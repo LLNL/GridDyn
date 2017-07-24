@@ -60,18 +60,18 @@ void differentialRelay::setFlag (const std::string &flag, bool val)
     }
 }
 
-bool differentialRelay::getFlag (const std::string &param) const
+bool differentialRelay::getFlag (const std::string &flag) const
 {
-    if (param == "relative")
+    if (flag == "relative")
     {
         return opFlags[relative_differential_flag];
     }
-    return Relay::getFlag (param);
+    return Relay::getFlag (flag);
 }
 
 void differentialRelay::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else
@@ -179,7 +179,7 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
     add (std::move (ge));
     if ((opFlags[relative_differential_flag]) && (opFlags[link_mode]) && (m_minLevel > 0.0))
     {
-        setActionMultiTrigger ({0, 1}, 0, m_delayTime);
+        setActionMultiTrigger (0,{0, 1}, m_delayTime);
     }
     else
     {

@@ -203,7 +203,6 @@ if(KLU_ENABLE)
 IF(MSVC)
 set(SuiteSparse_USE_LAPACK_BLAS ON)
 ENDIF(MSVC)
-set(SuiteSparse_VERBOSE OFF)
   find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
   if(SuiteSparse_FOUND) 
 	list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
@@ -317,21 +316,27 @@ set (optional_library_functions )
 IF (MSVC)
 find_path(BOOST_TEST_PATH 
 			NAMES 			boost/version.hpp
-			PATHS		C:/boost_1_64_0
+			PATHS		C:/boost_1_65_0
+						C:/boost_1_64_0
 						C:/boost_1_63_0
 						C:/boost_1_61_0
+						D:/boost_1_65_0
 						D:/boost_1_64_0
 						D:/boost_1_63_0
 						D:/boost_1_61_0
+						C:/boost/boost_1_65_0
 						C:/boost/boost_1_64_0
 						C:/boost/boost_1_63_0
 						C:/boost/boost_1_61_0
+						D:/boost/boost_1_65_0
 						D:/boost/boost_1_64_0
 						D:/boost/boost_1_63_0
 						D:/boost/boost_1_61_0
+						C:/local/boost_1_65_0
 						C:/local/boost_1_64_0
 						C:/local/boost_1_63_0
 						C:/local/boost_1_61_0
+						D:/local/boost_1_65_0
 						D:/local/boost_1_64_0
 						D:/local/boost_1_63_0
 						D:/local/boost_1_61_0
@@ -393,6 +398,7 @@ IF (ENABLE_PLUGINS)
 		message("Plugin support requires BOOST 1.61 or higher")
 	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 		add_subdirectory(plugins)
+		SET(DL_ENABLE ON)
 	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(ENABLE_PLUGINS)
 
@@ -422,6 +428,7 @@ IF (FMI_ENABLE)
 		message("FMI support requires BOOST 1.61 or higher")
 	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 		add_subdirectory(src/fmi)
+		SET(DL_ENABLE ON)
 	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
 ENDIF(FMI_ENABLE)
 
@@ -573,7 +580,7 @@ endif(NOT ZMQ_FOUND)
 # ZMQ_LIBRARY, the library needed to use ZMQ
 # ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
 	if (ZMQ_FOUND)
-		add_subdirectory(src/zmqLib)
+		add_subdirectory(src/zmqlib)
 	else(ZMQ_FOUND)
 		message(SEND_ERROR "unable to locate zmq library")
 	endif(ZMQ_FOUND)
@@ -627,11 +634,19 @@ add_subdirectory(src/coupling)
 
 add_subdirectory(src/gridDynCombined)
 
-OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" ON)
+OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" OFF)
 
 IF(BUILD_SHARED_FMI_LIBRARY)
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 	add_subdirectory(src/fmi_export)
 ENDIF(BUILD_SHARED_FMI_LIBRARY)
+
+OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
+
+IF(BUILD_GRIDDYN_SHARED_LIBRARY)
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+	add_subdirectory(src/griddyn_shared)
+ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 
 add_subdirectory(src/gridDynMain)
 # -------------------------------------------------------------

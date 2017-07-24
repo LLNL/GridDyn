@@ -12,6 +12,7 @@
 
 #ifndef FACTORY_TEMPLATES_H_
 #define FACTORY_TEMPLATES_H_
+#pragma once
 
 #include <map>
 #include <memory>

@@ -91,7 +91,7 @@ public:
 	virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 	virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
-	virtual double getOutput(index_t num = 0) const override;
+	virtual double getOutput (index_t outputNum = 0) const override;
 	virtual index_t getOutputLoc(const solverMode &sMode, index_t num = 0) const override;
 
 

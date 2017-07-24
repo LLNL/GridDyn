@@ -47,7 +47,7 @@ struct delayedControlAction
   bool measureAction;
 };
 
-/** @brief relay with control functionality  ie the ability to control an object through a comm channel
+/** @brief relay with control functionality  i.e. the ability to control an object through a comm channel
 */
 class controlRelay : public Relay
 {

@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <tuple>
 #include "utilities/units.h"
 #include <boost/variant.hpp>
 namespace griddyn
@@ -28,7 +27,7 @@ using property_type = boost::variant<double, std::pair<double, gridUnits::units_
 
 /** class for temporarily holding object properties if the object has delayed initialization or something to that effect
 @details includes storage for string, double, integer, and binary properties,  targeted at griddyn and helper objects
-It should be able to handle setting via regular pointer or shared pointer only griddyn are meant to make use of gridUnits*/
+It should be able to handle setting via regular pointer or shared pointer only coreObjects are meant to make use of gridUnits*/
 class propertyBuffer
 {
 private:

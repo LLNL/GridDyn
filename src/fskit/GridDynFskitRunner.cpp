@@ -11,9 +11,14 @@
 * LLNS Copyright End
 */
 
+#include "griddyn.h"
 #include "GridDynFskitRunner.h"
 #include "gridDynFederatedScheduler.h"
+#include "fskitCommunicator.h"
+#include "core/factoryTemplates.hpp"
 #include "griddyn-tracer.h"
+
+static griddyn::childClassFactory<FskitCommunicator,griddyn::Communicator> commFac(std::vector<std::string>{ "fskit" });
 
 GriddynFskitRunner::GriddynFskitRunner()
 {
@@ -25,14 +30,16 @@ int GriddynFskitRunner::Initialize(int argc, char *argv[], std::shared_ptr<fskit
 	{
 		GriddynFederatedScheduler::Initialize(scheduler);
 	}
-	GRIDDYN_TRACER("GridDyn::GriddynRunner::Initialize");
-	return GriddynRunner::Initialize(argc, argv);
+	return Initialize(argc, argv);
 }
 
 int GriddynFskitRunner::Initialize(int argc, char *argv[])
 {
 	GRIDDYN_TRACER("GridDyn::GriddynRunner::Initialize");
-	return GriddynRunner::Initialize(argc, argv);
+	auto retval = GriddynRunner::Initialize(argc, argv);
+	auto gds = griddyn::GriddynRunner::getSim();
+	griddyn::gridDynSimulation::setInstance(gds.get());
+	return retval;
 }
 
 void GriddynFskitRunner::Run()

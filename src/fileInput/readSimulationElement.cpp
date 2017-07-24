@@ -159,6 +159,7 @@ void loadDefaultObjectTranslations (readerInfo &ri)
     ri.addTranslate ("breaker", "relay");
     ri.addTranslate ("sensor", "relay");
     ri.addTranslate ("control", "relay");
+	ri.addTranslate("pmu", "relay");
     ri.addTranslate ("controlblock", "block");
     ri.addTranslate ("model", "genmodel");
     ri.addTranslate ("gen", "generator");

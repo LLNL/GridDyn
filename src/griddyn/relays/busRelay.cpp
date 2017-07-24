@@ -93,7 +93,7 @@ void busRelay::set (const std::string &param, double val, gridUnits::units_t uni
         if (opFlags[dyn_initialized])
         {
             setActionTrigger (0, 0, voltageDelay);
-            setActionTrigger (1, 0, frequencyDelay);
+            setActionTrigger (0, 1, frequencyDelay);
         }
     }
     else if (param == "voltagedelay")
@@ -109,7 +109,7 @@ void busRelay::set (const std::string &param, double val, gridUnits::units_t uni
         frequencyDelay = val;
         if (opFlags[dyn_initialized])
         {
-            setActionTrigger (1, 0, frequencyDelay);
+            setActionTrigger (0, 1, frequencyDelay);
         }
     }
     else
@@ -134,7 +134,7 @@ void busRelay::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         setConditionStatus (0, condition_status_t::disabled);
     }
     add (std::shared_ptr<Condition> (make_condition ("frequency", "<", cutoutFrequency, m_sourceObject)));
-    setActionTrigger (1, 0, frequencyDelay);
+    setActionTrigger (0, 1, frequencyDelay);
     if ((cutoutFrequency > 2.0) || (cutoutFrequency <= 0))
     {
         setConditionStatus (1, condition_status_t::disabled);

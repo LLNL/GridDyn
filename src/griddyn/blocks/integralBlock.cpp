@@ -61,7 +61,7 @@ void integralBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
 }
 
 // residual
-void integralBlock::residElements (double input,
+void integralBlock::blockResidual (double input,
                                    double didt,
                                    const stateData &sD,
                                    double resid[],
@@ -69,15 +69,15 @@ void integralBlock::residElements (double input,
 {
     if (isAlgebraicOnly (sMode))
     {
-        Block::residElements (input, didt, sD, resid, sMode);
+        Block::blockResidual (input, didt, sD, resid, sMode);
         return;
     }
     auto offset = offsets.getDiffOffset (sMode);
     resid[offset] = (K * (input + bias) - sD.dstate_dt[offset]);
-    Block::residElements (input, didt, sD, resid, sMode);
+    Block::blockResidual (input, didt, sD, resid, sMode);
 }
 
-void integralBlock::derivElements (double input,
+void integralBlock::blockDerivative (double input,
                                    double didt,
                                    const stateData &sD,
                                    double deriv[],
@@ -87,11 +87,11 @@ void integralBlock::derivElements (double input,
     deriv[offset + limiter_diff] = K * (input + bias);
     if (opFlags[use_ramp_limits])
     {
-        Block::derivElements (input, didt, sD, deriv, sMode);
+        Block::blockDerivative (input, didt, sD, deriv, sMode);
     }
 }
 
-void integralBlock::jacElements (double input,
+void integralBlock::blockJacobianElements (double input,
                                  double didt,
                                  const stateData &sD,
                                  matrixData<double> &md,
@@ -100,14 +100,14 @@ void integralBlock::jacElements (double input,
 {
     if (isAlgebraicOnly (sMode))
     {
-        Block::jacElements (input, didt, sD, md, argLoc, sMode);
+        Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
     }
     auto offset = offsets.getDiffOffset (sMode);
     // use the md.assign Macro defined in basicDefs
     // md.assign(arrayIndex, RowIndex, ColIndex, value)
     md.assignCheck (offset, argLoc, K);
     md.assign (offset, offset, -sD.cj);
-    Block::jacElements (input, didt, sD, md, argLoc, sMode);
+    Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
 }
 
 double integralBlock::step (coreTime time, double inputA)

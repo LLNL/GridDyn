@@ -204,35 +204,35 @@ class gridSimulation : public Area
 
     /**
      * \brief Gets the current simulation time.
-     * \return a double representing the current simulation time, in seconds.
+     * @return a double representing the current simulation time, in seconds.
      */
     coreTime getCurrentTime () const { return currentTime; }
 
     /**
      * \brief Gets the simulation start time.
-     * \return a double representing the simulation start time, in seconds.
+     * @return a double representing the simulation start time, in seconds.
      */
     coreTime getStartTime () const { return startTime; }
 	/**
 	* \brief Gets the simulation stop time.
-	* \return a double representing the simulation start time, in seconds.
+	* @return a double representing the simulation start time, in seconds.
 	*/
 	coreTime getStopTime() const { return stopTime; }
 	/**
 	* \brief Gets the simulation step time.
-	* \return a time representing the simulation start time, in seconds.
+	* @return a time representing the simulation start time, in seconds.
 	*/
 	coreTime getStepTime() const { return stepTime; }
 
     /**
      * \brief gets the next event time.
-     * \return a double representing the next scheduled event in GridDyn.
+     * @return a double representing the next scheduled event in GridDyn.
      */
     coreTime getEventTime () const;
 	/**
 	* \brief gets the next event time.
 	* @param[in] eventCode a code corresponding to a specific type of event
-	* \return a time representing the next scheduled event in GridDyn.
+	* @return a time representing the next scheduled event in GridDyn.
 	*/
 	coreTime getEventTime(int eventCode) const;
 

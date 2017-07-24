@@ -15,8 +15,8 @@
 #include "Generator.h"
 #include "blocks/blockLibrary.h"
 #include "core/coreExceptions.h"
-#include "core/objectFactoryTemplates.hpp"
 #include "core/coreObjectTemplates.hpp"
+#include "core/objectFactoryTemplates.hpp"
 #include "scheduler.h"
 
 namespace griddyn
@@ -73,7 +73,7 @@ protected:
 
 static typeFactory<Block> bbof ("agc", {"basic", "agc"}, "basic");
 
-AGControl::~AGControl() = default;
+AGControl::~AGControl () = default;
 
 AGControl::AGControl (const std::string &objName) : gridSubModel (objName)
 {
@@ -88,15 +88,14 @@ AGControl::AGControl (const std::string &objName) : gridSubModel (objName)
     db->set ("rampband", 4);
 }
 
-
 coreObject *AGControl::clone (coreObject *obj) const
 {
-	auto nobj = cloneBase<AGControl, gridSubModel>(this, obj);
+    auto nobj = cloneBase<AGControl, gridSubModel> (this, obj);
     if (nobj == nullptr)
     {
-		return obj;
+        return obj;
     }
-    
+
     nobj->KI = KI;
     nobj->KP = KP;
     nobj->beta = beta;
@@ -112,16 +111,15 @@ coreObject *AGControl::clone (coreObject *obj) const
     return nobj;
 }
 
-
-double AGControl::getOutput(const IOdata & /*inputs*/, const stateData & /*sD*/, const solverMode & /*sMode*/, index_t /*outNum*/) const
+double AGControl::getOutput (const IOdata & /*inputs*/,
+                             const stateData & /*sD*/,
+                             const solverMode & /*sMode*/,
+                             index_t /*outNum*/) const
 {
-	return reg;
+    return reg;
 }
 
-double AGControl::getOutput(index_t /*outNum*/) const
-{
-	return reg;
-}
+double AGControl::getOutput (index_t /*outNum*/) const { return reg; }
 void AGControl::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
     IOdata iSet (1);
@@ -187,7 +185,7 @@ void AGControl::timestep (coreTime time, const IOdata &inputs, const solverMode 
 
 void AGControl::add (coreObject *obj)
 {
-    if (dynamic_cast<schedulerReg *> (obj)!=nullptr)
+    if (dynamic_cast<schedulerReg *> (obj) != nullptr)
     {
         add (static_cast<schedulerReg *> (obj));
     }
@@ -211,7 +209,7 @@ void AGControl::remove (coreObject *obj)
 {
     for (index_t kk = 0; kk < schedCount; kk++)
     {
-		if (isSameObject(schedList[kk],obj))
+        if (isSameObject (schedList[kk], obj))
         {
             schedList.erase (schedList.begin () + kk);
             schedCount--;
@@ -268,11 +266,11 @@ void AGControl::regChange ()
     regUpAvailable = 0;
     regDownAvailable = 0;
 
-	for (auto &sched : schedList)
-	{
-		regUpAvailable += sched->getRegUpAvailable();
-		regDownAvailable += sched->getRegDownAvailable();
-	}
+    for (auto &sched : schedList)
+    {
+        regUpAvailable += sched->getRegUpAvailable ();
+        regDownAvailable += sched->getRegDownAvailable ();
+    }
     for (index_t kk = 0; kk < schedCount; kk++)
     {
         upRat[kk] = schedList[kk]->getRegUpAvailable () / regUpAvailable;

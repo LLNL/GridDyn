@@ -42,4 +42,4 @@
 
 #cmakedefine DISABLE_MULTITHREADING
 
-#endif //CONFIG_UTILITIES
+#endif //CONFIG_UTILITIES_H_

@@ -37,12 +37,10 @@ class matrixDataTranslate : public matrixDataContainer<ValueT>
     matrixDataTranslate ()
     {
         Trow.fill (kNullLocation);
-        // setRowLimit(CT);
     };
     explicit matrixDataTranslate (matrixData<ValueT> &input) : matrixDataContainer<ValueT> (input)
     {
         Trow.fill (kNullLocation);
-        // setRowLimit(CT);
     };
     inline bool isValidRow (index_t row) const
     {

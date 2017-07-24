@@ -227,7 +227,7 @@ void motorLoad5::residual (const IOdata &inputs, const stateData &sD, double res
 {
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+        auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
         double V = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
@@ -292,10 +292,10 @@ void motorLoad5::residual (const IOdata &inputs, const stateData &sD, double res
         // Erp and Emp
         rv[erpA] = systemBaseFrequency * slip * gm[empA] - (gm[erpA] + (x0 - xp) * gm[imA]) / T0p;
         rv[empA] = -systemBaseFrequency * slip * gm[erpA] - (gm[empA] - (x0 - xp) * gm[irA]) / T0p;
-        rv[erppA] =
-          -systemBaseFrequency * slip * (gm[empA] - gm[emppA]) - (gm[erpA] - gm[emppA] - (xp - xpp) * gm[imA]) / T0pp;
-        rv[emppA] =
-          systemBaseFrequency * slip * (gm[erpA] - gm[erppA]) - (gm[empA] - gm[erppA] + (xp - xpp) * gm[irA]) / T0pp;
+        rv[erppA] = -systemBaseFrequency * slip * (gm[empA] - gm[emppA]) -
+                    (gm[erpA] - gm[emppA] - (xp - xpp) * gm[imA]) / T0pp;
+        rv[emppA] = systemBaseFrequency * slip * (gm[erpA] - gm[erppA]) -
+                    (gm[empA] - gm[erppA] + (xp - xpp) * gm[irA]) / T0pp;
     }
 }
 
@@ -347,7 +347,7 @@ void motorLoad5::timestep (coreTime time, const IOdata &inputs, const solverMode
 
 void motorLoad5::updateCurrents (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, const_cast<double *> (sD.state), sMode, this);
+    auto Loc = offsets.getLocations (sD, const_cast<double *> (sD.state), sMode, this);
     double V = inputs[voltageInLocation];
     double theta = inputs[angleInLocation];
 
@@ -363,7 +363,7 @@ void motorLoad5::derivative (const IOdata & /*inputs*/,
                              double deriv[],
                              const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *ast = Loc.algStateLoc;
     const double *dst = Loc.diffStateLoc;
     const double *ddt = Loc.dstateLoc;
@@ -407,7 +407,7 @@ void motorLoad5::jacobianElements (const IOdata &inputs,
     double cj = sD.cj;
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         refAlg = Loc.algOffset;
         refDiff = Loc.diffOffset;
@@ -576,7 +576,7 @@ index_t motorLoad5::findIndex (const std::string &field, const solverMode &sMode
 
 void motorLoad5::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     auto ro = offsets.getRootOffset (sMode);
     if (opFlags[stalled])
     {
@@ -624,7 +624,7 @@ change_code motorLoad5::rootCheck (const IOdata & /*inputs*/,
 {
     if (opFlags[stalled])
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         double Te =
           Loc.diffStateLoc[erppD] * Loc.algStateLoc[irA] + Loc.diffStateLoc[emppD] * Loc.algStateLoc[imA];
         if (Te - mechPower (1.0) > 0)

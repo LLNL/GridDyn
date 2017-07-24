@@ -41,9 +41,9 @@ public:
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
-	virtual void algElements(double input, const stateData &sD, double update[], const solverMode &sMode) override;
-	//virtual double residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode) override;
-	virtual void jacElements(double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
+	virtual void blockAlgebraicUpdate(double input, const stateData &sD, double update[], const solverMode &sMode) override;
+	//virtual double blockResidual (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode) override;
+	virtual void blockJacobianElements(double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
 	virtual double step(coreTime time, double input) override;
 	//virtual void setTime(coreTime time){prevTime=time;};
 	double computeValue(double input);

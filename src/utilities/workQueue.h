@@ -84,7 +84,8 @@ class workBlock : public basicWorkBlock
         reset ();
         loaded = true;
     }
-    /** update the task with a new packaged_task*/
+    /** update the task with a new packaged_task
+	@param[in] newTask the packaged task with the correct return type*/
     void updateTask (std::packaged_task<retType ()> &&newTask)
     {
         loaded = false;
@@ -318,10 +319,9 @@ class workQueue
     simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoHigh;  //!< queue containing the work to do
     simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoMed;  //!< queue containing the work to do
     simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoLow;  //!< queue containing the work to do
-    std::mutex queueLock;  //!< mutex for condition variable
+	std::vector<std::thread> threadpool;  //!< the threads
+	std::mutex queueLock;  //!< mutex for condition variable
     std::condition_variable queueCondition;  //!< condition variable for waking the threads
-
-    std::vector<std::thread> threadpool;  //!< the threads
     std::atomic<bool> halt{false};  //!< flag indicating the threads should halt
 };
 

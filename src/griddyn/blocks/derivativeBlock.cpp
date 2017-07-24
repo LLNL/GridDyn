@@ -119,16 +119,16 @@ double derivativeBlock::step (coreTime time, double inputA)
     return out;
 }
 
-void derivativeBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void derivativeBlock::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, update, sMode, this);
+    auto Loc = offsets.getLocations (sD, update, sMode, this);
     Loc.destLoc[limiter_alg] = Loc.dstateLoc[0];
     //	update[Aoffset + limiter_alg] = sD.state[Aoffset + limiter_alg] -
     // sD.dstate_dt[offset];
-    Block::algElements (input, sD, update, sMode);
+    Block::blockAlgebraicUpdate (input, sD, update, sMode);
 }
 
-void derivativeBlock::derivElements (double input,
+void derivativeBlock::blockDerivative (double input,
                                      double /*didt*/,
                                      const stateData &sD,
                                      double deriv[],
@@ -139,7 +139,7 @@ void derivativeBlock::derivElements (double input,
     deriv[offset] = (K * (input + bias) - sD.state[offset]) / m_T1;
 }
 
-void derivativeBlock::jacElements (double input,
+void derivativeBlock::blockJacobianElements (double input,
                                    double didt,
                                    const stateData &sD,
                                    matrixData<double> &md,
@@ -163,7 +163,7 @@ void derivativeBlock::jacElements (double input,
         md.assign (Aoffset, Aoffset, -1);
         if (limiter_alg > 0)
         {
-            Block::jacElements (input, didt, sD, md, argLoc, sMode);
+            Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
         }
     }
 }

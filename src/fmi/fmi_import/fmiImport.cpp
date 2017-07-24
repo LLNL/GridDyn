@@ -275,6 +275,7 @@ path fmiLibrary::findSoPath (fmutype_t type)
         {
             return "";
         }
+		break;
     case fmutype_t::modelExchange:
         if (checkFlag (modelExchangeCapable))
         {
@@ -284,6 +285,7 @@ path fmiLibrary::findSoPath (fmutype_t type)
         {
             return "";
         }
+		break;
     }
     if (sizeof (void *) == 8)
     {
@@ -304,6 +306,10 @@ path fmiLibrary::findSoPath (fmutype_t type)
         {
             return sopath;
         }
+#ifdef MACOS
+		sopath /= "darwin64";
+		sopath /= identifier + ".so";
+#endif
     }
     else
     {

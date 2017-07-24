@@ -56,6 +56,7 @@ void controlBlock::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 // initial conditions
 void controlBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
+	fieldSet.resize(1);
     if (opFlags[has_limits])
     {
         Block::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
@@ -77,34 +78,34 @@ void controlBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &des
     }
 }
 
-void controlBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void controlBlock::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     if (!opFlags[differential_input])
     {
-        Lp Loc = offsets.getLocations (sD, update, sMode, this);
+        auto Loc = offsets.getLocations (sD, update, sMode, this);
 
         Loc.destLoc[limiter_alg] = Loc.diffStateLoc[0] + m_T2 / m_T1 * (input + bias) * K;
         if (limiter_alg > 0)
         {
-            Block::algElements (input, sD, update, sMode);
+            Block::blockAlgebraicUpdate (input, sD, update, sMode);
         }
     }
 }
 
-void controlBlock::derivElements (double input,
+void controlBlock::blockDerivative (double input,
                                   double didt,
                                   const stateData &sD,
                                   double deriv[],
                                   const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     if (opFlags[differential_input])
     {
         Loc.destDiffLoc[limiter_diff] = Loc.dstateLoc[limiter_diff + 1] + m_T2 / m_T1 * didt * K;
         Loc.destDiffLoc[limiter_diff + 1] = (K * (input + bias) - Loc.diffStateLoc[limiter_diff]) / m_T1;
         if (limiter_diff > 0)
         {
-            Block::derivElements (input, didt, sD, deriv, sMode);
+            Block::blockDerivative (input, didt, sD, deriv, sMode);
         }
     }
     else
@@ -113,14 +114,14 @@ void controlBlock::derivElements (double input,
     }
 }
 
-void controlBlock::jacElements (double input,
+void controlBlock::blockJacobianElements (double input,
                                 double didt,
                                 const stateData &sD,
                                 matrixData<double> &md,
                                 index_t argLoc,
                                 const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     if (opFlags[differential_input])
     {
     }
@@ -133,7 +134,7 @@ void controlBlock::jacElements (double input,
             md.assignCheckCol (Loc.algOffset + limiter_alg, argLoc, K * m_T2 / m_T1);
             if (limiter_alg > 0)
             {
-                Block::jacElements (input, didt, sD, md, argLoc, sMode);
+                Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
             }
             if (hasDifferential (sMode))
             {

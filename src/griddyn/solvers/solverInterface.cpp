@@ -53,7 +53,6 @@ std::shared_ptr<solverInterface> solverInterface::clone (std::shared_ptr<solverI
         si->setName (getName ());
     }
 
-    si->printResid = printResid;
     si->solverLogFile = solverLogFile;
     si->printLevel = printLevel;
     si->max_iterations = 10000;
@@ -77,7 +76,7 @@ std::shared_ptr<solverInterface> solverInterface::clone (std::shared_ptr<solverI
         // copy the state data
         const double *sd = state_data ();
         double *statecopy = si->state_data ();
-        if ((sd!=nullptr) && (statecopy!=nullptr))
+        if ((sd != nullptr) && (statecopy != nullptr))
         {
             std::copy (sd, sd + svsize, statecopy);
         }
@@ -85,14 +84,14 @@ std::shared_ptr<solverInterface> solverInterface::clone (std::shared_ptr<solverI
         // copy the derivative data
         const double *deriv = deriv_data ();
         double *derivcopy = si->deriv_data ();
-        if ((deriv!=nullptr) && (derivcopy!=nullptr))
+        if ((deriv != nullptr) && (derivcopy != nullptr))
         {
             std::copy (deriv, deriv + svsize, derivcopy);
         }
         // copy the type data
         const double *td = type_data ();
         double *tcopy = si->type_data ();
-        if ((td!=nullptr) && (tcopy!=nullptr))
+        if ((td != nullptr) && (tcopy != nullptr))
         {
             std::copy (td, td + svsize, tcopy);
         }
@@ -304,6 +303,8 @@ static const std::map<std::string, int> solverFlagMap{
   {"adams", -use_bdf_flag},
   {"functional", -use_newton_flag},
   {"newton", use_newton_flag},
+  {"print_resid",print_residuals},
+  {"print_residuals",print_residuals},
 };
 
 void solverInterface::setFlag (const std::string &flag, bool val)
@@ -466,7 +467,7 @@ void solverInterface::setApproximation (const std::string &approx)
     }
 }
 
-void solverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move(msk); }
+void solverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move (msk); }
 void solverInterface::addMaskElement (index_t newMaskElement) { maskElements.push_back (newMaskElement); }
 void solverInterface::addMaskElements (const std::vector<index_t> &newMsk)
 {
@@ -524,7 +525,7 @@ void solverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     else if (opt == 1)
     {
         // Check if flag < 0
-        errflag = reinterpret_cast<int *>(flagvalue);
+        errflag = reinterpret_cast<int *> (flagvalue);
         if (*errflag < 0)
         {
             if (printError)
@@ -558,6 +559,7 @@ void solverInterface::logMessage (int errorCode, const std::string &message)
 }
 
 void solverInterface::setMaxNonZeros (count_t nonZeroCount) { nnz = nonZeroCount; }
+
 // TODO:: change this function so the defaults can be something other than sundials solvers
 std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode)
 {
@@ -569,11 +571,11 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     else if ((isAlgebraicOnly (sMode)) || (!isDynamic (sMode)))
     {
         sd = std::make_unique<solvers::kinsolInterface> (gds, sMode);
-        if (sMode.offsetIndex == 2)
+        if (sMode.offsetIndex == power_flow)
         {
             sd->setName ("powerflow");
         }
-        else if (sMode.offsetIndex == 4)
+        else if (sMode.offsetIndex == dynamic_algebraic)
         {
             sd->setName ("algebraic");
         }
@@ -581,7 +583,7 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     else if (isDAE (sMode))
     {
         sd = std::make_unique<solvers::idaInterface> (gds, sMode);
-        if (sMode.offsetIndex == 3)
+        if (sMode.offsetIndex == dae)
         {
             sd->setName ("dynamic");
         }
@@ -590,7 +592,7 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     {
         sd = coreClassFactory<solverInterface>::instance ()->createObject ("differential");
         sd->setSimulationData (gds, sMode);
-        if (sMode.offsetIndex == 5)
+        if (sMode.offsetIndex == dynamic_differential)
         {
             sd->setName ("differential");
         }

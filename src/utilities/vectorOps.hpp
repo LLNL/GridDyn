@@ -10,8 +10,13 @@
  * LLNS Copyright End
  */
 
+ /** @file
+ *  @brief define template operations on vectors
+ */
 #ifndef VECTOR_OPS_H
 #define VECTOR_OPS_H
+#pragma once
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -19,12 +24,35 @@
 #include <numeric>
 #include <type_traits>
 #include <vector>
-
+/** solve a 2x2 matrix problem 
+@details solve a 2 variable set of equations Vx=y solve for x
+v11*x1+v12*x2=y1
+v21*x1+v22*x2=y2
+@param[in] v11
+@param[in] v12
+@param[in] v21
+@param[in] v22
+@param[in] y1  the result of the first equation
+@param[in] y2 the result of the second equation
+@param[out] x1 the computed first element
+@param[out] x2 the computed second result
+@return the value of the determinant
+*/
 double solve2x2 (double v11, double v12, double v21, double v22, double y1, double y2, double &x1, double &x2);
 
+/** solve Ax=b where A is a [3x3] matrix
+@param[in] input a 3x3 array
+@param[in] vals b in the equation Ax=b
+@return a 3x1 array of the results*/
 std::array<double, 3>
 solve3x3 (const std::array<std::array<double, 3>, 3> &input, const std::array<double, 3> &vals);
 
+/** perform a linear interpolation 
+@param[in] timeIn a vector of time values
+@param[in] valIn the values of the known vector
+@param[in] timeOut  the desired times in the output vector
+@return the computed values corresponding to timeOut
+*/
 std::vector<double> interpolateLinear (const std::vector<double> &timeIn,
                                        const std::vector<double> &valIn,
                                        const std::vector<double> &timeOut);
@@ -37,38 +65,69 @@ std::vector<double> interpolateLinear (const std::vector<double> &timeIn,
 #ifndef KEY_QUAL
 #define KEY_QUAL constexpr
 #endif
-
-template <class N>
-KEY_QUAL N valLimit (N val, N lowerLim, N upperLim)
+/** force a value to be between two limits
+@details if val is between the two limits it returns val if it is not it returns the appropriate limit
+requires that the < operator be defined on the type
+@tparam valType the value type to compare must define a < operator
+@param[in] val the value to operate on
+@param[in] LowerLim the lower limit of the valid range
+@param[in] UpperLim the upper limit of the valid range
+@return the clamped value */
+template <class valType>
+KEY_QUAL valType valLimit (valType val, valType lowerLim, valType upperLim)
 {
-    return (val > upperLim) ? upperLim : ((val < lowerLim) ? lowerLim : val);
+    return (val < upperLim) ? ((val < lowerLim) ? lowerLim : val):upperLim;
 }
 
-template <class N>
-KEY_QUAL N valUpperLimit (N val, N upperLim)
+/** force a value to be at or below an upper Limit
+@details if val is below the upper limit it returns val if it is not it returns the limit
+@tparam valType the value type to compare must define a < operator
+@param[in] val the value to operate on
+@param[in] upperLim the upper limit of the valid range
+@return the clamped value */
+template <class valType>
+KEY_QUAL valType valUpperLimit (valType val, valType upperLim)
 {
-    return (val > upperLim) ? upperLim : val;
+    return (val < upperLim) ? val:upperLim;
 }
 
-template <class N>
-KEY_QUAL N valLowerLimit (N val, N lowerLim)
+/** force a value to be at or above a lower Limit
+@details if val is greater than the lower limit it returns val if it is not it returns the limit
+@tparam valType the value type to compare must define a < operator
+@param[in] val the value to operate on
+@param[in] lowerLim the upper limit of the valid range
+@return the clamped value */
+template <class valType>
+KEY_QUAL valType valLowerLimit (valType val, valType lowerLim)
 {
     return (val < lowerLim) ? lowerLim : val;
 }
 
+/** get the sign of a number (-1) for numbers less than 1 for greater than 0 and 0 for == 0
+@details this could be used with other types if they define a constructor which take and integer argument
+and a less than operator and != operator
+@tparam M the value type to compare must define a < operator and != operator
+@param[in] x the value to operate on
+@return the sign of the value*/
 template <typename M>
 KEY_QUAL M signn (M x)
 {
-    return ((x > 0) ? 1 : ((x < 0) ? (-1) : 0));
+    return ((x < M(0)) ? M(-1) : ((x != M(0)) ? M(1) : M(0)));
 }
 
+/** sum a vector
+@tparam x the type of the vector
+@param[in] a the vector to sum the contents
+@return the sum as the same type as the vector
+*/
 template <class X>
 X sum (const std::vector<X> &a)
 {
-    X sum_of_vector = std::accumulate (a.cbegin (), a.cend (), 0.0);
+    X sum_of_vector = std::accumulate (a.cbegin (), a.cend (), X(0));
     return sum_of_vector;
 }
 
+/** check that a vector has the requested number of elements if not resize it*/
 template <class X>
 void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize)
 {
@@ -78,6 +137,7 @@ void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize)
     }
 }
 
+/** check that a vector has the requested number of elements if not resize it with all new elements having value = defArg*/
 template <class X>
 void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize, const X &defArg)
 {
@@ -87,6 +147,7 @@ void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize, const X &defA
     }
 }
 
+/** generate the mean of a vector sum(X)/size(X)*/
 template <class X>
 X mean (const std::vector<X> &a)
 {
@@ -99,14 +160,20 @@ X mean (const std::vector<X> &a)
     return sum_of_vector;
 }
 
+/** calculate the sum of the absolute values of a vector 
+@tparam X the type of the vector must define a negation operator and a < operator
+*/
 template <class X>
 X absSum (const std::vector<X> &a)
 {
     X sum_of_vector =
-      std::accumulate (a.begin (), a.end (), X (0), [](X a1, X a2) -> X { return a1 + std::abs (a2); });
+      std::accumulate (a.begin (), a.end (), X (0), [](X a1, X a2) -> X { return a1 + std::abs(a2); });
     return sum_of_vector;
 }
 
+/** calculate the maximum absolute value of a vector
+@tparam X the type of the vector must define a negation operator and a < operator
+*/
 template <class X>
 X absMax (const std::vector<X> &a)
 {
@@ -114,10 +181,14 @@ X absMax (const std::vector<X> &a)
     // return std::max (std::abs (*(result.first)),std::abs (*(result.second)));
 
     X max_of_vector = std::accumulate (a.begin (), a.end (), X (0),
-                                       [](X a1, X a2) -> X { return a1 >= std::abs (a2) ? a1 : std::abs (a2); });
+		[](X a1, X a2) -> X {auto absA = std::abs(a2); return (a1 <absA) ? absA : a1; });
     return max_of_vector;
 }
 
+/** calculate the maximum absolute value of a vector and return its location
+@tparam X the type of the vector must define a negation operator and a < operator
+@return a pair the first element is the absMax value the second is the index into the vector
+*/
 template <class X>
 std::pair<X, int> absMaxLoc (const std::vector<X> &a)
 {
@@ -128,6 +199,9 @@ std::pair<X, int> absMaxLoc (const std::vector<X> &a)
                        std::make_pair (a2, result.second - a.begin ());
 }
 
+/** calculate the maximum absolute value of a vector
+@tparam X the type of the vector must define a negation operator and a < operator
+*/
 template <class X>
 X absMin (const std::vector<X> &a)
 {
@@ -135,6 +209,10 @@ X absMin (const std::vector<X> &a)
     return std::min (std::abs (*(result.first)), std::abs (*(result.second)));
 }
 
+/** calculate the minimum absolute value of a vector and return its location
+@tparam X the type of the vector must define a negation operator and a < operator
+@return a pair the first element is the absMax value the second is the index into the vector
+*/
 template <class X>
 std::pair<X, int> absMinLoc (const std::vector<X> &a)
 {
@@ -145,6 +223,10 @@ std::pair<X, int> absMinLoc (const std::vector<X> &a)
                         std::make_pair (a2, result.second - a.begin ());
 }
 
+/** calculate the maximum value of a vector and return its location
+@tparam X the type of the vector must define a negation operator and a < operator
+@return a pair the first element is the Max value the second is the index into the vector
+*/
 template <class X>
 std::pair<X, int> maxLoc (const std::vector<X> &a)
 {
@@ -153,6 +235,10 @@ std::pair<X, int> maxLoc (const std::vector<X> &a)
     return std::make_pair (a1, result - a.begin ());
 }
 
+/** calculate the minimum value of a vector and return its location
+@tparam X the type of the vector must define a negation operator and a < operator
+@return a pair the first element is the Max value the second is the index into the vector
+*/
 template <class X>
 std::pair<X, int> minLoc (const std::vector<X> &a)
 {
@@ -161,22 +247,28 @@ std::pair<X, int> minLoc (const std::vector<X> &a)
     return std::make_pair (a1, result - a.begin ());
 }
 
+/** calculate the maximum absolute difference between values in two vectors and return the maximum difference and the location
+@tparam X the type of the vector must have std::abs defined
+@return a pair the first element is the absMax value the second is the index into the vector
+*/
 template <class X>
-std::pair<X, int> absMaxDiffLoc (const std::vector<X> &a, const std::vector<X> &b)
+auto absMaxDiffLoc (const std::vector<X> &a, const std::vector<X> &b)
 {
     int loc = -1;
-    X mdiff = 0;
+    
     auto cnt = (std::min) (a.size (), b.size ());
     auto abeg = a.begin ();
     auto acur = abeg;
     auto bcur = b.begin ();
     auto aend = abeg + cnt;
+	auto mdiff = decltype(std::abs(*acur - *bcur))(0);
     while (acur < aend)
     {
-        if (std::abs (*acur - *bcur) > mdiff)
+		auto adiff = std::abs(*acur - *bcur);
+        if (adiff > mdiff)
         {
             loc = acur - abeg;
-            mdiff = std::abs (*acur - *bcur);
+            mdiff = adiff;
         }
         ++acur;
         ++bcur;
@@ -184,13 +276,21 @@ std::pair<X, int> absMaxDiffLoc (const std::vector<X> &a, const std::vector<X> &
     return std::make_pair (mdiff, loc);
 }
 
+/** calculate the maximum absolute difference between values in two vectors and return the maximum difference
+@tparam X the type of the vector must have std::abs defined
+@return the maximum absolute value of the difference between two vectors
+*/
 template <class X>
-X absMaxDiff (const std::vector<X> &a, const std::vector<X> &b)
+auto absMaxDiff (const std::vector<X> &a, const std::vector<X> &b)
 {
     auto res = absMaxDiffLoc (a, b);
     return res.first;
 }
 
+/** calculate the product of all the values in a vector
+@tparam X the type of the vector must have std::abs defined
+@return the product of all the value in a vector
+*/
 template <class X>
 X product (const std::vector<X> &a)
 {
@@ -198,6 +298,10 @@ X product (const std::vector<X> &a)
     return prod_of_vector;
 }
 
+/** calculate the rms value of a vector 
+@tparam X the type of the vector must have std::abs defined
+@return the computed rms value
+*/
 template <class X>
 X rms (const std::vector<X> &a)
 {
@@ -211,7 +315,7 @@ X stdev (const std::vector<X> &a)
     X mv = mean (a);
     X sum_of_vector =
       std::accumulate (a.begin (), a.end (), 0.0, [mv](X a1, X a2) -> X { return (a1 + (a2 - mv) * (a2 - mv)); });
-    X ret = 0;
+    X ret = X(0);
     if (!a.empty ())
     {
         ret = std::sqrt (sum_of_vector / static_cast<X> (a.size ()));
@@ -246,6 +350,23 @@ std::vector<X> diff (std::vector<X> &a)
     std::vector<X> d (cnt);
     std::adjacent_difference (a.cbegin (), a.cend (), d.begin ());
     return d;
+}
+
+// finding index values to meet conditions
+template <class X>
+auto vecFindOp(const std::vector<X> &a, std::function<bool(X)> op)  //->std::vector<decltype (a.size ())>
+{
+	auto cnt = a.size();
+	std::vector<decltype (cnt)> locs;
+	locs.reserve(cnt);
+	for (decltype (cnt) ii = 0; ii < cnt; ++ii)
+	{
+		if (op(a[ii]))
+		{
+			locs.push_back(ii);
+		}
+	}
+	return locs;
 }
 
 // finding index values to meet conditions

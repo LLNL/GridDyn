@@ -29,7 +29,7 @@ namespace extra {
 txThermalModel::txThermalModel(const std::string &objName) :sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model
-	outputNames = { "ambient", "top_oil", "hot_spot" }; //preset the outputNames
+	outputStrings = { {"ambient","ambientTemp","airTemp"}, {"top_oil","top_oil_temp"}, {"hot_spot","hot_spot_temp"} }; //preset the outputNames
 }
 
 coreObject * txThermalModel::clone(coreObject *obj) const
@@ -210,7 +210,7 @@ void txThermalModel::set(const std::string &param, double val, units_t unitType)
 			setActionTrigger(0, 0, alarmDelay);
 			setActionTrigger(1, 1, alarmDelay);
 			setActionTrigger(2, 2, alarmDelay);
-			setActionTrigger(2, 3, alarmDelay);
+			setActionTrigger(3, 2, alarmDelay);
 		}
 	}
 	else if ((param == "lr") || (param == "loss_ratio"))
@@ -313,7 +313,7 @@ void txThermalModel::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
 
 		sensor::add(b1);
 		sensor::add(b2);
-        b1->parentSetFlag(separate_processing, true, this);
+		b1->parentSetFlag(separate_processing, true, this);
 		b2->parentSetFlag(separate_processing, true, this);
 		auto g1 = std::make_shared<customGrabber>();
 		g1->setGrabberFunction("ambient", [this](coreObject *)->double {return ambientTemp; });
@@ -354,7 +354,7 @@ void txThermalModel::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
 		setActionTrigger(0, 0, alarmDelay);
 		setActionTrigger(1, 1, alarmDelay);
 		setActionTrigger(2, 2, alarmDelay);
-		setActionTrigger(2, 3, alarmDelay);
+		setActionTrigger(3, 2, alarmDelay);
 
 		if (alarmTemp1 <= 0.1)
 		{

@@ -36,9 +36,9 @@ class matrixDataOrdered : public matrixData<ValueT>
     /** @brief default constructor*/
     matrixDataOrdered () noexcept {}
     /** @brief constructor
-    @param[in] rows  the number of elements to reserve
+    @param[in] rowCount  the number of rows and columns in the matrix
     */
-    explicit matrixDataOrdered (index_t N) : matrixData<ValueT> (N, N) { dVec.resize (N); };
+    explicit matrixDataOrdered (index_t RowCount) : matrixData<ValueT> (RowCount, RowCount),dVec(RowCount) { };
     void clear () override
     {
         count = 0;
@@ -75,7 +75,7 @@ class matrixDataOrdered : public matrixData<ValueT>
         }
     }
 
-	virtual void updateLimits(index_t newRowLimit, index_t newColLimit)
+	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) override
 	{
 		primary_max = keyOrder<index_t, M>::primary(newRowLimit, newColLimit);
 		dVec.resize(primary_max);

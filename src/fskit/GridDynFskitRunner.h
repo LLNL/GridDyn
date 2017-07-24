@@ -13,13 +13,14 @@
 #pragma once
 #ifndef GRIDDYN_FSKIT_RUNNER_H
 #define GRIDDYN_FSKIT_RUNNER_H
-#include "gridDynRunner.h"
+#include "fileInput/gridDynRunner.h"
 
 namespace fskit
 {
 	class GrantedTimeWindowScheduler;
 }
-class GriddynFskitRunner : public GriddynRunner
+
+class GriddynFskitRunner : public griddyn::GriddynRunner
 {
 public:
 	GriddynFskitRunner();

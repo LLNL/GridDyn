@@ -10,13 +10,13 @@
 * LLNS Copyright End
 */
 
+#include "Generator.h"
+#include "Link.h"
 #include "contingency.h"
 #include "events/Event.h"
-#include "Generator.h"
 #include "gridBus.h"
-#include "griddyn.h"
 #include "gridDynSimulationFileOps.h"
-#include "Link.h"
+#include "griddyn.h"
 #include "loads/zipLoad.h"
 #include "simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"
@@ -125,8 +125,7 @@ void runContingencyAnalysis (std::vector<std::shared_ptr<contingency>> &contList
 {
     auto wqI = workQueue::instance ();
 
-
-	for (auto &cList:contList)
+    for (auto &cList : contList)
     {
         wqI->addWorkBlock (cList);
     }
@@ -201,7 +200,7 @@ void buildLoadContingencies (gridDynSimulation *gds,
             {
                 index_t kk = 0;
                 auto ld = bus->getLoad (0);
-                while (ld!=nullptr)
+                while (ld != nullptr)
                 {
                     auto ge = std::make_shared<Event> ();
                     ge->setTarget (ld, "connected");
@@ -231,7 +230,7 @@ void buildGenContingencies (gridDynSimulation *gds,
             {
                 index_t kk = 0;
                 auto gen = bus->getGen (0);
-                while (gen!=nullptr)
+                while (gen != nullptr)
                 {
                     auto ge = std::make_shared<Event> ();
                     ge->setTarget (gen, "connected");
@@ -254,7 +253,7 @@ void addContingency (gridDynSimulation *gds,
     {
         auto cont = info.baseCont->clone ();
         cont->add (newEvent, info.stage);
-        contList.push_back (std::move(cont));
+        contList.push_back (std::move (cont));
     }
     else
     {
@@ -266,7 +265,7 @@ void addContingency (gridDynSimulation *gds,
         {
             auto cont = std::make_shared<contingency> (gds);
             cont->add (newEvent, info.stage);
-            contList.push_back (std::move(cont));
+            contList.push_back (std::move (cont));
         }
     }
 }

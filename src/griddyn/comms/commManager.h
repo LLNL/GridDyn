@@ -55,7 +55,7 @@ public:
 		return commLink;
 	}
 
-	void send(std::shared_ptr<commMessage> m);
+	void send(std::shared_ptr<commMessage> m) const;
 
 	const std::string &destName() const
 	{

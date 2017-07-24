@@ -66,10 +66,10 @@ public:
   //virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
   //virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
-  virtual void derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;
-  virtual void algElements (double input, const stateData &sD, double update[], const solverMode &sMode) override;
+  virtual void blockDerivative (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;
+  virtual void blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode) override;
 
-  virtual void jacElements (double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
+  virtual void blockJacobianElements (double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
   virtual double step (coreTime time, double input) override;
   virtual void rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
   virtual void rootTrigger (coreTime time, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;

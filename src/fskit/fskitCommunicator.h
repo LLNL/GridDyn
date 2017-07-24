@@ -14,7 +14,7 @@
 #ifndef FSKIT_COMMUNICATOR_H
 #define FSKIT_COMMUNICATOR_H
 
-#include "comms/gridCommunicator.h"
+#include "comms/Communicator.h"
 #include <fskit/logical-process.h>
 #include <fskit/event-message.h>
 #include <boost/serialization/serialization.hpp>
@@ -25,9 +25,8 @@
 #include <memory>
 
 class FskitCommunicator
-  : public gridCommunicator,
-    public fskit::LogicalProcess,
-    public std::enable_shared_from_this<FskitCommunicator>
+  : public griddyn::Communicator,
+    public fskit::LogicalProcess
 {
 public:
   class FskitCommunicatorMessage : public fskit::EventMessage
@@ -53,15 +52,15 @@ private:
   {
   }
 
-  virtual void transmit (const std::string &destName, std::shared_ptr<commMessage> message) override;
+  virtual void transmit (const std::string &destName, std::shared_ptr<griddyn::commMessage> message) override;
 
-  virtual void transmit (std::uint64_t destID, std::shared_ptr<commMessage> message) override;
+  virtual void transmit (std::uint64_t destID, std::shared_ptr<griddyn::commMessage> message) override;
 
   void ProcessEventMessage (const fskit::EventMessage& eventMessage);
   virtual void initialize () override; //!< XXX: Must be called by client
   virtual void disconnect() override;
 private:
-  void doTransmit (std::shared_ptr<commMessage> message);
+  void doTransmit (std::shared_ptr<griddyn::commMessage> message);
 };
 
 

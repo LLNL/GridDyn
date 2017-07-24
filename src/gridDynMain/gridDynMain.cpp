@@ -16,6 +16,8 @@
 
 #include "gridDynRunner.h"
 
+#include "libraryLoader.h"
+
 #ifdef HELICS_EXECUTABLE
 #include "helics/helicsRunner.h"
 #endif
@@ -46,6 +48,10 @@ int main (int argc, char *argv[])
 
     // Store the simulation pointer somewhere so that it can be accessed in other modules.
     gridDynSimulation::setInstance (gds.get ());  // peer to gridDynSimulation::GetInstance ();
+
+    // TODO: This was removed earlier. Need a way to get access to extraModels with griddynMain executable.
+    // If always loading them when available isn't desired, alternate mechanism is required (command line arg, config file?) 
+    loadLibraries ();
 
     auto execMode = execMode_t::normal;
     // check for different options

@@ -28,27 +28,27 @@ class jsonElement
 public:
 	int elementIndex = 0;
 	std::string name;
-	Json::ArrayIndex arrayIndex = 0;
+	Json_gd::ArrayIndex arrayIndex = 0;
 	jsonElement() noexcept
 	{
 	}
-	jsonElement(Json::Value vElement, std::string newName);
+	jsonElement(Json_gd::Value vElement, std::string newName);
 	
 	void clear();
-	const Json::Value &getElement() const
+	const Json_gd::Value &getElement() const
 	{
 		return (arraytype) ? element[arrayIndex] : element;
 	}
-	Json::ArrayIndex count() const
+	Json_gd::ArrayIndex count() const
 	{
-		return (arraytype) ? element.size() : Json::ArrayIndex(1);
+		return (arraytype) ? element.size() : Json_gd::ArrayIndex(1);
 	}
 	bool isNull() const
 	{
 		return (arraytype) ? element[arrayIndex].isNull() : element.isNull();
 	}
 private:
-	Json::Value element = Json::nullValue;
+	Json_gd::Value element = Json_gd::nullValue;
 	bool arraytype = false;
 
 };

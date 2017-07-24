@@ -186,6 +186,58 @@ BOOST_AUTO_TEST_CASE (gridDynTime_tests)
 
     double dval = static_cast<double> (rt);
     BOOST_CHECK_CLOSE (dval, 34.123141512, 0.0000001);
+
+	coreTime rt2(-2.3);
+
+	double dval2 = static_cast<double> (rt2);
+	BOOST_CHECK_CLOSE(dval2, -2.3, 0.0000001);
+
+	coreTime rt3(-1.0);
+
+	double dval3 = static_cast<double> (rt3);
+	BOOST_CHECK_CLOSE(dval3, -1.0, 0.0000001);
+}
+
+/** test case to construct all objects and do some potentially problematic things to them to ensure the object
+doesn't break or cause a fault
+*/
+
+BOOST_AUTO_TEST_CASE(object_tests_probe)
+{
+	auto cof = coreObjectFactory::instance();
+	auto componentList = cof->getFactoryNames();
+	for (auto &comp : componentList)
+	{
+		auto componentFactory = cof->getFactory(comp);
+		auto typeList = componentFactory->getTypeNames();
+		for (auto &type:typeList)
+		{
+			auto obj = componentFactory->makeObject(type);
+			BOOST_REQUIRE(obj != nullptr);
+			obj->setName("bob");
+			BOOST_CHECK_EQUAL(obj->getName(), "bob");
+			obj->setName(std::string());
+			BOOST_CHECK_EQUAL(obj->getName(), "");
+			obj->set("", "empty"); //this should not throw an exception
+			obj->set("", 0.34, defUnit);  //this should not throw an exception
+			obj->setFlag("", false);  //This should not throw an exception
+			obj->set("#unknown", "empty"); //this should not throw an exception
+			obj->set("#unknown", 0.34, defUnit);  //this should not throw an exception
+			obj->setFlag("#unknown", false);  //This should not throw an exception
+
+			//TODO:: add cloneable check  but need something in the object class
+			/*
+			if (obj->isCloneable())
+			{
+				auto nobj=obj->clone();
+				delete(obj);
+			}*/
+			delete obj;
+			
+
+		}
+	}
+	
 }
 
 BOOST_AUTO_TEST_SUITE_END ()

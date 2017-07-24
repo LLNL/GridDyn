@@ -159,7 +159,7 @@ class Generator : public gridSecondary
                                      const std::vector<double> &Qminpts,
                                      const std::vector<double> &Qmaxpts);
 
-    virtual IOdata predictOutputs (coreTime predTime,
+    virtual IOdata predictOutputs (coreTime predictionTime,
                                    const IOdata &inputs,
                                    const stateData &sD,
                                    const solverMode &sMode) const override;

@@ -76,7 +76,7 @@ void GenModel5::algebraicUpdate (const IOdata &inputs,
                                  const solverMode &sMode,
                                  double /*alpha*/)
 {
-    Lp Loc = offsets.getLocations (sD, update, sMode, this);
+    auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
     solve2x2 (Rs, (Xqp), -(Xdp), Rs, Loc.diffStateLoc[4] - Vd, Loc.diffStateLoc[3] - Vq, Loc.destLoc[0],
               Loc.destLoc[1]);
@@ -85,7 +85,7 @@ void GenModel5::algebraicUpdate (const IOdata &inputs,
 
 void GenModel5::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
     const double *gmp = Loc.dstateLoc;
@@ -117,7 +117,7 @@ void GenModel5::residual (const IOdata &inputs, const stateData &sD, double resi
 
 void GenModel5::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *ast = Loc.algStateLoc;
     const double *dst = Loc.diffStateLoc;
     double *dv = Loc.destDiffLoc;
@@ -150,7 +150,7 @@ void GenModel5::jacobianElements (const IOdata &inputs,
                                   const solverMode &sMode)
 {
     // md.assign (arrayIndex, RowIndex, ColIndex, value) const
-    Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+    auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
     auto refAlg = Loc.algOffset;
     auto refDiff = Loc.diffOffset;

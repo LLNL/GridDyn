@@ -22,8 +22,8 @@
 #include "gridBus.h"
 #include "griddyn.h"
 #include "listMaintainer.h"
-#include "utilities/vectorOps.hpp"
 #include "measurement/objectGrabbers.h"
+#include "utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -225,7 +225,7 @@ void Area::add (Relay *relay) { addObject (this, relay, m_Relays); }
 // --------------- remove components ---------------
 void Area::remove (coreObject *obj)
 {
-    if (dynamic_cast<gridBus *> (obj)!=nullptr)
+    if (dynamic_cast<gridBus *> (obj) != nullptr)
     {
         return remove (static_cast<gridBus *> (obj));
     }
@@ -242,8 +242,7 @@ void Area::remove (coreObject *obj)
         return remove (static_cast<Relay *> (obj));
     }
     // try removing from the objectHolder List
-	if ((!isValidIndex(obj->locIndex,objectHolder)) ||
-			(!isSameObject(objectHolder[obj->locIndex], obj)))
+    if ((!isValidIndex (obj->locIndex, objectHolder)) || (!isSameObject (objectHolder[obj->locIndex], obj)))
     {
         throw (objectRemoveFailure (this));
     }
@@ -268,8 +267,7 @@ void Area::remove (coreObject *obj)
 template <class X>
 void removeObject (Area *area, X *obj, std::vector<X *> &objVector)
 {
-    if ((!isValidIndex(obj->locIndex, objVector)) ||
-        (!isSameObject (objVector[obj->locIndex], obj)))
+    if ((!isValidIndex (obj->locIndex, objVector)) || (!isSameObject (objVector[obj->locIndex], obj)))
     {
         throw (objectRemoveFailure (area));
     }
@@ -337,11 +335,11 @@ void Area::alert (coreObject *obj, int code)
 
 gridBus *Area::getBus (index_t x) const { return (isValidIndex (x, m_Buses)) ? m_Buses[x] : nullptr; }
 
-Link *Area::getLink (index_t x) const { return (isValidIndex(x, m_Links)) ? m_Links[x] : nullptr; }
+Link *Area::getLink (index_t x) const { return (isValidIndex (x, m_Links)) ? m_Links[x] : nullptr; }
 
-Area *Area::getArea (index_t x) const { return (isValidIndex(x, m_Areas)) ? m_Areas[x] : nullptr; }
+Area *Area::getArea (index_t x) const { return (isValidIndex (x, m_Areas)) ? m_Areas[x] : nullptr; }
 
-Relay *Area::getRelay (index_t x) const { return (isValidIndex(x, m_Relays)) ? m_Relays[x] : nullptr; }
+Relay *Area::getRelay (index_t x) const { return (isValidIndex (x, m_Relays)) ? m_Relays[x] : nullptr; }
 
 Generator *Area::getGen (index_t x)
 {
@@ -413,7 +411,7 @@ coreObject *Area::getSubObject (const std::string &typeName, index_t num) const
     }
     if ((typeName == "object") || (typeName == "subobject"))
     {
-        return (isValidIndex(num, primaryObjects)) ? primaryObjects[num] : nullptr;
+        return (isValidIndex (num, primaryObjects)) ? primaryObjects[num] : nullptr;
     }
     return nullptr;
 }
@@ -553,7 +551,7 @@ coreObject *Area::findByUserID (const std::string &typeName, index_t searchID) c
     {
         for (auto po : possObjs)
         {
-			if (isValidIndex(po->locIndex, m_Buses))
+            if (isValidIndex (po->locIndex, m_Buses))
             {
                 if (isSameObject (po, m_Buses[po->locIndex]))
                 {
@@ -566,8 +564,7 @@ coreObject *Area::findByUserID (const std::string &typeName, index_t searchID) c
     {
         for (auto po : possObjs)
         {
-
-			if (isValidIndex(po->locIndex,m_Links))
+            if (isValidIndex (po->locIndex, m_Links))
             {
                 if (isSameObject (po, m_Links[po->locIndex]))
                 {
@@ -580,7 +577,7 @@ coreObject *Area::findByUserID (const std::string &typeName, index_t searchID) c
     {
         for (auto po : possObjs)
         {
-			if (isValidIndex(po->locIndex, m_Areas))
+            if (isValidIndex (po->locIndex, m_Areas))
             {
                 if (isSameObject (po, m_Areas[po->locIndex]))
                 {
@@ -593,7 +590,7 @@ coreObject *Area::findByUserID (const std::string &typeName, index_t searchID) c
     {
         for (auto po : possObjs)
         {
-			if (isValidIndex(po->locIndex, m_Relays))
+            if (isValidIndex (po->locIndex, m_Relays))
             {
                 if (isSameObject (po, m_Relays[po->locIndex]))
                 {
@@ -1059,20 +1056,20 @@ double Area::get (const std::string &param, units_t unitType) const
         val = 0;
         for (auto obj : primaryObjects)
         {
-			double count = obj->get(param);
-			val += (count != kNullVal ? count : 0);
+            double count = obj->get (param);
+            val += (count != kNullVal ? count : 0);
         }
     }
     else if (param == "subobjectcount")
     {
         val = primaryObjects.size ();
     }
-	else if (auto fptr = getObjectFunction(this, param).first)
-	{
-		auto unit = getObjectFunction(this, param).second;
-		coreObject *tobj = const_cast<Area*>(this);
-		val = unitConversion(fptr(tobj), unit, unitType);
-	}
+    else if (auto fptr = getObjectFunction (this, param).first)
+    {
+        auto unit = getObjectFunction (this, param).second;
+        coreObject *tobj = const_cast<Area *> (this);
+        val = unitConversion (fptr (tobj), unit, unitType);
+    }
     else
     {
         return gridPrimary::get (param, unitType);
@@ -1111,7 +1108,7 @@ void Area::timestep (coreTime time, const IOdata &inputs, const solverMode &sMod
             rel->timestep (time, inputs, sMode);
         }
     }
-	prevTime = time;
+    prevTime = time;
 }
 
 count_t Area::getBusVector (std::vector<gridBus *> &busVector, index_t start) const
@@ -2122,7 +2119,7 @@ Area *getMatchingArea (Area *area, gridPrimary *src, gridPrimary *sec)
     }
     lkind.push_back (area->locIndex);
 
-	while (!isSameObject(par,src))
+    while (!isSameObject (par, src))
     {
         lkind.push_back (par->locIndex);
         par = dynamic_cast<gridPrimary *> (par->getParent ());

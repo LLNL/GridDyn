@@ -60,9 +60,6 @@ coreObject *zipLoad::clone (coreObject *obj) const
     nobj->Iq = Iq;
     nobj->Ip = Ip;
     nobj->Pout = Pout;
-    nobj->dPdf = dPdf;
-    nobj->M = M;
-    nobj->H = H;
     nobj->Vpqmax = Vpqmax;
     nobj->Vpqmin = Vpqmin;
     nobj->baseVoltage = baseVoltage;
@@ -89,17 +86,17 @@ void zipLoad::dynObjectInitializeA (coreTime /*time0*/, std::uint32_t flags)
     if ((opFlags[convert_to_constant_impedance]) || CHECK_CONTROLFLAG (flags, all_loads_to_constant_impedence))
     {
         double V = bus->getVoltage ();
-		double invVsquared = 1.0 / (V*V);
-        Yp = Yp + P *invVsquared;
+        double invVsquared = 1.0 / (V * V);
+        Yp = Yp + P * invVsquared;
         P = 0;
         if (opFlags[use_power_factor_flag])
         {
-            Yq = Yq + P * pfq *invVsquared;
+            Yq = Yq + P * pfq * invVsquared;
             Q = 0;
         }
         else
         {
-            Yq = Yq + Q *invVsquared;
+            Yq = Yq + Q * invVsquared;
             Q = 0;
         }
     }
@@ -116,7 +113,6 @@ void zipLoad::timestep (coreTime time, const IOdata &inputs, const solverMode & 
     if (!isConnected ())
     {
         Pout = 0;
-        dPdf = 0;
         return;
     }
     if (time != prevTime)
@@ -124,16 +120,10 @@ void zipLoad::timestep (coreTime time, const IOdata &inputs, const solverMode & 
         updateLocalCache (inputs, stateData (time), cLocalSolverMode);
     }
 
-    double freq = (inputs.size () > 2) ? inputs[frequencyInLocation] : 1.0;
     double V = (inputs.empty ()) ? (bus->getVoltage ()) : inputs[voltageInLocation];
     Pout = -getRealPower (V);
     prevTime = time;
-    // TODO:: Move the frequency dependent parts to a new type of load
-    // Pout+=Pout*(M*freq)-2*df/60.0*H*Psched;
-    Pout -= Pout * (M * (freq - 1.0));
-    dPdf = -H / 30 * Pout;
     Qout = -getReactivePower (V);
-    Qout -= Qout * (M * (freq - 1.0));
 
 #ifdef SGS_DEBUG
     std::cout << "SGS : " << prevTime << " : " << name << " zipLoad::timestep realPower = " << getRealPower ()
@@ -267,6 +257,10 @@ double zipLoad::get (const std::string &param, units_t unitType) const
 
 void zipLoad::set (const std::string &param, double val, units_t unitType)
 {
+	if (param.empty())
+	{
+		return;
+	}
     if (param.length () == 1)
     {
         switch (param[0])
@@ -288,12 +282,6 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
             break;
         case 'b':
             setYq (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
-            break;
-        case 'h':
-            H = val;
-            break;
-        case 'm':
-            M = val;
             break;
         default:
             throw (unrecognizedParameter (param));

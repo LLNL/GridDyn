@@ -12,11 +12,11 @@
 
 #include "griddyn-config.h"
 
-#include "gridDyn.h" // for gridDynSimulation
+#include "griddyn.h" // for gridDynSimulation
 #include "fskitCommunicator.h"
 #include "gridDynFederatedScheduler.h"
 #include "events/eventQueue.h"
-#include "events/gridEvent.h"
+#include "events/Event.h"
 #include "comms/relayMessage.h"
 #include "comms/controlMessage.h"
 #include "comms/commMessage.h"
@@ -38,14 +38,13 @@ FskitCommunicator::FskitCommunicator () :
 }
 
 FskitCommunicator::FskitCommunicator (std::string id)
-  : gridCommunicator (id),
+  : Communicator (id),
     LogicalProcess (
       fskit::GlobalLogicalProcessId (
         fskit::FederatedSimulatorId ("gridDyn"), GRIDDYN_RANK,
         fskit::LocalLogicalProcessId (id)))
 {
   assert (GriddynFederatedScheduler::IsFederated ());
-
   // XXX: shared_from_this() cannot be used in a class
   // constructor because of the precondition that a
   // shared_ptr be created to manage this object prior
@@ -54,14 +53,13 @@ FskitCommunicator::FskitCommunicator (std::string id)
   //  shared_from_this ());
 }
 
-FskitCommunicator::FskitCommunicator (std::string name, std::uint64_t id)  : gridCommunicator (name,id),
+FskitCommunicator::FskitCommunicator (std::string name, std::uint64_t id)  : Communicator (name,id),
                                                                              LogicalProcess (
                                                                                fskit::GlobalLogicalProcessId (
                                                                                  fskit::FederatedSimulatorId ("gridDyn"), GRIDDYN_RANK,
                                                                                  fskit::LocalLogicalProcessId (name)))
 {
   assert (GriddynFederatedScheduler::IsFederated ());
-
   // XXX: shared_from_this() cannot be used in a class
   // constructor because of the precondition that a
   // shared_ptr be created to manage this object prior
@@ -78,7 +76,7 @@ FskitCommunicator::initialize ()
   // XXX: This assumes that clients are using this class instance
   // as a shared_ptr.
   GriddynFederatedScheduler::GetScheduler ()->RegisterLogicalProcess (
-    std::static_pointer_cast<FskitCommunicator>(gridCommunicator::shared_from_this()));
+    std::static_pointer_cast<FskitCommunicator>(Communicator::shared_from_this()));
 }
 
 void FskitCommunicator::disconnect()
@@ -90,13 +88,13 @@ void FskitCommunicator::disconnect()
 void
 FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
 {
-  auto gds = gridDynSimulation::getInstance ();
+  auto gds = griddyn::gridDynSimulation::getInstance ();
 
   // Convert fskit time (ns) to Griddyn time (s)
   double griddynTime = eventMessage.GetTime ().GetRaw () * 1.0E-9;
 
   //auto m = coreMessageFactory::instance()->createMessage(eventMessage.GetEventType());
-  auto m = std::make_shared<controlMessage>(eventMessage.GetEventType());
+  auto m = std::make_shared<griddyn::comms::controlMessage>(eventMessage.GetEventType());
   assert(m);
   eventMessage.Unpack(*m);
   std::string name = getName();
@@ -111,15 +109,15 @@ FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
 */
 
 
-  std::shared_ptr<commMessage> message = std::move(m);
+  std::shared_ptr<griddyn::commMessage> message = std::move(m);
   //using lambda capture to move the message to the lambda
   // unique ptr capture with message{std::move(m)} failed on gcc 4.9.3; build shared and capture the shared ptr.
-  auto event = std::make_unique<functionEventAdapter>([this, message](){
+  auto event = std::make_unique<griddyn::functionEventAdapter>([this, message](){
       receive(0, getName(), message);
-      return change_code::no_change;
+      return griddyn::change_code::no_change;
   });
   event->m_nextTime = griddynTime;
-  gds->add(std::shared_ptr<eventAdapter>(std::move(event)));
+  gds->add(std::shared_ptr<griddyn::eventAdapter>(std::move(event)));
 
   /*
   switch (eventMessage.GetEventType ())
@@ -224,23 +222,23 @@ FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
 	*/
 }
 
-void FskitCommunicator::transmit (const std::string & /*destName*/, std::shared_ptr<commMessage> message)
+void FskitCommunicator::transmit (const std::string & /*destName*/, std::shared_ptr<griddyn::commMessage> message)
 {
   doTransmit (message);
 }
 
-void FskitCommunicator::transmit (std::uint64_t /*destID*/, std::shared_ptr<commMessage> message)
+void FskitCommunicator::transmit (std::uint64_t /*destID*/, std::shared_ptr<griddyn::commMessage> message)
 {
   doTransmit (message);
 }
 
 void
-FskitCommunicator::doTransmit ( std::shared_ptr<commMessage> message)
+FskitCommunicator::doTransmit ( std::shared_ptr<griddyn::commMessage> message)
 {
   std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler (
     GriddynFederatedScheduler::GetScheduler ());
 
-  gridDynSimulation* inst = gridDynSimulation::getInstance ();
+  griddyn::gridDynSimulation* inst = griddyn::gridDynSimulation::getInstance ();
   fskit::Time currentTime;
   if (inst != 0)
     {
@@ -258,9 +256,9 @@ FskitCommunicator::doTransmit ( std::shared_ptr<commMessage> message)
 
   switch (message->getMessageType ())
     {
-    case commMessage::ignoreMessageType:
-    case commMessage::pingMessageType:
-    case commMessage::replyMessageType:
+    case griddyn::commMessage::ignoreMessageType:
+    case griddyn::commMessage::pingMessageType:
+    case griddyn::commMessage::replyMessageType:
       {
         scheduler->SendEventMessage (
           fskit::GlobalLogicalProcessId (
@@ -274,21 +272,21 @@ FskitCommunicator::doTransmit ( std::shared_ptr<commMessage> message)
           );
       }
       break;
-    case controlMessage::SET:
-    case controlMessage::GET:
-    case controlMessage::GET_MULTIPLE:
-    case controlMessage::GET_PERIODIC:
-    case controlMessage::SET_SUCCESS:
-    case controlMessage::SET_FAIL:
-    case controlMessage::GET_RESULT:
-    case controlMessage::GET_RESULT_MULTIPLE:
-    case controlMessage::SET_SCHEDULED:
-    case controlMessage::GET_SCHEDULED:
-    case controlMessage::CANCEL:
-    case controlMessage::CANCEL_SUCCESS:
-    case controlMessage::CANCEL_FAIL:
+    case griddyn::comms::controlMessage::SET:
+    case griddyn::comms::controlMessage::GET:
+    case griddyn::comms::controlMessage::GET_MULTIPLE:
+    case griddyn::comms::controlMessage::GET_PERIODIC:
+    case griddyn::comms::controlMessage::SET_SUCCESS:
+    case griddyn::comms::controlMessage::SET_FAIL:
+    case griddyn::comms::controlMessage::GET_RESULT:
+    case griddyn::comms::controlMessage::GET_RESULT_MULTIPLE:
+    case griddyn::comms::controlMessage::SET_SCHEDULED:
+    case griddyn::comms::controlMessage::GET_SCHEDULED:
+    case griddyn::comms::controlMessage::CANCEL:
+    case griddyn::comms::controlMessage::CANCEL_SUCCESS:
+    case griddyn::comms::controlMessage::CANCEL_FAIL:
       {
-        std::shared_ptr<controlMessage> m = std::dynamic_pointer_cast<controlMessage> (message);
+        std::shared_ptr<griddyn::comms::controlMessage> m = std::dynamic_pointer_cast<griddyn::comms::controlMessage> (message);
 
         scheduler->SendEventMessage (
           fskit::GlobalLogicalProcessId (
@@ -302,18 +300,18 @@ FskitCommunicator::doTransmit ( std::shared_ptr<commMessage> message)
           );
       }
       break;
-    case relayMessage::NO_EVENT:
-    case relayMessage::LOCAL_FAULT_EVENT:
-    case relayMessage::REMOTE_FAULT_EVENT:
-    case relayMessage::BREAKER_TRIP_EVENT:
-    case relayMessage::BREAKER_CLOSE_EVENT:
-    case relayMessage::LOCAL_FAULT_CLEARED:
-    case relayMessage::REMOTE_FAULT_CLEARED:
-    case relayMessage::BREAKER_TRIP_COMMAND:
-    case relayMessage::BREAKER_CLOSE_COMMAND:
-    case relayMessage::BREAKER_OOS_COMMAND:
+    case griddyn::comms::relayMessage::NO_EVENT:
+    case griddyn::comms::relayMessage::LOCAL_FAULT_EVENT:
+    case griddyn::comms::relayMessage::REMOTE_FAULT_EVENT:
+    case griddyn::comms::relayMessage::BREAKER_TRIP_EVENT:
+    case griddyn::comms::relayMessage::BREAKER_CLOSE_EVENT:
+    case griddyn::comms::relayMessage::LOCAL_FAULT_CLEARED:
+    case griddyn::comms::relayMessage::REMOTE_FAULT_CLEARED:
+    case griddyn::comms::relayMessage::BREAKER_TRIP_COMMAND:
+    case griddyn::comms::relayMessage::BREAKER_CLOSE_COMMAND:
+    case griddyn::comms::relayMessage::BREAKER_OOS_COMMAND:
       {
-        std::shared_ptr<relayMessage> m = std::dynamic_pointer_cast<relayMessage> (message);
+        std::shared_ptr<griddyn::comms::relayMessage> m = std::dynamic_pointer_cast<griddyn::comms::relayMessage> (message);
 
         scheduler->SendEventMessage (
           fskit::GlobalLogicalProcessId (

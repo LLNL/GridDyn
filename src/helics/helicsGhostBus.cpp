@@ -93,14 +93,14 @@ void helicsGhostBus::timestep (coreTime ttime, const IOdata &inputs, const solve
     gridBus::timestep (ttime, inputs, sMode);
 }
 
-void helicsGhostBus::setFlag (const std::string &param, bool val)
+void helicsGhostBus::setFlag (const std::string &flag, bool val)
 {
-    if (param[0] == '#')
+    if (flag.front() == '#')
     {
     }
     else
     {
-        gridBus::setFlag (param, val);
+        gridBus::setFlag (flag, val);
     }
 }
 

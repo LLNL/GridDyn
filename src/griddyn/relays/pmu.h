@@ -24,14 +24,21 @@ class pmu : public sensor
 public:
 	enum pmu_flags
 	{
-		transmit_active = object_flag11,
+		transmit_active = object_armed_flag, //!< flag to indicate that the relay is transmitting
+		three_phase_active=three_phase_only, //!<flag indicating 3 phase values
+		three_phase_set=three_phase_capable, //!<flag indicating that the 3-phase value was user set vs default
+		current_active=object_flag12,	//!< flag indicating that the current measurements are active
 	};
 protected:
-	coreTime transmissionRate = 30.0;  //!< the rate of data transmission
-	parameter_t Tv = 0.1;  //!< filter time constant for the voltage measurement
-	parameter_t Ttheta = 0.4;		//!< filter time constant for the angle measurement
-	coreTime sampleRate = 720.0;  //!< [Hz] the actual sample time 
-
+	coreTime transmissionPeriod = 1.0/30.0;  //!< the rate of data transmission
+	parameter_t Tv = 0.05;  //!< filter time constant for the voltage measurement
+	parameter_t Ttheta = 0.05;		//!< filter time constant for the angle measurement
+	parameter_t Tcurrent = 0.05;  //!< filter time constant for the current measurement
+	parameter_t Trocof = 0.05;  //!< filter time constant for computing the ROCOF
+	parameter_t sampleRate = 720.0;  //!< [Hz] the actual sample time 
+private:
+	coreTime nextTransmitTime = maxTime; //!< the time of the next transmission
+	coreTime lastTransmitTime = negTime; //!< the time of the last transmission
 public:
 	pmu(const std::string &objName = "pmu_$");
 	coreObject * clone(coreObject *obj = nullptr) const override;
@@ -45,7 +52,14 @@ public:
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 
 	virtual void updateA(coreTime time) override;
-
+	virtual coreTime updateB() override;
+private:
+	/** create the appropriate output names based on the settings*/
+	void generateOutputNames();
+	/** generate the filter blocks and inputs for the sensor object*/
+	void createFilterBlocks();
+	/** generate a control message packet with the PMU and send it if there is an existing communicator*/
+	void generateAndTransmitMessage() const;
 };
 
 }//namespace relays

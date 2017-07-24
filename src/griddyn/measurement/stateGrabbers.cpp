@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "Area.h"
 #include "Condition.h"
@@ -28,7 +28,7 @@
 namespace griddyn
 {
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber>
-sgInterpret ([](const std::string &fld, coreObject *obj) { return std::make_unique<stateGrabber> (fld, obj); });
+  sgInterpret ([](const std::string &fld, coreObject *obj) { return std::make_unique<stateGrabber> (fld, obj); });
 
 static const std::string specialChars (R"(:(+-/*\^?)");
 static const std::string sepChars (",;");
@@ -124,81 +124,84 @@ void stateGrabber::updateField (const std::string &fld)
 using namespace gridUnits;
 
 /** map of all the alternate strings that can be used*/
-/* *INDENT-OFF* */
-static const std::map<std::string, std::string> stringTranslate{{"voltage", "v"},
-                                                                {"vol", "v"},
-                                                                {"link", "linkreal"},
-                                                                {"linkp", "linkreal"},
-                                                                {"loadq", "loadreactive"},
-                                                                {"loadreactivepower", "loadreactive"},
-                                                                {"load", "loadreal"},
-                                                                {"loadp", "loadreal"},
-                                                                {"reactivegen", "genreactive"},
-                                                                {"genq", "genreactive"},
-                                                                {"gen", "genreal"},
-                                                                {"generation", "genreal"},
-                                                                {"genp", "genreal"},
-                                                                {"realgen", "genreal"},
-                                                                {"f", "freq"},
-                                                                {"frequency", "freq"},
-                                                                {"omega", "freq"},
-                                                                {"a", "angle"},
-                                                                {"ang", "angle"},
-                                                                {"phase", "angle"},
-                                                                {"busgenerationreal", "busgenreal"},
-                                                                {"busp", "busgenreal"},
-                                                                {"busgen", "busgenreal"},
-                                                                {"busgenerationreactive", "busgenreactive"},
-                                                                {"busq", "busgenreactive"},
-                                                                {"linkrealpower", "linkreal"},
-                                                                {"linkp1", "linkreal"},
-                                                                {"linkq", "linkreactive"},
-                                                                {"linkreactivepower", "linkreactive"},
-                                                                {"linkrealpower1", "linkreal"},
-                                                                {"linkq1", "linkreactive"},
-                                                                {"linkreactivepower1", "linkreactive"},
-                                                                {"linkreal1", "linkreal"},
-                                                                {"linkreactive1", "linkreactive"},
-                                                                {"linkrealpower2", "linkreal2"},
-                                                                {"linkq2", "linkreactive2"},
-                                                                {"linkreactivepower2", "linkreactive2"},
-                                                                {"linkp2", "linkreal2"},
-                                                                {"p", "real"},
-                                                                {"q", "reactive"},
-                                                                {"impedance", "z"},
-                                                                {"admittance", "y"},
-                                                                {"impedance1", "z"},
-                                                                {"admittance1", "y"},
-                                                                {"z1", "z"},
-                                                                {"y1", "y"},
-                                                                {"impedance2", "z2"},
-                                                                {"admittance2", "y2"},
-                                                                {"status", "connected"},
-                                                                {"breaker", "switch"},
-                                                                {"breaker1", "switch"},
-                                                                {"switch1", "switch"},
-                                                                {"breaker2", "switch2"},
-                                                                {"i", "current"},
-                                                                {"i1", "current"},
-                                                                {"current1", "current"},
-                                                                {"i2", "current2"},
-                                                                {"imagcurrent1", "imagcurrent"},
-                                                                {"realcurrent1", "realcurrent"},
-                                                                {"lossreal", "loss"},
-                                                                {"angle1", "angle"},
-                                                                {"absangle1", "absangle"},
-                                                                {"voltage1", "voltage"},
-                                                                {"v1", "voltage"},
-                                                                {"v2", "voltage2"},
-                                                                {"output0", "output"},
-                                                                {"cv", "output"},
-                                                                {"o0", "output"},
-                                                                {"currentvalue", "output"},
-                                                                {"deriv0", "deriv"},
-                                                                {"dodt", "deriv"},
-                                                                {"dodt0", "deriv"},
-                                                                {"doutdt", "deriv"},
-                                                                {"doutdt0", "deriv"}};
+static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"},
+																{"vol", "voltage"},
+																{"link", "linkreal"},
+																{"linkp", "linkreal"},
+																{"loadq", "loadreactive"},
+																{"loadreactivepower", "loadreactive"},
+																{"load", "loadreal"},
+																{"loadp", "loadreal"},
+																{"reactivegen", "genreactive"},
+																{"genq", "genreactive"},
+																{"gen", "genreal"},
+																{"generation", "genreal"},
+																{"genp", "genreal"},
+																{"realgen", "genreal"},
+																{"f", "freq"},
+																{"frequency", "freq"},
+																{"omega", "freq"},
+																{"a", "angle"},
+																{"ang", "angle"},
+																{"phase", "angle"},
+																{"busgenerationreal", "busgenreal"},
+																{"busp", "busgenreal"},
+																{"busgen", "busgenreal"},
+																{"busgenerationreactive", "busgenreactive"},
+																{"busq", "busgenreactive"},
+																{"linkrealpower", "linkreal"},
+																{"linkp1", "linkreal"},
+																{"linkq", "linkreactive"},
+																{"linkreactivepower", "linkreactive"},
+																{"linkrealpower1", "linkreal"},
+																{"linkq1", "linkreactive"},
+																{"linkreactivepower1", "linkreactive"},
+																{"linkreal1", "linkreal"},
+																{"linkreactive1", "linkreactive"},
+																{"linkrealpower2", "linkreal2"},
+																{"linkq2", "linkreactive2"},
+																{"linkreactivepower2", "linkreactive2"},
+																{"linkp2", "linkreal2"},
+																{"p", "real"},
+																{"q", "reactive"},
+																{"impedance", "z"},
+																{"admittance", "y"},
+																{"impedance1", "z"},
+																{"admittance1", "y"},
+																{"z1", "z"},
+																{"y1", "y"},
+																{"impedance2", "z2"},
+																{"admittance2", "y2"},
+																{"status", "connected"},
+																{"breaker", "switch"},
+																{"breaker1", "switch"},
+																{"switch1", "switch"},
+																{"breaker2", "switch2"},
+																{"i", "current"},
+																{"i1", "current"},
+																{"current1", "current"},
+																{"i2", "current2"},
+																{"imagcurrent1", "imagcurrent"},
+																{"realcurrent1", "realcurrent"},
+																{"lossreal", "loss"},
+																{"angle1", "angle"},
+																{"absangle1", "busangle"},
+																{"voltage1", "voltage"},
+																{"v1", "voltage"},
+																{"v2", "voltage2"},
+																{"output0", "output"},
+																{"cv", "output"},
+																{"o0", "output"},
+																{"currentvalue", "output"},
+																{"deriv0", "deriv"},
+																{"dodt", "deriv"},
+																{"dodt0", "deriv"},
+																{"doutdt", "deriv"},
+																{"doutdt0", "deriv"},
+																{"busangle1","busangle"},
+																{ "absangle","busangle" },
+																{ "absangle1","busangle2" },
+};
 
 #define FUNCTION_SIGNATURE [](gridComponent * obj, const stateData &sD, const solverMode &sMode)
 #define FUNCTION_SIGNATURE_OBJ_ONLY [](gridComponent * obj, const stateData & /*sD*/, const solverMode & /*sMode*/)
@@ -210,140 +213,49 @@ static const std::map<std::string, std::string> stringTranslate{{"voltage", "v"}
 
 // clang-format off
 static const std::map<std::string, fstateobjectPair> objectFunctions{
-  {"connected", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isConnected ());
-}
-, defUnit
-}
-}
-, {"enabled", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isEnabled ());
-}
-, defUnit
-}
-}
-, {"armed", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isArmed ());
-}
-, defUnit
-}
-}
-, {"output", {FUNCTION_SIGNATURE{return obj->getOutput (noInputs, sD, sMode, 0);
-}
-, defUnit
-}
-}
-,
-{
-    "deriv",
-    {
-        FUNCTION_SIGNATURE { return obj->getDoutdt (noInputs, sD, sMode, 0); }
-        , defUnit
-    }
-}
-}
-;
+  {"connected", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isConnected ());}, defUnit}},
+  {"enabled", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isEnabled ());}, defUnit}},
+{"armed", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<double> (obj->isArmed ());}, defUnit}},
+{"output", {FUNCTION_SIGNATURE{return obj->getOutput (noInputs, sD, sMode, 0);}, defUnit}},
+{"deriv",{FUNCTION_SIGNATURE { return obj->getDoutdt (noInputs, sD, sMode, 0); }, defUnit}}
+};
 
 static const std::map<std::string, fstateobjectPair> busFunctions{
-  {"v", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getVoltage (sD, sMode);
-}
-, puV
-}
-}
-, {"angle", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getAngle (sD, sMode);
-}
-, rad
-}
-}
-, {"freq", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getFreq (sD, sMode);
-}
-, puHz
-}
-}
-, {"genreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getGenerationReal ();
-}
-, puMW
-}
-}
-, {"genreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getGenerationReactive ();
-}
-, puMW
-}
-}
-, {"loadreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLoadReal ();
-}
-, puMW
-}
-}
-, {"loadreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLoadReactive ();
-}
-, puMW
-}
-}
-, {"linkreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLinkReal ();
-}
-, puMW
-}
-}
-, {"linkreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLinkReactive ();
-}
-, puMW
-}
-}
-,
-}
-;
+  {"voltage", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getVoltage (sD, sMode);}, puV}},
+{"angle", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getAngle (sD, sMode);}, rad}},
+{"busangle",{ FUNCTION_SIGNATURE{ return static_cast<gridBus *> (obj)->getAngle(sD, sMode); }, rad } },
+{"freq", {FUNCTION_SIGNATURE{return static_cast<gridBus *> (obj)->getFreq (sD, sMode);}, puHz}},
+{ "busfreq",{ FUNCTION_SIGNATURE{ return static_cast<gridBus *> (obj)->getFreq(sD, sMode); }, puHz } },
+{"genreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getGenerationReal ();}, puMW}},
+{"genreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getGenerationReactive ();}, puMW}},
+{"loadreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLoadReal ();}, puMW}},
+{"loadreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLoadReactive ();}, puMW}},
+{"linkreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLinkReal ();}, puMW}},
+{"linkreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<gridBus *> (obj)->getLinkReactive ();}, puMW}},
+};
 
 static const std::map<std::string, objJacFunction> busJacFunctions{
-  {"v", JAC_FUNCTION_SIGNATURE_NO_STATE{
-          md.assignCheckCol (0, static_cast<gridBus *> (obj)->getOutputLoc (sMode, voltageInLocation), 1.0);
-}
-}
-,
+  {"voltage", JAC_FUNCTION_SIGNATURE_NO_STATE{
+          md.assignCheckCol (0, static_cast<gridBus *> (obj)->getOutputLoc (sMode, voltageInLocation), 1.0);}},
   {"angle", JAC_FUNCTION_SIGNATURE_NO_STATE{
-              md.assignCheckCol (0, static_cast<gridBus *> (obj)->getOutputLoc (sMode, angleInLocation), 1.0);
-}
-}
-,
-}
-;
+              md.assignCheckCol (0, static_cast<gridBus *> (obj)->getOutputLoc (sMode, angleInLocation), 1.0);}},
+ { "busangle", JAC_FUNCTION_SIGNATURE_NO_STATE{
+	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, angleInLocation), 1.0); } },
+	{ "freq", JAC_FUNCTION_SIGNATURE_NO_STATE{
+	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
+	{ "busfreq", JAC_FUNCTION_SIGNATURE_NO_STATE{
+	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
+};
 
 static const std::map<std::string, fstateobjectPair> areaFunctions{
-  {"avgfreq", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getAvgFreq ();
-}
-, puHz
-}
-}
-, {"genreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getGenerationReal ();
-}
-, puMW
-}
-}
-, {"genreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getGenerationReactive ();
-}
-, puMW
-}
-}
-, {"loadreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoadReal ();
-}
-, puMW
-}
-}
-, {"loadreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoadReactive ();
-}
-, puMW
-}
-}
-, {"loss", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoss ();
-}
-, puMW
-}
-}
-, {"tieflow", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getTieFlowReal ();
-}
-, puMW
-}
-}
-,
-}
-;
+  {"avgfreq", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getAvgFreq ();}, puHz}},
+{"genreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getGenerationReal ();}, puMW}},
+{"genreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getGenerationReactive ();}, puMW}},
+{"loadreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoadReal ();}, puMW}},
+{"loadreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoadReactive ();}, puMW}},
+{"loss", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getLoss ();}, puMW}},
+{"tieflow", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Area *> (obj)->getTieFlowReal ();}, puMW}},
+};
 
 static const objStateGrabberFunction rpower = FUNCTION_SIGNATURE
 {
@@ -355,231 +267,71 @@ static const objStateGrabberFunction qpower = FUNCTION_SIGNATURE
     return static_cast<gridSecondary *> (obj)->getReactivePower (noInputs, sD, sMode);
 };
 
-static const std::map<std::string, fstateobjectPair> loadFunctions{{"real", {rpower, puMW}},
-                                                                   {"reactive", {qpower, puMW}},
-                                                                   {"loadreal", {rpower, puMW}},
-                                                                   {"loadreactive", {qpower, puMW}}};
+static const std::map<std::string, fstateobjectPair> secondaryFunctions{ { "real",{ rpower, puMW } },
+{ "reactive",{ qpower, puMW } },
+{ "busangle",{ FUNCTION_SIGNATURE{ return static_cast<gridSecondary *>(obj)->getBus()->getAngle(sD, sMode); }, rad } },
+{ "busvoltage",{ FUNCTION_SIGNATURE{ return static_cast<gridSecondary *>(obj)->getBus()->getVoltage(sD, sMode); }, puV } },
+{ "busfreq",{ FUNCTION_SIGNATURE{ return static_cast<gridSecondary *>(obj)->getBus()->getFreq(sD, sMode); }, puV } },
+};
+
+static const std::map<std::string, fstateobjectPair> loadFunctions{{"loadreal", {rpower, puMW}},
+                                                                   {"loadreactive", {qpower, puMW}}
+};
 
 static const std::map<std::string, fstateobjectPair> genFunctions{
-  {"real", {rpower, puMW}}, {"reactive", {qpower, puMW}}, {"genreal", {rpower, puMW}},
+  {"genreal", {rpower, puMW}},
   {"genreactive", {qpower, puMW}},
-  {"pset", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPset ();
-}
-, puMW
-}
-}
-, {"adjup", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getAdjustableCapacityUp ();
-}
-, puMW
-}
-}
-, {"adjdown", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getAdjustableCapacityDown ();
-}
-, puMW
-}
-}
-, {"pmax", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPmax ();
-}
-, puMW
-}
-}
-, {"pmin", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPmin ();
-}
-, puMW
-}
-}
-, {"qmax", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getQmax ();
-}
-, puMW
-}
-}
-, {"qmin", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getQmin ();
-}
-, puMW
-}
-}
-,
-  {"freq",
-   {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getFreq (emptyStateData, cLocalSolverMode);
-}
-, puHz
-}
-}
-,
-  {"angle",
-   {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getAngle (emptyStateData, cLocalSolverMode);
-}
-, rad
-}
-}
-,
-}
-;
+  {"pset", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPset ();}, puMW}},
+  {"adjup", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getAdjustableCapacityUp ();}, puMW}},
+  {"adjdown", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getAdjustableCapacityDown ();}, puMW}},
+  {"pmax", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPmax ();}, puMW}},
+  {"pmin", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getPmin ();}, puMW}},
+  {"qmax", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getQmax ();}, puMW}},
+  {"qmin", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Generator *> (obj)->getQmin ();}, puMW}},
+  {"freq",{FUNCTION_SIGNATURE{return static_cast<Generator *> (obj)->getFreq (sD, sMode);}, puHz}},
+  {"angle",{FUNCTION_SIGNATURE{return static_cast<Generator *> (obj)->getAngle (sD, sMode);}, rad}},
+};
 
 static const std::map<std::string, fstateobjectPair> linkFunctions{
-  {"real", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (1);
-}
-, puMW
-}
-}
-, {"reactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (1);
-}
-, puMW
-}
-}
-, {"linkreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (1);
-}
-, puMW
-}
-}
-, {"linkreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (1);
-}
-, puMW
-}
-}
-, {"z", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getTotalImpedance (1);
-}
-, puOhm
-}
-}
-, {"y", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getTotalImpedance (1));
-}
-, puOhm
-}
-}
-, {"r", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealImpedance (1);
-}
-, puOhm
-}
-}
-, {"x", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getImagImpedance (1));
-}
-, puOhm
-}
-}
-, {"current", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getCurrent (1));
-}
-, puA
-}
-}
-, {"realcurrent", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getRealCurrent (1));
-}
-, puA
-}
-}
-, {"imagcurrent", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getImagCurrent (1));
-}
-, puA
-}
-}
-, {"voltage", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getVoltage (1));
-}
-, puV
-}
-}
-, {"absangle", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getAbsAngle (1));
-}
-, rad
-}
-}
-,
-  // functions for to side
-  {"real2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (2);
-}
-, puMW
-}
-}
-, {"reactive2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (2);
-}
-, puMW
-}
-}
-, {"linkreal2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (2);
-}
-, puMW
-}
-}
-, {"linkreactive2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (2);
-}
-, puMW
-}
-}
-, {"z2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getTotalImpedance (2);
-}
-, puOhm
-}
-}
-, {"y2", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getTotalImpedance (2));
-}
-, puOhm
-}
-}
-, {"r2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealImpedance (2);
-}
-, puOhm
-}
-}
-, {"x2", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getImagImpedance (2));
-}
-, puOhm
-}
-}
-, {"current2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getCurrent (2));
-}
-, puA
-}
-}
-, {"realcurrent2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getRealCurrent (2));
-}
-, puA
-}
-}
-, {"imagcurrent2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getImagCurrent (2));
-}
-, puA
-}
-}
-, {"voltage2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getVoltage (2));
-}
-, puV
-}
-}
-, {"absangle2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getAbsAngle (2));
-}
-, rad
-}
-}
-,
+  {"real", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (1);}, puMW}},
+{"reactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (1);}, puMW}},
+{"linkreal", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (1);}, puMW}},
+{"linkreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (1);}, puMW}},
+{"z", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getTotalImpedance (1);}, puOhm}},
+{"y", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getTotalImpedance (1));}, puOhm}},
+{"r", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealImpedance (1);}, puOhm}},
+{"x", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getImagImpedance (1));}, puOhm}},
+{"current", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getCurrent (1));}, puA}},
+{"realcurrent", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getRealCurrent (1));}, puA}},
+{"imagcurrent", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getImagCurrent (1));}, puA}},
+{"voltage", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getVoltage (1));}, puV}},
+{ "busvoltage",{ FUNCTION_SIGNATURE_OBJ_ONLY{ return (static_cast<Link *> (obj)->getVoltage(1)); }, puV } },
+{"busangle", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getBusAngle (1));}, rad}},
+  // functions for "to" side
+  {"real2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (2);}, puMW}},
+{"reactive2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (2);}, puMW}},
+{"linkreal2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealPower (2);}, puMW}},
+{"linkreactive2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getReactivePower (2);}, puMW}},
+{"z2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getTotalImpedance (2);}, puOhm}},
+{"y2", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getTotalImpedance (2));}, puOhm}},
+{"r2", {FUNCTION_SIGNATURE_OBJ_ONLY{return static_cast<Link *> (obj)->getRealImpedance (2);}, puOhm}},
+{"x2", {FUNCTION_SIGNATURE_OBJ_ONLY{return 1.0 / (static_cast<Link *> (obj)->getImagImpedance (2));}, puOhm}},
+{"current2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getCurrent (2));}, puA}},
+{"realcurrent2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getRealCurrent (2));}, puA}},
+{"imagcurrent2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getImagCurrent (2));}, puA}},
+{"voltage2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getVoltage (2));}, puV}},
+{"busangle2", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getBusAngle (2));}, rad}},
 
   // non numbered fields
-  {"angle", {FUNCTION_SIGNATURE{return static_cast<Link *> (obj)->getAngle (sD.state, sMode);
-}
-, rad
-}
-}
-, {"loss", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getLoss ());
-}
-, puMW
-}
-}
-, {"lossreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getReactiveLoss ());
-}
-, puMW
-}
-}
-,
+  {"angle", {FUNCTION_SIGNATURE{return static_cast<Link *> (obj)->getAngle (sD.state, sMode);}, rad}},
+{"loss", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getLoss ());}, puMW}},
+{"lossreactive", {FUNCTION_SIGNATURE_OBJ_ONLY{return (static_cast<Link *> (obj)->getReactiveLoss ());}, puMW}},
   {"attached",
    {FUNCTION_SIGNATURE_OBJ_ONLY{
      return static_cast<double> (((!static_cast<Link *> (obj)->checkFlag (Link::switch1_open_flag)) ||
                                   (!static_cast<Link *> (obj)->checkFlag (Link::switch2_open_flag))) &&
-                                 (static_cast<Link *> (obj)->isEnabled ()));
-}
-, defUnit
-}
-}
-,
-}
-;
+                                 (static_cast<Link *> (obj)->isEnabled ()));}, defUnit}},
+};
 
 // clang-format on
 
@@ -608,8 +360,20 @@ void stateGrabber::objectLoadInfo (const std::string &fld)
         }
         else
         {
-            fptr = nullptr;
-            loaded = false;
+		
+			auto index = cobj->lookupOutputIndex(fieldStr);
+			if (index != kNullLocation)
+			{
+				fptr = [index](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+					return comp->getOutput(noInputs, sD, sMode, index);
+				};
+			}
+			else
+			{
+				fptr = nullptr;
+				loaded = false;
+			}
+			
         }
     }
 }
@@ -667,7 +431,7 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
     int num = stringOps::trailingStringInt (fld, fieldStr, 0);
     if ((fieldStr == "block") || (fieldStr == "b"))
     {
-        if (dynamic_cast<sensor *> (cobj)!=nullptr)
+        if (dynamic_cast<sensor *> (cobj) != nullptr)
         {
             fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
                 return static_cast<sensor *> (comp)->getBlockOutput (sD, sMode, num);
@@ -678,6 +442,19 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
             loaded = false;
         }
     }
+	else if ((fld == "blockderiv") || (fld == "dblockdt") || (fld == "dbdt"))
+	{
+		if (dynamic_cast<sensor *> (cobj) != nullptr)
+		{
+			fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+				return static_cast<sensor *> (comp)->getBlockDerivOutput(sD, sMode, num);
+			};
+		}
+		else
+		{
+			loaded = false;
+		}
+	}
     else if ((fieldStr == "input") || (fieldStr == "i"))
     {
         if (dynamic_cast<sensor *> (cobj) != nullptr)
@@ -700,26 +477,7 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
     }
     else
     {
-        if (dynamic_cast<sensor *> (cobj) != nullptr)
-        {
-            // try to lookup named output for sensors
-            index_t outIndex = static_cast<sensor *> (cobj)->lookupOutput (fld);
-            if (outIndex != kNullLocation)
-            {
-                fptr = [outIndex](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-                    return static_cast<sensor *> (comp)->getOutput (noInputs, sD, sMode, outIndex);
-                };
-            }
-            else
-            {
-                objectLoadInfo (fld);
-            }
-        }
-
-        else
-        {
-            objectLoadInfo (fld);
-        }
+         objectLoadInfo (fld);
     }
 }
 
@@ -753,7 +511,7 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
     }
     else
     {
-        offset = static_cast<gridSecondary *> (cobj)->findIndex (fld, cLocalbSolverMode);
+        offset = static_cast<gridSecondary *> (cobj)->findIndex (fld, cLocalSolverMode);
         if (offset != kInvalidLocation)
         {
             prevIndex = 1;
@@ -943,7 +701,7 @@ stateOpGrabber::stateOpGrabber (std::shared_ptr<stateGrabber> ggb1,
     {
         bgrabber2 = std::move (ggb2);
     }
-    opptr = get2ArgFunction (op);
+    opptr = get2ArgFunction (op_name);
     jacMode = std::min (bgrabber1->getJacobianMode (), bgrabber2->getJacobianMode ());
     loaded = ((bgrabber1->loaded) && (bgrabber2->loaded));
 }

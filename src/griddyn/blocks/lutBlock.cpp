@@ -54,17 +54,17 @@ void lutBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desired
     }
 }
 
-void lutBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void lutBlock::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
     update[offset] = K * computeValue (input + bias);
     if (limiter_alg > 0)
     {
-        return Block::algElements (input, sD, update, sMode);
+        return Block::blockAlgebraicUpdate (input, sD, update, sMode);
     }
 }
 
-void lutBlock::jacElements (double input,
+void lutBlock::blockJacobianElements (double input,
                             double didt,
                             const stateData &sD,
                             matrixData<double> &md,
@@ -78,7 +78,7 @@ void lutBlock::jacElements (double input,
     md.assign (offset, offset, -1);
     if (limiter_alg > 0)
     {
-        Block::jacElements (input, didt, sD, md, argLoc, sMode);
+        Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
     }
 }
 

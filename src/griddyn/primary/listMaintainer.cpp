@@ -169,9 +169,6 @@ void listMaintainer::residual (const IOdata &inputs, const stateData &sD, double
     }
 #endif
 
-    /*
-
-    */
 }
 
 void listMaintainer::algebraicUpdate (const IOdata &inputs,
@@ -184,10 +181,34 @@ void listMaintainer::algebraicUpdate (const IOdata &inputs,
     {
         return;
     }
-    for (auto &obj : partialLists[sMode.offsetIndex])
-    {
-        obj->algebraicUpdate (inputs, sD, update, sMode, alpha);
-    }
+
+#ifdef HAVE_OPENMP
+	if (parAlgebraic)
+	{
+		auto &vz = partialLists[sMode.offsetIndex];
+		int sz = static_cast<index_t> (vz.size());
+#pragma omp parallel for
+		for (index_t kk = 0; kk < sz; ++kk)
+		{
+			vz[kk]->algebraicUpdate(inputs, sD, update, sMode, alpha);
+		}
+	}
+	else
+	{
+		for (auto &obj : partialLists[sMode.offsetIndex])
+		{
+			obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
+		}
+	}
+
+#else
+	for (auto &obj : partialLists[sMode.offsetIndex])
+	{
+		obj->algebraicUpdate(inputs, sD, update, sMode, alpha);
+	}
+#endif
+
+    
 }
 
 void listMaintainer::derivative (const IOdata &inputs,
@@ -200,7 +221,7 @@ void listMaintainer::derivative (const IOdata &inputs,
         return;
     }
 #ifdef HAVE_OPENMP
-    if (parResid)
+    if (parDeriv)
     {
         auto &vz = partialLists[sMode.offsetIndex];
         index_t sz = static_cast<index_t> (vz.size ());
@@ -271,9 +292,12 @@ void listMaintainer::delayedAlgebraicUpdate (const IOdata &inputs,
     }
 }
 
+
+
 bool listMaintainer::isListValid (const solverMode &sMode) const
 {
-    if (sMode.offsetIndex < static_cast<index_t> (objectLists.size ()))
+   
+	if (isValidIndex(sMode.offsetIndex,objectLists))
     {
         return (sModeLists[sMode.offsetIndex].offsetIndex != kNullLocation);
     }
@@ -282,7 +306,7 @@ bool listMaintainer::isListValid (const solverMode &sMode) const
 
 void listMaintainer::invalidate (const solverMode &sMode)
 {
-    if (sMode.offsetIndex < static_cast<index_t> (objectLists.size ()))
+	if (isValidIndex(sMode.offsetIndex, objectLists))
     {
         sModeLists[sMode.offsetIndex] = solverMode ();
     }

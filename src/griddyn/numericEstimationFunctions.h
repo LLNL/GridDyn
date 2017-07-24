@@ -45,14 +45,14 @@ void numericJacobianCalculation(gridComponent *comp, const IOdata &inputs, const
 @param[out]  the location to copy the state information
 @param[in] sMode the solver mode corresponding to the state
 */
-void copyObjectState(const gridComponent *comp, const double state[], double newstate[], const solverMode &sMode);
+void copyObjectLocalState(const gridComponent *comp, const double state[], double newstate[], const solverMode &sMode);
 
 /** @brief get a vector of all the local state locations of an object
 @param[in] obj  the object get all the state locations
 @param[in] sMode the solver mode to get the locations for
 @return a vector containing the indices of the states
 */
-std::vector<index_t> getObjectStates(const gridComponent *comp, const solverMode &sMode);
+std::vector<index_t> getObjectLocalStateIndices(const gridComponent *comp, const solverMode &sMode);
 
 }//namespace griddyn
 #endif

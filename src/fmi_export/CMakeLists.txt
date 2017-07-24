@@ -108,5 +108,9 @@ list(APPEND executable_only_components fmiBuilder)
 set(executable_only_components ${executable_only_components} PARENT_SCOPE)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")

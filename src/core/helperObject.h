@@ -34,8 +34,8 @@ class coreObject;
 class helperObject
 {
 private:
-  static std::atomic<uint64_t> s_obcnt;
-  std::uint64_t m_oid;
+  static std::atomic<uint64_t> s_obcnt;  //!< static counter for a global object counter
+  std::uint64_t m_oid;	//!< the identifier for the object
   std::string um_name;       //!< the text name of the object
 
 public:
@@ -62,14 +62,14 @@ public:
   /** @brief get flags
   @param flag -the name of the flag to be queried
   @param val the value to the set the flag ;
-  \return int a value representing whether the set operation was successful or not
+  @return int a value representing whether the set operation was successful or not
   */
   virtual void setFlag (const std::string &flag, bool val = true);
   /** @brief get flags
   @param param the name of the flag to query.
-  \return the value of the flag queried
+  @return the value of the flag queried
   */
-  virtual bool getFlag (const std::string &param) const;
+  virtual bool getFlag (const std::string &flag) const;
   /**
   * @brief get a parameter from the object
   * @param[in] param the name of the parameter to get
@@ -87,12 +87,10 @@ public:
 	  return static_cast<int> (get(param));
   }
 
-  /** @brief set the name
-  @param[in] newName the new name of the object*/
-  template<typename T>
-  void setName(T&& newName)
+  /** @brief set the name*/
+  void setName(const std::string &newName)
   {
-	  um_name = std::forward<T>(newName);
+	  um_name = newName;
 	  nameUpdate();
   }
 
@@ -113,16 +111,31 @@ public:
   {
 	  return m_oid;
   }
+  /**
+  * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is higher than another object
+  */
+  void makeNewOID();
+
   /** 
   @brief get an expected or actual owner of the helperObject
   @return the actual or targeted owner of the helperObject
   */
   virtual coreObject *getOwner() const;
   protected:
+	  /** a notification functions primary implemented by derived class
+	  @details the function is called when the object name is updated
+	  */
 	  virtual void nameUpdate();
 	  
 };
 
+/** allow multiple flags to be set at once
+@details the flags parameter can be a list of flags
+"flag1, flag2, -flag3"
+a negative sign in front of the flag indicates the flag should be turned off
+@param[in] obj the helper object to set
+@param[in] flags the list of flags to set
+*/
 void setMultipleFlags(helperObject *obj, const std::string &flags);
 }//namespace griddyn
 #endif

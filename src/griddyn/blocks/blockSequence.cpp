@@ -62,7 +62,7 @@ void blockSequence::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
     auto cnt = sequence.size ();
     if (desiredOutput.empty ())
     {
-        IOdata inAct{!inputs.empty() ? inputs[0] + bias : 0.0, getRateInput (inputs)};
+        IOdata inAct{!inputs.empty () ? inputs[0] + bias : 0.0, getRateInput (inputs)};
 
         for (decltype (cnt) ii = 0; ii < cnt; ++ii)
         {
@@ -160,7 +160,7 @@ double blockSequence::step (coreTime time, double input)
     return Block::step (time, input);
 }
 
-void blockSequence::residElements (double input,
+void blockSequence::blockResidual (double input,
                                    double didt,
                                    const stateData &sD,
                                    double resid[],
@@ -172,14 +172,14 @@ void blockSequence::residElements (double input,
     double indt = didt;
     for (int ii = 0; ii < cnt; ++ii)
     {
-        blocks[sequence[ii]]->residElements (in, indt, sD, resid, sMode);
+        blocks[sequence[ii]]->blockResidual (in, indt, sD, resid, sMode);
         in = blockOutputs[sequence[ii]];
         indt = blockDoutDt[sequence[ii]];
     }
     limiterResidElements (in, indt, sD, resid, sMode);
 }
 
-void blockSequence::derivElements (double input,
+void blockSequence::blockDerivative (double input,
                                    double didt,
                                    const stateData &sD,
                                    double deriv[],
@@ -191,27 +191,27 @@ void blockSequence::derivElements (double input,
     double indt = didt;
     for (int ii = 0; ii < cnt; ++ii)
     {
-        blocks[sequence[ii]]->derivElements (in, indt, sD, deriv, sMode);
+        blocks[sequence[ii]]->blockDerivative (in, indt, sD, deriv, sMode);
         in = blockOutputs[sequence[ii]];
         indt = blockDoutDt[sequence[ii]];
     }
-    Block::derivElements (in, indt, sD, deriv, sMode);
+    Block::blockDerivative (in, indt, sD, deriv, sMode);
 }
 
-void blockSequence::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void blockSequence::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     updateLocalCache (noInputs, sD, sMode);
     auto cnt = static_cast<int> (sequence.size ());
     double in = input + bias;
     for (int ii = 0; ii < cnt; ++ii)
     {
-        blocks[sequence[ii]]->algElements (in, sD, update, sMode);
+        blocks[sequence[ii]]->blockAlgebraicUpdate (in, sD, update, sMode);
         in = blockOutputs[sequence[ii]];
     }
-    Block::algElements (input, sD, update, sMode);
+    Block::blockAlgebraicUpdate (input, sD, update, sMode);
 }
 
-void blockSequence::jacElements (double input,
+void blockSequence::blockJacobianElements (double input,
                                  double didt,
                                  const stateData &sD,
                                  matrixData<double> &md,
@@ -225,19 +225,19 @@ void blockSequence::jacElements (double input,
     index_t aLoc = argLoc;
     for (size_t ii = 0; ii < cnt; ++ii)
     {
-        blocks[sequence[ii]]->jacElements (in, indt, sD, md, aLoc, sMode);
+        blocks[sequence[ii]]->blockJacobianElements (in, indt, sD, md, aLoc, sMode);
         in = blockOutputs[sequence[ii]];
         indt = blockDoutDt[sequence[ii]];
         aLoc = blocks[sequence[ii]]->getOutputLoc (sMode, 0);
     }
-    Block::jacElements (in, indt, sD, md, aLoc, sMode);
+    Block::blockJacobianElements (in, indt, sD, md, aLoc, sMode);
 }
 
 void blockSequence::rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
     updateLocalCache (noInputs, sD, sMode);
     size_t cnt = sequence.size ();
-    IOdata inAct{!inputs.empty() ? inputs[0] + bias : kNullVal, getRateInput (inputs)};
+    IOdata inAct{!inputs.empty () ? inputs[0] + bias : kNullVal, getRateInput (inputs)};
 
     for (size_t ii = 0; ii < cnt; ++ii)
     {
@@ -271,7 +271,7 @@ blockSequence::rootCheck (const IOdata &inputs, const stateData &sD, const solve
     change_code ret = change_code::no_change;
     updateLocalCache (noInputs, sD, sMode);
     size_t cnt = sequence.size ();
-    IOdata inAct{!inputs.empty() ? inputs[0] + bias : kNullVal, getRateInput (inputs)};
+    IOdata inAct{!inputs.empty () ? inputs[0] + bias : kNullVal, getRateInput (inputs)};
 
     for (size_t ii = 0; ii < cnt; ++ii)
     {

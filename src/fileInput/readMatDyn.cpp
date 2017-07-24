@@ -11,7 +11,7 @@
 */
 
 #include "events/Event.h"
-#include "Generator.h"
+#include "generators/DynamicGenerator.h"
 #include "gridBus.h"
 #include "griddyn.h"
 #include "fileInput.h"
@@ -42,7 +42,6 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
     mArray M1;
 
     std::vector<Generator *> genList;
-    Generator *gen;
     // read the frequency
     size_t A = ftext.find_first_of ('[', 0);
     size_t B = ftext.find_first_of (']', 0);
@@ -106,7 +105,7 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
     A = 1;
     for (auto &ngen : genList)
     {
-        gen = static_cast<Generator *> (parentObject->findByUserID ("gen", static_cast<index_t> (A)));
+        auto gen = static_cast<Generator *> (parentObject->findByUserID ("gen", static_cast<index_t> (A)));
         A++;
         if (gen == nullptr)
         {
@@ -149,7 +148,6 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
 
 void loadGenDynArray (coreObject * /*parentObject*/, mArray &genData, std::vector<Generator *> &genList)
 {
-    Generator *gen = nullptr;
     Exciter *exc;
     Governor *gov;
     GenModel *gm;
@@ -157,7 +155,7 @@ void loadGenDynArray (coreObject * /*parentObject*/, mArray &genData, std::vecto
     /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
     for (const auto &genLine : genData)
     {
-        gen = new Generator ();
+        auto gen = new DynamicGenerator ();
         switch (static_cast<int> (genLine[0]))
         {
         case 1:  // classical model
@@ -189,7 +187,7 @@ void loadGenDynArray (coreObject * /*parentObject*/, mArray &genData, std::vecto
         {
         case 1:  // constant excitation means no exciter
             break;
-        case 2:  // DC1A eciter
+        case 2:  // DC1A exciter
             exc = new exciters::ExciterDC1A ();
             gen->add (exc);
             break;
@@ -235,9 +233,10 @@ void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vecto
     {
         Exciter *exc = nullptr;
         index_t ind1 = static_cast<index_t> (excLine[0]);
-        if (ind1 <= static_cast<index_t> (genList.size ()))
+      
+		if (isValidIndex(ind1,genList))
         {
-            Generator *gen = genList[ind1 - 1];
+            Generator *gen = genList[ind1-1]; //zero based in C vs 1 based in matlab
             exc = static_cast<Exciter *> (gen->getSubObject ("exciter", 0));
         }
         if (exc==nullptr)
@@ -278,9 +277,9 @@ void loadGenGovArray (coreObject * /*parentObject*/, mArray &govData, std::vecto
         Governor *gov = nullptr;
 		Generator *gen = nullptr;
         index_t ind1 = static_cast<index_t> (govLine[0]);
-        if (ind1 <= static_cast<index_t> (genList.size ()))
+		if (isValidIndex(ind1,genList))
         {
-            gen = genList[ind1 - 1];
+            gen = genList[ind1-1];//zero based in C vs 1 based in matlab
 			if (gen == nullptr)
 			{
 				//probably throw some sort of error here
@@ -310,14 +309,8 @@ void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, con
 {
 
 	string_view ftext = filetext;
-    mArray::size_type kk;
-    std::shared_ptr<Event> evnt;
-    gridBus *bus;
-    Load *ld;
-    Link *lnk;
-    int ind;
     mArray event1, M1;
-    gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
+    auto gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
     if (gds == nullptr)
     {  // cant make events if we don't have access to the simulation
         return;
@@ -341,34 +334,34 @@ void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, con
     {
         B = ftext.find_first_of ('=', A);
         readMatlabArray (filetext, B + 1, M1);
-        for (kk = 0; kk < M1.size (); ++kk)
+		for (auto &eventSpec:M1)
         {
-            evnt = std::make_unique<Event> (M1[kk][0]);
-            ind = static_cast<int> (M1[kk][1]);
-            bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", ind));
-            ld = bus->getLoad ();
+            auto evnt = std::make_shared<Event> (eventSpec[0]);
+            auto ind = static_cast<index_t> (eventSpec[1]);
+            auto bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", ind));
+            auto ld = bus->getLoad ();
             if (ld==nullptr)
             {
                 ld = new zipLoad ();
                 bus->add (ld);
             }
-            switch (static_cast<int> (M1[kk][2]))
+            switch (static_cast<int> (eventSpec[2]))
             {
             case 3:  // P
                 evnt->setTarget (ld, "p");
-                evnt->setValue (M1[kk][3], MW);
+                evnt->setValue (eventSpec[3], MW);
                 break;
             case 4:  // Q
                 evnt->setTarget (ld, "q");
-                evnt->setValue (M1[kk][3], MVAR);
+                evnt->setValue (eventSpec[3], MVAR);
                 break;
             case 5:  // GS
                 evnt->setTarget (ld, "yp");
-                evnt->setValue (M1[kk][3], MW);
+                evnt->setValue (eventSpec[3], MW);
                 break;
             case 6:  // BS
                 evnt->setTarget (ld, "yq");
-                evnt->setValue (-M1[kk][3], MW);
+                evnt->setValue (-eventSpec[3], MW);
                 break;
             default:
                 break;
@@ -385,10 +378,10 @@ void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, con
         readMatlabArray (filetext, B + 1, M1);
         for (const auto &lc : M1)
         {
-            evnt = std::make_unique<Event> (lc[0]);
+            auto evnt = std::make_shared<Event> (lc[0]);
 
-            ind = static_cast<int> (lc[1]);
-            lnk = static_cast<Link *> (parentObject->findByUserID ("link", ind));
+            auto ind = static_cast<index_t> (lc[1]);
+            auto lnk = static_cast<Link *> (parentObject->findByUserID ("link", ind));
             switch (static_cast<int> (lc[2]))
             {
             case 3:  // r

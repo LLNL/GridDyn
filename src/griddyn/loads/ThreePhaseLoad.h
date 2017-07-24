@@ -24,16 +24,17 @@ enum class phase_type_t
 	abc,
 	pnz,
 };
-/** primary load class supports 3 main types of loads  constant power, constant impedance, constant current
-these loads should for the basis of most non dynamic load models following the ZIP model Z-constant impedance,
-I-constant current, P- constant Power
+/** Three phase load is a base object for supporting 3-phase constant power loads includes a few conversions to positive sequence
+values.  
 */
 class ThreePhaseLoad : public Load
 {
 public:
-	enum load_flags
+	enum threephase_load_flags
 	{
 		use_abs_angle = object_flag5,
+		three_phase_output=object_flag6,
+		three_phase_input=object_flag7,
 	};
 private:
 	double Pa=0.0;  //!<[pu] A Phase real power
@@ -91,6 +92,10 @@ public:
 	void setQa(double val);
 	void setQb(double val);
 	void setQc(double val);
+
+
+	virtual const std::vector<stringVec> &inputNames() const override;
+	virtual const std::vector<stringVec> &outputNames() const override;
 private:
 	double getBaseAngle() const;
 

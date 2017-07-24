@@ -213,7 +213,7 @@ void motorLoad3::residual (const IOdata &inputs, const stateData &sD, double res
 {
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+        auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
         double V = inputs[voltageInLocation];
         double theta = inputs[angleInLocation];
@@ -327,7 +327,7 @@ void motorLoad3::timestep (coreTime time, const IOdata &inputs, const solverMode
 
 void motorLoad3::updateCurrents (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, const_cast<double *> (sD.state), sMode, this);
+    auto Loc = offsets.getLocations (sD, const_cast<double *> (sD.state), sMode, this);
     double V = inputs[voltageInLocation];
     double theta = inputs[angleInLocation];
 
@@ -343,7 +343,7 @@ void motorLoad3::derivative (const IOdata & /*inputs*/,
                              double deriv[],
                              const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *ast = Loc.algStateLoc;
     const double *dst = Loc.diffStateLoc;
     double *dv = Loc.destDiffLoc;
@@ -382,7 +382,7 @@ void motorLoad3::jacobianElements (const IOdata &inputs,
     double cj = sD.cj;
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         refAlg = Loc.algOffset;
         refDiff = Loc.diffOffset;
@@ -516,7 +516,7 @@ void motorLoad3::ioPartialDerivatives (const IOdata &inputs,
                                        const IOlocs &inputLocs,
                                        const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     double angle = inputs[angleInLocation];
@@ -605,7 +605,7 @@ index_t motorLoad3::findIndex (const std::string &field, const solverMode &sMode
 
 void motorLoad3::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     auto ro = offsets.getRootOffset (sMode);
     if (opFlags[stalled])
     {
@@ -657,7 +657,7 @@ change_code motorLoad3::rootCheck (const IOdata & /*inputs*/,
 {
     if (opFlags[stalled])
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         const double Te = Loc.diffStateLoc[1] * Loc.algStateLoc[0] + Loc.diffStateLoc[2] * Loc.algStateLoc[1];
         if (Te - mechPower (1.0) > 0)
         {

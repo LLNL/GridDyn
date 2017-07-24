@@ -80,7 +80,7 @@ void Recorder::set (const std::string &param, const std::string &val)
         fileName_ = val;
         boost::filesystem::path filePath (fileName_);
         std::string ext = convertToLowerCase (filePath.extension ().string ());
-		binaryFile = ((ext != ".csv") && (ext != ".txt"));
+        binaryFile = ((ext != ".csv") && (ext != ".txt"));
     }
     else if (param == "directory")
     {
@@ -154,15 +154,15 @@ void Recorder::saveFile (const std::string &fileName)
 }
 
 void Recorder::reset () { dataset.clear (); }
-void Recorder::setSpace (double span)
+void Recorder::setSpace (coreTime span)
 {
-    auto pts = static_cast<count_t> (span / timePeriod);
+    auto pts = static_cast<count_t> (std::floor(span / timePeriod));
     dataset.reserve (pts + 1);
 }
 
-void Recorder::addSpace (double span)
+void Recorder::addSpace (coreTime span)
 {
-    auto pts = static_cast<count_t> (span / timePeriod);
+    auto pts = static_cast<count_t> (std::floor(span / timePeriod));
     dataset.reserve (static_cast<fsize_t> (dataset.time ().capacity ()) + pts + 1);
 }
 

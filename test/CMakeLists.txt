@@ -81,12 +81,13 @@ set(testSystem_sources
 	list(APPEND testSystem_sources ${optional_system_test_files})
 
 set(testExtra_sources
-extraTests/testExtra.cpp
-extraTests/performanceTests.cpp
-extraTests/largeContingencyTests.cpp
-extraTests/largeInputTests.cpp
-testHelperFunctions.cpp
-exeTestHelper.cpp
+	extraTests/testExtra.cpp
+	extraTests/performanceTests.cpp
+	extraTests/largeContingencyTests.cpp
+	extraTests/largeInputTests.cpp
+	extraTests/objectSizeReport.cpp
+	testHelperFunctions.cpp
+	exeTestHelper.cpp
 )	
 	
 set(testMain_headers
@@ -139,6 +140,10 @@ target_link_libraries(testLibrary gridDynCombined)
 target_link_libraries(testComponents ${executable_only_components} gridDynCombined)
 target_link_libraries(testSystem gridDynCombined)
 target_link_libraries(testExtra gridDynCombined)
+
+if(DL_REQUIRED)
+    target_link_libraries(testComponents ${CMAKE_DL_LIBS})
+endif(DL_REQUIRED)
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 install(DIRECTORY DESTINATION bin/test/)

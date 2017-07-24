@@ -32,7 +32,14 @@ along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 #include "fmi_importGD.h"
 
 #include "core/objectFactoryTemplates.hpp"
-#include "fmi_models/fmiLoad.h"
+#include "fmi_models/fmiMELoad.h"
+#include "fmi_models/fmiCoSimLoad.h"
+#include "fmi_models/fmiMELoad3phase.h"
+#include "fmi_models/fmiCoSimLoad3phase.h"
+#include "fmi_models/fmiExciter.h"
+#include "fmi_models/fmiGovernor.h"
+#include "fmi_models/fmiGenModel.h"
+
 #include <memory>
 
 
@@ -42,7 +49,13 @@ along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 
 namespace griddyn
 {
-static typeFactory<fmi::fmiLoad> fmild("load", stringVec{ "fmiload", "fmi" });
+static childTypeFactory<fmi::fmiMELoad,Load> fmild("load", stringVec{ "fmimeload", "fmi","me" });
+static childTypeFactory<fmi::fmiCoSimLoad, Load> fmiCSld("load", stringVec{ "fmicosimload","cosim" });
+static childTypeFactory<fmi::fmiCoSimLoad3phase, Load> fmiCSld3("load", stringVec{ "fmicosimload3","fmicosimload3phase" });
+static childTypeFactory<fmi::fmiMELoad3phase, Load> fmiMEld3("load", stringVec{ "fmimeload3","fmiload3phase","fmi3phase" });
+static childTypeFactory<fmi::fmiGovernor, Governor> fmiGov("governor", stringVec{ "fmigov","fmigovernor","fmi"});
+static childTypeFactory<fmi::fmiExciter, Exciter> fmiExciter("exciter", stringVec{ "fmiexiter","fmi" });
+static childTypeFactory<fmi::fmiGenModel, GenModel> fmiGM("genmodel", stringVec{ "fmigenmodel","fmimachine","fmi" });
 
 void loadFmiLibrary()
 {
@@ -71,7 +84,7 @@ using namespace griddyn;
 		}
 
 		void load() override {
-			auto b = std::make_shared<childTypeFactory<fmi::fmiLoad, zipLoad>>("load", stringVec{ "fmiload", "fmi" });
+			auto b = std::make_shared<childTypeFactory<fmi::fmiMELoad, Load>>("load", stringVec{ "fmiload", "fmi" });
 			fmiFactories.push_back(b);
 
 		}

@@ -180,10 +180,16 @@ public:
   */
   virtual double getAngle (const double state[], const solverMode &sMode) const;
   /** @brief get the absolute angle of an attached bus
-  @param[in] busId  either 1 or 2 or the object id of the bus
+  @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets the opposite angle
   * @return the absolute angle
   */
-  virtual double getAbsAngle (id_type_t busId = 0) const;
+  double getBusAngle (id_type_t busId = 0) const;
+  /** @brief get the absolute angle of an attached bus
+  @param[in] busId  either 1 or 2 to get the actual angle of the bus if the busID is used it gets the opposite angle
+  * @return the absolute angle
+  */
+  
+  double getBusAngle(const stateData &sD, const solverMode &sMode, id_type_t busId = 0) const;
   /** @brief get the voltage of an attached bus
   @param[in] busId  either 1 or 2 or the object id of the bus
   * @return the voltage

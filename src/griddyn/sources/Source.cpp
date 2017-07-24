@@ -35,7 +35,7 @@ Source::Source (const std::string &objName, double startVal) : gridSubModel (obj
     m_output = startVal;
     m_inputSize = 0;
     m_outputSize = 1;
-	opFlags.set(pflow_init_required);
+    opFlags.set (pflow_init_required);
 }
 
 coreObject *Source::clone (coreObject *obj) const
@@ -102,7 +102,7 @@ void Source::timestep (coreTime time, const IOdata & /*inputs*/, const solverMod
     }
 }
 
-count_t Source::outputDependencyCount (index_t /*num*/, const solverMode & /*sMode*/) const { return 0; }
+count_t Source::outputDependencyCount (index_t /*outputNum*/, const solverMode & /*sMode*/) const { return 0; }
 IOdata Source::getOutputs (const IOdata & /*inputs*/, const stateData & /*sD*/, const solverMode & /*sMode*/) const
 {
     return {m_tempOut};
@@ -111,13 +111,13 @@ IOdata Source::getOutputs (const IOdata & /*inputs*/, const stateData & /*sD*/, 
 double Source::getOutput (const IOdata & /*inputs*/,
                           const stateData & /*sD*/,
                           const solverMode & /*sMode*/,
-                          index_t num) const
+                          index_t outputNum) const
 {
-    return (num == 0) ? m_tempOut : kNullVal;
+    return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
-double Source::getOutput (index_t num) const { return (num == 0) ? m_tempOut : kNullVal; }
-index_t Source::getOutputLoc (const solverMode & /*sMode*/, index_t /*num*/) const { return kNullLocation; }
+double Source::getOutput (index_t outputNum) const { return (outputNum == 0) ? m_tempOut : kNullVal; }
+index_t Source::getOutputLoc (const solverMode & /*sMode*/, index_t /*outputNum*/) const { return kNullLocation; }
 void Source::updateLocalCache (const IOdata & /*inputs*/, const stateData &sD, const solverMode & /*sMode*/)
 {
     if ((prevTime != sD.time) && (sD.time > timeZero))

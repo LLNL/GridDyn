@@ -259,6 +259,42 @@ void collector::recheckColumns ()
     recheck = false;
 }
 
+count_t collector::grabData(double *data_, index_t N)
+{
+	std::vector<double> vals;
+	count_t currentCount = 0;
+	if (recheck)
+	{
+		recheckColumns();
+	}
+	for (auto &datapoint : points)
+	{
+		if (datapoint.dataGrabber->vectorGrab)
+		{
+			datapoint.dataGrabber->grabVectorData(vals);
+			if (datapoint.column + vals.size() < N)
+			{
+				std::copy(vals.begin(), vals.end(), data_ + datapoint.column);
+				currentCount = (std::max)(currentCount, datapoint.column + static_cast<index_t>(vals.size()));
+			}
+			else if (datapoint.column < N)
+			{
+				std::copy(vals.begin(), vals.begin() + (N - datapoint.column-1), data_ + datapoint.column);
+				currentCount = N;
+			}
+			
+		}
+		else if (datapoint.column<N)
+		{
+			data_[datapoint.column] = datapoint.dataGrabber->grabData();
+			currentCount = (std::max)(currentCount, datapoint.column + 1);
+		}
+	}
+	currentCount = (std::min)(currentCount, N);
+	return currentCount;
+}
+
+
 change_code collector::trigger (coreTime time)
 {
     std::vector<double> vals;
@@ -395,7 +431,7 @@ void collector::add (std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrab
     }
 }
 
-// a notification that something was added much more useful in child classes
+// a notification that something was added much more useful in derived classes
 void collector::dataPointAdded (const collectorPoint & /*cp*/) {}
 void collector::add (gridGrabberInfo *gdRI, coreObject *obj)
 {

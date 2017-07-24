@@ -81,16 +81,23 @@ INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 #Merge_static_libs(gridDynCombined ${gd_library_list} ${external_library_list})
 
-#fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and lower level ones
+#fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
 target_link_libraries(gridDynCombined fileInput ${griddyn_optional_libraries} ${gd_library_list} ${external_library_list} )
+
+IF(FSKIT_ENABLE)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fskit)
+target_link_libraries(gridDynCombined fskitLibrary)
+ENDIF(FSKIT_ENABLE)
 
 INSTALL(TARGETS gridDynCombined
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
 
-
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 

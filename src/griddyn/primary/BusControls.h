@@ -74,7 +74,7 @@ public:
   double getAdjustableCapacityUp (coreTime time) const;
   double getAdjustableCapacityDown (coreTime time) const;
 
-  void addPowerControlObject (gridComponent * obj,bool update);
+  void addPowerControlObject (gridComponent *comp,bool update);
   void addVoltageControlObject (gridComponent *comp, bool update);
 
   void removePowerControlObject (id_type_t oid, bool update);

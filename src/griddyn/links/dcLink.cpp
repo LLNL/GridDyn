@@ -437,8 +437,8 @@ void dcLink::updateLocalCache ()
 }
 
 int dcLink::fixRealPower (double power,
-	id_type_t measureTerminal,
-	id_type_t fixedTerminal,
+                          id_type_t measureTerminal,
+                          id_type_t fixedTerminal,
                           gridUnits::units_t unitType)
 {
     int ret = 0;
@@ -539,10 +539,13 @@ int dcLink::fixRealPower (double power,
     return ret;
 }
 
-
-int dcLink::fixPower(double power, double /*qPower*/, id_type_t  measureTerminal, id_type_t  fixedTerminal, gridUnits::units_t unitType)
+int dcLink::fixPower (double power,
+                      double /*qPower*/,
+                      id_type_t measureTerminal,
+                      id_type_t fixedTerminal,
+                      gridUnits::units_t unitType)
 {
-	return fixRealPower(power, measureTerminal, fixedTerminal, unitType);
+    return fixRealPower (power, measureTerminal, fixedTerminal, unitType);
 }
 
 }  // namespace links

@@ -83,9 +83,7 @@ double gridSubModel::get (const std::string &param, gridUnits::units_t unitType)
         coreObject *tobj = const_cast<gridSubModel *> (this);
         return unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
     }
-    else
-    {
-        return gridComponent::get (param, unitType);
-    }
+
+    return gridComponent::get (param, unitType);
 }
 }  // namespace griddyn

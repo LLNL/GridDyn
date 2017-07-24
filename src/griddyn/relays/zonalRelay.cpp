@@ -211,7 +211,7 @@ void zonalRelay::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     add (std::shared_ptr<Event> (std::move (ge)));
     for (index_t kk = 0; kk < m_zones; ++kk)
     {
-        setActionTrigger (kk, 0, m_zoneDelays[kk]);
+        setActionTrigger (0, kk, m_zoneDelays[kk]);
     }
 
     if (opFlags[use_commLink])

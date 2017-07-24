@@ -76,8 +76,12 @@ INSTALL(TARGETS zmqInterfaceLibrary
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 
  IF(DIME_ENABLE)
   list(APPEND griddyn_optional_libraries dimeLibrary zmqInterfaceLibrary)

@@ -16,7 +16,7 @@
    3. This notice may not be removed or altered from any source distribution.
    René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
-   modified by Philip Top LLNL 2017:  added charMapper objects instead of find
+   modified by Philip Top LLNL 2017:  added charMapper objects instead of find and C++ based overloads
 */
 
 #include "base64.h"

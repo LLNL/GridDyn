@@ -49,10 +49,9 @@ coreObject *sensor::clone (coreObject *obj) const
 
     nobj->m_terminal = m_terminal;
     nobj->inputStrings = inputStrings;
-    nobj->outputNames = outputNames;
     nobj->blockInputs = blockInputs;
     nobj->outputs = outputs;
-    nobj->outputNames = outputNames;
+    nobj->outputStrings = outputStrings;
     nobj->outputMode = outputMode;
     nobj->processStatus = processStatus;
     // clone the dataSources
@@ -128,9 +127,11 @@ void sensor::add (Block *blk)
     else
     {
         filterBlocks.push_back (blk);
+		blk->locIndex = static_cast<index_t>(filterBlocks.size() - 1);
     }
     ensureSizeAtLeast (blockInputs, filterBlocks.size (), -1);
     addSubObject (blk);
+	blk->parentSetFlag(separate_processing,true, this);
 }
 
 void sensor::add (std::shared_ptr<grabberSet> dGr)
@@ -218,22 +219,20 @@ void sensor::set (const std::string &param, const std::string &val)
         {
             if (num >= 0)
             {
-                if (num + sp.size () - 1 >= outputNames.size ())
-                {
-                    outputNames.resize (num + sp.size ());
-                }
+				ensureSizeAtLeast(outputStrings, num + sp.size());
+                
                 for (auto &istr : sp)
                 {
-                    outputNames[num] = getTailString (istr, ':');
+					outputStrings[num] = { getTailString(istr, ':') };
                     ++num;
                 }
             }
             else
             {
-                outputNames.reserve (outputNames.size () + sp.size ());
+                outputStrings.reserve (outputStrings.size () + sp.size ());
                 for (auto &istr : sp)
                 {
-                    outputNames.push_back (getTailString (istr, ':'));
+					outputStrings.push_back({ getTailString(istr, ':') });
                 }
             }
         }
@@ -258,120 +257,32 @@ void sensor::set (const std::string &param, const std::string &val)
             throw (invalidParameterValue (param));
         }
     }
-    else if ((iparam == "outputname") || (param == "outputnames"))
+    else if ((iparam == "outputname") || (param == "outputnames")||(param=="outputstring"))
     {
         if (num >= 0)
         {
             if (num >= static_cast<int> (outputs.size ()))
             {
-                outputNames.resize (num + 1);
+                outputStrings.resize (num + 1);
             }
-            outputNames[num] = val;
+            outputStrings[num] = splitline(val);
         }
         else
         {
-            auto sep = splitline (val);
+            auto sep = splitlineQuotes (val);
             trim (sep);
-            if (outputNames.empty ())
-            {
-                outputNames = sep;
-            }
-            else
-            {
-                for (auto &nm : sep)
-                {
-                    outputNames.push_back (nm);
-                }
-            }
+
+				for (auto &outputStr : sep)
+				{
+					outputStrings.push_back(splitline(outputStr));
+				}
         }
     }
     else if ((iparam == "output") || (param == "outputs"))
     {
-        auto el = val.find_first_of ('=');
-        std::string v2 = (el != std::string::npos) ? val.substr (0, el) : val;
-        std::string sval = (el != std::string::npos) ? val.substr (el + 1) : "";
+		setupOutput(num, val);
 
-        if (num >= 0)
-        {
-            if (num >= static_cast<int> (outputs.size ()))
-            {
-                outputs.resize (num + 1, -1);
-                outputNames.resize (num + 1);
-
-                outputMode.resize (num + 1, outputMode_t::block);
-                outGrabbers.resize (num + 1);
-            }
-            if (!sval.empty ())
-            {
-                outputNames[num] = sval;
-            }
-            auto outputValue = numeric_conversionComplete<int> (v2, -1);
-            if (outputValue >= 0)
-            {
-                outputs[num] = outputValue;
-                outputMode[num] = outputMode_t::block;
-            }
-            else
-            {
-                int knum = trailingStringInt (v2, sval, 0);
-                if (sval == "input")
-                {
-                    outputs[num] = knum;
-                    outputMode[num] = outputMode_t::direct;
-                }
-                else if (sval == "block")
-                {
-                    outputs[num] = knum;
-                    outputMode[num] = outputMode_t::block;
-                }
-                else
-                {
-                    outGrabbers[num] = std::make_shared<grabberSet> (v2, this);
-
-                    outputMode[num] = outputMode_t::processed;
-                }
-            }
-        }
-        else
-        {
-            auto sep = splitline (val);
-            trim (sep);
-            auto ns = sep.size ();
-            outputs.resize (ns, -1);
-            outputMode.resize (ns, outputMode_t::block);
-            outGrabbers.resize (ns);
-            int pp = 0;
-            for (auto &v : sep)
-            {
-                auto outNum = numeric_conversion<int> (v, -1);
-                if (outNum >= 0)
-                {
-                    outputs[pp] = outNum;
-                    outputMode[pp] = outputMode_t::block;
-                }
-                else
-                {
-                    int knum = trailingStringInt (v, sval, 0);
-                    if (sval == "input")
-                    {
-                        outputs[pp] = knum;
-                        outputMode[pp] = outputMode_t::direct;
-                    }
-                    else if (sval == "block")
-                    {
-                        outputs[pp] = knum;
-                        outputMode[pp] = outputMode_t::block;
-                    }
-                    else
-                    {
-                        outGrabbers[pp] = std::make_shared<grabberSet> (v, this);
-
-                        outputMode[pp] = outputMode_t::processed;
-                    }
-                }
-                ++pp;
-            }
-        }
+        
     }
     else if ((iparam == "blockinput") || (iparam == "process"))
     {
@@ -403,6 +314,66 @@ void sensor::set (const std::string &param, const std::string &val)
     }
 }
 
+void sensor::setupOutput(index_t num, const std::string &outputString)
+{
+	if (num >= 0)
+	{
+		auto el = outputString.find_first_of('=');
+		std::string v2 = (el != std::string::npos) ? outputString.substr(0, el) : outputString;
+		std::string sval = (el != std::string::npos) ? outputString.substr(el + 1) : "";
+		ensureSizeAtLeast(outputs, num + 1, -1);
+		ensureSizeAtLeast(outputStrings, num + 1);
+		ensureSizeAtLeast(outputMode, num + 1, outputMode_t::block);
+		ensureSizeAtLeast(outGrabbers, num + 1);
+		
+		if (!sval.empty())
+		{
+			outputStrings[num] = { sval };
+		}
+		auto outputValue = numeric_conversionComplete<int>(v2, -1);
+		if (outputValue >= 0)
+		{
+			outputs[num] = outputValue;
+			outputMode[num] = outputMode_t::block;
+		}
+		else
+		{
+			int knum = trailingStringInt(v2, sval, 0);
+			if (sval == "input")
+			{
+				outputs[num] = knum;
+				outputMode[num] = outputMode_t::direct;
+			}
+			else if (sval == "block")
+			{
+				outputs[num] = knum;
+				outputMode[num] = outputMode_t::block;
+			}
+			else if (sval == "blockderiv")
+			{
+				outputs[num] = knum;
+				outputMode[num] = outputMode_t::blockderiv;
+			}
+			else
+			{
+				outGrabbers[num] = std::make_shared<grabberSet>(v2, this);
+
+				outputMode[num] = outputMode_t::processed;
+			}
+		}
+	}
+	else
+	{
+		auto sep = splitline(outputString);
+		trim(sep);
+		for (auto &v : sep)
+		{
+			setupOutput(static_cast<index_t>(outputs.size()), v);
+		}
+	}
+
+}
+
 void sensor::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
     std::string iparam;
@@ -425,7 +396,7 @@ void sensor::set (const std::string &param, double val, gridUnits::units_t unitT
     }
     else if (param == "direct")
     {
-        opFlags.set (direct_IO, (val > 0));
+        opFlags.set (direct_IO, (val > 0.1));
     }
     else if (iparam == "output")
     {
@@ -456,91 +427,21 @@ void sensor::set (const std::string &param, double val, gridUnits::units_t unitT
 
 double sensor::get (const std::string &param, gridUnits::units_t unitType) const
 {
-    std::string iparam;
-    int num = trailingStringInt (param, iparam, -1) - 1;
-    double ret = kNullVal;
-    if (iparam == "output")
-    {
-        if (num < 0)
-        {
-            num = 0;
-        }
-		
-        if (num < static_cast<int> (outputs.size ()))
-        {
-            switch (outputMode[num])
-            {
-            case outputMode_t::block:
-                if (outputs[num] >= 0)
-                {
-                    ret = filterBlocks[outputs[num]]->getOutput ();
-                }
-                break;
-            case outputMode_t::processed:
-                if (outGrabbers[num])
-                {
-                    ret = outGrabbers[num]->grabData ();
-                }
-                break;
-            case outputMode_t::direct:
-                if (outputs[num]>=0)
-                {
-                    ret = dataSources[outputs[num]]->grabData ();
-                }
-                break;
-            default:
-                ret = kNullVal;
-                break;
-            }
-        }
-
-        return ret;
-    }
-
-        for (size_t kk = 0; kk < outputNames.size (); ++kk)
-        {
-            if (param == outputNames[kk])
-            {
-                if (kk < outputMode.size ())
-                {
-                    switch (outputMode[kk])
-                    {
-                    case outputMode_t::block:
-                        if (outputs[kk] >= 0)
-                        {
-                            ret = filterBlocks[outputs[kk]]->getOutput ();
-                        }
-                        break;
-                    case outputMode_t::processed:
-                        if (outGrabbers[kk])
-                        {
-                            ret = outGrabbers[kk]->grabData ();
-                        }
-                        break;
-                    case outputMode_t::direct:
-                        if (outputs[kk] >= 0)
-                        {
-                            ret = dataSources[outputs[kk]]->grabData ();
-                        }
-                        break;
-                    default:
-                        ret = kNullVal;
-                        break;
-                    }
-                }
-                return ret;
-            }
-        }
+	index_t ind = lookupOutputIndex(param);
+	if (ind != kNullLocation)
+	{
+		return getOutput(ind);
+	}
+    
         if (param == "terminal")
         {
-            ret = static_cast<double> (m_terminal);
+            return static_cast<double> (m_terminal);
         }
         else
         {
-            ret = Relay::get (param, unitType);
+            return Relay::get (param, unitType);
         }
 
-    return ret;
 }
 
 void sensor::updateObject (coreObject *obj, object_update_mode mode)
@@ -575,7 +476,7 @@ void sensor::generateInputGrabbers ()
     ensureSizeAtLeast (dataSources, iSize);
     for (int ii = 0; ii < iSize; ++ii)
     {
-        if (inputStrings[ii][0] == '#')  // escape hatch for previously loaded grabbers
+        if (inputStrings[ii].front() == '#')  // escape hatch for previously loaded grabbers
         {
             continue;
         }
@@ -687,17 +588,37 @@ double sensor::getBlockOutput (const stateData &sD, const solverMode &sMode, ind
     {
 		if (isValidIndex(blockNumber,filterBlocks))
         {
-            ret = filterBlocks[blockNumber]->getOutput ();
+            ret = filterBlocks[blockNumber]->getBlockOutput ();
         }
     }
     else
     {
 		if (isValidIndex(blockNumber, filterBlocks))
         {
-            ret = filterBlocks[blockNumber]->getOutput (kNullVec, sD, sMode);
+            ret = filterBlocks[blockNumber]->getBlockOutput(sD, sMode);
         }
     }
     return ret;
+}
+
+double sensor::getBlockDerivOutput(const stateData &sD, const solverMode &sMode, index_t blockNumber) const
+{
+	double ret = kNullVal;
+	if (isLocal(sMode))
+	{
+		if (isValidIndex(blockNumber, filterBlocks))
+		{
+			ret = filterBlocks[blockNumber]->getBlockDoutDt();
+		}
+	}
+	else
+	{
+		if (isValidIndex(blockNumber, filterBlocks))
+		{
+			ret = filterBlocks[blockNumber]->getBlockDoutDt(sD, sMode);
+		}
+	}
+	return ret;
 }
 
 double sensor::getInput (const stateData &sD, const solverMode &sMode, index_t inputNumber) const
@@ -723,13 +644,7 @@ double sensor::getInput (const stateData &sD, const solverMode &sMode, index_t i
 
 void sensor::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-    for (auto fb : filterBlocks)
-    {
-        if (fb!=nullptr)
-        {
-            fb->dynInitializeA (time0, flags);
-        }
-    }
+    
     if (dynamic_cast<Link *> (m_sourceObject)!=nullptr)
     {
         opFlags.set (link_type_source);
@@ -767,9 +682,9 @@ void sensor::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     return Relay::dynObjectInitializeA (time0, flags);
 }
 
-void sensor::dynObjectInitializeB (const IOdata & /*inputs*/,
+void sensor::dynObjectInitializeB (const IOdata & inputs,
                                    const IOdata & /*desiredOutput*/,
-                                   IOdata & /*fieldSet*/)
+                                   IOdata & fieldSet)
 {
     if (filterBlocks.empty ())  // no filter blocks, use direct output
     {
@@ -814,20 +729,74 @@ void sensor::dynObjectInitializeB (const IOdata & /*inputs*/,
                 outGrabbers.push_back (nullptr);
             }
         }
+		
     }
+	//do a verification check on the output codes
+	int blkcnt = 0;
+	int ocount = 0;
+	for (int kk = 0; kk < m_outputSize; ++kk)
+	{
+		switch (outputMode[kk])
+		{
+		case outputMode_t::block:
+			if ((outputs[kk] < 0) || (outputs[kk] > static_cast<int>(filterBlocks.size())))
+			{
+				if (blkcnt < static_cast<int>(filterBlocks.size()))
+				{
+					outputs[kk] = blkcnt;
+				}
+				else
+				{
+					outputs[kk] = 0;
+				}
+				
+			}
+			++blkcnt;
+			break;
+		case outputMode_t::blockderiv:
+			if ((outputs[kk] < 0) || (outputs[kk] > static_cast<int>(filterBlocks.size())))
+			{
+				if (blkcnt < static_cast<int>(filterBlocks.size()))
+				{
+					outputs[kk] = blkcnt;
+				}
+				else
+				{
+					outputs[kk] = 0;
+				}
+			}
+			break;
+		case outputMode_t::direct:
+			if ((outputs[kk] < 0) || (outputs[kk] > static_cast<int>(dataSources.size())))
+			{
+				if (ocount < static_cast<int>(dataSources.size()))
+				{
+					outputs[kk] = ocount;
+				}
+				else
+				{
+					outputs[kk] = 0;
+				}
+			}
+			++ocount;
+		case outputMode_t::processed:
+		default:
+			break;
+		}
+	}
 
     // initialization of the blocks
-    for (size_t kk = 0; kk < filterBlocks.size (); ++kk)
+	auto sz = static_cast<count_t>(filterBlocks.size());
+    for (index_t kk = 0; kk < sz; ++kk)
     {
-        double cv = dataSources[blockInputs[kk]]->grabData ();
-        // make sure the process can be handled in states
-
-        IOdata out (1);
-        IOdata in{cv};
-        IOdata outset;
-        filterBlocks[kk]->dynInitializeB (in, outset, out);
+        double cv = getBlockInput(kk, noInputs);
+        filterBlocks[kk]->blockInitialize (cv, kNullVal);
     }
-    // TODO:: PT fill in the field vector
+	m_outputSize = static_cast<index_t>(outputMode.size());
+
+	//generate the output
+	fieldSet = getOutputs(inputs, emptyStateData, cLocalSolverMode);
+	
 }
 
 void sensor::updateA (coreTime time)
@@ -837,7 +806,7 @@ void sensor::updateA (coreTime time)
         auto blks = static_cast<index_t> (filterBlocks.size ());
         for (index_t kk = 0; kk < blks; ++kk)
         {
-            double inputFB = dataSources[blockInputs[kk]]->grabData ();
+            double inputFB = getBlockInput(kk, noInputs);
             // make sure the process can be handled in states
             // printf("%f block %d input=%f\n ", static_cast<double>(time), static_cast<int>(kk), inputFB);
             filterBlocks[kk]->step (time, inputFB);
@@ -851,14 +820,14 @@ void sensor::timestep (coreTime time, const IOdata &inputs, const solverMode &sM
     auto blks = static_cast<index_t> (filterBlocks.size ());
     for (index_t kk = 0; kk < blks; ++kk)
     {
-        double inputFB = dataSources[blockInputs[kk]]->grabData ();
+        double inputFB = getBlockInput(kk, inputs);
         // make sure the process can be handled in states
         filterBlocks[kk]->step (time, inputFB);
     }
     Relay::timestep (time, inputs, sMode);
 }
 
-void sensor::jacobianElements (const IOdata & /*inputs*/,
+void sensor::jacobianElements (const IOdata &inputs,
                                const stateData &sD,
                                matrixData<double> &md,
                                const IOlocs & /*inputLocs*/,
@@ -867,11 +836,11 @@ void sensor::jacobianElements (const IOdata & /*inputs*/,
     if (stateSize (sMode) > 0)
     {
         matrixDataSparse<double> d2, dp;
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (index_t kk = 0; kk < blks; ++kk)
         {
             // TODO::this needs some help for performance and organization
-            double inputFB = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+			double inputFB = getBlockInput(kk, inputs, sD, sMode);
             d2.clear ();
             if (dataSources[blockInputs[kk]]->hasJacobian ())
             {
@@ -882,11 +851,11 @@ void sensor::jacobianElements (const IOdata & /*inputs*/,
 
             if (d2.size () == 0)
             {
-                filterBlocks[kk]->jacElements (inputFB, 0, sD, md, kNullLocation, sMode);
+                filterBlocks[kk]->blockJacobianElements (inputFB, 0, sD, md, kNullLocation, sMode);
             }
             else
             {
-                filterBlocks[kk]->jacElements (inputFB, 0, sD, dp, 0, sMode);
+                filterBlocks[kk]->blockJacobianElements (inputFB, 0, sD, dp, 0, sMode);
                 dp.cascade (d2, 0);
                 md.merge (dp);
             }
@@ -894,21 +863,22 @@ void sensor::jacobianElements (const IOdata & /*inputs*/,
     }
 }
 
-void sensor::residual (const IOdata & /*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
+void sensor::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
     if (stateSize (sMode) > 0)
     {
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (index_t kk = 0; kk < blks; ++kk)
         {
-            double inputFB = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+            double inputFB = getBlockInput(kk, inputs, sD, sMode);
             // make sure the process can be handled in states
-            filterBlocks[kk]->residElements (inputFB, 0, sD, resid, sMode);
+			//printf("state [4]=%f, state[5]=%f\n", sD.state[4], sD.state[5]);
+            filterBlocks[kk]->blockResidual (inputFB, 0, sD, resid, sMode);
         }
     }
 }
 
-void sensor::algebraicUpdate (const IOdata & /*inputs*/,
+void sensor::algebraicUpdate (const IOdata &inputs,
                               const stateData &sD,
                               double update[],
                               const solverMode &sMode,
@@ -916,62 +886,58 @@ void sensor::algebraicUpdate (const IOdata & /*inputs*/,
 {
     if (algSize (sMode) > 0)
     {
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (index_t kk = 0; kk < blks; ++kk)
         {
-            double inputFB = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+			double inputFB = getBlockInput(kk, inputs, sD, sMode);
             // make sure the process can be handled in states
-            filterBlocks[kk]->algElements (inputFB, sD, update, sMode);
+            filterBlocks[kk]->blockAlgebraicUpdate (inputFB, sD, update, sMode);
         }
     }
 }
 
-void sensor::derivative (const IOdata & /*inputs*/, const stateData &sD, double deriv[], const solverMode &sMode)
+void sensor::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
     if (diffSize (sMode) > 0)
     {
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (index_t kk = 0; kk < blks; ++kk)
         {
-            double inputFB = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+            double inputFB = getBlockInput(kk,inputs,sD,sMode);
             // make sure the process can be handled in states
-            filterBlocks[kk]->derivElements (inputFB, 0, sD, deriv, sMode);
+            filterBlocks[kk]->blockDerivative (inputFB, 0, sD, deriv, sMode);
         }
     }
 }
 
-index_t sensor::lookupOutput (const std::string &outName) const
+double sensor::getBlockInput(index_t blockNum, const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
-    for (index_t kk = 0; kk < static_cast<index_t> (outputNames.size ()); ++kk)
-    {
-        if (outName == outputNames[kk])
-        {
-            return kk;
-        }
-    }
-    return kNullLocation;
+	double res= dataSources[blockInputs[blockNum]]->grabData(sD, sMode);
+	return res;
 }
 
-IOdata sensor::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
+double sensor::getBlockInput(index_t blockNum, const IOdata & /*inputs*/) const
 {
-    IOdata out (outputs.size ());
-    for (size_t pp = 0; pp < outputs.size (); ++pp)
+	double res = dataSources[blockInputs[blockNum]]->grabData();
+	return res;
+}
+
+const std::vector<stringVec> &sensor::outputNames() const
+{
+	if (static_cast<count_t>(outputStrings.size()) < m_outputSize)
+	{
+		//TODO:: this should be corrected before it gets here
+		return gridComponent::outputNames();
+	}
+	return outputStrings;
+}
+
+IOdata sensor::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
+{
+    IOdata out (m_outputSize);
+    for (index_t pp = 0; pp < m_outputSize; ++pp)
     {
-        switch (outputMode[pp])
-        {
-        case outputMode_t::block:
-            out[pp] = filterBlocks[outputs[pp]]->getOutput (noInputs, sD, sMode);
-            break;
-        case outputMode_t::processed:
-            out[pp] = outGrabbers[pp]->grabData (sD, sMode);
-            break;
-        case outputMode_t::direct:
-            out[pp] = dataSources[outputs[pp]]->grabData ();
-            break;
-        default:
-            out[pp] = kNullVal;
-            break;
-        }
+		out[pp] = getOutput(inputs, sD, sMode, pp);
     }
     return out;
 }
@@ -979,34 +945,31 @@ IOdata sensor::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const
 double
 sensor::getOutput (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode, index_t outNum) const
 {
-    double out = kNullVal;
-    if (outNum >= static_cast<index_t> (outputMode.size ()))
+    
+	if (!isValidIndex(outNum,outputMode))
     {
-        return out;
+        return kNullVal;
     }
     switch (outputMode[outNum])
     {
     case outputMode_t::block:
-        out = filterBlocks[outputs[outNum]]->getOutput (noInputs, sD, sMode);
-        break;
+       return filterBlocks[outputs[outNum]]->getOutput (noInputs, sD, sMode);
+	case outputMode_t::blockderiv:
+		return filterBlocks[outputs[outNum]]->getBlockDoutDt( sD, sMode);
     case outputMode_t::processed:
-        out = outGrabbers[outNum]->grabData (sD, sMode);
-        break;
+        return outGrabbers[outNum]->grabData (sD, sMode);
     case outputMode_t::direct:
-        out = dataSources[outputs[outNum]]->grabData (sD, sMode);
-        break;
+        return dataSources[outputs[outNum]]->grabData (sD, sMode);
     default:
-        break;
+		return kNullVal;
     }
-
-    // printf("sensors %d, output %d val=%f\n", getUserID(),outNum, out);
-    return out;
 }
 
 double sensor::getOutput (index_t outNum) const
 {
     double out = kNullVal;
-    if (outNum >= static_cast<index_t> (outputMode.size ()))
+
+	if (!isValidIndex(outNum,outputMode))
     {
         return out;
     }
@@ -1015,6 +978,8 @@ double sensor::getOutput (index_t outNum) const
     case outputMode_t::block:
         out = filterBlocks[outputs[outNum]]->getOutput ();
         break;
+	case outputMode_t::blockderiv:
+		return filterBlocks[outputs[outNum]]->getBlockDoutDt();
     case outputMode_t::processed:
         out = outGrabbers[outNum]->grabData ();
         break;
@@ -1031,7 +996,7 @@ double sensor::getOutput (index_t outNum) const
 
 index_t sensor::getOutputLoc (const solverMode &sMode, index_t outNum) const
 {
-    if (outNum >= static_cast<index_t> (outputMode.size ()))
+	if (!isValidIndex(outNum, outputMode))
     {
         return kNullLocation;
     }
@@ -1081,10 +1046,10 @@ void sensor::rootTest (const IOdata &inputs, const stateData &sD, double roots[]
     {
         IOdata localInputs (1);
 
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (decltype(blks) kk = 0; kk < blks; ++kk)
         {
-            localInputs[0] = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+            localInputs[0] = getBlockInput(kk, inputs,sD,sMode);
             // printf("%d root test:%f block %d input=%f\n ", filterBlocks[kk]->getUserID(),
             // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the process can be
             // handled in states
@@ -1103,10 +1068,10 @@ void sensor::rootTrigger (coreTime time,
     {
         IOdata localInputs (1);
 
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (decltype(blks) kk = 0; kk < blks; ++kk)
         {
-            localInputs[0] = dataSources[blockInputs[kk]]->grabData ();
+            localInputs[0] = getBlockInput(kk, inputs);
             // make sure the process can be handled in states
             // printf("rootTrigger:%f block %d input=%f\n ", static_cast<double>(time), static_cast<int>(kk),
             // localInputs[0]);
@@ -1123,10 +1088,10 @@ sensor::rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &
     {
         IOdata localInputs (1);
 
-        auto blks = filterBlocks.size ();
-        for (size_t kk = 0; kk < blks; ++kk)
+        auto blks = static_cast<index_t>(filterBlocks.size ());
+        for (decltype(blks) kk = 0; kk < blks; ++kk)
         {
-            localInputs[0] = dataSources[blockInputs[kk]]->grabData (sD, sMode);
+            localInputs[0] = getBlockInput(kk, inputs, sD, sMode);
             // printf("%d root check:%f block %d input=%f\n ", filterBlocks[kk]->getUserID(),
             // static_cast<double>(sD.time), static_cast<int>(kk), localInputs[0]);  make sure the process can be
             // handled in states

@@ -187,7 +187,7 @@ class objectOffsetGrabber : public gridGrabber
             loaded = gridGrabber::checkIfLoaded ();
             return;
         }
-        offset = tobject->findIndex (fld, cLocalbSolverMode);
+        offset = tobject->findIndex (fld, cLocalSolverMode);
 
         if (offset == kInvalidLocation)
         {
@@ -213,7 +213,7 @@ class objectOffsetGrabber : public gridGrabber
             }
             else
             {
-                offset = tobject->findIndex (field, cLocalbSolverMode);
+                offset = tobject->findIndex (field, cLocalSolverMode);
 
                 if (offset == kInvalidLocation)
                 {
@@ -261,7 +261,7 @@ class objectOffsetGrabber : public gridGrabber
             {
                 if (offset == kNullLocation)
                 {
-                    offset = tobject->findIndex (field, cLocalbSolverMode);
+                    offset = tobject->findIndex (field, cLocalSolverMode);
                 }
                 if (offset != kNullLocation)
                 {

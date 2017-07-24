@@ -157,14 +157,16 @@ void Relay::setSource (coreObject *obj) { m_sourceObject = obj; }
  */
 void Relay::setSink (coreObject *obj) { m_sinkObject = obj; }
 
-void Relay::setActionTrigger (index_t conditionNumber, index_t actionNumber, coreTime delayTime)
+void Relay::setActionTrigger (index_t actionNumber, index_t conditionNumber, coreTime delayTime)
 {
     if (conditionNumber >= static_cast<index_t> (conditions.size ()))
     {
+		LOG_WARNING("attempted set of invalid conditonNumber");
         return;
     }
     if (actionNumber >= static_cast<index_t> (actions.size ()))
     {
+		LOG_WARNING("attempted set of invaid actionNumber");
         return;
     }
     // search for an existing entry
@@ -181,7 +183,7 @@ void Relay::setActionTrigger (index_t conditionNumber, index_t actionNumber, cor
     actionDelays[conditionNumber].push_back (delayTime);
 }
 
-void Relay::setActionMultiTrigger (const IOlocs &multi_conditions, index_t actionNumber, coreTime delayTime)
+void Relay::setActionMultiTrigger (index_t actionNumber, const IOlocs &multi_conditions, coreTime delayTime)
 {
     if (actionNumber >= static_cast<index_t> (actions.size ()))
     {
@@ -603,7 +605,7 @@ void Relay::pFlowObjectInitializeA (coreTime time0, std::uint32_t /*flags*/)
     prevTime = time0;
 }
 
-void Relay::dynObjectInitializeA (coreTime time0, std::uint32_t /*flags*/)
+void Relay::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     if (opFlags[continuous_flag])
     {
@@ -634,6 +636,7 @@ void Relay::dynObjectInitializeA (coreTime time0, std::uint32_t /*flags*/)
             }
         }
     }
+	gridComponent::dynObjectInitializeA(time0, flags);
 }
 
 coreObject *Relay::find (const std::string &objName) const
@@ -776,11 +779,11 @@ change_code Relay::rootCheck (const IOdata & /*inputs*/,
                               const solverMode & /*sMode*/,
                               check_level_t /*level*/)
 {
-    count_t prevTrig = triggerCount;
-    count_t prevAct = actionsTakenCount;
+    auto prevTrig = triggerCount;
+    auto prevAct = actionsTakenCount;
     coreTime ctime = (!sD.empty ()) ? (sD.time) : prevTime;
     updateA (ctime);
-    if ((triggerCount > prevTrig) || (actionsTakenCount > prevAct))
+    if ((triggerCount != prevTrig) || (actionsTakenCount != prevAct))
     {
         alert (this, UPDATE_TIME_CHANGE);
         updateRootCount (true);

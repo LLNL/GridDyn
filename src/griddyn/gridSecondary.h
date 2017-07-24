@@ -97,6 +97,7 @@ public:
   **/
   virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
 
+  const gridBus* getBus() const { return bus; };
 
   /**
   *@brief get the time derivative of a single state
@@ -123,7 +124,7 @@ public:
   @param[in] the number of the state being requested
   @return the value of the state being requested
   **/
-  virtual double getOutput (index_t num = 0) const override;
+  virtual double getOutput (index_t outputNum = 0) const override;
 
   /**
   *@brief predict what the outputs will be at a specific time in the future
@@ -149,6 +150,14 @@ public:
   **/
   virtual double getAdjustableCapacityDown (coreTime time = maxTime) const;
 
+
+  virtual const std::vector<stringVec> &inputNames() const override;
+  virtual const std::vector<stringVec> &outputNames() const override;
+
+  virtual gridUnits::units_t inputUnits(index_t inputNum) const override;
+
+
+  virtual gridUnits::units_t outputUnits(index_t outputNum) const override;
  
 };
 

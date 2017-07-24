@@ -38,11 +38,6 @@ protected:
 	double Qout=0.0;									//!<[puMVA] the actual output power
 	//double Psched = 0.0;							//!<[puMW] the scheduled output power
 
-	double dPdf = 0.0;                            //!<factor for determining how sensitive Pout is to frequency
-
-	double M = 0.0;                               //!<load droop factor
-	double H = 0.0;                               //!<load inertia used in computing dPdf
-
 	double Vpqmin = 0.7;         //!<low voltage at which the PQ powers convert to an impedance type load
 	double Vpqmax = 1.3;        //!<upper voltage at which the PQ powers convert to an impedance type load
 	coreTime lastTime = negTime;

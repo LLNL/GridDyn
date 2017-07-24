@@ -11,9 +11,9 @@
 */
 
 #include "BusControls.h"
+#include "Link.h"
 #include "acBus.h"
 #include "gridSecondary.h"
-#include "Link.h"
 #include "utilities/vectorOps.hpp"
 
 namespace griddyn
@@ -322,7 +322,7 @@ void BusControls::updatePowerControls ()
             {
                 auto opath = static_cast<acBus *> (pco->find ("bus"))->getDirectPath (controlledBus, pco);
                 opath.pop_back ();
-                if (dynamic_cast<Link *> (opath.back ())!=nullptr)
+                if (dynamic_cast<Link *> (opath.back ()) != nullptr)
                 {
                     proxyPControlObject.push_back (static_cast<Link *> (opath.back ()));
                 }
@@ -365,14 +365,14 @@ bool BusControls::checkIdenticalControls ()
     {
         for (size_t kk = 0; kk < vControlObjects.size (); ++kk)
         {
-            if (!isSameObject(vControlObjects[kk],pControlObjects[kk]))
+            if (!isSameObject (vControlObjects[kk], pControlObjects[kk]))
             {
                 return false;
             }
         }
         for (size_t kk = 0; kk < vControlLinks.size (); ++kk)
         {
-            if (!isSameObject(vControlLinks[kk],pControlLinks[kk]))
+            if (!isSameObject (vControlLinks[kk], pControlLinks[kk]))
             {
                 return false;
             }

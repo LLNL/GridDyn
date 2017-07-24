@@ -105,7 +105,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
     std::vector<double> nstate (nsize);
     std::vector<double> ndstate (nsize);
     std::copy (state, state + nsize, nstate.data ());
-    if (dstate!=nullptr)
+    if (dstate != nullptr)
     {
         std::copy (dstate, dstate + nsize, ndstate.data ());
     }
@@ -640,33 +640,33 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
     }
     break;
     case 2:  // all the same sequence of points
-	{
-		double val = 1e-12;
-		while (val<1.51)
-		{
-			for (auto &v : vsi)
-			{
-				state[v] = val;
-			}
-			bFile.write(reinterpret_cast<char *> (state), ssize * sizeof(double));
-			std::copy(state, state + ssize, tempState.begin());
-			int retval = sd->calcIC(gds->getCurrentTime(), 0.001, solverInterface::ic_modes::fixed_diff, true);
-			if (retval < 0)
-			{
-				double rval2 = retval;
-				bFile.write(reinterpret_cast<char *> (&rval2), sizeof(double));
-				std::copy(tempState.begin(), tempState.begin() + ssize, state);
-			}
-			else
-			{
-				sd->getCurrentData();
-				bFile.write(reinterpret_cast<char *> (state), ssize * sizeof(double));
-				std::copy(tempState.begin(), tempState.begin() + ssize, state);
-			}
-			val += inc;
-		}
-	}
-        break;
+    {
+        double val = 1e-12;
+        while (val < 1.51)
+        {
+            for (auto &v : vsi)
+            {
+                state[v] = val;
+            }
+            bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
+            std::copy (state, state + ssize, tempState.begin ());
+            int retval = sd->calcIC (gds->getCurrentTime (), 0.001, solverInterface::ic_modes::fixed_diff, true);
+            if (retval < 0)
+            {
+                double rval2 = retval;
+                bFile.write (reinterpret_cast<char *> (&rval2), sizeof (double));
+                std::copy (tempState.begin (), tempState.begin () + ssize, state);
+            }
+            else
+            {
+                sd->getCurrentData ();
+                bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
+                std::copy (tempState.begin (), tempState.begin () + ssize, state);
+            }
+            val += inc;
+        }
+    }
+    break;
     case 3:  // specific points
     {
         std::vector<std::vector<double>> ptsv{{1, 1, 1}, {0.5, 0.5, 0.5}};
@@ -760,7 +760,8 @@ getObjectInformation (const gridComponent *comp, const solverMode &sMode, const 
     int ii = 0;
     while (subobj != nullptr)
     {
-        objI.subObjectInfo.push_back (getObjectInformation (static_cast<gridComponent *> (subobj), sMode, rowCount));
+        objI.subObjectInfo.push_back (
+          getObjectInformation (static_cast<gridComponent *> (subobj), sMode, rowCount));
         ++ii;
         subobj = comp->getSubObject ("subobject", ii);
     }
@@ -800,7 +801,7 @@ void jacobianAnalysis (matrixData<double> &md, gridDynSimulation *gds, const sol
 
 bool checkObjectEquivalence (const coreObject *obj1, const coreObject *obj2, bool printMessage)
 {
-    if ((obj1==nullptr) || (obj2==nullptr))
+    if ((obj1 == nullptr) || (obj2 == nullptr))
     {
         if (printMessage)
         {
@@ -826,16 +827,16 @@ bool checkObjectEquivalence (const coreObject *obj1, const coreObject *obj2, boo
         }
         return false;
     }
-  
-            if (obj1->getParent ()->getName () != obj2->getParent ()->getName ())
-            {  // these do not affect equivalence but should be noted
-                if (printMessage)
-                {
-                    printf ("object 1 (%s) has a different parent than object 2(%s)\n", obj1->getName ().c_str (),
-                            obj2->getName ().c_str ());
-                }
-            }
-      
+
+    if (obj1->getParent ()->getName () != obj2->getParent ()->getName ())
+    {  // these do not affect equivalence but should be noted
+        if (printMessage)
+        {
+            printf ("object 1 (%s) has a different parent than object 2(%s)\n", obj1->getName ().c_str (),
+                    obj2->getName ().c_str ());
+        }
+    }
+
     if (obj1 == obj2)
     {  // these do not affect equivalence but should be noted
         if (printMessage)
@@ -856,10 +857,10 @@ bool checkObjectEquivalence (const coreObject *obj1, const coreObject *obj2, boo
     int ii = 0;
     coreObject *sub1 = obj1->getSubObject ("subobject", ii);
     bool result = true;
-    while (sub1!=nullptr)
+    while (sub1 != nullptr)
     {
         coreObject *sub2 = obj2->find (sub1->getName ());
-        if (sub2==nullptr)
+        if (sub2 == nullptr)
         {
             if (printMessage)
             {
@@ -880,4 +881,23 @@ bool checkObjectEquivalence (const coreObject *obj1, const coreObject *obj2, boo
     return result;
 }
 
+
+void printStateSizesPretty(const gridComponent *obj, const solverMode &sMode, const std::string &inset)
+{
+	auto &off = obj->getOffsets(sMode);
+	printf("%s%s:: ssize=%d, alg=%d, diff=%d local=%d\n", inset.c_str(), obj->getName().c_str(), obj->stateSize(sMode), obj->algSize(sMode), obj->diffSize(sMode), off.local.totalSize());
+	auto subObj = dynamic_cast<gridComponent *>(obj->getSubObject("subobject", 0));
+	int ii = 1;
+	while (subObj != nullptr)
+	{
+		printStateSizesPretty(subObj, sMode, inset + "   ");
+		subObj = dynamic_cast<gridComponent *>(obj->getSubObject("subobject", ii));
+		++ii;
+	}
+}
+
+void printStateSizes(const gridComponent *comp, const solverMode &sMode)
+{
+	printStateSizesPretty(comp, sMode, "");
+}
 }  // namespace griddyn

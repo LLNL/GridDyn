@@ -14,6 +14,7 @@ set(fskit_sources
   gridDynfskit.cpp
   zonalRelayLogicalProcess.cpp
   GridDynFskitRunner.cpp
+  GridDynFederatedSimulator.cpp
 )
 	
 set (fskit_headers
@@ -22,6 +23,7 @@ set (fskit_headers
 	gridDynfskit.h
 	zonalRelayLogicalProcess.h
 	GridDynFskitRunner.h
+	GridDynFederatedSimulator.h
 	griddyn-tracer.h
 	)
 
@@ -29,16 +31,20 @@ add_library(fskitLibrary ${fskit_sources} ${fskit_headers})
 
 INCLUDE_DIRECTORIES(.)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 
 INSTALL(TARGETS fskitLibrary
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/gridDyn
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 
 list(APPEND griddyn_optional_libraries fskitLibrary)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/fskit)

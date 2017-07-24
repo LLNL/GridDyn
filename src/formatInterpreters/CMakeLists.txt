@@ -110,8 +110,12 @@ INSTALL(TARGETS formatInterpreter
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 
 set(formatInterpreter_include_directories
   ${PROJECT_SOURCE_DIR}/src/formatInterpreters

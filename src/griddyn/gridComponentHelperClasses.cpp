@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "gridObjectsHelperClasses.h"
+#include "gridComponentHelperClasses.h"
 #include "gridComponent.h"
 #include <cstring>
 
@@ -18,35 +18,35 @@ namespace griddyn
 {
 static const solverOffsets nullOffsets;
 
-solverMode::solverMode (index_t index)
+
+solverMode::solverMode (index_t index):offsetIndex(index)
 {
-    offsetIndex = index;
-    if (index == 0)  // predefined local
+    if (index == local_mode)  // predefined local
     {
         local = true;
         dynamic = true;
         differential = true;
         algebraic = true;
     }
-    else if ((index == 1) || (index == 3))  // predefined localb and dae
-    {
-        dynamic = true;
-        differential = true;
-        algebraic = true;
-    }
-    else if (index == 2)  // predefined pflow
+    else if (index == power_flow)  // predefined pflow
     {
         algebraic = true;
         differential = false;
         dynamic = false;
     }
-    else if (index == 4)  // predefined dynAlg
+	else if (index == dae)  // predefined dae
+    {
+		dynamic = true;
+		differential = true;
+        algebraic = true;
+    }
+    else if (index == dynamic_algebraic)  // predefined dynAlg
     {
         algebraic = true;
         differential = false;
         dynamic = true;
     }
-    else if (index == 5)  // predefined dynDiff
+    else if (index == dynamic_differential)  // predefined dynDiff
     {
         algebraic = false;
         differential = true;
@@ -294,33 +294,34 @@ void solverOffsets::setOffset (index_t newOffset)
     }
 }
 
-offsetTable::offsetTable () noexcept: offsetContainer (6)
+
+offsetTable::offsetTable () noexcept : offsetContainer (5)
 {
-    // most simulations use the first 2 and powerflow(3) and likely dynamic DAE(4)  and often 5 and 6 for dynamic
+    // most simulations use the first 1 and powerflow(2) and likely dynamic DAE(3)  and often 4 and 5 for dynamic
     // partitioned
     offsetContainer[0].sMode = cLocalSolverMode;
-    offsetContainer[1].sMode = cLocalbSolverMode;
 }
 
 bool offsetTable::isLoaded (const solverMode &sMode) const
 {
-    return (isValidIndex(sMode.offsetIndex))?  ((offsetContainer[sMode.offsetIndex].stateLoaded) &&
-		(offsetContainer[sMode.offsetIndex].rjLoaded)):false;
+    return (isValidIndex (sMode.offsetIndex)) ?
+             ((offsetContainer[sMode.offsetIndex].stateLoaded) && (offsetContainer[sMode.offsetIndex].rjLoaded)) :
+             false;
 }
 
 bool offsetTable::isStateLoaded (const solverMode &sMode) const
 {
-    return isValidIndex(sMode.offsetIndex) ?  offsetContainer[sMode.offsetIndex].stateLoaded:false;
+    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex].stateLoaded : false;
 }
 
 bool offsetTable::isrjLoaded (const solverMode &sMode) const
 {
-    return isValidIndex(sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex].rjLoaded : false;
+    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex].rjLoaded : false;
 }
 
 solverOffsets &offsetTable::getOffsets (const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
         offsetContainer[sMode.offsetIndex].sMode = sMode;
@@ -330,12 +331,12 @@ solverOffsets &offsetTable::getOffsets (const solverMode &sMode)
 
 const solverOffsets &offsetTable::getOffsets (const solverMode &sMode) const
 {
-	return isValidIndex(sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex] : nullOffsets;
+    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex] : nullOffsets;
 }
 
 void offsetTable::setOffsets (const solverOffsets &newOffsets, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -345,7 +346,7 @@ void offsetTable::setOffsets (const solverOffsets &newOffsets, const solverMode 
 
 void offsetTable::setOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -355,7 +356,7 @@ void offsetTable::setOffset (index_t newOffset, const solverMode &sMode)
 
 void offsetTable::setAlgOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -365,7 +366,7 @@ void offsetTable::setAlgOffset (index_t newOffset, const solverMode &sMode)
 
 void offsetTable::setDiffOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -375,7 +376,7 @@ void offsetTable::setDiffOffset (index_t newOffset, const solverMode &sMode)
 
 void offsetTable::setVOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -385,7 +386,7 @@ void offsetTable::setVOffset (index_t newOffset, const solverMode &sMode)
 
 void offsetTable::setAOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -395,7 +396,7 @@ void offsetTable::setAOffset (index_t newOffset, const solverMode &sMode)
 
 void offsetTable::setRootOffset (index_t newOffset, const solverMode &sMode)
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         offsetContainer.resize (sMode.offsetIndex + 1);
     }
@@ -405,7 +406,7 @@ void offsetTable::setRootOffset (index_t newOffset, const solverMode &sMode)
 
 index_t offsetTable::maxIndex (const solverMode &sMode) const
 {
-    if (!isValidIndex(sMode.offsetIndex))
+    if (!isValidIndex (sMode.offsetIndex))
     {
         return 0;
     }
@@ -540,8 +541,7 @@ void offsetTable::localUpdateAll (bool dynamic_only)
 }
 const solverMode &offsetTable::getSolverMode (index_t index) const
 {
-	return isValidIndex(index) ? offsetContainer[index].sMode : cEmptySolverMode;
-
+    return isValidIndex (index) ? offsetContainer[index].sMode : cEmptySolverMode;
 }
 
 const solverMode &offsetTable::find (const solverMode &tMode) const

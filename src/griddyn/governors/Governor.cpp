@@ -53,6 +53,8 @@ Governor::Governor (const std::string &objName)
     dbb.addOwningReference ();
     cb.addOwningReference ();
     delay.addOwningReference ();
+	m_inputSize = 2;
+	m_outputSize = 1;
 }
 
 coreObject *Governor::clone (coreObject *obj) const
@@ -137,9 +139,9 @@ void Governor::dynObjectInitializeB (const IOdata &inputs, const IOdata &desired
 // residual
 void Governor::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    cb.residElements (inputs[govOmegaInLocation], 0, sD, resid, sMode);
-    dbb.residElements (cb.getBlockOutput (sD, sMode), 0, sD, resid, sMode);
-    delay.residElements (dbb.getBlockOutput (sD, sMode) + inputs[govpSetInLocation], 0, sD, resid, sMode);
+    cb.blockResidual (inputs[govOmegaInLocation], 0, sD, resid, sMode);
+    dbb.blockResidual (cb.getBlockOutput (sD, sMode), 0, sD, resid, sMode);
+    delay.blockResidual (dbb.getBlockOutput (sD, sMode) + inputs[govpSetInLocation], 0, sD, resid, sMode);
 }
 
 void Governor::timestep (coreTime time, const IOdata &inputs, const solverMode & /*sMode*/)
@@ -167,16 +169,16 @@ void Governor::jacobianElements (const IOdata &inputs,
                                         const IOlocs &inputLocs,
                                         const solverMode &sMode)
 {
-    cb.jacElements (inputs[govOmegaInLocation], 0, sD, md, inputLocs[govOmegaInLocation], sMode);
+    cb.blockJacobianElements (inputs[govOmegaInLocation], 0, sD, md, inputLocs[govOmegaInLocation], sMode);
 
     matrixDataSparse<double> kp;
     index_t wloc = cb.getOutputLoc (sMode);
     double out = cb.getOutput (kNullVec, sD, sMode);
-    dbb.jacElements (out, 0, sD, md, wloc, sMode);
+    dbb.blockJacobianElements (out, 0, sD, md, wloc, sMode);
 
     out = dbb.getOutput (kNullVec, sD, sMode);
     wloc = dbb.getOutputLoc (sMode);
-    delay.jacElements (out + inputs[govpSetInLocation], 0, sD, kp, 0, sMode);
+    delay.blockJacobianElements (out + inputs[govpSetInLocation], 0, sD, kp, 0, sMode);
 
     if (inputLocs[govpSetInLocation] != kNullLocation)
     {
@@ -429,5 +431,27 @@ double Governor::get (const std::string &param, gridUnits::units_t unitType) con
     }
     return out;
 }
+
+static const std::vector<stringVec> inputNamesStr
+{
+	{ "omega","frequency","w","f" },
+	{ "pset","setpoint","power" },
+};
+
+const std::vector<stringVec> &Governor::inputNames() const
+{
+	return inputNamesStr;
+}
+
+static const std::vector<stringVec> outputNamesStr
+{
+	{ "pmech","power","output","p" },
+};
+
+const std::vector<stringVec> &Governor::outputNames() const
+{
+	return outputNamesStr;
+}
+
 
 }//namespace griddyn

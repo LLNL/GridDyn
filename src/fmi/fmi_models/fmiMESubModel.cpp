@@ -547,7 +547,7 @@ void fmiMESubModel::residual(const IOdata &inputs, const stateData &sD, double r
 {
 	if (hasDifferential(sMode))
 	{
-		Lp Loc=offsets.getLocations(sD, resid, sMode, this);
+		auto Loc=offsets.getLocations(sD, resid, sMode, this);
 		derivative(inputs, sD, resid, sMode);
 		for (index_t ii = 0; ii < Loc.diffSize; ++ii)
 		{
@@ -563,7 +563,7 @@ void fmiMESubModel::residual(const IOdata &inputs, const stateData &sD, double r
 
 void fmiMESubModel::derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-	Lp Loc=offsets.getLocations(sD, deriv, sMode, this);
+	auto Loc=offsets.getLocations(sD, deriv, sMode, this);
 	updateLocalCache(inputs, sD, sMode);
 	if (isDynamic(sMode))
 	{
@@ -697,7 +697,7 @@ void fmiMESubModel::jacobianElements(const IOdata &inputs, const stateData &sD,
 {
 		if  (hasDifferential(sMode))
 		{
-			Lp Loc=offsets.getLocations(sD, sMode, this);
+			auto Loc=offsets.getLocations(sD, sMode, this);
 			updateLocalCache(inputs, sD, sMode);
 			//for all the inputs
 			for (index_t kk = 0; kk < Loc.diffSize; ++kk)
@@ -736,7 +736,7 @@ void fmiMESubModel::jacobianElements(const IOdata &inputs, const stateData &sD,
 		}
 		else if (!isDynamic(sMode) && (opFlags[pflow_init_required]))
 		{
-			Lp Loc=offsets.getLocations(sD, sMode,  this);
+			auto Loc=offsets.getLocations(sD, sMode,  this);
 			updateLocalCache(inputs, sD, sMode);
 			//for all the inputs
 			for (index_t kk = 0; kk < m_stateSize; ++kk)
@@ -850,7 +850,7 @@ void fmiMESubModel::ioPartialDerivatives(const IOdata &inputs, const stateData &
 
 void fmiMESubModel::outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &md, const solverMode &sMode)
 {
-	Lp Loc=offsets.getLocations(sD, sMode, this);
+	auto Loc=offsets.getLocations(sD, sMode, this);
 	updateLocalCache(inputs, sD, sMode);
 	auto offsetLoc = isDynamic(sMode) ? Loc.diffOffset : Loc.algOffset;
 
@@ -930,12 +930,12 @@ IOdata fmiMESubModel::getOutputs(const IOdata &inputs, const stateData &sD, cons
 }
 
 
-double fmiMESubModel::getDoutdt(const IOdata &/*inputs*/,const stateData & /*sD*/, const solverMode & /*sMode*/, index_t /*num*/) const
+double fmiMESubModel::getDoutdt(const IOdata &/*inputs*/,const stateData & /*sD*/, const solverMode & /*sMode*/, index_t /*outputNum*/) const
 {
 	return 0;
 }
 
-double fmiMESubModel::getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode,index_t num) const
+double fmiMESubModel::getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode,index_t outputNum) const
 {
 	double out = kNullVal;
 	if (me->getCurrentMode() >= fmuMode::initializationMode)
@@ -944,30 +944,30 @@ double fmiMESubModel::getOutput(const IOdata &inputs, const stateData &sD, const
 		
 		if ((opFlags[use_output_estimator]) && (!sD.empty()) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
 		{
-			if (outputInformation[num].refMode >= refMode_t::level4)
+			if (outputInformation[outputNum].refMode >= refMode_t::level4)
 			{
-				out = oEst[num]->estimate(sD.time, inputs, sD.state + offsets.getDiffOffset(sMode));
+				out = oEst[outputNum]->estimate(sD.time, inputs, sD.state + offsets.getDiffOffset(sMode));
 			}
 		}
 		else
 		{
-			out=me->getOutput(num);
+			out=me->getOutput(outputNum);
 		}
 	}
 	return out;
 }
 
-double fmiMESubModel::getOutput(index_t num) const
+double fmiMESubModel::getOutput (index_t outputNum) const
 {
 	double out = kNullVal;
 	if (me->getCurrentMode() >= fmuMode::initializationMode)
 	{
-		out = me->getOutput(num);
+		out = me->getOutput(outputNum);
 	}
 	return out;
 }
 
-index_t fmiMESubModel::getOutputLoc(const solverMode & /*sMode*/,  index_t /*num*/) const
+index_t fmiMESubModel::getOutputLoc(const solverMode & /*sMode*/,  index_t /*outputNum*/) const
 {
 	return kNullLocation;
 }
@@ -980,7 +980,7 @@ void fmiMESubModel::updateLocalCache(const IOdata &inputs, const stateData &sD, 
 	{
 		if (sD.updateRequired(lastSeqID))
 		{
-			Lp Loc = offsets.getLocations(sD, sMode,  this);
+			auto Loc = offsets.getLocations(sD, sMode,  this);
 			me->setTime(sD.time);
 			if (m_stateSize > 0)
 			{

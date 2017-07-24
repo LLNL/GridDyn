@@ -54,10 +54,11 @@ void helperObject::setDescription (const std::string &description)
 }
 
 std::string helperObject::getDescription () const { return descriptionDictionary.query (m_oid); }
-void helperObject::setFlag (const std::string & flag, bool /*val*/) { throw (unrecognizedParameter (flag)); }
-bool helperObject::getFlag (const std::string & flag) const { throw (unrecognizedParameter (flag)); }
+void helperObject::setFlag (const std::string &flag, bool /*val*/) { throw (unrecognizedParameter (flag)); }
+bool helperObject::getFlag (const std::string &flag) const { throw (unrecognizedParameter (flag)); }
 double helperObject::get (const std::string &param) const { return getFlag (param) ? 1.0 : 0.0; }
 void helperObject::nameUpdate () {}
+void helperObject::makeNewOID() { m_oid = ++s_obcnt; }
 coreObject *helperObject::getOwner () const { return nullptr; }
 void setMultipleFlags (helperObject *obj, const std::string &flags)
 {

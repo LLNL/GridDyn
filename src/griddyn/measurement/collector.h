@@ -81,6 +81,13 @@ public:
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const;
 
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+	
+	/** function to grab the data to specific location
+	@param[out] data_ the location to place the captured values
+	@param[in] N the size of the data storage location
+	@return the number of data points stored
+	*/
+	count_t grabData(double *data_, index_t N);
 	virtual change_code trigger(coreTime time) override;
 	void recheckColumns();
 	coreTime nextTriggerTime() const override
@@ -144,8 +151,18 @@ public:
 		warnList.clear();
 		warningCount = 0;
 	}
+
+	/** clear all grabbers from the collector*/
+	void reset()
+	{
+		points.clear();
+		data.clear();
+		warnList.clear();
+		warningCount = 0;
+		triggerTime = maxTime;
+	}
 protected:
-	/** callback intended more for child classes to indicate that a dataPoint has been added*/
+	/** callback intended more for derived classes to indicate that a dataPoint has been added*/
 	virtual void dataPointAdded(const collectorPoint& cp);
 	/** get a column number, the requested column is a request only
 	*@param[in] requestedColumn the column that is being requested

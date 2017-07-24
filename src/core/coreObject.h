@@ -66,6 +66,7 @@ protected: //variables that are used regularly by child class objects
 	coreTime updatePeriod = maxTime;      //!<[s]the update period
 	coreTime updateDelay = timeZero;         //!<[s]the requested delay between updateA and updateB--requested is key here not guaranteed
 private:
+	//these shouldn't generate false shareing as one is static
 	static std::atomic<id_type_t> s_obcnt;       //!< the global object counter
 	std::atomic<count_t> m_refCount;		//!< counter for the number of owning objects;
 public:
@@ -172,14 +173,14 @@ public:
   /** @brief get flags
   @param flag -the name of the flag to be queried
   @param val the value to the set the flag ;
-  \return int a value representing whether the set operation was successful or not
+  @return int a value representing whether the set operation was successful or not
   */
   virtual void setFlag (const std::string &flag, bool val = true);
   /** @brief get flags
   @param param the name of the flag to query.
-  \return the value of the flag queried
+  @return the value of the flag queried
   */
-  virtual bool getFlag (const std::string &param) const;
+  virtual bool getFlag (const std::string &flag) const;
   /**
   * @brief get a parameter from the object
   * @param[in] param the name of the parameter to get
@@ -225,8 +226,12 @@ public:
   * @brief function to disable the object most objects are enabled by default
   */
   virtual void disable ();
-
+  /** check if the object is enabled*/
   virtual bool isEnabled() const;
+
+  /** check if the object is cloneable
+  @return true if the object is cloneable*/
+  virtual bool isCloneable() const;
   /**
   * @brief returns the oid of the object which is supposed to be a unique identifier
   */
@@ -238,12 +243,6 @@ public:
   * @brief updates the OID with a new number-useful in a few circumstances to ensure the id is higher than another object
   */
   void makeNewOID ();
-
-  /** @brief loads a position object
-   *@details I don't know what a grid Position object looks like yet
-  @param[in] npos a gridPositionObject
-  */
-  //void loadPosition (std::shared_ptr<gridPositionInfo> npos);
 
   /** @brief set the name*/
   void setName(const std::string &newName)
@@ -257,8 +256,11 @@ public:
   {
     return name;
   }
-
+  /** add a description to the object
+  @param[in] description a string describing the object*/
   void setDescription(const std::string &description);
+  /** fetch the core object description
+  @return a string describing the object may be empty if no description was entered*/
   std::string getDescription() const;
   /** @brief set the parent*/
   virtual void setParent (coreObject *parentObj);
@@ -272,40 +274,52 @@ public:
   { //the id of 0 is used by a special nullObject
 	  return (parent->id!=0) ? (parent->getRoot()) : const_cast<coreObject *>(this);
   }
-  /** check if the object is the root object*/
+  /** check if the object is a root object*/
   bool isRoot() const
   {
 	  return (parent->id == 0);
   }
-  /** @brief set the parent*/
+  /** @brief set the user defined identification number for an object
+  @param[in] newUserID the new user defined identifier for an object*/
   void setUserID(index_t newUserID)
   {
 	  id = newUserID;
 	  idUpdate();
   }
-  /** get the userID*/
+  /** get the userID
+  @return the user defined identification code for the object*/
   index_t getUserID () const noexcept
   {
     return id;
   }
+  /** turn on updates for an object
+  @param[in] enable a boolean defining whether to turn updates on(true) or off (false)
+  */
   void enable_updates(bool enable = true)
   {
 	  updates_enabled = enable;
 	  alert(this, UPDATE_REQUIRED);
   }
+  /** check if an object has updates
+  @return true if updates are enabled
+  */
   bool hasUpdates() const
   {
 	  return updates_enabled;
   }
-  //@brief set the next update Time
+  /**@brief set the next update Time
+  @param[in] newUpdateTime the next time the update should trigger
+  */
   virtual void setUpdateTime (double newUpdateTime);
-  //@brief get the next time the system should call the update functions
+  /** @brief get the next time the system should call the update functions
+  */
   coreTime getNextUpdateTime () const noexcept
   {
     return nextUpdateTime;
   }
   
-  //@brief return the last time the object had its state set or was updated
+  /**@brief return the last time the object had its state set or was updated
+  */
   coreTime currentTime () const noexcept
   {
     return prevTime;
@@ -326,11 +340,14 @@ public:
 	  /** simple function for alerting of a user id change*/
 	  virtual void idUpdate();
 private:
-	/** private function to build an object with a specified id*/
+	/** private constructor function to build an object with a specified object id
+	@details used in special objects for various purposes
+	*/
 	coreObject(id_type_t coid);
 };
 
 /** @brief function to set multiple flags on a object separated by ; or ,
+@details the flags can be turned off by putting a - in front of the flag
 @param[in] obj the object to set the flags on
 @param[in] flags  the list of flags to set
 */

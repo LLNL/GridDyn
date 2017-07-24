@@ -100,7 +100,7 @@ void ExciterIEEEtype2::derivative(const IOdata &inputs,
 	double deriv[],
 	const solverMode &sMode)
 {
-	Lp Loc = offsets.getLocations(sD, deriv, sMode, this);
+	auto Loc = offsets.getLocations(sD, deriv, sMode, this);
 	const double *es = Loc.diffStateLoc;
 	double *d = Loc.destDiffLoc;
 	d[0] = (-(Ke + Aex * exp(Bex * es[0])) * es[0] + es[1]) / Te;

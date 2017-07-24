@@ -32,7 +32,8 @@ void communicationsCore::registerCommunicator (Communicator *comm)
     auto ret2 = m_idMap.emplace (comm->getID (), comm);
     if (!ret2.second)
     {
-        // removing the successfule m_stringMap emplace operation the m_stringMap emplace success for exception safety
+        // removing the successfule m_stringMap emplace operation the m_stringMap emplace success for exception
+        // safety
         auto resName = m_stringMap.find (comm->getName ());
         if (resName != m_stringMap.end ())
         {

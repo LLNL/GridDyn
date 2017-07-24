@@ -136,7 +136,7 @@ double delayBlock::step (coreTime time, double inputA)
     return out;
 }
 
-void delayBlock::derivElements (double input,
+void delayBlock::blockDerivative (double input,
                                 double didt,
                                 const stateData &sD,
                                 double deriv[],
@@ -147,11 +147,11 @@ void delayBlock::derivElements (double input,
     deriv[offset] = (K * (input + bias) - sD.state[offset]) / m_T1;
     if (limiter_diff > 0)
     {
-        Block::derivElements (input, didt, sD, deriv, sMode);
+        Block::blockDerivative (input, didt, sD, deriv, sMode);
     }
 }
 
-void delayBlock::jacElements (double input,
+void delayBlock::blockJacobianElements (double input,
                               double didt,
                               const stateData &sD,
                               matrixData<double> &md,
@@ -160,13 +160,13 @@ void delayBlock::jacElements (double input,
 {
     if ((isAlgebraicOnly (sMode)) || (opFlags[simplified]))
     {
-        Block::jacElements (input, didt, sD, md, argLoc, sMode);
+        Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
         return;
     }
     auto offset = offsets.getDiffOffset (sMode) + limiter_diff;
     md.assignCheck (offset, argLoc, K / m_T1);
     md.assign (offset, offset, -1.0 / m_T1 - sD.cj);
-    Block::jacElements (input, didt, sD, md, argLoc, sMode);
+    Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
 }
 
 // set parameters

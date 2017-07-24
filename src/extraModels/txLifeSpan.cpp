@@ -28,7 +28,7 @@ namespace extra {
 txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model everything is slow so no need to make it continuous
-	outputNames = { "remaininglife", "lossoflife" ,"rate"};
+	outputStrings = { {"remaininglife","liferemaining"}, {"lossoflife"} ,{"rate","rateofloss"} };
 }
 
 coreObject * txLifeSpan::clone(coreObject *obj) const
@@ -179,8 +179,8 @@ void txLifeSpan::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 			setActionTrigger(0, 0);
 			if (!opFlags[no_disconnect])
 			{
-				setActionTrigger(0, 1);
-				setActionTrigger(0, 2);
+				setActionTrigger(1, 0);
+				setActionTrigger(2, 0);
 			}
 		}
 		

@@ -17,7 +17,7 @@ namespace griddyn
 {
 namespace comms
 {
-commManager::commManager() = default;
+commManager::commManager () = default;
 commManager::commManager (const commManager &cm)
 {
     commName = cm.commName;
@@ -174,13 +174,13 @@ std::shared_ptr<Communicator> commManager::build ()
     return commLink;
 }
 
-void commManager::send (std::shared_ptr<commMessage> m)
+void commManager::send (std::shared_ptr<commMessage> m) const
 {
-    if (!commDestName.empty ())
+    if (commDestId != 0)
     {
         commLink->transmit (commDestId, std::move (m));
     }
-    else if (commDestId != 0)
+    else if (!commDestName.empty())
     {
         commLink->transmit (commDestName, std::move (m));
     }

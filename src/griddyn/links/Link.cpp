@@ -281,10 +281,10 @@ void Link::switchMode (index_t num, bool mode)
 
         if (opFlags[pFlow_initialized])
         {
-            LOG_DEBUG ("Switch1 changed||state =" +
-                       ((opFlags[switch1_open_flag]) ? std::string ("OPEN") : std::string ("CLOSED")) +
-                       ", link status =" +
-                       ((isConnected ()) ? std::string ("CONNECTED") : std::string ("DISCONNECTED")));
+            LOG_DEBUG (
+              "Switch1 changed||state =" + ((opFlags[switch1_open_flag]) ? std::string ("OPEN") :
+                                                                           std::string ("CLOSED")) +
+              ", link status =" + ((isConnected ()) ? std::string ("CONNECTED") : std::string ("DISCONNECTED")));
             if (isConnected ())
             {
                 reconnect ();
@@ -468,19 +468,19 @@ double Link::get (const std::string &param, units_t unitType) const
     {
         val = circuitNum;
     }
-	else
-	{
-		auto fptr = getObjectFunction(this, param);
-		if (fptr.first)
-		{
-			coreObject *tobj = const_cast<Link*>(this);
-			val = unitConversion(fptr.first(tobj), fptr.second, unitType, systemBasePower);
-		}
-		else
-		{
-			val = gridPrimary::get(param, unitType);
-		}
-	}
+    else
+    {
+        auto fptr = getObjectFunction (this, param);
+        if (fptr.first)
+        {
+            coreObject *tobj = const_cast<Link *> (this);
+            val = unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
+        }
+        else
+        {
+            val = gridPrimary::get (param, unitType);
+        }
+    }
     return val;
 }
 
@@ -514,10 +514,10 @@ int Link::fixRealPower (double power, id_type_t measureTerminal, id_type_t /*fix
 static IOlocs aLoc{0, 1};
 
 int Link::fixPower (double rPower,
-                        double /*qPower*/,
-	id_type_t measureTerminal,
-	id_type_t fixedTerminal,
-                        gridUnits::units_t unitType)
+                    double /*qPower*/,
+                    id_type_t measureTerminal,
+                    id_type_t fixedTerminal,
+                    gridUnits::units_t unitType)
 {
     return fixRealPower (rPower, measureTerminal, fixedTerminal, unitType);
 }
@@ -549,17 +549,17 @@ void Link::computePowers ()
 }
 
 void Link::ioPartialDerivatives (id_type_t /*busId*/,
-                                     const stateData & /*sD*/,
-                                     matrixData<double> & /*md*/,
-                                     const IOlocs & /*inputLocs*/,
-                                     const solverMode & /*sMode*/)
+                                 const stateData & /*sD*/,
+                                 matrixData<double> & /*md*/,
+                                 const IOlocs & /*inputLocs*/,
+                                 const solverMode & /*sMode*/)
 {
 }
 
 void Link::outputPartialDerivatives (id_type_t /*busId*/,
-                                         const stateData & /*sD*/,
-                                         matrixData<double> & /*md*/,
-                                         const solverMode & /*sMode*/)
+                                     const stateData & /*sD*/,
+                                     matrixData<double> & /*md*/,
+                                     const solverMode & /*sMode*/)
 {
 }
 
@@ -569,10 +569,7 @@ IOdata Link::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const s
     return getOutputs (1, sD, sMode);
 }
 
-bool isBus2 (id_type_t busId, gridBus *bus)
-{
-    return ((busId == 2) || (isSameObject(busId,bus)));
-}
+bool isBus2 (id_type_t busId, gridBus *bus) { return ((busId == 2) || (isSameObject (busId, bus))); }
 
 IOdata Link::getOutputs (id_type_t busId, const stateData & /*sD*/, const solverMode & /*sMode*/) const
 {
@@ -643,14 +640,60 @@ double Link::getMaxTransfer () const
     return (kBigNum);
 }
 
-double Link::getAbsAngle (id_type_t busId) const
+double Link::getBusAngle (id_type_t busId) const
 {
-    if (isBus2 (busId, B2))
-    {
-        return B2->getAngle ();
-    }
+	if (busId < 500_ind)
+	{
+		auto B = getBus(busId);
+		if (B != nullptr)
+		{
+			return B->getAngle();
+		}
+	}
+	//these are special cases for getting opposite angles as called by the attached buses
+	if (isSameObject(busId,B2))
+	{
+		return (B1!=nullptr)?B1->getAngle():kNullVal;
+	}
+	if (isSameObject(busId,B1))
+	{
+		return (B2 != nullptr) ? B2->getAngle() : kNullVal;
+	}
+	//now just default to the original behavior
+	auto B = getBus(busId);
+	if (B != nullptr)
+	{
+		return B->getAngle();
+	}
+	return kNullVal;
+}
 
-    return B1->getAngle ();
+double Link::getBusAngle( const stateData &sD, const solverMode &sMode,id_type_t busId ) const
+{
+	if (busId < 500_ind)
+	{
+		auto B = getBus(busId);
+		if (B != nullptr)
+		{
+			return B->getAngle();
+		}
+	}
+	//these are special cases for getting opposite angles as called by the attached buses
+	if (isSameObject(busId, B2))
+	{
+		return (B1 != nullptr) ? B1->getAngle(sD,sMode) : kNullVal;
+	}
+	if (isSameObject(busId, B1))
+	{
+		return (B2 != nullptr) ? B2->getAngle(sD, sMode) : kNullVal;
+	}
+	//now just default to the original behavior
+	auto B = getBus(busId);
+	if (B != nullptr)
+	{
+		return B->getAngle(sD, sMode);
+	}
+	return kNullVal;
 }
 
 double Link::getVoltage (id_type_t busId) const
@@ -663,9 +706,9 @@ double Link::getVoltage (id_type_t busId) const
 }
 
 void Link::setState (coreTime time,
-                         const double /*state*/[],
-                         const double /*dstate_dt*/[],
-                         const solverMode & /*sMode*/)
+                     const double /*state*/[],
+                     const double /*dstate_dt*/[],
+                     const solverMode & /*sMode*/)
 {
     prevTime = time;
 }
@@ -707,6 +750,8 @@ void Link::updateLocalCache ()
 
 gridBus *Link::getBus (index_t busInd) const
 {
+	//for Links it is customary to refer to the buses as 1 and 2, but for indexing schemes they sometimes atart at 0
+	// so this function will return Bus 1 for indices <=1 and Bus if the index is 2.  
     return ((busInd <= 1) || (busInd == B1->getID ())) ?
              B1 :
              (((busInd == 2) || (busInd == B2->getID ())) ? B2 : nullptr);

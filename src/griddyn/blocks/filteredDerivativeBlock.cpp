@@ -132,7 +132,7 @@ double filteredDerivativeBlock::step (coreTime time, double inputA)
     return out;
 }
 
-void filteredDerivativeBlock::derivElements (double input,
+void filteredDerivativeBlock::blockDerivative (double input,
                                              double /*didt*/,
                                              const stateData &sD,
                                              double deriv[],
@@ -144,7 +144,7 @@ void filteredDerivativeBlock::derivElements (double input,
     deriv[offset] = (sD.dstate_dt[offset + 1] - sD.state[offset]) / m_T2;
 }
 
-void filteredDerivativeBlock::jacElements (double input,
+void filteredDerivativeBlock::blockJacobianElements (double input,
                                            double didt,
                                            const stateData &sD,
                                            matrixData<double> &md,
@@ -165,7 +165,7 @@ void filteredDerivativeBlock::jacElements (double input,
 
     if (limiter_diff > 0)
     {
-        Block::jacElements (input, didt, sD, md, argLoc, sMode);
+        Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
     }
 }
 

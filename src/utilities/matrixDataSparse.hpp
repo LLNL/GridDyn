@@ -59,8 +59,8 @@ class matrixDataSparse : public matrixData<ValueT>
     void compact () override;
 
     matrixElement<ValueT> element (index_t N) const override { return data_[N]; }
-    auto begin () const { return data_.cbegin (); }
-    auto end () const { return data_.end (); }
+    auto begin () const noexcept { return data_.cbegin (); }
+    auto end () const noexcept { return data_.end (); }
     void start () override { cptr_ = data_.cbegin (); }
     matrixElement<ValueT> next () override
     {

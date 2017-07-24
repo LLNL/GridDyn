@@ -119,7 +119,7 @@ make_condition (const std::string &field, comparison_type comp, double level, co
     }
 }
 
-Condition::Condition (std::shared_ptr<grabberSet> valGrabber) : conditionA (std::move (valGrabber)) {}
+Condition::Condition (std::shared_ptr<grabberSet> valGrabber) : conditionLHS (std::move (valGrabber)) {}
 Condition::~Condition () = default;
 
 std::shared_ptr<Condition> Condition::clone (std::shared_ptr<Condition> gc) const
@@ -131,20 +131,20 @@ std::shared_ptr<Condition> Condition::clone (std::shared_ptr<Condition> gc) cons
     }
     ngc->m_constant = m_constant;
     ngc->m_margin = m_margin;
-    ngc->m_constB = m_constB;
+    ngc->m_constRHS = m_constRHS;
     ngc->m_curr_margin = m_curr_margin;
     ngc->use_margin = use_margin;
 
-    if (conditionA)
+    if (conditionLHS)
     {
-        ngc->conditionA = conditionA->clone (ngc->conditionA);
+        ngc->conditionLHS = conditionLHS->clone (ngc->conditionLHS);
     }
 
-    if (!m_constB)
+    if (!m_constRHS)
     {
-        if (conditionB)
+        if (conditionRHS)
         {
-            ngc->conditionB = conditionB->clone (ngc->conditionB);
+            ngc->conditionRHS = conditionRHS->clone (ngc->conditionRHS);
         }
     }
     return ngc;
@@ -154,7 +154,7 @@ void Condition::setConditionLHS (std::shared_ptr<grabberSet> valGrabber)
 {
     if (valGrabber)
     {
-        conditionA = std::move (valGrabber);
+        conditionLHS = std::move (valGrabber);
     }
 }
 
@@ -162,8 +162,8 @@ void Condition::setConditionRHS (std::shared_ptr<grabberSet> valGrabber)
 {
     if (valGrabber)
     {
-        conditionB = std::move (valGrabber);
-        m_constB = false;
+        conditionRHS = std::move (valGrabber);
+        m_constRHS = false;
     }
 }
 
@@ -173,24 +173,24 @@ void Condition::updateObject (coreObject *obj, object_update_mode mode)
     // if it doesn't then B update may throw an error in which case we need to rollback A for exception safety
     // this would be very unusual to occur.
     coreObject *keyObject = nullptr;
-    if (conditionA)
+    if (conditionLHS)
     {
-        keyObject = conditionA->getObject ();
-        conditionA->updateObject (obj, mode);
+        keyObject = conditionLHS->getObject ();
+        conditionLHS->updateObject (obj, mode);
     }
 
-    if (conditionB)
+    if (conditionRHS)
     {
         try
         {
-            conditionB->updateObject (obj, mode);
+            conditionRHS->updateObject (obj, mode);
         }
         catch (objectUpdateFailException &oe)
         {
-            if ((conditionA) && (keyObject != nullptr))
+            if ((conditionLHS) && (keyObject != nullptr))
             {
                 // now rollback A
-                conditionA->updateObject (keyObject->getRoot (), object_update_mode::match);
+                conditionLHS->updateObject (keyObject->getRoot (), object_update_mode::match);
             }
             throw (oe);
         }
@@ -225,29 +225,29 @@ void Condition::setComparison (comparison_type ct)
 
 double Condition::evalCondition ()
 {
-    double v1 = conditionA->grabData ();
-    double v2 = (m_constB) ? m_constant : conditionB->grabData ();
+    double v1 = conditionLHS->grabData ();
+    double v2 = (m_constRHS) ? m_constant : conditionRHS->grabData ();
 
     return evalf (v1, v2, m_curr_margin);
 }
 
 double Condition::evalCondition (const stateData &sD, const solverMode &sMode)
 {
-    double v1 = conditionA->grabData (sD, sMode);
-    double v2 = (m_constB) ? m_constant : conditionB->grabData (sD, sMode);
+    double v1 = conditionLHS->grabData (sD, sMode);
+    double v2 = (m_constRHS) ? m_constant : conditionRHS->grabData (sD, sMode);
     return evalf (v1, v2, m_curr_margin);
 }
 
 double Condition::getVal (int side) const
 {
-    double v = (side == 2) ? ((m_constB) ? m_constant : conditionB->grabData ()) : conditionA->grabData ();
+    double v = (side == 2) ? ((m_constRHS) ? m_constant : conditionRHS->grabData ()) : conditionLHS->grabData ();
     return v;
 }
 
 double Condition::getVal (int side, const stateData &sD, const solverMode &sMode) const
 {
-    double v = (side == 2) ? ((m_constB) ? m_constant : conditionB->grabData (sD, sMode)) :
-                             conditionA->grabData (sD, sMode);
+    double v = (side == 2) ? ((m_constRHS) ? m_constant : conditionRHS->grabData (sD, sMode)) :
+                             conditionLHS->grabData (sD, sMode);
     return v;
 }
 
@@ -266,16 +266,16 @@ inline bool isEqualityComparison (comparison_type comp)
 
 bool Condition::checkCondition () const
 {
-    double v1 = conditionA->grabData ();
-    double v2 = (m_constB) ? m_constant : conditionB->grabData ();
+    double v1 = conditionLHS->grabData ();
+    double v2 = (m_constRHS) ? m_constant : conditionRHS->grabData ();
     double ret = evalf (v1, v2, m_curr_margin);
     return (isEqualityComparison (comp)) ? (ret <= 0.0) : (ret < 0.0);
 }
 
 bool Condition::checkCondition (const stateData &sD, const solverMode &sMode) const
 {
-    double v1 = conditionA->grabData (sD, sMode);
-    double v2 = (m_constB) ? m_constant : conditionB->grabData (sD, sMode);
+    double v1 = conditionLHS->grabData (sD, sMode);
+    double v2 = (m_constRHS) ? m_constant : conditionRHS->grabData (sD, sMode);
 
     double ret = evalf (v1, v2, m_curr_margin);
     return (isEqualityComparison (comp)) ? (ret <= 0.0) : (ret < 0.0);
@@ -292,9 +292,9 @@ void Condition::setMargin (double val)
 
 coreObject *Condition::getObject () const
 {
-    if (conditionA)
+    if (conditionLHS)
     {
-        return conditionA->getObject ();
+        return conditionLHS->getObject ();
     }
 
     return nullptr;
@@ -302,16 +302,16 @@ coreObject *Condition::getObject () const
 
 void Condition::getObjects (std::vector<coreObject *> &objects) const
 {
-    if (conditionA)
+    if (conditionLHS)
     {
-        conditionA->getObjects (objects);
+        conditionLHS->getObjects (objects);
     }
 
-    if (!m_constB)
+    if (!m_constRHS)
     {
-        if (conditionB)
+        if (conditionRHS)
         {
-            conditionB->getObjects (objects);
+            conditionRHS->getObjects (objects);
         }
     }
 }

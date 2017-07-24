@@ -230,7 +230,7 @@ void loadFile (coreObject *parentObject, const std::string &fileName, readerInfo
     {
         loadCSV (parentObject, fileName, *ri);
     }
-    else if (ext == "raw")
+    else if ((ext == "raw")||(ext=="psse")||(ext=="pss/e"))
     {
         loadRAW (parentObject, fileName, *ri);
     }
@@ -245,7 +245,7 @@ void loadFile (coreObject *parentObject, const std::string &fileName, readerInfo
     else if (ext == "uct")
     {
     }
-    else if (ext == "m")
+    else if ((ext == "m")||(ext=="matlab"))
     {
         loadMFile (parentObject, fileName, *ri);
     }

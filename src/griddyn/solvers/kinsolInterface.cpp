@@ -40,7 +40,13 @@ namespace griddyn
 namespace solvers
 {
 int kinsolFunc (N_Vector state, N_Vector resid, void *user_data);
-int kinsolJacDense (long int Neq, N_Vector state, N_Vector resid, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
+int kinsolJacDense (long int Neq,
+                    N_Vector state,
+                    N_Vector resid,
+                    DlsMat J,
+                    void *user_data,
+                    N_Vector tmp1,
+                    N_Vector tmp2);
 #ifdef KLU_ENABLE
 int kinsolJacSparse (N_Vector state, N_Vector resid, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 #endif
@@ -67,7 +73,7 @@ kinsolInterface::~kinsolInterface ()
     // clear the memory,  the sundialsInterface destructor will clear the rest
     if (flags[initialized_flag])
     {
-        if (m_kinsolInfoFile!=nullptr)
+        if (m_kinsolInfoFile != nullptr)
         {
             fclose (m_kinsolInfoFile);
         }
@@ -95,7 +101,7 @@ void kinsolInterface::allocate (count_t stateCount, count_t /*numRoots*/)
         return;
     }
 
-    if (solverMem!=nullptr)
+    if (solverMem != nullptr)
     {
         KINFree (&(solverMem));
     }
@@ -229,7 +235,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     retval = KINSetScaledStepTol (solverMem, tolerance / 100);
     check_flag (&retval, "KINSetScaledStepTol", 1);
 
-    retval = KINSetNoInitSetup (solverMem, true);
+    retval = KINSetNoInitSetup (solverMem, TRUE);
     check_flag (&retval, "KINSetNoInitSetup", 1);
 
     retval = KINInit (solverMem, kinsolFunc, state);
@@ -276,7 +282,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     retval = KINSetNumMaxIters (solverMem, 50);  // residual calls
     check_flag (&retval, "KINSetNumMaxIters", 1);
 
-    retval = KINSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *>(this));
+    retval = KINSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
     check_flag (&retval, "KINSetErrHandlerFn", 1);
 
     flags.set (initialized_flag);
@@ -457,7 +463,7 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
     int ret = sd->m_gds->residualFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr,
                                            NVECTOR_DATA (sd->use_omp, resid), sd->mode);
 #endif
-    if (sd->printResid)
+    if (sd->flags[print_residuals])
     {
         long int val = 0;
         KINGetNumNonlinSolvIters (sd->solverMem, &val);

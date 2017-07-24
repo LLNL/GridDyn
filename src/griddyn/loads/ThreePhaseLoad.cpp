@@ -35,12 +35,17 @@ ThreePhaseLoad::ThreePhaseLoad (const std::string &objName) : Load (objName) {}
 ThreePhaseLoad::ThreePhaseLoad (double rP, double rQ, const std::string &objName) : Load (rP, rQ, objName)
 {
     Pa = Pb = Pc = rP / 3.0;
-
     Qa = Pb = Pc = rQ / 3.0;
 }
 
 void ThreePhaseLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
+	if (bus->checkFlag(three_phase_only))
+	{
+		opFlags[three_phase_input] = true;
+		opFlags[three_phase_output] = true;
+	}
+
     Load::pFlowObjectInitializeA (time0, flags);
 }
 
@@ -488,5 +493,52 @@ void ThreePhaseLoad::setQc (double val)
     Qc = val;
     setQ (Qa + Qb + Qc);
 }
+
+static const std::vector<stringVec> inputNamesStr3phase
+{
+	{ "voltage_a","v_a","volt_a","vmag_a" },
+	{ "angle_a","vangle_a","angle_a","ang_a","vang_a" },
+	{ "voltage_b","v_b","volt_b","vmag_b" },
+	{ "angle_b","vangle_b","angle_b","ang_b","vang_b" },
+	{ "voltage_c","v_c","volt_c","vmag_c" },
+	{ "angle_c","vangle_c","angle_c","ang_c","vang_c" },
+	{ "frequency","freq","f","omega" },
+};
+
+const std::vector<stringVec> &ThreePhaseLoad::inputNames() const
+{
+	if (opFlags[three_phase_input])
+	{
+		return inputNamesStr3phase;
+	}
+	else
+	{
+		return Load::inputNames();
+	}
+	
+}
+
+static const std::vector<stringVec> outputNamesStr3phase
+{
+	{ "p_a","power_a","realpower_a","real_a" },
+	{ "q_a","reactive_a","reactivepower_a" },
+	{ "p_b","power_b","realpower_b","real_b" },
+	{ "q_b","reactive_b","reactivepower_b" },
+	{ "p_c","power_c","realpower_c","real_c" },
+	{ "q_c","reactive_c","reactivepower_c" },
+};
+
+const std::vector<stringVec> &ThreePhaseLoad::outputNames() const
+{
+	if (opFlags[three_phase_output])
+	{
+		return outputNamesStr3phase;
+	}
+	else
+	{
+		return Load::outputNames();
+	}
+}
+
 }  // namespace loads
 }  // namespace griddyn

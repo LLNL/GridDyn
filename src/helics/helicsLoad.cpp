@@ -156,13 +156,13 @@ void helicsLoad::timestep (coreTime ttime, const IOdata &inputs, const solverMod
     rampLoad::timestep (ttime, inputs, sMode);
 }
 
-void helicsLoad::setFlag (const std::string &param, bool val)
+void helicsLoad::setFlag (const std::string &flag, bool val)
 {
-    if (param == "initial_queury")
+    if (flag == "initial_query")
     {
         opFlags.set (initial_query, val);
     }
-    else if (param == "predictive")
+    else if (flag == "predictive")
     {
         if (val)
         {
@@ -174,22 +174,22 @@ void helicsLoad::setFlag (const std::string &param, bool val)
             opFlags.set (predictive_ramp, false);
         }
     }
-    else if (param == "interpolate")
+    else if (flag == "interpolate")
     {
         opFlags.set (use_ramp, val);
         opFlags.set (predictive_ramp, !val);
     }
-    else if (param == "step")
+    else if (flag == "step")
     {
         opFlags.set (use_ramp, !val);
     }
-    else if (param == "use_ramp")
+    else if (flag == "use_ramp")
     {
         opFlags.set (use_ramp, val);
     }
     else
     {
-        rampLoad::setFlag (param, val);
+        rampLoad::setFlag (flag, val);
     }
 }
 
@@ -225,7 +225,7 @@ void helicsLoad::set (const std::string &param, const std::string &val)
             throw (invalidParameterValue ("unrecognized type"));
         }
     }
-    else if (param == "units")
+    else if ((param == "units")||(param=="inputunits"))
     {
         inputUnits = gridUnits::getUnits (val);
     }
@@ -252,7 +252,7 @@ void helicsLoad::set (const std::string &param, double val, gridUnits::units_t u
 
 void helicsLoad::setSubscription ()
 {
-    if (coord)
+    if (coord!=nullptr)
     {
         if (!loadKey.empty ())
         {

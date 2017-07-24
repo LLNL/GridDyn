@@ -66,7 +66,7 @@ private:
   virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
   virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
-  virtual double getOutput(index_t num = 0) const override;
+  virtual double getOutput (index_t outputNum = 0) const override;
 
   virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
   bool isLoaded() const;
@@ -74,11 +74,10 @@ private:
   void loadFMU();
   
   void instantiateFMU();
-  void updateDependencyInfo();
   void makeSettableState();
   void resetState();
   double getPartial(int depIndex, int refIndex, refMode_t mode);
-  void probeFMU();
+
   void loadOutputJac(int index = -1);
  
 };

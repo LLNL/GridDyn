@@ -52,8 +52,7 @@ const std::string &modeToName (acdcConverter::mode_t mode, const std::string &na
     }
 }
 
-acdcConverter::acdcConverter (double rP, double xP, const std::string &objName)
-    : Link (objName), r (rP), x (xP)
+acdcConverter::acdcConverter (double rP, double xP, const std::string &objName) : Link (objName), r (rP), x (xP)
 {
     buildSubsystem ();
 }
@@ -358,7 +357,10 @@ void acdcConverter::dynObjectInitializeB (const IOdata & /*inputs*/,
     }
 }
 
-void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly) { gridComponent::loadSizes (sMode, dynOnly); }
+void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
+{
+    gridComponent::loadSizes (sMode, dynOnly);
+}
 void acdcConverter::ioPartialDerivatives (id_type_t busId,
                                           const stateData &sD,
                                           matrixData<double> &md,
@@ -433,31 +435,30 @@ void acdcConverter::ioPartialDerivatives (id_type_t busId,
     }
 }
 
-void acdcConverter::outputPartialDerivatives(const IOdata & /*inputs*/,
-	const stateData &sD,
-	matrixData<double> &md,
-	const solverMode &sMode)
+void acdcConverter::outputPartialDerivatives (const IOdata & /*inputs*/,
+                                              const stateData &sD,
+                                              matrixData<double> &md,
+                                              const solverMode &sMode)
 {
-	if (!(isEnabled()))
-	{
-		return;
-	}
-	updateLocalCache(noInputs, sD, sMode);
-	auto algOffset = offsets.getAlgOffset(sMode);
-	if (isDynamic(sMode))
-	{
-		/*
-		linkInfo.P1 = dirMult*linkInfo.v2 * Idc;
-		linkInfo.P2 = -linkInfo.P1;
-		double sr = k3sq2*linkInfo.v1*Idc;
+    if (!(isEnabled ()))
+    {
+        return;
+    }
+    updateLocalCache (noInputs, sD, sMode);
+    auto algOffset = offsets.getAlgOffset (sMode);
+    if (isDynamic (sMode))
+    {
+        /*
+        linkInfo.P1 = dirMult*linkInfo.v2 * Idc;
+        linkInfo.P2 = -linkInfo.P1;
+        double sr = k3sq2*linkInfo.v1*Idc;
 
-		linkInfo.Q1 = -std::sqrt(sr*sr - linkInfo.P1*linkInfo.P1);
-		*/
-			md.assign(PoutLocation, algOffset, dirMult * linkInfo.v2);
-			md.assign(QoutLocation, algOffset, linkFlows.Q1 / Idc);
-			md.assign(PoutLocation + 2, algOffset, -dirMult * linkInfo.v2);
-	}
-
+        linkInfo.Q1 = -std::sqrt(sr*sr - linkInfo.P1*linkInfo.P1);
+        */
+        md.assign (PoutLocation, algOffset, dirMult * linkInfo.v2);
+        md.assign (QoutLocation, algOffset, linkFlows.Q1 / Idc);
+        md.assign (PoutLocation + 2, algOffset, -dirMult * linkInfo.v2);
+    }
 }
 void acdcConverter::outputPartialDerivatives (id_type_t busId,
                                               const stateData &sD,
@@ -792,8 +793,8 @@ void acdcConverter::updateLocalCache ()
 }
 
 int acdcConverter::fixRealPower (double power,
-	id_type_t /*measureTerminal*/,
-	id_type_t fixedTerminal,
+                                 id_type_t /*measureTerminal*/,
+                                 id_type_t fixedTerminal,
                                  gridUnits::units_t unitType)
 {
     if (fixedTerminal != 1)
@@ -810,8 +811,8 @@ int acdcConverter::fixRealPower (double power,
 
 int acdcConverter::fixPower (double /*power*/,
                              double /*qpower*/,
-	id_type_t /*measureTerminal*/,
-	id_type_t /*fixedTerminal*/,
+                             id_type_t /*measureTerminal*/,
+                             id_type_t /*fixedTerminal*/,
                              gridUnits::units_t /*unitType*/)
 {
     return 0;

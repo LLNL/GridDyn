@@ -36,7 +36,8 @@ subsystem::subsystem (const std::string &objName) : Link (objName)
     cterm[0] = 1;
     cterm[1] = 2;
     subarea.addOwningReference ();
-    addSubObject (&subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
+    addSubObject (
+      &subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
 }
 
 subsystem::subsystem (count_t terminals, const std::string &objName) : Link (objName)
@@ -51,7 +52,8 @@ subsystem::subsystem (count_t terminals, const std::string &objName) : Link (obj
     }
 
     subarea.addOwningReference ();
-    addSubObject (&subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
+    addSubObject (
+      &subarea);  // add the subArea to the subObject list to take advantage of the code in gridComponent.
 }
 
 coreObject *subsystem::clone (coreObject *obj) const
@@ -387,8 +389,8 @@ bool subsystem::isConnected () const
 }
 
 int subsystem::fixRealPower (double power,
-	id_type_t measureTerminal,
-	id_type_t /*fixedterminal*/,
+                             id_type_t measureTerminal,
+                             id_type_t /*fixedterminal*/,
                              gridUnits::units_t unitType)
 {
     if (measureTerminal <= m_terminals)
@@ -400,8 +402,8 @@ int subsystem::fixRealPower (double power,
 
 int subsystem::fixPower (double rPower,
                          double qPower,
-	id_type_t measureTerminal,
-	id_type_t /*fixedterminal*/,
+                         id_type_t measureTerminal,
+                         id_type_t /*fixedterminal*/,
                          gridUnits::units_t unitType)
 {
     if (measureTerminal <= m_terminals)
@@ -452,14 +454,7 @@ double subsystem::getAngle (const double state[], const solverMode &sMode) const
     return t1 - t2;
 }
 
-double subsystem::getAbsAngle (id_type_t busId) const
-{
-    if ((busId == 1) || (busId == terminalBus[0]->getID ()))
-    {
-        return terminalBus[m_terminals - 1]->getAngle ();
-    }
-    return terminalBus[0]->getAngle ();
-}
+
 
 double subsystem::getRealImpedance (id_type_t busId) const
 {
@@ -610,7 +605,7 @@ void subsystem::ioPartialDerivatives (id_type_t busId,
     }
     for (index_t kk = 0; kk < m_terminals; ++kk)
     {
-        if ((busId == kk + 1) || (isSameObject(busId,terminalBus[kk])))
+        if ((busId == kk + 1) || (isSameObject (busId, terminalBus[kk])))
         {
             terminalLink[kk]->ioPartialDerivatives (cterm[kk], sD, md, inputLocs, sMode);
             break;
@@ -629,7 +624,7 @@ void subsystem::outputPartialDerivatives (id_type_t busId,
     }
     for (index_t kk = 0; kk < m_terminals; ++kk)
     {
-        if ((busId == kk + 1) || (isSameObject(busId, terminalBus[kk])))
+        if ((busId == kk + 1) || (isSameObject (busId, terminalBus[kk])))
         {
             terminalLink[kk]->outputPartialDerivatives (cterm[kk], sD, md, sMode);
             break;

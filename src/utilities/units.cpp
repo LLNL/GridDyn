@@ -304,11 +304,14 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
     {
     case Watt:
         val = val / 1000.0;  // I know this looks funny, there really shouldn't be a break here convert to KW
+		FALLTHROUGH
     case kW:
         val = val / 1000.0;  // then convert to MW
+		FALLTHROUGH
     case MW:
     case MVAR:
         val = val / basePower;  // now convert to puMW
+		FALLTHROUGH
     case puMW:
     case pu:
         switch (out)
@@ -349,8 +352,10 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case puV:
         val = val * baseVoltage;  // convert to kV --baseVoltage is defined in kV
+		FALLTHROUGH
     case kV:
         val = val * 1000.0;  // convert to V
+		FALLTHROUGH
     case Volt:
         switch (out)
         {
@@ -369,7 +374,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case Ohm:
         val = val / (basePower * 1000000.0 / baseVoltage / baseVoltage);  // convert to puOhms
-    // Purposely no break statement
+		FALLTHROUGH
     case puOhm:
 
         switch (out)
@@ -405,6 +410,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case Amp:
         val = val * baseVoltage / basePower / 1000.0;  // convert to puA
+		FALLTHROUGH
     case puA:
 
         switch (out)
@@ -427,9 +433,11 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         }
         break;
     case MWph:
-        val = val / 60;
+        val = val / 60.0;
+		FALLTHROUGH
     case MWpmin:
-        val = val / 60;
+        val = val / 60.0;
+		FALLTHROUGH
     case MWps:
         switch (out)
         {
@@ -456,9 +464,11 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         }
         break;
     case puMWph:
-        val = val / 60;
+        val = val / 60.0;
+		FALLTHROUGH
     case puMWpmin:
-        val = val / 60;
+        val = val / 60.0;
+		FALLTHROUGH
     case puMWps:
         switch (out)
         {
@@ -685,6 +695,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
     {
     case km:
         val = val * 1000;
+		FALLTHROUGH
     case meter:
         switch (out)
         {
@@ -706,6 +717,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
         break;
     case mile:
         ret = val * 5280;
+		FALLTHROUGH
     case ft:
         switch (out)
         {

@@ -23,7 +23,7 @@
 
 // test case for coreObject object
 
-#include "fmi_models/fmiLoad.h"
+#include "fmi_models/fmiMELoad.h"
 #include "testHelper.h"
 
 

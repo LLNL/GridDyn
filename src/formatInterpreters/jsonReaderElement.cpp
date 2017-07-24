@@ -19,8 +19,8 @@
 
 static const std::string nullStr = std::string ("");
 
-bool isElement (const Json::Value &testValue);
-bool isAttribute (const Json::Value &testValue);
+bool isElement (const Json_gd::Value &testValue);
+bool isAttribute (const Json_gd::Value &testValue);
 
 jsonReaderElement::jsonReaderElement () noexcept {}
 jsonReaderElement::jsonReaderElement (const std::string &fileName) { jsonReaderElement::loadFile (fileName); }
@@ -64,11 +64,11 @@ bool jsonReaderElement::loadFile (const std::string &fileName)
     std::ifstream file (fileName);
     if (file.is_open ())
     {
-        doc = std::make_shared<Json::Value> ();
+        doc = std::make_shared<Json_gd::Value> ();
 
-        Json::CharReaderBuilder rbuilder;
+        Json_gd::CharReaderBuilder rbuilder;
         std::string errs;
-        bool ok = Json::parseFromStream (rbuilder, file, doc.get (), &errs);
+        bool ok = Json_gd::parseFromStream (rbuilder, file, doc.get (), &errs);
         if (ok)
         {
             current = std::make_shared<jsonElement> (*doc, fileName);
@@ -89,9 +89,9 @@ bool jsonReaderElement::loadFile (const std::string &fileName)
 
 bool jsonReaderElement::parse (const std::string &inputString)
 {
-    doc = std::make_shared<Json::Value> ();
+    doc = std::make_shared<Json_gd::Value> ();
 
-    Json::Reader stringReader;
+    Json_gd::Reader stringReader;
     bool ok = stringReader.parse (inputString, *doc.get (), false);
     if (ok)
     {
@@ -112,11 +112,11 @@ double jsonReaderElement::getValue () const
         return readerNullVal;
     }
 
-    if (current->getElement ().isConvertibleTo (Json::ValueType::realValue))
+    if (current->getElement ().isConvertibleTo (Json_gd::ValueType::realValue))
     {
         return current->getElement ().asDouble ();
     }
-    if (current->getElement ().isConvertibleTo (Json::ValueType::stringValue))
+    if (current->getElement ().isConvertibleTo (Json_gd::ValueType::stringValue))
     {
         return numeric_conversionComplete (current->getElement ().asString (), readerNullVal);
     }
@@ -130,7 +130,7 @@ std::string jsonReaderElement::getText () const
         return nullStr;
     }
 
-    if (current->getElement ().isConvertibleTo (Json::ValueType::stringValue))
+    if (current->getElement ().isConvertibleTo (Json_gd::ValueType::stringValue))
     {
         return current->getElement ().asString ();
     }
@@ -144,7 +144,7 @@ std::string jsonReaderElement::getMultiText (const std::string & /*sep*/) const
         return nullStr;
     }
 
-    if (current->getElement ().isConvertibleTo (Json::ValueType::stringValue))
+    if (current->getElement ().isConvertibleTo (Json_gd::ValueType::stringValue))
     {
         return current->getElement ().asString ();
     }
@@ -260,7 +260,7 @@ double jsonReaderElement::getAttributeValue (const std::string &attributeName) c
 {
     if (hasAttribute (attributeName))
     {
-        if (current->getElement ()[attributeName].isConvertibleTo (Json::ValueType::realValue))
+        if (current->getElement ()[attributeName].isConvertibleTo (Json_gd::ValueType::realValue))
         {
             return current->getElement ()[attributeName].asDouble ();
         }
@@ -448,7 +448,7 @@ void jsonReaderElement::restore ()
     bookmarks.pop_back ();
 }
 
-bool isAttribute (const Json::Value &testValue)
+bool isAttribute (const Json_gd::Value &testValue)
 {
     if (testValue.empty ())
     {
@@ -465,7 +465,7 @@ bool isAttribute (const Json::Value &testValue)
     return true;
 }
 
-bool isElement (const Json::Value &testValue)
+bool isElement (const Json_gd::Value &testValue)
 {
     if (testValue.empty ())
     {

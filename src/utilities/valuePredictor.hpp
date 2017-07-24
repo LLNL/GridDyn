@@ -31,7 +31,7 @@ class valuePredictor
     /** construction the predictor
     * @param[in] input0 the initial input
     @param[in] output0 the initial output
-    @param[in] slope [optional] the initial rate of change
+    @param[in] slope0 [optional] the initial rate of change
     */
     valuePredictor (InputType input0, OutputType output0, SlopeType slope0 = SlopeType (0))
         : lastKnownInput_ (input0), lastKnownOutput_ (output0), slope_ (slope0)

@@ -21,6 +21,7 @@
 #include <future>
 namespace griddyn
 {
+/** namespace to contain different event types that can be used in the griddyn system*/
 namespace events
 {
 /** event player allowing a timeSeries of events to occur over numerous time points on a single object and field*/
@@ -30,11 +31,11 @@ protected:
 	coreTime period = maxTime;  //!< period of the player
 	timeSeries<double, coreTime> ts;	//!< the time series containing the data for the player 
 	index_t currIndex = kNullLocation;	//!< the current index of the player
-	index_t column = 0;
+	index_t column = 0;	//!< the column in the file to use as the value set
 	coreTime timeOffset = timeZero; //!< an offset to the time series time
 	std::string eFile;		//!< the file name
-	std::future<void> fileLoaded;
-	bool loadFileProcess = false;
+	std::future<void> fileLoaded; //!< future indicating that the file operations have completed
+	bool loadFileProcess = false;	//!< flag indicating that the files need to be loaded yet
 public:
 	explicit Player(const std::string &eventName);
 	Player(coreTime time0 = 0.0, double loopPeriod = 0.0);
@@ -48,8 +49,19 @@ public:
 	virtual void set(const std::string &param, double val) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 	void setTime(coreTime time) override;
+	/** set a time and value pair as part of the player
+	@param[in] time the time associated with the value
+	@param[in] val the value to set at the given time
+	*/
 	void setTimeValue(coreTime time, double val);
+	/** set a time and value set as part of the player
+	@param[in] time the times associated with the value
+	@param[in] val the values to set at the given times
+	*/
 	void setTimeValue(const std::vector<coreTime> &time, const std::vector<double> &val);
+	/** load a file containing the time/value data for the player
+	@param[in] filename the file to load
+	*/
 	void loadEventFile(const std::string &fileName);
 	virtual std::string to_string() override;
 
@@ -58,7 +70,9 @@ public:
 	virtual void initialize() override;
 	//friendly helper functions for sorting
 protected:
+	/** update the trigger time*/
 	virtual void updateTrigger(coreTime time);
+	/** queue up the next value to set when the event is triggered*/
 	virtual void setNextValue();
 };
 }//namespace events

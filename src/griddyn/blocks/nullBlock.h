@@ -43,15 +43,15 @@ public:
 	virtual double get(const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
 
-	virtual void residElements(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode) override;
+	virtual void blockResidual(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode) override;
 
 
-	virtual void derivElements(double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;
+	virtual void blockDerivative(double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;
 
-	virtual void algElements(double input, const stateData &sD, double update[], const solverMode &sMode) override;
+	virtual void blockAlgebraicUpdate(double input, const stateData &sD, double update[], const solverMode &sMode) override;
 
 
-	virtual void jacElements(double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
+	virtual void blockJacobianElements(double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode) override;
 
 
 	virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode) override;

@@ -37,18 +37,21 @@ functionSource::getOutputs (const IOdata & /*inputs*/, const stateData &sD, cons
 double functionSource::getOutput (const IOdata & /*inputs*/,
                                   const stateData &sD,
                                   const solverMode & /*sMode*/,
-                                  index_t num) const
+                                  index_t outputNum) const
 {
-    return (num == 0) ? sourceFunc (sD.time) : kNullVal;
+    return (outputNum == 0) ? sourceFunc (sD.time) : kNullVal;
 }
 
-double functionSource::getOutput (index_t num) const { return (num == 0) ? sourceFunc (prevTime) : kNullVal; }
+double functionSource::getOutput (index_t outputNum) const
+{
+    return (outputNum == 0) ? sourceFunc (prevTime) : kNullVal;
+}
 double functionSource::getDoutdt (const IOdata & /*inputs*/,
                                   const stateData &sD,
                                   const solverMode & /*sMode*/,
-                                  index_t num) const
+                                  index_t outputNum) const
 {
-    return (num == 0) ? ((sourceFunc (sD.time + 1e-7) - sourceFunc (sD.time)) / 1e-7) : 0.0;
+    return (outputNum == 0) ? ((sourceFunc (sD.time + 1e-7) - sourceFunc (sD.time)) / 1e-7) : 0.0;
 }
 
 void functionSource::setFunction (std::function<double(double)> calcFunc) { sourceFunc = std::move (calcFunc); }

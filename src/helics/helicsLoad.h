@@ -33,8 +33,8 @@ public:
 protected:
 	std::string voltageKey;			//!< the key to send voltage
 	std::string loadKey; 	//!< time series containing the load information
-	int32_t voltageIndex;  //!< index for sending the voltage data
-	int32_t loadIndex;  //!< index for getting the load data
+	int32_t voltageIndex = -1;  //!< index for sending the voltage data
+	int32_t loadIndex = -1;  //!< index for getting the load data
 	gridUnits::units_t inputUnits = gridUnits::MW;
 	helicsValueType loadType;
 	helicsValueType voltageType;

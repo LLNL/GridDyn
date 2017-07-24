@@ -34,15 +34,17 @@ protected:
   coreTime minClearingTime = timeZero;   //!<[s] minimum clearing time for from bus breaker
   coreTime recloseTime1 = 1.0;      //!<[s] first reclose time
   coreTime recloseTime2 = 5.0;    //!<[s] second reclose time
-  double recloserTap = 0;       //!< From side tap multiplier
-  double limit = 1.0;         //!<[puA] maximum current in puA
+  parameter_t recloserTap = 0;       //!< From side tap multiplier
+  parameter_t limit = 1.0;         //!<[puA] maximum current in puA
   coreTime lastRecloseTime = negTime;     //!<[s] last reclose time
   coreTime recloserResetTime = coreTime(60.0);    //!<[s] time the breaker has to be on before the recloser count resets
-  count_t maxRecloseAttempts = 0;        //!< total number of recloses
+  std::uint16_t maxRecloseAttempts = 0;        //!< total number of recloses
+private:
+	std::uint16_t recloseAttempts = 0;  //!< reclose attempt counter
+protected:
   index_t m_terminal = 1;       //!< link terminal
   gridBus *bus = nullptr;
 private:
-  count_t recloseAttempts = 0;        //!< reclose attempt counter1
   double cTI = 0.0;			//!< storage for the current integral
   double Vbase = 120.0;       //!< Voltage base for bus1
   bool &useCTI;		//!< internal flag to use the CTI stuff

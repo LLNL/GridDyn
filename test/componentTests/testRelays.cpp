@@ -12,9 +12,10 @@
 
 #include "griddyn.h"
 #include "fileInput.h"
-#include "Relay.h"
 #include "relays/zonalRelay.h"
+#include "relays/pmu.h"
 #include "testHelper.h"
+#include "gridBus.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -171,5 +172,48 @@ BOOST_AUTO_TEST_CASE (test_relay_comms)
     BOOST_CHECK (val != kNullVal);
     val = obj->get ("angle");
     BOOST_CHECK (val != kNullVal);
+}
+
+
+BOOST_AUTO_TEST_CASE(pmu_test1)
+{
+	std::string fileName = std::string(RELAY_TEST_DIRECTORY "pmu_test1.xml");
+
+	gds = readSimXMLFile(fileName);
+
+	gds->dynInitialize(timeZero);
+
+	auto pmu = dynamic_cast<relays::pmu *> (gds->getRelay(0));
+	BOOST_CHECK(pmu != nullptr);
+
+	auto bus3 = gds->getBus(2);
+	BOOST_CHECK(isSameObject(bus3, pmu->find("target")));
+	BOOST_CHECK_CLOSE(bus3->getVoltage(), pmu->getOutput(0), 0.0001);
+
+	BOOST_CHECK_CLOSE(pmu->get("voltage"), pmu->getOutput(0), 0.0001);
+
+	double val = pmu->get("voltage");
+	double ang = pmu->get("angle");
+	double freq = pmu->get("freq");
+	gds->run(20);
+	double val2 = pmu->get("voltage");
+	double ang2 = pmu->get("angle");
+	double freq2 = pmu->get("freq");
+	double rocof2 = pmu->get("rocof");
+	gds->run(40);
+	double val3 = pmu->get("voltage");
+	double ang3 = pmu->get("angle");
+	double freq3 = pmu->get("freq");
+	double rocof3 = pmu->get("rocof");
+
+	BOOST_CHECK_NE(val, val2);
+	BOOST_CHECK_NE(val2, val3);
+	BOOST_CHECK_GT(freq2, freq);
+	BOOST_CHECK_GT(freq3, freq2);
+	BOOST_CHECK_NE(ang, ang3);
+	BOOST_CHECK_NE(ang, ang2);
+
+	BOOST_CHECK_GT(rocof2, 0.0);
+	BOOST_CHECK_GT(rocof3, 0.0);
 }
 BOOST_AUTO_TEST_SUITE_END ()

@@ -61,6 +61,7 @@ set(utilities_headers
 	matrixDataOrdered.hpp
 	matrixDataOrdering.hpp
 	matrixDataFilter.hpp
+	matrixDataCustomWriteOnly.hpp
 	functionInterpreter.h
 	workQueue.h
 	simpleQueue.hpp
@@ -125,5 +126,9 @@ INSTALL(TARGETS utilities
        ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")

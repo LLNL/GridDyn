@@ -111,13 +111,13 @@ void pidBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &desired
     prevInput = in + bias;
 }
 
-void pidBlock::derivElements (double input,
+void pidBlock::blockDerivative (double input,
                               double didt,
                               const stateData &sD,
                               double deriv[],
                               const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     Loc.destDiffLoc[limiter_diff + 2] = m_I * (input + bias);
     Loc.destDiffLoc[limiter_diff + 1] =
       (no_D) ? 0 : (m_D * (input + bias) - Loc.diffStateLoc[limiter_diff + 1]) / m_T1;
@@ -128,18 +128,18 @@ void pidBlock::derivElements (double input,
       m_Td;
     if (limiter_diff > 0)
     {
-        Block::derivElements (input, didt, sD, deriv, sMode);
+        Block::blockDerivative (input, didt, sD, deriv, sMode);
     }
 }
 
-void pidBlock::jacElements (double input,
+void pidBlock::blockJacobianElements (double input,
                             double didt,
                             const stateData &sD,
                             matrixData<double> &md,
                             index_t argLoc,
                             const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+    auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
     // adjust the offset to account for the limiter states;
     Loc.diffOffset += limiter_diff;
     if (hasDifferential (sMode))
@@ -149,7 +149,7 @@ void pidBlock::jacElements (double input,
         //  Loc.diffStateLoc[limiter_diff]) / m_Td;
         if (opFlags[has_limits])
         {
-            Block::jacElements (input, didt, sD, md, argLoc, sMode);
+            Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
         }
 
         md.assign (Loc.diffOffset, Loc.diffOffset, -1.0 / m_Td - sD.cj);

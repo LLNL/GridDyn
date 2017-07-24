@@ -17,12 +17,13 @@
 #include "core/objectInterpreter.h"
 #include "gridBus.h"
 #include "utilities/matrixData.hpp"
+#include "utilities/matrixDataTranslate.hpp"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
-#include "utilities/matrixDataTranslate.hpp"
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include "config.h"
 
 /*
 enum control_mode_t{ manual_control=0, voltage_control=1, MW_control=2, MVar_control=3};
@@ -770,7 +771,7 @@ void adjustableTransformer::reset (reset_levels level)
             {
                 break;
             }
-        // purposeful fall through
+			FALLTHROUGH
         case control_mode_t::MVar_control:
         {
             double midTap = (minTap + maxTap) / 2.0;
@@ -1081,36 +1082,35 @@ void adjustableTransformer::ioPartialDerivatives (id_type_t busId,
     return acLine::ioPartialDerivatives (busId, sD, md, inputLocs, sMode);
 }
 
-
-void adjustableTransformer::outputPartialDerivatives(const IOdata & inputs,
-	const stateData &sD,
-	matrixData<double> &md,
-	const solverMode &sMode)
+void adjustableTransformer::outputPartialDerivatives (const IOdata &inputs,
+                                                      const stateData &sD,
+                                                      matrixData<double> &md,
+                                                      const solverMode &sMode)
 {
-	// if the terminal is not specified assume there are 4 outputs
-	if ((!(isDynamic(sMode))) && (opFlags[has_pflow_states]))
-	{
-		auto offset = offsets.getAlgOffset(sMode);
-		matrixDataTranslate<2> mtrans(md);
-		mtrans.setTranslation(0, 2);
-		mtrans.setTranslation(1, 3);
-		if (cMode == control_mode_t::MW_control)
-		{
-			tapAngle = sD.state[offset];
-			tapAnglePartial(1, sD, md, sMode);
-			tapAnglePartial(2, sD, mtrans, sMode);
-		}
-		else
-		{
-			tap = sD.state[offset];
-			tapPartial(1, sD, md, sMode);
-			tapPartial(2, sD, mtrans, sMode);
-		}
-	}
-	else if ((isDynamic(sMode)) && (opFlags[has_dyn_states]))
-	{
-	}
-	return acLine::outputPartialDerivatives(inputs, sD, md, sMode);
+    // if the terminal is not specified assume there are 4 outputs
+    if ((!(isDynamic (sMode))) && (opFlags[has_pflow_states]))
+    {
+        auto offset = offsets.getAlgOffset (sMode);
+        matrixDataTranslate<2> mtrans (md);
+        mtrans.setTranslation (0, 2);
+        mtrans.setTranslation (1, 3);
+        if (cMode == control_mode_t::MW_control)
+        {
+            tapAngle = sD.state[offset];
+            tapAnglePartial (1, sD, md, sMode);
+            tapAnglePartial (2, sD, mtrans, sMode);
+        }
+        else
+        {
+            tap = sD.state[offset];
+            tapPartial (1, sD, md, sMode);
+            tapPartial (2, sD, mtrans, sMode);
+        }
+    }
+    else if ((isDynamic (sMode)) && (opFlags[has_dyn_states]))
+    {
+    }
+    return acLine::outputPartialDerivatives (inputs, sD, md, sMode);
 }
 
 void adjustableTransformer::outputPartialDerivatives (id_type_t busId,

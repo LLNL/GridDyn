@@ -104,7 +104,7 @@ void ExciterDC1A::derivative(const IOdata &inputs,
 	double deriv[],
 	const solverMode &sMode)
 {
-	Lp Loc = offsets.getLocations(sD, deriv, sMode, this);
+	auto Loc = offsets.getLocations(sD, deriv, sMode, this);
 	const double *es = Loc.diffStateLoc;
 	double *d = Loc.destDiffLoc;
 	double V = inputs[voltageInLocation];

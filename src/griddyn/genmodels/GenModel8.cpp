@@ -75,7 +75,7 @@ void GenModel8::derivative (const IOdata &inputs, const stateData &sD, double de
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
@@ -109,7 +109,7 @@ void GenModel8::derivative (const IOdata &inputs, const stateData &sD, double de
 
 void GenModel8::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
@@ -147,7 +147,7 @@ void GenModel8::jacobianElements (const IOdata &inputs,
                                   const solverMode &sMode)
 {
     // md.assign (arrayIndex, RowIndex, ColIndex, value) const
-    Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+    auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
     double V = inputs[voltageInLocation];
     const double *gm = Loc.algStateLoc;

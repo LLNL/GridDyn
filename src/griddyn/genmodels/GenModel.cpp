@@ -57,7 +57,7 @@ static childTypeFactory<GenModel8, GenModel> gfgm8 ("genmodel", stringVec{"8", "
 
 }//namespace genmodels
 
-GenModel::GenModel (const std::string &objName) : gridSubModel (objName) {}
+GenModel::GenModel(const std::string &objName) : gridSubModel(objName) { m_inputSize = 4; m_outputSize = 2; }
 coreObject *GenModel::clone (coreObject *obj) const
 {
     GenModel *gd = cloneBase<GenModel, gridSubModel> (this, obj);
@@ -243,5 +243,30 @@ void GenModel::set (const std::string &param, double val, gridUnits::units_t uni
         gridSubModel::set (param, val, unitType);
     }
 }
+
+
+static const std::vector<stringVec> inputNamesStr
+{
+	{ "voltage","v","volt" },
+	{ "angle","ang","a" },
+	{ "eft","e","field","exciter"},
+	{ "pmech","power","p","mech" },
+};
+
+const std::vector<stringVec> &GenModel::inputNames() const
+{
+	return inputNamesStr;
+}
+
+static const std::vector<stringVec> outputNamesStr
+{
+	{ "e","field","exciter" },
+};
+
+const std::vector<stringVec> &GenModel::outputNames() const
+{
+	return outputNamesStr;
+}
+
 
 }//namespace griddyn

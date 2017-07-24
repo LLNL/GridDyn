@@ -18,7 +18,7 @@
 #include <memory>
 #include <vector>
 
-namespace Json
+namespace Json_gd
 {
 	class Value;
 }
@@ -73,7 +73,7 @@ private:
   void clear ();
 private:
   
-  std::shared_ptr<Json::Value> doc;             //!<document root
+  std::shared_ptr<Json_gd::Value> doc;             //!<document root
   std::vector<std::shared_ptr<jsonElement>> parents;
   std::shared_ptr<jsonElement> current;
   int iteratorCount = 0;

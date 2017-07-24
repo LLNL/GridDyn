@@ -12,6 +12,7 @@
 
 #ifndef GRIDDYN_LOAD_H_
 #define GRIDDYN_LOAD_H_
+#pragma once
 
 #include "gridSecondary.h"
 namespace griddyn
@@ -19,25 +20,29 @@ namespace griddyn
 
 class gridBus;
 
-/** primary load class supports 3 main types of loads  constant power, constant impedance, constant current
-these loads should for the basis of most non dynamic load models following the ZIP model Z-constant impedance,
-I-constant current, P- constant Power
+/** primary load class defines the load component is a very simple constant power load
 */
 class Load : public gridSecondary
 {
 public:
+	/** flags used in the load objec*/
   enum load_flags
   {
-    use_power_factor_flag = object_flag1,
+    use_power_factor_flag = object_flag1, //!< flag instructing the load to use a power factor to compute Q
   };
   static std::atomic<count_t> loadCount;      //!<counter for automatic load id's
 protected:
 	
 	double P = 0.0;                                     //!< [pu] real component of the load (constant Power)
 	double Q = 0.0;                                     //!< [pu] imaginary component of the load (constant Power)
-	double pfq = 0.0;									//!<power factor multiply  sqrt((1-pf*pf)/pf*pf)
+	parameter_t pfq = 0.0;									//!<power factor multiply  sqrt((1-pf*pf)/pf*pf)
 public:
+	/** constructor which takes the object name*/
   explicit Load (const std::string &objName = "load_$");
+  /** alternate constructor taking p and q values in addition to the name
+  @param[in] rP the real power consumption of the load
+  @param[in] rQ the reactive power consumption of the load
+  @objName the name of the load object*/
   Load (double rP, double rQ, const std::string &objName = "load_$");
 
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
@@ -78,13 +83,17 @@ public:
   count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
 protected:
 	//little helper functions to do some calculations
+	/** update the power factor ratio*/
 	void updatepfq();
+	/** check if the pfq is valid*/
 	void checkpfq();
 	//getters for the actual property values
+	/** get the real power output*/
 	double getP() const
 	{
 		return P;
 	}
+	/** get the reactive power output*/
 	double getQ() const
 	{
 		return Q;
@@ -93,11 +102,14 @@ protected:
 
 
 	//setters for the actual load values
+	/** set the real power consumption*/
 	void setP(double newP);
-	
+	/** set the reactive power consumption*/
 	void setQ(double newQ);
+	/** check if there was a change in the load around a fault and if so notify the bus*/
 	void checkFaultChange();
 private:
+	/** due some additional work required by the constructor*/
 	void constructionHelper();
 	
 };

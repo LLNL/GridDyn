@@ -105,7 +105,7 @@ void fmiCoSimSubModel::dynObjectInitializeB(const IOdata &inputs, const IOdata &
 			cs->setInputs(inputs.data());
 			cs->setMode(fmuMode::continuousTimeMode);
 			estimators.resize(m_outputSize);
-			probeFMU();
+			//probeFMU();
 			opFlags.set(pFlow_initialized);
 		}
 	}
@@ -279,7 +279,7 @@ void fmiCoSimSubModel::set(const std::string &param, const std::string &val)
 		stringOps::trim(ssep);
 		cs->setInputVariables(ssep);
 		m_inputSize = cs->inputSize();
-		updateDependencyInfo();
+	//	updateDependencyInfo();
 	}
 	else
 	{
@@ -583,7 +583,7 @@ double fmiCoSimSubModel::getDoutdt(const IOdata & /*inputs*/, const stateData &s
 	return 0;
 }
 
-double fmiCoSimSubModel::getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num) const
+double fmiCoSimSubModel::getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum) const
 {
 	double out = kNullVal;
 	if (cs->getCurrentMode() >= fmuMode::initializationMode)
@@ -600,18 +600,18 @@ double fmiCoSimSubModel::getOutput(const IOdata &inputs, const stateData &sD, co
 		}
 		else
 		{
-			out = cs->getOutput(num);
+			out = cs->getOutput(outputNum);
 		}
 	}
 	return out;
 }
 
-double fmiCoSimSubModel::getOutput(index_t num) const
+double fmiCoSimSubModel::getOutput (index_t outputNum) const
 {
 	double out = kNullVal;
 	if (cs->getCurrentMode() >= fmuMode::initializationMode)
 	{
-		out = cs->getOutput(num);
+		out = cs->getOutput(outputNum);
 	}
 	return out;
 }
@@ -625,7 +625,7 @@ void fmiCoSimSubModel::updateLocalCache(const IOdata &inputs, const stateData &s
 	{
 		if ((sD.seqID == 0) || (sD.seqID != lastSeqID))
 		{
-			Lp Loc = offsets.getLocations(sD, sMode, this);
+			auto Loc = offsets.getLocations(sD, sMode, this);
 			cs->setTime(sD.time);
 			if (m_stateSize > 0)
 			{

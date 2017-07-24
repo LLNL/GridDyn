@@ -24,6 +24,7 @@ class matrixData;
 namespace griddyn
 {
 class gridDynSimulation;
+class gridComponent;
 class solverMode;
 class solverInterface;
 class coreObject;
@@ -94,5 +95,10 @@ void jacobianAnalysis(matrixData<double> &md, gridDynSimulation *gds, const solv
 
 bool checkObjectEquivalence(const coreObject *obj1, const coreObject *obj2, bool printMessage = true);
 
+/** @brief check the state sizes and print out state size information in a nice format for each object in a hiearchy
+@param[in] comp the component to print the state sizes for
+@param[in] the solver mode of the states to print
+*/
+void printStateSizes(const gridComponent *comp, const solverMode &sMode);
 }//namespace griddyn
 #endif

@@ -50,7 +50,7 @@ add_executable(griddynFNCS ${griddynFNCS_sources} ${griddynFNCS_headers})
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynFileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)

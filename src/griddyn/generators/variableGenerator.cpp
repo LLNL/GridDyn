@@ -56,11 +56,11 @@ void variableGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata
     DynamicGenerator::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     IOdata args2{P};
     IOdata inputSet (4);
-    if (m_source!=nullptr)
+    if (m_source != nullptr)
     {
         m_source->dynInitializeB (inputs, {0.0}, inputSet);
     }
-    if (m_cBlock!=nullptr)
+    if (m_cBlock != nullptr)
     {
         m_cBlock->dynInitializeB (inputs, {0.0}, inputSet);
     }
@@ -98,7 +98,7 @@ void variableGenerator::add (gridSubModel *obj)
     }
     else if (dynamic_cast<Block *> (obj) != nullptr)
     {
-        if (m_cBlock)
+        if (m_cBlock != nullptr)
         {
             if (isSameObject (obj, m_cBlock))
             {
@@ -155,7 +155,7 @@ void variableGenerator::residual (const IOdata &inputs,
     if ((m_cBlock != nullptr) && (m_cBlock->isEnabled ()))
     {
         // TODO:: this needs to be tied to the source
-        m_cBlock->residElements (Pset, dPdt, sD, resid, sMode);
+        m_cBlock->blockResidual (Pset, dPdt, sD, resid, sMode);
     }
 }
 void variableGenerator::jacobianElements (const IOdata &inputs,
@@ -191,7 +191,7 @@ coreObject *variableGenerator::find (const std::string &object) const
 coreObject *variableGenerator::getSubObject (const std::string &typeName, index_t num) const
 {
     auto out = DynamicGenerator::getSubObject (typeName, num);
-    if (!out)
+    if (out == nullptr)
     {
         out = find (typeName);
     }

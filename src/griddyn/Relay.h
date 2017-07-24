@@ -48,11 +48,45 @@ public:
     triggered,  //!< the relay condition is triggered and waiting a timeout
     disabled,  //!< the relay condition is disabled and not scanning
   };
+  
 
 protected:
-  
+  /** flags for the relayFlags data*/
   enum relay_flags
   {
+	  relay_flag0 = 0,
+  relay_flag1 = 1,
+  relay_flag2 = 2,
+  relay_flag3 = 3,
+  relay_flag4 = 4,
+  relay_flag5 = 5,
+  relay_flag6 = 6,
+  relay_flag7 = 7,
+  relay_flag8 = 8,
+  relay_flag9 = 9,
+  relay_flag10 = 10,
+  relay_flag11 = 11,
+  relay_flag12 = 12,
+  relay_flag13 = 13,
+  relay_flag14 = 14,
+  relay_flag15 = 15,
+  relay_flag16 = 16,
+  relay_flag17 = 17,
+  relay_flag18 = 18,
+  relay_flag19 = 19,
+  relay_flag20 = 20,
+  relay_flag21 = 21,
+  relay_flag22 = 22,
+  relay_flag23 = 23,
+  relay_flag24 = 24,
+  relay_flag25 = 25,
+  relay_flag26 = 26,
+  relay_flag27 = 27,
+  relay_flag28 = 28,
+  relay_flag29 = 29,
+  relay_flag30 = 30,
+  relay_flag31 = 31,
+
     continuous_flag = object_flag1,             //!< flag indicating the relay has some continuous checks
     resettable_flag = object_flag2,             //!< flag indicating that the conditions can be reset
     use_commLink = object_flag3,             //!< flag indicating that the relay uses communications
@@ -63,9 +97,9 @@ protected:
   coreTime triggerTime = maxTime;            //!<the next time execute
   coreObject *m_sourceObject = nullptr;       //!<the default object where the data comes from
   coreObject *m_sinkObject = nullptr;            //!<the default object where the actions occur
-  count_t triggerCount = 0;        //!< count of the number of triggers
-  count_t actionsTakenCount = 0;        //!< count of the number of actions taken
-
+  std::uint16_t triggerCount = 0;        //!< count of the number of triggers
+  std::uint16_t actionsTakenCount = 0;        //!< count of the number of actions taken
+  std::bitset<32> relayFlags = 0;		//!< a set of extra relays flags that derived classes can use beyond the opFlags
   // comm fields
   comms::commManager cManager;    //!< structure object to store and manage the communicator information
   
@@ -95,14 +129,20 @@ public:
 
   /**
   *@brief update a specific action
+  @param[in] ge a gridEvent associated with the action
+  @param[in] actionNumber the index of the action to update
   **/
   virtual void updateAction (std::shared_ptr<Event> ge, index_t actionNumber);
   /**
   *@brief update a specific action
+  @param[in] geA an event Adapater to associate with an action
+  @param[in] actionNumber the index of the action to update
   **/
   virtual void updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber);
   /**
   *@brief update a specific condition
+  @param[in] gc a condition object to associate with a relay condition 
+  @param[in] conditionNumber the index of the condition to update with the new condition object
   **/
   virtual void updateCondition (std::shared_ptr<Condition> gc,  index_t conditionNumber);
 
@@ -112,25 +152,34 @@ public:
   void resetRelay ();
   /**
   * @brief set the relay source object
+  @param[in] obj the object to act as the default source for measurements
   */
   void setSource (coreObject *obj);
   /**
   * @brief set the relay sink object
+  @param[in] obj the object to act as the default sink for an object
   */
   void setSink (coreObject *obj);
   /**
   @brief set the status indicator for a particular condition
   @param[in] conditionNumber the index of the condition in question
-  @param[in] newStat
+  @param[in] newStatus the updated status of the condition active, triggered, disabled
   */
   void setConditionStatus (index_t conditionNumber, condition_status_t newStatus = condition_status_t::active);
   /** 
   @brief remove an action from service
-  @param[in] the action number
+  @param[in] actionNumber the index of the action to remove from service
   */
   void removeAction (index_t actionNumber);
 
+  /** @brief get a condition object from the relay
+  @param[in] conditionNumber the index of the condition retrieve
+  @return a shared pointer to the condition object
+  */
   std::shared_ptr<Condition> getCondition (index_t conditionNumber);
+  /** retrieve and eventAdapter associated with a particular action
+  @param[in] actionNumber the index of the action to retrieve
+  @return a shared pointer associated with particular action*/
   std::shared_ptr<eventAdapter> getAction (index_t actionNumber);
   /** 
   @brief get the status of one of the relays conditions
@@ -150,12 +199,42 @@ public:
   @return the value used in determining the status of a condition
   */
   double getConditionValue (index_t conditionNumber, const stateData &sD, const solverMode &sMode) const;
+  /** check if a particular condition is true
+  @param[in] conditionNumber the index of the condition to check
+  @return true if the condition is activated
+  */
   bool checkCondition (index_t conditionNumber) const;
+  /** set a threshold associated with particular condition
+  @param[in] conditionNumber the index of the condition to reference
+  @param[in] levelVal the new threashold
+  */
   void setConditionLevel (index_t conditionNumber, double levelVal);
-  virtual void setActionTrigger (index_t conditionNumber, index_t actionNumber, coreTime delayTime = timeZero);
+  /** set the condition that will trigger a particular action
+  @details this can be called multiple times with different values
+  actions can be associated with multiple conditions and conditions can trigger multiple actions
+  therefore this function can be called multiple times.  If called with the same actionNumber and conditionNumber
+  only the delay is updated
+  @param[in] actionNumber the condition index which is the trigger for an action
+  @param[in] conditionNumber the action to associate with a particular condition
+  @param[in] delayTime the time between the trigger and when the associated action is triggered
+  */
+  virtual void setActionTrigger (index_t actionNumber, index_t conditionNumber, coreTime delayTime = timeZero);
+  /** manually trigger a particular action
+  @param[in] actionNumber the index of the action to manually trigger
+  @return a change_code associated with the action describing the level of change to the system
+  */
   virtual change_code triggerAction (index_t actionNumber);
-  virtual void setActionMultiTrigger (const IOlocs &multi_conditions, index_t actionNumber, coreTime delayTime = timeZero);
+  /** define a set of conditions which all must be true for certain period of time before the action is triggered
+  @param[in] multi_conditions the set of condition indices which must all be true before an action is taken
+  @param[in] actionNumber the index of the action to take once all conditions are true for delayTime
+  @param[in] delayTime the period of time which all conditions must be true before triggering the action
+  */
+  virtual void setActionMultiTrigger (index_t actionNumber, const IOlocs &multi_conditions, coreTime delayTime = timeZero);
 
+  /** define the margin by which a resettable condition must be on the other side of reset level to actually reset
+  @param[in] conditionNumber the index of the condition to alter
+  @param[in] margin the numerical value by which a value must be on opposite side of the reset level to actually reset
+  */
   void setResetMargin (index_t conditionNumber, double margin);
   virtual void setFlag (const std::string &flag, bool val = true)  override;
   virtual void set (const std::string &param,  const std::string &val) override;
@@ -264,8 +343,17 @@ public:
   std::vector<index_t> conditionsWithRoots;			//!< indices of the conditions with root finding functions attached to them
 private:
  
-  void clearCondChecks (index_t condNum);
-  change_code executeAction (index_t actionNum, index_t conditionNum, coreTime actionTime);
+	/** clear all the conditional checks that have passed the initial trigger but not the full time duration for a particular condition
+	@param[in] conditionNumber the index of the condition to clear
+	*/
+  void clearCondChecks (index_t conditionNumber);
+  /** actually trigger a particular action via a particular condition
+  @param[in] actionNumber the index of the action to execute
+  @param[in] conditionNumber the ndex of hte condition which triggered the action
+  @param[in] actionTime the time which to execute the action
+  @return a change_code indicating the effect of the action
+  */
+  change_code executeAction (index_t actionNumber, index_t conditionNumber, coreTime actionTime);
   /** trigger a specific condition
   @param[in] conditionNum  the index of the condition to trigger
   @param[in] conditionTriggerTime the time of the trigger

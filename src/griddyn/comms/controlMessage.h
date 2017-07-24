@@ -27,38 +27,49 @@ namespace griddyn
 {
 namespace comms
 {
+/** a message type used for requesting control actions to relays and sending values in response
+*/
 class controlMessage : public commMessage
 {
 public:
+	/** the enumeration of the message types available in control messages*/
   enum control_message_t :std::uint32_t
   {
-    SET = BASE_CONTROL_MESSAGE_NUMBER + 3,
-    GET = BASE_CONTROL_MESSAGE_NUMBER + 4,
-    GET_MULTIPLE = BASE_CONTROL_MESSAGE_NUMBER + 5,
-    GET_PERIODIC = BASE_CONTROL_MESSAGE_NUMBER + 6,
-    SET_SUCCESS = BASE_CONTROL_MESSAGE_NUMBER + 7,
-    SET_FAIL = BASE_CONTROL_MESSAGE_NUMBER + 8,
-    GET_RESULT = BASE_CONTROL_MESSAGE_NUMBER + 9,
-    GET_RESULT_MULTIPLE = BASE_CONTROL_MESSAGE_NUMBER + 10,
-    SET_SCHEDULED = BASE_CONTROL_MESSAGE_NUMBER + 11,
-    GET_SCHEDULED = BASE_CONTROL_MESSAGE_NUMBER + 12,
-    CANCEL = BASE_CONTROL_MESSAGE_NUMBER + 13,
-    CANCEL_SUCCESS = BASE_CONTROL_MESSAGE_NUMBER + 14,
-    CANCEL_FAIL = BASE_CONTROL_MESSAGE_NUMBER + 15
+    SET = BASE_CONTROL_MESSAGE_NUMBER + 3, //!< set a single value
+    GET = BASE_CONTROL_MESSAGE_NUMBER + 4,	//!< request a single value
+    GET_MULTIPLE = BASE_CONTROL_MESSAGE_NUMBER + 5,	//!< request multiple values
+    GET_PERIODIC = BASE_CONTROL_MESSAGE_NUMBER + 6, //!< get values on a periodic basis
+    SET_SUCCESS = BASE_CONTROL_MESSAGE_NUMBER + 7,	//!< acknowledge that the set operation was successful
+    SET_FAIL = BASE_CONTROL_MESSAGE_NUMBER + 8,	//!< response when the set operation failed
+    GET_RESULT = BASE_CONTROL_MESSAGE_NUMBER + 9,	//!< the result of get request
+    GET_RESULT_MULTIPLE = BASE_CONTROL_MESSAGE_NUMBER + 10,	//!< the results of a get multiple request
+    SET_SCHEDULED = BASE_CONTROL_MESSAGE_NUMBER + 11,	//!< set operation to be scheduled in the future
+    GET_SCHEDULED = BASE_CONTROL_MESSAGE_NUMBER + 12,	//!< get operation to be scheduled in the future
+    CANCEL = BASE_CONTROL_MESSAGE_NUMBER + 13,	//!< cancel a scheduled operation
+    CANCEL_SUCCESS = BASE_CONTROL_MESSAGE_NUMBER + 14,	//!< acknowledge that the cancel operation was successful
+    CANCEL_FAIL = BASE_CONTROL_MESSAGE_NUMBER + 15	//!< respond to a cancel with an indication that the cancel operation was not successful
   };
-  std::string m_field;
-  double m_value=0.0;
-  double m_time = -1.0;
-  size_t m_actionID=0;
-  std::vector<std::string> multiFields;
-  std::vector<double> multiValues;
-  std::string m_units;
-  controlMessage() = default;
+  std::string m_field;  //!< the field in question
+  double m_value=0.0;	//!< the value of the field
+  double m_time = -1.0;	//!< the time of the action
+  size_t m_actionID=0;	//!< an identifier for reference of cancel operations
+  std::vector<std::string> multiFields;	//!< a vector of strings in the *_MULTIPLE types
+  std::vector<double> multiValues;	//!< a vector of values in the *_MULTIPLE operations
+  std::string m_units;	//!< the units requested
+  std::vector<std::string> multiUnits;	//!< the multiple units associated with different measurements
+  /** default constructor*/
+  controlMessage() = default;	
 
   explicit controlMessage(std::uint32_t type) : commMessage(type)
   {
   }
-  controlMessage (std::uint32_t type, std::string fld, double val, coreTime time) : commMessage (type), m_field (fld), m_value (val), m_time (time)
+  /** constructor
+  @param[in] type the type of the message
+  @param[in] fld the name of the field in question
+  @param[in] val the value associated with the field
+  @param[in] time the time for a schedule
+  */
+  controlMessage (std::uint32_t type, const std::string &fld, double val, coreTime time) : commMessage (type), m_field (fld), m_value (val), m_time (time)
   {
   }
 
@@ -102,7 +113,7 @@ private:
       }
   }
 };
-}//namespace comms
-}//namespace griddyn
+} //namespace comms
+} //namespace griddyn
 //BOOST_CLASS_EXPORT_GUID(controlMessage, "controlMessage");
 #endif

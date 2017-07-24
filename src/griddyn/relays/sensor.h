@@ -51,6 +51,7 @@ public:
   enum class outputMode_t : unsigned char
   {
     block,         //!<direct from a filter block output
+	blockderiv,		//!< direct time derivative of a block
     processed,        //!<processed output
     direct,        //!<direct from an input
   };
@@ -60,7 +61,7 @@ protected:
   std::vector<int> blockInputs; //!< the number of the input Source 
   //PT leaving outputs as int (vs index_t) as negative values here are meaningful and useful
   std::vector<int> outputs;  //!< locations of output values
-  stringVec outputNames; //!< names for the outputs
+  std::vector<stringVec> outputStrings; //!< names for the outputs
   std::vector<outputMode_t> outputMode; //!< output modes corresponding to the outputs
   std::vector<sequenceMode_t> processStatus; //!< the status of the processing sequence
   stringVec inputStrings; //!< vector of input strings
@@ -122,6 +123,14 @@ public:
   */
   double getBlockOutput (const stateData &sD,const solverMode &sMode, index_t blockNumber) const;
 
+  /** @brief get the block rate of change from the sensor
+  @param[in] sD  the state data to get the output from
+  @param[in] sMode  the solverMode corresponding to the data
+  @param[in] blockNumber the number of the block to get the output from
+  @return a double with the requested block output rate of change
+  */
+  double getBlockDerivOutput(const stateData &sD, const solverMode &sMode, index_t blockNumber) const;
+
   /** @brief get the raw sensor input
   @param[in] sD  the state data to get the output from
   @param[in] sMode  the solverMode corresponding to the data
@@ -138,19 +147,19 @@ public:
 
   virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 
-  /** @brief translate an output name into an output Index
-  @param[in] outName the named output to find
-  @return an index for the output number so it can be used with the getOutput function
-  */
-  index_t lookupOutput (const std::string &outName) const;
-
   virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual void getObjects(std::vector<coreObject *> &objects) const override;
+
+  virtual const std::vector<stringVec> &outputNames() const override;
 protected:
   /** @brief generate the input grabbers
    used in the initialize function
   */
   void generateInputGrabbers ();
+  void setupOutput(index_t num, const std::string &outputString);
+ private:
+	 double getBlockInput(index_t blockNum, const IOdata &inputs, const stateData &sD, const solverMode &sMode) const;
+	 double getBlockInput(index_t blockNum, const IOdata &inputs) const;
 };
 }//namespace griddyn
 #endif

@@ -82,7 +82,7 @@ double nullBlock::step (coreTime time, double input)
 
 double nullBlock::getBlockOutput (const stateData &sD, const solverMode &sMode) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     return opFlags[differential_output] ? *Loc.diffStateLoc : *Loc.algStateLoc;
 }
 
@@ -96,7 +96,7 @@ double nullBlock::getBlockDoutDt (const stateData &sD, const solverMode &sMode) 
 {
     if (opFlags[differential_output])
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         return *Loc.dstateLoc;
     }
     return 0.0;
@@ -104,7 +104,7 @@ double nullBlock::getBlockDoutDt (const stateData &sD, const solverMode &sMode) 
 
 double nullBlock::getBlockDoutDt () const { return 0.0; }
 
-void nullBlock::residElements (double /*input*/,
+void nullBlock::blockResidual (double /*input*/,
                                double /*didt*/,
                                const stateData & /*sD*/,
                                double /*resid*/[],
@@ -112,14 +112,14 @@ void nullBlock::residElements (double /*input*/,
 {
 }
 
-void nullBlock::algElements (double /*input*/,
+void nullBlock::blockAlgebraicUpdate (double /*input*/,
                              const stateData & /*sD*/,
                              double /*update*/[],
                              const solverMode & /*sMode*/)
 {
 }
 
-void nullBlock::derivElements (double /*input*/,
+void nullBlock::blockDerivative (double /*input*/,
                                double /*didt*/,
                                const stateData & /*sD*/,
                                double /*deriv*/[],
@@ -127,7 +127,7 @@ void nullBlock::derivElements (double /*input*/,
 {
 }
 
-void nullBlock::jacElements (double /*input*/,
+void nullBlock::blockJacobianElements (double /*input*/,
                              double /*didt*/,
                              const stateData & /*sD*/,
                              matrixData<double> & /*md*/,

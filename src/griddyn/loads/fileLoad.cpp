@@ -23,7 +23,10 @@ namespace loads
 {
 fileLoad::fileLoad (const std::string &objName) : rampLoad (objName) {}
 
-fileLoad::fileLoad(const std::string &objName, std::string fileName) : rampLoad(objName), fileName_(std::move(fileName)) {}
+fileLoad::fileLoad (const std::string &objName, std::string fileName)
+    : rampLoad (objName), fileName_ (std::move (fileName))
+{
+}
 
 coreObject *fileLoad::clone (coreObject *obj) const
 {
@@ -288,15 +291,14 @@ void fileLoad::set (const std::string &param, double val, gridUnits::units_t uni
 
 count_t fileLoad::loadFile ()
 {
-	try
-	{
-		schedLoad.loadFile(fileName_);
-	}
-	catch (const std::exception &e)
-	{
-		LOG_ERROR(std::string("unable to process file ") + e.what());
-
-	}
+    try
+    {
+        schedLoad.loadFile (fileName_);
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERROR (std::string ("unable to process file ") + e.what ());
+    }
     if (!schedLoad.empty ())
     {
         schedLoad.addData (maxTime, schedLoad.lastData ());
@@ -304,10 +306,10 @@ count_t fileLoad::loadFile ()
         {
             double scalar =
               gridUnits::unitConversion (1.0, inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
-			if (scalar != 1.0)
-			{
-				schedLoad.scaleData(scalar);
-			}
+            if (scalar != 1.0)
+            {
+                schedLoad.scaleData (scalar);
+            }
         }
     }
     else

@@ -24,25 +24,34 @@ void numericJacobianCalculation (gridComponent *comp,
                                  const IOlocs &inputLocs,
                                  const solverMode &sMode)
 {
+	stateData sDtest = sD;
+	std::vector<double> test; 
+	double *residTest;
+	double *stateTest;
     if (sD.hasScratch ())
     {
+		residTest = sD.scratch1;
     }
     else
     {
     }
+	sDtest.scratch1 = nullptr;
+	sDtest.scratch2 = nullptr;
+	sDtest.state = stateTest;
+	
     IOdata testInputs = inputs;
 }
 
-void copyObjectState (gridComponent *comp, const double state[], double newState[], const solverMode &sMode)
+void copyObjectLocalState (gridComponent *comp, const double state[], double newState[], const solverMode &sMode)
 {
-    auto sts = getObjectStates (comp, sMode);
+    auto sts = getObjectLocalStateIndices(comp, sMode);
     for (auto st : sts)
     {
         newState[st] = state[st];
     }
 }
 
-std::vector<index_t> getObjectStates (const gridComponent *comp, const solverMode &sMode)
+std::vector<index_t> getObjectLocalStateIndices(const gridComponent *comp, const solverMode &sMode)
 {
     std::vector<index_t> states;
     const auto &offsets = comp->getOffsets (sMode);

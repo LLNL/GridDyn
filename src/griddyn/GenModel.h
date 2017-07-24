@@ -66,6 +66,9 @@ public:
   //TODO:: PT split these into separate functions for getting the value and getting the offset
   virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *freqOffset = nullptr) const;
   virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset = nullptr) const;
+
+  virtual const std::vector<stringVec> &inputNames() const override;
+  virtual const std::vector<stringVec> &outputNames() const override;
 };
 
 

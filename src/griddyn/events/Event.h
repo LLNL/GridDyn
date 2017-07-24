@@ -30,17 +30,17 @@ namespace griddyn
 class EventInfo
 {
 public:
-  std::string name;
-  std::string description;
-  std::string type;
-  std::string file;
-  coreTime period = timeZero;
-  std::vector<coreTime> time;
-  std::vector<double> value;
-  stringVec fieldList;
-  std::vector<coreObject *>targetObjs;
-  std::vector<index_t> columns;
-  std::vector<gridUnits::units_t> units;
+  std::string name;  //!< event name
+  std::string description;	//!< event description
+  std::string type;	//!< event type
+  std::string file;	//!< file associated with the event	
+  coreTime period = timeZero;	//!< event periodicity
+  std::vector<coreTime> time;	//!< event trigger times
+  std::vector<double> value;	//!< event trigger values
+  stringVec fieldList;	//!< list of fields associated with the event
+  std::vector<coreObject *>targetObjs;	//!< the event targets
+  std::vector<index_t> columns;	//!< file columns associated with an event
+  std::vector<gridUnits::units_t> units;	//!< units associated with an event
 public:
 	EventInfo() = default;
   EventInfo(const std::string &eventString, coreObject *rootObj);
@@ -73,11 +73,21 @@ public:
 	*/
 	explicit Event(coreTime time0 = maxTime);
 	Event(EventInfo &gdEI, coreObject *rootObject);
-
+	/** duplicate the event
+	@param[in] gE a pointer to the event to copy the information to, if nullptr then a new event is created
+	@return a pointer to the clone of the event
+	*/
 	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> gE = nullptr) const;
-
+	/** update the information in an event from an event info
+	@param[in] gdEI the event information structure to get all the event information from
+	@param[in] rootObject the root object to use in searching for other objects
+	*/
 		virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject);
+		/** trigger the event
+		@return a change_code describing the impact associated with an event
+		*/
         virtual change_code trigger();
+
         virtual change_code trigger(coreTime time) override;
 
         virtual coreTime nextTriggerTime() const override
@@ -95,27 +105,56 @@ public:
 		virtual void set(const std::string &param, double val) override;
 		virtual void set(const std::string &param, const std::string &val) override;
 		virtual void setFlag(const std::string &flag, bool val) override;
+		/** set the trigger time of an event
+		*/
         virtual void setTime(coreTime time);
+		/** set the value associated with a parameter change event 
+		@param[in] val the new value
+		@param[in] unitType the units associated with the value
+		*/
         virtual void setValue(double val, gridUnits::units_t unitType=gridUnits::defUnit);
+		/** generate a string description of the event*/
         virtual std::string to_string();
+		/** update the event target
+		@param[in] obj the new target object for the event
+		@param[in] field the new target field for the event
+		@return true if the event is armed
+		*/
+        virtual bool setTarget(coreObject *obj, const std::string &field = "");
 
-        virtual bool setTarget(coreObject *gdo, const std::string &var = "");
-
-		virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
+		virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
 
 		virtual coreObject * getObject() const override;
 		virtual void getObjects(std::vector<coreObject *> &objects) const override;
 		
 protected:
+	/** udpate the target and field of an event*/
 	void loadField(coreObject *gdo, const std::string &field);
+	/** run a check if the event can be armed*/
 	virtual bool checkArmed();
 };
 
 
-
+/** construct a simple parameter change event
+@param[in] field the object field to change
+@param[in] val the value associated with the field
+@param[in] eventTime the time the event should trigger
+@param[in] rootObject the high level object to base any object searches from
+@return a unique ptr to the created event
+*/
 std::unique_ptr<Event> make_event (const std::string &field, double val, coreTime eventTime, coreObject *rootObject);
+/** construct an event from an event Info structure
+@param[in] gdEI the information associated with an event
+@param[in] rootObject the high level object to base any object searches from
+@return a unique ptr to the created event
+*/
 std::unique_ptr<Event> make_event (EventInfo &gdEI, coreObject *rootObject);
-std::unique_ptr<Event> make_event(const std::string &field, coreObject *rootObject);
+/** construct an event from a string description
+@param[in] eventString the information associated with an event
+@param[in] rootObject the high level object to base any object searches from
+@return a unique ptr to the created event
+*/
+std::unique_ptr<Event> make_event(const std::string &eventString, coreObject *rootObject);
 
 }//namespace griddyn
 #endif

@@ -351,7 +351,7 @@ class gridDynSimulation : public gridSimulation
                           const double state[],
                           const double dstate_dt[],
                           double resid[],
-                          const solverMode &sMode);
+                          const solverMode &sMode) noexcept;
 
     /** @brief compute the derivatives for all differential states
     @param[in] time  the simulation time of the evaluation
@@ -360,7 +360,7 @@ class gridDynSimulation : public gridSimulation
     @param[in] sMode the solverMode to solve for
     @return integer indicating success (0) or failure (non-zero)
     */
-    int derivativeFunction (coreTime time, const double state[], double dstate_dt[], const solverMode &sMode);
+    int derivativeFunction (coreTime time, const double state[], double dstate_dt[], const solverMode &sMode) noexcept;
 
     /** @brief compute an update to all algebraic states
      compute $x=f(\hat{x})$
@@ -375,7 +375,7 @@ class gridDynSimulation : public gridSimulation
                            const double state[],
                            double update[],
                            const solverMode &sMode,
-                           double alpha);
+                           double alpha) noexcept;
 
     /** @brief compute the Jacobian of the residuals
       computes $\frac{\partial r}{\partial x}$ for all components of the residual
@@ -392,7 +392,7 @@ class gridDynSimulation : public gridSimulation
                           const double dstate_dt[],
                           matrixData<double> &md,
                           double cj,
-                          const solverMode &sMode);
+                          const solverMode &sMode) noexcept;
 
     /** @brief compute any root values
       computes the roots for any root finding functions used in the system
@@ -407,7 +407,7 @@ class gridDynSimulation : public gridSimulation
                              const double state[],
                              const double dstate_dt[],
                              double roots[],
-                             const solverMode &sMode);
+                             const solverMode &sMode) noexcept;
 
     /** @brief find the derivatives of the residual function with respect to the given parameters
     @param[in] time  the simulation time of the evaluation
@@ -435,7 +435,7 @@ class gridDynSimulation : public gridSimulation
 @param[in] sMode the solverMode to solve related to the differential state information
 @return integer indicating success (0) or failure (non-zero)
 */
-    int dynAlgebraicSolve (coreTime time, const double diffState[], const double deriv[], const solverMode &sMode);
+    int dynAlgebraicSolve (coreTime time, const double diffState[], const double deriv[], const solverMode &sMode) noexcept;
 
     // solverMode and solverInterface search functions
 

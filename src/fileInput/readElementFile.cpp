@@ -19,6 +19,7 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include "utilities/gridRandom.h"
+#include "utilities/stringConversion.h"
 
 namespace griddyn
 {
@@ -39,6 +40,8 @@ void loadElementInformation (coreObject *obj,
     paramLoopElement (obj, element, objectName, ri, ignoreList);
     readImports (element, ri, obj, true);
 }
+
+void checkForEndUnits(gridParameter &param, const std::string &paramStr);
 
 static const std::string importString ("import");
 void readImports (std::shared_ptr<readerElement> &element,
@@ -200,8 +203,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
 			param.value = element->getAttributeValue (valueString);
             if (param.value == readerNullVal)
             {
-				param.stringType = true;
-				param.strVal = element->getAttributeText (valueString);
+				checkForEndUnits(param, element->getAttributeText(valueString));
             }
             else
             {
@@ -213,8 +215,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
 			param.value = element->getValue ();
             if (param.value == readerNullVal)
             {
-				param.stringType = true;
-				param.strVal = element->getText ();
+				checkForEndUnits(param, element->getText());
             }
             else
             {
@@ -238,8 +239,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
 		param.value = element->getValue ();
         if (param.value == readerNullVal)
         {
-			param.stringType = true;
-			param.strVal = element->getText ();
+			checkForEndUnits(param, element->getText());
         }
         else
         {
@@ -247,6 +247,26 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
         }
     }
 	param.valid = true;
+}
+
+void checkForEndUnits(gridParameter &param, const std::string &paramStr)
+{
+	double val = numeric_conversion(paramStr, readerNullVal);
+	if (val != readerNullVal)
+	{
+		auto N = paramStr.find_last_of("012345689. )]");
+		auto Unit = gridUnits::getUnits(paramStr.substr(N + 1));
+		if (Unit != gridUnits::defUnit)
+		{
+			param.value = val;
+			param.paramUnits = Unit;
+			param.stringType = false;
+			return;
+		}
+
+	}
+	param.strVal = paramStr;
+	param.stringType = true;
 }
 
 static const IgnoreListType keywords{"type",      "ref",      "number",        "index",   "retype",

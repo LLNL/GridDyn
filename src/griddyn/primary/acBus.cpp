@@ -13,17 +13,17 @@
 // headers
 #include "Area.h"
 
-#include "core/coreObjectTemplates.hpp"
-#include "core/coreOwningPtr.hpp"
 #include "Generator.h"
 #include "Link.h"
 #include "Load.h"
+#include "core/coreObjectTemplates.hpp"
+#include "core/coreOwningPtr.hpp"
 
 #include "acBus.h"
+#include "blocks/derivativeBlock.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
 #include "simulation/contingency.h"
-#include "blocks/derivativeBlock.h"
 #include "utilities/vectorOps.hpp"
 //#include "matrixDataSparse.hpp"
 #include "utilities/stringOps.h"
@@ -187,7 +187,7 @@ void acBus::alert (coreObject *obj, int code)
         {
             reconnect ();
         }
-    // fall through to the primary alert;
+    FALLTHROUGH
     default:
         gridPrimary::alert (obj, code);
     }
@@ -585,8 +585,7 @@ void acBus::reset (reset_levels level)
         if (prevDynType != dynType)
         {
             dynType = prevDynType;
-            double nAngle =
-              static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
+            double nAngle = static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
             angle = angle + (nAngle - refAngle);
             alert (this, JAC_COUNT_CHANGE);
         }
@@ -600,8 +599,7 @@ void acBus::reset (reset_levels level)
         if (prevDynType != dynType)
         {
             dynType = prevDynType;
-            double nAngle =
-              static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
+            double nAngle = static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
             angle = angle + (nAngle - refAngle);
             alert (this, JAC_COUNT_CHANGE);
         }
@@ -618,8 +616,7 @@ void acBus::reset (reset_levels level)
         if (prevDynType != dynType)
         {
             dynType = prevDynType;
-            double nAngle =
-              static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
+            double nAngle = static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
             angle = angle + (nAngle - refAngle);
             alert (this, JAC_COUNT_CHANGE);
         }
@@ -651,7 +648,7 @@ double acBus::getAverageAngle ()
         double rel = 0.0;
         for (auto &lnk : attachedLinks)
         {
-            a += lnk->getAbsAngle (getID ());
+            a += lnk->getBusAngle (getID ());
             rel += 1.0;
         }
         if (rel > 0.9)
@@ -1045,14 +1042,14 @@ void acBus::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desir
             {
                 if (vco->checkFlag (local_voltage_control))
                 {
-					if (busController.vcfrac[vci] > 0.0)
-					{
-						vco->set("q", -Qgap * busController.vcfrac[vci]);
-					}
-					if (busController.pcfrac[vci])
-					{
-						vco->set("p", -Pgap * busController.pcfrac[vci]);
-					}
+                    if (busController.vcfrac[vci] > 0.0)
+                    {
+                        vco->set ("q", -Qgap * busController.vcfrac[vci]);
+                    }
+                    if (busController.pcfrac[vci] > 0.0)
+                    {
+                        vco->set ("p", -Pgap * busController.pcfrac[vci]);
+                    }
                 }
                 else
                 {  // use both together on fixpower function
@@ -1155,11 +1152,11 @@ void acBus::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode
     double dt = time - prevTime;
     if (dt < 1.0)
     {
-		if (!m_dstate_dt.empty())
-		{
-			voltage += m_dstate_dt[voltageInLocation] * dt;
-		}
-        
+        if (!m_dstate_dt.empty ())
+        {
+            voltage += m_dstate_dt[voltageInLocation] * dt;
+        }
+
         if (isDynamic (sMode))
         {
             angle += (freq - 1.0) * systemBaseFrequency * dt;
@@ -1357,7 +1354,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-				busController.Qmax = unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
             }
         }
         else
@@ -1375,7 +1372,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-				busController.Qmin = unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
             }
         }
         else
@@ -1393,7 +1390,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-				busController.Pmax = unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
             }
         }
         else
@@ -1411,7 +1408,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-				busController.Pmin = unitConversion(val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
             }
         }
         else
@@ -1561,31 +1558,31 @@ index_t acBus::getOutputLoc (const solverMode &sMode, index_t num) const
         return kNullLocation;
     }
 
-        switch (num)
+    switch (num)
+    {
+    case voltageInLocation:
+        // return useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation;
+        return offsets.getVOffset (sMode);
+    case angleInLocation:
+        // return useAngle(sMode) ? offsets.getAOffset(sMode) : kNullLocation;
+        return offsets.getAOffset (sMode);
+    case frequencyInLocation:
+    {
+        if (opFlags[compute_frequency])
         {
-        case voltageInLocation:
-            // return useVoltage(sMode) ? offsets.getVOffset(sMode) : kNullLocation;
-            return offsets.getVOffset (sMode);
-        case angleInLocation:
-            // return useAngle(sMode) ? offsets.getAOffset(sMode) : kNullLocation;
-            return offsets.getAOffset (sMode);
-        case frequencyInLocation:
+            return fblock->getOutputLoc (sMode);
+        }
+        if (keyGen != nullptr)
         {
-            if (opFlags[compute_frequency])
-            {
-                return fblock->getOutputLoc (sMode);
-            }
-            if (keyGen!=nullptr)
-            {
-                index_t loc;
-                keyGen->getFreq (emptyStateData, sMode, &loc);
-                return loc;
-            }
-            return kNullLocation;
+            index_t loc;
+            keyGen->getFreq (emptyStateData, sMode, &loc);
+            return loc;
         }
-        default:
-            return kNullLocation;
-        }
+        return kNullLocation;
+    }
+    default:
+        return kNullLocation;
+    }
 }
 
 double acBus::getVoltage (const double state[], const solverMode &sMode) const
@@ -2007,7 +2004,7 @@ void acBus::residual (const IOdata &inputs, const stateData &sD, double resid[],
 
     if ((fblock) && (isDynamic (sMode)))
     {
-        fblock->residElements (getAngle (sD, sMode), 0, sD, resid, sMode);
+        fblock->blockResidual (getAngle (sD, sMode), 0, sD, resid, sMode);
     }
 }
 
@@ -2016,7 +2013,7 @@ void acBus::derivative (const IOdata &inputs, const stateData &sD, double deriv[
     gridBus::derivative (inputs, sD, deriv, sMode);
     if (opFlags[compute_frequency])
     {
-        fblock->derivElements (getAngle (sD, sMode), 0.0, sD, deriv, sMode);
+        fblock->blockDerivative (getAngle (sD, sMode), 0.0, sD, deriv, sMode);
     }
 }
 
@@ -2033,7 +2030,7 @@ void acBus::jacobianElements (const IOdata &inputs,
     auto Aoffset = offsets.getAOffset (sMode);
     if ((fblock) && (isDynamic (sMode)))
     {
-        fblock->jacElements (outputs[angleInLocation], 0.0, sD, md, Aoffset, sMode);
+        fblock->blockJacobianElements (outputs[angleInLocation], 0.0, sD, md, Aoffset, sMode);
     }
 
     computeDerivatives (sD, sMode);
@@ -3162,15 +3159,9 @@ void acBus::computePowerAdjustments ()
     }
 }
 
-double acBus::getMaxGenReal() const
-{
-	return busController.Pmax;
-}
+double acBus::getMaxGenReal () const { return busController.Pmax; }
 
-double acBus::getMaxGenReactive() const
-{
-	return busController.Qmax;
-}
+double acBus::getMaxGenReactive () const { return busController.Qmax; }
 
 double acBus::getAdjustableCapacityUp (coreTime time) const
 {
@@ -3182,38 +3173,23 @@ double acBus::getAdjustableCapacityDown (coreTime time) const
     return busController.getAdjustableCapacityDown (time);
 }
 
-double acBus::getdPdf() const
-{
-	return 0;
-}
+double acBus::getdPdf () const { return 0; }
 /** @brief get the tie error (may be deprecated in the future)
 * @return the tie error
 **/
-double acBus::getTieError() const
-{
-	return tieError;
-}
+double acBus::getTieError () const { return tieError; }
 /** @brief get the frequency response
 * @return the tie error
 **/
-double acBus::getFreqResp() const
-{
-	return 0;
-}
+double acBus::getFreqResp () const { return 0; }
 /** @brief get available regulation
 * @return the available regulation
 **/
-double acBus::getRegTotal() const
-{
-	return 0;
-}
+double acBus::getRegTotal () const { return 0; }
 /** @brief get the scheduled power
 * @return the scheduled power
 **/
-double acBus::getSched() const
-{
-	return 0;
-}
+double acBus::getSched () const { return 0; }
 
 double acBus::get (const std::string &param, units_t unitType) const
 {
@@ -3319,8 +3295,8 @@ acBus::rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &s
                     if (vcurr > 0.1)
                     {
                         dynType = dynBusType::normal;
-                        double nAngle = static_cast<Area *> (getParent ())
-                                          ->getMasterAngle (emptyStateData, cLocalSolverMode);
+                        double nAngle =
+                          static_cast<Area *> (getParent ())->getMasterAngle (emptyStateData, cLocalSolverMode);
                         angle = angle + (nAngle - refAngle);
                         alert (this, JAC_COUNT_INCREASE);
                         ret = change_code::jacobian_change;

@@ -25,8 +25,8 @@ class Block;
 class variableGenerator : public DynamicGenerator
 {
 protected:
-	Source *m_source = nullptr;
-	Block *m_cBlock = nullptr;
+	Source *m_source = nullptr; //!< reference to the generation source block
+	Block *m_cBlock = nullptr;	//!< reference to the control block 
 	parameter_t mp_Vcutout = -1.0;  //!<[pu] the cutout voltage
 	parameter_t mp_Vmax = kBigNum; //!< [pu] the maximum operating voltage
 public:
@@ -69,7 +69,7 @@ public:
 	{
 	}
 	virtual coreObject * find(const std::string &object) const override;
-	virtual coreObject * getSubObject(const std::string &type, index_t num) const override;
+	virtual coreObject * getSubObject(const std::string &typeName, index_t num) const override;
 protected:
 	virtual double pSetControlUpdate(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 	virtual index_t pSetLocation(const solverMode &sMode) override;

@@ -15,7 +15,8 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "rampLimiter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
+#include "utilities/string_viewConversion.h"
+#include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 #include "valueLimiter.h"
 
@@ -167,6 +168,14 @@ double Block::computeDefaultResetLevel ()
 
     return rlevel;
 }
+
+double Block::blockInitialize(double input, double desiredOutput)
+{
+	IOdata fieldSet;
+	dynInitializeB((input != kNullVal) ? IOdata{ input } : noInputs, (desiredOutput != kNullVal) ? IOdata{ desiredOutput } : noInputs, fieldSet);
+	return (!fieldSet.empty()) ? fieldSet[0] : kNullVal;
+}
+
 // initial conditions
 void Block::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
@@ -354,7 +363,7 @@ double Block::step (coreTime time, double input)
 
 double Block::getBlockOutput (const stateData &sD, const solverMode &sMode) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     return opFlags[differential_output] ? *Loc.diffStateLoc : *Loc.algStateLoc;
 }
 
@@ -368,7 +377,7 @@ double Block::getBlockDoutDt (const stateData &sD, const solverMode &sMode) cons
 {
     if (opFlags[differential_output])
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         return *Loc.dstateLoc;
     }
     return 0.0;
@@ -384,12 +393,12 @@ double Block::getBlockDoutDt () const
     return 0.0;
 }
 
-void Block::residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
+void Block::blockResidual (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode)
 {
     auto &so = offsets.getOffsets (sMode);
     if (so.total.diffSize > 0)
     {
-        derivElements (input, didt, sD, resid, sMode);
+        blockDerivative (input, didt, sD, resid, sMode);
         for (index_t ii = 0; ii < so.total.diffSize; ++ii)
         {
             resid[so.diffOffset + ii] -= sD.dstate_dt[so.diffOffset + ii];
@@ -398,7 +407,7 @@ void Block::residElements (double input, double didt, const stateData &sD, doubl
 
     if (so.total.algSize > 0)
     {
-        algElements (input, sD, resid, sMode);
+        blockAlgebraicUpdate (input, sD, resid, sMode);
         for (index_t ii = 0; ii < so.total.algSize; ++ii)
         {
             resid[so.algOffset + ii] -= sD.state[so.algOffset + ii];
@@ -452,7 +461,7 @@ void Block::limiterResidElements (double input,
     auto &so = offsets.getOffsets (sMode);
     if (so.total.diffSize > 0)
     {
-        derivElements (input, didt, sD, resid, sMode);
+        blockDerivative (input, didt, sD, resid, sMode);
         for (index_t ii = 0; ii < so.total.diffSize; ++ii)
         {
             resid[so.diffOffset + ii] -= sD.dstate_dt[so.diffOffset + ii];
@@ -461,7 +470,7 @@ void Block::limiterResidElements (double input,
 
     if (so.total.algSize > 0)
     {
-        algElements (input, sD, resid, sMode);
+        blockAlgebraicUpdate (input, sD, resid, sMode);
         for (index_t ii = 0; ii < so.total.algSize; ++ii)
         {
             resid[so.algOffset + ii] -= sD.state[so.algOffset + ii];
@@ -471,7 +480,7 @@ void Block::limiterResidElements (double input,
 // residual
 void Block::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    residElements (inputs[0], getRateInput (inputs), sD, resid, sMode);
+    blockResidual (inputs[0], getRateInput (inputs), sD, resid, sMode);
 }
 
 bool Block::hasValueState () const { return (!((opFlags[use_state]) || (opFlags[use_direct]))); }
@@ -507,7 +516,7 @@ double Block::getTestRate (double didt, double currentStateRate) const
     return testRate;
 }
 
-void Block::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void Block::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     if (opFlags[differential_output])
     {
@@ -535,10 +544,10 @@ void Block::algebraicUpdate (const IOdata &inputs,
                              const solverMode &sMode,
                              double /*alpha*/)
 {
-    algElements (inputs[0], sD, update, sMode);
+    blockAlgebraicUpdate (inputs[0], sD, update, sMode);
 }
 
-void Block::derivElements (double /*input*/,
+void Block::blockDerivative (double /*input*/,
                            double didt,
                            const stateData &sD,
                            double deriv[],
@@ -570,10 +579,10 @@ void Block::derivElements (double /*input*/,
 // residual
 void Block::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-    derivElements (inputs[0], getRateInput (inputs), sD, deriv, sMode);
+    blockDerivative (inputs[0], getRateInput (inputs), sD, deriv, sMode);
 }
 
-void Block::jacElements (double /*input*/,
+void Block::blockJacobianElements (double /*input*/,
                          double /*didt*/,
                          const stateData &sD,
                          matrixData<double> &md,
@@ -650,7 +659,7 @@ void Block::jacobianElements (const IOdata &inputs,
                               const IOlocs &inputLocs,
                               const solverMode &sMode)
 {
-    jacElements (inputs[0], getRateInput (inputs), sD, md, inputLocs[0], sMode);
+    blockJacobianElements (inputs[0], getRateInput (inputs), sD, md, inputLocs[0], sMode);
 }
 
 double Block::getLimiterTestValue (double input, const stateData &sD, const solverMode &sMode)
@@ -918,173 +927,6 @@ void Block::rampLimiterUpdate ()
         }
     }
 }
-std::unique_ptr<Block> make_block (const std::string &blockstr)
-{
-    using namespace blocks;
-
-    auto posp1 = blockstr.find_first_of ('(');
-    auto posp2 = blockstr.find_last_of (')');
-    auto fstr = blockstr.substr (0, posp1 - 1);
-    auto argstr = blockstr.substr (posp1 + 1, posp2 - posp1 - 1);
-
-    auto inputs = str2vector (argstr, kNullVal);
-    auto tail = blockstr.substr (posp2 + 2);
-    auto tailArgs = stringOps::splitline (tail);
-    stringOps::trim (tailArgs);
-    double gain = 1.0;
-    posp1 = fstr.find_first_of ('*');
-    std::unique_ptr<Block> ret;
-    if (posp1 == std::string::npos)
-    {
-        makeLowerCase (fstr);
-    }
-    else
-    {
-        gain = numeric_conversion (fstr, 1.0);  // purposely not using
-        // numeric_conversionComplete to just
-        // get the first number
-        fstr = convertToLowerCase (fstr.substr (posp1 + 1));
-    }
-    if (fstr == "basic")
-    {
-        ret = std::make_unique<Block> (gain);
-    }
-    else if ((fstr == "der") || (fstr == "derivative"))
-    {
-        if (inputs.empty ())
-        {
-            ret = std::make_unique<derivativeBlock> ();
-        }
-        else
-        {
-            ret = std::make_unique<derivativeBlock> (inputs[0]);
-        }
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else if ((fstr == "integral") || (fstr == "integrator"))
-    {
-        ret = std::make_unique<integralBlock> (gain);
-    }
-    else if (fstr == "control")
-    {
-        if (inputs.empty ())
-        {
-            ret = std::make_unique<controlBlock> ();
-        }
-        else if (inputs.size () == 1)
-        {
-            ret = std::make_unique<controlBlock> (inputs[0]);
-        }
-        else
-        {
-            ret = std::make_unique<controlBlock> (inputs[0], inputs[1]);
-        }
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else if (fstr == "delay")
-    {
-        if (inputs.empty ())
-        {
-            ret = std::make_unique<delayBlock> ();
-        }
-        else
-        {
-            ret = std::make_unique<delayBlock> (inputs[0]);
-        }
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else if (fstr == "deadband")
-    {
-        if (inputs.empty ())
-        {
-            ret = std::make_unique<deadbandBlock> ();
-        }
-        else
-        {
-            ret = std::make_unique<deadbandBlock> (inputs[0]);
-        }
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else if (fstr == "pid")
-    {
-        double p = 1.0, i = 0.0, d = 0.0;
-        if (!inputs.empty ())
-        {
-            p = inputs[0];
-        }
-        if (tailArgs.size () > 1)
-        {
-            i = inputs[1];
-        }
-        if (inputs.size () > 2)
-        {
-            d = inputs[2];
-        }
-
-        ret = std::make_unique<pidBlock> (p, i, d);
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else if (fstr == "function")
-    {
-        if (argstr.empty ())
-        {
-            ret = std::make_unique<functionBlock> ();
-        }
-        else
-        {
-            ret = std::make_unique<functionBlock> (argstr);
-        }
-        if (gain != 1.0)
-        {
-            ret->set ("gain", gain);
-        }
-    }
-    else
-    {
-        return ret;
-    }
-    // process any additional parameters
-    if (!tailArgs.empty ())
-    {
-        for (auto &ta : tailArgs)
-        {
-            auto eloc = ta.find_first_of ('=');
-            if (eloc == std::string::npos)
-            {
-                ret->setFlag (ta, true);
-            }
-            else
-            {
-                std::string param = ta.substr (0, eloc);
-                double val = numeric_conversionComplete (ta.substr (eloc + 1), kNullVal);
-                if (val == kNullVal)
-                {
-                    ret->set (param, ta.substr (eloc + 1));
-                }
-                else
-                {
-                    ret->set (param, val);
-                }
-            }
-        }
-    }
-    return ret;
-}
 
 stringVec Block::localStateNames () const
 {
@@ -1106,5 +948,177 @@ stringVec Block::localStateNames () const
         stNames[0] = outputName;
     }
     return stNames;
+}
+
+
+std::unique_ptr<Block> make_block(const std::string &blockstr)
+{
+	using namespace utilities::string_viewOps;
+	using namespace blocks;
+
+	string_view blockstrv(blockstr);
+	auto posp1 = blockstrv.find_first_of('(');
+	auto posp2 = blockstrv.find_last_of(')');
+	auto blockNameStr = blockstrv.substr(0, posp1 - 1);
+	auto argstr = blockstrv.substr(posp1 + 1, posp2 - posp1 - 1);
+
+	auto inputs = str2vector(argstr, kNullVal);
+	auto tail = blockstrv.substr(posp2 + 2);
+	auto tailArgs = split(tail);
+	trim(tailArgs);
+	double gain = 1.0;
+	posp1 = blockNameStr.find_first_of('*');
+	std::unique_ptr<Block> ret;
+	std::string fstr;
+	if (posp1 == std::string::npos)
+	{
+		fstr = convertToLowerCase(blockNameStr.to_string());
+	}
+	else
+	{
+		gain = numeric_conversion(blockNameStr, 1.0);  // purposely not using
+											   // numeric_conversionComplete to just
+											   // get the first number
+		fstr = convertToLowerCase(blockNameStr.substr(posp1 + 1).to_string());
+	}
+	if (fstr == "basic")
+	{
+		ret = std::make_unique<Block>(gain);
+	}
+	else if ((fstr == "der") || (fstr == "derivative"))
+	{
+		if (inputs.empty())
+		{
+			ret = std::make_unique<derivativeBlock>();
+		}
+		else
+		{
+			ret = std::make_unique<derivativeBlock>(inputs[0]);
+		}
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else if ((fstr == "integral") || (fstr == "integrator"))
+	{
+		ret = std::make_unique<integralBlock>(gain);
+	}
+	else if (fstr == "control")
+	{
+		if (inputs.empty())
+		{
+			ret = std::make_unique<controlBlock>();
+		}
+		else if (inputs.size() == 1)
+		{
+			ret = std::make_unique<controlBlock>(inputs[0]);
+		}
+		else
+		{
+			ret = std::make_unique<controlBlock>(inputs[0], inputs[1]);
+		}
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else if (fstr == "delay")
+	{
+		if (inputs.empty())
+		{
+			ret = std::make_unique<delayBlock>();
+		}
+		else
+		{
+			ret = std::make_unique<delayBlock>(inputs[0]);
+		}
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else if (fstr == "deadband")
+	{
+		if (inputs.empty())
+		{
+			ret = std::make_unique<deadbandBlock>();
+		}
+		else
+		{
+			ret = std::make_unique<deadbandBlock>(inputs[0]);
+		}
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else if (fstr == "pid")
+	{
+		double p = 1.0, i = 0.0, d = 0.0;
+		if (!inputs.empty())
+		{
+			p = inputs[0];
+		}
+		if (tailArgs.size() > 1)
+		{
+			i = inputs[1];
+		}
+		if (inputs.size() > 2)
+		{
+			d = inputs[2];
+		}
+
+		ret = std::make_unique<pidBlock>(p, i, d);
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else if (fstr == "function")
+	{
+		if (argstr.empty())
+		{
+			ret = std::make_unique<functionBlock>();
+		}
+		else
+		{
+			ret = std::make_unique<functionBlock>(argstr.to_string());
+		}
+		if (gain != 1.0)
+		{
+			ret->set("gain", gain);
+		}
+	}
+	else
+	{
+		return ret;
+	}
+	// process any additional parameters
+	if (!tailArgs.empty())
+	{
+		for (auto &ta : tailArgs)
+		{
+			auto eloc = ta.find_first_of('=');
+			if (eloc == std::string::npos)
+			{
+				ret->setFlag(ta.to_string(), true);
+			}
+			else
+			{
+				auto param = ta.substr(0, eloc);
+				double val = numeric_conversionComplete(ta.substr(eloc + 1), kNullVal);
+				if (val == kNullVal)
+				{
+					ret->set(param.to_string(), ta.substr(eloc + 1).to_string());
+				}
+				else
+				{
+					ret->set(param.to_string(), val);
+				}
+			}
+		}
+	}
+	return ret;
 }
 }  // namespace griddyn

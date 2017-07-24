@@ -56,7 +56,7 @@ coreObject *fuse::clone (coreObject *obj) const
 
 void fuse::setFlag (const std::string &flag, bool val)
 {
-    if (flag.front() == '#')
+    if (flag.empty())
     {
     }
     else
@@ -67,7 +67,7 @@ void fuse::setFlag (const std::string &flag, bool val)
 
 void fuse::set (const std::string &param, const std::string &val)
 {
-    if (param.front() == '#')
+    if (param.empty())
     {
     }
     else
@@ -165,17 +165,17 @@ void fuse::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     add (std::shared_ptr<functionEventAdapter> (std::move (ge2)));
     if (mp_I2T <= 0.0)
     {
-        setActionTrigger (0, 1, 0.0);
+        setActionTrigger (1, 0, 0.0);
     }
     else
     {
-        setActionTrigger (0, 1, minBlowTime);
+        setActionTrigger (1, 0, minBlowTime);
     }
 
     // add the event for blowing the fuse after i2T is exceeded
     auto ge3 = std::make_unique<functionEventAdapter> ([this]() { return blowFuse (); });
     add (std::shared_ptr<functionEventAdapter> (std::move (ge3)));
-    setActionTrigger (1, 2, 0.0);
+    setActionTrigger (2, 1, 0.0);
 
     Relay::dynObjectInitializeA (time0, flags);
 }

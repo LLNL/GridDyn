@@ -15,6 +15,7 @@
 
 #include <vector>
 
+/** mode defining how to get partial derivatives for jacobian calculations*/
 enum class refMode_t :unsigned char
 {
 	direct = 0,
@@ -34,7 +35,7 @@ class vInfo
 {
 public:
 	int varIndex = -1;  //!< the actual variable index in the fmi
-	int index = -1;
+	int index = -1; //!< the local index into a matrix
 	bool isState = false;	//!< defining if it is a state [for output only]
 	refMode_t refMode = refMode_t::direct;  //!< the mode to use for computing the partial derivatives
 	std::vector<int> inputDep;  //!< the inputs on which the calculation depends

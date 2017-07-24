@@ -23,9 +23,10 @@
 #include "gridBus.h"
 #include "infiniteBus.h"
 #include "loads/zipLoad.h"
+#include "measurement/objectGrabbers.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
-#include "measurement/objectGrabbers.h"
+#include "config.h"
 
 #include <cassert>
 #include <cmath>
@@ -45,6 +46,7 @@ using namespace gridUnits;
 gridBus::gridBus (const std::string &objName) : gridPrimary (objName), outputs (3), outLocs (3)
 {
     // default values
+	m_outputSize = 3;
     setUserID (++busCount);
     updateName ();
 }
@@ -52,6 +54,7 @@ gridBus::gridBus (const std::string &objName) : gridPrimary (objName), outputs (
 gridBus::gridBus (double voltageStart, double angleStart, const std::string &objName)
     : gridPrimary (objName), angle (angleStart), voltage (voltageStart)
 {
+	m_outputSize = 3;
     // default values
     setUserID (++busCount);
     updateName ();
@@ -213,8 +216,7 @@ void gridBus::remove (coreObject *obj)
 template <class X>
 bool removeObject (X *obj, objVector<X *> &OVector)
 {
-
-	if (!isValidIndex(obj->locIndex,OVector))
+    if (!isValidIndex (obj->locIndex, OVector))
     {
         return false;
     }
@@ -257,12 +259,12 @@ void gridBus::remove (Generator *gen)
 // remove link
 void gridBus::remove (Link *lnk)
 {
-	
-	auto lnkR = std::find_if(attachedLinks.begin(), attachedLinks.end(), [lnk](auto &lk) {return isSameObject(lk, lnk); });
-	if (lnkR != attachedLinks.end())
-	{
-		attachedLinks.erase(lnkR);
-	}
+    auto lnkR = std::find_if (attachedLinks.begin (), attachedLinks.end (),
+                              [lnk](auto &lk) { return isSameObject (lk, lnk); });
+    if (lnkR != attachedLinks.end ())
+    {
+        attachedLinks.erase (lnkR);
+    }
 }
 
 void gridBus::alert (coreObject *obj, int code)
@@ -277,7 +279,7 @@ void gridBus::alert (coreObject *obj, int code)
         {
             reconnect ();
         }
-    // fall through to the primary alert;
+		FALLTHROUGH
     default:
         gridPrimary::alert (obj, code);
     }
@@ -592,11 +594,11 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
     {
         angle = unitConversion (val, unitType, rad);
     }
-	else if ((param == "freq") || (param == "frequency") || (param == "dadt"))
-	{
-		freq = unitConversion(val, unitType, puHz,systemBaseFrequency);
-	}
-    else if ((param == "basevoltage") || (param == "base vol"))
+    else if ((param == "freq") || (param == "frequency") || (param == "dadt"))
+    {
+        freq = unitConversion (val, unitType, puHz, systemBaseFrequency);
+    }
+    else if ((param == "basevoltage") || (param == "base vol")||(param=="vbase")||(param=="voltagebase"))
     {
         baseVoltage = unitConversionPower (val, unitType, kV);
         for (auto &gen : attachedGens)
@@ -727,19 +729,19 @@ gridBus::getOutput (const IOdata & /*inputs*/, const stateData &sD, const solver
     }
 }
 
-double gridBus::getOutput(index_t outNum) const
+double gridBus::getOutput (index_t outNum) const
 {
-	switch (outNum)
-	{
-	case voltageInLocation:
-		return getVoltage();
-	case angleInLocation:
-		return getAngle();
-	case frequencyInLocation:
-		return getFreq();
-	default:
-		return kNullVal;
-	}
+    switch (outNum)
+    {
+    case voltageInLocation:
+        return getVoltage ();
+    case angleInLocation:
+        return getAngle ();
+    case frequencyInLocation:
+        return getFreq ();
+    default:
+        return kNullVal;
+    }
 }
 
 double gridBus::getVoltage (const double /*state*/[], const solverMode & /*sMode*/) const { return voltage; }
@@ -1206,7 +1208,7 @@ void gridBus::reconnect (gridBus *mapBus)
         LOG_DEBUG ("reconnecting to network");
         opFlags.reset (disconnected);
         alert (this, JAC_COUNT_INCREASE);
-        if (mapBus!=nullptr)
+        if (mapBus != nullptr)
         {
             angle = mapBus->angle;
             voltage = mapBus->voltage;
@@ -1223,10 +1225,7 @@ void gridBus::reconnect (gridBus *mapBus)
     }
 }
 
-void gridBus::reconnect ()
-{
-	reconnect(nullptr);
-}
+void gridBus::reconnect () { reconnect (nullptr); }
 
 void gridBus::updateFlags (bool dynOnly)
 {
@@ -1387,39 +1386,32 @@ void gridBus::updateLocalCache ()
     }*/
 }
 
-
-double gridBus::getGenerationRealNominal() const
+double gridBus::getGenerationRealNominal () const
 {
-	if ((type == busType::SLK)||(type==busType::afix))
-	{
-		double genreal = 0.0;
-		for (auto gen : attachedGens)
-		{
-			genreal += gen->getRealPower();
-		}
-		return genreal;
-	}
-	else
-	{
-		return S.genP;
-	}
+    if ((type == busType::SLK) || (type == busType::afix))
+    {
+        double genreal = 0.0;
+        for (auto gen : attachedGens)
+        {
+            genreal += gen->getRealPower ();
+        }
+        return genreal;
+    }
+    return S.genP;
 }
 
-double gridBus::getGenerationReactiveNominal() const
+double gridBus::getGenerationReactiveNominal () const
 {
-	if ((type == busType::SLK) || (type == busType::PV))
-	{
-		double genreactive = 0.0;
-		for (auto gen : attachedGens)
-		{
-			genreactive += gen->getReactivePower();
-		}
-		return genreactive;
-	}
-	else
-	{
-		return S.genQ;
-	}
+    if ((type == busType::SLK) || (type == busType::PV))
+    {
+        double genreactive = 0.0;
+        for (auto gen : attachedGens)
+        {
+            genreactive += gen->getReactivePower ();
+        }
+        return genreactive;
+    }
+    return S.genQ;
 }
 double gridBus::getAdjustableCapacityUp (coreTime /*time*/) const { return 0.0; }
 
@@ -1436,12 +1428,12 @@ Link *gridBus::findLink (gridBus *bs) const
 
     for (auto lnk2 : attachedLinks)
     {
-        if (isSameObject(lnk2->getBus (1),bs))
+        if (isSameObject (lnk2->getBus (1), bs))
         {
             lnk = lnk2;
             break;
         }
-        if (isSameObject(lnk2->getBus (2),bs))
+        if (isSameObject (lnk2->getBus (2), bs))
         {
             lnk = lnk2;
             break;
@@ -1461,33 +1453,33 @@ coreObject *gridBus::find (const std::string &objName) const
     {
         return getParent ()->find (objName);
     }
-	//finding links by naming the opposite end
-	auto fnd_Ex = objName.find_first_of('!');
-	if (fnd_Ex != std::string::npos)
-	{
-		if (fnd_Ex == 4)
-		{
-			if (objName.compare(0, 4, "link") == 0)
-			{
-				auto bobj = getParent()->find(objName.substr(fnd_Ex + 1));
-				if (bobj != nullptr)
-				{
-					for (auto &lnk : attachedLinks)
-					{
-						if (isSameObject(bobj, lnk->getBus(1)))
-						{
-							return lnk;
-						}
-						if (isSameObject(bobj, lnk->getBus(2)))
-						{
-							return lnk;
-						}
-					}
-					return nullptr;
-				}
-			}
-		}
-	}
+    // finding links by naming the opposite end
+    auto fnd_Ex = objName.find_first_of ('!');
+    if (fnd_Ex != std::string::npos)
+    {
+        if (fnd_Ex == 4)
+        {
+            if (objName.compare (0, 4, "link") == 0)
+            {
+                auto bobj = getParent ()->find (objName.substr (fnd_Ex + 1));
+                if (bobj != nullptr)
+                {
+                    for (auto &lnk : attachedLinks)
+                    {
+                        if (isSameObject (bobj, lnk->getBus (1)))
+                        {
+                            return lnk;
+                        }
+                        if (isSameObject (bobj, lnk->getBus (2)))
+                        {
+                            return lnk;
+                        }
+                    }
+                    return nullptr;
+                }
+            }
+        }
+    }
     return gridComponent::find (objName);
 }
 
@@ -1506,7 +1498,7 @@ coreObject *gridBus::getSubObject (const std::string &typeName, index_t num) con
         return getGen (num);
     }
 
-     return gridComponent::getSubObject (typeName, num);
+    return gridComponent::getSubObject (typeName, num);
 }
 
 coreObject *gridBus::findByUserID (const std::string &typeName, index_t searchID) const
@@ -1544,19 +1536,13 @@ coreObject *gridBus::findByUserID (const std::string &typeName, index_t searchID
     return gridComponent::findByUserID (typeName, searchID);
 }
 
-Link *gridBus::getLink (index_t x) const
-{
-    return (isValidIndex (x, attachedLinks)) ? attachedLinks[x] : nullptr;
-}
+Link *gridBus::getLink (index_t x) const { return (isValidIndex (x, attachedLinks)) ? attachedLinks[x] : nullptr; }
 
-Load *gridBus::getLoad (index_t x) const
-{
-    return (isValidIndex(x, attachedLoads)) ? attachedLoads[x] : nullptr;
-}
+Load *gridBus::getLoad (index_t x) const { return (isValidIndex (x, attachedLoads)) ? attachedLoads[x] : nullptr; }
 
 Generator *gridBus::getGen (index_t x) const
 {
-    return (isValidIndex(x, attachedGens)) ? attachedGens[x] : nullptr;
+    return (isValidIndex (x, attachedGens)) ? attachedGens[x] : nullptr;
 }
 
 void gridBus::mergeBus (gridBus * /*bus*/) {}
@@ -1641,19 +1627,19 @@ double gridBus::get (const std::string &param, units_t unitType) const
             val += ld->get (param, unitType);
         }
     }
-	else
-	{
-		auto fptr = getObjectFunction(this, param);
-		if (fptr.first)
-		{
-			coreObject *tobj = const_cast<gridBus*>(this);
-			val = unitConversion(fptr.first(tobj), fptr.second, unitType, systemBasePower, baseVoltage);
-		}
-		else
-		{
-			val=gridPrimary::get(param, unitType);
-		}
-	}
+    else
+    {
+        auto fptr = getObjectFunction (this, param);
+        if (fptr.first)
+        {
+            coreObject *tobj = const_cast<gridBus *> (this);
+            val = unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower, baseVoltage);
+        }
+        else
+        {
+            val = gridPrimary::get (param, unitType);
+        }
+    }
     return val;
 }
 
@@ -1680,7 +1666,7 @@ void gridBus::rootTrigger (coreTime time,
 
     auto rootsfound = vecFindne (rootMask, 0, rootOffset + rootCount, rootOffset + rootSize (sMode));
 
-    if (!rootsfound.empty())
+    if (!rootsfound.empty ())
     {
         size_t rootFoundIndex = 0;
         auto inputs = getOutputs (noInputs, emptyStateData, cLocalSolverMode);
@@ -1728,6 +1714,34 @@ void gridBus::rootTrigger (coreTime time,
     }
 }
 
+static const std::vector<stringVec> outputNamesStr
+{
+	{ "voltage","v","volt" },
+	{ "angle","theta","ang","a" },
+	{ "frequency","freq","f","omega" },
+};
+
+const std::vector<stringVec> &gridBus::outputNames() const
+{
+	return outputNamesStr;
+}
+
+gridUnits::units_t gridBus::outputUnits(index_t outputNum) const
+{
+	switch (outputNum)
+	{
+	case voltageInLocation:
+		return gridUnits::puV;
+	case angleInLocation:
+		return gridUnits::rad;
+	case frequencyInLocation:
+		return gridUnits::puHz;
+	default:
+		return gridUnits::defUnit;
+	}
+
+}
+
 bool compareBus (gridBus *bus1, gridBus *bus2, bool /*cmpBus*/, bool printDiff)
 {
     bool cmp = true;
@@ -1752,10 +1766,10 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool /*cmpBus*/, bool printDiff)
     else
     {
         bool fmatch = true;
-		for (auto &ld1:bus1->attachedLoads)
+        for (auto &ld1 : bus1->attachedLoads)
         {
             fmatch = false;
-			for (auto &ld2:bus2->attachedLoads)
+            for (auto &ld2 : bus2->attachedLoads)
             {
                 if (ld1->getName () == ld2->getName ())
                 {
@@ -1810,7 +1824,7 @@ gridBus *getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec)
         return nullptr;
     }
     std::vector<index_t> lkind = {bus->locIndex};
-	while (!isSameObject(par,src))
+    while (!isSameObject (par, src))
     {
         lkind.push_back (par->locIndex);
         par = dynamic_cast<gridPrimary *> (par->getParent ());

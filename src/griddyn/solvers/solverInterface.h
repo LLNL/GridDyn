@@ -15,7 +15,7 @@
 #pragma once
 
 #include "core/helperObject.h"
-#include "gridObjectsHelperClasses.h"
+#include "gridComponentHelperClasses.h"
 
 #include <exception>
 #include <memory>
@@ -86,6 +86,12 @@ enum solver_flags : int
     extra_solver_flag5 = 20,
     extra_solver_flag6 = 21,
     extra_solver_flag7 = 22,
+	extra_solver_flag8 = 23,
+	extra_solver_flag9 = 24,
+	extra_solver_flag10=25,
+	extra_solver_flag11=26,
+	extra_solver_flag12=27,
+	print_residuals = 28,
 };
 /** @brief class defining the data related to a specific solver
  the solverInterface class is the base class for solvers for the GridDyn power systems program
@@ -115,11 +121,8 @@ class solverInterface : public helperObject
     };
 
     std::vector<int> rootsfound;  //!< mask vector for which roots were found
-    bool printResid =
-      false;  //!< flag telling the interface to print the residual values to the screen (used for debugging)
   protected:
     std::string lastErrorString;  //!< string containing the last error
-    int lastErrorCode = 0;  //!< the last error Code
 
     // solver outputs
 
@@ -141,6 +144,7 @@ class solverInterface : public helperObject
     count_t svsize = 0;  //!< the state size
     count_t nnz = 0;  //!< the actual number of non-zeros in a Jacobian
     std::bitset<32> flags;  //!< flags for the solver
+	int lastErrorCode = 0;  //!< the last error Code
   public:
     /** @brief default constructor
      * @param[in] objName  the name of the solver
@@ -266,9 +270,9 @@ class solverInterface : public helperObject
   */
     virtual int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal);
     /** @brief resize the storage array for the Jacobian
-    @param[in] size  the number of elements to potentially store
+    @param[in] nonZeroCount  the number of elements to potentially store
     */
-    virtual void setMaxNonZeros (count_t size);
+    virtual void setMaxNonZeros (count_t nonZeroCount);
     /** @brief check if the solverInterface has been initialized
     @return true if initialized false if not
     */

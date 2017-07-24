@@ -70,8 +70,12 @@ INSTALL(TARGETS optimization
 	ARCHIVE DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")
 
 list(APPEND griddyn_optional_libraries optimization)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/optimization)

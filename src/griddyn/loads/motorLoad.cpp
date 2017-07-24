@@ -456,7 +456,7 @@ void motorLoad::ioPartialDerivatives (const IOdata &inputs,
         double V = inputs[voltageInLocation];
         if (isDynamic (sMode))
         {
-            Lp Loc = offsets.getLocations (sD, sMode, this);
+            auto Loc = offsets.getLocations (sD, sMode, this);
             slip = Loc.diffStateLoc[0];
         }
         else if (!opFlags[init_transient])
@@ -481,7 +481,7 @@ index_t motorLoad::findIndex (const std::string &field, const solverMode &sMode)
 
 void motorLoad::rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     double slip = Loc.diffStateLoc[0];
     auto ro = offsets.getRootOffset (sMode);
     if (opFlags[stalled])
@@ -561,7 +561,7 @@ double motorLoad::getRealPower (const IOdata &inputs, const stateData &sD, const
     double Ptemp;
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         double slip = Loc.diffStateLoc[0];
         Ptemp = rPower (V * Vcontrol, slip);
@@ -587,7 +587,7 @@ double motorLoad::getReactivePower (const IOdata &inputs, const stateData &sD, c
     double Qtemp;
     if (isDynamic (sMode))
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         double slip = Loc.diffStateLoc[0];
         Qtemp = qPower (V, slip);

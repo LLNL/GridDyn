@@ -10,12 +10,12 @@
 * LLNS Copyright End
 */
 
-#ifndef FMI_LOADMODEL_H_
-#define FMI_LOADMODEL_H_
+#ifndef FMI_EXCITER_H_
+#define FMI_EXCITER_H_
 
 
 #include "Exciter.h"
-
+#include "fmiMEWrapper.hpp"
 
 
 namespace griddyn
@@ -25,43 +25,15 @@ namespace fmi
 
 class fmiMESubModel;
 
-class fmiExciter : public Exciter
+class fmiExciter : public fmiMEWrapper<Exciter>
 {
-protected:
-	std::string v_in;
-	std::string E_out;
-
-private:
-	fmiMESubModel *fmisub = nullptr;
 public:
-	fmiExciter(std::string fmd = "");
-	~fmiExciter();
+	fmiExciter(const std::string &objName = "fmiExciter_#");
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
-	virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
-	virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
 	virtual void set (const std::string &param, const std::string &val) override;
 	virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-	virtual void getParameterStrings(stringVec &pstr, paramStringType pstype) const override;
 
-	virtual void residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
-
-	virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;     //return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
-
-	virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;
-	virtual void outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &md, const solverMode &sMode) override;
-	virtual void ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &md, const IOlocs &inputLocs, const solverMode &sMode) override;
-	virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &md, const IOlocs &inputLocs, const solverMode &sMode) override;
-
-	virtual void rootTest(const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode) override;
-	virtual void rootTrigger(coreTime time, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
-
-	virtual index_t findIndex(const std::string &field, const solverMode &sMode) const override;
-	virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode) override;
-
-	virtual IOdata getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
-protected:
-	void setupFmiIo();
 };
 
 }//namespace fmi

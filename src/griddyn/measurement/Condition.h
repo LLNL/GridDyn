@@ -39,11 +39,11 @@ protected:
   double m_constant = 0.0;  //!< right hand side constant
   double m_margin = 0.0;	//!< the margin around the conditions
   double m_curr_margin = 0.0; //!< the currently used margin
-  bool m_constB = false;	//!< flag indicating use of a constant RHS
+  bool m_constRHS = false;	//!< flag indicating use of a constant RHS
   bool use_margin = false;	//!< flag indicating margin use
 
-  std::shared_ptr<grabberSet> conditionA;        //!<grabber for left side condition
-  std::shared_ptr<grabberSet> conditionB;        //!<grabber for right side condition
+  std::shared_ptr<grabberSet> conditionLHS;        //!<grabber for left side condition
+  std::shared_ptr<grabberSet> conditionRHS;        //!<grabber for right side condition
 public:  
  
  
@@ -113,7 +113,7 @@ public:
   */
   void setConditionRHS (double val)
   {
-    m_constB = true;
+    m_constRHS = true;
     m_constant = val;
   }
   /** set the margin level for equality conditions

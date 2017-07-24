@@ -10,8 +10,11 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDOBJECTHELPERCLASSES_H_
-#define GRIDOBJECTHELPERCLASSES_H_
+/** @file
+@brief classes and object to help in the operation of gridComponents
+*/
+#ifndef GRIDCOMPONENT_HELPER_CLASSES_H_
+#define GRIDCOMPONENT_HELPER_CLASSES_H_
 #pragma once
 
 #include "solvers/solverMode.hpp"
@@ -23,6 +26,7 @@ constexpr static std::uint64_t flagMask =
   0x3FE;  //!< general flag mask for convenience to mask out flags that typically cascade to parents
 
 /** @brief  an enumeration of flags in the opFlags bitset for gridComponent
+@details flags are intended to be default off hence the various names in certain circumstances
  */
 enum operation_flags
 {
@@ -31,7 +35,7 @@ enum operation_flags
     // typically cascading flags
     has_constraints = 0,  //!<flag indicating if an object uses constraints
     has_roots = 1,  //!<flag indicating if an object uses root finding
-    has_alg_roots = 2,  //!< flag indicated the object has states to solve for
+    has_alg_roots = 2,  //!< flag indicated the object has roots dependent on algebraic states and thus must be evaluated after a initial condition update
     has_powerflow_adjustments = 3,  //!<flag indicating if an object has voltage adjustments for power flow
     preEx_requested = 4,  //!<flag indicating if an object requests pre-execution
     uses_bus_frequency = 5,  //!<flag indicating if an object uses bus frequency calculation
@@ -39,7 +43,7 @@ enum operation_flags
     has_dyn_states = 7,  //!< indicator if the object has dynamic states if in question
     has_differential_states = 8,  //!< indicator if the object has differential states
     not_cloneable = 9,  //!< flag indicating that an object should not be cloned
-    extra_cascading_flag = 10,
+    extra_cascading_flag = 10,  //!< reserved for future use
     // end of typically cascading flags
 
     // for handling remote voltage control capabilities
@@ -58,14 +62,14 @@ enum operation_flags
     pFlow_initialized = 19,  //!< indicator that powerFlow initialization has been completed
     dyn_initialized = 20,  //!<  indicator that dynamic Initialization has been completed
     object_armed_flag = 21,  //!<basically an extra object flag if the object has a trigger mechanism of some sort
-    late_b_initialize = 22,  //!< flag indicating the object would like to initialized after most other objects
+    late_b_initialize = 22,  //!< flag indicating the object would like to be initialized after most other objects
                              //!only acknowledged by areas and then only within the area
     error_flag = 23,  //!< flag indicating the object has an error
 
     // flags  24- 31 indicating some sort of condition change
     state_change_flag = 24,  //!< flag indicating that the state size or nature has changed
     object_change_flag = 25,  //!< flag indicating that an object has changed activity state
-    constraint_change_flag = 26,  //!< flag indicating an change in constrachange_code values
+    constraint_change_flag = 26,  //!< flag indicating an change in constraint values
     root_change_flag = 27,  //!< flag indicating a change in the root finding functions
     jacobian_count_change_flag = 28,  //!< flag indicating a change in the Jacobian count
     slack_bus_change = 29,  //!< flag indicating a change in the slack bus
@@ -100,7 +104,7 @@ enum operation_flags
     disconnected = 49,  //!< flag indicating that the object is disconnected
     differential_output =
       50,  //!< flag that the model has a differential state variable that is the primary output
-    no_gridobject_set = 51,  //!< flag indicating skipping of the coreObject set function for parent setting
+    no_gridcomponent_set = 51,  //!< flag indicating skipping of the gridComponent set function for parent setting
                              //!without throwing an error
     being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some
                          //!large objects with components allocated in larger fashion so we skip over some steps in
@@ -112,7 +116,7 @@ enum operation_flags
     multipart_calculation_capable =
       54,  //!< flag indicating the object is capable of using pre and post execution functions
     has_subobject_pflow_states = 55, //!< flag indicating that the object has a subobject with pflow states
-    extra_capability_flag1 = 56,
+    extra_capability_flag1 = 56,  //!< flag reserved for future use
     dc_only = 57,  //!<flag indicating the object must be attached to a DC bus
     dc_capable = 58,  //!<flag indicating the object can be attached to a DC bus
     dc_terminal2 = 59,  //!<flag indicating the terminal 2 must be a DC bus
@@ -443,7 +447,7 @@ class offsetTable
   private:
     // std::vector<solverOffsets> offsetContainer;       //!< a vector of containers for offsets corresponding to
     // the different solver modes
-    boost::container::small_vector<solverOffsets, 6>
+    boost::container::small_vector<solverOffsets,5>
       offsetContainer;  //!< a vector of containers for offsets corresponding to the different solver modes
   public:
     /** @brief constructor

@@ -33,6 +33,7 @@ public:
   };
 protected:
   index_t m_terminal = 1;  //!< line terminal  (typically 1 or 2)
+  //4 byte gap here to use for something if need be
   parameter_t limit = kBigNum;         //!<[puA] maximum current
   parameter_t mp_I2T = 0.0;         //!<[puA^2*s] I squared t characteristic of fuse 1 in puA^2*s
   coreTime minBlowTime = 0.001;   //!<[s] the minimum time required to for the fuse to blow only used if I2T>0;
@@ -62,11 +63,15 @@ public:
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
 	virtual void conditionTriggered (index_t conditionNum, coreTime triggerTime) override;
+	/** function to setup the numerical calculations associated with the fuse*/
   change_code setupFuseEvaluation ();
 private:
+	/** helper calculation function to compute the i^2 t value based on a current*/
   double I2Tequation (double current);
+  /** actually blow the fuse
+  @return a change_code associated with the action to match a function signature*/
   change_code blowFuse ();
 };
-}//namespace relays
-}//namespace griddyn
+} //namespace relays
+} //namespace griddyn
 #endif

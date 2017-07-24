@@ -37,12 +37,12 @@ public:
     etrigger_high = object_flag4,
   };
 protected:
-  double Vrmin = -5.1;         //!< [pu] lower voltage limit
-  double Vrmax = 6;         //!< [pu] upper voltage limit
-  double Vref = 1.0;          //!< [pu] reference voltage for voltage regulator
-  double Ka = 10;            //!< [pu] amplifier gain
-  double Ta = 0.004;            //!< [s]    amplifier time constant
-  double vBias = 0.0;           //!< bias field level for adjusting the field output so the ref can remain at some nominal level
+  parameter_t Vrmin = -5.1;         //!< [pu] lower voltage limit
+  parameter_t Vrmax = 6;         //!< [pu] upper voltage limit
+  parameter_t Vref = 1.0;          //!< [pu] reference voltage for voltage regulator
+  parameter_t Ka = 10;            //!< [pu] amplifier gain
+  parameter_t Ta = 0.004;            //!< [s]    amplifier time constant
+  parameter_t vBias = 0.0;           //!< bias field level for adjusting the field output so the ref can remain at some nominal level
   int limitState = 0;			//!< indicator of which state has the limits applied
 public:
   /** @brief constructor*/
@@ -68,6 +68,8 @@ public:
   virtual change_code rootCheck ( const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
   //virtual void setTime(coreTime time){prevTime=time;};
+  virtual const std::vector<stringVec> &inputNames() const override;
+  virtual const std::vector<stringVec> &outputNames() const override;
 protected:
   void checkForLimits ();
 };

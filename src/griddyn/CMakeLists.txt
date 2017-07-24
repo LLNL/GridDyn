@@ -183,6 +183,7 @@ set(load_headers
 	loads/svd.h
 	loads/aggregateLoad.h
 	loads/zipLoad.h
+	loads/frequencySensitiveLoad.h
 	loads/ThreePhaseLoad.h
 	)
 	
@@ -202,6 +203,7 @@ set(load_sources
 	loads/zipLoad.cpp
 	loads/svd.cpp
 	loads/ThreePhaseLoad.cpp
+	loads/frequencySensitiveLoad.cpp
 	)
 
 set (link_headers
@@ -312,7 +314,7 @@ set (core_headers
 	gridPrimary.h
 	gridSecondary.h
 	gridSubModel.h
-	gridObjectsHelperClasses.h
+	gridComponentHelperClasses.h
 	numericEstimationFunctions.h
 	gridDynDefinitions.hpp
 	)
@@ -323,7 +325,7 @@ set (core_sources
 	gridPrimary.cpp
 	gridSecondary.cpp
 	gridSubModel.cpp
-	gridObjectsHelperClasses.cpp
+	gridComponentHelperClasses.cpp
 	numericEstimationFunctions.cpp
 	)
 
@@ -531,6 +533,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIRS})
 
 #create a griddyn_config.h file for program options
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h DESTINATION include/griddyn)
 
 INSTALL(TARGETS griddyn
 	LIBRARY DESTINATION lib
@@ -540,4 +543,8 @@ INSTALL(TARGETS griddyn
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DESTINATION include
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include
+  FILES_MATCHING PATTERN "*.hpp")
 

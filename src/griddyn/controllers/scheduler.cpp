@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
 #include "utilities/timeSeries.hpp"
-
+#include "config.h"
 namespace griddyn
 {
 using namespace gridUnits;
@@ -311,7 +311,8 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
     case schedulerMessage::STARTUP:
         break;
     case schedulerMessage::UPDATE_TARGETS:  //
-        clearSchedule ();  // purposeful fall through
+        clearSchedule (); 
+		FALLTHROUGH
     case schedulerMessage::ADD_TARGETS:
         setTarget (sm->m_time, sm->m_target);
         break;

@@ -198,7 +198,7 @@ public:
   /** compute the objective value
   @param oD  the current object variable values
   @param oMode the optimization mode to use.
-  \return the objective value
+  @return the objective value
   */
   virtual double objValue (const optimData &oD, const optimMode &oMode);
 
@@ -256,25 +256,25 @@ public:
 
   /** get a specific bus
   @param index  the index of the bus to return
-  \return the gridOptObject represented by the bus index
+  @return the gridOptObject represented by the bus index
   */
   virtual gridOptObject * getBus (index_t index) const;
 
   /** get a specific area
   @param index  the index of the area to return
-  \return the gridOptObject represented by the area index
+  @return the gridOptObject represented by the area index
   */
   virtual gridOptObject * getArea (index_t index) const;
 
   /** get a specific Link
   @param index  the index of the area to return
-  \return the gridOptObject represented by the link  index
+  @return the gridOptObject represented by the link  index
   */
   virtual gridOptObject * getLink (index_t index) const;
   
   /** get a specific relay
   @param index  the index of the area to return
-  \return the gridOptObject represented by the link  index
+  @return the gridOptObject represented by the link  index
   */
   virtual gridOptObject * getRelay(index_t index) const;
 };

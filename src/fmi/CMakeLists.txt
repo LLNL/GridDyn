@@ -24,18 +24,31 @@ set(fmiGD_sources
 	fmiGDinfo.cpp
 	fmi_models/fmiMESubModel.cpp
 	fmi_models/fmiCoSimSubModel.cpp
-	fmi_models/fmiLoad.cpp
+	fmi_models/fmiMELoad.cpp
+	fmi_models/fmiCoSimLoad.cpp
+	fmi_models/fmiMELoad3phase.cpp
+	fmi_models/fmiCoSimLoad3phase.cpp
 	fmi_models/fmiExciter.cpp
 	fmi_models/outputEstimator.cpp
+	fmi_models/fmiGovernor.cpp
+	fmi_models/fmiGenModel.cpp
 	)
 	
 set(fmiGD_headers
 	fmi_models/fmiMESubModel.h
 	fmi_models/fmiCoSimSubModel.h 
-	fmi_models/fmiLoad.h
+	fmi_models/fmiMELoad.h
+	fmi_models/fmiCoSimLoad.h
+	fmi_models/fmiMELoad3phase.h
+	fmi_models/fmiCoSimLoad3phase.h
 	fmi_models/fmiExciter.h
+	fmi_models/fmiGovernor.h
+	fmi_models/fmiGenModel.h
 	fmi_models/outputEstimator.h
 	fmi_models/fmiSupport.h
+	fmi_models/fmiMEWrapper.hpp
+	fmi_models/fmiCoSimWrapper.hpp
+	fmi_models/fmiWrapper.hpp
 	fmiGDinfo.h
 	)	
 set(fmiImport_headers
@@ -87,5 +100,9 @@ list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/test/componentTe
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")

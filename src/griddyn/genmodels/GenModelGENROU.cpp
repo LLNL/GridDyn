@@ -88,7 +88,7 @@ void GenModelGENROU::algebraicUpdate (const IOdata &inputs,
                                       const solverMode &sMode,
                                       double /*alpha*/)
 {
-    Lp Loc = offsets.getLocations (sD, update, sMode, this);
+    auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
     solve2x2 (Rs, (Xqpp + Xl), -(Xdpp + Xl), Rs, Loc.diffStateLoc[4] - Vd, Loc.diffStateLoc[5] - Vq,
               Loc.destLoc[0], Loc.destLoc[1]);
@@ -100,7 +100,7 @@ void GenModelGENROU::derivative (const IOdata &inputs,
                                  double deriv[],
                                  const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
     // double V = inputs[voltageInLocation];
     const double *gm = Loc.algStateLoc;
@@ -149,7 +149,7 @@ void GenModelGENROU::derivative (const IOdata &inputs,
 
 void GenModelGENROU::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
@@ -189,7 +189,7 @@ void GenModelGENROU::jacobianElements (const IOdata &inputs,
                                        const IOlocs &inputLocs,
                                        const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     //  double theta = inputs[angleInLocation];

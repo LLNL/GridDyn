@@ -81,7 +81,7 @@ std::string commType;
 */
 void breaker::set (const std::string &param, const std::string &val)
 {
-    if (param.front() == '#')
+    if (param.empty())
     {
     }
     else
@@ -107,7 +107,7 @@ void breaker::set (const std::string &param, double val, gridUnits::units_t unit
     }
     else if ((param == "maxrecloseattempts") || (param == "reclosers"))
     {
-        maxRecloseAttempts = static_cast<count_t> (val);
+        maxRecloseAttempts = static_cast<decltype(maxRecloseAttempts)> (val);
     }
     else if ((param == "minclearingtime") || (param == "cleartime"))
     {

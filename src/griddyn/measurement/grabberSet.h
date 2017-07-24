@@ -46,7 +46,7 @@ private:
 	index_t seqID=0;	//!< the last sequence ID for the state grabber
 	bool usePredictor=false; //!< indicator that the Grabber should use a predictor 
 	double lastValue = 0;  //!< the last value captured related to seqID;
-	std::unique_ptr<utilities::valuePredictor<coreTime, double, double>> predictor;
+	std::unique_ptr<utilities::valuePredictor<coreTime, double, double>> predictor;  //!< pointer to a predictor object
 	
 public:
 
@@ -90,9 +90,11 @@ public:
 	virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
 	virtual coreObject * getObject() const override;
 	virtual void getObjects(std::vector<coreObject *> &objects) const override;
-
+	/** set the gain of the grabbers*/
 	void setGain(double newGain);
+	/** check if the grabberSet is using state information*/
 	bool stateCapable() const;
+	/** check if the grabberSet can compute a jacobian*/
 	bool hasJacobian() const;
 };
 

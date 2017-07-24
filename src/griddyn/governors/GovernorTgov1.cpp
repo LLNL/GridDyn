@@ -70,7 +70,7 @@ void GovernorTgov1::residual (const IOdata &inputs,
 {
     // double omega = getControlFrequency (inputs);
     double omega = inputs[govOmegaInLocation];
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
     Loc.destLoc[0] = Loc.algStateLoc[0] - Loc.diffStateLoc[0] + Dt * (omega - 1.0);
 
     if (isAlgebraicOnly (sMode))
@@ -89,7 +89,7 @@ void GovernorTgov1::derivative (const IOdata &inputs,
                                        double deriv[],
                                        const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
     const double *gs = Loc.diffStateLoc;
     // double omega = getControlFrequency (inputs);
@@ -126,7 +126,7 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
                                              const IOlocs &inputLocs,
                                              const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+    auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
     int refI = Loc.diffOffset;
     // use the md.assign Macro defined in basicDefs
@@ -200,7 +200,7 @@ void GovernorTgov1::rootTest (const IOdata &inputs,
        }*/
     if (opFlags[uses_plimits])
     {
-        Lp Loc = offsets.getLocations (sD, nullptr, sMode, this);
+        auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
         double Pmech = Loc.diffStateLoc[1];
 

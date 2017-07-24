@@ -14,8 +14,8 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "gridBus.h"
-#include "utilities/matrixData.hpp"
 #include "measurement/objectGrabbers.h"
+#include "utilities/matrixData.hpp"
 
 #include <cmath>
 #include <complex>
@@ -119,10 +119,10 @@ double Load::get (const std::string &param, units_t unitType) const
         switch (param[0])
         {
         case 'p':
-            val = unitConversion (P, puMW, unitType, systemBasePower,baseVoltage);
+            val = unitConversion (P, puMW, unitType, systemBasePower, baseVoltage);
             break;
         case 'q':
-            val = unitConversion (Q, puMW, unitType, systemBasePower,baseVoltage);
+            val = unitConversion (Q, puMW, unitType, systemBasePower, baseVoltage);
             break;
         default:
             break;
@@ -134,12 +134,12 @@ double Load::get (const std::string &param, units_t unitType) const
     {
         val = pfq;
     }
-	else if (auto fptr = getObjectFunction(this, param).first)
-	{
-		auto unit = getObjectFunction(this, param).second;
-		coreObject *tobj = const_cast<Load*>(this);
-		val = unitConversion(fptr(tobj), unit, unitType, systemBasePower,baseVoltage);
-	}
+    else if (auto fptr = getObjectFunction (this, param).first)
+    {
+        auto unit = getObjectFunction (this, param).second;
+        coreObject *tobj = const_cast<Load *> (this);
+        val = unitConversion (fptr (tobj), unit, unitType, systemBasePower, baseVoltage);
+    }
     else
     {
         val = gridSecondary::get (param, unitType);
@@ -149,9 +149,13 @@ double Load::get (const std::string &param, units_t unitType) const
 
 void Load::set (const std::string &param, double val, units_t unitType)
 {
+	if (param.empty())
+	{
+		return;
+	}
     if (param.length () == 1)
     {
-        switch (param.front())
+        switch (param.front ())
         {
         case 'p':
             setP (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
@@ -165,6 +169,10 @@ void Load::set (const std::string &param, double val, units_t unitType)
         checkFaultChange ();
         return;
     }
+	if (param.empty())
+	{
+		return;
+	}
     if (param.back () == '+')  // load increments
     {
         // load increments  allows a delta on the load through the set functions

@@ -38,7 +38,7 @@ public:
   explicit differentialRelay (const std::string &objName = "diffRelay_$");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void setFlag (const std::string &flag, bool val = true) override;
-  virtual bool getFlag (const std::string &param) const override;
+  virtual bool getFlag (const std::string &flag) const override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
 

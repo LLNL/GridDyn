@@ -37,7 +37,7 @@ static childTypeFactory<ExciterIEEEtype2, Exciter> gfet2("exciter", "type2");
 
 }//namespace exciters
 
-Exciter::Exciter (const std::string &objName) : gridSubModel (objName) {}
+Exciter::Exciter(const std::string &objName) : gridSubModel(objName) { m_inputSize = 4; m_outputSize = 1; }
 // cloning function
 coreObject *Exciter::clone (coreObject *obj) const
 {
@@ -116,7 +116,7 @@ void Exciter::derivative (const IOdata &inputs,
                                  double deriv[],
                                  const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *es = Loc.diffStateLoc;
     double *d = Loc.destDiffLoc;
     if (opFlags[outside_vlim])
@@ -298,6 +298,29 @@ void Exciter::set (const std::string &param, double val, gridUnits::units_t unit
     {
         gridSubModel::set (param, val, unitType);
     }
+}
+
+static const std::vector<stringVec> inputNamesStr
+{
+	{ "voltage","v","volt" },
+	{ "vset","setpoint","voltageset" },
+	{ "pmech","power","mechanicalpower" },
+	{"omega","frequency","w","f"},
+};
+
+const std::vector<stringVec> &Exciter::inputNames() const
+{
+	return inputNamesStr;
+}
+
+static const std::vector<stringVec> outputNamesStr
+{
+	{ "e","field","exciter" },
+};
+
+const std::vector<stringVec> &Exciter::outputNames() const
+{
+	return outputNamesStr;
 }
 
 }//namespace griddyn

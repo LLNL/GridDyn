@@ -135,7 +135,6 @@ public:
   double remainingCapacity () const override;
   double getAngle () const override;
   double getAngle (const double state[], const solverMode &sMode) const override;
-  double getAbsAngle (id_type_t busId = invalid_id_value) const override;
   virtual double getRealImpedance (id_type_t busId = invalid_id_value) const override;
   virtual double getImagImpedance (id_type_t busId = invalid_id_value) const override;
   virtual double getTotalImpedance (id_type_t busId = invalid_id_value) const override;

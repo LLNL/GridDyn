@@ -27,9 +27,16 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
+if(DL_REQUIRED)
+    target_link_libraries(griddynMain ${CMAKE_DL_LIBS})
+endif(DL_REQUIRED)
 
 message(STATUS "execOnly:${executable_only_components}")
 target_link_libraries(griddynMain ${executable_only_components} gridDynCombined)
+
+if(FMI_ENABLE)
+    target_link_libraries(griddynMain ${CMAKE_DL_LIBS})
+endif(FMI_ENABLE)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
 add_custom_command(TARGET griddynMain POST_BUILD        # Adds a post-build event to griddynMain

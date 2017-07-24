@@ -12,9 +12,9 @@
 
 // headers
 #include "infiniteBus.h"
+#include "Link.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "Link.h"
 
 namespace griddyn
 {
@@ -37,7 +37,7 @@ infiniteBus::infiniteBus (double startVoltage, double startAngle, const std::str
 coreObject *infiniteBus::clone (coreObject *obj) const
 {
     auto nobj = cloneBase<infiniteBus, gridBus> (this, obj);
-    if (nobj==nullptr)
+    if (nobj == nullptr)
     {
         return obj;
     }
@@ -74,7 +74,7 @@ void infiniteBus::set (const std::string &param, const std::string &val)
     {
         if (val != "infinite")
         {
-            throw (invalidParameterValue (param+':'+val));
+            throw (invalidParameterValue (param + ':' + val));
         }
     }
     else

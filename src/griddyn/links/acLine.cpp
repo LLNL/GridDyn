@@ -164,10 +164,7 @@ void acLine::timestep (const coreTime time, const IOdata & /*inputs*/, const sol
     }*/
 }
 
-
-void acLine::checkMerge()
-{
-}
+void acLine::checkMerge () {}
 
 static const stringVec locNumStrings{"r",        "x",       "link",    "b",     "g", "tap",
                                      "tapangle", "switch1", "switch2", "fault", "p"};
@@ -936,17 +933,17 @@ double acLine::getAngle (const double state[], const solverMode &sMode) const
     return t1 - t2 - tapAngle;
 }
 
-change_code acLine::powerFlowAdjust(const IOdata & /*inputs*/, std::uint32_t /*flags*/, check_level_t level)
+change_code acLine::powerFlowAdjust (const IOdata & /*inputs*/, std::uint32_t /*flags*/, check_level_t level)
 {
-	if ((level==check_level_t::high_angle_trip)&&(isConnected()))
-	{
-		if (std::abs(linkInfo.theta1) > kPI / 2.0 + 0.01)
-		{
-			disconnect();
-			return change_code::jacobian_change;
-		}
-	}
-	return change_code::no_change;
+    if ((level == check_level_t::high_angle_trip) && (isConnected ()))
+    {
+        if (std::abs (linkInfo.theta1) > kPI / 2.0 + 0.01)
+        {
+            disconnect ();
+            return change_code::jacobian_change;
+        }
+    }
+    return change_code::no_change;
 }
 
 change_code
@@ -1706,28 +1703,28 @@ void acLine::swOpenDeriv ()
 
     // flows from bus 2 to bus
 
-	double Y = 1.0 / (b + 0.5 * mp_B);
+    double Y = 1.0 / (b + 0.5 * mp_B);
     const double dT = -((g + 0.5 * mp_G) * Y - g / b);
 
     if (!opFlags[switch1_open_flag])
     {
         double it2 = 1.0 / (tap * tap);
         LinkDeriv.dP1dv1 = 2.0 * (g + 0.5 * mp_G) * it2 * linkInfo.v1;
-        LinkDeriv.dP1dv1 -= 2.0 * g * b * it2 * linkInfo.v1 *Y;
-        LinkDeriv.dP1dv1 += 2.0 * b * b * it2 * linkInfo.v1 *Y * dT;
+        LinkDeriv.dP1dv1 -= 2.0 * g * b * it2 * linkInfo.v1 * Y;
+        LinkDeriv.dP1dv1 += 2.0 * b * b * it2 * linkInfo.v1 * Y * dT;
 
         LinkDeriv.dQ1dv1 = -2.0 * (b + 0.5 * mp_B) * it2 * linkInfo.v1;
-        LinkDeriv.dQ1dv1 += 2.0 * b * b * it2 * linkInfo.v1 *Y;
+        LinkDeriv.dQ1dv1 += 2.0 * b * b * it2 * linkInfo.v1 * Y;
     }
 
     if (!opFlags[switch2_open_flag])
     {
         LinkDeriv.dP2dv2 = 2.0 * (g + 0.5 * mp_G) * linkInfo.v2;
-        LinkDeriv.dP2dv2 -= 2.0 * g * b * linkInfo.v2 *Y;
-        LinkDeriv.dP2dv2 += 2.0 * b * b * linkInfo.v2 *Y * dT;
+        LinkDeriv.dP2dv2 -= 2.0 * g * b * linkInfo.v2 * Y;
+        LinkDeriv.dP2dv2 += 2.0 * b * b * linkInfo.v2 * Y * dT;
 
         LinkDeriv.dQ2dv2 = -2.0 * (b + 0.5 * mp_B) * linkInfo.v2;
-        LinkDeriv.dQ2dv2 += 2.0 * b * b * linkInfo.v2 *Y;
+        LinkDeriv.dQ2dv2 += 2.0 * b * b * linkInfo.v2 * Y;
     }
     LinkDeriv.seqID = linkInfo.seqID;
 

@@ -81,6 +81,15 @@ protected:
 
   virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 public:
+	/** simplified initialization function for the block
+	@details wraps the call to dynInitializeB to simplify things for a block
+	@param[in] input  the initial input to the block
+	@param[in] desiredOutput the initial desired output for the block
+	@return if input is kNullVal it returns the input required to make the output match desiredOutput otherwise 
+	it returns the initial output
+	*/
+	double blockInitialize(double input, double desiredOutput);
+
   virtual void setFlag (const std::string &flag, bool val) override;
   virtual void set (const std::string &param,  const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
@@ -95,7 +104,7 @@ public:
   @param[out] resid the location to store the Jacobian elements
   @param[in] sMode the solverMode that corresponds to the state data
   */
-  virtual void residElements (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode);
+  virtual void blockResidual (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode);
 
   
   virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
@@ -108,7 +117,7 @@ public:
   @param[in] sMode the solverMode that corresponds to the state data
   @return the output
   */
-  virtual void derivElements (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode);
+  virtual void blockDerivative (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode);
   virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
 
   /** @brief simplifying function in place of algebraicUpdate call since block have only one input/output
@@ -118,7 +127,7 @@ public:
   @param[in] sMode the solverMode that corresponds to the state data
   @return the output
   */
-  virtual void algElements (double input, const stateData &sD, double update[], const solverMode &sMode);
+  virtual void blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode);
   virtual void algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
 
   /** @brief simplifying function in place of Jacobian elements since block have only one input/output
@@ -129,7 +138,7 @@ public:
   @param[in] argLoc the index location of the input
   @param[in] sMode the solverMode that corresponds to the state data
   */
-  virtual void jacElements (double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode);
+  virtual void blockJacobianElements (double input, double didt, const stateData &sD, matrixData<double> &md, index_t argLoc, const solverMode &sMode);
 
   virtual void jacobianElements (const IOdata &inputs, const stateData &sD,
                                  matrixData<double> &md,
@@ -147,24 +156,52 @@ public:
   virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
   //virtual void setTime(coreTime time){prevTime=time;};
   virtual stringVec localStateNames () const override;
+  /** get the single output for the block
+  @param[in] sD the state data to use in computing the output
+  @param[in] sMode the solverMode associated with the stateData
+  */
   virtual double getBlockOutput (const stateData &sD, const solverMode &sMode) const;
+  /** get the single output for the block based on local information
+  */
   virtual double getBlockOutput () const;
+  /** get the time derivative of the block output -should only be used for block with a differential output
+  @param[in] sD the state data to use in computing the output
+  @param[in] sMode the solverMode associated with the stateData
+  */
   virtual double getBlockDoutDt(const stateData &sD, const solverMode &sMode) const;
+  /**get the time derivative of the block output -should only be used for block with a differential output based on local information
+  */
   virtual double getBlockDoutDt() const;
+  /** get the name of the output for a block*/
   const std::string &getOutputName() const
   {
 	  return outputName;
   }
 protected:
+	/** compute the elements of the residual associated with the limiter
+	@param[in] input the input to the block
+	@param[in] didt the time derivative of the input of the block
+	@param[in] sD the stateData associated with a block
+	@param[in] resid the memory location to store the residual
+	@param[in] sMode the solverMode associated with the state Data
+	*/
   void limiterResidElements(double input, double didt, const stateData &sD, double resid[], const solverMode &sMode);
+  /** get the input that goes into the rate limiter*/
   double getRateInput(const IOdata &inputs) const;
 private:
+	/** get the value to test on a value limiter*/
 	  double getTestValue(double input, double currentState) const;
+	  /** get the value to test on the rate limiter*/
 	  double getTestRate(double didt, double currentStateRate) const;
+	  /** check if the object uses a value state */
 	  bool hasValueState() const;
+	  /** update the internal information associated with the value limiter*/
 	  void valLimiterUpdate();
+	  /** update the internal information associated with the ramp limiter*/
 	  void rampLimiterUpdate();
+	  /** generate a default reset level for the limiters*/
 	  double computeDefaultResetLevel();
+	  /** generate the value to test based incoming information for the limiter*/
 	  double getLimiterTestValue(double input, const stateData &sD, const solverMode &sMode);
 	  
 };

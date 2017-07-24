@@ -20,7 +20,7 @@ set(plugin_headers
 add_library(pluginLibrary ${plugin_sources} ${plugin_headers})
 
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 
 INSTALL(TARGETS pluginLibrary
 	LIBRARY DESTINATION lib

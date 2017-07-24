@@ -18,17 +18,17 @@ namespace griddyn
 {
 namespace solvers
 {
-sundialsMatrixDataDense::sundialsMatrixDataDense (DlsMat mat) :matrixData<double>(static_cast<count_t> (mat->M), static_cast<count_t> (J->N)), J (mat)
+sundialsMatrixDataDense::sundialsMatrixDataDense (DlsMat mat)
+    : matrixData<double> (static_cast<count_t> (mat->M), static_cast<count_t> (mat->N)), J (mat)
 {
-
 }
 void sundialsMatrixDataDense::clear () { memset (J->data, 0, sizeof (realtype) * J->ldata); }
 void sundialsMatrixDataDense::assign (index_t X, index_t Y, double num) { DENSE_ELEM (J, X, Y) += num; }
 void sundialsMatrixDataDense::setMatrix (DlsMat mat)
 {
     J = mat;
-    setRowLimit(static_cast<count_t> (J->M));
-    setColLimit(static_cast<count_t> (J->N));
+    setRowLimit (static_cast<count_t> (J->M));
+    setColLimit (static_cast<count_t> (J->N));
 }
 
 count_t sundialsMatrixDataDense::size () const { return static_cast<count_t> (J->M * J->N); }

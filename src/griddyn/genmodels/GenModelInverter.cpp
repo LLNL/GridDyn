@@ -144,7 +144,7 @@ void GenModelInverter::residual (const IOdata &inputs,
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     double angle = *Loc.algStateLoc;
     // printf("time=%f, angle=%f\n", sD.time, angle);
@@ -208,7 +208,7 @@ double GenModelInverter::getAngle (const stateData &sD, const solverMode &sMode,
 
 IOdata GenModelInverter::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     IOdata out (2);
     double V = inputs[voltageInLocation];
@@ -237,7 +237,7 @@ double GenModelInverter::getOutput (const IOdata &inputs,
                                     const solverMode &sMode,
                                     index_t outNum) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     double cAng = cos (Loc.algStateLoc[0]);
     double sAng = sin (Loc.algStateLoc[0]);
     double V = inputs[voltageInLocation];
@@ -260,7 +260,7 @@ void GenModelInverter::ioPartialDerivatives (const IOdata &inputs,
                                              const IOlocs &inputLocs,
                                              const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
 
@@ -294,7 +294,7 @@ void GenModelInverter::jacobianElements (const IOdata &inputs,
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     auto offset = Loc.algOffset;
     if (opFlags[at_angle_limits])
     {
@@ -329,7 +329,7 @@ void GenModelInverter::outputPartialDerivatives (const IOdata &inputs,
     {
         return;
     }
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     double Eft = inputs[genModelEftInLocation] + 1.0;
@@ -477,7 +477,7 @@ change_code GenModelInverter::rootCheck (const IOdata &inputs,
 {
     if (rootSize (sMode) > 0)
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         double angle = Loc.algStateLoc[0];
         if (opFlags[at_angle_limits])
         {

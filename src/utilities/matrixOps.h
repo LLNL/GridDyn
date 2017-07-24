@@ -10,6 +10,9 @@
 * LLNS Copyright End
 */
 
+/** @file
+*  @brief define some operations related to matrixData objects
+*/
 #ifndef MATRIX_OPS_H_
 #define MATRIX_OPS_H_
 #pragma once

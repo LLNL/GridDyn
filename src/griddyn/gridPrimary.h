@@ -24,6 +24,8 @@ class Link;
 class Relay;
 
 
+//these next two enumerations are used throughout the code base so I wouldn't recommend changing them if you want the code to work
+//properly making it adaptive would require a lot changes to const strings and arrays so isn't worth it as I don't see a good reason for it to need to change
 /** @brief locations for secondary input parameters (aka bus output locations)*/
 enum secondary_input_locations
 {
@@ -34,7 +36,7 @@ enum secondary_input_locations
 /** @brief locations grid secondary output locations*/
 enum secondary_output_locations
 {
-  PoutLocation = 0,
+  PoutLocation = 0,  
   QoutLocation = 1,
 };
 

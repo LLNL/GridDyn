@@ -32,11 +32,11 @@ public:
 	coreObject * clone(coreObject *obj = nullptr) const override;
 
 	virtual IOdata getOutputs(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
-	virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+	virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum = 0) const override;
 
-	virtual double getOutput(index_t num = 0) const override;
+	virtual double getOutput (index_t outputNum = 0) const override;
 
-	virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+	virtual double getDoutdt(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum = 0) const override;
 
 	void setFunction(std::function<double(double)> calcFunc);
 

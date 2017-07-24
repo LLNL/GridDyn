@@ -79,6 +79,7 @@ void deadbandBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
 
     else
     {
+		fieldSet.resize(1);
         if (limiter_alg > 0)
         {
             Block::rootCheck (inputs, emptyStateData, cLocalSolverMode, check_level_t::reversable_only);
@@ -238,7 +239,7 @@ double deadbandBlock::step (coreTime time, double input)
     return m_state[0];
 }
 
-void deadbandBlock::derivElements (double input,
+void deadbandBlock::blockDerivative (double input,
                                    double didt,
                                    const stateData &sD,
                                    double deriv[],
@@ -252,12 +253,12 @@ void deadbandBlock::derivElements (double input,
 
         if (limiter_diff > 0)
         {
-            return Block::derivElements (input, didt, sD, deriv, sMode);
+            return Block::blockDerivative (input, didt, sD, deriv, sMode);
         }
     }
 }
 
-void deadbandBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void deadbandBlock::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     if (!opFlags[differential_input])
     {
@@ -268,12 +269,12 @@ void deadbandBlock::algElements (double input, const stateData &sD, double updat
         // update[offset], static_cast<int>(dbstate));
         if (limiter_alg > 0)
         {
-            return Block::algElements (input, sD, update, sMode);
+            return Block::blockAlgebraicUpdate (input, sD, update, sMode);
         }
     }
 }
 
-void deadbandBlock::jacElements (double input,
+void deadbandBlock::blockJacobianElements (double input,
                                  double didt,
                                  const stateData &sD,
                                  matrixData<double> &md,
@@ -292,7 +293,7 @@ void deadbandBlock::jacElements (double input,
         }
         if (limiter_alg > 0)
         {
-            Block::jacElements (input, didt, sD, md, argLoc, sMode);
+            Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
         }
     }
     else if ((opFlags[differential_input]) && (hasDifferential (sMode)))
@@ -308,7 +309,7 @@ void deadbandBlock::jacElements (double input,
 
         if (limiter_diff > 0)
         {
-            Block::jacElements (input, didt, sD, md, argLoc, sMode);
+            Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
         }
     }
 }

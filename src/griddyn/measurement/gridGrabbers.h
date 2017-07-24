@@ -106,8 +106,14 @@ public:
 protected:
 	virtual bool checkIfLoaded() override;
 };
-
+/** create a grabber from a field and object pointer
+@param[in] fld the target field to grab 
+@param[in] obj the target object (can be nullptr if specified later)*/
 std::unique_ptr<gridGrabber> createGrabber (const std::string &fld, coreObject *obj);
+
+/** create a grabber from an offset and object pointer
+@param[in] noffset the index into a local state storage
+@param[in] obj the target object (can be nullptr if specified later)*/
 std::unique_ptr<gridGrabber> createGrabber (int noffset, coreObject *obj);
 
 std::vector < std::unique_ptr < gridGrabber >> makeGrabbers (const std::string & command, coreObject * obj);

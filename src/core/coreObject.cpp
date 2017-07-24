@@ -29,7 +29,7 @@ coreObject::coreObject (std::string objName) : m_refCount (0), m_oid (s_obcnt++)
 {
     static nullObject nullObject0 (0);
     // not using updateName since in many cases the id has not been set yet
-    if (name.back () == '#')
+    if (!name.empty()&&(name.back () == '#'))
     {
         name.pop_back ();
         appendInteger (name, m_oid);
@@ -162,9 +162,10 @@ void coreObject::set (const std::string &param, const std::string &val)
     {
         setDescription (val);
     }
-    else if (param.front () == '#')  // comment parameter meant to do nothing
-    {
-    }
+	else if ((param.empty())|| (param.front() == '#'))
+	{
+		// comment parameter meant to do nothing
+	}
     else
     {
         LOG_DEBUG ("parameter " + param + " not found");
@@ -233,20 +234,24 @@ void coreObject::setFlag (const std::string &flag, bool val)
     {
         alert (this, UPDATE_REQUIRED);
     }
+	else if ((flag.empty()) || (flag.front() == '#'))
+	{
+		// comment parameter meant to do nothing
+	}
     else
     {
         throw (unrecognizedParameter (flag));
     }
 }
 
-bool coreObject::getFlag (const std::string &param) const
+bool coreObject::getFlag (const std::string &flag) const
 {
     bool ret = false;
-    if (param == "enabled")
+    if (flag == "enabled")
     {
         ret = isEnabled ();
     }
-    else if (param == "updates")
+    else if (flag == "updates")
     {
         ret = hasUpdates ();
     }
@@ -305,9 +310,10 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
     {
         setUserID (static_cast<index_t> (val));
     }
-    else if (param[0] == '#')  // the comment parameter
-    {
-    }
+   else if ((param.empty()) || (param.front() == '#'))
+	{
+		// comment parameter meant to do nothing
+	}
     else
     {
         setFlag (param, (val > 0.1));
@@ -348,7 +354,7 @@ coreObject *coreObject::findByUserID (const std::string & /*typeName*/, index_t 
 void coreObject::updateA (coreTime time) { lastUpdateTime = time; }
 coreTime coreObject::updateB ()
 {
-    assert (nextUpdateTime > negTime / 2);  // The assert is to check for spurious calls
+    assert (nextUpdateTime > negTime / 2.0);  // The assert is to check for spurious calls
     if (nextUpdateTime < maxTime)
     {
         while (lastUpdateTime >= nextUpdateTime)
@@ -362,6 +368,8 @@ coreTime coreObject::updateB ()
 void coreObject::enable () { enabled = true; }
 void coreObject::disable () { enabled = false; }
 bool coreObject::isEnabled () const { return enabled; }
+//core objects are cloneable derived classes may not be
+bool coreObject::isCloneable() const { return true; }
 void coreObject::alert (coreObject *object, int code) { parent->alert (object, code); }
 void coreObject::log (coreObject *object, print_level level, const std::string &message)
 {
@@ -431,11 +439,11 @@ void setMultipleFlags (coreObject *obj, const std::string &flags)
     utilities::string_viewOps::trim (flgs);
     for (const auto &flag : flgs)
     {
-		if (flag.empty())
-		{
-			continue;
-		}
-        if (flag.front() != '-')
+        if (flag.empty ())
+        {
+            continue;
+        }
+        if (flag.front () != '-')
         {
             obj->setFlag (flag.to_string (), true);
         }

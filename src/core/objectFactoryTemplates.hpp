@@ -84,121 +84,117 @@ class gridObjectHolder : public coreObject
 };
 /** @brief template class for creating an object block of prepared objects
 @details a class which contains an object holder and gives them out as requested*/
-template<class Ntype>
+template <class Ntype>
 class objectPrepper
 {
-	static_assert (std::is_base_of<coreObject, Ntype>::value, "factory class must have coreObject as base");
-private:
-	coreOwningPtr<gridObjectHolder<Ntype>> obptr;
-	count_t targetprepped = 0;
-	bool useBlock;
-public:
-	objectPrepper(count_t count, coreObject *example) 
-	{
-		prepObjects(count, example);
-	}
-	void prepObjects(count_t count, coreObject *example)
-	{
-		auto root = example->getRoot();
-		useBlock = true;
-		if ((obptr) && (root != nullptr))
-		{
-			if (obptr->getParent() != root)
-			{
-				root->add(obptr.get());
-			}
-		}
-		if (remaining() < count)
-		{
-			if ((obptr) && (obptr->remaining() > 0))
-			{
-				targetprepped = count - obptr->remaining();
-			}
-			else
-			{
-				obptr = make_owningPtr<gridObjectHolder<Ntype>>(targetprepped);
-				if (root != nullptr)
-				{
-					if (!obptr)
-					{
-						root->log(root, print_level::warning, "unable to create container object");
-						useBlock = false;
-					}
-					else
-					{
-						root->add(obptr.get());
-					}
-				}
-				else
-				{
-					useBlock = false;
-				}
-			}
-		}
-	}
-	Ntype *getNewObject(const std::string &objName = "")
-	{
-		Ntype *ret = nullptr;
-		if (useBlock)
-		{
-			ret = obptr->getNext();
-			if (ret == nullptr)
-			{  // means the block was used up
-				if (targetprepped > 0)  // if we are scheduled for more make a new objectHolder
-				{
-					auto root = obptr->getRoot();
-					if (root != nullptr)
-					{
-						if (!isSameObject(obptr->getParent(), root))
-						{
-							root->add(obptr.get());
-						}
-					}
-					obptr = make_owningPtr<gridObjectHolder<Ntype>>(targetprepped);
-					if (!obptr)
-					{
-						if (root != nullptr)
-						{
-							root->log(root, print_level::warning, "unable to create container object");
-						}
-						useBlock = false;
-					}
-					else
-					{
-						if (root != nullptr)
-						{
-							root->add(obptr.get());
-						}
-						ret = obptr->getNext();
-						useBlock = true;
-					}
-					targetprepped = 0;
-				}
-				else
-				{
-					useBlock = false;
-					obptr = nullptr;
-				}
-			}
-			if (ret)
-			{
-				if (!objName.empty())
-				{
-					ret->setName(objName);
-				}
-			}
-		}
-		if (ret == nullptr)  // if we fail on all counts just make a new object
-		{
-			ret = (objName.empty()) ? (new Ntype()) : (new Ntype(objName));
-		}
-		return ret;
-	}
-	count_t remaining()
-	{
-		return (obptr) ? (obptr->remaining () + targetprepped) : 0;
-	}
-	coreObject *getHolder() const { return obptr.get(); }
+    static_assert (std::is_base_of<coreObject, Ntype>::value, "factory class must have coreObject as base");
+
+  private:
+    coreOwningPtr<gridObjectHolder<Ntype>> obptr;
+    count_t targetprepped = 0;
+    bool useBlock;
+
+  public:
+    objectPrepper (count_t count, coreObject *example) { prepObjects (count, example); }
+    void prepObjects (count_t count, coreObject *example)
+    {
+        auto root = example->getRoot ();
+        useBlock = true;
+        if ((obptr) && (root != nullptr))
+        {
+            if (obptr->getParent () != root)
+            {
+                root->add (obptr.get ());
+            }
+        }
+        if (remaining () < count)
+        {
+            if ((obptr) && (obptr->remaining () > 0))
+            {
+                targetprepped = count - obptr->remaining ();
+            }
+            else
+            {
+                obptr = make_owningPtr<gridObjectHolder<Ntype>> (targetprepped);
+                if (root != nullptr)
+                {
+                    if (!obptr)
+                    {
+                        root->log (root, print_level::warning, "unable to create container object");
+                        useBlock = false;
+                    }
+                    else
+                    {
+                        root->add (obptr.get ());
+                    }
+                }
+                else
+                {
+                    useBlock = false;
+                }
+            }
+        }
+    }
+    Ntype *getNewObject (const std::string &objName = "")
+    {
+        Ntype *ret = nullptr;
+        if (useBlock)
+        {
+            ret = obptr->getNext ();
+            if (ret == nullptr)
+            {  // means the block was used up
+                if (targetprepped > 0)  // if we are scheduled for more make a new objectHolder
+                {
+                    auto root = obptr->getRoot ();
+                    if (root != nullptr)
+                    {
+                        if (!isSameObject (obptr->getParent (), root))
+                        {
+                            root->add (obptr.get ());
+                        }
+                    }
+                    obptr = make_owningPtr<gridObjectHolder<Ntype>> (targetprepped);
+                    if (!obptr)
+                    {
+                        if (root != nullptr)
+                        {
+                            root->log (root, print_level::warning, "unable to create container object");
+                        }
+                        useBlock = false;
+                    }
+                    else
+                    {
+                        if (root != nullptr)
+                        {
+                            root->add (obptr.get ());
+                        }
+                        ret = obptr->getNext ();
+                        useBlock = true;
+                    }
+                    targetprepped = 0;
+                }
+                else
+                {
+                    useBlock = false;
+                    obptr = nullptr;
+                }
+            }
+            if (ret)
+            {
+                if (!objName.empty ())
+                {
+                    ret->setName (objName);
+                }
+            }
+        }
+        if (ret == nullptr)  // if we fail on all counts just make a new object
+        {
+            ret = (objName.empty ()) ? (new Ntype ()) : (new Ntype (objName));
+        }
+        return ret;
+    }
+    count_t remaining () { return (obptr) ? (obptr->remaining () + targetprepped) : 0; }
+    coreObject *getHolder () const { return obptr.get (); }
 };
 
 /** @brief template class for object construction */
@@ -208,7 +204,8 @@ class typeFactory : public objectFactory
     static_assert (std::is_base_of<coreObject, Ntype>::value, "factory class must have coreObject as base");
 
   private:
-	  std::unique_ptr<objectPrepper<Ntype>> preparedObjects;
+    std::unique_ptr<objectPrepper<Ntype>> preparedObjects;
+
   public:
     typeFactory (const std::string &component, const std::string &typeName) : objectFactory (component, typeName)
     {
@@ -249,38 +246,34 @@ class typeFactory : public objectFactory
 
     virtual Ntype *makeTypeObject (const std::string &objName = "")
     {
-		if (preparedObjects)
-		{
-			return preparedObjects->getNewObject(objName);
-		}
-		if (!objName.empty())
-		{
-			return new Ntype(objName);
-		}
-		return new Ntype();
-
+        if (preparedObjects)
+        {
+            return preparedObjects->getNewObject (objName);
+        }
+        if (!objName.empty ())
+        {
+            return new Ntype (objName);
+        }
+        return new Ntype ();
     }
 
     virtual void prepObjects (count_t count, coreObject *obj) override
     {
-		if (!preparedObjects)
-		{
-			preparedObjects = std::make_unique<objectPrepper<Ntype>>(count, obj);
-	   }
-		else
-		{
-			preparedObjects->prepObjects(count, obj);
-		}
+        if (!preparedObjects)
+        {
+            preparedObjects = std::make_unique<objectPrepper<Ntype>> (count, obj);
+        }
+        else
+        {
+            preparedObjects->prepObjects (count, obj);
+        }
     }
     virtual count_t remainingPrepped () const override
     {
-		return (preparedObjects) ? preparedObjects->remaining() : 0;
+        return (preparedObjects) ? preparedObjects->remaining () : 0;
     }
 
-    virtual coreObject *getHolder () const 
-	{
-		return (preparedObjects) ? preparedObjects->getHolder() : nullptr;
-	}
+    virtual coreObject *getHolder () const { return (preparedObjects) ? preparedObjects->getHolder () : nullptr; }
 };
 
 /** @brief template class for inherited object factories to cascade correctly*/
@@ -292,7 +285,7 @@ class childTypeFactory : public typeFactory<Btype>
                    "factory class types must have parent child relationship");
 
   private:
-	  std::unique_ptr<objectPrepper<Ntype>> preparedObjects;
+    std::unique_ptr<objectPrepper<Ntype>> preparedObjects;
 
   public:
     childTypeFactory (const std::string &component, const std::string &typeName)
@@ -326,37 +319,37 @@ class childTypeFactory : public typeFactory<Btype>
     // makeTypeObject on the parent works in the
     // correct polymorphic call
     {
-		if (preparedObjects)
-		{
-			return preparedObjects->getNewObject(objName);
-		}
-		if (!objName.empty())
-		{
-			return new Ntype(objName);
-		}
-		return new Ntype();
+        if (preparedObjects)
+        {
+            return preparedObjects->getNewObject (objName);
+        }
+        if (!objName.empty ())
+        {
+            return new Ntype (objName);
+        }
+        return new Ntype ();
     }
 
-	virtual void prepObjects(count_t count, coreObject *obj) override
-	{
-		if (!preparedObjects)
-		{
-			preparedObjects = std::make_unique<objectPrepper<Ntype>>(count, obj);
-		}
-		else
-		{
-			preparedObjects->prepObjects(count, obj);
-		}
-	}
-	virtual count_t remainingPrepped() const override
-	{
-		return (preparedObjects) ? preparedObjects->remaining() : 0;
-	}
+    virtual void prepObjects (count_t count, coreObject *obj) override
+    {
+        if (!preparedObjects)
+        {
+            preparedObjects = std::make_unique<objectPrepper<Ntype>> (count, obj);
+        }
+        else
+        {
+            preparedObjects->prepObjects (count, obj);
+        }
+    }
+    virtual count_t remainingPrepped () const override
+    {
+        return (preparedObjects) ? preparedObjects->remaining () : 0;
+    }
 
-	virtual coreObject *getHolder() const override
-	{
-		return (preparedObjects) ? preparedObjects->getHolder() : nullptr;
-	}
+    virtual coreObject *getHolder () const override
+    {
+        return (preparedObjects) ? preparedObjects->getHolder () : nullptr;
+    }
 };
 
 template <class Ntype, class argType>

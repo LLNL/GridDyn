@@ -27,7 +27,7 @@ add_executable(griddynServer ${griddynServer_sources} ${griddynServer_headers})
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/formatInterpreter)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynFileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/coupling)

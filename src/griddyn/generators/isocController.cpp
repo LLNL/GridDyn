@@ -14,7 +14,7 @@
 #include "Generator.h"
 
 #include "core/coreExceptions.h"
-#include "core/objectFactoryTemplates.hpp"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/vectorOps.hpp"
 
 #include <algorithm>
@@ -24,22 +24,12 @@ namespace griddyn
 isocController::isocController (const std::string &objName) : gridSubModel (objName) {}
 coreObject *isocController::clone (coreObject *obj) const
 {
-    isocController *nobj;
-    if (obj == nullptr)
+	auto nobj = cloneBase<isocController, gridSubModel>(this, obj);
+    if (nobj == nullptr)
     {
-        nobj = new isocController ();
+		return obj;
     }
-    else
-    {
-        nobj = dynamic_cast<isocController *> (obj);
-        if (nobj == nullptr)
-        {
-            // if we can't cast the pointer clone at the next lower m_output
-            coreObject::clone (obj);
-            return obj;
-        }
-    }
-    coreObject::clone (nobj);
+    
     nobj->db = db;
     nobj->upStep = upStep;
     nobj->downStep = downStep;
@@ -79,7 +69,7 @@ void isocController::dynObjectInitializeB (const IOdata &inputs, const IOdata &d
     }
 }
 
-void isocController::setLimits (double maxV, double minV)
+void isocController::setLimits (double minV, double maxV)
 {
     minLevel = std::min (maxV, minV);
     maxLevel = std::max (maxV, minV);

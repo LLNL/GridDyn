@@ -18,18 +18,21 @@
 #include "events/eventInterface.hpp"
 #include "core/objectOperatorInterface.hpp"
 #include <functional>
-
+/** @file 
+@brief define a state Grabber object to retrieve data from a state information
+*/
 namespace griddyn
 {
 
 using objJacFunction=std::function<void(gridComponent *comp, const stateData &sD, matrixData<double> &md, const solverMode &sMode)> ;
 using objStateGrabberFunction=std::function<double(gridComponent *comp, const stateData &sD, const solverMode &sMode)>;
 
+/** define if the grabber can compute the jacobian information*/
 enum class jacobian_mode
 {
-	none,
-	direct,
-	computed,
+	none,	//!< no jacobian computed
+	direct,	//!< the result is a state directly
+	computed,	//!< the jacobian needs to be computed
 };
 
 /**class for grabbing a subset of fields directly from the state vector for performing certain calculations
@@ -59,30 +62,52 @@ public:
 
   stateGrabber (const std::string &fld, coreObject *obj);
   stateGrabber(index_t noffset, coreObject *obj);
-  
+  /** clone the grabber*/
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const;
+  /** update the target field of a grabber
+  @param[in] fld the new target string of a grabber
+  */
   virtual void updateField (const std::string &fld);
+  /** retrieve the target data associated with a grabber
+  @param[in] sD the stateData to grab the data from
+  @param[in] sMode the solver mode associated with the stateData
+  */
   virtual double grabData (const stateData &sD, const solverMode &sMode);
+  /** compute the partial derivatives of a grabber
+  @param[in] sD the stateData for computing the information
+  @param[in] md the the matrix to store the computed jacobian information into
+  @param[in] sMode the solverMode associated with the stateData*/
   virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode);
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual coreObject * getObject() const override;
   virtual void getObjects(std::vector<coreObject *> &objects) const override;
-
+  /** get the jacobian abilities of a grabber*/
   jacobian_mode getJacobianMode() const
   {
 	  return jacMode;
   }
 protected:
+	/** load bus specific grabber info*/
   void busLoadInfo (const std::string &fld);
+  /** load link specific grabber info*/
   void linkLoadInfo (const std::string &fld);
+  /** load relay specific grabber info*/
   void relayLoadInfo (const std::string &fld);
+  /** load gridSecondary specific grabber info*/
   void secondaryLoadInfo (const std::string &fld);
+  /** load area specific grabber info*/
   void areaLoadInfo (const std::string &fld);
+  /** load generic object info*/
   void objectLoadInfo(const std::string &fld);
 };
 
 using fstateobjectPair=std::pair<std::function<double(gridComponent *, const stateData &sD, const solverMode &sMode)>, gridUnits::units_t>;
 
+/** construct a vector of state grabbers from a specific command string
+@param[in] command the string command to generate the grabbers
+@param[in] obj the root object to start any searches from
+@return a vector of unique_ptrs to stateGrabbers containing all the generated grabbers
+*/
 std::vector < std::unique_ptr < stateGrabber >> makeStateGrabbers (const std::string & command, coreObject * obj);
 
 /**
@@ -94,7 +119,13 @@ public:
 	customStateGrabber() = default;
 	explicit customStateGrabber(gridComponent *comp);
   virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const override;
+  /** set the custom grabber function
+  @param[in] nfptr the custom function for grabbing a state value
+  */
   void setGrabberFunction (objStateGrabberFunction nfptr);
+  /** set the custom jacobian function related to a state Grabber
+  @param[in] nJfptr the custom function for generating jacobian information for a stateGrabber
+  */
   void setGrabberJacFunction(objJacFunction nJfptr);
 };
 
@@ -134,6 +165,10 @@ public:
   virtual double grabData (const stateData &sD, const solverMode &sMode) override;
   virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode) override;
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+  /** overload for updating an object to a specific number of the underlying stateGrabbers
+  @param[in] obj the new targetObject
+  @param[in] num the index of the underlying state grabber to update
+  */
   void updateObject (coreObject *obj, int num);
   virtual coreObject * getObject () const override;
   virtual void updateField (const std::string &opName) override;

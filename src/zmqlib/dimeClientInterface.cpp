@@ -47,12 +47,12 @@ void dimeClientInterface::init()
 	socket = std::make_unique<zmq::socket_t>(context->getBaseContext(),zmq::socket_type::req);
 	socket->connect(address);
 		
-	Json::Value outgoing;
+	Json_gd::Value outgoing;
 	outgoing["command"] = "connect";
 	outgoing["name"] = name;
 	outgoing["listen_to_events"] = false;
 		
-	Json::FastWriter fw;
+	Json_gd::FastWriter fw;
 
 	std::string out = fw.write(outgoing);
 	socket->send(out.c_str(), out.size());
@@ -69,11 +69,11 @@ void dimeClientInterface::close()
 {
 	if (socket)
 	{
-		Json::Value outgoing;
+		Json_gd::Value outgoing;
 		outgoing["command"] = "exit";
 		outgoing["name"] = name;
 
-		Json::FastWriter fw;
+		Json_gd::FastWriter fw;
 
 		std::string out = fw.write(outgoing);
 		socket->send(out.c_str(), out.size());
@@ -89,14 +89,14 @@ void dimeClientInterface::sync()
 }
 	
 
-void encodeVariableMessage(Json::Value &data, double val)
+void encodeVariableMessage(Json_gd::Value &data, double val)
 {
-	Json::Value content;
+	Json_gd::Value content;
 	content["stdout"] = "";
 	content["figures"] = "";
 	content["datadir"] = "/tmp MatlabData/";
 	
-	Json::Value response;
+	Json_gd::Value response;
 	response["content"] = content;
 	response["result"] = val;
 	response["success"] = true;
@@ -111,13 +111,13 @@ void dimeClientInterface::send_var(const std::string &varName, double val, const
 	//outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
 	char buffer[10];
 
-	Json::Value outgoing;
+	Json_gd::Value outgoing;
 
 	outgoing["command"] = (recipient.empty())?"broadcast":"send";
 
 	outgoing["name"] = name;
 	outgoing["args"] = varName;
-	Json::FastWriter fw;
+	Json_gd::FastWriter fw;
 
 	std::string out = fw.write(outgoing);
 
@@ -125,7 +125,7 @@ void dimeClientInterface::send_var(const std::string &varName, double val, const
 
 	auto sz = socket->recv(buffer, 10, 0);
 	
-	Json::Value outgoingData;
+	Json_gd::Value outgoingData;
 	outgoingData["command"] = "response";
 	outgoingData["name"] = name;
 	if (!recipient.empty())

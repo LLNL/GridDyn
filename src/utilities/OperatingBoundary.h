@@ -27,23 +27,24 @@ private:
 	/** simple structor for containing points*/
 	using opPoint=struct
 	{
-		double ind;
-		double depMin;
-		double depMax;
+		double ind; //!< independent data point
+		double depMin;	//!< dependent variable max
+		double depMax;	//!< dependent variable min
 	};
 	double indMin = -1e47; //!< the independent variable lower limit
 	double indMax = 1e47;	//!< the independent variable upper limit
 
 	//these variables are all for keeping a cache
-	mutable double cRangeLow = 1e47;
-	mutable double cRangeHigh = -1e47;
 
-	mutable double depMin = -1e47;
-	mutable double depMax = 1e47;
-	mutable double slopeMin = 0.0;
-	mutable double slopeMax = 0.0;
+	mutable double cRangeLow = 1e47; //!< the current range lower limit
+	mutable double cRangeHigh = -1e47; //!< the current range upper limit
+		
+	mutable double depMin = -1e47;	//!< the lower limit of the dependent variable
+	mutable double depMax = 1e47;	//!< the upper limit of the dependent variable
+	mutable double slopeMin = 0.0;	//!< the rate of change of the lower bound
+	mutable double slopeMax = 0.0;	//!< the rate of change in the upper bound
 	std::vector<opPoint> operatingPoints; //!< storage for the operating points
-	mutable int lastIndex = 0;
+	mutable int lastIndex = 0;	//!< the last index 
 	
 public:
 	/** default constructor*/

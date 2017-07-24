@@ -12,8 +12,8 @@
 
 #include "Stabilizer.h"
 #include "Generator.h"
-#include "core/objectFactoryTemplates.hpp"
 #include "core/coreObjectTemplates.hpp"
+#include "core/objectFactoryTemplates.hpp"
 #include "gridBus.h"
 #include <cmath>
 
@@ -24,17 +24,17 @@ static const typeFactory<Stabilizer> gf ("pss", stringVec{"basic"});
 Stabilizer::Stabilizer (const std::string &objName) : gridSubModel (objName) {}
 coreObject *Stabilizer::clone (coreObject *obj) const
 {
-    auto pss=cloneBase<Stabilizer,gridSubModel>(this,obj);
+    auto pss = cloneBase<Stabilizer, gridSubModel> (this, obj);
     if (pss == nullptr)
     {
-		return obj;
+        return obj;
     }
-   
+
     return pss;
 }
 
 // destructor
-Stabilizer::~Stabilizer() = default;
+Stabilizer::~Stabilizer () = default;
 // initial conditions
 void Stabilizer::dynObjectInitializeB (const IOdata & /*inputs*/,
                                        const IOdata & /*desiredOutput*/,

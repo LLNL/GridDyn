@@ -98,7 +98,7 @@ void GenModelClassical::updateLocalCache (const IOdata &inputs, const stateData 
 {
     if (sD.updateRequired (seqId))
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
         double V = inputs[voltageInLocation];
         double angle = Loc.diffStateLoc[0] - inputs[angleInLocation];
         Vq = V * cos (angle);
@@ -113,10 +113,10 @@ void GenModelClassical::algebraicUpdate (const IOdata &inputs,
                                          const solverMode &sMode,
                                          double /*alpha*/)
 {
-    auto offset = offsets.getAlgOffset (sMode);
+	auto Loc = offsets.getLocations(sD,update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
-    solve2x2 (Rs, (Xd), -(Xd), Rs, -Vd, inputs[genModelEftInLocation] - Vq, update[offset], update[offset + 1]);
-    m_output = -(update[offset + 1] * Vq + update[offset] * Vd);
+    solve2x2 (Rs, (Xd), -(Xd), Rs, -Vd, inputs[genModelEftInLocation] - Vq, Loc.destLoc[0], Loc.destLoc[1]);
+    m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }
 
 // residual
@@ -126,7 +126,7 @@ void GenModelClassical::residual (const IOdata &inputs,
                                   double resid[],
                                   const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     updateLocalCache (inputs, sD, sMode);
 
@@ -183,7 +183,7 @@ void GenModelClassical::derivative (const IOdata &inputs,
                                     double deriv[],
                                     const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     double *dv = Loc.destDiffLoc;
     // Get the exciter field
     double Eft = inputs[genModelEftInLocation];
@@ -217,7 +217,7 @@ double GenModelClassical::getFreq (const stateData &sD, const solverMode &sMode,
 
     if (!sD.empty ())
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         omega = Loc.diffStateLoc[1];
 
@@ -253,7 +253,7 @@ double GenModelClassical::getAngle (const stateData &sD, const solverMode &sMode
 
     if (!sD.empty ())
     {
-        Lp Loc = offsets.getLocations (sD, sMode, this);
+        auto Loc = offsets.getLocations (sD, sMode, this);
 
         angle = Loc.diffStateLoc[0];
 
@@ -276,7 +276,7 @@ double GenModelClassical::getAngle (const stateData &sD, const solverMode &sMode
 IOdata
 GenModelClassical::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     IOdata out (2);
     out[PoutLocation] = -(Loc.algStateLoc[1] * Vq + Loc.algStateLoc[0] * Vd);
     out[QoutLocation] = -(Loc.algStateLoc[1] * Vd - Loc.algStateLoc[0] * Vq);
@@ -288,7 +288,7 @@ double GenModelClassical::getOutput (const IOdata &inputs,
                                      const solverMode &sMode,
                                      index_t numOut) const
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     double Vqtemp = Vq;
     double Vdtemp = Vd;
     if ((sD.empty ()) || (sD.seqID != seqId) || (sD.seqID == 0))
@@ -316,7 +316,7 @@ void GenModelClassical::ioPartialDerivatives (const IOdata &inputs,
                                               const IOlocs &inputLocs,
                                               const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     updateLocalCache (inputs, sD, sMode);
@@ -341,7 +341,7 @@ void GenModelClassical::jacobianElements (const IOdata &inputs,
                                           const IOlocs &inputLocs,
                                           const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     updateLocalCache (inputs, sD, sMode);
 
@@ -420,7 +420,7 @@ void GenModelClassical::outputPartialDerivatives (const IOdata &inputs,
                                                   matrixData<double> &md,
                                                   const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     auto refAlg = Loc.algOffset;
     auto refDiff = Loc.diffOffset;
 

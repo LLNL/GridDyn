@@ -107,13 +107,13 @@ void transferFunctionBlock::dynObjectInitializeB (const IOdata &inputs,
 }
 
 // residual
-void transferFunctionBlock::residElements (double input,
+void transferFunctionBlock::blockResidual (double input,
                                            double didt,
                                            const stateData &sD,
                                            double resid[],
                                            const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
     if (extraOutputState)
     {
     }
@@ -127,10 +127,10 @@ void transferFunctionBlock::residElements (double input,
 
     // Loc.destLoc[limiter_alg] = Loc.diffStateLoc[limiter_diff] + m_T2 / m_T1 *
     // (input + bias) - Loc.algStateLoc[limiter_alg];
-    Block::residElements (input, didt, sD, resid, sMode);
+    Block::blockResidual (input, didt, sD, resid, sMode);
 }
 
-void transferFunctionBlock::derivElements (double input,
+void transferFunctionBlock::blockDerivative (double input,
                                            double didt,
                                            const stateData &sD,
                                            double deriv[],
@@ -142,23 +142,23 @@ void transferFunctionBlock::derivElements (double input,
     // limiter_alg]) / m_T1;
     if (opFlags[use_ramp_limits])
     {
-        Block::derivElements (input, didt, sD, deriv, sMode);
+        Block::blockDerivative (input, didt, sD, deriv, sMode);
     }
 }
 
-void transferFunctionBlock::jacElements (double input,
+void transferFunctionBlock::blockJacobianElements (double input,
                                          double didt,
                                          const stateData &sD,
                                          matrixData<double> &md,
                                          index_t argLoc,
                                          const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
     md.assign (Loc.algOffset + 1, Loc.algOffset + 1, -1);
 
     // md.assignCheck(Loc.algOffset + 1, argLoc, m_T2 / m_T1);
 
-    Block::jacElements (input, didt, sD, md, argLoc, sMode);
+    Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
     if (isAlgebraicOnly (sMode))
     {
         return;

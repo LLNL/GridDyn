@@ -32,23 +32,23 @@ public:
   };
 
 protected:
-	double Pmot = -kBigNum;	//!< the mechanical power of the motor
-	double r = 0.01;	//!< the motor resistance
-	double x = 0.15;  //!< the motor impedance
-  double r1 = 0.05;  //!< primary resistance on the motor
-  double x1 = 0.15;  //!< primary inductance of the motor
-  double xm = 5.0;      //!< the inductive load of the motor
-  double H = 3.0;  //!< the inertial constant on the motor
-  double alpha = 1.0;  //!< alpha parameter for torque conversion
-  double beta = 0;  //!< beta parameter for torque conversion
-  double gamma = 0; //!< gamma parameter for torque conversion
-  double a = 1.0;  //!< a parameter for torque conversion
-  double b = 0;  //!< b parameter for torque conversion
-  double c = 0;  //!< c parameter for torque conversion
-  double mBase = -100;  //!< system machine base
-  double Vcontrol = 1.0;  //!< whether the motor has some voltage controls for tweaking power (basically a transformer attached motor
-  double init_slip = -1.0;  //!< the initial slip of the motor
-  double scale = 1.0;  //!< scaling factor for the motor
+	parameter_t Pmot = -kBigNum;	//!< the mechanical power of the motor
+	parameter_t r = 0.01;	//!< the motor resistance
+	parameter_t x = 0.15;  //!< the motor impedance
+	parameter_t r1 = 0.05;  //!< primary resistance on the motor
+	parameter_t x1 = 0.15;  //!< primary inductance of the motor
+	parameter_t xm = 5.0;      //!< the inductive load of the motor
+	parameter_t H = 3.0;  //!< the inertial constant on the motor
+	parameter_t alpha = 1.0;  //!< alpha parameter for torque conversion
+	parameter_t beta = 0;  //!< beta parameter for torque conversion
+	parameter_t gamma = 0; //!< gamma parameter for torque conversion
+	parameter_t a = 1.0;  //!< a parameter for torque conversion
+	parameter_t b = 0;  //!< b parameter for torque conversion
+	parameter_t c = 0;  //!< c parameter for torque conversion
+	parameter_t mBase = -100;  //!< system machine base
+	parameter_t Vcontrol = 1.0;  //!< whether the motor has some voltage controls for tweaking power (basically a transformer attached motor
+	parameter_t init_slip = -1.0;  //!< the initial slip of the motor
+	parameter_t scale = 1.0;  //!< scaling factor for the motor
 public:
   /** @brief constructor
   @param[in] objName  the name of the object
@@ -130,9 +130,9 @@ protected:
 class motorLoad3 : public motorLoad
 {
 protected:
-  double xp = 0.0;  //!< transient reactance of the motor
-  double T0p = 0.0; //!< transient time constant of the motor
-  double x0 = 0.0;  //!< x0 parameter
+  parameter_t xp = 0.0;  //!< transient reactance of the motor
+  parameter_t T0p = 0.0; //!< transient time constant of the motor
+  parameter_t x0 = 0.0;  //!< x0 parameter
   
   //double theta=0;
 public:
@@ -200,10 +200,10 @@ private:
     slipD = 0, erpD = 1, empD = 2, erppD = 3, emppD = 4
   };
 protected:
-  double r2 = 0.002;  //!< 3rd level loop resistance
-  double x2 = 0.04;  //!< 3 impedance loop reactance
-  double T0pp = 0.0;  //!< subtransient time constant
-  double xpp = 0.0;  //!< subtransient reactance
+  parameter_t r2 = 0.002;  //!< 3rd level loop resistance
+  parameter_t x2 = 0.04;  //!< 3 impedance loop reactance
+  parameter_t T0pp = 0.0;  //!< subtransient time constant
+  parameter_t xpp = 0.0;  //!< subtransient reactance
 public:
   /** @brief constructor
   @param[in] objName  the name of the object

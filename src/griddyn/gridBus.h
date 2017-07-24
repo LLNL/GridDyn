@@ -37,16 +37,21 @@ class busPowers
 {
   public:
     double linkP = 0.0;  //!< [puMW]    reactive power coming from Links
-    double linkQ = 0.0;  //!< [pu]    reactive power coming from Links
     double loadP = 0.0;  //!< [puMW] real power coming from the loads
+	double genP = 0.0;  //!< [puMW] real power from the generators
+
+	double linkQ = 0.0;  //!< [pu]    reactive power coming from Links
     double loadQ = 0.0;  //!< [puMW]  reactive  power coming from Loads
-    double genP = 0.0;  //!< [puMW] real power from the generators
     double genQ = 0.0;  //!< [puMW]  reactive power from the generators
     index_t seqID = 0;  //!< the sequence id of the latest state from which the powers are computed
     busPowers () {}
+	/**reset all the powers to 0*/
     void reset ();
+	/** check if the busPowers needs an update based on the stateData*/
     bool needsUpdate (const stateData &sD) const;
+	/** calculate the real power inbalance*/
     double sumP () const { return (linkP + loadP + genP); }
+	/** calculate the reactive power inbalance*/
     double sumQ () const { return (linkQ + loadQ + genQ); }
 };
 
@@ -67,19 +72,20 @@ class gridBus : public gridPrimary
     /* @brief enumeration to define potential busTypes for power flow*/
     enum class busType:char
     {
-        PQ = 0,
-        afix = 1,
-        PV = 2,
-        SLK = 3
+        PQ = 0,  //!< a bus that defines the real and reactive power calculates V and theta
+        afix = 1,	//!< a bus that defines the angle and reactive power calculates V and P
+        PV = 2,	//!< a bus that defines P and V computes Q and angle  
+        SLK = 3	//!< a bus that defines V and theta and computes P & Q
     };
     /* @brief enumeration to define potential busTypes for dynamic calculations*/
     enum class dynBusType:char
     {
-        normal = 0,
-        fixAngle = 1,
-        fixVoltage = 2,
-        dynSLK = 3
+        normal = 0,  //!< a bus that computes V and theta
+        fixAngle = 1,	//!< a bus that computes V and has a fixed theta 
+        fixVoltage = 2,	//!< a bus that has a known voltage and computes theta
+        dynSLK = 3	//!< a dynamic bus that knows both V and theta
     };
+	//network is left as a public parameter since it has no impact on the calculations but is useful for other object to define easily
     int32_t Network = 0;  //!<  the network a bus belongs to for labeling purposes
   protected:
 	  busType type = busType::PQ;  //!< [busType] bus type: PV, PQ, or slack/swing
@@ -93,11 +99,12 @@ class gridBus : public gridPrimary
 	IOlocs outLocs;  //!< the current output locations
     double angle = 0.0;  //!< [rad]     voltage angle
     double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
-    double baseVoltage = 120;  //!< [kV]    base voltage level
+	double freq = 1.0;  //!<[puHz] estimated actual frequency
+    parameter_t baseVoltage = 120;  //!< [kV]    base voltage level
     
-    double Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
-    double Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
-    double freq = 1.0;  //!<[puHz] estimated actual frequency
+    parameter_t Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
+    parameter_t Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
+    
     coreTime lowVtime = negTime;  //!< the last time a low voltage alert was triggered
    
   public:
@@ -129,7 +136,7 @@ class gridBus : public gridPrimary
     /** @brief  remove a Link object*/
     virtual void remove (Link *lnk);
     // deal with control alerts
-    virtual void alert (coreObject *, int code) override;
+    virtual void alert(coreObject *obj, int code) override;
 
     // dynInitializeB
   protected:
@@ -188,6 +195,12 @@ class gridBus : public gridPrimary
                                   double update[],
                                   const solverMode &sMode,
                                   double alpha) override;
+	/** do an update on the voltage similar to the algebraic update function but only looking at voltage
+	@param[in] sD the state data to update
+	@param[out] update the location to place the computed update
+	@param[in] sMode the solverMode associated with the state data
+	@param[in] alpha the scale associated with the update
+	*/
     virtual void voltageUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
     virtual void converge (coreTime time,
@@ -436,6 +449,8 @@ class gridBus : public gridPrimary
     /** @brief  remove an object from power control on a bus*/
     virtual void removePowerControl (gridComponent *comp);
 
+	virtual const std::vector<stringVec> &outputNames() const override;
+	gridUnits::units_t outputUnits(index_t outputNum) const override;
   protected:
     /** @brief
     @param[in] sD  the statDdata to compute the Error for

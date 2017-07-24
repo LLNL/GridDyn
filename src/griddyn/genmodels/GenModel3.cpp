@@ -72,7 +72,7 @@ void GenModel3::dynObjectInitializeB (const IOdata &inputs, const IOdata &desire
 
 void GenModel3::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
     double *dv = Loc.destDiffLoc;
@@ -99,7 +99,7 @@ void GenModel3::algebraicUpdate (const IOdata &inputs,
                                  const solverMode &sMode,
                                  double /*alpha*/)
 {
-    Lp Loc = offsets.getLocations (sD, update, sMode, this);
+    auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
     solve2x2 (Rs, (Xq), -(Xdp), Rs, -Vd + E, Loc.diffStateLoc[2] - Vq, Loc.destLoc[0], Loc.destLoc[1]);
     m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
@@ -107,7 +107,7 @@ void GenModel3::algebraicUpdate (const IOdata &inputs,
 
 void GenModel3::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
@@ -150,7 +150,7 @@ void GenModel3::jacobianElements (const IOdata &inputs,
                                   const IOlocs &inputLocs,
                                   const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     const double *gm = Loc.algStateLoc;

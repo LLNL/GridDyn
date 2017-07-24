@@ -110,17 +110,24 @@ void loadRelay::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     ge->setValue (0.0);
 
     add (std::move (ge));
-
+	add(std::shared_ptr<Condition>(make_condition("voltage", "<", cutoutVoltage, m_sourceObject)));
+	add(std::shared_ptr<Condition>(make_condition("frequency", "<", cutoutFrequency, m_sourceObject)));
     if (cutoutVoltage < 2.0)
-    {
-        add (std::shared_ptr<Condition> (make_condition ("voltage", "<", cutoutVoltage, m_sourceObject)));
+    {  
         setActionTrigger (0, 0, voltageDelay);
     }
+	else
+	{
+		setConditionStatus(0, condition_status_t::disabled);
+	}
     if (cutoutFrequency < 2.0)
-    {
-        add (std::shared_ptr<Condition> (make_condition ("frequency", "<", cutoutFrequency, m_sourceObject)));
-        setActionTrigger (1, 0, frequencyDelay);
+    {   
+        setActionTrigger (0, 1, frequencyDelay);
     }
+	else
+	{
+		setConditionStatus(1, condition_status_t::disabled);
+	}
 
     Relay::dynObjectInitializeA (time0, flags);
 }

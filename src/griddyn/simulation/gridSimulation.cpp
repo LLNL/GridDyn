@@ -11,17 +11,17 @@
  */
 
 #include "simulation/gridSimulation.h"
+#include "Area.h"
+#include "Generator.h"
+#include "Link.h"
+#include "Relay.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "events/Event.h"
 #include "events/eventQueue.h"
-#include "Generator.h"
-#include "Area.h"
 #include "gridBus.h"
-#include "Link.h"
 #include "loads/zipLoad.h"
 #include "measurement/collector.h"
-#include "Relay.h"
 #include "utilities/logger.h"
 #include "utilities/stringOps.h"
 
@@ -48,7 +48,7 @@ gridSimulation::~gridSimulation ()
 coreObject *gridSimulation::clone (coreObject *obj) const
 {
     auto sim = cloneBase<gridSimulation, Area> (this, obj);
-    if (sim==nullptr)
+    if (sim == nullptr)
     {
         return obj;
     }
@@ -110,11 +110,10 @@ int gridSimulation::run (coreTime /*finishTime*/) { return FUNCTION_EXECUTION_FA
 
 int gridSimulation::step () { return FUNCTION_EXECUTION_FAILURE; }
 
-
-void gridSimulation::timestep(coreTime time, const IOdata &inputs, const solverMode &sMode)
+void gridSimulation::timestep (coreTime time, const IOdata &inputs, const solverMode &sMode)
 {
-	Area::timestep(time, inputs, sMode);
-	EvQ->executeEvents(time);
+    Area::timestep (time, inputs, sMode);
+    EvQ->executeEvents (time);
 }
 
 void gridSimulation::saveRecorders ()
@@ -156,10 +155,10 @@ void gridSimulation::set (const std::string &param, const std::string &val)
         temp = convertToLowerCase (val);
         consolePrintLevel = stringToPrintLevel (temp);
     }
-	else if (param == "version")
-	{
-		version = val;
-	}
+    else if (param == "version")
+    {
+        version = val;
+    }
     else if (param == "printlevel")
     {
         temp = convertToLowerCase (val);
@@ -199,10 +198,10 @@ std::string gridSimulation::getString (const std::string &param) const
     {
         return sourceFile;
     }
-	if (param == "version")
-	{
-		return version;
-	}
+    if (param == "version")
+    {
+        return version;
+    }
     return Area::getString (param);
 }
 
@@ -270,10 +269,10 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     {
         recordStop = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
     }
-	else if (param == "version")
-	{
-		version = std::to_string(val);
-	}
+    else if (param == "version")
+    {
+        version = std::to_string (val);
+    }
     else if (param == "recordstart")
     {
         recordStart = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
@@ -316,11 +315,11 @@ void gridSimulation::log (coreObject *object, print_level level, const std::stri
         }
     }
 
-    if (object==nullptr)
+    if (object == nullptr)
     {
         object = this;
     }
-    std::string cname = '[' + (isSameObject(object,this) ?
+    std::string cname = '[' + (isSameObject (object, this) ?
                                  "sim" :
                                  (fullObjectName (object) + '(' + std::to_string (object->getUserID ()) + ')')) +
                         ']';
@@ -511,47 +510,48 @@ coreTime gridSimulation::getEventTime (int eventCode) const { return EvQ->getNex
 
 coreObject *findMatchingObject (coreObject *obj1, gridPrimary *src, gridPrimary *sec)
 {
-    if (obj1==nullptr)
+    if (obj1 == nullptr)
     {
         return nullptr;
     }
-	if (isSameObject(obj1,src))
+    if (isSameObject (obj1, src))
     {
         return sec;
     }
     coreObject *obj2 = nullptr;
-    if (dynamic_cast<gridSecondary *> (obj1)!=nullptr)  // we know it is a gen or load so it parent should be a bus
+    if (dynamic_cast<gridSecondary *> (obj1) !=
+        nullptr)  // we know it is a gen or load so it parent should be a bus
     {
         auto bus = dynamic_cast<gridBus *> (obj1->getParent ());
         auto bus2 = getMatchingBus (bus, src, sec);
-        if (bus2!=nullptr)
+        if (bus2 != nullptr)
         {
-            if (dynamic_cast<Generator *> (obj1)!=nullptr)
+            if (dynamic_cast<Generator *> (obj1) != nullptr)
             {
                 obj2 = bus2->getGen (obj1->locIndex);
             }
-            else if (dynamic_cast<zipLoad *> (obj1)!=nullptr)
+            else if (dynamic_cast<zipLoad *> (obj1) != nullptr)
             {
                 obj2 = bus2->getLoad (obj1->locIndex);
             }
         }
     }
-    else if (dynamic_cast<gridBus *> (obj1)!=nullptr)
+    else if (dynamic_cast<gridBus *> (obj1) != nullptr)
     {
         obj2 = getMatchingBus (dynamic_cast<gridBus *> (obj1), src, sec);
     }
-    else if (dynamic_cast<Area *> (obj1)!=nullptr)
+    else if (dynamic_cast<Area *> (obj1) != nullptr)
     {
         obj2 = getMatchingArea (dynamic_cast<Area *> (obj1), src, sec);
     }
-    else if (dynamic_cast<Link *> (obj1)!=nullptr)
+    else if (dynamic_cast<Link *> (obj1) != nullptr)
     {
         obj2 = getMatchingLink (dynamic_cast<Link *> (obj1), src, sec);
     }
     else  // now we get ugly we are gridSecondary Object
     {
         coreObject *pobj = findMatchingObject (obj1->getParent (), src, sec);
-        if (pobj!=nullptr)
+        if (pobj != nullptr)
         {  // this is an internal string sequence for this purpose, likely won't be documented
             obj2 = pobj->getSubObject ("submodelcode", obj1->locIndex);
         }

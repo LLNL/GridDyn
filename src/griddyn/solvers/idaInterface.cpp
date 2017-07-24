@@ -244,7 +244,7 @@ void idaInterface::logErrorWeights (print_level logLevel) const
           std::to_string (kk) + ':' + std::to_string (ewdata[kk]) + '\t' + std::to_string (eldata[kk]) + '\n';
     }
 
-    if (m_gds!=nullptr)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }
@@ -355,7 +355,7 @@ void idaInterface::initialize (coreTime t0)
     retval = IDASetId (solverMem, types);
     check_flag (&retval, "IDASetId", 1);
 
-    retval = IDASetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *>(this));
+    retval = IDASetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
     check_flag (&retval, "IDASetErrHandlerFn", 1);
 
     setConstraints ();
@@ -371,11 +371,10 @@ void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
         return;
     }
 
-        int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-        int retval =
-          IDAKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
-        check_flag (&retval, "IDAKLUReInit", 1);
-        jacCallCount = 0;
+    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
+    int retval = IDAKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
+    check_flag (&retval, "IDAKLUReInit", 1);
+    jacCallCount = 0;
 #endif
 }
 
@@ -418,7 +417,7 @@ int idaInterface::calcIC (coreTime t0, coreTime tstep0, ic_modes initCondMode, b
             if (retval == IDA_NO_RECOVERY)
             {
                 auto mvec = findMissing (a1);
-                if (!mvec.empty())
+                if (!mvec.empty ())
                 {
                     double *lstate = NV_DATA_S (state);
                     for (auto &me : mvec)
@@ -437,7 +436,7 @@ int idaInterface::calcIC (coreTime t0, coreTime tstep0, ic_modes initCondMode, b
                         return FUNCTION_EXECUTION_SUCCESS;
                     }
 
-                        return SOLVER_INVALID_STATE_ERROR;
+                    return SOLVER_INVALID_STATE_ERROR;
                 }
             }
             else

@@ -9,9 +9,10 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#pragma once
+
 #ifndef STRINGVIEWDEFS_H_
 #define STRINGVIEWDEFS_H_
+#pragma once
 
 #include "config.h"
 #include <vector>

@@ -72,7 +72,7 @@ void functionBlock::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
     }
 }
 
-void functionBlock::algElements (double input, const stateData &sD, double update[], const solverMode &sMode)
+void functionBlock::blockAlgebraicUpdate (double input, const stateData &sD, double update[], const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode) + limiter_alg;
     if (opFlags[uses_constantarg])
@@ -85,11 +85,11 @@ void functionBlock::algElements (double input, const stateData &sD, double updat
     }
     if (limiter_alg > 0)
     {
-        Block::algElements (input, sD, update, sMode);
+        Block::blockAlgebraicUpdate (input, sD, update, sMode);
     }
 }
 
-void functionBlock::jacElements (double input,
+void functionBlock::blockJacobianElements (double input,
                                  double didt,
                                  const stateData &sD,
                                  matrixData<double> &md,
@@ -114,7 +114,7 @@ void functionBlock::jacElements (double input,
     md.assign (offset, offset, -1);
     if (limiter_alg > 0)
     {
-        Block::jacElements (input, didt, sD, md, argLoc, sMode);
+        Block::blockJacobianElements (input, didt, sD, md, argLoc, sMode);
     }
 }
 
@@ -185,7 +185,7 @@ void functionBlock::setFunction (const std::string &functionName)
 double functionBlock::currentValue(const IOdata &inputs, const stateData &sD,
 const solverMode &sMode) const
 {
-  Lp Loc;
+  auto Loc;
   offsets.getLocations(sD, sMode, &Loc, this);
   double val = Loc.algStateLoc[1];
   if (!inputs.empty())

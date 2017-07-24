@@ -13,13 +13,14 @@
 
 #include "fskitCommunicator.h"
 #include "GridDynFskitRunner.h"
-#include "core/factoryTemplates.h"
+#include "core/factoryTemplates.hpp"
+#include "griddyn-tracer.h"
 
 #include <memory>
 //static std::vector<std::shared_ptr<objectFactory>> fskitFactories;
 
 
-static classFactory<FskitCommunicator> commFac(std::vector<std::string>{ "fskit" });
+static griddyn::childClassFactory<FskitCommunicator,griddyn::Communicator> commFac(std::vector<std::string>{ "fskit" });
 
 void loadFskit(const std::string & /*subset*/)
 {

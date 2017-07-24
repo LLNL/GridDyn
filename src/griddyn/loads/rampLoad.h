@@ -17,6 +17,7 @@
 #include "zipLoad.h"
 namespace griddyn
 {
+/** contains the different types of loads that can be used in griddyn*/
 namespace loads
 {
 /** @brief a load with ramping of the load types*/
@@ -42,6 +43,7 @@ public:
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
   virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
+  /** set the ramps to 0*/
   void clearRamp ();
 };
 }//namespace loads

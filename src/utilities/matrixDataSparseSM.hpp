@@ -130,14 +130,15 @@ class matrixDataSparseSMB : public matrixData<ValueT>
     static_assert (std::is_integral<X>::value, "class X must be of integral type");
     static_assert (std::is_unsigned<X>::value, "class X must be of an unsigned type");
     using pLoc = std::pair<X, ValueT>;
+	using cIterator = typename std::vector<pLoc>::const_iterator;
 
   private:
     keyCompute<X, M> key_computer;  //!< object that generators the keys and extracts row and column information
     std::array<std::vector<pLoc>, (1 << K)> dVec;  //!< the vector of pairs containing the data
     count_t sortCount = 0;  //!< count of the last sort operation
     blockCompute<K, M> block_computer;  //!< object that generates the appropriate block index;
-    decltype (dVec[0].cbegin ()) cptr;  //!< ptr to the beginning of the sequence;
-    decltype (dVec[0].cend ()) iend;  //!< ptr to the end of the current sequence;
+    cIterator cptr;  //!< ptr to the beginning of the sequence;
+	cIterator iend;  //!< ptr to the end of the current sequence;
     int ci = 0;  //!< indicator of which vector of the array we are sequencing on;
   public:
     /** @brief constructor
@@ -413,8 +414,8 @@ class matrixDataSparseSMB : public matrixData<ValueT>
 
       private:
         const matrixDataSparseSMB<K, X, ValueT, M> *mDS = nullptr;
-        decltype (mDS->dVec[0].cbegin ()) cptr;  //!< ptr to the beginning of the sequence;
-        decltype (mDS->dVec[0].cend ()) iend;  //!< ptr to the end of the current sequence;
+		cIterator cptr;  //!< ptr to the beginning of the sequence;
+		cIterator iend;  //!< ptr to the end of the current sequence;
         int ci = 0;  //!< indicator of which vector of the array we are sequencing on;
     };
 };
@@ -432,9 +433,10 @@ class matrixDataSparseSMB<0, X, ValueT, M> : public matrixData<ValueT>
 
   private:
     using pLoc = std::pair<X, ValueT>;
+	using cIterator = typename std::vector<pLoc>::const_iterator;
     count_t sortCount = 0;  //!< count of the last sort operation
     std::vector<pLoc> dVec;  //!< the vector of pairs containing the data
-    decltype (dVec.cbegin ()) cptr;  //!< ptr to the beginning of the sequence;
+	cIterator cptr;  //!< ptr to the beginning of the sequence;
     keyCompute<X, M> key_computer;  //!< object that generators the keys and extracts row and column information
 
   public:
@@ -574,7 +576,7 @@ class matrixDataSparseSMB<0, X, ValueT, M> : public matrixData<ValueT>
 
       private:
         const matrixDataSparseSMB<0, X, ValueT, M> *mDS = nullptr;
-        decltype (mDS->dVec.cbegin ()) cptr;  //!< ptr to the beginning of the sequence;
+		cIterator cptr;  //!< ptr to the beginning of the sequence;
     };
 };
 
@@ -591,14 +593,14 @@ class matrixDataSparseSMB<1, X, ValueT, M> : public matrixData<ValueT>
     static_assert (std::is_integral<X>::value, "class X must be of integral type");
     static_assert (std::is_unsigned<X>::value, "class X must be of an unsigned type");
     using pLoc = std::pair<X, ValueT>;
-
+	using cIterator = typename std::vector<pLoc>::const_iterator;
   private:
     int ci = 0;  //!< indicator of which vector of the array we are sequencing on;
     std::array<std::vector<pLoc>, 2> dVec;  //!< the vector of pairs containing the data
     count_t sortCount = 0;  //!< count of the last sort operation
 
-    decltype (dVec[0].cbegin ()) cptr;  //!< iterator to the beginning of the sequence;
-    decltype (dVec[0].cend ()) iend;  //!< iterator to the end of the current sequence;
+	cIterator cptr;  //!< iterator to the beginning of the sequence;
+	cIterator iend;  //!< iterator to the end of the current sequence;
 
     keyCompute<X, M> key_computer;  //!< object that generators the keys and extracts row and column information
     blockCompute<1, M> block_computer;  //!< object that generators the appropriate block to use
@@ -800,8 +802,8 @@ class matrixDataSparseSMB<1, X, ValueT, M> : public matrixData<ValueT>
 
       private:
         const matrixDataSparseSMB<1, X, ValueT, M> *mDS = nullptr;
-        decltype (mDS->dVec[0].cbegin ()) cptr;  //!< ptr to the beginning of the sequence;
-        decltype (mDS->dVec[0].cend ()) iend;  //!< ptr to the end of the current sequence;
+		cIterator cptr;  //!< ptr to the beginning of the sequence;
+		cIterator iend;  //!< ptr to the end of the current sequence;
         int ci = 0;  //!< indicator of which vector of the array we are sequencing on;
     };
 };

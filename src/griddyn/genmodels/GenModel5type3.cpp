@@ -67,7 +67,7 @@ void GenModel5type3::derivative (const IOdata &inputs,
                                  double deriv[],
                                  const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, deriv, sMode, this);
+    auto Loc = offsets.getLocations (sD, deriv, sMode, this);
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
     const double *gmp = Loc.dstateLoc;
@@ -93,7 +93,7 @@ void GenModel5type3::derivative (const IOdata &inputs,
 
 void GenModel5type3::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
-    Lp Loc = offsets.getLocations (sD, resid, sMode, this);
+    auto Loc = offsets.getLocations (sD, resid, sMode, this);
 
     const double *gm = Loc.algStateLoc;
     const double *gmd = Loc.diffStateLoc;
@@ -130,7 +130,7 @@ void GenModel5type3::jacobianElements (const IOdata &inputs,
 {
     // use the md.assign Macro defined in basicDefs
     // md.assign (arrayIndex, RowIndex, ColIndex, value) const
-    Lp Loc = offsets.getLocations (sD, sMode, this);
+    auto Loc = offsets.getLocations (sD, sMode, this);
 
     double V = inputs[voltageInLocation];
     const double *gm = Loc.algStateLoc;

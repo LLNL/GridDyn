@@ -40,7 +40,7 @@ add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDyn)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
@@ -92,5 +92,9 @@ set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE
 INSTALL(TARGETS helicsLib DESTINATION lib)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn/
+  DESTINATION include/griddyn
   FILES_MATCHING PATTERN "*.h")
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DESTINATION include/griddyn
+  FILES_MATCHING PATTERN "*.hpp")

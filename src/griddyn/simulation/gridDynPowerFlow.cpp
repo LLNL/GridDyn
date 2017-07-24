@@ -39,11 +39,11 @@ int gridDynSimulation::powerflow ()
     count_t power_iteration_count = 0;
     double prevPower = 0;
     int retval = makeReady (gridState_t::INITIALIZED, sm);
-	if (retval != FUNCTION_EXECUTION_SUCCESS)
-	{
-		LOG_ERROR("Unable to get simulation ready for power flow");
-		return retval;
-	}
+    if (retval != FUNCTION_EXECUTION_SUCCESS)
+    {
+        LOG_ERROR ("Unable to get simulation ready for power flow");
+        return retval;
+    }
     // load the vectors
     // operate in a loop then check then repeat
     bool hasPowerAdjustments = controlFlags[power_adjust_enabled];
@@ -79,7 +79,7 @@ int gridDynSimulation::powerflow ()
 
                 if (retval < 0)
                 {
-                    LOG_WARNING ("solver error return code:"+std::to_string(retval));
+                    LOG_WARNING ("solver error return code:" + std::to_string (retval));
 
                     if (controlFlags[no_powerflow_error_recovery])
                     {
@@ -168,7 +168,7 @@ int gridDynSimulation::powerflow ()
 
             if (controlFlags[power_adjust_enabled])
             {
-				hasPowerAdjustments = loadBalance (prevPower, slkBusBase);
+                hasPowerAdjustments = loadBalance (prevPower, slkBusBase);
                 if (hasPowerAdjustments)
                 {
                     if (!controlFlags[no_reset])
@@ -336,16 +336,16 @@ int gridDynSimulation::pFlowInitialize (coreTime time0)
         return retval;
     }
     updateOffsets (sm);
-	//Occasionally there is a need to execute some function in between the two phases of setup this 
-	//section of code calls those customized functions
-	for (auto &setupOperation : additionalPowerflowSetupFunctions)
-	{
-		if (setupOperation)
-		{
-			setupOperation();
-		}
-	}
-	additionalPowerflowSetupFunctions.clear();
+    // Occasionally there is a need to execute some function in between the two phases of setup this
+    // section of code calls those customized functions
+    for (auto &setupOperation : additionalPowerflowSetupFunctions)
+    {
+        if (setupOperation)
+        {
+            setupOperation ();
+        }
+    }
+    additionalPowerflowSetupFunctions.clear ();
     pFlowObjectInitializeB ();
 
     if (ssize > 0)
@@ -363,14 +363,13 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
     double cPower = 0.0;
     double availPower = 0.0;
     std::vector<double> avail;
-      std::vector<gridBus *> gbusses;
+    std::vector<gridBus *> gbusses;
     getBusVector (gbusses);
     avail.reserve (gbusses.size ());
     auto pv = prevSlkGen.begin ();
     for (auto &bus : slkBusses)
     {
-		
-        cPower -= (bus->getLinkReal()+bus->getLoadReal());
+        cPower -= (bus->getLinkReal () + bus->getLoadReal ());
         bus->set ("p", -(*pv));  // reset the slk generators to previous levels so the adjustments work properly
         ++pv;
     }
@@ -480,17 +479,17 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
             return pret;
         }
     }
-	else if (t_end == currentTime)
-	{
-		if (controlFlags[force_extra_powerflow])
-		{
-			int pret = powerflow();
-			if (pret != FUNCTION_EXECUTION_SUCCESS)
-			{
-				return pret;
-			}
-		}
-	}
+    else if (t_end == currentTime)
+    {
+        if (controlFlags[force_extra_powerflow])
+        {
+            int pret = powerflow ();
+            if (pret != FUNCTION_EXECUTION_SUCCESS)
+            {
+                return pret;
+            }
+        }
+    }
     // setup the periodic empty event in the queue
     EvQ->nullEventTime (currentTime + t_step, t_step);
     auto nextEvent = EvQ->getNextTime ();
@@ -540,11 +539,11 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
     {
         Area::timestep (t_end, noInputs, *defPowerFlowMode);
         currentTime = t_end;
-		int pret = powerflow();
-		if (pret != FUNCTION_EXECUTION_SUCCESS)
-		{
-			return pret;
-		}
+        int pret = powerflow ();
+        if (pret != FUNCTION_EXECUTION_SUCCESS)
+        {
+            return pret;
+        }
     }
     return FUNCTION_EXECUTION_SUCCESS;
 }
@@ -553,7 +552,7 @@ int gridDynSimulation::algUpdateFunction (coreTime time,
                                           const double state[],
                                           double update[],
                                           const solverMode &sMode,
-                                          double alpha)
+                                          double alpha) noexcept
 {
     ++evalCount;
     stateData sD (time, state);

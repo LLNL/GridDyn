@@ -29,26 +29,29 @@ namespace griddyn
 {
 namespace helicsLib
 {
-
+//defining a boost variant for the different data types possible
 using defV = boost::variant<std::string, double, int64_t, std::complex<double>>;
 
+/** simple structure containing the publication information*/
 class PubInfo
 {
 public:
 	helicsValueType type;
+	gridUnits::units_t unitType = gridUnits::defUnit;
 	helics::publication_id_t id=helics::invalid_id_value;
 	std::string name;
-	gridUnits::units_t unitType = gridUnits::defUnit;
+	
 };
 
+/** simple structure containing the subscription information*/
 class SubInfo
 {
 public:
 	helicsValueType type;
 	bool isValid = false;
+	gridUnits::units_t unitType = gridUnits::defUnit;
 	helics::subscription_id_t id = helics::invalid_id_value;
 	std::string name;
-	gridUnits::units_t unitType = gridUnits::defUnit;
 	defV defaults;
 };
 
@@ -101,6 +104,9 @@ public:
 			case helicsValueType::helicsVector:
 				vFed_->publish(pub.id, std::vector<double>{static_cast<double>(val)});
 				break;
+			default:
+				throw(invalidParameterValue());
+				break;
 			}
 			return;
 		}
@@ -128,12 +134,18 @@ public:
 				switch (sub.type)
 				{
 				case helicsValueType::helicsString:
-
 					return numeric_conversion<ValueType>(vFed_->getValue<std::string>(sub.id), ValueType(0));
 				case helicsValueType::helicsDouble:
 					return static_cast<ValueType>(vFed_->getValue<double>(sub.id));
 				case helicsValueType::helicsInteger:
 					return static_cast<ValueType>(vFed_->getValue<int64_t>(sub.id));
+				case helicsValueType::helicsComplex:
+					return static_cast<ValueType>(std::abs(vFed_->getValue<std::complex<double>>(sub.id)));
+				case helicsValueType::helicsVector:
+				{
+					auto V = vFed_->getValue<std::vector<double>>(sub.id);
+					return (!V.empty() ? static_cast<ValueType>(V.front()) : kNullVal);
+				}
 				default:
 					throw(invalidParameterValue());
 				}
