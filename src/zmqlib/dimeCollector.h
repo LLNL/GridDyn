@@ -13,6 +13,7 @@
 #ifndef DIME_COLLECTOR_HEADER_
 #define DIME_COLLECTOR_HEADER_
 
+#include "Link.h"
 #include "measurement/collector.h"
 
 class dimeClientInterface;
@@ -43,7 +44,9 @@ public:
 	void set(const std::string &param, const std::string &val) override;
 
 	virtual const std::string &getSinkName() const override;
-
+	
+	void sendlinks(std::vector<Link*> linkinfo);
+	
 };
 
 }//namespace dimeLib

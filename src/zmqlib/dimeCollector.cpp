@@ -18,6 +18,7 @@
 #include "json/json.h"
 #endif
 
+#include "Link.h"
 #include <iostream>
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
@@ -27,7 +28,7 @@
 using namespace std;
 
 
-
+static auto controlsig = std::make_unique<controlsignal>();
 
 static Json::Value Busd;
 static Json::Value PQd;
@@ -52,6 +53,9 @@ namespace griddyn
 {
 namespace dimeLib
 {
+static std::vector<Link*> dimlinkinfo;
+
+
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
 
@@ -105,6 +109,33 @@ int idxfindend(int a, int b)
 
 }
 
+void setcontrol()
+{
+	std::vector<std::string> controlname = controlsig->name;
+	std::vector<double> controlaction = controlsig->action;
+	std::vector<double> controlid = controlsig->id;
+	std::vector<double> controltime = controlsig->timec;
+	int k= controlname.size();
+	for (int si = 0; si < k; ++si)
+	{
+		try
+		{
+			dimlinkinfo[controlid[si]]->disconnect();
+		}
+		catch (std::out_of_range &exc)
+		{
+			std::cout << "wr" << std::endl;
+		}
+	
+	}
+}
+
+
+
+void dimeCollector::sendlinks(std::vector<Link*> linkinfo)
+{
+	dimlinkinfo = linkinfo;
+}
 
 //orgnize how to send to clients
 change_code dimeCollector::trigger(coreTime time)
@@ -479,21 +510,24 @@ change_code dimeCollector::trigger(coreTime time)
 				dime->send_reqvar(t, reqvar, reqvarheader, devname[ii]);
 				
 				//dime->send_var(t, Varvgs,dev_list[ii]);
-			 	auto sig = std::make_unique<controlsignal>();
-				dime->syncforcontrol(sig.get());
 
-
+				dime->syncforcontrol(controlsig.get());
+				if (controlsig->name.size() != 0)
+				{
+					setcontrol();
+				}
+			    
 
 		}
-
 	return out;
 }
+
+
 
 
 //compile the sysparam in order
 void dimeCollector::sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata, std::vector<std::string> Branchdata, std::vector<std::string> Transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata,std::vector <std::string> sysname,std::vector<int> Baseinfor)
 {
-
 	std::unique_ptr<dimeClientInterface> dime = std::make_unique<dimeClientInterface>("", "");
 	dime->init();
 	nbus = Busdata.size();
@@ -956,6 +990,11 @@ const std::string &dimeCollector::getSinkName() const
 
 
 
+
+
+
+
 }//namespace dimeLib
 }//namespace griddyn
+
 

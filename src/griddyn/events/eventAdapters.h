@@ -17,6 +17,7 @@
 #include "core/coreObject.h"
 #include "core/helperTemplates.hpp"
 
+
 #include "events/eventInterface.hpp"
 #include "core/objectOperatorInterface.hpp"
 #include "core/objectInterpreter.h"

@@ -47,7 +47,7 @@ public:
 
 private:
   std::vector<gridBus *> m_Buses;              //!< list of buses contained in a the area
-  std::vector<Link *> m_Links;          //!< links completely inside the area
+
   std::vector<Link *> m_externalLinks;    //!< links going to other areas
   std::vector<Area *> m_Areas;            //!< list of the areas contained within the parent area
   std::vector<Relay *> m_Relays;         //!< list of relay objects
@@ -72,6 +72,7 @@ interact with other simulations
   int masterBus = -1;                   //!< the master bus for frequency calculations purposes
   
 public:
+	std::vector<Link *> m_Links;          //!< links completely inside the area
   /** @brief the default constructor*/
   explicit Area (const std::string &objName = "area_$");
   /** @brief the default destructor*/

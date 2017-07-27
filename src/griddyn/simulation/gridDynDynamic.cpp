@@ -10,11 +10,11 @@
  * LLNS Copyright End
  */
 #include "events/Event.h"
-
+#include "Link.h"
 #include "griddyn.h"
 
 #include "dimeClientinterface.h"
-
+#include "dimeCollector.h"
 #include "dynamicInitialConditionRecovery.h"
 #include "events/eventQueue.h"
 #include "faultResetRecovery.h"
@@ -53,9 +53,6 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
     {
         return retval;
     }
-	auto kk= getSolverInterface(tempSm);
-	auto j= kk->m_gds;
-	auto k=j->;
     auto dynData = getSolverInterface (tempSm);
     const solverMode &sm = dynData->getSolverMode ();
     if (defaultDynamicSolverMethod == dynamic_solver_methods::partitioned)
@@ -346,7 +343,19 @@ int gridDynSimulation::dynamicDAE (coreTime tStop)
         // transmit the current state to the various objects for updates and recorders
         setState (currentTime, dynData->state_data (), dynData->deriv_data (), sMode);
         updateLocalCache ();
+	
+
+		gridDynSimulation* gdss;
+		gdss = s_instance.load(std::memory_order_relaxed);
+		std::vector<Link *> con = gdss->m_Links;
+		griddyn::dimeLib::dimeCollector dimee;
+		dimee.sendlinks(con);
+
+
         auto ret = EvQ->executeEvents (currentTime);
+		
+	   
+
         if (ret > change_code::non_state_change)
         {
             dynamicCheckAndReset (sMode);
