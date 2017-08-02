@@ -345,12 +345,12 @@ int gridDynSimulation::dynamicDAE (coreTime tStop)
         updateLocalCache ();
 	
 
-		gridDynSimulation* gdss;
+		gridDynSimulation* gdss;//let dimecollector do the control
 		gdss = s_instance.load(std::memory_order_relaxed);
-		std::vector<Link *> con = gdss->m_Links;
+		std::vector<Link *> con1 = gdss->rem_Links();
 		griddyn::dimeLib::dimeCollector dimee;
-		dimee.sendlinks(con);
-
+		std::vector<gridBus *> con2 = gdss->rem_Buses();
+		dimee.sendinfo(con1,con2);
 
         auto ret = EvQ->executeEvents (currentTime);
 		

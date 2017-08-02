@@ -33,6 +33,7 @@ public: std::vector<std::string> name;
 		std::vector<double> duration;
 		std::vector<double> action;
 		std::vector<double> timec;
+		std::vector<int> flgc;
 };
 class initFailure :public std::exception
 {
@@ -61,7 +62,7 @@ public:
 	void close();
 	/** sync with the server*/
 	std::string sync();
-	void syncforcontrol(controlsignal * sp);
+	int syncforcontrol(controlsignal * sp);
 	//void send_var(double t,Json::Value Varvgs, const std::string & recipient);
 	void send_varname(Json::Value Varheader, const std::string & recipient);
 	void send_sysname(Json::Value Sysname, const std::string & recipient);

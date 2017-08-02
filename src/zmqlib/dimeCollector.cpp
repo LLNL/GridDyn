@@ -18,6 +18,7 @@
 #include "json/json.h"
 #endif
 
+#include "gridBus.h"
 #include "Link.h"
 #include <iostream>
 #include "dimeCollector.h"
@@ -28,7 +29,7 @@
 using namespace std;
 
 
-static auto controlsig = std::make_unique<controlsignal>();
+
 
 static Json::Value Busd;
 static Json::Value PQd;
@@ -53,8 +54,10 @@ namespace griddyn
 {
 namespace dimeLib
 {
-static std::vector<Link*> dimlinkinfo;
 
+static std::vector<Link*> dimlinkinfo;
+static std::vector<gridBus*> dimbusinfo;
+static std::vector<controlsignal> queueforcon;
 
 dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
 {
@@ -109,32 +112,108 @@ int idxfindend(int a, int b)
 
 }
 
-void setcontrol()
+void setcontrol(double t)
 {
-	std::vector<std::string> controlname = controlsig->name;
-	std::vector<double> controlaction = controlsig->action;
-	std::vector<double> controlid = controlsig->id;
-	std::vector<double> controltime = controlsig->timec;
-	int k= controlname.size();
-	for (int si = 0; si < k; ++si)
+	int sicon = queueforcon.size();
+	for (int si = 0; si < sicon; ++si)
 	{
-		try
+
+		std::vector<std::string> controlname = queueforcon[si].name;
+		std::vector<double> controlaction = queueforcon[si].action;
+		std::vector<double> controlid = queueforcon[si].id;
+		std::vector<double> controltime = queueforcon[si].timec;
+		std::vector<double> controlduration = queueforcon[si].duration;
+		std::vector<int> flg = queueforcon[si].flgc;
+		int k = controlname.size();
+
+		for (int ss = 0; ss < k; ++ss)
 		{
-			dimlinkinfo[controlid[si]]->disconnect();
+			if ((queueforcon[si].flgc)[ss] == -1)
+			{
+				if (t == controltime[ss] + controlduration[ss]&& controlduration[ss]!=0)
+				{
+					if (controlaction[ss] == 0)
+					{
+						if (controlname[ss] == "Line")
+						{
+							dimlinkinfo[controlid[ss]]->reconnect();
+						}
+						if (controlname[ss] == "Bus")
+						{
+							dimbusinfo[controlid[ss]]->reconnect();
+						}
+					}
+					else
+					{
+						if (controlname[ss] == "Line")
+						{
+							dimlinkinfo[controlid[ss]]->disconnect();
+						}
+						if (controlname[ss] == "Bus")
+						{
+							dimbusinfo[controlid[ss]]->disconnect();
+						}
+					}
+					(queueforcon[si].flgc)[ss] = 0;
+				}
+			}
+			else if ((queueforcon[si].flgc)[ss] == 1)
+			{
+				if (controltime[ss] == t)
+				{
+					if (controlaction[ss] == 0)
+					{
+						if (controlname[ss] == "Line")
+						{
+							dimlinkinfo[controlid[ss]]->disconnect();
+						}
+						if (controlname[ss] == "Bus")
+						{
+							dimbusinfo[controlid[ss]]->disconnect();
+						}
+					}
+					else
+					{
+						if (controlname[ss] == "Line")
+						{
+							dimlinkinfo[controlid[ss]]->reconnect();
+						}
+						if (controlname[ss] == "Bus")
+						{
+							dimbusinfo[controlid[ss]]->reconnect();
+						}
+					}
+					(queueforcon[si].flgc)[ss] = -1;
+				}
+			}
+			else
+			{
+				continue;
+			}
 		}
-		catch (std::out_of_range &exc)
-		{
-			std::cout << "wr" << std::endl;
-		}
-	
+
 	}
+	std::vector<int> a(3, 0);
+	for (std::vector<controlsignal>::iterator sp = queueforcon.begin(); sp !=queueforcon.end();)
+	{
+		if ((*sp).flgc == a)
+		{
+			sp=queueforcon.erase(sp);
+		}
+		else
+		{
+			sp++;
+		}
+	}
+
 }
 
 
 
-void dimeCollector::sendlinks(std::vector<Link*> linkinfo)
+void dimeCollector::sendinfo(std::vector<Link*> linkinfo, std::vector<gridBus*> businfo)
 {
 	dimlinkinfo = linkinfo;
+	dimbusinfo = businfo;
 }
 
 //orgnize how to send to clients
@@ -511,13 +590,28 @@ change_code dimeCollector::trigger(coreTime time)
 				
 				//dime->send_var(t, Varvgs,dev_list[ii]);
 
-				dime->syncforcontrol(controlsig.get());
-				if (controlsig->name.size() != 0)
-				{
-					setcontrol();
-				}
-			    
+			
 
+		}
+	     //sync controlsig no matter from who 
+		//get controlsig until there is none
+		while (1)
+		{
+			auto controlsig = std::make_unique<controlsignal>();
+			int fg = dime->syncforcontrol(controlsig.get());
+			controlsignal ncon = *controlsig;
+			if (fg == 1)
+			{
+				queueforcon.push_back(ncon);
+			}
+			else
+			{
+				break;
+			}
+		}
+		if (!queueforcon.empty())
+		{
+			setcontrol(t);
 		}
 	return out;
 }

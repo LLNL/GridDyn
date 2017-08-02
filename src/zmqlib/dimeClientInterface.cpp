@@ -170,11 +170,11 @@ std::string dimeClientInterface::sync()
 
 
 
-void dimeClientInterface::syncforcontrol(controlsignal *sp)
+int dimeClientInterface::syncforcontrol(controlsignal *sp)
 {
 
 	
-	int flg=1;
+	    int flg=0;
 
 
 		char buffer[100000];
@@ -208,10 +208,13 @@ void dimeClientInterface::syncforcontrol(controlsignal *sp)
 			{
 				std::cout << "received control signal" << std::endl;
 				std::vector<std::string> signamev;
+				std::vector<int> flgv;
 				for (int ii = 0; ii != controlsigj["func_args"][2]["name"].size(); ++ii)
 				{
 					signamev.push_back(controlsigj["func_args"][2]["name"][ii].asString());
+					flgv.push_back(1);
 				}
+				sp->flgc = flgv;
 				sp->name = signamev;
 				//std::string signame = controlsigj["func_args"][2]["name"].asString();
 				std::string id = controlsigj["func_args"][2]["id"]["data"].asString();
@@ -222,9 +225,12 @@ void dimeClientInterface::syncforcontrol(controlsignal *sp)
 				sp->duration = decodeu8todouble(duration);
 				std::string time = controlsigj["func_args"][2]["time"]["data"].asString();
 				sp->timec = decodeu8todouble(time);
-
-
-			
+				flg = 1;
+				return flg;
+			}
+			else
+			{
+				return flg;
 			}
 
 		

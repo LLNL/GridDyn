@@ -35,6 +35,8 @@ public:
 
 	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
 
+	void sendinfo(std::vector<Link*> linkinfo, std::vector<gridBus*> businfo);
+
 	virtual change_code trigger(coreTime time) override;
 
 	void sendsysparam(std::vector<std::string> Busdata, std::vector<std::string> Loaddata, std::vector<std::string> Generatordata,std::vector<std::string> branchdata,std::vector<std::string> transformerdata, std::vector <std::vector<double>> Genroudata, std::vector<std::string> Fixshuntdata, std::vector <std::string> sysname, std::vector<int> Baseinfor);
@@ -45,7 +47,7 @@ public:
 
 	virtual const std::string &getSinkName() const override;
 	
-	void sendlinks(std::vector<Link*> linkinfo);
+
 	
 };
 
