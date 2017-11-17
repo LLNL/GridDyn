@@ -1,6 +1,8 @@
 ![image](docs/images/GridDyn_FullColor.png "GridDyn")
 ============
 
+[![Join the chat at https://gitter.im/LLNL/GridDyn](https://badges.gitter.im/LLNL/GridDyn.svg)](https://gitter.im/LLNL/GridDyn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 GridDyn is a power system simulator developed at Lawrence Livermore National Laboratory. 
 The name is a concatenation of Grid Dynamics, and as such usually pronounced as "Grid Dine". 
 It was created to meet a research need for exploring coupling between transmission, distribution, and communications system simulations.  
