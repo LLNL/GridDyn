@@ -12,7 +12,9 @@
 
 #ifndef BLOCKLIBRARY_H_
 #define BLOCKLIBRARY_H_
-
+/** @file
+@brief helper header file defining all the different block types
+*/
 #include "blockSequence.h"
 #include "controlBlock.h"
 #include "deadbandBlock.h"

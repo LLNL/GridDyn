@@ -13,7 +13,7 @@
 #include "elementReaderTemplates.hpp"
 #include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "formatInterpreters/tinyxmlReaderElement.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "readElement.h"
 #include "readElementFile.h"
 #include "readerHelper.h"
@@ -29,6 +29,10 @@ using namespace readerConfig;
 
 std::unique_ptr<gridDynSimulation> readSimXMLFile (const std::string &fileName, readerInfo *ri, xmlreader rtype)
 {
+	if (!boost::filesystem::exists(fileName))
+	{
+		return nullptr;
+	}
     if (rtype == xmlreader::default_reader)
     {
         rtype = readerConfig::default_xml_reader;

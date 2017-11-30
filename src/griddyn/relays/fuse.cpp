@@ -35,7 +35,6 @@ using namespace gridUnits;
 fuse::fuse (const std::string &objName) : Relay (objName),useI2T(extra_bool)
 {
     opFlags.set (continuous_flag);
-    opFlags.reset (no_dyn_states);
 }
 
 coreObject *fuse::clone (coreObject *obj) const
@@ -236,15 +235,23 @@ change_code fuse::setupFuseEvaluation ()
     return change_code::jacobian_change;
 }
 
-void fuse::loadSizes (const solverMode &sMode, bool dynOnly)
+stateSizes fuse::LocalStateSizes(const solverMode &sMode) const
 {
-    Relay::loadSizes (sMode, dynOnly);
-    auto &so = offsets.getOffsets (sMode);
-    if ((!isAlgebraicOnly (sMode)) && (mp_I2T > 0.0))
-    {
-        so.total.diffSize = 1;
-        so.total.jacSize = 12;
-    }
+	stateSizes SS;
+	if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
+	{
+		SS.diffSize = 1;
+	}
+	return SS;
+}
+
+count_t fuse::LocalJacobianCount(const solverMode &sMode) const
+{
+	if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
+	{
+		return 12;
+	}
+	return 0;
 }
 
 void fuse::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)

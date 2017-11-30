@@ -12,7 +12,7 @@
 
 #include "contingency.h"
 #include "events/Event.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 
 #include <map>

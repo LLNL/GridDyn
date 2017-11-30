@@ -12,7 +12,7 @@
 
 #include "core/coreExceptions.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "Link.h"
 #include "testHelper.h"

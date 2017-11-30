@@ -23,12 +23,16 @@ The component Definition class defines the interface for a Source
 class Source : public gridSubModel
 {
 public:
-  std::string m_purpose;        //!< string for use by applications to indicate usage
+  std::string purpose_;        //!< string for use by applications to indicate usage
 protected:
   double m_tempOut = 0;      //!< temporary output corresponding to desired time
   coreTime lastTime = timeZero;       //!<storage for the previously queried time
-  //gridUnits::units_t outputUnits = gridUnits::defUnit;
+  gridUnits::units_t outputUnits_ = gridUnits::defUnit;  //!< specify the units of the output
 public:
+	/** constructor
+	@param[in] objname the name of the object
+	@param[in] startVal the starting Value of the object
+	*/
   Source (const std::string &objName = "source_#", double startVal = 0.0);
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
 
@@ -43,8 +47,11 @@ public:
   virtual double getOutput (index_t outputNum = 0) const override;
   virtual index_t getOutputLoc (const solverMode &sMode,  index_t num = 0) const override;
   
+  virtual gridUnits::units_t outputUnits(index_t outputNum) const override;
+
   virtual count_t outputDependencyCount(index_t num, const solverMode &sMode) const override;
   virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;
+  /** update the output to correspond to a new time value*/
   virtual void updateOutput(coreTime time);
   virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
  

@@ -13,7 +13,7 @@
 #include "events/Event.h"
 #include "events/eventQueue.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "loads/gridLabDLoad.h"
 
 #include "contingency.h"
@@ -92,7 +92,14 @@ coreObject *gridDynSimulation::clone (coreObject *obj) const
     {
         if (solverInterfaces[kk])
         {
-            sim->solverInterfaces[kk] = solverInterfaces[kk]->clone (sim->solverInterfaces[kk], true);
+			if (sim->solverInterfaces[kk])
+			{
+				solverInterfaces[kk]->cloneTo(sim->solverInterfaces[kk].get(), true);
+			}
+			else
+			{
+				sim->solverInterfaces[kk] = solverInterfaces[kk]->clone(true);
+			}
             sim->solverInterfaces[kk]->setSimulationData (sim);
         }
     }
@@ -526,7 +533,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
                 if (outF.is_open ())
                 {
                     outF << "Violations for " << getName () << "at "
-                         << std::to_string (static_cast<double> (currentTime)) << '\n';
+                         << std::to_string (static_cast<double> (getSimulationTime())) << '\n';
                     for (auto &v : violations)
                     {
                         outF << v.to_string () << '\n';
@@ -723,7 +730,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
                     out = eventDrivenPowerflow (t_end, stepTime);
                 }
 
-                if (currentTime >= stopTime)
+                if (getSimulationTime() >= stopTime)
                 {
                     saveRecorders ();
                 }
@@ -1148,6 +1155,50 @@ double gridDynSimulation::get (const std::string &param, gridUnits::units_t unit
             val = stateSize (*defDAEMode);
         }
     }
+	else if (param == "vcount")
+	{
+		if (pState <= gridState_t::POWERFLOW_COMPLETE)
+		{
+			val = voltageStateCount(*defPowerFlowMode);
+		}
+		else
+		{
+			val = voltageStateCount(*defDAEMode);
+		}
+	}
+	else if (param == "acount")
+	{
+		if (pState <= gridState_t::POWERFLOW_COMPLETE)
+		{
+			val = angleStateCount(*defPowerFlowMode);
+		}
+		else
+		{
+			val = angleStateCount(*defDAEMode);
+		}
+	}
+	else if (param == "algcount")
+	{
+		if (pState <= gridState_t::POWERFLOW_COMPLETE)
+		{
+			val = algSize(*defPowerFlowMode);
+		}
+		else
+		{
+			val = algSize(*defDAEMode);
+		}
+	}
+	else if ((param == "diffcount")||(param=="diffsize"))
+	{
+		if (pState <= gridState_t::POWERFLOW_COMPLETE)
+		{
+			val = 0;
+		}
+		else
+		{
+			val = diffSize(*defDAEMode);
+		}
+	}
     else if (param == "nonzeros")
     {
         if (pState <= gridState_t::POWERFLOW_COMPLETE)

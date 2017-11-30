@@ -156,43 +156,44 @@ void dcLink::dynObjectInitializeA (coreTime /*time0*/, std::uint32_t /*flags*/)
     }
 }
 
-void dcLink::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
+stateSizes dcLink::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
-    if (isDynamic (sMode))
-    {
-        if (x != 0.0)
-        {
-            if (!isAlgebraicOnly (sMode))
-            {
-                so.total.diffSize = 1;
-                so.total.jacSize = 3;
-            }
-            else
-            {
-                so.total.diffSize = 0;
-                so.total.jacSize = 0;
-            }
-        }
-        else
-        {
-            so.total.diffSize = 0;
-            so.total.jacSize = 0;
-        }
-    }
-    else if (r <= 0.0)  // superconducting
-    {
-        so.total.algSize = 1;
-        so.total.jacSize = 2;
-    }
-    else
-    {
-        so.total.algSize = 0;
-        so.total.jacSize = 0;
-        so.total.diffSize = 0;
-    }
-    so.rjLoaded = true;
-    so.stateLoaded = true;
+	stateSizes localSS;
+	if (isDynamic(sMode))
+	{
+		if (x != 0.0)
+		{
+			if (!isAlgebraicOnly(sMode))
+			{
+				localSS.diffSize = 1;
+			}
+		}
+	}
+	else if (r <= 0.0)  // superconducting
+	{
+		localSS.algSize = 1;
+	}
+	return localSS;
+}
+
+count_t dcLink::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (isDynamic(sMode))
+	{
+		if (x != 0.0)
+		{
+			if (!isAlgebraicOnly(sMode))
+			{
+				jacSize = 3;
+			}
+		}
+	}
+	else if (r <= 0.0)  // superconducting
+	{
+		jacSize = 2;
+	}
+	return jacSize;
 }
 
 void dcLink::ioPartialDerivatives (id_type_t busId,

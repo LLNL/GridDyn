@@ -24,7 +24,7 @@ namespace fmi
 {
 
 class fmiMESubModel;
-
+/** class defining an exciter wrapper for an FMU*/
 class fmiExciter : public fmiMEWrapper<Exciter>
 {
 public:

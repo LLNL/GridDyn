@@ -1,4 +1,4 @@
-#pragma once/*
+/*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
@@ -12,13 +12,14 @@
 
 #ifndef _FMI_OBJECTS_H_
 #define _FMI_OBJECTS_H_
+#pragma once
 
 #include "fmiImport.h"
 
 #include <type_traits>
 #include <exception>
 
-
+/** base fmiException*/
 class fmiException : public std::exception
 {
 	virtual const char *what() const noexcept override
@@ -27,6 +28,7 @@ class fmiException : public std::exception
 	}
 };
 
+/** fmi exception for when fmiDiscard was returned*/
 class fmiDiscardException : public fmiException
 {
 	virtual const char *what() const noexcept override
@@ -34,7 +36,7 @@ class fmiDiscardException : public fmiException
 		return "return fmiDiscard";
 	}
 };
-
+/** fmi exception for when fmiWarning was returned*/
 class fmiWarningException : public fmiException
 {
 	virtual const char *what() const noexcept override
@@ -43,7 +45,7 @@ class fmiWarningException : public fmiException
 	}
 };
 
-
+/** fmi exception for when an error was returned*/
 class fmiErrorException : public fmiException
 {
 	virtual const char *what() const noexcept override
@@ -52,6 +54,7 @@ class fmiErrorException : public fmiException
 	}
 };
 
+/** fmi exception for when a fatal error was returned*/
 class fmiFatalException : public fmiException
 {
 	virtual const char *what() const noexcept override
@@ -64,7 +67,8 @@ class fmiFatalException : public fmiException
 class fmi2Object
 {
 public:
-	bool exceptionOnDiscard = true;
+	bool exceptionOnDiscard = true;  //!< flag indicating that an exception should be thrown when an input is discarded
+	bool exceptionOnWarning = false;  //!< flag indicating that an exception should be thrown on a fmiWarning
 public:
 	fmi2Object(fmi2Component cmp, std::shared_ptr<const fmiInfo> info, std::shared_ptr<const fmiCommonFunctions> comFunc);
 	virtual ~fmi2Object();
@@ -174,18 +178,19 @@ public:
 		}
 	}
 
+    void setFlag(const std::string &param, bool val);
 	void getFMUState(fmi2FMUstate* FMUState);
 	void setFMUState(fmi2FMUstate FMUState);
 
 	size_t serializedStateSize(fmi2FMUstate FMUState);
-	void serializeState(fmi2FMUstate FMUState, fmi2Byte[], size_t);
+	void serializeState(fmi2FMUstate FMUState, fmi2Byte serializedState[], size_t size);
 
 	void setInputs(const fmi2Real inputs[]);
 	void getCurrentInputs(fmi2Real inputs[]);
 	void getOutputs(fmi2Real outputs[]) const;
 	fmi2Real getOutput(size_t outNum) const;
-	void deSerializeState(const fmi2Byte[], size_t, fmi2FMUstate* FMUState);
-	void getDirectionalDerivative(const fmi2ValueReference[], size_t, const fmi2ValueReference[], size_t, const fmi2Real[], fmi2Real[]);
+	void deSerializeState(const fmi2Byte serializedState[], size_t size, fmi2FMUstate *FMUstate);
+	void getDirectionalDerivative(const fmi2ValueReference vUnknown_ref[], size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown, const fmi2Real dvKnown[], fmi2Real dvUnknown[]);
 	
 	fmi2Real getPartialDerivative(int index_x, int index_y, double dx);
 	void setOutputVariables(const std::vector<std::string> &outNames);
@@ -242,7 +247,7 @@ private:
 
 };
 
-
+/** template overload for getting strings*/
 template<>
 std::string fmi2Object::get<std::string>(const std::string &param) const;
 
@@ -251,34 +256,53 @@ class fmi2ModelExchangeObject : public fmi2Object
 {
 public:
 	fmi2ModelExchangeObject(fmi2Component cmp, std::shared_ptr<const fmiInfo> info, std::shared_ptr<const fmiCommonFunctions> comFunc, std::shared_ptr<const fmiModelExchangeFunctions> MEFunc);
-	void newDiscreteStates(fmi2EventInfo*);
-	void completedIntegratorStep(fmi2Boolean, fmi2Boolean*, fmi2Boolean*);
+	void newDiscreteStates(fmi2EventInfo* fmi2eventInfo);
+	/** call for a completed integrator step
+	@param[in] noSetFMUStatePriorToCurrentPoint flag indicating that the state will not be updated at a prior time point
+	@param[out] enterEventMode output flag indicating that an event was triggered and event Mode needs to be entered
+	@param[out] terminatesSimulation output flag indicating thaat the simulation was terminated
+	@throw an error if the underlying fmi returns an error code
+	*/
+	void completedIntegratorStep(fmi2Boolean noSetFMUStatePriorToCurrentPoint, fmi2Boolean *enterEventMode, fmi2Boolean *terminatesSimulation);
 	void setTime(fmi2Real time);
 	void setStates(const fmi2Real states[]);
 	void getDerivatives(fmi2Real deriv[]) const;
 	void getEventIndicators(fmi2Real eventIndicators[]) const;
+	/** get the current values for the states
+	@param[out] states the location to store the state data states must have sufficent space allocated for the states
+	*/
 	void getStates(fmi2Real states[]) const;
+	/** get the nominal expected values for the states
+	@param[out] nominalValues the location to store the state data states must have sufficent space allocated for the states
+	*/
 	void getNominalsOfContinuousStates(fmi2Real nominalValues[]) const;
-
+	/** set the operating state of the FMU
+	*/
 	virtual void setMode(fmuMode mode) override;
+	/** get the number of the states*/
 	size_t getNumberOfStates() const
 	{
 		return numStates;
 	}
+	/** get the number of indicators*/
 	size_t getNumberOfIndicators() const
 	{
 		return numIndicators;
 	}
-
+	/** get a pointer to the model exchange functions from the library
+	*/
 	std::shared_ptr<const fmiModelExchangeFunctions> getModelExchangeFunctions() const
 	{
 		return ModelExchangeFunctions;
 	}
+	/** get the names of the states
+	@return a vector strings containing the names of the states*/
 	std::vector<std::string> getStateNames() const;
 private:
-	size_t numStates=0;
-	size_t numIndicators;
-	std::shared_ptr<const fmiModelExchangeFunctions> ModelExchangeFunctions;
+	size_t numStates=0;  //!< the number of states in the FMU
+	size_t numIndicators=0;	//!< the number of event Indicators in the FMU
+	bool hasTime = true;  //!< flag indicating that there is a time variable in the system
+	std::shared_ptr<const fmiModelExchangeFunctions> ModelExchangeFunctions; //!< pointer the library model exchange functions
 };
 
 /** class containing the Information for working with a FMI coSimulation object*/
@@ -298,15 +322,18 @@ public:
 	*/
 	void getOutputDerivatives(int order, fmi2Real dOdt[]) const;
 	/** advance a time step 
-	@param[in]
-	@param[in] 
-	@param[in] 
+	@param[in] currentCommunicationPoint
+	@param[in] communicationStepSize
+	@param[in] noSetFMUStatePriorToCurrentPoint
 	*/
-	void doStep(fmi2Real, fmi2Real, fmi2Boolean);
+	void doStep(fmi2Real currentCommunicationPoint, fmi2Real communicationStepSize, fmi2Boolean noSetFMUStatePriorToCurrentPoint);
 	/** cancel a pending time step*/
 	void cancelStep();
+	/** get the last completed time step*/
 	fmi2Real getLastStepTime() const;
+	/** check if the current step is still pending*/
 	bool isPending();
+	/** get the status string*/
 	std::string getStatus() const;
 
 	std::shared_ptr<const fmiCoSimFunctions> getCoSimulationFunctions() const

@@ -26,19 +26,25 @@ from both the input and states and summing them with the actual difference betwe
 */
 class outputEstimator
 {
+private:
+	coreTime time=timeZero;  //!< the last time of known values
+	double prevValue=0.0;	//!< the previous known value
+	std::vector<double> prevInputs;	//!< the last known inputs
+	std::vector<double> prevStates;	//!< the last known states
+	
 public:
-	coreTime time=timeZero;
-	double prevValue=0.0;
-	std::vector<int> stateDep;
-	std::vector<int> inputDep;
-	std::vector<double> stateDiff;
-	std::vector<double> inputDiff;
-	std::vector<double> prevInputs;
-	std::vector<double> prevStates;
-	double timeDiff = 0.0;
-	outputEstimator() noexcept;
+	std::vector<int> stateDep;	//!< the indices of the state dependencies
+	std::vector<int> inputDep;	//!< the indices of the input dependencies
+	std::vector<double> stateDiff;	//!< the partial derivaties of the state dependencies
+	std::vector<double> inputDiff;	//!< the partial derivatives of the input dependencies
+	double timeDiff = 0.0;	//!< the partial derivative with respect to time (if there is a constant ramp
+public:
+	outputEstimator()=default;
+	/** construct with the known indices of the dependencies*/
 	outputEstimator(std::vector<int> sDep, std::vector<int> iDep);
+	/** make a guess as to the present output based on time inputs and states*/
 	double estimate(coreTime time, const IOdata &inputs, const double state[]);
+	/** update the estimator with new values inputs and states*/
 	bool update(coreTime time, double val, const IOdata &inputs, const double state[]);
 };
 

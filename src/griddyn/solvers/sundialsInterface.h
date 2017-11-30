@@ -29,11 +29,9 @@
 #define NVECTOR_DATA(omp, vec) NV_DATA_S (vec)
 #endif
 
-#include "sundials/sundials_dense.h"
-#include "sundials/sundials_types.h"
-#ifdef KLU_ENABLE
-#include "sundials/sundials_sparse.h"
-#endif
+#include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix      */
+#include <sundials/sundials_types.h>
+#include <sundials/sundials_linearsolver.h>
 
 #define ONE RCONST (1.0)
 #define ZERO RCONST (0.0)
@@ -57,14 +55,14 @@ void sundialsErrorHandlerFunc (int error_code,
  *@param[in] J the matrix to check
  *@return true if the matrix has been loaded already false otherwise
  */
-bool isSlsMatSetup (SlsMat J);
+bool isSUNMatrixSetup (SUNMatrix J);
 
-/** @brief convert an array data object to a SUNDIALS sparse matrix
+/** @brief convert an array data object to a SUNDIALS matrix
 @param[in] md the matrix data to convert
 @param[out] J the SUNDIALS matrix to store the data
 @param[in] svsize the number of states representing the matrix
 */
-void matrixDataToSlsMat (matrixData<double> &md, SlsMat J, count_t svsize);
+void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize);
 
 #endif
 /** brief abstract base class for SUNDIALS based solverInterface objects doesn't really do anything on its own
@@ -82,6 +80,8 @@ class sundialsInterface : public solverInterface
     N_Vector scale = nullptr;  //!< scaling vector
     N_Vector types = nullptr;  //!< type data
     void *solverMem = nullptr;  //!< the memory used by a specific solver internally
+	SUNMatrix J=nullptr; //!< sundials matrix to use
+	SUNLinearSolver LS=nullptr; //!< the link to the linear solver to use
   public:
     explicit sundialsInterface (const std::string &objName = "sundials");
     /** @brief constructor loading the solverInterface structure*
@@ -91,10 +91,11 @@ class sundialsInterface : public solverInterface
     sundialsInterface (gridDynSimulation *gds, const solverMode &sMode);
     /** @brief destructor
      */
-    ~sundialsInterface ();
+    virtual ~sundialsInterface ();
 
-    virtual std::shared_ptr<solverInterface>
-    clone (std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
     virtual double *state_data () noexcept override;
     virtual double *deriv_data () noexcept override;
     virtual const double *state_data () const noexcept override;
@@ -109,39 +110,23 @@ class sundialsInterface : public solverInterface
     @return a void pointer to the memory location of the solver specific memory
     */
     void *getSolverMem () const { return solverMem; }
-    friend int sundialsJacDense (long int Neq,
-                                 realtype time,
-                                 realtype cj,
-                                 N_Vector state,
-                                 N_Vector dstate_dt,
-                                 DlsMat J,
-                                 void *user_data,
-                                 N_Vector tmp1,
-                                 N_Vector tmp2);
-    friend int sundialsJacSparse (realtype time,
+
+    friend int sundialsJac (realtype time,
                                   realtype cj,
                                   N_Vector state,
                                   N_Vector dstate_dt,
-                                  SlsMat J,
+                                  SUNMatrix J,
                                   void *user_data,
                                   N_Vector tmp1,
                                   N_Vector tmp2);
 };
 
-int sundialsJacDense (long int Neq,
-                      realtype time,
-                      realtype cj,
-                      N_Vector state,
-                      N_Vector dstate_dt,
-                      DlsMat J,
-                      void *user_data,
-                      N_Vector tmp1,
-                      N_Vector tmp2);
-int sundialsJacSparse (realtype time,
+
+int sundialsJac (realtype time,
                        realtype cj,
                        N_Vector state,
                        N_Vector dstate_dt,
-                       SlsMat J,
+                       SUNMatrix J,
                        void *user_data,
                        N_Vector tmp1,
                        N_Vector tmp2);

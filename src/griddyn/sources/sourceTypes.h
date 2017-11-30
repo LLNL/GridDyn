@@ -13,7 +13,11 @@
 #ifndef SOURCE_TYPES_H_
 #define SOURCE_TYPES_H_
 
-#include "sineSource.h"
+/** @file
+convenience header file to load up all the other types of sources
+*/
+
+#include "sineSource.h"  //this will also load pulse source
 #include "fileSource.h"
 #include "functionSource.h"
 #include "randomSource.h"

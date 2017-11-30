@@ -11,13 +11,13 @@
  */
 
 // headers
-#include "griddyn-config.h"
-#include "griddyn.h"
+#include "griddyn/griddyn-config.h"
+#include "gridDynSimulation.h"
 
 #include "gridDynRunner.h"
 
 #include "libraryLoader.h"
-
+#include <boost/format.hpp>
 #ifdef HELICS_EXECUTABLE
 #include "helics/helicsRunner.h"
 #endif
@@ -194,17 +194,15 @@ int main (int argc, char *argv[])
     {
         auto ssize = gds->getInt ("dynstatesize");
         auto jsize = gds->getInt ("dynnonzeros");
-        gds->log (nullptr, print_level::summary,
-                  std::string ("simulation final Dynamic statesize= ") + std::to_string (ssize) + ", " +
-                    std::to_string (jsize) + " non zero elements in Jacobian\n");
+		auto res = boost::format("Simulation Final Dynamic Statesize =%d (%d V, %d angle, %d alg, %d differential), %d non zero elements in the the Jacobian\n") % ssize % gds->getInt("vcount")% gds->getInt("acount") % gds->getInt("algcount") % gds->getInt("diffcount") % jsize;
+		gds->log(nullptr, print_level::summary,res.str());
     }
     else  // if (pState <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
     {
         auto ssize = gds->getInt ("pflowstatesize");
         auto jsize = gds->getInt ("pflownonzeros");
-        gds->log (nullptr, print_level::summary,
-                  std::string ("simulation final Power flow statesize= ") + std::to_string (ssize) + ", " +
-                    std::to_string (jsize) + " non zero elements in Jacobian\n");
+		auto res = boost::format("Simulation Final Dynamic Statesize =%d (%d V, %d angle), %d non zero elements in the the Jacobian\n") % ssize % gds->getInt("vcount") % gds->getInt("acount") % jsize;
+        gds->log (nullptr, print_level::summary,res.str());
     }
 
     return 0;

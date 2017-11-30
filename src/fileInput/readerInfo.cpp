@@ -26,6 +26,15 @@ namespace griddyn
 {
 using namespace readerConfig;
 
+void basicReaderInfo::setFlag(int flagID)
+{
+	if (flagID < 32)
+	{
+		flags |= (1 << flagID);
+	}
+}
+
+
 readerInfo::readerInfo () { loadDefaultDefines (); }
 readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (std::move(bri)) {}
 readerInfo::~readerInfo ()

@@ -70,19 +70,21 @@ enum class contingency_mode_t
 };
 
 class contingency;
+/** convert a string to a contingency mode*/
 contingency_mode_t getContingencyMode(const std::string &mode);
 /** class defining some extra optional info used for building contingency lists */
 class extraContingencyInfo
 {
 public:
-	std::shared_ptr<contingency> baseCont;
-	double cutoff = 0.0;
-	double delta = 0.0;
-	int stage = 0;
-	extraContingencyInfo() {};
+	std::shared_ptr<contingency> baseCont; //!< pointer to the base contingency
+	double cutoff = 0.0;	//!< the threshold level to trigger
+	double delta = 0.0;	//!< the change in data
+	int stage = 0;	//!< which stage should the contingency execute in
+	extraContingencyInfo()=default;
 };
 
-const extraContingencyInfo emptyExtraInfo;
+/** an object pointing to empty information*/
+const extraContingencyInfo emptyExtraInfo{};
 /** class that encapsulated the information about a contingency
 */
 class contingency: public basicWorkBlock,objectOperatorInterface
@@ -102,11 +104,13 @@ public:
   std::vector<double> Lineflows;		//!< vector of transmission line flows
 protected:
   gridDynSimulation *gds = nullptr;  //!< master simulation object
-  std::promise<int> promise_val;
-  std::shared_future<int> future_ret;
+  std::promise<int> promise_val;	//!< paired with future for asyncrhonous operation
+  std::shared_future<int> future_ret;	//!< the future object to contain the data that will come upon execution
   std::vector<std::vector < std::shared_ptr < Event >>> eventList; //!< events that describe the contingency
 public:
+	/** default constructor*/
   contingency ();
+  /** construct from a sim and event*/
   contingency(gridDynSimulation *sim, std::shared_ptr<Event> ge = nullptr);
   /** run the contingency
    */
@@ -135,7 +139,9 @@ public:
    */
   std::string generateViolationsOutputLine() const;
 
+  /** reset the contingency to be able to execute again*/
   void reset();
+  /** wait for the contingency to finish executing*/
   void wait() const;
 
   coreObject *getObject() const override;

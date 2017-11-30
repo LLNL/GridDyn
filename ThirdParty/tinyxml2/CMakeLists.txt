@@ -15,24 +15,31 @@ set(tinyxml2files tinyxml2.cpp)
 set(tinyxml2_headers tinyxml2.h)
 
 
-SET(NO_CONFIG_GENERATION ON)
-include(configGenerator)
-
+include(CheckLatestCXXStandardOption)
 IF (VERSION_OPTION)
-	add_compile_options(${VERSION_OPTION})
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
 ELSE ()
 set(CMAKE_CXX_STANDARD 14)
 ENDIF ()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (NOT CMAKE_DEBUG_POSTFIX)
+set(CMAKE_DEBUG_POSTFIX d)
+endif()
 
 add_library(tinyxml2 STATIC ${tinyxml2files} ${tinyxml2_headers})
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	add_compile_options(-Wno-suggest-override)
-ENDIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+ENDIF ()
 
 
 
 INSTALL(TARGETS tinyxml2
-	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/)
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/  
+	EXPORT tinyxml2-targets)
+	
+install (EXPORT tinyxml2-targets DESTINATION cmake/)
 
 INSTALL(FILES ${tinyxml2_headers} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/tinyxml2)

@@ -40,7 +40,7 @@ enum class change_code; //forward declare change_code enumeration
 class Relay : public gridPrimary, objectOperatorInterface
 {
 public:
-  static std::atomic<count_t> relayCount;  //!< counter for the number of relays
+  static std::atomic<count_t> relayCount;  //!< static counter for the number of relays to generate an id number
   /** @brief enumeration of the relay condition states*/
   enum class condition_status_t
   {
@@ -326,7 +326,7 @@ public:
 	 index_t actionNum=kInvalidLocation;                      //!< the related ActionNumber
 	 IOlocs multiConditions;   //!< identification of all the conditions involved
     coreTime delayTime=timeZero;   //!< the delay time all conditions must be true before the action is taken TODO:PT account for this delay
-	mcondTrig() {};
+	mcondTrig()=default;
 	mcondTrig(index_t actNum, const IOlocs &conds, coreTime delTime = timeZero) :actionNum(actNum), multiConditions(conds), delayTime(delTime)
 	{};
  };

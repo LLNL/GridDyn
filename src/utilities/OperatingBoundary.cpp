@@ -49,11 +49,11 @@ void OperatingBoundary::addPoint (double indPt, double depLow, double depHigh)
     }
 }
 
-void OperatingBoundary::addPoints (const std::vector<double> &inPts,
+void OperatingBoundary::addPoints (const std::vector<double> &indPts,
                                    const std::vector<double> &lowPts,
                                    const std::vector<double> &highPts)
 {
-    if (inPts.size () != highPts.size ())
+    if (indPts.size () != highPts.size ())
     {
         throw (std::invalid_argument ("independent point list does not match upper bound point list"));
     }
@@ -61,9 +61,9 @@ void OperatingBoundary::addPoints (const std::vector<double> &inPts,
     {
         throw (std::invalid_argument ("upper and lower bound point list sizes do not match"));
     }
-    for (size_t ii = 0; ii < inPts.size (); ++ii)
+    for (size_t ii = 0; ii < indPts.size (); ++ii)
     {
-        addPoint (inPts[ii], highPts[ii], lowPts[ii]);
+        addPoint (indPts[ii], highPts[ii], lowPts[ii]);
     }
 }
 

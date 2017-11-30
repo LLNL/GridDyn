@@ -113,10 +113,10 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
         gdRI.offset = static_cast<int> (interpretString (elementText, ri));
         if (!(gdRI.field.empty ()))
         {
-            WARNPRINT (READER_WARN_ALL, "specifying offset in recorder overrides field specification");
+            WARNPRINT (READER_WARN_ALL, "specifying offset in collector overrides field specification");
         }
     }
-    // now load the other fields for the recorder
+    // now load the other fields for the collector
 
     setAttributes (col.get (), element, collectorNameString, ri, collectorIgnoreStrings);
     setParams (col.get (), element, collectorNameString, ri, collectorIgnoreStrings);
@@ -130,7 +130,7 @@ int loadCollectorElement (std::shared_ptr<readerElement> &element, coreObject *o
     {
         try
         {
-            col->add (&gdRI, targetObj);
+            col->add (gdRI, targetObj);
             if (col->getName ().empty ())
             {
                 col->setName (targetObj->getName () + "_" + type);

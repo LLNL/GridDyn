@@ -203,20 +203,19 @@ MU QMAX† 24 Kuhn-Tucker multiplier on upper Qg limit (u/MVAr)
 MU QMIN† 25 Kuhn-Tucker multiplier on lower Qg limit (u/MVAr)
 */
 
-int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo & /*bri*/)
+int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *> &busList, const basicReaderInfo & bri)
 {
     index_t kk = 1;
-
+	std::string gtype = (bri.checkFlag(assume_powerflow_only)) ? "simple" : "";
     auto genFactory = dynamic_cast<typeFactory<Generator> *> (
-      coreObjectFactory::instance ()->getFactory ("generator")->getFactory (""));
+      coreObjectFactory::instance ()->getFactory ("generator")->getFactory (gtype));
     genFactory->prepObjects (static_cast<count_t> (gens.size ()), parentObject);
 
     for (auto &genLine : gens)
     {
-        index_t ind1 = static_cast<index_t> (genLine[0]);
-        gridBus *bus = busList[ind1];
-        Generator *gen = genFactory->makeTypeObject ();
-        gen->setName ("gen" + std::to_string (kk));
+        auto ind1 = static_cast<index_t> (genLine[0]);
+        auto bus = busList[ind1];
+        Generator *gen = genFactory->makeTypeObject ("gen" + std::to_string(kk));
         gen->setUserID (kk);
         ++kk;
         bus->add (gen);
@@ -240,12 +239,19 @@ int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *>
             gen->disable ();
             if (genLine[5] != 1.0)
             {
-                bus->set ("vtarget", genLine[5]);
+				if (!bri.checkFlag(no_generator_bus_voltage_reset))
+				{
+					bus->set("vtarget", genLine[5]);
+				}
             }
         }
         else
         {
-            bus->set ("vtarget", genLine[5]);
+			if (!bri.checkFlag(no_generator_bus_voltage_reset))
+			{
+				bus->set("vtarget", genLine[5]);
+				//bus->set("voltage", genLine[5]);
+			}
         }
 
         if (genLine[8] != 0.0)

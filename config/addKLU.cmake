@@ -1,0 +1,55 @@
+
+OPTION(KLU_ENABLE "Enable KLU support" ON)
+
+if(NOT DEFINED SuiteSparse_DIR)
+  set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to SuiteSparse/KLU")
+endif()
+
+SHOW_VARIABLE(SuiteSparse_DIR PATH
+  "KLU library directory" "${SuiteSparse_DIR}")
+
+
+OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" ON)
+		
+
+if(KLU_ENABLE)
+  IF(MSVC)
+    set(SuiteSparse_USE_LAPACK_BLAS ON)
+  ENDIF(MSVC)
+  FILE(GLOB_RECURSE SUITESPARSE_CONFIG_FILE ${SuiteSparse_DIR}/*/suitesparse-config.cmake)
+  if (SUITESPARSE_CONFIG_FILE)
+	include(${SUITESPARSE_CONFIG_FILE})
+	add_dependencies(external_deps SuiteSparse::klu)
+	set(SuiteSparse_KLU_LIBRARY_RELEASE $<TARGET_FILE:SuiteSparse::klu>)
+	get_filename_component(SuiteSparse_LIBRARY_DIR $<TARGET_FILE:SuiteSparse::klu>} DIRECTORY)
+  else()
+	find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
+	if(SuiteSparse_FOUND) 
+        list(APPEND external_library_list ${SuiteSparse_LIBRARIES})
+		get_filename_component(SuiteSparse_LIBRARY_DIR ${SuiteSparse_KLU_LIBRARY_RELEASE} DIRECTORY)
+        #list(APPEND external_link_directories ${SuiteSparse_LIBRARY_DIR})
+        IF (AUTOBUILD_KLU)
+			OPTION(FORCE_KLU_REBUILD "force rebuild of KLU" OFF)
+			IF(FORCE_KLU_REBUILD)
+				include(buildSuiteSparse)
+				build_suitesparse()
+				set(FORCE_KLU_REBUILD OFF CACHE BOOL "force rebuild of KLU" FORCE)
+			ENDIF(FORCE_KLU_REBUILD)
+		ENDIF(AUTOBUILD_KLU)
+	else(SuiteSparse_FOUND)
+		
+		IF (AUTOBUILD_KLU)
+			include(buildSuiteSparse)
+			build_suitesparse()
+			set(SuiteSparse_DIR ${PROJECT_BINARY_DIR}/libs)
+			FILE(GLOB_RECURSE SUITESPARSE_CONFIG_FILEb ${SuiteSparse_DIR}/*/suitesparse-config.cmake)
+			if (SUITESPARSE_CONFIG_FILE)
+				include(${SUITESPARSE_CONFIG_FILEb})
+				add_dependencies(external_deps SuiteSparse::klu)
+				get_filename_component(SuiteSparse_LIBRARY_DIR $<TARGET_FILE:SuiteSparse::klu>} DIRECTORY)
+			endif()
+		ENDIF(AUTOBUILD_KLU)
+	endif(SuiteSparse_FOUND)
+  endif()
+
+endif(KLU_ENABLE)

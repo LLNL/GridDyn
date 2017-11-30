@@ -28,7 +28,7 @@ private:
 	std::unique_ptr<grabberSet> gset; //!< the grabberSet to get the data
 	std::string field;  //!< the field to grab
 	std::string target; //!< the name of the target
-
+	parameter_t multiplier; //!< a multiplier on the grabber value
 public:
 	grabberSource(const std::string &objName = "grabbersource_#");
 	~grabberSource();
@@ -38,11 +38,13 @@ protected:
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
-
+	/** update the target field of the grabber*/
 	void updateField(const std::string &newfield);
 
+	/** update the target object of the grabber*/
 	void updateTarget(const std::string &newTarget);
 
+	/** update the target object of the grabber directly*/
 	void updateTarget(coreObject *obj);
 
 	virtual void setFlag(const std::string &flag, bool val) override;

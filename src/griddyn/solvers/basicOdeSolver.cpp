@@ -11,8 +11,8 @@
 */
 
 #include "basicOdeSolver.h"
-#include "core/helperTemplates.hpp"
-#include "griddyn.h"
+
+#include "gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
@@ -28,16 +28,24 @@ basicOdeSolver::basicOdeSolver (const std::string &objName) : solverInterface (o
     mode.algebraic = false;
 }
 basicOdeSolver::basicOdeSolver (gridDynSimulation *gds, const solverMode &sMode) : solverInterface (gds, sMode) {}
-std::shared_ptr<solverInterface> basicOdeSolver::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> basicOdeSolver::clone (bool fullCopy) const
 {
-    auto rp = cloneBase<basicOdeSolver, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
-    rp->deltaT = deltaT;
-    return rp;
+	std::unique_ptr<solverInterface> si = std::make_unique<basicOdeSolver>();
+	basicOdeSolver::cloneTo(si.get(),fullCopy);
+	return si;
 }
+
+void basicOdeSolver::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	solverInterface::cloneTo(si, fullCopy);
+	auto bos = dynamic_cast<basicOdeSolver *>(si);
+	if (bos == nullptr)
+	{
+		return;
+	}
+	bos->deltaT = deltaT;
+}
+
 double *basicOdeSolver::state_data () noexcept { return state.data (); }
 double *basicOdeSolver::deriv_data () noexcept { return deriv.data (); }
 double *basicOdeSolver::type_data () noexcept { return type.data (); }

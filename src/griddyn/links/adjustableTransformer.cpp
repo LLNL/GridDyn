@@ -23,7 +23,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-#include "config.h"
+#include "griddyn/griddyn-config.h"
 
 /*
 enum control_mode_t{ manual_control=0, voltage_control=1, MW_control=2, MVar_control=3};
@@ -680,13 +680,11 @@ void adjustableTransformer::pFlowObjectInitializeA (coreTime time0, std::uint32_
     return acLine::pFlowObjectInitializeA (time0, flags);
 }
 
-void adjustableTransformer::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
+stateSizes adjustableTransformer::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
+	stateSizes lcStates;
     if (isDynamic (sMode))
     {
-        so.total.algSize = 0;
-        so.total.jacSize = 0;
         if (opFlags[continuous_flag])
         {
             switch (cMode)
@@ -694,40 +692,64 @@ void adjustableTransformer::loadSizes (const solverMode &sMode, bool /*dynOnly*/
             case control_mode_t::manual_control:
                 break;
             case control_mode_t::voltage_control:
-                so.total.algSize = 1;
-                so.total.jacSize = 2;
-                break;
             case control_mode_t::MVar_control:
             case control_mode_t::MW_control:
-                so.total.jacSize = 5;
-                so.total.algSize = 1;
+				lcStates.algSize = 1;
                 break;
             }
         }
     }
     else
     {
-        so.total.algSize = 0;
-        so.total.jacSize = 0;
         if ((opFlags[continuous_flag]) && (!opFlags[no_pFlow_adjustments]))
         {
-            so.total.algSize = 1;
-            switch (cMode)
-            {
-            case control_mode_t::manual_control:
-                break;
-            case control_mode_t::voltage_control:
-                so.total.jacSize = 2;
-                break;
-            case control_mode_t::MVar_control:
-            case control_mode_t::MW_control:
-                so.total.jacSize = 5;
-                break;
-            }
+			lcStates.algSize = 1;
         }
     }
-    so.stateLoaded = true;
-    so.rjLoaded = true;
+	return lcStates;
+}
+
+
+count_t adjustableTransformer::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (isDynamic(sMode))
+	{
+		if (opFlags[continuous_flag])
+		{
+			switch (cMode)
+			{
+			case control_mode_t::manual_control:
+				break;
+			case control_mode_t::voltage_control:
+				jacSize = 2;
+				break;
+			case control_mode_t::MVar_control:
+			case control_mode_t::MW_control:
+				jacSize = 5;
+				break;
+			}
+		}
+	}
+	else
+	{
+		if ((opFlags[continuous_flag]) && (!opFlags[no_pFlow_adjustments]))
+		{
+			switch (cMode)
+			{
+			case control_mode_t::manual_control:
+				break;
+			case control_mode_t::voltage_control:
+				jacSize = 2;
+				break;
+			case control_mode_t::MVar_control:
+			case control_mode_t::MW_control:
+				jacSize = 5;
+				break;
+			}
+		}
+	}
+	return jacSize;
 }
 
 void adjustableTransformer::getStateName (stringVec &stNames,

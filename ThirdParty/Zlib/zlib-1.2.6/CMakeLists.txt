@@ -7,6 +7,8 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     option(BUILD_SHARED_LIBS "Build a shared library form of zlib" ON)
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 include(CheckTypeSize)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
@@ -170,7 +172,10 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS zlib
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib )
+        LIBRARY DESTINATION lib)
+		
+install(TARGETS zlib DESTINATION lib EXPORT zlib-targets)		
+install (EXPORT zlib-targets DESTINATION cmake/)
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include)

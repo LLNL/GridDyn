@@ -13,7 +13,7 @@
 #include "fmiRunner.h"
 #include "fmi/FMI2/fmi2Functions.h"
 #include "fmiCoordinator.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput/fileInput.h"
 #include "boost/filesystem.hpp"
 #include "loadFMIExportObjects.h"
@@ -74,12 +74,12 @@ int fmiRunner::Reset()
 
 void fmiRunner::UpdateOutputs()
 {
-	coord->updateOutputs(m_gds->getCurrentTime());
+	coord->updateOutputs(m_gds->getSimulationTime());
 }
 
-void fmiRunner::Run()
+coreTime fmiRunner::Run()
 {
-	GriddynRunner::Run();
+	return GriddynRunner::Run();
 }
 
 
@@ -87,7 +87,7 @@ void fmiRunner::StepAsync(coreTime time)
 {
 	if (stepFinished)
 	{
-		async_ret=std::async(std::launch::async, [this, time] {fmiRunner::Step(time); stepFinished(fmiComp, fmi2OK); });
+		async_retFMI=std::async(std::launch::async, [this, time] {fmiRunner::Step(time); stepFinished(fmiComp, fmi2OK); });
 	}
 	else
 	{
@@ -103,7 +103,7 @@ void fmiRunner::StepAsync(coreTime time)
 
 bool fmiRunner::isFinished() const
 {
-	return (async_ret.valid())?(async_ret.wait_for(std::chrono::seconds(0))== std::future_status::ready):true;
+	return (async_retFMI.valid())?(async_retFMI.wait_for(std::chrono::seconds(0))== std::future_status::ready):true;
 
 }
 coreTime fmiRunner::Step(coreTime time)

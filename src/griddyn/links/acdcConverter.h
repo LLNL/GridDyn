@@ -96,8 +96,6 @@ class acdcConverter : public Link
     virtual void
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
-    virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
-
     virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 
     virtual double quickupdateP () override { return 0; }

@@ -15,22 +15,31 @@
 #include "gridComponent.h"
 #include "solvers/solverMode.hpp"
 typedef void * gridDynObject;
+/** make a gridDynObject wrapper out of an acual component pointer*/
 gridDynObject creategridDynObject(griddyn::gridComponent *comp);
+/** get the component pointer from a gridDynObject*/
 griddyn::gridComponent *getComponentPointer(gridDynObject obj);
+/** get the const component pointer from a const gridDynObject*/
+const griddyn::gridComponent *getConstComponentPointer(const gridDynObject obj);
 
+/** data class for storing some solver information and data buffers*/
 class solverKeyInfo
 {
 public:
 	griddyn::solverMode sMode_; //!< solverMode
-	std::vector<double> stateBuffer;
-	std::vector<double> dstateBuffer;
-	std::vector<std::string> stateNames;
-	solverKeyInfo() {};
-	solverKeyInfo(griddyn::solverMode sMode) :sMode_(sMode) {};
+	std::vector<double> stateBuffer; //!< buffer for storing state data
+	std::vector<double> dstateBuffer;	//!< buffer for storing dstate_dt data
+	std::vector<std::string> stateNames;	//!< buffer for storing the stateNames
+	/** default constructor*/
+	solverKeyInfo() = default;
+	/** constructor from a solverMode reference*/
+	solverKeyInfo(const griddyn::solverMode &sMode) :sMode_(sMode) {};
 };
 
+/** allocate buffers for using a solverKeyInfo object with a gridComponent*/
 void setUpSolverKeyInfo(solverKeyInfo *key, griddyn::gridComponent *comp);
-
+/** translate a system state vector to a local state vector*/
 void TranslateToLocal(const std::vector<double> &orig, double *newData, const griddyn::gridComponent *comp, const griddyn::solverMode &sMode);
+/** translate a local state vector into the appropriate elements of a system state vector*/
 void CopyFromLocal(std::vector<double> &dest, const double *localData, const griddyn::gridComponent *comp, const griddyn::solverMode &sMode);
 #endif

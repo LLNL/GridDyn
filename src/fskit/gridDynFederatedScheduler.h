@@ -22,6 +22,11 @@ namespace fskit {
 class GrantedTimeWindowScheduler;
 }
 
+namespace griddyn
+{
+class fskitRunner;
+} // namespace griddyn
+
 /**
  * Singleton for accessing federated scheduler.
  *
@@ -52,9 +57,9 @@ public:
   GriddynFederatedScheduler& operator= (const GriddynFederatedScheduler&) = delete;
 
   /*
-   * GriddynRunnder initializes the federated scheduler.
+   * GriddynRunner initializes the federated scheduler.
    */
-  friend class GriddynFskitRunner;
+  friend class griddyn::fskitRunner;
 
 private:
   /**

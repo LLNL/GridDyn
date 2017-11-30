@@ -12,7 +12,7 @@
 
 #include "core/coreObjectTemplates.hpp"
 #include "gridBus.h"
-#include "loads/motorLoad.h"
+#include "loads/motorLoad3.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 #include <iostream>
@@ -62,7 +62,7 @@ void motorLoad3::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
     Load::pFlowObjectInitializeA (time0, flags);
     converge ();
 
-    loadSizes (cLocalSolverMode, false);
+    loadStateSizes (cLocalSolverMode);
     setOffset (0, cLocalSolverMode);
 }
 
@@ -133,51 +133,54 @@ void motorLoad3::dynObjectInitializeB (const IOdata &inputs,
     }
 }
 
-void motorLoad3::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
+stateSizes motorLoad3::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
-    so.reset ();
-    if (isDynamic (sMode))
-    {
-        so.total.algSize = 2;
-        so.total.jacSize = 8;
-        if ((opFlags[stalled]) && (opFlags[resettable]))
-        {
-            so.total.algRoots = 1;
-            opFlags.set (has_alg_roots);
-        }
-        else
-        {
-            so.total.diffRoots = 1;
-            opFlags.reset (has_alg_roots);
-        }
+	stateSizes SS;
+	if (isDynamic(sMode))
+	{
+		SS.algSize = 2;
+		if (!isAlgebraicOnly(sMode))
+		{
+			SS.diffSize = 3;
+		}
+	}
+	else
+	{
+		SS.algSize = 5;
+	}
+	return SS;
+}
 
-        if (!isAlgebraicOnly (sMode))
-        {
-            so.total.diffSize = 3;
-            so.total.jacSize += 15;
-        }
-    }
-    else
-    {
-        so.total.algSize = 5;
-        if (opFlags[init_transient])
-        {
-            so.total.jacSize = 19;
-        }
-        else
-        {
-            so.total.jacSize = 23;
-        }
-    }
-    so.rjLoaded = true;
-    so.stateLoaded = true;
+count_t motorLoad3::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (isDynamic(sMode))
+	{
+		jacSize = 8;
+		if (!isAlgebraicOnly(sMode))
+		{
+			jacSize += 15;
+		}
+	}
+	else
+	{
+
+		if (opFlags[init_transient])
+		{
+			jacSize = 19;
+		}
+		else
+		{
+			jacSize = 23;
+		}
+	}
+	return jacSize;
 }
 
 // set properties
 void motorLoad3::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else

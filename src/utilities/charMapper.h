@@ -43,13 +43,19 @@ public:
 	 */
 	V operator[] (unsigned char x) const { return key[x]; }
 };
-
+/** map that translates all characters that could be in numbers to true all others to false*/
 charMapper<bool> numericMapper();
+/** map that translates all characters that could start a number to true all others to false*/
 charMapper<bool> numericStartMapper();
+/** map that translates all characters that could end a number to true all others to false*/
 charMapper<bool> numericEndMapper();
+/** map that translates all base 64 characters to the appropriate numerical value*/
 charMapper<unsigned char> base64Mapper();
+/** map that translates numerical characters to the appropriate numerical value*/
 charMapper<unsigned char> digitMapper();
+/** map that translates all hexidecimal characters to the appropriate numerical value*/
 charMapper<unsigned char> hexMapper();
+/** map that all containing characters that come in pairs to the appropriate match '{' to '}'*/
 charMapper<unsigned char> pairMapper();
 
 }//namespace utilities

@@ -24,28 +24,39 @@ class fmiCoordinator;
 class fmiEvent : public events::reversibleEvent
 {
 public:
+	/** enumeration of the event types*/
 	enum class fmiEventType
 	{
-		parameter,
-		input,
+		parameter, //!< indicator that the event corresponds to a parameter
+        string_parameter, //!< indicator that the event is a string parameter
+		input,	//!< indicator that the event corresponds to an input
 	};
 private:
-	fmiCoordinator *coord = nullptr;
-	fmiEventType eventType = fmiEventType::input;
+	fmiCoordinator *coord = nullptr; //!< pointer the coordinator
+	fmiEventType eventType = fmiEventType::input;	//!< the type of the event
 public:
-	
+	/** constructor taking name and eventType
+	@param name the name of the event
+	@param type the type of event either input or parameter
+	*/
 	fmiEvent(const std::string &newName, fmiEventType type=fmiEventType::input);
+	/** default constructor taking optional eventType
+	*/
 	fmiEvent(fmiEventType type = fmiEventType::input);
-	fmiEvent(EventInfo &gdEI, coreObject *rootObject);
-	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> ggb = nullptr) const override;
+	/** event constructor taking an eventInfo structure and root obejct*/
+	fmiEvent(const EventInfo &gdEI, coreObject *rootObject);
 
+	virtual std::unique_ptr<Event> clone() const override;
+
+	virtual void cloneTo(Event *evnt) const override;
 	virtual void set(const std::string &param, double val) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 
-	virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
+	virtual void updateEvent(const EventInfo &gdEI, coreObject *rootObject) override;
 	
 	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 
+    
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	virtual coreObject *getOwner() const override;
 	friend class fmiCoordinator;

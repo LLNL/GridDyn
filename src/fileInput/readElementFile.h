@@ -84,7 +84,7 @@ coreObject * loadElementFile (coreObject *parentObject, const std::string &fileN
 
   if (!doc->isValid ())
     {
-      WARNPRINT (READER_WARN_ALL, "Unable to open File" << fileName);
+      WARNPRINT (READER_WARN_ALL, "Unable to open File: " << fileName);
       if (dynamic_cast<gridSimulation *> (parentObject))
         {
           dynamic_cast<gridSimulation *> (parentObject)->setErrorCode (GS_INVALID_FILE_ERROR);

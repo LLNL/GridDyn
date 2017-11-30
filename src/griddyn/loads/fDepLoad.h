@@ -23,8 +23,8 @@ class fDepLoad : public exponentialLoad
 {
 public:
 protected:
-  double betaP = 0.0;   //!< the frequency exponent parameter for the real power output
-  double betaQ = 0.0;	//!< the frequency exponent parameter for the reactive power output
+  parameter_t betaP = 0.0;   //!< the frequency exponent parameter for the real power output
+  parameter_t betaQ = 0.0;	//!< the frequency exponent parameter for the reactive power output
 
 public:
   explicit fDepLoad (const std::string &objName = "fdepLoad_$");

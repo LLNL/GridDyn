@@ -13,6 +13,7 @@
 #include "grabberSource.h"
 #include "core/objectInterpreter.h"
 #include "measurement/grabberSet.h"
+#include "core/coreObjectTemplates.hpp"
 
 namespace griddyn
 {
@@ -21,8 +22,34 @@ namespace sources
 grabberSource::grabberSource (const std::string &objName) : rampSource (objName) {}
 grabberSource::~grabberSource () = default;
 
-coreObject *grabberSource::clone (coreObject *obj) const { return nullptr; }
-void grabberSource::setFlag (const std::string &flag, bool val) {}
+coreObject *grabberSource::clone (coreObject *obj) const 
+{ 
+	auto src = cloneBase<grabberSource, Source>(this, obj);
+	if (src == nullptr)
+	{
+		return obj;
+	}
+	src->updateTarget(target);
+	src->updateField(field);
+	src->set("gain", multiplier);
+	if ((gset)&&(!src->gset))
+	{
+		src->pFlowInitializeA(prevTime, 0);
+	}
+	return src;
+}
+
+void grabberSource::setFlag (const std::string &flag, bool val) 
+{
+	if (flag.empty())
+	{
+
+	}
+	else
+	{
+		Source::setFlag(flag, val);
+	}
+}
 void grabberSource::set (const std::string &param, const std::string &val)
 {
     if (param == "field")
@@ -55,26 +82,47 @@ void grabberSource::set (const std::string &param, const std::string &val)
 
 void grabberSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-    Source::set (param, val, unitType);
+	if ((param == "gain")||(param=="multipler"))
+	{
+		multiplier = val;
+		if (gset)
+		{
+			gset->setGain(multiplier);
+		}
+	}
+	else
+	{
+		Source::set(param, val, unitType);
+	}
+   
 }
 
 double grabberSource::get (const std::string &param, gridUnits::units_t unitType) const
 {
+	if (param == "multiplier")
+	{
+		return multiplier;
+	}
     return Source::get (param, unitType);
 }
 
-void grabberSource::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
+void grabberSource::pFlowObjectInitializeA (coreTime /*time0*/, std::uint32_t /*flags*/)
 {
     coreObject *obj = locateObject (target, this);
     gset = std::make_unique<grabberSet> (field, obj);
+	gset->setGain(multiplier);
 }
 
-void grabberSource::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) {}
-IOdata grabberSource::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
+void grabberSource::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata &fieldSet) 
+{
+	fieldSet.resize(1);
+	fieldSet[0] = gset->grabData();
+}
+IOdata grabberSource::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
     return {gset->grabData (sD, sMode)};
 }
-double grabberSource::getOutput (const IOdata &inputs,
+double grabberSource::getOutput (const IOdata & /*inputs*/,
                                  const stateData &sD,
                                  const solverMode &sMode,
                                  index_t outputNum) const
@@ -95,10 +143,10 @@ double grabberSource::getOutput (index_t outputNum) const
     return kNullVal;
 }
 
-double grabberSource::getDoutdt (const IOdata &inputs,
-                                 const stateData &sD,
-                                 const solverMode &sMode,
-                                 index_t outputNum) const
+double grabberSource::getDoutdt (const IOdata & /*inputs*/,
+                                 const stateData & /*sD*/,
+                                 const solverMode &/*sMode*/,
+                                 index_t /*outputNum*/) const
 {
     return 0.0;
 }

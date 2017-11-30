@@ -20,11 +20,13 @@
 GriddynFederatedSimulator::GriddynFederatedSimulator (std::string name, int argc, char *argv[],
                                                       std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler)
   : VariableStepSizeFederatedSimulator (fskit::FederatedSimulatorId (name)),
+    DiscreteEventFederatedSimulator (fskit::FederatedSimulatorId (name)),
+    FederatedSimulator (fskit::FederatedSimulatorId (name)),
     m_name (name),
     m_currentFskitTime (0),
     m_currentGriddynTime (0)
 {
-  m_griddyn = std::make_shared<GriddynFskitRunner> ();
+  m_griddyn = std::make_shared<griddyn::fskitRunner> ();
 
   m_griddyn->Initialize (argc, argv, scheduler);
 }
@@ -49,16 +51,18 @@ fskit::Time GriddynFederatedSimulator::CalculateLocalGrantedTime (void)
 {
   const double kBigNum (1e49);
 
-  double griddynNextEventTime = m_griddyn->getNextEvent ();
+  griddyn::coreTime griddynNextEventTime = m_griddyn->getNextEvent ();
+
+  //assert(griddynNextEventTime > m_currentGriddynTime);
 
   // Magic number that indicates there are no events on the event queue.
-  if (griddynNextEventTime == kBigNum )
+  if (griddynNextEventTime.getBaseTimeCode () == kBigNum )
     {
       return fskit::Time::getMax ();
     }
 
   // This could be event time + lookahead.
-  return fskit::Time (griddynNextEventTime * 1e9);
+  return fskit::Time (griddynNextEventTime.getBaseTimeCode ());
 }
 
 bool GriddynFederatedSimulator::Finalize (void)
@@ -69,6 +73,7 @@ bool GriddynFederatedSimulator::Finalize (void)
   return true;
 }
 
+// Method used by Variable Step Size simulator
 std::tuple<fskit::Time,bool> GriddynFederatedSimulator::TimeAdvancement (const fskit::Time& time)
 {
   griddyn::coreTime gdTime, gdRetTime;
@@ -84,15 +89,35 @@ std::tuple<fskit::Time,bool> GriddynFederatedSimulator::TimeAdvancement (const f
       try
         {
           gdRetTime = m_griddyn->Step (gdTime);
+          //assert(gdRetTime <= gdTime);
           m_currentGriddynTime = gdRetTime;
           m_currentFskitTime = fskit::Time (gdRetTime.getBaseTimeCode ());
+          {
+            // Next event time should now be larger than granted time
+            griddyn::coreTime griddynNextEventTime = m_griddyn->getNextEvent ();
+            //assert(griddynNextEventTime > m_currentGriddynTime);
+          }
         }
       catch (...)
         {
-          std::cout << "Griddyn exiting due to failure" << std::endl;
+          std::cout << "Griddyn stopping due to runtime_error" << std::endl;
           stopSimulation = true;
         }
     }
 
   return std::make_tuple (m_currentFskitTime, stopSimulation);
 }
+
+// Method used by Discrete Event simulator
+void GriddynFederatedSimulator::StartTimeAdvancement (const fskit::Time& time)
+{
+  m_grantedTime = time;
+}
+
+// Method used by Discrete Event simulator
+std::tuple<bool,bool> GriddynFederatedSimulator::TestTimeAdvancement (void)
+{
+  std::tuple<fskit::Time,bool> result = TimeAdvancement(m_grantedTime);
+  return std::make_tuple (true, std::get<1>(result));
+}
+

@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  eval: (c-set-offset 'innamespace 0); -*- */
 /*
  * LLNS Copyright Start
  * Copyright (c) 2016, Lawrence Livermore National Security
@@ -32,9 +31,7 @@ public:
   class FskitCommunicatorMessage : public fskit::EventMessage
   {
 public:
-    FskitCommunicatorMessage ()
-    {
-    }
+	FskitCommunicatorMessage() = default;
 
 private:
     friend class boost::serialization::access;
@@ -48,9 +45,7 @@ private:
   FskitCommunicator (std::string name);
   FskitCommunicator (std::string m_name, std::uint64_t id);
 
-  virtual ~FskitCommunicator ()
-  {
-  }
+  virtual ~FskitCommunicator() = default;
 
   virtual void transmit (const std::string &destName, std::shared_ptr<griddyn::commMessage> message) override;
 

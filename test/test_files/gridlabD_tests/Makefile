@@ -1,6 +1,6 @@
 
 
-testFiles:=$(wildcard ./bin/test-*.tc)
+testFiles:=$(sort $(wildcard ./bin/test-*.tc))
 
 .PHONY: check
 check: ${testFiles}

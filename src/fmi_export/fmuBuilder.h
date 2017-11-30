@@ -39,6 +39,7 @@ private:
 	std::unique_ptr<readerInfo> ri_;  //!< location of readerInfo
 	std::string execPath;		//!< location of the executable making the fmu
 	std::string platform="all";		//!< target platform for the fmu
+    bool keep_dir = false;
 	/** private function for loading the subcomponents*/
 	void loadComponents();
 	void generateXML(const std::string &xmlfile);
@@ -53,6 +54,8 @@ public:
 	/** build the FMU at the given location 
 	@param[in] fmuLocation optional argument to specify the location to build the FMU*/
 	void MakeFmu(const std::string &fmuLocation="");
+    const std::string &getOutputFile() const { return fmuLoc; }
+private:
 	void copySharedLibrary(const std::string &tempdir);
 };
 

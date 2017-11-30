@@ -133,7 +133,7 @@
 	<iv>-0.5</iv>
 	</block>
 	</sensor>
-	<recorder field="bus2:voltage-1.0, relay#0:output0" period=0.01>
+	<recorder field="bus2:voltage-1.0, relay#0:output0" period="0.01">
     <file>blocktest.dat</file>
   </recorder>
    <basepower>100</basepower>

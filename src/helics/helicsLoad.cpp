@@ -73,7 +73,7 @@ void helicsLoad::updateA (coreTime time)
     if (!voltageKey.empty ())
     {
         std::complex<double> Vc = std::polar (V, A);
-        Vc *= baseVoltage;
+        Vc *= localBaseVoltage;
         coord->setValue (voltageIndex, Vc);
     }
     lastUpdateTime = time;
@@ -102,8 +102,8 @@ coreTime helicsLoad::updateB ()
         return nextUpdateTime;
     }
     res = res * scaleFactor;
-    double newP = unitConversion (res.real (), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
-    double newQ = unitConversion (res.imag (), inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
+    double newP = unitConversion (res.real (), inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
+    double newQ = unitConversion (res.imag (), inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
 
     if (opFlags[use_ramp])
     {

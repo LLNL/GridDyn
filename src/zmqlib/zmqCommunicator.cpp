@@ -13,7 +13,7 @@
 #include "zmqCommunicator.h"
 #include "zmqLibrary/zmqHelper.h"
 #include "zmqLibrary/zmqContextManager.h"
-#include "core/helperTemplates.hpp"
+
 #include "zmqLibrary/zmqProxyHub.h"
 #include "zmqLibrary/zmqReactor.h"
 #include <zmqlib/cppzmq/zmq_addon.hpp>
@@ -28,17 +28,12 @@ namespace zmqInterface
 using namespace zmq;
 using namespace zmqlib;
 
-zmqCommunicator::zmqCommunicator() :Communicator()
+zmqCommunicator::zmqCommunicator(const std::string &name) : Communicator(name), txDescriptor(name + "_tx"), rxDescriptor(name + "_rx")
 {
 
 }
 
-zmqCommunicator::zmqCommunicator(std::string name) : Communicator(name), txDescriptor(name + "_tx"), rxDescriptor(name + "_rx")
-{
-
-}
-
-zmqCommunicator::zmqCommunicator(std::string name, std::uint64_t id) : Communicator(name, id), txDescriptor(name + "_tx"), rxDescriptor(name + "_rx")
+zmqCommunicator::zmqCommunicator(const std::string &name, std::uint64_t id) : Communicator(name, id), txDescriptor(name + "_tx"), rxDescriptor(name + "_rx")
 {
 
 }
@@ -50,20 +45,26 @@ zmqCommunicator::zmqCommunicator(std::uint64_t id) : Communicator(id)
 
 zmqCommunicator::~zmqCommunicator() = default;
 
-std::shared_ptr<Communicator> zmqCommunicator::clone(std::shared_ptr<Communicator> comm) const
+std::unique_ptr<Communicator> zmqCommunicator::clone() const
 {
-	auto zmqComm = cloneBase<zmqCommunicator, Communicator>(this, comm);
-	if (!zmqComm)
+	std::unique_ptr<Communicator> comm = std::make_unique<zmqCommunicator>();
+	zmqCommunicator::cloneTo(comm.get());
+	return comm;
+}
+
+void zmqCommunicator::cloneTo(Communicator *comm) const
+{
+	Communicator::cloneTo(comm);
+	auto zmqComm = dynamic_cast<zmqCommunicator *>(comm);
+	if (zmqComm == nullptr)
 	{
-		return comm;
+		return;
 	}
 	zmqComm->txDescriptor = txDescriptor;
 	zmqComm->rxDescriptor = rxDescriptor;
 	zmqComm->proxyName = proxyName;
 	zmqComm->contextName = contextName;
 	zmqComm->flags = flags;
-
-	return zmqComm;
 }
 
 void zmqCommunicator::transmit(const std::string &destName, std::shared_ptr<commMessage> message)

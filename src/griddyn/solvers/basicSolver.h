@@ -18,6 +18,7 @@
 
 namespace griddyn
 {
+/** namespace containing the various types of solvers that can be used with GridDyn*/
 namespace solvers
 {
 /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
@@ -25,6 +26,7 @@ namespace solvers
 class basicSolver : public solverInterface
 {
 public:
+	/** define whether to use the gauss algorithm or the gauss-seidel algorithm*/
 	enum class mode_t
 	{
 		gauss,
@@ -51,8 +53,10 @@ public:
 	*/
 	basicSolver(gridDynSimulation *gds, const solverMode &sMode);
 
-	virtual std::shared_ptr<solverInterface>
-		clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+
 	double *state_data() noexcept override;
 	double *deriv_data() noexcept override;
 	double *type_data() noexcept override;

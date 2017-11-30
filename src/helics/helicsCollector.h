@@ -28,10 +28,9 @@ private:
 public:
 	helicsCollector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
 	explicit helicsCollector(const std::string &name);
-	~helicsCollector();
 
-	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
-
+	virtual std::unique_ptr<collector> clone() const override;
+	virtual void cloneTo(collector *col) const override;
 	virtual change_code trigger(coreTime time) override;
 
 

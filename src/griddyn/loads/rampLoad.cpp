@@ -54,23 +54,23 @@ void rampLoad::set (const std::string &param, double val, units_t unitType)
             switch (param[1])
             {
             case 'p':  // dpdt
-                dPdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                dPdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                 break;
             case 'r':  // drdt
-                drdt = unitConversion (val, unitType, puA, systemBasePower, baseVoltage);
+                drdt = unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage);
                 break;
             case 'x':  // dxdt
-                dxdt = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
+                dxdt = unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage);
                 break;
             case 'q':  // dqdt
-                dQdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                dQdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                 break;
             case 'i':  // didt
-                dIpdt = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
+                dIpdt = unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage);
                 break;
             case 'z':
             case 'y':  // dzdt dydt
-                dYpdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                dYpdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                 break;
             default:
                 throw (unrecognizedParameter (param));
@@ -92,11 +92,11 @@ void rampLoad::set (const std::string &param, double val, units_t unitType)
                 switch (param[1])
                 {
                 case 'i':  // dirdt dipdt
-                    dIpdt = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
+                    dIpdt = unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage);
                     break;
                 case 'z':
                 case 'y':  // dzrdt dyrdt dzpdt dzrdt
-                    dYpdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                    dYpdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                     break;
                 default:
                     throw (unrecognizedParameter (param));
@@ -106,11 +106,11 @@ void rampLoad::set (const std::string &param, double val, units_t unitType)
                 switch (param[1])
                 {
                 case 'i':  // diqdt
-                    dIqdt = unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage);
+                    dIqdt = unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage);
                     break;
                 case 'z':
                 case 'y':  // dzqdt dyqdt
-                    dYqdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                    dYqdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                     break;
                 default:
                     throw (unrecognizedParameter (param));

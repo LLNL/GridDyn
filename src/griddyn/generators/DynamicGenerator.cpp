@@ -232,87 +232,6 @@ void DynamicGenerator::dynObjectInitializeA (coreTime time0, std::uint32_t flags
     gridSecondary::dynObjectInitializeA (time0, flags);
 }
 
-void DynamicGenerator::loadSizes (const solverMode &sMode, bool dynOnly)
-{
-    auto &soff = offsets.getOffsets (sMode);
-    if (!isConnected ())
-    {
-        soff.reset ();
-        soff.rjLoaded = true;
-        soff.stateLoaded = true;
-        return;
-    }
-    if (dynOnly)
-    {
-        soff.rootAndJacobianCountReset ();
-        if (!isDynamic (sMode))
-        {
-            soff.total.jacSize = offsets.local ().local.jacSize;
-            soff.rjLoaded = true;
-            return;
-        }
-
-        auto &lc = offsets.local ();
-        soff.total.jacSize = lc.local.jacSize;
-        soff.total.algRoots = lc.local.algRoots;
-        soff.total.diffRoots = lc.local.diffRoots;
-    }
-    else
-    {
-        soff.reset ();
-        if (!isDynamic (sMode))
-        {
-            if ((!isDC (sMode)) && (opFlags[indirect_voltage_control]))
-            {
-                soff.total.jacSize = 2;
-                soff.total.algSize = 1;
-            }
-            soff.rjLoaded = true;
-            soff.stateLoaded = true;
-            return;
-        }
-
-        soff.localLoad (false);
-    }
-
-    if (isDC (sMode))
-    {
-        // TODO determine what to include for DC dynamic modes
-    }
-    else
-    {
-        for (auto &subobj : getSubObjects ())
-        {
-            if (!(subobj->isLoaded (sMode, dynOnly)))
-            {
-                subobj->loadSizes (sMode, dynOnly);
-            }
-            if (dynOnly)
-            {
-                soff.addRootAndJacobianSizes (subobj->getOffsets (sMode));
-            }
-            else
-            {
-                soff.addSizes (subobj->getOffsets (sMode));
-            }
-        }
-    }
-    if (!dynOnly)
-    {
-        soff.stateLoaded = true;
-    }
-    soff.rjLoaded = true;
-
-    if (isLocal (sMode))
-    {
-     //   SSize = stateSize (cLocalbSolverMode);
-       // m_state.resize (SSize);
-       // m_dstate_dt.resize (SSize, 0);
-       // m_state_ind.resize (SSize, 1.0);
-       // setOffset (0, cLocalbSolverMode);
-    }
-}
-
 // initial conditions of dynamic states
 void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
@@ -527,7 +446,7 @@ void DynamicGenerator::add (gridSubModel *obj)
     else if (dynamic_cast<Source *> (obj) != nullptr)
     {
         auto src = static_cast<Source *> (obj);
-        if ((src->m_purpose == "power") || (src->m_purpose == "pset"))
+        if ((src->purpose_ == "power") || (src->purpose_ == "pset"))
         {
             pSetControl = static_cast<Source *> (replaceSubObject (obj, pSetControl, pset_loc));
             if (dynamic_cast<scheduler *> (pSetControl) != nullptr)
@@ -535,11 +454,11 @@ void DynamicGenerator::add (gridSubModel *obj)
                 sched = static_cast<scheduler *> (pSetControl);
             }
         }
-        else if ((src->m_purpose == "voltage") || (src->m_purpose == "vset"))
+        else if ((src->purpose_ == "voltage") || (src->purpose_ == "vset"))
         {
             vSetControl = static_cast<Source *> (replaceSubObject (obj, vSetControl, vset_loc));
         }
-        else if ((pSetControl == nullptr) && (src->m_purpose.empty ()))
+        else if ((pSetControl == nullptr) && (src->purpose_.empty ()))
         {
             pSetControl = static_cast<Source *> (replaceSubObject (obj, pSetControl, pset_loc));
         }
@@ -717,50 +636,6 @@ void DynamicGenerator::algebraicUpdate (const IOdata &inputs,
    // }
 }
 
-static std::map<int, int> alertFlags{
-  std::make_pair (FLAG_CHANGE, 1),
-  std::make_pair (STATE_COUNT_INCREASE, 3),
-  std::make_pair (STATE_COUNT_DECREASE, 3),
-  std::make_pair (STATE_COUNT_CHANGE, 3),
-  std::make_pair (ROOT_COUNT_INCREASE, 2),
-  std::make_pair (ROOT_COUNT_DECREASE, 2),
-  std::make_pair (ROOT_COUNT_CHANGE, 2),
-  std::make_pair (OBJECT_COUNT_INCREASE, 2),
-  std::make_pair (OBJECT_COUNT_DECREASE, 2),
-  std::make_pair (OBJECT_COUNT_CHANGE, 2),
-  std::make_pair (JAC_COUNT_INCREASE, 4),
-  std::make_pair (JAC_COUNT_DECREASE, 4),
-  std::make_pair (JAC_COUNT_CHANGE, 4),
-  std::make_pair (CONSTRAINT_COUNT_DECREASE, 1),
-  std::make_pair (CONSTRAINT_COUNT_INCREASE, 1),
-  std::make_pair (CONSTRAINT_COUNT_CHANGE, 1),
-};
-
-void DynamicGenerator::alert (coreObject *object, int code)
-{
-    if ((code >= MIN_CHANGE_ALERT) && (code < MAX_CHANGE_ALERT))
-    {
-        auto res = alertFlags.find (code);
-        if (res != alertFlags.end ())
-        {
-            int flagNum = res->second;
-            updateFlags ();
-            if (flagNum == 3)
-            {
-                offsets.unload ();
-            }
-            else if (flagNum == 2)
-            {
-                offsets.rjUnload (true);
-            }
-            else if (flagNum == 4)
-            {
-                offsets.rjUnload (false);
-            }
-        }
-    }
-    coreObject::alert (object, code);
-}
 
 void DynamicGenerator::setFlag (const std::string &flag, bool val)
 {
@@ -862,12 +737,12 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
         }
         else
         {
-            m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+            m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
         }
     }
     else if ((param == "rating") || (param == "base") || (param == "mbase"))
     {
-        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, baseVoltage);
+        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         opFlags.set (independent_machine_base);
         if (genModel != nullptr)
         {
@@ -905,7 +780,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
 
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0)
         {
             machineBasePower = unitConversionPower (Pmax, puMW, MW, systemBasePower);
@@ -917,7 +792,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (gov != nullptr)
         {
             gov->set ("pmin", Pmin * systemBasePower / machineBasePower);

@@ -12,7 +12,7 @@
 
 #include "dimeCollector.h"
 #include "dimeClientInterface.h"
-#include "core/helperTemplates.hpp"
+
 
 namespace griddyn
 {
@@ -35,19 +35,23 @@ dimeCollector::~dimeCollector()
 		dime->close();
 	}
 }
-
-std::shared_ptr<collector> dimeCollector::clone(std::shared_ptr<collector> gr) const
+std::unique_ptr<collector> dimeCollector::clone() const
 {
-	auto nrec = cloneBase<dimeCollector, collector>(this, gr);
-	if (!nrec)
+	std::unique_ptr<collector> col = std::make_unique<dimeCollector>();
+	dimeCollector::cloneTo(col.get());
+	return col;
+}
+
+void dimeCollector::cloneTo(collector *col) const
+{
+	collector::cloneTo(col);
+	auto dc = dynamic_cast<dimeCollector *>(col);
+	if (dc==nullptr)
 	{
-		return gr;
+		return;
 	}
-
-	nrec->server = server;
-	nrec->processName = processName;
-
-	return nrec;
+	dc->server = server;
+	dc->processName = processName;
 }
 
 change_code dimeCollector::trigger(coreTime time)

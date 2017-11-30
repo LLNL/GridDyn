@@ -145,7 +145,7 @@ int loadEventElement (std::shared_ptr<readerElement> &element, coreObject *obj, 
             }
             catch (const objectAddFailure &)
             {
-                WARNPRINT (READER_WARN_IMPORTANT, "Event: " << gdE->getName () << " unable to be added to "
+                WARNPRINT (READER_WARN_IMPORTANT, "Event: " << spE->getName () << " unable to be added to "
                                                             << owner->getName ());
                 ri.events.push_back (std::move (spE));
             }

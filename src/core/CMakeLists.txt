@@ -25,7 +25,6 @@ set(coreObject_headers
 	coreObjectList.h
 	coreObjectTemplates.hpp
 	objectOperatorInterface.hpp
-	helperTemplates.hpp
 	objectInterpreter.h
 	
     )

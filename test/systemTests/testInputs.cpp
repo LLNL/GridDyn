@@ -11,7 +11,7 @@
  */
 
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "links/acLine.h"
 #include "links/adjustableTransformer.h"
@@ -21,7 +21,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-
+#include <boost/filesystem.hpp>
 
 #include <cstdio>
 #include <functional>
@@ -37,7 +37,7 @@ BOOST_FIXTURE_TEST_SUITE(input_tests, gridDynSimulationTestFixture)
 using namespace griddyn;
 
 namespace data = boost::unit_test::data;
-/* *INDENT-OFF* */
+
 static const std::vector<std::pair<std::string, std::array<int, 2>>> baseCDFcase{
   {"ieee14_act.cdf", {{14, 20}}},
   {"ieee30_act.cdf", {{30, 41}}},
@@ -47,7 +47,7 @@ static const std::vector<std::pair<std::string, std::array<int, 2>>> baseCDFcase
   {"IEEE39.raw", {{39, 46}}},
   {std::string (INPUT_TEST_DIRECTORY "testCSV5k.xml"), {{5000, 6279}}},
 };
-/* *INDENT-ON* */
+
 // BOOST_AUTO_TEST_CASE(test_power_flow_inputs)
 BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, test_power_flow_inputs, data::xrange (7), caseIndex)
 {
@@ -205,17 +205,18 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, test_power_flow_inputs, da
 }
 
 // if more checks are added the data::xrange(X) must be changed as well
-/* *INDENT-OFF* */
+
 static const std::vector<griddyn::stringVec> compareCases{
   {"ieee118_act.cdf", "ieee118.psp", "IEEE 118 Bus.EPC"},
   {"ieee14_act.cdf", "IEEE 14 bus.epc", "IEEE 14 bus.raw"},
   {"IEEE39.raw", "ieee39_v29.raw"},
-  {"ieee30_no_limit.cdf", std::string (INPUT_TEST_DIRECTORY "testCSV.xml")},
+  {"powerflowWECC179_v30.raw","powerflowWECC179_v31.raw" ,"powerflowWECC179_v32.raw" },
+  {"ieee30_no_limit.cdf", "testCSV.xml"},
+ // {"powerflowWECC1.raw","WECC179_powerflow.m"},
 };
-/* *INDENT-ON* */
 
 
-BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrange (4), caseIndex)
+BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrange (5), caseIndex)
 {
     std::vector<double> volts1;
     std::vector<double> ang1;
@@ -226,6 +227,10 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrang
 
     auto caseSet = compareCases[caseIndex];
     std::string fileName = std::string (IEEE_TEST_DIRECTORY) + caseSet[0];
+	if (!boost::filesystem::exists(fileName))
+	{
+		fileName = std::string(INPUT_TEST_DIRECTORY) + caseSet[0];
+	}
     loadFile (gds, fileName);
 
     int bcount = gds->getInt ("totalbuscount");
@@ -248,25 +253,29 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrang
         if (fname2.size () < 25)
         {
             fname2 = std::string (IEEE_TEST_DIRECTORY) + nf;
+			if (!boost::filesystem::exists(fname2))
+			{
+				fname2 = std::string(INPUT_TEST_DIRECTORY) + nf;
+			}
         }
 
         loadFile (gds2, fname2);
 
         int count = gds2->getInt ("totalbuscount");
         BOOST_CHECK_EQUAL (count, bcount);
-        /*for (kk = 0; kk < count; ++kk)
+        for (index_t kk = 0; kk < count; ++kk)
           {
-          b2 = gds2->getBus(kk);
-          b1 = gds->getBus(kk);
-          cmp = compareBus(b2, b1, true);
+          auto b2 = gds2->getBus(kk);
+          auto b1 = gds->getBus(kk);
+          auto cmp = compareBus(b2, b1, false);
           if (cmp == false)
           {
-          std::cout << "bus " << kk << " does not match" << '\n';
-          cmp = compareBus(b1, b2, true);
+          std::cout << "bus " << kk <<" id["<<b1->getUserID()<< "] does not match" << '\n';
+          cmp = compareBus(b1, b2, false,true);
           }
           b2->setVoltageAngle(volts1[kk], ang1[kk]);
 
-          }*/
+          }
         // check the linkcount
         count = gds2->getInt ("totallinkcount");
         BOOST_CHECK_EQUAL (count, lcount);
@@ -307,8 +316,8 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrang
     }
 }
 
-/* { fileName , {buscount, linkcount, eventcount, 0=powerflow 1=dynamic}}*/
-/* *INDENT-OFF* */
+/* format { fileName , {buscount, linkcount, eventcount, 0=powerflow 1=dynamic}}*/
+
 static const std::vector<std::pair<std::string, std::array<int, 4>>> executionCases{
   {std::string (MATLAB_TEST_DIRECTORY "case4gs.m"), {{0, 4, 4, 0}}},
   // { std::string(MATLAB_TEST_DIRECTORY "d_003.m"), { { 0, 3, 3, 0 } } },
@@ -318,7 +327,7 @@ static const std::vector<std::pair<std::string, std::array<int, 4>>> executionCa
   //  { std::string(INPUT_TEST_DIRECTORY "testIEEE39dynamic_relay.xml"), { { 1, 39, 0, 0 } } },
   //{ std::string(INPUT_TEST_DIRECTORY "180busdyn_test.xml"),{ { 1, 179, 0, 1 } } },
 };
-/* *INDENT-ON* */
+
 
 BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, input_execTest, data::xrange (3), caseIndex)
 {

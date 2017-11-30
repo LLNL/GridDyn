@@ -11,7 +11,7 @@
 */
 
 #include "events/Event.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "measurement/collector.h"
 #include "testHelper.h"

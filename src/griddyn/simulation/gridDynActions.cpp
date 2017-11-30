@@ -270,18 +270,18 @@ void gridDynAction::process (const std::string &operation)
             }
         }
     }
-	else if (cmd == "check")
-	{
-		command = gd_action_t::check; // check 
-		if (sz > 1)
-		{
-			string1 = ssep[1];
-			if (sz > 2)
-			{
-				string2=ssep[2];
-			}
-		}
-	}
+    else if (cmd == "check")
+    {
+        command = gd_action_t::check;  // check
+        if (sz > 1)
+        {
+            string1 = ssep[1];
+            if (sz > 2)
+            {
+                string2 = ssep[2];
+            }
+        }
+    }
     else if (cmd == "run")  // run time(d)*
     {
         if (sz > 1)

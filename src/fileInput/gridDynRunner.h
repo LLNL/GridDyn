@@ -15,12 +15,15 @@
 #define GRIDDYN_GRIDDYN_RUNNER_H
 #pragma once
 
-#include "griddyn-config.h"
+#include "griddyn/griddyn-config.h"
 #include "gridDynDefinitions.hpp"
 #include <chrono>
 #include <memory>
+#include <future>
 
-
+#ifndef GRIDDYN_PENDING
+#define GRIDDYN_PENDING (25)
+#endif 
  //forward declaration for boost::program_options::variables_map
 namespace boost {
 namespace program_options {
@@ -71,8 +74,15 @@ public:
   virtual void simInitialize();
   /**
    * Run simulation to completion
+   @return the final time of the simulation
    */
-  virtual void Run ();
+  virtual coreTime Run ();
+
+  /**
+  * Run simulation to completion but return immediately
+  @details @see getStatus to query the status and result of the asynchronous call
+  */
+  virtual void RunAsync();
 
   /**
    * Run simulation up to provided time.   Simulation may
@@ -84,6 +94,19 @@ public:
   virtual coreTime Step (coreTime time);
 
   /**
+  * Run simulation up to provided time.   Simulation may
+  * return early.
+  *
+  * @param time maximum time simulation may advance to.
+  * @return time simulation successfully advanced to.
+  */
+  virtual void StepAsync(coreTime time);
+
+  /** get the current execution status of the simulation
+  @param[out] timeReturn the current simulation time
+  @return GRIDDYN_PENDING if an asyncrhonous operation is ongoing otherwise returns the current state of the simulation*/
+  virtual int getStatus(coreTime &timeReturn);
+  /**
    * Get the next GridDyn Event time
    *
    * @return the next event time
@@ -93,6 +116,7 @@ public:
   virtual void Finalize ();
   virtual int Reset();
   virtual int Reset(readerInfo &ri);
+  /** reset the underlying simulation of a runner*/
   void resetSim(std::shared_ptr<gridDynSimulation> sim)
   {
 	  m_gds = std::move(sim);
@@ -105,8 +129,14 @@ public:
 
   std::shared_ptr<gridDynSimulation> &getSim()
   {
+      if (!m_gds)
+      {
+          m_gds = std::make_shared<gridDynSimulation>();
+      }
 	  return m_gds;
   }
+
+  virtual bool isReady() const;
 protected:
   /**
    * Get the next GridDyn Event time
@@ -122,6 +152,7 @@ protected:
   bool eventMode = false;
 private:
 	std::unique_ptr<boost::program_options::variables_map> vm;
+	std::future<coreTime> async_ret; //!< future code for the asynchronous operations
 };
 
 

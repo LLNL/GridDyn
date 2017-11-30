@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <type_traits>
 
 namespace griddyn
 {
@@ -54,7 +55,7 @@ enum class print_level : int
 };
 
 using id_type_t = std::int64_t;
-constexpr auto invalid_id_value = std::numeric_limits<id_type_t>::min();
+constexpr auto invalid_id_value = std::numeric_limits<id_type_t>::min ();
 using coreTime = timeRepresentation<count_time<9>>;
 using stringVec = std::vector<std::string>;
 
@@ -69,21 +70,27 @@ constexpr coreTime kDayLength (86400.0f);
 constexpr coreTime kSmallTime (1e-7);
 constexpr coreTime kShortTime (1e-6);
 
-constexpr coreTime operator"" _t(long double val) { return coreTime(val); }
+constexpr coreTime operator"" _t (long double val) { return coreTime (val); }
 
-//create an inline check for valid indices
+// create an inline check for valid indices
 #ifdef UNSIGNED_INDEXING
-template<class VX>
-inline bool isValidIndex(index_t index, const std::vector<VX> &vector_obj)
+template <class VX>
+inline bool isValidIndex (index_t index, const std::vector<VX> &vector_obj)
 {
-	return (index < static_cast<count_t>(vector_obj.size());
+    return (index < static_cast<count_t>(vector_obj.size());
 }
 #else
-template<class VX>
-	inline bool isValidIndex(index_t index, const std::vector<VX> &vector_obj)
-	{
-		return ((index >= 0) && (index < static_cast<count_t>(vector_obj.size())));
-	}
+template <class VX>
+inline bool isValidIndex (index_t index, const std::vector<VX> &vector_obj)
+{
+    return ((index >= 0) && (index < static_cast<count_t> (vector_obj.size ())));
+}
 #endif
+
+template <class IND,class VX>
+inline bool isValidIndex(IND index, const std::vector<VX> &vector_obj)
+{
+	return ((index >= 0) && (index < static_cast<IND> (vector_obj.size())));
+}
 }  // namespace griddyn
 #endif

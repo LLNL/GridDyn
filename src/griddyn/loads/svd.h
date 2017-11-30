@@ -22,27 +22,30 @@ namespace loads
 class svd : public rampLoad
 {
 public:
+	/** flags used for svd operation*/
 	enum svd_flags
 	{
 		continuous_flag = object_flag6,
 		locked_flag = object_flag7,
 		reactive_control_flag = object_flag8,
+		reverse_control_flag = object_flag9,
+		reverse_toggled_flag = object_flag10, //indicator that the reverse flag has been toggled so don't try it again
 	};
 
 protected:
 	gridBus *controlBus = nullptr;    //!< pointer to the control bus
-	double Qmin = -kBigNum;                       //!<[puMVA] the minimum reactive power
-	double Qmax = kBigNum;                        //!<[puMVA] the maximum reactive power output
-	double Vmin = 0.8;                            //!<[puV] the low voltage threshold
-	double Vmax = 1.2;                            //!<[puV] the high voltage threshold
+	parameter_t Qmin = -kBigNum;                       //!<[puMVA] the minimum reactive power
+	parameter_t Qmax = kBigNum;                        //!<[puMVA] the maximum reactive power output
+	parameter_t Vmin = 0.8;                            //!<[puV] the low voltage threshold
+	parameter_t Vmax = 1.2;                            //!<[puV] the high voltage threshold
 
-	double Qlow = 0;                              //!<[puMVA] the lowest available Q block level
-	double Qhigh = kBigNum;                       //!<[puMVA] the maximum reactive power block level
+	parameter_t Qlow = 0.0;                              //!<[puMVA] the lowest available Q block level
+	parameter_t Qhigh = kBigNum;                       //!<[puMVA] the maximum reactive power block level
 	int currentStep = 0;                          //!< the current step level
 	int stepCount = 0;                            //!< the total number of steps available
 	std::vector < std::pair < int, double >> Cblocks;     // a vector containing the capacitive blocks (count, size[puMW])
 
-	double participation = 1.0;    //!< a participation factor
+	parameter_t participation = 1.0;    //!< a participation factor
 
 public:
 	svd(const std::string &objName = "svd_$");
@@ -59,12 +62,13 @@ public:
 	virtual void setLoad(double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit) override;
 	virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
 	virtual void guessState(coreTime time, double state[], double dstate_dt[], const solverMode &sMode) override;                //for initial setting of the state
-	//for identifying which variables are algebraic vs differential
+	
 	virtual void getVariableType(double sdata[], const solverMode &sMode) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-
+	/** define which bus the svd is controlling voltage on if it is not otherwise specified it is assumed to be the parent bus
+	*/
 	virtual void setControlBus(gridBus *cBus);
 
 	/** add a reactive block to the controller
@@ -92,7 +96,7 @@ public:
 	virtual void rootTrigger(coreTime time, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
 	virtual change_code rootCheck(const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 protected:
-	/** get the setting corresponding to a specfic output level
+	/** get the setting corresponding to a specific output level
 	@param[in] level the reactive output level desired [puMW]
 	@return the step number corresponding to that level (best effort)
 	*/
@@ -102,6 +106,6 @@ protected:
 	*/
 	virtual void updateSetting(int step);
 };
-}//namespace loads
-}//namespace griddyn
+} //namespace loads
+} //namespace griddyn
 #endif

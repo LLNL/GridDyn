@@ -32,7 +32,7 @@ class pidBlock : public Block
     double m_T1 = 0.01;  //!< filtering delay on the input for the differential calculation
     double m_Td = 0.01;  //!< filtering delay on the output
     double iv = 0;  //!< intermediate value for calculations
-    bool no_D = true;  //!< ignore the derivative part of the calculations
+    bool &no_D;  //!< ignore the derivative part of the calculations
   public:
     /** @brief default constructor*/
     explicit pidBlock (const std::string &objName = "pidBlock_#");

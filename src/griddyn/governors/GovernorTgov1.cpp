@@ -101,7 +101,7 @@ void GovernorTgov1::derivative (const IOdata &inputs,
     }
     else
     {
-        Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] - K * (omega - 1.0)) / T1;
+        Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
     }
 
     Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
@@ -170,14 +170,14 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
         md.assign (refI + 1, refI + 1, -1 / T1 - sD.cj);
         if (linkOmega)
         {
-            md.assign (refI + 1, inputLocs[govOmegaInLocation], -K / (T1));
+            md.assign (refI + 1, inputLocs[govOmegaInLocation], K / (T1));
         }
 
         md.assign (refI, refI + 1, (1 + T2 / T1) / T3);
         md.assignCheckCol (refI, inputLocs[govpSetInLocation], -T2 / T1 / T3);
         if (linkOmega)
         {
-            md.assign (refI, inputLocs[govOmegaInLocation], K * T2 / (T1) / T3);
+            md.assign (refI, inputLocs[govOmegaInLocation], -K * T2 / (T1) / T3);
         }
         md.assign (refI, refI, -1 / T3 - sD.cj);
     }
@@ -208,7 +208,7 @@ void GovernorTgov1::rootTest (const IOdata &inputs,
         {
             // double omega = getControlFrequency (inputs);
             double omega = inputs[govOmegaInLocation];
-            root[rootOffset] = (-Pmech + inputs[govpSetInLocation] - K * (omega - 1.0)) / T1;
+            root[rootOffset] = (-Pmech + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
         }
         else
         {

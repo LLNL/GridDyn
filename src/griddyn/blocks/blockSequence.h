@@ -39,7 +39,8 @@ private:
 	std::vector<double> blockOutputs;		//!< temporary storage for block outputs
 	std::vector<double> blockDoutDt;		//!< temporary storage for block ramp outputs
 	index_t seqID=0;							//!< sequence ID for last update
-	double sampleTime = kBigNum;
+	//NOTE:: 4 byte gap here
+	double sampleTime = kBigNum;	//!< the minimum local sampling time for local integration
 public:
 	/** @brief default constructor*/
 	explicit blockSequence(const std::string &objName = "block_#");

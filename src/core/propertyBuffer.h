@@ -18,10 +18,12 @@
 #include <utility>
 #include "utilities/units.h"
 #include <boost/variant.hpp>
+#include "core/coreOwningPtr.hpp"
+
 namespace griddyn
 {
 class coreObject;
-
+/** define a variant type for the different types of properties that may be set*/
 using property_type = boost::variant<double, std::pair<double, gridUnits::units_t>, int, bool, std::string>;
 
 
@@ -43,6 +45,10 @@ public:
 	void set(const std::string &param, int val);
 	/** add a flag property to the buffer*/
 	void setFlag(const std::string &flag, bool val=true);
+    /** return true if there are any parameters stored in the buffer*/
+    bool empty() const {
+        return properties.empty();
+    }
 	/** remove a property from the buffers
 	@param[in] param the parameter to remove
 	*/
@@ -52,8 +58,15 @@ public:
 	throw an exception from the underlying set function if the property is not valid
 	those exceptions are not caught here and left up to the callers */
 	void apply(coreObject *obj) const;
+	/** template specialization for coreOwningPtrs to route through the existing object*/
+	template <class Y>
+	void apply(coreOwningPtr<Y> &obj)
+	{
+		this->apply(static_cast<coreObject *>(obj.get()));
+	}
 	/** the template is supposed to work for all different types of pointer objects
 	regular pointers, shared_ptrs, or unique ptrs, it takes a reference to the pointer
+	@details this is mostly to apply to helper objects typically captured in a smart pointer of some kind
 	*/
 	template <class X>
 	void apply(X &obj) const
@@ -85,6 +98,7 @@ public:
 	/** clear all properties from the buffer*/
 	void clear();
 };
+
 
 }//namespace griddyn
 #endif

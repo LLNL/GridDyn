@@ -25,15 +25,17 @@ namespace events
 class compoundEvent :public Event
 {
 protected:
-        stringVec fields;
-        std::vector<double> values;
-        std::vector<gridUnits::units_t> units;
-        std::vector<coreObject *> targetObjects;
+        stringVec fields;  //!< the vector of fields to modify
+        std::vector<double> values;	//!< the vector of values to change to 
+        std::vector<gridUnits::units_t> units;	//!< vector of units corresponding to the changes
+        std::vector<coreObject *> targetObjects;	//!< the set of objects to target
 public:
 	explicit compoundEvent(const std::string &eventName);
 	explicit compoundEvent(coreTime time0 = 0.0);
-	compoundEvent(EventInfo &gdEI, coreObject *rootObject);
-	virtual std::shared_ptr<Event> clone( std::shared_ptr<Event> gE = nullptr) const override;
+	compoundEvent(const EventInfo &gdEI, coreObject *rootObject);
+	virtual std::unique_ptr<Event> clone() const override;
+
+	virtual void cloneTo(Event *evnt) const override;
 	
 	//virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
 	virtual change_code trigger() override;

@@ -3,7 +3,7 @@
 #define INDEX_TYPES_H_
 #pragma once
 
-#include "griddyn-config.h"  //TODO:: move these into the config-file as opposed to griddyn specific
+#include "griddyn/griddyn-config.h"  //TODO:: move these into the config-file as opposed to griddyn specific
 #include <cstdint>
 #include <limits>
 

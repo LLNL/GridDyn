@@ -13,7 +13,6 @@
 #include "compoundEvent.h"
 #include "core/objectInterpreter.h"
 #include "utilities/stringOps.h"
-#include "core/helperTemplates.hpp"
 #include "core/coreExceptions.h"
 #include <sstream>
 
@@ -32,25 +31,30 @@ compoundEvent::compoundEvent(const std::string &eventName) : Event(eventName)
 
 }
 
-compoundEvent::compoundEvent(EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject)
+compoundEvent::compoundEvent(const EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject)
 {
 
 }
 
-std::shared_ptr<Event> compoundEvent::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> compoundEvent::clone() const
 {
-	auto nE = cloneBase<compoundEvent, Event>(this, gE);
-	if (!nE)
-	{
-		return gE;
-	}
+	std::unique_ptr<Event> upE = std::make_unique<compoundEvent>(getName());
+	cloneTo(upE.get());
+	return upE;
+}
 
+void compoundEvent::cloneTo(Event *gE) const
+{
+	Event::cloneTo(gE);
+	auto nE = dynamic_cast<compoundEvent *>(gE);
+	if (nE==nullptr)
+	{
+		return;
+	}
 	nE->fields = fields;
 	nE->values = values;
 	nE->units = units;
 	nE->targetObjects = targetObjects;
-
-	return nE;
 }
 
 void compoundEvent::updateObject(coreObject *gco, object_update_mode mode)

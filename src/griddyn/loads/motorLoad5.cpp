@@ -13,7 +13,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactory.hpp"
 #include "gridBus.h"
-#include "loads/motorLoad.h"
+#include "loads/motorLoad5.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 
@@ -71,7 +71,7 @@ void motorLoad5::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
     Load::pFlowObjectInitializeA (time0, flags);
     converge ();
 
-    loadSizes (cLocalSolverMode, false);
+    loadStateSizes (cLocalSolverMode);
     setOffset (0, cLocalSolverMode);
 }
 
@@ -153,51 +153,54 @@ void motorLoad5::dynObjectInitializeB (const IOdata &inputs,
     }
 }
 
-void motorLoad5::loadSizes (const solverMode &sMode, bool /*dynOnly*/)
+stateSizes motorLoad5::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
+	stateSizes SS;
+	if (isDynamic(sMode))
+	{
+		SS.algSize = 2;
+		if (!isAlgebraicOnly(sMode))
+		{
+			SS.diffSize = 5;
+		}
+	}
+	else
+	{
+		SS.algSize = 7;
+	}
+	return SS;
+}
 
-    so.reset ();
-    if (isDynamic (sMode))
-    {
-        so.total.algSize = 2;
-        so.total.jacSize = 8;
-        if ((opFlags[stalled]) && (opFlags[resettable]))
-        {
-            so.total.algRoots = 1;
-            opFlags.set (has_alg_roots);
-        }
-        else
-        {
-            so.total.diffRoots = 1;
-            opFlags.reset (has_alg_roots);
-        }
-        if (!isAlgebraicOnly (sMode))
-        {
-            so.total.diffSize = 5;
-            so.total.jacSize += 27;
-        }
-    }
-    else
-    {
-        so.total.algSize = 7;
-        if (opFlags[init_transient])
-        {
-            so.total.jacSize = 31;
-        }
-        else
-        {
-            so.total.jacSize = 35;
-        }
-    }
-    so.rjLoaded = true;
-    so.stateLoaded = true;
+count_t motorLoad5::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (isDynamic(sMode))
+	{
+		jacSize = 8;
+		if (!isAlgebraicOnly(sMode))
+		{
+			jacSize += 27;
+		}
+	}
+	else
+	{
+
+		if (opFlags[init_transient])
+		{
+			jacSize = 31;
+		}
+		else
+		{
+			jacSize = 35;
+		}
+	}
+	return jacSize;
 }
 
 // set properties
 void motorLoad5::set (const std::string &param, const std::string &val)
 {
-    if (param == "#")
+    if (param.empty())
     {
     }
     else

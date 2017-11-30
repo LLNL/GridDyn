@@ -53,8 +53,8 @@ public:
 	OperatingBoundary(double indMn, double indMx, double depMn, double depMx);
 	/** add an intermediate point
 	@param[in] indPt the independent variable value
-	@param[in] the lower bound
-	@param[in] the upper bound
+	@param[in] depLow the lower bound
+	@param[in] depHigh the upper bound
 	*/
 	void addPoint(double indPt, double depLow, double depHigh);
 
@@ -63,7 +63,7 @@ public:
 	@param[in] lowPts  vector of values for the lower bound
 	@param[in] highPts vector of values for the upper bound
 	*/
-	void addPoints(const std::vector<double> &inPts, const std::vector<double> &lowPts, const std::vector<double> &highPts);
+	void addPoints(const std::vector<double> &indPts, const std::vector<double> &lowPts, const std::vector<double> &highPts);
 	/** set range of valid independent values*/
 	void setValidRange(double iMin, double iMax);
 

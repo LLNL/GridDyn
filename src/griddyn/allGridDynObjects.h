@@ -27,7 +27,7 @@
 #include "controllers/scheduler.h"
 #include "events/Event.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "loads/zipLoad.h"
 #include "measurement/collector.h"
 #include "relays/zonalRelay.h"

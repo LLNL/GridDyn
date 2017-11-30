@@ -14,7 +14,8 @@
 #include "fmi_import/fmiImport.h"
 #include "fmi_import/fmiObjects.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "fileInput.h"
+#include "gridDynSimulation.h"
 #include "simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
@@ -23,7 +24,8 @@
 
 // test case for coreObject object
 
-#include "fmi_models/fmiMELoad.h"
+#include "loads/approximatingLoad.h"
+#include "fmi_models/fmiMELoad3phase.h"
 #include "testHelper.h"
 
 
@@ -37,8 +39,8 @@ BOOST_FIXTURE_TEST_SUITE (fmi_tests, gridDynSimulationTestFixture)
 
 BOOST_AUTO_TEST_CASE (test_fmi_xml)
 {
-    std::string fmu = fmu_directory + "rectifier.fmu";
-    path rectDir (fmu_directory + "rectifier");
+    std::string fmu = fmu_directory + "Rectifier.fmu";
+    path rectDir (fmu_directory + "Rectifier");
     fmiLibrary rectFmu (fmu);
     BOOST_CHECK (rectFmu.isXmlLoaded ());
     BOOST_CHECK (rectFmu.getCounts ("states") == 4);
@@ -60,8 +62,8 @@ BOOST_AUTO_TEST_CASE (test_fmi_xml)
     }
 
     // test second fmu with different load mechanics
-    std::string fmu2 = fmu_directory + "rectifier2.fmu";
-    path rectDir2 (fmu_directory + "rectifier2");
+    std::string fmu2 = fmu_directory + "Rectifier2.fmu";
+    path rectDir2 (fmu_directory + "Rectifier2");
     fmiLibrary rect2Fmu (fmu2, rectDir2.string ());
     BOOST_CHECK (rect2Fmu.isXmlLoaded ());
     BOOST_CHECK (rect2Fmu.getCounts ("states") == 4);
@@ -116,6 +118,143 @@ BOOST_AUTO_TEST_CASE (test_fmi_load_shared)
     }
 }
 
+#endif
+
+#ifdef _WIN32
+#ifndef _WIN64
+BOOST_AUTO_TEST_CASE(test_3phase_fmu)
+{
+	std::string fmu = fmu_directory+"DUMMY_0CYMDIST.fmu";
+	fmiLibrary loadFmu(fmu);
+	BOOST_CHECK(loadFmu.isXmlLoaded());
+	auto states = loadFmu.getCounts("states");
+	BOOST_CHECK_EQUAL(states, 0);
+	auto outputs = loadFmu.getCounts("outputs");
+	BOOST_CHECK_EQUAL(outputs, 6);
+	auto inputs = loadFmu.getCounts("inputs");
+	BOOST_CHECK_EQUAL(inputs, 6);
+	//auto param = loadFmu.getCounts("parameters");
+	//auto units = loadFmu.getCounts("unit");
+	auto fm = loadFmu.createModelExchangeObject("meload");
+	BOOST_REQUIRE(fm);
+	double inp[6];
+	double out[6];
+	double out2[6];
+	fm->setMode(fmuMode::continuousTimeMode);
+	fm->getCurrentInputs(inp);
+	inp[0] = 1.0;
+	inp[1] = 1.0;
+	inp[2] = 1.0;
+	fm->setInputs(inp);
+	fm->getCurrentInputs(inp);
+	BOOST_CHECK_EQUAL(inp[2], 1.0);
+	fm->getOutputs(out);
+	inp[0] = 0.97;
+	inp[1] = 0.97;
+	inp[2] = 0.97;
+	auto res = fm->get<double>("a0");
+	BOOST_CHECK_EQUAL(res, 1.0);
+	fm->setInputs(inp);
+	fm->getOutputs(out2);
+	BOOST_CHECK_LT(out2[0], out[0]);
+	loadFmu.close();
+}
+
+
+BOOST_AUTO_TEST_CASE(test_fmi_approx_load)
+{
+	using namespace griddyn::loads;
+	approximatingLoad apload("apload1");
+
+	auto ld1 = new griddyn::fmi::fmiMELoad3phase("fmload1");
+    std::string fmu = fmu_directory + "DUMMY_0CYMDIST.fmu";
+
+	apload.add(ld1);
+    ld1->set("a2", 0.0);
+    ld1->set("b2", 0);
+    ld1->set("c2", 0.0);
+	ld1->setFlag("current_output",true);
+	apload.pFlowInitializeA(0, 0);
+	apload.pFlowInitializeB();
+	auto p = apload.get("p");
+	auto q = apload.get("q");
+    auto ip = apload.get("ip");
+    auto iq = apload.get("iq");
+	auto yp = apload.get("yp");
+	auto yq = apload.get("yq");
+	
+    BOOST_CHECK_SMALL(p, 0.0001);
+    BOOST_CHECK_CLOSE(ip, 3.0, 0.0001);
+    BOOST_CHECK_CLOSE(yp, 3.0, 0.0001);
+
+    BOOST_CHECK_CLOSE(q, 0.0, 0.0001);
+    BOOST_CHECK_CLOSE(iq, 0.0, 0.0001);
+    BOOST_CHECK_CLOSE(yq, 0.0, 0.0001);
+
+    ld1->set("a0", 2.0);
+    ld1->set("b0", 2.0);
+    ld1->set("c0", 2.0);
+    apload.updateA(0);
+    apload.updateB();
+    auto p2 = apload.get("p");
+    auto ip2 = apload.get("ip");
+    auto yp2 = apload.get("yp");
+    BOOST_CHECK_SMALL(p2, 0.0001);
+    BOOST_CHECK_CLOSE(ip*2.0, ip2, 0.00002);
+    BOOST_CHECK_CLOSE(yp, yp2, 0.001);
+
+    ld1->set("angle0", 10, gridUnits::deg);
+    apload.updateA(0);
+    apload.updateB();
+    auto iq2 = apload.get("iq");
+    auto yq2 = apload.get("yq");
+
+    BOOST_CHECK_GT(std::abs(iq2), 0.001);
+    BOOST_CHECK_CLOSE(iq2/2.0, yq2,0.0001);
+	ld1 = nullptr;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_fmi_approx_load_xml)
+{
+    using namespace griddyn::loads;
+    std::string fileName = fmi_test_directory+ "approxLoad_testfmi.xml";
+
+  
+    
+    gds = griddyn::readSimXMLFile(fileName);
+    BOOST_REQUIRE(gds);
+    auto obj = gds->getBus(1);
+    BOOST_REQUIRE(obj != nullptr);
+    auto apload = dynamic_cast<approximatingLoad *>(gds->getBus(1)->getLoad(0));
+   
+    auto ld1 = dynamic_cast<griddyn::Load *>(apload->getSubObject("subobject",0));
+    ld1->set("a2", 0.0);
+    ld1->set("b2", 0);
+    ld1->set("c2", 0.0);
+    ld1->setFlag("current_output", true);
+    gds->pFlowInitialize();
+    auto p = apload->get("p");
+    auto q = apload->get("q");
+    auto ip = apload->get("ip");
+    auto iq = apload->get("iq");
+    auto yp = apload->get("yp");
+    auto yq = apload->get("yq");
+
+    BOOST_CHECK_SMALL(p, 0.0001);
+    BOOST_CHECK_CLOSE(ip, 3.0, 0.0001);
+    BOOST_CHECK_CLOSE(yp, 3.0, 0.0001);
+
+    BOOST_CHECK_SMALL(q, 0.0001);
+    BOOST_CHECK_SMALL(iq, 0.0001);
+    BOOST_CHECK_SMALL(yq, 0.0001);
+
+    
+    ld1 = nullptr;
+}
+
+
+#endif
 #endif
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES

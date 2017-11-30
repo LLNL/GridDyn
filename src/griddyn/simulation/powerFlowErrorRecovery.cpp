@@ -11,7 +11,7 @@
 */
 
 #include "powerFlowErrorRecovery.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "solvers/solverInterface.h"
 
 #include <algorithm>
@@ -100,10 +100,10 @@ bool powerFlowErrorRecovery::powerFlowFix1 ()
 // try a few rounds of Gauss Seidel like convergence
 bool powerFlowErrorRecovery::powerFlowFix2 ()
 {
-    sim->guessState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
-    sim->converge (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode (),
+    sim->guessState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
+    sim->converge (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode (),
                    converge_mode::block_iteration, 0.1);
-    sim->setState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
+    sim->setState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
     if (sim->opFlags[has_powerflow_adjustments])
     {
         sim->updateLocalCache ();
@@ -121,10 +121,10 @@ bool powerFlowErrorRecovery::powerFlowFix3 ()
     sim->getVoltage (v);
     if (std::any_of (v.begin (), v.end (), [](double a) { return (a < 0.7); }))
     {
-        sim->guessState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
-        sim->converge (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode (),
+        sim->guessState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
+        sim->converge (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode (),
                        converge_mode::single_iteration, 0);
-        sim->setState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
+        sim->setState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
         if (!sim->opFlags[prev_setall_pqvlimit])
         {
             sim->setAll ("load", "pqlowvlimit", 1.0);
@@ -135,20 +135,20 @@ bool powerFlowErrorRecovery::powerFlowFix3 ()
         sim->updateLocalCache ();
         sim->powerFlowAdjust (noInputs, lower_flags (sim->controlFlags), check_level_t::reversable_only);
         sim->reInitpFlow (solver->getSolverMode (), change_code::state_count_change);
-        sim->guessState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
-        sim->converge (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode (),
+        sim->guessState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
+        sim->converge (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode (),
                        converge_mode::block_iteration, 0.1);
-        sim->setState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
+        sim->setState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
         sim->updateLocalCache ();
         change_code eval =
           sim->powerFlowAdjust (noInputs, lower_flags (sim->controlFlags), check_level_t::reversable_only);
         while (eval > change_code::no_change)
         {
             sim->reInitpFlow (solver->getSolverMode (), eval);
-            sim->guessState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
-            sim->converge (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode (),
+            sim->guessState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
+            sim->converge (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode (),
                            converge_mode::single_iteration, 0);
-            sim->setState (sim->getCurrentTime (), solver->state_data (), nullptr, solver->getSolverMode ());
+            sim->setState (sim->getSimulationTime(), solver->state_data (), nullptr, solver->getSolverMode ());
             sim->updateLocalCache ();
             eval =
               sim->powerFlowAdjust (noInputs, lower_flags (sim->controlFlags), check_level_t::reversable_only);
@@ -186,16 +186,16 @@ bool powerFlowErrorRecovery::lowVoltageFix ()
 }
 
 // Don't know what to do here yet
-bool powerFlowErrorRecovery::powerFlowFix5()
+bool powerFlowErrorRecovery::powerFlowFix5 ()
 {
-	change_code eval =
-		sim->powerFlowAdjust(noInputs, lower_flags(sim->controlFlags), check_level_t::high_angle_trip);
-	if (eval > change_code::no_change)
-	{
-		sim->checkNetwork(gridDynSimulation::network_check_type::simplified);
-		sim->reInitpFlow(solver->getSolverMode(), eval);
-		return true;
-	}
-	return false;
+    change_code eval =
+      sim->powerFlowAdjust (noInputs, lower_flags (sim->controlFlags), check_level_t::high_angle_trip);
+    if (eval > change_code::no_change)
+    {
+        sim->checkNetwork (gridDynSimulation::network_check_type::simplified);
+        sim->reInitpFlow (solver->getSolverMode (), eval);
+        return true;
+    }
+    return false;
 }
 }  // namespace griddyn

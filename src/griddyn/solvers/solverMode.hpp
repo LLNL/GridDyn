@@ -117,7 +117,7 @@ const solverMode cDaeSolverMode (dae);
 const solverMode cDynAlgSolverMode (dynamic_algebraic);
 const solverMode cDynDiffSolverMode (dynamic_differential);
 
-const solverMode cEmptySolverMode;
+const solverMode cEmptySolverMode{};
 /**
  *Helper functions for determining mode capabilities
  **/
@@ -126,13 +126,22 @@ const solverMode cEmptySolverMode;
  **/
 inline bool isDC (const solverMode &sMode) { return sMode.approx[dc]; }
 /**
- * @brief determine if the mode is dc only
+* @brief determine if the mode is AC only
+**/
+inline bool isAC(const solverMode &sMode) { return !sMode.approx[dc]; }
+/**
+ * @brief set the approximation mode to be DC
  **/
 inline void setDC (solverMode &sMode) { sMode.approx.set (dc); }
 /**
  * @brief determine if the mode requires dynamic initialization
  **/
 inline bool isDynamic (const solverMode &sMode) { return sMode.dynamic; }
+/**
+* @brief determine if the mode is for power flow 
+@details isPowerFlow()==(!isDynamic())
+**/
+inline bool isPowerFlow(const solverMode &sMode) { return !sMode.dynamic; }
 /**
  * @brief determine if the mode only uses algebraic variables
  **/

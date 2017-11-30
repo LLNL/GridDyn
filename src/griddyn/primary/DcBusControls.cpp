@@ -83,7 +83,7 @@ double DcBusControls::getAdjustableCapacityDown (coreTime time) const
 
 void DcBusControls::addControlObject (gridComponent *comp, bool update)
 {
-    if (dynamic_cast<gridSecondary *> (comp)!=nullptr)
+    if (dynamic_cast<gridSecondary *> (comp) != nullptr)
     {
         auto objid = comp->getID ();
         for (auto &rvc : controlObjects)
@@ -96,7 +96,7 @@ void DcBusControls::addControlObject (gridComponent *comp, bool update)
         controlObjects.push_back (static_cast<gridSecondary *> (comp));
         cfrac.push_back (comp->get ("participation"));
     }
-    else if (dynamic_cast<links::dcLink *> (comp)!=nullptr)
+    else if (dynamic_cast<links::dcLink *> (comp) != nullptr)
     {
         auto objid = comp->getID ();
         for (auto &rvc : controlLinks)
@@ -172,7 +172,7 @@ void DcBusControls::updateControls ()
             {
                 auto opath = static_cast<dcBus *> (pco->find ("bus"))->getDirectPath (controlledBus, pco);
                 opath.pop_back ();
-				if (dynamic_cast<Link *> (opath.back()) != nullptr)
+                if (dynamic_cast<Link *> (opath.back ()) != nullptr)
                 {
                     proxyControlObject.push_back (static_cast<Link *> (opath.back ()));
                 }

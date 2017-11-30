@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 //#define WINDOWS_MEMORY_DEBUG
 
 #ifdef WINDOWS_MEMORY_DEBUG
@@ -30,11 +30,6 @@
 
 #ifndef GRIDDYN_TEST_DIRECTORY
 #define GRIDDYN_TEST_DIRECTORY "./test_files/"
-#endif
-
-#include "boost/version.hpp"
-#if BOOST_VERSION / 100 % 1000 >= 60
-#define ALLOW_DATA_TEST_CASES
 #endif
 
 
@@ -57,26 +52,43 @@ class solverMode;
 //create a test fixture that makes sure everything gets deleted properly
 struct gridDynSimulationTestFixture
 {
-
+	/** constructor*/
   gridDynSimulationTestFixture();
+  /** remove copy constructor*/
   gridDynSimulationTestFixture(const gridDynSimulationTestFixture &) = delete;
+  /**destructor*/
   ~gridDynSimulationTestFixture();
+  /** remove copy assignment*/
   gridDynSimulationTestFixture &operator=(const gridDynSimulationTestFixture &) = delete;
 
-  std::unique_ptr<griddyn::gridDynSimulation> gds=nullptr;
-  std::unique_ptr<griddyn::gridDynSimulation> gds2=nullptr;
+  std::unique_ptr<griddyn::gridDynSimulation> gds; /** first simulation object*/
+  std::unique_ptr<griddyn::gridDynSimulation> gds2; /** second simulation object*/
 
+  /** run a simple test
+  @details loads a file, runs the simulation, checks if the simulation completed*/
   void simpleRunTestXML(const std::string &fileName);
+  /** run a test
+  @details loads a file, runs the simulation, checks if the simulation is in the specified state
+  */
+  void runTestXML(const std::string &fileName, griddyn::gridDynSimulation::gridState_t finalState);
+  /** run the simulation and verify it progressed properly along each step of the process
+  */
   void detailedStageCheck(const std::string &fileName, griddyn::gridDynSimulation::gridState_t finalState);
   void simpleStageCheck(const std::string &fileName, griddyn::gridDynSimulation::gridState_t finalState);
   void dynamicInitializationCheck(const std::string &fileName);
 
+  /** check that gds is in the specified state*/
   void checkState(griddyn::gridDynSimulation::gridState_t state);
+  /** require that gds is in the specified state*/
   void requireState(griddyn::gridDynSimulation::gridState_t state);
+  /** check that gds2 is in the specified state*/
   void checkState2(griddyn::gridDynSimulation::gridState_t state);
+  /** require that gds2 is in the specified state*/
   void requireState2(griddyn::gridDynSimulation::gridState_t state);
 };
 
+/** specialized fixture for load tests
+*/
 struct gridLoadTestFixture
 {
 
@@ -89,7 +101,9 @@ struct gridLoadTestFixture
   griddyn::Load *ld2=nullptr;
 };
 
-
+/** struct defining any global config for the test scripts
+@details currently doesn't do much
+*/
 struct glbconfig
 {
 	glbconfig();
@@ -101,20 +115,64 @@ struct glbconfig
 */
 std::ostream& operator<<(std::ostream& os, griddyn::gridDynSimulation::gridState_t state);
 
+/** convert a gridState_t into a string for printing purposes*/
 const std::string &to_string(griddyn::gridDynSimulation::gridState_t state);
 
+/** check two states to see if they are the same*/
 void checkStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDynSimulation::gridState_t state2);
+
+/** require two states to be the same
+@details calls the BOOST_REQUIRE to ensure the states are equal
+*/
 void requireStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDynSimulation::gridState_t state2);
+/** run a jacoabian check on the current simulation object
+@param[in] gds the simulation object to use
+@param[in] sMode the solverMode to check 
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@return the count of the number of mismatches between the calculated and numeric calculation
+*/
 int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, bool checkRequired=true);
 
+/** run a jacoabian check on the current simulation object
+@param[in] gds the simulation object to use
+@param[in] sMode the solverMode to check
+@param tol the tolerance to use for the check
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@return the count of the number of mismatches between the calculated and numeric calculation
+*/
 int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, double tol, bool checkRequired = true);
 
+/** run a residual check on the current simulation object
+@param[in] gds the simulation object to use
+@param[in] sMode the solverMode to check
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@return the count of the number of residual values that are sufficiantly far from 0
+*/
 int runResidualCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, bool checkRequired = true);
 
+/** run a derivative check on the current simulation object
+@param[in] gds the simulation object to use
+@param[in] sMode the solverMode to check
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@return the count of the number of mismatches between the calculated and numeric calculation
+*/
 int runDerivativeCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, bool checkRequired = true);
 
+/** run an algebraic check on the current simulation object
+@param[in] gds the simulation object to use
+@param[in] sMode the solverMode to check
+@param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
+@return the count of the number of mismatches between the calculated and numeric calculation
+*/
 int runAlgebraicCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, bool checkRequired = true);
 
+/** print any differences in bus voltages and angles between two vectors
+@details targetted at checking two sets of values between different simulations to make sure they produce the same result
+@param V1 the voltages of the first set
+@param V2 the voltages of the second set
+@param A1 the angles of the first set
+@param A2 the angles of the second set
+*/
 void printBusResultDeviations(const std::vector<double> &V1, const std::vector<double> &V2, const std::vector<double> &A1, const std::vector<double> &A2);
 
 #endif

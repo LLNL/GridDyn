@@ -160,7 +160,7 @@ public:
   /** get a guessState from the object as to the value.
   @param val  the output objective variable values
   @param oMode the optimization mode to use.
-  *///for saving the state
+  */
   virtual void guessState (double time, double val[], const optimMode &oMode);
 
   /** set the tolerances.

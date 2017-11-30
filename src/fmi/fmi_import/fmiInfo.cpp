@@ -16,7 +16,7 @@
 
 fmiInfo::fmiInfo()
 {
-	
+
 }
 
 fmiInfo::fmiInfo(const std::string &fileName)
@@ -26,7 +26,7 @@ fmiInfo::fmiInfo(const std::string &fileName)
 
 int fmiInfo::loadFile(const std::string &fileName)
 {
-	
+
 	std::shared_ptr<readerElement> rd = std::make_shared<tinyxml2ReaderElement>(fileName);
 	if (!rd->isValid())
 	{
@@ -137,7 +137,7 @@ const std::string &fmiInfo::getString(const std::string &field) const
 }
 
 
-double fmiInfo::getReal(const std::string &field) const 
+double fmiInfo::getReal(const std::string &field) const
 {
 	auto fld = convertToLowerCase(field);
 	if (fld == "version")
@@ -163,7 +163,7 @@ double fmiInfo::getReal(const std::string &field) const
 	return (-1.0e-48);
 }
 
-static const variableInformation emptyVI;
+static const variableInformation emptyVI{};
 static const fmiVariableSet emptyVset;
 
 
@@ -271,7 +271,7 @@ std::vector<std::string> fmiInfo::getVariableNames(const std::string &type) cons
 			}
 		}
 	}
-	
+
 	return vnames;
 }
 
@@ -494,6 +494,10 @@ void loadUnitInfo(std::shared_ptr<readerElement> &rd, fmiUnit &unitInfo)
 	}
 }
 
+/** load a single variable information from the XML
+@param[in] rd the readerElement to load from
+@param[out] the variable information to store the data to
+*/
 void loadVariableInfo(std::shared_ptr<readerElement> &rd, variableInformation &vInfo);
 
 /*
@@ -501,28 +505,38 @@ valueReference="100663424"
 description="Constant output value"
 variability="tunable"
 */
+
+const std::string ScalarVString("ScalarVariable");
 void fmiInfo::loadVariables(std::shared_ptr<readerElement> &rd)
 {
 	rd->bookmark();
 	rd->moveToFirstChild("ModelVariables");
-	//count the number of ScalarVariables
-	rd->moveToFirstChild("ScalarVariable");
+	//Loop over the variables to be able to allocate memory efficiently later on
+	rd->moveToFirstChild(ScalarVString);
 	int vcount = 0;
+
 	while (rd->isValid())
 	{
 		++vcount;
-		rd->moveToNextSibling("ScalarVariable");
+		rd->moveToNextSibling(ScalarVString);
 	}
 	variables.resize(vcount);
 	rd->moveToParent();
 	//now load the variables
-	rd->moveToFirstChild("ScalarVariable");
+	rd->moveToFirstChild(ScalarVString);
 	int kk = 0;
 	while (rd->isValid())
 	{
 		loadVariableInfo(rd, variables[kk]);
 		variables[kk].index = kk;
-		variableLookup.emplace(variables[kk].name, kk);
+		auto res=variableLookup.emplace(variables[kk].name, kk);
+		if (!res.second)
+		{//if we failed on the emplace operation, then we need to override
+			//this should be unusual but it is possible
+			variableLookup[variables[kk].name] = kk;
+		}
+		//this one may fail and that is ok since this is a secondary detection mechansim for purely lower case parameters and may not be needed
+		variableLookup.emplace(convertToLowerCase(variables[kk].name), kk);
 		switch (variables[kk].causality.value())
 		{
 		case fmi_causality_type_t::parameter:
@@ -537,7 +551,7 @@ void fmiInfo::loadVariables(std::shared_ptr<readerElement> &rd)
 		default:
 			break;
 		}
-		rd->moveToNextSibling("ScalarVariable");
+		rd->moveToNextSibling(ScalarVString);
 		++kk;
 	}
 	rd->restore();
@@ -627,6 +641,47 @@ void loadVariableInfo(std::shared_ptr<readerElement> &rd, variableInformation &v
 		}
 		rd->moveToParent();
 	}
+	else if (rd->hasElement("String"))
+	{
+		vInfo.type = fmi_variable_type_t::string;
+		rd->moveToFirstChild("String");
+		att = rd->getFirstAttribute();
+		while (att.isValid())
+		{
+			if (att.getName() == "start")
+			{
+				vInfo.initial = att.getText();
+			}
+			att = rd->getNextAttribute();
+		}
+		rd->moveToParent();
+
+	}
+	else if (rd->hasElement("Integer"))
+	{
+		vInfo.type = fmi_variable_type_t::integer;
+		rd->moveToFirstChild("Integer");
+		att = rd->getFirstAttribute();
+		while (att.isValid())
+		{
+			if (att.getName() == "start")
+			{
+				vInfo.initial = att.getValue();
+			}
+			else if (att.getName() == "min")
+			{
+				vInfo.min = att.getValue();
+			}
+			else if (att.getName() == "max")
+			{
+				vInfo.max = att.getValue();
+			}
+			att = rd->getNextAttribute();
+		}
+		rd->moveToParent();
+
+	}
+
 }
 
 auto depkindNum(const std::string &depknd)
@@ -654,14 +709,18 @@ auto depkindNum(const std::string &depknd)
 	return 6;
 }
 
+const std::string unknownString("Unknown");
+const std::string depString("dependencies");
+const std::string depKindString("dependenciesKind");
+
 void loadDependencies(std::shared_ptr<readerElement> &rd, std::vector<int> &store, matrixData<int> &depData)
 {
-	rd->moveToFirstChild("Unknown");
+	rd->moveToFirstChild(unknownString);
 	while (rd->isValid())
 	{
 		auto att = rd->getAttribute("index");
-		auto attDep = rd->getAttribute("dependencies");
-		auto attDepKind = rd->getAttribute("dependenciesKind");
+		auto attDep = rd->getAttribute(depString);
+		auto attDepKind = rd->getAttribute(depKindString);
 		index_t row = static_cast<index_t>(att.getValue());
 		auto dep = str2vector<int>(attDep.getText(), 0, " ");
 		auto depknd = (attDepKind.isValid()) ? stringOps::splitline(attDepKind.getText(), " ", stringOps::delimiter_compression::on) : stringVector();
@@ -676,7 +735,7 @@ void loadDependencies(std::shared_ptr<readerElement> &rd, std::vector<int> &stor
 
 			}
 		}
-		rd->moveToNextSibling("Unknown");
+		rd->moveToNextSibling(unknownString);
 	}
 	rd->moveToParent();
 }

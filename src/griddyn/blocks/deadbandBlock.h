@@ -39,14 +39,14 @@ public:
     normal, rampup, outside, rampdown, shifted
   };
 protected:
-  double deadbandHigh = -kBigNum;  //!< upper limit on the deadband
-  double deadbandLow = kBigNum;   //!< lower deadband limit
-  double rampUpband = 0;                //!< ramp band on the up side
-  double rampDownband = 0;              //!< ramp band on the low side
-  double resetHigh = -kBigNum;  //!< the reset level to go off the deadband
-  double resetLow = kBigNum;            //!< the reset level to go back in the deadband on the low side
-  double deadbandLevel = 0.0;           //!<  the output level while the input is inside the deadband
-  double tolerance = 1e-6;			//!< the tolerance for resetting on the check function
+  parameter_t deadbandHigh = -kBigNum;  //!< upper limit on the deadband
+  parameter_t deadbandLow = kBigNum;   //!< lower deadband limit
+  parameter_t rampUpband = 0;                //!< ramp band on the up side
+  parameter_t rampDownband = 0;              //!< ramp band on the low side
+  parameter_t resetHigh = -kBigNum;  //!< the reset level to go off the deadband
+  parameter_t resetLow = kBigNum;            //!< the reset level to go back in the deadband on the low side
+  parameter_t deadbandLevel = 0.0;           //!<  the output level while the input is inside the deadband
+  parameter_t tolerance = 1e-6;			//!< the tolerance for resetting on the check function
   deadbandstate_t dbstate = deadbandstate_t::normal;  //!< the current state of the deadband block
 
 public:

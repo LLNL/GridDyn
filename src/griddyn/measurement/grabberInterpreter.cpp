@@ -31,6 +31,26 @@ void allGrabbers (const std::string &mode, coreObject *obj, std::vector<std::uni
 static grabberInterpreter<gridGrabber, opGrabber, functionGrabber>
 gInterpret ([](const std::string &fld, coreObject *obj) { return createGrabber (fld, obj); });
 
+
+bool isOperatorOutsideBlocks(const std::vector<std::pair<size_t, size_t>> &blocks, size_t loc)
+{
+	if (loc < blocks[0].first)
+	{
+		return true;
+	}
+	if (loc > blocks.back().second)
+	{
+		return true;
+	}
+	for (auto blk : blocks)
+	{
+		if ((loc > blk.first) && (loc < blk.second))
+		{
+			return false;
+		}
+	}
+	return true;
+}
 std::vector<std::unique_ptr<gridGrabber>> makeGrabbers (const std::string &command, coreObject *obj)
 {
     std::vector<std::unique_ptr<gridGrabber>> v;

@@ -16,8 +16,6 @@
 #include "gridBus.h"
 #include "gridSubModel.h"
 #include "utilities/stringOps.h"
-#include <cstdio>
-#include <iostream>
 
 namespace griddyn
 {
@@ -36,7 +34,7 @@ coreObject *gridSecondary::clone (coreObject *obj) const
     {
         return obj;
     }
-    nobj->baseVoltage = baseVoltage;
+    nobj->localBaseVoltage = localBaseVoltage;
     nobj->bus = bus;
     return nobj;
 }
@@ -97,7 +95,7 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         {
             if (dynamic_cast<gridSubModel *> (subobj) != nullptr)
             {
-                if (subobj->checkFlag (pflow_init_required))
+                if ((subobj->checkFlag (pflow_init_required))|| (CHECK_CONTROLFLAG(flags, force_constant_pflow_initialization)))
                 {
                     subobj->pFlowInitializeA (time0, flags);
                 }
@@ -114,10 +112,10 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 void gridSecondary::set (const std::string &param, const std::string &val) { gridComponent::set (param, val); }
 void gridSecondary::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-    if ((param == "basevoltage") || (param=="vbase")||(param=="voltagebase")||(param == "basev") || (param == "bv") || (param == "base voltage"))
-    {
-        baseVoltage = gridUnits::unitConversion (val, unitType, gridUnits::kV);
-    }
+	if (param.empty())
+	{
+
+	}
     else
     {
         gridComponent::set (param, val, unitType);

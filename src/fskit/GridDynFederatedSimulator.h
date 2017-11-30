@@ -14,21 +14,25 @@
 #ifndef GRIDDYN_FEDERATED_SIMULATOR_H
 #define GRIDDYN_FEDERATED_SIMULATOR_H
 
-#include "fskit/GridDynFskitRunner.h"
+#include "fskit/fskitRunner.h"
 
 #include <fskit/granted-time-window-scheduler.h>
 #include <fskit/variable-step-size-federated-simulator.h>
+#include <fskit/discrete-event-federated-simulator.h>
 #include <fskit/time.h>
 
 #include <random>
 #include <iostream>
 
-class GriddynFskitRunner;
+namespace griddyn
+{
+class fskitRunner;
+} // namespace griddyn
 
 /**
  * Example variable step size simulator implementation.
  */
-class GriddynFederatedSimulator : public fskit::VariableStepSizeFederatedSimulator
+class GriddynFederatedSimulator : public fskit::VariableStepSizeFederatedSimulator, public fskit::DiscreteEventFederatedSimulator
 {
 public:
   GriddynFederatedSimulator (std::string name, int argc, char *argv[],
@@ -44,15 +48,22 @@ public:
 
   bool Finalize (void);
 
+  // Methods used by Variable Step Size simulator
   std::tuple<fskit::Time,bool> TimeAdvancement (const fskit::Time& time);
+
+  // Methods used by Discrete Event simulator
+  void StartTimeAdvancement (const fskit::Time& time);
+  
+  std::tuple<bool,bool> TestTimeAdvancement (void);
 
 private:
   std::string m_name;
 
   fskit::Time m_currentFskitTime;
-  double m_currentGriddynTime;
+  fskit::Time m_grantedTime;
+  griddyn::coreTime m_currentGriddynTime;
 
-  std::shared_ptr<GriddynFskitRunner> m_griddyn;
+  std::shared_ptr<griddyn::fskitRunner> m_griddyn;
 };
 
 #endif

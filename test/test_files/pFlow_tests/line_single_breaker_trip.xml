@@ -11,7 +11,7 @@
    <time>2.05</time>
 </event>
 
-   <recorder field="auto,busgenerationreactive,busloadreactive" period=0.05>
+   <recorder field="auto,busgenerationreactive,busloadreactive" period="0.05">
    <autosave>1</autosave>
    <file>dynfault.csv</file>
    </recorder>

@@ -86,12 +86,12 @@ enum solver_flags : int
     extra_solver_flag5 = 20,
     extra_solver_flag6 = 21,
     extra_solver_flag7 = 22,
-	extra_solver_flag8 = 23,
-	extra_solver_flag9 = 24,
-	extra_solver_flag10=25,
-	extra_solver_flag11=26,
-	extra_solver_flag12=27,
-	print_residuals = 28,
+    extra_solver_flag8 = 23,
+    extra_solver_flag9 = 24,
+    extra_solver_flag10 = 25,
+    extra_solver_flag11 = 26,
+    extra_solver_flag12 = 27,
+    print_residuals = 28,
 };
 /** @brief class defining the data related to a specific solver
  the solverInterface class is the base class for solvers for the GridDyn power systems program
@@ -144,7 +144,7 @@ class solverInterface : public helperObject
     count_t svsize = 0;  //!< the state size
     count_t nnz = 0;  //!< the actual number of non-zeros in a Jacobian
     std::bitset<32> flags;  //!< flags for the solver
-	int lastErrorCode = 0;  //!< the last error Code
+    int lastErrorCode = 0;  //!< the last error Code
   public:
     /** @brief default constructor
      * @param[in] objName  the name of the solver
@@ -158,12 +158,16 @@ class solverInterface : public helperObject
     solverInterface (gridDynSimulation *gds, const solverMode &sMode);
 
     /** @brief make a copy of the solver interface
-    @param[in] si a shared ptr to an existing interface that data should be copied to
     @param[in] fullCopy set to true to initialize and copy over all data to the new object
-    @return a shared ptr to the clones solverInterface
+    @return a unique ptr to the clones solverInterface
     */
-    virtual std::shared_ptr<solverInterface>
-    clone (std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const;
+    virtual std::unique_ptr<solverInterface> clone (bool fullCopy = false) const;
+
+    /** @brief make a copy of the solver interface
+    @param[in] si a ptr to an existing interface that data should be copied to
+    @param[in] fullCopy set to true to initialize and copy over all data to the new object
+    */
+    virtual void cloneTo (solverInterface *si, bool fullCopy = false) const;
     /** @brief get a pointer to the state data
     @return a pointer to a double array with the state data
     */
@@ -371,5 +375,5 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
 */
 std::unique_ptr<solverInterface> makeSolver (const std::string &type, const std::string &name = "");
 
-}//namespace griddyn
+}  // namespace griddyn
 #endif

@@ -140,7 +140,7 @@ void schedulerRamp::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
 
 double schedulerRamp::getRamp () const
 {
-    double ramp=PRampCurr;
+    double ramp = PRampCurr;
     double diff = reserveUse - reserveAct;
     if (diff > 0.001)
     {
@@ -166,12 +166,12 @@ double schedulerRamp::getRampTime () const
         return (diff) / (-rampDown - PRampCurr);
     }
 
-        if (pTarget.empty ())
-        {
-            return static_cast<double>(kDayLength);
-        }
+    if (pTarget.empty ())
+    {
+        return static_cast<double> (kDayLength);
+    }
 
-        return (pTarget.front ()).time - prevTime;
+    return (pTarget.front ()).time - prevTime;
 }
 
 double schedulerRamp::getMax (const coreTime /*time*/) const { return Pmax; }

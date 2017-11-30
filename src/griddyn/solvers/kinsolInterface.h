@@ -33,10 +33,11 @@ class kinsolInterface : public sundialsInterface
     kinsolInterface (gridDynSimulation *gds, const solverMode &sMode);
     /** @brief destructor
      */
-    ~kinsolInterface ();
+    virtual ~kinsolInterface ();
 
-    virtual std::shared_ptr<solverInterface>
-    clone (std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;
@@ -50,21 +51,17 @@ class kinsolInterface : public sundialsInterface
     virtual void set (const std::string &param, double val) override;
     // wrapper functions used by kinsol and ida to call the internal functions
     friend int kinsolFunc (N_Vector state, N_Vector resid, void *user_data);
-    friend int
-    kinsolJacDense (long int Neq, N_Vector state, N_Vector resid, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
-#ifdef KLU_ENABLE
-    friend int kinsolJacSparse (N_Vector state, N_Vector resid, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
+    friend int kinsolJac (N_Vector state, N_Vector resid, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 
-#endif
   private:
     FILE *m_kinsolInfoFile = nullptr;  //!<direct file reference for input to the solver itself
     int kinsolPrintLevel = 1;  //!< print level for the solver
 #if MEASURE_TIMINGS > 0
-    double kinTime = 0;
-    double residTime = 0;
-    double jacTime = 0;
-    double jac1Time = 0;
-    double kinsol1Time = 0;
+    double kinTime = 0;  //!< the total time spent in kinsol
+    double residTime = 0;	//!< the total time spent in the residual calls
+    double jacTime = 0;	//!< the total time spent in the jacobian calls
+    double jac1Time = 0;	//!< the total time spent in the first jacobian call
+    double kinsol1Time = 0;	//!< the total time spent in kinsol
 #endif
 };
 

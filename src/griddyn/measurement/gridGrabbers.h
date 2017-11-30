@@ -37,14 +37,12 @@ public:
   //TODO:: convert to a bitset
   bool loaded = false;	//!< flag if the grabber is loaded
   bool vectorGrab = false;  //!< flag if the grabber is meant to grab a vector of data
-  bool useVoltage = false; //!< flag indicating use of the baseVoltage for unit conversion
   bool cloneable = true;  //!< flag indicating if the grabber is cloneable
   bool customDesc = false;	//!< flag indicating the grabber uses a custom description
   gridUnits::units_t outputUnits = gridUnits::defUnit; //!< the desired input units of the grabber
   gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< the units of the actual grabbed data
   double gain = 1.0;	//!< gain multiplier on the output data
   double bias = 0.0;	//!< bias shift on the output
-  double m_baseVoltage = 100; //!< the base voltage on the grabber if needed
 protected:
   mutable std::string desc;  //!< a description of the grabber
   coreObject *cobj = nullptr; //!< the target core object to grab the data from
@@ -60,7 +58,11 @@ public:
 	/** clone function
 	 *@param[in] ggb a pointer to another gridGrabber function if we are cloning on existing object
 	 *@return a shared_ptr to another GridGrabber*/
-  virtual std::shared_ptr<gridGrabber> clone (std::shared_ptr<gridGrabber> ggb = nullptr) const;
+  virtual std::unique_ptr<gridGrabber> clone () const;
+  /** cloneTo function
+  *@param[in] ggb a pointer to another gridGrabber function to clone the data to
+*/
+  virtual void cloneTo(gridGrabber *ggb) const;
 	/** update the field of grabber
 	 *@param[in]  fld the new field to capture
 	 *@throw unrecognized parameter exception*/
@@ -76,9 +78,11 @@ public:
 	 *@param[out] desc_list  the list of descriptions
 	 **/
   virtual coreTime getTime() const;
+  /** get a description of the grabber*/
   virtual void getDesc (std::vector<std::string > &desc_list) const;
-
+  /** get a single description of the grabber*/
   virtual const std::string &getDesc() const;
+  /** set the description text*/
   void setDescription(const std::string &newDesc)
   {
 	  desc = newDesc;
@@ -132,7 +136,8 @@ protected:
 public:
   functionGrabber ()=default;
   functionGrabber (std::shared_ptr<gridGrabber> ggb, std::string func);
-  virtual std::shared_ptr<gridGrabber> clone (std::shared_ptr<gridGrabber> ggb = nullptr) const override;
+  virtual std::unique_ptr<gridGrabber> clone() const override;
+  virtual void cloneTo(gridGrabber *ggb) const override;
   virtual double grabData () override;
   virtual void grabVectorData (std::vector<double> &vdata) override;
  virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
@@ -159,7 +164,8 @@ protected:
 public:
   opGrabber ()=default;
   opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGrabber> ggb2, std::string op);
-  virtual std::shared_ptr<gridGrabber> clone (std::shared_ptr<gridGrabber> ggb = nullptr) const override;
+  virtual std::unique_ptr<gridGrabber> clone() const override;
+  virtual void cloneTo(gridGrabber *ggb) const override;
   virtual double grabData () override;
   virtual void grabVectorData (std::vector<double> &vdata) override;
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;

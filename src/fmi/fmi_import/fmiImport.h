@@ -12,6 +12,7 @@
 
 #ifndef _FMI_IMPORT_H_
 #define _FMI_IMPORT_H_
+#pragma once
 
 #include "fmiInfo.h"
 
@@ -43,7 +44,7 @@ typedef struct {
 	fmi2ComponentEnvironment   componentEnvironment;
 } fmi2CallbackFunctions_nc;
 
-/**contains functions that do not require and fmi2Component*/
+/**container class that do not require an fmi2Component*/
 class fmiBaseFunctions
 {
 public:
@@ -53,7 +54,7 @@ public:
 };
 
 
-/**contains functions that are common to all FMU's*/
+/**container class for functions that are common to all FMU's*/
 class fmiCommonFunctions
 {
 public:
@@ -95,7 +96,7 @@ public:
 
 };
 
-/**contains functions that are specific to model exchange*/
+/**container class for functions that are specific to model exchange*/
 class fmiModelExchangeFunctions
 {
 public:
@@ -117,7 +118,7 @@ public:
 		std::shared_ptr<boost::dll::shared_library> lib;
 };
 
-/**contains functions that are specific to coSimuluation*/
+/**container class for functions that are specific to coSimuluation*/
 class fmiCoSimFunctions
 {
 public:
@@ -226,8 +227,14 @@ private: //private Variables
 	std::shared_ptr<fmiCoSimFunctions> CoSimFunctions;
 };
 
-
-void loggerFunc(fmi2ComponentEnvironment, fmi2String, fmi2Status, fmi2String, fmi2String, ...);
+/** logging function to capture log messages
+@details converts to a string then calls a component specific logging function
+@param[in] compEnv the environment of the logger
+@param[in] instanceName the name of the object
+@param[in] status the status of the message
+@param[in] message
+*/
+void loggerFunc(fmi2ComponentEnvironment compEnv, fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message, ...);
 
 
 

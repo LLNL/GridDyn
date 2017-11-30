@@ -1,28 +1,31 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2017, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2017, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
+
 
 #include "stringToCmdLine.h"
 #include "stringOps.h"
 
 namespace utilities
 {
-stringToCmdLine::stringToCmdLine (const std::string &cmdString) { load (cmdString); }
+stringToCmdLine::stringToCmdLine(const std::string &cmdString)
+{
+	load(cmdString);
+}
 
 static std::string nullstr;
 
 void stringToCmdLine::load (const std::string &cmdString)
 {
-    stringCap = stringOps::splitlineQuotes (cmdString, " \t\n\r", stringOps::default_quote_chars,
-                                            stringOps::delimiter_compression::on);
+	stringCap = stringOps::splitlineQuotes(cmdString, " \t\n\r", stringOps::default_quote_chars, stringOps::delimiter_compression::on);
 
     for (auto &str : stringCap)
     {
@@ -55,11 +58,8 @@ void stringToCmdLine::load (const std::string &cmdString)
         stringPtrs[ii] = &(stringCap[ii - 1][0]);
     }
     stringPtrs[0] = &(nullstr[0]);
+
 }
 
-}  // namespace utilities
-/*
-std::vector<std::string> stringCap;
-int argCount;
-std::vector<const char *> stringPtrs;
-*/
+} //namespace utilities
+

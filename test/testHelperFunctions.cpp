@@ -12,7 +12,7 @@
 
 #include "testHelper.h"
 #include "Load.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "simulation/diagnostics.h"
 #include "fileInput.h"
 #include <iostream>
@@ -106,6 +106,14 @@ void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 	gds->consolePrintLevel = print_level::no_print;
 	gds->run();
 	requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+}
+
+void gridDynSimulationTestFixture::runTestXML(const std::string &fileName, gridDynSimulation::gridState_t finalState)
+{
+	gds = readSimXMLFile(fileName);
+	gds->consolePrintLevel = print_level::no_print;
+	gds->run();
+	requireState(finalState);
 }
 
 
@@ -281,7 +289,7 @@ int runResidualCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &
 
 int runDerivativeCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, bool checkRequired)
 {
-	int mmatch = derivativeCheck(gds.get(), gds->getCurrentTime(),sMode);
+	int mmatch = derivativeCheck(gds.get(), gds->getSimulationTime(),sMode);
 	if (mmatch > 0)
 	{
 		printStateNames(gds.get(), sMode);
@@ -295,7 +303,7 @@ int runDerivativeCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode
 
 int runAlgebraicCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &sMode, bool checkRequired)
 {
-	int mmatch = algebraicCheck(gds.get(), gds->getCurrentTime(), sMode);
+	int mmatch = algebraicCheck(gds.get(), gds->getSimulationTime(), sMode);
 	if (mmatch > 0)
 	{
 		printStateNames(gds.get(), sMode);

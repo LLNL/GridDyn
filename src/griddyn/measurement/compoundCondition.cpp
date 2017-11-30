@@ -107,6 +107,7 @@ bool compoundCondition::evalCombinations (count_t trueCount) const
     switch (mode)
     {
     case compound_mode::c_and:
+	case compound_mode::c_all:
     default:
         return (trueCount == static_cast<count_t> (conditions.size ()));
     case compound_mode::c_any:
@@ -123,7 +124,12 @@ bool compoundCondition::evalCombinations (count_t trueCount) const
     case compound_mode::c_three_or_more:
         return (trueCount >= 3);
     case compound_mode::c_xor:
+	case compound_mode::c_odd:
         return ((trueCount & 0x01) == 1);
+	case compound_mode::c_even:
+		return ((trueCount & 0x01) == 0);
+	case compound_mode::c_even_min:
+		return ((trueCount!=0)&&((trueCount & 0x01) == 0));
     case compound_mode::c_none:
         return (trueCount == 0);
     }

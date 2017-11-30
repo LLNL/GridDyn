@@ -640,7 +640,7 @@ void acBus::reset (reset_levels level)
     }
 }
 
-double acBus::getAverageAngle ()
+double acBus::getAverageAngle () const
 {
     if (!attachedLinks.empty ())
     {
@@ -1298,15 +1298,15 @@ void acBus::set (const std::string &param, const std::string &val)
 
 void acBus::set (const std::string &param, double val, units_t unitType)
 {
-    if ((param == "voltage") || (param == "vol"))
+    if ((param == "voltage") || (param == "vol")||(param=="v")||(param=="vmag")||(param=="v0")||(param=="voltage0"))
     {
-        voltage = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        voltage = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
         if ((type == busType::PV) || (type == busType::SLK))
         {
             vTarget = voltage;
         }
     }
-    else if ((param == "angle") || (param == "ang"))
+    else if ((param == "angle") || (param == "ang")||(param=="a")||(param=="theta")||(param=="angle0"))
     {
         angle = unitConversion (val, unitType, rad);
         if ((type == busType::SLK) || (type == busType::afix))
@@ -1333,7 +1333,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "vtarget")
     {
-        vTarget = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        vTarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
         /*powerFlowAdjust the target in all the generators as well*/
         for (auto &gen : attachedGens)
         {
@@ -1354,12 +1354,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "qmin")
@@ -1372,12 +1372,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "pmax")
@@ -1390,12 +1390,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "pmin")
@@ -1408,12 +1408,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "vmax")
@@ -1426,12 +1426,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "autogenp")
     {
-        busController.autogenP = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        busController.autogenP = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         opFlags.set (use_autogen);
     }
     else if (param == "autogenq")
     {
-        busController.autogenQ = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        busController.autogenQ = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         opFlags.set (use_autogen);
     }
     else if (param == "autogendelay")
@@ -2814,7 +2814,7 @@ bool acBus::useVoltage (const solverMode &sMode) const
     return false;
 }
 
-count_t acBus::getDependencyCount (const solverMode &sMode)
+count_t acBus::getDependencyCount (const solverMode &sMode) const
 {
     count_t sum = 0;
     if (isDC (sMode))
@@ -2852,130 +2852,60 @@ count_t acBus::getDependencyCount (const solverMode &sMode)
     }
     return sum;
 }
-void acBus::loadSizes (const solverMode &sMode, bool dynOnly)
-{
-    if (isLoaded (sMode, dynOnly))
-    {
-        return;
-    }
-    auto &so = offsets.getOffsets (sMode);
-    if (!isEnabled ())
-    {
-        so.reset ();
-        so.stateLoaded = true;
-        so.rjLoaded = true;
-        return;
-    }
-    if (dynOnly)
-    {
-        so.rootAndJacobianCountReset ();
-    }
-    else
-    {
-        so.reset ();
-    }
-    if (hasAlgebraic (sMode))
-    {
-        so.local.aSize = 1;
-        if (isDC (sMode))
-        {
-            so.local.jacSize = 1 + getDependencyCount (sMode);
-        }
-        else
-        {
-            so.local.vSize = 1;
-            so.local.jacSize = 4 + getDependencyCount (sMode);
-        }
-        // check for slave bus mode
-        if (opFlags[slave_bus])
-        {
-            so.local.vSize = 0;
-            so.local.aSize = 0;
-            so.local.jacSize -= (isDC (sMode)) ? 1 : 4;
-        }
-    }
 
-    if (dynOnly)
-    {
-        so.total.algRoots = so.local.algRoots;
-        so.total.diffRoots = so.local.diffRoots;
-        so.total.jacSize = so.local.jacSize;
-    }
-    else
-    {
-        so.localLoad (false);
-    }
-    if (isExtended (sMode))  // in extended state mode we have P and Q as states
-    {
-        if (isDC (sMode))
-        {
-            so.total.algSize = so.local.algSize = 1;
-        }
-        else
-        {
-            so.total.algSize = so.local.algSize = 2;
-        }
-    }
-    else
-    {
-        for (auto ld : attachedLoads)
-        {
-            if (!(ld->isLoaded (sMode, dynOnly)))
-            {
-                ld->loadSizes (sMode, dynOnly);
-            }
-            if (dynOnly)
-            {
-                so.addRootAndJacobianSizes (ld->getOffsets (sMode));
-            }
-            else
-            {
-                so.addSizes (ld->getOffsets (sMode));
-            }
-        }
-        for (auto gen : attachedGens)
-        {
-            if (!(gen->isLoaded (sMode, dynOnly)))
-            {
-                gen->loadSizes (sMode, dynOnly);
-            }
-            if (dynOnly)
-            {
-                so.addRootAndJacobianSizes (gen->getOffsets (sMode));
-            }
-            else
-            {
-                so.addSizes (gen->getOffsets (sMode));
-            }
-        }
-    }
-    if ((fblock) && (isDynamic (sMode)))
-    {
-        if (!(fblock->isLoaded (sMode, dynOnly)))
-        {
-            fblock->loadSizes (sMode, dynOnly);
-        }
-        if (dynOnly)
-        {
-            so.addRootAndJacobianSizes (fblock->getOffsets (sMode));
-        }
-        else
-        {
-            so.addSizes (fblock->getOffsets (sMode));
-        }
-    }
-    if (!dynOnly)
-    {
-        so.stateLoaded = true;
-    }
-    so.rjLoaded = true;
-    /*if (!isDynamic(sMode))
-    {
-    if (stateSize(sMode)>2)
-    {
-    printf("%s %d has statesize=%d\n",name.c_str(),id, stateSize(sMode));
-    }
-    }*/
+
+stateSizes acBus::LocalStateSizes(const solverMode &sMode) const
+{
+	stateSizes busSS;
+	if (hasAlgebraic(sMode))
+	{
+		busSS.aSize = 1;
+		if (isAC(sMode))
+		{
+			busSS.vSize = 1;
+		}
+		// check for slave bus mode
+		if (opFlags[slave_bus])
+		{
+			busSS.vSize = 0;
+			busSS.aSize = 0;
+		}
+
+		if (isExtended(sMode))  // in extended state mode we have P and Q as states
+		{
+			if (isDC(sMode))
+			{
+				busSS.algSize = 1;
+			}
+			else
+			{
+				busSS.algSize = 2;
+			}
+		}
+	}
+	return busSS;
+}
+
+count_t acBus::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (hasAlgebraic(sMode))
+	{
+		if (isDC(sMode))
+		{
+			jacSize = 1 + getDependencyCount(sMode);
+		}
+		else
+		{
+			jacSize = 4 + getDependencyCount(sMode);
+		}
+		// check for slave bus mode
+		if (opFlags[slave_bus])
+		{
+			jacSize -= (isDC(sMode)) ? 1 : 4;
+		}
+	}
+	return jacSize;
 }
 
 int acBus::getMode (const solverMode &sMode) const
@@ -3196,7 +3126,7 @@ double acBus::get (const std::string &param, units_t unitType) const
     double val = kNullVal;
     if (param == "vtarget")
     {
-        val = unitConversionPower (vTarget, puV, unitType, systemBasePower, baseVoltage);
+        val = unitConversionPower (vTarget, puV, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "atarget")
     {

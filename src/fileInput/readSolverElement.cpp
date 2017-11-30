@@ -11,7 +11,7 @@
 */
 
 #include "elementReaderTemplates.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "readElement.h"
 #include "solvers/solverInterface.h"

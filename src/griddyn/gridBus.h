@@ -91,16 +91,19 @@ class gridBus : public gridPrimary
 	  busType type = busType::PQ;  //!< [busType] bus type: PV, PQ, or slack/swing
 	  dynBusType dynType = dynBusType::normal;  //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types
 												//!as for power flow but for dynamic simulations
-    objVector<Load *> attachedLoads;  //!<  list of all the loads
+	  //2 byte gap here
+	  double angle = 0.0;  //!< [rad]     voltage angle
+	  double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
+	  double freq = 1.0;  //!<[puHz] estimated actual frequency
+	  busPowers S;  //!< storage for the power computation from the various sources;
+	  objVector<Generator *> attachedGens;  //!< list of the attached generators
+	 objVector<Load *> attachedLoads;  //!<  list of all the loads
     objVector<Link *> attachedLinks;  //!< list of the attached links
-    objVector<Generator *> attachedGens;  //!< list of the attached generators
-	busPowers S;  //!< storage for the power computation from the various sources;
+    
 	IOdata outputs;  //!< the current output values
 	IOlocs outLocs;  //!< the current output locations
-    double angle = 0.0;  //!< [rad]     voltage angle
-    double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
-	double freq = 1.0;  //!<[puHz] estimated actual frequency
-    parameter_t baseVoltage = 120;  //!< [kV]    base voltage level
+  
+    parameter_t localBaseVoltage = 120;  //!< [kV]    base voltage level
     
     parameter_t Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
     parameter_t Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
@@ -162,7 +165,7 @@ class gridBus : public gridPrimary
     /** @brief  disconnect the bus*/
     virtual void disconnect () override;
     /** @brief  reconnect the bus
-    @param[in] mapBus  a bus to pick of startup parameters from*/
+    @param[in] mapBus  a bus to pick of startup parameters from can be nullptr*/
     virtual void reconnect (gridBus *mapBus);
     virtual void reconnect () override;
     // parameter set functions

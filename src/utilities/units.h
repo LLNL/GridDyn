@@ -122,12 +122,12 @@ units_t getUnits (const std::string &unitString, units_t defValue = defUnit);
 @param[in] in the units of val
 @param[in] out the units of the desired result
 @param[in] basePower  the basePower when converting from pu values
-@param[in] baseVoltage  the base Voltage to use when converting to and from pu values
+@param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
 double
-unitConversion (double val, const units_t in, const units_t out, double basePower = 100, double baseVoltage = 100);
+unitConversion (double val, const units_t in, const units_t out, double basePower = 100, double localBaseVoltage = 100);
 
 /** @brief convert between units of Time
 @param[in] val  the value of the property in input units
@@ -143,7 +143,7 @@ double unitConversionTime (double val, const units_t in, const units_t out);
 @param[in] in the units of val
 @param[in] out the units of the desired result
 @param[in] basePower  the basePower when converting from pu values
-@param[in] baseVoltage  the base Voltage to use when converting to and from pu values
+@param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
@@ -152,7 +152,7 @@ double unitConversionPower (double val,
                             const units_t in,
                             const units_t out,
                             double basePower = 100,
-                            double baseVoltage = 100);
+                            double localBaseVoltage = 100);
 
 /** @brief convert a number between units of distance
 @param[in] val  the value of the property in input units

@@ -12,7 +12,7 @@
 */
 
 #include "fskitCommunicator.h"
-#include "GridDynFskitRunner.h"
+#include "fskitRunner.h"
 #include "core/factoryTemplates.hpp"
 #include "griddyn-tracer.h"
 
@@ -45,7 +45,7 @@ extern "C" {
 
 #endif
 
-		auto GridDyn = std::make_shared<GriddynFskitRunner>();
+		auto GridDyn = std::make_shared<griddyn::fskitRunner>();
 
 		// Not running with FSKIT.
 		std::shared_ptr<fskit::GrantedTimeWindowScheduler> scheduler(nullptr);

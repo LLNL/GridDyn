@@ -13,7 +13,7 @@
 #include "interpolatingPlayer.h"
 #include "core/objectInterpreter.h"
 #include "utilities/stringOps.h"
-#include "core/helperTemplates.hpp"
+
 #include "core/coreExceptions.h"
 #include <sstream>
 
@@ -32,23 +32,30 @@ interpolatingPlayer::interpolatingPlayer(coreTime time0, double loopPeriod) : Pl
 }
 
 
-interpolatingPlayer::interpolatingPlayer(EventInfo &gdEI, coreObject *rootObject) : Player(gdEI, rootObject)
+interpolatingPlayer::interpolatingPlayer(const EventInfo &gdEI, coreObject *rootObject) : Player(gdEI, rootObject)
 {
 
 }
 
-std::shared_ptr<Event> interpolatingPlayer::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> interpolatingPlayer::clone() const
 {
-	auto gp = cloneBaseStack<interpolatingPlayer, Player>(this, gE);
-	if (!gp)
+	std::unique_ptr<Event> upE = std::make_unique<interpolatingPlayer>(getName());
+	interpolatingPlayer::cloneTo(upE.get());
+	return upE;
+}
+
+void interpolatingPlayer::cloneTo(Event *gE) const
+{
+	Player::cloneTo(gE);
+	auto nE = dynamic_cast<interpolatingPlayer *>(gE);
+	if (nE == nullptr)
 	{
-		return gE;
+		return;
 	}
-	gp->slopeField = slopeField;
-	gp->useSlopeField = useSlopeField;
-	return gp;
-}
+	nE->slopeField = slopeField;
+	nE->useSlopeField = useSlopeField;
 
+}
 
 void interpolatingPlayer::set(const std::string &param, double val)
 {

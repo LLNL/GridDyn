@@ -30,7 +30,7 @@
 
 namespace griddyn
 {
-gridSimulation::gridSimulation (const std::string &objName) : Area (objName)
+gridSimulation::gridSimulation (const std::string &objName) : Area (objName), simulationTime(timeZero)
 {
     EvQ = std::make_unique<eventQueue> ();
 #ifdef DISABLE_MULTITHREADING
@@ -71,7 +71,7 @@ coreObject *gridSimulation::clone (coreObject *obj) const
     sim->maxUpdateTime = maxUpdateTime;  //(s) max time period to go between updates
     sim->absTime = absTime;  // [s] seconds in unix time;
 
-    EvQ->clone (sim->EvQ.get ());
+    EvQ->cloneTo (sim->EvQ.get ());
     sim->EvQ->mapObjectsOnto (sim);
     // TODO:: mapping the collectors
     return sim;
@@ -298,6 +298,11 @@ std::shared_ptr<collector> gridSimulation::findCollector (const std::string &col
             return col;
         }
     }
+	auto ind = stringOps::trailingStringInt(collectorName);
+	if (isValidIndex(ind, collectorList))
+	{
+		return collectorList[ind];
+	}
     return nullptr;
 }
 
@@ -346,7 +351,7 @@ void gridSimulation::log (coreObject *object, print_level level, const std::stri
     }
 }
 
-/* *INDENT-OFF* */
+
 static const std::map<int, std::string> alertStrings{
   {TRANSLINE_ANGLE_TRIP, "angle limit trip"},
   {TRANSLINE_LIMIT_TRIP, "transline limit trip"},
@@ -383,7 +388,7 @@ static const std::map<int, std::string> alertStrings{
   {BREAKER_RECLOSE, "breaker reclose"},
 
 };
-/* *INDENT-ON* */
+
 
 void gridSimulation::alert (coreObject *object, int code)
 {
@@ -467,7 +472,7 @@ double gridSimulation::get (const std::string &param, gridUnits::units_t unitTyp
     }
     else if ((param == "currenttime") || (param == "time"))
     {
-        fval = gridUnits::unitConversionTime (getCurrentTime (), gridUnits::sec, unitType);
+        fval = gridUnits::unitConversionTime (getSimulationTime(), gridUnits::sec, unitType);
     }
     else if (param == "starttime")
     {

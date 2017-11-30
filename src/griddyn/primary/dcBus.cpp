@@ -70,83 +70,48 @@ void dcBus::pFlowObjectInitializeB ()
     propogatePower ();
 }
 
-void dcBus::loadSizes (const solverMode &sMode, bool dynOnly)
+
+stateSizes dcBus::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
-    if (!isEnabled ())
-    {
-        so.reset ();
-        so.stateLoaded = true;
-        so.rjLoaded = true;
-        return;
-    }
-    if (dynOnly)
-    {
-        if (so.rjLoaded)
-        {
-            return;
-        }
-        so.rootAndJacobianCountReset ();
-    }
-    else
-    {
-        if (so.stateLoaded)
-        {
-            return;
-        }
-        so.reset ();
-    }
-    if (hasAlgebraic (sMode))
-    {
-        so.local.aSize = 0;
-        so.local.vSize = 1;
-        so.local.jacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size ());
-    }
-    if (dynOnly)
-    {
-        so.total.algRoots = so.local.algRoots;
-        so.total.diffRoots = so.local.diffRoots;
-        so.total.jacSize = so.local.jacSize;
-    }
-    else
-    {
-        so.localLoad (false);
-    }
-    for (auto ld : attachedLoads)
-    {
-        if (!(ld->isLoaded (sMode, dynOnly)))
-        {
-            ld->loadSizes (sMode, dynOnly);
-        }
-        if (dynOnly)
-        {
-            so.addRootAndJacobianSizes (ld->getOffsets (sMode));
-        }
-        else
-        {
-            so.addSizes (ld->getOffsets (sMode));
-        }
-    }
-    for (auto gen : attachedGens)
-    {
-        if (!(gen->isLoaded (sMode, dynOnly)))
-        {
-            gen->loadSizes (sMode, dynOnly);
-        }
-        if (dynOnly)
-        {
-            so.addRootAndJacobianSizes (gen->getOffsets (sMode));
-        }
-        else
-        {
-            so.addSizes (gen->getOffsets (sMode));
-        }
-    }
-    if (!dynOnly)
-    {
-        so.stateLoaded = true;
-    }
-    so.rjLoaded = true;
+	stateSizes busSS;
+	if (hasAlgebraic(sMode))
+	{
+		busSS.vSize = 1;
+		
+		// check for slave bus mode
+		if (opFlags[slave_bus])
+		{
+			busSS.vSize = 0;
+		}
+
+		if (isExtended(sMode))  // in extended state mode we have P and Q as states
+		{
+			if (isDC(sMode))
+			{
+				busSS.algSize = 1;
+			}
+			else
+			{
+				busSS.algSize = 2;
+			}
+		}
+	}
+	return busSS;
+}
+
+count_t dcBus::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (hasAlgebraic(sMode))
+	{
+		jacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size());
+		// check for slave bus mode
+		if (opFlags[slave_bus])
+		{
+			jacSize -= 1;
+		}
+	}
+	return jacSize;
 }
 
 change_code dcBus::powerFlowAdjust (const IOdata & /*inputs*/, std::uint32_t flags, check_level_t level)
@@ -342,7 +307,7 @@ void dcBus::set (const std::string &param, const std::string &val)
 
 void dcBus::set (const std::string &param, double val, units_t unitType)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else

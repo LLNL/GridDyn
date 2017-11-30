@@ -1,25 +1,30 @@
 /*
+Copyright (C) 2017, Battelle Memorial Institute
+All rights reserved.
+
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute; the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+*/
+/*
 * LLNS Copyright Start
 * Copyright (c) 2017, Lawrence Livermore National Security
 * This work was performed under the auspices of the U.S. Department
 * of Energy by Lawrence Livermore National Laboratory in part under
 * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 * Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
+* All rights reserved..
 * LLNS Copyright End
 */
 
 #ifndef ZMQREACTOR_H_
 #define ZMQREACTOR_H_
 #include "zmqSocketDescriptor.h"
-#include "utilities/simpleQueue.hpp"
+#include "simpleQueue.hpp"
 #include <memory>
+#include <queue>
+#include <mutex>
 #include <thread>
 #include <atomic>
 
-namespace zmqlib
-{
 class zmqContextManager;
 
 
@@ -28,12 +33,13 @@ class zmqContextManager;
 class zmqReactor
 {
 private:
+    /** enumeration of possible reactor instructions*/
 	enum class reactorInstruction :int
 	{
-		newSocket,
-		close,
-		modify,
-		terminate,
+		newSocket, //!< add a new socket
+		close,  //!< close an existing socket
+		modify, //!<modify an existing socket
+		terminate,  //!< terminate the socket
 	};
 	static std::vector<std::shared_ptr<zmqReactor>> reactors; //!< container for pointers to all the available contexts
 
@@ -48,18 +54,21 @@ private:
 	zmqReactor(const std::string &reactorName, const std::string &context);
 	std::atomic<bool> reactorLoopRunning{ false };
 public:
-	static std::shared_ptr<zmqReactor> getReactorInstance(const std::string &reactorName, const std::string &context="");
+	static std::shared_ptr<zmqReactor> getReactorInstance(const std::string &reactorName, const std::string &contextName="");
 
 
 	~zmqReactor();
 
 	void addSocket(const zmqSocketDescriptor &desc);
 	void modifySocket(const zmqSocketDescriptor &desc);
-	void closeSocket(const std::string &name);
+    /** asyncrhonous call to close a specific socket
+    @param socketName the name of the socket to close
+    */
+	void closeSocket(const std::string &socketName);
 
 	void addSocketBlocking(const zmqSocketDescriptor &desc);
 	void modifySocketBlocking(const zmqSocketDescriptor &desc);
-	void closeSocketBlocking(const std::string &name);
+	void closeSocketBlocking(const std::string &socketName);
 
 	const std::string &getName() const
 	{
@@ -71,7 +80,5 @@ private:
 	void reactorLoop();
 
 };
-
-} //zmqlib
 #endif
 

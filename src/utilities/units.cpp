@@ -64,7 +64,7 @@ week	= 405
 
 namespace gridUnits
 {
-/* *INDENT-OFF* */
+
 static std::map<std::string, units_t> name2Unit{
   {"mw", MW},
   {"mws", MW},
@@ -223,7 +223,7 @@ const static std::map<units_t, std::string> unit2Name{
   {K, "K"},
 };
 
-/* *INDENT-ON* */
+
 // function to convert a string to a unit enumeration value
 
 std::string to_string (units_t unitType) { return mapFind (unit2Name, unitType, std::string ("unknown")); }
@@ -287,12 +287,16 @@ static const std::map<units_t, units_type_t> unit2Type{std::make_pair (MW, elect
                                                        std::make_pair (F, temperature),
                                                        std::make_pair (K, temperature)};
 
+inline bool isPu(const units_t in)
+{
+	return ((in >= pu) && (static_cast<int>(in) < 200));
+}
 inline bool conversionNotNeeded (const units_t in, const units_t out)
 {
-    return ((in == defUnit) || (in == out) || (out == defUnit));
+    return ((in == defUnit) || (in == out) || (out == defUnit)||(isPu(in)&&(out==pu)));
 }
 
-double unitConversionPower (double val, const units_t in, const units_t out, double basePower, double baseVoltage)
+double unitConversionPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -327,11 +331,11 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
             ret = val * 1000.0 * basePower;
             break;
         case Ohm:
-            ret = baseVoltage * baseVoltage /
+            ret = localBaseVoltage * localBaseVoltage /
                   (val * basePower);  // the factors of 1000000 cancel out on top and bottomw
             break;
         case Amp:
-            ret = 1000 * val * basePower / baseVoltage;
+            ret = 1000 * val * basePower / localBaseVoltage;
             break;
         case puMW:
         case pu:
@@ -341,17 +345,17 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
             ret = val;
             break;
         case kV:
-            ret = val * baseVoltage;
+            ret = val * localBaseVoltage;
             break;
         case Volt:
-            ret = val * baseVoltage * 1000.0;
+            ret = val * localBaseVoltage * 1000.0;
             break;
         default:
             break;
         }
         break;
     case puV:
-        val = val * baseVoltage;  // convert to kV --baseVoltage is defined in kV
+        val = val * localBaseVoltage;  // convert to kV --localBaseVoltage is defined in kV
 		FALLTHROUGH
     case kV:
         val = val * 1000.0;  // convert to V
@@ -366,21 +370,22 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
             ret = val / 1000.0;
             break;
         case puV:
-            ret = val / baseVoltage / 1000.0;
+		case pu:
+            ret = val / localBaseVoltage / 1000.0;
             break;
         default:
             break;
         }
         break;
     case Ohm:
-        val = val / (basePower * 1000000.0 / baseVoltage / baseVoltage);  // convert to puOhms
+        val = val / (basePower * 1000000.0 / localBaseVoltage / localBaseVoltage);  // convert to puOhms
 		FALLTHROUGH
     case puOhm:
 
         switch (out)
         {
         case Ohm:
-            ret = val * (baseVoltage * baseVoltage / basePower);
+            ret = val * (localBaseVoltage * localBaseVoltage / basePower);
             break;
         case MW:
             ret = basePower / val;
@@ -392,7 +397,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
             ret = basePower / val * 1000000.0;
             break;
         case Amp:
-            ret = 1 / val * (basePower * 1000000.0 / baseVoltage);
+            ret = 1 / val * (basePower * 1000000.0 / localBaseVoltage);
             break;
         case puMW:
         case pu:
@@ -409,7 +414,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         }
         break;
     case Amp:
-        val = val * baseVoltage / basePower / 1000.0;  // convert to puA
+        val = val * localBaseVoltage / basePower / 1000.0;  // convert to puA
 		FALLTHROUGH
     case puA:
 
@@ -420,7 +425,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         case Watt:
         case Ohm:
         case Amp:
-            ret = 1000.0 * val * (basePower / baseVoltage);
+            ret = 1000.0 * val * (basePower / localBaseVoltage);
             break;
         case puMW:
         case pu:
@@ -880,7 +885,7 @@ double unitConversionCost (double val, const units_t in, const units_t out, doub
     return ret;
 }
 
-double unitConversion (double val, const units_t in, const units_t out, double basePower, double baseVoltage)
+double unitConversion (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -895,7 +900,7 @@ double unitConversion (double val, const units_t in, const units_t out, double b
     switch (utype)
     {
     case electrical:
-        ret = unitConversionPower (val, in, out, basePower, baseVoltage);
+        ret = unitConversionPower (val, in, out, basePower, localBaseVoltage);
         break;
     case rotation:
         if (basePower == 50.0)

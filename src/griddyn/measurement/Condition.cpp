@@ -105,7 +105,7 @@ make_condition (const std::string &field, comparison_type comp, double level, co
     try
     {
         auto gset = std::make_shared<grabberSet> (field, rootObject);
-        auto gc = std::make_unique<Condition> (gset);
+        auto gc = std::make_unique<Condition> (std::move(gset));
         gc->setConditionRHS (level);
 
         gc->setComparison (comp);
@@ -122,13 +122,15 @@ make_condition (const std::string &field, comparison_type comp, double level, co
 Condition::Condition (std::shared_ptr<grabberSet> valGrabber) : conditionLHS (std::move (valGrabber)) {}
 Condition::~Condition () = default;
 
-std::shared_ptr<Condition> Condition::clone (std::shared_ptr<Condition> gc) const
+std::unique_ptr<Condition> Condition::clone() const
 {
-    auto ngc = std::move (gc);
-    if (!ngc)
-    {
-        ngc = std::make_shared<Condition> ();
-    }
+	std::unique_ptr<Condition> ngcP=std::make_unique<Condition>();
+	cloneTo(ngcP.get());
+	return ngcP;
+}
+
+void Condition::cloneTo (Condition *ngc) const
+{
     ngc->m_constant = m_constant;
     ngc->m_margin = m_margin;
     ngc->m_constRHS = m_constRHS;
@@ -137,17 +139,28 @@ std::shared_ptr<Condition> Condition::clone (std::shared_ptr<Condition> gc) cons
 
     if (conditionLHS)
     {
-        ngc->conditionLHS = conditionLHS->clone (ngc->conditionLHS);
+		if (ngc->conditionLHS)
+		{
+			conditionLHS->cloneTo(ngc->conditionLHS.get());
+		}
+		else
+		{
+			ngc->conditionLHS = conditionLHS->clone();
+		}
+       
     }
 
     if (!m_constRHS)
     {
-        if (conditionRHS)
-        {
-            ngc->conditionRHS = conditionRHS->clone (ngc->conditionRHS);
-        }
+		if (ngc->conditionRHS)
+		{
+			conditionRHS->cloneTo(ngc->conditionRHS.get());
+		}
+		else
+		{
+			ngc->conditionRHS = conditionRHS->clone();
+		}
     }
-    return ngc;
 }
 
 void Condition::setConditionLHS (std::shared_ptr<grabberSet> valGrabber)

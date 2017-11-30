@@ -11,7 +11,7 @@
  */
 
 #include "core/objectFactory.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "Relay.h"
 #include "simulation/diagnostics.h"
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE (deadband_block_test)
     BOOST_REQUIRE_EQUAL (mmatch, 0);
     gds->set ("recorddirectory", BLOCK_TEST_DIRECTORY);
     gds->run ();
-    BOOST_REQUIRE_GT (double(gds->getCurrentTime ()), 7.9);
+    BOOST_REQUIRE_GT (double(gds->getSimulationTime()), 7.9);
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");
     timeSeriesMulti<> ts3;
@@ -287,11 +287,11 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_block_test, data::
     }
 
     gds->run ();
-    if (gds->getCurrentTime () < 7.99)
+    if (gds->getSimulationTime() < 7.99)
     {
         runJacobianCheck (gds, cDaeSolverMode);
         runResidualCheck (gds, cDaeSolverMode);
-        BOOST_REQUIRE_MESSAGE (gds->getCurrentTime () > 7.99, "Block " << plist.first << " failed to solve");
+        BOOST_REQUIRE_MESSAGE (gds->getSimulationTime() > 7.99, "Block " << plist.first << " failed to solve");
     }
 
     std::string recname = std::string (BLOCK_TEST_DIRECTORY "blocktest.dat");

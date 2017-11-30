@@ -12,7 +12,7 @@
 
 #include "Event.h"
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "utilities/units.h"
 #include "core/objectInterpreter.h"
 #include "core/factoryTemplates.hpp"
@@ -42,7 +42,7 @@ static childClassFactory<interpolatingPlayer, Event> interpPlay(std::vector<std:
 static childClassFactory<reversibleEvent, Event> revEvnt(std::vector<std::string>{"reversible", "undo", "rollback"});
 }//namespace events
 
-Event::Event(const std::string &eventName):helperObject(eventName),triggerTime(maxTime)
+Event::Event(const std::string &eventName):helperObject(eventName),triggerTime(negTime)
 {
 	eventId=static_cast<count_t>(getID());
 }
@@ -52,13 +52,13 @@ Event::Event (coreTime time0): triggerTime(time0)
 	eventId=static_cast<count_t>(getID());
 }
 
-Event::Event(EventInfo &gdEI, coreObject *rootObject)
+Event::Event(const EventInfo &gdEI, coreObject *rootObject)
 {
 	eventId = static_cast<count_t>(getID());
 	Event::updateEvent(gdEI, rootObject);
 }
 
-void Event::updateEvent(EventInfo &gdEI, coreObject *rootObject)
+void Event::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
 {
 	if (!gdEI.description.empty())
 	{
@@ -138,36 +138,31 @@ void Event::loadField(coreObject *searchObj, const std::string &newfield)
 		m_obj = fdata.m_obj;
 		if (getName().empty())
 		{
-			setName(m_obj->getName());
+			setName(m_obj->getName()+":"+field);
 		}
 		
 	}
 	armed = checkArmed();
 }
 
-std::shared_ptr<Event> Event::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> Event::clone() const
 {
+	std::unique_ptr<Event> upE = std::make_unique<Event>(getName());
+	cloneTo(upE.get());
+	return upE;
+}
 
-	auto nE = std::move(gE);
-	if (!nE)
-	{
-		nE = std::make_shared<Event>(getName());
-		
-	}
-	else
-	{
-		nE->setName(getName());
-	}
-  nE->value = value;
-  nE->field = field;
-  nE->armed = armed;
-  nE->m_obj = m_obj;
-  nE->resettable = resettable;
-  nE->reversable = reversable;
-  nE->initRequired = initRequired;
-  nE->unitType = unitType;
-  nE->triggerTime = triggerTime;
-  return nE;
+void Event::cloneTo(Event *evnt) const
+{
+	evnt->value = value;
+	evnt->field = field;
+	evnt->armed = armed;
+	evnt->m_obj = m_obj;
+	evnt->resettable = resettable;
+	evnt->reversable = reversable;
+	evnt->initRequired = initRequired;
+	evnt->unitType = unitType;
+	evnt->triggerTime = triggerTime;
 }
 
 void Event::setFlag(const std::string &flag, bool val)

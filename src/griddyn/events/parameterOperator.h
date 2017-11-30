@@ -9,12 +9,12 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#pragma once
+
 #ifndef PARAMETER_OPERATOR_H_
 #define PARAMETER_OPERATOR_H_
-
+#pragma once
 // headers
-//#include "griddyn.h"
+//#include "gridDynSimulation.h"
 
 #include "core/coreDefinitions.hpp"
 #include "core/helperObject.h"
@@ -25,8 +25,7 @@
 namespace griddyn
 {
 class gridComponent;
-/** basic event class enabling a property change in an object
-eventInterface, objectOperatorInterface are pure virtual interfaces
+/** a class defining a parameter to change as part of a sequence or other operation
 */
 class parameterOperator : public helperObject, public objectOperatorInterface
 {
@@ -52,8 +51,10 @@ protected:
 	void checkField();
 };
 
+/** construct a parameter operator object from a field and root object*/
 std::unique_ptr<parameterOperator> make_parameterOperator(const std::string &param, gridComponent *rootObject);
 
+/** helper class defining a set of parameters for various operations*/
 class parameterSet
 {
 private:

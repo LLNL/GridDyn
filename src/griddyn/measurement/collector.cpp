@@ -39,41 +39,61 @@ collector::collector (const std::string &collectorName)
 {
 }
 
-std::shared_ptr<collector> collector::clone (std::shared_ptr<collector> gr) const
+std::unique_ptr<collector> collector::clone() const
 {
-    std::shared_ptr<collector> nrec = std::move (gr);
-    if (!nrec)
-    {
-        nrec = std::make_shared<collector> (triggerTime, timePeriod);
-    }
-    nrec->reqPeriod = reqPeriod;
-    nrec->timePeriod = timePeriod;
-    nrec->setName (getName ());
-    nrec->startTime = startTime;
-    nrec->stopTime = stopTime;
-    nrec->triggerTime = triggerTime;
-    nrec->lastTriggerTime = lastTriggerTime;
+	auto col = std::make_unique<collector>();
+	cloneTo(col.get());
+	return col;
+}
+
+void collector::cloneTo (collector *col) const
+{
+   
+	col->reqPeriod = reqPeriod;
+	col->timePeriod = timePeriod;
+	col->setName (getName ());
+	col->startTime = startTime;
+	col->stopTime = stopTime;
+	col->triggerTime = triggerTime;
+	col->lastTriggerTime = lastTriggerTime;
     for (size_t kk = 0; kk < points.size (); ++kk)
     {
-        if (kk >= nrec->points.size ())
+        if (kk >= col->points.size ())
         {
             auto ggb = (points[kk].dataGrabber) ? points[kk].dataGrabber->clone () : nullptr;
             auto ggbst = (points[kk].dataGrabberSt) ? points[kk].dataGrabberSt->clone () : nullptr;
-            nrec->points.emplace_back (ggb, ggbst, points[kk].column);
+			col->points.emplace_back (std::move(ggb), std::move(ggbst), points[kk].column);
         }
         else
         {
-            nrec->points[kk].dataGrabber = (points[kk].dataGrabber) ?
-                                             points[kk].dataGrabber->clone (nrec->points[kk].dataGrabber) :
-                                             nrec->points[kk].dataGrabber;
-            nrec->points[kk].dataGrabberSt = (points[kk].dataGrabberSt) ?
-                                               points[kk].dataGrabberSt->clone (nrec->points[kk].dataGrabberSt) :
-                                               nrec->points[kk].dataGrabberSt;
-            nrec->points[kk].column = points[kk].column;
+			if (col->points[kk].dataGrabber)
+			{
+				if (points[kk].dataGrabber)
+				{
+					points[kk].dataGrabber->cloneTo(col->points[kk].dataGrabber.get());
+				}
+			}
+			else if (points[kk].dataGrabber)
+			{
+				col->points[kk].dataGrabber = points[kk].dataGrabber->clone();
+			}
+            
+			if (col->points[kk].dataGrabberSt)
+			{
+				if (points[kk].dataGrabberSt)
+				{
+					points[kk].dataGrabberSt->cloneTo(col->points[kk].dataGrabberSt.get());
+				}
+			}
+			else if (points[kk].dataGrabberSt)
+			{
+				col->points[kk].dataGrabberSt = points[kk].dataGrabberSt->clone();
+			}
+          
+			col->points[kk].column = points[kk].column;
         }
     }
-    nrec->data.resize (data.size ());
-    return nrec;
+	col->data.resize (data.size ());
 }
 
 void collector::updateObject (coreObject *gco, object_update_mode mode)
@@ -272,7 +292,7 @@ count_t collector::grabData(double *data_, index_t N)
 		if (datapoint.dataGrabber->vectorGrab)
 		{
 			datapoint.dataGrabber->grabVectorData(vals);
-			if (datapoint.column + vals.size() < N)
+			if (static_cast<index_t>(datapoint.column + vals.size()) < N)
 			{
 				std::copy(vals.begin(), vals.end(), data_ + datapoint.column);
 				currentCount = (std::max)(currentCount, datapoint.column + static_cast<index_t>(vals.size()));
@@ -433,19 +453,19 @@ void collector::add (std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrab
 
 // a notification that something was added much more useful in derived classes
 void collector::dataPointAdded (const collectorPoint & /*cp*/) {}
-void collector::add (gridGrabberInfo *gdRI, coreObject *obj)
+void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
 {
-    if (gdRI->field.empty ())  // any field specification overrides the offset
+    if (gdRI.field.empty ())  // any field specification overrides the offset
     {
-        if (gdRI->offset > 0)
+        if (gdRI.offset > 0)
         {
-            auto ggb = createGrabber (gdRI->offset, obj);
-            // auto sst = makeStateGrabbers(gdRI->offset, obj);
+            auto ggb = createGrabber (gdRI.offset, obj);
+            // auto sst = makeStateGrabbers(gdRI.offset, obj);
             if (ggb)
             {
-                ggb->bias = gdRI->bias;
-                ggb->gain = gdRI->gain;
-                return add (std::shared_ptr<gridGrabber> (std::move (ggb)), gdRI->column);
+                ggb->bias = gdRI.bias;
+                ggb->gain = gdRI.gain;
+                return add (std::shared_ptr<gridGrabber> (std::move (ggb)), gdRI.column);
             }
             throw (addFailureException ());
         }
@@ -457,43 +477,44 @@ void collector::add (gridGrabberInfo *gdRI, coreObject *obj)
     }
     else
     {
-        if (gdRI->field.find_first_of (",;") != std::string::npos)
+        if (gdRI.field.find_first_of (",;") != std::string::npos)
         {  // now go into a loop of the comma variables
             // if multiple fields were specified by comma or semicolon separation
-            auto v = stringOps::splitlineBracket (gdRI->field, ",;");
-            int ccol = gdRI->column;
+            auto v = stringOps::splitlineBracket (gdRI.field, ",;");
+            int ccol = gdRI.column;
+			auto tempInfo = gdRI;
             for (const auto &fld : v)
             {
-                gdRI->field = fld;
+				tempInfo.field = fld;
                 if (ccol >= 0)
                 {
                     /* this wouldn't work if the data was a vector grab, but in that case the recheck flag would be
                      * activated and this information overridden*/
-                    gdRI->column = ccol++;  // post increment intended
+					tempInfo.column = ccol++;  // post increment intended
                 }
-                add (gdRI, obj);
+                add (tempInfo, obj);
             }
         }
         else  // now we get to the interesting bit
         {
-            auto fldGrabbers = makeGrabbers (gdRI->field, obj);
-            auto stGrabbers = makeStateGrabbers (gdRI->field, obj);
+            auto fldGrabbers = makeGrabbers (gdRI.field, obj);
+            auto stGrabbers = makeStateGrabbers (gdRI.field, obj);
             if (fldGrabbers.size () == 1)
             {
                 // merge the gain and bias
-                fldGrabbers[0]->gain *= gdRI->gain;
-                fldGrabbers[0]->bias *= gdRI->gain;
-                fldGrabbers[0]->bias += gdRI->bias;
-                if (gdRI->outputUnits != gridUnits::defUnit)
+                fldGrabbers[0]->gain *= gdRI.gain;
+                fldGrabbers[0]->bias *= gdRI.gain;
+                fldGrabbers[0]->bias += gdRI.bias;
+                if (gdRI.outputUnits != gridUnits::defUnit)
                 {
-                    fldGrabbers[0]->outputUnits = gdRI->outputUnits;
+                    fldGrabbers[0]->outputUnits = gdRI.outputUnits;
                 }
                 // TODO:: PT incorporate state grabbers properly
-                add (std::shared_ptr<gridGrabber> (std::move (fldGrabbers[0])), gdRI->column);
+                add (std::shared_ptr<gridGrabber> (std::move (fldGrabbers[0])), gdRI.column);
             }
             else
             {
-                int ccol = gdRI->column;
+                int ccol = gdRI.column;
                 for (auto &ggb : fldGrabbers)
                 {
                     if (ccol > 0)
@@ -508,8 +529,8 @@ void collector::add (gridGrabberInfo *gdRI, coreObject *obj)
             }
             if (fldGrabbers.empty ())
             {
-                obj->log (obj, print_level::warning, "no grabbers created from " + gdRI->field);
-                addWarning ("no grabbers created from " + gdRI->field);
+                obj->log (obj, print_level::warning, "no grabbers created from " + gdRI.field);
+                addWarning ("no grabbers created from " + gdRI.field);
                 throw (addFailureException ());
             }
         }
@@ -541,6 +562,15 @@ void collector::add (const std::string &field, coreObject *obj)
             throw (addFailureException ());
         }
     }
+}
+
+void collector::reset()
+{
+	points.clear();
+	data.clear();
+	warnList.clear();
+	warningCount = 0;
+	triggerTime = maxTime;
 }
 
 void collector::flush () {}

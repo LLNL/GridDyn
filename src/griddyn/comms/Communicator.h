@@ -18,7 +18,7 @@
 #include "core/coreDefinitions.hpp"
 #include <cstdint>
 #include <functional>
-#include <queue>
+#include "utilities/simpleQueue.hpp"
 #include <memory>
 
 namespace griddyn
@@ -39,11 +39,13 @@ public:
   explicit Communicator (std::uint64_t id);
 
   /** function to clone the communicator
-  @param[in] obj an object to copy data to
-  @return a shared ptr to a new communicator
+  @return a unique ptr to a new communicator if one is created
   */
-  virtual std::shared_ptr<Communicator> clone(std::shared_ptr<Communicator> comm = nullptr) const;
-
+  virtual std::unique_ptr<Communicator> clone() const;
+  /** function to clone the communicator to another object
+  @param[in] obj an object to copy data to
+  */
+  virtual void cloneTo(Communicator *comm) const;
   /** transmit a commMessage somewhere
   * transmits a data block to somewhere Else
   * @param[in] destName the identifier of the receiving location specified as a string
@@ -72,30 +74,38 @@ public:
   virtual void receive (std::uint64_t sourceID, const std::string &destName, std::shared_ptr<commMessage> message);
 
   //ping functions
+  /** transmit a ping message to the specified ID*/
   void ping (std::uint64_t destID);
+  /** transmit a ping message to the named destination*/
   void ping (const std::string &destName);
+  /** query for the last time a ping response was received*/
   griddyn::coreTime getLastPingTime () const;
 
-  
+  /** set the identifier for the communicator*/
   void setCommID (std::uint64_t newID)
   {
     m_id = newID;
   }
-
+  /** get the communicator id */
   std::uint64_t getCommID () const
   {
     return m_id;
   }
   using rxMessageCallback_t=std::function<void (std::uint64_t, std::shared_ptr<commMessage>)> ;
+  /** specify the callback function to use when receiving a message*/
   void registerReceiveCallback (rxMessageCallback_t newAction)
   {
     m_rxCallbackMessage = newAction;
   }
+  /** return true if message are queued*/
   bool messagesAvailable () const;
+  /** get the next message on the queue*/
   std::shared_ptr<commMessage> getMessage (std::uint64_t &source);
 
+  /** initialize the communicator
+  @details setup the actual communication pathways and other component functions*/
   virtual void initialize();
-
+  /** disconnect the communictor from the communications medium*/
   virtual void disconnect();
   virtual void set(const std::string &param, const std::string &val) override;
   virtual void set(const std::string &param, double val) override;
@@ -103,9 +113,9 @@ public:
 private:
   std::uint64_t m_id;           //!< individual comm id
   rxMessageCallback_t m_rxCallbackMessage;       //!< call back action from parent object
-  griddyn::coreTime lastPingSend = griddyn::timeZero;
-  griddyn::coreTime lastReplyRX = griddyn::timeZero;
-  std::queue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;
+  griddyn::coreTime lastPingSend = griddyn::timeZero; //!< the time last ping was sent
+  griddyn::coreTime lastReplyRX = griddyn::timeZero;	//!< the time the last response was received
+  simpleQueue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;	//!< the message queue storing source and message
 };
 
 std::unique_ptr<Communicator> makeCommunicator (const std::string &commType, const std::string &commName, const std::uint64_t id);

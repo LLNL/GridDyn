@@ -27,12 +27,13 @@ namespace sources
 class randomSource : public rampSource
 {
 public:
+	/** random source flags*/
 	enum random_source_flags
 	{
-		interpolate_flag = object_flag5,
-		proportional_flag = object_flag6,
-		repeated_flag = object_flag7,
-		triggered_flag = object_flag8,
+		interpolate_flag = object_flag5, //!< indicator that the output should be interpolated
+		proportional_flag = object_flag6,	//!< indicator that the random change is proportional to the current value
+		repeated_flag = object_flag7,	//!< indicator that the random generation should be repeated
+		triggered_flag = object_flag8,	//!< indicator that the random generation has been triggered
 
 	};
 
@@ -44,8 +45,8 @@ protected:
 	parameter_t zbias = 0.0;           //!< a factor describing the preference of changes to trend toward zero mean
 	parameter_t offset = 0.0;          //!< the current bias in the value
 	coreTime keyTime = 0.0;         //!< the next time change
-	std::string timeDistribution = "constant";
-	std::string valDistribution = "constant";
+	std::string timeDistribution = "constant";  //!< string representing the time Distribution random number generation type
+	std::string valDistribution = "constant";	//!< string representing the value Distribution random number generation type
 	std::unique_ptr<utilities::gridRandom> timeGenerator;            //!< random number generator for the time
 	std::unique_ptr<utilities::gridRandom> valGenerator;                     //!< random number generator for the value
 
@@ -57,7 +58,7 @@ public:
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 	virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 
-
+	/** check if the random number generation has been triggered*/
 	bool isTriggered()
 	{
 		return opFlags[triggered_flag];
@@ -72,11 +73,15 @@ public:
 
 	virtual void updateOutput(coreTime time) override;
 private:
+	/** generate the next step in the random process this source represents*/
 	void nextStep(coreTime triggerTime);
+	/** generate a random time for the next update*/
 	coreTime ntime();
+	/** generate a new random value*/
 	double nval();
 	void timeParamUpdate();
 	void valParamUpdate();
+	/** compute a bias shift in the random generation*/
 	double computeBiasAdjust();
 };
 }//namespace sources

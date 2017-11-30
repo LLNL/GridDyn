@@ -48,11 +48,11 @@ public:
 	virtual int Initialize(int argc, char *argv[]) override final;
 
 	virtual void simInitialize() override;
-	virtual void Run(void) override;
+	virtual coreTime Run() override;
 
 	virtual coreTime Step(coreTime time) override;
 
-	virtual void Finalize(void) override;
+	virtual void Finalize() override;
 private:
 	void setCoordinatorOptions(boost::program_options::variables_map &helicsOptions);
 };

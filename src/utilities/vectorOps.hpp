@@ -309,6 +309,7 @@ X rms (const std::vector<X> &a)
     return std::sqrt (sum_of_vector);
 }
 
+/** compute the std deviation of a vector*/
 template <class X>
 X stdev (const std::vector<X> &a)
 {
@@ -323,8 +324,10 @@ X stdev (const std::vector<X> &a)
     return ret;
 }
 
+/** compute the median value in a vector and partially reorders the vector according to nth_element
+@return the median value*/
 template <class X>
-X median (std::vector<X> &a)
+X medianReorder (std::vector<X> &a)
 {
     size_t n = a.size () / 2;
     std::nth_element (a.begin (), a.begin () + n, a.end ());
@@ -335,26 +338,35 @@ X median (std::vector<X> &a)
     std::nth_element (a.begin (), a.begin () + n - 1, a.end ());
     return static_cast<X> (0.5 * (a[n] + a[n - 1]));
 }
-
+/** compute the median value in a const vector
+@return the median value*/
 template <class X>
 X median (const std::vector<X> &a)
 {
-    std::vector<X> b = a;  // copy the vector
-    return median (b);
+    std::vector<X> b(a);  // copy the vector
+    return medianReorder (b);
 }
 
+/** compute the ordered difference between elements in a vector
+@param[in] a the input vector
+@return a new vector whose elements contain the differences in adjacent elements*/
 template <class X>
-std::vector<X> diff (std::vector<X> &a)
+auto diff (const std::vector<X> &a)
 {
     auto cnt = a.size ();
-    std::vector<X> d (cnt);
-    std::adjacent_difference (a.cbegin (), a.cend (), d.begin ());
+    std::vector<decltype(a[1]-a[0])> d (cnt);
+    std::adjacent_difference (a.begin (), a.end (), d.begin ());
     return d;
 }
 
-// finding index values to meet conditions
+/** generate a vector of indices where the values of a vector are equal to a given value
+@param a the vector of value to compare
+@param op the operation to check a bool function which takes a value as an input
+@return a vector of indices into a with the matching condition
+
+*/
 template <class X>
-auto vecFindOp(const std::vector<X> &a, std::function<bool(X)> op)  //->std::vector<decltype (a.size ())>
+auto vecFindOp(const std::vector<X> &a, std::function<bool(X)> op) 
 {
 	auto cnt = a.size();
 	std::vector<decltype (cnt)> locs;
@@ -369,7 +381,11 @@ auto vecFindOp(const std::vector<X> &a, std::function<bool(X)> op)  //->std::vec
 	return locs;
 }
 
-// finding index values to meet conditions
+/** generate a vector of indices where the values of a vector are equal to a given value
+@param a the vector of value to compare
+@param match the matching value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
 auto vecFindeq (const std::vector<X> &a, X match)  //->std::vector<decltype (a.size ())>
 {
@@ -386,8 +402,13 @@ auto vecFindeq (const std::vector<X> &a, X match)  //->std::vector<decltype (a.s
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are not equal to a given value
+@param a the vector of value to compare
+@param match the matching value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
-auto vecFindne (const std::vector<X> &a, X match)  //->std::vector<decltype (a.size ())>
+auto vecFindne (const std::vector<X> &a, X match)
 {
     auto cnt = a.size ();
     std::vector<decltype (cnt)> locs;
@@ -402,8 +423,15 @@ auto vecFindne (const std::vector<X> &a, X match)  //->std::vector<decltype (a.s
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are not equal to a given value within a defined range
+@param a the vector of value to compare
+@param match the matching value
+@param start the starting index
+@param end the last index to compare
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
-auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)  //->std::vector<decltype (a.size ())>
+auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)
 {
     auto cnt = a.size ();
     cnt = std::min (end, cnt);
@@ -419,6 +447,11 @@ auto vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)  //-
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are less than a given value
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
 auto vecFindlt (const std::vector<X> &a, X val)  //->std::vector<decltype (a.size ())>
 {
@@ -435,6 +468,11 @@ auto vecFindlt (const std::vector<X> &a, X val)  //->std::vector<decltype (a.siz
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are less than or equal to a given value
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
 auto vecFindlte (const std::vector<X> &a, X val)  //->std::vector<decltype (a.size ())>
 {
@@ -451,8 +489,14 @@ auto vecFindlte (const std::vector<X> &a, X val)  //->std::vector<decltype (a.si
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are greater than a given value
+@tparam X the type of the values
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
-auto vecFindgt (const std::vector<X> &a, X val)  //->std::vector<decltype (a.size ())>
+auto vecFindgt (const std::vector<X> &a, X val)
 {
     auto cnt = a.size ();
     std::vector<decltype (cnt)> locs;
@@ -467,8 +511,14 @@ auto vecFindgt (const std::vector<X> &a, X val)  //->std::vector<decltype (a.siz
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are greate or equal to a given value
+@tparam X the type of the values
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X>
-auto vecFindgte (const std::vector<X> &a, X val)  //->std::vector<decltype (a.size ())>
+auto vecFindgte (const std::vector<X> &a, X val)
 {
     auto cnt = a.size ();
     std::vector<decltype (cnt)> locs;
@@ -483,7 +533,13 @@ auto vecFindgte (const std::vector<X> &a, X val)  //->std::vector<decltype (a.si
     return locs;
 }
 
-// return in specified type vector
+/** generate a vector of indices where the values of a vector are equal to a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindeq (const std::vector<X> &a, X match)
 {
@@ -500,6 +556,13 @@ std::vector<Y> vecFindeq (const std::vector<X> &a, X match)
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are not equal to a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param match the comparison value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindne (const std::vector<X> &a, X match)
 {
@@ -516,11 +579,20 @@ std::vector<Y> vecFindne (const std::vector<X> &a, X match)
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are not equal to a given value within a defined range
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param match the matching value
+@param start the starting index
+@param end the last index to compare
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)
 {
     auto cnt = a.size ();
-    cnt = std::min (end, cnt);
+    cnt = std::min (end+1, cnt);
     std::vector<Y> locs;
     locs.reserve (cnt);
     for (decltype (cnt) ii = start; ii < cnt; ++ii)
@@ -533,6 +605,13 @@ std::vector<Y> vecFindne (const std::vector<X> &a, X match, size_t start, size_t
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are less than a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param val the threshold value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindlt (const std::vector<X> &a, X val)
 {
@@ -549,6 +628,13 @@ std::vector<Y> vecFindlt (const std::vector<X> &a, X val)
     return locs;
 }
 
+/** generate a vector of indices where the values of a vector are less than or equal to a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param val the threshold value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindlte (const std::vector<X> &a, X val)
 {
@@ -564,7 +650,13 @@ std::vector<Y> vecFindlte (const std::vector<X> &a, X val)
     }
     return locs;
 }
-
+/** generate a vector of indices where the values of a vector are greater than a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param val the threshold value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindgt (const std::vector<X> &a, X val)
 {
@@ -580,7 +672,13 @@ std::vector<Y> vecFindgt (const std::vector<X> &a, X val)
     }
     return locs;
 }
-
+/** generate a vector of indices where the values of a vector are greater than or equal to a given value
+@tparam X the type of the values
+@tparam Y the type of the indices desired
+@param a the vector of value to compare
+@param val the threshold value
+@return a vector of indices into a with the matching condition
+*/
 template <class X, class Y>
 std::vector<Y> vecFindgte (const std::vector<X> &a, X val)
 {
@@ -597,6 +695,12 @@ std::vector<Y> vecFindgte (const std::vector<X> &a, X val)
     return locs;
 }
 
+/** sum a vector elements where an indicator function matches a defined value
+@param[in] a vector to sum specif elements of
+@param[in] b an indicator vector
+@param match if an element of b == match then add the corresponding value of a to the sum
+@return the summed value where the indicators match
+*/
 template <class X, class Y>
 X ind_sum (const std::vector<X> &a, const std::vector<Y> &b, Y match)
 {
@@ -612,6 +716,10 @@ X ind_sum (const std::vector<X> &a, const std::vector<Y> &b, Y match)
     return sum_of_vector;
 }
 
+/** multiply two vectors and sum the result
+@param[in] a vector 1
+@param[in] b vector 2
+*/
 template <class X>
 X mult_sum (const std::vector<X> &a, const std::vector<X> &b)
 {
@@ -624,6 +732,10 @@ X mult_sum (const std::vector<X> &a, const std::vector<X> &b)
     return sum_of_vector_mult;
 }
 
+/** add a vector from another and store the result in the original vector
+@param[in,out] a vector 1
+@param[in] b vector 2
+*/
 template <class X>
 void vectorAdd (std::vector<X> &a, const std::vector<X> &b)
 {
@@ -631,6 +743,10 @@ void vectorAdd (std::vector<X> &a, const std::vector<X> &b)
     std::transform (a.begin (), a + cnt, b.begin (), a.begin (), std::plus<X> ());
 }
 
+/** subtract a vector from another and store the result in the original vector
+@param[in,out] a vector 1
+@param[in] b vector 2
+*/
 template <class X>
 void vectorSubtract (std::vector<X> &a, const std::vector<X> &b)
 {
@@ -638,59 +754,50 @@ void vectorSubtract (std::vector<X> &a, const std::vector<X> &b)
     std::transform (a.begin (), a + cnt, b.begin (), a.begin (), std::minus<X> ());
 }
 
+/** multiply a two vectors and store the result
+@param[in] a vector 1
+@param[in] b vector 2
+@param[out] M the location to store the result
+*/
 template <class X>
 void vectorMult (const std::vector<X> &a, const std::vector<X> &b, std::vector<X> &M)
 {
     auto cnt = (std::min) (a.size (), b.size ());
+	M.resize(cnt);
     std::transform (a.begin (), a + cnt, b.begin (), M.begin (), std::multiplies<X> ());
 }
 
+/** multiply a vector by a constant and add a second vector and store the result
+@param[in] a vector 1
+@param[in] b vector 2
+@param[in] Multiplier the multiplication factor
+@param[out] res the location to store the result
+*/
 template <class X>
-void vectorMultAdd (const std::vector<X> &a, const std::vector<X> &b, const X M, std::vector<X> &res)
+void vectorMultAdd (const std::vector<X> &a, const std::vector<X> &b, const X Multiplier, std::vector<X> &res)
 {
     auto cnt = (std::min) (a.size (), b.size ());
     for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
     {
-        res[ii] = std::fma (M, b[ii], a[ii]);  // fast multiply add
+        res[ii] = std::fma (Multiplier, b[ii], a[ii]);  // fast multiply add
     }
 }
 
-template <class X>
-X compareVec (const std::vector<X> &a, const std::vector<X> &b, std::vector<X> &diff)
-{
-    X sum_of_diff = 0;
-    typename std::vector<X>::size_type cnt = (std::min) (a.size (), b.size ());
-    diff.resize (cnt);
-    for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
-    {
-        diff[ii] = std::abs (a[ii] - b[ii]);
-        sum_of_diff += diff[ii];
-    }
-    return sum_of_diff;
-}
-
-template <class X>
-X compareVec (const std::vector<X> &a, const std::vector<X> &b)
-{
-    X sum_of_diff = 0;
-    using stype_t = typename std::vector<X>::size_type;
-    stype_t cnt = (std::min) (a.size (), b.size ());
-
-    for (stype_t ii = 0; ii < cnt; ++ii)
-    {
-        sum_of_diff += std::abs (a[ii] - b[ii]);
-    }
-    return sum_of_diff;
-}
-
+/** sum the absolute differences between two Vectors
+@param a the first vector
+@param b the secon vector
+@param[out] diff a vector the absolute values of the differences
+@param cnt the number of elements in the vector to compare and sum
+@return the sum of the absolute values of the differences
+*/
 template <class X>
 X compareVec (const std::vector<X> &a,
               const std::vector<X> &b,
               std::vector<X> &diff,
-              typename std::vector<X>::size_type cnt)
+              typename std::vector<X>::size_type cnt=0)
 {
     X sum_of_diff = 0;
-    cnt = (std::min) (a.size (), cnt);
+	cnt = (cnt == 0) ? (a.size()) : (std::min) (a.size(), cnt);
     cnt = (std::min) (b.size (), cnt);
     diff.resize (cnt);
     for (typename std::vector<X>::size_type ii = 0; ii < 0; ++ii)
@@ -700,12 +807,18 @@ X compareVec (const std::vector<X> &a,
     }
     return sum_of_diff;
 }
-
+/** sum the absolute differences between two Vectors
+@param a the first vector
+@param b the secon vector
+@param cnt the number of elements in the vector to compare and sum
+@return the sum of the absolute values of the differences
+*/
 template <class X>
-X compareVec (const std::vector<X> &a, const std::vector<X> &b, typename std::vector<X>::size_type cnt)
+X compareVec (const std::vector<X> &a, const std::vector<X> &b, typename std::vector<X>::size_type cnt=0)
 {
     X sum_of_diff = 0;
-    cnt = (std::min) (a.size (), cnt);
+	
+    cnt = (cnt==0)?(a.size()):(std::min) (a.size (), cnt);
     cnt = (std::min) (b.size (), cnt);
     for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
     {
@@ -714,9 +827,13 @@ X compareVec (const std::vector<X> &a, const std::vector<X> &b, typename std::ve
     return sum_of_diff;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@return the number of differences*/
 template <class X>
-auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff) ->
-  typename std::vector<X>::size_type
+auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
@@ -731,16 +848,20 @@ auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowabl
     return diffs;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance, ignore a common mode difference between the two
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@return the number of differences*/
 template <class X>
-auto countDiffsIgnoreCommon (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff) ->
-  typename std::vector<X>::size_type
+auto countDiffsIgnoreCommon (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
     stype_t diffs = (std::max) (a.size (), b.size ()) - cnt;
     if (cnt < 3)
     {
-        return 0;
+        return stype_t(0);
     }
     X commonDiff1 = a[0] - b[0];
     X commonDiff2 = a[1] - b[1];
@@ -760,9 +881,14 @@ auto countDiffsIgnoreCommon (const std::vector<X> &a, const std::vector<X> &b, X
     return diffs;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@param  maxFracDiff the difference must be greater than maxFracDiff*|a[ii]|
+@return the number of differences*/
 template <class X>
-auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff, X maxFracDiff) ->
-  typename std::vector<X>::size_type
+auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff, X maxFracDiff)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
@@ -778,9 +904,13 @@ auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowabl
     return diffs;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance and the a value is valid (ie !=0)
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@return the number of differences*/
 template <class X>
-auto countDiffsIfValid (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff) ->
-  typename std::vector<X>::size_type
+auto countDiffsIfValid (const std::vector<X> &a, const std::vector<X> &b, X maxAllowableDiff)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
@@ -795,12 +925,17 @@ auto countDiffsIfValid (const std::vector<X> &a, const std::vector<X> &b, X maxA
     return diffs;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance and call a callback function for each difference
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@param  f the callback function takes 3 arguments the index and the values for each of the two vectors in the index
+@return the number of differences*/
 template <class X>
 auto countDiffsCallback (const std::vector<X> &a,
                          const std::vector<X> &b,
                          X maxAllowableDiff,
-                         std::function<void(typename std::vector<X>::size_type, X, X)> &f) ->
-  typename std::vector<X>::size_type
+                         std::function<void(typename std::vector<X>::size_type, X, X)> &f)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
@@ -816,19 +951,24 @@ auto countDiffsCallback (const std::vector<X> &a,
     return diffs;
 }
 
+/** count the differences between two vectors if the difference is greater than a tolerance and the a value is valid (ie !=0) and call a callback function for each difference
+@param a the first vector
+@param b the second vector
+@param maxAllowableDiff the tolerable difference between two values
+@param  f the callback function takes 3 arguments the index and the values for each of the two vectors in the index
+@return the number of differences*/
 template <class X>
 auto countDiffsIfValidCallback (const std::vector<X> &a,
                                 const std::vector<X> &b,
                                 X maxAllowableDiff,
-                                std::function<void(typename std::vector<X>::size_type, X, X)> &f) ->
-  typename std::vector<X>::size_type
+                                std::function<void(typename std::vector<X>::size_type, X, X)> &f)
 {
     using stype_t = typename std::vector<X>::size_type;
     stype_t cnt = (std::min) (a.size (), b.size ());
     stype_t diffs = (std::max) (a.size (), b.size ()) - cnt;
     for (stype_t ii = 0; ii < cnt; ++ii)
     {
-        if ((std::abs (a[ii] - b[ii]) > maxAllowableDiff) && (a[ii] != 0))
+        if ((std::abs (a[ii] - b[ii]) > maxAllowableDiff) && (a[ii] != X(0)))
         {
             ++diffs;
             f (ii, a[ii], b[ii]);
@@ -843,6 +983,10 @@ the function below them vectorConvert include a type_trait check for if the vect
 */
 namespace vectorConvertDetail
 {
+/** perform a vector conversion of one type to another
+@details uses SFINAE to do some checking to determine if the types are actually the same
+this function handles the case where they are not and is an lvalue reference
+*/
 template <typename X, typename Y>
 std::vector<X> vectorConvertActual (const std::vector<Y> &dvec, std::false_type /*unused*/)
 {
@@ -850,7 +994,10 @@ std::vector<X> vectorConvertActual (const std::vector<Y> &dvec, std::false_type 
     std::transform (dvec.begin (), dvec.end (), ret.begin (), [](Y val) { return static_cast<X> (val); });
     return ret;
 }
-
+/** perform a vector conversion of one type to another
+@details uses SFINAE to do some checking to determine if the types are actually the same
+this function handles the case where they are the same and is an rvalue reference
+*/
 template <typename X, typename Y>
 std::vector<X> vectorConvertActual (std::vector<Y> &&dvec, std::true_type /*unused*/)
 {
@@ -858,6 +1005,10 @@ std::vector<X> vectorConvertActual (std::vector<Y> &&dvec, std::true_type /*unus
     return ret;
 }
 
+/** perform a vector conversion of one type to another
+@details uses SFINAE to do some checking to determine if the types are actually the same
+this function handles the case where they are the same and is an lvalue reference
+*/
 template <typename X, typename Y>
 std::vector<X> vectorConvertActual (const std::vector<Y> &dvec, std::true_type /*unused*/)
 {
@@ -866,24 +1017,47 @@ std::vector<X> vectorConvertActual (const std::vector<Y> &dvec, std::true_type /
 }
 }  // namespace vectorConvertDetail
 
+/** convert a vector of one type into a vector of another type
+@tparam X the desired resultant type
+@tparam Y the original type
+@tparam Z the base type of Y  SFINAE check
+@param dvec a rvalue reference to a vector to convert
+*/
 template <typename X, typename Y, typename Z = typename Y::baseType>
 std::vector<X> vectorConvert (std::vector<Y> &&dvec)
 {
     return vectorConvertDetail::vectorConvertActual<X, Y> (dvec, std::is_same<X, Z>{});
 }
 
+/** convert a vector of one type into a vector of another type
+@tparam X the desired resultant type
+@tparam Y the original type
+@param dvec a rvalue reference to a vector to convert
+*/
 template <typename X, typename Y>
 std::vector<X> vectorConvert (std::vector<Y> &&dvec)
 {
     return vectorConvertDetail::vectorConvertActual<X, Y> (dvec, std::is_same<X, Y>{});
 }
 
+/** convert a vector of one type into a vector of another type
+@tparam X the desired resultant type
+@tparam Y the original type
+@tparam Z the base type of Y  SFINAE check
+@param dvec a const lvalue reference to a vector to convert
+*/
 template <typename X, typename Y, typename Z = typename Y::baseType>
 std::vector<X> vectorConvert (const std::vector<Y> &dvec)
 {
     return vectorConvertDetail::vectorConvertActual<X, Y> (dvec, std::is_same<X, Z>{});
 }
 
+/** convert a vector of one type into a vector of another type
+@tparam X the desired resultant type
+@tparam Y the original type
+@param dvec a lvalue reference to a vector to convert
+@return a vector containing the new type with the corresponding values as the original
+*/
 template <typename X, typename Y>
 std::vector<X> vectorConvert (const std::vector<Y> &dvec)
 {

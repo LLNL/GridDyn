@@ -60,8 +60,6 @@ Relay::Relay (const std::string &objName) : gridPrimary (objName)
     // default values
     setUserID (++relayCount);
     updateName ();
-    opFlags.set (no_pflow_states);
-    opFlags.set (no_dyn_states);
 }
 
 coreObject *Relay::clone (coreObject *obj) const
@@ -78,11 +76,11 @@ coreObject *Relay::clone (coreObject *obj) const
         if (static_cast<index_t> (nobj->conditions.size ()) <= kk)
         {
             // the other things which depend on this are being duplicated later so just use push_back
-            nobj->conditions.push_back (conditions[kk]->clone ());
+            nobj->conditions.emplace_back (conditions[kk]->clone ());
         }
         else
         {
-            conditions[kk]->clone (nobj->conditions[kk]);
+            conditions[kk]->cloneTo (nobj->conditions[kk].get());
         }
     }
     // clone the actions
@@ -91,11 +89,11 @@ coreObject *Relay::clone (coreObject *obj) const
         if (static_cast<index_t> (nobj->actions.size ()) <= kk)
         {
             // the other things which depend on this are being duplicated later so just use push_back
-            nobj->actions.push_back (actions[kk]->clone ());
+            nobj->actions.emplace_back (actions[kk]->clone ());
         }
         else
         {
-            actions[kk]->clone (nobj->actions[kk]);
+            actions[kk]->cloneTo (nobj->actions[kk].get());
         }
     }
     // clone everything else
@@ -703,6 +701,7 @@ void Relay::updateRootCount (bool alertChange)
             opFlags.reset (has_alg_roots);
             opFlags.reset (has_roots);
         }
+		offsets.rootUnload(true);
         if (alertChange)
         {
             alert (this, ROOT_COUNT_CHANGE);

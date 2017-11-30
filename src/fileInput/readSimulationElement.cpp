@@ -13,7 +13,7 @@
 #include "readElement.h"
 
 #include "elementReaderTemplates.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "measurement/collector.h"
 #include "readerHelper.h"
 

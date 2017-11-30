@@ -44,7 +44,7 @@ coreObject *busRelay::clone (coreObject *obj) const
 
 void busRelay::setFlag (const std::string &flag, bool val)
 {
-    if (flag[0] == '#')
+    if (flag.empty())
     {
     }
     else

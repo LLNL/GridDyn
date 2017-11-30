@@ -27,7 +27,7 @@ using namespace gridUnits;
 
 static typeFactory<zBreaker> glf ("link", stringVec{"zbreaker", "zline", "busbreaker"});
 
-zBreaker::zBreaker (const std::string &objName) : Link (objName) { opFlags.set (network_connected); }
+zBreaker::zBreaker (const std::string &objName) : Link (objName),merged(coreObject::extra_bool) { opFlags.set (network_connected); }
 coreObject *zBreaker::clone (coreObject *obj) const
 {
     auto lnk = cloneBase<zBreaker, Link> (this, obj);
@@ -41,7 +41,7 @@ coreObject *zBreaker::clone (coreObject *obj) const
 
 void zBreaker::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else
@@ -52,7 +52,7 @@ void zBreaker::set (const std::string &param, const std::string &val)
 
 void zBreaker::set (const std::string &param, double val, units_t unitType)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else
@@ -148,18 +148,17 @@ void zBreaker::unmerge ()
     merged = false;
 }
 
-
 int zBreaker::fixRealPower (double /*power*/,
-	id_type_t /*measureTerminal*/,
-	id_type_t /*fixedTerminal*/,
+                            id_type_t /*measureTerminal*/,
+                            id_type_t /*fixedTerminal*/,
                             gridUnits::units_t /*unitType*/)
 {
     return 1;
 }
 int zBreaker::fixPower (double /*rPower*/,
                         double /*qPower*/,
-	id_type_t /*measureTerminal*/,
-	id_type_t /*fixedTerminal*/,
+                        id_type_t /*measureTerminal*/,
+                        id_type_t /*fixedTerminal*/,
                         gridUnits::units_t /*unitType*/)
 {
     return 1;

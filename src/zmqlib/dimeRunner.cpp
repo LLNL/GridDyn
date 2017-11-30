@@ -14,7 +14,7 @@
 
 
 // headers
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput/fileInput.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "dimeRunner.h"
@@ -100,9 +100,9 @@ int dimeRunner::Initialize(int argc, char * argv[])
 }
 
 
-void dimeRunner::Run()
+coreTime dimeRunner::Run()
 {
-	GriddynRunner::Run();
+	return GriddynRunner::Run();
 }
 
 

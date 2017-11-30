@@ -12,7 +12,7 @@
 
 #include "faultResetRecovery.h"
 #include "diagnostics.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "solvers/solverInterface.h"
 
 namespace griddyn
@@ -90,7 +90,7 @@ int faultResetRecovery::faultResetFix1 ()
     // auto err = JacobianCheck(sMode, -1, true);
     //      dynamicSolverConvergenceTest(sMode, "convFile.dat",0,3);
     double *states = solver->state_data ();
-    coreTime timeCurr = sim->getCurrentTime ();
+    coreTime timeCurr = sim->getSimulationTime();
     sim->guessState (timeCurr, states, solver->deriv_data (), solver->getSolverMode ());
     std::vector<double> vstates (solver->size (), 0);
     sim->getVoltageStates (vstates.data (), solver->getSolverMode ());
@@ -116,7 +116,7 @@ int faultResetRecovery::faultResetFix2 (reset_levels rlevel)
     {
         return retval;
     }
-    coreTime timeCurr = sim->getCurrentTime ();
+    coreTime timeCurr = sim->getSimulationTime();
     sim->guessState (timeCurr, solver->state_data (), solver->deriv_data (), solver->getSolverMode ());
     // int mmatch = JacobianCheck(sim, solver->getSolverMode());
 
@@ -156,7 +156,7 @@ int faultResetRecovery::faultResetFix3 ()
         }
         //  dynData->printStates(true);
         retval =
-          solver->calcIC (sim->getCurrentTime (), sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+          solver->calcIC (sim->getSimulationTime(), sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
 
         if (retval == 0)
         {
@@ -170,15 +170,15 @@ int faultResetRecovery::faultResetFix3 ()
         }
         else
         {
-            sim->converge (sim->getCurrentTime (), solver->state_data (), solver->deriv_data (),
+            sim->converge (sim->getSimulationTime(), solver->state_data (), solver->deriv_data (),
                            solver->getSolverMode (), converge_mode::block_iteration, 0.1);
             // dynData->printStates(true);
-            retval = solver->calcIC (sim->getCurrentTime (), sim->probeStepTime,
+            retval = solver->calcIC (sim->getSimulationTime(), sim->probeStepTime,
                                      solverInterface::ic_modes::fixed_diff, true);
             if (retval == 0)
             {
                 solver->getCurrentData ();
-                sim->setState (sim->getCurrentTime () + sim->probeStepTime, solver->state_data (),
+                sim->setState (sim->getSimulationTime() + sim->probeStepTime, solver->state_data (),
                                solver->deriv_data (), solver->getSolverMode ());
                 sim->getVoltage (nVolts);
                 if (!checkResetVoltages (initVolts, nVolts))
@@ -214,7 +214,7 @@ bool checkResetVoltages (const std::vector<double> &prev, const std::vector<doub
             ++Bcond;
         }
     }
-    if ((Acond) && (Bcond>0))
+    if ((Acond) && (Bcond > 0))
     {
         return false;
     }

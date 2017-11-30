@@ -11,7 +11,7 @@
 */
 
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "primary/infiniteBus.h"
 #include "simulation/diagnostics.h"

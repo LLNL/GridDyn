@@ -13,7 +13,7 @@
 #include "helicsCollector.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
-#include "core/helperTemplates.hpp"
+
 #include "stringOps.h"
 
 namespace griddyn
@@ -30,17 +30,21 @@ helicsCollector::helicsCollector(const std::string &collectorName):collector(col
 
 }
 
-helicsCollector::~helicsCollector() = default;
-
-std::shared_ptr<collector> helicsCollector::clone(std::shared_ptr<collector> gr) const
+std::unique_ptr<collector> helicsCollector::clone() const
 {
-	auto nrec = cloneBase<helicsCollector, collector>(this, gr);
-	if (!nrec)
-	{
-		return gr;
-	}
+	std::unique_ptr<collector> col = std::make_unique<helicsCollector>();
+	helicsCollector::cloneTo(col.get());
+	return col;
+}
 
-	return nrec;
+void helicsCollector::cloneTo(collector *col) const
+{
+	collector::cloneTo(col);
+	auto hcol = dynamic_cast<helicsCollector *>(col);
+	if (hcol == nullptr)
+	{
+		return;
+	}
 }
 
 void helicsCollector::dataPointAdded(const collectorPoint& cp)

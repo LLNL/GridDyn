@@ -16,7 +16,7 @@
 #include "core/coreOwningPtr.hpp"
 #include "core/objectFactory.hpp"
 #include "core/coreExceptions.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "utilities/matrixDataCustomWriteOnly.hpp"
 
 using namespace griddyn;

@@ -30,8 +30,8 @@ class controlBlock : public Block
 
 public:
 protected:
-  double m_T1 = 0.1;  //!< delay time constant
-  double m_T2 = 0.0;  //!< upper time constant
+  parameter_t m_T1 = 0.1;  //!< delay time constant
+  parameter_t m_T2 = 0.0;  //!< upper time constant
 public:
   //!< default constructor
   explicit controlBlock (const std::string &objName = "controlBlock_#");
@@ -45,7 +45,7 @@ public:
   @param[in] t2 the upper time constant
   @param[in] objName the name of the block
   */
-  controlBlock (double t1, double t2, const std::string &objName = "controlBlock_#");  //convert to the equivalent of a delay block with t2=0;
+  controlBlock (double t1, double t2, const std::string &objName = "controlBlock_#");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
   virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
   virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;

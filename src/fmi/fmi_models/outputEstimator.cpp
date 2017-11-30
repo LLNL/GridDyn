@@ -20,10 +20,6 @@ namespace griddyn
 {
 namespace fmi
 {
-outputEstimator::outputEstimator() noexcept
-{
-
-}
 
 outputEstimator::outputEstimator(std::vector<int> sDep, std::vector<int> iDep)
 {

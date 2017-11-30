@@ -307,7 +307,7 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "r")
     {
-        K = 1 / val;
+        K = 1.0 / val;
         dbb.set ("k", -K);
     }
     else if (param == "t1")

@@ -10,6 +10,9 @@
  * LLNS Copyright End
 */
 
+/** @file
+define some functions and operations for configuring file reader operations and loading files
+*/
 #ifndef GRIDDYNINPUT_H_
 #define GRIDDYNINPUT_H_
 #pragma once
@@ -35,28 +38,35 @@ class gridDynSimulation;
 #define READER_WARN_ALL 2
 #define READER_WARN_IMPORTANT 1
 #define READER_WARN_NONE 0
-
+/** enumeration of the possible xml readers*/
 enum class xmlreader
 {
 	default_reader,
 	tinyxml,
 	tinyxml2,
 };
-
+/** namespace for configuring various options about filereaders such as xml or json*/
 namespace readerConfig {
-extern int printMode;
-extern int warnMode;
-extern int warnCount;
-/** set the print mode to a specific level*/
+extern int printMode; //!< the print level
+extern int warnMode; //!< the warning mode
+extern int warnCount; //!< total count of the warnings
+/** set the printMode to a particular level the higher the level the more gets printed*/
 void setPrintMode (int level);
 /** set the warning mode to a specific level*/
 void setWarnMode (int level);
-/** set the print mode to a specific level via a string*/
+/** set the printMode via a string
+@details "none,summary,normal, verbose"*/
 void setPrintMode (const std::string &level);
-/** set the warning mode to a specific level via a string*/
+/** set the warning mode to a specific level via a string
+@details "none,important,normal"*/
 void setWarnMode (const std::string &level);
-
+/** set the case matching mode
+@details can be "exact,  capital, or any  capital checks a few possible matches for capitalization
+*/
 void setDefaultMatchType (const std::string &matchType);
+/** set the default xml reader to use
+@details can be "1" or "tinyxml1" to use the tinyxml reader or "2" or "tinyxml2" to use the tinyxml2 reader
+*/
 void setDefaultXMLReader(const std::string &xmltype);
 /** @brief enumeration describing how the matching should be done
 */
@@ -68,20 +78,27 @@ enum class match_type
 
 };
 
-const double PI = 3.141592653589793;
-extern match_type defMatchType;
-extern xmlreader default_xml_reader;
+constexpr double PI = 3.141592653589793;
+extern match_type defMatchType; //!< control for how names are matches in the xm
+extern xmlreader default_xml_reader; //!< control the default xml reader
 }
 
+enum readerflags
+{
+
+};
 /** @brief defined flags for the readerInfo*/
 enum readerFlags
 {
   ignore_step_up_transformer = 1, //!< ignore any step up transformer definitions
+  assume_powerflow_only = 4,		//!< specify that some object construction may assume it will never be used for dynamics
+  no_generator_bus_voltage_reset = 5,	//!< do not use generator specification to alter bus voltages
+
 };
 
 std::unique_ptr<gridDynSimulation> readSimXMLFile (const std::string &fileName, readerInfo *ri = nullptr, xmlreader rtype = xmlreader::default_reader);
 
-std::uint32_t addflags (std::uint32_t iflags, const std::string &flags);
+void addflags(basicReaderInfo &bri, const std::string &flags);
 
 void loadFile(std::unique_ptr<gridDynSimulation> &gds, const std::string &fileName, readerInfo *ri = nullptr, const std::string &ext = "");
 

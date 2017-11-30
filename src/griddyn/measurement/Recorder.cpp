@@ -13,7 +13,6 @@
 #include "Recorder.h"
 
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/stringOps.h"
 #include <boost/filesystem.hpp>
@@ -38,26 +37,33 @@ Recorder::~Recorder ()
     }
 }
 
-std::shared_ptr<collector> Recorder::clone (std::shared_ptr<collector> gr) const
+std::unique_ptr<collector> Recorder::clone() const
 {
-    auto nrec = cloneBase<Recorder, collector> (this, gr);
-    if (!nrec)
-    {
-        return gr;
-    }
+	std::unique_ptr<collector> col = std::make_unique<Recorder>();
+	cloneTo(col.get());
+	return col;
+}
 
+void Recorder::cloneTo (collector *col) const
+{
+	collector::cloneTo(col);
+    auto nrec = dynamic_cast<Recorder *>(col);
+    if (nrec==nullptr)
+    {
+        return;
+    }
     nrec->fileName_ = fileName_;
     nrec->directory_ = directory_;
     nrec->binaryFile = binaryFile;
-
-    return nrec;
+	nrec->precision = precision;
+	nrec->autosave = autosave;
 }
 
 void Recorder::set (const std::string &param, double val)
 {
     if (param == "precision")
     {
-        precision = static_cast<int> (val);
+        precision = static_cast<decltype(precision)> (val);
     }
     else if ((param == "reserve") || (param == "reservecount"))
     {

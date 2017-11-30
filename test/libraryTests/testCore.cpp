@@ -225,13 +225,21 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
 			obj->set("#unknown", 0.34, defUnit);  //this should not throw an exception
 			obj->setFlag("#unknown", false);  //This should not throw an exception
 
-			//TODO:: add cloneable check  but need something in the object class
-			/*
 			if (obj->isCloneable())
 			{
 				auto nobj=obj->clone();
-				delete(obj);
-			}*/
+				BOOST_CHECK(nobj != nullptr);
+				if (nobj != nullptr)
+				{
+					BOOST_CHECK(typeid(nobj) == typeid(obj));
+					delete(nobj);
+				}
+				else
+				{
+					std::cout << "unable to clone " << comp << "::" << type << '\n';
+				}
+				
+			}
 			delete obj;
 			
 

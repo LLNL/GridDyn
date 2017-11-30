@@ -20,7 +20,12 @@
 #pragma warning( push )
 #pragma warning( disable: 4127 4459)
 #endif
+#include "boost/version.hpp"
+#if BOOST_VERSION / 100 % 1000 >= 60
 #include <boost/spirit/home/x3.hpp>
+#else
+#define NO_SPIRIT 1
+#endif
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
@@ -103,19 +108,27 @@ inline X numConv(string_view V)
 template <>
 inline double numConv(string_view V)
 {
+#ifndef NO_SPIRIT
 	namespace x3 = boost::spirit::x3;
 	double retVal=-1e49;
 	x3::parse(V.cbegin(), V.cend(), x3::double_, retVal);
 	return retVal;
+#else
+    return std::stod(V.to_string());
+#endif
 }
 
 template <>
 inline float numConv(utilities::string_view V)
 {
+#ifndef NO_SPIRIT
 	namespace x3 = boost::spirit::x3;
 	float retVal= - 1e25f;
 	x3::parse(V.cbegin(), V.cend(), x3::float_, retVal);
 	return retVal;
+#else
+    return std::stof(V.to_string());
+#endif
 }
 
 //template definition for long double conversion

@@ -13,7 +13,6 @@
 #include "coreObjectList.h"
 namespace griddyn
 {
-
 bool coreObjectList::insert (coreObject *obj, bool replace)
 {
     auto inp = m_objects.insert (obj);

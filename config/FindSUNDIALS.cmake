@@ -32,7 +32,7 @@
 ##   * CVODES
 ##   * KINSOL
 ##   * ARKODE
-##	 * NVECOPENMP
+##   * NVECOPENMP
 ##   * NVECSERIAL
 ##
 ## How to use this file : 
@@ -102,19 +102,19 @@ macro(SUNDIALS_FIND_COMPONENTS )
 		
 		## try to find include dir (looking for very important header file)
 		if(NOT ${sundialsCompUC} STREQUAL "NVECOPENMP" AND NOT ${sundialsCompUC} STREQUAL "NVECSERIAL")
-		find_path(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR	
-			NAMES 			${sundialsComp}.h ${sundialsCompLC}.h ${sundialsCompUC}.h 
-						sundials_${sundialsComp}.h sundials_${sundialsCompLC}.h SUNDIALS_${sundialsCompUC}.h 
+			find_path(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR	
+				NAMES 		${sundialsComp}.h ${sundialsCompLC}.h ${sundialsCompUC}.h 
+							sundials_${sundialsComp}.h sundials_${sundialsCompLC}.h SUNDIALS_${sundialsCompUC}.h
 							${sundialsComp}/${sundialsComp}.h ${sundialsCompLC}/${sundialsCompLC}.h ${sundialsCompUC}/${sundialsCompUC}.h 
 							sundials/sundials_${sundialsComp}.h sundials/sundials_${sundialsCompLC}.h sundials/SUNDIALS_${sundialsCompUC}.h
 				HINTS		${SUNDIALS_DIR}/include
-						${SUNDIALS_DIR}/include/sundials
-						${SUNDIALS_DIR}/sundials/include
-						${SUNDIALS_DIR}/include/${sundialsComp}
-						${SUNDIALS_DIR}/${sundialsComp}/include
-						${${sundialsCompUC}_DIR}/include
-						${${sundialsCompUC}_DIR}/${sundialsComp}/include
-						${${sundialsCompUC}_DIR}
+							${SUNDIALS_DIR}/include/sundials
+							${SUNDIALS_DIR}/sundials/include
+							${SUNDIALS_DIR}/include/${sundialsComp}
+							${SUNDIALS_DIR}/${sundialsComp}/include
+							${${sundialsCompUC}_DIR}/include
+							${${sundialsCompUC}_DIR}/${sundialsComp}/include
+							${${sundialsCompUC}_DIR}
 				PATHS		/opt/local/include
 							/usr/include
 							/usr/local/include
@@ -122,7 +122,7 @@ macro(SUNDIALS_FIND_COMPONENTS )
 							/usr/local/include/sundials
 							/usr/include/${sundialsComp}
 							/usr/local/include/${sundialsComp}
-		)
+			)
 		else()
 			find_path(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR	
 				NAMES		nvector_serial.h nvector_openmp.h
@@ -183,7 +183,7 @@ macro(SUNDIALS_FIND_COMPONENTS )
 							/usr/local/lib${SUNDIALS_SEARCH_LIB_POSTFIX}
 			PATH_SUFFIXES	Debug
 		)
-		
+	
 		## check and auto complete release with debug if release missing and vice versa
 		if(SUNDIALS_${sundialsCompUC}_LIBRARY_RELEASE)
 			if(NOT SUNDIALS_${sundialsCompUC}_LIBRARY_DEBUG)
@@ -250,7 +250,7 @@ macro(SUNDIALS_FIND_COMPONENTS )
 		endif()
 		if(NOT ${SUNDIALS_${sundialsCompUC}_FOUND}) 
 			if(${SUNDIALS_FIND_REQUIRED_${sundialsCompUC}}) #if the component was not found and is required
-			set(SUNDIALS_FOUND OFF)
+				set(SUNDIALS_FOUND OFF)
 				break() ## one required component not found is enough to fail
 			endif()
 		endif()

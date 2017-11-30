@@ -20,8 +20,8 @@
 #endif
 
 #include "core/factoryTemplates.hpp"
-#include "core/helperTemplates.hpp"
-#include "griddyn.h"
+
+#include "gridDynSimulation.h"
 #include "simulation/diagnostics.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
@@ -74,25 +74,32 @@ sundialsInterface::~sundialsInterface ()
     }
 }
 
-std::shared_ptr<solverInterface>
-sundialsInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+
+std::unique_ptr<solverInterface> sundialsInterface::clone(bool fullCopy) const
 {
-    auto rp = cloneBase<sundialsInterface, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
-    rp->maxNNZ = maxNNZ;
-    if ((fullCopy) && (flags[allocated_flag]))
-    {
-        auto tols = NVECTOR_DATA (use_omp, abstols);
-        std::copy (tols, tols + svsize, NVECTOR_DATA (use_omp, rp->abstols));
-        auto cons = NVECTOR_DATA (use_omp, consData);
-        std::copy (cons, cons + svsize, NVECTOR_DATA (use_omp, rp->consData));
-        auto sc = NVECTOR_DATA (use_omp, scale);
-        std::copy (sc, sc + svsize, NVECTOR_DATA (use_omp, rp->scale));
-    }
-    return rp;
+	std::unique_ptr<solverInterface> si = std::make_unique<sundialsInterface>();
+	sundialsInterface::cloneTo(si.get(),fullCopy);
+	return si;
+}
+
+void sundialsInterface::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	solverInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<sundialsInterface *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	ai->maxNNZ = maxNNZ;
+	if ((fullCopy) && (flags[allocated_flag]))
+	{
+		auto tols = NVECTOR_DATA(use_omp, abstols);
+		std::copy(tols, tols + svsize, NVECTOR_DATA(use_omp, ai->abstols));
+		auto cons = NVECTOR_DATA(use_omp, consData);
+		std::copy(cons, cons + svsize, NVECTOR_DATA(use_omp, ai->consData));
+		auto sc = NVECTOR_DATA(use_omp, scale);
+		std::copy(sc, sc + svsize, NVECTOR_DATA(use_omp, ai->scale));
+	}
 }
 
 void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
@@ -205,70 +212,82 @@ double sundialsInterface::get (const std::string &param) const
 }
 
 #ifdef KLU_ENABLE
-bool isSlsMatSetup (SlsMat J)
+bool isSUNMatrixSetup (SUNMatrix J)
 {
-    if ((J->indexptrs[0] != 0) || (J->indexptrs[0] > J->NNZ))
-    {
-        return false;
-    }
-    if ((J->indexptrs[J->N] <= 0) || (J->indexptrs[J->N] >= J->NNZ))
-    {
-        return false;
-    }
+	int id = SUNMatGetID(J);	if (id == SUNMATRIX_SPARSE)
+	{
+		auto M = SM_CONTENT_S(J);
+		if ((M->indexptrs[0] != 0) || (M->indexptrs[0] > M->NNZ))
+		{
+			return false;
+		}
+		if ((M->indexptrs[M->N] <= 0) || (M->indexptrs[M->N] >= M->NNZ))
+		{
+			return false;
+		}
+	}
     return true;
 }
 
-void matrixDataToSlsMat (matrixData<double> &md, SlsMat J, count_t svsize)
+void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 {
-    count_t indval = 0;
-    J->indexptrs[0] = indval;
+	int id = SUNMatGetID(J);	if (id == SUNMATRIX_SPARSE)
+	{
+		auto M = SM_CONTENT_S(J);
+		count_t indval = 0;
+		M->indexptrs[0] = indval;
 
-    md.compact ();
-    assert (J->NNZ >= static_cast<int> (md.size ()));
-    int sz = static_cast<int> (md.size ());
-    /*
-  auto itel = md.begin();
-  for (int kk = 0; kk < sz; ++kk)
-  {
-      auto tp = *itel;
-      //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
-  a1->colIndex(kk));
-      if (tp.col > colval)
-      {
-          colval++;
-          J->colptrs[colval] = kk;
-      }
+		md.compact();
+		assert(M->NNZ >= static_cast<int> (md.size()));
+		int sz = static_cast<int> (md.size());
+		/*
+	  auto itel = md.begin();
+	  for (int kk = 0; kk < sz; ++kk)
+	  {
+		  auto tp = *itel;
+		  //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
+	  a1->colIndex(kk));
+		  if (tp.col > colval)
+		  {
+			  colval++;
+			  J->colptrs[colval] = kk;
+		  }
 
-      J->data[kk] = tp.data;
-      J->rowvals[kk] = tp.row;
-      ++itel;
-  }
-*/
-    // SlsSetToZero(J);
+		  J->data[kk] = tp.data;
+		  J->rowvals[kk] = tp.row;
+		  ++itel;
+	  }
+	*/
+	// SlsSetToZero(J);
 
-    md.start ();
-    for (int kk = 0; kk < sz; ++kk)
-    {
-        auto tp = md.next ();
-        //	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
-        // a1->colIndex(kk));
-        if (tp.row > indval)
-        {
-            indval++;
-            J->indexptrs[indval] = kk;
-            assert (tp.row == indval);
-        }
+		md.start();
+		for (int kk = 0; kk < sz; ++kk)
+		{
+			auto tp = md.next();
+			//	  printf("kk: %d  dataval: %f  rowind: %d   colind: %d \n ", kk, a1->val(kk), a1->rowIndex(kk),
+			// a1->colIndex(kk));
+			if (tp.row > indval)
+			{
+				indval++;
+				M->indexptrs[indval] = kk;
+				assert(tp.row == indval);
+			}
 
-        J->data[kk] = tp.data;
-        J->indexvals[kk] = tp.col;
-    }
+			M->data[kk] = tp.data;
+			M->indexvals[kk] = tp.col;
+		}
 
-    if (indval + 1 != svsize)
-    {
-        printf ("sz=%d, svsize=%d, colval+1=%d\n", sz, svsize, indval + 1);
-    }
-    assert (indval + 1 == svsize);
-    J->indexptrs[indval + 1] = sz;
+		if (indval + 1 != svsize)
+		{
+			printf("sz=%d, svsize=%d, colval+1=%d\n", sz, svsize, indval + 1);
+		}
+		assert(indval + 1 == svsize);
+		M->indexptrs[indval + 1] = sz;
+	}
+	else if (id == SUNMATRIX_DENSE)
+	{
+
+	}
 }
 
 #endif
@@ -290,19 +309,31 @@ void sundialsErrorHandlerFunc (int error_code,
     sd->logMessage (error_code, message);
 }
 
-#ifdef KLU_ENABLE
-int sundialsJacSparse (realtype time,
+bool MatrixNeedsSetup(count_t callCount, SUNMatrix J)
+{
+	switch (SUNMatGetID(J))
+	{
+	case SUNMATRIX_DENSE:
+		return false;
+	case SUNMATRIX_SPARSE:
+		return ((callCount == 0) || (!isSUNMatrixSetup(J)));
+	default:
+		return false;
+	}
+}
+
+int sundialsJac (realtype time,
                        realtype cj,
                        N_Vector state,
                        N_Vector dstate_dt,
-                       SlsMat J,
+                       SUNMatrix J,
                        void *user_data,
                        N_Vector /*tmp1*/,
                        N_Vector /*tmp2*/)
 {
     auto sd = reinterpret_cast<sundialsInterface *> (user_data);
 
-    if ((sd->jacCallCount == 0) || (!isSlsMatSetup (J)))
+	if (MatrixNeedsSetup(sd->jacCallCount, J))
     {
         auto a1 = makeSparseMatrix (sd->svsize, sd->maxNNZ);
 
@@ -328,16 +359,16 @@ int sundialsJacSparse (realtype time,
 
         ++sd->jacCallCount;
 #ifdef _DEBUG
-        if (J->NNZ < static_cast<int> (a1->size ()))
+        if (SM_CONTENT_S(J)->NNZ < static_cast<int> (a1->size ()))
         {
             a1->compact ();
-            if (J->NNZ < static_cast<int> (a1->size ()))
+            if (SM_CONTENT_S(J)->NNZ < static_cast<int> (a1->size ()))
             {
                 jacobianAnalysis (*a1, sd->m_gds, sd->mode, 5);
             }
         }
 #endif
-        matrixDataToSlsMat (*a1, J, sd->svsize);
+        matrixDataToSUNMatrix (*a1, J, sd->svsize);
         sd->nnz = a1->size ();
         if (sd->flags[fileCapture_flag])
         {
@@ -351,22 +382,22 @@ int sundialsJacSparse (realtype time,
     else
     {
         // if it isn't the first we can use the SUNDIALS arraySparse object
-        sundialsMatrixDataSparseRow a1 (J);
+		auto a1 = makeSundialsMatrixData(J);
         if (sd->flags[useMask_flag])
         {
-            matrixDataFilter<double> filterAd (a1);
+            matrixDataFilter<double> filterAd (*a1);
             filterAd.addFilter (sd->maskElements);
             sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
                                          NVECTOR_DATA (sd->use_omp, dstate_dt), filterAd, cj, sd->mode);
             for (auto &v : sd->maskElements)
             {
-                a1.assign (v, v, 1.0);
+                a1->assign (v, v, 1.0);
             }
         }
         else
         {
             sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         NVECTOR_DATA (sd->use_omp, dstate_dt), a1, cj, sd->mode);
+                                         NVECTOR_DATA (sd->use_omp, dstate_dt), *a1, cj, sd->mode);
         }
 
         sd->jacCallCount++;
@@ -374,7 +405,7 @@ int sundialsJacSparse (realtype time,
         {
             if (!sd->jacFile.empty ())
             {
-                writeArray (time, 1, sd->jacCallCount, sd->mode.offsetIndex, a1, sd->jacFile);
+                writeArray (time, 1, sd->jacCallCount, sd->mode.offsetIndex, *a1, sd->jacFile);
             }
         }
     }
@@ -431,62 +462,10 @@ writeArray(sd->solveTime, 1, val, sd->mode.offsetIndex, a1, sd->jacFile);
         printf ("no entries for element %d\n", me);
     }
 #endif
-    return 0;
-}
-
-#endif
-
-#define CHECK_JACOBIAN 0
-int sundialsJacDense (long int Neq,
-                      realtype time,
-                      realtype cj,
-                      N_Vector state,
-                      N_Vector dstate_dt,
-                      DlsMat J,
-                      void *user_data,
-                      N_Vector /*tmp1*/,
-                      N_Vector /*tmp2*/)
-{
-    sundialsInterface *sd = reinterpret_cast<sundialsInterface *> (user_data);
-
-    assert (Neq == static_cast<int> (sd->svsize));
-    _unused (Neq);
-    sundialsMatrixDataDense a1 (J);
-    if (sd->flags[useMask_flag])
-    {
-        matrixDataFilter<double> filterAd (a1);
-        filterAd.addFilter (sd->maskElements);
-        sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                     NVECTOR_DATA (sd->use_omp, dstate_dt), filterAd, cj, sd->mode);
-        for (auto &v : sd->maskElements)
-        {
-            a1.assign (v, v, 1.0);
-        }
-    }
-    else
-    {
-        sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                     NVECTOR_DATA (sd->use_omp, dstate_dt), a1, cj, sd->mode);
-    }
-
-    ++sd->jacCallCount;
-    if (sd->flags[fileCapture_flag])
-    {
-        if (!sd->jacFile.empty ())
-        {
-            writeArray (time, 1, sd->jacCallCount, sd->mode.offsetIndex, a1, sd->jacFile);
-        }
-    }
-
-#if (CHECK_JACOBIAN > 0)
-    auto mv = findMissing (a1);
-    for (auto &me : mv)
-    {
-        printf ("no entries for element %d\n", me);
-    }
-#endif
     return FUNCTION_EXECUTION_SUCCESS;
 }
+
+
 
 }  // namespace solvers
 }  // namespace griddyn

@@ -11,7 +11,7 @@
 */
 
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "testHelper.h"
 

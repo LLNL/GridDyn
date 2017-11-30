@@ -15,7 +15,7 @@
 #include "events/Event.h"
 #include "fileInput/gridDynRunner.h"
 #include "core/coreExceptions.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include <memory>
 #include <vector>
 
@@ -127,7 +127,7 @@ int gridDynEvent_setString(gridDynEvent evnt, const char *parameter, const char 
 	}
 }
 
-int gridDynEvent_setFlag(gridDynEvent evnt, const char *flag, bool val)
+int gridDynEvent_setFlag(gridDynEvent evnt, const char *flag, int val)
 {
 	if (evnt == nullptr)
 	{
@@ -136,7 +136,7 @@ int gridDynEvent_setFlag(gridDynEvent evnt, const char *flag, bool val)
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	try
 	{
-		shr_event->operator->()->setFlag(flag, val);
+		shr_event->operator->()->setFlag(flag, (val!=0));
 		return EXECUTION_SUCCESS;
 	}
 	catch (const invalidParameterValue &)

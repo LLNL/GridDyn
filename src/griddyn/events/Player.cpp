@@ -14,7 +14,6 @@
 
 #include "core/objectInterpreter.h"
 #include "utilities/stringOps.h"
-#include "core/helperTemplates.hpp"
 #include "core/coreExceptions.h"
 #include <sstream>
 
@@ -33,7 +32,7 @@ Player::Player(coreTime time0, double loopPeriod) : Event(time0), period(loopPer
 }
 
 
-Player::Player(EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject), period(gdEI.period)
+Player::Player(const EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject), period(gdEI.period)
 {
 	if (gdEI.file.empty())
 	{
@@ -50,7 +49,7 @@ Player::Player(EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject
 
 }
 
-void Player::updateEvent(EventInfo &gdEI, coreObject *rootObject)
+void Player::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
 {
 	if (gdEI.file.empty())
 	{
@@ -67,22 +66,28 @@ void Player::updateEvent(EventInfo &gdEI, coreObject *rootObject)
 	Event::updateEvent(gdEI, rootObject);
 }
 
-std::shared_ptr<Event> Player::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> Player::clone() const
 {
-	auto gp = cloneBase<Player, Event>(this, gE);
-	if (!gp)
-	{
-		return gE;
-	}
-	gp->period = period;
-	gp->eFile = eFile;
-	gp->ts = ts;
-	gp->column = column;
-	gp->currIndex = currIndex;
-	gp->timeOffset = timeOffset;
-	return gp;
+	std::unique_ptr<Event> upE = std::make_unique<Player>(getName());
+	cloneTo(upE.get());
+	return upE;
 }
 
+void Player::cloneTo(Event *gE) const
+{
+	Event::cloneTo(gE);
+	auto nE = dynamic_cast<Player *>(gE);
+	if (nE == nullptr)
+	{
+		return;
+	}
+	nE->period = period;
+	nE->eFile = eFile;
+	nE->ts = ts;
+	nE->column = column;
+	nE->currIndex = currIndex;
+	nE->timeOffset = timeOffset;
+}
 
 void Player::set(const std::string &param, double val)
 {

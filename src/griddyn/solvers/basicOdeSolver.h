@@ -39,8 +39,9 @@ public:
 	*/
 	basicOdeSolver(gridDynSimulation *gds, const solverMode &sMode);
 
-	virtual std::shared_ptr<solverInterface>
-		clone(std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
 	double *state_data() noexcept override;
 	double *deriv_data() noexcept override;
 	double *type_data() noexcept override;

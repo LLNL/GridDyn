@@ -33,7 +33,7 @@ aggregateLoad::aggregateLoad (const std::string &objName) : zipLoad (objName)
 coreObject *aggregateLoad::clone (coreObject *obj) const
 {
     auto nobj = cloneBase<aggregateLoad, zipLoad> (this, obj);
-    if (nobj==nullptr)
+    if (nobj == nullptr)
     {
         return obj;
     }

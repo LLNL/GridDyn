@@ -190,18 +190,18 @@ double reserveDispatcher::testP (coreTime time, double pShort)
     return output;
 }
 
-void reserveDispatcher::remove(schedulerRamp *sched)
+void reserveDispatcher::remove (schedulerRamp *sched)
 {
-	for (auto sch = schedList.begin(); sch != schedList.end(); ++sch)
-	{
-		if (isSameObject(*sch, sched))
-		{
-			schedList.erase(sch);
-			--schedCount;
-			checkGen();
-			return;
-		}
-	}
+    for (auto sch = schedList.begin (); sch != schedList.end (); ++sch)
+    {
+        if (isSameObject (*sch, sched))
+        {
+            schedList.erase (sch);
+            --schedCount;
+            checkGen ();
+            return;
+        }
+    }
 }
 
 void reserveDispatcher::add (coreObject *obj)

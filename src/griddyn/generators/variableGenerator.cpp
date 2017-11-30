@@ -38,7 +38,7 @@ variableGenerator::variableGenerator (dynModel_t dynModel, const std::string &ob
 coreObject *variableGenerator::clone (coreObject *obj) const
 {
     auto gen = cloneBase<variableGenerator, DynamicGenerator> (this, obj);
-    if (gen != nullptr)
+    if (gen == nullptr)
     {
         return obj;
     }
@@ -128,11 +128,11 @@ void variableGenerator::set (const std::string &param, double val, units_t unitT
 {
     if (param == "vcutout")
     {
-        mp_Vcutout = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        mp_Vcutout = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmax")
     {
-        mp_Vmax = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        mp_Vmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else
 

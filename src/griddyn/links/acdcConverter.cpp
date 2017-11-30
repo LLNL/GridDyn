@@ -357,10 +357,7 @@ void acdcConverter::dynObjectInitializeB (const IOdata & /*inputs*/,
     }
 }
 
-void acdcConverter::loadSizes (const solverMode &sMode, bool dynOnly)
-{
-    gridComponent::loadSizes (sMode, dynOnly);
-}
+
 void acdcConverter::ioPartialDerivatives (id_type_t busId,
                                           const stateData &sD,
                                           matrixData<double> &md,

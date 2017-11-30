@@ -19,15 +19,28 @@
 
 namespace utilities
 {
+/** base class for object wrapping a random distribution */
 class distributionObject
 {
 public:
-	explicit distributionObject() {};
+	/**default constructor */
+	explicit distributionObject() = default;
+	/** virtual default destructor*/
 	virtual ~distributionObject() = default;
+	/** generate a random value */
 	virtual double operator() () = 0;
-	virtual void updateParameters(double param1) = 0;
-	virtual void updateParameters(double param1, double param2) = 0;
+	/** update a parameter*/
+	virtual void updateParameter(double param1) = 0;
+	/** update two parameters
+	@param param1  the first distribution parameter often the mean
+	@param param2 the second random distribution parameter often the std dev*/
+	virtual void updateParameters(double param1, double param2)
+	{
+		(void)(param2); //ignore it and forward to single parameter call
+		updateParameter(param1);
+	};
 };
+//TODO: rework this so it functions across threads as the current generator is not thread safe
 
 /** class defining random number generation*/
 class gridRandom
@@ -45,9 +58,13 @@ private:
 	static bool seeded;
 
 public:
+	/** set the seed of the random number generator*/
 	static void setSeed(unsigned int seed);
+	/** automatically generate a seed*/
 	static void setSeed();
+	/** get the current seed*/
 	static unsigned int getSeed();
+	/** enumeration of the different distribution types*/
 	enum class dist_type_t
 	{
 		constant,
@@ -64,17 +81,27 @@ public:
 
 	void setDistribution(dist_type_t dist);
 	dist_type_t getDistribution() const { return m_dist; }
+	/** generate a random number according to the distribution*/
 	double operator() ();
+	/** generate a random number according to the distribution*/
 	double generate();
+	/** set the parameters of the distribution*/
 	void setParameters(double param1, double param2 = 1.0);
+	/** generate a random number from a distribution*/
 	static double randNumber(dist_type_t dist);
+	/** generate a random number from a distribution with a two parameter distribution*/
 	static double randNumber(dist_type_t dist, double param1, double param2);
-
+	/** generate a pair of random numbers*/
 	std::pair<double, double> getPair();
+	/** generate a random vector with a specified number of values*/
 	std::vector<double> getNewValues(size_t count);
+	/** fill a vector with new random values
+	@param[out] the vector to fill with new random numbers
+	@param count the number of random values to generate
+	*/
 	void getNewValues(std::vector<double> &rvec, size_t count);
 
-	static decltype (s_gen) &getEngine() { return s_gen; };
+	static auto &getEngine() { return s_gen; };
 
 private:
 	std::unique_ptr<distributionObject> dobj;
@@ -96,7 +123,7 @@ public:
 	explicit randomDistributionObject2(double param1) : dist(param1) {}
 	randomDistributionObject2(double param1, double param2) : dist(param1, param2) {}
 	virtual double operator() () override { return dist(gridRandom::getEngine()); }
-	virtual void updateParameters(double param1) override { dist = DIST(param1); }
+	virtual void updateParameter(double param1) override { dist = DIST(param1); }
 	virtual void updateParameters(double param1, double param2) override { dist = DIST(param1, param2); }
 };
 
@@ -111,8 +138,7 @@ public:
 	randomDistributionObject1() {}
 	explicit randomDistributionObject1(double param1) : dist(param1) {}
 	virtual double operator() () override { return dist(gridRandom::getEngine()); }
-	virtual void updateParameters(double param1) override { dist = DIST(param1); }
-	virtual void updateParameters(double param1, double /*unused*/) override { dist = DIST(param1); }
+	virtual void updateParameter(double param1) override { dist = DIST(param1); }
 };
 
 /** a template specialization for a making a constant look like a random distribution*/
@@ -120,16 +146,16 @@ template <>
 class randomDistributionObject1<void> : public distributionObject
 {
 private:
-	double param1_ = 0.0;
+	double param1_ = 0.0;  //!< the constant value to generate
 
 public:
 	randomDistributionObject1() {}
 	explicit randomDistributionObject1(double param1) : param1_(param1) {}
 	virtual double operator() () override { return param1_; }
-	virtual void updateParameters(double param1) override { param1_ = param1; }
-	virtual void updateParameters(double param1, double /*unused*/) override { param1_ = param1; }
+	virtual void updateParameter(double param1) override { param1_ = param1; }
 };
 
+/** get the distribution type from a string*/
 gridRandom::dist_type_t getDist(const std::string &dist_name);
 
 }//namespace utilities

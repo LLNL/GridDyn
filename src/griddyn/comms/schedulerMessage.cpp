@@ -24,17 +24,16 @@ static dMessageFactory<schedulerMessage, BASE_SCHEDULER_MESSAGE_NUMBER, BASE_SCH
 schedulerMessage::schedulerMessage (std::uint32_t messageType,
                                     std::vector<double> time,
                                     std::vector<double> target)
-    : commMessage (messageType),m_time(std::move(time)),m_target(std::move(target))
+    : commMessage (messageType), m_time (std::move (time)), m_target (std::move (target))
 {
-
 }
 void schedulerMessage::loadMessage (std::uint32_t messageType,
                                     std::vector<double> time,
                                     std::vector<double> target)
 {
     setMessageType (messageType);
-    m_time = std::move(time);
-    m_target = std::move(target);
+    m_time = std::move (time);
+    m_target = std::move (target);
 }
 
 std::string schedulerMessage::to_string (int modifiers) const

@@ -20,6 +20,7 @@ ENDIF(UNIX)
 
 
 set(griddyn_lib_headers
+griddyn.h
 griddyn_export.h
 griddyn_export_advanced.h
 griddyn_export_internal.h
@@ -43,10 +44,14 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 
-target_link_libraries(griddyn_shared_lib gridDynCombined)
+IF(WITH_MATLAB)
+  target_link_libraries(griddyn_shared_lib gridDynCombined -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export.txt)
+ELSE(WITH_MATLAB)
+  target_link_libraries(griddyn_shared_lib gridDynCombined)
+ENDIF(WITH_MATLAB)
 
 
-INSTALL(TARGETS griddyn_shared_lib RUNTIME DESTINATION bin LIBRARY DESTINATION bin)
+INSTALL(TARGETS griddyn_shared_lib LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

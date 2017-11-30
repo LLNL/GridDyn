@@ -12,7 +12,7 @@
 
 #include "tinyxml2ReaderElement.h"
 #include <tinyxml2/tinyxml2.h>
-#include "utilities/stringConversion.h"
+#include "utilities/string_viewConversion.h"
 
 using namespace tinyxml2;
 
@@ -57,12 +57,12 @@ bool tinyxml2ReaderElement::loadFile (const std::string &fileName)
     doc = std::make_shared<XMLDocument> (true, COLLAPSE_WHITESPACE);
     XMLError res = doc->LoadFile (fileName.c_str ());
     clear ();
-    if (res == XML_NO_ERROR)
+    if (res == XML_SUCCESS)
     {
         element = doc->FirstChildElement ();
         return true;
     }
-
+	doc->PrintError();
     doc = nullptr;
     return false;
 }
@@ -72,7 +72,7 @@ bool tinyxml2ReaderElement::parse (const std::string &inputString)
     doc = std::make_shared<XMLDocument> (true, COLLAPSE_WHITESPACE);
     XMLError res = doc->Parse (inputString.data (), inputString.length ());
     clear ();
-    if (res == XML_NO_ERROR)
+    if (res == XML_SUCCESS)
     {
         element = doc->FirstChildElement ();
         return true;
@@ -102,7 +102,7 @@ double tinyxml2ReaderElement::getValue () const
         auto cText = element->GetText ();
         if (cText != nullptr)
         {
-            double val = numeric_conversionComplete (std::string (cText), readerNullVal);
+            double val = numeric_conversionComplete (cText, readerNullVal);
             return val;
         }
         // double ret = numeric_conversionComplete(element->GetText(false), kNullVal);
@@ -156,7 +156,7 @@ bool tinyxml2ReaderElement::hasAttribute (const std::string &attributeName) cons
     if (element != nullptr)
     {
         auto Att = element->Attribute (attributeName.c_str ());
-        return (Att == nullptr);
+        return (Att != nullptr);
     }
     return false;
 }
@@ -230,7 +230,7 @@ double tinyxml2ReaderElement::getAttributeValue (const std::string &attributeNam
         auto c = element->Attribute (attributeName.c_str ());
         if (c != nullptr)
         {
-            double val = numeric_conversionComplete (std::string (c), readerNullVal);
+            double val = numeric_conversionComplete (c, readerNullVal);
             return val;
         }
     }

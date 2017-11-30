@@ -110,7 +110,10 @@ public:
   // dynInitializeB
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
   virtual void setOffset (index_t offset, const solverMode &sMode) override;
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+
+  virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+  virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
 
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
 protected:
@@ -335,8 +338,8 @@ protected:
   */
   virtual double computeError (const stateData &sD, const solverMode &sMode) override;
 private:
-  double getAverageAngle ();
-  count_t getDependencyCount(const solverMode &sMode);
+  double getAverageAngle () const;
+  count_t getDependencyCount(const solverMode &sMode) const;
   Generator *keyGen = nullptr;
 };
 

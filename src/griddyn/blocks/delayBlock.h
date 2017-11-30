@@ -29,7 +29,7 @@ class delayBlock : public Block
 
 public:
 protected:
-  double m_T1 = 0.1;  //!< the time constant
+  parameter_t m_T1 = 0.1;  //!< the time constant
 public:
   //!< default constructor
   explicit delayBlock (const std::string &objName = "delayBlock_#");

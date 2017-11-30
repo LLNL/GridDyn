@@ -16,6 +16,7 @@ set(utilities_sources
 	stackInfo.cpp
 	stringOps.cpp
 	string_viewOps.cpp
+	ThreePhaseFunctions.cpp
 	matrixOps.cpp
 	stringConversion.cpp
 	units.cpp
@@ -38,6 +39,7 @@ set(utilities_headers
 	timeSeries.hpp
 	charMapper.h
 	timeSeriesMulti.hpp
+	ThreePhaseFunctions.h
 	vectorOps.hpp
 	generic_string_ops.hpp
 	stringOps.h
@@ -89,37 +91,27 @@ include(buildMiniZip)
 ###########################################
 set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 
-unset(ZLIB_FOUND)
-find_package(ZLIB)
-
-if (NOT ZLIB_FOUND)
+if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/zlib-targets.cmake)
 build_zlib()
-find_package(ZLIB)
-endif (NOT ZLIB_FOUND)
-
-
-
+endif()
+include(${PROJECT_BINARY_DIR}/libs/cmake/zlib-targets.cmake)
 
 ###########################################
 # building minizip
 ###########################################
-set(MINIZIP_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
-set(NO_SYSTEM_MINIZIP 1)
-find_package(MiniZip)
-
-if (NOT MINIZIP_FOUND)
+set(ZLIB_INCLUDES ${PROJECT_BINARY_DIR}/libs/include)
+if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
 build_minizip()
-find_package(MiniZip)
-endif (NOT MINIZIP_FOUND)
+endif()
+include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
+
+
+target_link_libraries(utilities zlib minizip)
 
 IF (ENABLE_64_BIT_INDEXING)
 add_definitions(-DENABLE_64_BIT_INDEXING)
 ENDIF(ENABLE_64_BIT_INDEXING)
 
-
-list(APPEND external_library_list ${MINIZIP_LIBRARIES} ${ZLIB_LIBRARIES})
-
-set (external_library_list ${external_library_list} PARENT_SCOPE)
 
 INSTALL(TARGETS utilities
        LIBRARY DESTINATION lib

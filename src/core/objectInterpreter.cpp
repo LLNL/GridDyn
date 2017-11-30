@@ -95,9 +95,9 @@ coreObject *locateObject (const std::string &Istring, const coreObject *rootObj,
                     case '$':  //$ means get by id
                         obj = rootObj->findByUserID (type, onum);
                         break;
-					case '!':
-						obj = rootObj->getSubObject(type, onum);
-						break;
+                    case '!':
+                        obj = rootObj->getSubObject (type, onum);
+                        break;
                     case '#':
                         obj = rootObj->getSubObject (type, onum);
                         break;
@@ -119,7 +119,7 @@ coreObject *locateObject (const std::string &Istring, const coreObject *rootObj,
         obj = locateObject (secName, obj, false);
     }
     else if ((secName[0] == ':') && (obj != nullptr))
-    {// we have a double colon so go deeper in the object using the found object as the base
+    {  // we have a double colon so go deeper in the object using the found object as the base
         obj = locateObject (secName.substr (1), obj, false);
     }
     return obj;

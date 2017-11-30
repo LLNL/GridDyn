@@ -566,7 +566,7 @@ void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicRea
     }
     bus->setName (temp2);
 
-    // get the baseVoltage
+    // get the localBaseVoltage
     double bv = numeric_conversion<double> (strvec[2], -1.0);
     if (bv > 0.0)
     {
@@ -656,7 +656,7 @@ void epcReadDCBus (dcBus *bus, string_view line, double /*base*/, const basicRea
     }
     bus->setName (temp2);
 
-    // get the baseVoltage
+    // get the localBaseVoltage
     double bv = numeric_conversion<double> (strvec[2], -1.0);
     if (bv > 0.0)
     {

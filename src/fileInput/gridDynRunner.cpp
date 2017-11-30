@@ -14,7 +14,7 @@
 
 #include "gridDynRunner.h"
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
@@ -119,6 +119,10 @@ void GriddynRunner::simInitialize ()
 
 int GriddynRunner::Reset()
 {
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
 	readerInfo ri;
 	return Reset(ri);
 }
@@ -126,6 +130,10 @@ int GriddynRunner::Reset()
 
 int GriddynRunner::Reset(readerInfo &ri)
 {
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
 	//make a new simulation object
     m_gds = std::make_shared<gridDynSimulation> ();
 	//reload it from the existing vm
@@ -140,18 +148,40 @@ int GriddynRunner::Reset(readerInfo &ri)
 
 }
 
-void GriddynRunner::Run ()
+coreTime GriddynRunner::Run ()
 {
-    m_startTime = std::chrono::high_resolution_clock::now ();
-    m_gds->run ();
-    m_stopTime = std::chrono::high_resolution_clock::now ();
-    std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
-    m_gds->log (m_gds.get (), print_level::summary,
-                m_gds->getName () + " executed in " + std::to_string (elapsed_t.count ()) + " seconds");
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
+	
+		m_startTime = std::chrono::high_resolution_clock::now();
+		m_gds->run();
+		m_stopTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
+		m_gds->log(m_gds.get(), print_level::summary,
+			m_gds->getName() + " executed in " + std::to_string(elapsed_t.count()) + " seconds");
+		return m_gds->getSimulationTime();
+	
+}
+
+
+void GriddynRunner::RunAsync()
+{
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
+	async_ret = std::async(std::launch::async, [this] {return Run(); });
+	
 }
 
 coreTime GriddynRunner::Step (coreTime time)
 {
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
     coreTime actual = time;
     if (m_gds)
     {
@@ -177,6 +207,27 @@ coreTime GriddynRunner::Step (coreTime time)
     }
 
     return actual;
+}
+
+void GriddynRunner::StepAsync(coreTime time)
+{
+	if (!isReady())
+	{
+		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
+	}
+	async_ret = std::async(std::launch::async, [this, time] {return Step(time); });
+}
+
+bool GriddynRunner::isReady() const
+{
+	return (async_ret.valid()) ? (async_ret.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : true;
+}
+
+int GriddynRunner::getStatus(coreTime &timeReturn)
+{
+	
+	timeReturn = m_gds->getSimulationTime();
+	return (isReady())?static_cast<int>(m_gds->currentProcessState()):GRIDDYN_PENDING;
 }
 
 coreTime GriddynRunner::getNextEvent () const { return m_gds->getEventTime (); }
@@ -236,7 +287,7 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
         stringVec flagstrings = vm["file-flags"].as<stringVec> ();
         for (auto &str : flagstrings)
         {
-            ri.flags = addflags (ri.flags, str);
+            addflags (ri, str);
         }
     }
     if (vm.count ("threads") > 0)

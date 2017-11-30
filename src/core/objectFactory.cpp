@@ -136,7 +136,7 @@ objectFactory *componentFactory::getFactory (const std::string &typeName)
 
 std::shared_ptr<coreObjectFactory> coreObjectFactory::instance ()
 {
-	//can't use make shared since constructor is private
+    // can't use make shared since constructor is private
     static std::shared_ptr<coreObjectFactory> factory =
       std::shared_ptr<coreObjectFactory> (new coreObjectFactory ());  // NOLINT
     return factory;
@@ -271,7 +271,7 @@ void coreObjectFactory::prepObjects (const std::string &component, count_t numOb
     }
 }
 
-coreObjectFactory::coreObjectFactory() = default;
+coreObjectFactory::coreObjectFactory () = default;
 coreObjectFactory::~coreObjectFactory () = default;
 
 }  // namespace griddyn

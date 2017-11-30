@@ -228,7 +228,7 @@ void cdfReadBusLine (gridBus *bus, const std::string &line, double base, const b
 
     bus->setName (temp);  // set the name
     // skip the load flow area and loss zone for now
-    // get the baseVoltage
+    // get the localBaseVoltage
     temp = line.substr (76, 6);
     double val = std::stod (temp);
     if (val > 0.0)

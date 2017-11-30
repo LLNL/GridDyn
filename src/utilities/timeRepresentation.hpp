@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2017, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -505,6 +505,13 @@ template <class Tconv>
 inline double operator* (double x, timeRepresentation<Tconv> t)
 {
     return x * static_cast<double> (t);
+}
+
+/** convenience operator to allow the int multiplier to be the first argument*/
+template <class Tconv>
+inline timeRepresentation<Tconv> operator* (int x, timeRepresentation<Tconv> t)
+{
+    return t.operator* (x);
 }
 
 /** dividing two times is a ratio and should produce a numerical output not a time output*/

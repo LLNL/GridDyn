@@ -11,7 +11,7 @@
 */
 
 #include "primary/acBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "generators/DynamicGenerator.h"
 #include "loads/zipLoad.h"
 #include "Area.h"

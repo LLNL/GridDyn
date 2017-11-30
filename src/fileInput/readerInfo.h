@@ -42,12 +42,21 @@ class basicReaderInfo
 public:
 	double base = 100.0;       //!< base power in MW
 	double basefreq = 60.0;       //!< base frequency in Hz
+private:
 	uint32_t flags = 0;        //!< any reader flags
+public:
 	int version = 0;        //!< file version info
 	std::string prefix;        //!< prefix to add to the names of imported objects
 
 	/** @brief virtual destructor*/
 	virtual ~basicReaderInfo() = default;
+	void setFlag(int flagID);
+	bool checkFlag(int flagID) const
+	{
+		return (flagID < 32) ? ((flags&(1 << flagID)) != 0) : false;
+	}
+	void setAllFlags(uint32_t newFlags) { flags = newFlags; }
+	uint32_t getFlags() const { return flags; };
 };
 
 const basicReaderInfo defInfo = basicReaderInfo();

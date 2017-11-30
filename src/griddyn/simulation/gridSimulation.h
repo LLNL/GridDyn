@@ -15,7 +15,7 @@
 #pragma once
 
 // header files
-#include "config.h"
+#include "griddyn/griddyn-config.h"
 #include "Area.h"
 #include <functional>
 
@@ -102,8 +102,9 @@ class gridSimulation : public Area
     // ---------------- clock ----------------
 
     coreTime startTime = timeZero;  //!< [s]  start time
-    coreTime stopTime = timeZero;  //!< [s]  end time
-    coreTime currentTime = negTime;  //!< [s]  current time
+    coreTime stopTime = 30.0;  //!< [s]  end time
+	coreTime currentTime = timeZero; //!< [s] the current time
+	std::atomic<coreTime> simulationTime;  //!< [s]  current time
     coreTime stepTime = coreTime (0.05);  //!< [s]  time step
     coreTime timeReturn = timeZero;  //!< [s]  time returned by the solver
     coreTime nextStopTime = negTime;  //!< next time to stop the dynamic Simulation
@@ -203,34 +204,36 @@ class gridSimulation : public Area
     void saveRecorders ();
 
     /**
-     * \brief Gets the current simulation time.
-     * @return a double representing the current simulation time, in seconds.
+     * @brief Gets the current simulation time.
+	 @details currentTime is atomic and can be used in a multithreaded context to observe the current progress of an asyncrhonously running dynamic simulation
+     * @return a coreTime representing the current simulation time.
+
      */
-    coreTime getCurrentTime () const { return currentTime; }
+    coreTime getSimulationTime () const { return currentTime; }
 
     /**
-     * \brief Gets the simulation start time.
+     * @brief Gets the simulation start time.
      * @return a double representing the simulation start time, in seconds.
      */
     coreTime getStartTime () const { return startTime; }
 	/**
-	* \brief Gets the simulation stop time.
+	* @brief Gets the simulation stop time.
 	* @return a double representing the simulation start time, in seconds.
 	*/
 	coreTime getStopTime() const { return stopTime; }
 	/**
-	* \brief Gets the simulation step time.
+	* @brief Gets the simulation step time.
 	* @return a time representing the simulation start time, in seconds.
 	*/
 	coreTime getStepTime() const { return stepTime; }
 
     /**
-     * \brief gets the next event time.
+     * @brief gets the next event time.
      * @return a double representing the next scheduled event in GridDyn.
      */
     coreTime getEventTime () const;
 	/**
-	* \brief gets the next event time.
+	* @brief gets the next event time.
 	* @param[in] eventCode a code corresponding to a specific type of event
 	* @return a time representing the next scheduled event in GridDyn.
 	*/

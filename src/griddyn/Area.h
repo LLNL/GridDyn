@@ -141,7 +141,17 @@ public:
   virtual void setOffsets (const solverOffsets &newOffsets, const solverMode &sMode) override;
   virtual void setOffset (index_t offset, const solverMode &sMode) override;
 
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+  virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+  virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
+
+  virtual std::pair<count_t, count_t> LocalRootCount(const solverMode &sMode) const override;
+
+  virtual void loadStateSizes(const solverMode &sMode) override;
+
+  virtual void loadJacobianSizes(const solverMode &sMode) override;
+
+  virtual void loadRootSizes(const solverMode &sMode) override;
   virtual void setRootOffset (index_t Roffset, const solverMode &sMode) override;
 
 protected:

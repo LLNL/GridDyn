@@ -28,6 +28,8 @@ namespace events
 class Player : public Event
 {
 protected:
+	//the bool is first to take advantage of the empty space in event there will still be a 3 byte gap
+	bool loadFileProcess = false;	//!< flag indicating that the files need to be loaded yet
 	coreTime period = maxTime;  //!< period of the player
 	timeSeries<double, coreTime> ts;	//!< the time series containing the data for the player 
 	index_t currIndex = kNullLocation;	//!< the current index of the player
@@ -35,14 +37,19 @@ protected:
 	coreTime timeOffset = timeZero; //!< an offset to the time series time
 	std::string eFile;		//!< the file name
 	std::future<void> fileLoaded; //!< future indicating that the file operations have completed
-	bool loadFileProcess = false;	//!< flag indicating that the files need to be loaded yet
+	
 public:
+	/** constructor taking the object name*/
 	explicit Player(const std::string &eventName);
+	/** constructor taking a trigger time and period default constructor*/
 	Player(coreTime time0 = 0.0, double loopPeriod = 0.0);
-	Player(EventInfo &gdEI, coreObject *rootObject);
-	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> gE = nullptr) const override;
+	/** constructor from an event Info structure and rootobject*/
+	Player(const EventInfo &gdEI, coreObject *rootObject);
+	virtual std::unique_ptr<Event> clone() const override;
 
-	virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
+	virtual void cloneTo(Event *evnt) const override;
+
+	virtual void updateEvent(const EventInfo &gdEI, coreObject *rootObject) override;
 	virtual change_code trigger() override;
 	virtual change_code trigger(coreTime time) override;
 

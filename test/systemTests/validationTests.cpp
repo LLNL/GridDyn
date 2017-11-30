@@ -10,7 +10,7 @@
 * LLNS Copyright End
 */
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "testHelper.h"
@@ -51,7 +51,7 @@ std::ostream &operator<< (std::ostream &stream, const std::pair<std::string, std
 }
 
 using namespace griddyn;
-/* *INDENT-OFF* */
+
 static const std::vector<file_pair_t> compare_cases{
   {"case4gs.m", "case4gs_res.m"},
   {"case5.m", "case5_res.m"},
@@ -93,7 +93,7 @@ static const std::vector<file_pair_t> compare_cases{
   {"case9241pegase.m", "case9241pegase_res.m"},
   { "case13659pegase.m", "case13659pegase_res.m" },
 };
-/* *INDENT-ON* */
+
 
 
 namespace data = boost::unit_test::data;
@@ -172,7 +172,7 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture,
 }
 
 
-/* *INDENT-OFF* */
+
 static const std::vector<file_pair_t> compare_cases_gs{
   {"case4gs.m", "case4gs_res.m"},
   {"case5.m", "case5_res.m"},
@@ -203,7 +203,7 @@ static const std::vector<file_pair_t> compare_cases_gs{
   { "case3375wp.m","case3375wp_res.m" },
   { "case9241pegase.m","case9241pegase_res.m" },*/
 };
-/* *INDENT-ON* */
+
 
 // test cases with Gauss-Seidel solver
 BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture,
@@ -301,7 +301,7 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture,
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (matpower_validation_tests_withq)
 {
-    /* *INDENT-OFF* */
+    
     const std::map<std::string, std::string> compare_cases{
       {"case4gs.m", "case4gs_resqlim.m"},
       {"case5.m", "case5_resqlim.m"},
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE (matpower_validation_tests_withq)
       {"case3375wp.m", "case3375wp_resqlim.m"},
       {"case9241pegase.m", "case9241pegase_resqlim.m"},
     };
-    /* *INDENT-ON* */
+    
 
     std::vector<double> volts1;
     std::vector<double> ang1;
@@ -441,16 +441,18 @@ BOOST_AUTO_TEST_CASE (matpower_validation_tests_withq)
     }
 }
 #endif
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+
+//#define ENABLE_PROBLEM_VALIDATION_TEST
+#ifdef ENABLE_PROBLEM_VALIDATION_TEST
 BOOST_AUTO_TEST_CASE (matpower_validation_tests_problems)
 {
-    /* *INDENT-OFF* */
+    
     const std::map<std::string, std::string> compare_p_cases{
       //{ "case3012wp.m","case3012wp_res.m" },
       //{ "case3120sp.m","case3120sp_res.m" },
       {"case1888rte.m", "case1888rte_res.m"},
     };
-    /* *INDENT-ON* */
+    
 
     std::vector<double> volts1;
     std::vector<double> ang1;

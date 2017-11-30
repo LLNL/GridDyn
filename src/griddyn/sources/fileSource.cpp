@@ -32,8 +32,10 @@ coreObject *fileSource::clone (coreObject *obj) const
     {
         return obj;
     }
-
-    nobj->setFile (fileName_, m_column);
+	if (!fileName_.empty())
+	{
+		nobj->setFile(fileName_, m_column);
+	}
     return nobj;
 }
 
@@ -166,8 +168,8 @@ void fileSource::set (const std::string &param, double val, gridUnits::units_t u
 int fileSource::loadFile ()
 {
     auto stl = fileName_.length ();
-
-    if ((fileName_[stl - 3] == 'c') || (fileName_[stl - 3] == 't'))
+	//TODO:: use filesystem library to check extension instead of this
+    if ((stl>4)&&((fileName_[stl - 3] == 'c') || (fileName_[stl - 3] == 't')))
     {
         schedLoad.loadTextFile (fileName_, m_column);
     }

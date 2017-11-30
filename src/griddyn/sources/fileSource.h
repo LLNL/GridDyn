@@ -24,6 +24,7 @@ namespace sources
 class fileSource : public rampSource
 {
 public:
+	/** enumerations of flags used in the file source*/
 	enum file_load_flags
 	{
 		use_absolute_time_flag = object_flag7,  //!< flag indicating use of an absolute time reference in the file
@@ -35,7 +36,7 @@ private:
 	index_t currIndex = 0;                //!< the current location in the file
 	count_t count = 0;            //!< the total number of elements in the file
 	index_t m_column = 0;         //!< the column of the file to use
-
+	// 4 byte structure hole here
 public:
 	fileSource(const std::string &fileName = "", int column = 0);
 

@@ -12,7 +12,7 @@
 
 #include "fmiEvent.h"
 #include "fmiCoordinator.h"
-#include "core/helperTemplates.hpp"
+
 
 namespace griddyn
 {
@@ -28,20 +28,28 @@ fmiEvent::fmiEvent(fmiEventType type): eventType(type)
 
 }
 
-fmiEvent::fmiEvent(EventInfo &gdEI, coreObject *rootObject):reversibleEvent(gdEI,rootObject)
+fmiEvent::fmiEvent(const EventInfo &gdEI, coreObject *rootObject):reversibleEvent(gdEI,rootObject)
 {
 	findCoordinator();
 }
 
-std::shared_ptr<Event> fmiEvent::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> fmiEvent::clone() const
 {
-	auto gp = cloneBaseStack<fmiEvent, reversibleEvent,Event>(this, gE);
-	if (!gp)
+	std::unique_ptr<Event> evnt = std::make_unique<fmiEvent>();
+	cloneTo(evnt.get());
+	return evnt;
+}
+
+void fmiEvent::cloneTo(Event *evnt) const
+{
+	reversibleEvent::cloneTo(evnt);
+	auto fe = dynamic_cast<fmiEvent *>(evnt);
+	if (fe == nullptr)
 	{
-		return gE;
+		return;
 	}
 	//gp->valueref = valueref;
-	return gp;
+
 }
 
 void fmiEvent::set(const std::string &param, double val)
@@ -52,16 +60,34 @@ void fmiEvent::set(const std::string &param, double val)
 	}
 	else
 	{
-		Event::set(param, val);
+        reversibleEvent::set(param, val);
 	}
 }
 
 void fmiEvent::set(const std::string &param, const std::string &val)
 {
-	reversibleEvent::set(param, val);
+    if (param == "datatype")
+    {
+        if (val == "string")
+        {
+            eventType = fmiEventType::string_parameter;
+            stringEvent = true;
+        }
+        else if ((val == "real") || (val == "number"))
+        {
+            eventType = fmiEventType::parameter;
+            stringEvent = false;
+        }
+        
+    }
+    else
+    {
+        reversibleEvent::set(param, val);
+    }
+	
 }
 
-void fmiEvent::updateEvent(EventInfo &gdEI, coreObject *rootObject)
+void fmiEvent::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
 {
 	reversibleEvent::updateEvent(gdEI, rootObject);
 	findCoordinator();

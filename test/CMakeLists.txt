@@ -9,6 +9,7 @@
 # LLNS Copyright End
 
 set(testComponent_sources
+    componentTests/ConditionTests.cpp
 	componentTests/testComponents.cpp
 	componentTests/testLoads.cpp
 	componentTests/testRecorders.cpp
@@ -26,6 +27,7 @@ set(testComponent_sources
 	componentTests/testSource.cpp
 	componentTests/simulationTests.cpp
 	componentTests/testEvents.cpp
+	componentTests/testExtraModels.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 	)
@@ -86,6 +88,7 @@ set(testExtra_sources
 	extraTests/largeContingencyTests.cpp
 	extraTests/largeInputTests.cpp
 	extraTests/objectSizeReport.cpp
+	extraTests/extraFMUtests.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 )	
@@ -111,7 +114,6 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
-
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
 
@@ -140,10 +142,6 @@ target_link_libraries(testLibrary gridDynCombined)
 target_link_libraries(testComponents ${executable_only_components} gridDynCombined)
 target_link_libraries(testSystem gridDynCombined)
 target_link_libraries(testExtra gridDynCombined)
-
-if(DL_REQUIRED)
-    target_link_libraries(testComponents ${CMAKE_DL_LIBS})
-endif(DL_REQUIRED)
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 install(DIRECTORY DESTINATION bin/test/)

@@ -43,6 +43,8 @@ static childTypeFactory<sourceLoad, Load> srcld ("load", stringVec{"src", "sourc
 static childTypeFactory<exponentialLoad, Load> glexp ("load", stringVec{"exponential", "exp"});
 static childTypeFactory<fDepLoad, Load> glfd ("load", "fdep");
 static childTypeFactory<ThreePhaseLoad, Load> gl3 ("load", stringVec{"3phase", "3p", "threephase"});
+
+static childTypeFactory<approximatingLoad,Load> apld("load", stringVec{ "approx", "approximating" });
 }  // namespace loads
 
 zipLoad::zipLoad (const std::string &objName) : Load (objName) {}
@@ -62,7 +64,7 @@ coreObject *zipLoad::clone (coreObject *obj) const
     nobj->Pout = Pout;
     nobj->Vpqmax = Vpqmax;
     nobj->Vpqmin = Vpqmin;
-    nobj->baseVoltage = baseVoltage;
+    nobj->localBaseVoltage = localBaseVoltage;
     nobj->trigVVlow = trigVVlow;
     nobj->trigVVhigh = trigVVhigh;
     return nobj;
@@ -266,22 +268,22 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
         switch (param[0])
         {
         case 'p':
-            setP (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+            setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'q':
-            setQ (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+            setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'r':
-            setr (unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage));
+            setr (unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage));
             break;
         case 'x':
-            setx (unitConversion (val, unitType, puOhm, systemBasePower, baseVoltage));
+            setx (unitConversion (val, unitType, puOhm, systemBasePower, localBaseVoltage));
             break;
         case 'g':
-            setYp (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+            setYp (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         case 'b':
-            setYq (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+            setYq (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
             break;
         default:
             throw (unrecognizedParameter (param));
@@ -294,32 +296,32 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
         // load increments  allows a delta on the load through the set functions
         if (param == "p+")
         {
-            P += unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            P += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkpfq ();
         }
         else if (param == "q+")
         {
-            Q += unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            Q += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             updatepfq ();
         }
         else if ((param == "yp+") || (param == "zr+"))
         {
-            Yp += unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            Yp += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if ((param == "yq+") || (param == "zq+"))
         {
-            Yq += unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            Yq += unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if ((param == "ir+") || (param == "ip+"))
         {
-            Ip += unitConversion (val, unitType, puA, systemBasePower, baseVoltage);
+            Ip += unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else if (param == "iq+")
         {
-            Iq += unitConversion (val, unitType, puA, systemBasePower, baseVoltage);
+            Iq += unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage);
             checkFaultChange ();
         }
         else
@@ -367,27 +369,27 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "load p")
     {
-        setP (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+        setP (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if (param == "load q")
     {
-        setQ (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+        setQ (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "yp") || (param == "shunt g") || (param == "zr"))
     {
-        setYp (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+        setYp (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "yq") || (param == "shunt b") || (param == "zq"))
     {
-        setYq (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+        setYq (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if ((param == "ir") || (param == "ip"))
     {
-        setIp (unitConversion (val, unitType, puA, systemBasePower, baseVoltage));
+        setIp (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage));
     }
     else if (param == "iq")
     {
-        setIq (unitConversion (val, unitType, puA, systemBasePower, baseVoltage));
+        setIq (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage));
     }
     else if ((param == "pf") || (param == "powerfactor"))
     {
@@ -417,7 +419,7 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     {
         if (!opFlags[no_pqvoltage_limit])
         {
-            Vpqmin = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+            Vpqmin = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
             trigVVlow = 1.0 / (Vpqmin * Vpqmin);
         }
     }
@@ -425,7 +427,7 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     {
         if (!opFlags[no_pqvoltage_limit])
         {
-            Vpqmax = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+            Vpqmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
             trigVVhigh = 1.0 / (Vpqmax * Vpqmax);
         }
     }
@@ -446,7 +448,7 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
     // SGS added to set the base voltage 2015-01-30
     else if ((param == "basevoltage") || (param == "base vol"))
     {
-        baseVoltage = val;
+        localBaseVoltage = val;
     }
     else
     {

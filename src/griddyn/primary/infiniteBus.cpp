@@ -87,7 +87,7 @@ void infiniteBus::set (const std::string &param, double val, units_t unitType)
 {
     if (param == "dvdt")
     {
-        dvdt = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        dvdt = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "dfdt")
     {

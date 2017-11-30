@@ -95,9 +95,9 @@ void sourceLoad::add (Source *src)
     if (src->locIndex != kNullLocation)
     {
     }
-    else if (!src->m_purpose.empty ())
+    else if (!src->purpose_.empty ())
     {
-        auto ind = source_match.find (src->m_purpose);
+        auto ind = source_match.find (src->purpose_);
         if (ind != source_match.end ())
         {
             src->locIndex = ind->second;

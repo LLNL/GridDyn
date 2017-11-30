@@ -36,7 +36,6 @@ sensor::sensor (const std::string &objName) : Relay (objName)
 {
     opFlags.set (continuous_flag);
     opFlags.set (late_b_initialize);
-    opFlags.reset (no_dyn_states);
 }
 
 coreObject *sensor::clone (coreObject *obj) const
@@ -62,7 +61,15 @@ coreObject *sensor::clone (coreObject *obj) const
         {
             if (static_cast<index_t> (nobj->dataSources.size ()) > kk)
             {
-                nobj->dataSources[kk] = dataSources[kk]->clone (nobj->dataSources[kk]);
+				if (nobj->dataSources[kk])
+				{
+					dataSources[kk]->cloneTo(nobj->dataSources[kk].get());
+				}
+				else
+				{
+					nobj->dataSources[kk] = dataSources[kk]->clone();
+				}
+                
             }
             else
             {
@@ -84,14 +91,20 @@ coreObject *sensor::clone (coreObject *obj) const
         {
             if (static_cast<index_t> (nobj->outGrabbers.size ()) > kk)
             {
-                nobj->outGrabbers[kk] = outGrabbers[kk]->clone (nobj->outGrabbers[kk]);
-                nobj->outGrabbers[kk]->updateObject (nobj);
+				if (nobj->outGrabbers[kk])
+				{
+					outGrabbers[kk]->cloneTo(nobj->outGrabbers[kk].get());
+				}
+				else
+				{
+					nobj->outGrabbers[kk] = outGrabbers[kk]->clone();
+				}
             }
             else
             {
-                nobj->outGrabbers.push_back (outGrabbers[kk]->clone ());
-                nobj->outGrabbers[kk]->updateObject (nobj);
+                nobj->outGrabbers.push_back (outGrabbers[kk]->clone ()); 
             }
+			nobj->outGrabbers[kk]->updateObject(nobj);
         }
         else
         {
@@ -235,7 +248,10 @@ void sensor::set (const std::string &param, const std::string &val)
 					outputStrings.push_back({ getTailString(istr, ':') });
                 }
             }
+			m_outputSize = static_cast<count_t>(outputStrings.size());
         }
+		m_inputSize = static_cast<count_t>(inputStrings.size());
+		
     }
     else if (param == "condition")
     {
@@ -277,6 +293,7 @@ void sensor::set (const std::string &param, const std::string &val)
 					outputStrings.push_back(splitline(outputStr));
 				}
         }
+		m_outputSize = static_cast<count_t>(outputStrings.size());
     }
     else if ((iparam == "output") || (param == "outputs"))
     {
@@ -325,7 +342,7 @@ void sensor::setupOutput(index_t num, const std::string &outputString)
 		ensureSizeAtLeast(outputStrings, num + 1);
 		ensureSizeAtLeast(outputMode, num + 1, outputMode_t::block);
 		ensureSizeAtLeast(outGrabbers, num + 1);
-		
+		m_outputSize = static_cast<count_t>(outputs.size());
 		if (!sval.empty())
 		{
 			outputStrings[num] = { sval };
@@ -501,6 +518,7 @@ void sensor::generateInputGrabbers ()
 
         dataSources[ii] = std::make_shared<grabberSet> (istr, target_obj, opFlags[sampled_only]);
     }
+	
 }
 
 void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)

@@ -9,9 +9,10 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#pragma once
+
 #ifndef FMI_ENUM_DEFINITIONS_H_
 #define FMI_ENUM_DEFINITIONS_H_
+#pragma once
 
 #include <string>
 

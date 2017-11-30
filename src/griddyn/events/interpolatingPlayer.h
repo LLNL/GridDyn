@@ -14,7 +14,7 @@
 #define GRIDDYN_INTERPOLATING_PLAYER_H_
 
 // headers
-//#include "griddyn.h"
+//#include "gridDynSimulation.h"
 
 #include "Player.h"
 namespace griddyn
@@ -30,10 +30,15 @@ protected:
 	double slope=0.0;	//!< the actual slope to use
 	bool useSlopeField = false;	//!< flag indicating that the event is actually using the slopefield
 public:
+	/** construct with a name*/
 	explicit interpolatingPlayer(const std::string &eventName);
+	/** construct with a time and looping period*/
 	interpolatingPlayer(coreTime time0 = 0.0, double loopPeriod = 0.0);
-	interpolatingPlayer(EventInfo &gdEI, coreObject *rootObject);
-	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> gE = nullptr) const override;
+	/** construct from an event Info structure and root object*/
+	interpolatingPlayer(const EventInfo &gdEI, coreObject *rootObject);
+	virtual std::unique_ptr<Event> clone() const override;
+
+	virtual void cloneTo(Event *evnt) const override;
 
 	//virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
 	virtual change_code trigger() override;

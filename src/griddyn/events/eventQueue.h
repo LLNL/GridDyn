@@ -98,10 +98,14 @@ public:
   virtual coreTime getNextTime(int eventCode) const;
 
   /** @brief clone the entire queue to a new queue
-  @param[in] eQ the eventQueue to clone to
-  @return a shared_ptr to the updated Queue
+  @return a unique_ptr to the updated Queue
   */
-  virtual std::unique_ptr<eventQueue> clone(eventQueue *eQ = nullptr) const;
+  virtual std::unique_ptr<eventQueue> clone() const;
+
+  /** @brief clone the entire queue to a different queue
+  @param eq the eventQueue to copy the data into
+  */
+  virtual void cloneTo(eventQueue *eq) const;
   /** @brief map all objects used in the events to a new root object
  */
   virtual void mapObjectsOnto(coreObject *newRootObject);

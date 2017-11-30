@@ -34,9 +34,11 @@ ExternalProject_Add(zlib
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log
         )
     execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release
         WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_build_release.log
         )
 
 endfunction()

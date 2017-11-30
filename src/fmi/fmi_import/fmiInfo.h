@@ -9,10 +9,13 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#pragma once
+
+/** @file
+@brief file containing classes and types for managing information about FMU's
+*/
 #ifndef FMI_INFORMATION_H_
 #define FMI_INFORMATION_H_
-
+#pragma once
 
 #include "utilities/matrixDataOrdered.hpp"
 #include "FMI2/fmi2TypesPlatform.h"
@@ -31,7 +34,7 @@
 #include <map>
 #include <memory>
 
-
+/** data class containing the default experiment information*/
 class fmuDefaultExpirement
 {
 public:
@@ -41,6 +44,7 @@ public:
 	double tolerance = 1e-8;
 };
 
+/** data class containing information about a variable*/
 class variableInformation
 {
 public:
@@ -86,7 +90,7 @@ public:
 
 };
 
-//data class matching the definition of an FMI type
+/**data class matching the definition of an FMI type*/
 class fmiTypeDefinition
 {
 public:
@@ -133,7 +137,8 @@ public:
 	void clear();
 private:
 	fmi_variable_type type = fmi_variable_type_t::real;
-	boost::container::small_vector<fmi2ValueReference, 4> vrset;
+	//boost::container::small_vector<fmi2ValueReference, 4> vrset;
+    std::vector<fmi2ValueReference> vrset;
 };
 
 class readerElement;

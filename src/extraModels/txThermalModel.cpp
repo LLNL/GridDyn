@@ -30,12 +30,13 @@ txThermalModel::txThermalModel(const std::string &objName) :sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model
 	outputStrings = { {"ambient","ambientTemp","airTemp"}, {"top_oil","top_oil_temp"}, {"hot_spot","hot_spot_temp"} }; //preset the outputNames
+	m_outputSize = 3;
 }
 
 coreObject * txThermalModel::clone(coreObject *obj) const
 {
 	txThermalModel *nobj = cloneBase<txThermalModel, sensor>(this, obj);
-	if (!(nobj))
+	if (nobj==nullptr)
 	{
 		return obj;
 	}

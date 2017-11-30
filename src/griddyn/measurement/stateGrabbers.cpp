@@ -15,7 +15,7 @@
 #include "Generator.h"
 #include "Link.h"
 #include "Relay.h"
-#include "core/helperTemplates.hpp"
+
 #include "grabberInterpreter.hpp"
 #include "gridBus.h"
 #include "relays/sensor.h"
@@ -71,12 +71,14 @@ stateGrabber::stateGrabber (index_t noffset, coreObject *obj)
 {
 }
 
-std::shared_ptr<stateGrabber> stateGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
+std::unique_ptr<stateGrabber> stateGrabber::clone() const
 {
-    if (ggb == nullptr)
-    {
-        ggb = std::make_shared<stateGrabber> ();
-    }
+	auto sg = std::make_unique<stateGrabber>();
+	cloneTo(sg.get());
+	return sg;
+}
+void stateGrabber::cloneTo (stateGrabber *ggb) const
+{
     ggb->field = field;
     ggb->fptr = fptr;
     ggb->jacIfptr = jacIfptr;
@@ -90,8 +92,6 @@ std::shared_ptr<stateGrabber> stateGrabber::clone (std::shared_ptr<stateGrabber>
     ggb->jacMode = jacMode;
     ggb->prevIndex = prevIndex;
     ggb->cobj = cobj;
-
-    return ggb;
 }
 
 void stateGrabber::updateField (const std::string &fld)
@@ -594,15 +594,22 @@ void customStateGrabber::setGrabberJacFunction (objJacFunction nJfptr)
     jacMode = (jacIfptr) ? jacobian_mode::computed : jacobian_mode::none;
 }
 
-std::shared_ptr<stateGrabber> customStateGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
+std::unique_ptr<stateGrabber> customStateGrabber::clone() const
 {
-    auto cgb = cloneBase<customStateGrabber, stateGrabber> (this, ggb);
-    if (cgb == nullptr)
-    {
-        return ggb;
-    }
-    return cgb;
+	std::unique_ptr<stateGrabber> sg = std::make_unique<customStateGrabber>();
+	cloneTo(sg.get());
+	return sg;
 }
+void customStateGrabber::cloneTo(stateGrabber *ggb) const
+{
+	stateGrabber::cloneTo(ggb);
+	auto csg = dynamic_cast<customStateGrabber *>(ggb);
+	if (csg == nullptr)
+	{
+		return;
+	}
+}
+
 
 stateFunctionGrabber::stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func)
     : function_name (std::move (func))
@@ -634,24 +641,34 @@ void stateFunctionGrabber::updateField (const std::string &fld)
     loaded = true;
 }
 
-std::shared_ptr<stateGrabber> stateFunctionGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
+std::unique_ptr<stateGrabber> stateFunctionGrabber::clone() const
 {
-    auto fgb = cloneBase<stateFunctionGrabber, stateGrabber> (this, ggb);
-    if (fgb == nullptr)
-    {
-        if (bgrabber)
-        {
-            return bgrabber->clone (ggb);
-        }
-        return ggb;
-    }
-    if (bgrabber)
-    {
-        fgb->bgrabber = bgrabber->clone (fgb->bgrabber);
-    }
-    fgb->function_name = function_name;
-    fgb->opptr = opptr;
-    return fgb;
+	std::unique_ptr<stateGrabber> sg = std::make_unique<stateFunctionGrabber>();
+	cloneTo(sg.get());
+	return sg;
+}
+
+void stateFunctionGrabber::cloneTo(stateGrabber *ggb) const
+{
+	stateGrabber::cloneTo(ggb);
+	auto sfg= dynamic_cast<stateFunctionGrabber *>(ggb);
+	if (sfg == nullptr)
+	{
+		return;
+	}
+	if (bgrabber)
+	{
+		if (sfg->bgrabber)
+		{
+			bgrabber->cloneTo(sfg->bgrabber.get());
+		}
+		else
+		{
+			sfg->bgrabber = bgrabber->clone();
+		}
+	}
+	sfg->function_name = function_name;
+	sfg->opptr = opptr;
 }
 
 double stateFunctionGrabber::grabData (const stateData &sD, const solverMode &sMode)
@@ -724,29 +741,45 @@ void stateOpGrabber::updateField (const std::string &opName)
     loaded = true;
 }
 
-std::shared_ptr<stateGrabber> stateOpGrabber::clone (std::shared_ptr<stateGrabber> ggb) const
+std::unique_ptr<stateGrabber> stateOpGrabber::clone() const
 {
-    auto ogb = cloneBase<stateOpGrabber, stateGrabber> (this, ggb);
-    if (ogb == nullptr)
-    {
-        if (bgrabber1)
-        {
-            bgrabber1->clone (ggb);
-        }
-        return ggb;
-    }
-    if (bgrabber1)
-    {
-        ogb->bgrabber1 = bgrabber1->clone (ogb->bgrabber1);
-    }
-    if (bgrabber2)
-    {
-        ogb->bgrabber2 = bgrabber2->clone (ogb->bgrabber2);
-    }
+	std::unique_ptr<stateGrabber> sg = std::make_unique<stateOpGrabber>();
+	cloneTo(sg.get());
+	return sg;
+}
 
-    ogb->op_name = op_name;
-    ogb->opptr = opptr;
-    return ogb;
+void stateOpGrabber::cloneTo(stateGrabber *ggb) const
+{
+	stateGrabber::cloneTo(ggb);
+	auto sog = dynamic_cast<stateOpGrabber *>(ggb);
+	if (sog == nullptr)
+	{
+		return;
+	}
+	if (bgrabber1)
+	{
+		if (sog->bgrabber1)
+		{
+			bgrabber1->cloneTo(sog->bgrabber1.get());
+		}
+		else
+		{
+			sog->bgrabber1 = bgrabber1->clone();
+		}
+	}
+	if (bgrabber2)
+	{
+		if (sog->bgrabber2)
+		{
+			bgrabber2->cloneTo(sog->bgrabber2.get());
+		}
+		else
+		{
+			sog->bgrabber2 = bgrabber2->clone();
+		}
+	}
+	sog->op_name = op_name;
+	sog->opptr = opptr;
 }
 
 double stateOpGrabber::grabData (const stateData &sD, const solverMode &sMode)

@@ -14,7 +14,7 @@
 #define STRINGVIEWDEFS_H_
 #pragma once
 
-#include "config.h"
+#include "griddyn/compiler-config.h"
 #include <vector>
 
 #ifdef HAVE_STRING_VIEW
@@ -31,12 +31,20 @@ namespace utilities
 	using string_view = std::experimental::string_view;
 }
 #else
+#include "boost/version.hpp"
+#if BOOST_VERSION / 100 % 1000 >= 61
 #include <boost/utility/string_view.hpp>
 namespace utilities
 {
 	using string_view=boost::string_view;
 }
-	
+#else
+#include <boost/utility/string_ref.hpp>
+namespace utilities
+{
+    using string_view = boost::string_ref;
+}
+#endif  //boost old version
 #endif
 #endif
 namespace utilities
@@ -46,5 +54,5 @@ namespace utilities
 
 
 
-#endif
+#endif //STRINGVIEWDEFS_H_
 

@@ -34,9 +34,9 @@ class fmiRunner : public GriddynRunner
 {
 	private:
 		coreOwningPtr<fmiCoordinator> coord; //!< the coordinator object for managing object that manage the fmi inputs and outputs
-		std::bitset<6> loggingCategories;
-		bool runAsync_ = false;
-		std::future<void> async_ret;
+		std::bitset<6> loggingCategories;  //!< indicators of which logging categories to use
+		bool runAsync_ = false;	//!< indicator that we should run asynchronously
+		std::future<void> async_retFMI;	//!< the future object corresponding to the asyncrhonous operation
 public:
 	fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions);
 	~fmiRunner();
@@ -47,13 +47,13 @@ public:
 	virtual int Initialize(int argc, char *argv[]) override final;
 	
 
-	virtual void Run(void) override;
+	virtual coreTime Run() override;
 	 
 	/** update the FMI outputs*/
 	void UpdateOutputs();
 
 	virtual coreTime Step(coreTime time) override;
-	virtual void StepAsync(coreTime time);
+	virtual void StepAsync(coreTime time) override;
 	virtual void Finalize() override;
 private:
 	using GriddynRunner::Reset;

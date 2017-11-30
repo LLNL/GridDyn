@@ -37,12 +37,15 @@ class valuePredictor
         : lastKnownInput_ (input0), lastKnownOutput_ (output0), slope_ (slope0)
     {
     }
+	/** destructor*/
     virtual ~valuePredictor () = default;
     // default copy and copy constructors
     valuePredictor (const valuePredictor &ref) = default;  //!< copy constructor does the default thing
-    valuePredictor (valuePredictor &&ref) noexcept = default;
-
+    /** move constructor*/
+	valuePredictor (valuePredictor &&ref) noexcept = default;
+	/** copy operator*/
     valuePredictor &operator= (const valuePredictor &ref) = default;
+	/** move operator*/
     valuePredictor &operator= (valuePredictor &&ref) noexcept = default;
     /** update the known values
      *@details sets the known values and computes the ramp rate

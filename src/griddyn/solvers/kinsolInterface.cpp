@@ -12,19 +12,19 @@
 
 #include "kinsolInterface.h"
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 //#include "matrixDataBoost.h"
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
+
 #include "utilities/matrixCreation.h"
 #include <kinsol/kinsol.h>
-#include <kinsol/kinsol_dense.h>
+#include <kinsol/kinsol_direct.h>
+#include <sunlinsol/sunlinsol_dense.h>
 
 #ifdef KLU_ENABLE
-#include <kinsol/kinsol_klu.h>
-#include <kinsol/kinsol_sparse.h>
+#include <sunlinsol/sunlinsol_klu.h>
 #endif
 
 #if MEASURE_TIMINGS > 0
@@ -40,16 +40,13 @@ namespace griddyn
 namespace solvers
 {
 int kinsolFunc (N_Vector state, N_Vector resid, void *user_data);
-int kinsolJacDense (long int Neq,
-                    N_Vector state,
+int kinsolJac ( N_Vector state,
                     N_Vector resid,
-                    DlsMat J,
+                    SUNMatrix J,
                     void *user_data,
                     N_Vector tmp1,
                     N_Vector tmp2);
-#ifdef KLU_ENABLE
-int kinsolJacSparse (N_Vector state, N_Vector resid, SlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
-#endif
+
 // int kinsolAlgFunc (N_Vector u, N_Vector f, void *user_data);
 // int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector
 // tmp2);
@@ -82,16 +79,24 @@ kinsolInterface::~kinsolInterface ()
     }
 }
 
-std::shared_ptr<solverInterface> kinsolInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> kinsolInterface::clone(bool fullCopy) const
 {
-    auto rp = cloneBaseStack<kinsolInterface, sundialsInterface, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
-
-    return rp;
+	std::unique_ptr<solverInterface> si = std::make_unique<kinsolInterface>();
+	kinsolInterface::cloneTo(si.get(),fullCopy);
+	return si;
 }
+
+void kinsolInterface::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	sundialsInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<kinsolInterface *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	ai->kinsolPrintLevel = kinsolPrintLevel;
+}
+
 
 void kinsolInterface::allocate (count_t stateCount, count_t /*numRoots*/)
 {
@@ -125,29 +130,6 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
     flag = KINGetNumFuncEvals (solverMem, &nfe);
     check_flag (&flag, "KINGetNumFuncEvals", 1);
 
-    if (flags[dense_flag])
-    {
-        flag = KINDlsGetNumJacEvals (solverMem, &nje);
-        check_flag (&flag, "KINDlsGetNumJacEvals", 1);
-        flag = KINDlsGetNumFuncEvals (solverMem, &nfeD);
-        check_flag (&flag, "KINDlsGetNumFuncEvals", 1);
-    }
-#ifdef KLU_ENABLE
-    else
-    {
-        flag = KINSlsGetNumJacEvals (solverMem, &nje);
-        check_flag (&flag, "KINSlsGetNumJacEvals", 1);
-        nfeD = -1;
-    }
-#else
-    else
-    {
-        flag = KINDlsGetNumJacEvals (solverMem, &nje);
-        check_flag (&flag, "KINDlsGetNumJacEvals", 1);
-        flag = KINDlsGetNumFuncEvals (solverMem, &nfeD);
-        check_flag (&flag, "KINDlsGetNumFuncEvals", 1);
-    }
-#endif
     flag = KINDlsGetNumJacEvals (solverMem, &nje);
     check_flag (&flag, "KINDlsGetNumJacEvals", 1);
     flag = KINDlsGetNumFuncEvals (solverMem, &nfeD);
@@ -172,7 +154,7 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
     }
 }
 
-/* *INDENT-OFF* */
+
 static const std::map<int, std::string> kinRetCodes{
   {KIN_MEM_NULL, "Null solver Memory"},
   {KIN_ILL_INPUT, "Illegal Input"},
@@ -193,7 +175,7 @@ static const std::map<int, std::string> kinRetCodes{
   {KIN_FIRST_SYSFUNC_ERR, "The system function failed recoverably at the first call"},
   {KIN_REPTD_SYSFUNC_ERR, "The system function had repeated recoverable errors"},
 };
-/* *INDENT-ON* */
+
 
 void kinsolInterface::initialize (coreTime /*t0*/)
 {
@@ -235,7 +217,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     retval = KINSetScaledStepTol (solverMem, tolerance / 100);
     check_flag (&retval, "KINSetScaledStepTol", 1);
 
-    retval = KINSetNoInitSetup (solverMem, TRUE);
+    retval = KINSetNoInitSetup (solverMem, SUNTRUE);
     check_flag (&retval, "KINSetNoInitSetup", 1);
 
     retval = KINInit (solverMem, kinsolFunc, state);
@@ -255,10 +237,16 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     else
     {
         auto jsize = m_gds->jacSize (mode);
-        retval = KINKLU (solverMem, static_cast<int> (svsize), static_cast<int> (jsize), CSR_MAT);
-        check_flag (&retval, "KINKLU", 1);
+		/* Create sparse SUNMatrix */
+		J = SUNSparseMatrix(static_cast<sunindextype>(svsize), static_cast<sunindextype>(svsize), static_cast<sunindextype>(jsize), CSR_MAT);
+		check_flag((void *)J, "SUNSparseMatrix", 0);
 
-        retval = KINSlsSetSparseJacFn (solverMem, kinsolJacSparse);
+		/* Create KLU solver object */
+		LS = SUNKLU(state, J);
+		check_flag((void *)LS, "SUNKLU", 0);
+
+
+        retval = KINDlsSetJacFn (solverMem, kinsolJac);
         check_flag (&retval, "KINSlsSetSpasreJacFn", 1);
 
         retval = KINKLUSetOrdering (solverMem, 0);  // SET to AMD instead of COLAMD
@@ -424,7 +412,7 @@ int kinsolInterface::solve (coreTime tStop, coreTime &tReturn, step_mode /*mode*
         auto mvec = findMissing (&a1);
     }
 #endif
-    tReturn = (retval >= 0) ? solveTime : m_gds->getCurrentTime ();
+    tReturn = (retval >= 0) ? solveTime : m_gds->getSimulationTime();
     ++solverCallCount;
     if (retval == KIN_REPTD_SYSFUNC_ERR)
     {
@@ -453,8 +441,8 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
 #if MEASURE_TIMINGS > 0
     auto start_t = std::chrono::high_resolution_clock::now ();
 
-    int ret = sd->m_gds->residualFunction (sd->m_gds->getCurrentTime (), NVECTOR_DATA (sd->use_omp, u), nullptr,
-                                           NVECTOR_DATA (sd->use_omp, f), sd->mode);
+    int ret = sd->m_gds->residualFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr,
+                                           NVECTOR_DATA (sd->use_omp, resid), sd->mode);
     auto stop_t = std::chrono::high_resolution_clock::now ();
     std::chrono::duration<double> elapsed_t = stop_t - start_t;
     sd->residTime += elapsed_t.count ();
@@ -489,30 +477,9 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
     return ret;
 }
 
-// TODO:: move these function to use the sundials functions
-int kinsolJacDense (long int Neq,
-                    N_Vector state,
-                    N_Vector /*f*/,
-                    DlsMat J,
-                    void *user_data,
-                    N_Vector /*tmp1*/,
-                    N_Vector /*tmp2*/)
-{
-    auto sd = reinterpret_cast<kinsolInterface *> (user_data);
-    assert (Neq == static_cast<int> (sd->svsize));
-    _unused (Neq);
-
-    sundialsMatrixDataDense a1 (J);
-    sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
-    sd->jacCallCount++;
-    return 0;
-}
-
-#ifdef KLU_ENABLE
-
-int kinsolJacSparse (N_Vector state,
+int kinsolJac (N_Vector state,
                      N_Vector /*f*/,
-                     SlsMat J,
+                     SUNMatrix J,
                      void *user_data,
                      N_Vector /*tmp1*/,
                      N_Vector /*tmp2*/)
@@ -584,6 +551,5 @@ int kinsolJacSparse (N_Vector state,
     return 0;
 }
 
-#endif  // KLU_ENABLE
 }  // namespace solvers
 }  // namespace griddyn

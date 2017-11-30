@@ -14,7 +14,7 @@
 #define GRIDDYN_COMPOUND_EVENT_PLAYER_H_
 #pragma once
 // headers
-//#include "griddyn.h"
+//#include "gridDynSimulation.h"
 
 #include "compoundEvent.h"
 #include "utilities/timeSeriesMulti.hpp"
@@ -32,12 +32,17 @@ protected:
 	timeSeriesMulti<double,coreTime> ts;	//!< the time series containing the data for the player 
 	index_t currIndex = kNullLocation;	//!< the current index of the player
 	std::string eFile;		//!< the file name
-	std::vector<index_t> columns;
+	std::vector<index_t> columns;  //!< the columns of the time series to use for the different fields
 public:
+	/** constructor from an event Name*/
 	explicit compoundEventPlayer(const std::string &eventName);
+	/** default constructor*/
 	compoundEventPlayer();
+	/** construct from an eventInfo structure and root object*/
 	compoundEventPlayer(EventInfo &gdEI, coreObject *rootObject);
-	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> gE = nullptr) const override;
+	virtual std::unique_ptr<Event> clone() const override;
+
+	virtual void cloneTo(Event *evnt) const override;
 
 	//virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
 
@@ -49,12 +54,16 @@ public:
 	void setTime(coreTime time) override;
 	void setTimeValue(coreTime time, double val);
 	void setTimeValue(const std::vector<coreTime> &time, const std::vector<double> &val);
+	/** load the player data from a file
+	@param[in] fileName the name of the file to load
+	*/
 	void loadEventFile(const std::string &fileName);
 	virtual std::string to_string() override;
 
 	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 	virtual void initialize() override;
 protected:
+	/** helper function to update the trigger time*/
 	virtual void updateTrigger(coreTime time);
 
 };

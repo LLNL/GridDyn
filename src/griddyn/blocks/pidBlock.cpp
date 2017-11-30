@@ -18,21 +18,20 @@ namespace griddyn
 {
 namespace blocks
 {
-pidBlock::pidBlock (const std::string &objName) : Block (objName)
+pidBlock::pidBlock (const std::string &objName) : Block (objName),no_D(extra_bool)
 {
     opFlags.set (use_state);
     opFlags.set (differential_output);
+	no_D = true;
 }
 
 pidBlock::pidBlock (double P, double I, double D, const std::string &objName)
-    : Block (objName), m_P (P), m_I (I), m_D (D)
+    : Block (objName), m_P (P), m_I (I), m_D (D), no_D(extra_bool)
 {
     opFlags.set (use_state);
     opFlags.set (differential_output);
-    if (D != 0)
-    {
-        no_D = false;
-    }
+	no_D = (D == 0.0);
+
 }
 
 coreObject *pidBlock::clone (coreObject *obj) const

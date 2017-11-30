@@ -11,7 +11,7 @@
 */
 
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "simulation/diagnostics.h"
 #include "simulation/diagnostics.h"
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE (test_pjm_pflow)
     std::string fileName = std::string (OTHER_TEST_DIRECTORY "pf.output.raw");
     gds = std::make_unique<gridDynSimulation> ();
     readerInfo ri;
-    ri.flags = addflags (0, "ignore_step_up_transformers");
+    addflags (ri, "ignore_step_up_transformers");
     loadFile (gds, fileName, &ri);
     BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::STARTUP);
     std::vector<double> gv1, gv2;

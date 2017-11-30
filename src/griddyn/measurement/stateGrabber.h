@@ -55,7 +55,7 @@ protected:
   gridComponent *cobj = nullptr; //!< the target object
   objStateGrabberFunction fptr; //!< the functional to grab the data
   objJacFunction jacIfptr; //!< the functional to compute the Jacobian
-  index_t prevIndex=kInvalidLocation; 
+  index_t prevIndex=kInvalidLocation; //!< temporary storage of the previous index
 public:
 	stateGrabber()=default;
   explicit stateGrabber(coreObject *obj);
@@ -63,7 +63,12 @@ public:
   stateGrabber (const std::string &fld, coreObject *obj);
   stateGrabber(index_t noffset, coreObject *obj);
   /** clone the grabber*/
-  virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const;
+  virtual std::unique_ptr<stateGrabber> clone () const;
+  /** clone a grabber to another grabber
+  @param[in] sgb a pointer to a grabber to clone to
+  */
+  virtual void cloneTo(stateGrabber *sgb) const;
+
   /** update the target field of a grabber
   @param[in] fld the new target string of a grabber
   */
@@ -118,7 +123,8 @@ class customStateGrabber : public stateGrabber
 public:
 	customStateGrabber() = default;
 	explicit customStateGrabber(gridComponent *comp);
-  virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber > ggb = nullptr) const override;
+	virtual std::unique_ptr<stateGrabber> clone() const override;
+	virtual void cloneTo(stateGrabber *sgb) const override;
   /** set the custom grabber function
   @param[in] nfptr the custom function for grabbing a state value
   */
@@ -141,7 +147,8 @@ protected:
 public:
 	stateFunctionGrabber() = default;
   stateFunctionGrabber (std::shared_ptr<stateGrabber> ggb, std::string func);
-  virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
+  virtual std::unique_ptr<stateGrabber> clone() const override;
+  virtual void cloneTo(stateGrabber *sgb) const override;
   virtual double grabData (const stateData &sD, const solverMode &sMode) override;
   virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode) override;
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
@@ -159,9 +166,12 @@ protected:
   std::function<double(double val1, double val2)> opptr;	//!< function pointer for a two argument function
 
 public:
+	/** default constructor*/
 	stateOpGrabber() = default;
+	/** construct from two state grabbers and a operation*/
   stateOpGrabber (std::shared_ptr<stateGrabber> ggb1, std::shared_ptr<stateGrabber> ggb2, std::string op);
-  virtual std::shared_ptr<stateGrabber> clone (std::shared_ptr<stateGrabber> ggb = nullptr) const override;
+  virtual std::unique_ptr<stateGrabber> clone() const override;
+  virtual void cloneTo(stateGrabber *sgb) const override;
   virtual double grabData (const stateData &sD, const solverMode &sMode) override;
   virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode) override;
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;

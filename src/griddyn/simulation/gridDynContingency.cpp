@@ -16,7 +16,7 @@
 #include "events/Event.h"
 #include "gridBus.h"
 #include "gridDynSimulationFileOps.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "loads/zipLoad.h"
 #include "simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"

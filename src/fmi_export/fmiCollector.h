@@ -23,19 +23,21 @@ namespace fmi
 {
 class fmiCoordinator;
 
+/** collector object to interface with an fmi output*/
 class fmiCollector : public collector
 {
 protected:
-	std::vector<index_t> vrs;
-	fmiCoordinator *coord=nullptr;
+	std::vector<index_t> vrs;  //!< vector of fmi value references that match the data
+	fmiCoordinator *coord=nullptr;	//!< pointer the fmi coordination object
 public:
 
 	fmiCollector();
 	explicit fmiCollector(const std::string &name);
 	//~fmiCollector();
 
-	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
+	virtual std::unique_ptr<collector> clone() const override;
 
+	virtual void cloneTo(collector *gr = nullptr) const override;
 	virtual change_code trigger(coreTime time) override;
 
 

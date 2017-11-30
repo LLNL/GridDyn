@@ -20,14 +20,16 @@ namespace griddyn
 class Block;
 namespace sources
 {
+/** define a source object that contains another source which is followed by a Block object
+*/
 class blockSource : public Source
 {
 private:
-	Source *src = nullptr;
-	Block *blk = nullptr;
-	double maxStepSize = kBigNum;
+	Source *src = nullptr;		//!< pointer to the source object
+	Block *blk = nullptr;	//!< pointer to the Block object
+	double maxStepSize = kBigNum;	//!< calculation for the maximum step size that should be taken in a timestep
 public:
-	blockSource(const std::string &objName = "functionsource_#");
+	blockSource(const std::string &objName = "blocksource_#");
 
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
 

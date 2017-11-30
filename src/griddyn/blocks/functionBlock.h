@@ -35,8 +35,8 @@ public:
 protected:
 	std::function<double(double)> fptr;        //!< function object for single argument functions
 	std::function<double(double, double)> fptr2;        //!< function object for multiple argument functions
-	double gain = 1.0;         //!< extra gain factor
-	double arg2 = 0.0;         //!< second argument for 2 argument functions
+	parameter_t gain = 1.0;         //!< extra gain factor
+	parameter_t arg2 = 0.0;         //!< second argument for 2 argument functions
 public:
 	/** @brief default constructor*/
 	functionBlock();

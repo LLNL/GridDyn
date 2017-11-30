@@ -12,7 +12,7 @@
 
 #include "core/objectFactory.hpp"
 #include "Generator.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "testHelper.h"
 #include "utilities/vectorOps.hpp"
@@ -64,6 +64,10 @@ BOOST_AUTO_TEST_CASE (model_test2)  // Jacobian code check
 
     for (auto &gname : genlist)
     {
+		if (gname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         gen->add (obj);
@@ -96,6 +100,10 @@ BOOST_AUTO_TEST_CASE (model_test2_withr)  // Jacobian code check
 
     for (auto &gname : genlist)
     {
+		if (gname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         // just set the resistance to make sure the models can handle that parameter
@@ -128,6 +136,10 @@ BOOST_AUTO_TEST_CASE (model_test2_alg_diff_tests)  // test the algebraic updates
 
     for (auto &gname : genlist)
     {
+		if (gname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         // just set the resistance to make sure the models can handle that parameter

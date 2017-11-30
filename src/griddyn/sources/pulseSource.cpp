@@ -44,7 +44,7 @@ coreObject *pulseSource::clone (coreObject *obj) const
     }
     nobj->ptype = ptype;
     nobj->dutyCycle = dutyCycle;
-    nobj->A = A;
+    nobj->Amplitude = Amplitude;
     nobj->cycleTime = cycleTime;
     nobj->baseValue = baseValue;
     nobj->shift = shift;
@@ -168,9 +168,9 @@ void pulseSource::setLevel (double val)
 
 void pulseSource::set (const std::string &param, double val, units_t unitType)
 {
-    if ((param == "a") || (param == "amplitude"))
+    if ((param == "a") || (param == "amplitude")||(param=="amp"))
     {
-        A = val;
+        Amplitude = val;
         // done to ensure a new value is computed at the next update
         cycleTime -= period;
     }
@@ -178,6 +178,10 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
     {
         period = val;
     }
+	else if (param == "frequency")
+	{
+		period = 1.0 / val;
+	}
     else if (param == "dutycycle")
     {
         dutyCycle = val;
@@ -219,7 +223,7 @@ double pulseSource::pulseCalc (double td) const
     double prop = (cloc - dutyCycle / 2) / dutyCycle;
     if ((prop < 0) || (prop >= 1.0))
     {
-        return (opFlags[invert_flag]) ? A : 0.0;
+        return (opFlags[invert_flag]) ? Amplitude : 0.0;
     }
 
     // calculate the multiplier
@@ -236,25 +240,25 @@ double pulseSource::pulseCalc (double td) const
     switch (ptype)
     {
     case pulse_type_t::square:
-        pamp = A;
+        pamp = Amplitude;
         break;
     case pulse_type_t::triangle:
-        pamp = 2.0 * A * ((prop < 0.5) ? prop : (1.0 - prop));
+        pamp = 2.0 * Amplitude * ((prop < 0.5) ? prop : (1.0 - prop));
         break;
     case pulse_type_t::gaussian:
-        pamp = mult * A * exp ((prop - 0.5) * (prop - 0.5) * 25.0);
+        pamp = mult * Amplitude * exp ((prop - 0.5) * (prop - 0.5) * 25.0);
         break;
     case pulse_type_t::monocycle:
-        pamp = 11.6583 * (prop - 0.5) * exp (-(prop - 0.5) * (prop - 0.5));
+        pamp = mult*Amplitude*11.6583 * (prop - 0.5) * exp (-(prop - 0.5) * (prop - 0.5));
         break;
     case pulse_type_t::biexponential:
         if (prop < 0.5)
         {
-            pamp = mult * A * exp (-(0.5 - prop) * 12.0);
+            pamp = mult * Amplitude * exp (-(0.5 - prop) * 12.0);
         }
         else
         {
-            pamp = mult * A * exp (-(prop - 0.5) * 12.0);
+            pamp = mult * Amplitude * exp (-(prop - 0.5) * 12.0);
         }
         break;
     case pulse_type_t::exponential:
@@ -262,24 +266,24 @@ double pulseSource::pulseCalc (double td) const
         {
             mult = 1.0;
         }
-        pamp = mult * A * exp (-prop * 6.0);
+        pamp = mult * Amplitude * exp (-prop * 6.0);
         break;
     case pulse_type_t::cosine:
 
-        pamp = A * sin (prop * kPI);
+        pamp = Amplitude * sin (prop * kPI);
         break;
     case pulse_type_t::flattop:
         if (prop < 0.25)
         {
-            pamp = A / 2.0 * (-cos (kPI * prop * 4) + 1.0);
+            pamp = Amplitude / 2.0 * (-cos (kPI * prop * 4.0) + 1.0);
         }
         else if (prop > 0.75)
         {
-            pamp = A / 2.0 * cos (kPI * ((1 - prop) * 4) + 1.0);
+            pamp = Amplitude / 2.0 * cos (kPI * ((1.0 - prop) * 4) + 1.0);
         }
         else
         {
-            pamp = A;
+            pamp = Amplitude;
         }
         break;
     default:
@@ -287,7 +291,7 @@ double pulseSource::pulseCalc (double td) const
     }
     if (opFlags[invert_flag])
     {
-        pamp = A - pamp;
+        pamp = Amplitude - pamp;
     }
     return pamp;
 }

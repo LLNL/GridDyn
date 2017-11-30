@@ -15,6 +15,7 @@
 
 #include "gridSubModel.h"
 #include "fmiSupport.h"
+#include "core/propertyBuffer.h"
 #include <map>
 
 class fmi2ModelExchangeObject;
@@ -41,17 +42,18 @@ public:
 		has_derivative_function = object_flag5,
 	};
 protected:
-	count_t m_stateSize = 0;
-	count_t m_jacElements = 0;
-	count_t m_eventCount = 0;
+	count_t m_stateSize = 0;  //!< the total state count
+	count_t m_jacElements = 0;	//!< the number of jacobian elements
+	count_t m_eventCount = 0;	//!< the number of event indicators
+	fmuMode prevFmiState;
 	std::shared_ptr<fmi2ModelExchangeObject> me;
 
 	std::vector<outputEstimator *> oEst;  //!<vector of objects used for output estimation //TODO:: Make this an actual vector of objects
 	coreTime localIntegrationTime = 0.01;
-	fmuMode prevFmiState;
 	std::vector<vInfo> stateInformation;
 	std::vector<vInfo> outputInformation;
 	std::vector<int> inputVarIndices;
+    propertyBuffer paramBuffer;
 private:
 
 	count_t lastSeqID = 0;
@@ -64,6 +66,9 @@ public:
 	virtual ~fmiMESubModel();
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
 protected:
+    virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
+    virtual void pFlowObjectInitializeB() override;
+
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 public:
@@ -75,7 +80,11 @@ public:
 
 	virtual double get(const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const  override;
 	virtual index_t findIndex(const std::string &field, const solverMode &sMode) const  override;
-	virtual void loadSizes(const solverMode &sMode, bool dynOnly) override;
+	virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+	virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
+
+	virtual std::pair<count_t, count_t> LocalRootCount(const solverMode &sMode) const override;
 	virtual void residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 	virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
 	virtual void jacobianElements(const IOdata &inputs, const stateData &sD,

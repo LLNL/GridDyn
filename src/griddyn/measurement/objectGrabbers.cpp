@@ -127,6 +127,8 @@ static const std::map<std::string, std::string> stringTranslate{
   {"busvoltage2", "voltage2"},
   {"busangle1", "busangle"},
   {"angle2", "busangle2"},
+  {"voltages","voltage"},
+  {"angles","angle"}
 
 };
 
@@ -329,11 +331,11 @@ fobjectPair getObjectFunction (const gridComponent *comp, const std::string &fie
                 defUnit};
     }
 
-    // try to lookup named output for sensors
+    // try to lookup named outputs
     index_t outIndex = comp->lookupOutputIndex (field);
     if (outIndex != kNullLocation)
     {
-        return {[outIndex](coreObject *obj) { return static_cast<sensor *> (obj)->getOutput (outIndex); },
+        return {[outIndex](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (outIndex); },
                 defUnit};
     }
     return nullPair;

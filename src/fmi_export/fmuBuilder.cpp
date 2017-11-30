@@ -15,7 +15,7 @@
 #include "fmiCollector.h"
 #include "fmiCoordinator.h"
 #include "fmiEvent.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "loadFMIExportObjects.h"
 #include "tinyxml2/tinyxml2.h"
 #include "utilities/stringOps.h"
@@ -77,6 +77,7 @@ int fmuBuilder::Initialize (int argc, char *argv[])
 	fmiOp.add_options()
 		("buildfmu", po::value < std::string >(), "fmu file to build")
 		("platform", po::value < std::string >(), "build the fmu for a specific platform win64,win32,linux64,linux32,darwin32,darwin64")
+        ("keep_dir","keep the temporary directory after building")
 	    ("help", "display the help messages");
     // clang-format on
     auto parsed = po::command_line_parser (argc, argv).options (fmiOp).allow_unregistered ().run ();
@@ -204,8 +205,34 @@ void fmuBuilder::MakeFmu (const std::string &fmuLocation)
     // now generate the model description file
     generateXML ((fmu_temp_dir / "modelDescription.xml").string ());
 
-    // now zip the fmu
-    utilities::zipFolder (fmupath.string (), fmu_temp_dir.string ());
+    if (fmupath.is_absolute())
+    {
+        // now zip the fmu
+        int status = utilities::zipFolder(fmupath.string(), fmu_temp_dir.string());
+        if (status == 0)
+        {
+            getSim()->log(nullptr, print_level::summary, "fmu created at " + fmupath.string());
+        }
+        else
+        {
+            getSim()->log(nullptr, print_level::error, "zip status failure creating " + fmupath.string() + "returned with error code " + std::to_string(status));
+        }
+    }
+    else
+    {
+        auto path2 = current_path() /fmupath;
+        int status = utilities::zipFolder(path2.string(), fmu_temp_dir.string());
+        if (status == 0)
+        {
+            getSim()->log(nullptr, print_level::summary, "fmu created at " + path2.string());
+        }
+        else
+        {
+            getSim()->log(nullptr, print_level::error, "zip status failure creating " + fmupath.string() + "returned with error code " + std::to_string(status));
+        }
+    }
+   
+  
 }
 
 void fmuBuilder::copySharedLibrary (const std::string &tempdir)
@@ -608,11 +635,21 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
 			sVariable->SetAttribute("description", evntdesc.c_str());
 		}
         sVariable->SetAttribute ("causality", "parameter");
-        sVariable->SetAttribute ("variability", "continuous");
+        if (fmiCoordinator::isStringParameter(param))
+        {
+            auto sParamType = doc.NewElement("String");
+            sParamType->SetAttribute("start", "");
+            sVariable->InsertEndChild(sParamType);
+        }
+        else
+        {
+            sVariable->SetAttribute("variability", "continuous");
 
-        auto rType = doc.NewElement ("Real");
-        rType->SetAttribute ("start", coord_->getOutput (param.first));
-        sVariable->InsertEndChild (rType);
+            auto rType = doc.NewElement("Real");
+            rType->SetAttribute("start", coord_->getOutput(param.first));
+            sVariable->InsertEndChild(rType);
+        }
+        
         pElement->InsertEndChild (sVariable);
         ++index;
     }
@@ -658,7 +695,7 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
     pRoot->InsertEndChild (pElement);
 
     auto res=doc.SaveFile (xmlfile.c_str ());
-	if (res != XMLError::XML_NO_ERROR)
+	if (res != XMLError::XML_SUCCESS)
 	{
 		throw(std::runtime_error("unable to write file"));
 	}

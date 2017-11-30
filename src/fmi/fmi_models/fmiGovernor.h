@@ -24,12 +24,9 @@ namespace fmi
 {
 
 class fmiMESubModel;
-
+/** class defining a governor with the dynamics through an FMI object*/
 class fmiGovernor : public fmiMEWrapper<Governor>
 {
-protected:
-	std::string v_in;
-	std::string E_out;
 
 public:
 	fmiGovernor(const std::string &objName = "fmiExciter_#");

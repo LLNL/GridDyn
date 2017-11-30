@@ -52,7 +52,7 @@ namespace griddyn
 static childTypeFactory<fmi::fmiMELoad,Load> fmild("load", stringVec{ "fmimeload", "fmi","me" });
 static childTypeFactory<fmi::fmiCoSimLoad, Load> fmiCSld("load", stringVec{ "fmicosimload","cosim" });
 static childTypeFactory<fmi::fmiCoSimLoad3phase, Load> fmiCSld3("load", stringVec{ "fmicosimload3","fmicosimload3phase" });
-static childTypeFactory<fmi::fmiMELoad3phase, Load> fmiMEld3("load", stringVec{ "fmimeload3","fmiload3phase","fmi3phase" });
+static childTypeFactory<fmi::fmiMELoad3phase, Load> fmiMEld3("load", stringVec{ "fmimeload3","fmiload3phase","fmi3phase","fmimeload3phase","fmime3phase" });
 static childTypeFactory<fmi::fmiGovernor, Governor> fmiGov("governor", stringVec{ "fmigov","fmigovernor","fmi"});
 static childTypeFactory<fmi::fmiExciter, Exciter> fmiExciter("exciter", stringVec{ "fmiexiter","fmi" });
 static childTypeFactory<fmi::fmiGenModel, GenModel> fmiGM("genmodel", stringVec{ "fmigenmodel","fmimachine","fmi" });

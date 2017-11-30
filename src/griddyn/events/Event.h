@@ -14,7 +14,7 @@
 #define GRIDDYN_EVENT_H_
 #pragma once
 // headers
-//#include "griddyn.h"
+//#include "gridDynSimulation.h"
 
 #include "core/coreObject.h"
 #include "core/helperObject.h"
@@ -65,24 +65,32 @@ protected:
 		bool resettable = false;  //!< flag indicating if the event can be reset;
 		bool reversable = false; //!< flag indicating if the event can be reversed;
 		bool initRequired = false;  //!< flag indicating the event requires initialization
+		//NOTE;; there is an extra 4 bytes here
 
 public:
+	/** construct with a name to the event*/
 	explicit Event(const std::string &eventName);
 	/** default constructor will set the event time to the maximum so it will never trigger on its own
 	@param[in] time0 the time to trigger the event
 	*/
-	explicit Event(coreTime time0 = maxTime);
-	Event(EventInfo &gdEI, coreObject *rootObject);
+	explicit Event(coreTime time0 = negTime);
+	/** constructor from and EventInfo object and rootObject
+	@param[in] gdEI a structure defining the information of an event
+	@param[in] rootObject the base object to use for searching for any parameters or other objects*/
+	Event(const EventInfo &gdEI, coreObject *rootObject);
 	/** duplicate the event
-	@param[in] gE a pointer to the event to copy the information to, if nullptr then a new event is created
 	@return a pointer to the clone of the event
 	*/
-	virtual std::shared_ptr<Event> clone(std::shared_ptr<Event> gE = nullptr) const;
+	virtual std::unique_ptr<Event> clone() const;
+	/** duplicate the event to a valid event
+	@param a pointer to an event object
+	*/
+	virtual void cloneTo(Event *evnt) const;
 	/** update the information in an event from an event info
 	@param[in] gdEI the event information structure to get all the event information from
 	@param[in] rootObject the root object to use in searching for other objects
 	*/
-		virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject);
+		virtual void updateEvent(const EventInfo &gdEI, coreObject *rootObject);
 		/** trigger the event
 		@return a change_code describing the impact associated with an event
 		*/
@@ -130,7 +138,7 @@ public:
 protected:
 	/** udpate the target and field of an event*/
 	void loadField(coreObject *gdo, const std::string &field);
-	/** run a check if the event can be armed*/
+	/** run a check to see if the event can be armed*/
 	virtual bool checkArmed();
 };
 

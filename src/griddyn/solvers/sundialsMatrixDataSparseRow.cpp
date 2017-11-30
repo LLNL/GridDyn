@@ -18,22 +18,22 @@ namespace griddyn
 {
 namespace solvers
 {
-sundialsMatrixDataSparseRow::sundialsMatrixDataSparseRow (SlsMat mat)
-    : matrixData<double> (static_cast<count_t> (mat->M), static_cast<count_t> (mat->N)), J (mat)
+sundialsMatrixDataSparseRow::sundialsMatrixDataSparseRow (SUNMatrix mat)
+    : matrixData<double> (static_cast<count_t> (SM_ROWS_S(mat)), static_cast<count_t> (SM_COLUMNS_S(mat))), J (mat)
 {
 }
 
-void sundialsMatrixDataSparseRow::clear () { memset (J->data, 0, sizeof (realtype) * J->NNZ); }
+void sundialsMatrixDataSparseRow::clear () {SUNMatZero(J); }
 void sundialsMatrixDataSparseRow::assign (index_t row, index_t col, double num)
 {
-    int sti = J->indexptrs[row];
-    int stp = J->indexptrs[row + 1];
-    auto st = J->indexvals + sti;
+    int sti = SM_INDEXPTRS_S(J)[row];
+    int stp = SM_INDEXPTRS_S(J)[row + 1];
+    auto st = SM_INDEXVALS_S(J) + sti;
     while (sti < stp)
     {
         if (*st == static_cast<int> (col))
         {
-            J->data[sti] += num;
+            SM_DATA_S(J)[sti] += num;
             break;
         }
         ++st;
@@ -41,22 +41,22 @@ void sundialsMatrixDataSparseRow::assign (index_t row, index_t col, double num)
     }
 }
 
-void sundialsMatrixDataSparseRow::setMatrix (SlsMat mat)
+void sundialsMatrixDataSparseRow::setMatrix (SUNMatrix mat)
 {
     J = mat;
-    setRowLimit (static_cast<count_t> (J->M));
-    setColLimit (static_cast<count_t> (J->N));
+    setRowLimit (static_cast<count_t> (SM_ROWS_S(J)));
+    setColLimit (static_cast<count_t> (SM_COLUMNS_S(J)));
 }
 
-count_t sundialsMatrixDataSparseRow::size () const { return static_cast<count_t> (J->indexptrs[rowLimit ()]); }
-count_t sundialsMatrixDataSparseRow::capacity () const { return static_cast<count_t> (J->NNZ); }
+count_t sundialsMatrixDataSparseRow::size () const { return static_cast<count_t> (SM_INDEXPTRS_S(J)[rowLimit ()]); }
+count_t sundialsMatrixDataSparseRow::capacity () const { return static_cast<count_t> (SM_NNZ_S(J)); }
 matrixElement<double> sundialsMatrixDataSparseRow::element (index_t N) const
 {
     matrixElement<double> ret;
-    ret.col = static_cast<index_t> (J->indexvals[N]);
-    auto res = std::lower_bound (J->indexptrs, &(J->indexptrs[rowLimit ()]), static_cast<int> (N));
+    ret.col = static_cast<index_t> (SM_INDEXVALS_S(J)[N]);
+    auto res = std::lower_bound (SM_INDEXPTRS_S(J), &(SM_INDEXPTRS_S(J)[rowLimit ()]), static_cast<int> (N));
     ret.row = static_cast<index_t> (*res - 1);
-    ret.data = J->data[N];
+    ret.data = SM_DATA_S(J)[N];
     return ret;
 }
 
@@ -68,9 +68,9 @@ void sundialsMatrixDataSparseRow::start ()
 
 matrixElement<double> sundialsMatrixDataSparseRow::next ()
 {
-    matrixElement<double> ret{crow, static_cast<index_t> (J->indexvals[cur]), J->data[cur]};
+    matrixElement<double> ret{crow, static_cast<index_t> (SM_INDEXVALS_S(J)[cur]), SM_DATA_S(J)[cur]};
     ++cur;
-    if (static_cast<int> (cur) >= J->indexptrs[crow + 1])
+    if (static_cast<int> (cur) >= SM_INDEXPTRS_S(J)[crow + 1])
     {
         ++crow;
         if (crow > rowLimit ())
@@ -84,17 +84,17 @@ matrixElement<double> sundialsMatrixDataSparseRow::next ()
 
 double sundialsMatrixDataSparseRow::at (index_t rowN, index_t colN) const
 {
-    if (static_cast<int> (rowN) > J->M)
+    if (static_cast<int> (rowN) > SM_ROWS_S(J))
     {
         return 0.0;
     }
-    int sti = J->indexptrs[rowN];
-    int stp = J->indexptrs[rowN + 1];
+    int sti = SM_INDEXPTRS_S(J)[rowN];
+    int stp = SM_INDEXPTRS_S(J)[rowN + 1];
     for (int kk = sti; kk < stp; ++kk)
     {
-        if (J->indexvals[kk] == static_cast<int> (colN))
+        if (SM_INDEXVALS_S(J)[kk] == static_cast<int> (colN))
         {
-            return J->data[kk];
+            return SM_DATA_S(J)[kk];
         }
     }
     return 0.0;

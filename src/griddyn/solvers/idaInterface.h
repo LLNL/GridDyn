@@ -24,7 +24,7 @@ namespace solvers
 class idaInterface : public sundialsInterface
 {
   public:
-    count_t icCount = 0;
+    count_t icCount = 0; //!< the number of times the initical condition function was called
 
   private:
     matrixDataSparse<double> a1;  //!< array structure for holding the Jacobian information
@@ -41,8 +41,9 @@ class idaInterface : public sundialsInterface
     /** @brief destructor*/
     ~idaInterface ();
 
-    virtual std::shared_ptr<solverInterface>
-    clone (std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
 
     virtual void allocate (count_t size, count_t numRoots = 0) override;
     void setMaxNonZeros (count_t size) override;
@@ -61,29 +62,18 @@ class idaInterface : public sundialsInterface
     void setConstraints () override;
     // declare friend some helper functions
     friend int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
-    friend int idaJacDense (long int Neq,
-                            realtype time,
-                            realtype cj,
-                            N_Vector state,
-                            N_Vector dstate_dt,
-                            N_Vector resid,
-                            DlsMat J,
-                            void *user_data,
-                            N_Vector tmp1,
-                            N_Vector tmp2,
-                            N_Vector tmp3);
-#ifdef KLU_ENABLE
-    friend int idaJacSparse (realtype time,
+
+    friend int idaJac (realtype time,
                              realtype cj,
                              N_Vector state,
                              N_Vector dstate_dt,
                              N_Vector resid,
-                             SlsMat J,
+                             SUNMatrix J,
                              void *user_data,
                              N_Vector tmp1,
                              N_Vector tmp2,
                              N_Vector tmp3);
-#endif
+
     friend int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data);
 
   protected:

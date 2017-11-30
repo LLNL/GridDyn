@@ -18,10 +18,12 @@
 #include "utilities/units.h"
 #include "core/objectOperatorInterface.hpp"
 #include <memory>
-
+/** @file
+@brief define a classes and information related to data retrieval in griddyn
+*/
 namespace griddyn
 {
-
+/** helper data class for defining the information necessary to fully specify and a data grabber*/
 class gridGrabberInfo
 {
 public:
@@ -40,11 +42,12 @@ public:
 class gridGrabber;
 class stateGrabber;
 
-/** class for capturing and storing data from a grid simulation */
+/** base class for capturing and storing data from a grid simulation */
 class collector : public helperObject,public eventInterface, public objectOperatorInterface
 {
 protected:
 	count_t warningCount = 0;  //!< counter for the number of warnings
+	//there is currently a 4 byte gap here
 	std::vector<std::string> warnList;  //!< listing for the number of warnings
 	coreTime timePeriod; //!< the actual period of the collector
 	coreTime reqPeriod; //!< the requested period of the collector
@@ -78,7 +81,14 @@ public:
 	collector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
 	explicit collector(const std::string &collectorName);
 
-	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const;
+	/** duplicate the collector
+	@return a pointer to the clone of the event
+	*/
+	virtual std::unique_ptr<collector> clone() const;
+	/** duplicate the collector to a valid event
+	@param a pointer to a collector object
+	*/
+	virtual void cloneTo(collector *col) const;
 
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	
@@ -89,6 +99,7 @@ public:
 	*/
 	count_t grabData(double *data_, index_t N);
 	virtual change_code trigger(coreTime time) override;
+	/** do a check to check and assign all columns*/
 	void recheckColumns();
 	coreTime nextTriggerTime() const override
 	{
@@ -101,7 +112,7 @@ public:
 
 	virtual void add(std::shared_ptr<gridGrabber> ggb, int requestedColumn = -1);
 	virtual void add(std::shared_ptr<stateGrabber> sst, int requestedColumn = -1);
-	virtual void add(gridGrabberInfo *gdRI, coreObject *obj);
+	virtual void add(const gridGrabberInfo &gdRI, coreObject *obj);
 	virtual void add(const std::string &field, coreObject *obj);
 	virtual void add(std::shared_ptr<gridGrabber> ggb, std::shared_ptr<stateGrabber> sst, int requestedColumn=-1);
 
@@ -120,8 +131,9 @@ public:
 	virtual coreObject * getObject() const override;
 
 	virtual void getObjects(std::vector<coreObject *> &objects) const override;
-
+	/** flush the buffer to a file or other sink*/
 	virtual void flush();
+	/** get a name or description associated with the sink of the data*/
 	virtual const std::string &getSinkName() const;
 
 	/** the the most recent value associated with a particular column
@@ -132,6 +144,7 @@ public:
 	{
 		return isValidIndex(column,data) ? data[column] : kNullVal;
 	}
+	/** get a list of all the descriptions of the columns */
 	virtual std::vector<std::string> getColumnDescriptions() const;
 	/** get the current warning count*/
 	count_t getWarningCount() const
@@ -153,13 +166,11 @@ public:
 	}
 
 	/** clear all grabbers from the collector*/
-	void reset()
+	void reset();
+	/** get the number of points in the collector*/
+	count_t numberOfPoints() const
 	{
-		points.clear();
-		data.clear();
-		warnList.clear();
-		warningCount = 0;
-		triggerTime = maxTime;
+		return static_cast<count_t>(points.size());
 	}
 protected:
 	/** callback intended more for derived classes to indicate that a dataPoint has been added*/

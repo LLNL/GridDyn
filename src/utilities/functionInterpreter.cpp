@@ -18,7 +18,7 @@
 #endif
 
 #include "functionInterpreter.h"
-#include "config.h"
+#include "griddyn/griddyn-config.h"
 #include "gridRandom.h"
 #include "mapOps.hpp"
 #include "stringOps.h"

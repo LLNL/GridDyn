@@ -176,23 +176,23 @@ void schedulerReg::dynObjectInitializeB (const IOdata &inputs, const IOdata &des
     m_output = regCurr + PCurr + reserveAct;
 }
 
-double schedulerReg::getRamp() const
+double schedulerReg::getRamp () const
 {
-	double ramp = 0;
-	double diff = regTarget - regCurr;
-	if (diff > 0.001)
-	{
-		ramp = regRampUp;
-	}
-	else if (diff < 0.001)
-	{
-		ramp = regRampDown;
-	}
-	else
-	{
-		ramp = schedulerRamp::getRamp();
-	}
-	return ramp;
+    double ramp = 0;
+    double diff = regTarget - regCurr;
+    if (diff > 0.001)
+    {
+        ramp = regRampUp;
+    }
+    else if (diff < 0.001)
+    {
+        ramp = regRampDown;
+    }
+    else
+    {
+        ramp = schedulerRamp::getRamp ();
+    }
+    return ramp;
 }
 
 double schedulerReg::getRampTime () const
@@ -206,7 +206,7 @@ double schedulerReg::getRampTime () const
     {
         return (regTarget - regCurr) / (regRampDown - PRampCurr);
     }
- 
+
     return schedulerRamp::getRampTime ();
 }
 

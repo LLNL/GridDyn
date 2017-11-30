@@ -24,14 +24,14 @@ namespace solvers
 class cvodeInterface : public sundialsInterface
 {
   public:
-    count_t icCount = 0;
+    count_t icCount = 0;	//!< total number of initial condition calls
 
   private:
     matrixDataSparse<double> a1;  //!< array structure for holding the Jacobian information
     std::vector<double> tempState;  //!<temporary holding location for a state vector
-    double maxStep = -1.0;
-    double minStep = -1.0;
-    double step = 0.0;
+    double maxStep = -1.0; //!< the maximum step size permitted
+    double minStep = -1.0;	//!< the minimum step size permitted
+    double step = 0.0;	//!< the requested step size
 
   public:
     /** @brief constructor*/
@@ -42,10 +42,11 @@ class cvodeInterface : public sundialsInterface
     */
     cvodeInterface (gridDynSimulation *gds, const solverMode &sMode);
     /** @brief destructor*/
-    ~cvodeInterface ();
+    virtual ~cvodeInterface ();
 
-    virtual std::shared_ptr<solverInterface>
-    clone (std::shared_ptr<solverInterface> si = nullptr, bool fullCopy = false) const override;
+	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+
+	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void setMaxNonZeros (count_t nonZeroCount) override;
@@ -62,25 +63,16 @@ class cvodeInterface : public sundialsInterface
     virtual double get (const std::string &param) const override;
     // declare friend some helper functions
     friend int cvodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
-    friend int cvodeJacDense (long int Neq,
-                              realtype time,
-                              N_Vector state,
-                              N_Vector dstate_dt,
-                              DlsMat J,
-                              void *user_data,
-                              N_Vector tmp1,
-                              N_Vector tmp2,
-                              N_Vector tmp3);
-#ifdef KLU_ENABLE
-    friend int cvodeJacSparse (realtype time,
+
+    friend int cvodeJac (realtype time,
                                N_Vector state,
                                N_Vector dstate_dt,
-                               SlsMat J,
+                               SUNMatrix J,
                                void *user_data,
                                N_Vector tmp1,
                                N_Vector tmp2,
                                N_Vector tmp3);
-#endif
+
     friend int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
   protected:

@@ -12,7 +12,7 @@
 
 #include "core/objectFactory.hpp"
 #include "Generator.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "testHelper.h"
 #include "utilities/vectorOps.hpp"
@@ -67,9 +67,14 @@ BOOST_AUTO_TEST_CASE (basic_stability_test1)
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         gds = readSimXMLFile (fileName);
         Generator *gen = gds->getGen (0);
         gds->consolePrintLevel = print_level::no_print;
+		
         auto obj = cof->createObject ("exciter", excname);
         BOOST_CHECK (obj != nullptr);
         auto fnd = parameters.find (excname);
@@ -101,7 +106,7 @@ BOOST_AUTO_TEST_CASE (basic_stability_test1)
 
         gds->run ();
 
-        BOOST_REQUIRE_MESSAGE (gds->getCurrentTime () >= 30.0, "exciter type " << excname << " didn't complete\n");
+        BOOST_REQUIRE_MESSAGE (gds->getSimulationTime() >= 30.0, "exciter type " << excname << " didn't complete\n");
         std::vector<double> volt2;
         gds->getVoltage (volt2);
         BOOST_CHECK ((volt2[0] > 0.95) && (volt2[0] < 1.00));
@@ -127,6 +132,10 @@ BOOST_AUTO_TEST_CASE (basic_stability_test2)
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         gds = readSimXMLFile (fileName);
         Generator *gen = gds->getGen (0);
         gds->consolePrintLevel = print_level::no_print;
@@ -160,12 +169,12 @@ BOOST_AUTO_TEST_CASE (basic_stability_test2)
         gds->getVoltage (volt1);
 
         gds->run ();
-        if (gds->getCurrentTime () < 30.0)
+        if (gds->getSimulationTime() < 30.0)
         {
             printf ("exciter didn't complete %s\n", excname.c_str ());
             gds->saveRecorders ();
         }
-        BOOST_REQUIRE (gds->getCurrentTime () >= 30.0);
+        BOOST_REQUIRE (gds->getSimulationTime() >= 30.0);
         std::vector<double> volt2;
         gds->getVoltage (volt2);
         BOOST_CHECK ((volt2[0] > 1.00) && (volt2[0] < 1.05));
@@ -193,6 +202,10 @@ BOOST_AUTO_TEST_CASE (basic_stability_test3)
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         if (excname == "dc1a")
         {
             // TODO: this doesn't work for now (unknown)
@@ -232,12 +245,12 @@ BOOST_AUTO_TEST_CASE (basic_stability_test3)
         gds->getVoltage (volt1);
 
         gds->run ();
-        if (gds->getCurrentTime () < 30.0)
+        if (gds->getSimulationTime() < 30.0)
         {
             printf ("exciter didn't complete %s\n", excname.c_str ());
             gds->saveRecorders ();
         }
-        BOOST_REQUIRE (gds->getCurrentTime () >= 30.0);
+        BOOST_REQUIRE (gds->getSimulationTime() >= 30.0);
         std::vector<double> volt2;
         gds->getVoltage (volt2);
         BOOST_CHECK ((volt2[0] > 0.98) && (volt2[0] < 1.02));
@@ -264,6 +277,10 @@ BOOST_AUTO_TEST_CASE (basic_stability_test4)
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         if (excname == "dc1a")
         {
             // TODO: this doesn't work for now (unknown)
@@ -302,12 +319,12 @@ BOOST_AUTO_TEST_CASE (basic_stability_test4)
         gds->getVoltage (volt1);
 
         gds->run ();
-        if (gds->getCurrentTime () < 30.0)
+        if (gds->getSimulationTime() < 30.0)
         {
             printf ("exciter didn't complete %s\n", excname.c_str ());
             gds->saveRecorders ();
         }
-        BOOST_REQUIRE (gds->getCurrentTime () >= 30.0);
+        BOOST_REQUIRE (gds->getSimulationTime() >= 30.0);
         std::vector<double> volt2;
         gds->getVoltage (volt2);
         BOOST_CHECK ((volt2[0] > 0.98) && (volt2[0] < 1.02));
@@ -334,6 +351,10 @@ BOOST_AUTO_TEST_CASE (exciter_test2_alg_diff_tests)  // test the algebraic updat
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         gds = readSimXMLFile (fileName);
         Generator *gen = gds->getGen (0);
         gds->consolePrintLevel = print_level::no_print;
@@ -380,6 +401,10 @@ BOOST_AUTO_TEST_CASE (exciter_alg_diff_jacobian_tests)  // test the algebraic up
     // exclist.insert(exclist.begin(), "none");
     for (auto &excname : exclist)
     {
+		if (excname.compare(0, 3, "fmi") == 0)
+		{
+			continue;
+		}
         gds = readSimXMLFile (fileName);
         Generator *gen = gds->getGen (0);
         gds->consolePrintLevel = print_level::no_print;

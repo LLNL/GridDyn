@@ -11,9 +11,8 @@
 */
 
 #include "griddyn-config.h"
-
-#include "griddyn.h" // for gridDynSimulation
 #include "fskitCommunicator.h"
+#include "gridDynSimulation.h" // for gridDynSimulation
 #include "gridDynFederatedScheduler.h"
 #include "events/eventQueue.h"
 #include "events/Event.h"
@@ -242,7 +241,7 @@ FskitCommunicator::doTransmit ( std::shared_ptr<griddyn::commMessage> message)
   fskit::Time currentTime;
   if (inst != 0)
     {
-      double currentTimeSeconds = inst->getCurrentTime ();
+      double currentTimeSeconds = inst->getSimulationTime ();
       currentTime = fskit::Time (currentTimeSeconds * 1e9); // scale current time to nanoseconds
     }
   else

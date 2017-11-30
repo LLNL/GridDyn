@@ -373,7 +373,7 @@ void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
     }
     bus->setName (temp2);
 
-    // get the baseVoltage
+    // get the localBaseVoltage
   bv = std::stod (strvec[2]);
   if (bv > 0.0)
     {

@@ -22,7 +22,7 @@ namespace helicsLib
 class helicsCoordinator;
 
 enum class helicsValueType:char;
-
+/** class defining an object that pulls in data from a helics co-simulation*/
 class helicsSource :public sources::rampSource
 {
 public:
@@ -37,8 +37,8 @@ protected:
 	parameter_t scaleFactor = 1.0;			//!< scaling factor on the load
 	gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the incoming data
 	gridUnits::units_t outputUnits = gridUnits::defUnit; //!< units of the outgoing data
-	helicsValueType valueType;
-	int32_t valueIndex=-1;
+	helicsValueType valueType;	//!< the type of value that is used through helics
+	int32_t valueIndex=-1;	//!< the index into the helics coordinator
 	helicsCoordinator *coord_=nullptr;  //!< pointer to the helics coordinator
 private:
 	double prevVal = 0;
@@ -56,6 +56,7 @@ public:
 	virtual void set(const std::string &param, const std::string &val) override;
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 private:
+	/** update the publication and subscription info in the helics coordinator*/
 	void updateSubscription();
 };
 

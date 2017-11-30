@@ -15,7 +15,6 @@
 #pragma once
 
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "measurement/gridGrabbers.h"
 #include "solvers/solverMode.hpp"
@@ -73,18 +72,25 @@ class objectGrabber : public gridGrabber
             objectGrabber<X>::updateField (fld);
         }
     }
-    std::shared_ptr<gridGrabber> clone (std::shared_ptr<gridGrabber> ggb = nullptr) const override
+    std::unique_ptr<gridGrabber> clone () const override
     {
-        auto ngb = cloneBase<objectGrabber, gridGrabber> (this, ggb);
-        if (!ngb)
-        {
-            return ggb;
-        }
-
-        ngb->tobject = tobject;
-
-        return ngb;
+		std::unique_ptr<gridGrabber> ggb = std::make_unique<objectGrabber>();
+		cloneTo(ggb.get());
+        return ggb;
     }
+
+	void cloneTo(gridGrabber *ggb) const override
+	{
+	
+		gridGrabber::cloneTo(ggb);
+		auto ngb = dynamic_cast<objectGrabber *>(ggb);
+		if (ngb == nullptr)
+		{
+			return;
+		}
+
+		ngb->tobject = tobject;
+	}
 
     void updateField (const std::string &fld) override
     {
@@ -153,18 +159,27 @@ class objectOffsetGrabber : public gridGrabber
 
         updateOffset (newOffset);
     }
-    std::shared_ptr<gridGrabber> clone (std::shared_ptr<gridGrabber> ggb = nullptr) const override
-    {
-        auto ngb = cloneBase<objectOffsetGrabber, gridGrabber> (this, ggb);
-        if (!ngb)
-        {
-            return ggb;
-        }
 
-        ngb->tobject = tobject;
-        ngb->offset = offset;
-        return ngb;
-    }
+	std::unique_ptr<gridGrabber> clone() const override
+	{
+		std::unique_ptr<gridGrabber> ggb = std::make_unique<objectOffsetGrabber>();
+			objectOffsetGrabber::cloneTo(ggb.get());
+		return ggb;
+	}
+
+	void cloneTo(gridGrabber *ggb) const override
+	{
+
+		gridGrabber::cloneTo(ggb);
+		auto ngb = dynamic_cast<objectOffsetGrabber *>(ggb);
+		if (ngb == nullptr)
+		{
+			return;
+		}
+		ngb->offset = offset;
+		ngb->tobject = tobject;
+	}
+    
 
     void updateField (const std::string &fld) override
     {

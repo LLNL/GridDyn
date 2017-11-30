@@ -17,7 +17,7 @@
 #include "Load.h"
 #include "Relay.h"
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
+
 #include "grabberInterpreter.hpp"
 #include "gridBus.h"
 #include "gridSubModel.h"
@@ -40,12 +40,15 @@ gridGrabber::gridGrabber (const std::string &fld, coreObject *obj)
     gridGrabber::updateField (fld);
 }
 
-std::shared_ptr<gridGrabber> gridGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
+std::unique_ptr<gridGrabber> gridGrabber::clone() const
 {
-    if (ggb == nullptr)
-    {
-        ggb = std::make_shared<gridGrabber> ();
-    }
+	auto ggb = std::make_unique<gridGrabber>();
+	gridGrabber::cloneTo(ggb.get());
+	return ggb;
+}
+
+void gridGrabber::cloneTo (gridGrabber *ggb) const
+{
     ggb->desc = desc;
     ggb->field = field;
     ggb->fptr = fptr;
@@ -57,20 +60,15 @@ std::shared_ptr<gridGrabber> gridGrabber::clone (std::shared_ptr<gridGrabber> gg
     ggb->outputUnits = outputUnits;
     ggb->vectorGrab = vectorGrab;
     ggb->loaded = loaded;
-    ggb->useVoltage = useVoltage;
     ggb->cobj = cobj;
-    return ggb;
 }
 
-/* *INDENT-OFF* */
 static const std::map<std::string, std::function<double(coreObject *)>> coreFunctions{
   {"nextupdatetime", [](coreObject *obj) { return obj->getNextUpdateTime (); }},
   {"lastupdatetime", [](coreObject *obj) { return obj->get ("lastupdatetime"); }},
   {"currenttime", [](coreObject *obj) { return obj->currentTime (); }},
   {"constant", [](coreObject * /*obj*/) { return 0.0; }},
 };
-
-/* *INDENT-OFF* */
 
 void gridGrabber::updateField (const std::string &fld)
 {
@@ -138,7 +136,7 @@ double gridGrabber::grabData ()
         val = fptr (cobj);
         if (outputUnits != defUnit)
         {
-            val = unitConversion (val, inputUnits, outputUnits, cobj->get ("basepower"), m_baseVoltage);
+            val = unitConversion (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get("basevoltage"));
         }
     }
     else
@@ -152,15 +150,16 @@ double gridGrabber::grabData ()
 
 void gridGrabber::grabVectorData (std::vector<double> &vdata)
 {
-    if ((loaded)&&(vectorGrab))
+    if ((loaded) && (vectorGrab))
     {
         fptrV (cobj, vdata);
         if (outputUnits != defUnit)
         {
-			auto localBasePower = cobj->get("basepower");
+            auto localBasePower = cobj->get ("basepower");
+			auto localBaseVoltage = cobj->get("basevoltage");
             for (auto &v : vdata)
             {
-                v = unitConversion (v, inputUnits, outputUnits, localBasePower, m_baseVoltage);
+                v = unitConversion (v, inputUnits, outputUnits, localBasePower, localBaseVoltage);
             }
         }
     }
@@ -172,7 +171,7 @@ void gridGrabber::grabVectorData (std::vector<double> &vdata)
 
 coreTime gridGrabber::getTime () const
 {
-    if (cobj!=nullptr)
+    if (cobj != nullptr)
     {
         return cobj->currentTime ();
     }
@@ -197,11 +196,7 @@ void gridGrabber::updateObject (coreObject *obj, object_update_mode mode)
         }
         if (cobj != nullptr)
         {
-            if (useVoltage)
-            {
-                m_baseVoltage = cobj->get ("basevoltage");
-                makeDescription ();
-            }
+			makeDescription();
         }
     }
     else
@@ -425,18 +420,26 @@ void functionGrabber::getDesc (std::vector<std::string> &desc_list) const
     }
 }
 
-std::shared_ptr<gridGrabber> functionGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
+std::unique_ptr<gridGrabber> functionGrabber::clone() const
 {
-    std::shared_ptr<functionGrabber> fgb = cloneBase<functionGrabber, gridGrabber> (this, ggb);
-    if (!fgb)
-    {
-        return ggb;
-    }
+	std::unique_ptr<gridGrabber> fgrab = std::make_unique<functionGrabber>();
+	functionGrabber::cloneTo(fgrab.get());
+	return fgrab;
+}
+
+void  functionGrabber::cloneTo (gridGrabber *ggb) const
+{
+	gridGrabber::cloneTo(ggb);
+	auto fgb = dynamic_cast<functionGrabber *>(ggb);
+
+	if (fgb == nullptr)
+	{
+		return;
+	}
     fgb->bgrabber = bgrabber->clone ();
     fgb->function_name = function_name;
     fgb->opptr = opptr;
     fgb->opptrV = opptrV;
-    return fgb;
 }
 
 double functionGrabber::grabData ()
@@ -587,20 +590,27 @@ void opGrabber::getDesc (stringVec &desc_list) const
     }
 }
 
-std::shared_ptr<gridGrabber> opGrabber::clone (std::shared_ptr<gridGrabber> ggb) const
+std::unique_ptr<gridGrabber> opGrabber::clone() const
 {
-    auto ogb = cloneBase<opGrabber, gridGrabber> (this, ggb);
-    if (!ogb)
-    {
-        return ggb;
-    }
+	std::unique_ptr<gridGrabber> ograb = std::make_unique<opGrabber>();
+	opGrabber::cloneTo(ograb.get());
+	return ograb;
+}
 
-    ogb->bgrabber1 = bgrabber1->clone (nullptr);
-    ogb->bgrabber2 = bgrabber2->clone (nullptr);
+void opGrabber::cloneTo (gridGrabber *ggb) const
+{
+	gridGrabber::cloneTo(ggb);
+	auto ogb = dynamic_cast<opGrabber *>(ggb);
+
+    if (ogb==nullptr)
+    {
+        return;
+    }
+    ogb->bgrabber1 = bgrabber1->clone ();
+    ogb->bgrabber2 = bgrabber2->clone ();
     ogb->op_name = op_name;
     ogb->opptr = opptr;
     ogb->opptrV = opptrV;
-    return ogb;
 }
 
 double opGrabber::grabData ()

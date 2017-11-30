@@ -82,9 +82,18 @@ index_t fmiCoordinator::findVR(const std::string &varName) const
 }
 
 
-bool fmiCoordinator::sendInput(index_t /*vr*/, const char * /*s*/)
+bool fmiCoordinator::sendInput(index_t vr, const char *s)
 {
-	return false;
+    auto res = std::lower_bound(paramVR.begin(), paramVR.end(), vrInputPair(vr, inputSet()),
+        [](const auto &vp1, const auto &vp2) { return (vp1.first < vp2.first); });
+    if ((res != paramVR.end()) && (res->first == vr)&&(res->second.evnt->eventType==fmi::fmiEvent::fmiEventType::string_parameter))
+    {
+        res->second.evnt->updateStringValue(s);
+        res->second.evnt->trigger();
+        return true;
+    }
+    LOG_WARNING("invalid value reference " + std::to_string(vr));
+    return false;
 }
 
 double fmiCoordinator::getOutput (index_t vr)
@@ -132,6 +141,11 @@ void fmiCoordinator::addHelper(std::shared_ptr<helperObject> ho)
 {
 	std::lock_guard<std::mutex> hLock(helperProtector);
 	helpers.push_back(std::move(ho));
+}
+
+bool fmiCoordinator::isStringParameter(const vrInputPair &param)
+{
+    return (param.second.evnt->eventType == fmi::fmiEvent::fmiEventType::string_parameter);
 }
 
 }//namespace fmi

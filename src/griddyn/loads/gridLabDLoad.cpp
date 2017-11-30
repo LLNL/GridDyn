@@ -489,8 +489,8 @@ void gridLabDLoad::runGridLabA (coreTime time, const IOdata &inputs)
     Vprev = inputs[voltageInLocation];
     Thprev = inputs[angleInLocation];
     // static double *res=new double[8];
-    double V1 = inputs[voltageInLocation] * baseVoltage *
-                1000.0;  // baseVoltage is in KV  we ignore the angle since it shouldn't matter
+    double V1 = inputs[voltageInLocation] * localBaseVoltage *
+                1000.0;  // localBaseVoltage is in KV  we ignore the angle since it shouldn't matter
     Vg[0] = std::complex<double> (V1, 0);
     Vg[1] = Vg[0] * rotn120;
     Vg[2] = Vg[0] * rotp120;
@@ -521,7 +521,7 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
     GhostSwingBusManager::cvec Ig2 (3);
     GhostSwingBusManager::cvec Vg (3);
 
-    Vg[0] = std::complex<double> (Vprev * baseVoltage * 1000.0, 0);
+    Vg[0] = std::complex<double> (Vprev * localBaseVoltage * 1000.0, 0);
     Vg[1] = Vg[0] * rotn120;
     Vg[2] = Vg[0] * rotp120;
 
@@ -583,9 +583,9 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
         }
     }
 
-    /* *INDENT-OFF* */
+    
     return {retP, retQ};
-    /* *INDENT-ON* */
+    
 }
 
 void gridLabDLoad::run2GridLabA (coreTime time, const IOdata &inputs)
@@ -608,7 +608,7 @@ void gridLabDLoad::run2GridLabA (coreTime time, const IOdata &inputs)
     Vprev = inputs[voltageInLocation];
     Thprev = inputs[angleInLocation];
 
-    Vg[3] = std::complex<double> (V * baseVoltage * 1000.0, 0);
+    Vg[3] = std::complex<double> (V * localBaseVoltage * 1000.0, 0);
     Vg[4] = Vg[3] * rotn120;
     Vg[5] = Vg[3] * rotp120;
 
@@ -645,7 +645,7 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
 
     double V = Vprev;
 
-    Vg[3] = std::complex<double> (V * baseVoltage * 1000.0, 0);
+    Vg[3] = std::complex<double> (V * localBaseVoltage * 1000.0, 0);
     Vg[4] = Vg[3] * rotn120;
     Vg[5] = Vg[3] * rotp120;
 
@@ -692,7 +692,7 @@ std::vector<double> gridLabDLoad::run2GridLabB (bool unbalancedAlert)
     double Q1 = S1.imag () * scale;  // basePower is MW
     double Q2 = S2.imag () * scale;  // basePower is MW
 
-    double V2 = V;  // baseVoltage is in KV  we ignore the angle since it shouldn't matter
+    double V2 = V;  // localBaseVoltage is in KV  we ignore the angle since it shouldn't matter
     double V1 = V * (1.0 + spread);
 
     std::vector<double> retP (4);
@@ -740,8 +740,8 @@ void gridLabDLoad::run3GridLabA (coreTime time, const IOdata &inputs)
     Thprev = inputs[angleInLocation];
 
     // send the current voltage as the last in the series
-    Vg[6] = std::complex<double> (V * baseVoltage * 1000.0,
-                                  0);  // baseVoltage is in KV  we ignore the angle since it shouldn't matter
+    Vg[6] = std::complex<double> (V * localBaseVoltage * 1000.0,
+                                  0);  // localBaseVoltage is in KV  we ignore the angle since it shouldn't matter
     Vg[7] = Vg[6] * rotn120;
     Vg[8] = Vg[6] * rotp120;
 
@@ -782,8 +782,8 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
     GhostSwingBusManager::cvec Vg (9);
     double P1;
     double V = Vprev;
-    Vg[6] = std::complex<double> (V * baseVoltage * 1000.0,
-                                  0);  // baseVoltage is in KV  we ignore the angle since it shouldn't matter
+    Vg[6] = std::complex<double> (V * localBaseVoltage * 1000.0,
+                                  0);  // localBaseVoltage is in KV  we ignore the angle since it shouldn't matter
     Vg[7] = Vg[6] * rotn120;
     Vg[8] = Vg[6] * rotp120;
 
@@ -1216,9 +1216,9 @@ void gridLabDLoad::run_dummy_load (index_t kk, VoltageMessage *vm, CurrentMessag
     {
         auto vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
-        auto rP = dummy_load[kk]->getRealPower ({vtest / baseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
+        auto rP = dummy_load[kk]->getRealPower ({vtest / localBaseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
         auto rQ =
-          dummy_load[kk]->getReactivePower ({vtest / baseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
+          dummy_load[kk]->getReactivePower ({vtest / localBaseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
         auto vcom = std::complex<double> (vtest, 0);
         auto power = std::complex<double> (rP, rQ) / 3.0;
         auto ctest = power * (dummy_load[kk]->get ("basepower")) * 1000000.0 / vcom;
@@ -1243,8 +1243,8 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage *vm, Curre
         auto vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
         auto rP =
-          dummy_load_forward[kk]->getRealPower ({vtest / baseVoltage / 1000}, emptyStateData, cLocalSolverMode);
-        auto rQ = dummy_load_forward[kk]->getReactivePower ({vtest / baseVoltage / 1000}, emptyStateData,
+          dummy_load_forward[kk]->getRealPower ({vtest / localBaseVoltage / 1000}, emptyStateData, cLocalSolverMode);
+        auto rQ = dummy_load_forward[kk]->getReactivePower ({vtest / localBaseVoltage / 1000}, emptyStateData,
                                                             cLocalSolverMode);
         auto vcom = std::complex<double> (vtest, 0);
         auto power = std::complex<double> (rP, rQ) / 3.0;
@@ -1262,6 +1262,6 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage *vm, Curre
     }
     cm->numThreePhaseCurrent = vm->numThreePhaseVoltage;
 }
-#endif // HAVE_MPI
-}//namespace loads
-}//namespace griddyn
+#endif  // HAVE_MPI
+}  // namespace loads
+}  // namespace griddyn

@@ -12,13 +12,14 @@
 
 #include "fmiImport.h"
 #include "fmiObjects.h"
+#include "griddyn/compiler-config.h"
 #include "utilities/zipUtilities.h"
 
 #include "utilities/stringOps.h"
 #include <boost/dll/import.hpp>
 #include <boost/dll/shared_library.hpp>
 #include <map>
-
+#include <cstdarg>
 
 using namespace boost::filesystem;
 
@@ -169,6 +170,10 @@ int fmiLibrary::extract ()
 
 std::unique_ptr<fmi2ModelExchangeObject> fmiLibrary::createModelExchangeObject (const std::string &name)
 {
+	if (!isSoLoaded())
+	{
+		loadSharedLibrary(fmutype_t::modelExchange);
+	}
     if (soMeLoaded)
     {
         if (!callbacks)
@@ -191,6 +196,10 @@ std::unique_ptr<fmi2ModelExchangeObject> fmiLibrary::createModelExchangeObject (
 
 std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject (const std::string &name)
 {
+	if (!isSoLoaded())
+	{
+		loadSharedLibrary(fmutype_t::cosimulation);
+	}
     if (soCoSimLoaded)
     {
         if (!callbacks)
@@ -212,7 +221,10 @@ std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject (const std
 
 void fmiLibrary::loadSharedLibrary (fmutype_t type)
 {
-    // TODO:: make a check for already loaded
+	if (isSoLoaded())
+	{
+		return;
+	}
     auto sopath = findSoPath (type);
     bool loaded = false;
     if (!sopath.empty ())
@@ -287,7 +299,7 @@ path fmiLibrary::findSoPath (fmutype_t type)
         }
 		break;
     }
-    if (sizeof (void *) == 8)
+	if IF_CONSTEXPR(sizeof (void *) == 8)
     {
 #ifdef _WIN32
         sopath /= "win64";
@@ -444,5 +456,16 @@ void fmiLibrary::makeCallbackFunctions ()
     callbacks->componentEnvironment = static_cast<void *>(this);
 }
 
+#define STRING_BUFFER_SIZE 1000
+void loggerFunc(fmi2ComponentEnvironment compEnv, fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message, ...)
+{
+	std::string temp;
+	temp.resize(STRING_BUFFER_SIZE);
+	va_list arglist;
+	va_start(arglist, message);
+	auto sz=vsnprintf(&(temp[0]), STRING_BUFFER_SIZE,message, arglist);
+	va_end(arglist);
+	temp.resize(std::min(sz, STRING_BUFFER_SIZE));
+	printf("%s\n", temp.c_str());
 
-void loggerFunc (fmi2ComponentEnvironment, fmi2String, fmi2Status, fmi2String, fmi2String, ...) {}
+}

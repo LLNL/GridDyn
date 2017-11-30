@@ -11,7 +11,7 @@
  */
 #include "events/Event.h"
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 
 #include "core/coreExceptions.h"
 #include "dynamicInitialConditionRecovery.h"
@@ -458,7 +458,7 @@ int gridDynSimulation::dynamicPartitioned (coreTime tStop, coreTime tStep)
     }
     // go into the main loop
     int smStep = 0;
-    while (currentTime < tStop)
+    while (getSimulationTime() < tStop)
     {
         nextStopTime = std::min (tStop, nextEventTime);
 
@@ -725,7 +725,7 @@ void gridDynSimulation::handleEarlySolverReturn (int retval,
             stateData sD (timeActual, dynData->state_data (), dynData->deriv_data ());
 
             rootCheck (noInputs, sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
-            // return dynData->calcIC(getCurrentTime(), probeStepTime, solverInterface::ic_modes::fixed_diff,
+            // return dynData->calcIC(getSimulationTime(), probeStepTime, solverInterface::ic_modes::fixed_diff,
             // true);
             opFlags.reset (low_bus_voltage);
 #if JAC_CHECK_ENABLED > 0
@@ -820,10 +820,10 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
     }
     if (opFlags[low_bus_voltage])
     {
-        stateData sD (getCurrentTime (), dynData->state_data (), dynData->deriv_data ());
+        stateData sD (getSimulationTime(), dynData->state_data (), dynData->deriv_data ());
 
         rootCheck (noInputs, sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
-        // return dynData->calcIC(getCurrentTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+        // return dynData->calcIC(getSimulationTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
         opFlags.reset (low_bus_voltage);
     }
     // Do the first cut guessState at the solution
@@ -910,10 +910,10 @@ int gridDynSimulation::generatePartitionedDynamicInitialConditions (const solver
     }
     if (opFlags[low_bus_voltage])
     {
-        /*stateData sD(getCurrentTime(), dynData->state_data(), dynData->deriv_data());
+        /*stateData sD(getSimulationTime(), dynData->state_data(), dynData->deriv_data());
 
         rootCheck(&sD, dynData->getSolverMode(), check_level_t::low_voltage_check);
-        //return dynData->calcIC(getCurrentTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+        //return dynData->calcIC(getSimulationTime(), probeStepTime, solverInterface::ic_modes::fixed_diff, true);
         opFlags.reset(low_bus_voltage);
         */
     }

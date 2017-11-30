@@ -179,6 +179,8 @@ set(load_headers
 	loads/fileLoad.h
 	loads/fDepLoad.h
 	loads/motorLoad.h
+	loads/motorLoad3.h
+	loads/motorLoad5.h
 	loads/gridLabDLoad.h
 	loads/svd.h
 	loads/aggregateLoad.h
@@ -195,7 +197,7 @@ set(load_sources
 	loads/motorLoad.cpp
 	loads/motorLoad3.cpp
 	loads/motorLoad5.cpp
-	loads/gridLabDLoad.cpp
+	loads/approximatingLoad.cpp
 	loads/exponentialLoad.cpp
 	loads/fDepLoad.cpp
 	loads/aggregateLoad.cpp
@@ -204,6 +206,7 @@ set(load_sources
 	loads/svd.cpp
 	loads/ThreePhaseLoad.cpp
 	loads/frequencySensitiveLoad.cpp
+	loads/gridLabDLoad.cpp
 	)
 
 set (link_headers
@@ -234,7 +237,7 @@ set(link_sources
 set(simulation_headers
 	simulation/contingency.h
 	simulation/continuation.h
-	griddyn.h
+	gridDynSimulation.h
 	simulation/gridSimulation.h
 	simulation/diagnostics.h
 	simulation/powerFlowErrorRecovery.h
@@ -279,6 +282,7 @@ set(solver_sources
 	solvers/kinsolInterface.cpp
 	solvers/solverInterface.cpp
 	solvers/basicSolver.cpp
+	solvers/sundialsMatrixData.cpp
 	solvers/sundialsMatrixDataDense.cpp
 	solvers/sundialsMatrixDataSparseRow.cpp
 	solvers/sundialsMatrixDataSparseColumn.cpp
@@ -507,7 +511,6 @@ set(header_files
 	${generator_headers}
 	)
 
-
 add_library(griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} ${primary_sources} ${sublibrary_files})
 
 source_group("loads" FILES ${load_sources})
@@ -531,14 +534,14 @@ source_group("solvers" FILES ${solver_sources})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIRS})
 
+target_include_directories(griddyn PRIVATE ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
 #create a griddyn_config.h file for program options
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h)
-INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn-config.h DESTINATION include/griddyn)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h DESTINATION include/griddyn)
 
 INSTALL(TARGETS griddyn
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
-
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DESTINATION include

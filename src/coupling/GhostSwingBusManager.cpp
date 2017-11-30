@@ -93,9 +93,7 @@ GhostSwingBusManager::GhostSwingBusManager (int* argc, char **argv[])
   return;
 }
 
-GhostSwingBusManager::~GhostSwingBusManager ()
-{
-}
+GhostSwingBusManager::~GhostSwingBusManager() = default;
 
 // for Transmission
 int GhostSwingBusManager::createGridlabDInstance (string arguments)

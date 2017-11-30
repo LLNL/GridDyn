@@ -80,7 +80,7 @@ void loadMFile (coreObject *parentObject, const std::string &fileName, const bas
                     }
                     else
                     {
-                        std::cout << "I don't know what this file is\n";
+                        std::cout << "unrecognized file structure\n";
                     }
                 }
                 else
@@ -92,7 +92,7 @@ void loadMFile (coreObject *parentObject, const std::string &fileName, const bas
                     }
                     else
                     {
-                        std::cout << "I don't know what this file is\n";
+                        std::cout << "unrecognized file structure\n";
                     }
                 }
             }

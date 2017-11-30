@@ -12,7 +12,7 @@
 
 
 #include "core/coreExceptions.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "solvers/solverInterface.h"
 #include "testHelper.h"
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE (test_iterated_pflow)
 	gds->consolePrintLevel = print_level::no_print;
     gds->set ("recorddirectory", pFlow_test_directory);
     gds->run ();
-    BOOST_REQUIRE_GT (gds->getCurrentTime (),575.0);
+    BOOST_REQUIRE_GT (gds->getSimulationTime(),575.0);
 }
 
 
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(pflow_test_single_breaker)
 
 	
 	gds->run(5.0);
-	BOOST_CHECK_GE(static_cast<double>(gds->getCurrentTime()), 5.0);
+	BOOST_CHECK_GE(static_cast<double>(gds->getSimulationTime()), 5.0);
 	//gds->timestep(2.05,noInputs,cPflowSolverMode);
 	//runJacobianCheck(gds, cPflowSolverMode);
 	requireState(gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);

@@ -12,16 +12,12 @@
 
 #include "gridSubModel.h"
 #include "measurement/objectGrabbers.h"
-#include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include <cstdio>
-#include <iostream>
 
 namespace griddyn
 {
 gridSubModel::gridSubModel (const std::string &objName) : gridComponent (objName)
 {
-    opFlags.set (no_pflow_states);
+    opFlags.set (no_powerflow_operations);
     m_outputSize = 1;
 }
 
@@ -44,7 +40,7 @@ void gridSubModel::dynInitializeA (coreTime time, std::uint32_t flags)
         }
         else
         {
-            loadSizes (cLocalSolverMode);
+            loadStateSizes (cLocalSolverMode);
         }
 
         so.setOffset (0);

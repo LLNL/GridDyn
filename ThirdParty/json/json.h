@@ -1,4 +1,4 @@
-/// Json_gd-cpp amalgated header (http://jsoncpp.sourceforge.net/).
+/// Json-cpp amalgated header (http://jsoncpp.sourceforge.net/).
 /// It is intended to be used with #include "json/json.h"
 
 // //////////////////////////////////////////////////////////////////////
@@ -10,13 +10,13 @@ The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The JsonCpp Authors explicitly disclaim copyright in all 
+Baptiste Lepilleur and The JsonCpp Authors explicitly disclaim copyright in all 
 jurisdictions which recognize such a disclaimer. In such jurisdictions, 
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
-2010), this software is Copyright (c) 2007-2010 by The JsonCpp Authors, and is
-released under the terms of the MIT License (see below).
+2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur and
+The JsonCpp Authors, and is released under the terms of the MIT License (see below).
 
 In jurisdictions which recognize Public Domain property, the user of this 
 software may choose to accept it either as 1) Public Domain, 2) under the 
@@ -31,7 +31,7 @@ described in clear, concise terms at:
 The full text of the MIT License follows:
 
 ========================================================================
-Copyright (c) 2007-2010 The JsonCpp Authors
+Copyright (c) 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -87,10 +87,10 @@ license you like.
 #ifndef JSON_VERSION_H_INCLUDED
 # define JSON_VERSION_H_INCLUDED
 
-# define JSONCPP_VERSION_STRING "1.8.1"
+# define JSONCPP_VERSION_STRING "1.8.3"
 # define JSONCPP_VERSION_MAJOR 1
 # define JSONCPP_VERSION_MINOR 8
-# define JSONCPP_VERSION_PATCH 1
+# define JSONCPP_VERSION_PATCH 3
 # define JSONCPP_VERSION_QUALIFIER
 # define JSONCPP_VERSION_HEXA ((JSONCPP_VERSION_MAJOR << 24) | (JSONCPP_VERSION_MINOR << 16) | (JSONCPP_VERSION_PATCH << 8))
 
@@ -116,7 +116,7 @@ license you like.
 // Beginning of content of file: include/json/config.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -172,7 +172,7 @@ license you like.
 #define JSON_API
 #endif
 
-// If JSON_NO_INT64 is defined, then Json_gd only support C++ "int" type for
+// If JSON_NO_INT64 is defined, then Json only support C++ "int" type for
 // integer
 // Storages, and 64 bits integer support is disabled.
 // #define JSON_NO_INT64 1
@@ -202,19 +202,15 @@ license you like.
 #if __cplusplus >= 201103L
 # define JSONCPP_OVERRIDE override
 # define JSONCPP_NOEXCEPT noexcept
-# define JSONCPP_FALLTHROUGH [[fallthrough]];
 #elif defined(_MSC_VER) && _MSC_VER > 1600 && _MSC_VER < 1900
 # define JSONCPP_OVERRIDE override
 # define JSONCPP_NOEXCEPT throw()
-# define JSONCPP_FALLTHROUGH //fallthrough
 #elif defined(_MSC_VER) && _MSC_VER >= 1900
 # define JSONCPP_OVERRIDE override
 # define JSONCPP_NOEXCEPT noexcept
-# define JSONCPP_FALLTHROUGH //fallthrough
 #else
 # define JSONCPP_OVERRIDE
 # define JSONCPP_NOEXCEPT throw()
-# define JSONCPP_FALLTHROUGH //fallthrough
 #endif
 
 #ifndef JSON_HAS_RVALUE_REFERENCES
@@ -242,6 +238,9 @@ license you like.
 #endif
 
 #ifdef __clang__
+#  if __has_extension(attribute_deprecated_with_message)
+#    define JSONCPP_DEPRECATED(message)  __attribute__ ((deprecated(message)))
+#  endif
 #elif defined __GNUC__ // not clang (gcc comes later since clang emulates gcc)
 #  if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #    define JSONCPP_DEPRECATED(message)  __attribute__ ((deprecated(message)))
@@ -318,7 +317,7 @@ typedef UInt64 LargestUInt;
 // Beginning of content of file: include/json/forwards.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -369,13 +368,10 @@ class ValueConstIterator;
 // Beginning of content of file: include/json/features.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
-
-//This code was customized for use in GridDyn by modifying the namespace to prevent static compilation issues
-// and fixing a few other warnings by LLNL 2017
 
 #ifndef CPPTL_JSON_FEATURES_H_INCLUDED
 #define CPPTL_JSON_FEATURES_H_INCLUDED
@@ -447,7 +443,7 @@ public:
 // Beginning of content of file: include/json/value.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -639,6 +635,9 @@ public:
   typedef Json_gd::LargestUInt LargestUInt;
   typedef Json_gd::ArrayIndex ArrayIndex;
 
+  // Required for boost integration, e. g. BOOST_TEST
+  typedef std::string value_type;
+
   static const Value& null;  ///< We regret this reference to a global instance; prefer the simpler Value().
   static const Value& nullRef;  ///< just a kludge for binary-compatibility; same as null
   static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
@@ -776,10 +775,7 @@ Json_gd::Value obj_value(Json_gd::objectValue); // {}
 
   /// Deep copy, then swap(other).
   /// \note Over-write existing comments. To preserve comments, use #swapPayload().
-  Value& operator=(const Value& other);
-#if JSON_HAS_RVALUE_REFERENCES
-  Value& operator=(Value&& other);
-#endif
+  Value& operator=(Value other);
 
   /// Swap everything.
   void swap(Value& other);
@@ -808,7 +804,7 @@ Json_gd::Value obj_value(Json_gd::objectValue); // {}
 #endif
   JSONCPP_STRING asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
-   *  @return false if !string. (Seg-fault if str or end are NULL.)
+   *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
   bool getString(
       char const** begin, char const** end) const;
@@ -961,20 +957,20 @@ Json_gd::Value obj_value(Json_gd::objectValue); // {}
   Value const* find(char const* begin, char const* end) const;
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
-  /// @return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
+  /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
   Value const* demand(char const* begin, char const* end);
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
-  /// @return the removed Value, or null.
+  /// \return the removed Value, or null.
   /// \pre type() is objectValue or nullValue
   /// \post type() is unchanged
   /// \deprecated
-  Value removeMember(const char* key);
+  void removeMember(const char* key);
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
   /// \deprecated
-  Value removeMember(const JSONCPP_STRING& key);
+  void removeMember(const JSONCPP_STRING& key);
   /// Same as removeMember(const char* begin, const char* end, Value* removed),
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Value* removed);
@@ -982,7 +978,7 @@ Json_gd::Value obj_value(Json_gd::objectValue); // {}
 
       Update 'removed' iff removed.
       \param key may contain embedded nulls.
-      @return true iff removed (no exceptions)
+      \return true iff removed (no exceptions)
   */
   bool removeMember(JSONCPP_STRING const& key, Value* removed);
   /// Same as removeMember(JSONCPP_STRING const& key, Value* removed)
@@ -991,7 +987,7 @@ Json_gd::Value obj_value(Json_gd::objectValue); // {}
 
       O(n) expensive operations.
       Update 'removed' iff removed.
-      @return true iff removed (no exceptions)
+      \return true iff removed (no exceptions)
   */
   bool removeIndex(ArrayIndex i, Value* removed);
 
@@ -1349,7 +1345,7 @@ inline void swap(Json_gd::Value& a, Json_gd::Value& b) { a.swap(b); }
 // Beginning of content of file: include/json/reader.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -1383,7 +1379,7 @@ namespace Json_gd {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
-class JSON_API Reader {
+class JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead") JSON_API Reader {
 public:
   typedef char Char;
   typedef const Char* Location;
@@ -1421,7 +1417,7 @@ public:
    *                        This parameter is ignored if
    * Features::allowComments_
    *                        is \c false.
-   * @return \c true if the document was successfully parsed, \c false if an
+   * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
   bool
@@ -1442,7 +1438,7 @@ public:
    *                        This parameter is ignored if
    Features::allowComments_
    *                        is \c false.
-   * @return \c true if the document was successfully parsed, \c false if an
+   * \return \c true if the document was successfully parsed, \c false if an
    error occurred.
    */
   bool parse(const char* beginDoc,
@@ -1456,7 +1452,7 @@ public:
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
-   * @return Formatted error message with the list of errors with their location
+   * \return Formatted error message with the list of errors with their location
    * in
    *         the parsed document. An empty string is returned if no error
    * occurred
@@ -1468,7 +1464,7 @@ public:
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
-   * @return Formatted error message with the list of errors with their location
+   * \return Formatted error message with the list of errors with their location
    * in
    *         the parsed document. An empty string is returned if no error
    * occurred
@@ -1477,7 +1473,7 @@ public:
   JSONCPP_STRING getFormattedErrorMessages() const;
 
   /** \brief Returns a vector of structured erros encounted while parsing.
-   * @return A (possibly empty) vector of StructuredError objects. Currently
+   * \return A (possibly empty) vector of StructuredError objects. Currently
    *         only one error can be returned, but the caller should tolerate
    * multiple
    *         errors.  This can occur if the parser recovers from a non-fatal
@@ -1488,7 +1484,7 @@ public:
   /** \brief Add a semantic error message.
    * \param value JSON Value location associated with the error
    * \param message The error message.
-   * @return \c true if the error was successfully added, \c false if the
+   * \return \c true if the error was successfully added, \c false if the
    * Value offset exceeds the document size.
    */
   bool pushError(const Value& value, const JSONCPP_STRING& message);
@@ -1497,13 +1493,13 @@ public:
    * \param value JSON Value location associated with the error
    * \param message The error message.
    * \param extra Additional JSON Value location to contextualize the error
-   * @return \c true if the error was successfully added, \c false if either
+   * \return \c true if the error was successfully added, \c false if either
    * Value offset exceeds the document size.
    */
   bool pushError(const Value& value, const JSONCPP_STRING& message, const Value& extra);
 
   /** \brief Return whether there are any errors.
-   * @return \c true if there are no errors to report \c false if
+   * \return \c true if there are no errors to report \c false if
    * errors have occurred.
    */
   bool good() const;
@@ -1581,6 +1577,9 @@ private:
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
+  static bool containsNewLine(Location begin, Location end);
+  static JSONCPP_STRING normalizeEOL(Location begin, Location end);
+
   typedef std::stack<Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
@@ -1614,7 +1613,7 @@ public:
    * \param errs [out] Formatted error messages (if not NULL)
    *        a user friendly string that lists errors in the parsed
    * document.
-   * @return \c true if the document was successfully parsed, \c false if an
+   * \return \c true if the document was successfully parsed, \c false if an
    error occurred.
    */
   virtual bool parse(
@@ -1690,7 +1689,7 @@ public:
 
   CharReader* newCharReader() const JSONCPP_OVERRIDE;
 
-  /** @return true if 'settings' are legal and consistent;
+  /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json_gd::Value* invalid) const;
@@ -1771,7 +1770,7 @@ JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 // Beginning of content of file: include/json/writer.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -1788,7 +1787,7 @@ JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
-#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING) && defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
@@ -1821,7 +1820,7 @@ public:
   /** Write Value into document as configured in sub-class.
       Do not take ownership of sout, but maintain a reference during function.
       \pre sout != NULL
-      @return zero on success (For now, we always return zero, so check the stream instead.)
+      \return zero on success (For now, we always return zero, so check the stream instead.)
       \throw std::exception possibly, depending on configuration
    */
   virtual int write(Value const& root, JSONCPP_OSTREAM* sout) = 0;
@@ -1894,7 +1893,7 @@ public:
    */
   StreamWriter* newStreamWriter() const JSONCPP_OVERRIDE;
 
-  /** @return true if 'settings' are legal and consistent;
+  /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json_gd::Value* invalid) const;
@@ -1913,7 +1912,7 @@ public:
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
-class JSON_API Writer {
+class JSONCPP_DEPRECATED("Use StreamWriter instead") JSON_API Writer {
 public:
   virtual ~Writer();
 
@@ -1929,8 +1928,11 @@ public:
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */
-class JSON_API FastWriter : public Writer {
-
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
+#endif
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
 public:
   FastWriter();
   ~FastWriter() JSONCPP_OVERRIDE {}
@@ -1957,6 +1959,9 @@ private:
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
 };
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  *human friendly way.
@@ -1982,7 +1987,11 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
-class JSON_API StyledWriter : public Writer {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
+#endif
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
   ~StyledWriter() JSONCPP_OVERRIDE {}
@@ -1990,7 +1999,7 @@ public:
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
-   * @return String containing the JSON document that represents the root value.
+   * \return String containing the JSON document that represents the root value.
    */
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
@@ -2017,6 +2026,9 @@ private:
   unsigned int indentSize_;
   bool addChildValues_;
 };
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  human friendly way,
@@ -2040,12 +2052,18 @@ private:
  * If the Value have comments then they are outputed according to their
  #CommentPlacement.
  *
- * \param indentation Each level will be indented by this amount extra.
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
-class JSON_API StyledStreamWriter {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
+#endif
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledStreamWriter {
 public:
+/**
+ * \param indentation Each level will be indented by this amount extra.
+ */
   StyledStreamWriter(JSONCPP_STRING indentation = "\t");
   ~StyledStreamWriter() {}
 
@@ -2082,6 +2100,9 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(Int value);
@@ -2120,7 +2141,7 @@ JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 // Beginning of content of file: include/json/assertions.h
 // //////////////////////////////////////////////////////////////////////
 
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE

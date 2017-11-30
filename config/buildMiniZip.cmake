@@ -10,7 +10,7 @@ include(escape_string)
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
 	
-	escape_string(zlib_includes_string ${ZLIB_INCLUDES})
+	escape_string(zlib_includes_string ${ZLIB_ROOT_DIR})
 	
 	escape_string(binary_dir_string ${CMAKE_BINARY_DIR})
 	
@@ -33,9 +33,9 @@ ExternalProject_Add(minizip
 	 
     CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX=${binary_dir_string}/libs
-        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
 		-DCMAKE_MODULE_PATH=${project_src_dir_string}/config
-		-DZLIB_INCLUDES=${zlib_includes_string}
+		-DZLIB_LOCATION=${zlib_includes_string}
 		-DCMAKE_C_COMPILER=${c_compiler_string}
 		-DCMAKE_LINKER=${linker_string}
 		
@@ -52,9 +52,11 @@ message(STATUS ${trigger_build_dir})
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_release.log
         )
     execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release
         WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_build_release.log
         )
 
 endfunction()

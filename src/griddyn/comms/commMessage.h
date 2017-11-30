@@ -33,12 +33,13 @@ namespace griddyn
 class commMessage
 {
 public:
+	/** define the most basic of message types*/
 	enum comm_message_type_t:std::uint32_t
 	{
-		ignoreMessageType = 0,
-		pingMessageType = 1,
-		replyMessageType = 2,
-		unknownMessageType = 0xFFFFFFFF,
+		ignoreMessageType = 0, //!< a message that can be ignored
+		pingMessageType = 1,	//!< a message sending a ping
+		replyMessageType = 2,	//!< a message responding to a ping
+		unknownMessageType = 0xFFFFFFFF,	//!< I don't know what this message means
   };
 	//default constructor
 	commMessage() noexcept = default;
@@ -46,29 +47,36 @@ public:
   commMessage (std::uint32_t type) : m_messageType (type)
   {
   }
+  /** virtual destructor*/
   virtual ~commMessage() = default;
   /** get the message type*/
   std::uint32_t getMessageType(void) const
   {
 	  return m_messageType;
   }
+  /** explicitly set the message type of a message object*/
   virtual void setMessageType (std::uint32_t type)
   {
     m_messageType = type;
   }
+  /** an enumeration describing some options for converting a message to a string*/
   enum comm_modifiers
   {
 	  none = 0,
 	  with_type=1,
   };
+  /** generate a string describing the message*/
   virtual std::string to_string (int modifiers=comm_modifiers::none) const;
+  /** load a message definition from a string*/
   virtual void loadString (const std::string &fromString);
-
+  /** extract the type of the message from a string
+  @param[in] messageString the message string to extract the type from*/
   static std::uint32_t extractMessageType(const std::string &messageString);
 protected:
+	/** do an encoding on the type to place it into a string*/
 	std::string encodeTypeInString() const;
 private:
-  std::uint32_t m_messageType = ignoreMessageType;
+  std::uint32_t m_messageType = ignoreMessageType; //!< the actual type of the message
 
   //add the boost serialization stuff
   friend class boost::serialization::access;
@@ -80,24 +88,30 @@ private:
 };
 
 
-// class definitions for the message factories that can create the message
-//cFactory is a virtual base class for message Construction functions
+/** class definitions for the message factories that can create the message
+messageFactory is a virtual base class for message Construction functions
+*/
 class messageFactory
 {
 public:
-  std::string  name;
+  std::string  name; //!< the name of the factory
+  /** constructor taking the name as an argument*/
   explicit messageFactory (const std::string & typeName) : name (typeName)
   {
   }
+  /** virtual destructor*/
   virtual ~messageFactory() = default;
 
+  /** build a default message*/
   virtual std::unique_ptr<commMessage> makeMessage () = 0;
+  /** make a message of a specific type*/
   virtual std::unique_ptr<commMessage> makeMessage (std::uint32_t) = 0;
-  
+  /** check if a given message type is within the valid range of a specific message object*/
   virtual bool inRange (std::uint32_t) const
   {
     return true;
   }
+
   virtual std::uint32_t range () const
   {
     return 0xFFFFFFF0;
@@ -114,16 +128,33 @@ typedef std::unordered_map<std::string, messageFactory*> mfMap;
 class coreMessageFactory
 {
 public:
+	/** destructor*/
   ~coreMessageFactory ();
+  /** get a pointer to the underlying factory*/
   static std::shared_ptr<coreMessageFactory> instance ();
+  /** insert a factory in the coreMessageFactory
+  @param[in] name the string used to find the message factory in subsequant operations
+  @param[in] mf pointer to a message factory to store in the core factory*/
   void registerFactory (std::string name, messageFactory *mf);
+  /** insert a factory in the coreMessageFactory
+  @param[in] mf pointer to a message factory to store in the core factory*/
   void registerFactory (messageFactory *mf);
+  /** get a list of all the valid message types*/
   std::vector<std::string> getMessageTypeNames ();
+  /** build a default message of the type defined in messageType*/
   std::unique_ptr<commMessage> createMessage (const std::string &messageType);
+  /** build a default message of the type defined in messageType
+  @param messageType string describing the class of messages
+  @param type the specific message code for the message*/
   std::unique_ptr<commMessage> createMessage (const std::string &messageType, std::uint32_t type);
+  /** build a message of the specific type, deriving the general type from the valid ranges of specific types defining in the factory
+  @param type the specific message code for the message*/
   std::unique_ptr<commMessage> createMessage (std::uint32_t type);
+  /** get a pointer to a specific factory*/
   messageFactory * getFactory (const std::string &factoryName);
+  /** get a pointer to a factory that builds a specific type of message*/
   messageFactory * getFactory (std::uint32_t type);
+  /** check if a string represents a valid message class*/
   bool isValidMessage (const std::string &messageType);
 private:
 	/** private constructor defined in a singleton class*/
@@ -157,11 +188,12 @@ public:
     std::unique_ptr<commMessage> cm = std::make_unique<Messagetype> (mtype);
     return cm;
   }
-
-  std::unique_ptr<Messagetype> makeTypeMessage () 
+  /** default generator for a specific instantiation of a message factory*/
+  std::unique_ptr<Messagetype> makeTypeMessage ()
   {
     return(std::make_unique<Messagetype> ());
   }
+  /** make a message of the specific type*/
   std::unique_ptr<Messagetype> makeTypeMessage (std::uint32_t mtype)
   {
     return(std::make_unique<Messagetype> (mtype));

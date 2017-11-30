@@ -56,24 +56,25 @@ void eventQueue::nullEventTime (coreTime time, coreTime period)
 
 coreTime eventQueue::getNullEventTime () const { return nullEvent->m_nextTime; }
 
-
-std::unique_ptr<eventQueue> eventQueue::clone (eventQueue *eQ) const
+std::unique_ptr<eventQueue> eventQueue::clone() const
 {
-	std::unique_ptr<eventQueue> newQueue = (eQ != nullptr) ? nullptr : std::make_unique<eventQueue>();
-	auto cloneQ = (eQ != nullptr) ? eQ : newQueue.get();
+	auto eq = std::make_unique<eventQueue>();
+	eventQueue::cloneTo(eq.get());
+	return eq;
+}
 
-    nullEvent->clone (cloneQ->nullEvent);
+void eventQueue::cloneTo (eventQueue *eQ) const
+{
+    nullEvent->cloneTo (eQ->nullEvent.get());
     for (auto &ev : events)
     {
-        if (ev == nullEvent)  // we dealt with the nullEvent separately
+        if (ev == nullEvent)  // we dealt with the nullEvent already
         {
             continue;
         }
-        cloneQ->insert (ev->clone ());
+        eQ->insert (ev->clone ());
     }
-    cloneQ->timeTols = timeTols;
-
-    return newQueue;
+    eQ->timeTols = timeTols;
 }
 
 void eventQueue::mapObjectsOnto (coreObject *newRootObject)

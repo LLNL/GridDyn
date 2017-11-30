@@ -29,7 +29,7 @@
    </event>
    <timestart>0</timestart>
    <timestop>10</timestop>
-<recorder field="auto,bus2::gen1:angle(deg)" period=0.01>
+<recorder field="auto,bus2::gen1:angle(deg)" period="0.01">
    <file>faulttest.dat</file>
    </recorder>
 </griddyn>

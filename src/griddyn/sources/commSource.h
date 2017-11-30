@@ -30,12 +30,12 @@ protected:
 	std::shared_ptr<Communicator> commLink;       //!<communicator link
 	gridSimulation *rootSim = nullptr;		//!< pointer to the root simulation
 	comms::commManager cManager;		//!< comm manager object to build and manage the comm link
-	double maxRamp = kBigNum;	//!< the maximum rate of change of the source
+	parameter_t maxRamp = kBigNum;	//!< the maximum rate of change of the source
 public:
 	enum commSourceFlags
 	{
-		useRamp = object_flag3,
-		no_message_reply = object_flag4,
+		useRamp = object_flag3,	//!< indicator that the output should be interpolated
+		no_message_reply = object_flag4,	//!< indicator that there should be no repsonse to commands
 	};
 	commSource(const std::string &objName = "commSource_#");
 

@@ -32,7 +32,7 @@ class violation;
 /** @brief base object for gridDynSimulations
 * the basic object for creating a power system encapsulating some common functions and data that is needed by all objects in the simulation
 * and defining some common methods for use by all objects.  This object is not really intended to be instantiated directly and is mostly a
-* common interface to inheriting objects ::gridPrimary, ::gridSecondary, and ::gridSubModel as it encapsulated common functionality between those objects
+* common interface to inheriting objects @see gridPrimary, @see gridSecondary, and @see gridSubModel as it encapsulated common functionality between those objects
 **/
 class gridComponent : public coreObject
 {
@@ -44,7 +44,7 @@ protected:
 	count_t m_outputSize = 0;            //!< the number of outputs the subModel produces
 	parameter_t systemBaseFrequency = kWS;              //!<[radians per second] the base frequency of the system default to 60Hz
 	parameter_t systemBasePower = 100;		//!<[MVA] base power for all PU computations 
-    
+	parameter_t localBaseVoltage = kNullVal;  //!< [kV] base voltage for object
   
   std::vector<double> m_state;              //!<storage location for internal state
   std::vector<double> m_dstate_dt;             //!<storage location for internal state differential
@@ -321,11 +321,23 @@ public:
   */
   const solverOffsets &getOffsets(const solverMode &sMode) const;
 
-  /** @brief checks if the object is loaded
+  /** @brief checks if the object state sizes are loaded
   @param[in] sMode  the solverMode to get the stateSize for
   @return boolean true if the object is loaded false if not
   */
-  bool isLoaded (const solverMode &sMode, bool dynOnly) const;
+  bool isStateCountLoaded (const solverMode &sMode) const;
+
+  /** @brief checks if the object state sizes are loaded
+  @param[in] sMode  the solverMode to get the stateSize for
+  @return boolean true if the object is loaded false if not
+  */
+  bool isJacobianCountLoaded(const solverMode &sMode) const;
+
+  /** @brief checks if the object state sizes are loaded
+  @param[in] sMode  the solverMode to get the stateSize for
+  @return boolean true if the object is loaded false if not
+  */
+  bool isRootCountLoaded(const solverMode &sMode) const;
   /** @brief convenience function for checking armed status
   @return boolean true if the object is armed false if not
   */
@@ -348,23 +360,58 @@ public:
   */
   virtual void disconnect ();
 
+  virtual void alert(coreObject *, int code) override;
+
   /** @brief common function to load some flags appropriate to pFlow.
   */
   void setupPFlowFlags ();
   /** @brief common function to load some flags appropriate to dynamic simulation.
   */
   void setupDynFlags ();
-  /** @brief compute the sizes and store them in the offsetTables.
-  @param sMode the optimization mode to use.
-  @param dynOnly set to true if only the dynamic conditions are of concern
+  /** @brief compute the local sizes
+  @param sMode the solver mode to use.
+  @return a stateSizes object containing the various segment sizes
   */
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly = false);
+  virtual stateSizes LocalStateSizes(const solverMode &sMode) const;
+
+  /** @brief compute the local jacobian count
+  @param sMode the solver mode to use.
+  @return a stateSizes object containing the various segment sizes
+  */
+  virtual count_t LocalJacobianCount(const solverMode &sMode) const;
+
+  /** @brief compute the local root count
+  @param sMode the solver mode to use.
+  @return a pair containing the local root counts <algebraic, differential>
+  */
+  virtual std::pair<count_t,count_t> LocalRootCount(const solverMode &sMode) const;
+
+  /** @brief compute the sizes and store them in the offsetTables.
+  @param sMode the solver mode to use.
+  */
+  virtual void loadStateSizes (const solverMode &sMode);
+  /** @brief compute the sizes and store them in the offsetTables.
+  @param sMode the solver mode to use.
+  */
+  virtual void loadJacobianSizes(const solverMode &sMode);
+
+  /** @brief compute the sizes and store them in the offsetTables.
+  @param sMode the solver mode to use.
+  */
+  virtual void loadRootSizes(const solverMode &sMode);
+  protected:
+	  enum class sizeCategory
+	  {
+		  state_size_update,
+		  jacobian_size_update,
+		  root_size_update,
+	};
   /** @brief compute the sizes of the subObject and store them in the offsetTables.
   @param sMode the solver mode to use.
   @param dynOnly set to true if only the dynamic conditions are of concern
   */
-  void loadSizesSub (const solverMode &sMode, bool dynOnly);
- 
+  void loadSizesSub (const solverMode &sMode, sizeCategory category);
+ public:
 
   /** @brief reset the object
   * reset any internal states to a base level depending on the level
@@ -416,6 +463,7 @@ public:
   @param[in] dynamics  if true only do so for flags corresponding to dynamic solution
   */
   virtual void updateFlags (bool dynamicsFlags = true);
+
   /** @brief get the names for all the states
   @param[out] stNames -- the output state names
   @param[in] sMode  -- the solverMode corresponding to the computed state.
@@ -465,7 +513,17 @@ public:
   @return a unit value corresponding to the particular output*/
   virtual gridUnits::units_t outputUnits(index_t outputNum) const;
 
+  /** get the systemBasePower*/
+  parameter_t basePower() const
+  {
+	  return systemBasePower;
+  }
 
+  /** get the localBaseVoltage*/
+  parameter_t baseVoltage() const
+  {
+	  return localBaseVoltage;
+  }
   /** @brief get a vector of output Names
   @details the return data is a vector of vectors of string the first element of each vector is the typical output Name the others are alternatives
   @return a const vector of stringVec containing the names +alternatives for the outputs*/
@@ -570,7 +628,7 @@ public:
   /**
   *a root has occurred now take action
   * @param[in] time the simulation time the root evaluation takes place
-  @param[in] a vector of integers representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
+  @param[in] rootMask a vector of integers representing a rootMask  (only object having a value of 1 in their root locations should actually trigger
   * @param[in] rootMask an integer array the same size as roots where a 1 indicates a root has been found
   * @param[in] sMode the mode the solver is in
   **/

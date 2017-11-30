@@ -14,7 +14,7 @@
 #include "core/objectFactory.hpp"
 #include "fileInput.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "helicsCoordinator.h"
 #include "helicsLibrary.h"
 #include "helicsLoad.h"
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE (load_helics_xml)
     BOOST_REQUIRE (dynamic_cast<helicsSource *> (obj) != nullptr);
     // as a note sources are source with respect to GridDyn not HELICS
     auto src = static_cast<helicsSource *> (obj);
-
+	BOOST_REQUIRE(src != nullptr);
     src->set ("valkey", "sourceValue");
     src->set ("period", 2);
     src->set ("value", 0.4);

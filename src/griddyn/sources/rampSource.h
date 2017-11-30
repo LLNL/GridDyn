@@ -25,7 +25,7 @@ namespace sources
 class rampSource : public Source
 {
 protected:
-	double mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output
+	parameter_t mp_dOdt = 0.0;  //!< [1/s] the ramp rate of the output
 public:
 	rampSource(const std::string &objName = "rampSource_#", double startVal = 0.0);
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;

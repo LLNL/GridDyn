@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "relays/zonalRelay.h"
 #include "relays/pmu.h"
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE (test_bus_relay)
     simpleRunTestXML (fileName);
 }
 
-#ifdef ENABLE_EXPERIMENTAL_TEST_CASES
+
 BOOST_AUTO_TEST_CASE (test_differential_relay)
 {
     std::string fileName = std::string (RELAY_TEST_DIRECTORY "test_differential_relay.xml");
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE (test_differential_relay)
     BOOST_CHECK_EQUAL (static_cast<gridComponent *> (obj)->isConnected (), false);
     requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
-#endif
+
 
 
 BOOST_AUTO_TEST_CASE (test_control_relay)

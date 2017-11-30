@@ -11,7 +11,7 @@
 */
 
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "simulation/diagnostics.h"
 #include "simulation/gridDynSimulationFileOps.h"
@@ -37,10 +37,10 @@ static const std::string validationTestDirectory (GRIDDYN_TEST_DIRECTORY "/valid
 
 BOOST_AUTO_TEST_CASE (performance_tests1)
 {
-    /* *INDENT-OFF* */
+    
     const stringVec perf_cases{"case1354pegase.m", "case2869pegase.m", "case3012wp.m", "case3375wp.m",
                                "case9241pegase.m"};
-    /* *INDENT-ON* */
+    
     std::chrono::duration<double> pflow_time (0);
     std::chrono::duration<double> load_time (0);
     for (const auto &mp : perf_cases)
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE (performance_tests_scaling_pFlow)
         3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  14,  16,  18,  20,  24,  28,  32,
         36,  40,  45,  50,  56,  60,  66,  70,  74,  80,  84,  86,  88,  90,  92,  100, 110,
         120, 132, 136, 140, 148, 156, 164, 168, 172, 180, 188, 196, 204, 212, 218, 220, 224,
-        230, 240, 244, 250, 260, 270, 318, 340, 360, 400, 450, 500, 550, 600, /*720,800*/
+        230, 240, 244, 250, 260, 270, 318, 340, 360, 400, /*450, 500, 550, 600, 720,800*/
       };
     int numLoops = 1;
     for (int rr = 0; rr < numLoops; ++rr)

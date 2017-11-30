@@ -305,7 +305,7 @@ count_t fileLoad::loadFile ()
         if (inputUnits != gridUnits::defUnit)
         {
             double scalar =
-              gridUnits::unitConversion (1.0, inputUnits, gridUnits::puMW, systemBasePower, baseVoltage);
+              gridUnits::unitConversion (1.0, inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
             if (scalar != 1.0)
             {
                 schedLoad.scaleData (scalar);

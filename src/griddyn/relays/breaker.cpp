@@ -35,7 +35,6 @@ using namespace gridUnits;
 breaker::breaker (const std::string &objName) : Relay (objName),useCTI(extra_bool)
 {
     opFlags.set (continuous_flag);
-    opFlags.reset (no_dyn_states);
 }
 
 coreObject *breaker::clone (coreObject *obj) const
@@ -270,16 +269,23 @@ void breaker::updateA (coreTime time)
     lastUpdateTime = time;
 }
 
-void breaker::loadSizes (const solverMode &sMode, bool dynOnly)
+stateSizes breaker::LocalStateSizes(const solverMode &sMode) const
 {
-    Relay::loadSizes (sMode, dynOnly);
-    auto &so = offsets.getOffsets (sMode);
+	stateSizes SS;
+	if ((!isAlgebraicOnly(sMode)) && (recloserTap > 0))
+	{
+		SS.diffSize = 1;
+	}
+	return SS;
+}
 
-    if ((!isAlgebraicOnly (sMode)) && (recloserTap > 0))
-    {
-        so.total.diffSize = 1;
-        so.total.jacSize = 12;
-    }
+count_t breaker::LocalJacobianCount(const solverMode &sMode) const
+{
+	if ((!isAlgebraicOnly(sMode)) && (recloserTap > 0))
+	{
+		return 12;
+	}
+	return 0;
 }
 
 void breaker::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)

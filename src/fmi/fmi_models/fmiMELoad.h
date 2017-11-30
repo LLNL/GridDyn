@@ -40,8 +40,10 @@ public:
 	virtual void set (const std::string &param, const std::string &val)override;
 	virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit)override;
 	
+    virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 	virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode)override;
-
+protected:
+    IOdata outputTranslation(const IOdata &fmiOutput, const IOdata &busV);
 };
 
 }//namespace fmi

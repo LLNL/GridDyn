@@ -14,7 +14,7 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "Generator.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "links/acLine.h"
 #include "links/adjustableTransformer.h"
@@ -225,11 +225,12 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
                 busList[index]->setUserID (index);
 
                 rawReadBus (busList[index], line, opt);
-                try
+				auto tobj = parentObject->find(busList[index]->getName());
+                if (tobj==nullptr)
                 {
                     parentObject->add (busList[index]);
                 }
-                catch (const objectAddFailure &)
+				else
                 {
                     auto prevName = busList[index]->getName ();
                     busList[index]->setName (prevName + '_' +
@@ -474,13 +475,13 @@ int getPSSversion (const std::string &line)
     return ver;
 }
 
-/* *INDENT-OFF* */
 static const std::map<std::string, sections> sectionNames{
   {"BEGIN FIXED SHUNT", fixedShunt},
   {"BEGIN SWITCHED SHUNT DATA", switchedShunt},
   {"BEGIN AREA INTERCHANGE DATA", unknown},
   {"BEGIN TWO-TERMINAL DC LINE DATA", unknown},
-  {"BEGIN TRANSFORMER IMPEDNCE CORRECTION DATA", unknown},
+  {"BEGIN TRANSFORMER IMPEDANCE CORRECTION DATA", unknown},
+  { "BEGIN IMPEDANCE CORRECTION DATA", unknown },
   {"BEGIN MULTI-TERMINAL DC LINE DATA", unknown},
   {"BEGIN MULTI-SECTION LINE GROUP DATA", unknown},
   {"BEGIN ZONE DATA", unknown},
@@ -494,18 +495,22 @@ static const std::map<std::string, sections> sectionNames{
   {"BEGIN TRANSFORMER DATA", tx},
 };
 
-/* *INDENT-ON* */
 
 sections findSectionType (const std::string &line)
 {
-    size_t ts;
     for (auto &sname : sectionNames)
     {
-        ts = line.find (sname.first);
+        auto ts = line.find (sname.first);
         if (ts != std::string::npos)
         {
             return sname.second;
         }
+		auto l2 = convertToUpperCase(line);
+		ts = l2.find(sname.first);
+		if (ts != std::string::npos)
+		{
+			return sname.second;
+		}
     }
     return unknown;
 }
@@ -542,7 +547,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
     }
     bus->setName (temp2);
 
-    // get the baseVoltage
+    // get the localBaseVoltage
     bv = std::stod (strvec[2]);
     if (bv > 0.0)
     {
@@ -578,8 +583,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
         bus->disable ();
     }
     bus->set ("type", temp);
-
-    if (opt.version >= 31)
+	if (opt.version >= 31)
     {
         // skip the load flow area and loss zone for now
         // skip the owner information
@@ -763,8 +767,11 @@ void rawReadGen (Generator *gen, const std::string &line, basicReaderInfo &opt)
             gen->set ("vtarget", V);
             // for raw files the bus doesn't necessarily set a control point it comes from the generator, so we
             // have to set it here.
-            gen->getParent ()->set ("vtarget", V);
-            gen->getParent ()->set ("v", V);
+			if (!opt.checkFlag(no_generator_bus_voltage_reset))
+			{
+				gen->getParent()->set("vtarget", V);
+				gen->getParent()->set("voltage", V);
+			}
         }
         else
         {
@@ -788,15 +795,15 @@ void rawReadGen (Generator *gen, const std::string &line, basicReaderInfo &opt)
     auto x = numeric_conversion<double> (strvec[10], 0.0);
     gen->set ("xs", x);
 
-    if (!CHECK_CONTROLFLAG (opt.flags, ignore_step_up_transformer))
+    if (!opt.checkFlag(ignore_step_up_transformer))
     {
         r = numeric_conversion<double> (strvec[11], 0.0);
         x = numeric_conversion<double> (strvec[12], 0.0);
         if ((r != 0) || (x != 0))  // need to add a step up transformer
         {
-            gridBus *oBus = static_cast<gridBus *> (gen->getParent ());
+            auto oBus = static_cast<gridBus *> (gen->find("bus"));
             gridBus *nBus = busfactory->makeTypeObject ();
-            acLine *lnk =
+            auto lnk =
               new acLine (r * opt.base / mb,
                           x * opt.base /
                             mb);  // we need to adjust to the simulation base as opposed to the machine base
@@ -1183,7 +1190,7 @@ int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
     std::string name;
     int ind1, ind2;
     std::tie (name, ind1, ind2) =
-      generateBranchName (strvec, busList, (opt.prefix.empty ()) ? "tx_" : opt.prefix + "_tx_");
+      generateBranchName (strvec, busList, (opt.prefix.empty ()) ? "tx_" : opt.prefix + "_tx_",3);
 
     int ind3 = std::stoi (strvec[2]);
     int tline = 4;
@@ -1367,25 +1374,30 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     }
 
     int mode = numeric_conversion<int> (strvec[1], 0);
-    double high = numeric_conversion<double> (strvec[2], 0.0);
-    double low = numeric_conversion<double> (strvec[3], 0.0);
+	int shift = 0;
+	if (opt.version > 32)
+	{
+		shift = 2;
+	}
+    double high = numeric_conversion<double> (strvec[2+shift], 0.0);
+    double low = numeric_conversion<double> (strvec[3+shift], 0.0);
     // get the controlled bus
-    int cbus = numeric_conversion<int> (strvec[4], -1);
+    int cbus = numeric_conversion<int> (strvec[4+shift], -1);
 
     if (cbus < 0)
     {
-        trimString (strvec[4]);
-        if (strvec[4] == "I")
+        trimString (strvec[4+shift]);
+        if (strvec[4+shift] == "I")
         {
             cbus = index;
         }
-        else if (strvec[4].empty ())
+        else if (strvec[4+shift].empty ())
         {
             cbus = index;
         }
         else
         {
-            rbus = static_cast<gridBus *> (parentObject->find (strvec[4]));
+            rbus = static_cast<gridBus *> (parentObject->find (strvec[4+shift]));
             if (rbus != nullptr)
             {
                 cbus = rbus->getUserID ();
@@ -1415,7 +1427,7 @@ void rawReadSwitchedShunt (coreObject *parentObject,
             ld->setControlBus (rbus);
         }
 
-        temp = numeric_conversion<double> (strvec[5], 0.0);
+        temp = numeric_conversion<double> (strvec[5+shift], 0.0);
         if (temp > 0)
         {
             ld->set ("participation", temp / 100.0);
@@ -1429,7 +1441,7 @@ void rawReadSwitchedShunt (coreObject *parentObject,
         {
             ld->setControlBus (rbus);
         }
-        temp = numeric_conversion<double> (strvec[5], 0.0);
+        temp = numeric_conversion<double> (strvec[5+shift], 0.0);
         if (temp > 0)
         {
             ld->set ("participation", temp / 100.0);
@@ -1487,7 +1499,10 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     {
         start = 5;
     }
-
+	else if (opt.version > 32)
+	{
+		start = 9;
+	}
     size_t ksize = strvec.size () - 1;
     for (size_t kk = start + 1; kk < ksize; kk += 2)
     {

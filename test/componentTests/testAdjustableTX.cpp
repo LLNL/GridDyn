@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "links/acLine.h"
 #include "links/adjustableTransformer.h"

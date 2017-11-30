@@ -14,7 +14,7 @@
 #define OPTIONALDEFS_H_
 #pragma once
 
-#include "config.h"
+#include "griddyn/compiler-config.h"
 
 #ifdef HAVE_OPTIONAL
 #include <optional>

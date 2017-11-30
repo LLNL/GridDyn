@@ -14,7 +14,7 @@
 
 #include "core/helperObject.h"
 #include "elementReaderTemplates.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "readerHelper.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
@@ -55,7 +55,7 @@ void readImports (std::shared_ptr<readerElement> &element,
     }
 
     // run any source files
-    auto bflags = ri.flags;
+    auto bflags = ri.getFlags();
     element->bookmark ();
     element->moveToFirstChild (importString);
     while (element->isValid ())
@@ -77,7 +77,7 @@ void readImports (std::shared_ptr<readerElement> &element,
         std::string flags = getElementField (element, "flags", defMatchType);
         if (!flags.empty ())
         {
-            ri.flags = addflags (ri.flags, flags);
+            addflags (ri, flags);
         }
         std::string sourceFile = getElementField (element, "file", defMatchType);
         if (sourceFile.empty ())
@@ -115,7 +115,7 @@ void readImports (std::shared_ptr<readerElement> &element,
         }
         std::swap (prefix, ri.prefix);
 
-        ri.flags = bflags;
+        ri.setAllFlags(bflags);
         element->moveToNextSibling (importString);  // next import file
     }
     element->restore ();
@@ -313,7 +313,7 @@ void objSetAttributes (coreObject *obj,
             continue;
         }
 
-        else if (fieldName.find ("file") != std::string::npos)
+        else if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
         {
             std::string strVal = att.getText ();
             ri.checkFileParam (strVal);
@@ -394,7 +394,7 @@ void paramLoopElement (coreObject *obj,
             {
                 if (param.stringType)
                 {
-                    if (param.field.find ("file") != std::string::npos)
+                    if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
                     {
                         ri.checkFileParam (param.strVal);
                         objectParameterSet (component, obj, param);
@@ -530,7 +530,7 @@ void setAttributes (helperObject *obj,
         }
         try
         {
-            if (fieldName.find ("file") != std::string::npos)
+            if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
             {
                 std::string strVal = att.getText ();
                 ri.checkFileParam (strVal);
@@ -540,7 +540,7 @@ void setAttributes (helperObject *obj,
             else
             {
                 double val = att.getValue ();
-                if (val != kNullVal)
+                if ((val != readerNullVal)&&(val!=kNullVal))
                 {
                     LEVELPRINT (READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << val);
                     obj->set (fieldName, val);
@@ -604,7 +604,7 @@ void setParams (helperObject *obj,
             {
                 if (param.stringType)
                 {
-                    if (param.field.find ("file") != std::string::npos)
+                    if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
                     {
                         ri.checkFileParam (param.strVal);
                         LEVELPRINT (READER_VERBOSE_PRINT,

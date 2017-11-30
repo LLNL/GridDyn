@@ -17,7 +17,6 @@ namespace griddyn
 {
 namespace blocks
 {
-
 valueLimiter::valueLimiter (double nmin, double nmax) : minVal (nmin), maxVal (nmax) {}
 void valueLimiter::setLimits (double nmin, double nmax)
 {

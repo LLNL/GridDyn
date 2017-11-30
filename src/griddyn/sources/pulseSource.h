@@ -24,7 +24,8 @@ class pulseSource : public Source
 {
 
 public:
-	static const char invert_flag = object_flag3;  //
+	static const char invert_flag = object_flag3;  //!< flag location indicating an inverse waveform
+	/** enumeration of the different available pulse types*/
 	enum class pulse_type_t
 	{
 		square, triangle, gaussian, biexponential, exponential, cosine, flattop, monocycle
@@ -32,11 +33,11 @@ public:
 	pulse_type_t ptype = pulse_type_t::square;  //!< the type of the pulse
 protected:
 	coreTime period = maxTime;         //!<[s] pulse period
-	double dutyCycle = 0.5;           //!<[%] pulse duty cycle
-	double A = 0.0;                    //!< pulse amplitude
+	parameter_t dutyCycle = 0.5;           //!<[%] pulse duty cycle
+	parameter_t Amplitude = 0.0;                    //!< pulse amplitude
 	coreTime cycleTime = maxTime;           //!<[s] the start time of the last cycle
-	double baseValue;                  //!< the base level of the output
-	double shift = 0;                 //!< storage for phase shift fraction (should be between 0 and 1)
+	parameter_t baseValue;                  //!< the base level of the output
+	parameter_t shift = 0.0;                 //!< storage for phase shift fraction (should be between 0 and 1)
 
 public:
 	pulseSource(const std::string &objName = "pulseSource_#", double startVal = 0.0);

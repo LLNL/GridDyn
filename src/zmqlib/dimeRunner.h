@@ -43,7 +43,7 @@ public:
 	virtual int Initialize(int argc, char *argv[]) final;
 
 
-	virtual void Run(void) override;
+	virtual coreTime Run(void) override;
 
 	virtual coreTime Step(coreTime time) override;
 

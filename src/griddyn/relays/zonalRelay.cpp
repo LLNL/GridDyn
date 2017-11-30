@@ -253,9 +253,9 @@ void zonalRelay::actionTaken (index_t ActionNum,
 
     if (opFlags[use_commLink])
     {
-        auto P = std::make_shared<relayMessage> (relayMessage::BREAKER_TRIP_EVENT);
         if (ActionNum == 0)
         {
+            auto P = std::make_shared<relayMessage>(relayMessage::BREAKER_TRIP_EVENT);
             cManager.send (P);
         }
     }

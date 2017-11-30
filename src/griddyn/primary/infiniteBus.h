@@ -46,7 +46,7 @@ public:
 
   virtual void set (const std::string &param, const std::string &val) override;
   virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  //for identifying which variables are algebraic vs differential
+  
   virtual bool checkCapable () override;
 
 
@@ -57,6 +57,7 @@ public:
   virtual double getFreq (const stateData &sD, const solverMode &sMode) const override;
 
 protected:
+	/** update the Voltage and Angle based on time using the defined ramp rates*/
   void updateVoltageAngle (coreTime time);
 };
 

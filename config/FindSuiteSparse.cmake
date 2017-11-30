@@ -147,9 +147,10 @@ macro(SuiteSparse_FIND_COMPONENTS )
 
 		## try to find include dir (looking for very important header file)
 		find_path(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR	
-			NAMES 			${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
+			NAMES 		${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
 						${suitesparseComp}.hpp ${suitesparseCompLC}.hpp ${suitesparseCompUC}.hpp
-			HINTS			${SuiteSparse_DIR}/include
+			HINTS			${SuiteSparse_DIR_INCLUDE}
+						${SuiteSparse_DIR}/include
 						${SuiteSparse_DIR}/include/suitesparse
 						${SuiteSparse_DIR}/suitesparse/include
 						${SuiteSparse_DIR}/include/${suitesparseComp}
@@ -174,36 +175,59 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			list(APPEND SuiteSparse_INCLUDE_DIRS	${SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR})
 		endif()
 
+		if(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR)
+			if(NOT ${SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR} MATCHES ^${SuiteSparse_DIR_INCLUDE}.*$)
+				if(NOT ${SuiteSparse_${suitespraseCompUC}_INCLUDE_DIR} MATCHES ^${SuiteSparse_DIR}.*$)
+					if(NOT ${SuiteSparse_${suitespraseCompUC}_INCLUDE_DIR} MATCHES ^${${suitesparseCompUC}_DIR}.*$)
+						if(SuiteSparse_VERBOSE)
+							message(WARNING "Using system ${suitesparseCompUC} includes")
+						endif()
+					endif()
+				endif()
+			endif()
+		endif()
+
+
 		## try to find filepath lib name (looking for very important lib file)
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE 
-			NAMES 			lib${suitesparseComp} 	lib${suitesparseCompLC} lib${suitesparseCompUC}
+			NAMES 		lib${suitesparseComp} 	lib${suitesparseCompLC} lib${suitesparseCompUC}
 						${suitesparseComp} 		${suitesparseCompLC} 	${suitesparseCompUC}
-			HINTS			${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+			HINTS			${SuiteSparse_DIR_LIB}
+						${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						${${suitesparseCompUC}_DIR}/lib
 						${${suitesparseCompUC}_DIR}
 						${SuiteSparse_DIR}/${CMAKE_INSTALL_LIBDIR}
 						${${suitesparseCompUC}_DIR}/${CMAKE_INSTALL_LIBDIR}
-			PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX} 		
-						/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+			PATHS 		/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/opt/local/${CMAKE_INSTALL_LIBDIR}
+						/usr/lib
+						/usr/local/lib
+						/opt/local/lib
 						/usr/${CMAKE_INSTALL_LIBDIR}
 						/usr/local/${CMAKE_INSTALL_LIBDIR}
 			PATH_SUFFIXES	Release
 		)
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG 
-			NAMES 			${suitesparseComp}d		${suitesparseCompLC}d 		${suitesparseCompUC}d
+			NAMES 		${suitesparseComp}d		${suitesparseCompLC}d 		${suitesparseCompUC}d
 						lib${suitesparseComp}d 	lib${suitesparseCompLC}d 	lib${suitesparseCompUC}d
-			HINTS			${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+			HINTS			${SuiteSparse_DIR_LIB_DEBUG}
+						${SuiteSparse_DIR_LIB}
+						${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						${${suitesparseCompUC}_DIR}/lib
 						${${suitesparseCompUC}_DIR}
 						${SuiteSparse_DIR}/${CMAKE_INSTALL_LIBDIR}
 						${${suitesparseCompUC}_DIR}/${CMAKE_INSTALL_LIBDIR}
-
-			PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX} 		
-						/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+			PATHS 		/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+						/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						/opt/local/${CMAKE_INSTALL_LIBDIR}
+						/usr/lib
+						/usr/local/lib
+						/opt/local/lib
 						/usr/${CMAKE_INSTALL_LIBDIR}
 						/usr/local/${CMAKE_INSTALL_LIBDIR}
 			PATH_SUFFIXES	Debug
@@ -218,6 +242,32 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		if(SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
 			if(NOT SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE)
 				set(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE ${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG} CACHE PATH "Path to a library." FORCE)
+			endif()
+		endif()
+
+		if(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE)
+			if(NOT ${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE} MATCHES ^${SuiteSparse_DIR_LIB}.*$)
+				if(NOT ${SuiteSparse_${suitespraseCompUC}_LIBRARY_RELEASE} MATCHES ^${SuiteSparse_DIR}.*$)
+					if(NOT ${SuiteSparse_${suitespraseCompUC}_LIBRARY_RELEASE} MATCHES ^${${suitesparseCompUC}_DIR}.*$)
+						if(SuiteSparse_VERBOSE)
+							message(WARNING "Using system ${suitesparseCompUC} release lib")
+						endif()
+					endif()
+				endif()
+			endif()
+		endif()
+
+		if(SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
+			if(NOT ${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG} MATCHES ^${SuiteSparse_DIR_LIB_DEBUG}.*$)
+				if(NOT ${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG} MATCHES ^${SuiteSparse_DIR_LIB}.*$)
+					if(NOT ${SuiteSparse_${suitespraseCompUC}_LIBRARY_DEBUG} MATCHES ^${SuiteSparse_DIR}.*$)
+						if(NOT ${SuiteSparse_${suitespraseCompUC}_LIBRARY_DEBUG} MATCHES ^${${suitesparseCompUC}_DIR}.*$)
+							if(SuiteSparse_VERBOSE)
+								message(WARNING "Using system ${suitesparseCompUC} debug lib")
+							endif()
+						endif()
+					endif()
+				endif()
 			endif()
 		endif()
 		
@@ -300,6 +350,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	## set additional search dirs
 	set(ADDITIONAL_SEARCH_DIRS 
 		${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		${SuiteSparse_DIR}/lib
 		${SuiteSparse_DIR}/lapack_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/lapack_windows/x${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/blas_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
@@ -307,8 +358,12 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 		${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}/lapack_windows
 		${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}/blas_windows
 		${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}/lapack_blas_windows
+		${SuiteSparse_DIR}/lib/lapack_windows
+		${SuiteSparse_DIR}/lib/blas_windows
+		${SuiteSparse_DIR}/lib/lapack_blas_windows
 		${SuiteSparse_DIR}/lapack_blas_windows
 		${SuiteSparse_DIR}/lapack_blas_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		${SuiteSparse_DIR}/lapack_blas_windows/lib
 		${SuiteSparse_DIR}/${CMAKE_INSTALL_LIBDIR}
 		${SuiteSparse_DIR}/lapack_windows/${CMAKE_INSTALL_LIBDIR}
 		${SuiteSparse_DIR}/blas_windows/${CMAKE_INSTALL_LIBDIR}
@@ -320,15 +375,19 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 
 	## try to find blas lib
 	find_library(SuiteSparse_BLAS_LIBRARY 
-		NAMES 			blas cblas libblas
+		NAMES 		blas cblas libblas
 		HINTS			${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+					${SuiteSparse_BLAS_DIR}}/lib
 					${SuiteSparse_BLAS_DIR}
 					${SuiteSparse_BLAS_DIR}/${CMAKE_INSTALL_LIBDIR}
 					${ADDITIONAL_SEARCH_DIRS}
-		PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}		
-					/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		PATHS 		/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+					/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					/opt/local/${CMAKE_INSTALL_LIBDIR}
+					/usr/lib
+					/usr/local/lib
+					/opt/local/lib
 					/usr/${CMAKE_INSTALL_LIBDIR}
 					/usr/local/${CMAKE_INSTALL_LIBDIR}
 		PATH_SUFFIXES	Release Debug
@@ -348,14 +407,18 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	
 	## try to find lapack lib
 	find_library(SuiteSparse_LAPACK_LIBRARY 
-		NAMES 			lapack liblapack
+		NAMES 		lapack liblapack
 		HINTS			${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+					${SuiteSparse_LAPACK_DIR}/lib
 					${SuiteSparse_LAPACK_DIR}
 					${SuiteSparse_LAPACK_DIR}/${CMAKE_INSTALL_LIBDIR}
 					${ADDITIONAL_SEARCH_DIRS}
-		PATHS 			/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}		
-					/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		PATHS 		/usr/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					/usr/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+					/opt/local/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+					/usr/lib
+					/usr/local/lib
+					/opt/local/lib
 					/opt/local/${CMAKE_INSTALL_LIBDIR}
 					/usr/${CMAKE_INSTALL_LIBDIR}
 					/usr/local/${CMAKE_INSTALL_LIBDIR}
@@ -398,6 +461,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 		
 		set(SuiteSparse_DLL_SEARCH_DIRS
 			${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+			${SuiteSparse_LAPACK_DIR}/lib
 			${SuiteSparse_LAPACK_DIR}
 			${SuiteSparse_LAPACK_DIR}/bin
 			${SuiteSparse_LAPACK_DIR}/bin/${SuiteSparse_SEARCH_BIN_POSTFIX_1}

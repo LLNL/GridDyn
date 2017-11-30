@@ -133,7 +133,7 @@
 	<t>2</t>
 	</block>
 	</sensor>
-	<recorder field="bus3:voltage, relay#0:output0" period=0.1>
+	<recorder field="bus3:voltage, relay#0:output0" period="0.1">
     <file>blocktest.dat</file>
   </recorder>
    <basepower>100</basepower>

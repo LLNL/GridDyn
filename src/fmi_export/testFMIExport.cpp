@@ -18,7 +18,7 @@
 #include "fmi_export/fmuBuilder.h"
 #include "fmi_export/loadFMIExportObjects.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "griddyn/loads/ThreePhaseLoad.h"
 #include "readerInfo.h"
 #include "simulation/diagnostics.h"

@@ -7,10 +7,12 @@ set(BUILD_SHARED_LIBS OFF)
 cmake_minimum_required(VERSION 3.4)
 cmake_policy(VERSION 3.4)
 
-IF (NOT ZLIB_INCLUDES)
-find_package(ZLIB REQUIRED)
-ENDIF(NOT ZLIB_INCLUDES)
+if (EXISTS ${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
+include (${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
 
+else()
+find_package(ZLIB)
+endif()
 
 if(CMAKE_HOST_APPLE)
 set(PLATFORM __APPLE__)
@@ -29,10 +31,10 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 if(MSVC)
-  add_definitions(/wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456)
+  add_definitions(/wd4131 /wd4013 /wd4127 /wd4100 /wd4189 /wd4456 -D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
-include_directories(${ZLIB_INCLUDES})
+include_directories(${ZLIB_LOCATION}/include)
 set(SOURCES
   ioapi.c
   miniunz.c
@@ -63,8 +65,10 @@ add_library(minizip ${SOURCES} ${HEADERS})
 
 
 	install(TARGETS minizip
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/
+       LIBRARY DESTINATION lib
+       ARCHIVE DESTINATION lib
+	   EXPORT minizip-targets
 	)
 
-
+install (EXPORT minizip-targets DESTINATION cmake/)
 INSTALL(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/minizip)

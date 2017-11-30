@@ -33,7 +33,7 @@
    <flags>sampled</flags>
    <period>0.05</period>
 	</sensor>
-	<recorder field="bus2::loadP:p, relay#0:output0, relay#1:output0" period=0.05>
+	<recorder field="bus2::loadP:p, relay#0:output0, relay#1:output0" period="0.05">
     <file>blocktest.dat</file>
   </recorder>
    <basepower>100</basepower>

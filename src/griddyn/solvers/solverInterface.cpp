@@ -14,7 +14,7 @@
 #include "basicSolver.h"
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
 #include "utilities/mapOps.hpp"
@@ -42,17 +42,18 @@ static childClassFactory<basicOdeSolver, solverInterface>
 }  // namespace solvers
 solverInterface::solverInterface (const std::string &objName) : helperObject (objName) {}
 solverInterface::solverInterface (gridDynSimulation *gds, const solverMode &sMode) : mode (sMode), m_gds (gds) {}
-std::shared_ptr<solverInterface> solverInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
-{
-    if (!si)
-    {
-        si = std::make_shared<solverInterface> (getName ());
-    }
-    else
-    {
-        si->setName (getName ());
-    }
 
+std::unique_ptr<solverInterface> solverInterface::clone(bool fullCopy) const
+{
+	auto si = std::make_unique<solverInterface>();
+	solverInterface::cloneTo(si.get(),fullCopy);
+	return si;
+}
+
+void solverInterface::cloneTo (solverInterface *si, bool fullCopy) const
+{
+
+    si->setName (getName ());
     si->solverLogFile = solverLogFile;
     si->printLevel = printLevel;
     si->max_iterations = 10000;
@@ -98,7 +99,6 @@ std::shared_ptr<solverInterface> solverInterface::clone (std::shared_ptr<solverI
         si->jacFile = jacFile;
         si->stateFile = stateFile;
     }
-    return si;
 }
 
 double *solverInterface::state_data () noexcept { return nullptr; }

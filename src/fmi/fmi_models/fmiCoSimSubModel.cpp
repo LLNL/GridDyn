@@ -53,6 +53,7 @@ coreObject * fmiCoSimSubModel::clone(coreObject *obj) const
 	}
 
 	return gco;
+
 }
 
 bool fmiCoSimSubModel::isLoaded() const
@@ -253,7 +254,7 @@ stringVec fmiCoSimSubModel::getInputNames() const
 
 void fmiCoSimSubModel::set(const std::string &param, const std::string &val)
 {
-	if (param == "fmu")
+	if ((param == "fmu") || (param == "file"))
 	{
 		if (!(cs))
 		{
@@ -679,11 +680,14 @@ void fmiCoSimSubModel::makeSettableState()
 }
 void fmiCoSimSubModel::resetState()
 {
-	//if (prevFmiState == cs->getCurrentMode())
+	if (opFlags[dyn_initialized])
 	{
-		return;
+		//if (prevFmiState == cs->getCurrentMode())
+		{
+			return;
+		}
+		//	cs->setMode(prevFmiState);
 	}
-//	cs->setMode(prevFmiState);
 }
 
 void fmiCoSimSubModel::loadOutputJac(int index)

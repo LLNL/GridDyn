@@ -24,8 +24,7 @@ class gridBus;
 class gridSecondary : public gridComponent
 {
 protected:
-	double baseVoltage = 120.0;  //!< [kV] base voltage for the secondary object
-	gridBus *bus = nullptr;		//!< reference to the bus managing the object;
+	gridBus *bus = nullptr;		//!< reference to the bus connecting the object;
 public:
   /** @brief default constructor*/
   explicit gridSecondary (const std::string &objName="");
@@ -58,7 +57,7 @@ public:
 
   /**
   *@brief get the real output power
-  @detail  these are the main data output functions for secondary object.  The intention is to supply the load/gen to the bus
+  @details  these are the main data output functions for secondary object.  The intention is to supply the load/gen to the bus
   they may have other outputs but first and second are the real and reactive power negative numbers indicate power generation
   @param[in] inputs the inputs for the secondary object
   * @param[in] sD the current state data for the simulation

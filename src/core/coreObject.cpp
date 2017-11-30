@@ -25,7 +25,7 @@ namespace griddyn
 // secondary
 std::atomic<id_type_t> coreObject::s_obcnt (101);
 
-coreObject::coreObject (std::string objName) : m_refCount (0), m_oid (s_obcnt++), name (std::move (objName))
+coreObject::coreObject (const std::string &objName) : m_refCount (0), m_oid (s_obcnt++), name (objName)
 {
     static nullObject nullObject0 (0);
     // not using updateName since in many cases the id has not been set yet
@@ -69,6 +69,10 @@ coreObject *coreObject::clone (coreObject *obj) const
 
 void coreObject::updateName ()
 {
+	if (name.empty())
+	{
+		return;
+	}
     switch (name.back ())
     {
     case '$':

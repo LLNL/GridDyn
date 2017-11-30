@@ -31,22 +31,22 @@ eventAdapter::eventAdapter (coreTime nextTime, coreTime period) : m_period (peri
 
 eventAdapter::~eventAdapter() = default;
 
-std::shared_ptr<eventAdapter> eventAdapter::clone(std::shared_ptr<eventAdapter> eA) const
+std::unique_ptr<eventAdapter> eventAdapter::clone() const
 {
-	auto newAdapter = std::move(eA);
-	if (!newAdapter)
-	{
-		newAdapter = std::make_shared<eventAdapter>(m_nextTime, m_period);
-	}
-	newAdapter->m_remove_event = m_remove_event;
-	newAdapter->partBdelay = partBdelay;
-	newAdapter->two_part_execute = two_part_execute;
-	newAdapter->partB_turn = partB_turn;
-	newAdapter->partB_only = partB_only;
-	newAdapter->m_period = m_period;
-	newAdapter->m_nextTime = m_nextTime;
-
-	return newAdapter;
+	auto ea = std::make_unique<eventAdapter>();
+	eventAdapter::cloneTo(ea.get());
+	return ea;
+}
+void eventAdapter::cloneTo(eventAdapter *eA) const
+{
+	
+	eA->m_remove_event = m_remove_event;
+	eA->partBdelay = partBdelay;
+	eA->two_part_execute = two_part_execute;
+	eA->partB_turn = partB_turn;
+	eA->partB_only = partB_only;
+	eA->m_period = m_period;
+	eA->m_nextTime = m_nextTime;
 }
 
 void eventAdapter::updateObject(coreObject * /*newObject*/, object_update_mode /*mode*/)
@@ -97,10 +97,7 @@ bool compareEventAdapters (const std::shared_ptr<eventAdapter> &e1, const std::s
 }
 
 
-functionEventAdapter::functionEventAdapter()
-{
 
-}
 functionEventAdapter::functionEventAdapter(ccode_function_t fcal) : fptr(std::move(fcal))
 {
 }
@@ -108,15 +105,26 @@ functionEventAdapter::functionEventAdapter(ccode_function_t fcal, coreTime trigg
 {
 }
 
-std::shared_ptr<eventAdapter> functionEventAdapter::clone(std::shared_ptr<eventAdapter> eA) const
+
+
+void functionEventAdapter::cloneTo(eventAdapter *ea) const
 {
-	auto newAdapter = cloneBase<functionEventAdapter, eventAdapter>(this, eA);
-	if (!newAdapter)
+	eventAdapter::cloneTo(ea);
+	auto fea = dynamic_cast<functionEventAdapter *>(ea);
+	if (ea == nullptr)
 	{
-		return eA;
+		return;
 	}
-	//functions may not be amenable to cloning or duplication so we can't really clone here.  
-	return newAdapter;
+	fea->fptr = fptr;
+	fea->evCode_ = evCode_;
+
+}
+
+std::unique_ptr<eventAdapter> functionEventAdapter::clone() const
+{
+	std::unique_ptr<eventAdapter> ea = std::make_unique<functionEventAdapter>();
+	functionEventAdapter::cloneTo(ea.get());
+	return ea;
 }
 
 change_code functionEventAdapter::execute(coreTime cTime)
@@ -136,6 +144,29 @@ change_code functionEventAdapter::execute(coreTime cTime)
 void functionEventAdapter::setfunction(ccode_function_t nfptr)
 {
 	fptr = std::move(nfptr);
+}
+
+void functionEventAdapter::setExecutionMode(event_execution_mode newMode)
+{
+	switch (newMode)
+	{
+	case event_execution_mode::normal:
+
+		two_part_execute = false;
+		partB_only = false;
+		break;
+		/** this one really shouldn't be used as it has no meaning*/
+	case event_execution_mode::two_part_execution:
+		two_part_execute = true;
+		partB_only = true;
+		break;
+	case event_execution_mode::delayed:
+		two_part_execute = true;
+		partB_only = true;
+		break;
+	default:
+		break;
+	}
 }
 
 }//namespace griddyn

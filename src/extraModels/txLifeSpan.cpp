@@ -29,12 +29,13 @@ txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model everything is slow so no need to make it continuous
 	outputStrings = { {"remaininglife","liferemaining"}, {"lossoflife"} ,{"rate","rateofloss"} };
+	m_outputSize = 3;
 }
 
 coreObject * txLifeSpan::clone(coreObject *obj) const
 {
 	txLifeSpan *nobj = cloneBase<txLifeSpan, sensor>(this, obj);
-	if (!(nobj))
+	if (nobj==nullptr)
 	{
 		return obj;
 	}

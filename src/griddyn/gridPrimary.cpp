@@ -24,7 +24,7 @@ gridPrimary::gridPrimary (const std::string &objName) : gridComponent (objName) 
 coreObject *gridPrimary::clone (coreObject *obj) const
 {
     auto nobj = cloneBase<gridPrimary, gridComponent> (this, obj);
-    if (nobj==nullptr)
+    if (nobj == nullptr)
     {
         return obj;
     }
@@ -50,59 +50,6 @@ void gridPrimary::dynInitializeB (const IOdata &inputs, const IOdata &desiredOut
         gridComponent::dynInitializeB (inputs, desiredOutput, fieldSet);
         updateLocalCache ();
     }
-}
-
-static const std::map<int, int> alertFlags{
-  std::make_pair (FLAG_CHANGE, 1),
-  std::make_pair (STATE_COUNT_INCREASE, 3),
-  std::make_pair (STATE_COUNT_DECREASE, 3),
-  std::make_pair (STATE_COUNT_CHANGE, 3),
-  std::make_pair (ROOT_COUNT_INCREASE, 2),
-  std::make_pair (ROOT_COUNT_DECREASE, 2),
-  std::make_pair (ROOT_COUNT_CHANGE, 2),
-  std::make_pair (JAC_COUNT_INCREASE, 4),
-  std::make_pair (JAC_COUNT_DECREASE, 4),
-  std::make_pair (JAC_COUNT_CHANGE, 4),
-  std::make_pair (OBJECT_COUNT_INCREASE, 3),
-  std::make_pair (OBJECT_COUNT_DECREASE, 3),
-  std::make_pair (OBJECT_COUNT_CHANGE, 3),
-  std::make_pair (CONSTRAINT_COUNT_DECREASE, 1),
-  std::make_pair (CONSTRAINT_COUNT_INCREASE, 1),
-  std::make_pair (CONSTRAINT_COUNT_CHANGE, 1),
-};
-
-void gridPrimary::alert (coreObject *object, int code)
-{
-    if ((code >= MIN_CHANGE_ALERT) && (code < MAX_CHANGE_ALERT))
-    {
-        auto res = alertFlags.find (code);
-        if (res != alertFlags.end ())
-        {
-            if (!opFlags[disable_flag_updates])
-            {
-                updateFlags ();
-            }
-            else
-            {
-                opFlags.set (flag_update_required);
-            }
-            switch (res->second)
-            {
-            case 3:
-                offsets.stateUnload ();
-                break;
-            case 2:
-                offsets.rjUnload (true);
-                break;
-			case 4:
-				offsets.rjUnload(true);
-				break;
-            default:
-                break;
-            }
-        }
-    }
-    coreObject::alert (object, code);
 }
 
 void gridPrimary::set (const std::string &param, const std::string &val) { gridComponent::set (param, val); }

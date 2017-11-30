@@ -79,11 +79,11 @@ public:
   @param[in] objName the name of the object[optiona] default to "object_#"
   the name can be followed by a few symbols see # appends the id, $ appends the userid, and @ appends the locIndex
   */
-  explicit coreObject (std::string objName = "object_#");
+  explicit coreObject (const std::string &objName = "object_#");
 
   //don't allow copy constructors and equal operator as they would introduce all sorts of other complicated issues in the system
   coreObject (const coreObject&) = delete;
-  void operator= (coreObject &obj) = delete;
+  void operator= (const coreObject &obj) = delete;
   /** @brief default destructor  so it can be overridden*/
   virtual ~coreObject ();
   /**

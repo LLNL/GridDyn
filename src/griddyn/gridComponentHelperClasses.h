@@ -92,8 +92,8 @@ enum operation_flags
     object_flag12 = 43,
 
     // flags 43 - 45 state control
-    no_pflow_states = 44,  //!< flag indicating there is not nor will ever there be power flow states
-    no_dyn_states = 45,  //!< flag indicating there is not nor will ever there be dynamic states
+    no_powerflow_operations = 44,  //!< flag indicating there is not nor will ever there be power flow states or checks
+    no_dynamics = 45,  //!< flag indicating there is not nor will ever there be dynamic states
 
     disable_flag_updates = 46,  // flag to temporarily disable flag updates from the alert function
     flag_update_required = 47,  //!< flag indicated that a flag update is required
@@ -128,7 +128,7 @@ enum operation_flags
 /** alternate names for some of the flags*/
 enum operation_flag_overloads
 {
-    sampled_only = no_dyn_states,
+    sampled_only = no_dynamics,
 };
 
 /** @brief enumeration of possible convergence modes
@@ -282,8 +282,11 @@ class stateSizes
     void reset ();
     /** reset just the sizes related to states to 0*/
     void stateReset ();
-    /** reset the root counter and Jacobian sizes to 0*/
-    void rootAndJacobianReset ();
+    /** reset the root counter and  sizes to 0*/
+	void rootReset() { algRoots = diffRoots = 0; };
+
+	/** reset the jacobian counter and  sizes to 0*/
+	void JacobianReset() { jacSize = 0; };
     /** add another stateSizes object to this one
     @param[in] arg the stateSizes object to combine*/
     void add (const stateSizes &arg);
@@ -293,8 +296,11 @@ class stateSizes
     void addStateSizes (const stateSizes &arg);
     /** add just the root and Jacobian information
     @param[in] arg the update to add to the calling object*/
-    void addRootAndJacobianSizes (const stateSizes &arg);
-
+    void addRootSizes (const stateSizes &arg);
+	/** add just the Jacobian information
+	@param[in] arg the update to add to the calling object*/
+	void addJacobianSizes(const stateSizes &arg);
+	/** get the total count*/
     count_t totalSize () const;
 };
 
@@ -313,9 +319,9 @@ class solverOffsets
                                          // total object sizes
 
     bool stateLoaded = false;  //!<flag indicating the state sizes have been loaded
-    bool rjLoaded = false;  //!< flag indicated that roots and Jacobian size is loaded
-    bool offetLoaded = false;  //!<flag indicating that offsets have been loaded
-    bool rootsLoaded = false;  //!< dummy flag to fill a gap and alignment
+    bool jacobianLoaded = false;  //!< flag indicated Jacobian size is loaded
+    bool rootsLoaded = false;  //!< flag indicated root size is loaded
+	bool offetLoaded = false;  //!<flag indicating that offsets have been loaded
     solverMode sMode = cLocalSolverMode;  //!<the reference solverMode
 
     // local objectSizes
@@ -330,9 +336,12 @@ class solverOffsets
      */
     void reset ();
 
-    /** @brief reset the solverOffset root and Jacobian component
+    /** @brief reset the solverOffset root components
      */
-    void rootAndJacobianCountReset ();
+    void rootCountReset ();
+	/** @brief reset the solverOffset Jacobian component
+	*/
+	void JacobianCountReset();
 
     /** @brief reset the solverOffset state components
      */
@@ -362,9 +371,12 @@ class solverOffsets
       */
     void addStateSizes (const solverOffsets&offsets);
 
-    /** @brief load the Dynamic parameters to the sizes
+    /** @brief add the Root count parameters to the sizes
      */
-    void addRootAndJacobianSizes (const solverOffsets &offsets);
+    void addRootSizes (const solverOffsets &offsets);
+	/** @brief add the Jacobian parameters to the sizes
+	*/
+	void addJacobianSizes(const solverOffsets &offsets);
 
     /** @brief load the local variables to the sizes
      */
@@ -379,6 +391,11 @@ class solverOffsets
     @param newOffset the index of the new offset
     */
     void setOffset (index_t newOffset);
+
+	void setLoaded() { stateLoaded = jacobianLoaded = rootsLoaded = true; };
+	void setLoaded(bool dynOnly) {
+		stateLoaded = (!dynOnly) ? stateLoaded : true; jacobianLoaded = rootsLoaded = true;
+	}
 };
 
 /**@brief local state pointers
@@ -437,6 +454,7 @@ class stateData
 
 const stateData emptyStateData{};
 
+#define DEFAULT_OFFSET_CONTAINER_SIZE 5
 class gridComponent;
 
 /**
@@ -447,7 +465,7 @@ class offsetTable
   private:
     // std::vector<solverOffsets> offsetContainer;       //!< a vector of containers for offsets corresponding to
     // the different solver modes
-    boost::container::small_vector<solverOffsets,5>
+    boost::container::small_vector<solverOffsets, DEFAULT_OFFSET_CONTAINER_SIZE>
       offsetContainer;  //!< a vector of containers for offsets corresponding to the different solver modes
   public:
     /** @brief constructor
@@ -463,12 +481,17 @@ class offsetTable
      *@param[in] sMode the solverMode we are interested in
      *@return a flag (true) if loaded (false) if not
      */
-    bool isStateLoaded (const solverMode &sMode) const;
-    /** @brief check whether the root and Jacobian information is loaded
+    bool isStateCountLoaded (const solverMode &sMode) const;
+    /** @brief check whether the root information is loaded
      *@param[in] sMode the solverMode we are interested in
      *@return a flag (true) if loaded (false) if not
      */
-    bool isrjLoaded (const solverMode &sMode) const;
+    bool isRootCountLoaded (const solverMode &sMode) const;
+	/** @brief check whether the Jacobian information is loaded
+	*@param[in] sMode the solverMode we are interested in
+	*@return a flag (true) if loaded (false) if not
+	*/
+	bool isJacobianCountLoaded(const solverMode &sMode) const;
     /** @brief set the offsets for a solverMode
      *@param[in] sMode the solverMode we are interested in
      *@return a pointer to the
@@ -595,11 +618,14 @@ class offsetTable
      *@param[in] dynamic_only only unload the dynamic solverObjects
      */
     void stateUnload (bool dynamic_only = false);
-    /** @brief unload the root and Jacobian information for the solverOffsets
-     *TODO Separate the root and Jacobian information from each other
+    /** @brief unload the root information for the solverOffsets
      *@param[in] dynamic_only only unload the dynamic solverObjects
      */
-    void rjUnload (bool dynamic_only = false);
+    void rootUnload (bool dynamic_only = false);
+	/** @brief unload the Jacobian information for the solverOffsets
+	*@param[in] dynamic_only only unload the dynamic solverObjects
+	*/
+	void JacobianUnload(bool dynamic_only = false);
     /** @brief update all solverOffsets with the local information
      *@param[in] dynamic_only only unload the dynamic solverObjects
      */

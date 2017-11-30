@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
 #include "utilities/timeSeries.hpp"
-#include "config.h"
+#include "griddyn/griddyn-config.h"
 namespace griddyn
 {
 using namespace gridUnits;

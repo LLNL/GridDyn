@@ -59,7 +59,10 @@ public:
   virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
   virtual void guessState (coreTime time, double state[], double dstate_dt[], const solverMode &sMode) override;
   virtual void converge (coreTime time, double state[], double dstate_dt[], const solverMode &sMode, converge_mode = converge_mode::high_error_only, double tol = 0.01) override;
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+  virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+  virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
+
   virtual void getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const override;
 protected:
 	virtual void conditionTriggered (index_t conditionNum, coreTime triggerTime) override;

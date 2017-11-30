@@ -16,7 +16,7 @@
 #include "helicsRunner.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 
 #include "libraryLoader.h"
 #include <boost/filesystem.hpp>
@@ -163,11 +163,12 @@ void helicsRunner::setCoordinatorOptions(boost::program_options::variables_map &
 	
 }
 
-void helicsRunner::Run(void)
+coreTime helicsRunner::Run()
 {
 	coreTime stop_time = m_gds->getStopTime();
-	Step(stop_time);
+	auto retTime=Step(stop_time);
 	fed_->finalize();
+	return retTime;
 }
 
 
@@ -176,7 +177,7 @@ coreTime helicsRunner::Step(coreTime time)
 	helics::Time time_granted = 0.0; /* the time step HELICS has allowed us to process */
 	helics::Time time_desired = 0.0; /* the time step we would like to go to next */
 
-	while (m_gds->getCurrentTime() < time)
+	while (m_gds->getSimulationTime() < time)
 	{
 		auto evntTime = m_gds->getEventTime();
 		auto nextTime = std::min(evntTime, time);
@@ -195,7 +196,7 @@ coreTime helicsRunner::Step(coreTime time)
 		//check if the granted time is too small to do anything about
 		if (time_granted < time_desired)
 		{
-			if (helics2gdTime(time_granted) - m_gds->getCurrentTime() < 0.00001)
+			if (helics2gdTime(time_granted) - m_gds->getSimulationTime() < 0.00001)
 			{
 				continue;
 			}
@@ -213,7 +214,7 @@ coreTime helicsRunner::Step(coreTime time)
 			throw(re);
 		}
 	}
-	return m_gds->getCurrentTime();
+	return m_gds->getSimulationTime();
 }
 
 void helicsRunner::Finalize()

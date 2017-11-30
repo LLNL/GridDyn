@@ -71,7 +71,7 @@ void controlRelay::addMeasurement (const std::string &measure)
     }
 }
 
-double controlRelay::getMeasurement (index_t num)
+double controlRelay::getMeasurement (index_t num) const
 {
 	if (isValidIndex(num,measurement_points_))
     {
@@ -80,7 +80,7 @@ double controlRelay::getMeasurement (index_t num)
     return kNullVal;
 }
 
-double controlRelay::getMeasurement (const std::string &pointName)
+double controlRelay::getMeasurement (const std::string &pointName) const
 {
     auto ind = findMeasurement (pointName);
     return (ind != kNullLocation) ? measurement_points_[ind]->grabData () : kNullVal;
@@ -150,6 +150,8 @@ void controlRelay::actionTaken (index_t ActionNum,
                                 coreTime /*actionTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d-> action %d taken") % conditionNum % ActionNum).str ());
+	(void)(ActionNum);
+	(void)(conditionNum);
 }
 
 using controlMessage = griddyn::comms::controlMessage;
@@ -197,7 +199,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
             }
             else
             {
-                auto fea = generateGetEvent (prevTime + measureDelay, sourceID, m);
+                auto fea = generateGetEvent (m->m_time + measureDelay, sourceID, m);
                 rootSim->add (std::shared_ptr<eventAdapter> (std::move (fea)));
             }
         }
@@ -211,6 +213,21 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
         }
         break;
     case controlMessage::GET_MULTIPLE:
+		if (m->m_time <= prevTime + kSmallTime)
+		{
+			if (measureDelay <= kSmallTime)
+			{
+				
+			}
+			else
+			{
+				
+			}
+		}
+		else
+		{
+			
+		}
         break;
     case controlMessage::GET_PERIODIC:
         break;
@@ -396,7 +413,9 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
         actions[act].unitType = gridUnits::getUnits (message->m_units);
     }
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
-    return fea;
+	/** this is so the get event triggers last*/
+	fea->setExecutionMode(event_execution_mode::delayed);
+	return fea;
 }
 
 std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime eventTime,
@@ -424,14 +443,8 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime e
 
 index_t controlRelay::findAction (std::uint64_t actionID)
 {
-    for (index_t ii = 0; ii < static_cast<index_t> (actions.size ()); ++ii)
-    {
-        if (actions[ii].actionID == actionID)
-        {
-            return ii;
-        }
-    }
-    return kNullLocation;
+	auto res = std::find_if(actions.begin(), actions.end(), [actionID](const auto &act) {return (act.actionID == actionID); });
+    return (res != actions.end()) ? static_cast<index_t>(res - actions.begin()) : kNullLocation;
 }
 
 index_t controlRelay::getFreeAction ()

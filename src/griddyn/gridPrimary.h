@@ -49,7 +49,7 @@ class gridPrimary : public gridComponent
 {
 public:
 	int zone = 1;  //!< publicly accessible loss zone indicator not used internally
-	index_t locIndex2 = kNullLocation;           //!< a second lookup index for the object to reference parent location in storage arrays for use by containing objects no operational dependencies
+	index_t locIndex2 = kNullLocation;           //!< a second lookup index for the object to reference parent location in storage arrays for use by containing objects with no operational dependencies
 
 public:
   /**@brief default constructor*/
@@ -134,8 +134,6 @@ public:
   /** @brief do any local computation to get ready for measurements*/
   virtual void updateLocalCache ();
 
-
-  virtual void alert (coreObject *, int code) override;
 
   /**
   *@brief get a pointer for a particular bus

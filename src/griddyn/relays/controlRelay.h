@@ -36,15 +36,15 @@ namespace relays
 /**helper class for delayed execution of set functions*/
 struct delayedControlAction
 {
-  std::uint64_t sourceID;
-  std::uint64_t actionID;
-  std::string field;
-  coreTime triggerTime;
-  coreTime executionTime;
-  double val;
-  gridUnits::units_t unitType = gridUnits::defUnit;
-  bool executed;
-  bool measureAction;
+  std::uint64_t sourceID;  //!< the id of the source
+  std::uint64_t actionID; //!< the id of the action itself
+  std::string field;	//!< the field to act upon
+  coreTime triggerTime;	//!< the time the delayed action should be triggered
+  coreTime executionTime;	//!< the time it was executed
+  double val;	//!< the value associated with the change
+  gridUnits::units_t unitType = gridUnits::defUnit;	//!< the units associated with the action
+  bool executed;	//!< flag indicating the action is executed
+  bool measureAction;	//!< flag indicating the action is a measurement event
 };
 
 /** @brief relay with control functionality  i.e. the ability to control an object through a comm channel
@@ -62,15 +62,14 @@ protected:
   coreTime actionDelay = timeZero;		//!< the delay between comm signal and action
   coreTime measureDelay = timeZero;	//!< the delay between comm measure request and action measurement extraction
   count_t instructionCounter = 0;	//!< counter for the number of instructions
-  //NOTE: probably have a 4 byte padding gap
+  std::int16_t m_terminal = 1;		//!< the terminal of a link device to act upon(if source or sink is a link
+  std::int16_t autoName = -1;			//!< variable for autonaming
   std::vector<delayedControlAction> actions;	//!< queue for delayed control actions
   gridSimulation *rootSim = nullptr;		//!< pointer to the root object
-  index_t m_terminal=1;		//!< the terminal of a link device to act upon(if source or sink is a link
-  int autoName = -1;			//!< variable for autonaming
   std::vector<std::unique_ptr<gridGrabber>> measurement_points_;  //!< vector of grabbers defining measurement points
   std::unordered_map<std::string, index_t> pointNames_;  //!< vector of names for the pointlist;
 private:
-  std::string m_terminal_key;
+  std::string m_terminal_key; //!< string related to the terminal
 public:
   explicit controlRelay (const std::string &objName = "controlRelay_$");
   virtual coreObject * clone (coreObject *obj = nullptr) const override;
@@ -81,10 +80,15 @@ public:
 
   virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
   virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
-
+  /** add a measurement point to the relay
+  @param[in] measure a string representing the measurement
+  */
   void addMeasurement(const std::string &measure);
-  double getMeasurement(index_t num);
-  double getMeasurement(const std::string &pointName);
+  /** retrieve a numbered measurement*/
+  double getMeasurement(index_t num) const;
+  /** retrieve the value of a named measurement*/
+  double getMeasurement(const std::string &pointName) const;
+  /** locate a numerical index of a measurement from its name*/
   index_t findMeasurement(const std::string &pointName) const;
 protected:
   virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime actionTime) override;

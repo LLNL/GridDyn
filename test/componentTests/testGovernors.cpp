@@ -11,7 +11,7 @@
 */
 
 #include "core/objectFactory.hpp"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "simulation/diagnostics.h"
 #include "testHelper.h"

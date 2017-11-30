@@ -100,6 +100,8 @@ public:
   */
   virtual void add(std::shared_ptr<gridGrabber> dGr);
 
+  /** retrieve the grabberSet based on index
+  @return a shared_ptr to a grabberset object that is used in the data retrieval*/
   std::shared_ptr<grabberSet> getGrabberSet(index_t grabberNum);
 
   //dynamic functions for evaluation with a limit exceeded
@@ -152,13 +154,16 @@ public:
 
   virtual const std::vector<stringVec> &outputNames() const override;
 protected:
-  /** @brief generate the input grabbers
-   used in the initialize function
-  */
-  void generateInputGrabbers ();
+  /** define an output based on a string*/
   void setupOutput(index_t num, const std::string &outputString);
  private:
+	 /** @brief generate the input grabbers
+	 used in the initialize function
+	 */
+	 void generateInputGrabbers();
+	 /** get the input to a particular block based on inputs and stateData*/
 	 double getBlockInput(index_t blockNum, const IOdata &inputs, const stateData &sD, const solverMode &sMode) const;
+	 /** get the input to a block based on inputs only*/
 	 double getBlockInput(index_t blockNum, const IOdata &inputs) const;
 };
 }//namespace griddyn

@@ -13,19 +13,15 @@
 #include "cvodeInterface.h"
 
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
-#include "griddyn.h"
+
+#include "gridDynSimulation.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 
 #include <cvode/cvode.h>
-#include <cvode/cvode_dense.h>
+#include <cvode/cvode_direct.h>
 
-#ifdef KLU_ENABLE
-#include <cvode/cvode_klu.h>
-#include <cvode/cvode_sparse.h>
-#endif
 
 #include <cassert>
 #include <cstdio>
@@ -80,16 +76,26 @@ cvodeInterface::~cvodeInterface ()
     }
 }
 
-std::shared_ptr<solverInterface> cvodeInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> cvodeInterface::clone(bool fullCopy) const
 {
-    auto rp = cloneBaseStack<cvodeInterface, sundialsInterface, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
-
-    return rp;
+	std::unique_ptr<solverInterface> si = std::make_unique<cvodeInterface>();
+	cvodeInterface::cloneTo(si.get(),fullCopy);
+	return si;
 }
+
+void cvodeInterface::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	sundialsInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<cvodeInterface *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	ai->maxStep = maxStep;
+	ai->minStep = minStep;
+	ai->step = step;
+}
+
 
 void cvodeInterface::allocate (count_t stateCount, count_t numRoots)
 {
@@ -282,7 +288,7 @@ void cvodeInterface::logErrorWeights (print_level logLevel) const
           std::to_string (kk) + ':' + std::to_string (ewdata[kk]) + '\t' + std::to_string (eldata[kk]) + '\n';
     }
 
-    if (m_gds!=nullptr)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }
@@ -294,7 +300,7 @@ void cvodeInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-/* *INDENT-OFF* */
+
 static const std::map<int, std::string> cvodeRetCodes{
   {CV_MEM_NULL, "The solver memory argument was NULL"},
   {CV_ILL_INPUT, "One of the function inputs is illegal"},
@@ -317,7 +323,7 @@ static const std::map<int, std::string> cvodeRetCodes{
   {CV_BAD_K, "Bad K"},
   {CV_BAD_DKY, "Bad DKY"},
 };
-/* *INDENT-ON* */
+
 
 void cvodeInterface::initialize (coreTime time0)
 {
@@ -330,7 +336,7 @@ void cvodeInterface::initialize (coreTime time0)
 
     // dynInitializeB CVode - Sundials
 
-    int retval = CVodeSetUserData (solverMem, reinterpret_cast<void *>(this));
+    int retval = CVodeSetUserData (solverMem, reinterpret_cast<void *> (this));
     check_flag (&retval, "CVodeSetUserData", 1);
 
     // guessState an initial condition
@@ -383,7 +389,7 @@ void cvodeInterface::initialize (coreTime time0)
     retval = CVodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "CVodeSetMaxNonlinIters", 1);
 
-    retval = CVodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *>(this));
+    retval = CVodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
     check_flag (&retval, "CVodeSetErrHandlerFn", 1);
 
     if (maxStep > 0.0)

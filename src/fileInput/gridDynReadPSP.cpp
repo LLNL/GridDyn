@@ -286,7 +286,7 @@ void pspReadBus (gridBus *bus, const std::string &line, double base, const basic
 
     bus->setName (temp);  // set the name
 
-    // get the baseVoltage
+    // get the localBaseVoltage
     temp = line.substr (18, 3);
 
     val = numeric_conversion<double> (temp, 0.0);

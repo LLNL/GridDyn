@@ -11,7 +11,7 @@
 */
 
 #include "fmiCollector.h"
-#include "core/helperTemplates.hpp"
+
 #include "fmiCoordinator.h"
 #include "measurement/gridGrabbers.h"
 
@@ -30,17 +30,24 @@ fmiCollector::fmiCollector(const std::string &name):collector(name)
 }
 
 
-std::shared_ptr<collector> fmiCollector::clone(std::shared_ptr<collector> gr) const
+std::unique_ptr<collector> fmiCollector::clone() const
 {
-	auto nrec = cloneBase<fmiCollector, collector>(this, gr);
-	if (!nrec)
+	std::unique_ptr<collector> fmicol = std::make_unique<fmiCollector>();
+	fmiCollector::cloneTo(fmicol.get());
+	return fmicol;
+}
+
+
+void fmiCollector::cloneTo(collector *gr) const
+{
+	collector::cloneTo(gr);
+
+	auto nrec = dynamic_cast<fmiCollector *>(gr);
+	if (nrec == nullptr)
 	{
-		return gr;
+		return;
 	}
-
 	
-
-	return nrec;
 }
 
 change_code fmiCollector::trigger(coreTime time)

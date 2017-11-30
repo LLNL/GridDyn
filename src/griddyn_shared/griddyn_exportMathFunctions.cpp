@@ -11,12 +11,13 @@
  */
 
 #include "fileInput/gridDynRunner.h"
-#include "gridDyn.h"
+#include "gridDynSimulation.h"
 
 #include "griddyn_export.h"
 
-#include "gridDyn_export_internal.h"
+#include "griddyn_export_internal.h"
 #include "utilities/matrixDataCustomWriteOnly.hpp"
+#include "measurement/objectGrabbers.h"
 
 using namespace griddyn;
 
@@ -41,6 +42,55 @@ void gridDynSolverKey_free(solverKey key)
 		delete skey;
 	}
 }
+
+int gridDynSimulation_busCount(gridDynSimReference sim)
+{
+    auto runner = reinterpret_cast<GriddynRunner *> (sim);
+
+    if (runner == nullptr)
+    {
+        return INVALID_OBJECT;
+    }
+    return runner->getSim()->getInt("buscount");
+}
+
+int gridDynSimulation_lineCount(gridDynSimReference sim)
+{
+    auto runner = reinterpret_cast<GriddynRunner *> (sim);
+
+    if (runner == nullptr)
+    {
+        return INVALID_OBJECT;
+    }
+    return runner->getSim()->getInt("linkcount");
+}
+
+int gridDynSimulation_getResults(gridDynSimReference sim, const char *dataType, double *data, int maxSize)
+{
+    auto runner = reinterpret_cast<GriddynRunner *> (sim);
+
+    if (runner == nullptr)
+    {
+        return INVALID_OBJECT;
+    }
+    if (!runner->getSim())
+    {
+        return 0;
+    }
+    std::vector<double> dataVec;
+    auto fvecfunc = getObjectVectorFunction(static_cast<const Area *>(nullptr), dataType);
+    if (!fvecfunc.first)
+    {
+        return 0;
+    }
+    fvecfunc.first(runner->getSim().get(), dataVec);
+    for (int ii = 0; (ii < maxSize) && (ii < static_cast<int>(dataVec.size()));++ii)
+    {
+        data[ii]=dataVec[ii];
+    }
+    return (std::min)(maxSize, static_cast<int>(dataVec.size()));
+}
+
 int gridDynSimulation_stateSize (gridDynSimReference sim, solverKey key)
 {
     auto runner = reinterpret_cast<GriddynRunner *> (sim);

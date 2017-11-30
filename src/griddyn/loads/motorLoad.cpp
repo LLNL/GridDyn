@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
-#include "loads/motorLoad.h"
+#include "loads/motorLoad5.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
@@ -108,55 +108,59 @@ void motorLoad::dynObjectInitializeB (const IOdata & /*inputs*/,
     }
 }
 
-void motorLoad::loadSizes (const solverMode &sMode, bool dynOnly)
+stateSizes motorLoad::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &so = offsets.getOffsets (sMode);
-    if (dynOnly)
-    {
-        so.total.jacSize = 4;
-        if ((opFlags[stalled]) && (opFlags[resettable]))
-        {
-            so.total.algRoots = 1;
-        }
-        else
-        {
-            so.total.diffRoots = 1;
-        }
-        so.rjLoaded = true;
-    }
-    else
-    {
-        so.reset ();
-        if (isDynamic (sMode))
-        {
-            if ((opFlags[stalled]) && (opFlags[resettable]))
-            {
-                so.total.diffRoots = 1;
-            }
-            else
-            {
-                so.total.algRoots = 1;
-            }
-            if (!isAlgebraicOnly (sMode))
-            {
-                so.total.diffSize = 1;
-                so.total.jacSize = 4;
-            }
-        }
-        else if (!opFlags[init_transient])
-        {
-            so.total.algSize = 1;
-            so.total.jacSize = 4;
-        }
-        so.rjLoaded = true;
-        so.stateLoaded = true;
-    }
+	stateSizes SS;
+	if (isDynamic(sMode))
+	{
+		if (!isAlgebraicOnly(sMode))
+		{
+			SS.diffSize = 1;
+		}
+	}
+	else if (!opFlags[init_transient])
+	{
+		SS.algSize = 1;
+	}
+	return SS;
+}
+
+count_t motorLoad::LocalJacobianCount(const solverMode &sMode) const
+{
+	count_t jacSize = 0;
+	if (isDynamic(sMode))
+	{
+		if (!isAlgebraicOnly(sMode))
+		{
+			jacSize = 4;
+		}
+	}
+	else if (!opFlags[init_transient])
+	{
+		jacSize = 4;
+	}
+	return jacSize;
+}
+
+std::pair<count_t, count_t> motorLoad::LocalRootCount(const solverMode &/*sMode*/) const
+{
+	count_t algRoots = 0;
+	count_t diffRoots = 0;
+	if ((opFlags[stalled]) && (opFlags[resettable]))
+	{
+		algRoots = 1;
+	}
+	else
+	{
+		diffRoots = 1;
+	}
+	return std::make_pair(algRoots, diffRoots);
 }
 
 // set properties
 void motorLoad::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else
@@ -177,7 +181,7 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
             H = val;
             break;
         case 'p':
-            Pmot = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            Pmot = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             if (mBase < 0)
             {
                 mBase = Pmot * systemBasePower;
@@ -243,11 +247,11 @@ void motorLoad::set (const std::string &param, double val, gridUnits::units_t un
         }
         else if ((param == "base") || (param == "mbase") || (param == "rating"))
         {
-            mBase = unitConversion (val, unitType, MVAR, systemBasePower, baseVoltage);
+            mBase = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         }
         else if (param == "Vcontrol")
         {
-            Vcontrol = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+            Vcontrol = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
             slipCheck = true;
         }
         else

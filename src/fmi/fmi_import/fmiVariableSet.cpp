@@ -13,10 +13,7 @@
 #include "fmiInfo.h"
 #include <algorithm>
 
-fmiVariableSet::fmiVariableSet()
-{
-
-}
+fmiVariableSet::fmiVariableSet() = default;
 
 fmiVariableSet::fmiVariableSet(fmi2ValueReference newvr) :vrset({ newvr })
 {

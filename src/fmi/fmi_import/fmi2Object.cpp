@@ -49,13 +49,12 @@ void fmi2Object::setMode(fmuMode mode)
 		ret=commonFunctions->fmi2Terminate(comp);
 	}
 
-	
-	
 	switch(currentMode)
 	{
 	case fmuMode::instantiatedMode:
-		if ((mode==fmuMode::initializationMode)||(mode==fmuMode::eventMode))
+		switch (mode)
 		{
+		case fmuMode::initializationMode:
 			if (inputSize() == 0)
 			{
 				setDefaultInputs();
@@ -64,13 +63,13 @@ void fmi2Object::setMode(fmuMode mode)
 			{
 				setDefaultOutputs();
 			}
-			ret=commonFunctions->fmi2EnterInitializationMode(comp);
-			if ((ret==fmi2OK)&&((mode == fmuMode::eventMode)||(mode==fmuMode::stepMode)))
-			{
-				ret = commonFunctions->fmi2ExitInitializationMode(comp);
-			}
+			ret = commonFunctions->fmi2EnterInitializationMode(comp);
+			break;
+		case fmuMode::eventMode:
+		case fmuMode::stepMode:
+			fmi2Object::setMode(fmuMode::initializationMode); //go into initialization first
+			ret = commonFunctions->fmi2ExitInitializationMode(comp);
 		}
-		
 		break;
 	case fmuMode::initializationMode:
 		if ((mode == fmuMode::eventMode)||(mode==fmuMode::stepMode))
@@ -196,6 +195,22 @@ void fmi2Object::set(const std::string &param, const std::string &val)
 	{
 		handleNonOKReturnValues(ret);
 	}
+}
+
+void fmi2Object::setFlag(const std::string &param, bool val)
+{
+    auto ref = info->getVariableInfo(param);
+    if (!(ref.type == fmi_variable_type_t::string))
+    {
+        handleNonOKReturnValues(fmi2Status::fmi2Discard);
+        return;
+    }
+    fmi2Boolean val2 = val?fmi2True:fmi2False;
+    auto ret = commonFunctions->fmi2SetBoolean(comp, &(ref.valueRef), 1, &val2);
+    if (ret != fmi2Status::fmi2OK)
+    {
+        handleNonOKReturnValues(ret);
+    }
 }
 
 void fmi2Object::getFMUState(fmi2FMUstate *FMUstate)
@@ -408,21 +423,36 @@ fmiVariableSet fmi2Object::getVariableSet(int index) const
 std::vector<std::string> fmi2Object::getOutputNames() const
 {
 	std::vector<std::string> oVec;
-	oVec.reserve(activeOutputs.getVRcount());
-	for (auto &os : activeOutputIndices)
+	if (activeOutputs.getVRcount() == 0)
 	{
-		oVec.push_back(info->getVariableInfo(os).name);
+		oVec=info->getVariableNames("outputs");
 	}
+	else
+	{
+		oVec.reserve(activeOutputs.getVRcount());
+		for (auto &os : activeOutputIndices)
+		{
+			oVec.push_back(info->getVariableInfo(os).name);
+		}
+	}
+	
 	return oVec;
 }
 
 std::vector<std::string> fmi2Object::getInputNames() const
 {
 	std::vector<std::string> oVec;
-	oVec.reserve(activeInputs.getVRcount());
-	for (auto &os : activeInputIndices)
+	if (activeInputs.getVRcount() == 0)
 	{
-		oVec.push_back(info->getVariableInfo(os).name);
+		oVec = info->getVariableNames("inputs");
+	}
+	else
+	{
+		oVec.reserve(activeInputs.getVRcount());
+		for (auto &os : activeInputIndices)
+		{
+			oVec.push_back(info->getVariableInfo(os).name);
+		}
 	}
 	return oVec;
 }
@@ -488,7 +518,11 @@ void fmi2Object::handleNonOKReturnValues(fmi2Status retval) const
 		}
 		break;
 	case fmi2Status::fmi2Warning:
-		throw(fmiWarningException());
+		if (exceptionOnWarning)
+		{
+			throw(fmiWarningException());
+		}
+		break;
 	case fmi2Status::fmi2Error:
 		throw(fmiErrorException());
 	case fmi2Status::fmi2Fatal:

@@ -12,7 +12,7 @@
 
 #include "reversibleEvent.h"
 #include "measurement/gridGrabbers.h"
-#include "core/helperTemplates.hpp"
+
 
 namespace griddyn
 {
@@ -26,7 +26,7 @@ reversibleEvent::reversibleEvent(coreTime time0):Event(time0)
 {
 
 }
-reversibleEvent::reversibleEvent(EventInfo &gdEI, coreObject *rootObject):Event(gdEI,rootObject)
+reversibleEvent::reversibleEvent(const EventInfo &gdEI, coreObject *rootObject):Event(gdEI,rootObject)
 {
 	ggrab = createGrabber(field, m_obj);
 	ggrab->outputUnits = unitType;
@@ -35,7 +35,7 @@ reversibleEvent::reversibleEvent(EventInfo &gdEI, coreObject *rootObject):Event(
 	
 }
 
-void reversibleEvent::updateEvent(EventInfo &gdEI, coreObject *rootObject)
+void reversibleEvent::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
 {
 	Event::updateEvent(gdEI, rootObject);
 	ggrab = createGrabber(field, m_obj);
@@ -45,18 +45,27 @@ void reversibleEvent::updateEvent(EventInfo &gdEI, coreObject *rootObject)
 
 reversibleEvent::~reversibleEvent() = default;
 
-std::shared_ptr<Event> reversibleEvent::clone(std::shared_ptr<Event> gE) const
+std::unique_ptr<Event> reversibleEvent::clone() const
 {
-	auto re = cloneBase<reversibleEvent, Event>(this, gE);
-	if (!re)
-	{
-		return gE;
-	}
-	re->ggrab = createGrabber(field, m_obj);
-	re->ggrab->outputUnits = ggrab->outputUnits;
-	re->canUndo = canUndo;
-	return gE;
+	std::unique_ptr<Event> upE = std::make_unique<reversibleEvent>(getName());
+	cloneTo(upE.get());
+	return upE;
 }
+
+void reversibleEvent::cloneTo(Event *gE) const
+{
+	Event::cloneTo(gE);
+	auto nE = dynamic_cast<reversibleEvent *>(gE);
+	if (nE == nullptr)
+	{
+		return;
+	}
+	nE->ggrab = createGrabber(field, m_obj);
+	nE->ggrab->outputUnits = ggrab->outputUnits;
+	nE->canUndo = canUndo;
+	
+}
+
 
 //virtual void updateEvent(EventInfo &gdEI, coreObject *rootObject) override;
 change_code reversibleEvent::trigger()
@@ -66,7 +75,29 @@ change_code reversibleEvent::trigger()
 		undoValue= ggrab->grabData();
 		hasUndo = true;
 	}
-	return Event::trigger();
+    if (stringEvent)
+    {
+        if (m_obj == nullptr)
+        {
+            armed = false;
+            return change_code::execution_failure;
+        }
+        try
+        {
+            m_obj->set(field, newStringValue);
+            return change_code::parameter_change;
+        }
+        catch (const std::invalid_argument &)
+        {
+            return change_code::execution_failure;
+        }
+
+    }
+    else
+    {
+        return Event::trigger();
+    }
+	
 }
 
 change_code reversibleEvent::trigger(coreTime time)
@@ -76,7 +107,34 @@ change_code reversibleEvent::trigger(coreTime time)
 		undoValue = ggrab->grabData();
 		hasUndo = true;
 	}
-	return Event::trigger(time);
+    if (stringEvent)
+    {
+        change_code ret = change_code::not_triggered;
+        if (time >= triggerTime)
+        {
+            if (m_obj == nullptr)
+            {
+                armed = false;
+                return change_code::execution_failure;
+            }
+            try
+            {
+                m_obj->set(field, newStringValue);
+                ret = change_code::parameter_change;
+            }
+            catch (const std::invalid_argument &)
+            {
+                ret = change_code::execution_failure;
+            }
+            armed = false;
+        }
+        return ret;
+    }
+    else
+    {
+        return Event::trigger(time);
+    }
+	
 }
 
 bool reversibleEvent::setTarget(coreObject *gdo, const std::string &var)
@@ -95,6 +153,12 @@ bool reversibleEvent::setTarget(coreObject *gdo, const std::string &var)
 		canUndo = ggrab->loaded;
 	}
 	return res;
+}
+
+
+void reversibleEvent::updateStringValue(const std::string &newStr)
+{
+    newStringValue = newStr;
 }
 
 void reversibleEvent::updateObject(coreObject *gco, object_update_mode mode)

@@ -11,17 +11,18 @@
  */
 
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "loads/gridLabDLoad.h"
 #include "loads/ThreePhaseLoad.h"
-#include "loads/motorLoad.h"
+#include "loads/motorLoad5.h"
 #include "loads/zipLoad.h"
 #include "simulation/diagnostics.h"
 #include "testHelper.h"
 #include <cmath>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include "loads/approximatingLoad.h"
 
 using namespace griddyn;
 using namespace griddyn::loads;
@@ -126,7 +127,7 @@ BOOST_AUTO_TEST_CASE (load_voltage_sweep)
 BOOST_AUTO_TEST_CASE (ramp_load_test)
 {
     ld1 = new rampLoad ();
-    rampLoad *ldT = dynamic_cast<rampLoad *> (ld1);
+    auto ldT = dynamic_cast<rampLoad *> (ld1);
     BOOST_REQUIRE ((ldT));
     double val;
     // test P ramp
@@ -207,7 +208,7 @@ BOOST_AUTO_TEST_CASE (ramp_load_test)
 BOOST_AUTO_TEST_CASE (random_load_test)
 {
     ld1 = new sourceLoad (sourceLoad::sourceType::random);
-    sourceLoad *ldT = static_cast<sourceLoad *> (ld1);
+    auto ldT = static_cast<sourceLoad *> (ld1);
     BOOST_REQUIRE (ldT != nullptr);
     // test P random
     ld1->set ("p:trigger_dist", "constant");
@@ -255,7 +256,7 @@ BOOST_AUTO_TEST_CASE (random_load_test)
 BOOST_AUTO_TEST_CASE (random_load_test2)
 {
     ld1 = new sourceLoad (sourceLoad::sourceType::random);
-    sourceLoad *ldT = static_cast<sourceLoad *> (ld1);
+    auto ldT = static_cast<sourceLoad *> (ld1);
     BOOST_REQUIRE (ldT != nullptr);
     double val;
     // test P ramp
@@ -513,6 +514,60 @@ BOOST_AUTO_TEST_CASE (fdep_test)
 
     gds->run ();
     requireStates (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+}
+
+BOOST_AUTO_TEST_CASE(approxload_test1)
+{
+	approximatingLoad apload("apload1");
+
+	ld1 = new zipLoad("zload1");
+	ld1->set("p", 0.4);
+	ld1->set("q", 0.3);
+	ld1->set("yp", 0.1);
+	ld1->set("yq", -0.12);
+	ld1->set("ip", 0.03);
+	ld1->set("iq", 0.06);
+	apload.add(ld1);
+	apload.pFlowInitializeA(0, 0);
+	apload.pFlowInitializeB();
+	auto p=apload.get("p");
+	auto q = apload.get("q");
+	auto yp = apload.get("yp");
+	auto yq = apload.get("yq");
+	auto ip = apload.get("ip");
+	auto iq = apload.get("iq");
+
+	BOOST_CHECK_CLOSE(p, 0.4, 0.001);
+	BOOST_CHECK_CLOSE(q, 0.3, 0.001);
+	BOOST_CHECK_CLOSE(yp, 0.1, 0.001);
+	BOOST_CHECK_CLOSE(yq, -0.12, 0.001);
+	BOOST_CHECK_CLOSE(ip, 0.03, 0.001);
+	BOOST_CHECK_CLOSE(iq, 0.06, 0.001);
+
+
+	ld1->set("p", 0.5);
+	ld1->set("q", -0.1);
+	ld1->set("yp", 0.13);
+	ld1->set("yq", -0.12);
+	ld1->set("ip", 0);
+	ld1->set("iq", 0.23);
+
+	apload.updateA(2);
+	apload.updateB();
+	p = apload.get("p");
+	q = apload.get("q");
+	yp = apload.get("yp");
+	yq = apload.get("yq");
+	ip = apload.get("ip");
+	iq = apload.get("iq");
+
+	BOOST_CHECK_CLOSE(p, 0.5, 0.001);
+	BOOST_CHECK_CLOSE(q, -0.1, 0.001);
+	BOOST_CHECK_CLOSE(yp, 0.13, 0.001);
+	BOOST_CHECK_CLOSE(yq, -0.12, 0.001);
+	BOOST_CHECK_SMALL(ip, 0.00001);
+	BOOST_CHECK_CLOSE(iq, 0.23, 0.001);
+	ld1 = nullptr;
 }
 
 BOOST_AUTO_TEST_CASE (simple_3phase_load_test)

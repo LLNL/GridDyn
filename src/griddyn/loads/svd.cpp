@@ -83,7 +83,7 @@ void svd::setLoad (double Plevel, double Qlevel, units_t unitType)
 
 int svd::checkSetting (double level)
 {
-    if (level == 0)
+    if (level == 0.0)
     {
         return 0;
     }
@@ -94,28 +94,64 @@ int svd::checkSetting (double level)
     else
     {
         int setting = 0;
-        auto block = Cblocks.begin ();
-        double totalQ = Qlow;
-        while (std::abs (totalQ) < std::abs (level))
-        {
-            for (int kk = 0; kk < (*block).first; ++kk)
-            {
-                totalQ += (*block).second;
-                ++setting;
-                if (std::abs (totalQ - level) < 0.00001)
-                {
-                    return setting;
-                }
-            }
-            ++block;
-            if (block == Cblocks.end ())
-            {
-                break;
-            }
-        }
+		double totalQ = Qlow;
+		if (!opFlags[reverse_control_flag])
+		{
+			auto block = Cblocks.begin();
+			while (std::abs(totalQ) < std::abs(level))
+			{
+				for (int kk = 0; kk < (*block).first; ++kk)
+				{
+					totalQ += (*block).second;
+					++setting;
+					if (std::abs(totalQ - level) < 0.00001)
+					{
+						return setting;
+					}
+				}
+				++block;
+				if (block == Cblocks.end())
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			auto block = Cblocks.rbegin();
+			while (std::abs(totalQ) < std::abs(level))
+			{
+				for (int kk = 0; kk < (*block).first; ++kk)
+				{
+					totalQ += (*block).second;
+					++setting;
+					if (std::abs(totalQ - level) < 0.00001)
+					{
+						return setting;
+					}
+				}
+				++block;
+				if (block == Cblocks.rend())
+				{
+					break;
+				}
+			}
+		}
         if (std::abs (totalQ) > std::abs (level))
         {
-            LOG_WARNING ("unable to match requested level");
+			if (opFlags[reverse_toggled_flag])
+			{
+				opFlags.flip(reverse_control_flag);
+				opFlags.reset(reverse_toggled_flag);
+				LOG_WARNING("unable to match requested level");
+			}
+			else
+			{
+				opFlags.flip(reverse_control_flag);
+				opFlags.set(reverse_toggled_flag);
+				return checkSetting(level);
+			}
+            
         }
 
         return setting;
@@ -136,22 +172,43 @@ void svd::updateSetting (int step)
     }
     else
     {
-        auto block = Cblocks.begin ();
-        int scount = 0;
-        double qlevel = Qlow;
-        while (step > scount + (*block).first)
-        {
-            scount += (*block).first;
-            qlevel += (*block).second;
-            ++block;
-            if (block == Cblocks.end ())
-            {
-                break;
-            }
-        }
-        qlevel += (step - scount) * (*block).second;
+		double qlevel = Qlow;
+		if (opFlags[reverse_control_flag])
+		{
+			auto block = Cblocks.begin();
+			int scount = 0;
+			
+			while (step > scount + (*block).first)
+			{
+				scount += (*block).first;
+				qlevel += (*block).second;
+				++block;
+				if (block == Cblocks.end())
+				{
+					break;
+				}
+			}
+			qlevel += (step - scount) * (*block).second;
+		}
+		else
+		{
+			auto block = Cblocks.rbegin();
+			int scount = 0;
+			while (step > scount + (*block).first)
+			{
+				scount += (*block).first;
+				qlevel += (*block).second;
+				++block;
+				if (block == Cblocks.rend())
+				{
+					break;
+				}
+			}
+			qlevel += (step - scount) * (*block).second;
+		}
+		setYq(qlevel);
         currentStep = step;
-        setYq (qlevel);
+       
     }
 }
 
@@ -253,31 +310,31 @@ void svd::set (const std::string &param, double val, units_t unitType)
 {
     if (param == "qlow")
     {
-        Qlow = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qlow = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qhigh")
     {
-        Qhigh = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qhigh = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        Qmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     if (param == "qmax")
     {
-        Qmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmax")
     {
-        Vmax = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        Vmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmin")
     {
-        Vmin = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        Vmin = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "yq")
     {
-        double temp = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        double temp = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         setLoad (temp);
     }
     else if (param == "step")
@@ -294,7 +351,7 @@ void svd::set (const std::string &param, double val, units_t unitType)
         {
             if (Cblocks[0].second == 0)
             {
-                Cblocks[0].second = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+                Cblocks[0].second = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
                 Qhigh = Qlow + Cblocks[0].first * Cblocks[0].second;
                 stepCount = Cblocks[0].first;
             }

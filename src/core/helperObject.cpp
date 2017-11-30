@@ -67,7 +67,11 @@ void setMultipleFlags (helperObject *obj, const std::string &flags)
     utilities::string_viewOps::trim (flgs);
     for (const auto &flag : flgs)
     {
-        if (flag[0] != '-')
+		if (flag.empty())
+		{
+			continue;
+		}
+        if (flag.front() != '-')
         {
             obj->setFlag (flag.to_string (), true);
         }

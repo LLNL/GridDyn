@@ -24,10 +24,11 @@ static typeFactory<Source>
 namespace sources
 {
 static childTypeFactory<pulseSource, Source> glfp ("source", "pulse");
-static childTypeFactory<sineSource, Source> cfgsl ("source", "sine");
+static childTypeFactory<sineSource, Source> cfgsl("source", stringVec{ "sine","oscillatory" });
 static childTypeFactory<rampSource, Source> glfr ("source", "ramp");
-static childTypeFactory<randomSource, Source> glfrand ("source", "random");
+static childTypeFactory<randomSource, Source> glfrand("source", stringVec{ "random","rand" });
 static childTypeFactory<fileSource, Source> glfld ("source", "file");
+static childTypeFactory<grabberSource, Source> grbsrc("source", stringVec{ "grabber","data" });
 }  // namespace sources
 
 Source::Source (const std::string &objName, double startVal) : gridSubModel (objName), m_tempOut (startVal)
@@ -47,7 +48,8 @@ coreObject *Source::clone (coreObject *obj) const
     }
     gS->m_tempOut = m_tempOut;
     gS->lastTime = lastTime;
-    gS->m_purpose = m_purpose;
+    gS->purpose_ = purpose_;
+	gS->outputUnits_ = outputUnits_;
     return gS;
 }
 
@@ -55,8 +57,12 @@ void Source::set (const std::string &param, const std::string &val)
 {
     if (param == "purpose")
     {
-        m_purpose = val;
+        purpose_ = val;
     }
+	else if ((param == "units") || (param == "outputunits"))
+	{
+		outputUnits_ = gridUnits::getUnits(val);
+	}
     else
     {
         gridSubModel::set (param, val);
@@ -68,7 +74,7 @@ void Source::set (const std::string &param, double val, gridUnits::units_t unitT
 {
     if ((param == "val") || (param == "setval") || (param == "level") || (param == "value") || (param == "output"))
     {
-        setLevel (val);
+        setLevel (gridUnits::unitConversion(val,unitType,outputUnits_,systemBasePower,localBaseVoltage));
     }
     else
     {
@@ -116,7 +122,14 @@ double Source::getOutput (const IOdata & /*inputs*/,
     return (outputNum == 0) ? m_tempOut : kNullVal;
 }
 
+
 double Source::getOutput (index_t outputNum) const { return (outputNum == 0) ? m_tempOut : kNullVal; }
+
+gridUnits::units_t Source::outputUnits(index_t outputNum) const
+{
+	return (outputNum == 0) ? outputUnits_ : gridUnits::defUnit;
+}
+
 index_t Source::getOutputLoc (const solverMode & /*sMode*/, index_t /*outputNum*/) const { return kNullLocation; }
 void Source::updateLocalCache (const IOdata & /*inputs*/, const stateData &sD, const solverMode & /*sMode*/)
 {

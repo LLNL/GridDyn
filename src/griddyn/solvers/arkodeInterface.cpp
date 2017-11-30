@@ -13,19 +13,15 @@
 #include "arkodeInterface.h"
 
 #include "core/coreExceptions.h"
-#include "core/helperTemplates.hpp"
-#include "griddyn.h"
+
+#include "gridDynSimulation.h"
 #include "simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 
 #include <arkode/arkode.h>
-#include <arkode/arkode_dense.h>
+#include <arkode/arkode_direct.h>
 
-#ifdef KLU_ENABLE
-#include <arkode/arkode_klu.h>
-#include <arkode/arkode_sparse.h>
-#endif
 
 #include <cassert>
 #include <map>
@@ -35,25 +31,15 @@ namespace griddyn
 namespace solvers
 {
 int arkodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
-int arkodeJacDense (long int Neq,
-                    realtype time,
+int arkodeJac (realtype time,
                     N_Vector state,
                     N_Vector dstate_dt,
-                    DlsMat J,
+                    SUNMatrix J,
                     void *user_data,
                     N_Vector tmp1,
                     N_Vector tmp2,
                     N_Vector tmp3);
-#ifdef KLU_ENABLE
-int arkodeJacSparse (realtype time,
-                     N_Vector state,
-                     N_Vector dstate_dt,
-                     SlsMat J,
-                     void *user_data,
-                     N_Vector tmp1,
-                     N_Vector tmp2,
-                     N_Vector tmp3);
-#endif
+
 int arkodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
 arkodeInterface::arkodeInterface (const std::string &objName) : sundialsInterface (objName)
@@ -79,15 +65,24 @@ arkodeInterface::~arkodeInterface ()
     }
 }
 
-std::shared_ptr<solverInterface> arkodeInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> arkodeInterface::clone(bool fullCopy) const
 {
-    auto rp = cloneBaseStack<arkodeInterface, sundialsInterface, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
+	std::unique_ptr<solverInterface> si = std::make_unique<arkodeInterface>();
+	arkodeInterface::cloneTo(si.get(),fullCopy);
+	return si;
+}
 
-    return rp;
+void arkodeInterface::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	sundialsInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<arkodeInterface *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	ai->maxStep = maxStep;
+	ai->minStep = minStep;
+	ai->step = step;
 }
 
 void arkodeInterface::allocate (count_t stateCount, count_t numRoots)
@@ -107,7 +102,7 @@ void arkodeInterface::allocate (count_t stateCount, count_t numRoots)
     rootsfound.resize (numRoots);
 
     // allocate the solverMemory
-    if (solverMem!=nullptr)
+    if (solverMem != nullptr)
     {
         ARKodeFree (&(solverMem));
     }
@@ -248,7 +243,7 @@ void arkodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
     logstr += "Last step                          = " + std::to_string (hlast) + '\n';
     logstr += "Tolerance scale factor             = " + std::to_string (tolsfac) + '\n';
 
-    if (m_gds!=nullptr)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }
@@ -276,7 +271,7 @@ void arkodeInterface::logErrorWeights (print_level logLevel) const
           std::to_string (kk) + ':' + std::to_string (ewdata[kk]) + '\t' + std::to_string (eldata[kk]) + '\n';
     }
 
-    if (m_gds!=nullptr)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }
@@ -288,7 +283,7 @@ void arkodeInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-/* *INDENT-OFF* */
+
 static const std::map<int, std::string> arkodeRetCodes{
   {ARK_MEM_NULL, "The solver memory argument was NULL"},
   {ARK_ILL_INPUT, "One of the function inputs is illegal"},
@@ -312,7 +307,7 @@ static const std::map<int, std::string> arkodeRetCodes{
   {ARK_BAD_DKY, "Bad DKY"},
 
 };
-/* *INDENT-ON* */
+
 
 void arkodeInterface::initialize (coreTime time0)
 {
@@ -324,7 +319,7 @@ void arkodeInterface::initialize (coreTime time0)
 
     // dynInitializeB CVode - Sundials
 
-    int retval = ARKodeSetUserData (solverMem, reinterpret_cast<void *>(this));
+    int retval = ARKodeSetUserData (solverMem, reinterpret_cast<void *> (this));
     check_flag (&retval, "ARKodeSetUserData", 1);
 
     // guessState an initial condition
@@ -377,7 +372,7 @@ void arkodeInterface::initialize (coreTime time0)
     retval = ARKodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "ARKodeSetMaxNonlinIters", 1);
 
-    retval = ARKodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *>(this));
+    retval = ARKodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
     check_flag (&retval, "ARKodeSetErrHandlerFn", 1);
 
     if (maxStep > 0.0)
@@ -508,19 +503,6 @@ int arkodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_da
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-#define CHECK_JACOBIAN 1
-int arkodeJacDense (long int Neq,
-                    realtype time,
-                    N_Vector state,
-                    N_Vector dstate_dt,
-                    DlsMat J,
-                    void *user_data,
-                    N_Vector tmp1,
-                    N_Vector tmp2,
-                    N_Vector /*tmp3*/)
-{
-    return sundialsJacDense (Neq, time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
-}
 
 //#define CAPTURE_JAC_FILE
 
@@ -528,13 +510,13 @@ int arkodeJacDense (long int Neq,
 int arkodeJacSparse (realtype time,
                      N_Vector state,
                      N_Vector dstate_dt,
-                     SlsMat J,
+                     SUNMatrix J,
                      void *user_data,
                      N_Vector tmp1,
                      N_Vector tmp2,
                      N_Vector /*tmp3*/)
 {
-    return sundialsJacSparse (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
+    return sundialsJac (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
 }
 
 #endif  // KLU_ENABLE

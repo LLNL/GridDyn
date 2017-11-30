@@ -32,6 +32,7 @@ private:
 	double vlower = -kBigNum;  //!< the lower value of the current lookup table section
 	double vupper = kBigNum;     //!< the upper value of the current lookup table section
 	int lindex = -1;  //!< the index of the current lookup table section
+	//NOTE: extra 4 bytes here
 public:
 	explicit lutBlock(const std::string &objName = "lutBlock_#");
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;

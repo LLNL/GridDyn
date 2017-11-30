@@ -26,7 +26,7 @@ used for implementing a bus-breaker model of a power system as well as creating 
 class zBreaker : public Link
 {
 protected:
-	bool merged = false;  //!< flag indicating that the buses have been merged
+	bool &merged;  //!< flag indicating that the buses have been merged using the extra bool in coreObject
 public:
 	zBreaker(const std::string &objName = "zbreaker_$");
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;

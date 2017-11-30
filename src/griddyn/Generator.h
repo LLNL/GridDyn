@@ -109,7 +109,9 @@ class Generator : public gridSecondary
     @throw unrecognizedObjectError is object is not valid*/
     virtual void add (gridSubModel *obj);
 
-    void loadSizes (const solverMode &sMode, bool dynOnly) override;
+	virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+	virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
 
     virtual void algebraicUpdate (const IOdata &inputs,
                                   const stateData &sD,
@@ -192,12 +194,24 @@ class Generator : public gridSecondary
                                          std::uint32_t flags,
                                          check_level_t level) override;  // only applicable in pFlow
     virtual coreObject *find (const std::string &object) const override;
+	/** get the frequency the generator is operating at
+	@param[in] sD the current stateData
+	@param[in] sMode the solvermode corresponding to the state
+	@param[out] freqOffset the location of the frequency state in the sD arrays
+	@return the current frequency the generator is operating at
+	*/
     virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *freqOffset = nullptr) const;
-    virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset = nullptr) const;
+	/** get the internal angle of the generator
+	@param[in] sD the current stateData
+	@param[in] sMode the solvermode corresponding to the state
+	@param[out] angleOffset the location of the frequency state in the sD arrays
+	@return the current angle of  the generator is operating at
+	*/
+	virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset = nullptr) const;
 
   protected:
-    virtual void updateFlags (bool dynOnly = false) override;
-
+	/** set the non-local bus that the generator controls
+	@param[in] newRemoteBus the bus the generate is monitoring and controlling*/
     void setRemoteBus (coreObject *newRemoteBus);
 };
 

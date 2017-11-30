@@ -13,7 +13,7 @@ set(fskit_sources
   gridDynFederatedScheduler.cpp
   gridDynfskit.cpp
   zonalRelayLogicalProcess.cpp
-  GridDynFskitRunner.cpp
+  fskitRunner.cpp
   GridDynFederatedSimulator.cpp
 )
 	
@@ -22,7 +22,7 @@ set (fskit_headers
 	gridDynFederatedScheduler.h
 	gridDynfskit.h
 	zonalRelayLogicalProcess.h
-	GridDynFskitRunner.h
+	fskitRunner.h
 	GridDynFederatedSimulator.h
 	griddyn-tracer.h
 	)
@@ -33,6 +33,8 @@ INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
+
+target_link_libraries(fskitLibrary fileInput)
 
 INSTALL(TARGETS fskitLibrary
 	LIBRARY DESTINATION lib

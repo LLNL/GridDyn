@@ -11,7 +11,7 @@
 */
 
 #include "events/Event.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE (link_test1_dynamic)
     g2->setTime (3.4);
 
     gds->add (g1);
-    gds->add (g2);
+    gds->add (std::shared_ptr<Event>(std::move(g2)));
     gds->run (0.5);
     int mmatch = runJacobianCheck (gds, cDaeSolverMode);
 

@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "readElement.h"
 #include "sources/sourceTypes.h"

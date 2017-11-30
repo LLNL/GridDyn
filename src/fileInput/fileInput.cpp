@@ -25,18 +25,20 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/filesystem.hpp>
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 namespace griddyn
 {
+	
 namespace readerConfig
 {
-int printMode = READER_DEFAULT_PRINT;
-int warnMode = READER_WARN_ALL;
-int warnCount = 0;
+int printMode = READER_DEFAULT_PRINT;  
+int warnMode = READER_WARN_ALL;	
+int warnCount = 0;	
 
-match_type defMatchType = match_type::capital_case_match;
+match_type defMatchType = match_type::capital_case_match; 
 
-xmlreader default_xml_reader = xmlreader::tinyxml;
+xmlreader default_xml_reader = xmlreader::tinyxml;  
+ 
 
 void setPrintMode (int level) { printMode = level; }
 #define READER_VERBOSE_PRINT 3
@@ -73,6 +75,7 @@ void setPrintMode (const std::string &level)
 }
 
 void setWarnMode (int level) { warnMode = level; }
+
 void setWarnMode (const std::string &level)
 {
     if ((level == "0") || (level == "none"))
@@ -92,6 +95,7 @@ void setWarnMode (const std::string &level)
         WARNPRINT (READER_WARN_IMPORTANT, "invalid waring level specification");
     }
 }
+
 
 void setDefaultMatchType (const std::string &matchType)
 {
@@ -166,21 +170,27 @@ int objectParameterSet (const std::string &label, coreObject *obj, gridParameter
     return (-1);
 }
 
-uint32_t addflags (uint32_t iflags, const std::string &flags)
+static const std::map<std::string, int> flagStringMap
+{
+	{ "ignore_step_up_transformers" ,ignore_step_up_transformer },
+	{"powerflow_only",assume_powerflow_only },
+	{"no_generator_bus_reset",no_generator_bus_voltage_reset },
+	{ "no_generator_bus_voltage_reset",no_generator_bus_voltage_reset },
+};
+
+void addflags (basicReaderInfo &bri, const std::string &flags)
 {
     using namespace stringOps;
-    uint32_t oflags = iflags;
     auto flagsep = splitline (flags);
     trim (flagsep);
     for (auto &flag : flagsep)
     {
-        if (flag == "ignore_step_up_transformers")
-        {
-            oflags |= (1 << ignore_step_up_transformer);
-        }
+		auto fnd = flagStringMap.find(convertToLowerCase(flag));
+		if (fnd != flagStringMap.end())
+		{
+			bri.setFlag(fnd->second);
+		}
     }
-    // MORE will likely be added later
-    return oflags;
 }
 
 void loadFile (std::unique_ptr<gridDynSimulation> &gds,

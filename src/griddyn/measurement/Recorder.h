@@ -31,7 +31,7 @@ protected:
   
   bool binaryFile = true;	//!< flag indicating if the file is binary
   bool firstTrigger = true; //!< flag indicating that the recorder has not been triggered yet
-  int precision = -1;                //!< precision for writing text files.
+  std::int16_t precision = -1;     //!< precision for writing text files.
   count_t autosave = 0;			//!< flag indicating the recorder should autosave after the given number of points
 public:
   Recorder (coreTime time0 = timeZero,coreTime period = 1.0);
@@ -39,7 +39,11 @@ public:
   /** destructor will attempt to save the data*/
   ~Recorder ();
 
-  virtual std::shared_ptr<collector> clone (std::shared_ptr<collector> gr=nullptr) const override;
+  virtual std::unique_ptr<collector> clone() const override;
+  /** duplicate the collector to a valid event
+  @param a pointer to a collector object
+  */
+  virtual void cloneTo(collector *col) const override;
 
   virtual change_code trigger (coreTime time) override;
 

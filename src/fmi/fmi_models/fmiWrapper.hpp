@@ -15,7 +15,7 @@
 #include "utilities/stringOps.h"
 #include <cassert>
 #include <string>
-#include <vector>
+#include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
 
@@ -88,8 +88,11 @@ class fmiWrapper : public BaseObj
         stringVec inputNames_actual (BaseObj::m_inputSize);
         stringVec outputNames_actual (BaseObj::m_outputSize);
 
-        // deal with inputs
-
+       //Make sure the specified sizes are big enough
+		ensureSizeAtLeast(inputNames_specified, BaseObj::m_inputSize);
+		ensureSizeAtLeast(outputNames_specified, BaseObj::m_outputSize);
+		
+		// deal with inputs
         for (index_t ii = 0; ii < BaseObj::m_inputSize; ++ii)
         {
             if (inputNames_specified[ii].empty ())
@@ -119,7 +122,7 @@ class fmiWrapper : public BaseObj
                     }
                     else
                     {
-						BaseObj::log(this, print_level::warning,"unable to match inputs for input" + std::to_string (ii));
+                        BaseObj::log(this, print_level::warning,"unable to match inputs for input#" + std::to_string (ii) + "("+iNames[ii][0]+")");
                     }
                 }
             }
@@ -140,7 +143,7 @@ class fmiWrapper : public BaseObj
                     }
                     else
                     {
-						BaseObj::log(this, print_level::warning, "unable to match inputs for input" + std::to_string (ii));
+                        BaseObj::log(this, print_level::warning, "unable to match inputs for input#" + std::to_string (ii)+ "("+inputNames_specified[ii]+")");
                     }
                 }
             }
@@ -254,9 +257,10 @@ class fmiWrapper : public BaseObj
 				BaseObj::remove (fmisub);
             }
             fmisub = new FMItype (this->getName ());
+            this->addSubObject(fmisub);
+            assert(isSameObject(fmisub->getParent(), this));
             fmisub->set ("fmu", val);
-			this->addSubObject (fmisub);
-            assert (isSameObject (fmisub->getParent (), this));
+
         }
         else if (param2.compare (param2.size () - 3, 2, "in") == 0)
         {

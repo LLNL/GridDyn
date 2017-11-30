@@ -55,7 +55,9 @@ public:
 
   // dynInitializeB
 
-  virtual void loadSizes (const solverMode &sMode, bool dynOnly) override;
+  virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+
+  virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
 protected:
   virtual  void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override;
   virtual  void pFlowObjectInitializeB () override;

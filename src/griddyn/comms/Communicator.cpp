@@ -9,7 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-#include "griddyn-config.h"
+#include "griddyn/griddyn-config.h"
 
 #include "Communicator.h"
 
@@ -26,17 +26,17 @@ Communicator::Communicator () : m_id (getID ()) { setName ("comm_" + std::to_str
 Communicator::Communicator (const std::string &name) : helperObject (name), m_id (getID ()) {}
 Communicator::Communicator (const std::string &name, std::uint64_t id) : helperObject (name), m_id (id) {}
 Communicator::Communicator (std::uint64_t id) : m_id (id) { setName ("comm_" + std::to_string (m_id)); }
-std::shared_ptr<Communicator> Communicator::clone (std::shared_ptr<Communicator> comm) const
+std::unique_ptr<Communicator> Communicator::clone() const
 {
-    if (!comm)
-    {
-        comm = std::make_shared<Communicator> (getName ());
-    }
-    else
-    {
-        comm->setName (getName ());
-    }
-    return comm;
+	auto comm = std::make_unique<Communicator>();
+	Communicator::cloneTo(comm.get());
+	return comm;
+}
+
+void Communicator::cloneTo (Communicator *comm) const
+{
+    comm->setName (getName ());
+	comm->autoPingEnabled = autoPingEnabled;
 }
 
 void Communicator::transmit (std::uint64_t destID, std::shared_ptr<commMessage> message)
@@ -110,15 +110,13 @@ void Communicator::receive (std::uint64_t sourceID,
 bool Communicator::messagesAvailable () const { return !(messageQueue.empty ()); }
 std::shared_ptr<commMessage> Communicator::getMessage (std::uint64_t &source)
 {
-    if (messageQueue.empty ())
+	auto msg = messageQueue.pop();
+    if (!msg)
     {
         return nullptr;
     }
-    auto msp = messageQueue.front ();
-    source = msp.first;
-    std::shared_ptr<commMessage> ms = msp.second;
-    messageQueue.pop ();
-    return ms;
+    source = msg->first;
+    return msg->second;
 }
 
 // ping functions
@@ -170,7 +168,7 @@ void Communicator::setFlag (const std::string &flag, bool val)
     }
     else
     {
-		helperObject::setFlag(flag, val);
+        helperObject::setFlag (flag, val);
     }
 }
 

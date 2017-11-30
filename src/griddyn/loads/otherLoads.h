@@ -19,6 +19,7 @@
 #include "sourceLoad.h"
 #include "aggregateLoad.h"
 #include "svd.h"
+#include "approximatingLoad.h"
 
 
 

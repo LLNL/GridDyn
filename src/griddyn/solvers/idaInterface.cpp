@@ -12,23 +12,23 @@
 
 #include "idaInterface.h"
 
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 
-#include "core/helperTemplates.hpp"
+
 #include "simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 #include "utilities/matrixCreation.h"
 #include "utilities/matrixDataFilter.hpp"
 #include <ida/ida.h>
-#include <ida/ida_dense.h>
+#include <ida/ida_direct.h>
 #include <sundials/sundials_math.h>
 
 #ifdef KLU_ENABLE
-#include <ida/ida_klu.h>
-#include <ida/ida_sparse.h>
+#include <sunlinsol/sunlinsol_klu.h>
 #endif
 
+#include <sunlinsol/sunlinsol_dense.h>
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -40,29 +40,18 @@ namespace griddyn
 namespace solvers
 {
 int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
-int idaJacDense (long int Neq,
-                 realtype time,
-                 realtype cj,
-                 N_Vector state,
-                 N_Vector dstate_dt,
-                 N_Vector resid,
-                 DlsMat J,
-                 void *user_data,
-                 N_Vector tmp1,
-                 N_Vector tmp2,
-                 N_Vector tmp3);
-#ifdef KLU_ENABLE
-int idaJacSparse (realtype time,
+
+int idaJac (realtype time,
                   realtype sD,
                   N_Vector state,
                   N_Vector dstate_dt,
                   N_Vector resid,
-                  SlsMat J,
+                  SUNMatrix J,
                   void *user_data,
                   N_Vector tmp1,
                   N_Vector tmp2,
                   N_Vector tmp3);
-#endif
+
 int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data);
 
 idaInterface::idaInterface (const std::string &objName) : sundialsInterface (objName) {}
@@ -76,15 +65,22 @@ idaInterface::~idaInterface ()
     }
 }
 
-std::shared_ptr<solverInterface> idaInterface::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> idaInterface::clone(bool fullCopy) const
 {
-    auto rp = cloneBaseStack<idaInterface, sundialsInterface, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
+	std::unique_ptr<solverInterface> si = std::make_unique<idaInterface>();
+	idaInterface::cloneTo(si.get(),fullCopy);
+	return si;
+}
 
-    return rp;
+void idaInterface::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	sundialsInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<idaInterface *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	
 }
 
 void idaInterface::allocate (count_t stateCount, count_t numRoots)
@@ -138,11 +134,7 @@ double idaInterface::get (const std::string &param) const
     }
     else if (param == "jac calls")
     {
-#ifdef KLU_ENABLE
-        IDASlsGetNumJacEvals (solverMem, &val);
-#else
-        IDADlsGetNumJacEvals (solverMem, &val);
-#endif
+       IDADlsGetNumJacEvals (solverMem, &val);
     }
     else
     {
@@ -256,7 +248,7 @@ void idaInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-/* *INDENT-OFF* */
+
 static const std::map<int, std::string> idaRetCodes{
   {IDA_MEM_NULL, "The solver memory argument was NULL"},
   {IDA_ILL_INPUT, "One of the function inputs is illegal"},
@@ -287,7 +279,7 @@ static const std::map<int, std::string> idaRetCodes{
   {IDA_BAD_K, "Bad K"},
   {IDA_BAD_DKY, "Bad DKY"},
 };
-/* *INDENT-ON* */
+
 
 void idaInterface::initialize (coreTime t0)
 {
@@ -325,27 +317,37 @@ void idaInterface::initialize (coreTime t0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        retval = IDADense (solverMem, svsize);
-        check_flag (&retval, "IDADense", 1);
-
-        retval = IDADlsSetDenseJacFn (solverMem, idaJacDense);
-        check_flag (&retval, "IDADlsSetDenseJacFn", 1);
+		J = SUNDenseMatrix(svsize, svsize);
+		check_flag((void *)J, "SUNDenseMatrix", 0);
+		/* Create KLU solver object */
+		LS = SUNDenseLinearSolver(state, J);
+		check_flag((void *)LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
-        retval = IDAKLU (solverMem, svsize, jsize, CSR_MAT);
-        check_flag (&retval, "IDAKLU", 1);
+		/* Create sparse SUNMatrix */
+		J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
+		check_flag((void *)J, "SUNSparseMatrix", 0);
 
-        retval = IDASlsSetSparseJacFn (solverMem, idaJacSparse);
-        check_flag (&retval, "IDASlsSetSparseJacFn", 1);
+		/* Create KLU solver object */
+		LS = SUNKLU(state, J);
+		check_flag((void *)LS, "SUNKLU", 0);
+		
     }
 #else
-    retval = IDADense (solverMem, svsize);
-    check_flag (&retval, "IDADense", 1);
-
-    retval = IDADlsSetDenseJacFn (solverMem, idaJacDense);
-    check_flag (&retval, "IDADlsSetDenseJacFn", 1);
+	J = SUNDenseMatrix(svsize, svsize);
+	check_flag((void *)J, "SUNSparseMatrix", 0);
+	/* Create KLU solver object */
+	LS = SUNDenseLinearSolver(state, J);
+	check_flag((void *)LS, "SUNDenseLinearSolver", 0);
 #endif
+
+	retval = IDADlsSetLinearSolver(solverMem, LS, J);
+
+	check_flag(&retval, "IDADlsSetLinearSolver", 1);
+
+	retval = IDADlsSetJacFn(solverMem, idaJac);
+	check_flag(&retval, "IDADlsSetJacFn", 1);
 
     retval = IDASetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "IDASetMaxNonlinIters", 1);
@@ -372,8 +374,8 @@ void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
     }
 
     int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = IDAKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
-    check_flag (&retval, "IDAKLUReInit", 1);
+    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity ()), kinmode);
+    check_flag (&retval, "SUNKLUReInit", 1);
     jacCallCount = 0;
 #endif
 }
@@ -604,40 +606,19 @@ int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *go
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-#define CHECK_JACOBIAN 0
-int idaJacDense (long int Neq,
-                 realtype time,
-                 realtype cj,
-                 N_Vector state,
-                 N_Vector dstate_dt,
-                 N_Vector /*resid*/,
-                 DlsMat J,
-                 void *user_data,
-                 N_Vector tmp1,
-                 N_Vector tmp2,
-                 N_Vector /*tmp3*/)
-{
-    return sundialsJacDense (Neq, time, cj, state, dstate_dt, J, user_data, tmp1, tmp2);
-}
-
-//#define CAPTURE_JAC_FILE
-
-#ifdef KLU_ENABLE
-int idaJacSparse (realtype time,
+int idaJac (realtype time,
                   realtype cj,
                   N_Vector state,
                   N_Vector dstate_dt,
                   N_Vector /*resid*/,
-                  SlsMat J,
+                  SUNMatrix J,
                   void *user_data,
                   N_Vector tmp1,
                   N_Vector tmp2,
                   N_Vector /*tmp3*/)
 {
-    return sundialsJacSparse (time, cj, state, dstate_dt, J, user_data, tmp1, tmp2);
+    return sundialsJac (time, cj, state, dstate_dt, J, user_data, tmp1, tmp2);
 }
-
-#endif  // KLU_ENABLE
 
 }  // namespace solvers
 }  // namespace griddyn

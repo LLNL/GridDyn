@@ -70,8 +70,5 @@ public:
   virtual const std::vector<stringVec> &inputNames() const override;
   virtual const std::vector<stringVec> &outputNames() const override;
 };
-
-
-
 }//namespace griddyn
 #endif //GRIDDYNGENMODEL_H_

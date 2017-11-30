@@ -138,6 +138,8 @@ void loadRelay::actionTaken (index_t ActionNum,
                              coreTime /*actionTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d action %d") % conditionNum % ActionNum).str ());
+	((void)(ActionNum));
+	((void)(conditionNum));
     /*
     if (opFlags.test (use_commLink))
     {
@@ -171,6 +173,7 @@ void loadRelay::actionTaken (index_t ActionNum,
 void loadRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d triggered") % conditionNum).str ());
+	((void)(conditionNum));
     /*
     if (conditionNum < m_condition_level)
     {
@@ -211,6 +214,7 @@ void loadRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime
 void loadRelay::conditionCleared (index_t conditionNum, coreTime /*triggerTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d cleared") % conditionNum).str ());
+	((void)(conditionNum));
     /*for (size_t kk = 0; kk < m_zones; ++kk)
    {
    if (cStates[kk] == condition_status_t::active)

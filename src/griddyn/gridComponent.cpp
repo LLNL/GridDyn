@@ -196,7 +196,7 @@ coreObject *gridComponent::clone (coreObject *obj) const
     nobj->opFlags = opFlags;
     nobj->systemBaseFrequency = systemBaseFrequency;
     nobj->systemBasePower = systemBasePower;
-
+	nobj->localBaseVoltage = localBaseVoltage;
     if (nobj->subObjectList.empty ())
     {
         for (const auto &subobj : subObjectList)
@@ -241,7 +241,7 @@ coreObject *gridComponent::clone (coreObject *obj) const
                     }
                     catch (const unrecognizedObjectException &)
                     {
-                        // this likely means that the parent will take care of it itself
+                        // this likely means that the derived class will take care of it itself
                     }
                 }
             }
@@ -293,6 +293,21 @@ void gridComponent::updateObjectLinkages (coreObject *newRoot)
 
 void gridComponent::pFlowInitializeA (coreTime time0, std::uint32_t flags)
 {
+	if (localBaseVoltage == kNullVal)
+	{
+		if (isRoot())
+		{
+			localBaseVoltage = 120.0;
+		}
+		else if (dynamic_cast<gridComponent *>(getParent()))
+		{
+			localBaseVoltage = static_cast<gridComponent *>(getParent())->localBaseVoltage;
+		}
+		else
+		{
+			localBaseVoltage = 120.0;
+		}
+	}
     if (isEnabled ())
     {
         pFlowObjectInitializeA (time0, flags);
@@ -376,7 +391,7 @@ count_t gridComponent::stateSize (const solverMode &sMode)
     const auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     count_t ssize = (hasAlgebraic (sMode)) ? (so.total.algSize + so.total.vSize + so.total.aSize) : 0;
     if (hasDifferential (sMode))
@@ -402,7 +417,7 @@ count_t gridComponent::totalAlgSize (const solverMode &sMode)
     auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     return so.total.algSize + so.total.vSize + so.total.aSize;
 }
@@ -418,7 +433,7 @@ count_t gridComponent::algSize (const solverMode &sMode)
     auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     return so.total.algSize;
 }
@@ -434,7 +449,7 @@ count_t gridComponent::diffSize (const solverMode &sMode)
     auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     return so.total.diffSize;
 }
@@ -448,9 +463,9 @@ count_t gridComponent::diffSize (const solverMode &sMode) const
 count_t gridComponent::rootSize (const solverMode &sMode)
 {
     auto &so = offsets.getOffsets (sMode);
-    if (!(so.rjLoaded))
+    if (!(so.rootsLoaded))
     {
-        loadSizes (sMode, true);
+        loadRootSizes (sMode);
     }
     return so.total.algRoots + so.total.diffRoots;
 }
@@ -465,9 +480,9 @@ count_t gridComponent::rootSize (const solverMode &sMode) const
 count_t gridComponent::jacSize (const solverMode &sMode)
 {
     auto &so = offsets.getOffsets (sMode);
-    if (!(so.rjLoaded))
+    if (!(so.jacobianLoaded))
     {
-        loadSizes (sMode, true);
+        loadJacobianSizes (sMode);
     }
     return so.total.jacSize;
 }
@@ -483,7 +498,7 @@ count_t gridComponent::voltageStateCount (const solverMode &sMode)
     auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     return so.total.vSize;
 }
@@ -499,7 +514,7 @@ count_t gridComponent::angleStateCount (const solverMode &sMode)
     auto &so = offsets.getOffsets (sMode);
     if (!(so.stateLoaded))
     {
-        loadSizes (sMode, false);
+        loadStateSizes (sMode);
     }
     return so.total.aSize;
 }
@@ -549,12 +564,23 @@ void gridComponent::setOffset (index_t newOffset, const solverMode &sMode)
     offsets.setOffset (newOffset, sMode);
 }
 
-bool gridComponent::isLoaded (const solverMode &sMode, bool dynOnly) const
+bool gridComponent::isStateCountLoaded(const solverMode &sMode) const
 {
-    return (dynOnly) ? offsets.isrjLoaded (sMode) : offsets.isLoaded (sMode);
+	return offsets.isStateCountLoaded(sMode);
 }
 
-/* *INDENT-OFF* */
+
+bool gridComponent::isJacobianCountLoaded(const solverMode &sMode) const
+{
+	return offsets.isJacobianCountLoaded(sMode);
+}
+
+
+bool gridComponent::isRootCountLoaded(const solverMode &sMode) const
+{
+	return offsets.isRootCountLoaded(sMode);
+}
+
 static const std::map<std::string, operation_flags> user_settable_flags{
   {"use_bus_frequency", uses_bus_frequency},
   {"late_b_initialize", late_b_initialize},
@@ -563,7 +589,7 @@ static const std::map<std::string, operation_flags> user_settable_flags{
   {"disable_flag_update", disable_flag_updates},
   {"flag_update_required", flag_update_required},
   {"pflow_init_required", pflow_init_required},
-  {"sampled_only", no_dyn_states},
+  {"sampled_only", no_dynamics},
 };
 
 // there isn't that many flags that we want to be user settable, most are controlled by the model so allowing them
@@ -675,10 +701,10 @@ static const std::map<std::string, operation_flags> flagmap{{"constraints", has_
                                                             {"voltage_control_change", voltage_control_change},
                                                             {"error", error_flag},
                                                             {"connectivity_change", connectivity_change_flag},
-                                                            {"no_pflow_states", no_pflow_states},
+                                                            {"no_powerflow_operations", no_powerflow_operations},
                                                             {"disconnected", disconnected},
-                                                            {"no_dyn_states", no_dyn_states},
-                                                            {"sampled_only", no_dyn_states},
+                                                            {"no_dynamics", no_dynamics},
+                                                            {"sampled_only", no_dynamics},
                                                             {"disable_flag_update", disable_flag_updates},
                                                             {"flag_update_required", flag_update_required},
                                                             {"differential_output", differential_output},
@@ -905,11 +931,16 @@ void gridComponent::set (const std::string &param, double val, gridUnits::units_
             }
         }
     }
+	
     else if ((param == "basepower") || (param == "basemw") || (param == "basemva"))
     {
         systemBasePower = gridUnits::unitConversion (val, unitType, gridUnits::MW);
         setAll ("all", "basepower", systemBasePower);
     }
+	else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") || (param == "basev") || (param == "bv") || (param == "base voltage"))
+	{
+		localBaseVoltage = gridUnits::unitConversion(val, unitType, gridUnits::kV);
+	}
     else if ((param == "basefreq") || (param == "basefrequency") || (param == "systembasefrequency"))
     {
         systemBaseFrequency = gridUnits::unitConversionFreq (val, unitType, gridUnits::rps);
@@ -942,11 +973,7 @@ void gridComponent::setAll (const std::string &type,
 double gridComponent::get (const std::string &param, gridUnits::units_t unitType) const
 {
     double out = kNullVal;
-    if (param == "basefrequency")
-    {
-        out = gridUnits::unitConversionFreq (systemBaseFrequency, gridUnits::rps, unitType);
-    }
-    else if (param == "basepower")
+    if (param == "basepower")
     {
         out = gridUnits::unitConversion (systemBasePower, gridUnits::MVAR, unitType, systemBasePower);
     }
@@ -954,6 +981,14 @@ double gridComponent::get (const std::string &param, gridUnits::units_t unitType
     {
         out = static_cast<double> (subObjectList.size ());
     }
+	else if (param == "basefrequency")
+	{
+		out = gridUnits::unitConversionFreq(systemBaseFrequency, gridUnits::rps, unitType);
+	}
+	else if (param == "basevoltage")
+	{
+		out = gridUnits::unitConversionFreq(localBaseVoltage, gridUnits::kV, unitType);
+	}
     else
     {
         out = subObjectGet (param, unitType);
@@ -966,7 +1001,7 @@ double gridComponent::get (const std::string &param, gridUnits::units_t unitType
 				{
 					if (oname == param)
 					{
-						return getOutput(ii);
+						return gridUnits::unitConversion(getOutput(ii), outputUnits(ii), unitType, systemBasePower);
 					}
 				}
 			}
@@ -1173,58 +1208,103 @@ void gridComponent::setupDynFlags ()
 
 double gridComponent::getState (index_t offset) const
 {
-    if ((offset != kNullLocation) && (offset < static_cast<index_t> (m_state.size ())))
+	if (isValidIndex(offset,m_state))
     {
         return m_state[offset];
     }
     return kNullVal;
 }
 
-void gridComponent::loadSizesSub (const solverMode &sMode, bool dynOnly)
+void gridComponent::loadSizesSub (const solverMode &sMode, sizeCategory category)
 {
     auto &so = offsets.getOffsets (sMode);
-    if (dynOnly)
-    {
-        so.total.algRoots = so.local.algRoots;
-        so.total.diffRoots = so.local.diffRoots;
-        so.total.jacSize = so.local.jacSize;
-    }
-    else
-    {
-        so.localLoad (false);
-    }
-    for (auto &sub : subObjectList)
-    {
-        if (sub->isEnabled ())
-        {
-            if (!(sub->isLoaded (sMode, dynOnly)))
-            {
-                sub->loadSizes (sMode, dynOnly);
-            }
-            if (sub->checkFlag (sampled_only))
-            {
-                continue;
-            }
-            if (dynOnly)
-            {
-                so.addRootAndJacobianSizes (sub->offsets.getOffsets (sMode));
-            }
-            else
-            {
-                so.addSizes (sub->offsets.getOffsets (sMode));
-            }
-        }
-    }
-    if (!dynOnly)
-    {
-        so.stateLoaded = true;
-    }
-    so.rjLoaded = true;
+	switch (category)
+	{
+	case sizeCategory::state_size_update:
+		so.localLoad(false);
+		for (auto &sub : subObjectList)
+		{
+			if (sub->isEnabled())
+			{
+				if (!(sub->isStateCountLoaded(sMode)))
+				{
+					sub->loadStateSizes(sMode);
+				}
+				if (sub->checkFlag(sampled_only))
+				{
+					continue;
+				}
+				so.addStateSizes(sub->offsets.getOffsets(sMode));
+			}
+		}
+		so.stateLoaded = true;
+		break;
+	case sizeCategory::jacobian_size_update:
+		so.total.jacSize = so.local.jacSize;
+		for (auto &sub : subObjectList)
+		{
+			if (sub->isEnabled())
+			{
+				if (!(sub->isJacobianCountLoaded(sMode)))
+				{
+					sub->loadJacobianSizes(sMode);
+				}
+				if (sub->checkFlag(sampled_only))
+				{
+					continue;
+				}
+				so.addJacobianSizes(sub->offsets.getOffsets(sMode));
+			}
+		}
+		so.jacobianLoaded = true;
+		break;
+	case sizeCategory::root_size_update:
+		so.total.algRoots = so.local.algRoots;
+		so.total.diffRoots = so.local.diffRoots;
+		for (auto &sub : subObjectList)
+		{
+			if (sub->isEnabled())
+			{
+				if (!(sub->isRootCountLoaded(sMode)))
+				{
+					sub->loadRootSizes(sMode);
+				}
+				if (sub->checkFlag(sampled_only))
+				{
+					continue;
+				}
+				so.addRootSizes(sub->offsets.getOffsets(sMode));
+			}
+		}
+		so.rootsLoaded = true;
+		break;
+	}
+    
+   
+   
 }
 
-void gridComponent::loadSizes (const solverMode &sMode, bool dynOnly)
+stateSizes gridComponent::LocalStateSizes(const solverMode & /*sMode*/) const
 {
-    if (isLoaded (sMode, dynOnly))
+	return  offsets.local().local;
+}
+
+
+count_t gridComponent::LocalJacobianCount(const solverMode & /*sMode*/) const
+{
+	return  offsets.local().local.jacSize;
+}
+
+
+std::pair<count_t, count_t> gridComponent::LocalRootCount(const solverMode & /*sMode*/) const
+{
+	auto &lc = offsets.local().local;
+	return std::make_pair(lc.algRoots, lc.diffRoots);
+}
+
+void gridComponent::loadStateSizes (const solverMode &sMode)
+{
+    if (isStateCountLoaded (sMode))
     {
         return;
     }
@@ -1232,55 +1312,40 @@ void gridComponent::loadSizes (const solverMode &sMode, bool dynOnly)
     if (!isEnabled ())
     {
         so.reset ();
-        so.stateLoaded = true;
-        so.rjLoaded = true;
+		so.setLoaded();
         return;
     }
-    if ((!isDynamic (sMode)) && (opFlags[no_pflow_states]))
+    if ((!isDynamic (sMode)) && (opFlags[no_powerflow_operations]))
     {
         so.stateReset ();
         so.stateLoaded = true;
         return;
     }
-    if ((isDynamic (sMode)) && (opFlags[no_dyn_states]))
+    if ((isDynamic (sMode)) && (opFlags[no_dynamics]))
     {
         so.stateReset ();
         so.stateLoaded = true;
     }
-    auto &lc = offsets.local ();
-    if (dynOnly)
-    {
-        if (!isLocal (sMode))  // don't reset if it is the local offsets
-        {
-            so.rootAndJacobianCountReset ();
-        }
-    }
-    else
-    {
+
         if (!(so.stateLoaded))
         {
             if (!isLocal (sMode))  // don't reset if it is the local offsets
             {
                 so.stateReset ();
             }
+			auto selfSizes = LocalStateSizes(sMode);
             if (hasAlgebraic (sMode))
             {
-                so.local.aSize = lc.local.aSize;
-                so.local.vSize = lc.local.vSize;
-                so.local.algSize = lc.local.algSize;
+                so.local.aSize = selfSizes.aSize;
+                so.local.vSize = selfSizes.vSize;
+                so.local.algSize = selfSizes.algSize;
             }
             if (hasDifferential (sMode))
             {
-                so.local.diffSize = lc.local.diffSize;
+                so.local.diffSize = selfSizes.diffSize;
             }
         }
-    }
-    if (!(so.rjLoaded))
-    {
-        so.local.algRoots = lc.local.algRoots;
-        so.local.diffRoots = lc.local.diffRoots;
-        so.local.jacSize = lc.local.jacSize;
-    }
+    
     if (opFlags[sampled_only])  // no states
     {
         if (sMode == cLocalSolverMode)
@@ -1298,22 +1363,92 @@ void gridComponent::loadSizes (const solverMode &sMode, bool dynOnly)
     }
     if (subObjectList.empty ())
     {
-        if (dynOnly)
-        {
-            so.total.algRoots = so.local.algRoots;
-            so.total.diffRoots = so.local.diffRoots;
-            so.total.jacSize = so.local.jacSize;
-            so.rjLoaded = true;
-        }
-        else
-        {
             so.localLoad (true);
-        }
     }
     else
     {
-        loadSizesSub (sMode, dynOnly);
+        loadSizesSub (sMode, sizeCategory::state_size_update);
     }
+}
+
+void gridComponent::loadRootSizes(const solverMode &sMode)
+{
+	if (isRootCountLoaded(sMode))
+	{
+		return;
+	}
+	auto &so = offsets.getOffsets(sMode);
+	if (!isEnabled())
+	{
+		so.reset();
+		so.setLoaded();
+		return;
+	}
+	if (!isDynamic(sMode))
+	{
+		so.rootCountReset();
+		so.rootsLoaded = true;
+		return;
+	}
+
+		if (!isLocal(sMode))  // don't reset if it is the local offsets
+		{
+			so.rootCountReset();
+		}
+		auto selfSizes = LocalRootCount(sMode);
+	if (!(so.rootsLoaded))
+	{
+		so.local.algRoots = selfSizes.first;
+		so.local.diffRoots = selfSizes.second;
+	}
+	
+	if (subObjectList.empty())
+	{
+			so.total.algRoots = so.local.algRoots;
+			so.total.diffRoots = so.local.diffRoots;
+			so.rootsLoaded = true;
+	}
+	else
+	{
+		loadSizesSub(sMode, sizeCategory::root_size_update);
+	}
+}
+
+void gridComponent::loadJacobianSizes(const solverMode &sMode)
+{
+	if (isJacobianCountLoaded(sMode))
+	{
+		return;
+	}
+	auto &so = offsets.getOffsets(sMode);
+	if (!isEnabled())
+	{
+		so.reset();
+		so.setLoaded();
+		return;
+	}
+
+	auto selfJacCount = LocalJacobianCount(sMode);
+
+	if (!isLocal(sMode))  // don't reset if it is the local offsets
+	{
+		so.JacobianCountReset();
+	}
+
+	if (!(so.jacobianLoaded))
+	{
+		so.local.jacSize = selfJacCount;
+	}
+
+	if (subObjectList.empty())
+	{
+		so.total.jacSize = so.local.jacSize;
+		so.jacobianLoaded = true;
+	}
+	else
+	{
+		loadSizesSub(sMode, sizeCategory::jacobian_size_update);
+	}
 }
 
 void gridComponent::getTols (double tols[], const solverMode &sMode)
@@ -1335,7 +1470,7 @@ void gridComponent::getVariableType (double sdata[], const solverMode &sMode)
         if (so.total.algSize > 0)
         {
             auto offset = so.algOffset;
-            for (count_t kk = 0; kk < so.total.algSize; ++kk)
+            for (index_t kk = 0; kk < so.total.algSize; ++kk)
             {
                 sdata[offset + kk] = ALGEBRAIC_VARIABLE;
             }
@@ -1343,7 +1478,7 @@ void gridComponent::getVariableType (double sdata[], const solverMode &sMode)
         if (so.total.diffSize > 0)
         {
             auto offset = so.diffOffset;
-            for (count_t kk = 0; kk < so.total.diffSize; ++kk)
+            for (index_t kk = 0; kk < so.total.diffSize; ++kk)
             {
                 sdata[offset + kk] = DIFFERENTIAL_VARIABLE;
             }
@@ -1354,7 +1489,7 @@ void gridComponent::getVariableType (double sdata[], const solverMode &sMode)
         if (so.local.algSize > 0)
         {
             auto offset = so.algOffset;
-            for (count_t kk = 0; kk < so.local.algSize; ++kk)
+            for (index_t kk = 0; kk < so.local.algSize; ++kk)
             {
                 sdata[offset + kk] = ALGEBRAIC_VARIABLE;
             }
@@ -1362,7 +1497,7 @@ void gridComponent::getVariableType (double sdata[], const solverMode &sMode)
         if (so.local.diffSize > 0)
         {
             auto offset = so.diffOffset;
-            for (count_t kk = 0; kk < so.local.diffSize; ++kk)
+            for (index_t kk = 0; kk < so.local.diffSize; ++kk)
             {
                 sdata[offset + kk] = DIFFERENTIAL_VARIABLE;
             }
@@ -1375,6 +1510,60 @@ void gridComponent::getVariableType (double sdata[], const solverMode &sMode)
             }
         }
     }
+}
+
+
+static const std::map<int, int> alertFlags{
+	std::make_pair(FLAG_CHANGE, 1),
+	std::make_pair(STATE_COUNT_INCREASE, 3),
+	std::make_pair(STATE_COUNT_DECREASE, 3),
+	std::make_pair(STATE_COUNT_CHANGE, 3),
+	std::make_pair(ROOT_COUNT_INCREASE, 2),
+	std::make_pair(ROOT_COUNT_DECREASE, 2),
+	std::make_pair(ROOT_COUNT_CHANGE, 2),
+	std::make_pair(JAC_COUNT_INCREASE, 4),
+	std::make_pair(JAC_COUNT_DECREASE, 4),
+	std::make_pair(JAC_COUNT_CHANGE, 4),
+	std::make_pair(OBJECT_COUNT_INCREASE, 3),
+	std::make_pair(OBJECT_COUNT_DECREASE, 3),
+	std::make_pair(OBJECT_COUNT_CHANGE, 3),
+	std::make_pair(CONSTRAINT_COUNT_DECREASE, 1),
+	std::make_pair(CONSTRAINT_COUNT_INCREASE, 1),
+	std::make_pair(CONSTRAINT_COUNT_CHANGE, 1),
+};
+
+void gridComponent::alert(coreObject *object, int code)
+{
+	if ((code >= MIN_CHANGE_ALERT) && (code <= MAX_CHANGE_ALERT))
+	{
+		auto res = alertFlags.find(code);
+		if (res != alertFlags.end())
+		{
+			if (!opFlags[disable_flag_updates])
+			{
+				updateFlags();
+			}
+			else
+			{
+				opFlags.set(flag_update_required);
+			}
+			switch (res->second)
+			{
+			case 3:
+				offsets.stateUnload();
+				break;
+			case 2:
+				offsets.rootUnload(true);
+				break;
+			case 4:
+				offsets.JacobianUnload(true);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	coreObject::alert(object, code);
 }
 
 void gridComponent::getConstraints (double constraints[], const solverMode &sMode)
@@ -1688,6 +1877,7 @@ coreObject *gridComponent::find (const std::string &object) const
     auto rlc2 = object.find_last_of ("#$!");
     if (rlc2 != std::string::npos)
     {
+
         return nullptr;
     }
     return coreObject::find (object);

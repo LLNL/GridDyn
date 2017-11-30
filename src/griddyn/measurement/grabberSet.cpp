@@ -52,25 +52,24 @@ grabberSet::grabberSet (std::shared_ptr<gridGrabber> ggrab, std::shared_ptr<stat
 
 grabberSet::~grabberSet () = default;
 
-/** clone function
-*@param[in] ggb a pointer to another gridGrabber function if we are cloning on existing object
-*@return a shared_ptr to another GridGrabber*/
-std::shared_ptr<grabberSet> grabberSet::clone (std::shared_ptr<grabberSet> ggb) const
+std::unique_ptr<grabberSet> grabberSet::clone() const
 {
-    if (ggb == nullptr)
-    {
-        ggb = std::make_shared<grabberSet> (grab->clone (), (stGrab) ? stGrab->clone () : nullptr);
-    }
-    else
-    {
-        ggb->updateGrabbers (grab->clone (), (stGrab) ? stGrab->clone () : nullptr);
-    }
+	auto gset = std::make_unique<grabberSet>(grab->clone(), (stGrab) ? stGrab->clone() : nullptr);
+	if (predictor)
+	{
+		gset->predictor = std::make_unique<utilities::valuePredictor<coreTime, double>>(*predictor);
+	}
+	return gset;
+}
+
+void grabberSet::cloneTo (grabberSet *ggb) const
+{
+    ggb->updateGrabbers (grab->clone (), (stGrab) ? stGrab->clone () : nullptr);
     if (predictor)
     {
         ggb->predictor = std::make_unique<utilities::valuePredictor<coreTime, double>> (*predictor);
     }
 
-    return ggb;
 }
 
 void grabberSet::updateGrabbers (std::shared_ptr<gridGrabber> ggrab, std::shared_ptr<stateGrabber> stgrab)
@@ -81,7 +80,11 @@ void grabberSet::updateGrabbers (std::shared_ptr<gridGrabber> ggrab, std::shared
 
 void grabberSet::updateField (const std::string &fld)
 {
-    grab->updateField (fld);
+	if (grab)
+	{
+		grab->updateField(fld);
+	}
+    
     if (stGrab)
     {
         stGrab->updateField (fld);
@@ -91,7 +94,7 @@ void grabberSet::updateField (const std::string &fld)
 *@return the value produced by the grabber*/
 double grabberSet::grabData ()
 {
-    auto lastOutput = grab->grabData ();
+    auto lastOutput = (grab)?grab->grabData ():((stGrab)?grabData(emptyStateData,cLocalSolverMode):kNullVal);
     if (predictor)
     {
         predictor->update (lastOutput, grab->getTime ());
@@ -112,7 +115,11 @@ double grabberSet::grabData (const stateData &sD, const solverMode &sMode)
     {
         return predictor->predict (sD.time);
     }
-    return grab->grabData ();
+	if (grab)
+	{
+		return grab->grabData();
+	}
+	return kNullVal;
 }
 
 void grabberSet::outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode)
@@ -128,7 +135,10 @@ std::string grabberSet::getDesc () { return grab->getDesc (); }
 void grabberSet::setDescription (const std::string &newDesc) { grab->setDescription (newDesc); }
 void grabberSet::updateObject (coreObject *obj, object_update_mode mode)
 {
-    grab->updateObject (obj, mode);
+	if (grab)
+	{
+		grab->updateObject(obj, mode);
+	}
     if (stGrab)
     {
         stGrab->updateObject (obj, mode);
@@ -137,7 +147,10 @@ void grabberSet::updateObject (coreObject *obj, object_update_mode mode)
 
 void grabberSet::setGain (double newGain)
 {
-    grab->gain = newGain;
+	if (grab)
+	{
+		grab->gain = newGain;
+	}
     if (stGrab)
     {
         stGrab->gain = newGain;
@@ -147,7 +160,10 @@ void grabberSet::setGain (double newGain)
 coreObject *grabberSet::getObject () const { return grab->getObject (); }
 void grabberSet::getObjects (std::vector<coreObject *> &objects) const
 {
-    grab->getObjects (objects);
+	if (grab)
+	{
+		grab->getObjects(objects);
+	}
     if (stGrab)
     {
         stGrab->getObjects (objects);

@@ -25,7 +25,8 @@ namespace fmi
 {
 fmiCoSimLoad3phase::fmiCoSimLoad3phase(const std::string &objName):fmiCoSimWrapper<loads::ThreePhaseLoad>(objName)
 {
-	
+	opFlags.set(three_phase_input);
+	opFlags.set(three_phase_output);
 }
 
 coreObject * fmiCoSimLoad3phase::clone(coreObject *obj) const

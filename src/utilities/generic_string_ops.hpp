@@ -51,6 +51,35 @@ std::vector<X> generalized_string_split (const X &str, const X &delimiterCharact
 }
 
 template <class X>
+size_t getChunkEnd(size_t start, const X &str, char ChunkStart, char ChunkEnd )
+{
+	int open = 1;
+	size_t rlc = start;
+
+	while (open > 0)
+	{
+		auto newOpen = str.find_first_of(ChunkStart, rlc + 1);
+		auto newClose = str.find_first_of(ChunkEnd, rlc + 1);
+		if (newClose == X::npos)
+		{
+			rlc = X::npos;
+			break;
+		}
+		if (newOpen<newClose)
+		{
+			++open;
+			rlc = newOpen;
+		}
+		else
+		{
+			--open;
+			rlc = newClose;
+		}
+	}
+	return rlc;
+}
+
+template <class X>
 std::vector<X> generalized_section_splitting (const X &line,
                                               const X &delimiterCharacters,
                                               const X &sectionStartCharacters,
@@ -91,11 +120,23 @@ std::vector<X> generalized_section_splitting (const X &line,
         }
         else  // now we are in a quote
         {
-            sectionLoc = line.find_first_of (sectionMatch[line[sectionLoc]], sectionLoc + 1);
-            if (sectionLoc != X::npos)
+			auto endLoc = getChunkEnd(sectionLoc + 1, line, line[sectionLoc], sectionMatch[line[sectionLoc]]);
+            if (endLoc != X::npos)
             {
-                d1 = line.find_first_of (delimiterCharacters, sectionLoc + 1);
-                sectionLoc = line.find_first_of (sectionStartCharacters, d1 + 1);
+                d1 = line.find_first_of (delimiterCharacters, endLoc + 1);
+				if (d1 == X::npos)
+				{
+					strVec.push_back(line.substr(start));
+					sectionLoc = d1;
+					start = d1;
+				}
+				else
+				{
+					strVec.push_back(line.substr(start, d1 - start));
+					sectionLoc = line.find_first_of(sectionStartCharacters, d1 + 1);
+					start = d1 + 1;
+				}
+				d1 = line.find_first_of(delimiterCharacters, start);
             }
             else
             {
@@ -106,11 +147,14 @@ std::vector<X> generalized_section_splitting (const X &line,
         // get the last string
         if (d1 == X::npos)
         {
-            if ((start < line.length ()) || (!compress))
-            {
-                strVec.push_back (line.substr (start));
-            }
-            start = d1;
+			if (start != X::npos)
+			{
+				if ((start < line.length()) || (!compress))
+				{
+					strVec.push_back(line.substr(start));
+				}
+				start = d1;
+			}
         }
     }
     return strVec;

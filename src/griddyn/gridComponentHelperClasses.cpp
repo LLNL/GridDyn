@@ -16,7 +16,7 @@
 
 namespace griddyn
 {
-static const solverOffsets nullOffsets;
+static const solverOffsets nullOffsets{};
 
 
 solverMode::solverMode (index_t index):offsetIndex(index)
@@ -56,7 +56,6 @@ solverMode::solverMode (index_t index):offsetIndex(index)
 
 void stateSizes::reset () { std::memset (this, 0, sizeof (stateSizes)); }
 void stateSizes::stateReset () { vSize = aSize = algSize = diffSize = 0; }
-void stateSizes::rootAndJacobianReset () { algRoots = diffRoots = jacSize = 0; }
 void stateSizes::add (const stateSizes &arg)
 {
     vSize += arg.vSize;
@@ -76,11 +75,15 @@ void stateSizes::addStateSizes (const stateSizes &arg)
     diffSize += arg.diffSize;
 }
 
-void stateSizes::addRootAndJacobianSizes (const stateSizes &arg)
+void stateSizes::addRootSizes (const stateSizes &arg)
 {
     algRoots += arg.algRoots;
     diffRoots += arg.diffRoots;
-    jacSize += arg.jacSize;
+}
+
+void stateSizes::addJacobianSizes(const stateSizes &arg)
+{
+	jacSize += arg.jacSize;
 }
 
 count_t stateSizes::totalSize () const { return vSize + aSize + algSize + diffSize; }
@@ -91,7 +94,7 @@ void solverOffsets::reset ()
     local.reset ();
     total.reset ();
 
-    rjLoaded = stateLoaded = offetLoaded = false;
+    rootsLoaded = jacobianLoaded=stateLoaded = offetLoaded = false;
 }
 
 void solverOffsets::stateReset ()
@@ -102,14 +105,23 @@ void solverOffsets::stateReset ()
     stateLoaded = false;
 }
 
-void solverOffsets::rootAndJacobianCountReset ()
+void solverOffsets::rootCountReset ()
 {
     rootOffset = kNullLocation;
-    local.rootAndJacobianReset ();
-    total.rootAndJacobianReset ();
+    local.rootReset ();
+    total.rootReset ();
 
-    rjLoaded = false;
+    rootsLoaded = false;
 }
+
+void solverOffsets::JacobianCountReset()
+{
+	local.JacobianReset();
+	total.JacobianReset();
+
+	jacobianLoaded = false;
+}
+
 
 void solverOffsets::increment ()
 {
@@ -221,16 +233,21 @@ void solverOffsets::localIncrement (const solverOffsets &offsets)
 
 void solverOffsets::addSizes (const solverOffsets &offsets) { total.add (offsets.total); }
 void solverOffsets::addStateSizes (const solverOffsets &offsets) { total.addStateSizes (offsets.total); }
-void solverOffsets::addRootAndJacobianSizes (const solverOffsets &offsets)
+void solverOffsets::addJacobianSizes (const solverOffsets &offsets)
 {
-    total.addRootAndJacobianSizes (offsets.total);
+    total.addJacobianSizes (offsets.total);
 }
 
+void solverOffsets::addRootSizes(const solverOffsets &offsets)
+{
+	total.addRootSizes(offsets.total);
+}
 void solverOffsets::localLoad (bool finishedLoading)
 {
     total = local;
     stateLoaded = finishedLoading;
-    rjLoaded = finishedLoading;
+    jacobianLoaded = finishedLoading;
+	rootsLoaded = finishedLoading;
 }
 
 void solverOffsets::setOffsets (const solverOffsets &newOffsets)
@@ -295,28 +312,36 @@ void solverOffsets::setOffset (index_t newOffset)
 }
 
 
-offsetTable::offsetTable () noexcept : offsetContainer (5)
+offsetTable::offsetTable () noexcept : offsetContainer (DEFAULT_OFFSET_CONTAINER_SIZE)
 {
     // most simulations use the first 1 and powerflow(2) and likely dynamic DAE(3)  and often 4 and 5 for dynamic
     // partitioned
+#if DEFAULT_OFFSET_CONTAINER_SIZE==0
+	offsetContainer.resize(1);
+#endif
     offsetContainer[0].sMode = cLocalSolverMode;
 }
 
 bool offsetTable::isLoaded (const solverMode &sMode) const
 {
-    return (isValidIndex (sMode.offsetIndex)) ?
-             ((offsetContainer[sMode.offsetIndex].stateLoaded) && (offsetContainer[sMode.offsetIndex].rjLoaded)) :
-             false;
+    return (isValidIndex (sMode.offsetIndex)) &&
+           ((offsetContainer[sMode.offsetIndex].stateLoaded) && (offsetContainer[sMode.offsetIndex].rootsLoaded) &&
+            (offsetContainer[sMode.offsetIndex].jacobianLoaded));
 }
 
-bool offsetTable::isStateLoaded (const solverMode &sMode) const
+bool offsetTable::isStateCountLoaded (const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex].stateLoaded : false;
+    return isValidIndex (sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].stateLoaded;
 }
 
-bool offsetTable::isrjLoaded (const solverMode &sMode) const
+bool offsetTable::isRootCountLoaded (const solverMode &sMode) const
 {
-    return isValidIndex (sMode.offsetIndex) ? offsetContainer[sMode.offsetIndex].rjLoaded : false;
+    return isValidIndex (sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].rootsLoaded;
+}
+
+bool offsetTable::isJacobianCountLoaded(const solverMode &sMode) const
+{
+	return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].jacobianLoaded;
 }
 
 solverOffsets &offsetTable::getOffsets (const solverMode &sMode)
@@ -450,7 +475,8 @@ void offsetTable::unload (bool dynamic_only)
             if (isDynamic (so.sMode))
             {
                 so.stateLoaded = false;
-                so.rjLoaded = false;
+                so.rootsLoaded = false;
+				so.jacobianLoaded = false;
                 so.diffOffset = kNullLocation;
                 so.algOffset = kNullLocation;
             }
@@ -461,7 +487,8 @@ void offsetTable::unload (bool dynamic_only)
         for (auto &so : offsetContainer)
         {
             so.stateLoaded = false;
-            so.rjLoaded = false;
+            so.rootsLoaded = false;
+			so.jacobianLoaded = false;
             so.diffOffset = kNullLocation;
             so.algOffset = kNullLocation;
         }
@@ -493,7 +520,7 @@ void offsetTable::stateUnload (bool dynamic_only)
     }
 }
 
-void offsetTable::rjUnload (bool dynamic_only)
+void offsetTable::rootUnload (bool dynamic_only)
 {
     if (dynamic_only)
     {
@@ -501,7 +528,7 @@ void offsetTable::rjUnload (bool dynamic_only)
         {
             if (isDynamic (so.sMode))
             {
-                so.rjLoaded = false;
+                so.rootsLoaded = false;
             }
         }
     }
@@ -509,9 +536,29 @@ void offsetTable::rjUnload (bool dynamic_only)
     {
         for (auto &so : offsetContainer)
         {
-            so.rjLoaded = false;
+            so.rootsLoaded = false;
         }
     }
+}
+void offsetTable::JacobianUnload(bool dynamic_only)
+{
+	if (dynamic_only)
+	{
+		for (auto &so : offsetContainer)
+		{
+			if (isDynamic(so.sMode))
+			{
+				so.jacobianLoaded = false;
+			}
+		}
+	}
+	else
+	{
+		for (auto &so : offsetContainer)
+		{
+			so.jacobianLoaded = false;
+		}
+	}
 }
 
 void offsetTable::localUpdateAll (bool dynamic_only)
@@ -526,7 +573,8 @@ void offsetTable::localUpdateAll (bool dynamic_only)
                 so.total.algRoots = so.local.algRoots = lc.local.algRoots;
                 so.total.diffRoots = so.local.diffRoots = lc.local.diffRoots;
                 so.total.jacSize = so.local.jacSize = lc.local.jacSize;
-                so.rjLoaded = true;
+                so.rootsLoaded = true;
+				so.jacobianLoaded = true;
             }
         }
     }

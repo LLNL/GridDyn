@@ -26,8 +26,9 @@ enum class comparison_type
 {
 	eq, ne, gt, ge, le, lt, null,
 };
-
+/** generate a value of the comparison type enumeration from a string*/
 comparison_type comparisonFromString(const std::string &compStr);
+/** convert the comparison type to a string description*/
 std::string to_string(comparison_type comp);
 
 /**
@@ -39,11 +40,10 @@ protected:
   double m_constant = 0.0;  //!< right hand side constant
   double m_margin = 0.0;	//!< the margin around the conditions
   double m_curr_margin = 0.0; //!< the currently used margin
-  bool m_constRHS = false;	//!< flag indicating use of a constant RHS
-  bool use_margin = false;	//!< flag indicating margin use
-
   std::shared_ptr<grabberSet> conditionLHS;        //!<grabber for left side condition
   std::shared_ptr<grabberSet> conditionRHS;        //!<grabber for right side condition
+  bool m_constRHS = false;	//!< flag indicating use of a constant RHS
+  bool use_margin = false;	//!< flag indicating margin use
 public:  
  
  
@@ -52,9 +52,16 @@ public:
   @param[in] valGrabberSt the state portion of the grabber for the LHS of the equation
   */
   explicit Condition(std::shared_ptr<grabberSet> valGrabber = nullptr);
+  /** destructor*/
   virtual ~Condition();
-
-  virtual std::shared_ptr<Condition> clone(std::shared_ptr<Condition> gc = nullptr) const;
+  /** clone the condition
+  @return a new Condition object with identical to the original
+  */
+  virtual std::unique_ptr<Condition> clone() const;
+  /** clone the condition to a given object
+  @param[out] pointer to a Condition object to clone the information to
+  */
+  virtual void cloneTo(Condition *cond) const;
   /** load the grabbers for the Left hand side of the condition equation
   @param[in] valGrabber a gridGrabber
   @param[in] valGrabberSt a stateGrabber default nullptr
@@ -76,6 +83,9 @@ public:
   virtual double evalCondition (const stateData &sD, const solverMode &sMode);
   /**
   *get the value for which the comparison is made
+  @param[in] side either 1 for left hand side or 2 for right hand side
+  @param[in] sD the state data from which to get the values
+  @param[in] sMode the solverMode related to the state data
   * @return returns the value for the comparison side=1 is left hand side, side=2 is the right hand side
   **/
   double getVal (int side,const stateData &sD,const solverMode &sMode) const;
@@ -85,10 +95,6 @@ public:
   **/
   double getVal (int side) const;
 
-  /** update the object used in the conditions
- @param[in] obj the object we want the condition based on
-@param[in] mode  the mode of the update
-*/
   virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
 
   /** evaluation the condition based on object data
@@ -143,32 +149,66 @@ private:
 * @param[in] rootObject the root object to find the other objects
 */
 std::unique_ptr<Condition> make_condition (const std::string &condString, coreObject *rootObject);
+/** make a condition object
+* function to create a condition object from a field a comparison type and threshold
+* @param field the field to get from the rootObject
+@param compare a string of the comparison function
+@param level the threshold level for the comparson
+* @param[in] rootObject the root object to find the other objects
+*/
 std::unique_ptr<Condition> make_condition (const std::string &field, const std::string &compare, double level, coreObject *rootObject);
+/** make a condition object
+* function to create a condition object from a field a comparison type and threshold
+* @param field the field to get from the rootObject
+@param comp a value in the comparsion enumeration
+@param level the threshold level for the comparson
+* @param[in] rootObject the root object to find the other objects
+*/
 std::unique_ptr<Condition> make_condition (const std::string &field, comparison_type comp, double level, coreObject *rootObject);
+
 /** evaluate a compound condition consisting of multiple individual conditions
 */
 class compoundCondition : public Condition
 {
-
 public:
-  enum class compound_mode
-  {
-    c_and, c_or, c_any, c_xor,c_one_of, c_two_of, c_three_of, c_none, c_two_or_more, c_three_or_more
-  };
+	/** enumeration of the possible compounding modes*/
+	enum class compound_mode
+	{
+		c_and,  //!< all conditions are true
+		c_all,   //!< same as c_and  all conditions are true
+		c_or,	//!< any of the conditions are true
+		c_any,	//!< same as c_or, any of the conditions are true
+		c_xor,	//!< an odd number of the conditions are true
+		c_one_of,	//!< exactly one of the conditions are true
+		c_two_of,	//!< exactly two of the conditions are true
+		c_three_of,	//!< exactly three of the conditions are true
+		c_none,	//!< no conditions are true
+		c_two_or_more,	//!< 2 or more of the conditions are true
+		c_three_or_more,	//!< 3 or more of the conditions are true
+		c_even,   //!< an even number of conditions is true (0 is an even number)
+		c_even_min, //!< an even number of conditions are true with at least two being true 
+		c_odd,   //!< an odd number of conditions is true, same as xor
+	};
+private:
+	bool breakFalse = true; //!< indicator that the checking should stop if a false is encountered
+	bool breakTrue = false;	//!< indicator that the checking should stop if a true is encountered
+	std::vector<std::shared_ptr<Condition> > conditions;	//!< vector of pointers to the conditions
+	compound_mode mode = compound_mode::c_and; //!< the compounding mode to use
+public:
   compoundCondition()=default;
 
   virtual double evalCondition () override;
   virtual double evalCondition (const stateData &sD, const solverMode &sMode) override;
   virtual bool checkCondition () const override;
   virtual bool checkCondition (const stateData &sD, const solverMode &sMode) const override;
+  /** add a condition to the set of conditions to evaluate*/
   void add (std::shared_ptr<Condition> gc);
+  /** set the compounding mode
+  */
   void setMode(compound_mode newMode);
+
 private:
-	bool breakFalse = true;
-	bool breakTrue=false;
-  std::vector<std::shared_ptr<Condition> > conditions;
-  compound_mode mode = compound_mode::c_and;
-private:
+	/** evalutate the compounding based on the number of true values encountered*/
 	bool evalCombinations(count_t trueCount) const;
 };
 

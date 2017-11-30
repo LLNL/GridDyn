@@ -13,7 +13,7 @@
 #include "fmi/FMI2/fmi2Functions.h"
 #include "fmiRunner.h"
 #include "core/coreExceptions.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -155,8 +155,9 @@ void fmi2FreeInstance (fmi2Component comp)
 	{
 		std::lock_guard<std::mutex> lock(fmiLock);
 		fmiRunnerInstances[p->first] = nullptr;
+        delete p;
 	}
-	delete p;
+	
     
 }
 
@@ -538,7 +539,7 @@ fmi2Status fmi2GetRealStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Re
 	}
 	if (s == fmi2LastSuccessfulTime)
 	{
-		*status = static_cast<fmi2Real>(runner->getSim()->getCurrentTime());
+		*status = static_cast<fmi2Real>(runner->getSim()->getSimulationTime());
 		return fmi2OK;
 	}
 	return fmi2Discard;
@@ -575,4 +576,106 @@ fmi2Status fmi2GetStringStatus (fmi2Component comp, const fmi2StatusKind s, fmi2
 		return fmi2OK;
 	}
 	return fmi2Discard;
+}
+
+
+/** model exchange functions*/
+
+fmi2Status fmi2EnterEventMode(fmi2Component comp)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+fmi2Status fmi2NewDiscreteStates(fmi2Component comp, fmi2EventInfo*)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+fmi2Status fmi2EnterContinuousTimeMode(fmi2Component comp)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+fmi2Status fmi2CompletedIntegratorStep(fmi2Component comp, fmi2Boolean, fmi2Boolean*, fmi2Boolean*)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+/* Providing independent variables and re-initialization of caching */
+fmi2Status fmi2SetTime(fmi2Component comp, fmi2Real)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+fmi2Status fmi2SetContinuousStates(fmi2Component comp, const fmi2Real[], size_t)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+/* Evaluation of the model equations */
+fmi2Status fmi2GetDerivatives(fmi2Component comp, fmi2Real[], size_t)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+fmi2Status fmi2GetEventIndicators(fmi2Component comp, fmi2Real[], size_t)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+fmi2Status fmi2GetContinuousStates(fmi2Component comp, fmi2Real[], size_t)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
+}
+
+fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component comp, fmi2Real[], size_t)
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    return fmi2Discard;
 }

@@ -14,10 +14,11 @@
 #define _MATRIX_DATA_SUNDIALS_H_
 #pragma once
 
-#include "sundials/sundials_dense.h"
-#include "sundials/sundials_sparse.h"
+#include "sunmatrix/sunmatrix_dense.h"
+#include "sunmatrix/sunmatrix_sparse.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/matrixDataOrdering.hpp"
+#include <memory>
 
 namespace griddyn
 {
@@ -27,14 +28,14 @@ namespace solvers
 class sundialsMatrixDataDense : public matrixData<double>
 {
   private:
-    DlsMat J = nullptr;  //!< the vector of tuples containing the data
+    SUNMatrix J = nullptr;  //!< the vector of tuples containing the data
   public:
     /** @brief compact constructor
      */
     sundialsMatrixDataDense ()=default;
     /** @brief alternate constructor defining the Dense matrix to fill
     @param[in] mat the dense SUNDIALS matrix*/
-    explicit sundialsMatrixDataDense (DlsMat mat);
+    explicit sundialsMatrixDataDense (SUNMatrix mat);
 
     void clear () override;
 
@@ -43,7 +44,7 @@ class sundialsMatrixDataDense : public matrixData<double>
     /** set the SUNDIALS matrix
     @param[in] mat the dense SUNDIALS matrix
     */
-    void setMatrix (DlsMat mat);
+    void setMatrix (SUNMatrix mat);
 
     count_t size () const override;
 
@@ -57,7 +58,7 @@ class sundialsMatrixDataDense : public matrixData<double>
 class sundialsMatrixDataSparseColumn : public matrixData<double>
 {
   private:
-    SlsMat J = nullptr;  //!< pointer to the sundials sparse matrix
+	  SUNMatrix J = nullptr;  //!< pointer to the sundials sparse matrix
     index_t ccol = 0;
 
   public:
@@ -65,7 +66,7 @@ class sundialsMatrixDataSparseColumn : public matrixData<double>
      */
     sundialsMatrixDataSparseColumn ()=default;
     /** @brief alternate constructor defining the Sparse matrix to fill*/
-    explicit sundialsMatrixDataSparseColumn (SlsMat mat);
+    explicit sundialsMatrixDataSparseColumn (SUNMatrix mat);
 
     void clear () override;
 
@@ -74,7 +75,7 @@ class sundialsMatrixDataSparseColumn : public matrixData<double>
     /** set the SUNDIALS matrix
     @param[in] mat the sparse SUNDIALS matrix
     */
-    void setMatrix (SlsMat mat);
+    void setMatrix (SUNMatrix mat);
 
     count_t size () const override;
 
@@ -95,15 +96,15 @@ class sundialsMatrixDataSparseColumn : public matrixData<double>
 class sundialsMatrixDataSparseRow : public matrixData<double>
 {
   private:
-    SlsMat J;  //!< the vector of tuples containing the data
-    index_t crow = 0;
+	  SUNMatrix J;  //!< the vector of tuples containing the data
+    index_t crow = 0; //!< the current row of access
 
   public:
     /** @brief compact constructor
      */
     sundialsMatrixDataSparseRow () =default;
     /** @brief alternate constructor defining the Sparse matrix to fill*/
-    explicit sundialsMatrixDataSparseRow (SlsMat mat);
+    explicit sundialsMatrixDataSparseRow (SUNMatrix mat);
 
     void clear () override;
 
@@ -112,7 +113,7 @@ class sundialsMatrixDataSparseRow : public matrixData<double>
     /** set the SUNDIALS matrix
     @param[in] mat the sparse SUNDIALS matrix
     */
-    void setMatrix (SlsMat mat);
+    void setMatrix (SUNMatrix mat);
 
     count_t size () const override;
 
@@ -123,9 +124,12 @@ class sundialsMatrixDataSparseRow : public matrixData<double>
     double at (index_t rowN, index_t colN) const override;
 
     virtual void start () override;
-
+	
     virtual matrixElement<double> next () override;
 };
+
+std::unique_ptr<matrixData<double>> makeSundialsMatrixData(SUNMatrix J);
+
 }//namespace solvers
 }//namespace griddyn
 #endif

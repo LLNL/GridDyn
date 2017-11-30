@@ -19,9 +19,10 @@
 
 namespace utilities
 {
+/** enumeration describing whether the zip functions should overwrite or append*/
 enum class zipMode {
-	overwrite,
-	append
+	overwrite,  //!< any existing file should be erased
+	append	//!< an existing file should be added to
 };
 /** zip a set of files into a zip file
 @param[in] file the name of the file to zip the specified files into

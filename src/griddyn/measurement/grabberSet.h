@@ -49,18 +49,30 @@ private:
 	std::unique_ptr<utilities::valuePredictor<coreTime, double, double>> predictor;  //!< pointer to a predictor object
 	
 public:
-
+	/** create a grabber from a field String and object
+	@param[in] fld the field to grab from an object
+	@param[in] obj the object to get the field from
+	@param[in] step_only if set to true the underlying stateGrabber is not constructed
+	*/
 	grabberSet(const std::string &fld, coreObject *obj,bool step_only=false);
+	/** create a grabber from an offset index
+	@param[in] noffset the offset into the state to grab
+	@param[in] obj the object to get the field from
+	*/
 	grabberSet(index_t noffset, coreObject *obj);
-
+	/** create a grabber from a gridGrabber and stateGrabber*/
 	grabberSet(std::shared_ptr<gridGrabber> ggrab, std::shared_ptr<stateGrabber> stgrab);
+	/** destructor*/
 	virtual ~grabberSet();
 
 
 	/** clone function
-	*@param[in] ggb a pointer to another gridGrabber function if we are cloning on existing object
-	*@return a shared_ptr to another GridGrabber*/
-	virtual std::shared_ptr<grabberSet> clone(std::shared_ptr<grabberSet> ggb = nullptr) const;
+	*@return a unique_ptr to another GrabberSet*/
+	virtual std::unique_ptr<grabberSet> clone() const;
+	/** cloneTo function
+	*@param[in] ggb a pointer to another grabberSet function to clone the data to
+	*/
+	virtual void cloneTo(grabberSet *gset) const;
 	/** update the field of grabber
 	*@param[in]  fld the new field to capture
 	*@throw unrecognized parameter exception if fld is not available
@@ -84,8 +96,11 @@ public:
 	virtual void outputPartialDerivatives(const stateData &sD, matrixData<double> &md, const solverMode &sMode);
 	//virtual void getDoutDt(const stateData &sD, const solverMode &sMode) const;
 	virtual void getDesc(std::vector<std::string > &desc_list) const;
+	/** get a description of the grabberSet*/
 	virtual const std::string &getDesc() const;
+	/** get a description of the grabber Set*/
 	virtual std::string getDesc();
+	/** set the grabber desciption*/
 	void setDescription(const std::string &newDesc);
 	virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
 	virtual coreObject * getObject() const override;

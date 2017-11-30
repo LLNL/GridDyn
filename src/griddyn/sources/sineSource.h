@@ -24,15 +24,15 @@ namespace sources
 class sineSource : public pulseSource
 {
 public:
-	static const char pulsed_flag = object_flag4;
+	static const char pulsed_flag = object_flag4; //!< indicator that the source should be pulsed
 protected:
-	double frequency = 0.0;			//!<[Hz] frequency of an oscillation
-	double phase = 0.0;				//!<[rad]  the offset angle
+	parameter_t frequency = 0.0;			//!<[Hz] frequency of an oscillation
+	parameter_t phase = 0.0;				//!<[rad]  the offset angle
 	coreTime lastCycle = negTime;		///!< time of the last cycle completion
-	double Amp = 0.0;					//!< the amplitude of the pulse
+	parameter_t Amp = 0.0;					//!< the amplitude of the pulse
 	coreTime sinePeriod = maxTime;		//!< the period of the sinusoid
-	double dfdt = 0.0;				///!<[Hz/s] the rate of change of frequency
-	double dAdt = 0.0;				//!< [1/s] the rate of change of amplitude
+	parameter_t dfdt = 0.0;				///!<[Hz/s] the rate of change of frequency
+	parameter_t dAdt = 0.0;				//!< [1/s] the rate of change of amplitude
 
 public:
 	sineSource(const std::string &objName = "sineSource_#", double startVal = 0.0);

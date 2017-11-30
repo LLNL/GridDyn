@@ -13,6 +13,8 @@
 #define GRIDDYN_CONFIG_H
 #pragma once
 
+#include "compiler-config.h"
+
 #cmakedefine HAVE_MPI
 
 #cmakedefine OPENMP_ENABLE
@@ -33,11 +35,9 @@
 
 #cmakedefine LOAD_ARKODE
 
-#cmakedefine LOG_ENABLE
-
-#cmakedefine DEBUG_LOG_ENABLE
-
-#cmakedefine TRACE_LOG_ENABLE
+#cmakedefine DISABLE_LOGGING
+#cmakedefine DISABLE_TRACE_LOGGING
+#cmakedefine DISABLE_DEBUG_LOGGING
 
 #cmakedefine YAML_FOUND
 

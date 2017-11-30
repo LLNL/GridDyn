@@ -38,7 +38,7 @@
 	<level>0.4</level>
 	</block>
 	</sensor>
-	<recorder field="bus2:load, relay#0:output0" period=0.1>
+	<recorder field="bus2:load, relay#0:output0" period="0.1">
     <file>blocktest.dat</file>
   </recorder>
    <basepower>100</basepower>

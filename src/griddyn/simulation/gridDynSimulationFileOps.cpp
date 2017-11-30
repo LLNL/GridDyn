@@ -14,7 +14,7 @@
 #include "contingency.h"
 #include "core/coreExceptions.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "links/acLine.h"
 #include "links/adjustableTransformer.h"
 #include "solvers/solverInterface.h"
@@ -368,7 +368,7 @@ void cdfLinkPrint (FILE *fp, int areaNum, acLine *lnk)
     double minAdj = 0.0;
     double maxAdj = 0.0;
     double ssize = 0.0;
-    if (dynamic_cast<links::adjustableTransformer *> (lnk)!=nullptr)
+    if (dynamic_cast<links::adjustableTransformer *> (lnk) != nullptr)
     {
         auto alnk = static_cast<links::adjustableTransformer *> (lnk);
         type = alnk->getInt ("control_mode");
@@ -754,21 +754,21 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fileName, const
     if (fileName.empty ())
     {
         auto stateFile = gds->getString ("statefile");
-        writeVector (gds->getCurrentTime (), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
+        writeVector (gds->getSimulationTime(), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
                      stateFile, append);
         if (hasDifferential (currentMode))
         {
-            writeVector (gds->getCurrentTime (), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
+            writeVector (gds->getSimulationTime(), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
                          sd->deriv_data (), stateFile);
         }
     }
     else
     {
-        writeVector (gds->getCurrentTime (), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
+        writeVector (gds->getSimulationTime(), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
                      fileName, append);
         if (hasDifferential (currentMode))
         {
-            writeVector (gds->getCurrentTime (), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
+            writeVector (gds->getSimulationTime(), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
                          sd->deriv_data (), fileName);
         }
     }
@@ -961,11 +961,11 @@ void loadPowerFlow (gridDynSimulation *gds, const std::string &fileName)
     }
 }
 
-void loadPowerFlowCdf (gridDynSimulation *  /*gds*/, const std::string & /*fileName*/) {}
+void loadPowerFlowCdf (gridDynSimulation * /*gds*/, const std::string & /*fileName*/) {}
 
-void loadPowerFlowCSV (gridDynSimulation *  /*gds*/, const std::string & /*fileName*/) {}
+void loadPowerFlowCSV (gridDynSimulation * /*gds*/, const std::string & /*fileName*/) {}
 
-void loadPowerFlowBinary (gridDynSimulation *  /*gds*/, const std::string & /*fileName*/) {}
+void loadPowerFlowBinary (gridDynSimulation * /*gds*/, const std::string & /*fileName*/) {}
 
 void loadPowerFlowXML (gridDynSimulation *gds, const std::string &fileName)
 {
@@ -1023,7 +1023,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fileName, const
     auto &currentMode = gds->getCurrentMode (sMode);
     auto sd = gds->getSolverInterface (currentMode);
     matrixDataSparse<double> md;
-    stateData sD (gds->getCurrentTime (), sd->state_data (), sd->deriv_data ());
+    stateData sD (gds->getSimulationTime(), sd->state_data (), sd->deriv_data ());
 
     sD.cj = 10000;
 
@@ -1073,7 +1073,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
 
     matrixDataSparse<double> md;
 
-    stateData sD (gds->getCurrentTime (), solverInterface->state_data (), solverInterface->deriv_data ());
+    stateData sD (gds->getSimulationTime(), solverInterface->state_data (), solverInterface->deriv_data ());
 
     sD.cj = 10000;
     gds->jacobianElements (noInputs, sD, md, noInputLocs, currentMode);

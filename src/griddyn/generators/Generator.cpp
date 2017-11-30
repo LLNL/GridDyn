@@ -158,76 +158,37 @@ void Generator::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     gridSecondary::dynObjectInitializeA (time0, flags);
 }
 
-void Generator::loadSizes (const solverMode &sMode, bool dynOnly)
+stateSizes Generator::LocalStateSizes(const solverMode &sMode) const
 {
-    auto &soff = offsets.getOffsets (sMode);
-    if (!isConnected ())
-    {
-        soff.reset ();
-        soff.rjLoaded = true;
-        soff.stateLoaded = true;
-        return;
-    }
-    if (dynOnly)
-    {
-        soff.rootAndJacobianCountReset ();
-        if (!isDynamic (sMode))
-        {
-            soff.total.jacSize = offsets.local ().local.jacSize;
-            soff.rjLoaded = true;
-            return;
-        }
+	stateSizes localStates;
+	if (!isEnabled())
+	{
+		return localStates;
+	}
+	if (isPowerFlow(sMode))
+	{
+		if ((isAC(sMode)) && (opFlags[indirect_voltage_control]))
+		{
+			localStates.algSize = 1;
+		}
+	}
+	return localStates;
+}
 
-        auto &lc = offsets.local ();
-        soff.total.jacSize = lc.local.jacSize;
-        soff.total.algRoots = lc.local.algRoots;
-        soff.total.diffRoots = lc.local.diffRoots;
-    }
-    else
-    {
-        soff.reset ();
-        if (!isDynamic (sMode))
-        {
-            if ((!isDC (sMode)) && (opFlags[indirect_voltage_control]))
-            {
-                soff.total.jacSize = 2;
-                soff.total.algSize = 1;
-            }
-            soff.rjLoaded = true;
-            soff.stateLoaded = true;
-            return;
-        }
-
-        soff.localLoad (false);
-    }
-
-    if (isDC (sMode))
-    {
-        // TODO determine what to include for DC dynamic modes
-    }
-    else
-    {
-        for (auto &subobj : getSubObjects ())
-        {
-            if (!(subobj->isLoaded (sMode, dynOnly)))
-            {
-                subobj->loadSizes (sMode, dynOnly);
-            }
-            if (dynOnly)
-            {
-                soff.addRootAndJacobianSizes (subobj->getOffsets (sMode));
-            }
-            else
-            {
-                soff.addSizes (subobj->getOffsets (sMode));
-            }
-        }
-    }
-    if (!dynOnly)
-    {
-        soff.stateLoaded = true;
-    }
-    soff.rjLoaded = true;
+count_t Generator::LocalJacobianCount(const solverMode &sMode) const
+{
+	if (!isEnabled())
+	{
+		return 0;
+	}
+	if (isPowerFlow(sMode))
+	{
+		if ((isAC(sMode)) && (opFlags[indirect_voltage_control]))
+		{
+			return 2;
+		}
+	}
+	return 0;
 }
 
 // initial conditions of dynamic states
@@ -434,29 +395,29 @@ double Generator::get (const std::string &param, units_t unitType) const
     }
     else if (param == "pset")
     {
-        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "pmax")
     {
-        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (getPmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "pmin")
     {
-        ret = unitConversion (getPmin (), puMW, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (getPmin (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmax")
     {
-        ret = unitConversion (getQmax (), puMW, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (getQmax (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        ret = unitConversion (getQmin (), puMW, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (getQmin (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (auto fptr = getObjectFunction (this, param).first)
     {
         auto unit = getObjectFunction (this, param).second;
         coreObject *tobj = const_cast<Generator *> (this);
-        ret = unitConversion (fptr (tobj), unit, unitType, systemBasePower, baseVoltage);
+        ret = unitConversion (fptr (tobj), unit, unitType, systemBasePower, localBaseVoltage);
     }
     else
     {
@@ -599,10 +560,10 @@ void Generator::set (const std::string &param, double val, units_t unitType)
         switch (param[0])
         {
         case 'p':
-            P = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            P = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             break;
         case 'q':
-            Q = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+            Q = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
             break;
         case 'r':
             m_Rs = val;
@@ -619,23 +580,23 @@ void Generator::set (const std::string &param, double val, units_t unitType)
 
     if (param == "pset")
     {
-        Pset = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Pset = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if ((param == "p+") || (param == "adjustment"))
     {
-        generationAdjust (unitConversion (val, unitType, puMW, systemBasePower, baseVoltage));
+        generationAdjust (unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage));
     }
     else if (param == "qmax")
     {
-        Qmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        Qmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qbias")
     {
-        Qbias = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Qbias = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "xs")
     {
@@ -647,20 +608,20 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "vref") || (param == "vtarget"))
     {
-        m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, baseVoltage);
+        m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if ((param == "rating") || (param == "base") || (param == "mbase"))
     {
-        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, baseVoltage);
+        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         opFlags.set (independent_machine_base);
     }
     else if (param == "dpdt")
     {
-        dPdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        dPdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "dqdt")
     {
-        dQdt = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        dQdt = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
 
     else if (param == "participation")
@@ -673,7 +634,7 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0)
         {
             machineBasePower = unitConversionPower (Pmax, puMW, MW, systemBasePower);
@@ -685,7 +646,7 @@ void Generator::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower, baseVoltage);
+        Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (bounds)
         {
             bounds->setValidRange (Pmin, Pmax);
@@ -721,11 +682,6 @@ void Generator::setCapabilityCurve (const std::vector<double> &Ppts,
     }
 }
 
-void Generator::updateFlags (bool dynOnly)
-{
-    gridSecondary::updateFlags (dynOnly);
-    loadSizes (cLocalSolverMode, true);
-}
 
 void Generator::outputPartialDerivatives (const IOdata & /*inputs*/,
                                           const stateData & /*sD*/,

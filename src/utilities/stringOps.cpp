@@ -35,8 +35,9 @@
 
 std::string convertToLowerCase (const std::string &input)
 {
-    std::string out (input);
-    std::transform (input.begin (), input.end (), out.begin (), ::tolower);
+    std::string out;
+	out.reserve(input.size());
+	std::transform(input.begin(), input.end(), std::back_inserter(out), ::tolower);
     return out;
 }
 
@@ -199,7 +200,7 @@ static const std::string quoteChars (R"raw("'`)raw");
 
 std::string removeQuotes (const std::string &str)
 {
-    std::string newString = trim (str);
+    auto newString = trim (str);
     if (!newString.empty ())
     {
         if ((newString.front () == '\"') || (newString.front () == '\'') || (newString.front () == '`'))
@@ -328,9 +329,8 @@ int findCloseStringMatch (const stringVector &testStrings,
                     {
                         return kk;
                     }
-                    auto nstr = removeChar (lcis, '_');
-                    bf = lcis.find (nstr);
-                    if (bf != std::string::npos)
+                    auto nstr = removeChar (lct, '_');
+                  if (lcis==nstr)
                     {
                         return kk;
                     }
@@ -346,6 +346,9 @@ std::string removeChars (const std::string &source, const std::string &remchars)
 {
     std::string result;
     result.reserve (source.length ());
+	std::remove_copy_if(source.begin(), source.end(), std::back_inserter(result), [remchars](char in) {return (std::find(remchars.begin(), remchars.end(), in) != remchars.end()); });
+	return result;
+	/*
     for (auto sc : source)
     {
         bool foundany = false;
@@ -363,19 +366,14 @@ std::string removeChars (const std::string &source, const std::string &remchars)
         }
     }
     return result;
+	*/
 }
 
 std::string removeChar (const std::string &source, char remchar)
 {
     std::string result;
     result.reserve (source.length ());
-    for (auto sc : source)
-    {
-        if (sc != remchar)
-        {
-            result.push_back (sc);
-        }
-    }
+	std::remove_copy(source.begin(), source.end(),std::back_inserter(result), remchar);
     return result;
 }
 
@@ -387,10 +385,7 @@ std::string characterReplace (const std::string &source, char key, std::string r
     {
         if (sc == key)
         {
-            for (auto rc : repStr)
-            {
-                result.push_back (rc);
-            }
+			result += repStr;
         }
         else
         {

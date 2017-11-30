@@ -32,8 +32,9 @@ public:
 	explicit dimeCollector(const std::string &name);
 	~dimeCollector();
 
-	virtual std::shared_ptr<collector> clone(std::shared_ptr<collector> gr = nullptr) const override;
+	virtual std::unique_ptr<collector> clone() const override;
 
+	virtual void cloneTo(collector *col) const override;
 	virtual change_code trigger(coreTime time) override;
 
 

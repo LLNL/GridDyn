@@ -147,7 +147,7 @@ void gridDynOptimization::setFlag (const std::string &flag, bool val)
   ignore_voltage_limits = 4,
   power_adjust_enabled = 5,
   dcFlow_initialization = 6,*/
-  if (flag[0] == '#')
+  if (flag.empty())
     {
 
     }

@@ -11,8 +11,8 @@
 */
 
 #include "basicSolver.h"
-#include "core/helperTemplates.hpp"
-#include "griddyn.h"
+
+#include "gridDynSimulation.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 
@@ -32,17 +32,25 @@ basicSolver::basicSolver (gridDynSimulation *gds, const solverMode &sMode)
     mode.algebraic = true;
 }
 
-std::shared_ptr<solverInterface> basicSolver::clone (std::shared_ptr<solverInterface> si, bool fullCopy) const
+std::unique_ptr<solverInterface> basicSolver::clone(bool fullCopy) const
 {
-    auto rp = cloneBase<basicSolver, solverInterface> (this, si, fullCopy);
-    if (!rp)
-    {
-        return si;
-    }
-    rp->algorithm = algorithm;
-    rp->alpha = alpha;
-    return rp;
+	std::unique_ptr<solverInterface> si = std::make_unique<basicSolver>();
+	basicSolver::cloneTo(si.get(),fullCopy);
+	return si;
 }
+
+void basicSolver::cloneTo(solverInterface *si, bool fullCopy) const
+{
+	solverInterface::cloneTo(si, fullCopy);
+	auto ai = dynamic_cast<basicSolver *>(si);
+	if (ai == nullptr)
+	{
+		return;
+	}
+	ai->algorithm = algorithm;
+	ai->alpha = alpha;
+}
+
 double *basicSolver::state_data () noexcept { return state.data (); }
 double *basicSolver::deriv_data () noexcept { return nullptr; }
 double *basicSolver::type_data () noexcept { return type.data (); }

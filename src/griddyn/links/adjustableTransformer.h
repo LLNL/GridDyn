@@ -130,7 +130,8 @@ public:
 	void residual(const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
 	void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 	void guessState(coreTime time, double state[], double dstate_dt[], const solverMode &sMode) override;
-	void loadSizes(const solverMode &sMode, bool dynOnly) override;
+	virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+	virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
 protected:
 	void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 	void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;

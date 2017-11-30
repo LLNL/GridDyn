@@ -110,7 +110,10 @@ class fmiCoordinator : public griddyn::coreObject
 	/** capture a helper object 
 	@param[in] ho  the helper object to capture*/
     void addHelper (std::shared_ptr<helperObject> ho);
+    
+    static bool isStringParameter(const vrInputPair &param);
 };
+
 
 }  // namespace fmi
 }  // namespace griddyn

@@ -21,8 +21,8 @@ namespace blocks
 nullBlock::nullBlock (const std::string &objName) : Block (objName)
 {
     opFlags[use_direct] = true;
-    opFlags[no_pflow_states] = true;
-    opFlags[no_dyn_states] = true;
+    opFlags[no_powerflow_operations] = true;
+    opFlags[no_dynamics] = true;
 }
 
 coreObject *nullBlock::clone (coreObject *obj) const

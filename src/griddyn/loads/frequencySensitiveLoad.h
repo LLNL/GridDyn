@@ -28,8 +28,8 @@ class frequencySensitiveLoad : public Load
 
 private:
 	double dPdf = 0.0;                            //!<factor for determining how sensitive Pout is to frequency
-	double Pout = 0.0;
-	double Qout = 0.0;
+	double Pout = 0.0;						//!< Pout before applying frequency variation
+	double Qout = 0.0;						//!< Qout before applying frequency variation
 protected:
 	parameter_t M = 0.0;                               //!<load droop factor
 	parameter_t H = 0.0;                               //!<load inertia used in computing dPdf
@@ -53,7 +53,7 @@ public:
 
 
 	virtual void updateLocalCache(const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
-
+	/** update the actual outputs with a frequency related calculation*/
 	virtual void updateOutputs(double frequency);
 	virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;
 

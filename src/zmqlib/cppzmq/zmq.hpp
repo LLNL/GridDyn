@@ -1,4 +1,5 @@
 /*
+    Copyright (c) 2016-2017 ZeroMQ community
     Copyright (c) 2009-2011 250bpm s.r.o.
     Copyright (c) 2011 Botond Ballo
     Copyright (c) 2007-2009 iMatix Corporation
@@ -485,12 +486,10 @@ namespace zmq
         xsub = ZMQ_XSUB,
         push = ZMQ_PUSH,
         pull = ZMQ_PULL,
-#if ZMQ_VERSION_MAJOR < 4
-        pair = ZMQ_PAIR
-#else
-        pair = ZMQ_PAIR,
-        stream = ZMQ_STREAM
+#if ZMQ_VERSION_MAJOR >= 4
+        stream = ZMQ_STREAM,
 #endif
+        pair = ZMQ_PAIR
     };
     #endif
 
@@ -657,8 +656,6 @@ namespace zmq
                 return (size_t) nbytes;
             if (zmq_errno () == EAGAIN)
                 return 0;
-            if (zmq_errno () == EHOSTUNREACH)
-                return 0;
             throw error_t ();
         }
 
@@ -668,8 +665,6 @@ namespace zmq
             if (nbytes >= 0)
                 return true;
             if (zmq_errno () == EAGAIN)
-                return false;
-            if (zmq_errno () == EHOSTUNREACH)
                 return false;
             throw error_t ();
         }
@@ -726,7 +721,7 @@ namespace zmq
     class monitor_t
     {
     public:
-        monitor_t() : socketPtr(NULL), monitor_socket{NULL} {}
+        monitor_t() : socketPtr(NULL), monitor_socket(NULL) {}
 
         virtual ~monitor_t()
         {
@@ -885,12 +880,27 @@ namespace zmq
                 on_event_disconnected(*event, address.c_str());
                 break;
 #ifdef ZMQ_BUILD_DRAFT_API
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 3)
+            case ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL:
+                on_event_handshake_failed_no_detail(*event, address.c_str());
+                break;
+            case ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL:
+                on_event_handshake_failed_protocol(*event, address.c_str());
+                break;
+            case ZMQ_EVENT_HANDSHAKE_FAILED_AUTH:
+                on_event_handshake_failed_auth(*event, address.c_str());
+                break;
+            case ZMQ_EVENT_HANDSHAKE_SUCCEEDED:
+                on_event_handshake_succeeded(*event, address.c_str());
+                break;
+#elif ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 1)
             case ZMQ_EVENT_HANDSHAKE_FAILED:
                 on_event_handshake_failed(*event, address.c_str());
                 break;
             case ZMQ_EVENT_HANDSHAKE_SUCCEED:
                 on_event_handshake_succeed(*event, address.c_str());
                 break;
+#endif
 #endif
             default:
                 on_event_unknown(*event, address.c_str());
@@ -925,8 +935,15 @@ namespace zmq
         virtual void on_event_closed(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
         virtual void on_event_close_failed(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
         virtual void on_event_disconnected(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 3)
+        virtual void on_event_handshake_failed_no_detail(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+        virtual void on_event_handshake_failed_protocol(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+        virtual void on_event_handshake_failed_auth(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+        virtual void on_event_handshake_succeeded(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+#elif ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 1)
         virtual void on_event_handshake_failed(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
         virtual void on_event_handshake_succeed(const zmq_event_t &event_, const char* addr_) { (void) event_; (void) addr_; }
+#endif		
         virtual void on_event_unknown(const zmq_event_t &event_, const char* addr_) { (void)event_; (void)addr_; }
     private:
 
@@ -972,7 +989,7 @@ namespace zmq
 
         bool wait (std::chrono::milliseconds timeout)
         {
-            int rc = zmq_poller_wait_all (poller_ptr, poller_events.data (), poller_events.size (), static_cast<long>(timeout.count ()));
+            int rc = zmq_poller_wait_all (poller_ptr, poller_events.data (), static_cast<int> (poller_events.size ()), static_cast<long>(timeout.count ()));
             if (rc >= 0) {
                 std::for_each (poller_events.begin (), poller_events.begin () + rc, [](zmq_poller_event_t& event) {
                     if (event.user_data != NULL)
@@ -981,7 +998,11 @@ namespace zmq
                 return true;
             }
 
-            if (zmq_errno ()  == ETIMEDOUT)
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 3)
+            if (zmq_errno () == EAGAIN)
+#else			
+            if (zmq_errno () == ETIMEDOUT)
+#endif			
                 return false;
 
             throw error_t ();

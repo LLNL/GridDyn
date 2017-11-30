@@ -61,11 +61,11 @@ protected:
   Source *pSetControl = nullptr;				//!< source for throttle control
   Source *vSetControl = nullptr;				//!< source for voltage level control
   isocController *isoc = nullptr;		//!< pointer to a isochronous controller
-  const double *m_stateTemp = nullptr;                       //!< temporary state vector(assumed not writable)
-  const double *m_dstate_dt_Temp = nullptr;                   //!<  a temporary deriv vector;
+  //const double *m_stateTemp = nullptr;                       //!< temporary state vector(assumed not writable)
+  //const double *m_dstate_dt_Temp = nullptr;                   //!<  a temporary deriv vector;
 
-  std::vector<double> m_state_ind;                              //!< a vector holding the indices to indicate if a variable is a algebraic or differential state
-  count_t SSize = 0;                                                             //!< the total number of states
+  //std::vector<double> m_state_ind;                              //!< a vector holding the indices to indicate if a variable is a algebraic or differential state
+  //count_t SSize = 0;                                                             //!< the total number of states
   double m_Eft = 0;                                             //!< place to store a constant the exciter field
   double m_Pmech = 0;                                           //!< place to store a constant power output
 public:
@@ -88,14 +88,9 @@ public:
   virtual void setFlag (const std::string &flag, bool val = true) override;
 
   virtual void add (coreObject *obj) override;
-  /** @brief additional add function specific to subModels
-  @param[in] a submodel to add 
-  @throw unrecognizedObjectError is object is not valid*/
+  
   virtual void add (gridSubModel *obj) override;
 
-  void loadSizes (const solverMode &sMode, bool dynOnly) override;
-
-  virtual void alert (coreObject *object, int code) override;
   virtual void algebraicUpdate (const IOdata &inputs,const stateData &sD, double update[],const solverMode &sMode, double alpha) override;
   virtual void residual (const IOdata &inputs, const stateData &sD, double resid[],const solverMode &sMode) override;
   virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;

@@ -13,7 +13,7 @@
 #include "core/objectFactory.hpp"
 #include "Generator.h"
 #include "gridBus.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 #include "fileInput.h"
 #include "links/acLine.h"
 #include "relays/breaker.h"

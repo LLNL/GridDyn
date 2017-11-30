@@ -15,6 +15,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 
 class fmiLibrary;
 class fmi2ModelExchangeObject;
@@ -26,6 +27,7 @@ class fmiLibraryManager
 private:
 	std::map<std::string, std::shared_ptr<fmiLibrary>> libraries;
 	std::map<std::string, std::string> quickReferenceLibraries;
+	mutable std::mutex libraryLock;
 public:
 
 	~fmiLibraryManager();

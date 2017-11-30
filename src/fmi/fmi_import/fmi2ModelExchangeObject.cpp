@@ -17,6 +17,10 @@ fmi2ModelExchangeObject::fmi2ModelExchangeObject(fmi2Component cmp, std::shared_
 {
 	numIndicators = info->getCounts("events");
 	numStates = info->getCounts("states");
+	if (numStates == 0)
+	{
+		hasTime = false;
+	}
 }
 
 void fmi2ModelExchangeObject::setMode(fmuMode mode)
@@ -24,12 +28,21 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 	fmi2Status ret=fmi2Error;
 	switch (currentMode)
 	{
+	case fmuMode::instantiatedMode:
 	case fmuMode::initializationMode:
 		
 		if (mode == fmuMode::continuousTimeMode)
 		{
 			fmi2Object::setMode(fmuMode::eventMode);
-			ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+			if (numStates > 0)
+			{
+				ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+			}
+			else
+			{
+				ret = fmi2OK;
+			}
+			
 		}
 		else
 		{
@@ -49,7 +62,14 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 		}
 		else if (mode==fmuMode::continuousTimeMode)
 		{
-			ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+			if (numStates > 0)
+			{
+				ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+			}
+			else
+			{
+				ret = fmi2OK;
+			}
 		}
 		break;
 	default:
@@ -86,11 +106,15 @@ void fmi2ModelExchangeObject::completedIntegratorStep(fmi2Boolean noSetFMUStateP
 }
 void fmi2ModelExchangeObject::setTime(fmi2Real time)
 {
-	auto ret = ModelExchangeFunctions->fmi2SetTime(comp, time);
-	if (ret != fmi2Status::fmi2OK)
+	if (hasTime)
 	{
-		handleNonOKReturnValues(ret);
+		auto ret = ModelExchangeFunctions->fmi2SetTime(comp, time);
+		if (ret != fmi2Status::fmi2OK)
+		{
+			handleNonOKReturnValues(ret);
+		}
 	}
+	
 }
 void fmi2ModelExchangeObject::setStates(const fmi2Real x[])
 {

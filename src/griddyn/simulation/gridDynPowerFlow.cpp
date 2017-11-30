@@ -11,7 +11,7 @@
 */
 
 #include "events/Event.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 
 #include "continuation.h"
 #include "events/eventQueue.h"
@@ -75,7 +75,8 @@ int gridDynSimulation::powerflow ()
                 guessState (currentTime, pFlowData->state_data (), nullptr, sm);
 
                 // solve
-                retval = pFlowData->solve (currentTime, currentTime);
+				coreTime returnTime = currentTime;
+                retval = pFlowData->solve (currentTime, returnTime);
 
                 if (retval < 0)
                 {
@@ -105,7 +106,7 @@ int gridDynSimulation::powerflow ()
                         retval = -30;
                     }
                 }
-
+				currentTime = returnTime;
                 // pass the solution to the bus objects
                 setState (currentTime, pFlowData->state_data (), nullptr, sm);
                 // tell the components to calculate some parameters and power flows
@@ -491,7 +492,7 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
         }
     }
     // setup the periodic empty event in the queue
-    EvQ->nullEventTime (currentTime + t_step, t_step);
+    EvQ->nullEventTime (getSimulationTime() + t_step, t_step);
     auto nextEvent = EvQ->getNextTime ();
 
     while (nextEvent <= t_end)
@@ -504,7 +505,7 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
         ret = EvQ->executeEventsAonly (currentTime);
         // run the power flow
         if ((ret >= change_code::parameter_change) || (controlFlags[force_power_flow]) ||
-            (EvQ->getNullEventTime () >= currentTime + t_step))
+            (EvQ->getNullEventTime () >= getSimulationTime() + t_step))
         {
             int pret = powerflow ();
             powerflow_executed = true;
@@ -529,13 +530,13 @@ int gridDynSimulation::eventDrivenPowerflow (coreTime t_end, coreTime t_step)
         nextEvent = EvQ->getNextTime ();
         if (powerflow_executed)
         {
-            if (nextEvent < currentTime + t_step)  // only run the empty event if there is nothing in between
+            if (nextEvent < getSimulationTime() + t_step)  // only run the empty event if there is nothing in between
             {
                 EvQ->nullEventTime (nextEvent + t_step);
             }
         }
     }
-    if (currentTime != t_end)
+    if (getSimulationTime() != t_end)
     {
         Area::timestep (t_end, noInputs, *defPowerFlowMode);
         currentTime = t_end;

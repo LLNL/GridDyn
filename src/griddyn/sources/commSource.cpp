@@ -15,7 +15,7 @@
 #include "comms/controlMessage.h"
 #include "core/coreObjectTemplates.hpp"
 #include "events/eventQueue.h"
-#include "griddyn.h"
+#include "gridDynSimulation.h"
 
 namespace griddyn
 {
