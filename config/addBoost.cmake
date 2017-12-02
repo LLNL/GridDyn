@@ -2,7 +2,7 @@ IF (MSVC)
 
 set (boost_versions
 boost_1_66_0
-boost_1_66_b1
+boost_1_66_0_b1
 boost_1_65_1
 boost_1_65_0
 boost_1_64_0

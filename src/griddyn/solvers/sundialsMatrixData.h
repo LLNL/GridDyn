@@ -13,7 +13,7 @@
 #ifndef _MATRIX_DATA_SUNDIALS_H_
 #define _MATRIX_DATA_SUNDIALS_H_
 #pragma once
-
+#include <cstdio>
 #include "sunmatrix/sunmatrix_dense.h"
 #include "sunmatrix/sunmatrix_sparse.h"
 #include "utilities/matrixData.hpp"

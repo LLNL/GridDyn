@@ -22,6 +22,11 @@
 #include <cvode/cvode.h>
 #include <cvode/cvode_direct.h>
 
+#ifdef KLU_ENABLE
+#include <sunlinsol/sunlinsol_klu.h>
+#endif
+
+#include <sunlinsol/sunlinsol_dense.h>
 
 #include <cassert>
 #include <cstdio>
@@ -32,25 +37,16 @@ namespace griddyn
 namespace solvers
 {
 int cvodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
-int cvodeJacDense (long int Neq,
-                   realtype time,
-                   N_Vector state,
-                   N_Vector dstate_dt,
-                   DlsMat J,
-                   void *user_data,
-                   N_Vector tmp1,
-                   N_Vector tmp2,
-                   N_Vector tmp3);
-#ifdef KLU_ENABLE
-int cvodeJacSparse (realtype time,
+
+int cvodeJac (realtype time,
                     N_Vector state,
                     N_Vector dstate_dt,
-                    SlsMat J,
+                    SUNMatrix J,
                     void *user_data,
                     N_Vector tmp1,
                     N_Vector tmp2,
                     N_Vector tmp3);
-#endif
+
 int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
 cvodeInterface::cvodeInterface (const std::string &objName) : sundialsInterface (objName)
@@ -363,28 +359,39 @@ void cvodeInterface::initialize (coreTime time0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        retval = CVDense (solverMem, svsize);
-        check_flag (&retval, "CVDense", 1);
-
-        retval = CVDlsSetDenseJacFn (solverMem, cvodeJacDense);
-        check_flag (&retval, "CVDlsSetDenseJacFn", 1);
+        J = SUNDenseMatrix(svsize, svsize);
+        check_flag((void *)J, "SUNDenseMatrix", 0);
+        /* Create KLU solver object */
+        LS = SUNDenseLinearSolver(state, J);
+        check_flag((void *)LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
-        retval = CVKLU (solverMem, svsize, jsize, CSR_MAT);
-        check_flag (&retval, "CVodeKLU", 1);
+        /* Create sparse SUNMatrix */
+        J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
+        check_flag((void *)J, "SUNSparseMatrix", 0);
 
-        retval = CVSlsSetSparseJacFn (solverMem, cvodeJacSparse);
-        check_flag (&retval, "CVSlsSetSparseJacFn", 1);
+        /* Create KLU solver object */
+        LS = SUNKLU(state, J);
+        check_flag((void *)LS, "SUNKLU", 0);
+
     }
 #else
-    retval = CVDense (solverMem, svsize);
-    check_flag (&retval, "CVDense", 1);
-
-    retval = CVDlsSetDenseJacFn (solverMem, cvodeJacDense);
-    check_flag (&retval, "CVDlsSetDenseJacFn", 1);
-
+    J = SUNDenseMatrix(svsize, svsize);
+    check_flag((void *)J, "SUNSparseMatrix", 0);
+    /* Create KLU solver object */
+    LS = SUNDenseLinearSolver(state, J);
+    check_flag((void *)LS, "SUNDenseLinearSolver", 0);
 #endif
+
+
+    
+    retval = CVDlsSetLinearSolver(solverMem, LS, J);
+
+    check_flag(&retval, "IDADlsSetLinearSolver", 1);
+
+    retval = CVDlsSetJacFn(solverMem, cvodeJac);
+    check_flag(&retval, "IDADlsSetJacFn", 1);
 
     retval = CVodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "CVodeSetMaxNonlinIters", 1);
@@ -415,11 +422,15 @@ void cvodeInterface::initialize (coreTime time0)
 void cvodeInterface::sparseReInit (sparse_reinit_modes reInitMode)
 {
 #ifdef KLU_ENABLE
-    int kinmode = (reInitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = CVKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
-    check_flag (&retval, "KINKLUReInit", 1);
-    jacCallCount = 0;
+    if (flags[dense_flag])
+    {
+        return;
+    }
 
+    int kinmode = (reInitMode == sparse_reinit_modes::refactor) ? 1 : 2;
+    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity()), kinmode);
+    check_flag(&retval, "SUNKLUReInit", 1);
+    jacCallCount = 0;
 #endif
 }
 
@@ -526,35 +537,18 @@ int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_dat
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-int cvodeJacDense (long int Neq,
-                   realtype time,
-                   N_Vector state,
-                   N_Vector dstate_dt,
-                   DlsMat J,
-                   void *user_data,
-                   N_Vector tmp1,
-                   N_Vector tmp2,
-                   N_Vector /*tmp3*/)
-{
-    return sundialsJacDense (Neq, time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
-}
 
-//#define CAPTURE_JAC_FILE
-
-#ifdef KLU_ENABLE
 int cvodeJacSparse (realtype time,
                     N_Vector state,
                     N_Vector dstate_dt,
-                    SlsMat J,
+                    SUNMatrix J,
                     void *user_data,
                     N_Vector tmp1,
                     N_Vector tmp2,
                     N_Vector /*tmp3*/)
 {
-    return sundialsJacSparse (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
+    return sundialsJac (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
 }
-
-#endif  // KLU_ENABLE
 
 }  // namespace solvers
 }  // namespace griddyn

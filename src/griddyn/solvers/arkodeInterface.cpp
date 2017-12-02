@@ -22,6 +22,11 @@
 #include <arkode/arkode.h>
 #include <arkode/arkode_direct.h>
 
+#ifdef KLU_ENABLE
+#include <sunlinsol/sunlinsol_klu.h>
+#endif
+
+#include <sunlinsol/sunlinsol_dense.h>
 
 #include <cassert>
 #include <map>
@@ -346,28 +351,39 @@ void arkodeInterface::initialize (coreTime time0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        retval = ARKDense (solverMem, svsize);
-        check_flag (&retval, "ARKDense", 1);
-
-        retval = ARKDlsSetDenseJacFn (solverMem, arkodeJacDense);
-        check_flag (&retval, "ARKDlsSetDenseJacFn", 1);
+        J = SUNDenseMatrix(svsize, svsize);
+        check_flag((void *)J, "SUNDenseMatrix", 0);
+        /* Create KLU solver object */
+        LS = SUNDenseLinearSolver(state, J);
+        check_flag((void *)LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
-        retval = ARKKLU (solverMem, svsize, jsize, CSR_MAT);
-        check_flag (&retval, "ARKodeKLU", 1);
+        /* Create sparse SUNMatrix */
+        J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
+        check_flag((void *)J, "SUNSparseMatrix", 0);
 
-        retval = ARKSlsSetSparseJacFn (solverMem, arkodeJacSparse);
-        check_flag (&retval, "ARKSlsSetSparseJacFn", 1);
+        /* Create KLU solver object */
+        LS = SUNKLU(state, J);
+        check_flag((void *)LS, "SUNKLU", 0);
+
     }
 #else
-    retval = ARKDense (solverMem, svsize);
-    check_flag (&retval, "ARKDense", 1);
-
-    retval = ARKDlsSetDenseJacFn (solverMem, arkodeJacDense);
-    check_flag (&retval, "ARKDlsSetDenseJacFn", 1);
-
+    J = SUNDenseMatrix(svsize, svsize);
+    check_flag((void *)J, "SUNSparseMatrix", 0);
+    /* Create KLU solver object */
+    LS = SUNDenseLinearSolver(state, J);
+    check_flag((void *)LS, "SUNDenseLinearSolver", 0);
 #endif
+
+
+    
+    retval = ARKDlsSetLinearSolver(solverMem, LS, J);
+
+    check_flag(&retval, "IDADlsSetLinearSolver", 1);
+
+    retval = ARKDlsSetJacFn(solverMem, arkodeJac);
+    check_flag(&retval, "IDADlsSetJacFn", 1);
 
     retval = ARKodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "ARKodeSetMaxNonlinIters", 1);
@@ -397,11 +413,15 @@ void arkodeInterface::initialize (coreTime time0)
 void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
 #ifdef KLU_ENABLE
-    jacCallCount = 0;
-    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = ARKKLUReInit (solverMem, static_cast<int> (svsize), static_cast<int> (a1.capacity ()), kinmode);
-    check_flag (&retval, "ARKKLUReInit", 1);
+    if (flags[dense_flag])
+    {
+        return;
+    }
 
+    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
+    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity()), kinmode);
+    check_flag(&retval, "SUNKLUReInit", 1);
+    jacCallCount = 0;
 #endif
 }
 
@@ -503,11 +523,7 @@ int arkodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_da
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-
-//#define CAPTURE_JAC_FILE
-
-#ifdef KLU_ENABLE
-int arkodeJacSparse (realtype time,
+int arkodeJac (realtype time,
                      N_Vector state,
                      N_Vector dstate_dt,
                      SUNMatrix J,
@@ -519,7 +535,6 @@ int arkodeJacSparse (realtype time,
     return sundialsJac (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
 }
 
-#endif  // KLU_ENABLE
 
 }  // namespace solvers
 }  // namespace griddyn

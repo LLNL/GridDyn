@@ -49,11 +49,30 @@ message(STATUS ${trigger_build_dir})
 
 #execute_process(COMMAND ${CMAKE_COMMAND} WORKING_DIRECTORY ${trigger_build_dir}/build)
 
+if (NOT BUILD_RELEASE_ONLY)
+message(STATUS "Configuring Minizip Autobuild for debug: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_debug.log")	
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
-        -G ${CMAKE_GENERATOR} .. 
+        -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
+        WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_debug.log
+        )
+		
+	message(STATUS "Building minizip Autobuild for debug: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_build_debug.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Debug
+        WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_build_debug.log
+        )
+
+endif()
+
+message(STATUS "Configuring Minizip Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_release.log")	
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+        -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_release.log
         )
+		
+	message(STATUS "Building minizip Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_build_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_build_release.log

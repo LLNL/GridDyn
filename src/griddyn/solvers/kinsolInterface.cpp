@@ -224,42 +224,43 @@ void kinsolInterface::initialize (coreTime /*t0*/)
 
     check_flag (&retval, "KINInit", 1);
 
+
 #ifdef KLU_ENABLE
-    jacCallCount = 0;
     if (flags[dense_flag])
     {
-        retval = KINDense (solverMem, svsize);
-        check_flag (&retval, "KINDense", 1);
-
-        retval = KINDlsSetDenseJacFn (solverMem, kinsolJacDense);
-        check_flag (&retval, "KINDlsSetDenseJacFn", 1);
+        J = SUNDenseMatrix(svsize, svsize);
+        check_flag((void *)J, "SUNDenseMatrix", 0);
+        /* Create KLU solver object */
+        LS = SUNDenseLinearSolver(state, J);
+        check_flag((void *)LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
-        auto jsize = m_gds->jacSize (mode);
-		/* Create sparse SUNMatrix */
-		J = SUNSparseMatrix(static_cast<sunindextype>(svsize), static_cast<sunindextype>(svsize), static_cast<sunindextype>(jsize), CSR_MAT);
-		check_flag((void *)J, "SUNSparseMatrix", 0);
+        /* Create sparse SUNMatrix */
+        J = SUNSparseMatrix(svsize, svsize, maxNNZ, CSR_MAT);
+        check_flag((void *)J, "SUNSparseMatrix", 0);
 
-		/* Create KLU solver object */
-		LS = SUNKLU(state, J);
-		check_flag((void *)LS, "SUNKLU", 0);
+        /* Create KLU solver object */
+        LS = SUNKLU(state, J);
+        check_flag((void *)LS, "SUNKLU", 0);
 
-
-        retval = KINDlsSetJacFn (solverMem, kinsolJac);
-        check_flag (&retval, "KINSlsSetSpasreJacFn", 1);
-
-        retval = KINKLUSetOrdering (solverMem, 0);  // SET to AMD instead of COLAMD
-        check_flag (&retval, "KINKLUSetOrdering", 1);
+        retval=SUNKLUSetOrdering(LS, 0);
+        check_flag(&retval, "SUNKLUSetOrdering", 1);
     }
 #else
-    retval = KINDense (solverMem, svsize);
-    check_flag (&retval, "KINDense", 1);
-
-    retval = KINDlsSetDenseJacFn (solverMem, kinsolJacDense);
-    check_flag (&retval, "KINDlsSetDenseJacFn", 1);
-
+    J = SUNDenseMatrix(svsize, svsize);
+    check_flag((void *)J, "SUNSparseMatrix", 0);
+    /* Create KLU solver object */
+    LS = SUNDenseLinearSolver(state, J);
+    check_flag((void *)LS, "SUNDenseLinearSolver", 0);
 #endif
+
+    retval = KINDlsSetLinearSolver(solverMem, LS, J);
+
+    check_flag(&retval, "KINDlsSetLinearSolver", 1);
+
+    retval = KINDlsSetJacFn(solverMem, kinsolJac);
+    check_flag(&retval, "KINDlsSetJacFn", 1);
 
     retval = KINSetMaxSetupCalls (solverMem, 1);  // exact Newton
     check_flag (&retval, "KINSetMaxSetupCalls", 1);
@@ -279,11 +280,15 @@ void kinsolInterface::initialize (coreTime /*t0*/)
 void kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
 #ifdef KLU_ENABLE
-    jacCallCount = 0;
-    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = KINKLUReInit (solverMem, static_cast<int> (svsize), maxNNZ, kinmode);
-    check_flag (&retval, "KINKLUReInit", 1);
+    if (flags[dense_flag])
+    {
+        return;
+    }
 
+    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
+    int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
+    check_flag(&retval, "SUNKLUReInit", 1);
+    jacCallCount = 0;
 #endif
 }
 void kinsolInterface::set (const std::string &param, const std::string &val)
@@ -322,18 +327,7 @@ double kinsolInterface::get (const std::string &param) const
     long int val = -1;
     if (param == "jac calls")
     {
-        if (flags[dense_flag])
-        {
-            KINDlsGetNumJacEvals (solverMem, &val);
-        }
-        else
-        {
-#ifdef KLU_ENABLE
-            KINSlsGetNumJacEvals (solverMem, &val);
-#else
-            KINDlsGetNumJacEvals (solverMem, &val);
-#endif
-        }
+       KINDlsGetNumJacEvals (solverMem, &val);
     }
 #if MEASURE_TIMINGS > 0
     else if (param == "kintime")
@@ -477,78 +471,15 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
     return ret;
 }
 
-int kinsolJac (N_Vector state,
-                     N_Vector /*f*/,
-                     SUNMatrix J,
-                     void *user_data,
-                     N_Vector /*tmp1*/,
-                     N_Vector /*tmp2*/)
+int kinsolJac(N_Vector state,
+    N_Vector /*f*/,
+    SUNMatrix J,
+    void *user_data,
+    N_Vector tmp1,
+    N_Vector tmp2)
 {
     auto sd = reinterpret_cast<kinsolInterface *> (user_data);
-#if MEASURE_TIMINGS > 0
-    auto start_t = std::chrono::high_resolution_clock::now ();
-#endif
-    if ((sd->jacCallCount == 0) || (!isSlsMatSetup (J)))
-    {
-        auto a1 = makeSparseMatrix (sd->svsize, sd->maxNNZ);
-
-        a1->setRowLimit (sd->svsize);
-        a1->setColLimit (sd->svsize);
-
-        sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, *a1, 0, sd->mode);
-
-        sd->jacCallCount++;
-        matrixDataToSlsMat (*a1, J, sd->svsize);
-        sd->nnz = a1->size ();
-        if (sd->flags[fileCapture_flag])
-        {
-            if (!sd->jacFile.empty ())
-            {
-                long int val = 0;
-                KINGetNumNonlinSolvIters (sd->solverMem, &val);
-                writeArray (sd->solveTime, 1, val, sd->mode.offsetIndex, *a1, sd->jacFile);
-            }
-        }
-    }
-    else
-    {
-        // if it isn't the first we can use the SUNDIALS arraySparse object
-        sundialsMatrixDataSparseRow a1 (J);
-        sd->m_gds->jacobianFunction (sd->solveTime, NVECTOR_DATA (sd->use_omp, state), nullptr, a1, 0, sd->mode);
-        sd->jacCallCount++;
-        if (sd->flags[fileCapture_flag])
-        {
-            if (!sd->jacFile.empty ())
-            {
-                long int val = 0;
-                KINGetNumNonlinSolvIters (sd->solverMem, &val);
-                writeArray (sd->solveTime, 1, val, sd->mode.offsetIndex, a1, sd->jacFile);
-            }
-        }
-    }
-// for (kk = 0; kk<a1->points(); ++kk) {
-//   printf("kk: %d  J->data[kk]: %f  J->rowvals[kk]: %d \n ", kk, J->data[kk], J->rowvals[kk]);
-// }
-// for (kk = 0; kk<(colval+2); ++kk) {
-//   printf("kk: %d  : J->colptrs[kk]: %d \n ", kk, J->colptrs[kk]);
-// }
-#if MEASURE_TIMINGS > 0
-    auto stop_t = std::chrono::high_resolution_clock::now ();
-    static auto last_stop = stop_t;
-    std::chrono::duration<double> elapsed_t = stop_t - start_t;
-    if (sd->jac1Time == sd->jacTime)
-    {
-        std::chrono::duration<double> jac1_t = stop_t - last_stop;
-        sd->kinsol1Time = jac1_t.count ();
-    }
-    sd->jacTime += elapsed_t.count ();
-    if (sd->jac1Time == 0)
-    {
-        sd->jac1Time = sd->jacTime;
-        last_stop = stop_t;
-    }
-#endif
-    return 0;
+    return sundialsJac(sd->solveTime, 0, state, nullptr, J, user_data, tmp1, tmp2);
 }
 
 }  // namespace solvers

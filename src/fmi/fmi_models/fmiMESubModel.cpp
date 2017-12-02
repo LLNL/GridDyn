@@ -70,16 +70,7 @@ void fmiMESubModel::pFlowObjectInitializeB()
         me->setMode(fmuMode::initializationMode);
     }
 }
-void fmiMESubModel::pFlowObjectInitializeB()
-{
-    if (opFlags[pflow_init_required])
-    {
-        me->setMode(fmuMode::continuousTimeMode);
-        oEst.resize(m_outputSize);
-        probeFMU();
-        opFlags.set(pFlow_initialized);
-    }
-}
+
 
 void fmiMESubModel::dynObjectInitializeA (coreTime time0, std::uint32_t flags) { prevTime = time0; }
 
@@ -107,8 +98,6 @@ void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs,
 					}
 				}
 			}
-        opFlags.set (dyn_initialized);
-		}
 	}
 	else
 	{

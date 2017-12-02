@@ -90,9 +90,7 @@ ENDIF()
 # -------------------------------------------------------------
 # Setup compiler options and configurations
 # -------------------------------------------------------------
-IF (WITH_MATLAB)
-  set(Boost_USE_STATIC_LIBS ON)
-ENDIF (WITH_MATLAB)
+
 message(STATUS "setting up for ${CMAKE_CXX_COMPILER_ID}")
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
@@ -101,6 +99,7 @@ IF(UNIX)
   set(Boost_NO_BOOST_CMAKE ON)
 
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
+  option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
   if (ENABLE_EXTRA_COMPILER_WARNINGS)
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
@@ -113,40 +112,43 @@ IF(UNIX)
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
   endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-  option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
+  
 ELSE(UNIX)
-  IF(MINGW)
-  if (ENABLE_EXTRA_COMPILER_WARNINGS)
- add_compile_options(-Wall -pedantic)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
-  #this options produces lots of warning but is useful for checking ever once in a while with Clang GCC warnin notices with this aren't as useful
-  #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpadded>)
-  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-  ENDIF(MINGW)
-
- option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
-  ELSE(MINGW)
-   option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" ON)
+	IF(MINGW)
+		if (ENABLE_EXTRA_COMPILER_WARNINGS)
+			add_compile_options(-Wall -pedantic)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
+			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
+			#this options produces lots of warning but is useful for checking ever once in a while with Clang GCC warnin notices with this aren't as useful
+			#add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpadded>)
+		endif(ENABLE_EXTRA_COMPILER_WARNINGS)
+		option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
+	ELSE(MINGW)
+		option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" ON)
 # -------------------------------------------------------------
 # Extra definitions for visual studio
 # -------------------------------------------------------------
-  IF(MSVC)
-  ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-  ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-  add_compile_options(/EHsc)
-  if (ENABLE_EXTRA_COMPILER_WARNINGS)
-   add_compile_options(-W4 /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
-  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
+		IF(MSVC)
+			ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+			ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
+			add_compile_options(/EHsc)
+			if (ENABLE_EXTRA_COMPILER_WARNINGS)
+				add_compile_options(-W4 /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
+			endif(ENABLE_EXTRA_COMPILER_WARNINGS)
 
-ENDIF(MSVC)
+		ENDIF(MSVC)
+	ENDIF(MINGW)
 ENDIF(UNIX)
+
+IF (WITH_MATLAB OR USE_BOOST_STATIC_LIBS)
+  set(Boost_USE_STATIC_LIBS ON)
+ENDIF ()
 
 # -------------------------------------------------------------
 # Check and set latest CXX Standard supported by compiler
@@ -166,9 +168,40 @@ ENDIF ()
 #message(STATUS ${CMAKE_CXX_FLAGS})
 set(CONFIGURE_TARGET_LOCATION ${PROJECT_BINARY_DIR}/libs/include/griddyn/)
 include(configGenerator)
-INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/compiler-config.h DESTINATION include/griddyn)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTINATION include/griddyn)
 
 include(ExternalProject)
+
+
+
+include(GNUInstallDirs)
+
+# -------------------------------------------------------------
+# setting the RPATH
+# -------------------------------------------------------------
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/bin")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/bin" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/bin")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
+if (NOT USE_BOOST_STATIC_LIBS)
+list(APPEND CMAKE_INSTALL_RPATH ${Boost_LIBRARY_DIRS})
+endif()
 
 #########################################################################################
 
@@ -319,8 +352,7 @@ ENDIF(LOAD_EXTRA_MODELS)
 # -------------------------------------------------------------
 
 OPTION(FMI_ENABLE "Enable FMI support" ON)
-# If FMI is enabled try to locate the libraries
-# link against them.
+
 
 IF (FMI_ENABLE)
 	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
@@ -411,15 +443,15 @@ OPTION(ZMQ_ENABLE "Enable ZMQ networking library" ${ZMQ_NEEDED})
 # If ZMQ library is enabled try to locate it and link against it
 
 IF ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
-	include(addZMQ)
+	include(addZeroMQ)
 	# ZMQ_INCLUDE_DIR, where to find zmq.h
 # ZMQ_LIBRARY, the library needed to use ZMQ
 # ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
-	if (ZMQ_FOUND)
+	if (ZeroMQ_FOUND)
 		add_subdirectory(src/zmqlib)
-	else(ZMQ_FOUND)
+	else(ZeroMQ_FOUND)
 		message(SEND_ERROR "unable to locate zmq library")
-	endif(ZMQ_FOUND)
+	endif(ZeroMQ_FOUND)
 ENDIF((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 
 

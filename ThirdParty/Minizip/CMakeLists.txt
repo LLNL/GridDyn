@@ -61,13 +61,16 @@ if(WIN32)
     set(HEADERS ${HEADERS} iowin32.h)
 endif(WIN32)
 
+if (NOT CMAKE_DEBUG_POSTFIX)
+set(CMAKE_DEBUG_POSTFIX d)
+endif()
+
 add_library(minizip ${SOURCES} ${HEADERS})
 
 
-	install(TARGETS minizip
+	install(TARGETS minizip EXPORT minizip-targets
        LIBRARY DESTINATION lib
        ARCHIVE DESTINATION lib
-	   EXPORT minizip-targets
 	)
 
 install (EXPORT minizip-targets DESTINATION cmake/)
