@@ -18,67 +18,71 @@ This software was modified by Pacific Northwest National Laboratory, operated by
 #ifndef ZMQREACTOR_H_
 #define ZMQREACTOR_H_
 #include "zmqSocketDescriptor.h"
-#include "simpleQueue.hpp"
+#include "utilities/simpleQueue.hpp"
 #include <memory>
 #include <queue>
 #include <mutex>
 #include <thread>
 #include <atomic>
 
-class zmqContextManager;
-
-
-/** class that manages receive sockets and triggers callbacks
-@detail the class starts up a thread that listens for */
-class zmqReactor
+namespace zmqlib
 {
-private:
-    /** enumeration of possible reactor instructions*/
-	enum class reactorInstruction :int
-	{
-		newSocket, //!< add a new socket
-		close,  //!< close an existing socket
-		modify, //!<modify an existing socket
-		terminate,  //!< terminate the socket
-	};
-	static std::vector<std::shared_ptr<zmqReactor>> reactors; //!< container for pointers to all the available contexts
-
-	std::string name;
-	std::shared_ptr<zmqContextManager> contextManager;  //!< pointer the context the reactor is using
-
-	simpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
-
-	std::unique_ptr<zmq::socket_t> notifier;
-	std::thread loopThread;
-	/** private constructor*/
-	zmqReactor(const std::string &reactorName, const std::string &context);
-	std::atomic<bool> reactorLoopRunning{ false };
-public:
-	static std::shared_ptr<zmqReactor> getReactorInstance(const std::string &reactorName, const std::string &contextName="");
+    class zmqContextManager;
 
 
-	~zmqReactor();
 
-	void addSocket(const zmqSocketDescriptor &desc);
-	void modifySocket(const zmqSocketDescriptor &desc);
-    /** asyncrhonous call to close a specific socket
-    @param socketName the name of the socket to close
-    */
-	void closeSocket(const std::string &socketName);
+    /** class that manages receive sockets and triggers callbacks
+    @detail the class starts up a thread that listens for */
+    class zmqReactor
+    {
+    private:
+        /** enumeration of possible reactor instructions*/
+        enum class reactorInstruction :int
+        {
+            newSocket, //!< add a new socket
+            close,  //!< close an existing socket
+            modify, //!<modify an existing socket
+            terminate,  //!< terminate the socket
+        };
+        static std::vector<std::shared_ptr<zmqReactor>> reactors; //!< container for pointers to all the available contexts
 
-	void addSocketBlocking(const zmqSocketDescriptor &desc);
-	void modifySocketBlocking(const zmqSocketDescriptor &desc);
-	void closeSocketBlocking(const std::string &socketName);
+        std::string name;
+        std::shared_ptr<zmqContextManager> contextManager;  //!< pointer the context the reactor is using
 
-	const std::string &getName() const
-	{
-		return name;
-	}
-	void terminateReactor();
+        simpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
 
-private:
-	void reactorLoop();
+        std::unique_ptr<zmq::socket_t> notifier;
+        std::thread loopThread;
+        /** private constructor*/
+        zmqReactor(const std::string &reactorName, const std::string &context);
+        std::atomic<bool> reactorLoopRunning{ false };
+    public:
+        static std::shared_ptr<zmqReactor> getReactorInstance(const std::string &reactorName, const std::string &contextName = "");
 
-};
+
+        ~zmqReactor();
+
+        void addSocket(const zmqSocketDescriptor &desc);
+        void modifySocket(const zmqSocketDescriptor &desc);
+        /** asyncrhonous call to close a specific socket
+        @param socketName the name of the socket to close
+        */
+        void closeSocket(const std::string &socketName);
+
+        void addSocketBlocking(const zmqSocketDescriptor &desc);
+        void modifySocketBlocking(const zmqSocketDescriptor &desc);
+        void closeSocketBlocking(const std::string &socketName);
+
+        const std::string &getName() const
+        {
+            return name;
+        }
+        void terminateReactor();
+
+    private:
+        void reactorLoop();
+
+    };
+}
 #endif
 

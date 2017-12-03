@@ -22,104 +22,108 @@ Lawrence Livermore National Laboratory, operated by Lawrence Livermore National 
 #include "zmqProxyHub.h"
 #include <mutex>
 
-std::vector<std::shared_ptr<zmqProxyHub>> zmqProxyHub::proxies;
-
-std::mutex proxyCreationMutex;
-
-std::shared_ptr<zmqProxyHub>
-zmqProxyHub::getProxy (const std::string &proxyName, const std::string &pairType, const std::string &contextName)
+namespace zmqlib
 {
-    std::lock_guard<std::mutex> proxyLock (proxyCreationMutex);
-    for (auto &rct : proxies)
+    std::vector<std::shared_ptr<zmqProxyHub>> zmqProxyHub::proxies;
+
+    std::mutex proxyCreationMutex;
+
+    std::shared_ptr<zmqProxyHub>
+        zmqProxyHub::getProxy(const std::string &proxyName, const std::string &pairType, const std::string &contextName)
     {
-        if (rct->getName () == proxyName)
+        std::lock_guard<std::mutex> proxyLock(proxyCreationMutex);
+        for (auto &rct : proxies)
         {
-            return rct;
+            if (rct->getName() == proxyName)
+            {
+                return rct;
+            }
+        }
+        // if it doesn't find a matching name make a new one with the appropriate name
+        auto newProxy = std::shared_ptr<zmqProxyHub>(new zmqProxyHub(proxyName, pairType, contextName));
+        proxies.push_back(newProxy);
+        return newProxy;
+    }
+
+    zmqProxyHub::~zmqProxyHub() { stopProxy(); }
+
+    void zmqProxyHub::startProxy()
+    {
+        proxyThread = std::thread(&zmqProxyHub::proxyLoop, this);
+        int active = 0;
+        controllerSocket->recv(&active, 4);
+        if (active == 1)
+        {
+            proxyRunning = true;
         }
     }
-    // if it doesn't find a matching name make a new one with the appropriate name
-    auto newProxy = std::shared_ptr<zmqProxyHub> (new zmqProxyHub (proxyName, pairType, contextName));
-    proxies.push_back (newProxy);
-    return newProxy;
-}
 
-zmqProxyHub::~zmqProxyHub () { stopProxy (); }
-
-void zmqProxyHub::startProxy ()
-{
-    proxyThread = std::thread (&zmqProxyHub::proxyLoop, this);
-    int active = 0;
-    controllerSocket->recv (&active, 4);
-    if (active == 1)
+    void zmqProxyHub::stopProxy()
     {
-        proxyRunning = true;
-    }
-}
-
-void zmqProxyHub::stopProxy ()
-{
-    if (proxyRunning)
-    {
-        controllerSocket->send ("TERMINATE", 9, 0);
-        proxyThread.join ();
-    }
-    std::lock_guard<std::mutex> proxyLock (proxyCreationMutex);
-    for (auto px = proxies.begin (); px != proxies.end (); ++px)
-    {
-        if ((*px)->name == name)
+        if (proxyRunning)
         {
-            proxies.erase (px);
-            break;
+            controllerSocket->send("TERMINATE", 9, 0);
+            proxyThread.join();
+        }
+        std::lock_guard<std::mutex> proxyLock(proxyCreationMutex);
+        for (auto px = proxies.begin(); px != proxies.end(); ++px)
+        {
+            if ((*px)->name == name)
+            {
+                proxies.erase(px);
+                break;
+            }
         }
     }
-}
 
-void zmqProxyHub::modifyIncomingConnection (socket_ops op, const std::string &connection)
-{
-    incoming.addOperation (op, connection);
-}
-void zmqProxyHub::modifyOutgoingConnection (socket_ops op, const std::string &connection)
-{
-    outgoing.addOperation (op, connection);
-}
-
-zmqProxyHub::zmqProxyHub (const std::string &proxyName, const std::string &pairtype, const std::string &context)
-    : name (proxyName)
-{
-    contextManager = zmqContextManager::getContextPointer (context);
-    if ((pairtype == "pubsub") || (pairtype == "sub") || (pairtype == "pub"))
+    void zmqProxyHub::modifyIncomingConnection(socket_ops op, const std::string &connection)
     {
-        incoming.type = zmq::socket_type::xsub;
-        outgoing.type = zmq::socket_type::xpub;
+        incoming.addOperation(op, connection);
     }
-    else if ((pairtype == "router") || (pairtype == "dealer"))
+    void zmqProxyHub::modifyOutgoingConnection(socket_ops op, const std::string &connection)
     {
-        incoming.type = zmq::socket_type::router;
-        outgoing.type = zmq::socket_type::dealer;
+        outgoing.addOperation(op, connection);
     }
-    else if ((pairtype == "pull") || (pairtype == "push") || (pairtype == "pushpull"))
+
+    zmqProxyHub::zmqProxyHub(const std::string &proxyName, const std::string &pairtype, const std::string &context)
+        : name(proxyName)
     {
-        incoming.type = zmq::socket_type::pull;
-        outgoing.type = zmq::socket_type::push;
+        contextManager = zmqContextManager::getContextPointer(context);
+        if ((pairtype == "pubsub") || (pairtype == "sub") || (pairtype == "pub"))
+        {
+            incoming.type = zmq::socket_type::xsub;
+            outgoing.type = zmq::socket_type::xpub;
+        }
+        else if ((pairtype == "router") || (pairtype == "dealer"))
+        {
+            incoming.type = zmq::socket_type::router;
+            outgoing.type = zmq::socket_type::dealer;
+        }
+        else if ((pairtype == "pull") || (pairtype == "push") || (pairtype == "pushpull"))
+        {
+            incoming.type = zmq::socket_type::pull;
+            outgoing.type = zmq::socket_type::push;
+        }
+        controllerSocket = std::make_unique<zmq::socket_t>(contextManager->getContext(), zmq::socket_type::pair);
+        controllerSocket->bind(std::string("inproc://proxy_" + name).c_str());
     }
-    controllerSocket = std::make_unique<zmq::socket_t> (contextManager->getContext (), zmq::socket_type::pair);
-    controllerSocket->bind (std::string ("inproc://proxy_" + name).c_str ());
-}
 
-void zmqProxyHub::proxyLoop ()
-{
-    zmq::socket_t inputSocket = incoming.makeSocket (contextManager->getContext ());
-    zmq::socket_t outputSocket = outgoing.makeSocket (contextManager->getContext ());
+    void zmqProxyHub::proxyLoop()
+    {
+        zmq::socket_t inputSocket = incoming.makeSocket(contextManager->getContext());
+        zmq::socket_t outputSocket = outgoing.makeSocket(contextManager->getContext());
 
-    zmq::socket_t control (contextManager->getContext (), zmq::socket_type::pair);
+        zmq::socket_t control(contextManager->getContext(), zmq::socket_type::pair);
 
-    control.connect (std::string ("inproc://proxy_" + name).c_str ());
+        control.connect(std::string("inproc://proxy_" + name).c_str());
 
-    int active = 1;
-    control.send (&active, sizeof (int), 0);
+        int active = 1;
+        control.send(&active, sizeof(int), 0);
 
-    zmq::proxy_steerable (inputSocket, outputSocket, nullptr, control);
+        zmq::proxy_steerable(inputSocket, outputSocket, nullptr, control);
 
-    // if we exit the proxy function we are no longer running
-    proxyRunning = false;
+        // if we exit the proxy function we are no longer running
+        proxyRunning = false;
+    }
+
 }

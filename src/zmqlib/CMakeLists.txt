@@ -72,7 +72,7 @@ else()
 	set(ZMQ_DEPENDENCY ${ZMQ_LIBRARY})
 endif()
 	
-target_link_libraries( ${ZMQ_LIBRARY} )
+target_link_libraries(zmqInterfaceLibrary ${ZMQ_DEPENDENCY} )
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
 

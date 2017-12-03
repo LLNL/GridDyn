@@ -37,7 +37,7 @@ ENDIF(WIN32)
 
 ADD_DEFINITIONS(-DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
 
-target_link_libraries(shared_library_tests griddyn_shared_lib ${external_library_list})
+target_link_libraries(shared_library_tests griddyn_shared_lib ${external_library_list} ${Boost_LIBRARIES_test})
 
 add_test(NAME shared_library_tests COMMAND shared_library_tests)
 

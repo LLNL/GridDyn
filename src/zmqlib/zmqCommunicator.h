@@ -53,7 +53,7 @@ public:
 	virtual void set(const std::string &param, double val) override;
 	virtual void setFlag(const std::string &flag, bool val) override;
 protected:
-	/** enumeration flags for the commmunicator object*/
+	/** enumeration flags for the communicator object*/
 	enum zmqCommFlags
 	{
 		no_transmit_dest=0, //!< flag indicating whether the communicator should include the destination as the first frame

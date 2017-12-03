@@ -21,52 +21,56 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
 
 #include "zmqSocketDescriptor.h"
 
-zmq::socket_t zmqSocketDescriptor::makeSocket (zmq::context_t &ctx) const
+namespace zmqlib
 {
-    zmq::socket_t sock (ctx, type);
-    modifySocket (sock);
-    return sock;
-}
-
-std::unique_ptr<zmq::socket_t> zmqSocketDescriptor::makeSocketPtr (zmq::context_t &ctx) const
-{
-    auto sock = std::make_unique<zmq::socket_t> (ctx, type);
-    modifySocket (*sock);
-    return sock;
-}
-
-void zmqSocketDescriptor::modifySocket (zmq::socket_t &sock) const
-{
-    for (auto &op : ops)
+    zmq::socket_t zmqSocketDescriptor::makeSocket(zmq::context_t &ctx) const
     {
-        switch (op.first)
+        zmq::socket_t sock(ctx, type);
+        modifySocket(sock);
+        return sock;
+    }
+
+    std::unique_ptr<zmq::socket_t> zmqSocketDescriptor::makeSocketPtr(zmq::context_t &ctx) const
+    {
+        auto sock = std::make_unique<zmq::socket_t>(ctx, type);
+        modifySocket(*sock);
+        return sock;
+    }
+
+    void zmqSocketDescriptor::modifySocket(zmq::socket_t &sock) const
+    {
+        for (auto &op : ops)
         {
-        case socket_ops::bind:
-            sock.bind (op.second);
-            break;
-        case socket_ops::unbind:
-            sock.unbind (op.second);
-            break;
-        case socket_ops::connect:
-            sock.connect (op.second);
-            break;
-        case socket_ops::disconnect:
-            sock.disconnect (op.second);
-            break;
-        case socket_ops::subscribe:
-            if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
+            switch (op.first)
             {
-                sock.setsockopt (ZMQ_SUBSCRIBE, op.second);
+            case socket_ops::bind:
+                sock.bind(op.second);
+                break;
+            case socket_ops::unbind:
+                sock.unbind(op.second);
+                break;
+            case socket_ops::connect:
+                sock.connect(op.second);
+                break;
+            case socket_ops::disconnect:
+                sock.disconnect(op.second);
+                break;
+            case socket_ops::subscribe:
+                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
+                {
+                    sock.setsockopt(ZMQ_SUBSCRIBE, op.second);
+                }
+                break;
+            case socket_ops::unsubscribe:
+                if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
+                {
+                    sock.setsockopt(ZMQ_UNSUBSCRIBE, op.second);
+                }
+                break;
+            default:
+                break;
             }
-            break;
-        case socket_ops::unsubscribe:
-            if ((type == zmq::socket_type::pub) || (type == zmq::socket_type::sub))
-            {
-                sock.setsockopt (ZMQ_UNSUBSCRIBE, op.second);
-            }
-            break;
-        default:
-            break;
         }
     }
-}
+
+} //namespace zmqlib
