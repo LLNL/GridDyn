@@ -211,7 +211,6 @@ endif()
 # -------------------------------------------------------------
 OPTION(OPENMP_ENABLE "Enable openMP support" ON)
 
-add_custom_target(external_deps)
 
 IF(OPENMP_ENABLE)
   #message(STATUS "****** finding OpenMP support")

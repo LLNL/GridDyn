@@ -84,6 +84,10 @@ INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 #fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
 target_link_libraries(gridDynCombined fileInput ${griddyn_optional_libraries} ${gd_library_list} ${external_library_list} )
 
+IF (KLU_CMAKE)
+target_link_libraries(gridDynCombined SuiteSparse::klu)
+ENDIF(KLU_CMAKE)
+
 if(DL_REQUIRED OR FMI_ENABLE)
 	target_link_libraries(gridDynCombined ${CMAKE_DL_LIBS})
 endif(DL_REQUIRED OR FMI_ENABLE)

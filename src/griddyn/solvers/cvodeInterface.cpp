@@ -538,7 +538,7 @@ int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_dat
 }
 
 
-int cvodeJacSparse (realtype time,
+int cvodeJac (realtype time,
                     N_Vector state,
                     N_Vector dstate_dt,
                     SUNMatrix J,
