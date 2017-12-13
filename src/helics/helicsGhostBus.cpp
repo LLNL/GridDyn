@@ -70,11 +70,11 @@ coreTime helicsGhostBus::updateB ()
     // now get the updates
     if (!voltageKey.empty ())
     {
-        auto res = helicsGetComplex (voltageKey);
-        if (res.real () == kNullVal)
+    //    auto res = helicsGetComplex (voltageKey);
+    //    if (res.real () == kNullVal)
         {
-            voltage = std::abs (res);
-            angle = std::arg (res);
+    //        voltage = std::abs (res);
+    //        angle = std::arg (res);
         }
     }
 

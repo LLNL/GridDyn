@@ -14,7 +14,7 @@
 #define HELICS_SUPPORT_HEADER_
 
 
-#include "helics/application_api/application_api.h"
+#include "helics/helics.hpp"
 #include "gridDynDefinitions.hpp"
 #include <complex>
 #include <future>
@@ -28,31 +28,9 @@ helics::Time gd2helicsTime(coreTime evntTime);
 
 coreTime helics2gdTime(helics::Time ftime);
 
-std::string helicsComplexString(double real, double imag);
-std::string helicsComplexString(std::complex<double> val);
-std::complex<double> helicsGetComplex(const std::string &val);
-
 std::future<int> runBroker(const std::string &cmd_args);
 std::future<int> runPlayer(const std::string &cmd_args);
 std::future<int> runRecorder(const std::string &cmd_args);
-
-/** defining the type of values that are supported through helics*/
-enum class helicsValueType :char
-{
-	helicsDouble,  //!< a 64 bit floating point number
-	helicsInteger,	//!< a 64 bit integer
-	helicsComplex,	//!< a complex number
-	helicsVector,	//!< a vector of double values
-	helicsString,	//!< a string
-	unknown,		//!< all other dataTypes
-};
-
-/** get a string representing the type*/
-std::string to_string(helicsValueType dtype);
-
-helicsValueType helicsValueTypeFromString(const std::string &typeString);
-
-bool isValidHelicsValueTypeString(const std::string &typeString);
 
 }// namespace helicsLib
 } // namespace griddyn

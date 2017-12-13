@@ -62,16 +62,17 @@ add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
 ENDIF(DIME_ENABLE)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${ZeroMQ_INCLUDE_DIR})
 
 
 if (ZMQ_USE_STATIC_LIBRARY)
-	set(ZMQ_DEPENDENCY ${ZMQ_STATIC_LIBRARY})
+	set(ZMQ_DEPENDENCY ${ZeroMQ_STATIC_LIBRARY})
 	ADD_DEFINITIONS(-DZMQ_STATIC)
 else()
-	set(ZMQ_DEPENDENCY ${ZMQ_LIBRARY})
+	set(ZMQ_DEPENDENCY ${ZeroMQ_LIBRARY})
 endif()
 	
+	message(status "zmq lib ${ZMQ_DEPENDENCY}")
 target_link_libraries(zmqInterfaceLibrary ${ZMQ_DEPENDENCY} )
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})

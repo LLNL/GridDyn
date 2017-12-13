@@ -45,8 +45,10 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 INCLUDE_DIRECTORIES(${HELICS_INCLUDE_DIR})
+message(status "helics include ${HELICS_INCLUDE_DIR}")
+message(status "helics libraries ${HELICS_STATIC_LIBRARY}")
 
-INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${ZeroMQ_INCLUDE_DIR})
 
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
@@ -66,10 +68,10 @@ ADD_DEFINITIONS(-DHELICS_BROKER_EXECUTABLE="${HELICS_BROKER}")
 ADD_DEFINITIONS(-DHELICS_PLAYER_EXECUTABLE="${HELICS_PLAYER}")
 ADD_DEFINITIONS(-DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}")
 
-target_link_libraries(helicsLib ${HELICS_LIBRARIES})
+target_link_libraries(helicsLib helics-static)
 
 # this has to come before the zmq library in order
-list(FIND griddyn_optional_libraries ${ZMQ_LIBRARY} ZMQ_INDEX)
+list(FIND griddyn_optional_libraries ${ZeroMQ_LIBRARY} ZMQ_INDEX)
 
 list(INSERT griddyn_optional_libraries ${ZMQ_INDEX} helicsLib)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/helics)

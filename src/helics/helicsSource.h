@@ -14,14 +14,14 @@
 #define HELICS_SOURCE_HEADER_
 
 #include "sources/rampSource.h"
-
+#include "helicsSupport.h"
 namespace griddyn
 {
 namespace helicsLib
 {
 class helicsCoordinator;
 
-enum class helicsValueType:char;
+
 /** class defining an object that pulls in data from a helics co-simulation*/
 class helicsSource :public sources::rampSource
 {
@@ -37,7 +37,7 @@ protected:
 	parameter_t scaleFactor = 1.0;			//!< scaling factor on the load
 	gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the incoming data
 	gridUnits::units_t outputUnits = gridUnits::defUnit; //!< units of the outgoing data
-	helicsValueType valueType;	//!< the type of value that is used through helics
+	helics::helicsType_t valueType;	//!< the type of value that is used through helics
 	int32_t valueIndex=-1;	//!< the index into the helics coordinator
 	helicsCoordinator *coord_=nullptr;  //!< pointer to the helics coordinator
 private:

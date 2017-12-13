@@ -24,7 +24,7 @@ namespace griddyn
 namespace helicsLib
 {
 helicsLoad::helicsLoad (const std::string &objName)
-    : rampLoad (objName), loadType (helicsValueType::helicsComplex), voltageType (helicsValueType::helicsComplex)
+    : rampLoad (objName), loadType (helics::helicsType_t::helicsComplex), voltageType (helics::helicsType_t::helicsComplex)
 {
 }
 
@@ -262,11 +262,11 @@ void helicsLoad::setSubscription ()
               std::to_string (Punit / scaleFactor) + "+" + std::to_string (Qunit / scaleFactor) + "j";
             if (loadIndex < 0)
             {
-                loadIndex = coord->addSubscription (loadKey, loadType, inputUnits);
+                loadIndex = coord->addSubscription (loadKey, inputUnits);
             }
             else
             {
-                coord->updateSubscription (loadIndex, loadKey, loadType, inputUnits);
+                coord->updateSubscription (loadIndex, loadKey, inputUnits);
             }
             coord->setDefault (loadIndex, std::complex<double> (Punit, Qunit));
         }

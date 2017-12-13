@@ -10,7 +10,7 @@
 * LLNS Copyright End
 */
 
-#include "config.h"
+#include "griddyn/griddyn-config.h"
 
 #include "helicsLibrary.h"
 #include "helicsCollector.h"

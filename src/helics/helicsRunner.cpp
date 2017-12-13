@@ -22,7 +22,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include "helics/application_api/application_api.h"
+#include "helics/helics.hpp"
 #include "helicsCoordinator.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"

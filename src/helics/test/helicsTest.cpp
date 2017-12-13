@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (time_conversion_test)
 BOOST_AUTO_TEST_CASE (test_pub_sub_str)
 {
     helics::FederateInfo fi ("string_test");
-    fi.coreType = "test";
+    fi.coreType = helics::core_type::TEST;
     fi.coreInitString = "1";
 
     auto vFed = std::make_shared<helics::ValueFederate> (fi);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE (test_pub_sub_str)
 BOOST_AUTO_TEST_CASE (test_pub_sub_double)
 {
     helics::FederateInfo fi ("double_test");
-    fi.coreType = "test";
+    fi.coreType = helics::core_type::TEST;
     fi.coreInitString = "1";
 
     auto vFed = std::make_shared<helics::ValueFederate> (fi);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 BOOST_AUTO_TEST_CASE (load_helics_xml)
 {
     helics::FederateInfo fi ("source_test");
-    fi.coreType = "test";
+    fi.coreType = helics::core_type::TEST;
     fi.coreInitString = "2";
 
     auto vFed = std::make_shared<helics::ValueFederate> (fi);
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE (load_helics_xml)
 BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 {
     helics::FederateInfo fi ("helics_load_test");
-    fi.coreType = "test";
+    fi.coreType = helics::core_type::TEST;
 	fi.coreName = "test2";
     fi.coreInitString = "2";
     auto vFed = std::make_shared<helics::ValueFederate> (fi);

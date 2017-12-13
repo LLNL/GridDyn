@@ -106,7 +106,7 @@ endif()
 include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
 
 
-target_link_libraries(utilities zlib minizip)
+target_link_libraries(utilities minizip zlib)
 
 IF (ENABLE_64_BIT_INDEXING)
 add_definitions(-DENABLE_64_BIT_INDEXING)
