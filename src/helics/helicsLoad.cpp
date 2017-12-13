@@ -201,11 +201,12 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     }
     else if (param == "voltagetype")
     {
-        if (isValidHelicsValueTypeString (val))
-        {
-            voltageType = helicsValueTypeFromString (val);
-        }
-        else
+      auto type= helics::getTypeFromString(val);
+      if (type != helics::helicsType_t::helicsInvalid)
+      {
+          voltageType = type;
+     }
+      else
         {
             throw (invalidParameterValue ("unrecognized type"));
         }
@@ -216,9 +217,10 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     }
     else if (param == "loadtype")
     {
-        if (isValidHelicsValueTypeString (val))
+        auto type = helics::getTypeFromString(val);
+        if (type != helics::helicsType_t::helicsInvalid)
         {
-            loadType = helicsValueTypeFromString (val);
+            loadType = type;
         }
         else
         {

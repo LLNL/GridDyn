@@ -155,7 +155,7 @@ helicsCoordinator::addPublication (const std::string &pubName, helics::helicsTyp
 {
     PubInfo p;
     p.name = pubName;
-   // p.type = type;
+    p.type = type;
     p.unitType = unitType;
     pubI.push_back (p);
     auto ind = static_cast<int32_t> (pubs_.size ()) - 1;

@@ -33,64 +33,7 @@ coreTime helics2gdTime(helics::Time ftime)
 
 
 
-
-std::string helicsComplexString(double real, double imag)
-{
-	std::stringstream ss;
-	ss << real;
-	if (imag != 0.0)
-	{
-		if (imag >= 0.0)
-		{
-			ss << '+' << imag;
-		}
-		else
-		{
-			ss << imag;
-		}
-		ss << 'j';
-	}
-	return ss.str();
-}
-
-std::string helicsComplexString(std::complex<double> val)
-{
-	return helicsComplexString(val.real(), val.imag());
-}
-
 const std::regex creg("([+-]?(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)\\s*([+-]\\s*(\\d+(\\.\\d+)?|\\.\\d+)([eE][+-]?\\d+)?)[ji]*");
-
-std::complex<double> helicsGetComplex(const std::string &val)
-{
-	
-	if (val.empty())
-	{
-		return std::complex<double>(kNullVal, kNullVal);
-	}
-	std::smatch m;
-	double re = 0.0;
-	double im = 0.0;
-	std::regex_search(val, m, creg);
-	if (m.size() == 9)
-	{
-		re = numeric_conversionComplete(m[1], kNullVal);
-		im = numeric_conversionComplete(m[5], kNullVal);
-
-	}
-	else
-	{
-		if ((val.back() == 'j') || (val.back() == 'i'))
-		{
-			im = numeric_conversionComplete(val.substr(0,val.size()-1), kNullVal);
-
-		}
-		else
-		{
-			re = numeric_conversionComplete(val, kNullVal);
-		}
-	}
-	return std::complex<double>(re, im);
-}
 
 
 
@@ -115,49 +58,6 @@ std::future<int> runRecorder(const std::string &cmd_args)
 	return v;
 }
 
-
-std::string to_string(helicsValueType dtype)
-{
-	switch (dtype)
-	{
-	case helicsValueType::helicsDouble:
-	default:
-		return "double";
-	case helicsValueType::helicsComplex:
-		return "complex";
-	case helicsValueType::helicsInteger:
-		return "int64";
-	case helicsValueType::helicsString:
-		return "string";
-	case helicsValueType::helicsVector:
-		return "vector_double";
-
-	}
-}
-
-const std::map<std::string, helicsValueType> valueMap{
-	{"double",helicsValueType::helicsDouble },
-	{"float64",helicsValueType::helicsDouble },
-	{ "float",helicsValueType::helicsDouble },
-	{ "int64",helicsValueType::helicsInteger },
-	{ "int",helicsValueType::helicsInteger },
-	{ "integer",helicsValueType::helicsInteger },
-	{ "string",helicsValueType::helicsString },
-	{ "vector",helicsValueType::helicsVector },
-	{ "vector_double",helicsValueType::helicsVector },
-	{ "complex",helicsValueType::helicsComplex },
-	{ "complex_double",helicsValueType::helicsComplex }
-};
-
-helicsValueType helicsValueTypeFromString(const std::string &typeString)
-{
-	return mapFind(valueMap, typeString, helicsValueType::unknown);
-}
-
-bool isValidHelicsValueTypeString(const std::string &typeString)
-{
-	return (valueMap.find(typeString) != valueMap.end());
-}
 
 }// namespace helicsLib
 } // namespace griddyn
