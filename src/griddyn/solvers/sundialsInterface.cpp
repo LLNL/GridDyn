@@ -345,7 +345,7 @@ int sundialsJac (realtype time,
             matrixDataFilter<double> filterAd (*(a1));
             filterAd.addFilter (sd->maskElements);
             sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         NVECTOR_DATA (sd->use_omp, dstate_dt), filterAd, cj, sd->mode);
+                                         (dstate_dt!=nullptr)?NVECTOR_DATA (sd->use_omp, dstate_dt):nullptr, filterAd, cj, sd->mode);
             for (auto &v : sd->maskElements)
             {
                 a1->assign (v, v, 1.0);
@@ -354,7 +354,7 @@ int sundialsJac (realtype time,
         else
         {
             sd->m_gds->jacobianFunction (time, NVECTOR_DATA (sd->use_omp, state),
-                                         NVECTOR_DATA (sd->use_omp, dstate_dt), *a1, cj, sd->mode);
+                (dstate_dt != nullptr) ? NVECTOR_DATA (sd->use_omp, dstate_dt):nullptr, *a1, cj, sd->mode);
         }
 
         ++sd->jacCallCount;
