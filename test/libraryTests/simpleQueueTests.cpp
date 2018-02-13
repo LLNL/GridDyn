@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE (simple_queue_tests)
 /** test basic operations */
 BOOST_AUTO_TEST_CASE (basic_tests)
 {
-    simpleQueue<int> sq;
+    SimpleQueue<int> sq;
 
     sq.push (45);
     sq.push (54);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE (basic_tests)
 /** test with a move only element*/
 BOOST_AUTO_TEST_CASE (move_only_tests)
 {
-    simpleQueue<std::unique_ptr<double>> sq;
+    SimpleQueue<std::unique_ptr<double>> sq;
 
     sq.push (std::make_unique<double> (4534.23));
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE (move_only_tests)
 
 BOOST_AUTO_TEST_CASE (ordering_tests)
 {
-    simpleQueue<int> sq;
+    SimpleQueue<int> sq;
 
     for (int ii = 1; ii < 10; ++ii)
     {
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE (ordering_tests)
 
 BOOST_AUTO_TEST_CASE (emplace_tests)
 {
-    simpleQueue<std::pair<int, double>> sq;
+    SimpleQueue<std::pair<int, double>> sq;
 
     sq.emplace (10, 45.4);
     sq.emplace (11, 34.1);
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE (emplace_tests)
 /** test with single consumer/single producer*/
 BOOST_AUTO_TEST_CASE (multithreaded_tests)
 {
-    simpleQueue<long long> sq (1010000);
+    SimpleQueue<long long> sq (1010000);
 
     for (long long ii = 0; ii < 10'000; ++ii)
     {
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests)
 /** test with multiple consumer/single producer*/
 BOOST_AUTO_TEST_CASE (multithreaded_tests2)
 {
-    simpleQueue<long long> sq (1010000);
+    SimpleQueue<long long> sq (1010000);
 
     for (long long ii = 0; ii < 10'000; ++ii)
     {
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests2)
 /** test with multiple producer/multiple consumer*/
 BOOST_AUTO_TEST_CASE (multithreaded_tests3)
 {
-    simpleQueue<long long> sq;
+    SimpleQueue<long long> sq;
     sq.reserve (3'010'000);
     for (long long ii = 0; ii < 10'000; ++ii)
     {

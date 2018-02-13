@@ -214,7 +214,8 @@ double sundialsInterface::get (const std::string &param) const
 #ifdef KLU_ENABLE
 bool isSUNMatrixSetup (SUNMatrix J)
 {
-	int id = SUNMatGetID(J);	if (id == SUNMATRIX_SPARSE)
+	int id = SUNMatGetID(J);
+	if (id == SUNMATRIX_SPARSE)
 	{
 		auto M = SM_CONTENT_S(J);
 		if ((M->indexptrs[0] != 0) || (M->indexptrs[0] > M->NNZ))
@@ -231,7 +232,8 @@ bool isSUNMatrixSetup (SUNMatrix J)
 
 void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 {
-	int id = SUNMatGetID(J);	if (id == SUNMATRIX_SPARSE)
+	int id = SUNMatGetID(J);
+	if (id == SUNMATRIX_SPARSE)
 	{
 		auto M = SM_CONTENT_S(J);
 		count_t indval = 0;

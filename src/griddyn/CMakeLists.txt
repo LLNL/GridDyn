@@ -536,7 +536,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIRS})
 
 target_include_directories(griddyn PRIVATE ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
 #create a griddyn_config.h file for program options
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h DESTINATION include/griddyn)
 
 INSTALL(TARGETS griddyn

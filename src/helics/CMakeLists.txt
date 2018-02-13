@@ -37,6 +37,8 @@ link_directories(${external_link_directories})
 
 add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 
+set_target_properties (helicsLib PROPERTIES FOLDER libraries)
+
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})

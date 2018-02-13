@@ -56,7 +56,7 @@ enum class print_level : int
 
 using id_type_t = std::int64_t;
 constexpr auto invalid_id_value = std::numeric_limits<id_type_t>::min ();
-using coreTime = timeRepresentation<count_time<9>>;
+using coreTime = TimeRepresentation<count_time<9>>;
 using stringVec = std::vector<std::string>;
 
 /** commonly used time expressions*/

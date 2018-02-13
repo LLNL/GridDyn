@@ -37,7 +37,7 @@ protected:
 	parameter_t scaleFactor = 1.0;			//!< scaling factor on the load
 	gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the incoming data
 	gridUnits::units_t outputUnits = gridUnits::defUnit; //!< units of the outgoing data
-	helics::helicsType_t valueType;	//!< the type of value that is used through helics
+	helics::helics_type_t valueType;	//!< the type of value that is used through helics
 	int32_t valueIndex=-1;	//!< the index into the helics coordinator
 	helicsCoordinator *coord_=nullptr;  //!< pointer to the helics coordinator
 private:

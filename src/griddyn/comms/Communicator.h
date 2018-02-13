@@ -105,7 +105,7 @@ public:
   /** initialize the communicator
   @details setup the actual communication pathways and other component functions*/
   virtual void initialize();
-  /** disconnect the communictor from the communications medium*/
+  /** disconnect the communicator from the communications medium*/
   virtual void disconnect();
   virtual void set(const std::string &param, const std::string &val) override;
   virtual void set(const std::string &param, double val) override;
@@ -115,7 +115,7 @@ private:
   rxMessageCallback_t m_rxCallbackMessage;       //!< call back action from parent object
   griddyn::coreTime lastPingSend = griddyn::timeZero; //!< the time last ping was sent
   griddyn::coreTime lastReplyRX = griddyn::timeZero;	//!< the time the last response was received
-  simpleQueue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;	//!< the message queue storing source and message
+  SimpleQueue<std::pair<std::uint64_t, std::shared_ptr<commMessage>>> messageQueue;	//!< the message queue storing source and message
 };
 
 std::unique_ptr<Communicator> makeCommunicator (const std::string &commType, const std::string &commName, const std::uint64_t id);

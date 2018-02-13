@@ -39,7 +39,7 @@ set(zmqInterface_headers
 	)
 
 add_library(zmqInterfaceLibrary ${zmqLibrary_sources} ${zmqLibrary_headers} ${zmqInterface_sources} ${zmqInterface_headers})
- 
+set_target_properties (zmqInterfaceLibrary PROPERTIES FOLDER libraries)
 
 IF(DIME_ENABLE)
 set(dimeInterface_sources
@@ -59,6 +59,9 @@ set(dimeInterface_headers
 	)
 
 add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
+
+set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
+
 ENDIF(DIME_ENABLE)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/griddyn)

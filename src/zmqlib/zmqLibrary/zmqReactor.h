@@ -49,7 +49,7 @@ namespace zmqlib
         std::string name;
         std::shared_ptr<zmqContextManager> contextManager;  //!< pointer the context the reactor is using
 
-        simpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
+        SimpleQueue<std::pair<reactorInstruction, zmqSocketDescriptor>> updates; //!< the modifications to make the reactor sockets
 
         std::unique_ptr<zmq::socket_t> notifier;
         std::thread loopThread;

@@ -21,8 +21,8 @@
 
 namespace utilities
 {
-class logger;
-class loggerNoThread;
+class Logger;
+class LoggerNoThread;
 }
 
 namespace griddyn
@@ -86,9 +86,9 @@ class gridSimulation : public Area
 	std::string version;  //!< storage for the version string
     coreTime state_record_period = negTime;  //!<how often to record the state
 #ifdef DISABLE_MULTITHREADING
-    std::unique_ptr<utilities::loggerNoThread> gridLog;  //!< the object that does the logging
+    std::unique_ptr<utilities::LoggerNoThread> gridLog;  //!< the object that does the logging
 #else
-    std::unique_ptr<utilities::logger> gridLog;  //!< the object that does the logging
+    std::unique_ptr<utilities::Logger> gridLog;  //!< the object that does the logging
 #endif
     std::function<void(int, const std::string &)> customLogger;  //!< callback for a custom logging function
     std::shared_ptr<functionEventAdapter>

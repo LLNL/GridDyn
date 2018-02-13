@@ -113,17 +113,17 @@ void helicsCoordinator::set (const std::string &param, const std::string &val)
 
 void helicsCoordinator::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-    if (param == "timedelta")
+    if ((param == "timedelta")||(param=="mintimedelta"))
     {
         info_.timeDelta = val;
     }
-    else if (param == "lookahead")
+    else if (param == "outputdelay")
     {
-        info_.lookAhead = val;
+        info_.outputDelay = val;
     }
-    else if (param == "impactwindow")
+    else if (param == "inputdelay")
     {
-        info_.impactWindow = val;
+        info_.inputDelay = val;
     }
     else if (param == "period")
     {
@@ -151,7 +151,7 @@ bool helicsCoordinator::isUpdated (int32_t index) const
 
 
 int32_t
-helicsCoordinator::addPublication (const std::string &pubName, helics::helicsType_t  type, gridUnits::units_t unitType)
+helicsCoordinator::addPublication (const std::string &pubName, helics::helics_type_t  type, gridUnits::units_t unitType)
 {
     PubInfo p;
     p.name = pubName;
@@ -177,7 +177,7 @@ helicsCoordinator::addSubscription (const std::string &subName, gridUnits::units
 
 void helicsCoordinator::updatePublication (int32_t index,
                                            const std::string &pubName,
-                                            helics::helicsType_t  type,
+                                            helics::helics_type_t  type,
                                            gridUnits::units_t unitType)
 {
     if (isValidIndex(index,pubI))

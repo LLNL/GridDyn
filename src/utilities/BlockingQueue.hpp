@@ -1,6 +1,6 @@
 /*
 
-Copyright (C) 2017, Battelle Memorial Institute
+Copyright (C) 2017-2018, Battelle Memorial Institute
 All rights reserved.
 
 This software was co-developed by Pacific Northwest National Laboratory, operated by the Battelle Memorial
@@ -8,8 +8,8 @@ Institute; the National Renewable Energy Laboratory, operated by the Alliance fo
 Lawrence Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
 
 */
-#ifndef BLOCKING_QUEUE_HPP_
-#define BLOCKING_QUEUE_HPP_
+#ifndef HELICS_BLOCKING_QUEUE3_HPP_
+#define HELICS_BLOCKING_QUEUE3_HPP_
 
 #include "optionalDef.hpp"
 #include <algorithm>
@@ -19,6 +19,9 @@ Lawrence Livermore National Laboratory, operated by Lawrence Livermore National 
 #include <string>
 #include <type_traits>
 #include <vector>
+
+template <typename T>
+using opt = utilities::optional<T>;
 
 /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
@@ -184,7 +187,7 @@ class BlockingQueue
     @return an optional object with an object of type T if available
     */
     template <typename = std::enable_if<std::is_copy_assignable<T>::value>>
-    utilities::optional<T> try_peek () const
+    opt<T> try_peek () const
     {
         std::lock_guard<std::mutex> lock (m_pullLock);
 
@@ -201,7 +204,7 @@ class BlockingQueue
     @return an optional containing the value if successful the optional will be empty if there is no
     element in the queue
     */
-	utilities::optional<T> try_pop ();
+    opt<T> try_pop ();
 
     /** blocking call to wait on an object from the stack*/
     T pop ()
@@ -277,7 +280,7 @@ depending on the number of consumers
 };
 
 template <typename T>
-utilities::optional<T> BlockingQueue<T>::try_pop ()
+opt<T> BlockingQueue<T>::try_pop ()
 {
     std::lock_guard<std::mutex> pullLock (m_pullLock);  // first pullLock
     if (pullElements.empty ())
@@ -288,7 +291,7 @@ utilities::optional<T> BlockingQueue<T>::try_pop ()
             std::swap (pushElements, pullElements);
             pushLock.unlock ();  // we can free the push function to accept more elements after the swap call;
             std::reverse (pullElements.begin (), pullElements.end ());
-            utilities::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+            opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
             pullElements.pop_back ();
             if (pullElements.empty ())
             {
@@ -310,7 +313,7 @@ utilities::optional<T> BlockingQueue<T>::try_pop ()
         queueEmptyFlag = true;
         return {};  // return the empty optional
     }
-	utilities::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+    opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
     pullElements.pop_back ();
     if (pullElements.empty ())
     {

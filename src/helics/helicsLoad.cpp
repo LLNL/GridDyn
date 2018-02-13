@@ -24,7 +24,7 @@ namespace griddyn
 namespace helicsLib
 {
 helicsLoad::helicsLoad (const std::string &objName)
-    : rampLoad (objName), loadType (helics::helicsType_t::helicsComplex), voltageType (helics::helicsType_t::helicsComplex)
+    : rampLoad (objName), loadType (helics::helics_type_t::helicsComplex), voltageType (helics::helics_type_t::helicsComplex)
 {
 }
 
@@ -202,7 +202,7 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     else if (param == "voltagetype")
     {
       auto type= helics::getTypeFromString(val);
-      if (type != helics::helicsType_t::helicsInvalid)
+      if (type != helics::helics_type_t::helicsInvalid)
       {
           voltageType = type;
      }
@@ -218,7 +218,7 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     else if (param == "loadtype")
     {
         auto type = helics::getTypeFromString(val);
-        if (type != helics::helicsType_t::helicsInvalid)
+        if (type != helics::helics_type_t::helicsInvalid)
         {
             loadType = type;
         }

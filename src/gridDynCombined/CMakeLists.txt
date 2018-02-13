@@ -56,6 +56,8 @@ file(APPEND ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 
 add_library(gridDynCombined STATIC libraryLoader.h ${PROJECT_BINARY_DIR}/libraryLoader.cpp)
 
+set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
+
 #message("optlibs: ${griddyn_optional_libraries}")
 #message("optheaders: ${griddyn_optional_include_dirs}")
 #message("external_libraries: ${external_library_list}")

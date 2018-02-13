@@ -34,9 +34,9 @@ gridSimulation::gridSimulation (const std::string &objName) : Area (objName), si
 {
     EvQ = std::make_unique<eventQueue> ();
 #ifdef DISABLE_MULTITHREADING
-    gridLog = std::make_unique<utilities::loggerNoThread> ();
+    gridLog = std::make_unique<utilities::LoggerNoThread> ();
 #else
-    gridLog = std::make_unique<utilities::logger> ();
+    gridLog = std::make_unique<utilities::Logger> ();
 #endif
 }
 

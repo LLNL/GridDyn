@@ -80,6 +80,8 @@ source_group("Elements"  FILES  ${elementReader_sources})
 source_group("formatSpecific"  FILES  ${formattedfileInput_sources})
 source_group("general" FILES ${reader_sources})
 
+set_target_properties (fileInput PROPERTIES FOLDER libraries)
+
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)

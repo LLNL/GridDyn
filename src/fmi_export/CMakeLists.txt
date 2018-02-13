@@ -57,9 +57,12 @@ fmiGridDynExport.cpp
 
 add_library(fmiGridDynSharedLib SHARED ${fmiShared_sources} ${fmiShared_headers})
 
+set_target_properties (fmiGridDynSharedLib PROPERTIES FOLDER fmi)
+
 add_library(fmiBuilder STATIC ${fmiBuilder_sources} ${fmiBuilder_headers})
 link_directories(${external_link_directories})
 
+set_target_properties (fmiBuilder PROPERTIES FOLDER fmi)
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)

@@ -42,6 +42,8 @@ set(coreObject_sources
 	
 	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
 	
+	set_target_properties (coreObjects PROPERTIES FOLDER libraries)
+
 	INSTALL(TARGETS coreObjects
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)

@@ -19,9 +19,11 @@ cmake_policy(VERSION 3.4)
 set(GRIDDYN_MAJOR 0)
 set(GRIDDYN_MINOR 9)
 set(GRIDDYN_PATCH 0)
-set(GRIDDYN_DATE 11-24-2017)
+set(GRIDDYN_DATE 2-2-2018)
 
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/cmake)
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -84,83 +86,46 @@ IF(USE_POSITION_INDEPENDENT_CODE)
 ENDIF()
 ENDIF()
 
+include(compiler_flags)
 
-
-
-# -------------------------------------------------------------
-# Setup compiler options and configurations
-# -------------------------------------------------------------
-
-message(STATUS "setting up for ${CMAKE_CXX_COMPILER_ID}")
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
   # CMake, turn off using CMake build and find include/libs the
   # regular way.
   set(Boost_NO_BOOST_CMAKE ON)
-
   set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
   option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
-  if (ENABLE_EXTRA_COMPILER_WARNINGS)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-pedantic>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
-  endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-  
 ELSE(UNIX)
-	IF(MINGW)
-		if (ENABLE_EXTRA_COMPILER_WARNINGS)
-			add_compile_options(-Wall -pedantic)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-aliasing=1>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-			add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
-			#this options produces lots of warning but is useful for checking ever once in a while with Clang GCC warnin notices with this aren't as useful
-			#add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpadded>)
-		endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-		option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
-	ELSE(MINGW)
-		option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" ON)
-# -------------------------------------------------------------
-# Extra definitions for visual studio
-# -------------------------------------------------------------
-		IF(MSVC)
-			ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-			ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-			add_compile_options(/EHsc)
-			if (ENABLE_EXTRA_COMPILER_WARNINGS)
-				add_compile_options(-W4 /wd4065 /wd4101 /wd4102 /wd4244 /wd4297 /wd4355 /wd4800 /wd4484)
-			endif(ENABLE_EXTRA_COMPILER_WARNINGS)
-
-		ENDIF(MSVC)
-	ENDIF(MINGW)
+  IF(MINGW)
+  option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
+  ELSE(MINGW)
+  #this would most likely be MSVC
+   option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" ON)
+  ENDIF(MINGW)
 ENDIF(UNIX)
 
-IF (WITH_MATLAB OR USE_BOOST_STATIC_LIBS)
+IF (BUILD_MATLAB OR USE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
+  set(BOOST_STATIC ON)
+	  
 ENDIF ()
 
 # -------------------------------------------------------------
-# Check and set latest CXX Standard supported by compiler
+# add coverage target
 # -------------------------------------------------------------
-OPTION(ENABLE_CXX_17 "set to on to enable C++17 compilation features" OFF)
-include(CheckLatestCXXStandardOption)
-IF (VERSION_OPTION)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
-ELSE ()
-set(CMAKE_CXX_STANDARD 14)
-ENDIF ()
+ option (TEST_CODE_COVERAGE "Build a target for testing code coverage" OFF)
+ if (TEST_CODE_COVERAGE)
+ include(CodeCoverage)
 
+ set(COVERAGE_EXCLUDES 'ThirdParty/*' 'tests/*' 'swig/*' 'examples/*')
+ add_compile_options(${COVERAGE_COMPILER_FLAGS})
+  SETUP_TARGET_FOR_COVERAGE(
+     NAME griddyn_coverage                    # New target name
+     EXECUTABLE CTest # Executable in PROJECT_BINARY_DIR
+	)
+
+ endif(TEST_CODE_COVERAGE)
+ 
 # -------------------------------------------------------------
 # Get some configuration for C++17 as that becomes available
 # -------------------------------------------------------------
@@ -171,7 +136,6 @@ include(configGenerator)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTINATION include/griddyn)
 
 include(ExternalProject)
-
 
 
 include(GNUInstallDirs)
@@ -402,7 +366,7 @@ find_package(Doxygen)
 if(DOXYGEN_FOUND)
 
 	SHOW_VARIABLE(DOXYGEN_OUTPUT_DIR PATH "location to put Doxygen docs" "${CMAKE_CURRENT_SOURCE_DIR}/docs")
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 	add_custom_target(doc
 	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs}
@@ -584,7 +548,7 @@ ENDIF()
 set(CPACK_PACKAGE_NAME "GridDyn")
 set(CPACK_PACKAGE_VENDOR "Lawrence Livermore National Security")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GridDyn Installer")
-set(CPACK_PACKAGE_VERSION "${GridDyn_MAJOR_VERSION}.${GridDyn_MINOR_VERSION}")
+set(CPACK_PACKAGE_VERSION "${GridDyn_MAJOR_VERSION}.${GridDyn_MINOR_VERSION}.${GridDyn_PATCH_VERSION}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${GridDyn_MAJOR_VERSION})
 set(CPACK_PACKAGE_VERSION_MINOR ${GridDyn_MINOR_VERSION})
 #set(CPACK_PACKAGE_VERSION_PATCH ${GridDyn_VERSION_PATCH})

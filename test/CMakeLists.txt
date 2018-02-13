@@ -105,6 +105,12 @@ add_executable(testLibrary ${testLibrary_sources} ${testMain_headers})
 add_executable(testComponents ${testComponent_sources} ${testMain_headers})
 add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
+
+set_target_properties (testLibrary PROPERTIES FOLDER tests)
+set_target_properties (testComponents PROPERTIES FOLDER tests)
+set_target_properties (testSystem PROPERTIES FOLDER tests)
+set_target_properties (testExtra PROPERTIES FOLDER tests)
+
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})

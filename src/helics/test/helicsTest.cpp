@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE (test_pub_sub_double)
 BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 {
     helicsCoordinator coord;
-    auto ind1 = coord.addPublication ("pub1", helics::helicsType_t::helicsDouble);
+    auto ind1 = coord.addPublication ("pub1", helics::helics_type_t::helicsDouble);
     auto ind2 = coord.addSubscription ("pub1");
 
     coord.set ("coretype", "test");
@@ -152,9 +152,9 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 
    // BOOST_CHECK (fed->currentState () == helics::Federate::op_states::startup);
    // fed->enterInitializationState ();
-    BOOST_CHECK (fed->currentState () == helics::Federate::op_states::initialization);
+    BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::initialization);
     fed->enterExecutionState ();
-    BOOST_CHECK (fed->currentState () == helics::Federate::op_states::execution);
+    BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::execution);
 
     coord.setValue (ind1, 23.234);
     fed->requestTime (3.0);

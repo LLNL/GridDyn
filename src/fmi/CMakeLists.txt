@@ -76,6 +76,8 @@ add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_heade
 source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
 source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
+set_target_properties (fmiGDLibrary PROPERTIES FOLDER fmi)
+
 INCLUDE_DIRECTORIES(.)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)

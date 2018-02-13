@@ -92,6 +92,8 @@ include(${PROJECT_BINARY_DIR}/libs/cmake/tinyxml2-targets.cmake)
 add_library(formatInterpreter STATIC ${elementReader_files})
 target_link_libraries(formatInterpreter tinyxml2 ticpp)
 
+set_target_properties (formatInterpreter PROPERTIES FOLDER libraries)
+
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)
 
 IF (YAML_FOUND)

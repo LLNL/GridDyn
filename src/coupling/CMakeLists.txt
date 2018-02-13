@@ -30,6 +30,7 @@ include_directories(${MPI_INCLUDE_PATH})
 
 add_library(coupling_static_lib STATIC ${shared_sources} ${shared_headers})
 
+set_target_properties (coupling_static_lib PROPERTIES FOLDER libraries)
 INSTALL(TARGETS coupling_static_lib 
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)

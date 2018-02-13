@@ -21,6 +21,7 @@ set(extra_headers
 	)
 
 add_library(extraModelLibrary ${extra_sources} ${extra_headers})
+set_target_properties (extraModelLibrary PROPERTIES FOLDER libraries)
 
 INCLUDE_DIRECTORIES(.)
 

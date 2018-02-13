@@ -218,7 +218,7 @@ auto make_workBlock (std::packaged_task<X ()> &&task)
 }
 
 /** make a shared pointer to a workBlock object from a packaged task object
-@param[in] task a packeged task containing something to do
+@param[in] task a packaged task containing something to do
 @return a unique pointer to a work block function
 */
 template <typename X>
@@ -227,7 +227,7 @@ auto make_shared_workBlock (std::packaged_task<X ()> &&task)
     return std::make_shared<workBlock<X>> (std::move (task));
 }
 
-/** the defualt ratio between med and low priority tasks*/
+/** the default ratio between med and low priority tasks*/
 constexpr int defaultPriorityRatio (4);
 
 /** class defining a work queuing system
@@ -316,9 +316,9 @@ class workQueue
     int priorityRatio = defaultPriorityRatio;  //!< the ratio of medium Priority blocks to low priority blocks
     int numWorkers = 0;  //!< counter for the number of workers
     std::atomic<int> MedCounter{0};  //!< the counter to use low instead of Med
-    simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoHigh;  //!< queue containing the work to do
-    simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoMed;  //!< queue containing the work to do
-    simpleQueue<std::shared_ptr<basicWorkBlock>> workToDoLow;  //!< queue containing the work to do
+    SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoHigh;  //!< queue containing the work to do
+    SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoMed;  //!< queue containing the work to do
+    SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoLow;  //!< queue containing the work to do
 	std::vector<std::thread> threadpool;  //!< the threads
 	std::mutex queueLock;  //!< mutex for condition variable
     std::condition_variable queueCondition;  //!< condition variable for waking the threads
