@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2017, Lawrence Livermore National Security
+# Copyright (c) 2014-2018, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department 
 # of Energy by Lawrence Livermore National Laboratory in part under 
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -14,7 +14,7 @@ file(REMOVE_RECURSE ${PROJECT_BINARY_DIR}/libraryLoader.cpp)
 
 file(WRITE ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 "/*LLNS Copyright Start\n"
-" *Copyright (c) 2017, Lawrence Livermore National Security\n"
+" *Copyright (c) 2014-2018, Lawrence Livermore National Security\n"
 " *This work was performed under the auspices of the U.S. Department\n" 
 " *of Energy by Lawrence Livermore National Laboratory in part under\n"
 " *Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.\n"

@@ -31,6 +31,7 @@ ExternalProject_Add(suitesparse
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
         -DCMAKE_LINKER=${CMAKE_LINKER}
+		-DBUILD_METIS=OFF
 		-DConfigPackageLocation=${PROJECT_BINARY_DIR}/cmake
         
       
