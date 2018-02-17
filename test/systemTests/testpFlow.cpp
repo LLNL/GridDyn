@@ -45,7 +45,9 @@ BOOST_AUTO_TEST_CASE (pFlow_test1)
     // check the linkcount
     count = gds->getInt ("totallinkcount");
     BOOST_CHECK_EQUAL (count, 9);
+    
     BOOST_CHECK_EQUAL (runJacobianCheck (gds, cPflowSolverMode, false), 0);
+    BOOST_CHECK_EQUAL(gds->getInt("jacobiancount"), 96);
     gds->powerflow ();
     BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 }

@@ -1363,7 +1363,7 @@ void gridComponent::loadStateSizes (const solverMode &sMode)
     }
     if (subObjectList.empty ())
     {
-            so.localLoad (true);
+        so.stateLoaded = true;
     }
     else
     {
