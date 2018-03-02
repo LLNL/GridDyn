@@ -1203,6 +1203,7 @@ void DynamicGenerator::generateSubModelInputs (const IOdata &inputs, const state
     if ((gov != nullptr) && (gov->isEnabled ()))
     {
         pmech = gov->getOutput (subInputs.inputs[governor_loc], sD, sMode, 0);
+        
     }
     if (std::abs (pmech) > 1e25)
     {

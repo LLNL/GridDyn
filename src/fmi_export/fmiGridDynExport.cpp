@@ -51,7 +51,7 @@ fmi2Status fmi2SetDebugLogging (fmi2Component comp, fmi2Boolean loggingOn, size_
 	{
 		return fmi2Error;
 	}
-	std::bitset<6> logCat = 0;
+	std::bitset<7> logCat = 0;
 	logCat[0] = true;
 	if (loggingOn)
 	{
@@ -78,6 +78,10 @@ fmi2Status fmi2SetDebugLogging (fmi2Component comp, fmi2Boolean loggingOn, size_
 			{
 				logCat[5] = true;
 			}
+            else if (lcat == "logTrace")
+            {
+                logCat[6] = true;
+            }
 			else
 			{
 				return fmi2Warning;
@@ -98,54 +102,57 @@ fmi2Component fmi2Instantiate (fmi2String instanceName,
                                fmi2Boolean /*visible*/,
                                fmi2Boolean loggingOn)
 {
-	if (fmuType != fmi2Type::fmi2CoSimulation)
-	{
-		return nullptr;
-	}
-        auto locString = std::string (fmuResourceLocation);
-        if (locString.compare (0, 6, "file:/") == 0)
+    if ((fmuType == fmi2Type::fmi2CoSimulation)||(fmuType==fmi2Type::fmi2ModelExchange))
+    {
+        auto locString = std::string(fmuResourceLocation);
+        if (locString.compare(0, 6, "file:/") == 0)
         {
             if (locString[6] == '/')
             {
                 if (locString[7] == '/')
                 {
-                    locString.erase (0, 8);
+                    locString.erase(0, 8);
                 }
                 else
                 {
-                    locString.erase (0, 7);
+                    locString.erase(0, 7);
                 }
             }
             else
             {
-                locString.erase (0, 6);
+                locString.erase(0, 6);
             }
         }
         try
         {
-            auto fmiM = std::make_unique<fmi::fmiRunner> (instanceName, locString, functions);
+            auto fmiM = std::make_unique<fmi::fmiRunner>(instanceName, locString, functions, (fmuType == fmi2Type::fmi2ModelExchange));
             auto rv = new compID;
-            rv->second = fmiM->GetID ();
-			fmiM->fmiComp = static_cast<fmi2Component>(rv);
-            std::lock_guard<std::mutex> arrayLock (fmiLock);
-			if (loggingOn == fmi2False)
-			{
-				std::bitset<6> logCat{ 0 };
-				logCat[0] = true;
-				logCat[1] = true;
-				logCat[2] = true;
-				logCat[3] = true;
-				fmiM->setLoggingCategories(logCat);
-			}
-            fmiRunnerInstances.push_back (std::move (fmiM));
-            rv->first = static_cast<unsigned int>(fmiRunnerInstances.size ()) - 1;
+            rv->second = fmiM->GetID();
+            fmiM->fmiComp = static_cast<fmi2Component>(rv);
+            std::lock_guard<std::mutex> arrayLock(fmiLock);
+            if (loggingOn == fmi2False)
+            {
+                std::bitset<7> logCat{ 0 };
+                logCat[0] = true;
+                logCat[1] = true;
+                logCat[2] = true;
+                logCat[3] = true;
+                fmiM->setLoggingCategories(logCat);
+            }
+            fmiRunnerInstances.push_back(std::move(fmiM));
+            rv->first = static_cast<unsigned int>(fmiRunnerInstances.size()) - 1;
+
             return static_cast<fmi2Component>(rv);
         }
         catch (const std::invalid_argument &)
         {
             return nullptr;
         }
-   
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 void fmi2FreeInstance (fmi2Component comp)
@@ -421,6 +428,7 @@ fmi2Status fmi2SetString (fmi2Component comp, const fmi2ValueReference vr[], siz
         }
         else
         {
+			printf(" setting string %d to %s\n", vr[ii], value[ii]);
             auto res = runner->SetString (vr[ii], value[ii]);
             if (!res)
             {
@@ -590,7 +598,8 @@ fmi2Status fmi2EnterEventMode(fmi2Component comp)
     }
     return fmi2Discard;
 }
-fmi2Status fmi2NewDiscreteStates(fmi2Component comp, fmi2EventInfo*)
+
+fmi2Status fmi2NewDiscreteStates(fmi2Component comp, fmi2EventInfo *fmi2eventInfo)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -599,6 +608,7 @@ fmi2Status fmi2NewDiscreteStates(fmi2Component comp, fmi2EventInfo*)
     }
     return fmi2Discard;
 }
+
 fmi2Status fmi2EnterContinuousTimeMode(fmi2Component comp)
 {
     auto runner = getFmiRunner(comp);
@@ -608,7 +618,8 @@ fmi2Status fmi2EnterContinuousTimeMode(fmi2Component comp)
     }
     return fmi2Discard;
 }
-fmi2Status fmi2CompletedIntegratorStep(fmi2Component comp, fmi2Boolean, fmi2Boolean*, fmi2Boolean*)
+
+fmi2Status fmi2CompletedIntegratorStep(fmi2Component comp, fmi2Boolean noSetFMUStatePriorToCurrentPoint, fmi2Boolean *enterEventMode, fmi2Boolean *terminateSimulation)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -619,7 +630,7 @@ fmi2Status fmi2CompletedIntegratorStep(fmi2Component comp, fmi2Boolean, fmi2Bool
 }
 
 /* Providing independent variables and re-initialization of caching */
-fmi2Status fmi2SetTime(fmi2Component comp, fmi2Real)
+fmi2Status fmi2SetTime(fmi2Component comp, fmi2Real time)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -629,7 +640,7 @@ fmi2Status fmi2SetTime(fmi2Component comp, fmi2Real)
     return fmi2Discard;
 }
 
-fmi2Status fmi2SetContinuousStates(fmi2Component comp, const fmi2Real[], size_t)
+fmi2Status fmi2SetContinuousStates(fmi2Component comp, const fmi2Real x[], size_t nx)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -640,7 +651,7 @@ fmi2Status fmi2SetContinuousStates(fmi2Component comp, const fmi2Real[], size_t)
 }
 
 /* Evaluation of the model equations */
-fmi2Status fmi2GetDerivatives(fmi2Component comp, fmi2Real[], size_t)
+fmi2Status fmi2GetDerivatives(fmi2Component comp, fmi2Real derivatives[], size_t nx)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -650,7 +661,7 @@ fmi2Status fmi2GetDerivatives(fmi2Component comp, fmi2Real[], size_t)
     return fmi2Discard;
 }
 
-fmi2Status fmi2GetEventIndicators(fmi2Component comp, fmi2Real[], size_t)
+fmi2Status fmi2GetEventIndicators(fmi2Component comp, fmi2Real eventIndicators[], size_t ni)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -660,7 +671,7 @@ fmi2Status fmi2GetEventIndicators(fmi2Component comp, fmi2Real[], size_t)
     return fmi2Discard;
 }
 
-fmi2Status fmi2GetContinuousStates(fmi2Component comp, fmi2Real[], size_t)
+fmi2Status fmi2GetContinuousStates(fmi2Component comp, fmi2Real x[], size_t nx)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)
@@ -670,7 +681,7 @@ fmi2Status fmi2GetContinuousStates(fmi2Component comp, fmi2Real[], size_t)
     return fmi2Discard;
 }
 
-fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component comp, fmi2Real[], size_t)
+fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component comp, fmi2Real x_nominals[], size_t nx)
 {
     auto runner = getFmiRunner(comp);
     if (runner == nullptr)

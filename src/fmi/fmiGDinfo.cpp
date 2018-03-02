@@ -39,6 +39,7 @@ along with this program. If not, contact Modelon AB <http://www.modelon.com>.
 #include "fmi_models/fmiExciter.h"
 #include "fmi_models/fmiGovernor.h"
 #include "fmi_models/fmiGenModel.h"
+#include "fmi_models/CymeDistLoad.h"
 
 #include <memory>
 
@@ -56,6 +57,7 @@ static childTypeFactory<fmi::fmiMELoad3phase, Load> fmiMEld3("load", stringVec{ 
 static childTypeFactory<fmi::fmiGovernor, Governor> fmiGov("governor", stringVec{ "fmigov","fmigovernor","fmi"});
 static childTypeFactory<fmi::fmiExciter, Exciter> fmiExciter("exciter", stringVec{ "fmiexiter","fmi" });
 static childTypeFactory<fmi::fmiGenModel, GenModel> fmiGM("genmodel", stringVec{ "fmigenmodel","fmimachine","fmi" });
+static childTypeFactory<fmi::CymeDistLoadME, Load> cymeME("load", stringVec{ "cyme","cymeme","cymefmi" });
 
 void loadFmiLibrary()
 {

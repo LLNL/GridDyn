@@ -275,9 +275,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     check_flag (&retval, "KINSetErrHandlerFn", 1);
 
     flags.set (initialized_flag);
-    jacFile = "jactest2.dat";
-    stateFile = "jactest2.dat";
-    flags[fileCapture_flag] = true;
+
 }
 
 void kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)

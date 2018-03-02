@@ -41,6 +41,7 @@ class fmiMEWrapper : public fmiWrapper<fmiMESubModel, BaseObj>
         if (fmiWrapper<fmiMESubModel, BaseObj>::fmisub == nullptr)
         {
             this->disable();
+            return;
         }
         if (fmiWrapper<fmiMESubModel, BaseObj>::fmisub->isLoaded ())
         {
@@ -53,6 +54,7 @@ class fmiMEWrapper : public fmiWrapper<fmiMESubModel, BaseObj>
             this->disable ();
         }
     }
+
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override
 	{
 		if (!BaseObj::opFlags[pFlow_initialized])

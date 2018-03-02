@@ -330,7 +330,9 @@ void gridBus::pFlowObjectInitializeB ()
     }
     for (auto &load : attachedLoads)
     {
+		printf("initializeB load %s\n", load->getName().c_str());
         load->pFlowInitializeB ();
+		printf("finished initializeB load %s\n", load->getName().c_str());
     }
     m_dstate_dt.resize (3, 0);
     m_dstate_dt[angleInLocation] = systemBaseFrequency * (freq - 1.0);

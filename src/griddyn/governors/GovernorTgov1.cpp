@@ -101,7 +101,8 @@ void GovernorTgov1::derivative (const IOdata &inputs,
     }
     else
     {
-        Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
+        Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] - K * (omega - 1.0)) / T1;
+      //  LOG_WARNING(std::string("gov set =") + std::to_string(K * (omega - 1.0)));
     }
 
     Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
@@ -170,7 +171,7 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
         md.assign (refI + 1, refI + 1, -1 / T1 - sD.cj);
         if (linkOmega)
         {
-            md.assign (refI + 1, inputLocs[govOmegaInLocation], K / (T1));
+            md.assign (refI + 1, inputLocs[govOmegaInLocation],-K / (T1));
         }
 
         md.assign (refI, refI + 1, (1 + T2 / T1) / T3);
@@ -270,7 +271,7 @@ void GovernorTgov1::rootTrigger (coreTime /*time*/,
 index_t GovernorTgov1::findIndex (const std::string &field, const solverMode &sMode) const
 {
     index_t ret = kInvalidLocation;
-    if (field == "pm")
+    if ((field == "pm")||(field=="pmech"))
     {
         ret = offsets.getAlgOffset (sMode);
     }

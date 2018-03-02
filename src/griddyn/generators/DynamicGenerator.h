@@ -88,7 +88,9 @@ public:
   virtual void setFlag (const std::string &flag, bool val = true) override;
 
   virtual void add (coreObject *obj) override;
-  
+  /** @brief additional add function specific to subModels
+  @param[in] a submodel to add 
+  @throw unrecognizedObjectError is object is not valid*/
   virtual void add (gridSubModel *obj) override;
 
   virtual void algebraicUpdate (const IOdata &inputs,const stateData &sD, double update[],const solverMode &sMode, double alpha) override;

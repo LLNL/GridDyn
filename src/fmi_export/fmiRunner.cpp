@@ -18,22 +18,22 @@
 #include "boost/filesystem.hpp"
 #include "loadFMIExportObjects.h"
 #include "core/coreOwningPtr.hpp"
-
+#include "libraryLoader.h"
 
 namespace griddyn
 {
 namespace fmi
 {
-fmiRunner::fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions):identifier(name),resource_loc(resourceLocations)
+fmiRunner::fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions, bool ModelExchange):identifier(name),resource_loc(resourceLocations)
 {
 	if (functions != nullptr)
 	{
 		loggerFunc = functions->logger;
 		stepFinished = functions->stepFinished;
 	}
-	
+    loadLibraries();
 	Reset();
-
+    modelExchangeRunner = ModelExchange;
 }
 
 fmiRunner::~fmiRunner() = default;

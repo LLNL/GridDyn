@@ -80,7 +80,16 @@ void approximatingLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
 	updateA(time0);
 }
 
-void approximatingLoad::pFlowObjectInitializeB () { updateB (); }
+void approximatingLoad::pFlowObjectInitializeB () 
+{
+	printf("apload pflowB enter\n");
+	updateB();
+	printf("finished updateB\n");
+	rampLoad::pFlowObjectInitializeB();
+	printf("apload pflowB exit\n");
+	
+}
+
 void approximatingLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     switch (dynCoupling)
@@ -335,11 +344,12 @@ void approximatingLoad::updateLocalCache (const IOdata &inputs, const stateData 
 
 std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues(const std::vector<double> &inputs, const std::vector<double> &voltages)
 {
+	std::vector<std::tuple<double, double, double>> res;
 	if (subLoad == nullptr)
 	{
-		return{};
+		return res;
 	}
-	std::vector<std::tuple<double, double, double>> res;
+	
 	IOdata cinputs(inputs.begin(), inputs.end());
 	for (auto &V : voltages)
 	{

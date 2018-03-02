@@ -45,11 +45,11 @@ protected:
 	count_t m_stateSize = 0;  //!< the total state count
 	count_t m_jacElements = 0;	//!< the number of jacobian elements
 	count_t m_eventCount = 0;	//!< the number of event indicators
-	fmuMode prevFmiState;
 	std::shared_ptr<fmi2ModelExchangeObject> me;
 
 	std::vector<outputEstimator *> oEst;  //!<vector of objects used for output estimation //TODO:: Make this an actual vector of objects
 	coreTime localIntegrationTime = 0.01;
+	fmuMode prevFmiState;
 	std::vector<vInfo> stateInformation;
 	std::vector<vInfo> outputInformation;
 	std::vector<int> inputVarIndices;

@@ -34,11 +34,18 @@ class fmiRunner : public GriddynRunner
 {
 	private:
 		coreOwningPtr<fmiCoordinator> coord; //!< the coordinator object for managing object that manage the fmi inputs and outputs
-		std::bitset<6> loggingCategories;  //!< indicators of which logging categories to use
+		std::bitset<7> loggingCategories;  //!< indicators of which logging categories to use
 		bool runAsync_ = false;	//!< indicator that we should run asynchronously
+        bool modelExchangeRunner = false; //!< indicator that the object is running in model exchange mode
 		std::future<void> async_retFMI;	//!< the future object corresponding to the asyncrhonous operation
 public:
-	fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions);
+    /** construct an fmurunner object
+    @param name the name of the runner
+    @param resourceLocations the FMU resource location information
+    @param function a set of helper function from the FMI master
+    @param ModelExchange set to true if this is instantiating a model exchange object (optional defaults to false)
+    */
+	fmiRunner(const std::string &name, const std::string &resourceLocations, const fmi2CallbackFunctions* functions, bool ModelExchange=false);
 	~fmiRunner();
 	//most of the stuff that would be in here is dealt with in the constructor and has to be handled differently in the FMU
 private:
@@ -66,7 +73,7 @@ public:
 	virtual bool SetString(index_t vr, const char *s);
 	virtual double Get(index_t vr);
 
-	void setLoggingCategories(std::bitset<6> logCat)
+	void setLoggingCategories(std::bitset<7> logCat)
 	{
 		loggingCategories = logCat;
 	}
@@ -75,11 +82,17 @@ public:
 	{
 		return runAsync_;
 	}
-	
+	/** set the asyncrhonous mode for operation*/
 	void setAsynchronousMode(bool async)
 	{
 		runAsync_ = (stepFinished != nullptr) ? async : false;	
 	}
+
+    /** return true if the object is a model exchange object*/
+    bool isModelExchangeObject() const
+    {
+        return modelExchangeRunner;
+    }
 	/** check whether an asynchronous step call is finished*/
 	bool isFinished() const;
 	/** locate a value reference from a name*/

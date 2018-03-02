@@ -18,6 +18,8 @@
 #include "core/coreExceptions.h"
 #include "json/json.h"
 #include <fstream>
+#include <iostream>
+
 namespace griddyn
 {
 namespace fmi
@@ -27,7 +29,7 @@ std::atomic<int> CymeDistLoadME::indexCounter{ 0 };
 CymeDistLoadME::CymeDistLoadME(const std::string &objName): fmiMELoad3phase(objName)
 {
 	opFlags.set(current_output);
-	configIndex = ++indexCounter;
+	configIndex = indexCounter++;
 }
 
 coreObject * CymeDistLoadME::clone(coreObject *obj) const
@@ -37,12 +39,14 @@ coreObject * CymeDistLoadME::clone(coreObject *obj) const
 
 void CymeDistLoadME::set(const std::string &param, const std::string &val)
 {
-	if ((param == "config") || (param == "configfile"))
+	if ((param == "config") || (param == "configfile")||(param=="configuration_file"))
 	{
+		printf("loading config file %s\n", val.c_str());
 		loadConfigFile(val);
 	}
 	else
 	{
+		printf("setting parameter %s to %s\n", param.c_str(), val.c_str());
 		fmiMELoad3phase::set(param, val);
 	}
 }
@@ -65,6 +69,8 @@ void CymeDistLoadME::loadConfigFile(const std::string &configFileName)
 	std::ifstream file(configFileName);
 	if (!file.is_open())
 	{
+        std::cerr << "unable to open the file:" << configFileName << std::endl;
+        LOG_WARNING(std::string("unable to open the configuration file ") + configFileName);
 		return;
 	}
 	Json_gd::Value doc;
@@ -74,6 +80,7 @@ void CymeDistLoadME::loadConfigFile(const std::string &configFileName)
 	bool ok = Json_gd::parseFromStream(rbuilder, file, &doc, &errs);
 	if (!ok)
 	{
+		fprintf(stderr, "unable to parse json file %s\n", errs.c_str());
 		return;
 			
 	}
@@ -83,8 +90,24 @@ void CymeDistLoadME::loadConfigFile(const std::string &configFileName)
 	auto model = mval[configIndex];
 	if (model.isObject())
 	{
-		fmiMELoad3phase::set("fmu", model["fmu_path"].asString());
-		fmiMELoad3phase::set("_configuration_file", model["config_file_path"].asString());
+		auto fmu_path = model["fmu_path"].asString();
+		fprintf(stderr, "setting fmu_path to %s\n", fmu_path.c_str());
+		fmiMELoad3phase::set("fmu", fmu_path);
+        LOG_DEBUG(std::string("setting fmu to ") + model["fmu_path"].asString());
+
+        if (model.isMember("fmu_config_path"))
+        {
+			
+            auto config_path = model["fmu_config_path"].asString();
+			fprintf(stderr, "fmu config_path=%s\n", config_path.c_str());
+            if (config_path.size()>5)
+            {
+                fmiMELoad3phase::set("_configurationFileName", config_path);
+                LOG_DEBUG(std::string("setting config file to ") + config_path);
+            }
+            
+        }
+		
 	}
 }
 } //namespace fmi

@@ -32,6 +32,7 @@ set(fmiGD_sources
 	fmi_models/outputEstimator.cpp
 	fmi_models/fmiGovernor.cpp
 	fmi_models/fmiGenModel.cpp
+	fmi_models/CymeDistLoad.cpp
 	)
 	
 set(fmiGD_headers
@@ -49,6 +50,7 @@ set(fmiGD_headers
 	fmi_models/fmiMEWrapper.hpp
 	fmi_models/fmiCoSimWrapper.hpp
 	fmi_models/fmiWrapper.hpp
+	fmi_models/CymeDistLoad.h
 	fmiGDinfo.h
 	)	
 set(fmiImport_headers

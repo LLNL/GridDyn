@@ -25,6 +25,7 @@ fmi2ModelExchangeObject::fmi2ModelExchangeObject(fmi2Component cmp, std::shared_
 
 void fmi2ModelExchangeObject::setMode(fmuMode mode)
 {
+	printf("setting mode %d\n", static_cast<int>(mode));
 	fmi2Status ret=fmi2Error;
 	switch (currentMode)
 	{
@@ -33,10 +34,14 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 		
 		if (mode == fmuMode::continuousTimeMode)
 		{
+			printf(" entering event mode\n");
 			fmi2Object::setMode(fmuMode::eventMode);
+			printf(" now in event event mode\n");
 			if (numStates > 0)
 			{
+				printf("now entering continuous time mode\n");
 				ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+				printf("entered continous time mode return code %d\n",ret);
 			}
 			else
 			{
@@ -64,7 +69,9 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 		{
 			if (numStates > 0)
 			{
+				printf("now entering continuous time mode\n");
 				ret = ModelExchangeFunctions->fmi2EnterContinuousTimeMode(comp);
+				printf("entered continous time mode return code %d\n", ret);
 			}
 			else
 			{

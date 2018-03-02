@@ -572,6 +572,10 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
     logElement->SetAttribute ("name", "logDebug");
     pElement->InsertEndChild (logElement);
 
+    logElement = doc.NewElement("Category");
+    logElement->SetAttribute("name", "logTrace");
+    pElement->InsertEndChild(logElement);
+
     pRoot->InsertEndChild (pElement);
 
     // next load all the scalar variables in the system
@@ -637,6 +641,7 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
         sVariable->SetAttribute ("causality", "parameter");
         if (fmiCoordinator::isStringParameter(param))
         {
+            sVariable->SetAttribute("variability", "fixed");
             auto sParamType = doc.NewElement("String");
             sParamType->SetAttribute("start", "");
             sVariable->InsertEndChild(sParamType);

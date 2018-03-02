@@ -231,6 +231,7 @@ class fmiWrapper : public BaseObj
 
         fmisub->set ("outputs", outputs);
     }
+
     void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override
     {
         if (fmisub->isLoaded ())
@@ -245,6 +246,17 @@ class fmiWrapper : public BaseObj
 			this->disable ();
         }
     }
+
+	void pFlowObjectInitializeB() override
+	{
+		printf("entering pflow Init B wrapper\n");
+		if (isEnabled())
+		{
+			fmisub->pFlowInitializeB();
+			BaseObj::pFlowObjectInitializeB();
+		}
+		printf("finished pflow Init B wrapper\n");
+	}
 
     void set (const std::string &param, const std::string &val) override
     {

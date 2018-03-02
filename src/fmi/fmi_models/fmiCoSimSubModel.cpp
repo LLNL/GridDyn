@@ -258,6 +258,7 @@ void fmiCoSimSubModel::set(const std::string &param, const std::string &val)
 	{
 		if (!(cs))
 		{
+			
 			cs = fmiLibraryManager::instance().createCoSimulationObject(val, getName());
 		}
 		else
