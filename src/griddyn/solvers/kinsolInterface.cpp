@@ -275,6 +275,9 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     check_flag (&retval, "KINSetErrHandlerFn", 1);
 
     flags.set (initialized_flag);
+    jacFile = "jactest2.dat";
+    stateFile = "jactest2.dat";
+    flags[fileCapture_flag] = true;
 }
 
 void kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
@@ -328,6 +331,10 @@ double kinsolInterface::get (const std::string &param) const
     if (param == "jac calls")
     {
        KINDlsGetNumJacEvals (solverMem, &val);
+    }
+    else if (param == "nliterations")
+    {
+        KINGetNumNonlinSolvIters(solverMem, &val);
     }
 #if MEASURE_TIMINGS > 0
     else if (param == "kintime")

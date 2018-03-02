@@ -989,6 +989,47 @@ double gridComponent::get (const std::string &param, gridUnits::units_t unitType
 	{
 		out = gridUnits::unitConversionFreq(localBaseVoltage, gridUnits::kV, unitType);
 	}
+    else if (param == "jacsize")
+    {
+        if (opFlags[dyn_initialized])
+        {
+            out = jacSize(cDaeSolverMode);
+        }
+        else
+        {
+            out = jacSize(cPflowSolverMode);
+        }
+    }
+    else if (param == "statesize")
+    {
+        if (opFlags[dyn_initialized])
+        {
+            out = stateSize(cDaeSolverMode);
+        }
+        else
+        {
+            out = stateSize(cPflowSolverMode);
+        }
+    }
+    else if (param == "algsize")
+    {
+        if (opFlags[dyn_initialized])
+        {
+            out = algSize(cDaeSolverMode);
+        }
+        else
+        {
+            out = algSize(cPflowSolverMode);
+        }
+    }
+    else if (param=="diffsize")
+    {
+         out = diffSize(cDaeSolverMode);
+    }
+    else if (param == "rootsize")
+    {
+        out = rootSize(cDaeSolverMode);
+    }
     else
     {
         out = subObjectGet (param, unitType);
@@ -1221,7 +1262,7 @@ void gridComponent::loadSizesSub (const solverMode &sMode, sizeCategory category
 	switch (category)
 	{
 	case sizeCategory::state_size_update:
-		so.localLoad(false);
+		so.localStateLoad(false);
 		for (auto &sub : subObjectList)
 		{
 			if (sub->isEnabled())
@@ -1363,7 +1404,7 @@ void gridComponent::loadStateSizes (const solverMode &sMode)
     }
     if (subObjectList.empty ())
     {
-        so.stateLoaded = true;
+        so.localStateLoad(true);
     }
     else
     {

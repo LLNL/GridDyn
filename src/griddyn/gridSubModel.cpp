@@ -36,7 +36,7 @@ void gridSubModel::dynInitializeA (coreTime time, std::uint32_t flags)
         auto &so = offsets.getOffsets (cLocalSolverMode);
         if (getSubObjects ().empty ())
         {
-            so.localLoad (true);
+            so.localLoadAll (true);
         }
         else
         {

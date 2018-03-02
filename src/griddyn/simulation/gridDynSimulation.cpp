@@ -1188,6 +1188,17 @@ double gridDynSimulation::get (const std::string &param, gridUnits::units_t unit
 			val = algSize(*defDAEMode);
 		}
 	}
+    else if (param == "jacsize")
+    {
+        if (pState <= gridState_t::POWERFLOW_COMPLETE)
+        {
+            val = jacSize(*defPowerFlowMode);
+        }
+        else
+        {
+            val = jacSize(*defDAEMode);
+        }
+    }
 	else if ((param == "diffcount")||(param=="diffsize"))
 	{
 		if (pState <= gridState_t::POWERFLOW_COMPLETE)
@@ -1238,9 +1249,9 @@ double gridDynSimulation::get (const std::string &param, gridUnits::units_t unit
     {
         fval = getSolverInterface (*defPowerFlowMode)->get ("iterationcount");
     }
-    else if ((param == "jacobiancount") || (param == "jaccount"))
+    else if ((param == "jacobiancallcount") || (param == "jaccallcount"))
     {
-        val = JacobianCount;
+        val = JacobianCallCount;
     }
     else if (param == "rootcount")
     {

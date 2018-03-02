@@ -285,6 +285,7 @@ void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 		}
 		assert(indval + 1 == svsize);
 		M->indexptrs[indval + 1] = sz;
+        
 	}
 	else if (id == SUNMATRIX_DENSE)
 	{

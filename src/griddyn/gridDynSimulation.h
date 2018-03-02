@@ -160,7 +160,7 @@ class gridDynSimulation : public gridSimulation
     count_t haltCount = 0;  //!< counter for the number of times the solver was halted
     count_t residCount = 0;  //!< counter for the number of times the residual function was called
     count_t evalCount = 0;  //!< counter for the number of times the algUpdateFunction was called
-    count_t JacobianCount = 0;  //!< counter for the number of calls to the Jacobian function
+    count_t JacobianCallCount = 0;  //!< counter for the number of calls to the Jacobian function
     count_t rootCount = 0;  //!< counter for the number of roots
     count_t busCount = 0;  //!< counter for the number of buses
     count_t linkCount = 0;  //!<counter for the number of links

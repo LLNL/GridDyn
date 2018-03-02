@@ -378,9 +378,14 @@ class solverOffsets
 	*/
 	void addJacobianSizes(const solverOffsets &offsets);
 
-    /** @brief load the local variables to the sizes
+    /** @brief load the local state variables to the sizes
+    @param finishedLoading set the stateLoaded flag to the given value
      */
-    void localLoad (bool finishedLoading = false);
+    void localStateLoad (bool finishedLoading = false);
+    /** @brief load the local information to the total
+    @param finishedLoading set the stateLoaded flag to the given value
+    */
+    void localLoadAll(bool finishedLoading = false);
 
     /** @brief set the offsets from another solverOffset object
     @param newOffsets the solverOffset object to use as the sizes

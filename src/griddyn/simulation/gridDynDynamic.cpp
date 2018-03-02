@@ -1248,7 +1248,7 @@ int gridDynSimulation::jacobianFunction (coreTime time,
                                          double cj,
                                          const solverMode &sMode) noexcept
 {
-    ++JacobianCount;
+    ++JacobianCallCount;
     // assuming it is the same data as the preceding residual call  (it is for IDA but not sure if this assumption
     // will be generally valid)
     stateData sD (time, state, dstate_dt, residCount);

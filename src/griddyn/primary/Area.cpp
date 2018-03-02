@@ -2091,7 +2091,7 @@ void Area::loadStateSizes (const solverMode &sMode)
         so.local.diffSize = selfSizes.diffSize;
     }
 
-    so.localLoad (false);
+    so.localStateLoad (false);
     for (auto &sub : primaryObjects)
     {
         if (sub->isEnabled ())

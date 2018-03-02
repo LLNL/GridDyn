@@ -242,12 +242,22 @@ void solverOffsets::addRootSizes(const solverOffsets &offsets)
 {
 	total.addRootSizes(offsets.total);
 }
-void solverOffsets::localLoad (bool finishedLoading)
+
+void solverOffsets::localStateLoad (bool finishedLoading)
+{
+    total.algSize = local.algSize;
+    total.diffSize = local.diffSize;
+    total.aSize = local.aSize;
+    total.vSize = local.vSize;
+    stateLoaded = finishedLoading;
+}
+
+void solverOffsets::localLoadAll(bool finishedLoading)
 {
     total = local;
     stateLoaded = finishedLoading;
     jacobianLoaded = finishedLoading;
-	rootsLoaded = finishedLoading;
+    rootsLoaded = finishedLoading;
 }
 
 void solverOffsets::setOffsets (const solverOffsets &newOffsets)
@@ -583,7 +593,7 @@ void offsetTable::localUpdateAll (bool dynamic_only)
         for (auto &so : offsetContainer)
         {
             so.local = local ().local;
-            so.localLoad (true);
+            so.localLoadAll(true);
         }
     }
 }
