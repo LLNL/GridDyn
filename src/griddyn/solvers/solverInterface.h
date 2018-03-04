@@ -116,8 +116,8 @@ class solverInterface : public helperObject
     /** @brief enumeration of initiaL condition call modes*/
     enum class sparse_reinit_modes
     {
-        resize,  //!< destroy and completely reinit the sparse calculations
         refactor,  //!< refactor the sparse matrix
+        resize  //!< destroy and completely reinit the sparse calculations
     };
 
     std::vector<int> rootsfound;  //!< mask vector for which roots were found

@@ -249,13 +249,13 @@ class fmiWrapper : public BaseObj
 
 	void pFlowObjectInitializeB() override
 	{
-		printf("entering pflow Init B wrapper\n");
+		//printf("entering pflow Init B wrapper\n");
 		if (isEnabled())
 		{
 			fmisub->pFlowInitializeB();
 			BaseObj::pFlowObjectInitializeB();
 		}
-		printf("finished pflow Init B wrapper\n");
+		//printf("finished pflow Init B wrapper\n");
 	}
 
     void set (const std::string &param, const std::string &val) override

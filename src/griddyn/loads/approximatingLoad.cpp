@@ -82,11 +82,9 @@ void approximatingLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
 
 void approximatingLoad::pFlowObjectInitializeB () 
 {
-	printf("apload pflowB enter\n");
+
 	updateB();
-	printf("finished updateB\n");
 	rampLoad::pFlowObjectInitializeB();
-	printf("apload pflowB exit\n");
 	
 }
 

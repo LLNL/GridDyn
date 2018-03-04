@@ -11,15 +11,17 @@
 #project name
 project(GridDyn)
 
-#states that Cmake version > 3.4
-cmake_minimum_required(VERSION 3.4)
-cmake_policy(VERSION 3.4)
+#states that Cmake version > 3.5
+cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
 
 #version number
 set(GRIDDYN_MAJOR 0)
 set(GRIDDYN_MINOR 9)
 set(GRIDDYN_PATCH 0)
-set(GRIDDYN_DATE 2-2-2018)
+set(GRIDDYN_VERSION ${GRIDDYN_MAJOR}.${GRIDDYN_MINOR}.${GRIDDYN_PATCH})
+set(GRIDDYN_DATE 3-2-2018)
+set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} (${GRIDDYN_DATE}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

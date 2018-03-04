@@ -63,9 +63,9 @@ void fmi2Object::setMode(fmuMode mode)
 			{
 				setDefaultOutputs();
 			}
-			printf("calling fmi enterInitMode\n");
+			//printf("calling fmi enterInitMode\n");
 			ret = commonFunctions->fmi2EnterInitializationMode(comp);
-			printf("return from fmiEnterInitializationMode with code %d\n", ret);
+			//printf("return from fmiEnterInitializationMode with code %d\n", ret);
 			break;
 		case fmuMode::eventMode:
 		case fmuMode::stepMode:
@@ -76,13 +76,13 @@ void fmi2Object::setMode(fmuMode mode)
 	case fmuMode::initializationMode:
 		if ((mode == fmuMode::eventMode)||(mode==fmuMode::stepMode))
 		{
-			printf("calling exit initMode\n");
+			//printf("calling exit initMode\n");
 			if (!commonFunctions->fmi2ExitInitializationMode)
 			{
 				printf("function is not present\n");
 			}
 			ret = commonFunctions->fmi2ExitInitializationMode(comp);
-			printf("finished exit initMode return %d\n", ret);
+			//printf("finished exit initMode return %d\n", ret);
 		}
 		break;
 	default:

@@ -332,6 +332,9 @@ void idaInterface::initialize (coreTime t0)
 		/* Create KLU solver object */
 		LS = SUNKLU(state, J);
 		check_flag((void *)LS, "SUNKLU", 0);
+
+        retval = SUNKLUSetOrdering(LS, 0);
+        check_flag(&retval, "SUNKLUSetOrdering", 1);
 		
     }
 #else
@@ -372,9 +375,9 @@ void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
     {
         return;
     }
-
-    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity ()), kinmode);
+     
+    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 2 : 1;
+    int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
     check_flag (&retval, "SUNKLUReInit", 1);
     jacCallCount = 0;
 #endif

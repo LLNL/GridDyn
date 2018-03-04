@@ -111,7 +111,6 @@ void GovernorIeeeSimple::derivative (const IOdata &inputs,
     else
     {
         Loc.destDiffLoc[0] = (inputs[govpSetInLocation] - gs[0] - K * gs[1] - K * T2 * (omega - 1.0) / T1) / T3;
-        LOG_WARNING(std::string("gov set =") + std::to_string(K * T2*(omega - 1.0)));
     }
 
     Loc.destDiffLoc[1] = (-gs[1] + (1 - T2 / T1) * (omega - 1.0)) / T1;
