@@ -419,19 +419,9 @@ void cvodeInterface::initialize (coreTime time0)
     flags.set (initialized_flag);
 }
 
-void cvodeInterface::sparseReInit (sparse_reinit_modes reInitMode)
+void cvodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
-#ifdef KLU_ENABLE
-    if (flags[dense_flag])
-    {
-        return;
-    }
-
-    int kinmode = (reInitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity()), kinmode);
-    check_flag(&retval, "SUNKLUReInit", 1);
-    jacCallCount = 0;
-#endif
+    KLUReInit(sparseReinitMode);
 }
 
 void cvodeInterface::setRootFinding (count_t numRoots)

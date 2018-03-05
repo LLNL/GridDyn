@@ -119,6 +119,8 @@ class sundialsInterface : public solverInterface
                                   void *user_data,
                                   N_Vector tmp1,
                                   N_Vector tmp2);
+    protected:
+        void KLUReInit(sparse_reinit_modes mode);
 };
 
 

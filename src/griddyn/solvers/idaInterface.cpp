@@ -370,17 +370,7 @@ void idaInterface::initialize (coreTime t0)
 
 void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
-#ifdef KLU_ENABLE
-    if (flags[dense_flag])
-    {
-        return;
-    }
-     
-    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 2 : 1;
-    int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
-    check_flag (&retval, "SUNKLUReInit", 1);
-    jacCallCount = 0;
-#endif
+    KLUReInit(sparseReinitMode);
 }
 
 void idaInterface::setRootFinding (count_t numRoots)

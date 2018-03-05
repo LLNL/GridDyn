@@ -19,6 +19,10 @@
 #include "arkodeInterface.h"
 #endif
 
+#ifdef KLU_ENABLE
+#include <sunlinsol/sunlinsol_klu.h>
+#endif
+
 #include "core/factoryTemplates.hpp"
 
 #include "gridDynSimulation.h"
@@ -211,7 +215,22 @@ double sundialsInterface::get (const std::string &param) const
     return solverInterface::get (param);
 }
 
+void sundialsInterface::KLUReInit(sparse_reinit_modes mode)
+{
 #ifdef KLU_ENABLE
+    if (flags[dense_flag])
+    {
+        return;
+    }
+
+    int kinmode = (mode == sparse_reinit_modes::refactor) ? 2 : 1;
+    int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
+    check_flag(&retval, "SUNKLUReInit", 1);
+    jacCallCount = 0;
+#endif
+}
+
+
 bool isSUNMatrixSetup (SUNMatrix J)
 {
 	int id = SUNMatGetID(J);
@@ -293,7 +312,6 @@ void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 	}
 }
 
-#endif
 
 // Error handling function for Sundials
 void sundialsErrorHandlerFunc (int error_code,

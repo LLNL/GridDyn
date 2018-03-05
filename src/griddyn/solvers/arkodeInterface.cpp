@@ -126,7 +126,7 @@ void arkodeInterface::setMaxNonZeros (count_t nonZeroCount)
 
 void arkodeInterface::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else
@@ -412,17 +412,7 @@ void arkodeInterface::initialize (coreTime time0)
 
 void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
 {
-#ifdef KLU_ENABLE
-    if (flags[dense_flag])
-    {
-        return;
-    }
-
-    int kinmode = (sparseReinitMode == sparse_reinit_modes::refactor) ? 1 : 2;
-    int retval = SUNKLUReInit(LS, J, static_cast<int> (a1.capacity()), kinmode);
-    check_flag(&retval, "SUNKLUReInit", 1);
-    jacCallCount = 0;
-#endif
+    KLUReInit(sparseReinitMode);
 }
 
 void arkodeInterface::setRootFinding (count_t numRoots)
