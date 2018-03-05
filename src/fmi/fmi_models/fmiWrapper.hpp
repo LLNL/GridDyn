@@ -18,12 +18,14 @@
 #include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
+#include "gridComponent.h"
+#include <type_traits>
 
 namespace griddyn
 {
 namespace fmi
 {
-/** @brief templace class to wrap a component type with an FMIsubmodel
+/** @brief template class to wrap a component type with an FMIsubmodel
 @tparam FMItype the type of fmiSubmodel to incorporate
 @tparam BaseObj the component class this object is a part of 
 */
@@ -36,6 +38,7 @@ class fmiWrapper : public BaseObj
     std::vector<std::string> outputNames_specified; //!< storage for the specified output names
 
   public:
+      static_assert(std::is_base_of<gridComponent, BaseObj>::value, "BaseObj must inherit from GridComponent");
 	  /** constructor taking an object name
 	  @param[in] objName the name of the object
 	  */
@@ -250,7 +253,7 @@ class fmiWrapper : public BaseObj
 	void pFlowObjectInitializeB() override
 	{
 		//printf("entering pflow Init B wrapper\n");
-		if (isEnabled())
+		if (BaseObj::isEnabled())
 		{
 			fmisub->pFlowInitializeB();
 			BaseObj::pFlowObjectInitializeB();

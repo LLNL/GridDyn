@@ -33,12 +33,6 @@ namespace griddyn
 
 #define STRINGIFY(x) #x
 
-const std::string griddyn_version =
-  std::to_string (GRIDDYN_MAJOR) + "." + std::to_string (GRIDDYN_MINOR) + "." + std::to_string (GRIDDYN_PATCH);
-
-const std::string griddyn_version_string = "GridDyn version " + griddyn_version + " " + GRIDDYN_DATE;
-
-
 class contingency;
 class continuationSequence;
 class solverInterface;

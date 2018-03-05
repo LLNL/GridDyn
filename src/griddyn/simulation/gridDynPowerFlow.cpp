@@ -559,7 +559,7 @@ int gridDynSimulation::algUpdateFunction (coreTime time,
     stateData sD (time, state);
     sD.seqID = (sMode.approx[force_recalc] ? 0 : evalCount);
 
-#if (CHECK_STATE > 0)
+#ifdef CHECK_STATE
     auto dynDataa = getSolverInterface (sMode);
     for (size_t kk = 0; kk < dynDataa->getSize (); ++kk)
     {

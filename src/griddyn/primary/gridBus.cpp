@@ -1176,7 +1176,7 @@ void gridBus::updateFlags (bool dynOnly)
 
 static const IOlocs inLoc{0, 1, 2};
 
-//#define DEBUG_KEY_BUS 1445
+#define DEBUG_KEY_BUS 0
 // computed power at bus
 void gridBus::updateLocalCache (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode)
 {

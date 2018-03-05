@@ -101,6 +101,12 @@ set(testMain_headers
 
 link_directories(${external_link_directories})
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
+INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
+
 add_executable(testLibrary ${testLibrary_sources} ${testMain_headers})
 add_executable(testComponents ${testComponent_sources} ${testMain_headers})
 add_executable(testSystem ${testSystem_sources} ${testMain_headers})
@@ -112,10 +118,7 @@ set_target_properties (testSystem PROPERTIES FOLDER tests)
 set_target_properties (testExtra PROPERTIES FOLDER tests)
 
 INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
+
 
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
@@ -148,6 +151,11 @@ target_link_libraries(testLibrary gridDynCombined)
 target_link_libraries(testComponents ${executable_only_components} gridDynCombined)
 target_link_libraries(testSystem gridDynCombined)
 target_link_libraries(testExtra gridDynCombined)
+
+target_link_libraries(testLibrary ${Boost_LIBRARIES_test})
+target_link_libraries(testComponents ${Boost_LIBRARIES_test})
+target_link_libraries(testSystem ${Boost_LIBRARIES_test})
+target_link_libraries(testExtra ${Boost_LIBRARIES_test})
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 install(DIRECTORY DESTINATION bin/test/)

@@ -324,6 +324,7 @@ bool MatrixNeedsSetup(count_t callCount, SUNMatrix J)
 		return false;
 	}
 }
+#define CHECK_JACOBIAN 0
 
 int sundialsJac (realtype time,
                        realtype cj,

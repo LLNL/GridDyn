@@ -10,8 +10,8 @@
 * LLNS Copyright End
 */
 
-
-#ifndef _MSC_VER
+#include "griddyn/griddyn-config.h"
+#ifndef BOOST_STATIC
 #define BOOST_TEST_DYN_LINK
 #endif
 

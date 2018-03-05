@@ -86,7 +86,7 @@ int GriddynRunner::Initialize (int argc, char *argv[], readerInfo &ri, bool allo
         return (ret);
     }
     m_stopTime = std::chrono::high_resolution_clock::now ();
-    m_gds->log (nullptr, print_level::summary, griddyn_version_string);
+    m_gds->log (nullptr, print_level::summary, GRIDDYN_VERSION_STRING);
 
     std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
     m_gds->log (m_gds.get (), print_level::normal,
@@ -499,7 +499,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 
     if (cmd_vm.count ("version") > 0)
     {
-        std::cout << griddyn_version_string << '\n';
+        std::cout << GRIDDYN_VERSION_STRING << '\n';
         return 1;
     }
 
