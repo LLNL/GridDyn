@@ -37,4 +37,4 @@ add_custom_command(TARGET griddynMain POST_BUILD        # Adds a post-build even
         $<TARGET_FILE_DIR:griddynMain>)                 # <--this is out-file path
 endforeach(keyfile)
 
-INSTALL(TARGETS griddynMain RUNTIME DESTINATION bin)
+INSTALL(TARGETS griddynMain RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

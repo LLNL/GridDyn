@@ -21,7 +21,7 @@ set(GRIDDYN_VERSION_MINOR 9)
 set(GRIDDYN_VERSION_PATCH 0)
 set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH})
 set(GRIDDYN_DATE 3-20-2018)
-set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} (${GRIDDYN_DATE}")
+set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -54,7 +54,7 @@ endif()
 
 OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
 
-IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_FMI_LIBRARY)
+IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_FMI_LIBRARY OR BUILD_PYTHON_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE OR BUILD_MATLAB_INTERFACE)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ELSE()
 OPTION(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
@@ -81,7 +81,7 @@ ELSE(UNIX)
   ENDIF(MINGW)
 ENDIF(UNIX)
 
-IF (BUILD_MATLAB OR USE_BOOST_STATIC_LIBS)
+IF (BUILD_MATLAB_INTERFACE OR BUILD_OCTAVE_INTERFACE OR USE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
   set(BOOST_STATIC ON)
 	  
@@ -103,6 +103,7 @@ ENDIF ()
 
  endif(TEST_CODE_COVERAGE)
  
+ include(GNUInstallDirs)
 # -------------------------------------------------------------
 # Get some configuration for C++17 as that becomes available
 # -------------------------------------------------------------
@@ -115,7 +116,7 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTI
 include(ExternalProject)
 
 
-include(GNUInstallDirs)
+
 
 # -------------------------------------------------------------
 # setting the RPATH
@@ -206,8 +207,6 @@ ENDIF(MPI_ENABLE)
 
 include(addKLU)
 
-
-
 # -------------------------------------------------------------
 # Sundials
 # -------------------------------------------------------------
@@ -217,9 +216,6 @@ set(optional_component_test_files)
 set(optional_system_test_files)
 
 set(griddyn_optional_libraries )
-
-
-
 
 set (optional_library_key_headers )
 set (optional_library_functions )
@@ -531,9 +527,13 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${GRIDDYN_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${GRIDDYN_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${GRIDDYN_VERSION_PATCH})
 
-set(CPACK_COMPONENTS_ALL applications headers libs runtime matlab python java octave)
+set(CPACK_COMPONENTS_ALL applications headers libs runtime matlab python java octave examples)
 
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}\\\\LICENSE")
+if (WIN32)
+	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}\\\\LICENSE")
+else(WIN32)
+	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+endif(WIN32)
 
 set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  set(CPACK_COMPONENT_LIBS_DISPLAY_NAME "Libraries")
@@ -555,15 +555,22 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  
  set(CPACK_COMPONENT_LIBS_DEPENDS headers)
  SET(CPACK_COMPONENT_RUNTIME_REQUIRED ON)
- 
-set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\docs\\\\img\\\\GridDyn.ico")
-set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
+ if (WIN32)
+	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\docs\\\\img\\\\GridDyn.ico")
+	set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
 
-set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
-#set(CPACK_NSIS_URL_INFO_ABOUT "https://www.github.com/GMLC-TDC/Helics-src")
-#set(CPACK_NSIS_MENU_LINKS 
-#	"https://www.github.com/GMLC-TDC/Helics-src" "HELICS source code"
-#	"https://gmlc-tdc.github.io/HELICS-src/" "GridDyn Documentation")
+	set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
+	set(CPACK_NSIS_URL_INFO_ABOUT "https://www.github.com/LLNL/GridDyn")
+	set(CPACK_NSIS_MENU_LINKS 
+		"https://www.github.com/LLNL/GridDyn" "GridDyn source code"
+		"https://www.griddyn.org" "GridDyn Web Page")
+	
+		set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
+else(WIN32)
+	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
+endif(WIN32)
+set(CPACK_SOURCE_IGNORE_FILES  "/Build*/;/build*/;/.git/")
+
 #THIS LINE MUST BE LAST
 include(CPack)
 

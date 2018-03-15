@@ -37,10 +37,10 @@ set(MATLAB_PREFIX ${DEF_MATLAB_PREFIX} CACHE PATH "Installation directory for MA
 set_property(SOURCE griddyn.i PROPERTY CPLUSPLUS ON)
 set_property(SOURCE griddyn.i  PROPERTY SWIG_MODULE_NAME griddyn)
 
-if(WITH_PYTHON)
+if(BUILD_PYTHON_INTERFACE)
        add_subdirectory(python)
 endif()
-if(WITH_MATLAB)
+if(BUILD_MATLAB_INTERFACE)
        add_subdirectory(matlab)
 endif()
 

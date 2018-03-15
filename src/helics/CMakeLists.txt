@@ -93,12 +93,12 @@ set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
 list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/src/helics/test/helicsTest.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-INSTALL(TARGETS helicsLib DESTINATION lib)
+INSTALL(TARGETS helicsLib DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.h")
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
+  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.hpp")
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
+  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)

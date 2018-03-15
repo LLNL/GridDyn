@@ -104,9 +104,9 @@ list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/test/componentTe
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.h")
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/griddyn
+  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
 
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.hpp")
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/griddyn
+  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
