@@ -20,7 +20,7 @@ set(GRIDDYN_VERSION_MAJOR 0)
 set(GRIDDYN_VERSION_MINOR 9)
 set(GRIDDYN_VERSION_PATCH 0)
 set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH})
-set(GRIDDYN_DATE 3-10-2018)
+set(GRIDDYN_DATE 3-20-2018)
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} (${GRIDDYN_DATE}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -135,7 +135,7 @@ ENDIF ()
 #message(STATUS ${CMAKE_CXX_FLAGS})
 set(CONFIGURE_TARGET_LOCATION ${PROJECT_BINARY_DIR}/libs/include/griddyn/)
 include(configGenerator)
-INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTINATION include/griddyn)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
 
 include(ExternalProject)
 
@@ -506,12 +506,12 @@ ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 ENDIF(TEST_ENABLE)
 
 FILE(GLOB efiles "examples/*")
-INSTALL(FILES ${efiles} DESTINATION examples)
+INSTALL(FILES ${efiles} DESTINATION examples COMPONENT examples)
 
 SET(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
-INSTALL(PROGRAMS ${binfiles} DESTINATION bin)
+INSTALL(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 
-INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION bin)
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 
 
 # -------------------------------------------------------------
@@ -536,24 +536,59 @@ add_test(NAME testSystem COMMAND testSystem)
 #####################################################
 ######################### swig ######################
 #####################################################
-option(WITH_PYTHON "Compile the Python front-end" OFF)
-option(WITH_MATLAB "Compile the MATLAB front-end" OFF)
+option(BUILD_PYTHON_INTERFACE "Compile the Python front-end" OFF)
+option(BUILD_MATLAB_INTERFACE "Compile the MATLAB front-end" OFF)
 option(WITH_PYTHON3 "Use Python 3.*" OFF)
-if(WITH_PYTHON OR WITH_MATLAB)
-    add_subdirectory(swig)
-ENDIF()
+
+add_subdirectory(swig)
+
+
 
 # -------------------------------------------------------------
-# CPack for NSIS Installer
+# CPack 
 # -------------------------------------------------------------
 
 set(CPACK_PACKAGE_NAME "GridDyn")
-set(CPACK_PACKAGE_VENDOR "Lawrence Livermore National Security")
+set(CPACK_PACKAGE_VENDOR "Lawrence Livermore National Security LLC")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GridDyn Installer")
-set(CPACK_PACKAGE_VERSION "${GridDyn_MAJOR_VERSION}.${GridDyn_MINOR_VERSION}.${GridDyn_PATCH_VERSION}")
-set(CPACK_PACKAGE_VERSION_MAJOR ${GridDyn_MAJOR_VERSION})
-set(CPACK_PACKAGE_VERSION_MINOR ${GridDyn_MINOR_VERSION})
-#set(CPACK_PACKAGE_VERSION_PATCH ${GridDyn_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION "${GRIDDYN_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${GRIDDYN_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${GRIDDYN_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${GRIDDYN_VERSION_PATCH})
 
+set(CPACK_COMPONENTS_ALL applications headers libs runtime matlab python java octave)
+
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}\\\\LICENSE")
+
+set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
+ set(CPACK_COMPONENT_LIBS_DISPLAY_NAME "Libraries")
+ set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "Headers")
+ set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "Runtime Libraries")
+
+  
+ set(CPACK_COMPONENT_MATLAB_GROUP interfaces)
+ set(CPACK_COMPONENT_JAVA_GROUP interfaces)
+ set(CPACK_COMPONENT_OCTAVE_GROUP interfaces)
+ set(CPACK_COMPONENT_PYTHON_GROUP interfaces)
+ 
+ set(CPACK_COMPONENT_APPLICATION_DESCRIPTION "Executables and helper applications for GridDyn")
+ set(CPACK_COMPONENT_LIBS_DESCRIPTION "Libraries for compiling and linking with GridDyn")
+ set(CPACK_COMPONENT_HEADERS_DESCRIPTION "Headers for linking and compiling with GridDyn")
+ set(CPACK_COMPONENT_RUNTIME_DESCRIPTION "Runtime libraries for GrdDyn")
+ 
+ set(CPACK_COMPONENT_GROUP_INTERFACES_DESCRIPTION "additional language interfaces for GridDyn")
+ 
+ set(CPACK_COMPONENT_LIBS_DEPENDS headers)
+ SET(CPACK_COMPONENT_RUNTIME_REQUIRED ON)
+ 
+set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\docs\\\\img\\\\GridDyn.ico")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
+
+set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
+#set(CPACK_NSIS_URL_INFO_ABOUT "https://www.github.com/GMLC-TDC/Helics-src")
+#set(CPACK_NSIS_MENU_LINKS 
+#	"https://www.github.com/GMLC-TDC/Helics-src" "HELICS source code"
+#	"https://gmlc-tdc.github.io/HELICS-src/" "GridDyn Documentation")
 #THIS LINE MUST BE LAST
 include(CPack)
+
