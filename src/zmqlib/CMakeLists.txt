@@ -62,6 +62,8 @@ add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
 target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
 set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
 
+INSTALL(TARGETS dimeLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+
 ENDIF(DIME_ENABLE)
 
 target_include_directories(zmqInterfaceLibrary PRIVATE ${ZeroMQ_INCLUDE_DIR})
@@ -69,13 +71,14 @@ target_include_directories(zmqInterfaceLibrary PRIVATE ${ZeroMQ_INCLUDE_DIR})
 
 if (ZMQ_USE_STATIC_LIBRARY)
 	set(ZMQ_DEPENDENCY ${ZeroMQ_STATIC_LIBRARY})
-	ADD_DEFINITIONS(-DZMQ_STATIC)
+	target_add_definitions(zmqInterfaceLibrary PUBLIC -DZMQ_STATIC)
 else()
 	set(ZMQ_DEPENDENCY ${ZeroMQ_LIBRARY})
 endif()
 	
 	message(status "zmq lib ${ZMQ_DEPENDENCY}")
 target_link_libraries(zmqInterfaceLibrary PUBLIC ${ZMQ_DEPENDENCY} )
+target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn)
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
 
@@ -94,14 +97,8 @@ INSTALL(FILES ${zmqLibrary_headers}
   list(APPEND griddyn_optional_libraries zmqInterfaceLibrary)
  ENDIF(DIME_ENABLE)
 
-list(APPEND griddyn_optional_include_dirs ${ZMQ_INCLUDE_DIR})
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/zmqlib)
 
-
-set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
-set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
-
-list (APPEND optional_library_key_headers zmqInterface.h)
+list (APPEND optional_library_key_headers zmqlib/zmqInterface.h)
 list (APPEND optional_library_functions loadZMQLibrary)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)

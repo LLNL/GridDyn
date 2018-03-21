@@ -27,12 +27,12 @@ set (fskit_headers
 	griddyn-tracer.h
 	)
 
+find_package(FSKIT)
+
 add_library(fskitLibrary ${fskit_sources} ${fskit_headers})
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/include)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-
-target_link_libraries(fskitLibrary fileInput)
+target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
+target_link_libraries(fskitLibrary fileInput ${FSKIT_LIBRARIES})
 
 INSTALL(TARGETS fskitLibrary DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
@@ -40,14 +40,7 @@ INSTALL(FILES ${fskit_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fskit
   COMPONENT headers)
 
-
-list(APPEND griddyn_optional_libraries fskitLibrary)
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/fskit)
-
-set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
-set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
-
-list (APPEND optional_library_key_headers gridDynfskit.h)
+list (APPEND optional_library_key_headers fskit/gridDynfskit.h)
 list (APPEND optional_library_functions loadFskit)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)

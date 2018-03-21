@@ -62,24 +62,16 @@ set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
 #message("optheaders: ${griddyn_optional_include_dirs}")
 #message("external_libraries: ${external_library_list}")
 #message("external_lib_dirs: ${external_link_directories}")
-link_directories(${external_link_directories})
 
-INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
-
-#Merge_static_libs(gridDynCombined ${gd_library_list} ${external_library_list})
 
 #fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
-target_link_libraries(gridDynCombined fileInput ${griddyn_optional_libraries} griddyn coupling_static_lib ${external_library_list} )
+target_link_libraries(gridDynCombined fileInput coupling_static_lib  )
 
 
 if(DL_REQUIRED OR FMI_ENABLE)
 	target_link_libraries(gridDynCombined ${CMAKE_DL_LIBS})
 endif(DL_REQUIRED OR FMI_ENABLE)
 
-IF(FSKIT_ENABLE)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fskit)
-target_link_libraries(gridDynCombined fskitLibrary)
-ENDIF(FSKIT_ENABLE)
 
 INSTALL(TARGETS gridDynCombined EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 

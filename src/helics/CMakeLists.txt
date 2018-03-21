@@ -61,12 +61,6 @@ target_compile_definitions(helicsLib PUBLIC -DHELICS_RECORDER_EXECUTABLE="${HELI
 
 target_link_libraries(helicsLib PUBLIC Helics::helics-static fileInput)
 
-list(APPEND griddyn_optional_libraries helicsLib)
-
-set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
-set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
-
-
 list (APPEND optional_library_key_headers helics/helicsLibrary.h)
 list (APPEND optional_library_functions loadHELICSLibrary)
 

@@ -37,6 +37,9 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source build is not supported. Please, use an empty directory for building the project.")
 ENDIF()
 
+#add a baseline library for underlying dependencies and flags
+add_library(griddyn_base INTERFACE)
+
 OPTION(ENABLE_EXTRA_COMPILER_WARNINGS "disable compiler warning for GridDyn build" ON)
 
 SHOW_VARIABLE(COMPILER_OPTIMIZATION_LEVEL STRING
@@ -71,6 +74,14 @@ ENDIF()
 ENDIF()
 
 include(compiler_flags)
+
+IF (VERSION_OPTION)
+	IF (MSVC)
+		target_compile_options(griddyn_base INTERFACE ${VERSION_OPTION})
+	ELSE()
+		target_compile_options(griddyn_base INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
+	ENDIF (MSVC)
+ENDIF(VERSION_OPTION)
 
 IF(UNIX)
   # Since default builds of boost library under Unix don't use
@@ -196,7 +207,7 @@ elseif (MSYS)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 endif()
 find_package(Threads REQUIRED)
-list(APPEND external_library_list Threads::Threads)
+target_link_libraries(griddyn_base INTERFACE Threads::Threads)
 ENDIF(NOT DISABLE_MULTITHREADING)
 
 # -------------------------------------------------------------
@@ -230,8 +241,6 @@ include(addSundials)
 set(optional_component_test_files)
 set(optional_system_test_files)
 
-set(griddyn_optional_libraries )
-
 set (optional_library_key_headers )
 set (optional_library_functions )
 
@@ -243,16 +252,16 @@ set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
 message("Using Boost include files : ${Boost_INCLUDE_DIR}")
 message("Using Boost libraries ${Boost_LIBRARY_DIRS}")
 
-list(APPEND external_library_list ${Boost_LIBRARIES_core})
-  list(APPEND external_link_directories ${Boost_LIBRARY_DIRS})
 
 # -------------------------------------------------------------
 # global include directories
 # -------------------------------------------------------------
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty)
-INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
+target_include_directories(griddyn_base INTERFACE
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/libs/include>
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+	$<INSTALL_INTERFACE:include>
+)
 
 # -------------------------------------------------------------
 # load the required subdirectories
@@ -269,6 +278,7 @@ add_subdirectory(src/griddyn)
 
 # now go into the optional stuff
 
+add_library(griddyn_optional INTERFACE)
 
 # -------------------------------------------------------------
 # Enable support for Plugins
@@ -296,6 +306,7 @@ OPTION(LOAD_EXTRA_MODELS "Compile and load extraModels" ON)
 
 if (LOAD_EXTRA_MODELS)
   add_subdirectory(src/extraModels)
+  target_link_libraries(griddyn_optional INTERFACE extraModelLibrary)
 ENDIF(LOAD_EXTRA_MODELS)
 
 # -------------------------------------------------------------
@@ -311,6 +322,7 @@ IF (FMI_ENABLE)
 		message("FMI support requires BOOST 1.61 or higher")
 	ELSE()
 		add_subdirectory(src/fmi)
+		target_link_libraries(griddyn_optional INTERFACE fmiGDLibrary)
 		SET(DL_REQUIRED ON)
 	ENDIF()
 ENDIF(FMI_ENABLE)
@@ -323,10 +335,9 @@ ENDIF(FMI_ENABLE)
 OPTION(FSKIT_ENABLE "Enable FSKIT support" OFF)
 
 IF(FSKIT_ENABLE)
-  find_package(FSKIT)
-  INCLUDE_DIRECTORIES(SYSTEM ${FSKIT_INCLUDE_DIR})
   set(GRIDDYN_HAVE_FSKIT 1)
   add_subdirectory(src/fskit)
+  target_link_libraries(griddyn_optional INTERFACE fskitLibrary)
 ENDIF(FSKIT_ENABLE)
 
 # -------------------------------------------------------------
@@ -400,6 +411,11 @@ IF ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 # ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
 	if (ZeroMQ_FOUND)
 		add_subdirectory(src/zmqlib)
+		if (DIME_ENABLE)
+			target_link_libraries(griddyn_optional INTERFACE dimeLibrary)
+		else(DIME_ENABLE)
+			target_link_libraries(griddyn_optional INTERFACE zmqInterfaceLibrary)
+		endif(DIME_ENABLE)
 	else(ZeroMQ_FOUND)
 		message(SEND_ERROR "unable to locate zmq library")
 	endif(ZeroMQ_FOUND)
@@ -409,6 +425,7 @@ ENDIF((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 IF (HELICS_EXECUTABLE)
 	include(addHELICS)
 	add_subdirectory(src/helics)
+	target_link_libraries(griddyn_optional INTERFACE helicsLib)
 ENDIF(HELICS_EXECUTABLE)
 
 FILE(GLOB KEY_LIBRARY_FILES  ${PROJECT_BINARY_DIR}/libs/bin/*)
@@ -424,6 +441,7 @@ OPTION(OPTIMIZATION_ENABLE "Enable Optimization libraries" OFF)
 # link against them.
 IF(OPTIMIZATION_ENABLE)
 	add_subdirectory(src/optimization)
+	target_link_libraries(griddyn_optional INTERFACE optimization)
 ENDIF(OPTIMIZATION_ENABLE)
 
 add_subdirectory(src/fileInput)
@@ -444,7 +462,10 @@ ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 
 add_subdirectory(src/gridDynMain)
 
-
+INSTALL(TARGETS griddyn_base griddyn_optional 
+	EXPORT griddyn-targets 
+	DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+	COMPONENT libraries)
 # -------------------------------------------------------------
 # Enable clang analysis and formatting tools
 # -------------------------------------------------------------
@@ -471,7 +492,7 @@ ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 ENDIF(TEST_ENABLE)
 
 
-set(GRIDDYN_CMAKECONFIG_INSTALL_DIR "cmake/${PROJECT_NAME}" CACHE STRING "install path for GriddynConfig.cmake")
+set(GRIDDYN_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for GriddynConfig.cmake")
 
 FILE(GLOB efiles "examples/*")
 INSTALL(FILES ${efiles} DESTINATION examples COMPONENT examples)

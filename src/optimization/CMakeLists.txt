@@ -66,11 +66,6 @@ source_group("models" FILES ${opt_model_sources})
 INSTALL(TARGETS optimization EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries})
 
 INSTALL(FILES ${header_files}
-  DESTINATION include/griddyn/optimization
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/optimization
    COMPONENT headers)
 
-list(APPEND griddyn_optional_libraries optimization)
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/optimization)
-
-set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
-set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)

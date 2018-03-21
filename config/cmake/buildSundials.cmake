@@ -24,6 +24,7 @@ function (build_sundials)
 			set(EXTRA_C_FLAGS /MP)
 		endif()
     ENDIF()
+	message(STATUS "extra c flags ${EXTRA_C_FLAGS}")
     set(CMAKE_LIST_CONTENT "
     cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)

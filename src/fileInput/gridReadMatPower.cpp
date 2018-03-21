@@ -10,6 +10,7 @@
  * LLNS Copyright End
 */
 
+#include "griddyn/griddyn-config.h"
 #include "fileInput.h"
 #include "readerHelper.h"
 
@@ -20,9 +21,9 @@
 #include "griddyn/loads/zipLoad.h"
 
 #ifdef OPTIMIZATION_ENABLE
-#include "gridDynOpt.h"
-#include "models/gridGenOpt.h"
-#include "optObjectFactory.h"
+#include "optimization/gridDynOpt.h"
+#include "optimization/models/gridGenOpt.h"
+#include "optimization/optObjectFactory.h"
 #else
 #include "griddyn/simulation/gridSimulation.h"
 #endif

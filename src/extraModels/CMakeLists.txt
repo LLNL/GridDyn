@@ -30,11 +30,6 @@ INSTALL(FILES ${extra_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraModels
  COMPONENT headers)
 
-list(APPEND griddyn_optional_libraries extraModelLibrary)
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/extraModels)
-
-set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
-set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
 
 list (APPEND optional_library_key_headers extraModels/extraModels.h)
 list (APPEND optional_library_functions loadExtraModels)

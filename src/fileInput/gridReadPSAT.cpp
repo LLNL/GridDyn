@@ -10,6 +10,7 @@
  * LLNS Copyright End
  */
 
+#include "griddyn/griddyn-config.h"
 #include "griddyn/events/Event.h"
 #include "griddyn/Generator.h"
 #include "fileInput.h"
@@ -23,8 +24,8 @@
 #include "griddyn/relays/pmu.h"
 
 #ifdef OPTIMIZATION_ENABLE
-#include "gridDynOpt.h"
-#include "models/gridGenOpt.h"
+#include "optimization/gridDynOpt.h"
+#include "optimization/models/gridGenOpt.h"
 #else
 #include "griddyn/simulation/gridSimulation.h"
 #endif

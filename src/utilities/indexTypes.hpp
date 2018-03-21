@@ -1,9 +1,16 @@
+/*
+* LLNS Copyright Start
+* Copyright (c) 2017, Lawrence Livermore National Security
+* This work was performed under the auspices of the U.S. Department
+* of Energy by Lawrence Livermore National Laboratory in part under
+* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+* Produced at the Lawrence Livermore National Laboratory.
+* All rights reserved..
+* LLNS Copyright End
+*/
 
-#ifndef INDEX_TYPES_H_
-#define INDEX_TYPES_H_
 #pragma once
 
-#include "griddyn/griddyn-config.h"  //TODO:: move these into the config-file as opposed to griddyn specific
 #include <cstdint>
 #include <limits>
 
@@ -33,4 +40,3 @@ constexpr count_t kCountMax (std::numeric_limits<count_t>::max ());
 
 constexpr index_t operator"" _ind (unsigned long long val) { return index_t (val); }
 constexpr count_t operator"" _cnt (unsigned long long val) { return count_t (val); }
-#endif

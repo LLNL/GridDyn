@@ -89,11 +89,11 @@ include(${PROJECT_BINARY_DIR}/libs/cmake/tinyxml2-targets.cmake)
 
 
 add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers})
-target_link_libraries(formatInterpreter PUBLIC tinyxml2::tinyxml2 ticpp::ticpp)
+target_link_libraries(formatInterpreter PUBLIC tinyxml2::tinyxml2 ticpp::ticpp utilities)
 
 set_target_properties (formatInterpreter PROPERTIES FOLDER libraries)
 
-ADD_DEFINITIONS(-DTIXML_USE_TICPP)
+target_compile_definitions(formatInterpreter PRIVATE -DTIXML_USE_TICPP)
 
 IF (YAML_FOUND)
 target_link_libraries(formatInterpreter PUBLIC yaml-cpp)
@@ -106,8 +106,5 @@ INSTALL(FILES ${elementReader_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
   COMPONENT headers)
 
-set(formatInterpreter_include_directories
-  ${PROJECT_SOURCE_DIR}/src/formatInterpreters
- PARENT_SCOPE)
  
  
