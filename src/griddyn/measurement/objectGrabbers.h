@@ -16,8 +16,8 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
-#include "measurement/gridGrabbers.h"
-#include "solvers/solverMode.hpp"
+#include "gridGrabbers.h"
+#include "../solvers/solverMode.hpp"
 
 namespace griddyn
 {

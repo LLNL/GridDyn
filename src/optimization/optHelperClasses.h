@@ -14,7 +14,7 @@
 #define OPT_HELPER_CLASSES_
 
 
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include <vector>
 #include <cstdio>
 

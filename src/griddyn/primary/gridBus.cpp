@@ -11,20 +11,20 @@
  */
 
 // headers
-#include "Area.h"
+#include "../Area.h"
 
-#include "Generator.h"
-#include "Link.h"
+#include "../Generator.h"
+#include "../Link.h"
 #include "acBus.h"
 #include "griddyn/griddyn-config.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "dcBus.h"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "infiniteBus.h"
-#include "loads/zipLoad.h"
-#include "measurement/objectGrabbers.h"
+#include "../loads/zipLoad.h"
+#include "../measurement/objectGrabbers.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 

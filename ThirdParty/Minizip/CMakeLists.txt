@@ -4,8 +4,8 @@ project(minizip C)
 
 set(BUILD_SHARED_LIBS OFF)
 
-cmake_minimum_required(VERSION 3.4)
-cmake_policy(VERSION 3.4)
+cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
 
 if (EXISTS ${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
 include (${ZLIB_LOCATION}/cmake/zlib-targets.cmake)
@@ -73,5 +73,5 @@ add_library(minizip ${SOURCES} ${HEADERS})
        ARCHIVE DESTINATION lib
 	)
 
-install (EXPORT minizip-targets DESTINATION cmake/)
+install (EXPORT minizip-targets NAMESPACE minizip:: DESTINATION cmake/)
 INSTALL(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/minizip)

@@ -12,7 +12,7 @@
 
 #include "basicSolver.h"
 
-#include "gridDynSimulation.h"
+#include "../gridDynSimulation.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 

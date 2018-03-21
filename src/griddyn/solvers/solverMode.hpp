@@ -13,7 +13,7 @@
 #ifndef SOLVERMODE_H_
 #define SOLVERMODE_H_
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <bitset>
 
 namespace griddyn

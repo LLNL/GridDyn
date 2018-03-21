@@ -13,7 +13,7 @@
 #ifndef EXCITER_IEEE_TYPE1_H_
 #define EXCITER_IEEE_TYPE1_H_
 
-#include "Exciter.h"
+#include "../Exciter.h"
 namespace griddyn
 {
  namespace exciters

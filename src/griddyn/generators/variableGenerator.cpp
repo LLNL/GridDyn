@@ -11,10 +11,10 @@
  */
 
 #include "variableGenerator.h"
-#include "Block.h"
-#include "Source.h"
+#include "../Block.h"
+#include "../Source.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 
 namespace griddyn
 {

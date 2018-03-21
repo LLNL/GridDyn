@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.5)
 
-FIND_PACKAGE(SWIG REQUIRED)
-INCLUDE(${SWIG_USE_FILE})
+if (NOT DISABLE_SWIG)
+	FIND_PACKAGE(SWIG REQUIRED 3.0)
+	INCLUDE(${SWIG_USE_FILE})
+endif()
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/griddyn_shared")
@@ -42,5 +44,14 @@ if(BUILD_PYTHON_INTERFACE)
 endif()
 if(BUILD_MATLAB_INTERFACE)
        add_subdirectory(matlab)
+endif()
+
+if(BUILD_OCTAVE_INTERFACE)
+       add_subdirectory(octave)
+endif()
+
+
+if(BUILD_JAVA_INTERFACE)
+       add_subdirectory(java)
 endif()
 

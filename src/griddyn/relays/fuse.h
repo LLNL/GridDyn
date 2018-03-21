@@ -13,7 +13,7 @@
 #ifndef FUSE_RELAY_H_
 #define FUSE_RELAY_H_
 
-#include "Relay.h"
+#include "../Relay.h"
 #include <cstdint>
 namespace griddyn
 {

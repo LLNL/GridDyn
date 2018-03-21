@@ -10,17 +10,17 @@
  * LLNS Copyright End
 */
 
-#include "events/Event.h"
-#include "generators/DynamicGenerator.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
+#include "griddyn/events/Event.h"
+#include "griddyn/generators/DynamicGenerator.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/gridDynSimulation.h"
 #include "fileInput.h"
-#include "Link.h"
-#include "loads/zipLoad.h"
+#include "griddyn/Link.h"
+#include "griddyn/loads/zipLoad.h"
 #include "readerHelper.h"
-#include "Governor.h"
-#include "exciters/ExciterDC1A.h"
-#include "genmodels/GenModel4.h"
+#include "griddyn/Governor.h"
+#include "griddyn/exciters/ExciterDC1A.h"
+#include "griddyn/genmodels/GenModel4.h"
 #include "utilities/string_viewConversion.h"
 
 #include <cstdlib>

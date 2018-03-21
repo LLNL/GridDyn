@@ -14,7 +14,7 @@
 #include "basicSolver.h"
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
-#include "gridDynSimulation.h"
+#include "../gridDynSimulation.h"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
 #include "utilities/mapOps.hpp"

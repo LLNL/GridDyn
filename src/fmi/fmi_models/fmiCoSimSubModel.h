@@ -13,7 +13,7 @@
 #ifndef FMI_COSIMSUBMODEL_H_
 #define FMI_COSIMSUBMODEL_H_
 
-#include "gridSubModel.h"
+#include "griddyn/gridSubModel.h"
 #include "fmiSupport.h"
 #include <map>
 

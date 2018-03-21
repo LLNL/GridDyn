@@ -19,12 +19,6 @@ link_directories(${external_link_directories})
 
 add_executable(griddynMain ${griddynMain_sources} ${griddynMain_headers})
 
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
 message(STATUS "execOnly:${executable_only_components}")

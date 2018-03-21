@@ -13,7 +13,7 @@
 #ifndef READERHELPER_H_
 #define READERHELPER_H_
 
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include <iostream>
 #include <stdexcept>
 

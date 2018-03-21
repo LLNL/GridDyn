@@ -11,12 +11,12 @@
 */
 
 #include "acdcConverter.h"
-#include "Area.h"
-#include "blocks/delayBlock.h"
-#include "blocks/pidBlock.h"
+#include "../Area.h"
+#include "../blocks/delayBlock.h"
+#include "../blocks/pidBlock.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "primary/dcBus.h"
+#include "../primary/dcBus.h"
 #include "utilities/matrixDataSparse.hpp"
 #include "utilities/vectorOps.hpp"
 

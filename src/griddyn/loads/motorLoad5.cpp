@@ -12,8 +12,8 @@
 
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactory.hpp"
-#include "gridBus.h"
-#include "loads/motorLoad5.h"
+#include "../gridBus.h"
+#include "motorLoad5.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 

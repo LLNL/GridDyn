@@ -13,7 +13,7 @@
 #ifndef ZIPLOAD_H_
 #define ZIPLOAD_H_
 
-#include "Load.h"
+#include "../Load.h"
 namespace griddyn
 {
 /** primary load class supports 3 main types of loads  constant power, constant impedance, constant current

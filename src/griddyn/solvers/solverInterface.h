@@ -15,7 +15,7 @@
 #pragma once
 
 #include "core/helperObject.h"
-#include "gridComponentHelperClasses.h"
+#include "griddyn/gridComponentHelperClasses.h"
 
 #include <exception>
 #include <memory>

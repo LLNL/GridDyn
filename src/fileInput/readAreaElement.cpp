@@ -11,7 +11,7 @@
  */
 
 #include "elementReaderTemplates.hpp"
-#include "Area.h"
+#include "griddyn/Area.h"
 #include "readElement.h"
 #include "readerHelper.h"
 #include <cstdio>

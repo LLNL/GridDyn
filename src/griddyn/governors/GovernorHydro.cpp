@@ -11,8 +11,8 @@
 */
 
 #include "core/coreObjectTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "../Generator.h"
+#include "../gridBus.h"
 #include "GovernorHydro.h"
 #include "utilities/matrixData.hpp"
 

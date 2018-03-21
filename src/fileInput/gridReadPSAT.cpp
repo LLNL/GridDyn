@@ -10,29 +10,29 @@
  * LLNS Copyright End
  */
 
-#include "events/Event.h"
-#include "Generator.h"
+#include "griddyn/events/Event.h"
+#include "griddyn/Generator.h"
 #include "fileInput.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "loads/motorLoad.h"
-#include "loads/zipLoad.h"
-#include "primary/acBus.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/links/adjustableTransformer.h"
+#include "griddyn/loads/motorLoad.h"
+#include "griddyn/loads/zipLoad.h"
+#include "griddyn/primary/acBus.h"
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
-#include "relays/pmu.h"
+#include "griddyn/relays/pmu.h"
 
 #ifdef OPTIMIZATION_ENABLE
 #include "gridDynOpt.h"
 #include "models/gridGenOpt.h"
 #else
-#include "simulation/gridSimulation.h"
+#include "griddyn/simulation/gridSimulation.h"
 #endif
 
-#include "Exciter.h"
-#include "governors/GovernorTypes.h"
-#include "genmodels/otherGenModels.h"
-#include "Stabilizer.h"
+#include "griddyn/Exciter.h"
+#include "griddyn/governors/GovernorTypes.h"
+#include "griddyn/genmodels/otherGenModels.h"
+#include "griddyn/Stabilizer.h"
 
 #include <cstdlib>
 #include <fstream>

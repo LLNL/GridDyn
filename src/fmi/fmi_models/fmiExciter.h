@@ -14,7 +14,7 @@
 #define FMI_EXCITER_H_
 
 
-#include "Exciter.h"
+#include "griddyn/Exciter.h"
 #include "fmiMEWrapper.hpp"
 
 

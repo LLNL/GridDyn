@@ -52,6 +52,13 @@ if (NOT CMAKE_DEBUG_POSTFIX)
 set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
+
+OPTION(BUILD_PYTHON_INTERFACE "Build Python extension" OFF)
+OPTION(BUILD_MATLAB_INTERFACE "Build Matlab Extension" OFF)
+OPTION(BUILD_OCTAVE_INTERFACE "Build Octave extension" OFF)
+OPTION(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
+
+OPTION(DISABLE_SWIG "Disable the use of swig to generate interface code and use repo code" OFF)
 OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
 
 IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_FMI_LIBRARY OR BUILD_PYTHON_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE OR BUILD_MATLAB_INTERFACE)
@@ -83,7 +90,7 @@ ENDIF(UNIX)
 
 IF (BUILD_MATLAB_INTERFACE OR BUILD_OCTAVE_INTERFACE OR USE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
-  set(BOOST_STATIC ON)
+  set(GRIDDYN_BOOST_STATIC ON)
 	  
 ENDIF ()
 
@@ -183,21 +190,29 @@ OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
 # -------------------------------------------------------------
 
 IF (NOT DISABLE_MULTITHREADING)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
+if (NOT WIN32)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+elseif (MSYS)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+endif()
 find_package(Threads REQUIRED)
 list(APPEND external_library_list Threads::Threads)
 ENDIF(NOT DISABLE_MULTITHREADING)
 
 # -------------------------------------------------------------
-# Enable MPI support?
+# finding MPI
 # -------------------------------------------------------------
 
-OPTION(MPI_ENABLE "Enable MPI support" OFF)
-
-IF(MPI_ENABLE)
-  find_package(MPI)
-  # SGS FIXME this should in configure.h somewhere perhaps?
-  ADD_DEFINITIONS(-DHAVE_MPI)
+OPTION(MPI_ENABLE "Enable MPI networking library" OFF)
+IF (MPI_ENABLE)
+	find_package(MPI)
+	if (MPI_C_FOUND)
+   set(GRIDDYN_HAVE_MPI TRUE)
+	else()
+		set(GRIDDYN_HAVE_MPI FALSE)
+	endif (MPI_C_FOUND)
+ELSE(MPI_ENABLE)
+	set(GRIDDYN_HAVE_MPI FALSE)
 ENDIF(MPI_ENABLE)
 
 
@@ -224,7 +239,7 @@ set (optional_library_functions )
 # BOOST  find the boost libraries
 # -------------------------------------------------------------
 include(addBoost)
-
+set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
 message("Using Boost include files : ${Boost_INCLUDE_DIR}")
 message("Using Boost libraries ${Boost_LIBRARY_DIRS}")
 
@@ -238,7 +253,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/ThirdParty)
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
-#INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/swig)
+
 # -------------------------------------------------------------
 # load the required subdirectories
 # -------------------------------------------------------------
@@ -262,13 +277,13 @@ add_subdirectory(src/griddyn)
 OPTION(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
 IF (ENABLE_PLUGINS)
-	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	IF (BOOST_VERSION_LEVEL==0)
 		set(ENABLE_PLUGINS OFF)
 		message("Plugin support requires BOOST 1.61 or higher")
-	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	ELSE()
 		add_subdirectory(plugins)
 		SET(DL_REQUIRED ON)
-	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	ENDIF()
 ENDIF(ENABLE_PLUGINS)
 
 # -------------------------------------------------------------
@@ -291,13 +306,13 @@ OPTION(FMI_ENABLE "Enable FMI support" ON)
 
 
 IF (FMI_ENABLE)
-	IF (Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	IF (BOOST_VERSION_LEVEL==0)
 		set(FMI_ENABLE OFF CACHE BOOL "Enable FMI Support" FORCE)
 		message("FMI support requires BOOST 1.61 or higher")
-	ELSE(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	ELSE()
 		add_subdirectory(src/fmi)
 		SET(DL_REQUIRED ON)
-	ENDIF(Boost_MAJOR_VERSION==1 AND Boost_MINOR_VERSION<61)
+	ENDIF()
 ENDIF(FMI_ENABLE)
 
 
@@ -326,10 +341,10 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 # ------------------------------------------------------------
 # Enable message logging
 # -------------------------------------------------------------
-OPTION(DISABLE_LOGGING "disable all normal, debug, and trace logging in GridDyn" OFF)
+OPTION(GRIDDYN_DISABLE_LOGGING "disable all normal, debug, and trace logging in GridDyn" OFF)
 if (NOT DISABLE_LOGGING)
-OPTION(DISABLE_TRACE_LOGGING "disable trace logging" OFF)
-OPTION(DISABLE_DEBUG_LOGGING "disable debug logging" OFF)
+OPTION(GRIDDYN_DISABLE_TRACE_LOGGING "disable trace logging" OFF)
+OPTION(GRIDDYN_DISABLE_DEBUG_LOGGING "disable debug logging" OFF)
 endif()
 
 option (GRIDDYN_GENERATE_DOXYGEN_DOC "Generate Doxygen doc target" OFF)
@@ -392,28 +407,7 @@ ENDIF((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 
 
 IF (HELICS_EXECUTABLE)
-	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
-	if (EXISTS ${HELICS_INSTALL_PATH}/cmake/HELICS/HELICSImport.cmake)
-		IF (AUTOBUILD_HELICS)
-			OPTION(FORCE_HELICS_REBUILD "force rebuild of helics" OFF)
-			IF(FORCE_HELICS_REBUILD)
-				include(buildHELICS)
-				build_helics()
-				set(HELICS_INSTALL_PATH ${PROJECT_BINARY_DIR}/libs)
-				set(FORCE_HELICS_REBUILD OFF CACHE BOOL "force rebuild of helics" FORCE)
-			ENDIF(FORCE_HELICS_REBUILD)
-		ENDIF(AUTOBUILD_HELICS)
-		message(status "loading ${HELICS_INSTALL_PATH}/cmake/HELICS/HELICSImport.cmake")
-		include(${HELICS_INSTALL_PATH}/cmake/HELICS/HELICSImport.cmake)
-	else()
-		message(status "couldn't find ${HELICS_INSTALL_PATH}/cmake/HELICS/HELICSImport.cmake")
-		OPTION(AUTOBUILD_HELICS "enable HELICS to automatically download and build" OFF)
-		IF(AUTOBUILD_HELICS)
-			include(buildHELICS)
-			build_helics()
-			include(${HELICS_INSTALL_PATH}/cmake/HELICS/HELICSImport.cmake)
-		ENDIF(AUTOBUILD_HELICS)
-	endif()
+	include(addHELICS)
 	add_subdirectory(src/helics)
 ENDIF(HELICS_EXECUTABLE)
 
@@ -476,6 +470,9 @@ ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 	#add_test(NAME gridDynTest COMMAND testCore)
 ENDIF(TEST_ENABLE)
 
+
+set(GRIDDYN_CMAKECONFIG_INSTALL_DIR "cmake/${PROJECT_NAME}" CACHE STRING "install path for GriddynConfig.cmake")
+
 FILE(GLOB efiles "examples/*")
 INSTALL(FILES ${efiles} DESTINATION examples COMPONENT examples)
 
@@ -484,6 +481,11 @@ INSTALL(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runti
 
 INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 
+install (EXPORT griddyn-targets 
+	NAMESPACE Griddyn::
+	DESTINATION ${GRIDDYN_CMAKECONFIG_INSTALL_DIR}
+	COMPONENT libs
+	)
 
 # -------------------------------------------------------------
 # Future Additions
@@ -507,11 +509,12 @@ add_test(NAME testSystem COMMAND testSystem)
 #####################################################
 ######################### swig ######################
 #####################################################
-option(BUILD_PYTHON_INTERFACE "Compile the Python front-end" OFF)
-option(BUILD_MATLAB_INTERFACE "Compile the MATLAB front-end" OFF)
+
 option(WITH_PYTHON3 "Use Python 3.*" OFF)
 
+if (BUILD_PYTHON_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
 add_subdirectory(swig)
+endif()
 
 
 
@@ -539,7 +542,7 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  set(CPACK_COMPONENT_LIBS_DISPLAY_NAME "Libraries")
  set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "Headers")
  set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "Runtime Libraries")
-
+ set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "Examples")
   
  set(CPACK_COMPONENT_MATLAB_GROUP interfaces)
  set(CPACK_COMPONENT_JAVA_GROUP interfaces)
@@ -550,14 +553,15 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  set(CPACK_COMPONENT_LIBS_DESCRIPTION "Libraries for compiling and linking with GridDyn")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "Headers for linking and compiling with GridDyn")
  set(CPACK_COMPONENT_RUNTIME_DESCRIPTION "Runtime libraries for GrdDyn")
- 
+ set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Example files for GridDyn")
+
  set(CPACK_COMPONENT_GROUP_INTERFACES_DESCRIPTION "additional language interfaces for GridDyn")
  
  set(CPACK_COMPONENT_LIBS_DEPENDS headers)
  SET(CPACK_COMPONENT_RUNTIME_REQUIRED ON)
  if (WIN32)
-	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\docs\\\\img\\\\GridDyn.ico")
-	set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
+	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\docgen\\\\images\\\\griddyn.ico")
+	set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/docgen/images/griddyn.ico")
 
 	set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
 	set(CPACK_NSIS_URL_INFO_ABOUT "https://www.github.com/LLNL/GridDyn")
@@ -567,7 +571,7 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
 	
 		set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
 else(WIN32)
-	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/docs/img/GridDyn.ico")
+	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/docgen/images/griddyn.ico")
 endif(WIN32)
 set(CPACK_SOURCE_IGNORE_FILES  "/Build*/;/build*/;/.git/")
 

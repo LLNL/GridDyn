@@ -11,8 +11,8 @@
  */
 
 #include "contingency.h"
-#include "events/Event.h"
-#include "gridDynSimulation.h"
+#include "../events/Event.h"
+#include "../gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 
 #include <map>

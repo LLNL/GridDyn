@@ -16,7 +16,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/coreObject.h"
-#include "measurement/collector.h"
+#include "../measurement/collector.h"
 
 #include <typeinfo>
 

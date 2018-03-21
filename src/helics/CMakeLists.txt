@@ -33,25 +33,14 @@ set(griddynHELICS_headers
 	helicsCoordinator.h
 	)
 
-link_directories(${external_link_directories})
 
 add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 
 set_target_properties (helicsLib PROPERTIES FOLDER libraries)
 
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-INCLUDE_DIRECTORIES(${HELICS_INCLUDE_DIR})
+target_include_directories(helicsLib PUBLIC ${HELICS_INCLUDE_DIR})
 message(status "helics include ${HELICS_INCLUDE_DIR}")
 message(status "helics libraries ${HELICS_STATIC_LIBRARY}")
-
-INCLUDE_DIRECTORIES(${ZeroMQ_INCLUDE_DIR})
-
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
 
@@ -65,40 +54,31 @@ STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
 ENDIF(WIN32)
 #message(${test_dir})
 
-ADD_DEFINITIONS(-DHELICS_TEST_DIRECTORY="${test_dir}" )
-ADD_DEFINITIONS(-DHELICS_BROKER_EXECUTABLE="${HELICS_BROKER}")
-ADD_DEFINITIONS(-DHELICS_PLAYER_EXECUTABLE="${HELICS_PLAYER}")
-ADD_DEFINITIONS(-DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}")
+target_compile_definitions(helicsLib PUBLIC -DHELICS_TEST_DIRECTORY="${test_dir}" )
+target_compile_definitions(helicsLib PUBLIC -DHELICS_BROKER_EXECUTABLE="${HELICS_BROKER}")
+target_compile_definitions(helicsLib PUBLIC -DHELICS_PLAYER_EXECUTABLE="${HELICS_PLAYER}")
+target_compile_definitions(helicsLib PUBLIC -DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}")
 
-target_link_libraries(helicsLib helics-static)
+target_link_libraries(helicsLib PUBLIC Helics::helics-static fileInput)
 
-# this has to come before the zmq library in order
-list(FIND griddyn_optional_libraries ${ZeroMQ_LIBRARY} ZMQ_INDEX)
-
-list(INSERT griddyn_optional_libraries ${ZMQ_INDEX} helicsLib)
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/helics)
-list(APPEND griddyn_optional_include_dirs ${HELICS_INCLUDE_DIR})
+list(APPEND griddyn_optional_libraries helicsLib)
 
 set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
 set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
 
 
-list (APPEND optional_library_key_headers helicsLibrary.h)
+list (APPEND optional_library_key_headers helics/helicsLibrary.h)
 list (APPEND optional_library_functions loadHELICSLibrary)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
 
 
-list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/src/helics/test/helicsTest.cpp)
+list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/helicsTest.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-INSTALL(TARGETS helicsLib DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS helicsLib EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${griddynHELICS_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/helics
+   COMPONENT headers)

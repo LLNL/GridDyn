@@ -16,7 +16,7 @@
 
 // headers
 
-#include "gridOptObjects.h"
+#include "../gridOptObjects.h"
 
 #include "core/coreObjectList.h"
 // forward classes

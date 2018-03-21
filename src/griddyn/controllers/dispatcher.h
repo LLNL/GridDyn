@@ -14,7 +14,7 @@
 #define DISPATCHER_H_
 #pragma once
 
-#include "gridSubModel.h"
+#include "../gridSubModel.h"
 #include <vector>
 
 namespace griddyn

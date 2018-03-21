@@ -13,7 +13,7 @@
 #ifndef FMI_MESUBMODEL_H_
 #define FMI_MESUBMODEL_H_
 
-#include "gridSubModel.h"
+#include "griddyn/gridSubModel.h"
 #include "fmiSupport.h"
 #include "core/propertyBuffer.h"
 #include <map>
@@ -43,7 +43,7 @@ public:
 	};
 protected:
 	count_t m_stateSize = 0;  //!< the total state count
-	count_t m_jacElements = 0;	//!< the number of jacobian elements
+	count_t m_jacElements = 0;	//!< the number of Jacobian elements
 	count_t m_eventCount = 0;	//!< the number of event indicators
 	std::shared_ptr<fmi2ModelExchangeObject> me;
 

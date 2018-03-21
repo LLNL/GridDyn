@@ -13,7 +13,7 @@
 #ifndef ZMQ_COMMUNICATOR_HEADER_
 #define ZMQ_COMMUNICATOR_HEADER_
 
-#include "comms/Communicator.h"
+#include "griddyn/comms/Communicator.h"
 #include "zmqLibrary/zmqSocketDescriptor.h"
 #include <bitset>
 

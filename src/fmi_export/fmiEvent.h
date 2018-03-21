@@ -13,7 +13,7 @@
 #ifndef _FMI_EVENT_H_
 #define _FMI_EVENT_H_
 
-#include "events/reversibleEvent.h"
+#include "griddyn/events/reversibleEvent.h"
 
 namespace griddyn
 {

@@ -15,7 +15,7 @@
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "events/Event.h"
+#include "../events/Event.h"
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
 #include "utilities/stringOps.h"

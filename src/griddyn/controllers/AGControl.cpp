@@ -11,9 +11,9 @@
  */
 
 #include "AGControl.h"
-#include "Area.h"
-#include "Generator.h"
-#include "blocks/blockLibrary.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../blocks/blockLibrary.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"

@@ -13,7 +13,7 @@
 #ifndef FUNCTION_SOURCE_H_
 #define FUNCTION_SOURCE_H_
 
-#include "Source.h"
+#include "../Source.h"
 #include <functional>
 
 namespace griddyn

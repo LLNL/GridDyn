@@ -10,14 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_RELAY_MESSAGE_H_
-#define GRIDDYN_RELAY_MESSAGE_H_
+#pragma once
 
-#include "comms/commMessage.h"
+#include "commMessage.h"
 #include <string>
-
-#include <boost/serialization/base_object.hpp>
-
 
 #define BASE_RELAY_MESSAGE_NUMBER 400
 namespace griddyn
@@ -57,12 +53,11 @@ public:
   virtual void loadString (const std::string &fromString) override;
 private:
   //boost serialization stuff
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template <class Archive>
-  void serialize (Archive & ar, const unsigned int /*version*/)
+  void serialize (Archive & ar)
   {
-    ar & boost::serialization::base_object<commMessage> (*this);
-    ar & m_code;
+    ar(cereal::base_class<commMessage> (this),m_code);
   }
 };
 
@@ -81,8 +76,6 @@ enum alarmCode
 };
 
 std::uint32_t getAlarmCode (const std::string &alarmStr);
-//BOOST_CLASS_EXPORT_GUID(relayMessage, "relayMessage");
 
 }//namespace comms
 }//namespace griddyn
-#endif

@@ -11,8 +11,8 @@
  */
 
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
-#include "loads/motorLoad3.h"
+#include "../gridBus.h"
+#include "motorLoad3.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 #include <iostream>

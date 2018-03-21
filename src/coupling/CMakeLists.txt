@@ -8,7 +8,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.5)
 
 # set variable shared_sources with the sources for the coupling library
 set(shared_sources
@@ -25,13 +25,11 @@ set(shared_headers
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
-include_directories(${PROJECT_SOURCE_DIR}/src/griddyn)
-include_directories(${MPI_INCLUDE_PATH})
 
 add_library(coupling_static_lib STATIC ${shared_sources} ${shared_headers})
-
+target_include_directories(coupling_static_lib PUBLIC ${MPI_INCLUDE_PATH})
 set_target_properties (coupling_static_lib PROPERTIES FOLDER libraries)
-INSTALL(TARGETS coupling_static_lib DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS coupling_static_lib EXPORT griddyn-targets  DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES ${shared_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
 

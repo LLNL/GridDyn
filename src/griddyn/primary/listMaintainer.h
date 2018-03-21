@@ -17,7 +17,7 @@
 #include <vector>
 #include <functional>
 
-#include "gridComponentHelperClasses.h"
+#include "../gridComponentHelperClasses.h"
 
 template<class Y>
 class matrixData;
@@ -34,7 +34,7 @@ class listMaintainer
 {
 public:
 	bool parResid = false; //!<indicator that the residual should run in parallel
-	bool parJac = false;	//!< indicator that the jacobian should run in parallel
+	bool parJac = false;	//!< indicator that the Jacobian should run in parallel
 	bool parDeriv = false; //!< indicator that the derivative should run in parallel
 	bool parAlgebraic = false; //!< indicator that the algebraic update should run in parallel
 private:

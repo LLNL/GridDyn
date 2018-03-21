@@ -15,7 +15,7 @@
 
 #include "core/objectOperatorInterface.hpp"
 #include "utilities/units.h"
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <functional>
 #include <memory>
 

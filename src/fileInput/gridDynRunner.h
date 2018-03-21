@@ -16,7 +16,7 @@
 #pragma once
 
 #include "griddyn/griddyn-config.h"
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include <chrono>
 #include <memory>
 #include <future>

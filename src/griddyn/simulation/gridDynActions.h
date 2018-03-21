@@ -14,7 +14,7 @@
 #define GRIDDYN_ACTIONS_H_
 
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 
 namespace griddyn
 {

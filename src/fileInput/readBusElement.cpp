@@ -17,7 +17,7 @@
 #include "readerHelper.h"
 
 #include "core/objectInterpreter.h"
-#include "gridBus.h"
+#include "griddyn/gridBus.h"
 #include "utilities/stringOps.h"
 
 #include "core/objectFactory.hpp"

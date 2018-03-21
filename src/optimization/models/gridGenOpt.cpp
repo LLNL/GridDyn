@@ -12,9 +12,9 @@
 
 // headers
 #include "gridGenOpt.h"
-#include "Generator.h"
+#include "griddyn/Generator.h"
 #include "gridBusOpt.h"
-#include "optObjectFactory.h"
+#include "../optObjectFactory.h"
 #include "utilities/vectorOps.hpp"
 #include "utilities/vectData.hpp"
 #include "utilities/matrixData.hpp"

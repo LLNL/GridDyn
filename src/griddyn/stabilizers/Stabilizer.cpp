@@ -10,11 +10,11 @@
  * LLNS Copyright End
 */
 
-#include "Stabilizer.h"
-#include "Generator.h"
+#include "../Stabilizer.h"
+#include "../Generator.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include <cmath>
 
 namespace griddyn

@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "comms/schedulerMessage.h"
+#include "schedulerMessage.h"
 #include "utilities/stringConversion.h"
 #include <cstring>
 

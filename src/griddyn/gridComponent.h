@@ -374,7 +374,7 @@ public:
   */
   virtual stateSizes LocalStateSizes(const solverMode &sMode) const;
 
-  /** @brief compute the local jacobian count
+  /** @brief compute the local Jacobian count
   @param sMode the solver mode to use.
   @return a stateSizes object containing the various segment sizes
   */

@@ -13,7 +13,7 @@
 #ifndef DIME_COLLECTOR_HEADER_
 #define DIME_COLLECTOR_HEADER_
 
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 
 class dimeClientInterface;
 

@@ -10,11 +10,8 @@
  * LLNS Copyright End
 */
 
-#ifndef NULL_BLOCK_H_
-#define NULL_BLOCK_H_
-
 #pragma once
-#include "Block.h"
+#include "../Block.h"
 
 namespace griddyn
 {
@@ -70,6 +67,4 @@ public:
 };
 
 } //namespace blocks
-}//namespace griddyn
-
-#endif //NULL_BLOCK_H_
+} //namespace griddyn

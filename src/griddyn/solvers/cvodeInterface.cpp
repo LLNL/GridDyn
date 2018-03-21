@@ -14,8 +14,8 @@
 
 #include "core/coreExceptions.h"
 
-#include "gridDynSimulation.h"
-#include "simulation/gridDynSimulationFileOps.h"
+#include "../gridDynSimulation.h"
+#include "../simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 

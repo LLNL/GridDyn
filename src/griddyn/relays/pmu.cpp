@@ -13,17 +13,17 @@
 #include "pmu.h"
 #include "core/coreObjectTemplates.hpp"
 
-#include "Link.h"
-#include "blocks/delayBlock.h"
-#include "blocks/filteredDerivativeBlock.h"
+#include "../Link.h"
+#include "../blocks/delayBlock.h"
+#include "../blocks/filteredDerivativeBlock.h"
 #include "core/coreExceptions.h"
-#include "events/Event.h"
-#include "gridBus.h"
-#include "measurement/Condition.h"
-#include "measurement/grabberSet.h"
-#include "measurement/gridGrabbers.h"
-#include "comms/controlMessage.h"
-#include "comms/Communicator.h"
+#include "../events/Event.h"
+#include "../gridBus.h"
+#include "../measurement/Condition.h"
+#include "../measurement/grabberSet.h"
+#include "../measurement/gridGrabbers.h"
+#include "../comms/controlMessage.h"
+#include "../comms/Communicator.h"
 #include <cmath>
 
 namespace griddyn

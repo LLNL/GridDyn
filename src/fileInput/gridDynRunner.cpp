@@ -14,14 +14,14 @@
 
 #include "gridDynRunner.h"
 
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput.h"
-#include "measurement/Recorder.h"
-#include "simulation/gridDynSimulationFileOps.h"
+#include "griddyn/measurement/Recorder.h"
+#include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
 #include "utilities/workQueue.h"
 #include "utilities/stringToCmdLine.h"

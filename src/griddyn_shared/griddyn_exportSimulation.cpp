@@ -12,7 +12,7 @@
 
 #include "griddyn_export.h"
 #include "griddyn_export_internal.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "fileInput/gridDynRunner.h"
 #include "fileInput/fileInput.h"
 #include "core/coreExceptions.h"

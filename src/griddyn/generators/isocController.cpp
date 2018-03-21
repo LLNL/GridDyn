@@ -11,7 +11,7 @@
 */
 
 #include "isocController.h"
-#include "Generator.h"
+#include "../Generator.h"
 
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"

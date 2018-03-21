@@ -18,7 +18,7 @@
 #pragma once
 
 #include "utilities/matrixDataOrdered.hpp"
-#include "FMI2/fmi2TypesPlatform.h"
+#include "../FMI2/fmi2TypesPlatform.h"
 #include "fmiEnumDefinitions.h"
 
 #ifdef __GNUC__

@@ -18,7 +18,7 @@ define some functions and operations for configuring file reader operations and 
 #pragma once
 
 #include "readerInfo.h"
-#include "gridDynDefinitions.hpp"
+#include "../griddyn/gridDynDefinitions.hpp"
 
 namespace griddyn
 {

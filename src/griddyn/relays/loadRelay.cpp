@@ -12,8 +12,8 @@
 
 #include "loadRelay.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "measurement/Condition.h"
+#include "../events/Event.h"
+#include "../measurement/Condition.h"
 
 #include <boost/format.hpp>
 

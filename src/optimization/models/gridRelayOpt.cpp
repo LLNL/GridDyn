@@ -13,10 +13,10 @@
 // headers
 #include "gridAreaOpt.h"
 #include "gridRelayOpt.h"
-#include "optObjectFactory.h"
+#include "../optObjectFactory.h"
 #include "utilities/vectorOps.hpp"
 #include "utilities/vectData.hpp"
-#include "Relay.h"
+#include "griddyn/Relay.h"
 #include "core/coreExceptions.h"
 #include <cmath>
 #include <utility>

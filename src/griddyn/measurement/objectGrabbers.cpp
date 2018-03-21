@@ -11,17 +11,17 @@
  */
 
 #include "objectGrabbers.h"
-#include "Area.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Load.h"
-#include "Relay.h"
-#include "gridBus.h"
-#include "gridSubModel.h"
-#include "relays/controlRelay.h"
-#include "relays/sensor.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Load.h"
+#include "../Relay.h"
+#include "../gridBus.h"
+#include "../gridSubModel.h"
+#include "../relays/controlRelay.h"
+#include "../relays/sensor.h"
 
-#include "solvers/solverMode.hpp"
+#include "../solvers/solverMode.hpp"
 #include "utilities/mapOps.hpp"
 #include "utilities/stringOps.h"
 #include <iterator>

@@ -13,7 +13,7 @@
 #ifndef SCHEDULERINFO_H_
 #define SCHEDULERINFO_H_
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 
 #define SCHEDULER_UPDATE 1501
 

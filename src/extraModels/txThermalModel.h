@@ -13,7 +13,7 @@
 #ifndef TX_THERMAL_MODEL_H_
 #define TX_THERMAL_MODEL_H_
 
-#include "relays/sensor.h"
+#include "griddyn/relays/sensor.h"
 
 namespace griddyn {
 namespace extra {

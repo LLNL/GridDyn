@@ -11,10 +11,10 @@
 */
 
 #include "elementReaderTemplates.hpp"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "fileInput.h"
 #include "readElement.h"
-#include "solvers/solverInterface.h"
+#include "griddyn/solvers/solverInterface.h"
 #include "utilities/stringConversion.h"
 
 namespace griddyn

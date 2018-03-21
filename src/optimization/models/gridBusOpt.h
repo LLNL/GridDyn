@@ -14,7 +14,7 @@
 #define GRIDBUSOPT_H_
 
 // headers
-#include "gridOptObjects.h"
+#include "../gridOptObjects.h"
 // forward classes
 namespace griddyn
 {

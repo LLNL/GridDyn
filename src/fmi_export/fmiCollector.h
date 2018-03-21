@@ -10,11 +10,9 @@
 * LLNS Copyright End
 */
 
-#ifndef _FMI_COLLECTOR_H_
-#define _FMI_COLLECTOR_H_
 #pragma once
 
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 #include <memory>
 
 namespace griddyn
@@ -54,4 +52,4 @@ protected:
 
 }//namespace fmi
 }//namespace griddyn
-#endif
+

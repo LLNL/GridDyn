@@ -13,7 +13,7 @@
 #ifndef SENSOR_RELAY_H_
 #define SENSOR_RELAY_H_
 
-#include "Relay.h"
+#include "../Relay.h"
 
 namespace griddyn
 {

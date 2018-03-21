@@ -12,9 +12,9 @@
 
 #include "busRelay.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "events/eventQueue.h"
-#include "measurement/Condition.h"
+#include "../events/Event.h"
+#include "../events/eventQueue.h"
+#include "../measurement/Condition.h"
 
 #include <boost/format.hpp>
 

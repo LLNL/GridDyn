@@ -13,7 +13,7 @@
 #include "fmiCollector.h"
 
 #include "fmiCoordinator.h"
-#include "measurement/gridGrabbers.h"
+#include "griddyn/measurement/gridGrabbers.h"
 
 namespace griddyn
 {

@@ -15,7 +15,7 @@
 
 
 #include "helics/helics.hpp"
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include <complex>
 #include <future>
 

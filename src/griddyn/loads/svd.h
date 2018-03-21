@@ -13,7 +13,7 @@
 #ifndef GRIDSVD_H_
 #define GRIDSVD_H_
 
-#include "loads/otherLoads.h"
+#include "otherLoads.h"
 namespace griddyn
 {
 namespace loads

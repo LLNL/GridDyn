@@ -11,14 +11,14 @@
 */
 
 #include "grabberInterpreter.hpp"
-#include "Area.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Load.h"
-#include "gridBus.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Load.h"
+#include "../gridBus.h"
 #include "gridGrabbers.h"
 #include "objectGrabbers.h"
-#include "simulation/gridSimulation.h"
+#include "../simulation/gridSimulation.h"
 #include "utilities/vectorOps.hpp"
 
 namespace griddyn

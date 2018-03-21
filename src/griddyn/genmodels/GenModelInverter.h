@@ -13,7 +13,7 @@
 #ifndef GENMODELINVERTER_H_
 #define GENMODELINVERTER_H_
 
-#include "GenModel.h"
+#include "../GenModel.h"
 
 namespace griddyn
 {

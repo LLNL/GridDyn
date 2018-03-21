@@ -59,13 +59,12 @@ set(dimeInterface_headers
 	)
 
 add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
-
+target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
 set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
 
 ENDIF(DIME_ENABLE)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${ZeroMQ_INCLUDE_DIR})
+target_include_directories(zmqInterfaceLibrary PRIVATE ${ZeroMQ_INCLUDE_DIR})
 
 
 if (ZMQ_USE_STATIC_LIBRARY)
@@ -76,22 +75,21 @@ else()
 endif()
 	
 	message(status "zmq lib ${ZMQ_DEPENDENCY}")
-target_link_libraries(zmqInterfaceLibrary ${ZMQ_DEPENDENCY} )
+target_link_libraries(zmqInterfaceLibrary PUBLIC ${ZMQ_DEPENDENCY} )
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
 
-INSTALL(TARGETS zmqInterfaceLibrary DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS zmqInterfaceLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${zmqLibrary_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/zmqlib
+   COMPONENT headers)
 
  IF(DIME_ENABLE)
-  list(APPEND griddyn_optional_libraries dimeLibrary zmqInterfaceLibrary)
+  list(APPEND griddyn_optional_libraries dimeLibrary)
+  INSTALL(FILES ${dimeInterface_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/zmqlib
+   COMPONENT headers)
  ELSE(DIME_ENABLE)
   list(APPEND griddyn_optional_libraries zmqInterfaceLibrary)
  ENDIF(DIME_ENABLE)

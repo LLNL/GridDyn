@@ -13,7 +13,7 @@
 #include "eventAdapters.h"
 
 #include "Event.h"
-#include "Relay.h"
+#include "../Relay.h"
 #include "core/coreObject.h"
 
 #include <typeinfo>

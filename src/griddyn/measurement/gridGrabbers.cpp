@@ -11,19 +11,19 @@
 */
 
 #include "gridGrabbers.h"
-#include "Area.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Load.h"
-#include "Relay.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Load.h"
+#include "../Relay.h"
 #include "core/coreExceptions.h"
 
 #include "grabberInterpreter.hpp"
-#include "gridBus.h"
-#include "gridSubModel.h"
+#include "../gridBus.h"
+#include "../gridSubModel.h"
 #include "objectGrabbers.h"
-#include "relays/sensor.h"
-#include "simulation/gridSimulation.h"
+#include "../relays/sensor.h"
+#include "../simulation/gridSimulation.h"
 #include "utilities/functionInterpreter.h"
 #include "utilities/vectorOps.hpp"
 #include <algorithm>

@@ -11,14 +11,14 @@
 */
 
 #include "differentialRelay.h"
-#include "Link.h"
-#include "comms/Communicator.h"
-#include "comms/relayMessage.h"
+#include "../Link.h"
+#include "../comms/Communicator.h"
+#include "../comms/relayMessage.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "events/eventQueue.h"
-#include "gridBus.h"
-#include "measurement/Condition.h"
+#include "../events/Event.h"
+#include "../events/eventQueue.h"
+#include "../gridBus.h"
+#include "../measurement/Condition.h"
 #include "utilities/timeSeries.hpp"
 
 namespace griddyn

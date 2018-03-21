@@ -13,7 +13,7 @@
 #ifndef HELICS_COLLECTOR_HEADER_
 #define HELICS_COLLECTOR_HEADER_
 
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 #include <utility>
 
 namespace griddyn

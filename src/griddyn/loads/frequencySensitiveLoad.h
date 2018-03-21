@@ -13,7 +13,7 @@
 #ifndef FREQSENSITIVELOAD_H_
 #define FREQSENSITIVELOAD_H_
 
-#include "Load.h"
+#include "../Load.h"
 namespace griddyn
 {
 namespace loads

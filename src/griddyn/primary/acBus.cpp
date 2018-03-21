@@ -11,19 +11,19 @@
  */
 
 // headers
-#include "Area.h"
+#include "../Area.h"
 
-#include "Generator.h"
-#include "Link.h"
-#include "Load.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Load.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreOwningPtr.hpp"
 
 #include "acBus.h"
-#include "blocks/derivativeBlock.h"
+#include "../blocks/derivativeBlock.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
-#include "simulation/contingency.h"
+#include "../simulation/contingency.h"
 #include "utilities/vectorOps.hpp"
 //#include "matrixDataSparse.hpp"
 #include "utilities/stringOps.h"

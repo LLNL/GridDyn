@@ -14,7 +14,7 @@
 #define DELAYBLOCK_H_
 #pragma once
 
-#include "Block.h"
+#include "../Block.h"
 
 namespace griddyn
 {

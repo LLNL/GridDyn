@@ -15,7 +15,7 @@
 
 #include <vector>
 
-/** mode defining how to get partial derivatives for jacobian calculations*/
+/** mode defining how to get partial derivatives for Jacobian calculations*/
 enum class refMode_t :unsigned char
 {
 	direct = 0,

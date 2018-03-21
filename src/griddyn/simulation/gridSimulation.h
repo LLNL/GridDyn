@@ -16,7 +16,7 @@
 
 // header files
 #include "griddyn/griddyn-config.h"
-#include "Area.h"
+#include "../Area.h"
 #include <functional>
 
 namespace utilities

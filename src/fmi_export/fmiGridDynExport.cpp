@@ -13,7 +13,7 @@
 #include "fmi/FMI2/fmi2Functions.h"
 #include "fmiRunner.h"
 #include "core/coreExceptions.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include <memory>
 #include <mutex>
 #include <vector>

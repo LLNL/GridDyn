@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
-#include "solvers/sundialsMatrixData.h"
+#include "sundialsMatrixData.h"
 #include <algorithm>
 #include <cstring>
 

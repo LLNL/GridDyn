@@ -13,7 +13,7 @@
 #ifndef FMI_MELOADMODEL_H_
 #define FMI_MELOADMODEL_H_
 
-#include "Load.h"
+#include "griddyn/Load.h"
 #include "fmiMEWrapper.hpp"
 
 

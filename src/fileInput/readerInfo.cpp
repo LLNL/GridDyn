@@ -14,7 +14,7 @@
 #include "core/coreObject.h"
 #include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 #include "readerHelper.h"
 
 #include <boost/date_time.hpp>

@@ -13,7 +13,7 @@
 #ifndef COMPOSITELOAD_H_
 #define COMPOSITELOAD_H_
 
-#include "loads/zipLoad.h"
+#include "zipLoad.h"
 namespace griddyn
 {
 namespace loads

@@ -19,7 +19,7 @@
 #include <boost/filesystem.hpp>
 #include <memory>
 
-#include "FMI2/fmi2FunctionTypes.h"
+#include "../FMI2/fmi2FunctionTypes.h"
 #include <functional>
 
 

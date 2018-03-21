@@ -10,21 +10,22 @@
 
 #project name
 
-set (elementReader_files 
-jsonReaderElement.cpp
+set (elementReader_headers 
 jsonReaderElement.h
 jsonElement.h
-jsonElement.cpp
-tinyxml2ReaderElement.cpp
 tinyxml2ReaderElement.h
-tinyxmlReaderElement.cpp
 tinyxmlReaderElement.h
 readerElement.h
+)
+
+set (elementReader_files 
+jsonReaderElement.cpp
+jsonElement.cpp
+tinyxml2ReaderElement.cpp
+tinyxmlReaderElement.cpp
 readerElement.cpp
 ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
-
-
 
 #SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
@@ -48,10 +49,12 @@ endif(ENABLE_YAML)
 
 if (YAML_FOUND)
 list(APPEND elementReader_files 
-yamlReaderElement.h
 yamlReaderElement.cpp
-yamlElement.h
 yamlElement.cpp)
+
+list(APPEND elementReader_headers
+yamlReaderElement.h
+yamlElement.h)
 
 list(APPEND optional_library_test_files ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp)
 set (optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
@@ -60,11 +63,7 @@ ENDIF(YAML_FOUND)
 
 set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
 
-
-
 set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
-
-
 
 ###########################################
 # building ticpp
@@ -89,27 +88,23 @@ endif()
 include(${PROJECT_BINARY_DIR}/libs/cmake/tinyxml2-targets.cmake)
 
 
-add_library(formatInterpreter STATIC ${elementReader_files})
-target_link_libraries(formatInterpreter tinyxml2 ticpp)
+add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers})
+target_link_libraries(formatInterpreter PUBLIC tinyxml2::tinyxml2 ticpp::ticpp)
 
 set_target_properties (formatInterpreter PROPERTIES FOLDER libraries)
 
 ADD_DEFINITIONS(-DTIXML_USE_TICPP)
 
 IF (YAML_FOUND)
-target_link_libraries(formatInterpreter yaml-cpp)
+target_link_libraries(formatInterpreter PUBLIC yaml-cpp)
 
 ENDIF(YAML_FOUND)
 
-INSTALL(TARGETS formatInterpreter DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS formatInterpreter EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+INSTALL(FILES ${elementReader_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+  COMPONENT headers)
 
 set(formatInterpreter_include_directories
   ${PROJECT_SOURCE_DIR}/src/formatInterpreters

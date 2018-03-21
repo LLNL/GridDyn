@@ -16,7 +16,7 @@
 #include "readerHelper.h"
 
 #include "core/objectInterpreter.h"
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 
 namespace griddyn
 {

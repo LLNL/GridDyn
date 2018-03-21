@@ -29,8 +29,6 @@ set (fskit_headers
 
 add_library(fskitLibrary ${fskit_sources} ${fskit_headers})
 
-INCLUDE_DIRECTORIES(.)
-
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
 
@@ -38,13 +36,10 @@ target_link_libraries(fskitLibrary fileInput)
 
 INSTALL(TARGETS fskitLibrary DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
+INSTALL(FILES ${fskit_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fskit
+  COMPONENT headers)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
 
 list(APPEND griddyn_optional_libraries fskitLibrary)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/fskit)

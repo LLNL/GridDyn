@@ -8,8 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-cmake_minimum_required (VERSION 3.4)
-
 set(coreObject_headers
     propertyBuffer.h
 	coreDefinitions.hpp
@@ -41,16 +39,17 @@ set(coreObject_sources
 	)
 	
 	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
-	
+	target_include_directories(coreObjects PUBLIC ${Boost_INCLUDE_DIRS})
 	set_target_properties (coreObjects PROPERTIES FOLDER libraries)
+	target_link_libraries(coreObjects PUBLIC utilities)
+	INSTALL(TARGETS coreObjects 
+		EXPORT griddyn-targets 
+		DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+		COMPONENT libraries)
 
-	INSTALL(TARGETS coreObjects DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
+INSTALL(FILES ${coreObject_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/core
+  COMPONENT headers)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
 

@@ -12,8 +12,8 @@
 
 #include "griddyn_export.h"
 #include "griddyn_export_internal.h"
-#include "measurement/gridGrabbers.h"
-#include "measurement/collector.h"
+#include "griddyn/measurement/gridGrabbers.h"
+#include "griddyn/measurement/collector.h"
 #include <memory>
 #include <vector>
 

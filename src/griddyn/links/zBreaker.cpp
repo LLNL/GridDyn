@@ -11,10 +11,10 @@
 */
 
 // headers
-#include "links/zBreaker.h"
+#include "zBreaker.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringOps.h"
 
 #include "core/objectFactoryTemplates.hpp"

@@ -10,13 +10,13 @@
 * LLNS Copyright End
 */
 
-#include "loads/zipLoad.h"
+#include "zipLoad.h"
 #include "ThreePhaseLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "gridBus.h"
-#include "loads/otherLoads.h"
+#include "../gridBus.h"
+#include "otherLoads.h"
 #include "utilities/matrixData.hpp"
 
 #include <cmath>

@@ -25,7 +25,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/filesystem.hpp>
 
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 namespace griddyn
 {
 	

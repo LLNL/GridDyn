@@ -12,7 +12,7 @@
 
 #include "Event.h"
 
-#include "gridDynSimulation.h"
+#include "../gridDynSimulation.h"
 #include "utilities/units.h"
 #include "core/objectInterpreter.h"
 #include "core/factoryTemplates.hpp"

@@ -1,3 +1,4 @@
+SHOW_VARIABLE(BOOST_INSTALL_PATH PATH "Boost root directory" "${BOOST_INSTALL_PATH}")
 IF (MSVC)
 
 set (boost_versions
@@ -24,27 +25,30 @@ D:/boost
 
 # create an empty list
 list(APPEND boost_paths "")
-
+mark_as_advanced(BOOST_INSTALL_PATH)
 foreach( dir ${poss_prefixes})
 	foreach( boostver ${boost_versions})
 		IF (IS_DIRECTORY ${dir}/${boostver})
+			IF (EXISTS ${dir}/${boostver}/boost/version.hpp)
 			list(APPEND boost_paths ${dir}/${boostver})
+		ENDIF()
 		ENDIF()
 	endforeach()
 endforeach()
 
-
 find_path(BOOST_TEST_PATH
 			NAMES 			boost/version.hpp
-			PATHS		${boost_paths}
+			PATHS		${BOOST_INSTALL_PATH}
+						${boost_paths}
 		)
 
 		if (BOOST_TEST_PATH)
 		set(BOOST_ROOT ${BOOST_TEST_PATH})
 		endif(BOOST_TEST_PATH)
+ELSE(MSVC)
+set(BOOST_ROOT "${BOOST_INSTALL_PATH}")
 ENDIF(MSVC)
 
-SHOW_VARIABLE(BOOST_ROOT PATH "Boost root directory" "${BOOST_ROOT}")
 
 # Minimum version of Boost required for building GridDyn
 set(BOOST_MINIMUM_VERSION 1.56)
@@ -57,13 +61,17 @@ ENDIF(MPI_ENABLE)
 
 # Minimum version of Boost required for building test suite
 if (Boost_VERSION LESS 106100)
-  set(BUILD_GRIDDYN_TESTS OFF)
-  message(WARNING "Boost version >=1.61 required for building GridDyn tests (Found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION})")
-endif()
+  set(BOOST_VERSION_LEVEL 0)
+elseif (Boost_VERSION GREATER 106599)
+	#in 1.166 there were some changes to asio and inclusion of beast that will enable other components
+	set(BOOST_VERSION_LEVEL 2)
+else()
+	set(BOOST_VERSION_LEVEL 1)
+ENDIF()
 
-mark_as_advanced(CLEAR BOOST_ROOT)
+#mark_as_advanced(CLEAR BOOST_ROOT)
 
-message(STATUS "Using Boost include files : ${Boost_INCLUDE_DIR}")
+#message(STATUS "Using Boost include files : ${Boost_INCLUDE_DIR}")
 #message(STATUS "Using Boost libraries in : ${Boost_LIBRARY_DIRS}")
 #message(STATUS "Using Boost libraries : ${Boost_LIBRARIES}")
 set(modifier,"")
@@ -88,5 +96,4 @@ endforeach(loop_var)
 
 #message(STATUS "Using Boost core libraries : ${Boost_LIBRARIES_core}")
 #message(STATUS "Using Boost test libraries : ${Boost_LIBRARIES_test}")
-list(APPEND external_library_list ${Boost_LIBRARIES_core})
-list(APPEND external_link_directories ${Boost_LIBRARY_DIRS})
+

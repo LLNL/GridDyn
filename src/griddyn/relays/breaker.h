@@ -13,7 +13,7 @@
 #ifndef BREAKER_RELAY_H_
 #define BREAKER_RELAY_H_
 
-#include "Relay.h"
+#include "../Relay.h"
 namespace griddyn
 {
 namespace relays

@@ -11,12 +11,12 @@
 */
 
 #include "core/objectFactory.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "griddyn/Generator.h"
+#include "griddyn/gridBus.h"
 #include "fileInput.h"
-#include "Exciter.h"
-#include "GenModel.h"
-#include "Governor.h"
+#include "griddyn/Exciter.h"
+#include "griddyn/GenModel.h"
+#include "griddyn/Governor.h"
 
 #include "utilities/stringConversion.h"
 

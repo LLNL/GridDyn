@@ -13,7 +13,7 @@
 #ifndef FMI_LOADMODEL_3PHASE_ME_H_
 #define FMI_LOADMODEL_3PHASE_ME_H_
 
-#include "loads/ThreePhaseLoad.h"
+#include "griddyn/loads/ThreePhaseLoad.h"
 #include "fmiMEWrapper.hpp"
 
 

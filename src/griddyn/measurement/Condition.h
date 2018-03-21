@@ -13,7 +13,7 @@
 #ifndef GRIDDYN_CONDITION_H_
 #define GRIDDYN_CONDITION_H_
 
-#include "gridComponent.h"
+#include "../gridComponent.h"
 #include "core/objectOperatorInterface.hpp"
 #include <functional>
 

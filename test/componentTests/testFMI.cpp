@@ -10,9 +10,9 @@
  * LLNS Copyright End
 */
 
-#include "fmiGDinfo.h"
-#include "fmi_import/fmiImport.h"
-#include "fmi_import/fmiObjects.h"
+#include "fmi/fmiGDinfo.h"
+#include "fmi/fmi_import/fmiImport.h"
+#include "fmi/fmi_import/fmiObjects.h"
 #include "gridBus.h"
 #include "fileInput.h"
 #include "gridDynSimulation.h"
@@ -25,7 +25,7 @@
 // test case for coreObject object
 
 #include "loads/approximatingLoad.h"
-#include "fmi_models/fmiMELoad3phase.h"
+#include "fmi/fmi_models/fmiMELoad3phase.h"
 #include "testHelper.h"
 
 

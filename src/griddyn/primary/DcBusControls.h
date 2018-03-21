@@ -14,7 +14,7 @@
 #define DCBUSCONTROLS_H_
 #pragma once
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 
 namespace griddyn
 {

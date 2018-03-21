@@ -13,11 +13,11 @@
 #include "gridDynSimulationFileOps.h"
 #include "contingency.h"
 #include "core/coreExceptions.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "solvers/solverInterface.h"
+#include "../gridBus.h"
+#include "../gridDynSimulation.h"
+#include "../links/acLine.h"
+#include "../links/adjustableTransformer.h"
+#include "../solvers/solverInterface.h"
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push

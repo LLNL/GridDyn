@@ -11,8 +11,8 @@
 */
 
 #include "powerFlowErrorRecovery.h"
-#include "gridDynSimulation.h"
-#include "solvers/solverInterface.h"
+#include "../gridDynSimulation.h"
+#include "../solvers/solverInterface.h"
 
 #include <algorithm>
 

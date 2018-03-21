@@ -106,21 +106,25 @@ endif()
 include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
 
 
-target_link_libraries(utilities minizip zlib)
+target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib)
 set_target_properties (utilities PROPERTIES FOLDER libraries)
 
 IF (ENABLE_64_BIT_INDEXING)
-add_definitions(-DENABLE_64_BIT_INDEXING)
+target_compile_definitions(utilities PUBLIC -DENABLE_64_BIT_INDEXING)
 ENDIF(ENABLE_64_BIT_INDEXING)
 
+IF (VERSION_OPTION)
+	IF (MSVC)
+		target_compile_options(utilities PUBLIC ${VERSION_OPTION})
+	ELSE()
+		target_compile_options(utilities PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
+	ENDIF (MSVC)
+ENDIF(VERSION_OPTION)
 
-INSTALL(TARGETS utilities DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+
+INSTALL(TARGETS utilities EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${utilities_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/utilities
+  COMPONENT headers)

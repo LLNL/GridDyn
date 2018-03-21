@@ -57,7 +57,7 @@ set (generator_sources
 	generators/DynamicGenerator.cpp
 	)
 
-set(gridSource_sources
+set(gridSource_headers
 	Source.h
 	sources/sourceTypes.h
 	sources/rampSource.h
@@ -69,6 +69,10 @@ set(gridSource_sources
 	sources/commSource.h
 	sources/blockSource.h
 	sources/grabberSource.h
+)
+
+set(gridSource_sources
+	${gridSource_headers}
 	sources/Source.cpp
 	sources/rampSource.cpp
 	sources/fileSource.cpp
@@ -81,31 +85,38 @@ set(gridSource_sources
 	sources/grabberSource.cpp
 	)
 
-set(exciter_sources
+set(exciter_headers
+	Exciter.h
+	Stabilizer.h
 	exciters/ExciterDC1A.h
 	exciters/ExciterDC2A.h
 	exciters/ExciterIEEEtype1.h
 	exciters/ExciterIEEEtype2.h
+)
+
+set(exciter_sources
+	${exciter_headers}
 	exciters/Exciter.cpp
 	exciters/ExciterDC1A.cpp
 	exciters/ExciterDC2A.cpp
 	exciters/ExciterIEEEtype1.cpp
 	exciters/ExciterIEEEtype2.cpp
 	stabilizers/Stabilizer.cpp
-	Exciter.h
-	Stabilizer.h
 	)
 	
-
-	
-set(gov_sources
-
+set(gov_headers
+	Governor.h
+	governors/GovernorTypes.h
 	governors/GovernorHydro.h
 	governors/GovernorIeeeSimple.h
 	governors/GovernorReheat.h
 	governors/GovernorSteamNR.h
 	governors/GovernorSteamTCSR.h
 	governors/GovernorTgov1.h
+)
+	
+set(gov_sources
+	${gov_headers}
 	governors/Governor.cpp
 	governors/GovernorHydro.cpp
 	governors/GovernorIeeeSimple.cpp
@@ -113,42 +124,44 @@ set(gov_sources
 	governors/GovernorSteamNR.cpp
 	governors/GovernorSteamTCSR.cpp
 	governors/GovernorTgov1.cpp
-	Governor.h
-	governors/GovernorTypes.h
 	)
 
-set (block_sources
-	blocks/Block.cpp
-	blocks/integralBlock.cpp
+set (block_headers
+	Block.h
 	blocks/integralBlock.h
-	blocks/deadbandBlock.cpp
 	blocks/deadbandBlock.h
-	blocks/delayBlock.cpp
 	blocks/delayBlock.h
 	blocks/nullBlock.h
-	blocks/nullBlock.cpp
-	blocks/pidBlock.cpp
 	blocks/pidBlock.h
-	blocks/controlBlock.cpp
 	blocks/controlBlock.h
-	blocks/derivativeBlock.cpp
 	blocks/derivativeBlock.h
-	blocks/functionBlock.cpp
 	blocks/functionBlock.h
-	blocks/lutBlock.cpp
 	blocks/lutBlock.h
-	blocks/transferFunctionBlock.cpp
 	blocks/transferFunctionBlock.h
-	blocks/filteredDerivativeBlock.cpp
-	blocks/filteredDerivativeBlock.h
-	blocks/blockSequence.cpp
 	blocks/blockSequence.h
-	blocks/valueLimiter.cpp
+	blocks/filteredDerivativeBlock.h
 	blocks/valueLimiter.h
-	blocks/rampLimiter.cpp
 	blocks/rampLimiter.h
 	blocks/blockLibrary.h
-	Block.h
+)
+
+set (block_sources
+	${block_headers}
+	blocks/Block.cpp
+	blocks/integralBlock.cpp
+	blocks/deadbandBlock.cpp
+	blocks/delayBlock.cpp
+	blocks/nullBlock.cpp
+	blocks/pidBlock.cpp
+	blocks/controlBlock.cpp
+	blocks/derivativeBlock.cpp
+	blocks/functionBlock.cpp
+	blocks/lutBlock.cpp
+	blocks/transferFunctionBlock.cpp
+	blocks/filteredDerivativeBlock.cpp
+	blocks/blockSequence.cpp
+	blocks/valueLimiter.cpp
+	blocks/rampLimiter.cpp
 	)
 	
 set(submodel_sources
@@ -157,16 +170,6 @@ set(submodel_sources
 	${gov_sources}
 	${gridSource_sources}
 	${block_sources}
-	)
-
-set(submodel_headers
-	Exciter.h
-	Stabilizer.h
-	Source.h
-	GenModel.h
-	otherGenModels.h
-	Governor.h
-	gridControlBlocks.h
 	)
 	
 set(load_headers
@@ -495,6 +498,10 @@ set(model_files
 
 
 set(header_files
+${exciter_headers}
+${gov_headers}
+${block_headers}
+	${gridSource_headers}
 	${core_headers}
 	${primary_headers}
 	${link_headers}
@@ -512,6 +519,14 @@ set(header_files
 	)
 
 add_library(griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} ${primary_sources} ${sublibrary_files})
+
+target_link_libraries(griddyn PUBLIC coreObjects)
+target_link_libraries(griddyn PUBLIC utilities)
+IF (KLU_CMAKE)
+target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
+ENDIF(KLU_CMAKE)
+
+target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})
@@ -531,21 +546,14 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIRS})
-
 target_include_directories(griddyn PRIVATE ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
+target_include_directories(griddyn PRIVATE ${SUNDIALS_INCLUDE_DIRS})
 #create a griddyn_config.h file for program options
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
 
-INSTALL(TARGETS griddyn DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS griddyn EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
-
+INSTALL(FILES ${header_files}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/griddyn
+  COMPONENT headers)

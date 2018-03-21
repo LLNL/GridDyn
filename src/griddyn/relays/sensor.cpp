@@ -11,15 +11,15 @@
  */
 
 #include "sensor.h"
-#include "Block.h"
-#include "Link.h"  //some special features for links
-#include "comms/Communicator.h"
-#include "comms/controlMessage.h"
+#include "../Block.h"
+#include "../Link.h"  //some special features for links
+#include "../comms/Communicator.h"
+#include "../comms/controlMessage.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "measurement/Condition.h"
-#include "measurement/grabberSet.h"
+#include "../events/Event.h"
+#include "../measurement/Condition.h"
+#include "../measurement/grabberSet.h"
 #include "utilities/matrixDataSparse.hpp"
 #include "utilities/matrixDataTranslate.hpp"
 #include "utilities/stringConversion.h"

@@ -76,23 +76,18 @@ set (fileInput_sources
 	)
 add_library(fileInput STATIC ${fileInput_sources})
 
+target_link_libraries(fileInput PUBLIC formatInterpreter griddyn)
 source_group("Elements"  FILES  ${elementReader_sources})
 source_group("formatSpecific"  FILES  ${formattedfileInput_sources})
 source_group("general" FILES ${reader_sources})
 
 set_target_properties (fileInput PROPERTIES FOLDER libraries)
 
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
-INSTALL(TARGETS fileInput DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS fileInput EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
+INSTALL(FILES ${fileInput_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fileInput
+  COMPONENT headers)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)

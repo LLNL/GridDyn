@@ -12,8 +12,8 @@
 
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactory.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "../Generator.h"
+#include "../gridBus.h"
 #include "GovernorReheat.h"
 #include "utilities/matrixData.hpp"
 

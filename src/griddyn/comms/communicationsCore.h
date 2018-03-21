@@ -14,7 +14,7 @@
 #define GRIDDYN_COMMUNICATIONS_CORE_
 #pragma once
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <memory>
 #include <unordered_map>
 #include <cstdint>

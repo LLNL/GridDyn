@@ -12,8 +12,8 @@
 
 #include "kinsolInterface.h"
 
-#include "gridDynSimulation.h"
-#include "simulation/gridDynSimulationFileOps.h"
+#include "../gridDynSimulation.h"
+#include "../simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 //#include "matrixDataBoost.h"
 #include "core/coreExceptions.h"

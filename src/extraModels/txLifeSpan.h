@@ -13,7 +13,7 @@
 #ifndef TX_LIFESPAN_H_
 #define TX_LIFESPAN_H_
 
-#include "relays/sensor.h"
+#include "griddyn/relays/sensor.h"
 
 namespace griddyn {
 namespace extra {

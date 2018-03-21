@@ -13,9 +13,9 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
-#include "governors/GovernorTypes.h"
+#include "../Generator.h"
+#include "../gridBus.h"
+#include "GovernorTypes.h"
 #include "utilities/matrixDataSparse.hpp"
 
 namespace griddyn

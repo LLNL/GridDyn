@@ -13,7 +13,7 @@
 #ifndef CONTROLSYSTEM_H_
 #define CONTROLSYSTEM_H_
 
-#include "gridSubModel.h"
+#include "../gridSubModel.h"
 
 #include "utilities/matrixDataSparse.hpp"
 namespace griddyn

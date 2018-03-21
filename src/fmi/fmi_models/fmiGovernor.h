@@ -14,7 +14,7 @@
 #define FMI_GOVERNOR_H_
 
 
-#include "Governor.h"
+#include "griddyn/Governor.h"
 #include "fmiMEWrapper.hpp"
 
 

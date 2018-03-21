@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "Source.h"
+#include "../Source.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "otherSources.h"

@@ -60,25 +60,22 @@ add_library(fmiGridDynSharedLib SHARED ${fmiShared_sources} ${fmiShared_headers}
 set_target_properties (fmiGridDynSharedLib PROPERTIES FOLDER fmi)
 
 add_library(fmiBuilder STATIC ${fmiBuilder_sources} ${fmiBuilder_headers})
-link_directories(${external_link_directories})
+target_link_libraries(fmiBuilder PUBLIC fileInput)
 
 set_target_properties (fmiBuilder PROPERTIES FOLDER fmi)
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 
-target_link_libraries(fmiGridDynSharedLib gridDynCombined)
+
+target_link_libraries(fmiGridDynSharedLib PRIVATE gridDynCombined)
 
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 
-INSTALL(TARGETS fmiGridDynSharedLib 
+INSTALL(TARGETS fmiGridDynSharedLib EXPORT griddyn-targets
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} 
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-INSTALL(FILE $<TARGET_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
-INSTALL(FILE $<TARGET_LINKER_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(FILES $<TARGET_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime EXCLUDE_FROM_ALL)
+INSTALL(FILES $<TARGET_LINKER_FILE:fmiGridDynSharedLib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries EXCLUDE_FROM_ALL)
 IF (WIN32)
 	if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 		INSTALL(TARGETS fmiGridDynSharedLib RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/win64/ COMPONENT runtime)
@@ -107,8 +104,8 @@ ELSE(WIN32)
 	ENDIF(UNIX)
 ENDIF(WIN32)
 
-ADD_DEFINITIONS(-DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}")
-ADD_DEFINITIONS(-DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")
+target_compile_definitions(fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}")
+target_compile_definitions(fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")
 
 list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/src/fmi_export/testFMIExport.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
@@ -116,10 +113,6 @@ set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE
 list(APPEND executable_only_components fmiBuilder)
 set(executable_only_components ${executable_only_components} PARENT_SCOPE)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${fmiBuilder_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fmi_export
+  COMPONENT headers)

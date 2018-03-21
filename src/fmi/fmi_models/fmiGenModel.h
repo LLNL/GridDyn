@@ -14,7 +14,7 @@
 #define FMI_GENMODEL_H_
 
 
-#include "GenModel.h"
+#include "griddyn/GenModel.h"
 #include "fmiMEWrapper.hpp"
 
 

@@ -10,13 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef SCHEDULER_MESSAGE_H_
-#define SCHEDULER_MESSAGE_H_
+#pragma once
+#include "commMessage.h"
 
-#include "comms/commMessage.h"
-
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/vector.hpp>
+#include <cereal/types/vector.hpp>
 
 #define BASE_SCHEDULER_MESSAGE_NUMBER 800
 namespace griddyn
@@ -60,37 +57,17 @@ public:
 	virtual void loadString(const std::string &fromString) override;
 
 private:
-	friend class boost::serialization::access;
+	friend class cereal::access;
 	template <class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+	void serialize(Archive & ar)
 	{
-		ar & boost::serialization::base_object<commMessage>(*this);
-
-		switch (getMessageType())
-		{
-		case SHUTDOWN:
-		case STARTUP:
-			ar & m_time;
-			break;
-		case ADD_TARGETS:
-		case UPDATE_TARGETS:
-		case UPDATE_RESERVES:
-		case UPDATE_REGULATION_RESERVE:
-		case USE_RESERVE:
-		case UPDATE_REGULATION_TARGET:
-			ar & m_time;
-			ar & m_target;
-			break;
-		default:           //all other ones don't have any information
-			break;
-		}
-
+		ar(cereal::base_class<commMessage>(this), m_time,m_target);		
 	}
 
 	std::string makeTargetString(size_t cnt) const;
 };
 
-//BOOST_CLASS_EXPORT_GUID(schedulerMessage, "schedulerMessage");
-}//namespace comms
-}//namespace griddyn
-#endif
+
+} //namespace comms
+} //namespace griddyn
+

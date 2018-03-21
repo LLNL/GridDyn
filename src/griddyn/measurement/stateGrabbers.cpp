@@ -10,15 +10,15 @@
  * LLNS Copyright End
  */
 
-#include "Area.h"
+#include "../Area.h"
 #include "Condition.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Relay.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Relay.h"
 
 #include "grabberInterpreter.hpp"
-#include "gridBus.h"
-#include "relays/sensor.h"
+#include "../gridBus.h"
+#include "../relays/sensor.h"
 #include "stateGrabber.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"

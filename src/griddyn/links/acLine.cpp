@@ -11,14 +11,14 @@
  */
 
 // headers
-#include "links/acLine.h"
-#include "Area.h"
+#include "acLine.h"
+#include "../Area.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "gridBus.h"
-#include "simulation/contingency.h"
+#include "../gridBus.h"
+#include "../simulation/contingency.h"
 #include "utilities/matrixDataCompact.hpp"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"

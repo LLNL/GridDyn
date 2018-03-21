@@ -12,7 +12,7 @@
 
 #include "gridBus.h"
 #include "gridDynSimulation.h"
-#include "fmi_models/fmiMELoad3phase.h"
+#include "fmi/fmi_models/fmiMELoad3phase.h"
 #include "fileInput.h"
 #include "simulation/diagnostics.h"
 #include "simulation/diagnostics.h"

@@ -1,6 +1,6 @@
 /***********************************************************************
 *
-* Copyright (c) 2015-2017 Ansel Sermersheim
+* Copyright (c) 2015-2018 Ansel Sermersheim
 * All rights reserved.
 *
 * This file is part of libguarded
@@ -10,6 +10,17 @@
 *
 ***********************************************************************/
 
+/*
+
+Copyright (C) 2017, Battelle Memorial Institute
+All rights reserved.
+
+This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial
+Institute; the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the
+Lawrence Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+
+additions include load store operations and operator= functions
+*/
 #ifndef LIBGUARDED_GUARDED_HPP
 #define LIBGUARDED_GUARDED_HPP
 
@@ -103,31 +114,28 @@ class guarded
 
     /** generate a copy of the protected object
     */
-    std::enable_if_t<std::is_copy_constructible<T>::value, T> load()
+    std::conditional_t<std::is_copy_assignable<T>::value,T,void> load()
     {
-        std::lock_guard<M> lock(m_mutex);
-        return m_obj;
-    }
-    /** generate a copy of the protected object
-    */
-    std::enable_if_t<std::is_copy_constructible<T>::value, T> operator*()
-    {
-        return load();
+        std::lock_guard<M> glock(m_mutex);
+        auto retObj= std::conditional_t<std::is_copy_assignable<T>::value, T, void>(m_obj);
+        return retObj;
+
     }
 
     /** store an updated value into the object*/
     template <typename objType>
-    std::enable_if_t<std::is_copy_assignable<T>::value> store(objType &&newObj)
-    {
-        std::lock_guard<M> lock(m_mutex);
+     void store(objType &&newObj)
+    { //uses a forwarding reference
+        std::lock_guard<M> glock(m_mutex);
         m_obj = std::forward<objType>(newObj);
     }
 
     /** store an updated value into the object*/
     template <typename objType>
-    std::enable_if_t<std::is_copy_assignable<T>::value> operator=(objType &&newObj)
-    {
-        store(std::forward<objType>(newObj));
+    void operator=(objType &&newObj)
+    { //uses a forwarding reference
+        std::lock_guard<M> glock(m_mutex);
+        m_obj = std::forward<objType>(newObj);
     }
 
   private:
@@ -140,7 +148,7 @@ class guarded
         {
         }
 
-        void operator()(T *ptr)
+        void operator()(T * /*ptr*/)
         {
             if (m_lock.owns_lock()) {
                 m_lock.unlock();
@@ -164,19 +172,19 @@ guarded<T, M>::guarded(Us &&... data) : m_obj(std::forward<Us>(data)...)
 template <typename T, typename M>
 auto guarded<T, M>::lock() -> handle
 {
-    std::unique_lock<M> lock(m_mutex);
-    return handle(&m_obj, deleter(std::move(lock)));
+    std::unique_lock<M> glock(m_mutex);
+    return handle(&m_obj, deleter(std::move(glock)));
 }
 
 template <typename T, typename M>
 auto guarded<T, M>::try_lock() -> handle
 {
-    std::unique_lock<M> lock(m_mutex, std::try_to_lock);
+    std::unique_lock<M> glock(m_mutex, std::try_to_lock);
 
-    if (lock.owns_lock()) {
-        return handle(&m_obj, deleter(std::move(lock)));
+    if (glock.owns_lock()) {
+        return handle(&m_obj, deleter(std::move(glock)));
     } else {
-        return handle(nullptr, deleter(std::move(lock)));
+        return handle(nullptr, deleter(std::move(glock)));
     }
 }
 
@@ -184,12 +192,12 @@ template <typename T, typename M>
 template <typename Duration>
 auto guarded<T, M>::try_lock_for(const Duration &d) -> handle
 {
-    std::unique_lock<M> lock(m_mutex, d);
+    std::unique_lock<M> glock(m_mutex, d);
 
-    if (lock.owns_lock()) {
-        return handle(&m_obj, deleter(std::move(lock)));
+    if (glock.owns_lock()) {
+        return handle(&m_obj, deleter(std::move(glock)));
     } else {
-        return handle(nullptr, deleter(std::move(lock)));
+        return handle(nullptr, deleter(std::move(glock)));
     }
 }
 
@@ -197,12 +205,12 @@ template <typename T, typename M>
 template <typename TimePoint>
 auto guarded<T, M>::try_lock_until(const TimePoint &tp) -> handle
 {
-    std::unique_lock<M> lock(m_mutex, tp);
+    std::unique_lock<M> glock(m_mutex, tp);
 
-    if (lock.owns_lock()) {
-        return handle(&m_obj, deleter(std::move(lock)));
+    if (glock.owns_lock()) {
+        return handle(&m_obj, deleter(std::move(glock)));
     } else {
-        return handle(nullptr, deleter(std::move(lock)));
+        return handle(nullptr, deleter(std::move(glock)));
     }
 }
 

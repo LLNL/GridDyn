@@ -9,7 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#include "comms/relayMessage.h"
+#include "relayMessage.h"
 
 #include "utilities/stringOps.h"
 #include <map>

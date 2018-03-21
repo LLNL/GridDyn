@@ -14,7 +14,7 @@
 #define EVENTINTERFACE_H_
 #pragma once
 
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 
 namespace griddyn
 {

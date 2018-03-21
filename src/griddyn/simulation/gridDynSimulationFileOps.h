@@ -13,7 +13,7 @@
 #ifndef GRIDDYN_SIMULATION_FILE_OPS_H_
 #define GRIDDYN_SIMULATION_FILE_OPS_H_
 
-#include "solvers/solverMode.hpp"
+#include "../solvers/solverMode.hpp"
 
 #include <memory>
 template <class Y>

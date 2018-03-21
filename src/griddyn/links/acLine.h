@@ -13,7 +13,7 @@
 #ifndef ACLINE_H_
 #define ACLINE_H_
 
-#include "Link.h"
+#include "../Link.h"
 namespace griddyn
 {
 #define APPROXIMATION_LEVELS (9)

@@ -12,9 +12,9 @@
 
 // headers
 #include "gridLoadOpt.h"
-#include "loads/zipLoad.h"
+#include "griddyn/loads/zipLoad.h"
 #include "gridBusOpt.h"
-#include "optObjectFactory.h"
+#include "../optObjectFactory.h"
 #include "utilities/vectorOps.hpp"
 #include "utilities/vectData.hpp"
 #include "core/coreExceptions.h"

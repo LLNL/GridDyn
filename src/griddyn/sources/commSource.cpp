@@ -11,11 +11,11 @@
 */
 
 #include "commSource.h"
-#include "comms/Communicator.h"
-#include "comms/controlMessage.h"
+#include "../comms/Communicator.h"
+#include "../comms/controlMessage.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/eventQueue.h"
-#include "gridDynSimulation.h"
+#include "../events/eventQueue.h"
+#include "../gridDynSimulation.h"
 
 namespace griddyn
 {

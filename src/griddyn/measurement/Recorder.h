@@ -14,7 +14,7 @@
 #define GRIDDYN_RECORDER_H_
 
 #include "utilities/timeSeriesMulti.hpp"
-#include "measurement/collector.h"
+#include "collector.h"
 
 namespace griddyn
 {

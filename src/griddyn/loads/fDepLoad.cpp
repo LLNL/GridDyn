@@ -12,7 +12,7 @@
 
 #include "fDepLoad.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/stringOps.h"
 #include <cmath>

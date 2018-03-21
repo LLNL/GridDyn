@@ -15,7 +15,7 @@
 
 #include "compiler-config.h"
 
-#cmakedefine HAVE_MPI
+#cmakedefine GRIDDYN_HAVE_MPI
 
 #cmakedefine OPENMP_ENABLE
 #cmakedefine SUNDIALS_OPENMP
@@ -35,9 +35,9 @@
 
 #cmakedefine LOAD_ARKODE
 
-#cmakedefine DISABLE_LOGGING
-#cmakedefine DISABLE_TRACE_LOGGING
-#cmakedefine DISABLE_DEBUG_LOGGING
+#cmakedefine GRIDDYN_DISABLE_LOGGING
+#cmakedefine GRIDDYN_DISABLE_TRACE_LOGGING
+#cmakedefine GRIDDYN_DISABLE_DEBUG_LOGGING
 
 #cmakedefine YAML_FOUND
 
@@ -45,9 +45,9 @@
 
 #cmakedefine DIME_ENABLE
 
-#cmakedefine BOOST_STATIC
+#cmakedefine GRIDDYN_BOOST_STATIC
 
-#define BOOST_VERSION_LEVEL @BOOST_VERSION_LEVEL@
+#define GRIDYN_BOOST_VERSION_LEVEL @BOOST_VERSION_LEVEL@
 
 #define GRIDDYN_VERSION_MAJOR ${GRIDDYN_VERSION_MAJOR}
 #define GRIDDYN_VERSION_MINOR ${GRIDDYN_VERSION_MINOR}

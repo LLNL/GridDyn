@@ -11,7 +11,7 @@
 */
 
 #include "reversibleEvent.h"
-#include "measurement/gridGrabbers.h"
+#include "../measurement/gridGrabbers.h"
 
 
 namespace griddyn

@@ -13,7 +13,7 @@
 #ifndef DYNAMICGENERATOR_H_
 #define DYNAMICGENERATOR_H_
 #pragma once
-#include "Generator.h"
+#include "../Generator.h"
 
 namespace griddyn
 {

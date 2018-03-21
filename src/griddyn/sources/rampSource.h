@@ -13,7 +13,7 @@
 #ifndef RAMP_SOURCE_H_
 #define RAMP_SOURCE_H_
 
-#include "Source.h"
+#include "../Source.h"
 
 
 namespace griddyn

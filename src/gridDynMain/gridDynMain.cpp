@@ -12,11 +12,11 @@
 
 // headers
 #include "griddyn/griddyn-config.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 
-#include "gridDynRunner.h"
+#include "fileInput/gridDynRunner.h"
 
-#include "libraryLoader.h"
+#include "gridDynCombined/libraryLoader.h"
 #include <boost/format.hpp>
 #ifdef HELICS_EXECUTABLE
 #include "helics/helicsRunner.h"

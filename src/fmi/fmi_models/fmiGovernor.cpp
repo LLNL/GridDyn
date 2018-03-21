@@ -14,7 +14,7 @@
 #include "fmiGovernor.h"
 #include "core/coreObjectTemplates.hpp"
 #include "fmiMESubModel.h"
-#include "gridBus.h"
+#include "griddyn/gridBus.h"
 #include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 

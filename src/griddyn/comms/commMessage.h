@@ -10,11 +10,9 @@
  * LLNS Copyright End
 */
 
-#ifndef COMM_MESSAGE_H_
-#define COMM_MESSAGE_H_
 #pragma once
 
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <vector>
 #include <cstddef>
 #include <string>
@@ -23,9 +21,9 @@
 #include <type_traits>
 #include <cstdint>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/export.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/portable_binary.hpp>
+//#include <cereal/archives/json.hpp>
 
 namespace griddyn
 {
@@ -78,12 +76,11 @@ protected:
 private:
   std::uint32_t m_messageType = ignoreMessageType; //!< the actual type of the message
 
-  //add the boost serialization stuff
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template <class Archive>
-  void serialize (Archive & ar, const unsigned int /*version*/)
+  void serialize (Archive & ar)
   {
-    ar & m_messageType;
+    ar(m_messageType);
   }
 };
 
@@ -133,7 +130,7 @@ public:
   /** get a pointer to the underlying factory*/
   static std::shared_ptr<coreMessageFactory> instance ();
   /** insert a factory in the coreMessageFactory
-  @param[in] name the string used to find the message factory in subsequant operations
+  @param[in] name the string used to find the message factory in subsequent operations
   @param[in] mf pointer to a message factory to store in the core factory*/
   void registerFactory (std::string name, messageFactory *mf);
   /** insert a factory in the coreMessageFactory
@@ -210,5 +207,3 @@ public:
 };
 
 }//namespace griddyn
-
-#endif

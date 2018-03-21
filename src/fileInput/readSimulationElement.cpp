@@ -13,8 +13,8 @@
 #include "readElement.h"
 
 #include "elementReaderTemplates.hpp"
-#include "gridDynSimulation.h"
-#include "measurement/collector.h"
+#include "griddyn/gridDynSimulation.h"
+#include "griddyn/measurement/collector.h"
 #include "readerHelper.h"
 
 namespace griddyn

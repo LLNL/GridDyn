@@ -11,12 +11,12 @@
 */
 
 #include "zonalRelay.h"
-#include "comms/Communicator.h"
-#include "comms/relayMessage.h"
+#include "../comms/Communicator.h"
+#include "../comms/relayMessage.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "measurement/Condition.h"
+#include "../events/Event.h"
+#include "../measurement/Condition.h"
 #include "utilities/stringConversion.h"
 #include "utilities/timeSeries.hpp"
 #include <algorithm>

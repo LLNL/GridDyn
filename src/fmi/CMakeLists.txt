@@ -80,20 +80,20 @@ source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
 set_target_properties (fmiGDLibrary PROPERTIES FOLDER fmi)
 
-INCLUDE_DIRECTORIES(.)
+target_link_libraries(fmiGDLibrary griddyn)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/plugins)
-
+INSTALL(TARGETS fmiGDLibrary 
+		EXPORT griddyn-targets 
+		DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+		COMPONENT libraries)
 
 list(APPEND griddyn_optional_libraries fmiGDLibrary)
-list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/fmi)
 
 set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
 set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
 
 
-list (APPEND optional_library_key_headers fmiGDinfo.h)
+list (APPEND optional_library_key_headers fmi/fmiGDinfo.h)
 list (APPEND optional_library_functions loadFmiLibrary)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
@@ -103,10 +103,6 @@ set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
 list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/test/componentTests/testFMI.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${fmiImport_headers} ${fmiGD_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
+  COMPONENT headers)

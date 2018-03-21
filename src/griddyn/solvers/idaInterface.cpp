@@ -12,11 +12,11 @@
 
 #include "idaInterface.h"
 
-#include "gridDynSimulation.h"
+#include "../gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 
 
-#include "simulation/gridDynSimulationFileOps.h"
+#include "../simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 #include "utilities/matrixCreation.h"
 #include "utilities/matrixDataFilter.hpp"

@@ -10,11 +10,11 @@
  * LLNS Copyright End
 */
 
-#include "Load.h"
+#include "../Load.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
-#include "measurement/objectGrabbers.h"
+#include "../gridBus.h"
+#include "../measurement/objectGrabbers.h"
 #include "utilities/matrixData.hpp"
 
 #include <cmath>

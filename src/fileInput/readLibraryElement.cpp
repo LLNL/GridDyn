@@ -21,21 +21,21 @@
 #include <map>
 
 // A bunch of includes to load these kinds of objects
-#include "Area.h"
-#include "Block.h"
-#include "Exciter.h"
-#include "GenModel.h"
-#include "Generator.h"
-#include "Governor.h"
-#include "Link.h"
-#include "Relay.h"
-#include "Source.h"
-#include "Stabilizer.h"
-#include "controllers/AGControl.h"
-#include "controllers/reserveDispatcher.h"
-#include "controllers/scheduler.h"
-#include "gridBus.h"
-#include "loads/zipLoad.h"
+#include "griddyn/Area.h"
+#include "griddyn/Block.h"
+#include "griddyn/Exciter.h"
+#include "griddyn/GenModel.h"
+#include "griddyn/Generator.h"
+#include "griddyn/Governor.h"
+#include "griddyn/Link.h"
+#include "griddyn/Relay.h"
+#include "griddyn/Source.h"
+#include "griddyn/Stabilizer.h"
+#include "griddyn/controllers/AGControl.h"
+#include "griddyn/controllers/reserveDispatcher.h"
+#include "griddyn/controllers/scheduler.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/loads/zipLoad.h"
 
 namespace griddyn
 {

@@ -15,10 +15,10 @@
 // headers
 #include "helicsRunner.h"
 #include "coupling/GhostSwingBusManager.h"
-#include "fileInput.h"
-#include "gridDynSimulation.h"
+#include "fileInput/fileInput.h"
+#include "griddyn/gridDynSimulation.h"
 
-#include "libraryLoader.h"
+#include "gridDynCombined/libraryLoader.h"
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 

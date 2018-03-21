@@ -14,7 +14,7 @@
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
 
-#include "stringOps.h"
+#include "utilities/stringOps.h"
 
 namespace griddyn
 {

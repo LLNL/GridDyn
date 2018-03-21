@@ -10,18 +10,18 @@
  * LLNS Copyright End
  */
 
-#include "simulation/gridSimulation.h"
-#include "Area.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Relay.h"
+#include "../simulation/gridSimulation.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Relay.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "events/eventQueue.h"
-#include "gridBus.h"
-#include "loads/zipLoad.h"
-#include "measurement/collector.h"
+#include "../events/Event.h"
+#include "../events/eventQueue.h"
+#include "../gridBus.h"
+#include "../loads/zipLoad.h"
+#include "../measurement/collector.h"
 #include "utilities/logger.h"
 #include "utilities/stringOps.h"
 

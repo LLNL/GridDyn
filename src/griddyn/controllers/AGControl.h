@@ -14,7 +14,7 @@
 #define AGCONTROL_H_
 
 
-#include "gridSubModel.h"
+#include "griddyn/gridSubModel.h"
 #include "core/coreOwningPtr.hpp"
 
 namespace griddyn

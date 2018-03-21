@@ -14,7 +14,7 @@
 #define DCBUS_H_
 
 // headers
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "DcBusControls.h"
 #include "utilities/matrixDataTranslate.hpp"
 

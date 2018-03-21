@@ -12,12 +12,12 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "griddyn/Generator.h"
+#include "griddyn/gridBus.h"
 #include "fileInput.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "loads/zipLoad.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/links/adjustableTransformer.h"
+#include "griddyn/loads/zipLoad.h"
 #include "readerHelper.h"
 #include "utilities/stringConversion.h"
 

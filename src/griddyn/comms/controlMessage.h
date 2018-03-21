@@ -14,12 +14,10 @@
 #define GRIDDYN_CONTROL_MESSAGE_H_
 #pragma once
 
-#include "comms/commMessage.h"
-#include <string>
+#include "commMessage.h"
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #define BASE_CONTROL_MESSAGE_NUMBER 500
 
@@ -79,53 +77,27 @@ class controlMessage : public commMessage
     virtual void loadString (const std::string &fromString) override;
 
   private:
-    friend class boost::serialization::access;
+    friend class cereal::access;
     template <class Archive>
-    void serialize (Archive &ar, const unsigned int /*version*/)
+    void serialize (Archive &ar)
     {
-        ar &boost::serialization::base_object<commMessage> (*this);
-        ar &m_actionID;
-        switch (getMessageType ())
+        ar(cereal::base_class<commMessage>(this));
+        ar(m_actionID, m_field, m_units, m_value, m_time);
+        switch (m_messageType)
         {
-        case GET_RESULT:
-        case SET:
-            ar &m_field;
-            ar &m_units;
-            ar &m_value;
-            ar &m_time;
-            break;
-        case GET:
-            ar &m_field;
-            ar &m_units;
-            break;
         case GET_MULTIPLE:
-            ar &m_time;
-            ar &multiFields;
-            ar &multiUnits;
-            break;
         case SET_MULTIPLE:
-            ar &m_time;
-            ar &multiFields;
-            ar &multiValues;
-            ar &multiUnits;
-            break;
-        case GET_PERIODIC:
-            ar &m_field;
-            ar &m_units;
-            ar &m_time;
-            break;
         case GET_RESULT_MULTIPLE:
-            ar &m_time;
-            ar &multiFields;
-            ar &multiValues;
-
+            ar(multiFields, multiValues, multiUnits);
             break;
         default:
             break;
         }
+        
     }
 };
+
 }  // namespace comms
 }  // namespace griddyn
-// BOOST_CLASS_EXPORT_GUID(controlMessage, "controlMessage");
+
 #endif

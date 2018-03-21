@@ -25,9 +25,9 @@
 
 #include "core/factoryTemplates.hpp"
 
-#include "gridDynSimulation.h"
-#include "simulation/diagnostics.h"
-#include "simulation/gridDynSimulationFileOps.h"
+#include "../gridDynSimulation.h"
+#include "../simulation/diagnostics.h"
+#include "../simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 #include "utilities/matrixCreation.h"
 #include "utilities/matrixDataFilter.hpp"
@@ -215,7 +215,7 @@ double sundialsInterface::get (const std::string &param) const
     return solverInterface::get (param);
 }
 
-void sundialsInterface::KLUReInit(sparse_reinit_modes mode)
+void sundialsInterface::KLUReInit(sparse_reinit_modes reinitMode)
 {
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
@@ -223,7 +223,7 @@ void sundialsInterface::KLUReInit(sparse_reinit_modes mode)
         return;
     }
 
-    int kinmode = (mode == sparse_reinit_modes::refactor) ? 2 : 1;
+    int kinmode = (reinitMode == sparse_reinit_modes::refactor) ? 2 : 1;
     int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
     check_flag(&retval, "SUNKLUReInit", 1);
     jacCallCount = 0;

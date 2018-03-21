@@ -15,7 +15,7 @@
 
 #include "utilities/workQueue.h"
 #include "core/objectOperatorInterface.hpp"
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <future>
 #include <vector>
 #include <memory>

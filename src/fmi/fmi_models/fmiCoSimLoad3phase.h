@@ -13,7 +13,7 @@
 #ifndef FMI_COSIMLOADMODEL_3PHASE_H_
 #define FMI_COSIMLOADMODEL_3PHASE_H_
 
-#include "loads/ThreePhaseLoad.h"
+#include "griddyn/loads/ThreePhaseLoad.h"
 #include "fmiCoSimWrapper.hpp"
 
 

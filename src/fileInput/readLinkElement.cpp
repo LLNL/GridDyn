@@ -19,8 +19,8 @@
 #include "core/objectInterpreter.h"
 
 #include "core/coreExceptions.h"
-#include "gridBus.h"
-#include "Link.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/Link.h"
 
 namespace griddyn
 {

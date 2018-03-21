@@ -14,8 +14,8 @@
 #define STATE_GRABBER_H_
 #pragma once
 
-#include "gridComponent.h"
-#include "events/eventInterface.hpp"
+#include "../gridComponent.h"
+#include "../events/eventInterface.hpp"
 #include "core/objectOperatorInterface.hpp"
 #include <functional>
 /** @file 
@@ -27,12 +27,12 @@ namespace griddyn
 using objJacFunction=std::function<void(gridComponent *comp, const stateData &sD, matrixData<double> &md, const solverMode &sMode)> ;
 using objStateGrabberFunction=std::function<double(gridComponent *comp, const stateData &sD, const solverMode &sMode)>;
 
-/** define if the grabber can compute the jacobian information*/
+/** define if the grabber can compute the Jacobian information*/
 enum class jacobian_mode
 {
-	none,	//!< no jacobian computed
+	none,	//!< no Jacobian computed
 	direct,	//!< the result is a state directly
-	computed,	//!< the jacobian needs to be computed
+	computed,	//!< the Jacobian needs to be computed
 };
 
 /**class for grabbing a subset of fields directly from the state vector for performing certain calculations
@@ -80,13 +80,13 @@ public:
   virtual double grabData (const stateData &sD, const solverMode &sMode);
   /** compute the partial derivatives of a grabber
   @param[in] sD the stateData for computing the information
-  @param[in] md the the matrix to store the computed jacobian information into
+  @param[in] md the  matrix to store the computed Jacobian information into
   @param[in] sMode the solverMode associated with the stateData*/
   virtual void outputPartialDerivatives (const stateData &sD, matrixData<double> &md, const solverMode &sMode);
   virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual coreObject * getObject() const override;
   virtual void getObjects(std::vector<coreObject *> &objects) const override;
-  /** get the jacobian abilities of a grabber*/
+  /** get the Jacobian abilities of a grabber*/
   jacobian_mode getJacobianMode() const
   {
 	  return jacMode;
@@ -129,8 +129,8 @@ public:
   @param[in] nfptr the custom function for grabbing a state value
   */
   void setGrabberFunction (objStateGrabberFunction nfptr);
-  /** set the custom jacobian function related to a state Grabber
-  @param[in] nJfptr the custom function for generating jacobian information for a stateGrabber
+  /** set the custom Jacobian function related to a state Grabber
+  @param[in] nJfptr the custom function for generating Jacobian information for a stateGrabber
   */
   void setGrabberJacFunction(objJacFunction nJfptr);
 };

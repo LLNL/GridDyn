@@ -13,7 +13,7 @@
 #ifndef CYMEDIST_LOAD_H_
 #define CYMEDIST_LOAD_H_
 
-#include "fmi_models/fmiMELoad3phase.h"
+#include "fmiMELoad3phase.h"
 
 
 namespace griddyn

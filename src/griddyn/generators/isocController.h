@@ -14,7 +14,7 @@
 #define ISOCCONTROLLER_H_
 
 
-#include "gridSubModel.h"
+#include "../gridSubModel.h"
 namespace griddyn
 {
 class Generator;

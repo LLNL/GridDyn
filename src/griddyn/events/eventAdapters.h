@@ -17,10 +17,10 @@
 #include "core/coreObject.h"
 
 
-#include "events/eventInterface.hpp"
+#include "eventInterface.hpp"
 #include "core/objectOperatorInterface.hpp"
 #include "core/objectInterpreter.h"
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 
 #include <functional>
 #include <memory>

@@ -488,12 +488,12 @@ GRIDDYN_Export int gridDynSimulation_algebraicUpdate (gridDynSimReference sim,
                                                       double alpha,
                                                       solverKey key);
 
-/** generate a system jacobian matrix
+/** generate a system Jacobian matrix
 @param[in] sim the simulation runner reference object
-@param[in] time the time to use in the jacobian computation
+@param[in] time the time to use in the Jacobian computation
 @param[in] states the state variable values to use in the computation
-@param[in] dstate_dt the derivative information to use in the computation of the system jacobian
-@param[in] cj the constant of differentiation.  this is the number to use when the jacobian depends on the
+@param[in] dstate_dt the derivative information to use in the computation of the system Jacobian
+@param[in] cj the constant of differentiation.  this is the number to use when the Jacobian depends on the
 derivative of state
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @param[in] insert a function pointer to a callback that takes a row, a column and a value to define values on a

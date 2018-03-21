@@ -10,12 +10,12 @@
  * LLNS Copyright End
 */
 
-#include "loads/gridLabDLoad.h"
+#include "gridLabDLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "coupling/GhostSwingBusManager.h"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 

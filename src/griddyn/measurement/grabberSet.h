@@ -15,7 +15,7 @@
 #pragma once
 
 #include "core/objectOperatorInterface.hpp"
-#include "gridDynDefinitions.hpp"
+#include "../gridDynDefinitions.hpp"
 #include <memory>
 
 template<class Y>
@@ -109,7 +109,7 @@ public:
 	void setGain(double newGain);
 	/** check if the grabberSet is using state information*/
 	bool stateCapable() const;
-	/** check if the grabberSet can compute a jacobian*/
+	/** check if the grabberSet can compute a Jacobian*/
 	bool hasJacobian() const;
 };
 

@@ -12,8 +12,8 @@
 
 #include "GenModelGENROU.h"
 #include "core/coreObjectTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "../Generator.h"
+#include "../gridBus.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 

@@ -13,9 +13,9 @@
 #ifndef GRID_SUBSYSTEM_H_
 #define GRID_SUBSYSTEM_H_
 
-#include "Link.h"
+#include "../Link.h"
 
-#include "Area.h"
+#include "../Area.h"
 
 namespace griddyn
 {

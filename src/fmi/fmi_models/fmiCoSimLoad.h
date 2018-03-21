@@ -13,7 +13,7 @@
 #ifndef FMI_COSIMLOADMODEL_H_
 #define FMI_COSIMLOADMODEL_H_
 
-#include "Load.h"
+#include "griddyn/Load.h"
 #include "fmiCoSimWrapper.hpp"
 
 

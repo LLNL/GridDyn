@@ -10,16 +10,16 @@
  * LLNS Copyright End
 */
 
-#include "events/Event.h"
-#include "gridDynSimulation.h"
+#include "../events/Event.h"
+#include "../gridDynSimulation.h"
 
 #include "continuation.h"
-#include "events/eventQueue.h"
-#include "gridBus.h"
+#include "../events/eventQueue.h"
+#include "../gridBus.h"
 #include "gridDynSimulationFileOps.h"
 #include "powerFlowErrorRecovery.h"
-#include "simulation/diagnostics.h"
-#include "solvers/solverInterface.h"
+#include "../simulation/diagnostics.h"
+#include "../solvers/solverInterface.h"
 #include "utilities/vectorOps.hpp"
 // system headers
 #include <cmath>

@@ -13,7 +13,7 @@
 #ifndef SINE_SOURCE_H_
 #define SINE_SOURCE_H_
 
-#include "sources/pulseSource.h"
+#include "pulseSource.h"
 
 namespace griddyn
 {

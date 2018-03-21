@@ -10,11 +10,11 @@
  * LLNS Copyright End
  */
 
-#include "loads/aggregateLoad.h"
+#include "aggregateLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringConversion.h"
 
 #include <cmath>

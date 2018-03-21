@@ -12,10 +12,10 @@
 
 #include "griddyn_export.h"
 #include "griddyn_export_internal.h"
-#include "events/Event.h"
+#include "griddyn/events/Event.h"
 #include "fileInput/gridDynRunner.h"
 #include "core/coreExceptions.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include <memory>
 #include <vector>
 

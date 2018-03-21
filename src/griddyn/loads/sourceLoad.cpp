@@ -9,9 +9,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-#include "loads/sourceLoad.h"
-#include "Source.h"
-#include "sources/sourceTypes.h"
+#include "sourceLoad.h"
+#include "../Source.h"
+#include "../sources/sourceTypes.h"
 
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"

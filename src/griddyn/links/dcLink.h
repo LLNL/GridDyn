@@ -13,7 +13,7 @@
 #ifndef GRID_DC_LINK_H_
 #define GRID_DC_LINK_H_
 
-#include "Link.h"
+#include "../Link.h"
 
 namespace griddyn
 {

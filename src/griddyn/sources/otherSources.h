@@ -15,7 +15,7 @@
 
 
 #include "sourceTypes.h"
-#include "comms/commManager.h"
+#include "../comms/commManager.h"
 #include <functional>
 
 namespace griddyn

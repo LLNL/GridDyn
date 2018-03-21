@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#include "links/longLine.h"
+#include "longLine.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "primary/acBus.h"
+#include "../primary/acBus.h"
 
 #include <cmath>
 

@@ -13,7 +13,7 @@
 #include "core/coreExceptions.h"
 #include "core/coreObject.h"
 #include "formatInterpreters/readerElement.h"
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include "fileInput.h"
 #include "readElement.h"
 #include "readElement.h"

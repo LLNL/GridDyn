@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "blocks/blockLibrary.h"
+#include "blockLibrary.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "rampLimiter.h"

@@ -13,7 +13,7 @@
 #ifndef GRABBER_SOURCE_H_
 #define GRABBER_SOURCE_H_
 
-#include "sources/rampSource.h"
+#include "rampSource.h"
 
 
 namespace griddyn

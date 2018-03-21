@@ -13,12 +13,12 @@
 #include "txThermalModel.h"
 #include "core/coreObjectTemplates.hpp"
 
-#include "Link.h"
-#include "blocks/delayBlock.h"
-#include "measurement/grabberSet.h"
-#include "measurement/gridGrabbers.h"
-#include "measurement/Condition.h"
-#include "events/Event.h"
+#include "griddyn/Link.h"
+#include "griddyn/blocks/delayBlock.h"
+#include "griddyn/measurement/grabberSet.h"
+#include "griddyn/measurement/gridGrabbers.h"
+#include "griddyn/measurement/Condition.h"
+#include "griddyn/events/Event.h"
 #include "core/coreExceptions.h"
 #include "utilities/stringOps.h"
 

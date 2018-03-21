@@ -11,7 +11,7 @@
  */
 
 #include "AGControl.h"
-#include "comms/schedulerMessage.h"
+#include "../comms/schedulerMessage.h"
 #include "core/coreObjectTemplates.hpp"
 #include "reserveDispatcher.h"
 #include "scheduler.h"

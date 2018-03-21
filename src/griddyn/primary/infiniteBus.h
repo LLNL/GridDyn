@@ -13,7 +13,7 @@
 #ifndef INFINITEBUS_H_
 #define INFINITEBUS_H_
 
-#include "gridBus.h"
+#include "../gridBus.h"
 namespace griddyn
 {
 

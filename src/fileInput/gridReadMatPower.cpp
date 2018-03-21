@@ -14,17 +14,17 @@
 #include "readerHelper.h"
 
 #include "core/objectFactoryTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
-#include "links/acLine.h"
-#include "loads/zipLoad.h"
+#include "griddyn/Generator.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/loads/zipLoad.h"
 
 #ifdef OPTIMIZATION_ENABLE
 #include "gridDynOpt.h"
 #include "models/gridGenOpt.h"
 #include "optObjectFactory.h"
 #else
-#include "simulation/gridSimulation.h"
+#include "griddyn/simulation/gridSimulation.h"
 #endif
 
 #include "utilities/stringConversion.h"

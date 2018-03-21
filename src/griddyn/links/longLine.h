@@ -13,8 +13,8 @@
 #ifndef LONG_LINE_H_
 #define LONG_LINE_H_
 
-#include "links/subsystem.h"
-#include "links/acLine.h"
+#include "subsystem.h"
+#include "acLine.h"
 
 namespace griddyn
 {

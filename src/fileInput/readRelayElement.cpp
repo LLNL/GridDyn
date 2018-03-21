@@ -11,12 +11,12 @@
 */
 
 #include "elementReaderTemplates.hpp"
-#include "Generator.h"
-#include "Area.h"
-#include "gridBus.h"
-#include "loads/zipLoad.h"
+#include "griddyn/Generator.h"
+#include "griddyn/Area.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/loads/zipLoad.h"
 #include "readElement.h"
-#include "Relay.h"
+#include "griddyn/Relay.h"
 
 namespace griddyn
 {

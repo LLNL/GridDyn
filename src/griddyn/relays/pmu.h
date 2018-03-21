@@ -13,7 +13,7 @@
 #ifndef GRIDDYN_PMU_H_
 #define GRIDDYN_PMU_H_
 
-#include "relays/sensor.h"
+#include "sensor.h"
 
 namespace griddyn {
 namespace relays {

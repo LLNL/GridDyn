@@ -11,10 +11,10 @@
  */
 
 #include "dcBus.h"
-#include "Area.h"
-#include "Generator.h"
-#include "Link.h"
-#include "Load.h"
+#include "../Area.h"
+#include "../Generator.h"
+#include "../Link.h"
+#include "../Load.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"

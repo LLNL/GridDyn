@@ -12,12 +12,12 @@
 
 #include "helicsGhostBus.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "griddyn/gridBus.h"
 #include "helicsCoordinator.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
-#include "stringOps.h"
-#include "vectorOps.hpp"
+#include "utilities/stringOps.h"
+#include "utilities/vectorOps.hpp"
 
 namespace griddyn
 {

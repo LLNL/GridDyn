@@ -13,8 +13,8 @@
 #ifndef CONTINUATION_H_
 #define CONTINUATION_H_
 
-#include "events/Event.h"
-#include "measurement/collector.h"
+#include "../events/Event.h"
+#include "../measurement/collector.h"
 
 namespace griddyn
 {

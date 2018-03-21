@@ -12,10 +12,10 @@
 
 #ifndef GRIDDYN_EXPORT_INTERNAL_H_
 #define GRIDDYN_EXPORT_INTERNAL_H_
-#include "gridComponent.h"
-#include "solvers/solverMode.hpp"
+#include "griddyn/gridComponent.h"
+#include "griddyn/solvers/solverMode.hpp"
 typedef void * gridDynObject;
-/** make a gridDynObject wrapper out of an acual component pointer*/
+/** make a gridDynObject wrapper out of an actual component pointer*/
 gridDynObject creategridDynObject(griddyn::gridComponent *comp);
 /** get the component pointer from a gridDynObject*/
 griddyn::gridComponent *getComponentPointer(gridDynObject obj);

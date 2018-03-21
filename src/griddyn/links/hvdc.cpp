@@ -11,14 +11,14 @@
 */
 
 // headers
-#include "links/hvdc.h"
-#include "Link.h"
+#include "hvdc.h"
+#include "../Link.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "gridBus.h"
-#include "links/acdcConverter.h"
-#include "links/dcLink.h"
-#include "primary/dcBus.h"
+#include "../gridBus.h"
+#include "acdcConverter.h"
+#include "dcLink.h"
+#include "../primary/dcBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 

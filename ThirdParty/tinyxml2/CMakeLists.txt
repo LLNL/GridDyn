@@ -10,6 +10,9 @@
 
 #project name
 
+cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
+
 project(tinyxml2)
 set(tinyxml2files tinyxml2.cpp)
 set(tinyxml2_headers tinyxml2.h)
@@ -40,6 +43,6 @@ INSTALL(TARGETS tinyxml2
 	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/  
 	EXPORT tinyxml2-targets)
 	
-install (EXPORT tinyxml2-targets DESTINATION cmake/)
+install (EXPORT tinyxml2-targets NAMESPACE tinyxml2:: DESTINATION cmake/)
 
 INSTALL(FILES ${tinyxml2_headers} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/tinyxml2)

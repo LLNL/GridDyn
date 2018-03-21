@@ -14,8 +14,8 @@
 
 #include "fmiMESubModel.h"
 #include "core/coreObjectTemplates.hpp"
-#include "fmi_import/fmiLibraryManager.h"
-#include "fmi_import/fmiObjects.h"
+#include "../fmi_import/fmiLibraryManager.h"
+#include "../fmi_import/fmiObjects.h"
 #include "utilities/vectorOps.hpp"
 #include  "utilities/matrixData.hpp"
 #include "outputEstimator.h"

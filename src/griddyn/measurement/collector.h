@@ -13,7 +13,7 @@
 #ifndef GRIDDYN_COLLECTOR_H_
 #define GRIDDYN_COLLECTOR_H_
 
-#include "events/eventInterface.hpp"
+#include "../events/eventInterface.hpp"
 #include "core/helperObject.h"
 #include "utilities/units.h"
 #include "core/objectOperatorInterface.hpp"

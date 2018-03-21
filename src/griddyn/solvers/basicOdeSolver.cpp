@@ -12,7 +12,7 @@
 
 #include "basicOdeSolver.h"
 
-#include "gridDynSimulation.h"
+#include "../gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>

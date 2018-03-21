@@ -14,11 +14,11 @@
 #define GOVERNORIEEE_SIMPLE_H_
 #pragma once
 
-#include "Governor.h"
+#include "../Governor.h"
 
-#include "blocks/delayBlock.h"
-#include "blocks/deadbandBlock.h"
-#include "blocks/controlBlock.h"
+#include "../blocks/delayBlock.h"
+#include "../blocks/deadbandBlock.h"
+#include "../blocks/controlBlock.h"
 
 namespace griddyn
 {

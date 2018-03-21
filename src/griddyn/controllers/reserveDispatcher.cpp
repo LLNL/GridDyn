@@ -12,8 +12,8 @@
 
 #include "reserveDispatcher.h"
 #include "AGControl.h"
-#include "Area.h"
-#include "Generator.h"
+#include "../Area.h"
+#include "../Generator.h"
 #include "core/coreExceptions.h"
 #include "scheduler.h"
 

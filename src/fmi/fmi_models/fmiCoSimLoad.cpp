@@ -12,10 +12,10 @@
 
 
 #include "fmiCoSimLoad.h"
-#include "fmi_import/fmiObjects.h"
+#include "../fmi_import/fmiObjects.h"
 #include "fmiMESubModel.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "griddyn/gridBus.h"
 #include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
 

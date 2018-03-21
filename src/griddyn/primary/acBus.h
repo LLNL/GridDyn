@@ -14,7 +14,7 @@
 #define ACBUS_H_
 
 // headers
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/matrixDataCompact.hpp"
 
 #include "utilities/matrixDataTranslate.hpp"

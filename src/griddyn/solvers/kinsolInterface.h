@@ -59,8 +59,8 @@ class kinsolInterface : public sundialsInterface
 #if MEASURE_TIMINGS > 0
     double kinTime = 0;  //!< the total time spent in kinsol
     double residTime = 0;	//!< the total time spent in the residual calls
-    double jacTime = 0;	//!< the total time spent in the jacobian calls
-    double jac1Time = 0;	//!< the total time spent in the first jacobian call
+    double jacTime = 0;	//!< the total time spent in the Jacobian calls
+    double jac1Time = 0;	//!< the total time spent in the first Jacobian call
     double kinsol1Time = 0;	//!< the total time spent in kinsol
 #endif
 };

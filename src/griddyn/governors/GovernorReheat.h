@@ -14,7 +14,7 @@
 #define GOVERNOR_REHEAT_H_
 #pragma once
 
-#include "Governor.h"
+#include "../Governor.h"
 
 
 namespace griddyn

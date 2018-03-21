@@ -12,8 +12,8 @@
 
 #include "faultResetRecovery.h"
 #include "diagnostics.h"
-#include "gridDynSimulation.h"
-#include "solvers/solverInterface.h"
+#include "../gridDynSimulation.h"
+#include "../solvers/solverInterface.h"
 
 namespace griddyn
 {

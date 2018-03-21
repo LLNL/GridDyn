@@ -8,16 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-IF(UNIX)
-  add_compile_options(-fvisibility=hidden)
-ELSE(UNIX)
-  IF(MINGW)
- add_compile_options(-fvisibility=hidden)
-  ENDIF(MINGW)
-ENDIF(UNIX)
-
 
 set(griddyn_lib_headers
 griddyn.h
@@ -36,30 +26,31 @@ griddyn_exportEvents.cpp
 )
 
 add_library(griddyn_shared_lib SHARED ${griddyn_lib_sources} ${griddyn_lib_headers})
-add_definitions(-DBUILD_DLL=1)
-link_directories(${external_link_directories})
+target_compile_definitions(griddyn_shared_lib PRIVATE -DBUILD_DLL=1)
 
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
+IF(UNIX)
+  target_compile_options(griddyn_shared_lib PRIVATE -fvisibility=hidden)
+ELSE(UNIX)
+  IF(MINGW)
+ target_compile_options(griddyn_shared_lib PRIVATE -fvisibility=hidden)
+  ENDIF(MINGW)
+ENDIF(UNIX)
 
+target_link_libraries(griddyn_shared_lib PRIVATE gridDynCombined)
+if (UNIX OR MINGW)
+	if (NOT APPLE)
+		target_link_libraries(griddyn_shared_lib PRIVATE -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export.txt)
+	endif(NOT APPLE)
+endif()
 
-target_link_libraries(griddyn_shared_lib gridDynCombined -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export.txt)
-
-
-INSTALL(TARGETS griddyn_shared_lib
+INSTALL(TARGETS griddyn_shared_lib EXPORT griddyn-targets
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} 
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
-INSTALL(FILES $<TARGET_LINKER_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime EXCLUDE_FROM_ALL)
+INSTALL(FILES $<TARGET_LINKER_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries EXCLUDE_FROM_ALL)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${griddyn_lib_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/shared
+  COMPONENT headers)

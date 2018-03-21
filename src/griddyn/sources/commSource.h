@@ -13,8 +13,8 @@
 #ifndef COMM_SOURCE_H_
 #define COMM_SOURCE_H_
 
-#include "sources/rampSource.h"
-#include "comms/commManager.h"
+#include "rampSource.h"
+#include "../comms/commManager.h"
 
 namespace griddyn
 {

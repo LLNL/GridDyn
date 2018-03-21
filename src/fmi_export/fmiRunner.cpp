@@ -13,12 +13,12 @@
 #include "fmiRunner.h"
 #include "fmi/FMI2/fmi2Functions.h"
 #include "fmiCoordinator.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "fileInput/fileInput.h"
 #include "boost/filesystem.hpp"
 #include "loadFMIExportObjects.h"
 #include "core/coreOwningPtr.hpp"
-#include "libraryLoader.h"
+#include "griddynCombined/libraryLoader.h"
 
 namespace griddyn
 {

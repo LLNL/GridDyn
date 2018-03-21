@@ -13,7 +13,7 @@
 #ifndef TRANSFER_FUNCTION_BLOCK_H_
 #define TRANSFER_FUNCTION_BLOCK_H_
 
-#include "Block.h"
+#include "../Block.h"
 
 namespace griddyn
 {

@@ -17,7 +17,7 @@
 #include "readElement.h"
 #include "formatInterpreters/readerElement.h"
 #include "core/coreObject.h"
-#include "simulation/gridSimulation.h"
+#include "griddyn/simulation/gridSimulation.h"
 #include "boost/filesystem.hpp"
 
 #include <type_traits>

@@ -13,7 +13,7 @@
 #ifndef HELICS_SOURCE_HEADER_
 #define HELICS_SOURCE_HEADER_
 
-#include "sources/rampSource.h"
+#include "griddyn/sources/rampSource.h"
 #include "helicsSupport.h"
 namespace griddyn
 {

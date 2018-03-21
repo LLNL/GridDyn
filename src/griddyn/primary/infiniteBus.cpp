@@ -12,7 +12,7 @@
 
 // headers
 #include "infiniteBus.h"
-#include "Link.h"
+#include "../Link.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 

@@ -12,8 +12,8 @@
 #ifndef DIFFERENTIAL_RELAY_H_
 #define DIFFERENTIAL_RELAY_H_
 
-#include "Relay.h"
-#include "comms/commMessage.h"
+#include "../Relay.h"
+#include "../comms/commMessage.h"
 namespace griddyn
 {
 namespace relays

@@ -11,7 +11,7 @@
 */
 
 #include "listMaintainer.h"
-#include "Area.h"
+#include "../Area.h"
 namespace griddyn
 {
 void fillList (const solverMode &sMode,

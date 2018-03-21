@@ -13,7 +13,7 @@
 #ifndef OUTPUT_ESTIMATOR_H_
 #define OUTPUT_ESTIMATOR_H_
 
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 
 namespace griddyn
 {

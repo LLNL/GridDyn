@@ -25,7 +25,7 @@ file(WRITE ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 " */\n"
 "\n"
 "//automatically generated file\n"
-"\#include \"libraryLoader.h\"\n"
+"\#include \"griddynCombined/libraryLoader.h\"\n"
 "\#include \"griddyn/griddyn-config.h\"\n"
 )
 
@@ -64,31 +64,13 @@ set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
 #message("external_lib_dirs: ${external_link_directories}")
 link_directories(${external_link_directories})
 
-
-set(gd_library_list
-griddyn
-coreObjects
-coupling_static_lib
-utilities
-formatInterpreter
-)
-
-
-INCLUDE_DIRECTORIES(.)
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
-
 INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
 
 #Merge_static_libs(gridDynCombined ${gd_library_list} ${external_library_list})
 
 #fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
-target_link_libraries(gridDynCombined fileInput ${griddyn_optional_libraries} ${gd_library_list} ${external_library_list} )
+target_link_libraries(gridDynCombined fileInput ${griddyn_optional_libraries} griddyn coupling_static_lib ${external_library_list} )
 
-IF (KLU_CMAKE)
-target_link_libraries(gridDynCombined SuiteSparse::klu)
-ENDIF(KLU_CMAKE)
 
 if(DL_REQUIRED OR FMI_ENABLE)
 	target_link_libraries(gridDynCombined ${CMAKE_DL_LIBS})
@@ -99,13 +81,9 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fskit)
 target_link_libraries(gridDynCombined fskitLibrary)
 ENDIF(FSKIT_ENABLE)
 
-INSTALL(TARGETS gridDynCombined DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS gridDynCombined EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+INSTALL(FILES libraryLoader.h
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+   COMPONENT headers)
 

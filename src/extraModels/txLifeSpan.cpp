@@ -14,12 +14,12 @@
 #include "txLifeSpan.h"
 #include "core/coreObjectTemplates.hpp"
 
-#include "blocks/integralBlock.h"
-#include "Link.h"
-#include "measurement/gridGrabbers.h"
-#include "measurement/grabberSet.h"
-#include "events/Event.h"
-#include "measurement/Condition.h"
+#include "griddyn/blocks/integralBlock.h"
+#include "griddyn/Link.h"
+#include "griddyn/measurement/gridGrabbers.h"
+#include "griddyn/measurement/grabberSet.h"
+#include "griddyn/events/Event.h"
+#include "griddyn/measurement/Condition.h"
 #include "core/coreExceptions.h"
 #include <cmath>
 

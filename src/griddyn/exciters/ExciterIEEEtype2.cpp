@@ -11,8 +11,8 @@
 */
 
 #include "core/coreObjectTemplates.hpp"
-#include "Generator.h"
-#include "gridBus.h"
+#include "../Generator.h"
+#include "../gridBus.h"
 #include "ExciterIEEEtype2.h"
 #include "utilities/matrixData.hpp"
 #include <cmath>

@@ -14,7 +14,7 @@
 
 #include "core/helperObject.h"
 #include "elementReaderTemplates.hpp"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "readerHelper.h"
 #include <sstream>
 #include <boost/filesystem.hpp>

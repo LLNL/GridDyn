@@ -18,7 +18,7 @@
 #include "utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
-#include "gridComponent.h"
+#include "griddyn/gridComponent.h"
 #include <type_traits>
 
 namespace griddyn

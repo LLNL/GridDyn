@@ -13,7 +13,7 @@
 #ifndef APPROXIMATINGLOAD_H_
 #define APPROXIMATINGLOAD_H_
 
-#include "loads/otherLoads.h"
+#include "otherLoads.h"
 #include <future>
 namespace griddyn
 {

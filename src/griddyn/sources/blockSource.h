@@ -13,7 +13,7 @@
 #ifndef BLOCK_SOURCE_H_
 #define BLOCK_SOURCE_H_
 
-#include "Source.h"
+#include "../Source.h"
 
 namespace griddyn
 {

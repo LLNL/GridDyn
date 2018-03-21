@@ -14,7 +14,7 @@
 #define FMI_MEWRAPPER_H_
 
 #include "fmiWrapper.hpp"
-#include "fmi_models/fmiMESubModel.h"
+#include "../fmi_models/fmiMESubModel.h"
 
 namespace griddyn
 {

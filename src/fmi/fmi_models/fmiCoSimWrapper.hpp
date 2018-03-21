@@ -14,7 +14,7 @@
 #define FMI_COSIMWRAPPER_H_
 
 #include "fmiWrapper.hpp"
-#include "fmi_models/fmiCoSimSubModel.h"
+#include "../fmi_models/fmiCoSimSubModel.h"
 namespace griddyn
 {
 namespace fmi

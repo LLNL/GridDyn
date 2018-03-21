@@ -13,7 +13,7 @@
 #ifndef BLOCK_SEQUENCE_H_
 #define BLOCK_SEQUENCE_H_
 #pragma once
-#include "Block.h"
+#include "../Block.h"
 
 namespace griddyn
 {

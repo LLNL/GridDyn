@@ -11,7 +11,7 @@
  */
 
 #include "blockSource.h"
-#include "Block.h"
+#include "../Block.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include <algorithm>

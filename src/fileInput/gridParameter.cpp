@@ -12,7 +12,7 @@
 
 #include "gridParameter.h"
 #include "core/coreExceptions.h"
-#include "gridDynDefinitions.hpp"
+#include "griddyn/gridDynDefinitions.hpp"
 #include "utilities/string_viewConversion.h"
 
 namespace griddyn

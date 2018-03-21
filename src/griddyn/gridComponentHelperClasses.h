@@ -285,7 +285,7 @@ class stateSizes
     /** reset the root counter and  sizes to 0*/
 	void rootReset() { algRoots = diffRoots = 0; };
 
-	/** reset the jacobian counter and  sizes to 0*/
+	/** reset the Jacobian counter and  sizes to 0*/
 	void JacobianReset() { jacSize = 0; };
     /** add another stateSizes object to this one
     @param[in] arg the stateSizes object to combine*/

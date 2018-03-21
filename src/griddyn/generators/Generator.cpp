@@ -10,13 +10,13 @@
  * LLNS Copyright End
 */
 
-#include "controllers/scheduler.h"
+#include "../controllers/scheduler.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "gridBus.h"
-#include "measurement/objectGrabbers.h"
+#include "../gridBus.h"
+#include "../measurement/objectGrabbers.h"
 #include "utilities/OperatingBoundary.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/stringOps.h"

@@ -11,12 +11,12 @@
 */
 
 #include "core/coreExceptions.h"
-#include "Generator.h"
+#include "griddyn/Generator.h"
 #include "fileInput.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "loads/zipLoad.h"
-#include "primary/acBus.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/links/adjustableTransformer.h"
+#include "griddyn/loads/zipLoad.h"
+#include "griddyn/primary/acBus.h"
 #include "readerHelper.h"
 #include "utilities/stringConversion.h"
 

@@ -14,7 +14,7 @@
 #define GRID_HVDC_H_
 
 
-#include "links/subsystem.h"
+#include "subsystem.h"
 
 namespace griddyn
 {

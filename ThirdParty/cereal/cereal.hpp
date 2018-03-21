@@ -156,6 +156,14 @@ namespace cereal
   instantiate_polymorphic_binding( T*, Archive*, BindingTag, adl_tag ); \
   } } /* end namespaces */
 
+  //! Helper macro to omit unused warning
+  #if defined(__GNUC__)
+    // GCC / clang don't want the function
+    #define CEREAL_UNUSED_FUNCTION
+  #else
+    #define CEREAL_UNUSED_FUNCTION static void unused() { (void)version; }
+  #endif
+
   // ######################################################################
   //! Defines a class version for some type
   /*! Versioning information is optional and adds some small amount of
@@ -218,7 +226,7 @@ namespace cereal
              std::type_index(typeid(TYPE)).hash_code(), VERSION_NUMBER );        \
         return VERSION_NUMBER;                                                   \
       }                                                                          \
-      static void unused() { (void)version; }                                    \
+      CEREAL_UNUSED_FUNCTION                                                     \
     }; /* end Version */                                                         \
     const std::uint32_t Version<TYPE>::version =                                 \
       Version<TYPE>::registerVersion();                                          \
@@ -269,14 +277,14 @@ namespace cereal
       //! Indicates this archive is not intended for loading
       /*! This ensures compatibility with boost archive types.  If you are transitioning
           from boost, you can check this value within a member or external serialize function
-          (i.e., Archive::is_loading::value) to disable behavior specific to loading, until 
+          (i.e., Archive::is_loading::value) to disable behavior specific to loading, until
           you can transition to split save/load or save_minimal/load_minimal functions */
       using is_loading = std::false_type;
 
       //! Indicates this archive is intended for saving
       /*! This ensures compatibility with boost archive types.  If you are transitioning
           from boost, you can check this value within a member or external serialize function
-          (i.e., Archive::is_saving::value) to enable behavior specific to loading, until 
+          (i.e., Archive::is_saving::value) to enable behavior specific to loading, until
           you can transition to split save/load or save_minimal/load_minimal functions */
       using is_saving = std::true_type;
 
@@ -511,8 +519,7 @@ namespace cereal
       /*! If this is the first time this class has been serialized, we will record its
           version number and serialize that.
 
-          @tparam T The type of the class being serialized
-          @param version The version number associated with it */
+          @tparam T The type of the class being serialized */
       template <class T> inline
       std::uint32_t registerClassVersion()
       {
@@ -656,14 +663,14 @@ namespace cereal
       //! Indicates this archive is intended for loading
       /*! This ensures compatibility with boost archive types.  If you are transitioning
           from boost, you can check this value within a member or external serialize function
-          (i.e., Archive::is_loading::value) to enable behavior specific to loading, until 
+          (i.e., Archive::is_loading::value) to enable behavior specific to loading, until
           you can transition to split save/load or save_minimal/load_minimal functions */
       using is_loading = std::true_type;
 
       //! Indicates this archive is not intended for saving
       /*! This ensures compatibility with boost archive types.  If you are transitioning
           from boost, you can check this value within a member or external serialize function
-          (i.e., Archive::is_saving::value) to disable behavior specific to loading, until 
+          (i.e., Archive::is_saving::value) to disable behavior specific to loading, until
           you can transition to split save/load or save_minimal/load_minimal functions */
       using is_saving = std::false_type;
 
@@ -920,8 +927,7 @@ namespace cereal
       /*! If this is the first time this class has been serialized, we will record its
           version number and serialize that.
 
-          @tparam T The type of the class being serialized
-          @param version The version number associated with it */
+          @tparam T The type of the class being serialized */
       template <class T> inline
       std::uint32_t loadClassVersion()
       {

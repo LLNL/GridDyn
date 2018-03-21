@@ -12,7 +12,7 @@
 
 #include "grabberSource.h"
 #include "core/objectInterpreter.h"
-#include "measurement/grabberSet.h"
+#include "../measurement/grabberSet.h"
 #include "core/coreObjectTemplates.hpp"
 
 namespace griddyn

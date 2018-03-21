@@ -13,7 +13,7 @@
 #ifndef GENMODELCLASSICAL_H_
 #define GENMODELCLASSICAL_H_
 
-#include "GenModel.h"
+#include "../GenModel.h"
 
 namespace griddyn
 {

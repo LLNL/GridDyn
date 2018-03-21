@@ -11,14 +11,14 @@
 */
 
 // headers
-#include "links/subsystem.h"
-#include "Link.h"
-#include "Relay.h"
+#include "subsystem.h"
+#include "../Link.h"
+#include "../Relay.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringConversion.h"
 #include "utilities/vectorOps.hpp"
 #include <cmath>

@@ -13,7 +13,7 @@
 #ifndef MOTOR_LOAD_H_
 #define MOTOR_LOAD_H_
 
-#include "Load.h"
+#include "../Load.h"
 namespace griddyn
 {
 namespace loads

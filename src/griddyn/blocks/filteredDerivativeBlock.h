@@ -13,7 +13,7 @@
 #ifndef FILTERED_DERIVATIVE_BLOCK_H_
 #define FILTERED_DERIVATIVE_BLOCK_H_
 #pragma once
-#include "Block.h"
+#include "../Block.h"
 
 namespace griddyn
 {

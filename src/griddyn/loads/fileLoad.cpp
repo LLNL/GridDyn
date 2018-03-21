@@ -12,7 +12,7 @@
 
 #include "fileLoad.h"
 #include "core/coreObjectTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringOps.h"
 
 #include "utilities/vectorOps.hpp"

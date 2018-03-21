@@ -13,7 +13,7 @@
 #ifndef HELICS_LOAD_HEADER_
 #define HELICS_LOAD_HEADER_
 
-#include "loads/rampLoad.h"
+#include "griddyn/loads/rampLoad.h"
 #include "helics/helicsSupport.h"
 namespace griddyn
 {

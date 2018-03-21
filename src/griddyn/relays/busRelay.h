@@ -13,7 +13,7 @@
 #ifndef BUS_RELAY_H_
 #define BUS_RELAY_H_
 
-#include "Relay.h"
+#include "../Relay.h"
 namespace griddyn
 {
 namespace relays

@@ -11,13 +11,13 @@
  */
 
 #include "fileInput/gridDynRunner.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 
 #include "griddyn_export.h"
 
 #include "griddyn_export_internal.h"
 #include "utilities/matrixDataCustomWriteOnly.hpp"
-#include "measurement/objectGrabbers.h"
+#include "griddyn/measurement/objectGrabbers.h"
 
 using namespace griddyn;
 

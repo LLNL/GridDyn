@@ -58,22 +58,16 @@ set(header_files
 	
 add_library(optimization STATIC ${opt_files})
 
+target_link_libraries(optimization PUBLIC griddyn)
+
 source_group("optimization" FILES ${opt_sim_sources})
 source_group("models" FILES ${opt_model_sources})
 
-INCLUDE_DIRECTORIES(.)
+INSTALL(TARGETS optimization EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries})
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-
-INSTALL(TARGETS optimization DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries})
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION include/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${header_files}
+  DESTINATION include/griddyn/optimization
+   COMPONENT headers)
 
 list(APPEND griddyn_optional_libraries optimization)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/optimization)

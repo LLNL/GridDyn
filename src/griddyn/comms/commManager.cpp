@@ -10,7 +10,7 @@
 * LLNS Copyright End
 */
 #include "commManager.h"
-#include "comms/Communicator.h"
+#include "Communicator.h"
 #include "core/propertyBuffer.h"
 
 namespace griddyn

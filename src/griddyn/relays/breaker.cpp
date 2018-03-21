@@ -11,16 +11,16 @@
 */
 
 #include "breaker.h"
-#include "measurement/Condition.h"
+#include "../measurement/Condition.h"
 
-#include "Link.h"
+#include "../Link.h"
 #include "core/coreObjectTemplates.hpp"
-#include "events/Event.h"
-#include "gridBus.h"
-#include "gridSecondary.h"
-#include "measurement/grabberSet.h"
-#include "measurement/gridGrabbers.h"
-#include "measurement/stateGrabber.h"
+#include "../events/Event.h"
+#include "../gridBus.h"
+#include "../gridSecondary.h"
+#include "../measurement/grabberSet.h"
+#include "../measurement/gridGrabbers.h"
+#include "../measurement/stateGrabber.h"
 #include "utilities/matrixDataSparse.hpp"
 
 #include <boost/format.hpp>

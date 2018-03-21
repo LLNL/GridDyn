@@ -10,20 +10,20 @@
  * LLNS Copyright End
  */
 
-#include "events/Event.h"
-#include "events/eventQueue.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "loads/gridLabDLoad.h"
+#include "../events/Event.h"
+#include "../events/eventQueue.h"
+#include "../gridBus.h"
+#include "../gridDynSimulation.h"
+#include "../loads/gridLabDLoad.h"
 
 #include "contingency.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "events/parameterOperator.h"
+#include "../events/parameterOperator.h"
 #include "gridDynSimulationFileOps.h"
-#include "solvers/solverInterface.h"
+#include "../solvers/solverInterface.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixData.hpp"
 #include "utilities/stringOps.h"

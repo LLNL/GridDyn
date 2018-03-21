@@ -13,7 +13,7 @@
 #include "elementReaderTemplates.hpp"
 #include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "formatInterpreters/tinyxmlReaderElement.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "readElement.h"
 #include "readElementFile.h"
 #include "readerHelper.h"

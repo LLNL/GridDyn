@@ -18,7 +18,7 @@
 #include "zmqLibrary/zmqReactor.h"
 #include <zmqlib/cppzmq/zmq_addon.hpp>
 
-#include "comms/commMessage.h"
+#include "griddyn/comms/commMessage.h"
 
 namespace griddyn
 {

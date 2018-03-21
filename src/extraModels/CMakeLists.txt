@@ -23,19 +23,12 @@ set(extra_headers
 add_library(extraModelLibrary ${extra_sources} ${extra_headers})
 set_target_properties (extraModelLibrary PROPERTIES FOLDER libraries)
 
-INCLUDE_DIRECTORIES(.)
+target_link_libraries(extraModelLibrary PUBLIC griddyn)
+INSTALL(TARGETS extraModelLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-
-INSTALL(TARGETS extraModelLibrary DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.h" COMPONENT headers)
-
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  FILES_MATCHING PATTERN "*.hpp" COMPONENT headers)
+INSTALL(FILES ${extra_headers}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraModels
+ COMPONENT headers)
 
 list(APPEND griddyn_optional_libraries extraModelLibrary)
 list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/extraModels)
@@ -43,7 +36,7 @@ list(APPEND griddyn_optional_include_dirs ${PROJECT_SOURCE_DIR}/src/extraModels)
 set(griddyn_optional_libraries ${griddyn_optional_libraries} PARENT_SCOPE)
 set(griddyn_optional_include_dirs ${griddyn_optional_include_dirs} PARENT_SCOPE)
 
-list (APPEND optional_library_key_headers extraModels.h)
+list (APPEND optional_library_key_headers extraModels/extraModels.h)
 list (APPEND optional_library_functions loadExtraModels)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)

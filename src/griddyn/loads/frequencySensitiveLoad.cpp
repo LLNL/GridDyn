@@ -10,12 +10,12 @@
 * LLNS Copyright End
 */
 
-#include "loads/frequencySensitiveLoad.h"
+#include "frequencySensitiveLoad.h"
 
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "gridBus.h"
+#include "../gridBus.h"
 
 #include "utilities/matrixData.hpp"
 

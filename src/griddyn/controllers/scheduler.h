@@ -14,8 +14,8 @@
 #define SCHEDULER_H_
 #pragma once
 
-#include "Source.h"
-#include "comms/commManager.h"
+#include "../Source.h"
+#include "../comms/commManager.h"
 #include "schedulerInfo.h"
 #include <list>
 #include <utility>

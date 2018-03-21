@@ -13,8 +13,8 @@
 #define CONTROL_RELAY_H_
 
 #include <unordered_map>
-#include "Relay.h"
-#include "Link.h"  //some special features for links
+#include "../Relay.h"
+#include "../Link.h"  //some special features for links
 
 namespace griddyn
 {

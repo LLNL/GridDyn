@@ -14,7 +14,7 @@
 
 #include <sstream>
 #include <regex>
-#include "stringConversion.h"
+#include "utilities/stringConversion.h"
 #include "utilities/mapOps.hpp"
 
 namespace griddyn

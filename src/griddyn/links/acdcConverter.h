@@ -13,7 +13,7 @@
 #ifndef GRID_ACDCCONVERTER_H_
 #define GRID_ACDCCONVERTER_H_
 
-#include "Link.h"
+#include "../Link.h"
 #include "core/coreOwningPtr.hpp"
 
 namespace griddyn

@@ -13,7 +13,7 @@
 #ifndef ADJUSTABLE_LINKS_H_
 #define ADJUSTABLE_LINKS_H_
 
-#include "links/acLine.h"
+#include "acLine.h"
 
 namespace griddyn
 {

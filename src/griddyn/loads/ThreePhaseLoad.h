@@ -13,7 +13,7 @@
 #ifndef GRIDLOAD3PHASE_H_
 #define GRIDLOAD3PHASE_H_
 
-#include "Load.h"
+#include "../Load.h"
 namespace griddyn
 {
 class gridBus;

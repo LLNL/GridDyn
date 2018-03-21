@@ -17,9 +17,13 @@ function (build_sundials)
     #message(STATUS "KLU_DIR=${SuiteSparse_LIBRARY_DIR}")
 	
     #generate false dependency project
-    IF (UNIX)
-    set(EXTRA_C_FLAGS -fpic)
-    ENDIF(UNIX)
+    IF (UNIX OR MINGW)
+		set(EXTRA_C_FLAGS -fpic)
+	ELSE()
+		if (MSVC)
+			set(EXTRA_C_FLAGS /MP)
+		endif()
+    ENDIF()
     set(CMAKE_LIST_CONTENT "
     cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)

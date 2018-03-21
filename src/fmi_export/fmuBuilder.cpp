@@ -15,7 +15,7 @@
 #include "fmiCollector.h"
 #include "fmiCoordinator.h"
 #include "fmiEvent.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "loadFMIExportObjects.h"
 #include "tinyxml2/tinyxml2.h"
 #include "utilities/stringOps.h"

@@ -175,7 +175,7 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
         LIBRARY DESTINATION lib)
 		
 install(TARGETS zlib DESTINATION lib EXPORT zlib-targets)		
-install (EXPORT zlib-targets DESTINATION cmake/)
+install (EXPORT zlib-targets NAMESPACE zlib:: DESTINATION cmake/)
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include)

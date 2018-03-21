@@ -10,6 +10,9 @@
 
 #project name
 
+cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
+
 project(ticpp)
 set(ticppfiles ticpp.cpp tinystr.cpp tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp)
 set(ticpp_headers ticppapi.h ticpp.h ticpprc.h tinystr.h tinyxml.h)
@@ -38,7 +41,7 @@ ENDIF ()
 INSTALL(TARGETS ticpp EXPORT ticpp-targets
 	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ )
 
-install (EXPORT ticpp-targets DESTINATION cmake/)
+install (EXPORT ticpp-targets NAMESPACE ticpp:: DESTINATION cmake/)
 
 INSTALL(FILES ${ticpp_headers} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/ticpp)
  

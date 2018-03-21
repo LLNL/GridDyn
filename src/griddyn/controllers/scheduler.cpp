@@ -11,8 +11,8 @@
  */
 
 #include "scheduler.h"
-#include "comms/Communicator.h"
-#include "comms/schedulerMessage.h"
+#include "../comms/Communicator.h"
+#include "../comms/schedulerMessage.h"
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
 #include "utilities/timeSeries.hpp"

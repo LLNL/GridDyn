@@ -14,7 +14,7 @@
 #define ZBREAKER_H_
 
 
-#include "Link.h"
+#include "../Link.h"
 
 namespace griddyn
 {

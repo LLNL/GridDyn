@@ -12,8 +12,8 @@
 
 #include "BusControls.h"
 #include "dcBus.h"
-#include "gridSecondary.h"
-#include "links/dcLink.h"
+#include "../gridSecondary.h"
+#include "../links/dcLink.h"
 #include "utilities/vectorOps.hpp"
 
 namespace griddyn

@@ -14,7 +14,7 @@
 #define RESERVEDISPATCHER_H_
 #pragma once
 
-#include "gridSubModel.h"
+#include "../gridSubModel.h"
 #include "utilities/vectorOps.hpp"
 
 namespace griddyn

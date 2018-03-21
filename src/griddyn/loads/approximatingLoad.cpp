@@ -10,12 +10,12 @@
  * LLNS Copyright End
 */
 
-#include "loads/approximatingLoad.h"
+#include "approximatingLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "utilities/workQueue.h"
-#include "gridBus.h"
+#include "../gridBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 #include <complex>
