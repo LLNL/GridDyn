@@ -524,6 +524,8 @@ target_link_libraries(griddyn PUBLIC coreObjects)
 target_link_libraries(griddyn PUBLIC utilities)
 IF (KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
+ELSE(KLU_CMAKE)
+target_link_libraries(griddyn PUBLIC ${SuiteSparse_LIBRARIES})
 ENDIF(KLU_CMAKE)
 
 target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
