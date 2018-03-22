@@ -83,7 +83,7 @@ class controlMessage : public commMessage
     {
         ar(cereal::base_class<commMessage>(this));
         ar(m_actionID, m_field, m_units, m_value, m_time);
-        switch (m_messageType)
+        switch (getMessageType())
         {
         case GET_MULTIPLE:
         case SET_MULTIPLE:

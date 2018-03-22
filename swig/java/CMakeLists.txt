@@ -21,7 +21,7 @@ ELSE(DISABLE_SWIG)
 		SWIG_ADD_MODULE(JNIgriddyn java griddynJava.i)
 	ENDIF ()
 
-	SWIG_LINK_LIBRARIES(JNIgriddyn griddynSharedLib)
+	SWIG_LINK_LIBRARIES(JNIgriddyn griddyn_shared_lib)
 	SWIG_LINK_LIBRARIES(JNIgriddyn ${JAVA_LIBRARIES})
 
 
@@ -49,7 +49,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/MakeJarCMakeLists.txt.in ${CMAKE_CURR
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/buildjar/)
 
-# -D ADDITIONAL_JAR_FILES=$<TARGET_FILE:griddynSharedLib>;$<TARGET_FILE:JNIgriddyn>
+# -D ADDITIONAL_JAR_FILES=$<TARGET_FILE:griddyn_shared_lib>;$<TARGET_FILE:JNIgriddyn>
 ADD_CUSTOM_COMMAND(
     TARGET "JNIgriddyn" POST_BUILD
     COMMAND ${CMAKE_COMMAND} -D LIBRARY_FILE=$<TARGET_FILE:JNIgriddyn> -P ${CMAKE_CURRENT_SOURCE_DIR}/addLoadLibraryCommand.cmake

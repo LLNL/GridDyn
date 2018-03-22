@@ -1,60 +1,76 @@
-cmake_minimum_required(VERSION 3.4)
+# Generate SWIG wrapper (for both MATLAB)
 
-# Find MATLAB
-find_package(Matlab REQUIRED)
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS
-    date_time filesystem iostreams thread log regex serialization system chrono)
+set(Matlab_FIND_COMPONENTS "MAIN_PROGRAM")
+FIND_PACKAGE(MATLAB)
 
-include_directories(${Matlab_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/griddyn_shared/)
+IF (NOT DISABLE_SWIG AND SWIG_EXECUTABLE)
 
-# Generate SWIG wrapper (for both MATLAB and Octave)
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/target${MATLABLAG}/extra)
-set(CMAKE_SWIG_WRAP_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/target${MATLABFLAG}/source/dummy)
-
-set_source_files_properties(../griddyn.i  PROPERTIES  CPLUSPLUS ON)
-swig_module_initialize(griddynMEX matlab)
-swig_add_source_to_module(griddynMEX MEX_FILE ../griddyn.i ../../src/griddyn_shared/griddyn_export.h ../../src/griddyn_shared/griddyn_export_advanced.h)
-get_directory_property(swig_extra_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${MEX_FILE}")
-
-# Install the generated front-end to ${MATLAB_PREFIX}
-install(DIRECTORY ${CMAKE_SWIG_OUTDIR}/+griddyn DESTINATION lib/matlab)
-install(FILES  ${CMAKE_SWIG_OUTDIR}/SwigGet.m 
-   ${CMAKE_SWIG_OUTDIR}/SwigMem.m  
-   ${CMAKE_SWIG_OUTDIR}/SwigRef.m 
-   DESTINATION  lib/matlab
-   )
-
-# create module directory
-set(MODULE ${CMAKE_CURRENT_BINARY_DIR}/griddyn)
-
-file(MAKE_DIRECTORY ${MODULE})
-
-# Install the generated front-end to lib/matlab
-add_custom_target(matlab DEPENDS griddynMATLAB)
-
-message("matlab include dir: ${Matlab_INCLUDE_DIRS}")
-message("MEX_FILE: ${MEX_FILE}")
-message("Matlab MEX Library: ${Matlab_MEX_LIBRARY}")
-message("Boost LIBRARY DIRS: ${Boost_LIBRARY_DIRS}")
-message("Boost LIBRARIES: ${Boost_LIBRARIES}")
-
-# Compile MEX file
-if (EXISTS ${Matlab_INCLUDE_DIRS}/../version/cpp_mexapi_version.cpp)
-    add_library(griddynMATLAB MODULE ${MEX_FILE} ${Matlab_INCLUDE_DIRS}/../version/cpp_mexapi_version.cpp)
-else()
-    add_library(griddynMATLAB MODULE ${MEX_FILE})
+execute_process(COMMAND ${SWIG_EXECUTABLE} -help OUTPUT_VARIABLE SWIG_HELP_OUTPUT)
+STRING(FIND "${SWIG_HELP_OUTPUT}" "-matlab" MATLAB_HELP_FOUND)
+if (${MATLAB_HELP_FOUND} LESS 0)
+set (MATLAB_SWIG_NOT_AVAILABLE 1)
+message(warning " SWIG VERSION does not support matlab, reverting to build only")
 endif()
-target_include_directories(griddynMATLAB PUBLIC ${Matlab_INCLUDE_DIRS})
-target_link_libraries(griddynMATLAB  griddyn_shared_lib ${Boost_LIBRARIES} ${Matlab_MEX_LIBRARY} )
-set_target_properties(griddynMATLAB
-               PROPERTIES OUTPUT_NAME "griddynMEX"
-               PREFIX ""
-               SUFFIX .${Matlab_MEX_EXTENSION}
-               )
-install(TARGETS griddynMATLAB DESTINATION lib/matlab)
-install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.mexa64 DESTINATION  lib/matlab )
+ENDIF()
 
 
+MESSAGE(STATUS "Building MATLAB")
+IF (DISABLE_SWIG OR MATLAB_SWIG_NOT_AVAILABLE)
+
+  ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+    COMMAND "${CMAKE_COMMAND}"
+      -E copy ${CMAKE_CURRENT_SOURCE_DIR}/target/griddynMEX.cpp ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+  )
+  INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/+griddyn DESTINATION matlab COMPONENT matlab)
+
+  FILE(GLOB MATLAB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/target/*.m)
+  INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/target/+griddyn DESTINATION matlab COMPONENT matlab)
+  INSTALL(FILES ${MATLAB_FILES} DESTINATION matlab COMPONENT matlab)
+ELSE()
+
+FILE(GLOB SHARED_LIB_HEADERS ${CMAKE_SOURCE_DIR}/src/griddyn/shared_library/*.h)
+
+#custom command for building the wrap file
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+  COMMAND "${SWIG_EXECUTABLE}"
+    "-matlab" "-c++"
+    -o "griddynMEX.cpp"
+	"-I${CMAKE_SOURCE_DIR}/src/griddyn/shared_api_library"
+	${CMAKE_CURRENT_SOURCE_DIR}/griddynMatlab.i
+  DEPENDS ${CMAKE_SOURCE_DIR}/swig/griddyn.i ${CMAKE_CURRENT_SOURCE_DIR}/griddynMatlab.i ${SHARED_LIB_HEADERS}
+)
+
+#ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+#  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/modifyOctSourceFile.cmake
+#  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+#)
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/+griddyn DESTINATION matlab COMPONENT matlab)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/SwigGet.m ${CMAKE_CURRENT_BINARY_DIR}/SwigMem.m ${CMAKE_CURRENT_BINARY_DIR}/SwigRef.m DESTINATION matlab COMPONENT matlab)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pisender.m ${CMAKE_CURRENT_SOURCE_DIR}/pireceiver.m ${CMAKE_CURRENT_SOURCE_DIR}/GetFullPath.m DESTINATION matlab COMPONENT matlab)
+ENDIF()
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mkgriddynMEXFile.m
+  COMMAND ${CMAKE_COMMAND} 
+  -D LIBRARY_FILE=$<TARGET_LINKER_FILE:griddyn_shared_lib> 
+  -D BUILD_FILE=${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp 
+  -D LIBRARY_INCLUDE_LOCATION=${CMAKE_SOURCE_DIR}/src/griddyn/shared_api_library/
+  -D SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+  -P ${CMAKE_CURRENT_SOURCE_DIR}/generateMEXcreationScript.cmake
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp 
+)
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.${Matlab_MEX_EXTENSION}
+  COMMAND ${Matlab_MAIN_PROGRAM} -nojvm -nodesktop -r "\"run('${CMAKE_CURRENT_BINARY_DIR}/mkgriddynMEXFile.m');quit;\""
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkgriddynMEXFile.m griddyn_shared_lib ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.cpp
+)
+
+ADD_CUSTOM_TARGET(griddynMEX ALL
+   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.${Matlab_MEX_EXTENSION}
+)
+
+set_target_properties (griddynMEX PROPERTIES FOLDER interfaces)
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/griddynMEX.${Matlab_MEX_EXTENSION} DESTINATION matlab COMPONENT matlab)
+INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION matlab COMPONENT matlab)
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION matlab COMPONENT matlab)

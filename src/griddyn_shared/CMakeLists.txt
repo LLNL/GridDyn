@@ -9,11 +9,15 @@
 # LLNS Copyright End
 
 
-set(griddyn_lib_headers
+set(griddyn_lib_public_headers
 griddyn.h
 griddyn_export.h
 griddyn_export_advanced.h
-griddyn_export_internal.h
+
+)
+ 
+set(griddyn_lib_internal_headers
+internal/griddyn_export_internal.h
 )
  
 set(griddyn_lib_sources
@@ -25,7 +29,7 @@ griddyn_exportObjectMathFunctions.cpp
 griddyn_exportEvents.cpp
 )
 
-add_library(griddyn_shared_lib SHARED ${griddyn_lib_sources} ${griddyn_lib_headers})
+add_library(griddyn_shared_lib SHARED ${griddyn_lib_sources} ${griddyn_lib_public_headers} ${griddyn_lib_internal_headers})
 target_compile_definitions(griddyn_shared_lib PRIVATE -DBUILD_DLL=1)
 
 IF(UNIX)
@@ -51,6 +55,6 @@ INSTALL(TARGETS griddyn_shared_lib EXPORT griddyn-targets
 INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime EXCLUDE_FROM_ALL)
 INSTALL(FILES $<TARGET_LINKER_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries EXCLUDE_FROM_ALL)
 
-INSTALL(FILES ${griddyn_lib_headers}
+INSTALL(FILES ${griddyn_lib_public_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/shared
   COMPONENT headers)

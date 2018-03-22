@@ -1,3 +1,3 @@
-%include "various.i"
+#%include "cstring.i"
 %include "../griddyn.i"
 

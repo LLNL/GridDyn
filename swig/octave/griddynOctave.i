@@ -1,2 +1,2 @@
-%include "../helics.i"
+%include "../griddyn.i"
 

@@ -48,7 +48,7 @@ public:
   /** virtual destructor*/
   virtual ~commMessage() = default;
   /** get the message type*/
-  std::uint32_t getMessageType(void) const
+  std::uint32_t getMessageType() const
   {
 	  return m_messageType;
   }
@@ -67,6 +67,24 @@ public:
   virtual std::string to_string (int modifiers=comm_modifiers::none) const;
   /** load a message definition from a string*/
   virtual void loadString (const std::string &fromString);
+
+  /** convert a command to a raw data bytes
+  @param[out] data pointer to memory to store the command
+  @param[in] buffer_size-- the size of the buffer
+  @return the size of the buffer actually used
+  */
+  int toByteArray(char *data, size_t buffer_size) const;
+  /** covert to a byte vector using a reference*/
+  void to_vector(std::vector<char> &data) const;
+  /** convert a command to a byte vector*/
+  std::vector<char> to_vector() const;
+  /** generate a command from a raw data stream*/
+  virtual void fromByteArray(const char *data, size_t buffer_size);
+  /** load a command from a packetized stream /ref packetize
+  @return the number of bytes used
+  */
+  void from_vector(const std::vector<char> &data);
+
   /** extract the type of the message from a string
   @param[in] messageString the message string to extract the type from*/
   static std::uint32_t extractMessageType(const std::string &messageString);

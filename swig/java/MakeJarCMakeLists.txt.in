@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.4)
+cmake_minimum_required (VERSION 3.5)
 project (GRIDDYNJAR)
 
 FIND_PACKAGE(Java REQUIRED)
@@ -9,4 +9,4 @@ FILE (GLOB JAVAFILES  @CMAKE_CURRENT_BINARY_DIR@/*.java)
 add_jar(griddyn 
 	SOURCES ${JAVAFILES} ${ADDITIONAL_JAR_FILES}
 	OUTPUT_NAME griddyn
-	VERSION @HELICS_VERSION@)
+	VERSION @GRIDDYN_VERSION@)

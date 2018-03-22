@@ -1,58 +1,70 @@
-cmake_minimum_required(VERSION 3.4)
 
-FIND_PACKAGE(PythonLibs REQUIRED)
-FIND_PACKAGE(PythonInterp REQUIRED)
+IF (DISABLE_SWIG OR NOT SWIG_EXECUTABLE)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${PYTHON_INCLUDE_PATH})
-include_directories(${PYTHON_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn_shared)
-link_directories(${external_link_directories})
+MESSAGE("Building without swig")
 
-make_directory(${PROJECT_BINARY_DIR}/python/griddyn)
+add_custom_target("griddynPYTHON" ALL)
 
-set(PYTHONFLAG "")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/griddyn_wrap.c ${CMAKE_CURRENT_BINARY_DIR}/griddyn_wrap.c COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/griddyn.py ${CMAKE_CURRENT_BINARY_DIR}/griddyn.py COPYONLY)
+
+ADD_CUSTOM_TARGET("griddynPYTHONEXT" ALL DEPENDS griddyn_shared_lib griddynPYTHON)
+
+ADD_CUSTOM_COMMAND(
+    TARGET "griddynPYTHONEXT" POST_BUILD
+    COMMAND "pip" #
+    ARGS "install" "-e" "."
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "Building Python extension"
+)
+ELSE() # use swig in this branch
+# https://stackoverflow.com/a/3818084/5451769
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  # Update if necessary
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-long -Wno-overlength-strings")
+endif()
+
 set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-DPy_USING_UNICODE")
 set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-noproxydel")
 
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/target${PYTHONFLAG}/extra)
-set(CMAKE_SWIG_WRAP_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/target${PYTHONFLAG}/source/dummy)
+FIND_PACKAGE(PythonLibs REQUIRED)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
 
-set_property(SOURCE ../griddyn.i PROPERTY CPLUSPLUS ON)
-set_property(SOURCE ../griddyn.i  PROPERTY SWIG_MODULE_NAME griddyn)
-# Generate SWIG wrapper
-# Add swig module
-swig_module_initialize(griddyn python)
-message("Python libraries = ${PYTHON_LIBRARIES}")
-message("Python = ${PYTHON_EXECUTABLE}")
-message("griddynDynCombined=" gridDynCombined)
-message("griddyn_shared_lib=" griddyn_shared_lib)
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
 
-swig_add_source_to_module(griddyn FALSE ../griddyn.i ../../src/griddyn_shared/griddyn_export.h ../../src/griddyn_shared/griddyn_export_advanced.h)
-swig_add_library(griddyn LANGUAGE python SOURCES ../griddyn.i)
-swig_link_libraries(griddyn ${PYTHON_LIBRARIES} griddyn_shared_lib)
-get_directory_property(swig_extra_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PYTHON_FILE}")
+SET_PROPERTY(SOURCE ../griddyn.i PROPERTY SWIG_MODULE_NAME griddyn)
 
-set(SETUP_PY_IN ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in)
-set(SETUP_PY_OUT ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
-set(DEPS         ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py)
-set(OUTPUT       ${CMAKE_CURRENT_BINARY_DIR}/pythonlog)
-set(MODULE       ${CMAKE_CURRENT_BINARY_DIR}/griddyn)
 
-configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT})
-file(MAKE_DIRECTORY ${MODULE})
-file(COPY ${DEPS} DESTINATION ${MODULE})
+IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.7)
+  SWIG_ADD_LIBRARY(griddyn TYPE MODULE LANGUAGE python SOURCES griddynPython.i)
+ELSE (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.7)
+  SWIG_ADD_MODULE(griddyn python griddynPython.i)
+ENDIF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.7)
 
-add_custom_command(OUTPUT ${OUTPUT} POST_BUILD
-                   COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} build
-                   COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
-                  )
+SWIG_LINK_LIBRARIES(griddyn griddyn_shared_lib)
 
-add_custom_target(make_gen  DEPENDS ${OUTPUT})
-target_link_libraries(_griddyn griddyn_shared_lib)
 
-install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/_griddyn.so DESTINATION  ${MODULE})
-install(FILES  ${CMAKE_SWIG_OUTDIR}/griddyn.py DESTINATION  ${MODULE})
-install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} install)")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # https://groups.google.com/a/continuum.io/d/msg/anaconda/057P4uNWyCU/Iem6OtjBCQAJ
+  set_target_properties(_griddyn PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+else ()
+  SWIG_LINK_LIBRARIES(griddyn ${PYTHON_LIBRARIES})
+endif()
+
+set_target_properties (_griddyn PROPERTIES FOLDER interfaces)
+
+
+
+# execute_process(COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+INSTALL(TARGETS _griddyn DESTINATION python COMPONENT python)
+
+ENDIF ()
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/griddyn.py DESTINATION python COMPONENT python)
+INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION python COMPONENT python)
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION python COMPONENT python)
+
