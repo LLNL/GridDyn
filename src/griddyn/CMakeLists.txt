@@ -522,13 +522,14 @@ add_library(griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} 
 
 target_link_libraries(griddyn PUBLIC coreObjects)
 target_link_libraries(griddyn PUBLIC utilities)
+
+target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
+
 IF (KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
 ELSE(KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC ${SuiteSparse_LIBRARIES})
 ENDIF(KLU_CMAKE)
-
-target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})

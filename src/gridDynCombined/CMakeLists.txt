@@ -25,7 +25,7 @@ file(WRITE ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 " */\n"
 "\n"
 "//automatically generated file\n"
-"\#include \"griddynCombined/libraryLoader.h\"\n"
+"\#include \"gridDynCombined/libraryLoader.h\"\n"
 "\#include \"griddyn/griddyn-config.h\"\n"
 )
 

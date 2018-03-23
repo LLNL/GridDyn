@@ -93,12 +93,43 @@ protected:
 	std::string encodeTypeInString() const;
 private:
   std::uint32_t m_messageType = ignoreMessageType; //!< the actual type of the message
+public:
+  std::int32_t code = 0;
+  std::shared_ptr<CommPayload> payload;
+  std::vector<char> payloadData;
 
+
+private:
   friend class cereal::access;
   template <class Archive>
-  void serialize (Archive & ar)
+  void save (Archive & ar)
   {
-    ar(m_messageType);
+    ar(m_messageType,code);
+    bool ptoggle = static_cast<bool>(payload);
+    ar(ptoggle);
+    if (ptoggle)
+    {
+        ar(payload);
+    }
+    else
+    {
+        ar(payloadData);
+    }
+  }
+  template <class Archive>
+  void load(Archive & ar)
+  {
+      ar(m_messageType, code);
+      bool ptoggle;
+      ar(ptoggle);
+      if (ptoggle)
+      {
+          ar(payload);
+      }
+      else
+      {
+          ar(payloadData);
+      }
   }
 };
 

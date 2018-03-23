@@ -15,7 +15,7 @@
 
 #include "griddyn_export.h"
 
-#include "griddyn_export_internal.h"
+#include "internal/griddyn_export_internal.h"
 #include "utilities/matrixDataCustomWriteOnly.hpp"
 #include "griddyn/measurement/objectGrabbers.h"
 

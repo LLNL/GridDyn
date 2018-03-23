@@ -11,7 +11,7 @@
 */
 
 #include "griddyn_export.h"
-#include "griddyn_export_internal.h"
+#include "internal/griddyn_export_internal.h"
 #include "griddyn/events/Event.h"
 #include "fileInput/gridDynRunner.h"
 #include "core/coreExceptions.h"
