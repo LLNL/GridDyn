@@ -250,20 +250,20 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
             {  // can only cancel actions that have not executed and are not closer than the actionDelay
                 actions[actnum].executed = true;
                 auto gres = std::make_shared<commMessage>(cm::CANCEL_SUCCESS);
-                std::static_pointer_cast<cm>(gres->payload)->m_actionID = m->m_actionID;
+                gres->getPayload<cm>()->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, std::move (gres));
             }
             else
             {
                 auto gres = std::make_shared<commMessage>(cm::CANCEL_FAIL);
-                std::static_pointer_cast<cm>(gres->payload)->m_actionID = m->m_actionID;
+                gres->getPayload<cm>()->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, std::move (gres));
             }
         }
         else
         {
             auto gres = std::make_shared<commMessage>(cm::CANCEL_FAIL);
-            std::static_pointer_cast<cm>(gres->payload)->m_actionID = m->m_actionID;
+            gres->getPayload<cm>()->m_actionID = m->m_actionID;
             commLink->transmit (sourceID, std::move (gres));
         }
         break;

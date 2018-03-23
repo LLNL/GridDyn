@@ -89,5 +89,5 @@ class controlMessagePayload : public CommPayload
 }  // namespace comms
 }  // namespace griddyn
 
-CEREAL_REGISTER_TYPE(griddyn::comms::controlMessagePayload);
+CEREAL_REGISTER_TYPE(griddyn::comms::controlMessagePayload)
 #endif

@@ -300,7 +300,7 @@ void scheduler::insertTarget (tsched ts)
 void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    auto sm = std::dynamic_pointer_cast<schedulerMessagePayload> (message->payload);
+    auto sm = message->getPayload<schedulerMessagePayload>();
     switch (message->getMessageType ())
     {
     case schedulerMessagePayload::CLEAR_TARGETS:

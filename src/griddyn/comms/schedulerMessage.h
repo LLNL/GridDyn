@@ -67,4 +67,4 @@ private:
 } //namespace comms
 } //namespace griddyn
 
-CEREAL_REGISTER_TYPE(griddyn::comms::schedulerMessagePayload);
+CEREAL_REGISTER_TYPE(griddyn::comms::schedulerMessagePayload)

@@ -88,9 +88,53 @@ public:
   template <class payLoadType>
   payLoadType *getPayload()
   {
-      return dynamic_cast<payLoadType *>(payload.get());
+      switch (ptype)
+      {
+      case payloadType_t::none:
+          return nullptr;
+      case payloadType_t::shared:
+          return dynamic_cast<payLoadType *>(payload.get());
+      case payloadType_t::vector:
+          return reinterpret_cast<payLoadType *>(payload_v.data());
+      case payloadType_t::raw:
+          return reinterpret_cast<payLoadType *>(payloadData);
+      }
+      
   }
 
+  auto getPayloadPointer()
+  {
+      return payload;
+  }
+    
+  void setPayload(std::shared_ptr<CommPayload> ptr)
+  {
+      ptype = (ptr)?payloadType_t::shared:payloadType_t::none;
+      payload = std::move(ptr);
+  }
+  void setPayload(const std::vector<char> &vec)
+  {
+      payload_V = vec;
+      ptype = payloadType_t::vector;
+  }
+  void setPayload(std::vector<char> &&vec)
+  {
+      payload_V = std::move(vec);
+      ptype = payloadType_t::vector;
+  }
+  void setPayload(void *data, size_t dsize)
+  {
+      payloadData = data;
+      payloadSize = dsize;
+      if ((data == nullptr) || (dsize == 0))
+      {
+          ptype = payloadType_t::none;
+      }
+      else
+      {
+          ptype = payloadType_t::raw;
+      }
+  }
   /** generate a string describing the message*/
   std::string to_string () const;
   /** load a message definition from a string*/
@@ -102,8 +146,10 @@ public:
   @return the size of the buffer actually used
   */
   int toByteArray(char *data, size_t buffer_size) const;
-  /** convert to a string using a reference*/
+  /** convert to a data string using a reference*/
   void to_datastring(std::string &data) const;
+  /** convert to a data string
+  @details a data string is a string containing raw data*/
   std::string to_datastring() const;
   /** covert to a byte vector using a reference*/
   void to_vector(std::vector<char> &data) const;
@@ -120,37 +166,68 @@ private:
   std::uint32_t m_messageType = ignoreMessageType; //!< the actual type of the message
 public:
   std::uint32_t code = 0xFFFFFFFF;
+private:
+    
+    enum class payloadType_t:uint8_t
+    {
+        none = 0,
+        shared=1,
+        vector=2,
+        raw=3
+    };
+    payloadType_t ptype = payloadType_t::none;
   std::shared_ptr<CommPayload> payload;
-  std::vector<char> payloadData;
-
+  void *payloadData = nullptr; //!< blob pointer for payload data
+  size_t payloadSize = 0; //!< blob size;
+  std::vector<char> payload_V; //payload as a vector
+public:
   template <class Archive>
   void save (Archive & ar) const
   {
     ar(m_messageType,code);
-    bool ptoggle = static_cast<bool>(payload);
-    ar(ptoggle);
-    if (ptoggle)
+    ar(static_cast<uint8_t>(ptype));
+    switch (ptype)
     {
+    case payloadType_t::none:
+        break;
+    case payloadType_t::shared:
         ar(payload);
-    }
-    else
-    {
-        ar(payloadData);
+        break;
+    case payloadType_t::vector:
+        ar(payload_V);
+        break;
+    case payloadType_t::raw:
+        // Save number of chars + the data
+        ar(make_size_tag(payloadSize));
+        if (payloadData != nullptr)
+        {
+            ar(binary_data(payloadData, payloadSize));
+        }
     }
   }
   template <class Archive>
   void load(Archive & ar)
   {
       ar(m_messageType, code);
-      bool ptoggle;
-      ar(ptoggle);
-      if (ptoggle)
+      uint8_t type;
+      ar(type);
+      ptype = static_cast<payloadType_t>(type);
+      switch (ptype)
       {
+      case payloadType_t::none:
+          break;
+      case payloadType_t::shared:
           ar(payload);
-      }
-      else
-      {
-          ar(payloadData);
+          break;
+      case payloadType_t::vector:
+          ar(payload_V);
+          break;
+      case payloadType_t::raw:
+          // Save to the vector
+          size_t size;
+          ar(make_size_tag(size));
+          payload_V.resize(static_cast<std::size_t>(size));
+          ar(binary_data(payload_V.data(), size));
       }
   }
 };
@@ -211,7 +288,7 @@ public:
 };
 
 /** macro used to register types with the type registry*/
-#define REGISTER_MESSAGE_TYPE(name,namestr,type) static const typeRegister name(namestr,type);
+#define REGISTER_MESSAGE_TYPE(name,namestr,type) static const typeRegister name(namestr,type)
 
 
 /** class definitions for the message factories that can create the message

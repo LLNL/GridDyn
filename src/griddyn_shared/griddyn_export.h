@@ -96,11 +96,11 @@ typedef void *solverKey;
 
 #define GRIDDYN_COMPLETE (30)
 
-// the object hiearchary interface and object properties interface
+// the object hierarchy interface and object properties interface
 
 /** create an object in GridDyn
 @details the function creates a an owning pointer to the object, as long as this owning pointer exists
-the object exists,  if the object is added to the hiearchacy and remains in operation the object will continue to
+the object exists,  if the object is added to the hierarchy and remains in operation the object will continue to
 exist even if the gridDynObject representing it is freed
 @param[in] componentType  the component type of the object to create (bus, link, load, etc)
 @param[in] objectType  the specific type of the component to create
@@ -120,14 +120,14 @@ GRIDDYN_Export gridDynObject gridDynObject_clone(const gridDynObject obj);
 */
 GRIDDYN_Export void gridDynObject_free (gridDynObject obj);
 
-/** add an object to another in the hiearchy
+/** add an object to another in the hierarchy
 @param[in] parentObject the object to which another is being added
 @param[in] objectToAdd  the object being added
 @return 0 if successful, non-zero otherwise
 */
 GRIDDYN_Export int gridDynObject_add (gridDynObject parentObject, gridDynObject objectToAdd);
 
-/** remove an object from another in the hiearchy
+/** remove an object from another in the hierarchy
 @param[in] parentObject the object to which another is being added
 @param[in] objectToRemove  the object being removed
 @return 0 if successful, non-zero otherwise success is defined as the object not being present in the parent
@@ -198,7 +198,7 @@ gridDynObject_getValueUnits(const gridDynObject obj, const char *parameter, cons
 /** query the value of an object parameter
 @param[in] obj the object to query
 @param[in] parameter the name of the parameter to query
-@param[out] result the the value of the flag 0 if false otherwise(usually 1) if true
+@param[out] result the value of the flag 0 if false otherwise(usually 1) if true
 @return 0 if the flag is found UNKNOWN_PARAMETER Otherwise*/
 GRIDDYN_Export int gridDynObject_getFlag (const gridDynObject obj, const char *flag, int *result);
 
@@ -237,7 +237,7 @@ GRIDDYN_Export const char *gridDynObject_getType (const gridDynObject obj);
 // functions for the gridDyn Simulation
 /** create a new simulation object
 @param[in] type the type of simulation to create (can be "" for the standard type
-@param[in] name  the name of the simulation to ceate
+@param[in] name  the name of the simulation to create
 @return a reference to the simulation object
 */
 GRIDDYN_Export gridDynSimReference gridDynSimulation_create (const char *type, const char *name);
@@ -340,7 +340,7 @@ otherwise it runs a power flow and stops this function will return immediately
 */
 GRIDDYN_Export int gridDynSimulation_runAsync(gridDynSimReference sim);
 
-/** run the simulation to a particular time but return and run aynchronously
+/** run the simulation to a particular time but return and run asynchronously
 @param[in] sim the simulation runner reference object
 @param[in] runToTime the time to execute the simulator to
 @return 0 if successful an error code otherwise
@@ -395,7 +395,7 @@ GRIDDYN_Export int gridDynSimulation_busCount(gridDynSimReference sim);
 GRIDDYN_Export int gridDynSimulation_lineCount(gridDynSimReference sim);
 /** get a set of data from the simulation
 @param[in] sim the simulation runner reference object
-@param datatype a string defining what data to retreive from the simulation
+@param datatype a string defining what data to retrieve from the simulation
 @param[out] data memory for storing the requested results
 @param maxSize the size of the memory location specified by voltages
 @return  the number of points written
