@@ -132,28 +132,30 @@ BOOST_AUTO_TEST_CASE (test_control_relay)
     auto comm = makeCommunicator ("", "control", 0);
     comm->initialize ();
 
-    auto cm = std::make_shared<comms::controlMessage> (comms::controlMessage::SET);
-    cm->m_field = "P";
-    cm->m_value = 1.3;
+    auto cm = std::make_shared<commMessage> (comms::controlMessagePayload::SET);
+    auto data = cm->getPayload<comms::controlMessagePayload>();
+    BOOST_REQUIRE(data != nullptr);
+    data->m_field = "P";
+    data->m_value = 1.3;
 
     comm->transmit ("cld4", cm);
 
     BOOST_CHECK (comm->messagesAvailable ());
     std::uint64_t src;
-    auto rep = std::dynamic_pointer_cast<comms::controlMessage> (comm->getMessage (src));
+    auto rep = comm->getMessage (src);
     BOOST_REQUIRE ((rep));
-    BOOST_CHECK (rep->getMessageType () == comms::controlMessage::SET_SUCCESS);
+    BOOST_CHECK (rep->getMessageType () == comms::controlMessagePayload::SET_SUCCESS);
     auto ldr = obj->get ("p");
     BOOST_CHECK_CLOSE (ldr, 1.3, 0.0001);
     // send a get request
-    cm->setMessageType (comms::controlMessage::GET);
-    cm->m_field = "q";
+    cm->setMessageType (comms::controlMessagePayload::GET);
+    cm->getPayload<comms::controlMessagePayload>()->m_field = "q";
 
     comm->transmit ("cld4", cm);
-    rep = std::dynamic_pointer_cast<comms::controlMessage> (comm->getMessage (src));
+    rep = comm->getMessage (src);
     BOOST_CHECK ((rep));
-    BOOST_CHECK (rep->getMessageType () == comms::controlMessage::GET_RESULT);
-    BOOST_CHECK_CLOSE (rep->m_value, 0.126, 0.001);
+    BOOST_CHECK (rep->getMessageType () == comms::controlMessagePayload::GET_RESULT);
+    BOOST_CHECK_CLOSE (rep->getPayload<comms::controlMessagePayload>()->m_value, 0.126, 0.001);
 }
 
 BOOST_AUTO_TEST_CASE (test_relay_comms)

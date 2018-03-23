@@ -129,40 +129,43 @@ void commSource::updateA (coreTime time)
     }
 }
 
-using controlMessage = griddyn::comms::controlMessage;
+using controlMessagePayload = griddyn::comms::controlMessagePayload;
 
 void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
-    std::shared_ptr<controlMessage> m = std::dynamic_pointer_cast<controlMessage> (std::move (message));
+    auto m = message->getPayload<controlMessagePayload>();
 
-    std::shared_ptr<controlMessage> reply;
+    std::shared_ptr<commMessage> reply;
 
-    switch (m->getMessageType ())
+    switch (message->getMessageType ())
     {
-    case controlMessage::SET:
+    case controlMessagePayload::SET:
         setLevel (m->m_value);
 
         if (!opFlags[no_message_reply])  // unless told not to respond return with the
         {
-            auto gres = std::make_shared<controlMessage> (controlMessage::SET_SUCCESS);
-            gres->m_actionID = m->m_actionID;
-            commLink->transmit (sourceID, gres);
+            reply = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
+            std::static_pointer_cast<controlMessagePayload>(reply->payload)->m_actionID = m->m_actionID;
+            commLink->transmit (sourceID, reply);
         }
 
         break;
-    case controlMessage::GET:
-        reply = std::make_shared<controlMessage> (controlMessage::GET_RESULT);
-        reply->m_field = "level";
-        reply->m_value = m_output;
-        reply->m_time = prevTime;
-        commLink->transmit (sourceID, reply);
+    case controlMessagePayload::GET:
+    {
+        reply = std::make_shared<commMessage>(controlMessagePayload::GET_RESULT);
 
+        auto rep = std::static_pointer_cast<controlMessagePayload>(reply->payload);
+        rep->m_field = "level";
+        rep->m_value = m_output;
+        rep->m_time = prevTime;
+        commLink->transmit(sourceID, reply);
+    }
         break;
-    case controlMessage::SET_SUCCESS:
-    case controlMessage::SET_FAIL:
-    case controlMessage::GET_RESULT:
+    case controlMessagePayload::SET_SUCCESS:
+    case controlMessagePayload::SET_FAIL:
+    case controlMessagePayload::GET_RESULT:
         break;
-    case controlMessage::SET_SCHEDULED:
+    case controlMessagePayload::SET_SCHEDULED:
         if (m->m_time > prevTime)
         {
             double val = m->m_value;
@@ -180,23 +183,23 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
 
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
-                auto gres = std::make_shared<controlMessage> (controlMessage::SET_SUCCESS);
-                gres->m_actionID = m->m_actionID;
+                auto gres = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
+                std::static_pointer_cast<controlMessagePayload>(reply->payload)->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, gres);
             }
         }
         break;
-    case controlMessage::GET_SCHEDULED:
-    case controlMessage::CANCEL_FAIL:
-    case controlMessage::CANCEL_SUCCESS:
-    case controlMessage::GET_RESULT_MULTIPLE:
+    case controlMessagePayload::GET_SCHEDULED:
+    case controlMessagePayload::CANCEL_FAIL:
+    case controlMessagePayload::CANCEL_SUCCESS:
+    case controlMessagePayload::GET_RESULT_MULTIPLE:
         break;
-    case controlMessage::CANCEL:
+    case controlMessagePayload::CANCEL:
 
         break;
-    case controlMessage::GET_MULTIPLE:
+    case controlMessagePayload::GET_MULTIPLE:
         break;
-    case controlMessage::GET_PERIODIC:
+    case controlMessagePayload::GET_PERIODIC:
         break;
     default:
         break;

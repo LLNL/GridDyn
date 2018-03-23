@@ -22,7 +22,7 @@ namespace griddyn
 class commMessage;
 namespace comms
 {
-	class controlMessage;
+	class controlMessagePayload;
 }
 
 
@@ -103,8 +103,8 @@ protected:
   index_t getFreeAction ();
   
 
-  std::unique_ptr<functionEventAdapter> generateGetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessage> &message);
-  std::unique_ptr<functionEventAdapter> generateSetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessage> &message);
+  std::unique_ptr<functionEventAdapter> generateGetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessagePayload> &message);
+  std::unique_ptr<functionEventAdapter> generateSetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessagePayload> &message);
 };
 }//namespace relays
 }//namespace griddyn

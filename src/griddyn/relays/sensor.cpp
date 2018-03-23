@@ -520,25 +520,25 @@ void sensor::generateInputGrabbers ()
     }
 	
 }
-
+using cm = comms::controlMessagePayload;
 void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    std::shared_ptr<controlMessage> m = std::dynamic_pointer_cast<controlMessage> (message);
+    auto m = message->getPayload<cm>();
 
     double val;
 
-    switch (m->getMessageType ())
+    switch (message->getMessageType ())
     {
-    case controlMessage::SET:
+    case cm::SET:
         // only local set
         try
         {
             set (convertToLowerCase (m->m_field), m->m_value, gridUnits::getUnits (m->m_units));
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
-                auto gres = std::make_unique<controlMessage> (controlMessage::SET_SUCCESS);
-                gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+                auto gres = std::make_shared<commMessage> (cm::SET_SUCCESS);
+                gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
                 commLink->transmit (sourceID, std::move (gres));
             }
         }
@@ -546,51 +546,53 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         {
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
-                auto gres = std::make_unique<controlMessage> (controlMessage::SET_FAIL);
-                gres->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+                auto gres = std::make_shared<commMessage>(cm::SET_FAIL);
+                gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
                 commLink->transmit (sourceID, std::move (gres));
             }
         }
 
         break;
-    case controlMessage::GET:
+    case cm::GET:
     {
         val = get (convertToLowerCase (m->m_field), gridUnits::getUnits (m->m_units));
-        auto reply = std::make_unique<controlMessage> (controlMessage::GET_RESULT);
-        reply->m_field = m->m_field;
-        reply->m_value = val;
-        reply->m_time = prevTime;
+        auto reply = std::make_shared<commMessage> (cm::GET_RESULT);
+        auto rep = reply->getPayload<cm>();
+        rep->m_field = m->m_field;
+        rep->m_value = val;
+        rep->m_time = prevTime;
         commLink->transmit (sourceID, std::move (reply));
 
         break;
     }
-    case controlMessage::SET_SUCCESS:
-    case controlMessage::SET_FAIL:
-    case controlMessage::GET_RESULT:
-    case controlMessage::SET_SCHEDULED:
-    case controlMessage::GET_SCHEDULED:
-    case controlMessage::CANCEL_FAIL:
-    case controlMessage::CANCEL_SUCCESS:
-    case controlMessage::GET_RESULT_MULTIPLE:
+    case cm::SET_SUCCESS:
+    case cm::SET_FAIL:
+    case cm::GET_RESULT:
+    case cm::SET_SCHEDULED:
+    case cm::GET_SCHEDULED:
+    case cm::CANCEL_FAIL:
+    case cm::CANCEL_SUCCESS:
+    case cm::GET_RESULT_MULTIPLE:
         break;
-    case controlMessage::CANCEL:
+    case cm::CANCEL:
 
         break;
-    case controlMessage::GET_MULTIPLE:
+    case controlMessagePayload::GET_MULTIPLE:
     {
-        auto reply = std::make_unique<controlMessage> (controlMessage::GET_RESULT_MULTIPLE);
-        reply->multiValues.resize (0);
-        reply->multiFields = m->multiFields;
+        auto reply = std::make_shared<commMessage>(cm::GET_RESULT_MULTIPLE);
+        auto rep = reply->getPayload<cm>();
+        rep->multiValues.resize (0);
+        rep->multiFields = m->multiFields;
         for (const auto &fieldName : m->multiFields)
         {
             val = get (convertToLowerCase (fieldName), gridUnits::getUnits (m->m_units));
             m->multiValues.push_back (val);
         }
-        reply->m_time = prevTime;
+        rep->m_time = prevTime;
         commLink->transmit (sourceID, std::move (reply));
         break;
     }
-    case controlMessage::GET_PERIODIC:
+    case cm::GET_PERIODIC:
         break;
     default:
         break;

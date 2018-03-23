@@ -413,7 +413,6 @@ set (comm_headers
 	comms/commMessage.h
 	comms/Communicator.h
 	comms/communicationsCore.h
-	comms/relayMessage.h
 	comms/schedulerMessage.h
 	comms/controlMessage.h
 	comms/commManager.h
@@ -424,7 +423,6 @@ set (comm_sources
 	comms/commMessage.cpp
 	comms/Communicator.cpp
 	comms/communicationsCore.cpp
-	comms/relayMessage.cpp
 	comms/schedulerMessage.cpp
 	comms/controlMessage.cpp
 	comms/commManager.cpp

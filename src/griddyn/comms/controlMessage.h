@@ -27,7 +27,7 @@ namespace comms
 {
 /** a message type used for requesting control actions to relays and sending values in response
  */
-class controlMessage : public commMessage
+class controlMessagePayload : public CommPayload
 {
   public:
     /** the enumeration of the message types available in control messages*/
@@ -59,45 +59,35 @@ class controlMessage : public commMessage
     std::string m_units;  //!< the units requested
     std::vector<std::string> multiUnits;  //!< the multiple units associated with different measurements
     /** default constructor*/
-    controlMessage () = default;
+    controlMessagePayload () = default;
 
-    explicit controlMessage (std::uint32_t type) : commMessage (type) {}
     /** constructor
     @param[in] type the type of the message
     @param[in] fld the name of the field in question
     @param[in] val the value associated with the field
     @param[in] time the time for a schedule
     */
-    controlMessage (std::uint32_t type, const std::string &fld, double val, coreTime time)
-        : commMessage (type), m_field (fld), m_value (val), m_time (time)
+    controlMessagePayload ( const std::string &fld, double val, coreTime time)
+        : m_field (fld), m_value (val), m_time (time)
     {
     }
 
-    virtual std::string to_string (int modifiers = comm_modifiers::none) const override;
-    virtual void loadString (const std::string &fromString) override;
+    virtual std::string to_string (uint32_t type, uint32_t code) const override;
+    virtual void from_string (uint32_t type, uint32_t code, const std::string &fromString, size_t offset) override;
 
   private:
     friend class cereal::access;
     template <class Archive>
     void serialize (Archive &ar)
     {
-        ar(cereal::base_class<commMessage>(this));
+        ar(cereal::base_class<CommPayload>(this));
         ar(m_actionID, m_field, m_units, m_value, m_time);
-        switch (getMessageType())
-        {
-        case GET_MULTIPLE:
-        case SET_MULTIPLE:
-        case GET_RESULT_MULTIPLE:
-            ar(multiFields, multiValues, multiUnits);
-            break;
-        default:
-            break;
-        }
-        
+        ar(multiFields, multiValues, multiUnits);
     }
 };
 
 }  // namespace comms
 }  // namespace griddyn
 
+CEREAL_REGISTER_TYPE(griddyn::comms::controlMessagePayload);
 #endif

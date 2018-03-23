@@ -66,7 +66,7 @@ std::string relayMessage::to_string (int modifiers) const
     return "<UNKNOWN>";
 }
 
-void relayMessage::loadString (const std::string &fromString)
+void relayMessage::from_string (const std::string &fromString)
 {
     auto lstr = convertToUpperCase (fromString);
     auto cc = fromString.find_first_of (':');
@@ -130,22 +130,7 @@ void relayMessage::loadString (const std::string &fromString)
     }
 }
 
-static std::map<std::string, std::uint32_t> alarmCodeMap{
-  {"overcurrent", OVERCURRENT_ALARM},         {"undercurrent", UNDERCURRENT_ALARM},
-  {"overvoltage", OVERVOLTAGE_ALARM},         {"undervoltage", UNDERVOLTAGE_ALARM},
-  {"temperature_alarm1", TEMPERATURE_ALARM1}, {"temperature", TEMPERATURE_ALARM1},
-  {"temperature_alarm2", TEMPERATURE_ALARM2}, {"temperature2", TEMPERATURE_ALARM2},
-};
 
-std::uint32_t getAlarmCode (const std::string &alarmStr)
-{
-    auto fnd = alarmCodeMap.find (alarmStr);
-    if (fnd != alarmCodeMap.end ())
-    {
-        return fnd->second;
-    }
-    return 0;
-}
 
 }  // namespace comms
 }  // namespace griddyn

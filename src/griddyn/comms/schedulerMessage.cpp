@@ -18,62 +18,66 @@ namespace griddyn
 {
 namespace comms
 {
-static dMessageFactory<schedulerMessage, BASE_SCHEDULER_MESSAGE_NUMBER, BASE_SCHEDULER_MESSAGE_NUMBER + 16>
+static dPayloadFactory<schedulerMessagePayload, BASE_SCHEDULER_MESSAGE_NUMBER, BASE_SCHEDULER_MESSAGE_NUMBER + 16>
   dmf ("scheduler");
 
-schedulerMessage::schedulerMessage (std::uint32_t messageType,
+REGISTER_MESSAGE_TYPE (m1, "CLEAR TARGETS", schedulerMessagePayload::CLEAR_TARGETS);
+REGISTER_MESSAGE_TYPE (m2, "SHUTDOWN", schedulerMessagePayload::SHUTDOWN);
+REGISTER_MESSAGE_TYPE (m3, "STARTUP", schedulerMessagePayload::STARTUP);
+REGISTER_MESSAGE_TYPE (m4, "ADD TARGETS", schedulerMessagePayload::ADD_TARGETS);
+REGISTER_MESSAGE_TYPE (m5, "UPDATE TARGETS", schedulerMessagePayload::UPDATE_TARGETS);
+REGISTER_MESSAGE_TYPE (m6, "UPDATE RESERVES", schedulerMessagePayload::UPDATE_RESERVES);
+REGISTER_MESSAGE_TYPE (m7, "UPDATE REGULATION RESERVE", schedulerMessagePayload::UPDATE_REGULATION_RESERVE);
+REGISTER_MESSAGE_TYPE (m8, "USE RESERVE", schedulerMessagePayload::USE_RESERVE);
+REGISTER_MESSAGE_TYPE (m9, "UPDATE REGULATION RESERVE", schedulerMessagePayload::UPDATE_REGULATION_TARGET);
+REGISTER_MESSAGE_TYPE (m10, "REGISTER DISPATCHER", schedulerMessagePayload::REGISTER_DISPATCHER);
+REGISTER_MESSAGE_TYPE (m11, "REGISTER AGC DISPATCHER", schedulerMessagePayload::REGISTER_AGC_DISPATCHER);
+REGISTER_MESSAGE_TYPE (m12, "REGISTER RESERVE DISPATCHER", schedulerMessagePayload::REGISTER_RESERVE_DISPATCHER);
+REGISTER_MESSAGE_TYPE (m13, "REGISTER CONTROLLER", schedulerMessagePayload::REGISTER_CONTROLLER);
+
+schedulerMessagePayload::schedulerMessagePayload (
                                     std::vector<double> time,
                                     std::vector<double> target)
-    : commMessage (messageType), m_time (std::move (time)), m_target (std::move (target))
+    : m_time (std::move (time)), m_target (std::move (target))
 {
 }
-void schedulerMessage::loadMessage (std::uint32_t messageType,
+void schedulerMessagePayload::loadMessage (
                                     std::vector<double> time,
                                     std::vector<double> target)
 {
-    setMessageType (messageType);
     m_time = std::move (time);
     m_target = std::move (target);
 }
 
-std::string schedulerMessage::to_string (int modifiers) const
+std::string schedulerMessagePayload::to_string (uint32_t type, uint32_t /*code*/) const
 {
-    std::string typeString = (modifiers == comm_modifiers::with_type) ? encodeTypeInString () : "";
+    std::string typeString;
     auto tsize = m_time.size ();
 
-    switch (getMessageType ())
+    switch (type)
     {
-    case CLEAR_TARGETS:
-        return typeString + "CLEAR TARGETS";
     case SHUTDOWN:
-        return typeString + "SHUTDOWN @" + std::to_string (m_time[0]);
     case STARTUP:
-        return typeString + "STARTUP @:" + std::to_string (m_time[0]);
+        return typeString + "@" + std::to_string (m_time[0]);
     case ADD_TARGETS:
-        return typeString + "ADD TARGETS:" + makeTargetString (tsize);
     case UPDATE_TARGETS:
-        return typeString + "UPDATE TARGETS:" + makeTargetString (tsize);
     case UPDATE_RESERVES:
-        return typeString + "UPDATE RESERVES:" + makeTargetString (tsize);
     case UPDATE_REGULATION_RESERVE:
-        return typeString + "UPDATE REGULATION RESERVE:" + makeTargetString (tsize);
     case USE_RESERVE:
-        return typeString + "USE RESERVE:" + makeTargetString (tsize);
     case UPDATE_REGULATION_TARGET:
-        return typeString + "UPDATE REGULATION TARGET:" + makeTargetString (tsize);
+        return typeString + makeTargetString (tsize);
+    default:
+        break;
     }
-    return typeString + "<UNKNOWN>";
+    return typeString;
 }
 
-void schedulerMessage::loadString (const std::string &fromString)
+void schedulerMessagePayload::from_string (uint32_t type, uint32_t /*code*/,const std::string &fromString, size_t offset)
 {
-    auto strV = stringOps::splitline (fromString, ':');
-    auto lstr = convertToUpperCase (strV[0]);
-
     std::vector<double> targets;
-    if (strV.size () > 1)
+    if (fromString.size ()-offset > 1)
     {
-        targets = str2vector (strV[1], kNullVal, "@ ");
+        targets = str2vector (fromString.substr(offset), kNullVal, "@ ");
     }
 
     auto loadtargets = [this](std::vector<double> newTargets) {
@@ -86,56 +90,25 @@ void schedulerMessage::loadString (const std::string &fromString)
             m_time[(kk >> 1) + 1] = newTargets[kk + 1];
         }
     };
-
-    if (lstr == "CLEAR TARGETS")
+    switch (type)
     {
-        setMessageType (CLEAR_TARGETS);
-    }
-    else if (lstr == "SHUTDOWN")
-    {
-        setMessageType (SHUTDOWN);
-        m_time.resize (1);
+    case SHUTDOWN:
+    case STARTUP:
+        m_time.resize(1);
         m_time[0] = targets[0];
+        break;
+    case ADD_TARGETS:
+    case UPDATE_TARGETS:
+    case UPDATE_RESERVES:
+    case USE_RESERVE:
+    case UPDATE_REGULATION_TARGET:
+        loadtargets(targets);
+        break;
     }
-    else if (lstr == "gridState_t::STARTUP")
-    {
-        setMessageType (STARTUP);
-        m_time.resize (1);
-        m_time[0] = targets[0];
-    }
-    else if (lstr == "ADD TARGETS")
-    {
-        setMessageType (ADD_TARGETS);
-        loadtargets (targets);
-    }
-    else if (lstr == "UPDATE TARGETS")
-    {
-        setMessageType (UPDATE_TARGETS);
-        loadtargets (targets);
-    }
-    else if (lstr == "UPDATE RESERVES")
-    {
-        setMessageType (UPDATE_RESERVES);
-        loadtargets (targets);
-    }
-    else if (lstr == "UPDATE REGULATION RESERVE")
-    {
-        setMessageType (UPDATE_REGULATION_RESERVE);
-        loadtargets (targets);
-    }
-    else if (lstr == "USE RESERVE")
-    {
-        setMessageType (USE_RESERVE);
-        loadtargets (targets);
-    }
-    else if (lstr == "UPDATE REGULATION TARGET")
-    {
-        setMessageType (UPDATE_REGULATION_TARGET);
-        loadtargets (targets);
-    }
+    
 }
 
-std::string schedulerMessage::makeTargetString (size_t cnt) const
+std::string schedulerMessagePayload::makeTargetString (size_t cnt) const
 {
     std::string targetString;
     for (size_t kk = 0; kk < cnt; ++kk)

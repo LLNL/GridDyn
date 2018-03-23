@@ -338,20 +338,21 @@ void pmu::generateAndTransmitMessage() const
 	{
 		auto &oname = outputNames();
 
-		auto cm = std::make_shared<comms::controlMessage>(comms::controlMessage::GET_RESULT_MULTIPLE);
+		auto cm = std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
 
+        auto payload = std::static_pointer_cast<comms::controlMessagePayload>(cm->payload);
 		auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
 
 
-		cm->multiFields.resize(res.size());
-		cm->multiValues.resize(res.size());
-		cm->multiUnits.resize(res.size());
-		cm->m_time = prevTime;
+        payload->multiFields.resize(res.size());
+        payload->multiValues.resize(res.size());
+        payload->multiUnits.resize(res.size());
+        payload->m_time = prevTime;
 		for (index_t ii = 0; ii < static_cast<index_t>(res.size()); ++ii)
 		{
-			cm->multiFields[ii] = oname[ii][0];
-			cm->multiValues[ii] = res[ii];
-			cm->multiUnits[ii] = gridUnits::to_string(outputUnits(ii));
+            payload->multiFields[ii] = oname[ii][0];
+            payload->multiValues[ii] = res[ii];
+            payload->multiUnits[ii] = gridUnits::to_string(outputUnits(ii));
 		}
 		
 		cManager.send(std::move(cm));

@@ -823,7 +823,7 @@ std::unique_ptr<eventAdapter> Relay::make_alarm (const std::string &val)
         auto code = numeric_conversion<std::uint32_t> (codeStr, std::uint32_t (-1));
         if (code == std::uint32_t (-1))
         {
-            code = comms::getAlarmCode (codeStr);
+            code = getAlarmCode (codeStr);
         }
         return std::make_unique<functionEventAdapter> ([this, code]() {
             try

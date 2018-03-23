@@ -282,17 +282,17 @@ void zonalRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTim
         {
             return;
         }
-        auto P = std::make_shared<relayMessage> ();
+        auto P = std::make_shared<commMessage> ();
         // std::cout << "GridDyn conditionTriggered(), conditionNum = " << conditionNum << '\n';
         if (conditionNum == 0)
         {
             // std::cout << "GridDyn setting relay message type to LOCAL_FAULT_EVENT" << '\n';
-            P->setMessageType (relayMessage::LOCAL_FAULT_EVENT);
+            P->setMessageType (commMessage::LOCAL_FAULT_EVENT);
         }
         else
         {
             // std::cout << "GridDyn setting relay message type to REMOTE_FAULT_EVENT" << '\n';
-            P->setMessageType (relayMessage::REMOTE_FAULT_EVENT);
+            P->setMessageType (commMessage::REMOTE_FAULT_EVENT);
         }
         cManager.send (P);
     }

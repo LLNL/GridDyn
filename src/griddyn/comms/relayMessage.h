@@ -11,7 +11,6 @@
  */
 
 #pragma once
-
 #include "commMessage.h"
 #include <string>
 
@@ -20,9 +19,7 @@ namespace griddyn
 {
 namespace comms
 {
-class relayMessage : public commMessage
-{
-public:
+using relayMessage = commMessage;
   enum relay_message_type_t:std::uint32_t
   {
     NO_EVENT = BASE_RELAY_MESSAGE_NUMBER,
@@ -38,44 +35,8 @@ public:
     ALARM_TRIGGER_EVENT = BASE_RELAY_MESSAGE_NUMBER + 12,
     ALARM_CLEARED_EVENT = BASE_RELAY_MESSAGE_NUMBER + 13,
   };
-  std::uint32_t m_code = 0;
-  relayMessage ()
-  {
-  }
-  /** construct from type */
-  explicit relayMessage (std::uint32_t type) : commMessage (type)
-  {
-  }
-  relayMessage (std::uint32_t type, std::uint32_t code) : commMessage (type), m_code (code)
-  {
-  }
-  virtual std::string to_string (int modifiers=comm_modifiers::none) const override;
-  virtual void loadString (const std::string &fromString) override;
-private:
-  //boost serialization stuff
-  friend class cereal::access;
-  template <class Archive>
-  void serialize (Archive & ar)
-  {
-    ar(cereal::base_class<commMessage> (this),m_code);
-  }
-};
 
-//defining a number of alarm codes
-enum alarmCode
-{
-  OVERCURRENT_ALARM = 101,
-  UNDERCURRENT_ALARM = 102,
-  OVERVOLTAGE_ALARM = 111,
-  UNDERVOLTAGE_ALARM = 112,
-  TEMPERATURE_ALARM1 = 201,
-  TEMPERATURE_ALARM2 = 202,
-  UNDERFREQUENCY_ALARM = 301,
-  OVERFREQUENCY_ALARM = 303,
 
-};
-
-std::uint32_t getAlarmCode (const std::string &alarmStr);
 
 }//namespace comms
 }//namespace griddyn

@@ -17,24 +17,38 @@ namespace griddyn
 {
 namespace comms
 {
-static dMessageFactory<controlMessage, BASE_CONTROL_MESSAGE_NUMBER, BASE_CONTROL_MESSAGE_NUMBER + 16>
+static dPayloadFactory<controlMessagePayload, BASE_CONTROL_MESSAGE_NUMBER, BASE_CONTROL_MESSAGE_NUMBER + 16>
   dmf ("control");
 
+REGISTER_MESSAGE_TYPE (m1, "SET", controlMessagePayload::SET);
+REGISTER_MESSAGE_TYPE (m2, "GET", controlMessagePayload::GET);
+REGISTER_MESSAGE_TYPE (m3, "GET MULTIPLE", controlMessagePayload::GET_MULTIPLE);
+REGISTER_MESSAGE_TYPE (m4, "GET PERIODIC", controlMessagePayload::GET_PERIODIC);
+REGISTER_MESSAGE_TYPE (m5, "SET MULTIPLE", controlMessagePayload::SET_MULTIPLE);
+REGISTER_MESSAGE_TYPE (m6, "SET SUCCESS", controlMessagePayload::SET_SUCCESS);
+REGISTER_MESSAGE_TYPE (m7, "SET FAIL", controlMessagePayload::SET_FAIL);
+REGISTER_MESSAGE_TYPE (m8, "GET RESULT", controlMessagePayload::GET_RESULT);
+REGISTER_MESSAGE_TYPE (m9, "GET RESULT MULTIPLE", controlMessagePayload::GET_RESULT_MULTIPLE);
+REGISTER_MESSAGE_TYPE (m10, "SET SCHEDULED", controlMessagePayload::SET_SCHEDULED);
+REGISTER_MESSAGE_TYPE (m11, "GET SCHEDULED", controlMessagePayload::GET_SCHEDULED);
+REGISTER_MESSAGE_TYPE (m12, "CANCEL", controlMessagePayload::CANCEL);
+REGISTER_MESSAGE_TYPE (m13, "CANCEL SUCCESS", controlMessagePayload::CANCEL_SUCCESS);
+REGISTER_MESSAGE_TYPE (m14, "CANCEL FAIL", controlMessagePayload::CANCEL_FAIL);
 using namespace stringOps;
 
-std::string controlMessage::to_string (int modifiers) const
+std::string controlMessagePayload::to_string (uint32_t type, uint32_t /*code*/) const
 {
-    std::string temp = (modifiers == comm_modifiers::with_type) ? encodeTypeInString () : "";
-    switch (getMessageType ())
+    std::string temp;
+    switch (type)
     {
     case SET:
         if (m_actionID > 0)
         {
-            temp += "SET(" + std::to_string (m_actionID) + "):" + m_field;
+            temp = "(" + std::to_string (m_actionID) + ")" + m_field;
         }
         else
         {
-            temp += "SET:" + m_field;
+            temp = m_field;
         }
         if (!m_units.empty ())
         {
@@ -43,14 +57,13 @@ std::string controlMessage::to_string (int modifiers) const
         temp += " = " + std::to_string (m_value) + '@' + std::to_string (m_time);
         break;
     case GET:
-        temp += "GET:" + m_field;
+        temp = m_field;
         if (!m_units.empty ())
         {
             temp += '(' + m_units + ')';
         }
         break;
     case GET_MULTIPLE:
-        temp += "GET_MULTIPLE:";
         for (auto &fld : multiFields)
         {
             temp += ' ' + fld + ',';
@@ -58,7 +71,7 @@ std::string controlMessage::to_string (int modifiers) const
         temp.pop_back ();  // get rid of the last comma
         break;
     case GET_PERIODIC:
-        temp += "GET_PERIODIC:" + m_field;
+        temp = m_field;
         if (!m_units.empty ())
         {
             temp += '(' + m_units + ')';
@@ -66,7 +79,6 @@ std::string controlMessage::to_string (int modifiers) const
         temp += " @" + std::to_string (m_time);
         break;
     case GET_RESULT_MULTIPLE:
-        temp += "GET_RESULT_MULTIPLE:";
         for (size_t ii = 0; ii < multiFields.size (); ++ii)
         {
             temp += ' ' + multiFields[ii] + '=' + std::to_string (multiValues[ii]) + ',';
@@ -76,25 +88,17 @@ std::string controlMessage::to_string (int modifiers) const
     case SET_SUCCESS:
         if (m_actionID > 0)
         {
-            temp += "SET SUCCESS:" + std::to_string (m_actionID);
-        }
-        else
-        {
-            temp += "SET SUCCESS";
+            temp =std::to_string (m_actionID);
         }
         break;
     case SET_FAIL:
         if (m_actionID > 0)
         {
-            temp += "SET FAIL:" + std::to_string (m_actionID);
-        }
-        else
-        {
-            temp += "SET FAIL";
+            temp = std::to_string (m_actionID);
         }
         break;
     case GET_RESULT:
-        temp += "GET RESULT: " + m_field;
+        temp = m_field;
         if (!m_units.empty ())
         {
             temp += '(' + m_units + ')';
@@ -102,213 +106,136 @@ std::string controlMessage::to_string (int modifiers) const
         temp += " = " + std::to_string (m_value) + '@' + std::to_string (m_time);
         break;
     case SET_SCHEDULED:
-        temp += "SET SCHEDULED:" + std::to_string (m_actionID);
+        temp = std::to_string (m_actionID);
         break;
     case GET_SCHEDULED:
-        temp += "GET SCHEDULED:" + std::to_string (m_actionID);
+        temp = std::to_string (m_actionID);
         break;
     case CANCEL:
-        temp += "CANCEL:" + std::to_string (m_actionID);
+        temp = std::to_string (m_actionID);
         break;
     case CANCEL_SUCCESS:
-        temp += "CANCEL SUCCESS:" + std::to_string (m_actionID);
+        temp = std::to_string (m_actionID);
         break;
     case CANCEL_FAIL:
-        temp += "CANCEL FAIL:" + std::to_string (m_actionID);
+        temp = std::to_string (m_actionID);
         break;
     default:
-        temp += "<UNKNOWN>";
+        break;
     }
     return temp;
 }
 
-void controlMessage::loadString (const std::string &fromString)
+void controlMessagePayload::from_string (uint32_t type, uint32_t /*code*/, const std::string &fromString, size_t offset)
 {
     std::string idstring;
-    std::string vstring;
-    auto cc = fromString.find_first_of (':');
-    std::string lstr;
     bool vstrid = false;
-    if (cc != std::string::npos)
-    {
-        lstr = fromString.substr (0, cc - 1);
-        vstring = fromString.substr (cc + 1, std::string::npos);
-        cc = lstr.find_first_of ('(');
-        if (cc != std::string::npos)
-        {
-            auto cp = lstr.find_first_of (')', cc + 1);
-            idstring = lstr.substr (cc + 1, cp - 1);
-            lstr = lstr.substr (0, cc - 1);
-            trimString (lstr);
-        }
-    }
-    if (lstr == "SET")
-    {
-        setMessageType (SET);
-        if (idstring.empty ())
-        {
-            m_actionID = 0;
-        }
-        else
-        {
-            m_actionID = numeric_conversion<size_t> (idstring, 0);
-        }
-        auto svec = splitline (vstring, "=@");
-        auto psep = splitline (svec[0], "()");
-        if (psep.size () > 1)
-        {
-            m_units = psep[1];
-        }
-        m_field = psep[0];
-        m_value = numeric_conversion (svec[1], kNullVal);
-        if (svec.size () > 2)
-        {
-            m_time = numeric_conversion (svec[2], kNullVal);
-        }
-    }
-    else if (lstr == "GET")
-    {
-        setMessageType (GET);
-        if (idstring.empty ())
-        {
-            m_actionID = 0;
-        }
-        else
-        {
-            m_actionID = std::stoull (idstring);
-        }
-        auto svec = splitline (vstring, '@');
-        auto psep = splitline (svec[0], "()");
-        if (psep.size () > 1)
-        {
-            m_units = psep[1];
-        }
-        m_field = psep[0];
 
-        if (svec.size () > 1)
+        auto vstring = fromString.substr (offset, std::string::npos);
+        if (vstring[0] == '(')
         {
-            m_time = numeric_conversion (svec[1], kNullVal);
-        }
-    }
-    else if (lstr == "GET_PERIODIC")
-    {
-        setMessageType (GET_PERIODIC);
-        if (idstring.empty ())
-        {
-            m_actionID = 0;
-        }
-        else
-        {
-            m_actionID = std::stoull (idstring);
-        }
-        auto svec = splitline (vstring, '@');
-        auto psep = splitline (vstring, ',');
-        if (psep.size () > 1)
-        {
-            m_units = psep[1];
-        }
-        m_field = psep[0];
-
-        if (svec.size () > 1)
-        {
-            m_time = numeric_conversion (svec[1], kNullVal);
-        }
-    }
-    else if (lstr == "GET_MULTIPLE")
-    {
-        setMessageType (GET_MULTIPLE);
-        if (idstring.empty ())
-        {
-            m_actionID = 0;
-        }
-        else
-        {
-            m_actionID = std::stoull (idstring);
-        }
-        multiFields = splitline (vstring, ',');
-    }
-    else if (lstr == "GET_RESULT_MULTIPLE")
-    {
-        setMessageType (GET_RESULT_MULTIPLE);
-        if (idstring.empty ())
-        {
-            m_actionID = 0;
-        }
-        else
-        {
-            m_actionID = std::stoull (idstring);
-        }
-        auto mf = splitline (vstring, ',');
-        multiFields.resize (0);
-        multiValues.resize (0);
-        for (auto &mfl : mf)
-        {
-            auto fsep = splitline (mfl, '=');
-            if (fsep.size () == 2)
+            auto cp = vstring.find_first_of (')');
+            idstring = vstring.substr (0, cp - 1);
+            if (idstring.empty())
             {
-                multiFields.push_back (fsep[0]);
-                multiValues.push_back (numeric_conversion (fsep[1], kNullVal));
+                m_actionID = 0;
+            }
+            else
+            {
+                m_actionID = std::stoull(idstring);
             }
         }
-    }
-    else if (lstr == "SET SUCCESS")
-    {
-        setMessageType (SET_SUCCESS);
-        vstrid = true;
-    }
-    else if (lstr == "SET FAIL")
-    {
-        setMessageType (SET_FAIL);
-        vstrid = true;
-    }
-    else if (lstr == "GET RESULT")
-    {
-        setMessageType (GET_RESULT);
-        if (idstring.empty ())
+
+        switch (type)
         {
-            m_actionID = 0;
-        }
-        else
+        case SET:
         {
-            m_actionID = std::stoull (idstring);
+            auto svec = splitline(vstring, "=@");
+            auto psep = splitline(svec[0], "()");
+            if (psep.size() > 1)
+            {
+                m_units = psep[1];
+            }
+            m_field = psep[0];
+            m_value = numeric_conversion(svec[1], kNullVal);
+            if (svec.size() > 2)
+            {
+                m_time = numeric_conversion(svec[2], kNullVal);
+            }
         }
-        auto svec = splitline (vstring, "=@");
-        auto psep = splitline (svec[0], "()");
-        if (psep.size () > 1)
+        break;
+        case GET:
         {
-            m_units = psep[1];
+            auto svec = splitline(vstring, '@');
+            auto psep = splitline(svec[0], "()");
+            if (psep.size() > 1)
+            {
+                m_units = psep[1];
+            }
+            m_field = psep[0];
+
+            if (svec.size() > 1)
+            {
+                m_time = numeric_conversion(svec[1], kNullVal);
+            }
         }
-        m_field = psep[0];
-        m_value = numeric_conversion (svec[1], kNullVal);
-        if (svec.size () > 2)
+        break;
+        case GET_PERIODIC:
         {
-            m_time = numeric_conversion (svec[2], kNullVal);
+            auto svec = splitline(vstring, '@');
+            auto psep = splitline(vstring, ',');
+            if (psep.size() > 1)
+            {
+                m_units = psep[1];
+            }
+            m_field = psep[0];
+
+            if (svec.size() > 1)
+            {
+                m_time = numeric_conversion(svec[1], kNullVal);
+            }
         }
-    }
-    else if (lstr == "SET SCHEDULED")
-    {
-        setMessageType (SET_SCHEDULED);
-        vstrid = true;
-    }
-    else if (lstr == "GET SCHEDULED")
-    {
-        setMessageType (GET_SCHEDULED);
-        vstrid = true;
-    }
-    else if (lstr == "CANCEL")
-    {
-        setMessageType (CANCEL);
-        vstrid = true;
-    }
-    else if (lstr == "CANCEL FAIL")
-    {
-        setMessageType (CANCEL_FAIL);
-        vstrid = true;
-    }
-    else if (lstr == "CANCEL SUCCESS")
-    {
-        setMessageType (CANCEL_SUCCESS);
-        vstrid = true;
+        break;
+        case GET_MULTIPLE:
+        {
+            multiFields = splitline(vstring, ',');
+        }
+        break;
+        case GET_RESULT_MULTIPLE:
+        {
+            auto mf = splitline(vstring, ',');
+            multiFields.resize(0);
+            multiValues.resize(0);
+            for (auto &mfl : mf)
+            {
+                auto fsep = splitline(mfl, '=');
+                if (fsep.size() == 2)
+                {
+                    multiFields.push_back(fsep[0]);
+                    multiValues.push_back(numeric_conversion(fsep[1], kNullVal));
+                }
+            }
+        }
+        break;
+        case GET_RESULT:
+        {
+            auto svec = splitline(vstring, "=@");
+            auto psep = splitline(svec[0], "()");
+            if (psep.size() > 1)
+            {
+                m_units = psep[1];
+            }
+            m_field = psep[0];
+            m_value = numeric_conversion(svec[1], kNullVal);
+            if (svec.size() > 2)
+            {
+                m_time = numeric_conversion(svec[2], kNullVal);
+            }
+        }
+        break;
+        default:
+            vstrid = true;
+            break;
     }
 
     if (vstrid)

@@ -600,21 +600,21 @@ double schedulerRamp::get (const std::string &param, gridUnits::units_t unitType
 void schedulerRamp::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
-    switch (sm->getMessageType ())
+   // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
+    switch (message->getMessageType ())
     {
-    case schedulerMessage::CLEAR_TARGETS:
+    case schedulerMessagePayload::CLEAR_TARGETS:
         clearSchedule ();
         break;
-    case schedulerMessage::SHUTDOWN:
+    case schedulerMessagePayload::SHUTDOWN:
         break;
-    case schedulerMessage::STARTUP:
+    case schedulerMessagePayload::STARTUP:
         break;
-    case schedulerMessage::UPDATE_TARGETS:
+    case schedulerMessagePayload::UPDATE_TARGETS:
         break;
-    case schedulerMessage::UPDATE_RESERVES:
+    case schedulerMessagePayload::UPDATE_RESERVES:
         break;
-    case schedulerMessage::USE_RESERVE:
+    case schedulerMessagePayload::USE_RESERVE:
         break;
     default:
         scheduler::receiveMessage (sourceID, message);

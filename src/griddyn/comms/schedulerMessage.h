@@ -20,7 +20,7 @@ namespace griddyn
 {
 namespace comms
 {
-class schedulerMessage : public commMessage
+class schedulerMessagePayload : public CommPayload
 {
 public:
 	enum scheduler_message_type_t :std::uint32_t
@@ -40,28 +40,24 @@ public:
 		REGISTER_CONTROLLER = BASE_SCHEDULER_MESSAGE_NUMBER + 15,
 	};
 
-	schedulerMessage()
-	{
-	}
-	schedulerMessage(std::uint32_t messageType) : commMessage(messageType)
-	{
-	}
-	schedulerMessage(std::uint32_t messageType, std::vector<double> time, std::vector<double> target);
+    schedulerMessagePayload() = default;
 
-	void loadMessage(std::uint32_t messageType, std::vector<double> time, std::vector<double> target);
+    schedulerMessagePayload( std::vector<double> time, std::vector<double> target);
+
+	void loadMessage( std::vector<double> time, std::vector<double> target);
 
 	std::vector<double> m_time;
 	std::vector<double> m_target;
 
-	virtual std::string to_string(int modifiers = comm_modifiers::none) const override;
-	virtual void loadString(const std::string &fromString) override;
+	virtual std::string to_string(uint32_t type, uint32_t code) const override;
+	virtual void from_string(uint32_t type, uint32_t code, const std::string &fromString, size_t offset) override;
 
 private:
 	friend class cereal::access;
 	template <class Archive>
 	void serialize(Archive & ar)
 	{
-		ar(cereal::base_class<commMessage>(this), m_time,m_target);		
+		ar(cereal::base_class<CommPayload>(this), m_time,m_target);		
 	}
 
 	std::string makeTargetString(size_t cnt) const;
@@ -71,3 +67,4 @@ private:
 } //namespace comms
 } //namespace griddyn
 
+CEREAL_REGISTER_TYPE(griddyn::comms::schedulerMessagePayload);

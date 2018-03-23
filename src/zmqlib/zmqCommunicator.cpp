@@ -102,7 +102,7 @@ void zmqCommunicator::addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessa
 
 void zmqCommunicator::addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message)
 {
-	msg.addstr(message->to_string(commMessage::comm_modifiers::with_type));
+	msg.addstr(message->to_datastring());
 }
 
 void zmqCommunicator::initialize()
@@ -256,9 +256,8 @@ void zmqCommunicator::messageHandler(const multipart_t &msg)
 	auto msgBody = (sz == 2) ? msg.peek(1) : msg.peek(2);
 
 	std::string msgString((const char *)(msgBody->data()), msgBody->size());
-	auto type = commMessage::extractMessageType(msgString);
-	auto gdMsg = coreMessageFactory::instance()->createMessage(type);
-	gdMsg->loadString(msgString);
+    std::shared_ptr<commMessage> gdMsg;
+	gdMsg->from_datastring(msgString);
 
 	//call the lower level receive function
 	receive(0, getName(), std::move(gdMsg));
