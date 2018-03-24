@@ -340,7 +340,7 @@ void pmu::generateAndTransmitMessage() const
 
 		auto cm = std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
 
-        auto payload = std::static_pointer_cast<comms::controlMessagePayload>(cm->payload);
+        auto payload = cm->getPayload<comms::controlMessagePayload>();
 		auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
 
 

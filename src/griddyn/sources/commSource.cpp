@@ -145,7 +145,7 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
         if (!opFlags[no_message_reply])  // unless told not to respond return with the
         {
             reply = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-            std::static_pointer_cast<controlMessagePayload>(reply->payload)->m_actionID = m->m_actionID;
+            reply->getPayload<controlMessagePayload>()->m_actionID = m->m_actionID;
             commLink->transmit (sourceID, reply);
         }
 
@@ -154,7 +154,7 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
     {
         reply = std::make_shared<commMessage>(controlMessagePayload::GET_RESULT);
 
-        auto rep = std::static_pointer_cast<controlMessagePayload>(reply->payload);
+        auto rep = reply->getPayload<controlMessagePayload>();
         rep->m_field = "level";
         rep->m_value = m_output;
         rep->m_time = prevTime;
@@ -184,7 +184,7 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-                std::static_pointer_cast<controlMessagePayload>(reply->payload)->m_actionID = m->m_actionID;
+                reply->getPayload<controlMessagePayload>()->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, gres);
             }
         }

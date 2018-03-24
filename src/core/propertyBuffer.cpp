@@ -51,23 +51,23 @@ void propertyBuffer::apply (coreObject *obj) const
 {
     for (auto &prop : properties)
     {
-        switch (prop.second.which ())
+        switch (prop.second.index ())
         {
         case 0:
-            obj->set (prop.first, boost::get<double> (prop.second));
+            obj->set (prop.first, mpark::get<double> (prop.second));
             break;
         case 1:
-            obj->set (prop.first, boost::get<std::pair<double, gridUnits::units_t>> (prop.second).first,
-                      boost::get<std::pair<double, gridUnits::units_t>> (prop.second).second);
+            obj->set (prop.first, mpark::get<std::pair<double, gridUnits::units_t>> (prop.second).first,
+                      mpark::get<std::pair<double, gridUnits::units_t>> (prop.second).second);
             break;
         case 2:
-            obj->set (prop.first, boost::get<int> (prop.second));
+            obj->set (prop.first, mpark::get<int> (prop.second));
             break;
         case 3:
-            obj->setFlag (prop.first, boost::get<bool> (prop.second));
+            obj->setFlag (prop.first, mpark::get<bool> (prop.second));
             break;
         case 4:
-            obj->set (prop.first, boost::get<std::string> (prop.second));
+            obj->set (prop.first, mpark::get<std::string> (prop.second));
             break;
         }
     }

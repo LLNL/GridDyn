@@ -16,7 +16,6 @@
 
 #include "coreObject.h"
 
-
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/mem_fun.hpp>

@@ -535,7 +535,7 @@ void Generator::setFlag (const std::string &flag, bool val)
     {
         opFlags.set (reserve_capable, val);
     }
-    else if ((flag == "agc") || (flag == "agccapble"))
+    else if ((flag == "agc") || (flag == "agccapable") || (flag == "agc_capable"))
     {
         opFlags.set (agc_capable, val);
     }

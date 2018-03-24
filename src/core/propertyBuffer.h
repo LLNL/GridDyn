@@ -17,14 +17,14 @@
 #include <vector>
 #include <utility>
 #include "utilities/units.h"
-#include <boost/variant.hpp>
+#include <extra_includes/variant.hpp>
 #include "core/coreOwningPtr.hpp"
 
 namespace griddyn
 {
 class coreObject;
 /** define a variant type for the different types of properties that may be set*/
-using property_type = boost::variant<double, std::pair<double, gridUnits::units_t>, int, bool, std::string>;
+using property_type =mpark::variant<double, std::pair<double, gridUnits::units_t>, int, bool, std::string>;
 
 
 /** class for temporarily holding object properties if the object has delayed initialization or something to that effect
@@ -74,22 +74,22 @@ public:
 		
 		for (auto &prop : properties)
 		{
-			switch (prop.second.which())
+			switch (prop.second.index())
 			{
 			case 0:
-				obj->set(prop.first, boost::get<double>(prop.second));
+				obj->set(prop.first, mpark::get<double>(prop.second));
 				break;
 			case 1:
-				obj->set(prop.first, boost::get<std::pair<double,gridUnits::units_t>>(prop.second).first);
+				obj->set(prop.first, mpark::get<std::pair<double,gridUnits::units_t>>(prop.second).first);
 				break;
 			case 2:
-				obj->set(prop.first, boost::get<int>(prop.second));
+				obj->set(prop.first, mpark::get<int>(prop.second));
 				break;
 			case 3:
-				obj->setFlag(prop.first, boost::get<bool>(prop.second));
+				obj->setFlag(prop.first, mpark::get<bool>(prop.second));
 				break;
 			case 4:
-				obj->set(prop.first, boost::get<std::string>(prop.second));
+				obj->set(prop.first, mpark::get<std::string>(prop.second));
 				break;
 			}
 		}

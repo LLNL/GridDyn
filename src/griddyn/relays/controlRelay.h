@@ -103,8 +103,8 @@ protected:
   index_t getFreeAction ();
   
 
-  std::unique_ptr<functionEventAdapter> generateGetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessagePayload> &message);
-  std::unique_ptr<functionEventAdapter> generateSetEvent (coreTime eventTime, std::uint64_t sourceID, std::shared_ptr<comms::controlMessagePayload> &message);
+  std::unique_ptr<functionEventAdapter> generateGetEvent (coreTime eventTime, std::uint64_t sourceID, comms::controlMessagePayload *message);
+  std::unique_ptr<functionEventAdapter> generateSetEvent (coreTime eventTime, std::uint64_t sourceID, comms::controlMessagePayload *message);
 };
 }//namespace relays
 }//namespace griddyn

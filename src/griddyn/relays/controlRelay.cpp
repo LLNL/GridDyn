@@ -158,7 +158,7 @@ using cm = griddyn::comms::controlMessagePayload;
 
 void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
-    auto m = std::dynamic_pointer_cast<cm> (message->payload);
+    auto m = message->getPayload<cm>();
     index_t actnum;
     ++instructionCounter;
 
@@ -181,7 +181,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
         else
         {
             auto gres = std::make_shared<commMessage>(cm::SET_SCHEDULED);
-            std::static_pointer_cast<cm>(gres->payload)->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+            gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
 
             commLink->transmit (sourceID, std::move (gres));
             // make the event
@@ -207,7 +207,7 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
         else
         {
             auto gres = std::make_shared<commMessage>(cm::SET_SCHEDULED);
-            std::static_pointer_cast<cm>(gres->payload)->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
+            gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
             commLink->transmit (sourceID, std::move (gres));
             auto fea = generateGetEvent (m->m_time, sourceID, m);
             rootSim->add (std::shared_ptr<eventAdapter> (std::move (fea)));
@@ -329,7 +329,7 @@ change_code controlRelay::executeAction (index_t actionNum)
                 }
             }
             auto gres = std::make_shared<commMessage> (cm::GET_RESULT);
-            auto ptr = static_cast<cm *>(gres->payload.get());
+            auto ptr = gres->getPayload<cm>();
            ptr->m_field = cact.field;
             ptr->m_value = val;
             ptr->m_time = prevTime;
@@ -361,7 +361,7 @@ change_code controlRelay::executeAction (index_t actionNum)
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (cm::SET_SUCCESS);
-                std::static_pointer_cast<cm>(gres->payload)->m_actionID = cact.actionID;
+                gres->getPayload<cm>()->m_actionID = cact.actionID;
                 commLink->transmit (cact.sourceID, std::move (gres));
             }
             return change_code::parameter_change;
@@ -371,7 +371,7 @@ change_code controlRelay::executeAction (index_t actionNum)
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage>(cm::SET_FAIL);
-                std::static_pointer_cast<cm>(gres->payload)->m_actionID = cact.actionID;
+                gres->getPayload<cm>()->m_actionID = cact.actionID;
                 commLink->transmit (cact.sourceID, std::shared_ptr<commMessage> (std::move (gres)));
             }
             return change_code::execution_failure;
@@ -400,7 +400,7 @@ void controlRelay::updateObject (coreObject *obj, object_update_mode mode)
 
 std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime eventTime,
                                                                       std::uint64_t sourceID,
-                                                                      std::shared_ptr<cm> &message)
+                                                                      cm *message)
 {
     auto act = getFreeAction ();
     actions[act].actionID = (message->m_actionID > 0) ? message->m_actionID : instructionCounter;
@@ -422,7 +422,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
 
 std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime eventTime,
                                                                       std::uint64_t sourceID,
-                                                                      std::shared_ptr<cm> &message)
+                                                                      cm* message)
 {
     auto act = getFreeAction ();
     actions[act].actionID = (message->m_actionID > 0) ? message->m_actionID : instructionCounter;

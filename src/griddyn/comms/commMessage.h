@@ -91,11 +91,12 @@ public:
       switch (ptype)
       {
       case payloadType_t::none:
+      default:
           return nullptr;
       case payloadType_t::shared:
           return dynamic_cast<payLoadType *>(payload.get());
       case payloadType_t::vector:
-          return reinterpret_cast<payLoadType *>(payload_v.data());
+          return reinterpret_cast<payLoadType *>(payload_V.data());
       case payloadType_t::raw:
           return reinterpret_cast<payLoadType *>(payloadData);
       }
@@ -198,10 +199,10 @@ public:
         break;
     case payloadType_t::raw:
         // Save number of chars + the data
-        ar(make_size_tag(payloadSize));
+        ar(cereal::make_size_tag(payloadSize));
         if (payloadData != nullptr)
         {
-            ar(binary_data(payloadData, payloadSize));
+            ar(cereal::binary_data(payloadData, payloadSize));
         }
     }
   }
@@ -225,9 +226,9 @@ public:
       case payloadType_t::raw:
           // Save to the vector
           size_t size;
-          ar(make_size_tag(size));
+          ar(cereal::make_size_tag(size));
           payload_V.resize(static_cast<std::size_t>(size));
-          ar(binary_data(payload_V.data(), size));
+          ar(cereal::binary_data(payload_V.data(), size));
       }
   }
 };
