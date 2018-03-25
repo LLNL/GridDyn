@@ -19,7 +19,7 @@
 #include "helicsSource.h"
 #include "core/factoryTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-
+#include "helicsCommunicator.h"
 #include "fileInput/readerInfo.h"
 //#include "helics.hpp"
 
@@ -27,7 +27,8 @@ namespace griddyn
 {
 namespace helicsLib
 {
-static childClassFactory<helicsCollector, collector> helicsFac(std::vector<std::string> {"helics"});
+static childClassFactory<helicsCollector, collector> helicsFac(stringVec {"helics"});
+static childClassFactory<helicsCommunicator, Communicator> hcomms(stringVec{ "helics" });
 
 static childTypeFactory<helicsSource, sources::rampSource> fnsrc("source", stringVec{ "helics" });
 static childTypeFactory<helicsLoad, loads::rampLoad> fnld("load", "helics");
@@ -49,6 +50,7 @@ void loadHELICSLibrary()
 void loadHelicsReaderInfoDefinitions(readerInfo &ri)
 {
 	ri.addTranslate("helics", "extra");
+   // ri.addTranslate("cosim", "helics");
 }
 
 } // namespace griddyn

@@ -13,8 +13,7 @@
 /** 
 @file
 @brief define the simulation object itself and several helper classes and enumerations*/
-#ifndef GRIDDYN_SIMULATION_H_
-#define GRIDDYN_SIMULATION_H_
+
 #pragma once
 
 
@@ -693,4 +692,3 @@ class gridDynSimulation : public gridSimulation
 };
 
 }//namespace griddyn
-#endif

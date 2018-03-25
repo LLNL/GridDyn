@@ -93,7 +93,7 @@ FskitCommunicator::ProcessEventMessage (const fskit::EventMessage& eventMessage)
   double griddynTime = eventMessage.GetTime ().GetRaw () * 1.0E-9;
 
   //auto m = coreMessageFactory::instance()->createMessage(eventMessage.GetEventType());
-  auto m = std::make_shared<griddyn::comms::controlMessage>(eventMessage.GetEventType());
+  auto m = std::make_shared<griddyn::comms::commMessage>(eventMessage.GetEventType());
   assert(m);
   eventMessage.Unpack(*m);
   std::string name = getName();

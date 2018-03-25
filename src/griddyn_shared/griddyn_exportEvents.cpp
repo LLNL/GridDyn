@@ -40,28 +40,28 @@ void gridDynEvent_free(gridDynEvent evnt)
 	}
 }
 
-int gridDynEvent_trigger(gridDynEvent evnt)
+griddyn_status gridDynEvent_trigger(gridDynEvent evnt)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	if (*shr_event)
 	{
 		if ((*shr_event)->trigger() >= change_code::no_change)
 		{
-			return EXECUTION_SUCCESS;
+			return griddyn_ok;
 		}
 	}
-	return FUNCTION_EXECUTION_FAILURE;
+    return griddyn_function_failure;
 }
 
-int gridDynEvent_schedule(gridDynEvent evnt, gridDynSimReference sim)
+griddyn_status gridDynEvent_schedule(gridDynEvent evnt, gridDynSimReference sim)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 
@@ -69,106 +69,106 @@ int gridDynEvent_schedule(gridDynEvent evnt, gridDynSimReference sim)
 
 	if (runner == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	try
 	{
 		runner->getSim()->add(*shr_event);
-		return EXECUTION_SUCCESS;
+		return griddyn_ok;
 	}
 	catch (...)
 	{
-		return ADD_FAILURE;
+		return griddyn_add_failure;
 	}
 	
 }
 
-int gridDynEvent_setValue(gridDynEvent evnt, const char *parameter, double value)
+griddyn_status gridDynEvent_setValue(gridDynEvent evnt, const char *parameter, double value)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	try
 	{
 		shr_event->operator->()->set(parameter, value);
-		return EXECUTION_SUCCESS;
+		return griddyn_ok;
 	}
 	catch (const invalidParameterValue &)
 	{
-		return INVALID_PARAMETER_VALUE;
+		return griddyn_invalid_parameter_value;
 	}
 	catch (const unrecognizedParameter &)
 	{
-		return UNKNOWN_PARAMETER;
+		return griddyn_unknown_parameter;
 	}
 }
 
-int gridDynEvent_setString(gridDynEvent evnt, const char *parameter, const char *value)
+griddyn_status gridDynEvent_setString(gridDynEvent evnt, const char *parameter, const char *value)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	try
 	{
 		shr_event->operator->()->set(parameter, value);
-		return EXECUTION_SUCCESS;
+		return griddyn_ok;
 	}
 	catch (const invalidParameterValue &)
 	{
-		return INVALID_PARAMETER_VALUE;
+		return griddyn_invalid_parameter_value;
 	}
 	catch (const unrecognizedParameter &)
 	{
-		return UNKNOWN_PARAMETER;
+		return griddyn_unknown_parameter;
 	}
 }
 
-int gridDynEvent_setFlag(gridDynEvent evnt, const char *flag, int val)
+griddyn_status gridDynEvent_setFlag(gridDynEvent evnt, const char *flag, int val)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	try
 	{
 		shr_event->operator->()->setFlag(flag, (val!=0));
-		return EXECUTION_SUCCESS;
+		return griddyn_ok;
 	}
 	catch (const invalidParameterValue &)
 	{
-		return INVALID_PARAMETER_VALUE;
+		return griddyn_invalid_parameter_value;
 	}
 	catch (const unrecognizedParameter &)
 	{
-		return UNKNOWN_PARAMETER;
+		return griddyn_unknown_parameter;
 	}
 }
 
-int gridDynEvent_setTarget(gridDynEvent evnt, gridDynObject obj)
+griddyn_status gridDynEvent_setTarget(gridDynEvent evnt, gridDynObject obj)
 {
 	if (evnt == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	auto shr_event = reinterpret_cast<std::shared_ptr<Event> *>(evnt);
 	auto comp = getComponentPointer(obj);
 	if (comp == nullptr)
 	{
-		return INVALID_OBJECT;
+		return griddyn_invalid_object;
 	}
 	try
 	{
 		shr_event->operator->()->updateObject(comp, object_update_mode::match);
-		return EXECUTION_SUCCESS;
+		return griddyn_ok;
 	}
 	catch (...)
 	{
-		return ADD_FAILURE;
+		return griddyn_add_failure;
 	}
 
 }

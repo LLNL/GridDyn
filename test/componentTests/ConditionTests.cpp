@@ -11,9 +11,9 @@
 */
 
 
-#include "measurement/Condition.h"
-#include "links/acLine.h"
-#include "gridBus.h"
+#include "griddyn/measurement/Condition.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/gridBus.h"
 
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

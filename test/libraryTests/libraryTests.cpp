@@ -21,6 +21,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "testHelper.h"
+#include "../testHelper.h"
 
 BOOST_GLOBAL_FIXTURE (glbconfig);

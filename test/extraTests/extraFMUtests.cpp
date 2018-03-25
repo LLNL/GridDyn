@@ -10,15 +10,12 @@
 * LLNS Copyright End
 */
 
-#include "gridBus.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridBus.h"
 #include "fmi/fmi_models/fmiMELoad3phase.h"
-#include "fileInput.h"
-#include "simulation/diagnostics.h"
-#include "simulation/diagnostics.h"
-#include "simulation/gridDynSimulationFileOps.h"
-#include "solvers/solverInterface.h"
-#include "testHelper.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "griddyn/simulation/gridDynSimulationFileOps.h"
+#include "griddyn/solvers/solverInterface.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>

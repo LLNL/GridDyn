@@ -13,7 +13,7 @@
 
 // test case for element readers
 
-#include "testHelper.h"
+#include "../testHelper.h"
 #include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "formatInterpreters/tinyxmlReaderElement.h"
 #include <boost/test/floating_point_comparison.hpp>

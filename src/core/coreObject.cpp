@@ -172,8 +172,30 @@ void coreObject::set (const std::string &param, const std::string &val)
 	}
     else
     {
-        LOG_DEBUG ("parameter " + param + " not found");
-        throw (unrecognizedParameter (param));
+        if (val == "true")
+        {
+            setFlag(param, true);
+        }
+        else if (val == "false")
+        {
+            setFlag(param, false);
+        }
+        else
+        {
+            auto lower = convertToLowerCase(param);
+            if (lower != param)
+            {
+                set(lower, val);
+                LOG_WARNING(std::string("parameters should be lower case \"") + param + "\" is not");
+            }
+            else
+            {
+                LOG_WARNING("parameter " + param + " not found");
+                throw (unrecognizedParameter(param));
+            }
+          
+        }
+       
     }
 }
 
@@ -244,7 +266,16 @@ void coreObject::setFlag (const std::string &flag, bool val)
 	}
     else
     {
-        throw (unrecognizedParameter (flag));
+        auto lower = convertToLowerCase(flag);
+        if (lower != flag)
+        {
+            setFlag(lower, val);
+            LOG_WARNING(std::string("flags should be lower case \"") + flag + "\" is not");
+        }
+        else
+        {
+            throw (unrecognizedParameter(flag));
+        }
     }
 }
 
@@ -320,7 +351,23 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
 	}
     else
     {
-        setFlag (param, (val > 0.1));
+        try
+        {
+            setFlag(param, (val > 0.1));
+        }
+        catch (const unrecognizedParameter &e)
+        {
+            auto lower = convertToLowerCase(param);
+            if (lower != param)
+            {
+                set(lower, val, unitType);
+                LOG_WARNING(std::string("parameters should be lower case \"") + param + "\" is not");
+            }
+            else
+            {
+                throw;
+            }
+        }
     }
 }
 

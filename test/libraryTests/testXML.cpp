@@ -10,15 +10,13 @@
  * LLNS Copyright End
  */
 
-#include "Generator.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "Link.h"
-#include "loads/zipLoad.h"
-#include "Exciter.h"
-#include "GenModel.h"
-#include "Governor.h"
+#include "griddyn/Generator.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/Link.h"
+#include "griddyn/loads/zipLoad.h"
+#include "griddyn/Exciter.h"
+#include "griddyn/GenModel.h"
+#include "griddyn/Governor.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
@@ -26,7 +24,7 @@
 
 // test case for coreObject object
 
-#include "testHelper.h"
+#include "../testHelper.h"
 
 static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 // create a test fixture that makes sure everything gets deleted properly

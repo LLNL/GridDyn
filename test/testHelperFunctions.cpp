@@ -11,10 +11,8 @@
 */
 
 #include "testHelper.h"
-#include "Load.h"
-#include "gridDynSimulation.h"
-#include "simulation/diagnostics.h"
-#include "fileInput.h"
+#include "griddyn/Load.h"
+#include "griddyn/simulation/diagnostics.h"
 #include <iostream>
 #include <cmath>
 #include <boost/test/unit_test.hpp>

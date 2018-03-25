@@ -12,7 +12,7 @@
 
 // test cases for the main executable
 
-#include "exeTestHelper.h"
+#include "../exeTestHelper.h"
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
 #include <iostream>

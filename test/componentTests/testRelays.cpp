@@ -10,18 +10,16 @@
  * LLNS Copyright End
 */
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "relays/zonalRelay.h"
-#include "relays/pmu.h"
-#include "testHelper.h"
-#include "gridBus.h"
+#include "griddyn/relays/zonalRelay.h"
+#include "griddyn/relays/pmu.h"
+#include "../testHelper.h"
+#include "griddyn/gridBus.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "comms/controlMessage.h"
-#include "comms/Communicator.h"
-#include "relays/controlRelay.h"
+#include "griddyn/comms/controlMessage.h"
+#include "griddyn/comms/Communicator.h"
+#include "griddyn/relays/controlRelay.h"
 
 //#include <crtdbg.h>
 // test case for link objects

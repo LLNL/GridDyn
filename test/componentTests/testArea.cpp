@@ -11,11 +11,9 @@
 */
 
 #include "core/coreExceptions.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "Link.h"
-#include "testHelper.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/Link.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

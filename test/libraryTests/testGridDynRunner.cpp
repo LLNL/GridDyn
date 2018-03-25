@@ -12,9 +12,9 @@
 
 // test case for element readers
 
-#include "exeTestHelper.h"
-#include "gridDynRunner.h"
-#include "testHelper.h"
+#include "../exeTestHelper.h"
+#include "fileInput/gridDynRunner.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>

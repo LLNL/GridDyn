@@ -10,18 +10,16 @@
  * LLNS Copyright End
  */
 
-#include "fileInput.h"
 #include "fmi/fmi_import/fmiImport.h"
 #include "fmi_export/fmiCollector.h"
 #include "fmi_export/fmiCoordinator.h"
 #include "fmi_export/fmiEvent.h"
 #include "fmi_export/fmuBuilder.h"
 #include "fmi_export/loadFMIExportObjects.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridBus.h"
 #include "griddyn/loads/ThreePhaseLoad.h"
-#include "readerInfo.h"
-#include "simulation/diagnostics.h"
+#include "fileInput/readerInfo.h"
+#include "griddyn/simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -31,7 +29,7 @@
 #include "core/coreOwningPtr.hpp"
 #include "fmi/fmi_import/fmiObjects.h"
 #include "fmi_export/fmiRunner.h"
-#include "testHelper.h"
+#include "../test/testHelper.h"
 #include <set>
 
 static const std::string fmi_test_directory (GRIDDYN_TEST_DIRECTORY "/fmi_export_tests/");

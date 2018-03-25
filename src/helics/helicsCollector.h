@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef HELICS_COLLECTOR_HEADER_
-#define HELICS_COLLECTOR_HEADER_
+#pragma once
 
 #include "griddyn/measurement/collector.h"
 #include <utility>
@@ -44,4 +42,3 @@ protected:
 
 }// namespace helicsLib
 } // namespace griddyn
-#endif

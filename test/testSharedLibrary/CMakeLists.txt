@@ -20,8 +20,8 @@ basic_tests.cpp
 
 add_executable(shared_library_tests ${shared_library_test_sources} ${shared_library_test_headers})
 
-include_directories( SYSTEM ${Boost_INCLUDE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/src/griddyn_shared)
+target_include_directories(shared_library_tests PUBLIC ${Boost_INCLUDE_DIR})
+target_include_directories(shared_library_tests PUBLIC ${PROJECT_SOURCE_DIR}/src/griddyn_shared)
 
 
 
@@ -35,11 +35,24 @@ STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
 ENDIF(WIN32)
 #message(${test_dir})
 
-ADD_DEFINITIONS(-DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
+target_compile_definitions(shared_library_tests PRIVATE -DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
 
-target_link_libraries(shared_library_tests griddyn_shared_lib ${external_library_list} ${Boost_LIBRARIES_test})
+target_link_libraries(shared_library_tests PRIVATE griddyn_shared_lib ${Boost_LIBRARIES_test})
+
+IF (VERSION_OPTION)
+	IF (MSVC)
+		target_compile_options(shared_library_tests PUBLIC ${VERSION_OPTION})
+	ELSE()
+		target_compile_options(shared_library_tests PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
+	ENDIF (MSVC)
+ENDIF(VERSION_OPTION)
+
+target_link_libraries(shared_library_tests PUBLIC ${Boost_LIBRARIES_core})
+
 
 add_test(NAME shared_library_tests COMMAND shared_library_tests)
+
+set_target_properties (testExtra PROPERTIES FOLDER tests)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
 add_custom_command(TARGET shared_library_tests POST_BUILD        # Adds a post-build event to api tests

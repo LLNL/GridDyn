@@ -10,11 +10,9 @@
 * LLNS Copyright End
 */
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "simulation/diagnostics.h"
-#include "solvers/solverInterface.h"
-#include "testHelper.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "griddyn/solvers/solverInterface.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdio>

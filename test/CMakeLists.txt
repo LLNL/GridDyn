@@ -99,13 +99,6 @@ set(testMain_headers
 	
 	)
 
-link_directories(${external_link_directories})
-
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${formatInterpreter_include_directories})
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/fileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/libs/include)
 
 add_executable(testLibrary ${testLibrary_sources} ${testMain_headers})
 add_executable(testComponents ${testComponent_sources} ${testMain_headers})
@@ -116,13 +109,6 @@ set_target_properties (testLibrary PROPERTIES FOLDER tests)
 set_target_properties (testComponents PROPERTIES FOLDER tests)
 set_target_properties (testSystem PROPERTIES FOLDER tests)
 set_target_properties (testExtra PROPERTIES FOLDER tests)
-
-INCLUDE_DIRECTORIES(.)
-
-
-INCLUDE_DIRECTORIES(${griddyn_optional_include_dirs})
-
-INCLUDE_DIRECTORIES(SYSTEM ${SUNDIALS_INCLUDE_DIR})
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
 

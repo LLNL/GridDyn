@@ -12,9 +12,8 @@
 
 // test cases for the simulation outputs
 
-#include "fileInput.h"
-#include "simulation/gridDynSimulationFileOps.h"
-#include "testHelper.h"
+#include "griddyn/simulation/gridDynSimulationFileOps.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>

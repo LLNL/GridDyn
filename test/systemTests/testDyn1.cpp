@@ -10,12 +10,10 @@
  * LLNS Copyright End
 */
 
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "primary/infiniteBus.h"
-#include "simulation/diagnostics.h"
-#include "testHelper.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/primary/infiniteBus.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

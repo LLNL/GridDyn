@@ -12,10 +12,8 @@
 
 
 #include "core/coreExceptions.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "solvers/solverInterface.h"
-#include "testHelper.h"
+#include "griddyn/solvers/solverInterface.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 
 #include <cstdio>

@@ -9,14 +9,13 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef TEST_HELPER_HEADER_
-#define TEST_HELPER_HEADER_
+#pragma once
 
 #include <string>
 #include <vector>
 #include <iosfwd>
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
+#include "fileInput/fileInput.h"
 //#define WINDOWS_MEMORY_DEBUG
 
 #ifdef WINDOWS_MEMORY_DEBUG
@@ -125,7 +124,7 @@ void checkStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDy
 @details calls the BOOST_REQUIRE to ensure the states are equal
 */
 void requireStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::gridDynSimulation::gridState_t state2);
-/** run a jacoabian check on the current simulation object
+/** run a Jacobian check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check 
 @param checkRequired set to true to halt the check procedure if there was any mismatches in the Jacobian
@@ -133,7 +132,7 @@ void requireStates(griddyn::gridDynSimulation::gridState_t state1, griddyn::grid
 */
 int runJacobianCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const griddyn::solverMode &sMode, bool checkRequired=true);
 
-/** run a jacoabian check on the current simulation object
+/** run a Jacobian check on the current simulation object
 @param[in] gds the simulation object to use
 @param[in] sMode the solverMode to check
 @param tol the tolerance to use for the check
@@ -175,4 +174,3 @@ int runAlgebraicCheck(std::unique_ptr<griddyn::gridDynSimulation> &gds, const gr
 */
 void printBusResultDeviations(const std::vector<double> &V1, const std::vector<double> &V2, const std::vector<double> &A1, const std::vector<double> &A2);
 
-#endif

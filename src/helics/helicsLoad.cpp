@@ -74,7 +74,7 @@ void helicsLoad::updateA (coreTime time)
     {
         std::complex<double> Vc = std::polar (V, A);
         Vc *= localBaseVoltage;
-        coord->setValue (voltageIndex, Vc);
+        coord->publish (voltageIndex, Vc);
     }
     lastUpdateTime = time;
 }

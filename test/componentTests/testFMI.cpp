@@ -13,10 +13,8 @@
 #include "fmi/fmiGDinfo.h"
 #include "fmi/fmi_import/fmiImport.h"
 #include "fmi/fmi_import/fmiObjects.h"
-#include "gridBus.h"
-#include "fileInput.h"
-#include "gridDynSimulation.h"
-#include "simulation/diagnostics.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -24,9 +22,9 @@
 
 // test case for coreObject object
 
-#include "loads/approximatingLoad.h"
+#include "griddyn/loads/approximatingLoad.h"
 #include "fmi/fmi_models/fmiMELoad3phase.h"
-#include "testHelper.h"
+#include "../testHelper.h"
 
 
 static const std::string fmi_test_directory (GRIDDYN_TEST_DIRECTORY "/fmi_tests/");

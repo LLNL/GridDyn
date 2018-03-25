@@ -11,10 +11,8 @@
 */
 
 #include "coupling/GhostSwingBusManager.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "loads/approximatingLoad.h"
-#include "testHelper.h"
+#include "griddyn/loads/approximatingLoad.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdio>

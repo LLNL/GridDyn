@@ -10,13 +10,11 @@
  * LLNS Copyright End
 */
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "libraryLoader.h"
-#include "testHelper.h"
+#include "gridDynCombined/libraryLoader.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
-#include "measurement/collector.h"
+#include "griddyn/measurement/collector.h"
 
 #define EXTRAMODEL_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/extraModel_tests/"
 

@@ -10,19 +10,18 @@
  * LLNS Copyright End
  */
 
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "loads/gridLabDLoad.h"
-#include "loads/ThreePhaseLoad.h"
-#include "loads/motorLoad5.h"
-#include "loads/zipLoad.h"
-#include "simulation/diagnostics.h"
-#include "testHelper.h"
+#include "griddyn/gridBus.h"
+#include "fileInput/fileInput.h"
+#include "griddyn/loads/gridLabDLoad.h"
+#include "griddyn/loads/ThreePhaseLoad.h"
+#include "griddyn/loads/motorLoad5.h"
+#include "griddyn/loads/zipLoad.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "../testHelper.h"
 #include <cmath>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include "loads/approximatingLoad.h"
+#include "griddyn/loads/approximatingLoad.h"
 
 using namespace griddyn;
 using namespace griddyn::loads;

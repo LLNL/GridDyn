@@ -14,7 +14,7 @@
 // test case for coreObject object
 
 #include "formatInterpreters/jsonReaderElement.h"
-#include "testHelper.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <iostream>

@@ -10,9 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "testHelper.h"
+#include "../testHelper.h"
 #include "utilities/timeSeries.hpp"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>

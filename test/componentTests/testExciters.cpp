@@ -11,10 +11,8 @@
 */
 
 #include "core/objectFactory.hpp"
-#include "Generator.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "testHelper.h"
+#include "griddyn/Generator.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

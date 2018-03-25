@@ -13,8 +13,8 @@
 
 // test case for coreObject object
 
-#include "gridDynDefinitions.hpp"
-#include "testHelper.h"
+#include "griddyn/gridDynDefinitions.hpp"
+#include "../testHelper.h"
 #include "utilities/matrixDataSparse.hpp"
 #include "utilities/matrixDataSparseSM.hpp"
 #include "utilities/matrixOps.h"

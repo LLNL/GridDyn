@@ -10,12 +10,10 @@
  * LLNS Copyright End
  */
 
-#include "gridBus.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "testHelper.h"
+#include "griddyn/gridBus.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/links/adjustableTransformer.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 #include <array>
 #include <boost/test/unit_test.hpp>

@@ -10,18 +10,16 @@
  * LLNS Copyright End
  */
 
-#include "Generator.h"
+#include "griddyn/Generator.h"
 #include "core/objectFactory.hpp"
-#include "fileInput.h"
-#include "gridBus.h"
-#include "gridDynSimulation.h"
+#include "griddyn/gridBus.h"
 #include "helics/helicsCoordinator.h"
 #include "helics/helicsLibrary.h"
 #include "helics/helicsLoad.h"
 #include "helics/helicsRunner.h"
 #include "helics/helicsSource.h"
 #include "helics/helicsSupport.h"
-#include "testHelper.h"
+#include "../test/testHelper.h"
 #include "utilities/string_viewOps.h"
 #include <complex>
 #include <future>
@@ -31,7 +29,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include "exeTestHelper.h"
+#include "../test/exeTestHelper.h"
 
 BOOST_FIXTURE_TEST_SUITE (helics_tests, gridDynSimulationTestFixture)
 using namespace griddyn;
@@ -143,7 +141,8 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
     helicsCoordinator coord;
     auto ind1 = coord.addPublication ("pub1", helics::helics_type_t::helicsDouble);
     auto ind2 = coord.addSubscription ("pub1");
-
+    BOOST_CHECK_GE(ind1, 0);
+    BOOST_CHECK_GE(ind2, 0);
     coord.set ("coretype", "test");
     coord.set ("init", "1");
     coord.set ("name", "coordtest");
@@ -156,7 +155,7 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
     fed->enterExecutionState ();
     BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::execution);
 
-    coord.setValue (ind1, 23.234);
+    coord.publish (ind1, 23.234);
     fed->requestTime (3.0);
     double val = coord.getValueAs<double> (ind2);
 

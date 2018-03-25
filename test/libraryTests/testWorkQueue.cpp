@@ -12,7 +12,7 @@
 
 // test case for workQueue
 
-#include "testHelper.h"
+#include "../testHelper.h"
 #include "utilities/workQueue.h"
 #include <boost/test/unit_test.hpp>
 #include <chrono>

@@ -10,10 +10,9 @@
  * LLNS Copyright End
 */
 
-#include "Generator.h"
-#include "gridBus.h"
-#include "fileInput.h"
-#include "testHelper.h"
+#include "griddyn/Generator.h"
+#include "griddyn/gridBus.h"
+#include "../testHelper.h"
 #include "utilities/timeSeriesMulti.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

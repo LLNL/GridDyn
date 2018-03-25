@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE (simple_load_test)
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
     auto res = gridDynSimulation_loadfile(sim, file.c_str(), "");
-    BOOST_CHECK(res == EXECUTION_SUCCESS);
+    BOOST_CHECK(res == griddyn_ok);
     res = gridDynSimulation_run(sim);
 
     double time = gridDynSimulation_getCurrentTime(sim);
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE (simple_load_test)
     auto obj=getSimulationObject(sim);
 
     gridDynObject_free(obj);
-    BOOST_CHECK(res == EXECUTION_SUCCESS);
+    BOOST_CHECK(res == griddyn_ok);
 
     gridDynSimulation_free(sim);
 }
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(getResult_test)
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
     auto res = gridDynSimulation_loadfile(sim, file.c_str(), "");
-    BOOST_CHECK(res == EXECUTION_SUCCESS);
+    BOOST_CHECK(res == griddyn_ok);
     res = gridDynSimulation_powerflow(sim);
 
     int cnt = gridDynSimulation_busCount(sim);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
     BOOST_CHECK(sim != nullptr);
     std::string file = ieee_test_directory + "ieee14.cdf";
     auto res = gridDynSimulation_loadfile(sim, file.c_str(), "");
-    BOOST_CHECK(res == EXECUTION_SUCCESS);
+    BOOST_CHECK(res == griddyn_ok);
     res = gridDynSimulation_powerflow(sim);
 
     auto obj = getSimulationObject(sim);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
 
     double result;
     auto status = gridDynObject_getValue(bus2, "voltage", &result);
-    BOOST_CHECK(status == EXECUTION_SUCCESS);
+    BOOST_CHECK(status == griddyn_ok);
     BOOST_CHECK_CLOSE(result, 1.056, 0.1);
 
     char name[50];

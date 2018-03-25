@@ -11,12 +11,10 @@
  */
 
 #include "core/objectFactory.hpp"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "Relay.h"
-#include "simulation/diagnostics.h"
-#include "blocks/blockLibrary.h"
-#include "testHelper.h"
+#include "griddyn/Relay.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "griddyn/blocks/blockLibrary.h"
+#include "../testHelper.h"
 #include "utilities/timeSeriesMulti.hpp"
 #include "utilities/vectorOps.hpp"
 #include <cstdio>

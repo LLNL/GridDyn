@@ -15,11 +15,11 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectFactory.hpp"
-#include "loads/otherLoads.h"
-#include "exciters/ExciterIEEEtype1.h"
-#include "Governor.h"
-#include "genmodels/GenModel4.h"
-#include "testHelper.h"
+#include "griddyn/loads/otherLoads.h"
+#include "griddyn/exciters/ExciterIEEEtype1.h"
+#include "griddyn/Governor.h"
+#include "griddyn/genmodels/GenModel4.h"
+#include "../testHelper.h"
 
 // test case for coreObject object
 

@@ -11,10 +11,8 @@
 */
 
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "simulation/diagnostics.h"
-#include "testHelper.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "../testHelper.h"
 #include "utilities/vectorOps.hpp"
 
 #include <boost/test/floating_point_comparison.hpp>

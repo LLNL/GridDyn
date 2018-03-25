@@ -10,12 +10,11 @@
  * LLNS Copyright End
 */
 
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "links/acLine.h"
-#include "links/adjustableTransformer.h"
-#include "simulation/diagnostics.h"
-#include "testHelper.h"
+#include "fileInput/fileInput.h"
+#include "griddyn/links/acLine.h"
+#include "griddyn/links/adjustableTransformer.h"
+#include "griddyn/simulation/diagnostics.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 // testP case for coreObject object

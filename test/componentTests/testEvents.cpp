@@ -10,10 +10,9 @@
  * LLNS Copyright End
 */
 
-#include "events/Event.h"
-#include "gridDynSimulation.h"
-#include "fileInput.h"
-#include "testHelper.h"
+#include "griddyn/events/Event.h"
+#include "fileInput/fileInput.h"
+#include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cmath>
