@@ -1,7 +1,7 @@
-function v = INVALID_FUNCTION_CALL()
+function v = griddyn_unknown_parameter()
   persistent vInitialized;
   if isempty(vInitialized)
-    vInitialized = griddynMEX(0, 10);
+    vInitialized = griddynMEX(0, 3);
   end
   v = vInitialized;
 end

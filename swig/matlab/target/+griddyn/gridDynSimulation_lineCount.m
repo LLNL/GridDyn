@@ -1,3 +1,3 @@
 function varargout = gridDynSimulation_lineCount(varargin)
-  [varargout{1:nargout}] = griddynMEX(66, varargin{:});
+  [varargout{1:nargout}] = griddynMEX(62, varargin{:});
 end

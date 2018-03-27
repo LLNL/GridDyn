@@ -253,7 +253,7 @@ bool helicsCoordinator::isUpdated (int32_t index) const
 {
     if (isValidIndex(index,subs_))
     {
-        subs_[index].isUpdated();
+        return subs_[index].isUpdated();
     }
     return false;
 }
@@ -262,7 +262,7 @@ bool helicsCoordinator::hasMessage(int32_t index) const
 {
     if (isValidIndex(index, epts_))
     {
-        epts_[index].hasMessage();
+        return epts_[index].hasMessage();
     }
     return false;
 }

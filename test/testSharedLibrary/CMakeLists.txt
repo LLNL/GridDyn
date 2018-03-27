@@ -37,7 +37,7 @@ ENDIF(WIN32)
 
 target_compile_definitions(shared_library_tests PRIVATE -DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
 
-target_link_libraries(shared_library_tests PRIVATE griddyn_shared_lib ${Boost_LIBRARIES_test})
+target_link_libraries(shared_library_tests PUBLIC griddyn_shared_lib ${Boost_LIBRARIES_test})
 
 IF (VERSION_OPTION)
 	IF (MSVC)

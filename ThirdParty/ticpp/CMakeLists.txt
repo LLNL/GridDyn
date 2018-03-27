@@ -17,10 +17,16 @@ project(ticpp)
 set(ticppfiles ticpp.cpp tinystr.cpp tinyxml.cpp tinyxmlerror.cpp tinyxmlparser.cpp)
 set(ticpp_headers ticppapi.h ticpp.h ticpprc.h tinystr.h tinyxml.h)
 
+add_library(ticpp STATIC ${ticppfiles} ${ticpp_headers})
+
 include(CheckLatestCXXStandardOption)
 IF (VERSION_OPTION)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
-ELSE ()
+	IF (MSVC)
+		target_compile_options(ticpp PUBLIC ${VERSION_OPTION})
+	ELSE()
+		target_compile_options(ticpp PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
+	ENDIF (MSVC)
+ELSE()
 set(CMAKE_CXX_STANDARD 14)
 ENDIF ()
 
@@ -30,11 +36,9 @@ if (NOT CMAKE_DEBUG_POSTFIX)
 set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-ADD_DEFINITIONS(-DTIXML_USE_TICPP)
-add_library(ticpp STATIC ${ticppfiles} ${ticpp_headers})
-
+target_compile_options(ticpp PUBLIC -DTIXML_USE_TICPP)
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options(-Wno-suggest-override)
+	target_compile_options(ticpp PRIVATE -Wno-suggest-override)
 ENDIF ()
 
 

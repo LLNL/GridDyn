@@ -1,7 +1,7 @@
-function v = QUERY_LOAD_FAILURE()
+function v = griddyn_add_failure()
   persistent vInitialized;
   if isempty(vInitialized)
-    vInitialized = griddynMEX(0, 6);
+    vInitialized = griddynMEX(0, 4);
   end
   v = vInitialized;
 end

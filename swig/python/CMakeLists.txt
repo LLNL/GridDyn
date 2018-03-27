@@ -6,7 +6,7 @@ MESSAGE("Building without swig")
 add_custom_target("griddynPYTHON" ALL)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/griddyn_wrap.c ${CMAKE_CURRENT_BINARY_DIR}/griddyn_wrap.c COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/griddynPythonPYTHON_wrap.c ${CMAKE_CURRENT_BINARY_DIR}/griddynPythonPYTHON_wrap.c COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/griddyn.py ${CMAKE_CURRENT_BINARY_DIR}/griddyn.py COPYONLY)
 
 ADD_CUSTOM_TARGET("griddynPYTHONEXT" ALL DEPENDS griddyn_shared_lib griddynPYTHON)

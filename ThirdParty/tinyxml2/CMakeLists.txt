@@ -17,24 +17,30 @@ project(tinyxml2)
 set(tinyxml2files tinyxml2.cpp)
 set(tinyxml2_headers tinyxml2.h)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+add_library(tinyxml2 STATIC ${tinyxml2files} ${tinyxml2_headers})
 
 include(CheckLatestCXXStandardOption)
 IF (VERSION_OPTION)
-	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
-ELSE ()
+	IF (MSVC)
+		target_compile_options(tinyxml2 PUBLIC ${VERSION_OPTION})
+	ELSE()
+		target_compile_options(tinyxml2 PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>)
+	ENDIF (MSVC)
+ELSE()
 set(CMAKE_CXX_STANDARD 14)
 ENDIF ()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 
 if (NOT CMAKE_DEBUG_POSTFIX)
 set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-add_library(tinyxml2 STATIC ${tinyxml2files} ${tinyxml2_headers})
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options(-Wno-suggest-override)
+	target_compile_options(tinyxml2 PRIVATE -Wno-suggest-override)
 ENDIF ()
 
 

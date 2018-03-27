@@ -286,11 +286,12 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 BOOST_AUTO_TEST_CASE(test_recorder_player)
 {
 	auto brk = runBroker("2");
-	auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=25");
-	auto rec = runRecorder(helics_test_directory + "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt");
+	auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=25 2> playerout.txt");
+	auto rec = runRecorder(helics_test_directory + "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt 2> recout.txt");
 
+    BOOST_CHECK(play.get() == 0);
 	BOOST_CHECK(rec.get() == 0);
-	BOOST_CHECK(play.get() == 0);
+	
 	BOOST_CHECK(brk.get() == 0);
 	BOOST_CHECK(boost::filesystem::exists("rec_capture.txt"));
 
@@ -301,8 +302,8 @@ BOOST_AUTO_TEST_CASE(test_recorder_player)
 	BOOST_CHECK(!line.empty());
 	using namespace utilities::string_viewOps;
 	auto lineEle = split(line, whiteSpaceCharacters, delimiter_compression::on);
-	BOOST_REQUIRE_EQUAL(lineEle.size(), 3);
-	BOOST_CHECK_EQUAL(lineEle[0], "4");
+	BOOST_REQUIRE_GE(lineEle.size(), 3);
+	BOOST_CHECK_EQUAL(lineEle[0], "3");
 	BOOST_CHECK_EQUAL(lineEle[1], "gen");
 	BOOST_CHECK_EQUAL(lineEle[2], "40");
 
@@ -311,8 +312,8 @@ BOOST_AUTO_TEST_CASE(test_recorder_player)
 	BOOST_CHECK(!line.empty());
 
 	lineEle = split(line, whiteSpaceCharacters, delimiter_compression::on);
-	BOOST_REQUIRE_EQUAL(lineEle.size(), 3);
-	BOOST_CHECK_EQUAL(lineEle[0], "12");
+	BOOST_REQUIRE_GE(lineEle.size(), 3);
+	BOOST_CHECK_EQUAL(lineEle[0], "11");
 	BOOST_CHECK_EQUAL(lineEle[1], "gen");
 	BOOST_CHECK_EQUAL(lineEle[2], "50");
 	inFile.close();

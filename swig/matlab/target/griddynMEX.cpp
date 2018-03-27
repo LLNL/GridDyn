@@ -1207,16 +1207,15 @@ namespace swig {
 /* -------- TYPES TABLE (BEGIN) -------- */
 
 #define SWIGTYPE_p_char swig_types[0]
-#define SWIGTYPE_p_charArray swig_types[1]
-#define SWIGTYPE_p_double swig_types[2]
-#define SWIGTYPE_p_doubleArray swig_types[3]
-#define SWIGTYPE_p_f_int_int_double__void swig_types[4]
+#define SWIGTYPE_p_double swig_types[1]
+#define SWIGTYPE_p_doubleArray swig_types[2]
+#define SWIGTYPE_p_f_int_int_double__void swig_types[3]
+#define SWIGTYPE_p_griddyn_status_enum swig_types[4]
 #define SWIGTYPE_p_int swig_types[5]
 #define SWIGTYPE_p_p_char swig_types[6]
-#define SWIGTYPE_p_p_charArray swig_types[7]
-#define SWIGTYPE_p_void swig_types[8]
-static swig_type_info *swig_types[10];
-static swig_module_info swig_module = {swig_types, 9, 0, 0, 0, 0};
+#define SWIGTYPE_p_void swig_types[7]
+static swig_type_info *swig_types[9];
+static swig_module_info swig_module = {swig_types, 8, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1546,27 +1545,6 @@ SWIGINTERN double *doubleArray_cast(doubleArray *self){
   }
 SWIGINTERN doubleArray *doubleArray_frompointer(double *t){
     return static_cast< doubleArray * >(t);
-  }
-
-typedef char charArray;
-
-SWIGINTERN charArray *new_charArray(size_t nelements){
-    return (new char[nelements]);
-  }
-SWIGINTERN void delete_charArray(charArray *self){
-    delete[] self;
-  }
-SWIGINTERN char charArray_paren(charArray *self,size_t index){
-    return self[index];
-  }
-SWIGINTERN void charArray_paren_asgn(charArray *self,size_t index,char value){
-    self[index] = value;
-  }
-SWIGINTERN char *charArray_cast(charArray *self){
-    return self;
-  }
-SWIGINTERN charArray *charArray_frompointer(char *t){
-    return static_cast< charArray * >(t);
   }
 
 SWIGINTERN int
@@ -2020,179 +1998,6 @@ fail:
 }
 
 
-int _wrap_new_charArray(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  size_t arg1 ;
-  size_t val1 ;
-  int ecode1 = 0 ;
-  mxArray * _out;
-  charArray *result = 0 ;
-  
-  if (!SWIG_check_num_args("new_charArray",argc,1,1,0)) {
-    SWIG_fail;
-  }
-  ecode1 = SWIG_AsVal_size_t(argv[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_charArray" "', argument " "1"" of type '" "size_t""'");
-  } 
-  arg1 = static_cast< size_t >(val1);
-  result = (charArray *)new_charArray(arg1);
-  _out = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_charArray, 1 |  0 );
-  if (_out) --resc, *resv++ = _out;
-  return 0;
-fail:
-  return 1;
-}
-
-
-int _wrap_delete_charArray(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  charArray *arg1 = (charArray *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  mxArray * _out;
-  
-  int is_owned;
-  if (!SWIG_check_num_args("delete_charArray",argc,1,1,0)) {
-    SWIG_fail;
-  }
-  is_owned = SWIG_Matlab_isOwned(argv[0]);
-  res1 = SWIG_ConvertPtr(argv[0], &argp1,SWIGTYPE_p_charArray, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_charArray" "', argument " "1"" of type '" "charArray *""'"); 
-  }
-  arg1 = reinterpret_cast< charArray * >(argp1);
-  if (is_owned) {
-    delete_charArray(arg1);
-  }
-  _out = (mxArray*)0;
-  if (_out) --resc, *resv++ = _out;
-  return 0;
-fail:
-  return 1;
-}
-
-
-int _wrap_charArray_paren(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  charArray *arg1 = (charArray *) 0 ;
-  size_t arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  mxArray * _out;
-  char result;
-  
-  if (!SWIG_check_num_args("charArray_paren",argc,2,2,0)) {
-    SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(argv[0], &argp1,SWIGTYPE_p_charArray, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "charArray_paren" "', argument " "1"" of type '" "charArray *""'"); 
-  }
-  arg1 = reinterpret_cast< charArray * >(argp1);
-  ecode2 = SWIG_AsVal_size_t(argv[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "charArray_paren" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);
-  result = (char)charArray_paren(arg1,arg2);
-  _out = SWIG_From_char(static_cast< char >(result));
-  if (_out) --resc, *resv++ = _out;
-  return 0;
-fail:
-  return 1;
-}
-
-
-int _wrap_charArray_paren_asgn(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  charArray *arg1 = (charArray *) 0 ;
-  size_t arg2 ;
-  char arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  size_t val2 ;
-  int ecode2 = 0 ;
-  char val3 ;
-  int ecode3 = 0 ;
-  mxArray * _out;
-  
-  if (!SWIG_check_num_args("charArray_paren_asgn",argc,3,3,0)) {
-    SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(argv[0], &argp1,SWIGTYPE_p_charArray, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "charArray_paren_asgn" "', argument " "1"" of type '" "charArray *""'"); 
-  }
-  arg1 = reinterpret_cast< charArray * >(argp1);
-  ecode2 = SWIG_AsVal_size_t(argv[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "charArray_paren_asgn" "', argument " "2"" of type '" "size_t""'");
-  } 
-  arg2 = static_cast< size_t >(val2);
-  ecode3 = SWIG_AsVal_char(argv[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "charArray_paren_asgn" "', argument " "3"" of type '" "char""'");
-  } 
-  arg3 = static_cast< char >(val3);
-  charArray_paren_asgn(arg1,arg2,arg3);
-  _out = (mxArray*)0;
-  if (_out) --resc, *resv++ = _out;
-  return 0;
-fail:
-  return 1;
-}
-
-
-int _wrap_charArray_cast(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  charArray *arg1 = (charArray *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  mxArray * _out;
-  char *result = 0 ;
-  
-  if (!SWIG_check_num_args("charArray_cast",argc,1,1,0)) {
-    SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(argv[0], &argp1,SWIGTYPE_p_charArray, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "charArray_cast" "', argument " "1"" of type '" "charArray *""'"); 
-  }
-  arg1 = reinterpret_cast< charArray * >(argp1);
-  result = (char *)charArray_cast(arg1);
-  _out = SWIG_FromCharPtr((const char *)result);
-  if (_out) --resc, *resv++ = _out;
-  return 0;
-fail:
-  return 1;
-}
-
-
-int _wrap_charArray_frompointer(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  char *arg1 = (char *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  mxArray * _out;
-  charArray *result = 0 ;
-  
-  if (!SWIG_check_num_args("charArray_frompointer",argc,1,1,0)) {
-    SWIG_fail;
-  }
-  res1 = SWIG_AsCharPtrAndSize(argv[0], &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "charArray_frompointer" "', argument " "1"" of type '" "char *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  result = (charArray *)charArray_frompointer(arg1);
-  _out = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_charArray, 0 |  0 );
-  if (_out) --resc, *resv++ = _out;
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  return 0;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  return 1;
-}
-
-
 int _wrap_gridDynSimulation_getResults__SWIG_0(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   char *arg2 = (char *) 0 ;
@@ -2232,55 +2037,6 @@ int _wrap_gridDynSimulation_getResults__SWIG_0(int resc, mxArray *resv[], int ar
   } 
   arg4 = static_cast< int >(val4);
   result = (int)gridDynSimulation_getResults(arg1,(char const *)arg2,arg3,arg4);
-  _out = SWIG_From_int(static_cast< int >(result));
-  if (_out) --resc, *resv++ = _out;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return 0;
-fail:
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return 1;
-}
-
-
-int _wrap_gridDynObject_getString__SWIG_0(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  gridDynObject arg1 = (gridDynObject) (gridDynObject)0 ;
-  char *arg2 = (char *) 0 ;
-  char *arg3 ;
-  int arg4 ;
-  int res1 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  char temp3[0] ;
-  int res3 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  mxArray * _out;
-  int result;
-  
-  if (!SWIG_check_num_args("gridDynObject_getString",argc,4,4,0)) {
-    SWIG_fail;
-  }
-  res1 = SWIG_ConvertPtr(argv[0],SWIG_as_voidptrptr(&arg1), 0, 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynObject_getString" "', argument " "1"" of type '" "gridDynObject const""'"); 
-  }
-  res2 = SWIG_AsCharPtrAndSize(argv[1], &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_getString" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  res3 = SWIG_AsCharArray(argv[2], temp3, 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getString" "', argument " "3"" of type '" "char [0]""'");
-  }
-  arg3 = reinterpret_cast< char * >(temp3);
-  ecode4 = SWIG_AsVal_int(argv[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "gridDynObject_getString" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
-  result = (int)gridDynObject_getString(arg1,(char const *)arg2,arg3,arg4);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2378,7 +2134,7 @@ int _wrap_gridDynObject_add(int resc, mxArray *resv[], int argc, mxArray *argv[]
   int res1 ;
   int res2 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_add",argc,2,2,0)) {
     SWIG_fail;
@@ -2391,7 +2147,7 @@ int _wrap_gridDynObject_add(int resc, mxArray *resv[], int argc, mxArray *argv[]
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_add" "', argument " "2"" of type '" "gridDynObject""'"); 
   }
-  result = (int)gridDynObject_add(arg1,arg2);
+  result = (griddyn_status)gridDynObject_add(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -2406,7 +2162,7 @@ int _wrap_gridDynObject_remove(int resc, mxArray *resv[], int argc, mxArray *arg
   int res1 ;
   int res2 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_remove",argc,2,2,0)) {
     SWIG_fail;
@@ -2419,7 +2175,7 @@ int _wrap_gridDynObject_remove(int resc, mxArray *resv[], int argc, mxArray *arg
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_remove" "', argument " "2"" of type '" "gridDynObject""'"); 
   }
-  result = (int)gridDynObject_remove(arg1,arg2);
+  result = (griddyn_status)gridDynObject_remove(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -2440,7 +2196,7 @@ int _wrap_gridDynObject_setString(int resc, mxArray *resv[], int argc, mxArray *
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_setString",argc,3,3,0)) {
     SWIG_fail;
@@ -2459,7 +2215,7 @@ int _wrap_gridDynObject_setString(int resc, mxArray *resv[], int argc, mxArray *
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_setString" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynObject_setString(arg1,(char const *)arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynObject_setString(arg1,(char const *)arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2476,20 +2232,16 @@ int _wrap_gridDynObject_setValue(int resc, mxArray *resv[], int argc, mxArray *a
   gridDynObject arg1 = (gridDynObject) 0 ;
   char *arg2 = (char *) 0 ;
   double arg3 ;
-  char *arg4 = (char *) 0 ;
   int res1 ;
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   double val3 ;
   int ecode3 = 0 ;
-  int res4 ;
-  char *buf4 = 0 ;
-  int alloc4 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
-  if (!SWIG_check_num_args("gridDynObject_setValue",argc,4,4,0)) {
+  if (!SWIG_check_num_args("gridDynObject_setValue",argc,3,3,0)) {
     SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(argv[0],SWIG_as_voidptrptr(&arg1), 0, 0);
@@ -2506,12 +2258,57 @@ int _wrap_gridDynObject_setValue(int resc, mxArray *resv[], int argc, mxArray *a
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynObject_setValue" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
+  result = (griddyn_status)gridDynObject_setValue(arg1,(char const *)arg2,arg3);
+  _out = SWIG_From_int(static_cast< int >(result));
+  if (_out) --resc, *resv++ = _out;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return 0;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return 1;
+}
+
+
+int _wrap_gridDynObject_setValueUnits(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
+  gridDynObject arg1 = (gridDynObject) 0 ;
+  char *arg2 = (char *) 0 ;
+  double arg3 ;
+  char *arg4 = (char *) 0 ;
+  int res1 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  int res4 ;
+  char *buf4 = 0 ;
+  int alloc4 = 0 ;
+  mxArray * _out;
+  griddyn_status result;
+  
+  if (!SWIG_check_num_args("gridDynObject_setValueUnits",argc,4,4,0)) {
+    SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(argv[0],SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynObject_setValueUnits" "', argument " "1"" of type '" "gridDynObject""'"); 
+  }
+  res2 = SWIG_AsCharPtrAndSize(argv[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_setValueUnits" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  ecode3 = SWIG_AsVal_double(argv[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynObject_setValueUnits" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
   res4 = SWIG_AsCharPtrAndSize(argv[3], &buf4, NULL, &alloc4);
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "gridDynObject_setValue" "', argument " "4"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "gridDynObject_setValueUnits" "', argument " "4"" of type '" "char const *""'");
   }
   arg4 = reinterpret_cast< char * >(buf4);
-  result = (int)gridDynObject_setValue(arg1,(char const *)arg2,arg3,(char const *)arg4);
+  result = (griddyn_status)gridDynObject_setValueUnits(arg1,(char const *)arg2,arg3,(char const *)arg4);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2535,7 +2332,7 @@ int _wrap_gridDynObject_setFlag(int resc, mxArray *resv[], int argc, mxArray *ar
   int val3 ;
   int ecode3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_setFlag",argc,3,3,0)) {
     SWIG_fail;
@@ -2554,7 +2351,7 @@ int _wrap_gridDynObject_setFlag(int resc, mxArray *resv[], int argc, mxArray *ar
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynObject_setFlag" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  result = (int)gridDynObject_setFlag(arg1,(char const *)arg2,arg3);
+  result = (griddyn_status)gridDynObject_setFlag(arg1,(char const *)arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2565,7 +2362,7 @@ fail:
 }
 
 
-int _wrap_gridDynObject_getString__SWIG_1(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
+int _wrap_gridDynObject_getString(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
   gridDynObject arg1 = (gridDynObject) (gridDynObject)0 ;
   char *arg2 = (char *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -2580,7 +2377,7 @@ int _wrap_gridDynObject_getString__SWIG_1(int resc, mxArray *resv[], int argc, m
   int val4 ;
   int ecode4 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_getString",argc,4,4,0)) {
     SWIG_fail;
@@ -2604,7 +2401,7 @@ int _wrap_gridDynObject_getString__SWIG_1(int resc, mxArray *resv[], int argc, m
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "gridDynObject_getString" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
-  result = (int)gridDynObject_getString(arg1,(char const *)arg2,arg3,arg4);
+  result = (griddyn_status)gridDynObject_getString(arg1,(char const *)arg2,arg3,arg4);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2617,63 +2414,48 @@ fail:
 }
 
 
-int _wrap_gridDynObject_getString(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
-  if (argc == 4) {
-    int _v;
-    void *ptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &ptr, 0, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharArray(argv[2], (char *)0, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            return _wrap_gridDynObject_getString__SWIG_0(resc,resv,argc,argv);
-          }
-        }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    void *ptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &ptr, 0, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            return _wrap_gridDynObject_getString__SWIG_1(resc,resv,argc,argv);
-          }
-        }
-      }
-    }
-  }
+int _wrap_gridDynObject_getValue(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
+  gridDynObject arg1 = (gridDynObject) (gridDynObject)0 ;
+  char *arg2 = (char *) 0 ;
+  double *arg3 = (double *) 0 ;
+  int res1 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  mxArray * _out;
+  griddyn_status result;
   
-  SWIG_Error(SWIG_RuntimeError, "No matching function for overload function 'gridDynObject_getString'."
-    "  Possible C/C++ prototypes are:\n"
-    "    gridDynObject_getString(gridDynObject const,char const *,char [0],int)\n"
-    "    gridDynObject_getString(gridDynObject const,char const *,char *,int)\n");
+  if (!SWIG_check_num_args("gridDynObject_getValue",argc,3,3,0)) {
+    SWIG_fail;
+  }
+  res1 = SWIG_ConvertPtr(argv[0],SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynObject_getValue" "', argument " "1"" of type '" "gridDynObject const""'"); 
+  }
+  res2 = SWIG_AsCharPtrAndSize(argv[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_getValue" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_ConvertPtr(argv[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getValue" "', argument " "3"" of type '" "double *""'"); 
+  }
+  arg3 = reinterpret_cast< double * >(argp3);
+  result = (griddyn_status)gridDynObject_getValue(arg1,(char const *)arg2,arg3);
+  _out = SWIG_From_int(static_cast< int >(result));
+  if (_out) --resc, *resv++ = _out;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return 0;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return 1;
 }
 
 
-int _wrap_gridDynObject_getValue(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
+int _wrap_gridDynObject_getValueUnits(int resc, mxArray *resv[], int argc, mxArray *argv[]) {
   gridDynObject arg1 = (gridDynObject) (gridDynObject)0 ;
   char *arg2 = (char *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -2688,31 +2470,31 @@ int _wrap_gridDynObject_getValue(int resc, mxArray *resv[], int argc, mxArray *a
   void *argp4 = 0 ;
   int res4 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
-  if (!SWIG_check_num_args("gridDynObject_getValue",argc,4,4,0)) {
+  if (!SWIG_check_num_args("gridDynObject_getValueUnits",argc,4,4,0)) {
     SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(argv[0],SWIG_as_voidptrptr(&arg1), 0, 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynObject_getValue" "', argument " "1"" of type '" "gridDynObject const""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynObject_getValueUnits" "', argument " "1"" of type '" "gridDynObject const""'"); 
   }
   res2 = SWIG_AsCharPtrAndSize(argv[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_getValue" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_getValueUnits" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   res3 = SWIG_AsCharPtrAndSize(argv[2], &buf3, NULL, &alloc3);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getValue" "', argument " "3"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getValueUnits" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
   res4 = SWIG_ConvertPtr(argv[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "gridDynObject_getValue" "', argument " "4"" of type '" "double *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "gridDynObject_getValueUnits" "', argument " "4"" of type '" "double *""'"); 
   }
   arg4 = reinterpret_cast< double * >(argp4);
-  result = (int)gridDynObject_getValue(arg1,(char const *)arg2,(char const *)arg3,arg4);
+  result = (griddyn_status)gridDynObject_getValueUnits(arg1,(char const *)arg2,(char const *)arg3,arg4);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2736,7 +2518,7 @@ int _wrap_gridDynObject_getFlag(int resc, mxArray *resv[], int argc, mxArray *ar
   void *argp3 = 0 ;
   int res3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_getFlag",argc,3,3,0)) {
     SWIG_fail;
@@ -2755,7 +2537,7 @@ int _wrap_gridDynObject_getFlag(int resc, mxArray *resv[], int argc, mxArray *ar
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getFlag" "', argument " "3"" of type '" "int *""'"); 
   }
   arg3 = reinterpret_cast< int * >(argp3);
-  result = (int)gridDynObject_getFlag(arg1,(char const *)arg2,arg3);
+  result = (griddyn_status)gridDynObject_getFlag(arg1,(char const *)arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2992,7 +2774,7 @@ int _wrap_gridDynSimulation_initializeFromString(int resc, mxArray *resv[], int 
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_initializeFromString",argc,2,2,0)) {
     SWIG_fail;
@@ -3006,7 +2788,7 @@ int _wrap_gridDynSimulation_initializeFromString(int resc, mxArray *resv[], int 
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynSimulation_initializeFromString" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  result = (int)gridDynSimulation_initializeFromString(arg1,(char const *)arg2);
+  result = (griddyn_status)gridDynSimulation_initializeFromString(arg1,(char const *)arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -3030,7 +2812,7 @@ int _wrap_gridDynSimulation_initializeFromArgs(int resc, mxArray *resv[], int ar
   int val4 ;
   int ecode4 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_initializeFromArgs",argc,4,4,0)) {
     SWIG_fail;
@@ -3054,7 +2836,7 @@ int _wrap_gridDynSimulation_initializeFromArgs(int resc, mxArray *resv[], int ar
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "gridDynSimulation_initializeFromArgs" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
-  result = (int)gridDynSimulation_initializeFromArgs(arg1,arg2,arg3,arg4);
+  result = (griddyn_status)gridDynSimulation_initializeFromArgs(arg1,arg2,arg3,arg4);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3075,7 +2857,7 @@ int _wrap_gridDynSimulation_loadfile(int resc, mxArray *resv[], int argc, mxArra
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_loadfile",argc,3,3,0)) {
     SWIG_fail;
@@ -3094,7 +2876,7 @@ int _wrap_gridDynSimulation_loadfile(int resc, mxArray *resv[], int argc, mxArra
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynSimulation_loadfile" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynSimulation_loadfile(arg1,(char const *)arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynSimulation_loadfile(arg1,(char const *)arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -3115,7 +2897,7 @@ int _wrap_gridDynSimulation_addCommand(int resc, mxArray *resv[], int argc, mxAr
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_addCommand",argc,2,2,0)) {
     SWIG_fail;
@@ -3129,7 +2911,7 @@ int _wrap_gridDynSimulation_addCommand(int resc, mxArray *resv[], int argc, mxAr
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynSimulation_addCommand" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  result = (int)gridDynSimulation_addCommand(arg1,(char const *)arg2);
+  result = (griddyn_status)gridDynSimulation_addCommand(arg1,(char const *)arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -3144,7 +2926,7 @@ int _wrap_gridDynSimulation_powerflowInitialize(int resc, mxArray *resv[], int a
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_powerflowInitialize",argc,1,1,0)) {
     SWIG_fail;
@@ -3153,7 +2935,7 @@ int _wrap_gridDynSimulation_powerflowInitialize(int resc, mxArray *resv[], int a
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_powerflowInitialize" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_powerflowInitialize(arg1);
+  result = (griddyn_status)gridDynSimulation_powerflowInitialize(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3166,7 +2948,7 @@ int _wrap_gridDynSimulation_powerflow(int resc, mxArray *resv[], int argc, mxArr
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_powerflow",argc,1,1,0)) {
     SWIG_fail;
@@ -3175,7 +2957,7 @@ int _wrap_gridDynSimulation_powerflow(int resc, mxArray *resv[], int argc, mxArr
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_powerflow" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_powerflow(arg1);
+  result = (griddyn_status)gridDynSimulation_powerflow(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3188,7 +2970,7 @@ int _wrap_gridDynSimulation_dynamicInitialize(int resc, mxArray *resv[], int arg
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_dynamicInitialize",argc,1,1,0)) {
     SWIG_fail;
@@ -3197,7 +2979,7 @@ int _wrap_gridDynSimulation_dynamicInitialize(int resc, mxArray *resv[], int arg
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_dynamicInitialize" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_dynamicInitialize(arg1);
+  result = (griddyn_status)gridDynSimulation_dynamicInitialize(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3210,7 +2992,7 @@ int _wrap_gridDynSimulation_reset(int resc, mxArray *resv[], int argc, mxArray *
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_reset",argc,1,1,0)) {
     SWIG_fail;
@@ -3219,7 +3001,7 @@ int _wrap_gridDynSimulation_reset(int resc, mxArray *resv[], int argc, mxArray *
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_reset" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_reset(arg1);
+  result = (griddyn_status)gridDynSimulation_reset(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3254,7 +3036,7 @@ int _wrap_gridDynSimulation_run(int resc, mxArray *resv[], int argc, mxArray *ar
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_run",argc,1,1,0)) {
     SWIG_fail;
@@ -3263,7 +3045,7 @@ int _wrap_gridDynSimulation_run(int resc, mxArray *resv[], int argc, mxArray *ar
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_run" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_run(arg1);
+  result = (griddyn_status)gridDynSimulation_run(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3279,7 +3061,7 @@ int _wrap_gridDynSimulation_runTo(int resc, mxArray *resv[], int argc, mxArray *
   double val2 ;
   int ecode2 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_runTo",argc,2,2,0)) {
     SWIG_fail;
@@ -3293,7 +3075,7 @@ int _wrap_gridDynSimulation_runTo(int resc, mxArray *resv[], int argc, mxArray *
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gridDynSimulation_runTo" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
-  result = (int)gridDynSimulation_runTo(arg1,arg2);
+  result = (griddyn_status)gridDynSimulation_runTo(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3306,7 +3088,7 @@ int _wrap_gridDynSimulation_Step(int resc, mxArray *resv[], int argc, mxArray *a
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_Step",argc,1,1,0)) {
     SWIG_fail;
@@ -3315,7 +3097,7 @@ int _wrap_gridDynSimulation_Step(int resc, mxArray *resv[], int argc, mxArray *a
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_Step" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_Step(arg1);
+  result = (griddyn_status)gridDynSimulation_Step(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3328,7 +3110,7 @@ int _wrap_gridDynSimulation_runAsync(int resc, mxArray *resv[], int argc, mxArra
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_runAsync",argc,1,1,0)) {
     SWIG_fail;
@@ -3337,7 +3119,7 @@ int _wrap_gridDynSimulation_runAsync(int resc, mxArray *resv[], int argc, mxArra
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_runAsync" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_runAsync(arg1);
+  result = (griddyn_status)gridDynSimulation_runAsync(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3353,7 +3135,7 @@ int _wrap_gridDynSimulation_runToAsync(int resc, mxArray *resv[], int argc, mxAr
   double val2 ;
   int ecode2 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_runToAsync",argc,2,2,0)) {
     SWIG_fail;
@@ -3367,7 +3149,7 @@ int _wrap_gridDynSimulation_runToAsync(int resc, mxArray *resv[], int argc, mxAr
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gridDynSimulation_runToAsync" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
-  result = (int)gridDynSimulation_runToAsync(arg1,arg2);
+  result = (griddyn_status)gridDynSimulation_runToAsync(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3380,7 +3162,7 @@ int _wrap_gridDynSimulation_StepAsync(int resc, mxArray *resv[], int argc, mxArr
   gridDynSimReference arg1 = (gridDynSimReference) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_StepAsync",argc,1,1,0)) {
     SWIG_fail;
@@ -3389,7 +3171,7 @@ int _wrap_gridDynSimulation_StepAsync(int resc, mxArray *resv[], int argc, mxArr
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynSimulation_StepAsync" "', argument " "1"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynSimulation_StepAsync(arg1);
+  result = (griddyn_status)gridDynSimulation_StepAsync(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3690,7 +3472,7 @@ int _wrap_gridDynSimulation_guessState(int resc, mxArray *resv[], int argc, mxAr
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_guessState",argc,5,5,0)) {
     SWIG_fail;
@@ -3718,7 +3500,7 @@ int _wrap_gridDynSimulation_guessState(int resc, mxArray *resv[], int argc, mxAr
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynSimulation_guessState" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_guessState(arg1,arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynSimulation_guessState(arg1,arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3742,7 +3524,7 @@ int _wrap_gridDynSimulation_setState(int resc, mxArray *resv[], int argc, mxArra
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_setState",argc,5,5,0)) {
     SWIG_fail;
@@ -3770,7 +3552,7 @@ int _wrap_gridDynSimulation_setState(int resc, mxArray *resv[], int argc, mxArra
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynSimulation_setState" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_setState(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5);
+  result = (griddyn_status)gridDynSimulation_setState(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3788,7 +3570,7 @@ int _wrap_gridDynSimulation_getStateVariableTypes(int resc, mxArray *resv[], int
   int res2 = 0 ;
   int res3 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_getStateVariableTypes",argc,3,3,0)) {
     SWIG_fail;
@@ -3806,7 +3588,7 @@ int _wrap_gridDynSimulation_getStateVariableTypes(int resc, mxArray *resv[], int
   if (!SWIG_IsOK(res3)) {
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynSimulation_getStateVariableTypes" "', argument " "3"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_getStateVariableTypes(arg1,arg2,arg3);
+  result = (griddyn_status)gridDynSimulation_getStateVariableTypes(arg1,arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3833,7 +3615,7 @@ int _wrap_gridDynSimulation_residual(int resc, mxArray *resv[], int argc, mxArra
   int res5 = 0 ;
   int res6 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_residual",argc,6,6,0)) {
     SWIG_fail;
@@ -3866,7 +3648,7 @@ int _wrap_gridDynSimulation_residual(int resc, mxArray *resv[], int argc, mxArra
   if (!SWIG_IsOK(res6)) {
     SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "gridDynSimulation_residual" "', argument " "6"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_residual(arg1,arg2,arg3,(double const *)arg4,(double const *)arg5,arg6);
+  result = (griddyn_status)gridDynSimulation_residual(arg1,arg2,arg3,(double const *)arg4,(double const *)arg5,arg6);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3890,7 +3672,7 @@ int _wrap_gridDynSimulation_derivative(int resc, mxArray *resv[], int argc, mxAr
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_derivative",argc,5,5,0)) {
     SWIG_fail;
@@ -3918,7 +3700,7 @@ int _wrap_gridDynSimulation_derivative(int resc, mxArray *resv[], int argc, mxAr
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynSimulation_derivative" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_derivative(arg1,arg2,arg3,(double const *)arg4,arg5);
+  result = (griddyn_status)gridDynSimulation_derivative(arg1,arg2,arg3,(double const *)arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -3945,7 +3727,7 @@ int _wrap_gridDynSimulation_algebraicUpdate(int resc, mxArray *resv[], int argc,
   int ecode5 = 0 ;
   int res6 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_algebraicUpdate",argc,6,6,0)) {
     SWIG_fail;
@@ -3978,7 +3760,7 @@ int _wrap_gridDynSimulation_algebraicUpdate(int resc, mxArray *resv[], int argc,
   if (!SWIG_IsOK(res6)) {
     SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "gridDynSimulation_algebraicUpdate" "', argument " "6"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynSimulation_algebraicUpdate(arg1,arg2,arg3,(double const *)arg4,arg5,arg6);
+  result = (griddyn_status)gridDynSimulation_algebraicUpdate(arg1,arg2,arg3,(double const *)arg4,arg5,arg6);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4006,7 +3788,7 @@ int _wrap_gridDynSimulation_jacobian(int resc, mxArray *resv[], int argc, mxArra
   int ecode5 = 0 ;
   int res6 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSimulation_jacobian",argc,7,7,0)) {
     SWIG_fail;
@@ -4045,7 +3827,7 @@ int _wrap_gridDynSimulation_jacobian(int resc, mxArray *resv[], int argc, mxArra
       SWIG_exception_fail(SWIG_ArgError(res), "in method '" "gridDynSimulation_jacobian" "', argument " "7"" of type '" "void (*)(int,int,double)""'"); 
     }
   }
-  result = (int)gridDynSimulation_jacobian(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5,arg6,arg7);
+  result = (griddyn_status)gridDynSimulation_jacobian(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5,arg6,arg7);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4194,7 +3976,7 @@ int _wrap_gridDynVectorQuery_run(int resc, mxArray *resv[], int argc, mxArray *a
   int val3 ;
   int ecode3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynVectorQuery_run",argc,3,3,0)) {
     SWIG_fail;
@@ -4213,7 +3995,7 @@ int _wrap_gridDynVectorQuery_run(int resc, mxArray *resv[], int argc, mxArray *a
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynVectorQuery_run" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  result = (int)gridDynVectorQuery_run(arg1,arg2,arg3);
+  result = (griddyn_status)gridDynVectorQuery_run(arg1,arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4232,7 +4014,7 @@ int _wrap_gridDynVectorQuery_append(int resc, mxArray *resv[], int argc, mxArray
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynVectorQuery_append",argc,3,3,0)) {
     SWIG_fail;
@@ -4250,7 +4032,7 @@ int _wrap_gridDynVectorQuery_append(int resc, mxArray *resv[], int argc, mxArray
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynVectorQuery_append" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynVectorQuery_append(arg1,arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynVectorQuery_append(arg1,arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
@@ -4271,7 +4053,7 @@ int _wrap_gridDynSingleQuery_update(int resc, mxArray *resv[], int argc, mxArray
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynSingleQuery_update",argc,3,3,0)) {
     SWIG_fail;
@@ -4289,7 +4071,7 @@ int _wrap_gridDynSingleQuery_update(int resc, mxArray *resv[], int argc, mxArray
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynSingleQuery_update" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynSingleQuery_update(arg1,arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynSingleQuery_update(arg1,arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
@@ -4310,7 +4092,7 @@ int _wrap_gridDynVectorQuery_update(int resc, mxArray *resv[], int argc, mxArray
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynVectorQuery_update",argc,3,3,0)) {
     SWIG_fail;
@@ -4328,7 +4110,7 @@ int _wrap_gridDynVectorQuery_update(int resc, mxArray *resv[], int argc, mxArray
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynVectorQuery_update" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynVectorQuery_update(arg1,arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynVectorQuery_update(arg1,arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
@@ -4397,7 +4179,7 @@ int _wrap_gridDynEvent_trigger(int resc, mxArray *resv[], int argc, mxArray *arg
   gridDynEvent arg1 = (gridDynEvent) 0 ;
   int res1 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_trigger",argc,1,1,0)) {
     SWIG_fail;
@@ -4406,7 +4188,7 @@ int _wrap_gridDynEvent_trigger(int resc, mxArray *resv[], int argc, mxArray *arg
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gridDynEvent_trigger" "', argument " "1"" of type '" "gridDynEvent""'"); 
   }
-  result = (int)gridDynEvent_trigger(arg1);
+  result = (griddyn_status)gridDynEvent_trigger(arg1);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4421,7 +4203,7 @@ int _wrap_gridDynEvent_schedule(int resc, mxArray *resv[], int argc, mxArray *ar
   int res1 ;
   int res2 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_schedule",argc,2,2,0)) {
     SWIG_fail;
@@ -4434,7 +4216,7 @@ int _wrap_gridDynEvent_schedule(int resc, mxArray *resv[], int argc, mxArray *ar
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynEvent_schedule" "', argument " "2"" of type '" "gridDynSimReference""'"); 
   }
-  result = (int)gridDynEvent_schedule(arg1,arg2);
+  result = (griddyn_status)gridDynEvent_schedule(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4454,7 +4236,7 @@ int _wrap_gridDynEvent_setValue(int resc, mxArray *resv[], int argc, mxArray *ar
   double val3 ;
   int ecode3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_setValue",argc,3,3,0)) {
     SWIG_fail;
@@ -4473,7 +4255,7 @@ int _wrap_gridDynEvent_setValue(int resc, mxArray *resv[], int argc, mxArray *ar
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynEvent_setValue" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
-  result = (int)gridDynEvent_setValue(arg1,(char const *)arg2,arg3);
+  result = (griddyn_status)gridDynEvent_setValue(arg1,(char const *)arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -4496,7 +4278,7 @@ int _wrap_gridDynEvent_setString(int resc, mxArray *resv[], int argc, mxArray *a
   char *buf3 = 0 ;
   int alloc3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_setString",argc,3,3,0)) {
     SWIG_fail;
@@ -4515,7 +4297,7 @@ int _wrap_gridDynEvent_setString(int resc, mxArray *resv[], int argc, mxArray *a
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynEvent_setString" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
-  result = (int)gridDynEvent_setString(arg1,(char const *)arg2,(char const *)arg3);
+  result = (griddyn_status)gridDynEvent_setString(arg1,(char const *)arg2,(char const *)arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -4539,7 +4321,7 @@ int _wrap_gridDynEvent_setFlag(int resc, mxArray *resv[], int argc, mxArray *arg
   int val3 ;
   int ecode3 = 0 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_setFlag",argc,3,3,0)) {
     SWIG_fail;
@@ -4558,7 +4340,7 @@ int _wrap_gridDynEvent_setFlag(int resc, mxArray *resv[], int argc, mxArray *arg
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gridDynEvent_setFlag" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  result = (int)gridDynEvent_setFlag(arg1,(char const *)arg2,arg3);
+  result = (griddyn_status)gridDynEvent_setFlag(arg1,(char const *)arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -4575,7 +4357,7 @@ int _wrap_gridDynEvent_setTarget(int resc, mxArray *resv[], int argc, mxArray *a
   int res1 ;
   int res2 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynEvent_setTarget",argc,2,2,0)) {
     SWIG_fail;
@@ -4588,7 +4370,7 @@ int _wrap_gridDynEvent_setTarget(int resc, mxArray *resv[], int argc, mxArray *a
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynEvent_setTarget" "', argument " "2"" of type '" "gridDynObject""'"); 
   }
-  result = (int)gridDynEvent_setTarget(arg1,arg2);
+  result = (griddyn_status)gridDynEvent_setTarget(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4603,7 +4385,7 @@ int _wrap_gridDynObject_stateSize(int resc, mxArray *resv[], int argc, mxArray *
   int res1 ;
   int res2 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_stateSize",argc,2,2,0)) {
     SWIG_fail;
@@ -4616,7 +4398,7 @@ int _wrap_gridDynObject_stateSize(int resc, mxArray *resv[], int argc, mxArray *
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gridDynObject_stateSize" "', argument " "2"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_stateSize(arg1,arg2);
+  result = (griddyn_status)gridDynObject_stateSize(arg1,arg2);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4640,7 +4422,7 @@ int _wrap_gridDynObject_guessState(int resc, mxArray *resv[], int argc, mxArray 
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_guessState",argc,5,5,0)) {
     SWIG_fail;
@@ -4668,7 +4450,7 @@ int _wrap_gridDynObject_guessState(int resc, mxArray *resv[], int argc, mxArray 
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_guessState" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_guessState(arg1,arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynObject_guessState(arg1,arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4692,7 +4474,7 @@ int _wrap_gridDynObject_setState(int resc, mxArray *resv[], int argc, mxArray *a
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_setState",argc,5,5,0)) {
     SWIG_fail;
@@ -4720,7 +4502,7 @@ int _wrap_gridDynObject_setState(int resc, mxArray *resv[], int argc, mxArray *a
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_setState" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_setState(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5);
+  result = (griddyn_status)gridDynObject_setState(arg1,arg2,(double const *)arg3,(double const *)arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4738,7 +4520,7 @@ int _wrap_gridDynObject_getStateVariableTypes(int resc, mxArray *resv[], int arg
   int res2 = 0 ;
   int res3 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_getStateVariableTypes",argc,3,3,0)) {
     SWIG_fail;
@@ -4756,7 +4538,7 @@ int _wrap_gridDynObject_getStateVariableTypes(int resc, mxArray *resv[], int arg
   if (!SWIG_IsOK(res3)) {
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "gridDynObject_getStateVariableTypes" "', argument " "3"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_getStateVariableTypes(arg1,arg2,arg3);
+  result = (griddyn_status)gridDynObject_getStateVariableTypes(arg1,arg2,arg3);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4780,7 +4562,7 @@ int _wrap_gridDynObject_residual(int resc, mxArray *resv[], int argc, mxArray *a
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_residual",argc,5,5,0)) {
     SWIG_fail;
@@ -4808,7 +4590,7 @@ int _wrap_gridDynObject_residual(int resc, mxArray *resv[], int argc, mxArray *a
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_residual" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_residual(arg1,(double const *)arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynObject_residual(arg1,(double const *)arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4832,7 +4614,7 @@ int _wrap_gridDynObject_derivative(int resc, mxArray *resv[], int argc, mxArray 
   int res4 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_derivative",argc,5,5,0)) {
     SWIG_fail;
@@ -4860,7 +4642,7 @@ int _wrap_gridDynObject_derivative(int resc, mxArray *resv[], int argc, mxArray 
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_derivative" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_derivative(arg1,(double const *)arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynObject_derivative(arg1,(double const *)arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4887,7 +4669,7 @@ int _wrap_gridDynObject_algebraicUpdate(int resc, mxArray *resv[], int argc, mxA
   int ecode5 = 0 ;
   int res6 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_algebraicUpdate",argc,6,6,0)) {
     SWIG_fail;
@@ -4920,7 +4702,7 @@ int _wrap_gridDynObject_algebraicUpdate(int resc, mxArray *resv[], int argc, mxA
   if (!SWIG_IsOK(res6)) {
     SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "gridDynObject_algebraicUpdate" "', argument " "6"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_algebraicUpdate(arg1,(double const *)arg2,arg3,arg4,arg5,arg6);
+  result = (griddyn_status)gridDynObject_algebraicUpdate(arg1,(double const *)arg2,arg3,arg4,arg5,arg6);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -4945,7 +4727,7 @@ int _wrap_gridDynObject_jacobian(int resc, mxArray *resv[], int argc, mxArray *a
   int ecode4 = 0 ;
   int res6 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_jacobian",argc,6,6,0)) {
     SWIG_fail;
@@ -4979,7 +4761,7 @@ int _wrap_gridDynObject_jacobian(int resc, mxArray *resv[], int argc, mxArray *a
   if (!SWIG_IsOK(res6)) {
     SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "gridDynObject_jacobian" "', argument " "6"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_jacobian(arg1,(double const *)arg2,arg3,arg4,arg5,arg6);
+  result = (griddyn_status)gridDynObject_jacobian(arg1,(double const *)arg2,arg3,arg4,arg5,arg6);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -5001,7 +4783,7 @@ int _wrap_gridDynObject_ioPartialDerivatives(int resc, mxArray *resv[], int argc
   int ecode3 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_ioPartialDerivatives",argc,5,5,0)) {
     SWIG_fail;
@@ -5030,7 +4812,7 @@ int _wrap_gridDynObject_ioPartialDerivatives(int resc, mxArray *resv[], int argc
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_ioPartialDerivatives" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_ioPartialDerivatives(arg1,(double const *)arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynObject_ioPartialDerivatives(arg1,(double const *)arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -5052,7 +4834,7 @@ int _wrap_gridDynObject_outputPartialDerivatives(int resc, mxArray *resv[], int 
   int ecode3 = 0 ;
   int res5 ;
   mxArray * _out;
-  int result;
+  griddyn_status result;
   
   if (!SWIG_check_num_args("gridDynObject_outputPartialDerivatives",argc,5,5,0)) {
     SWIG_fail;
@@ -5081,7 +4863,7 @@ int _wrap_gridDynObject_outputPartialDerivatives(int resc, mxArray *resv[], int 
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "gridDynObject_outputPartialDerivatives" "', argument " "5"" of type '" "solverKey""'"); 
   }
-  result = (int)gridDynObject_outputPartialDerivatives(arg1,(double const *)arg2,arg3,arg4,arg5);
+  result = (griddyn_status)gridDynObject_outputPartialDerivatives(arg1,(double const *)arg2,arg3,arg4,arg5);
   _out = SWIG_From_int(static_cast< int >(result));
   if (_out) --resc, *resv++ = _out;
   return 0;
@@ -5093,56 +4875,46 @@ fail:
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
-static void *_p_charArrayTo_p_char(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((char *)  ((charArray *) x));
-}
 static void *_p_doubleArrayTo_p_double(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((double *)  ((doubleArray *) x));
 }
-static void *_p_p_charArrayTo_p_p_char(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((char **)  ((charArray **) x));
-}
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_charArray = {"_p_charArray", "charArray *", 0, 0, (void*)"griddyn.charArray", 0};
 static swig_type_info _swigt__p_double = {"_p_double", "double *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_doubleArray = {"_p_doubleArray", "doubleArray *", 0, 0, (void*)"griddyn.doubleArray", 0};
 static swig_type_info _swigt__p_f_int_int_double__void = {"_p_f_int_int_double__void", "void (*)(int,int,double)", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_griddyn_status_enum = {"_p_griddyn_status_enum", "enum griddyn_status_enum *|griddyn_status_enum *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "int *|griddyn_status *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_p_charArray = {"_p_p_charArray", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "gridDynObject|gridDynVectorQuery|gridDynSimReference|gridDynEvent|void *|solverKey|gridDynSingleQuery", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_char,
-  &_swigt__p_charArray,
   &_swigt__p_double,
   &_swigt__p_doubleArray,
   &_swigt__p_f_int_int_double__void,
+  &_swigt__p_griddyn_status_enum,
   &_swigt__p_int,
   &_swigt__p_p_char,
-  &_swigt__p_p_charArray,
   &_swigt__p_void,
 };
 
-static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},  {&_swigt__p_charArray, _p_charArrayTo_p_char, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_charArray[] = {  {&_swigt__p_charArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_double[] = {  {&_swigt__p_doubleArray, _p_doubleArrayTo_p_double, 0, 0},  {&_swigt__p_double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_doubleArray[] = {  {&_swigt__p_doubleArray, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_int_double__void[] = {  {&_swigt__p_f_int_int_double__void, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_griddyn_status_enum[] = {  {&_swigt__p_griddyn_status_enum, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_charArray[] = {{&_swigt__p_p_charArray, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},  {&_swigt__p_p_charArray, _p_p_charArrayTo_p_p_char, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_char,
-  _swigc__p_charArray,
   _swigc__p_double,
   _swigc__p_doubleArray,
   _swigc__p_f_int_int_double__void,
+  _swigc__p_griddyn_status_enum,
   _swigc__p_int,
   _swigc__p_p_char,
-  _swigc__p_p_charArray,
   _swigc__p_void,
 };
 
@@ -5402,19 +5174,20 @@ SWIG_InitializeModule(0);
 
 SWIGINTERN const char* SwigConstantName(int con_id) {
   switch (con_id) {
-  case 0: return "EXECUTION_SUCCESS";
-  case 1: return "INVALID_OBJECT";
-  case 2: return "INVALID_PARAMETER_VALUE";
-  case 3: return "UNKNOWN_PARAMETER";
-  case 4: return "ADD_FAILURE";
-  case 5: return "REMOVE_FAILURE";
-  case 6: return "QUERY_LOAD_FAILURE";
-  case 7: return "FILE_LOAD_FAILURE";
-  case 8: return "SOLVE_ERROR";
-  case 9: return "OBJECT_NOT_INITIALIZED";
-  case 10: return "INVALID_FUNCTION_CALL";
-  case 11: return "GRIDDYN_PENDING";
-  case 12: return "GRIDDYN_COMPLETE";
+  case 0: return "griddyn_ok";
+  case 1: return "griddyn_invalid_object";
+  case 2: return "griddyn_invalid_parameter_value";
+  case 3: return "griddyn_unknown_parameter";
+  case 4: return "griddyn_add_failure";
+  case 5: return "griddyn_remove_failure";
+  case 6: return "griddyn_query_load_failure";
+  case 7: return "griddyn_file_load_failure";
+  case 8: return "griddyn_solve_error";
+  case 9: return "griddyn_object_not_initialized";
+  case 10: return "griddyn_invalid_function_call";
+  case 11: return "griddyn_function_failure";
+  case 12: return "GRIDDYN_PENDING";
+  case 13: return "GRIDDYN_COMPLETE";
   default: return 0;
   }
 }
@@ -5445,19 +5218,20 @@ SWIGINTERN int swigConstant(int SWIGUNUSEDPARM(resc), mxArray *resv[], int argc,
   }
   int con_id = (int)mxGetScalar(*argv++);
   switch (con_id) {
-  case 0: *resv = SWIG_Matlab_SetConstant(module_ns,"EXECUTION_SUCCESS",SWIG_From_int(static_cast< int >((0))));; break;
-  case 1: *resv = SWIG_Matlab_SetConstant(module_ns,"INVALID_OBJECT",SWIG_From_int(static_cast< int >((-24))));; break;
-  case 2: *resv = SWIG_Matlab_SetConstant(module_ns,"INVALID_PARAMETER_VALUE",SWIG_From_int(static_cast< int >((-25))));; break;
-  case 3: *resv = SWIG_Matlab_SetConstant(module_ns,"UNKNOWN_PARAMETER",SWIG_From_int(static_cast< int >((-26))));; break;
-  case 4: *resv = SWIG_Matlab_SetConstant(module_ns,"ADD_FAILURE",SWIG_From_int(static_cast< int >((-27))));; break;
-  case 5: *resv = SWIG_Matlab_SetConstant(module_ns,"REMOVE_FAILURE",SWIG_From_int(static_cast< int >((-28))));; break;
-  case 6: *resv = SWIG_Matlab_SetConstant(module_ns,"QUERY_LOAD_FAILURE",SWIG_From_int(static_cast< int >((-33))));; break;
-  case 7: *resv = SWIG_Matlab_SetConstant(module_ns,"FILE_LOAD_FAILURE",SWIG_From_int(static_cast< int >((-36))));; break;
-  case 8: *resv = SWIG_Matlab_SetConstant(module_ns,"SOLVE_ERROR",SWIG_From_int(static_cast< int >((-43))));; break;
-  case 9: *resv = SWIG_Matlab_SetConstant(module_ns,"OBJECT_NOT_INITIALIZED",SWIG_From_int(static_cast< int >((-54))));; break;
-  case 10: *resv = SWIG_Matlab_SetConstant(module_ns,"INVALID_FUNCTION_CALL",SWIG_From_int(static_cast< int >((-60))));; break;
-  case 11: *resv = SWIG_Matlab_SetConstant(module_ns,"GRIDDYN_PENDING",SWIG_From_int(static_cast< int >((25))));; break;
-  case 12: *resv = SWIG_Matlab_SetConstant(module_ns,"GRIDDYN_COMPLETE",SWIG_From_int(static_cast< int >((30))));; break;
+  case 0: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_ok",SWIG_From_int(static_cast< int >(griddyn_ok)));; break;
+  case 1: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_invalid_object",SWIG_From_int(static_cast< int >(griddyn_invalid_object)));; break;
+  case 2: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_invalid_parameter_value",SWIG_From_int(static_cast< int >(griddyn_invalid_parameter_value)));; break;
+  case 3: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_unknown_parameter",SWIG_From_int(static_cast< int >(griddyn_unknown_parameter)));; break;
+  case 4: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_add_failure",SWIG_From_int(static_cast< int >(griddyn_add_failure)));; break;
+  case 5: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_remove_failure",SWIG_From_int(static_cast< int >(griddyn_remove_failure)));; break;
+  case 6: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_query_load_failure",SWIG_From_int(static_cast< int >(griddyn_query_load_failure)));; break;
+  case 7: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_file_load_failure",SWIG_From_int(static_cast< int >(griddyn_file_load_failure)));; break;
+  case 8: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_solve_error",SWIG_From_int(static_cast< int >(griddyn_solve_error)));; break;
+  case 9: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_object_not_initialized",SWIG_From_int(static_cast< int >(griddyn_object_not_initialized)));; break;
+  case 10: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_invalid_function_call",SWIG_From_int(static_cast< int >(griddyn_invalid_function_call)));; break;
+  case 11: *resv = SWIG_Matlab_SetConstant(module_ns,"griddyn_function_failure",SWIG_From_int(static_cast< int >(griddyn_function_failure)));; break;
+  case 12: *resv = SWIG_Matlab_SetConstant(module_ns,"GRIDDYN_PENDING",SWIG_From_int(static_cast< int >((25))));; break;
+  case 13: *resv = SWIG_Matlab_SetConstant(module_ns,"GRIDDYN_COMPLETE",SWIG_From_int(static_cast< int >((30))));; break;
   default:
     SWIG_Error(SWIG_RuntimeError, "No such constant.");
     return 1;
@@ -5488,87 +5262,83 @@ SWIGINTERN const char* SwigFunctionName(int fcn_id) {
   case 18: return "doubleArray_paren_asgn";
   case 19: return "doubleArray_cast";
   case 20: return "doubleArray_frompointer";
-  case 21: return "new_charArray";
-  case 22: return "delete_charArray";
-  case 23: return "charArray_paren";
-  case 24: return "charArray_paren_asgn";
-  case 25: return "charArray_cast";
-  case 26: return "charArray_frompointer";
-  case 27: return "_wrap_gridDynObject_create";
-  case 28: return "_wrap_gridDynObject_clone";
-  case 29: return "_wrap_gridDynObject_free";
-  case 30: return "_wrap_gridDynObject_add";
-  case 31: return "_wrap_gridDynObject_remove";
-  case 32: return "_wrap_gridDynObject_setString";
-  case 33: return "_wrap_gridDynObject_setValue";
-  case 34: return "_wrap_gridDynObject_setFlag";
-  case 35: return "_wrap_gridDynObject_getString";
-  case 36: return "_wrap_gridDynObject_getValue";
-  case 37: return "_wrap_gridDynObject_getFlag";
-  case 38: return "_wrap_gridDynObject_find";
-  case 39: return "_wrap_gridDynObject_getSubObject";
-  case 40: return "_wrap_gridDynObject_findByUserId";
-  case 41: return "_wrap_gridDynObject_getParent";
-  case 42: return "_wrap_gridDynObject_getType";
-  case 43: return "_wrap_gridDynSimulation_create";
-  case 44: return "_wrap_gridDynSimulation_free";
-  case 45: return "_wrap_gridDynSimulation_initializeFromString";
-  case 46: return "_wrap_gridDynSimulation_initializeFromArgs";
-  case 47: return "_wrap_gridDynSimulation_loadfile";
-  case 48: return "_wrap_gridDynSimulation_addCommand";
-  case 49: return "_wrap_gridDynSimulation_powerflowInitialize";
-  case 50: return "_wrap_gridDynSimulation_powerflow";
-  case 51: return "_wrap_gridDynSimulation_dynamicInitialize";
-  case 52: return "_wrap_gridDynSimulation_reset";
-  case 53: return "_wrap_gridDynSimulation_getCurrentTime";
-  case 54: return "_wrap_gridDynSimulation_run";
-  case 55: return "_wrap_gridDynSimulation_runTo";
-  case 56: return "_wrap_gridDynSimulation_Step";
-  case 57: return "_wrap_gridDynSimulation_runAsync";
-  case 58: return "_wrap_gridDynSimulation_runToAsync";
-  case 59: return "_wrap_gridDynSimulation_StepAsync";
-  case 60: return "_wrap_gridDynSimulation_getStatus";
-  case 61: return "_wrap_getSimulationObject";
-  case 62: return "_wrap_gridDynSimulation_getSolverKey";
-  case 63: return "_wrap_gridDynSolverKey_free";
-  case 64: return "_wrap_gridDynSimulation_stateSize";
-  case 65: return "_wrap_gridDynSimulation_busCount";
-  case 66: return "_wrap_gridDynSimulation_lineCount";
-  case 67: return "_wrap_gridDynSimulation_getResults";
-  case 68: return "_wrap_gridDynSimulation_guessState";
-  case 69: return "_wrap_gridDynSimulation_setState";
-  case 70: return "_wrap_gridDynSimulation_getStateVariableTypes";
-  case 71: return "_wrap_gridDynSimulation_residual";
-  case 72: return "_wrap_gridDynSimulation_derivative";
-  case 73: return "_wrap_gridDynSimulation_algebraicUpdate";
-  case 74: return "_wrap_gridDynSimulation_jacobian";
-  case 75: return "_wrap_gridDynSingleQuery_create";
-  case 76: return "_wrap_gridDynVectorQuery_create";
-  case 77: return "_wrap_gridDynSingleQuery_free";
-  case 78: return "_wrap_gridDynVectorQuery_free";
-  case 79: return "_wrap_gridDynSingleQuery_run";
-  case 80: return "_wrap_gridDynVectorQuery_run";
-  case 81: return "_wrap_gridDynVectorQuery_append";
-  case 82: return "_wrap_gridDynSingleQuery_update";
-  case 83: return "_wrap_gridDynVectorQuery_update";
-  case 84: return "_wrap_gridDynEvent_create";
-  case 85: return "_wrap_gridDynEvent_free";
-  case 86: return "_wrap_gridDynEvent_trigger";
-  case 87: return "_wrap_gridDynEvent_schedule";
-  case 88: return "_wrap_gridDynEvent_setValue";
-  case 89: return "_wrap_gridDynEvent_setString";
-  case 90: return "_wrap_gridDynEvent_setFlag";
-  case 91: return "_wrap_gridDynEvent_setTarget";
-  case 92: return "_wrap_gridDynObject_stateSize";
-  case 93: return "_wrap_gridDynObject_guessState";
-  case 94: return "_wrap_gridDynObject_setState";
-  case 95: return "_wrap_gridDynObject_getStateVariableTypes";
-  case 96: return "_wrap_gridDynObject_residual";
-  case 97: return "_wrap_gridDynObject_derivative";
-  case 98: return "_wrap_gridDynObject_algebraicUpdate";
-  case 99: return "_wrap_gridDynObject_jacobian";
-  case 100: return "_wrap_gridDynObject_ioPartialDerivatives";
-  case 101: return "_wrap_gridDynObject_outputPartialDerivatives";
+  case 21: return "_wrap_gridDynObject_create";
+  case 22: return "_wrap_gridDynObject_clone";
+  case 23: return "_wrap_gridDynObject_free";
+  case 24: return "_wrap_gridDynObject_add";
+  case 25: return "_wrap_gridDynObject_remove";
+  case 26: return "_wrap_gridDynObject_setString";
+  case 27: return "_wrap_gridDynObject_setValue";
+  case 28: return "_wrap_gridDynObject_setValueUnits";
+  case 29: return "_wrap_gridDynObject_setFlag";
+  case 30: return "_wrap_gridDynObject_getString";
+  case 31: return "_wrap_gridDynObject_getValue";
+  case 32: return "_wrap_gridDynObject_getValueUnits";
+  case 33: return "_wrap_gridDynObject_getFlag";
+  case 34: return "_wrap_gridDynObject_find";
+  case 35: return "_wrap_gridDynObject_getSubObject";
+  case 36: return "_wrap_gridDynObject_findByUserId";
+  case 37: return "_wrap_gridDynObject_getParent";
+  case 38: return "_wrap_gridDynObject_getType";
+  case 39: return "_wrap_gridDynSimulation_create";
+  case 40: return "_wrap_gridDynSimulation_free";
+  case 41: return "_wrap_gridDynSimulation_initializeFromString";
+  case 42: return "_wrap_gridDynSimulation_initializeFromArgs";
+  case 43: return "_wrap_gridDynSimulation_loadfile";
+  case 44: return "_wrap_gridDynSimulation_addCommand";
+  case 45: return "_wrap_gridDynSimulation_powerflowInitialize";
+  case 46: return "_wrap_gridDynSimulation_powerflow";
+  case 47: return "_wrap_gridDynSimulation_dynamicInitialize";
+  case 48: return "_wrap_gridDynSimulation_reset";
+  case 49: return "_wrap_gridDynSimulation_getCurrentTime";
+  case 50: return "_wrap_gridDynSimulation_run";
+  case 51: return "_wrap_gridDynSimulation_runTo";
+  case 52: return "_wrap_gridDynSimulation_Step";
+  case 53: return "_wrap_gridDynSimulation_runAsync";
+  case 54: return "_wrap_gridDynSimulation_runToAsync";
+  case 55: return "_wrap_gridDynSimulation_StepAsync";
+  case 56: return "_wrap_gridDynSimulation_getStatus";
+  case 57: return "_wrap_getSimulationObject";
+  case 58: return "_wrap_gridDynSimulation_getSolverKey";
+  case 59: return "_wrap_gridDynSolverKey_free";
+  case 60: return "_wrap_gridDynSimulation_stateSize";
+  case 61: return "_wrap_gridDynSimulation_busCount";
+  case 62: return "_wrap_gridDynSimulation_lineCount";
+  case 63: return "_wrap_gridDynSimulation_getResults";
+  case 64: return "_wrap_gridDynSimulation_guessState";
+  case 65: return "_wrap_gridDynSimulation_setState";
+  case 66: return "_wrap_gridDynSimulation_getStateVariableTypes";
+  case 67: return "_wrap_gridDynSimulation_residual";
+  case 68: return "_wrap_gridDynSimulation_derivative";
+  case 69: return "_wrap_gridDynSimulation_algebraicUpdate";
+  case 70: return "_wrap_gridDynSimulation_jacobian";
+  case 71: return "_wrap_gridDynSingleQuery_create";
+  case 72: return "_wrap_gridDynVectorQuery_create";
+  case 73: return "_wrap_gridDynSingleQuery_free";
+  case 74: return "_wrap_gridDynVectorQuery_free";
+  case 75: return "_wrap_gridDynSingleQuery_run";
+  case 76: return "_wrap_gridDynVectorQuery_run";
+  case 77: return "_wrap_gridDynVectorQuery_append";
+  case 78: return "_wrap_gridDynSingleQuery_update";
+  case 79: return "_wrap_gridDynVectorQuery_update";
+  case 80: return "_wrap_gridDynEvent_create";
+  case 81: return "_wrap_gridDynEvent_free";
+  case 82: return "_wrap_gridDynEvent_trigger";
+  case 83: return "_wrap_gridDynEvent_schedule";
+  case 84: return "_wrap_gridDynEvent_setValue";
+  case 85: return "_wrap_gridDynEvent_setString";
+  case 86: return "_wrap_gridDynEvent_setFlag";
+  case 87: return "_wrap_gridDynEvent_setTarget";
+  case 88: return "_wrap_gridDynObject_stateSize";
+  case 89: return "_wrap_gridDynObject_guessState";
+  case 90: return "_wrap_gridDynObject_setState";
+  case 91: return "_wrap_gridDynObject_getStateVariableTypes";
+  case 92: return "_wrap_gridDynObject_residual";
+  case 93: return "_wrap_gridDynObject_derivative";
+  case 94: return "_wrap_gridDynObject_algebraicUpdate";
+  case 95: return "_wrap_gridDynObject_jacobian";
+  case 96: return "_wrap_gridDynObject_ioPartialDerivatives";
+  case 97: return "_wrap_gridDynObject_outputPartialDerivatives";
   default: return 0;
   }
 }
@@ -5646,87 +5416,83 @@ void mexFunction(int resc, mxArray *resv[], int argc, const mxArray *argv[]) {
   case 18: flag=_wrap_doubleArray_paren_asgn(resc,resv,argc,(mxArray**)(argv)); break;
   case 19: flag=_wrap_doubleArray_cast(resc,resv,argc,(mxArray**)(argv)); break;
   case 20: flag=_wrap_doubleArray_frompointer(resc,resv,argc,(mxArray**)(argv)); break;
-  case 21: flag=_wrap_new_charArray(resc,resv,argc,(mxArray**)(argv)); break;
-  case 22: flag=_wrap_delete_charArray(resc,resv,argc,(mxArray**)(argv)); break;
-  case 23: flag=_wrap_charArray_paren(resc,resv,argc,(mxArray**)(argv)); break;
-  case 24: flag=_wrap_charArray_paren_asgn(resc,resv,argc,(mxArray**)(argv)); break;
-  case 25: flag=_wrap_charArray_cast(resc,resv,argc,(mxArray**)(argv)); break;
-  case 26: flag=_wrap_charArray_frompointer(resc,resv,argc,(mxArray**)(argv)); break;
-  case 27: flag=_wrap_gridDynObject_create(resc,resv,argc,(mxArray**)(argv)); break;
-  case 28: flag=_wrap_gridDynObject_clone(resc,resv,argc,(mxArray**)(argv)); break;
-  case 29: flag=_wrap_gridDynObject_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 30: flag=_wrap_gridDynObject_add(resc,resv,argc,(mxArray**)(argv)); break;
-  case 31: flag=_wrap_gridDynObject_remove(resc,resv,argc,(mxArray**)(argv)); break;
-  case 32: flag=_wrap_gridDynObject_setString(resc,resv,argc,(mxArray**)(argv)); break;
-  case 33: flag=_wrap_gridDynObject_setValue(resc,resv,argc,(mxArray**)(argv)); break;
-  case 34: flag=_wrap_gridDynObject_setFlag(resc,resv,argc,(mxArray**)(argv)); break;
-  case 35: flag=_wrap_gridDynObject_getString(resc,resv,argc,(mxArray**)(argv)); break;
-  case 36: flag=_wrap_gridDynObject_getValue(resc,resv,argc,(mxArray**)(argv)); break;
-  case 37: flag=_wrap_gridDynObject_getFlag(resc,resv,argc,(mxArray**)(argv)); break;
-  case 38: flag=_wrap_gridDynObject_find(resc,resv,argc,(mxArray**)(argv)); break;
-  case 39: flag=_wrap_gridDynObject_getSubObject(resc,resv,argc,(mxArray**)(argv)); break;
-  case 40: flag=_wrap_gridDynObject_findByUserId(resc,resv,argc,(mxArray**)(argv)); break;
-  case 41: flag=_wrap_gridDynObject_getParent(resc,resv,argc,(mxArray**)(argv)); break;
-  case 42: flag=_wrap_gridDynObject_getType(resc,resv,argc,(mxArray**)(argv)); break;
-  case 43: flag=_wrap_gridDynSimulation_create(resc,resv,argc,(mxArray**)(argv)); break;
-  case 44: flag=_wrap_gridDynSimulation_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 45: flag=_wrap_gridDynSimulation_initializeFromString(resc,resv,argc,(mxArray**)(argv)); break;
-  case 46: flag=_wrap_gridDynSimulation_initializeFromArgs(resc,resv,argc,(mxArray**)(argv)); break;
-  case 47: flag=_wrap_gridDynSimulation_loadfile(resc,resv,argc,(mxArray**)(argv)); break;
-  case 48: flag=_wrap_gridDynSimulation_addCommand(resc,resv,argc,(mxArray**)(argv)); break;
-  case 49: flag=_wrap_gridDynSimulation_powerflowInitialize(resc,resv,argc,(mxArray**)(argv)); break;
-  case 50: flag=_wrap_gridDynSimulation_powerflow(resc,resv,argc,(mxArray**)(argv)); break;
-  case 51: flag=_wrap_gridDynSimulation_dynamicInitialize(resc,resv,argc,(mxArray**)(argv)); break;
-  case 52: flag=_wrap_gridDynSimulation_reset(resc,resv,argc,(mxArray**)(argv)); break;
-  case 53: flag=_wrap_gridDynSimulation_getCurrentTime(resc,resv,argc,(mxArray**)(argv)); break;
-  case 54: flag=_wrap_gridDynSimulation_run(resc,resv,argc,(mxArray**)(argv)); break;
-  case 55: flag=_wrap_gridDynSimulation_runTo(resc,resv,argc,(mxArray**)(argv)); break;
-  case 56: flag=_wrap_gridDynSimulation_Step(resc,resv,argc,(mxArray**)(argv)); break;
-  case 57: flag=_wrap_gridDynSimulation_runAsync(resc,resv,argc,(mxArray**)(argv)); break;
-  case 58: flag=_wrap_gridDynSimulation_runToAsync(resc,resv,argc,(mxArray**)(argv)); break;
-  case 59: flag=_wrap_gridDynSimulation_StepAsync(resc,resv,argc,(mxArray**)(argv)); break;
-  case 60: flag=_wrap_gridDynSimulation_getStatus(resc,resv,argc,(mxArray**)(argv)); break;
-  case 61: flag=_wrap_getSimulationObject(resc,resv,argc,(mxArray**)(argv)); break;
-  case 62: flag=_wrap_gridDynSimulation_getSolverKey(resc,resv,argc,(mxArray**)(argv)); break;
-  case 63: flag=_wrap_gridDynSolverKey_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 64: flag=_wrap_gridDynSimulation_stateSize(resc,resv,argc,(mxArray**)(argv)); break;
-  case 65: flag=_wrap_gridDynSimulation_busCount(resc,resv,argc,(mxArray**)(argv)); break;
-  case 66: flag=_wrap_gridDynSimulation_lineCount(resc,resv,argc,(mxArray**)(argv)); break;
-  case 67: flag=_wrap_gridDynSimulation_getResults(resc,resv,argc,(mxArray**)(argv)); break;
-  case 68: flag=_wrap_gridDynSimulation_guessState(resc,resv,argc,(mxArray**)(argv)); break;
-  case 69: flag=_wrap_gridDynSimulation_setState(resc,resv,argc,(mxArray**)(argv)); break;
-  case 70: flag=_wrap_gridDynSimulation_getStateVariableTypes(resc,resv,argc,(mxArray**)(argv)); break;
-  case 71: flag=_wrap_gridDynSimulation_residual(resc,resv,argc,(mxArray**)(argv)); break;
-  case 72: flag=_wrap_gridDynSimulation_derivative(resc,resv,argc,(mxArray**)(argv)); break;
-  case 73: flag=_wrap_gridDynSimulation_algebraicUpdate(resc,resv,argc,(mxArray**)(argv)); break;
-  case 74: flag=_wrap_gridDynSimulation_jacobian(resc,resv,argc,(mxArray**)(argv)); break;
-  case 75: flag=_wrap_gridDynSingleQuery_create(resc,resv,argc,(mxArray**)(argv)); break;
-  case 76: flag=_wrap_gridDynVectorQuery_create(resc,resv,argc,(mxArray**)(argv)); break;
-  case 77: flag=_wrap_gridDynSingleQuery_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 78: flag=_wrap_gridDynVectorQuery_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 79: flag=_wrap_gridDynSingleQuery_run(resc,resv,argc,(mxArray**)(argv)); break;
-  case 80: flag=_wrap_gridDynVectorQuery_run(resc,resv,argc,(mxArray**)(argv)); break;
-  case 81: flag=_wrap_gridDynVectorQuery_append(resc,resv,argc,(mxArray**)(argv)); break;
-  case 82: flag=_wrap_gridDynSingleQuery_update(resc,resv,argc,(mxArray**)(argv)); break;
-  case 83: flag=_wrap_gridDynVectorQuery_update(resc,resv,argc,(mxArray**)(argv)); break;
-  case 84: flag=_wrap_gridDynEvent_create(resc,resv,argc,(mxArray**)(argv)); break;
-  case 85: flag=_wrap_gridDynEvent_free(resc,resv,argc,(mxArray**)(argv)); break;
-  case 86: flag=_wrap_gridDynEvent_trigger(resc,resv,argc,(mxArray**)(argv)); break;
-  case 87: flag=_wrap_gridDynEvent_schedule(resc,resv,argc,(mxArray**)(argv)); break;
-  case 88: flag=_wrap_gridDynEvent_setValue(resc,resv,argc,(mxArray**)(argv)); break;
-  case 89: flag=_wrap_gridDynEvent_setString(resc,resv,argc,(mxArray**)(argv)); break;
-  case 90: flag=_wrap_gridDynEvent_setFlag(resc,resv,argc,(mxArray**)(argv)); break;
-  case 91: flag=_wrap_gridDynEvent_setTarget(resc,resv,argc,(mxArray**)(argv)); break;
-  case 92: flag=_wrap_gridDynObject_stateSize(resc,resv,argc,(mxArray**)(argv)); break;
-  case 93: flag=_wrap_gridDynObject_guessState(resc,resv,argc,(mxArray**)(argv)); break;
-  case 94: flag=_wrap_gridDynObject_setState(resc,resv,argc,(mxArray**)(argv)); break;
-  case 95: flag=_wrap_gridDynObject_getStateVariableTypes(resc,resv,argc,(mxArray**)(argv)); break;
-  case 96: flag=_wrap_gridDynObject_residual(resc,resv,argc,(mxArray**)(argv)); break;
-  case 97: flag=_wrap_gridDynObject_derivative(resc,resv,argc,(mxArray**)(argv)); break;
-  case 98: flag=_wrap_gridDynObject_algebraicUpdate(resc,resv,argc,(mxArray**)(argv)); break;
-  case 99: flag=_wrap_gridDynObject_jacobian(resc,resv,argc,(mxArray**)(argv)); break;
-  case 100: flag=_wrap_gridDynObject_ioPartialDerivatives(resc,resv,argc,(mxArray**)(argv)); break;
-  case 101: flag=_wrap_gridDynObject_outputPartialDerivatives(resc,resv,argc,(mxArray**)(argv)); break;
+  case 21: flag=_wrap_gridDynObject_create(resc,resv,argc,(mxArray**)(argv)); break;
+  case 22: flag=_wrap_gridDynObject_clone(resc,resv,argc,(mxArray**)(argv)); break;
+  case 23: flag=_wrap_gridDynObject_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 24: flag=_wrap_gridDynObject_add(resc,resv,argc,(mxArray**)(argv)); break;
+  case 25: flag=_wrap_gridDynObject_remove(resc,resv,argc,(mxArray**)(argv)); break;
+  case 26: flag=_wrap_gridDynObject_setString(resc,resv,argc,(mxArray**)(argv)); break;
+  case 27: flag=_wrap_gridDynObject_setValue(resc,resv,argc,(mxArray**)(argv)); break;
+  case 28: flag=_wrap_gridDynObject_setValueUnits(resc,resv,argc,(mxArray**)(argv)); break;
+  case 29: flag=_wrap_gridDynObject_setFlag(resc,resv,argc,(mxArray**)(argv)); break;
+  case 30: flag=_wrap_gridDynObject_getString(resc,resv,argc,(mxArray**)(argv)); break;
+  case 31: flag=_wrap_gridDynObject_getValue(resc,resv,argc,(mxArray**)(argv)); break;
+  case 32: flag=_wrap_gridDynObject_getValueUnits(resc,resv,argc,(mxArray**)(argv)); break;
+  case 33: flag=_wrap_gridDynObject_getFlag(resc,resv,argc,(mxArray**)(argv)); break;
+  case 34: flag=_wrap_gridDynObject_find(resc,resv,argc,(mxArray**)(argv)); break;
+  case 35: flag=_wrap_gridDynObject_getSubObject(resc,resv,argc,(mxArray**)(argv)); break;
+  case 36: flag=_wrap_gridDynObject_findByUserId(resc,resv,argc,(mxArray**)(argv)); break;
+  case 37: flag=_wrap_gridDynObject_getParent(resc,resv,argc,(mxArray**)(argv)); break;
+  case 38: flag=_wrap_gridDynObject_getType(resc,resv,argc,(mxArray**)(argv)); break;
+  case 39: flag=_wrap_gridDynSimulation_create(resc,resv,argc,(mxArray**)(argv)); break;
+  case 40: flag=_wrap_gridDynSimulation_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 41: flag=_wrap_gridDynSimulation_initializeFromString(resc,resv,argc,(mxArray**)(argv)); break;
+  case 42: flag=_wrap_gridDynSimulation_initializeFromArgs(resc,resv,argc,(mxArray**)(argv)); break;
+  case 43: flag=_wrap_gridDynSimulation_loadfile(resc,resv,argc,(mxArray**)(argv)); break;
+  case 44: flag=_wrap_gridDynSimulation_addCommand(resc,resv,argc,(mxArray**)(argv)); break;
+  case 45: flag=_wrap_gridDynSimulation_powerflowInitialize(resc,resv,argc,(mxArray**)(argv)); break;
+  case 46: flag=_wrap_gridDynSimulation_powerflow(resc,resv,argc,(mxArray**)(argv)); break;
+  case 47: flag=_wrap_gridDynSimulation_dynamicInitialize(resc,resv,argc,(mxArray**)(argv)); break;
+  case 48: flag=_wrap_gridDynSimulation_reset(resc,resv,argc,(mxArray**)(argv)); break;
+  case 49: flag=_wrap_gridDynSimulation_getCurrentTime(resc,resv,argc,(mxArray**)(argv)); break;
+  case 50: flag=_wrap_gridDynSimulation_run(resc,resv,argc,(mxArray**)(argv)); break;
+  case 51: flag=_wrap_gridDynSimulation_runTo(resc,resv,argc,(mxArray**)(argv)); break;
+  case 52: flag=_wrap_gridDynSimulation_Step(resc,resv,argc,(mxArray**)(argv)); break;
+  case 53: flag=_wrap_gridDynSimulation_runAsync(resc,resv,argc,(mxArray**)(argv)); break;
+  case 54: flag=_wrap_gridDynSimulation_runToAsync(resc,resv,argc,(mxArray**)(argv)); break;
+  case 55: flag=_wrap_gridDynSimulation_StepAsync(resc,resv,argc,(mxArray**)(argv)); break;
+  case 56: flag=_wrap_gridDynSimulation_getStatus(resc,resv,argc,(mxArray**)(argv)); break;
+  case 57: flag=_wrap_getSimulationObject(resc,resv,argc,(mxArray**)(argv)); break;
+  case 58: flag=_wrap_gridDynSimulation_getSolverKey(resc,resv,argc,(mxArray**)(argv)); break;
+  case 59: flag=_wrap_gridDynSolverKey_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 60: flag=_wrap_gridDynSimulation_stateSize(resc,resv,argc,(mxArray**)(argv)); break;
+  case 61: flag=_wrap_gridDynSimulation_busCount(resc,resv,argc,(mxArray**)(argv)); break;
+  case 62: flag=_wrap_gridDynSimulation_lineCount(resc,resv,argc,(mxArray**)(argv)); break;
+  case 63: flag=_wrap_gridDynSimulation_getResults(resc,resv,argc,(mxArray**)(argv)); break;
+  case 64: flag=_wrap_gridDynSimulation_guessState(resc,resv,argc,(mxArray**)(argv)); break;
+  case 65: flag=_wrap_gridDynSimulation_setState(resc,resv,argc,(mxArray**)(argv)); break;
+  case 66: flag=_wrap_gridDynSimulation_getStateVariableTypes(resc,resv,argc,(mxArray**)(argv)); break;
+  case 67: flag=_wrap_gridDynSimulation_residual(resc,resv,argc,(mxArray**)(argv)); break;
+  case 68: flag=_wrap_gridDynSimulation_derivative(resc,resv,argc,(mxArray**)(argv)); break;
+  case 69: flag=_wrap_gridDynSimulation_algebraicUpdate(resc,resv,argc,(mxArray**)(argv)); break;
+  case 70: flag=_wrap_gridDynSimulation_jacobian(resc,resv,argc,(mxArray**)(argv)); break;
+  case 71: flag=_wrap_gridDynSingleQuery_create(resc,resv,argc,(mxArray**)(argv)); break;
+  case 72: flag=_wrap_gridDynVectorQuery_create(resc,resv,argc,(mxArray**)(argv)); break;
+  case 73: flag=_wrap_gridDynSingleQuery_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 74: flag=_wrap_gridDynVectorQuery_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 75: flag=_wrap_gridDynSingleQuery_run(resc,resv,argc,(mxArray**)(argv)); break;
+  case 76: flag=_wrap_gridDynVectorQuery_run(resc,resv,argc,(mxArray**)(argv)); break;
+  case 77: flag=_wrap_gridDynVectorQuery_append(resc,resv,argc,(mxArray**)(argv)); break;
+  case 78: flag=_wrap_gridDynSingleQuery_update(resc,resv,argc,(mxArray**)(argv)); break;
+  case 79: flag=_wrap_gridDynVectorQuery_update(resc,resv,argc,(mxArray**)(argv)); break;
+  case 80: flag=_wrap_gridDynEvent_create(resc,resv,argc,(mxArray**)(argv)); break;
+  case 81: flag=_wrap_gridDynEvent_free(resc,resv,argc,(mxArray**)(argv)); break;
+  case 82: flag=_wrap_gridDynEvent_trigger(resc,resv,argc,(mxArray**)(argv)); break;
+  case 83: flag=_wrap_gridDynEvent_schedule(resc,resv,argc,(mxArray**)(argv)); break;
+  case 84: flag=_wrap_gridDynEvent_setValue(resc,resv,argc,(mxArray**)(argv)); break;
+  case 85: flag=_wrap_gridDynEvent_setString(resc,resv,argc,(mxArray**)(argv)); break;
+  case 86: flag=_wrap_gridDynEvent_setFlag(resc,resv,argc,(mxArray**)(argv)); break;
+  case 87: flag=_wrap_gridDynEvent_setTarget(resc,resv,argc,(mxArray**)(argv)); break;
+  case 88: flag=_wrap_gridDynObject_stateSize(resc,resv,argc,(mxArray**)(argv)); break;
+  case 89: flag=_wrap_gridDynObject_guessState(resc,resv,argc,(mxArray**)(argv)); break;
+  case 90: flag=_wrap_gridDynObject_setState(resc,resv,argc,(mxArray**)(argv)); break;
+  case 91: flag=_wrap_gridDynObject_getStateVariableTypes(resc,resv,argc,(mxArray**)(argv)); break;
+  case 92: flag=_wrap_gridDynObject_residual(resc,resv,argc,(mxArray**)(argv)); break;
+  case 93: flag=_wrap_gridDynObject_derivative(resc,resv,argc,(mxArray**)(argv)); break;
+  case 94: flag=_wrap_gridDynObject_algebraicUpdate(resc,resv,argc,(mxArray**)(argv)); break;
+  case 95: flag=_wrap_gridDynObject_jacobian(resc,resv,argc,(mxArray**)(argv)); break;
+  case 96: flag=_wrap_gridDynObject_ioPartialDerivatives(resc,resv,argc,(mxArray**)(argv)); break;
+  case 97: flag=_wrap_gridDynObject_outputPartialDerivatives(resc,resv,argc,(mxArray**)(argv)); break;
   default: flag=1, SWIG_Error(SWIG_RuntimeError, "No function id %d.", fcn_id);
   }
   if (flag) {

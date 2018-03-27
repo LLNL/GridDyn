@@ -32,6 +32,8 @@ griddyn_exportEvents.cpp
 add_library(griddyn_shared_lib SHARED ${griddyn_lib_sources} ${griddyn_lib_public_headers} ${griddyn_lib_internal_headers})
 target_compile_definitions(griddyn_shared_lib PRIVATE -DBUILD_DLL=1)
 
+set_target_properties (griddyn_shared_lib PROPERTIES FOLDER interfaces)
+
 IF(UNIX)
   target_compile_options(griddyn_shared_lib PRIVATE -fvisibility=hidden)
 ELSE(UNIX)

@@ -381,7 +381,7 @@ endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 # -------------------------------------------------------------
 
 OPTION(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
-# If HELICS_EXECUTABLE is load the fncs directory
+# If HELICS_EXECUTABLE is load the helics directory
 # link against them.
 
 IF (HELICS_EXECUTABLE)
@@ -531,7 +531,7 @@ add_test(NAME testSystem COMMAND testSystem)
 ######################### swig ######################
 #####################################################
 
-option(WITH_PYTHON3 "Use Python 3.*" OFF)
+#option(WITH_PYTHON3 "Use Python 3.*" OFF)
 
 if (BUILD_PYTHON_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
 add_subdirectory(swig)

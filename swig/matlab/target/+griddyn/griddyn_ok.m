@@ -1,7 +1,7 @@
-function v = OBJECT_NOT_INITIALIZED()
+function v = griddyn_ok()
   persistent vInitialized;
   if isempty(vInitialized)
-    vInitialized = griddynMEX(0, 9);
+    vInitialized = griddynMEX(0, 0);
   end
   v = vInitialized;
 end

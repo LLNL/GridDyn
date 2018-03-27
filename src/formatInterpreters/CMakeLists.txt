@@ -66,41 +66,38 @@ set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
 set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 
 ###########################################
-# building ticpp
+# building ticpp and tinyxml2
 ###########################################
 
-set(TICPP_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
+file(GLOB ticppfiles ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.cpp)
+file(GLOB ticpp_headers ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.h)
 
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/ticpp-targets.cmake)
-build_ticpp()
-endif()
-include(${PROJECT_BINARY_DIR}/libs/cmake/ticpp-targets.cmake)
+add_library(tinyxml STATIC ${ticppfiles} ${ticpp_headers} 
+	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
+	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.h)
 
-###########################################
-# building tinyxml2
-###########################################
+target_link_libraries(tinyxml griddyn_base)
+target_compile_definitions(tinyxml PUBLIC -DTIXML_USE_TICPP)
 
-set(TINYXML2_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	target_compile_options(tinyxml PRIVATE -Wno-suggest-override)
+ENDIF ()
 
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/tinyxml2-targets.cmake)
-build_tinyxml2()
-endif()
-include(${PROJECT_BINARY_DIR}/libs/cmake/tinyxml2-targets.cmake)
+set_target_properties (tinyxml PROPERTIES FOLDER libraries)
 
-
-add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers})
-target_link_libraries(formatInterpreter PUBLIC tinyxml2::tinyxml2 ticpp::ticpp utilities)
+add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers} )
+target_link_libraries(formatInterpreter PUBLIC tinyxml utilities)
 
 set_target_properties (formatInterpreter PROPERTIES FOLDER libraries)
 
-target_compile_definitions(formatInterpreter PRIVATE -DTIXML_USE_TICPP)
+
 
 IF (YAML_FOUND)
 target_link_libraries(formatInterpreter PUBLIC yaml-cpp)
 
 ENDIF(YAML_FOUND)
 
-INSTALL(TARGETS formatInterpreter EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS formatInterpreter tinyxml EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES ${elementReader_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn

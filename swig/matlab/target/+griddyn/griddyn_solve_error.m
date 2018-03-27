@@ -1,7 +1,7 @@
-function v = FILE_LOAD_FAILURE()
+function v = griddyn_solve_error()
   persistent vInitialized;
   if isempty(vInitialized)
-    vInitialized = griddynMEX(0, 7);
+    vInitialized = griddynMEX(0, 8);
   end
   v = vInitialized;
 end
