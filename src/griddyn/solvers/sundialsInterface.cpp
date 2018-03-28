@@ -224,10 +224,24 @@ void sundialsInterface::KLUReInit(sparse_reinit_modes reinitMode)
     {
         return;
     }
-
-    int kinmode = (reinitMode == sparse_reinit_modes::refactor) ? 2 : 1;
-    int retval = SUNKLUReInit(LS, J, maxNNZ, kinmode);
-    check_flag(&retval, "SUNKLUReInit", 1);
+    switch (reinitMode)
+    {
+    case sparse_reinit_modes::refactor:
+    {
+        int retval = SUNKLUReInit(LS, J, maxNNZ, 2);
+        check_flag(&retval, "SUNKLUReInit", 1);
+    }
+    break;
+    case sparse_reinit_modes::resize:
+        /*there is a major bug in sundials with KLU on resize*/
+    {
+        SM_NNZ_S(J) = maxNNZ;
+        SUNSparseMatrix_Realloc(J);
+        int retval = SUNKLUReInit(LS, J, maxNNZ, 2);
+        check_flag(&retval, "SUNKLUReInit", 1);
+    }
+    break;
+    }
     jacCallCount = 0;
 #endif
 }

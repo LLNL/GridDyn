@@ -16,6 +16,8 @@ jsonElement.h
 tinyxml2ReaderElement.h
 tinyxmlReaderElement.h
 readerElement.h
+tomlElement.h
+tomlReaderElement.h
 )
 
 set (elementReader_files 
@@ -24,6 +26,8 @@ jsonElement.cpp
 tinyxml2ReaderElement.cpp
 tinyxmlReaderElement.cpp
 readerElement.cpp
+tomlElement.cpp
+tomlReaderElement.cpp
 ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
 

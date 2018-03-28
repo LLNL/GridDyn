@@ -9,41 +9,35 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
+
 #pragma once
 
 #include "readerElement.h"
-
 #include <memory>
 #include <vector>
-#include <utility>
 
-namespace tinyxml2 {
-class XMLDocument;
-class XMLElement;
-class XMLAttribute;
+namespace toml
+{
+	class Value;
+    struct ParseResult;
 }
 
-/** @brief class defines a reader element around the ticpp element XML reader*/
-class tinyxml2ReaderElement : public readerElement
+class tomlElement;
+
+/** @brief class defines a reader element around the toml reader*/
+class tomlReaderElement : public readerElement
 {
-
 public:
-  tinyxml2ReaderElement () noexcept;
-  explicit tinyxml2ReaderElement (const std::string &fileName);
-
-  tinyxml2ReaderElement (const tinyxml2::XMLElement *xmlElement, const tinyxml2::XMLElement *xmlParent);
-
-  virtual ~tinyxml2ReaderElement () override;
+  tomlReaderElement () noexcept;
+  explicit tomlReaderElement (const std::string &fileName);
 
   std::shared_ptr<readerElement> clone () const override;
 
   virtual bool isValid () const override;
   virtual bool isDocument () const override;
 
-  /** brief load the xml from a string instead of a file*/
-  virtual bool parse (const std::string &inputString) override;
-
   virtual bool loadFile (const std::string &fileName) override;
+  virtual bool parse (const std::string &inputString) override;
   virtual std::string getName () const override;
   virtual double getValue () const override;
   virtual std::string getText () const override;
@@ -75,13 +69,15 @@ public:
   virtual void bookmark () override;
   virtual void restore () override;
 private:
-  std::shared_ptr<tinyxml2::XMLDocument> doc;       //!<document root
-  const tinyxml2::XMLElement *element = nullptr;
-  const tinyxml2::XMLAttribute *att = nullptr;
-  const tinyxml2::XMLElement *parent = nullptr;
-  std::vector<std::pair<const tinyxml2::XMLElement *, const tinyxml2::XMLElement *>> bookmarks;
-
-private:
   void clear ();
+private:
+  
+  std::shared_ptr<toml::ParseResult> doc;             //!<document root
+  std::vector<std::shared_ptr<tomlElement>> parents;
+  std::shared_ptr<tomlElement> current;
+  int iteratorCount = 0;
+
+  std::vector<std::shared_ptr<tomlReaderElement> > bookmarks;
 };
+
 

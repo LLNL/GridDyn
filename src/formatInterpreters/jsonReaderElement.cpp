@@ -98,7 +98,7 @@ bool jsonReaderElement::parse (const std::string &inputString)
         current = std::make_shared<jsonElement> (*doc, "string");
         return true;
     }
-        std::cerr << "file read error in stream::" << stringReader.getFormattedErrorMessages () << '\n';
+        std::cerr << "Read error in stream::" << stringReader.getFormattedErrorMessages () << '\n';
         doc = nullptr;
         clear ();
         return false;
