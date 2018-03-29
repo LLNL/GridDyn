@@ -363,31 +363,31 @@ void tomlReaderElement::moveToNextSibling ()
         return;
     }
     // there are no more elements in a potential array
-    /*
-    auto elementIterator = parents.back ()->getElement ().begin ();
-    auto endIterator = parents.back ()->getElement ().end ();
+   
+    auto &tab = parents.back()->getElement().as<toml::Table>();
+    auto elementIterator = tab.begin();
+    auto elementEnd = tab.end();
     ++parents.back ()->elementIndex;
     // iterators don't survive copy so have to move the iterator to the next element index
     for (int ii = 0; ii < parents.back ()->elementIndex; ++ii)
     {
         ++elementIterator;
-        if (elementIterator == endIterator)
+        if (elementIterator == elementEnd)
         {
             current->clear ();
         }
     }
     // Now find the next valid element
-    while (elementIterator != endIterator)
+    while (elementIterator != elementEnd)
     {
-        if (isElement (*elementIterator))
+        if (isElement (elementIterator->first))
         {
-            current = std::make_shared<jsonElement> (*elementIterator, elementIterator.name ());
+            current = std::make_shared<tomlElement> (elementIterator->first, elementIterator->first);
             return;
         }
         ++elementIterator;
         ++parents.back ()->elementIndex;
     }
-    */
     current->clear ();
 }
 
