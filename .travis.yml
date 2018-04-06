@@ -1,0 +1,154 @@
+dist: trusty
+language: cpp
+
+cache:
+  ccache: true
+  directories:
+    - dependencies
+
+before_cache:
+  - ${TRAVIS_BUILD_DIR}/scripts/cleanup-cmake.sh
+
+env:
+  global:
+    - MAKEFLAGS="-j 2"
+
+# Create aliases for some of shared build configuration
+_basic_env:
+- &daily_linux
+  if: type = cron
+  os: linux
+  compiler: gcc
+  addons:
+    apt:
+      sources:
+        - ubuntu-toolchain-r-test
+      packages:
+        - g++-6
+        - valgrind
+- &linux_base
+  if: type != cron
+  os: linux
+  compiler: gcc
+- &osx_base
+  if: branch IN (master, develop)
+  os: osx
+  compiler: clang
+
+jobs:
+  # On weekdays, the backlog for waiting OS X builds is huge
+  fast_finish: true
+  allow_failures:
+    - os: osx
+
+  include:
+    # XCode 6.4, OS X 10.10
+    - <<: *osx_base
+      env:
+        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=64"
+        - HOMEBREW_NO_AUTO_UPDATE=1
+        - CI_BOOST_VERSION=1.58.0
+      osx_image: xcode6.4
+    # XCode 7.3, OS X 10.11
+    - <<: *osx_base
+      env:
+        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=73"
+        - HOMEBREW_NO_AUTO_UPDATE=1
+      osx_image: xcode7.3
+
+    # Built without errors on my clone from one of the changes made
+    # Possibly local dependencies, or removing Linux-only commands fixed it
+    # XCode 8.3, OS X 10.12
+    #- env: COMPILER=clang++ BUILD_TYPE=Debug
+    #  osx_image: xcode8.3
+
+    - <<: *linux_base
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+
+    - <<: *linux_base
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
+        - CI_BOOST_VERSION=1.61.0
+
+    - <<: *linux_base
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+      env:
+        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-3.6' && CXX='ccache clang++-3.6'"
+        - CCACHE_CPP2=yes
+
+   # ------------------------------------------------
+   # Jobs for daily valgrind and code coverage tests
+   # ------------------------------------------------
+    - <<: *daily_linux
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+        - RUN_VALGRIND=true
+    - <<: *daily_linux
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+        - RUN_COVERAGE=true
+    - <<: *daily_linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
+    - <<: *daily_linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - libstdc++-6-dev
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
+        - CCACHE_CPP2=yes
+        - CXX_STANDARD=17
+
+branches:
+  except:
+    - gh-pages
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+  - $CXX --version
+
+install:
+  - source scripts/install-ci-dependencies.sh
+
+script:
+  - mkdir build && cd build
+  - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost -DSUNDIALS_DIR=${CI_DEPENDENCY_DIR}/sundials"
+  - export GRIDDYN_OPTION_FLAGS=""
+  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS}
+  - make -j2
+
+notifications:
+    email: false
+
