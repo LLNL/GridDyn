@@ -36,7 +36,7 @@ install_sundials () {
     (
         cd ${sundials_version_str}/;
         mkdir -p build && cd build;
-        cmake .. ${klu_options} ${suitesparse_option} -DBUILD_CVODES=OFF -DBUILD_IDAS=OFF -DBUILD_SHARED_LIBS=OFF -DEXAMPLES_INSTALL=OFF -DEXAMPLES_ENABLE_C=OFF -DEXAMPLES_ENABLE_F77=OFF -DEXAMPLES_ENABLED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${install_path}"
+        cmake .. ${klu_options} ${suitesparse_option} -DOPENMP_ENABLE=ON -DBUILD_CVODES=OFF -DBUILD_IDAS=OFF -DBUILD_SHARED_LIBS=OFF -DEXAMPLES_INSTALL=OFF -DEXAMPLES_ENABLE_C=OFF -DEXAMPLES_ENABLE_F77=OFF -DEXAMPLES_ENABLED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${install_path}"
         make;
         make install;
     )
