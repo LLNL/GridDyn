@@ -24,7 +24,7 @@ fi
 
 boost_version=$CI_BOOST_VERSION
 if [[ -z "$CI_BOOST_VERSION" ]]; then
-    boost_version=1.65.0
+    boost_version=1.66.0
 fi
 boost_install_path=${CI_DEPENDENCY_DIR}/boost
 
