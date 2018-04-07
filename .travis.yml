@@ -92,6 +92,7 @@ jobs:
             - llvm-toolchain-trusty-5.0
           packages:
             - libstdc++-6-dev
+            - libiomp5
             - clang-5.0
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
