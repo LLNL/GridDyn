@@ -79,7 +79,7 @@ fi
 
 # Install Sundials
 if [[ ! -d "${sundials_install_path}" ]]; then
-    scripts/install-dependency.sh sundials ${sundials_version} ${sundials_install_path}
+    #scripts/install-dependency.sh sundials ${sundials_version} ${sundials_install_path}
     echo "*** built sundials successfully"
 fi
 
