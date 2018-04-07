@@ -89,11 +89,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-3.9
+            - llvm-toolchain-trusty-5.0
           packages:
-            - clang-3.9
+            - libstdc++-6-dev
+            - clang-5.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-3.9' && CXX='ccache clang++-3.9'"
+        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
         - CCACHE_CPP2=yes
 
    # ------------------------------------------------
