@@ -19,29 +19,6 @@ check_minimum_version () {
     fi
 }
 
-install_sundials () {
-    local sundials_version=$1
-    local sundials_version_str=sundials-${sundials_version}
-    local install_path=$2
-    if [[ $KLU_INLUDE_DIR ]]; then
-        if [[ $KLU_LIBRARY_DIR ]]; then
-            local klu_options="-DKLU_ENABLE=ON -DKLU_INCLUDE_DIR=${KLU_INCLUDE_DIR} -DKLU_LIBRARY_DIR=${KLU_LIBRARY_DIR}"
-        fi
-    fi
-    if [[ $SUITESPARSECONFIG_LIBRARY ]]; then
-        local suitesparse_option="-DSUITESPARSECONFIG_LIBRARY=${SUITESPARSECONFIG_LIBRARY}"
-    fi
-    wget --no-check-certificate -O ${sundials_version_str}.tar.gz https://computation.llnl.gov/projects/sundials/download/${sundials_version_str}.tar.gz;
-    tar xzf ${sundials_version_str}.tar.gz;
-    (
-        cd ${sundials_version_str}/;
-        mkdir -p build && cd build;
-        cmake .. ${klu_options} ${suitesparse_option} -DOPENMP_ENABLE=ON -DBUILD_CVODES=OFF -DBUILD_IDAS=OFF -DBUILD_SHARED_LIBS=OFF -DEXAMPLES_INSTALL=OFF -DEXAMPLES_ENABLE_C=OFF -DEXAMPLES_ENABLE_F77=OFF -DEXAMPLES_ENABLED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${install_path}"
-        make;
-        make install;
-    )
-}
-
 install_swig () {
     #Download and install SWIG
     local swig_version=$1
@@ -240,9 +217,6 @@ case "$1" in
         ;;
     openmpi)
         install_openmpi ${install_version} ${install_path}
-        ;;
-    sundials)
-        install_sundials ${install_version} ${install_path}
         ;;
     swig)
         install_swig ${install_version} ${install_path}
