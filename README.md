@@ -1,7 +1,7 @@
 ![image](docs/images/GridDyn_FullColor.png "GridDyn")
 ============
 [![Build Status](https://travis-ci.org/LLNL/GridDyn.svg?branch=master)](https://travis-ci.org/LLNL/GridDyn)
-[![Build status](https://ci.appveyor.com/api/projects/status/<update_url>/branch/develop?svg=true)](https://ci.appveyor.com/project/griddyn/griddyn/branch/develop)
+[![Build status](https://ci.appveyor.com/api/projects/status/e3rygs874w04a25n?svg=true)](https://ci.appveyor.com/project/griddyn/griddyn)
 [![Gitter chat](https://badges.gitter.im/LLNL/GridDyn.png)](https://gitter.im/LLNL/GridDyn)
 
 GridDyn is a power system simulator developed at Lawrence Livermore National Laboratory. 
