@@ -10,6 +10,10 @@ platform:
 configuration:
   - Release
 
+#cache:
+#  - foldername -> dependencyfile #caches foldername, but will ignore/update cache if dependencyfile changes
+#  surround entire line with single-quotes to make env variable substitution work
+
 install:
 
 before_build:
