@@ -12,8 +12,6 @@ configuration:
 
 cache:
   - build\libs
-#  - foldername -> dependencyfile #caches foldername, but will ignore/update cache if dependencyfile changes
-#  surround entire line with single-quotes to make env variable substitution work
 
 install:
 
