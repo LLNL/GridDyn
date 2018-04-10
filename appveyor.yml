@@ -10,14 +10,16 @@ platform:
 configuration:
   - Release
 
-#cache:
+cache:
+  - build\libs
 #  - foldername -> dependencyfile #caches foldername, but will ignore/update cache if dependencyfile changes
 #  surround entire line with single-quotes to make env variable substitution work
 
 install:
 
 before_build:
-  - mkdir build
+  # Make the build directory if it doesn't already exist
+  - IF NOT EXIST build mkdir build
   - cd build
   - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0
   - cd ..
