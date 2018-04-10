@@ -20,7 +20,7 @@ basic_tests.cpp
 
 add_executable(shared_library_tests ${shared_library_test_sources} ${shared_library_test_headers})
 
-target_include_directories(shared_library_tests PUBLIC ${Boost_INCLUDE_DIR})
+target_include_directories(shared_library_tests SYSTEM PUBLIC ${Boost_INCLUDE_DIR})
 target_include_directories(shared_library_tests PUBLIC ${PROJECT_SOURCE_DIR}/src/griddyn_shared)
 
 

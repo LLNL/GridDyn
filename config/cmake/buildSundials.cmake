@@ -29,7 +29,9 @@ function (build_sundials)
     cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(sundials
-    URL https://computation.llnl.gov/projects/sundials/download/sundials-3.1.0.tar.gz
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/sundials
+    GIT_REPOSITORY  https://github.com/llnl/sundials.git
+    GIT_TAG v3.1.0
     UPDATE_COMMAND " " 
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/sundials
      
@@ -115,7 +117,9 @@ message(STATUS "BUILD SUNDIALS with MINGW")
     cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(sundials
-    URL https://computation.llnl.gov/projects/sundials/download/sundials-3.1.0.tar.gz
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/sundials
+    GIT_REPOSITORY  https://github.com/llnl/sundials.git
+    GIT_TAG v3.1.0
     UPDATE_COMMAND " " 
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/sundials
      
