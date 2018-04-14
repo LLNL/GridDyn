@@ -173,7 +173,7 @@ class gridDynSimulation : public gridSimulation
     std::vector<gridBus *> slkBusses;  //!< vector of slack buses to aid in powerFlow adjust
     std::queue<gridDynAction> actionQueue;  //!< queue for actions for GridDyn to execute
     std::vector<std::shared_ptr<continuationSequence>> continList;  //!< set of continuation sequences to run
-	std::vector<std::function<void()>> additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the PflowInitializeA step
+	std::vector<std::function<int()>> additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the PflowInitializeA step
   public:
     /** @ constructor to set the name
     @param[in] objName the name of the simulation*/
@@ -540,8 +540,10 @@ class gridDynSimulation : public gridSimulation
     @param[in] sMode the solverMode of the state Data object
     */
     void fillExtraStateData (stateData &sD, const solverMode &sMode) const;
-
-	void addInitOperation(std::function<void()> fptr);
+    /** @brief add an initialization function that will execute prior to the internal initialization in HELICS
+    @param fptr a function object that returns an int.  if the value is non-zero it returns a failure the initialization will halt
+    */
+	void addInitOperation(std::function<int()> fptr);
   protected:
     /** @brief makes sure the specified mode has the correct offsets
     @param[in] sMode the solverMode of the offsets to check

@@ -1783,7 +1783,7 @@ void gridComponent::getStateName (stringVec &stNames, const solverMode &sMode, c
     auto mxsize = offsets.maxIndex (sMode);
     std::string prefix2 = prefix + getName () + ':';
 
-    if (mxsize > 0)
+    if ((mxsize > 0)&&(so.stateLoaded))
     {
         ensureSizeAtLeast (stNames, mxsize + 1);
     }

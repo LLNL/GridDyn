@@ -13,7 +13,7 @@
 // headers
 #include "griddyn/griddyn-config.h"
 #include "griddyn/gridDynSimulation.h"
-
+#include "core/coreExceptions.h"
 #include "fileInput/gridDynRunner.h"
 
 #include "gridDynCombined/libraryLoader.h"
@@ -154,8 +154,16 @@ int main (int argc, char *argv[])
         {
             return ret;
         }
-        runner->simInitialize ();
-        runner->Run ();
+        try
+        {
+            runner->simInitialize();
+            runner->Run();
+        }
+        catch (const executionFailure &e)
+        {
+            gds->log(nullptr, print_level::error,
+                std::string(e.what()));
+        }
 #endif
     }
     break;

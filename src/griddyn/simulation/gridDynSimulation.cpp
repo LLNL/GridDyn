@@ -1857,7 +1857,7 @@ void gridDynSimulation::getSolverReady (std::shared_ptr<solverInterface> &solver
         checkOffsets (solver->getSolverMode ());
     }
 }
-void gridDynSimulation::addInitOperation (std::function<void()> fptr)
+void gridDynSimulation::addInitOperation (std::function<int()> fptr)
 {
     if (fptr)
     {

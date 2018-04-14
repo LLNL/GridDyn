@@ -119,11 +119,20 @@ int helicsRunner::Initialize (int argc, char *argv[])
 void helicsRunner::simInitialize()
 {
 	//add an initialization function after the first part of the power flow init
-	m_gds->addInitOperation([this]() {fed_ = coord_->RegisterAsFederate(); });
-	m_gds->pFlowInitialize();
+    m_gds->addInitOperation([this]() {fed_ = coord_->RegisterAsFederate(); return ((fed_) ? 0 : -45); });
+    int ret = 0;
+    ret = m_gds->pFlowInitialize();
+    if (ret!=0)
+    {
+        throw(executionFailure(m_gds.get(), "power flow initialize failure"));
+    }
 
 	GriddynRunner::simInitialize();  //TODO this will need to be unpacked for co-iteration on the power flow solution
-	fed_->enterExecutionState();
+    if (!fed_)
+    {
+        throw(executionFailure(m_gds.get(),"unable to initialize helics federate"));
+    }
+    fed_->enterExecutionState();
 }
 
 void helicsRunner::setCoordinatorOptions(boost::program_options::variables_map &helicsOptions)

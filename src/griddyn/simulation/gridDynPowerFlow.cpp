@@ -343,7 +343,11 @@ int gridDynSimulation::pFlowInitialize (coreTime time0)
     {
         if (setupOperation)
         {
-            setupOperation ();
+            retval = setupOperation();
+            if (retval!=0)
+            {
+                return retval;
+            }
         }
     }
     additionalPowerflowSetupFunctions.clear ();

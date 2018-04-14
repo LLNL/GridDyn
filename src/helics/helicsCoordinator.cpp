@@ -12,6 +12,8 @@
 
 #include "helicsCoordinator.h"
 #include "helics/helics.hpp"
+#include "helics/core/core-exceptions.hpp"
+
 #include "helics/flag-definitions.h"
 #include "utilities/stringConversion.h"
 #include <algorithm>
@@ -63,8 +65,15 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     {
         info_.name = getParent ()->getName ();
     }
-
-        auto cfed = std::make_shared<helics::CombinationFederate>(info_);
+    std::shared_ptr<helics::Federate> cfed;
+    try
+    {
+        cfed = std::make_shared<helics::CombinationFederate>(info_);
+    }
+    catch (const helics::RegistrationFailure &e)
+    {
+        return nullptr;
+      }
         vFed_ = dynamic_cast<helics::ValueFederate*>(cfed.get());
         mFed_ = dynamic_cast<helics::MessageFederate *>(cfed.get());
         fed = std::move(cfed);
