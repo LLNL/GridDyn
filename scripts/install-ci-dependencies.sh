@@ -8,6 +8,8 @@ if [[ "$TRAVIS" == "true" ]]; then
 
     export CI_DEPENDENCY_DIR=${TRAVIS_BUILD_DIR}/dependencies
 
+    WAIT_COMMAND=travis_wait
+
     # Convert commit message to lower case
     commit_msg=$(tr '[:upper:]' '[:lower:]' <<< ${TRAVIS_COMMIT_MESSAGE})
 
@@ -66,7 +68,7 @@ fi
 # Install Boost
 if [[ ! -d "${boost_install_path}" ]]; then
     echo "*** build boost"
-    travis_wait ./scripts/install-dependency.sh boost ${boost_version} ${boost_install_path}
+    ${WAIT_COMMAND} ./scripts/install-dependency.sh boost ${boost_version} ${boost_install_path}
     echo "*** built boost successfully"
 fi
 
