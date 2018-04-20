@@ -4,11 +4,16 @@
 function (build_suitesparse install_path)
 
 	include(escape_string)
-	
+
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
 	
+    message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "cxx_compiler_string: ${cxx_compiler_string}")
+    message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+    message(STATUS "c_compiler_string: ${c_compiler_string}")
+
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_suitesparse)
 
     #mktemp dir in build tree
