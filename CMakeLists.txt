@@ -102,7 +102,7 @@ ENDIF(UNIX)
 IF (BUILD_MATLAB_INTERFACE OR BUILD_OCTAVE_INTERFACE OR USE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
   set(GRIDDYN_BOOST_STATIC ON)
-	  
+
 ENDIF ()
 
 # -------------------------------------------------------------
@@ -120,7 +120,7 @@ ENDIF ()
 	)
 
  endif(TEST_CODE_COVERAGE)
- 
+
  include(GNUInstallDirs)
 # -------------------------------------------------------------
 # Get some configuration for C++17 as that becomes available
@@ -144,7 +144,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/bin")
 
@@ -158,10 +158,6 @@ LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/bin"
 IF("${isSystemDir}" STREQUAL "-1")
    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/bin")
 ENDIF("${isSystemDir}" STREQUAL "-1")
-
-if (NOT USE_BOOST_STATIC_LIBS)
-list(APPEND CMAKE_INSTALL_RPATH ${Boost_LIBRARY_DIRS})
-endif()
 
 #########################################################################################
 
@@ -252,6 +248,9 @@ set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
 message("Using Boost include files : ${Boost_INCLUDE_DIR}")
 message("Using Boost libraries ${Boost_LIBRARY_DIRS}")
 
+if (NOT Boost_USE_STATIC_LIBS)
+    list(APPEND CMAKE_INSTALL_RPATH ${Boost_LIBRARY_DIRS})
+endif()
 
 # -------------------------------------------------------------
 # global include directories
@@ -462,9 +461,9 @@ ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
 
 add_subdirectory(src/gridDynMain)
 
-INSTALL(TARGETS griddyn_base griddyn_optional 
-	EXPORT griddyn-targets 
-	DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+INSTALL(TARGETS griddyn_base griddyn_optional
+	EXPORT griddyn-targets
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	COMPONENT libraries)
 # -------------------------------------------------------------
 # Enable clang analysis and formatting tools
@@ -502,7 +501,7 @@ INSTALL(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runti
 
 INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 
-install (EXPORT griddyn-targets 
+install (EXPORT griddyn-targets
 	NAMESPACE Griddyn::
 	DESTINATION ${GRIDDYN_CMAKECONFIG_INSTALL_DIR}
 	COMPONENT libs
@@ -540,7 +539,7 @@ endif()
 
 
 # -------------------------------------------------------------
-# CPack 
+# CPack
 # -------------------------------------------------------------
 
 set(CPACK_PACKAGE_NAME "GridDyn")
@@ -564,12 +563,12 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "Headers")
  set(CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "Runtime Libraries")
  set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "Examples")
-  
+
  set(CPACK_COMPONENT_MATLAB_GROUP interfaces)
  set(CPACK_COMPONENT_JAVA_GROUP interfaces)
  set(CPACK_COMPONENT_OCTAVE_GROUP interfaces)
  set(CPACK_COMPONENT_PYTHON_GROUP interfaces)
- 
+
  set(CPACK_COMPONENT_APPLICATION_DESCRIPTION "Executables and helper applications for GridDyn")
  set(CPACK_COMPONENT_LIBS_DESCRIPTION "Libraries for compiling and linking with GridDyn")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "Headers for linking and compiling with GridDyn")
@@ -577,7 +576,7 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
  set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Example files for GridDyn")
 
  set(CPACK_COMPONENT_GROUP_INTERFACES_DESCRIPTION "additional language interfaces for GridDyn")
- 
+
  set(CPACK_COMPONENT_LIBS_DEPENDS headers)
  SET(CPACK_COMPONENT_RUNTIME_REQUIRED ON)
  if (WIN32)
@@ -586,10 +585,10 @@ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Application")
 
 	set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
 	set(CPACK_NSIS_URL_INFO_ABOUT "https://www.github.com/LLNL/GridDyn")
-	set(CPACK_NSIS_MENU_LINKS 
+	set(CPACK_NSIS_MENU_LINKS
 		"https://www.github.com/LLNL/GridDyn" "GridDyn source code"
 		"https://www.griddyn.org" "GridDyn Web Page")
-	
+
 		set(CPACK_NSIS_INSTALL_ROOT "C:\\\\local\\\\")
 else(WIN32)
 	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/docgen/images/griddyn.ico")
