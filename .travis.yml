@@ -149,7 +149,10 @@ script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost -DSUNDIALS_DIR=${CI_DEPENDENCY_DIR}/sundials"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON"
-  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DSuiteSparse_AUTOBUILD_DETECT_COMPILER=ON
+  - export SuiteSparse_FLAGS=''
+  - if [[ $CC == ccache* ]]; then SuiteSparse_FLAGS+=" -DSuiteSparse_CMAKE_C_COMPILER=${CC#ccache }"; fi
+  - if [[ $CXX == ccache* ]]; then SuiteSparse_FLAGS+=" -DSuiteSparse_CMAKE_CXX_COMPILER=${CXX#ccache }"; fi
+  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${SuiteSparse_FLAGS}
   - make -j2
 
 notifications:
