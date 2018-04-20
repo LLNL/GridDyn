@@ -39,7 +39,7 @@ set(coreObject_sources
 	)
 	
 	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
-	target_include_directories(coreObjects SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+	target_include_directories(coreObjects SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 	set_target_properties (coreObjects PROPERTIES FOLDER libraries)
 	target_link_libraries(coreObjects PUBLIC utilities)
 	INSTALL(TARGETS coreObjects 
