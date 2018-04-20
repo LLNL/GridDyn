@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2017, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -25,14 +25,14 @@ set(zmqLibrary_headers
 	zmqLibrary/zmqProxyHub.h
 	zmqLibrary/zmqSocketDescriptor.h
 	)
-	
+
 set(zmqInterface_sources
 	zmqCommunicator.cpp
 	zmqInterface.cpp
 	)
 
 
-	
+
 set(zmqInterface_headers
 	zmqCommunicator.h
 	zmqInterface.h
@@ -59,6 +59,7 @@ set(dimeInterface_headers
 	)
 
 add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
+target_include_directories(dimeLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
 set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
 
@@ -75,7 +76,7 @@ if (ZMQ_USE_STATIC_LIBRARY)
 else()
 	set(ZMQ_DEPENDENCY ${ZeroMQ_LIBRARY})
 endif()
-	
+
 	message(status "zmq lib ${ZMQ_DEPENDENCY}")
 target_link_libraries(zmqInterfaceLibrary PUBLIC ${ZMQ_DEPENDENCY} )
 target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn)

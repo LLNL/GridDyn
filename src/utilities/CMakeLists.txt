@@ -107,7 +107,7 @@ include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
 
 
 target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib griddyn_base)
-target_include_directories(utilities SYSTEM ${Boost_INCLUDE_DIR})
+target_include_directories(utilities SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
 target_link_libraries(utilities PUBLIC ${Boost_LIBRARIES_core})
 set_target_properties (utilities PROPERTIES FOLDER libraries)
 

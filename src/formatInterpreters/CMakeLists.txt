@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -10,7 +10,7 @@
 
 #project name
 
-set (elementReader_headers 
+set (elementReader_headers
 jsonReaderElement.h
 jsonElement.h
 tinyxml2ReaderElement.h
@@ -20,7 +20,7 @@ tomlElement.h
 tomlReaderElement.h
 )
 
-set (elementReader_files 
+set (elementReader_files
 jsonReaderElement.cpp
 jsonElement.cpp
 tinyxml2ReaderElement.cpp
@@ -52,7 +52,7 @@ include(${PROJECT_BINARY_DIR}/libs/cmake/yaml-cpp-targets.cmake)
 endif(ENABLE_YAML)
 
 if (YAML_FOUND)
-list(APPEND elementReader_files 
+list(APPEND elementReader_files
 yamlReaderElement.cpp
 yamlElement.cpp)
 
@@ -76,7 +76,7 @@ set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 file(GLOB ticppfiles ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.cpp)
 file(GLOB ticpp_headers ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.h)
 
-add_library(tinyxml STATIC ${ticppfiles} ${ticpp_headers} 
+add_library(tinyxml STATIC ${ticppfiles} ${ticpp_headers}
 	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
 	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.h)
 
@@ -107,5 +107,5 @@ INSTALL(FILES ${elementReader_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
   COMPONENT headers)
 
- 
- 
+
+

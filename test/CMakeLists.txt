@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -91,12 +91,12 @@ set(testExtra_sources
 	extraTests/extraFMUtests.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
-)	
-	
+)
+
 set(testMain_headers
 	testHelper.h
 	exeTestHelper.h
-	
+
 	)
 
 
@@ -138,11 +138,16 @@ target_link_libraries(testComponents ${executable_only_components} gridDynCombin
 target_link_libraries(testSystem gridDynCombined)
 target_link_libraries(testExtra gridDynCombined)
 
+target_include_directories(testLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(testComponents SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(testSystem SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(testExtra SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+
 target_link_libraries(testLibrary ${Boost_LIBRARIES_test})
 target_link_libraries(testComponents ${Boost_LIBRARIES_test})
 target_link_libraries(testSystem ${Boost_LIBRARIES_test})
 target_link_libraries(testExtra ${Boost_LIBRARIES_test})
- 
+
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 install(DIRECTORY DESTINATION bin/test/)
 INSTALL(TARGETS testLibrary RUNTIME DESTINATION bin/test/)
