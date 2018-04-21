@@ -150,8 +150,9 @@ script:
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost -DSUNDIALS_DIR=${CI_DEPENDENCY_DIR}/sundials"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON"
   - export AUTOBUILD_FLAGS=''
-  - if [[ $CC == ccache* ]]; then AUTOBUILD_FLAGS+=" -DSuiteSparse_CMAKE_C_COMPILER=$(which ${CC#ccache}) -DSundials_CMAKE_C_COMPILER=$(which ${CC#ccache})"; fi
-  - if [[ $CXX == ccache* ]]; then AUTOBUILD_FLAGS+=" -DSuiteSparse_CMAKE_CXX_COMPILER=$(which ${CXX#ccache}) -DSundials_CMAKE_CXX_COMPILER=$(which ${CXX#ccache})"; fi
+  - if [[ $CC == ccache* ]]; then AUTOBUILD_FLAGS+=" -DAUTOBUILD_CC=$(which ${CC#ccache})"; fi
+  - if [[ $CXX == ccache* ]]; then AUTOBUILD_FLAGS+=" -DAUTOBUILD_CXX=$(which ${CXX#ccache})"; fi
+  - if [[ "$AUTOBUILD_FLAGS" ]]; then AUTOBUILD_FLAGS+=" -DENABLE_AUTOBUILD_COMPILERS=ON"; fi
   - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${AUTOBUILD_FLAGS}
   - make -j2
 

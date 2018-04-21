@@ -3,6 +3,14 @@
 
 function (build_zlib)
 
+    set(Zlib_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+    set(Zlib_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+
+    if(ENABLE_AUTOBUILD_COMPILERS)
+        unset(Zlib_CMAKE_C_COMPILER)
+        unset(Zlib_CMAKE_CXX_COMPILER)
+    endif()
+
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_zlib)
 
     #mktemp dir in build tree
@@ -22,7 +30,8 @@ ExternalProject_Add(zlib
         -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/libs
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        ${Zlib_CMAKE_C_COMPILER}
+        ${Zlib_CMAKE_CXX_COMPILER}
         -DCMAKE_LINKER=${CMAKE_LINKER}
         
     INSTALL_DIR ${PROJECT_BINARY_DIR}/libs
@@ -33,7 +42,7 @@ ExternalProject_Add(zlib
 
 if (NOT BUILD_RELEASE_ONLY)
 message(STATUS "Configuring zlib Autobuild for Debug: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_debug.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${Zlib_CMAKE_CXX_COMPILER} ${Zlib_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_debug.log
@@ -47,7 +56,7 @@ message(STATUS "Configuring zlib Autobuild for Debug: logging to ${PROJECT_BINAR
 	endif()
 	
 message(STATUS "Configuring zlib Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${Zlib_CMAKE_CXX_COMPILER} ${Zlib_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log

@@ -3,6 +3,14 @@
 
 function (build_yaml)
 
+    set(YAML_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+    set(YAML_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+
+    if(ENABLE_AUTOBUILD_COMPILERS)
+        unset(YAML_CMAKE_C_COMPILER)
+        unset(YAML_CMAKE_CXX_COMPILER)
+    endif()
+
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_yaml)
 
     #mktemp dir in build tree
@@ -25,8 +33,8 @@ ExternalProject_Add(yaml-cpp
         -DYAML_CPP_BUILD_TOOLS=OFF
 		-DYAML_CPP_BUILD_TESTS=OFF
 		-DYAML_CPP_BUILD_CONTRIB=OFF
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        ${YAML_CMAKE_CXX_COMPILER}
+        ${YAML_CMAKE_C_COMPILER}
         -DCMAKE_LINKER=${CMAKE_LINKER}
 		-DINSTALL_CMAKE_DIR=${PROJECT_BINARY_DIR}/cmake
         
@@ -36,7 +44,7 @@ ExternalProject_Add(yaml-cpp
 
 
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev ${YAML_CMAKE_CXX_COMPILER} ${YAML_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/yaml_autobuild_config_release.log
@@ -46,7 +54,7 @@ ExternalProject_Add(yaml-cpp
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/yaml_autobuild_build_release.log
         )
        
- execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev ${YAML_CMAKE_CXX_COMPILER} ${YAML_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/yaml_autobuild_config_debug.log

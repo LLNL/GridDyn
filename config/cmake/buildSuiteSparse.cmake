@@ -8,9 +8,14 @@ function (build_suitesparse install_path)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
-    message(STATUS "CC=$ENV{CC} CXX=$ENV{CXX}")	
+	
     set(SuiteSparse_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${c_compiler_string}")
     set(SuiteSparse_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${cxx_compiler_string}")
+
+    if(ENABLE_AUTOBUILD_COMPILERS)
+        unset(SuiteSparse_CMAKE_C_COMPILER)
+        unset(SuiteSparse_CMAKE_CXX_COMPILER)
+    endif()
 
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_suitesparse)
 
