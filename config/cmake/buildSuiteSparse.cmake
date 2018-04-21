@@ -8,9 +8,9 @@ function (build_suitesparse install_path)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
-	
-    set(SuiteSparse_CMAKE_C_COMPILER "${c_compiler_string}" CACHE FILEPATH "the c compiler to autobuild suitesparse with")
-    set(SuiteSparse_CMAKE_CXX_COMPILER "${cxx_compiler_string}" CACHE FILEPATH "the cxx compiler to autobuild suitesparse with")
+    message(STATUS "CC=$ENV{CC} CXX=$ENV{CXX}")	
+    set(SuiteSparse_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${c_compiler_string}")
+    set(SuiteSparse_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${cxx_compiler_string}")
 
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_suitesparse)
 
@@ -37,8 +37,8 @@ ExternalProject_Add(suitesparse
     CMAKE_ARGS 
         -D${prefix_install}_INSTALL_PREFIX=${install_path}
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
-        -DCMAKE_C_COMPILER=${SuiteSparse_CMAKE_C_COMPILER}
-        -DCMAKE_CXX_COMPILER=${SuiteSparse_CMAKE_CXX_COMPILER}
+        ${SuiteSparse_CMAKE_C_COMPILER}
+        ${SuiteSparse_CMAKE_CXX_COMPILER}
 		-DCMAKE_LINKER=${linker_string}
 		-DBUILD_METIS=OFF
 		-DConfigPackageLocation=${PROJECT_BINARY_DIR}/cmake
@@ -51,7 +51,7 @@ ExternalProject_Add(suitesparse
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
 
 	message(STATUS "Configuring SuiteSparse Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -DCMAKE_C_COMPILER=${SuiteSparse_CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${SuiteSparse_CMAKE_CXX_COMPILER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${SuiteSparse_CMAKE_C_COMPILER} ${SuiteSparse_CMAKE_CXX_COMPILER}
         -D CMAKE_LINKER=${linker_string}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
@@ -66,7 +66,7 @@ ExternalProject_Add(suitesparse
 	
 if (NOT BUILD_RELEASE_ONLY)	
 	message(STATUS "Configuring SuiteSparse Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_debug.log")
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -DCMAKE_C_COMPILER=${SuiteSparse_CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${SuiteSparse_CMAKE_CXX_COMPILER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${SuiteSparse_CMAKE_C_COMPILER} ${SuiteSparse_CMAKE_CXX_COMPILER}
         -D CMAKE_LINKER=${linker_string}
         -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
