@@ -21,27 +21,27 @@ namespace griddyn
 namespace solvers
 {
 basicSolver::basicSolver (mode_t alg) : algorithm (alg) { mode.algebraic = true; }
-basicSolver::basicSolver (const std::string &objName, mode_t alg) : solverInterface (objName), algorithm (alg)
+basicSolver::basicSolver (const std::string &objName, mode_t alg) : SolverInterface (objName), algorithm (alg)
 {
     mode.algebraic = true;
 }
 
 basicSolver::basicSolver (gridDynSimulation *gds, const solverMode &sMode)
-    : solverInterface (gds, sMode), algorithm (mode_t::gauss)
+    : SolverInterface (gds, sMode), algorithm (mode_t::gauss)
 {
     mode.algebraic = true;
 }
 
-std::unique_ptr<solverInterface> basicSolver::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> basicSolver::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<basicSolver>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<basicSolver>();
 	basicSolver::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void basicSolver::cloneTo(solverInterface *si, bool fullCopy) const
+void basicSolver::cloneTo(SolverInterface *si, bool fullCopy) const
 {
-	solverInterface::cloneTo(si, fullCopy);
+	SolverInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<basicSolver *>(si);
 	if (ai == nullptr)
 	{
@@ -93,7 +93,7 @@ double basicSolver::get (const std::string &param) const
     {
         return static_cast<double> (iterations);
     }
-    return solverInterface::get (param);
+    return SolverInterface::get (param);
 }
 void basicSolver::set (const std::string &param, const std::string &val)
 {
@@ -113,7 +113,7 @@ void basicSolver::set (const std::string &param, const std::string &val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
 }
 void basicSolver::set (const std::string &param, double val)
@@ -124,7 +124,7 @@ void basicSolver::set (const std::string &param, double val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
 }
 

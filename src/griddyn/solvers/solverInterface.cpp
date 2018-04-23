@@ -26,12 +26,12 @@ namespace griddyn
 {
 namespace solvers
 {
-static childClassFactoryArg<basicSolver, solverInterface, basicSolver::mode_t>
+static childClassFactoryArg<basicSolver, SolverInterface, basicSolver::mode_t>
   basicFactoryG (stringVec{"basic", "gauss"}, basicSolver::mode_t::gauss);
-static childClassFactoryArg<basicSolver, solverInterface, basicSolver::mode_t>
+static childClassFactoryArg<basicSolver, SolverInterface, basicSolver::mode_t>
   basicFactoryGS (stringVec{"gs", "gauss-seidel"}, basicSolver::mode_t::gauss_seidel);
 #ifdef LOAD_CVODE
-static childClassFactory<basicOdeSolver, solverInterface> basicOdeFactory (stringVec{"basicode", "euler"});
+static childClassFactory<basicOdeSolver, SolverInterface> basicOdeFactory (stringVec{"basicode", "euler"});
 #else
 // if cvode is not available this becomes the default differential solver
 static childClassFactory<basicOdeSolver, solverInterface>
@@ -40,17 +40,17 @@ static childClassFactory<basicOdeSolver, solverInterface>
 #endif
 
 }  // namespace solvers
-solverInterface::solverInterface (const std::string &objName) : helperObject (objName) {}
-solverInterface::solverInterface (gridDynSimulation *gds, const solverMode &sMode) : mode (sMode), m_gds (gds) {}
+SolverInterface::SolverInterface (const std::string &objName) : helperObject (objName) {}
+SolverInterface::SolverInterface (gridDynSimulation *gds, const solverMode &sMode) : mode (sMode), m_gds (gds) {}
 
-std::unique_ptr<solverInterface> solverInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> SolverInterface::clone(bool fullCopy) const
 {
-	auto si = std::make_unique<solverInterface>();
-	solverInterface::cloneTo(si.get(),fullCopy);
+	auto si = std::make_unique<SolverInterface>();
+	SolverInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void solverInterface::cloneTo (solverInterface *si, bool fullCopy) const
+void SolverInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
 
     si->setName (getName ());
@@ -101,25 +101,25 @@ void solverInterface::cloneTo (solverInterface *si, bool fullCopy) const
     }
 }
 
-double *solverInterface::state_data () noexcept { return nullptr; }
-double *solverInterface::deriv_data () noexcept { return nullptr; }
-double *solverInterface::type_data () noexcept { return nullptr; }
-const double *solverInterface::state_data () const noexcept { return nullptr; }
-const double *solverInterface::deriv_data () const noexcept { return nullptr; }
-const double *solverInterface::type_data () const noexcept { return nullptr; }
-void solverInterface::allocate (count_t /*stateSize*/, count_t numRoots) { rootsfound.resize (numRoots); }
-void solverInterface::initialize (coreTime t0) { solveTime = t0; }
-void solverInterface::sparseReInit (sparse_reinit_modes /*mode*/) {}
-void solverInterface::setConstraints () {}
-int solverInterface::calcIC (coreTime /*t0*/, coreTime /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
+double *SolverInterface::state_data () noexcept { return nullptr; }
+double *SolverInterface::deriv_data () noexcept { return nullptr; }
+double *SolverInterface::type_data () noexcept { return nullptr; }
+const double *SolverInterface::state_data () const noexcept { return nullptr; }
+const double *SolverInterface::deriv_data () const noexcept { return nullptr; }
+const double *SolverInterface::type_data () const noexcept { return nullptr; }
+void SolverInterface::allocate (count_t /*stateSize*/, count_t numRoots) { rootsfound.resize (numRoots); }
+void SolverInterface::initialize (coreTime t0) { solveTime = t0; }
+void SolverInterface::sparseReInit (sparse_reinit_modes /*mode*/) {}
+void SolverInterface::setConstraints () {}
+int SolverInterface::calcIC (coreTime /*t0*/, coreTime /*tstep0*/, ic_modes /*mode*/, bool /*constraints*/)
 {
     return -101;
 }
-void solverInterface::getCurrentData () {}
-void solverInterface::getRoots () {}
-void solverInterface::setRootFinding (index_t /*numRoots*/) {}
-void solverInterface::setSimulationData (const solverMode &sMode) { mode = sMode; }
-void solverInterface::setSimulationData (gridDynSimulation *gds, const solverMode &sMode)
+void SolverInterface::getCurrentData () {}
+void SolverInterface::getRoots () {}
+void SolverInterface::setRootFinding (index_t /*numRoots*/) {}
+void SolverInterface::setSimulationData (const solverMode &sMode) { mode = sMode; }
+void SolverInterface::setSimulationData (gridDynSimulation *gds, const solverMode &sMode)
 {
     mode = sMode;
     if (gds != nullptr)
@@ -128,7 +128,7 @@ void solverInterface::setSimulationData (gridDynSimulation *gds, const solverMod
     }
 }
 
-void solverInterface::setSimulationData (gridDynSimulation *gds)
+void SolverInterface::setSimulationData (gridDynSimulation *gds)
 {
     if (gds != nullptr)
     {
@@ -136,7 +136,7 @@ void solverInterface::setSimulationData (gridDynSimulation *gds)
     }
 }
 
-double solverInterface::get (const std::string &param) const
+double SolverInterface::get (const std::string &param) const
 {
     double res;
     if (param == "solvercount")
@@ -174,7 +174,7 @@ double solverInterface::get (const std::string &param) const
     return res;
 }
 
-void solverInterface::set (const std::string &param, const std::string &val)
+void SolverInterface::set (const std::string &param, const std::string &val)
 {
     if ((param == "approx") || (param == "approximation"))
     {
@@ -245,7 +245,7 @@ void solverInterface::set (const std::string &param, const std::string &val)
     }
 }
 
-void solverInterface::set (const std::string &param, double val)
+void SolverInterface::set (const std::string &param, double val)
 {
     if ((param == "pair") || (param == "pairedmode"))
     {
@@ -307,7 +307,7 @@ static const std::map<std::string, int> solverFlagMap{
   {"print_residuals",print_residuals},
 };
 
-void solverInterface::setFlag (const std::string &flag, bool val)
+void SolverInterface::setFlag (const std::string &flag, bool val)
 {
     auto flgInd = mapFind (solverFlagMap, flag, -60);
     if (flgInd > -32)
@@ -408,7 +408,7 @@ void solverInterface::setFlag (const std::string &flag, bool val)
     }
 }
 
-void solverInterface::setApproximation (const std::string &approx)
+void SolverInterface::setApproximation (const std::string &approx)
 {
     if ((approx == "normal") || (approx == "none"))
     {
@@ -467,9 +467,9 @@ void solverInterface::setApproximation (const std::string &approx)
     }
 }
 
-void solverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move (msk); }
-void solverInterface::addMaskElement (index_t newMaskElement) { maskElements.push_back (newMaskElement); }
-void solverInterface::addMaskElements (const std::vector<index_t> &newMsk)
+void SolverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move (msk); }
+void SolverInterface::addMaskElement (index_t newMaskElement) { maskElements.push_back (newMaskElement); }
+void SolverInterface::addMaskElements (const std::vector<index_t> &newMsk)
 {
     for (auto &nme : newMsk)
     {
@@ -477,7 +477,7 @@ void solverInterface::addMaskElements (const std::vector<index_t> &newMsk)
     }
 }
 
-void solverInterface::printStates (bool stateNames)
+void SolverInterface::printStates (bool stateNames)
 {
     auto *state = state_data ();
     auto *dstate = deriv_data ();
@@ -510,7 +510,7 @@ void solverInterface::printStates (bool stateNames)
     }
 }
 
-void solverInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError) const
+void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError) const
 {
     int *errflag;
     // Check if SUNDIALS function returned nullptr pointer - no memory allocated
@@ -538,10 +538,10 @@ void solverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     }
 }
 
-int solverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode) { return -101; }
-void solverInterface::logSolverStats (print_level /*logLevel*/, bool /*iconly*/) const {}
-void solverInterface::logErrorWeights (print_level /*logLevel*/) const {}
-void solverInterface::logMessage (int errorCode, const std::string &message)
+int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode) { return -101; }
+void SolverInterface::logSolverStats (print_level /*logLevel*/, bool /*iconly*/) const {}
+void SolverInterface::logErrorWeights (print_level /*logLevel*/) const {}
+void SolverInterface::logMessage (int errorCode, const std::string &message)
 {
     if ((errorCode > 0) && (printLevel == solver_print_level::s_debug_print))
     {
@@ -558,15 +558,15 @@ void solverInterface::logMessage (int errorCode, const std::string &message)
     }
 }
 
-void solverInterface::setMaxNonZeros (count_t nonZeroCount) { nnz = nonZeroCount; }
+void SolverInterface::setMaxNonZeros (count_t nonZeroCount) { nnz = nonZeroCount; }
 
 // TODO:: change this function so the defaults can be something other than sundials solvers
-std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode)
+std::unique_ptr<SolverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode)
 {
-    std::unique_ptr<solverInterface> sd = nullptr;
+    std::unique_ptr<SolverInterface> sd = nullptr;
     if (isLocal (sMode))
     {
-        sd = std::make_unique<solverInterface> (gds, sMode);
+        sd = std::make_unique<SolverInterface> (gds, sMode);
     }
     else if ((isAlgebraicOnly (sMode)) || (!isDynamic (sMode)))
     {
@@ -590,7 +590,7 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     }
     else if (isDifferentialOnly (sMode))
     {
-        sd = coreClassFactory<solverInterface>::instance ()->createObject ("differential");
+        sd = coreClassFactory<SolverInterface>::instance ()->createObject ("differential");
         sd->setSimulationData (gds, sMode);
         if (sMode.offsetIndex == dynamic_differential)
         {
@@ -601,14 +601,14 @@ std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solve
     return sd;
 }
 
-std::unique_ptr<solverInterface> makeSolver (const std::string &type, const std::string &name)
+std::unique_ptr<SolverInterface> makeSolver (const std::string &type, const std::string &name)
 {
     if (name.empty ())
     {
-        return coreClassFactory<solverInterface>::instance ()->createObject (type);
+        return coreClassFactory<SolverInterface>::instance ()->createObject (type);
     }
 
-    return coreClassFactory<solverInterface>::instance ()->createObject (type, name);
+    return coreClassFactory<SolverInterface>::instance ()->createObject (type, name);
 }
 
 }  // namespace griddyn

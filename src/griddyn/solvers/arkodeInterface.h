@@ -19,7 +19,7 @@ namespace griddyn
 {
 namespace solvers
 {
-/** @brief solverInterface interfacing to the SUNDIALS arkode solver
+/** @brief SolverInterface interfacing to the SUNDIALS arkode solver
  */
 class arkodeInterface : public sundialsInterface
 {
@@ -45,9 +45,9 @@ class arkodeInterface : public sundialsInterface
     /** @brief destructor*/
     virtual ~arkodeInterface ();
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void setMaxNonZeros (count_t nonZeroCount) override;

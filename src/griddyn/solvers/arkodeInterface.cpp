@@ -70,14 +70,14 @@ arkodeInterface::~arkodeInterface ()
     }
 }
 
-std::unique_ptr<solverInterface> arkodeInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> arkodeInterface::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<arkodeInterface>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<arkodeInterface>();
 	arkodeInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void arkodeInterface::cloneTo(solverInterface *si, bool fullCopy) const
+void arkodeInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 {
 	sundialsInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<arkodeInterface *>(si);
@@ -163,7 +163,7 @@ void arkodeInterface::set (const std::string &param, double val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
     if (checkStepUpdate)
     {

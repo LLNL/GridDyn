@@ -23,7 +23,7 @@ namespace solvers
 {
 /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
  */
-class basicSolver : public solverInterface
+class basicSolver : public SolverInterface
 {
 public:
 	/** define whether to use the gauss algorithm or the gauss-seidel algorithm*/
@@ -47,15 +47,15 @@ public:
 	explicit basicSolver(mode_t alg);
 	/** @brief default constructor*/
 	explicit basicSolver(const std::string &objName = "basic", mode_t alg = mode_t::gauss);
-	/** alternate constructor to feed to solverInterface
+	/** alternate constructor to feed to SolverInterface
 	@param[in] gds  the gridDynSimulation to link to
 	@param[in] sMode the solverMode to solve with
 	*/
 	basicSolver(gridDynSimulation *gds, const solverMode &sMode);
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
 
 	double *state_data() noexcept override;
 	double *deriv_data() noexcept override;

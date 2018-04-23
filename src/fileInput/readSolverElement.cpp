@@ -26,7 +26,7 @@ static const IgnoreListType solverIgnoreFields{"flags", "name", "type", "index"}
 
 void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri, gridDynSimulation *parentObject)
 {
-    std::shared_ptr<solverInterface> sd;
+    std::shared_ptr<SolverInterface> sd;
     std::string type = getElementField (element, "type", defMatchType);
     if (type.empty ())
     {

@@ -34,7 +34,7 @@ namespace griddyn
 
 class contingency;
 class continuationSequence;
-class solverInterface;
+class SolverInterface;
 class parameterSet;
 
 /** additional flags for the controlFlags bitset*/
@@ -133,7 +133,7 @@ class gridDynSimulation : public gridSimulation
     };
 
   protected:
-    // storageSpace for SUNDIALS solverInterface
+    // storageSpace for SUNDIALS SolverInterface
 
     std::bitset<64> controlFlags;  //!< storage container for user settable flags
     // ---------------solution mode-------------
@@ -164,7 +164,7 @@ class gridDynSimulation : public gridSimulation
     struct tolerances tols;  //!< structure of the tolerances
 
     std::string powerFlowFile;  //!<the power flow output file if any
-    std::vector<std::shared_ptr<solverInterface>> solverInterfaces;  //!< vector of solver data
+    std::vector<std::shared_ptr<SolverInterface>> solverInterfaces;  //!< vector of solver data
     std::vector<const double *>
       extraStateInformation;  //!< a vector of additional state information for solveMode pairings
     std::vector<const double *>
@@ -426,57 +426,57 @@ class gridDynSimulation : public gridSimulation
 */
     int dynAlgebraicSolve (coreTime time, const double diffState[], const double deriv[], const solverMode &sMode) noexcept;
 
-    // solverMode and solverInterface search functions
+    // solverMode and SolverInterface search functions
 
     /** @brief get the solverMode dependent on a particular index of the solver data structure
-    @param[in] index the index into the solverInterface storage array
+    @param[in] index the index into the SolverInterface storage array
     @return the solverMode named by the string or a blank one if none can be found
     */
     const solverMode &getSolverMode (index_t index) const;
 
     /** @brief get the solverMode named by a string
-    @param[in] solverType the name of the solverInterface to get the solverMode for
+    @param[in] solverType the name of the SolverInterface to get the solverMode for
     @return the solverMode named by the string or a blank one if none can be found
     */
     solverMode getSolverMode (const std::string &solverType);
 
-    /** @brief get the solverInterface referenced by a particular index into the solverInterface array
-  @param[in] index the index into the solverInterface storage array
-  @return a shared pointer to a solverInterface
+    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface array
+  @param[in] index the index into the SolverInterface storage array
+  @return a shared pointer to a SolverInterface
   */
-    std::shared_ptr<const solverInterface> getSolverInterface (index_t index) const;
+    std::shared_ptr<const SolverInterface> getSolverInterface (index_t index) const;
 
-    /** @brief get the solverInterface referenced by a particular index into the solverInterface array
-    @param[in] index the index into the solverInterface storage array
-    @return a shared pointer to a solverInterface
+    /** @brief get the SolverInterface referenced by a particular index into the SolverInterface array
+    @param[in] index the index into the SolverInterface storage array
+    @return a shared pointer to a SolverInterface
     */
-    std::shared_ptr<solverInterface> getSolverInterface (index_t index);
+    std::shared_ptr<SolverInterface> getSolverInterface (index_t index);
 
-    /** @brief get a shared pointer to a solverInterface object
+    /** @brief get a shared pointer to a SolverInterface object
     @param[in] sMode the solver mode to get the residual information for
-    @return a shared pointer to an solverInterface object
+    @return a shared pointer to an SolverInterface object
     */
-    std::shared_ptr<const solverInterface> getSolverInterface (const solverMode &sMode) const;
+    std::shared_ptr<const SolverInterface> getSolverInterface (const solverMode &sMode) const;
 
-    /** @brief get a shared pointer to a solverInterface object
-     non-const version that can create new solverInterface objects if necessary
+    /** @brief get a shared pointer to a SolverInterface object
+     non-const version that can create new SolverInterface objects if necessary
     @param[in] sMode the solver mode to get the residual information for
-    @return a shared pointer to an solverInterface object
+    @return a shared pointer to an SolverInterface object
     */
-    std::shared_ptr<solverInterface> getSolverInterface (const solverMode &sMode);
+    std::shared_ptr<SolverInterface> getSolverInterface (const solverMode &sMode);
 
-    /** @brief get the solverInterface referenced by name
-    @param[in] solverName string representing the solverInterface name,  can be customized name or a particular type
-    @return a shared pointer to a solverInterface
+    /** @brief get the SolverInterface referenced by name
+    @param[in] solverName string representing the SolverInterface name,  can be customized name or a particular type
+    @return a shared pointer to a SolverInterface
     */
-    std::shared_ptr<solverInterface> getSolverInterface (const std::string &solverName);
+    std::shared_ptr<SolverInterface> getSolverInterface (const std::string &solverName);
 
     using gridSimulation::add;  // use the add functions from gridSimulation
 
-    /** @brief  add a solverInterface object to the solverDat storage array
-    @param[in] nSolver the solverInterface to add to the storage array
+    /** @brief  add a SolverInterface object to the solverDat storage array
+    @param[in] nSolver the SolverInterface to add to the storage array
   */
-    void add (std::shared_ptr<solverInterface> nSolver);
+    void add (std::shared_ptr<SolverInterface> nSolver);
 
     /** @brief  add an action to the queue
     @param[in] actionString a string containing the action to add
@@ -531,10 +531,10 @@ class gridDynSimulation : public gridSimulation
     */
     const solverMode &getCurrentMode (const solverMode &sMode = cEmptySolverMode) const;
 
-    /** @brief makes sure the solverInterface object is ready to run solutions
+    /** @brief makes sure the SolverInterface object is ready to run solutions
     @param[in] solver pointer to a solver to make ready
     */
-    void getSolverReady (std::shared_ptr<solverInterface> &solver);
+    void getSolverReady (std::shared_ptr<SolverInterface> &solver);
     /** @brief load a stateData object with extra state information if necessary
     @param[in] sD the stateData object to load
     @param[in] sMode the solverMode of the state Data object
@@ -550,13 +550,13 @@ class gridDynSimulation : public gridSimulation
     */
     void checkOffsets (const solverMode &sMode);
 
-    /** @brief get and update a solverInterface object
+    /** @brief get and update a SolverInterface object
      the difference here is that the object may not exist, in which case it is created and loaded with recent
     information from the models
     @param[in] sMode the solverMode to get the data for
-    @return a shared pointer to the solverInterface object
+    @return a shared pointer to the SolverInterface object
     */
-    std::shared_ptr<solverInterface> updateSolver (const solverMode &sMode);
+    std::shared_ptr<SolverInterface> updateSolver (const solverMode &sMode);
 
     /** @brief get a pointer to a solverMode based on a string
     @param[in] solverType the string representing the solverMode, this can be a particular type of solverMode or the name
@@ -566,7 +566,7 @@ class gridDynSimulation : public gridSimulation
     const solverMode *getSolverModePtr (const std::string &solverType) const;
 
     /** @brief get a pointer to a solverMode dependent on a particular index of the solver data structure
-    @param[in] index the index into the solverInterface storage array
+    @param[in] index the index into the SolverInterface storage array
     @return the solverMode named by the string or a blank one if none can be found
     */
     const solverMode *getSolverModePtr (index_t index) const;
@@ -651,9 +651,9 @@ class gridDynSimulation : public gridSimulation
     /** @brief function to help with IDA solving steps
 	@param[in] retval the return code from the solver
 	@param[in] timeActual the actual time returned
-	@param[in] dynData the solverInterface currently in use
+	@param[in] dynData the SolverInterface currently in use
      */
-    void handleEarlySolverReturn (int retval, coreTime timeActual, std::shared_ptr<solverInterface> &dynData);
+    void handleEarlySolverReturn (int retval, coreTime timeActual, std::shared_ptr<SolverInterface> &dynData);
 
     /** @brief reset the dynamic simulation
      function checks for various conditions that cause specific things in the solver or simulation to be reset
@@ -666,9 +666,9 @@ class gridDynSimulation : public gridSimulation
     bool dynamicCheckAndReset (const solverMode &sMode, change_code change = change_code::no_change);
 
     int handleStateChange (const solverMode &sMode);
-    void handleRootChange (const solverMode &sMode, std::shared_ptr<solverInterface> &dynData);
+    void handleRootChange (const solverMode &sMode, std::shared_ptr<SolverInterface> &dynData);
 
-    int checkAlgebraicRoots (std::shared_ptr<solverInterface> &dynData);
+    int checkAlgebraicRoots (std::shared_ptr<SolverInterface> &dynData);
     /** @brief checks events for events needing to run and runs them then checks if a reset is needed if so it does
     so
     @param[in] cTime the time to run the events
@@ -682,13 +682,13 @@ class gridDynSimulation : public gridSimulation
     void setupDynamicDAE ();
     void setupDynamicPartitioned ();
 
-    int dynamicDAEStartupConditions (std::shared_ptr<solverInterface> &dynData, const solverMode &sMode);
-    int dynamicPartitionedStartupConditions (std::shared_ptr<solverInterface> &dynDataDiff,
-                                             std::shared_ptr<solverInterface> &dynDataAlg,
+    int dynamicDAEStartupConditions (std::shared_ptr<SolverInterface> &dynData, const solverMode &sMode);
+    int dynamicPartitionedStartupConditions (std::shared_ptr<SolverInterface> &dynDataDiff,
+                                             std::shared_ptr<SolverInterface> &dynDataAlg,
                                              const solverMode &sModeDiff,
                                              const solverMode &sModeAlg);
     int
-    runDynamicSolverStep (std::shared_ptr<solverInterface> &dynData, coreTime nextStop, coreTime &timeActual);
+    runDynamicSolverStep (std::shared_ptr<SolverInterface> &dynData, coreTime nextStop, coreTime &timeActual);
 
     static std::atomic<gridDynSimulation *>s_instance;  //!< static variable to set the master simulation instance
 };

@@ -310,6 +310,19 @@ if (LOAD_EXTRA_MODELS)
 ENDIF(LOAD_EXTRA_MODELS)
 
 # -------------------------------------------------------------
+# Enable compilation of extraSolvers?
+# -------------------------------------------------------------
+
+OPTION(LOAD_EXTRA_SOLVERS "Compile and load extraSolvers" OFF)
+# If extra solvers are used enabled try to locate the libraries
+# link against them.
+
+if (LOAD_EXTRA_SOLVERS)
+  add_subdirectory(src/extraSolvers)
+  target_link_libraries(griddyn_optional INTERFACE extraSolverLibrary)
+ENDIF(LOAD_EXTRA_SOLVERS)
+
+# -------------------------------------------------------------
 # Enable FMI support?
 # -------------------------------------------------------------
 
