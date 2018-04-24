@@ -9,15 +9,7 @@ include(escape_string)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
-
-    set(Minizip_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${c_compiler_string}")
-    set(Minizip_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${cxx_compiler_string}")
-
-    if(ENABLE_AUTOBUILD_COMPILERS)
-        unset(Minizip_CMAKE_C_COMPILER)
-        unset(Minizip_CMAKE_CXX_COMPILER)
-    endif()
-
+	
 	escape_string(zlib_includes_string ${ZLIB_ROOT_DIR})
 	
 	escape_string(binary_dir_string ${CMAKE_BINARY_DIR})
@@ -44,8 +36,7 @@ ExternalProject_Add(minizip
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
 		-DCMAKE_MODULE_PATH=${project_src_dir_string}/config/cmake
 		-DZLIB_LOCATION=${zlib_includes_string}
-        ${Minizip_CMAKE_C_COMPILER}
-        ${Minizip_CMAKE_CXX_COMPILER}
+		-DCMAKE_C_COMPILER=${c_compiler_string}
 		-DCMAKE_LINKER=${linker_string}
 		
 	INSTALL_DIR ${binary_dir_string}/libs
@@ -60,7 +51,7 @@ message(STATUS ${trigger_build_dir})
 
 if (NOT BUILD_RELEASE_ONLY)
 message(STATUS "Configuring Minizip Autobuild for debug: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_debug.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${Minizip_CMAKE_CXX_COMPILER} ${Minizip_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_debug.log
@@ -75,7 +66,7 @@ message(STATUS "Configuring Minizip Autobuild for debug: logging to ${PROJECT_BI
 endif()
 
 message(STATUS "Configuring Minizip Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_release.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev ${Minizip_CMAKE_CXX_COMPILER} ${Minizip_CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/minizip_autobuild_config_release.log

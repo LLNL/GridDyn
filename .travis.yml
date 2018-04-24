@@ -90,13 +90,13 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-precise-3.5
           packages:
             - libstdc++-6-dev
             - libiomp5
-            - clang-5.0
+            - clang-3.5
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
 
    # ------------------------------------------------
@@ -130,7 +130,7 @@ jobs:
             - libstdc++-6-dev
             - clang-5.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - CXX_STANDARD=17
 
@@ -149,11 +149,7 @@ script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost -DSUNDIALS_DIR=${CI_DEPENDENCY_DIR}/sundials"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON"
-  - export AUTOBUILD_FLAGS=''
-  - if [[ $CC == ccache* ]]; then AUTOBUILD_FLAGS+=" -DAUTOBUILD_CC=$(which ${CC#ccache})"; fi
-  - if [[ $CXX == ccache* ]]; then AUTOBUILD_FLAGS+=" -DAUTOBUILD_CXX=$(which ${CXX#ccache})"; fi
-  - if [[ "$AUTOBUILD_FLAGS" ]]; then AUTOBUILD_FLAGS+=" -DENABLE_AUTOBUILD_COMPILERS=ON"; fi
-  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${AUTOBUILD_FLAGS}
+  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
   - make -j2
 
 notifications:

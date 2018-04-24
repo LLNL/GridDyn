@@ -8,14 +8,6 @@ function (build_sundials)
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
 	
-    set(Sundials_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${c_compiler_string}")
-    set(Sundials_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${cxx_compiler_string}")
-
-    if(ENABLE_AUTOBUILD_COMPILERS)
-        unset(Sundials_CMAKE_C_COMPILER)
-        unset(Sundials_CMAKE_CXX_COMPILER)
-    endif()
-
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_sundials)
 
     #mktemp dir in build tree
@@ -58,8 +50,7 @@ ExternalProject_Add(sundials
         -DOPENMP_ENABLE=${OPENMP_FOUND}
         -DKLU_INCLUDE_DIR=${SuiteSparse_DIRECT_INCLUDE_DIR}
         -DKLU_LIBRARY_DIR=${SuiteSparse_DIRECT_LIBRARY_DIR}
-        ${Sundials_CMAKE_C_COMPILER}
-        ${Sundials_CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER=${c_compiler_string}
 		-DCMAKE_LINKER=${linker_string}
 		-DCMAKE_DEBUG_POSTFIX=d
         
@@ -71,7 +62,7 @@ ExternalProject_Add(sundials
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
 if (NOT BUILD_RELEASE_ONLY)
 	message(STATUS "Configuring Sundials Autobuild for debug: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config_debug.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev ${Sundials_CMAKE_CXX_COMPILER} ${Sundials_CMAKE_C_COMPILER}
+    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
         -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
@@ -87,7 +78,7 @@ if (NOT BUILD_RELEASE_ONLY)
 	endif()
 	
 	message(STATUS "Configuring Sundials Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config_release.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev ${Sundials_CMAKE_CXX_COMPILER} ${Sundials_CMAKE_C_COMPILER}
+	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build

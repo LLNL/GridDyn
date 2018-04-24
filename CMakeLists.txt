@@ -224,18 +224,6 @@ ENDIF(MPI_ENABLE)
 
 
 # -------------------------------------------------------------
-# Set ENV{CC} and ENV{CXX} for auto-building
-# -------------------------------------------------------------
-OPTION(ENABLE_AUTOBUILD_COMPILERS "Enable overriding the CC and CXX environment variables for autobuilding" OFF)
-set(AUTOBUILD_CC $ENV{CC} CACHE STRING "CC env var to use for autobuilding")
-set(AUTOBUILD_CXX $ENV{CXX} CACHE STRING "CXX env var to use for autobuilding")
-
-if(ENABLE_AUTOBUILD_COMPILERS)
-    set(ENV{CC} ${AUTOBUILD_CC})
-    set(ENV{CXX} ${AUTOBUILD_CXX})
-endif()
-
-# -------------------------------------------------------------
 # Find (and test) the KLU libraries
 # -------------------------------------------------------------
 
