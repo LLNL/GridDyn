@@ -9,22 +9,24 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#ifndef EquationGridDyn_h
-#define EquationGridDyn_h
+#pragma once
 
 #include "Equation_DAE_full.h"
 #include "../common/MapParam.h"
 #include <memory>
+namespace griddyn
+{
+    class gridDynSimulation;
+}
 
-class gridDynSimulation;
 
 /** @brief class that connects ParaDAE and GridDyn 
  */
 class EquationGridDyn : public Equation_DAE_full {
-  gridDynSimulation *gds;
+  griddyn::gridDynSimulation *gds;
 public:
   // EquationGridDyn specific
-  EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_);
+  EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, griddyn::gridDynSimulation *gds_, const Vector& y0_);
   static EquationGridDyn Default(const MapParam& param);
 
   // Redefinition of inherited virtual methods
@@ -33,8 +35,6 @@ public:
   virtual void init(const Real t,Vector& y);
   virtual ~EquationGridDyn(){};
 };
-
-#endif
 
 
 

@@ -9,8 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#ifndef VirtualMatrix_h
-#define VirtualMatrix_h
+#pragma once
 
 #include "../common/def.h"
 #include <iostream>
@@ -21,7 +20,7 @@ class Vector;
 
 class VirtualMatrix {
 private:
-  void operator=(const VirtualMatrix& mat){};
+    void operator=(const VirtualMatrix& /*mat*/) {};
 protected:
   int m;
   bool isfacto;
@@ -71,4 +70,3 @@ public:
   virtual void SetIJV(int n_, int nnz_, int* ival, int* jval, Real* vval) = 0;
 };
 
-#endif

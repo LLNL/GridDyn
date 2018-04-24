@@ -9,14 +9,13 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#ifndef MapParam_h
-#define MapParam_h
+#pragma once
 
 #include <map>
 #include <string>
 #include <cstring>
-#include "mpi.h"
-#include "common/def.h"
+#include <mpi.h>
+#include "def.h"
 
 class SVector;
 
@@ -34,5 +33,3 @@ public:
   SVector GetVectorParam(std::string key, SVector default_val) const;
   int GetMpiRank()const{return mpi_rank;};
 };
-
-#endif

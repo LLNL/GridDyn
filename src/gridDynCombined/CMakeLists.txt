@@ -65,7 +65,7 @@ set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
 
 
 #fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
-target_link_libraries(gridDynCombined fileInput coupling_static_lib  )
+target_link_libraries(gridDynCombined fileInput )
 
 
 if(DL_REQUIRED OR FMI_ENABLE)

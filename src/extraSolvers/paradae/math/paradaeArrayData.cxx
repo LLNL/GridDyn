@@ -16,8 +16,9 @@
 paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
 {
   J=mat;
-  rowLim=static_cast<count_t>(mat->GetM());
-  colLim=rowLim;
+  setRowLimit(static_cast<count_t>(mat->GetM()));
+  
+  setColLimit(static_cast<count_t>(mat->GetM()));
 }
 
 void paradaeArrayData::clear()
@@ -33,8 +34,8 @@ void paradaeArrayData::assign(index_t X, index_t Y, double num)
 void paradaeArrayData::setMatrix (SparseMatrix* mat)
 {
   J=mat;
-  rowLim=static_cast<count_t>(mat->GetM());
-  colLim=rowLim;
+  setRowLimit(static_cast<count_t>(mat->GetM()));
+  setColLimit(static_cast<count_t>(mat->GetM()));
 }
 
 count_t paradaeArrayData::size() const

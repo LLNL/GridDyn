@@ -17,10 +17,7 @@ set(extra_solver_headers
 	)
 
 set(paradae_headers
-   paradae/common/MapParam.h
-   paradae/common/Timer.h
    paradae/common/def.h
-   paradae/common/def_mpi.h
    paradae/equations/AllEquations.h
    paradae/equations/Equation.h
    paradae/equations/Equation_DAE.h
@@ -79,9 +76,6 @@ set(paradae_headers
    )
 
 set(paradae_sources
-   ${paradae_headers}
-   paradae/common/MapParam.cxx
-   paradae/common/Timer.cxx
    paradae/common/def.cxx
    paradae/equations/Equation.cxx
    paradae/equations/Equation_ODE.cxx
@@ -141,16 +135,23 @@ OPTION(BUILD_PARADAE_SOLVERS "enable inclusion of PARADAE solvers" OFF)
 
 if (BUILD_BRAID_SOLVER)
 find_package(Braid)
-list(APPEND extra_solver_sources ${paradae_sources} braidSolver.cpp braid_driver.cxx)
-list(APPEND extra_solver_headers ${paradae_headers} braidInterface.h braid_driver.h)
+list(APPEND extra_solver_sources ${paradae_sources} braid/braidSolver.cpp braid/braid_driver.cxx)
+list(APPEND extra_solver_headers ${paradae_headers} braid/braidInterface.h braid/braid_driver.h)
 elseif (BUILD_PARADAE_SOLVERS)
 list(APPEND extra_solver_sources ${paradae_sources})
 list(APPEND extra_solver_headers ${paradae_headers})
 endif()
 
 IF (GRIDDYN_HAVE_MPI)
-	list(APPEND extra_solver_sources )
-	list(APPEND extra_solver_headers )
+	list(APPEND extra_solver_sources 
+		paradae/common/MapParam.cxx
+		paradae/common/Timer.cxx
+		)
+	list(APPEND extra_solver_headers 
+		paradae/common/def_mpi.h
+		paradae/common/MapParam.h
+		paradae/common/Timer.h
+	)
 ELSEIF(BUILD_BRAID_SOLVER)
 	message(warning "Braid requires MPI to function")
 ENDIF()
@@ -174,10 +175,6 @@ target_link_libraries(extraSolverLibrary PUBLIC braid::braid)
 source_group("braid" REGULAR_EXPRESSION "braid/.*")
 target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
-
-IF (GRIDDYN_HAVE_MPI)
-	target_link_libraries(extraSolverLibrary PUBLIC coupling_static_lib)
-ENDIF()
 
 INSTALL(TARGETS extraSolverLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 

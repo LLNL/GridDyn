@@ -9,9 +9,9 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#include "problems/ODEProblem.h"
-#include "equations/AllEquations.h"
-#include "timeintegrators/AllTimeIntegrators.h"
+#include "ODEProblem.h"
+#include "../equations/AllEquations.h"
+#include "../timeintegrators/AllTimeIntegrators.h"
 
 #include <sstream>
 #include <iomanip>

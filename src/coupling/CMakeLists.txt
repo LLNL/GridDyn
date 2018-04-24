@@ -26,10 +26,11 @@ set(coupling_headers
 
 add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})
 IF (GRIDDYN_HAVE_MPI)
-target_compile_definitions(coupling_static_lib PUBLIC ${MPI_COMPILE_FLAGS})
-target_include_directories(coupling_static_lib PUBLIC ${MPI_INCLUDE_PATH})
-target_link_libraries(coupling_static_lib PUBLIC ${MPI_LINK_FLAGS})
+target_compile_definitions(coupling_static_lib PUBLIC ${MPI_CXX_COMPILE_FLAGS})
+target_include_directories(coupling_static_lib PUBLIC ${MPI_CXX_INCLUDE_PATH})
+target_link_libraries(coupling_static_lib PUBLIC ${MPI_CXX_LINK_FLAGS})
 ENDIF()
+target_link_libraries(coupling_static_lib PUBLIC griddyn_base)
 set_target_properties (coupling_static_lib PROPERTIES FOLDER libraries)
 INSTALL(TARGETS coupling_static_lib EXPORT griddyn-targets  DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 

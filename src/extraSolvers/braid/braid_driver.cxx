@@ -9,11 +9,11 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#include "drivers/braid_driver.h"
-#include "timeintegrators/BackwardDiff.h"
-#include "math/IVanderExt.h"
-#include "math/IVander.h"
-#include "common/Timer.h"
+#include "braid_driver.h"
+#include "../paradae/timeintegrators/BackwardDiff.h"
+#include "../paradae/math/IVanderExt.h"
+#include "../paradae/math/IVander.h"
+#include "../paradae/common/Timer.h"
 #include <iomanip>
 #include <sstream>
 #include <cmath>

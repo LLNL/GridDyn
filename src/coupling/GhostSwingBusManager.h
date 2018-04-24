@@ -13,13 +13,15 @@
 #ifndef GHOSTSWINGBUSMANAGER_H_
 #define GHOSTSWINGBUSMANAGER_H_
 
+#include "griddyn/griddyn-config.h"
 #include "GhostSwingBusMessageTypes.h"
 
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
 #include <mpi.h>
 #else
 #include <functional>
 #endif
+
 
 #include <complex>
 #include <vector>
@@ -27,6 +29,11 @@
 
 namespace griddyn
 {
+namespace mpi
+{
+    class MpiService;
+}
+
 class GhostSwingBusManager
 {
 
@@ -109,7 +116,7 @@ public:
     g_printStuff = debug;
   }
 
-#ifndef HAVE_MPI
+#ifndef GRIDDYN_HAVE_MPI
   /**
    * sets the dummy load function
    */
@@ -121,7 +128,7 @@ public:
 
 private:
   static bool g_printStuff;  //!< public boolean to change whether things are printed or not
-
+  mpi::MpiService *servicer; //!< pointer to the global MpiService
   /**
    * Singleton so prevent external construction and copying of this
    * class.
@@ -150,7 +157,7 @@ private:
   static std::shared_ptr<GhostSwingBusManager> m_pInstance;
 
   int m_numTasks = 20;
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
   int m_taskId = 0;
 
   char m_hostname[MPI_MAX_PROCESSOR_NAME];
@@ -191,7 +198,7 @@ private:
   /*
    * Did manager call MPI_Init.
    */
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
   bool m_mpiInitCalled = false;
 #endif
 };

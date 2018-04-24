@@ -12,17 +12,18 @@
 #include "EqGridDyn.h"
 #include "../math/paradaeArrayData.h"
 #include "../common/Timer.h"
-#include "gridDyn.h"
-#include "gridDynFileInput.h"
-#include "simulation/gridSimulation.h"
-#include "GhostSwingBusManager.h"
-#include "gridDynRunner.h"
+#include "griddyn/gridDynSimulation.h"
+#include "fileInput/FileInput.h"
+#include "griddyn/simulation/gridSimulation.h"
+#include "coupling/GhostSwingBus.h"
+#include "fileInput/gridDynRunner.h"
 
 #include <boost/program_options.hpp>
 #include <boost/container/small_vector.hpp>
 #include <cmath>
 
 using namespace std;
+using namespace griddyn;
 
 EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_)
 {

@@ -15,9 +15,9 @@
 #include <list>
 #include <map>
 #include "braid.h"
-#include "math/Vector.h"
-#include "math/SMultiVector.h"
-#include "problems/ODEProblem.h"
+#include "../paradae/math/Vector.h"
+#include "../paradae/math/SMultiVector.h"
+#include "../paradae/problems/ODEProblem.h"
 
 enum BDF_STRAT {nobdf, usual, usual_c, uni0, uni0_c, uni1, uni1_c, inject, inject_c, extrap, extrap_c};
 
