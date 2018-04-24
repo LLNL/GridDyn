@@ -26,7 +26,6 @@ _basic_env:
         - ubuntu-toolchain-r-test
       packages:
         - g++-6
-        - liblapack-dev
         - valgrind
 - &linux_base
   if: type != cron
@@ -57,7 +56,6 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
 
@@ -68,7 +66,6 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
@@ -84,7 +81,6 @@ jobs:
             - libstdc++-6-dev
             - libiomp5
             - clang-3.5
-            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
@@ -107,7 +103,6 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
     - <<: *daily_linux
@@ -120,7 +115,6 @@ jobs:
           packages:
             - libstdc++-6-dev
             - clang-5.0
-            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
@@ -141,7 +135,7 @@ script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON"
-  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
   - make -j2
 
 notifications:
