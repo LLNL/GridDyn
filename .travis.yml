@@ -26,6 +26,7 @@ _basic_env:
         - ubuntu-toolchain-r-test
       packages:
         - g++-6
+        - liblapack-dev
         - valgrind
 - &linux_base
   if: type != cron
@@ -56,6 +57,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
 
@@ -66,6 +68,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - CI_BOOST_VERSION=1.61.0
@@ -81,6 +84,7 @@ jobs:
             - libstdc++-6-dev
             - libiomp5
             - clang-3.5
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
@@ -103,6 +107,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
     - <<: *daily_linux
@@ -115,6 +120,7 @@ jobs:
           packages:
             - libstdc++-6-dev
             - clang-5.0
+            - liblapack-dev
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
