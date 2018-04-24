@@ -10,15 +10,7 @@ function (build_helics)
 	escape_string(linker_string ${CMAKE_LINKER})
 	
 	#message(STATUS "${CMAKE_CXX_COMPILER} to ${compiler_string}")
-
-    set(HELICS_CMAKE_C_COMPILER "-DCMAKE_C_COMPILER=${c_compiler_string}")
-    set(HELICS_CMAKE_CXX_COMPILER "-DCMAKE_CXX_COMPILER=${cxx_compiler_string}")
-
-    if(ENABLE_AUTOBUILD_COMPILERS)
-        unset(HELICS_CMAKE_C_COMPILER)
-        unset(HELICS_CMAKE_CXX_COMPILER)
-    endif()
-
+	
 	escape_string(binary_dir_string ${CMAKE_BINARY_DIR})
     set(trigger_build_dir ${binary_dir_string}/autobuild/force_helics)
 
@@ -48,8 +40,8 @@ ExternalProject_Add(helics
 		-DBUILD_HELICS_EXAMPLES=OFF
 		-DBUILD_C_SHARED_LIB=OFF
 		-DBUILD_PYTHON=OFF
-        ${HELICS_CMAKE_CXX_COMPILER}
-        ${HELICS_CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
+        -DCMAKE_C_COMPILER=${c_compiler_string}
 		-DZeroMQ_ENABLE=ON
 		-DZeroMQ_INSTALL_PATH:PATH=${zmq_target}/
         -DCMAKE_LINKER=${linker_string}
@@ -63,22 +55,22 @@ ExternalProject_Add(helics
 if (NOT BUILD_RELEASE_ONLY)
 	
 	message(STATUS "Configuring HELICS Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_debug.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D ${HELICS_CMAKE_CXX_COMPILER} ${HELICS_CMAKE_C_COMPILER} -D CMAKE_LINKER=${linker_string}
+	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compilier_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
          -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_debug.log
         )
 		
 	message(STATUS "Building HELICS debug build logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_build_debug.log")
-	execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Debug
+	 execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Debug
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/helics_autobuild_build_debug.log
         )
 
   endif()
   
-    message(STATUS "Configuring HELICS Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_release.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev ${HELICS_CMAKE_CXX_COMPILER} ${HELICS_CMAKE_C_COMPILER} -D CMAKE_LINKER=${linker_string}
+  message(STATUS "Configuring HELICS Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_release.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compilier_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
          -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_release.log
