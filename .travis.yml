@@ -90,13 +90,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-precise-3.5
           packages:
-            - libstdc++-6-dev
             - libiomp5
-            - clang-5.0
+            - clang-3.5
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
 
    # ------------------------------------------------
