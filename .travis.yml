@@ -92,6 +92,7 @@ jobs:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.5
           packages:
+            - libstdc++-6-dev
             - libiomp5
             - clang-3.5
       env:
