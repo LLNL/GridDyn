@@ -32,7 +32,6 @@ _basic_env:
   os: linux
   compiler: gcc
 - &osx_base
-  if: branch IN (master, develop)
   os: osx
   compiler: clang
 
@@ -43,25 +42,12 @@ jobs:
     - os: osx
 
   include:
-    # XCode 6.4, OS X 10.10
+    # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
-        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=64"
+        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=8"
         - HOMEBREW_NO_AUTO_UPDATE=1
-        - CI_BOOST_VERSION=1.58.0
-      osx_image: xcode6.4
-    # XCode 7.3, OS X 10.11
-    - <<: *osx_base
-      env:
-        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=73"
-        - HOMEBREW_NO_AUTO_UPDATE=1
-      osx_image: xcode7.3
-
-    # Built without errors on my clone from one of the changes made
-    # Possibly local dependencies, or removing Linux-only commands fixed it
-    # XCode 8.3, OS X 10.12
-    #- env: COMPILER=clang++ BUILD_TYPE=Debug
-    #  osx_image: xcode8.3
+      osx_image: xcode8
 
     - <<: *linux_base
       addons:
