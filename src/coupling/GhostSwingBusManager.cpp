@@ -101,7 +101,7 @@ int GhostSwingBusManager::createGridlabDInstance (string arguments)
 #ifdef GRIDDYN_HAVE_MPI
   char *arguments_c = const_cast<char*> (arguments.c_str ());
   m_initializeCompleted[taskId] = false;
-
+  auto token = servicer->getToken();
   MPI_Isend (arguments_c, static_cast<int>(arguments.size ()), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);
 
 #else
@@ -156,7 +156,7 @@ void GhostSwingBusManager::sendVoltageStep (int taskId, cvec &voltage, unsigned 
 
 
 #ifdef GRIDDYN_HAVE_MPI
-
+  auto token = servicer->getToken();
   if (!m_initializeCompleted[taskId])
     {
       MPI_Status status;
@@ -195,6 +195,7 @@ void GhostSwingBusManager::sendStopMessage (int taskId)
     }
 #ifdef GRIDDYN_HAVE_MPI
   // Blocking send to gridlabd task
+  auto token = servicer->getToken();
   MPI_Send (&m_voltSendMessage[taskId], 1, MPI_BYTE, taskId, STOPTAG, MPI_COMM_WORLD);
 #endif
 }
@@ -213,7 +214,7 @@ void GhostSwingBusManager::getCurrent (int taskId, cvec &current)
 #ifdef GRIDDYN_HAVE_MPI
   {
     MPI_Status status;
-
+    auto token = servicer->getToken();
     // Make sure async Send has completed.
     MPI_Wait (&m_mpiSendRequests[taskId], &status);
 

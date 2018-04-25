@@ -266,7 +266,7 @@ void braidSolver::initialize(coreTime t0)
     // Compute global time domain values
     double stopTime = static_cast<double> (m_gds->getStopTime());
     tStart = t0;
-    double dt = static_cast<double> (m_gds->getStepSize());
+    double dt = static_cast<double> (m_gds->getStepTime());
     int N_unistep_ = ceil((stopTime - static_cast<double> (tStart)) / dt);
 
     m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), cDaeSolverMode);
