@@ -26,8 +26,8 @@ set(coupling_headers
 
 add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})
 IF (GRIDDYN_HAVE_MPI)
-target_compile_definitions(coupling_static_lib PUBLIC ${MPI_CXX_COMPILE_FLAGS})
-target_include_directories(coupling_static_lib PUBLIC ${MPI_CXX_INCLUDE_PATH})
+target_compile_definitions(coupling_static_lib PRIVATE ${MPI_CXX_COMPILE_FLAGS})
+target_include_directories(coupling_static_lib PRIVATE ${MPI_CXX_INCLUDE_PATH})
 target_link_libraries(coupling_static_lib PUBLIC ${MPI_CXX_LINK_FLAGS})
 ENDIF()
 target_link_libraries(coupling_static_lib PUBLIC griddyn_base)

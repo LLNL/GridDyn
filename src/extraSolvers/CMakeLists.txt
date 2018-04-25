@@ -176,6 +176,11 @@ source_group("braid" REGULAR_EXPRESSION "braid/.*")
 target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
 
+IF (GRIDDYN_HAVE_MPI)
+target_compile_definitions(extraSolverLibrary PRIVATE ${MPI_CXX_COMPILE_FLAGS})
+target_include_directories(extraSolverLibrary PRIVATE ${MPI_CXX_INCLUDE_PATH})
+ENDIF(GRIDDYN_HAVE_MPI)
+
 INSTALL(TARGETS extraSolverLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES ${extra_solver_headers}

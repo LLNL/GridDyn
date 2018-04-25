@@ -17,6 +17,10 @@
 #include <cstring>
 #include <cassert>
 
+#ifdef GRIDDYN_HAVE_MPI
+#include <mpi.h>
+#endif
+
 using namespace std;
 
 namespace griddyn
@@ -98,7 +102,7 @@ int GhostSwingBusManager::createGridlabDInstance (string arguments)
   char *arguments_c = const_cast<char*> (arguments.c_str ());
   m_initializeCompleted[taskId] = false;
 
-  MPI_Isend (arguments_c, arguments.size (), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);
+  MPI_Isend (arguments_c, static_cast<int>(arguments.size ()), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);
 
 #else
   if (taskId >= m_numTasks)

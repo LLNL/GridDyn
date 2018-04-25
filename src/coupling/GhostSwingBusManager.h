@@ -16,16 +16,16 @@
 #include "griddyn/griddyn-config.h"
 #include "GhostSwingBusMessageTypes.h"
 
-#ifdef GRIDDYN_HAVE_MPI
-#include <mpi.h>
-#else
+#ifndef GRIDDYN_HAVE_MPI
 #include <functional>
 #endif
-
 
 #include <complex>
 #include <vector>
 #include <memory>
+
+
+typedef int MPI_Request;
 
 namespace griddyn
 {
@@ -160,7 +160,7 @@ private:
 #ifdef GRIDDYN_HAVE_MPI
   int m_taskId = 0;
 
-  char m_hostname[MPI_MAX_PROCESSOR_NAME];
+  char m_hostname[256];
 
   /*
    * Async send requests
