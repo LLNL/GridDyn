@@ -56,7 +56,7 @@ fmiGridDynExport.cpp
 )
 
 add_library(fmiGridDynSharedLib SHARED ${fmiShared_sources} ${fmiShared_headers})
-target_include_directories(fmiGridDynSharedLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR}
+target_include_directories(fmiGridDynSharedLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 
 set_target_properties (fmiGridDynSharedLib PROPERTIES FOLDER fmi)
 
