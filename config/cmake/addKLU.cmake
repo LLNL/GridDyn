@@ -10,9 +10,11 @@ endif()
 SHOW_VARIABLE(SuiteSparse_DIR PATH
   "KLU library directory" "${SuiteSparse_DIR}")
 
-
-OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" ON)
-		
+if(WIN32 AND NOT MSYS)
+    OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" ON)
+else()
+    OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" OFF)
+endif()
 
 if(KLU_ENABLE)
   IF(MSVC)
@@ -97,7 +99,7 @@ if(KLU_ENABLE)
         # This used to try setting SuiteSparse_DIR and autobuilding
         # On systems with a system-wide install of SuiteSparse, find package resulted in an odd mix of paths
         if(AUTOBUILD_KLU)
-          message(WARNING "unset SuiteSparse_DIR using cmake's -USuiteSparse_DIR option to autobuild SuiteSparse")
+		message(FATAL_ERROR "unset SuiteSparse_DIR using cmake's -USuiteSparse_DIR option to autobuild SuiteSparse, or ensure that SuiteSparse_DIR is set to the location of a SuiteSparse installation")
         else()
           message(WARNING "suitesparse not found")
         endif()
