@@ -227,7 +227,13 @@ ENDIF(MPI_ENABLE)
 # Find (and test) the KLU libraries
 # -------------------------------------------------------------
 
-include(addKLU)
+option(DISABLE_KLU "disable KLU (not recommended [slow], turn on AUTOBUILD_KLU if your system doesn't have SuiteSparse installed)" OFF)
+
+if(NOT DISABLE_KLU)
+    include(addKLU)
+else()
+    set(KLU_ENABLE OFF CACHE BOOL "Disable KLU support" FORCE)
+endif()
 
 # -------------------------------------------------------------
 # Sundials

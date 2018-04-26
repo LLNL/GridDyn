@@ -525,11 +525,13 @@ target_link_libraries(griddyn PUBLIC utilities)
 
 target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
 
+if(NOT DISABLE_KLU)
 IF (KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
 ELSE(KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC ${SuiteSparse_LIBRARIES})
 ENDIF(KLU_CMAKE)
+endif(DISABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})
