@@ -91,15 +91,15 @@ using parameter_t = double;
 
 /* define the basic vector types*/
 }  // namespace griddyn
-#include "boost/version.hpp"
+#include <boost/version.hpp>
 #if BOOST_VERSION / 100 % 1000 >= 58
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
-#include "boost/container/small_vector.hpp"
+#include <boost/container/small_vector.hpp>
 #pragma GCC diagnostic pop
 #else
-#include "boost/container/small_vector.hpp"
+#include <boost/container/small_vector.hpp>
 #endif
 
 namespace griddyn

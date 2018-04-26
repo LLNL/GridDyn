@@ -24,10 +24,10 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
-#include "boost/container/small_vector.hpp"
+#include <boost/container/small_vector.hpp>
 #pragma GCC diagnostic pop
 #else
-#include "boost/container/small_vector.hpp"
+#include <boost/container/small_vector.hpp>
 #endif
 
 #include <bitset>

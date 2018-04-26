@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -54,7 +54,7 @@ set(formattedfileInput_sources
 	loadGDZ.cpp
 	readXMLfile.cpp
 	)
-	
+
 set(fileInput_headers
 	readElement.h
 	readerHelper.h
@@ -76,6 +76,7 @@ set (fileInput_sources
 	)
 add_library(fileInput STATIC ${fileInput_sources})
 
+target_include_directories(fileInput SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_link_libraries(fileInput PUBLIC griddyn_optional formatInterpreter griddyn)
 source_group("Elements"  FILES  ${elementReader_sources})
 source_group("formatSpecific"  FILES  ${formattedfileInput_sources})

@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -17,7 +17,7 @@ set(fmiImport_sources
 	fmi_import/fmiVariableSet.cpp
 	fmi_import/fmiEnumDefinitions.cpp
 	fmi_import/fmiLibraryManager.cpp
-	
+
 	)
 
 set(fmiGD_sources
@@ -34,10 +34,10 @@ set(fmiGD_sources
 	fmi_models/fmiGenModel.cpp
 	fmi_models/CymeDistLoad.cpp
 	)
-	
+
 set(fmiGD_headers
 	fmi_models/fmiMESubModel.h
-	fmi_models/fmiCoSimSubModel.h 
+	fmi_models/fmiCoSimSubModel.h
 	fmi_models/fmiMELoad.h
 	fmi_models/fmiCoSimLoad.h
 	fmi_models/fmiMELoad3phase.h
@@ -52,7 +52,7 @@ set(fmiGD_headers
 	fmi_models/fmiWrapper.hpp
 	fmi_models/CymeDistLoad.h
 	fmiGDinfo.h
-	)	
+	)
 set(fmiImport_headers
 	fmi_import/fmiInfo.h
 	fmi_import/fmiImport.h
@@ -75,6 +75,8 @@ ENDIF(UNIX)
 
 add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
 
+target_include_directories(fmiGDLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+
 source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
 source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
@@ -82,9 +84,9 @@ set_target_properties (fmiGDLibrary PROPERTIES FOLDER fmi)
 
 target_link_libraries(fmiGDLibrary griddyn)
 
-INSTALL(TARGETS fmiGDLibrary 
-		EXPORT griddyn-targets 
-		DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+INSTALL(TARGETS fmiGDLibrary
+		EXPORT griddyn-targets
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		COMPONENT libraries)
 
 

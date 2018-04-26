@@ -1,7 +1,7 @@
 # This function is used to force a build on a dependant project at cmake configuration phase.
 # 
 
-function (build_suitesparse)
+function (build_suitesparse install_path)
 
 	include(escape_string)
 	
@@ -32,7 +32,7 @@ ExternalProject_Add(suitesparse
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/suitesparse
      
     CMAKE_ARGS 
-        -D${prefix_install}_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/libs
+        -D${prefix_install}_INSTALL_PREFIX=${install_path}
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
@@ -41,7 +41,7 @@ ExternalProject_Add(suitesparse
 		-DConfigPackageLocation=${PROJECT_BINARY_DIR}/cmake
         
       
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/libs
+    INSTALL_DIR ${install_path}
     )")
 
 

@@ -3,10 +3,13 @@
 # Set variables based on build environment
 if [[ "$TRAVIS" == "true" ]]; then
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install pcre
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install ccache
+        export PATH="/usr/local/opt/ccache/libexec:$PATH"
     fi
 
     export CI_DEPENDENCY_DIR=${TRAVIS_BUILD_DIR}/dependencies
+
+    WAIT_COMMAND=travis_wait
 
     # Convert commit message to lower case
     commit_msg=$(tr '[:upper:]' '[:lower:]' <<< ${TRAVIS_COMMIT_MESSAGE})
@@ -66,7 +69,7 @@ fi
 # Install Boost
 if [[ ! -d "${boost_install_path}" ]]; then
     echo "*** build boost"
-    travis_wait ./scripts/install-dependency.sh boost ${boost_version} ${boost_install_path}
+    ${WAIT_COMMAND} ./scripts/install-dependency.sh boost ${boost_version} ${boost_install_path}
     echo "*** built boost successfully"
 fi
 

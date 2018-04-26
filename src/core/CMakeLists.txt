@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -16,7 +16,7 @@ set(coreObject_headers
 	objectFactoryTemplates.hpp
 	factoryTemplates.hpp
 	coreExceptions.h
-	coreOwningPtr.hpp 
+	coreOwningPtr.hpp
 	helperObject.h
 	coreObject.h
 	nullObject.h
@@ -24,9 +24,9 @@ set(coreObject_headers
 	coreObjectTemplates.hpp
 	objectOperatorInterface.hpp
 	objectInterpreter.h
-	
+
     )
-    
+
 set(coreObject_sources
 	objectFactory.cpp
 	coreObject.cpp
@@ -37,14 +37,14 @@ set(coreObject_sources
 	propertyBuffer.cpp
 	objectInterpreter.cpp
 	)
-	
+
 	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
-	target_include_directories(coreObjects SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+    target_include_directories(coreObjects SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
 	set_target_properties (coreObjects PROPERTIES FOLDER libraries)
 	target_link_libraries(coreObjects PUBLIC utilities)
-	INSTALL(TARGETS coreObjects 
-		EXPORT griddyn-targets 
-		DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+	INSTALL(TARGETS coreObjects
+		EXPORT griddyn-targets
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		COMPONENT libraries)
 
 

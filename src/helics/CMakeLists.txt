@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2017, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -22,7 +22,7 @@ set(griddynHELICS_sources
 	helicsCoordinator.cpp
 	helicsCommunicator.cpp
 	)
-	
+
 set(griddynHELICS_headers
 	helicsLibrary.h
 	helicsSource.h
@@ -39,7 +39,7 @@ set(griddynHELICS_headers
 add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 
 set_target_properties (helicsLib PROPERTIES FOLDER libraries)
-
+target_include_directories(helicsLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(helicsLib PUBLIC ${HELICS_INCLUDE_DIR})
 message(status "helics include ${HELICS_INCLUDE_DIR}")
 message(status "helics libraries ${HELICS_STATIC_LIBRARY}")
@@ -49,7 +49,7 @@ FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test test_dir)
 IF(WIN32)
 #there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4
 # to get the regex to work and I need two for visual studio to actually print it.
-# thus to it looks like this to replace '\' with '\\' 
+# thus to it looks like this to replace '\' with '\\'
 #this will probably fail on macs yet
 
 STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})

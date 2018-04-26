@@ -32,7 +32,6 @@ _basic_env:
   os: linux
   compiler: gcc
 - &osx_base
-  if: branch IN (master, develop)
   os: osx
   compiler: clang
 
@@ -43,25 +42,12 @@ jobs:
     - os: osx
 
   include:
-    # XCode 6.4, OS X 10.10
+    # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
-        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=64"
+        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=8"
         - HOMEBREW_NO_AUTO_UPDATE=1
-        - CI_BOOST_VERSION=1.58.0
-      osx_image: xcode6.4
-    # XCode 7.3, OS X 10.11
-    - <<: *osx_base
-      env:
-        - MATRIX_EVAL="COMPILER=clang && BUILD_TYPE=Release && TRAVIS_XCODE_VERSION=73"
-        - HOMEBREW_NO_AUTO_UPDATE=1
-      osx_image: xcode7.3
-
-    # Built without errors on my clone from one of the changes made
-    # Possibly local dependencies, or removing Linux-only commands fixed it
-    # XCode 8.3, OS X 10.12
-    #- env: COMPILER=clang++ BUILD_TYPE=Debug
-    #  osx_image: xcode8.3
+      osx_image: xcode8
 
     - <<: *linux_base
       addons:
@@ -90,13 +76,13 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-precise-3.5
           packages:
             - libstdc++-6-dev
             - libiomp5
-            - clang-5.0
+            - clang-3.5
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
         - CCACHE_CPP2=yes
 
    # ------------------------------------------------
@@ -130,7 +116,7 @@ jobs:
             - libstdc++-6-dev
             - clang-5.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='ccache clang-5.0' && CXX='ccache clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - CXX_STANDARD=17
 
@@ -147,9 +133,9 @@ install:
 
 script:
   - mkdir -p build && cd build
-  - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost -DSUNDIALS_DIR=${CI_DEPENDENCY_DIR}/sundials"
-  - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON"
-  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS}
+  - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
+  - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON -DAUTOBUILD_KLU=ON"
+  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
   - make -j2
 
 notifications:

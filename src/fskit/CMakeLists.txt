@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2016, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -16,7 +16,7 @@ set(fskit_sources
   fskitRunner.cpp
   GridDynFederatedSimulator.cpp
 )
-	
+
 set (fskit_headers
 	fskitCommunicator.h
 	gridDynFederatedScheduler.h
@@ -25,12 +25,13 @@ set (fskit_headers
 	fskitRunner.h
 	GridDynFederatedSimulator.h
 	griddyn-tracer.h
-	)
+)
 
 find_package(FSKIT)
 
 add_library(fskitLibrary ${fskit_sources} ${fskit_headers})
 
+target_include_directories(fskitLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
 target_link_libraries(fskitLibrary fileInput ${FSKIT_LIBRARIES})
 

@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -18,14 +18,14 @@ set(genmodel_headers
 	genmodels/GenModel5.h
 	genmodels/GenModel5type2.h
 	genmodels/GenModel5type3.h
-	genmodels/GenModel6.h	
-	genmodels/GenModel6type2.h	
-	genmodels/GenModelGENROU.h	
+	genmodels/GenModel6.h
+	genmodels/GenModel6type2.h
+	genmodels/GenModelGENROU.h
 	genmodels/GenModel8.h
 	genmodels/GenModelInverter.h
 	genmodels/otherGenModels.h
 	)
-	
+
 set(genmodel_sources
 	${genmodel_headers}
 	genmodels/GenModel.cpp
@@ -35,9 +35,9 @@ set(genmodel_sources
 	genmodels/GenModel5.cpp
 	genmodels/GenModel5type2.cpp
 	genmodels/GenModel5type3.cpp
-	genmodels/GenModel6.cpp	
-	genmodels/GenModel6type2.cpp	
-	genmodels/GenModelGENROU.cpp	
+	genmodels/GenModel6.cpp
+	genmodels/GenModel6type2.cpp
+	genmodels/GenModelGENROU.cpp
 	genmodels/GenModel8.cpp
 	genmodels/GenModelInverter.cpp
 	)
@@ -48,7 +48,7 @@ set(generator_headers
 	generators/isocController.h
 	generators/DynamicGenerator.h
 	)
-	
+
 set (generator_sources
 	${generator_headers}
 	generators/Generator.cpp
@@ -103,7 +103,7 @@ set(exciter_sources
 	exciters/ExciterIEEEtype2.cpp
 	stabilizers/Stabilizer.cpp
 	)
-	
+
 set(gov_headers
 	Governor.h
 	governors/GovernorTypes.h
@@ -114,7 +114,7 @@ set(gov_headers
 	governors/GovernorSteamTCSR.h
 	governors/GovernorTgov1.h
 )
-	
+
 set(gov_sources
 	${gov_headers}
 	governors/Governor.cpp
@@ -163,7 +163,7 @@ set (block_sources
 	blocks/valueLimiter.cpp
 	blocks/rampLimiter.cpp
 	)
-	
+
 set(submodel_sources
 	${genmodel_sources}
 	${exciter_sources}
@@ -171,7 +171,7 @@ set(submodel_sources
 	${gridSource_sources}
 	${block_sources}
 	)
-	
+
 set(load_headers
 
 	Load.h
@@ -191,7 +191,7 @@ set(load_headers
 	loads/frequencySensitiveLoad.h
 	loads/ThreePhaseLoad.h
 	)
-	
+
 set(load_sources
 	${load_headers}
 	loads/Load.cpp
@@ -223,7 +223,7 @@ set (link_headers
 	links/longLine.h
 	links/acLine.h
 	)
-	
+
 set(link_sources
 	${link_headers}
 	links/Link.cpp
@@ -249,11 +249,11 @@ set(simulation_headers
 	simulation/gridDynActions.h
 	simulation/gridDynSimulationFileOps.h
 	)
-	
+
 set(simulation_sources
 	${simulation_headers}
     simulation/gridDynContinuation.cpp
-	simulation/gridDynSimulation.cpp	
+	simulation/gridDynSimulation.cpp
 	simulation/contingency.cpp
 	simulation/gridDynPowerFlow.cpp
 	simulation/gridDynDynamic.cpp
@@ -265,7 +265,7 @@ set(simulation_sources
 	simulation/dynamicInitialConditionRecovery.cpp
 	simulation/faultResetRecovery.cpp
 	simulation/gridDynContingency.cpp
-	
+
 	)
 
 set(solver_headers
@@ -278,7 +278,7 @@ set(solver_headers
 	solvers/basicOdeSolver.h
 	solvers/solverMode.hpp
 	)
-	
+
 set(solver_sources
 	${solver_headers}
 	solvers/idaInterface.cpp
@@ -292,9 +292,9 @@ set(solver_sources
 	solvers/sundialsInterface.cpp
 	solvers/basicOdeSolver.cpp
 	)
-	
+
 IF (LOAD_CVODE)
-	list(APPEND solver_sources 
+	list(APPEND solver_sources
 	solvers/cvodeInterface.cpp
 	solvers/cvodeInterface.h
 	)
@@ -302,11 +302,11 @@ IF (LOAD_CVODE)
 	list(APPEND solver_headers
 	solvers/cvodeInterface.h
 	)
-	
+
 ENDIF(LOAD_CVODE)
 
 IF (LOAD_ARKODE)
-	list(APPEND solver_sources 
+	list(APPEND solver_sources
 	solvers/arkodeInterface.cpp
 	solvers/arkodeInterface.h
 	)
@@ -347,11 +347,11 @@ set(primary_headers
 	primary/acBus.h
 	primary/DcBusControls.h
 	)
-	
+
 set(primary_sources
 	${primary_headers}
 	primary/gridBus.cpp
-	primary/Area.cpp		
+	primary/Area.cpp
 	primary/dcBus.cpp
 	primary/infiniteBus.cpp
 	primary/BusControls.cpp
@@ -372,7 +372,7 @@ set(event_headers
 	events/compoundEvent.h
 	events/compoundEventPlayer.h
 	)
-	
+
 set(event_sources
 	${event_headers}
 	events/Event.cpp
@@ -384,7 +384,7 @@ set(event_sources
 	events/compoundEventPlayer.cpp
 	events/reversibleEvent.cpp
 	events/parameterOperator.cpp
-	)	
+	)
 set(measurement_headers
 	measurement/gridGrabbers.h
 	measurement/objectGrabbers.h
@@ -395,7 +395,7 @@ set(measurement_headers
 	measurement/grabberSet.h
 	measurement/grabberInterpreter.hpp
 	)
-	
+
 set(measurement_sources
 	${measurement_headers}
 	measurement/Recorder.cpp
@@ -407,7 +407,7 @@ set(measurement_sources
 	measurement/compoundCondition.cpp
 	measurement/collector.cpp
 	measurement/grabberSet.cpp
-	)	
+	)
 
 set (comm_headers
 	comms/commMessage.h
@@ -417,7 +417,7 @@ set (comm_headers
 	comms/controlMessage.h
 	comms/commManager.h
 	)
-	
+
 set (comm_sources
 	${comm_headers}
 	comms/commMessage.cpp
@@ -427,7 +427,7 @@ set (comm_sources
 	comms/controlMessage.cpp
 	comms/commManager.cpp
 	)
-	
+
 set(relay_headers
 	Relay.h
 	relays/zonalRelay.h
@@ -440,7 +440,7 @@ set(relay_headers
 	relays/controlRelay.h
 	relays/pmu.h
 	)
-	
+
 set (relay_sources
 	${relay_headers}
 	relays/Relay.cpp
@@ -464,7 +464,7 @@ set (controller_headers
 	controllers/controlSystem.h
 	controllers/dispatcher.h
 	)
-	
+
 set (controller_sources
 	${controller_headers}
 	controllers/scheduler.cpp
@@ -518,16 +518,20 @@ ${block_headers}
 
 add_library(griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} ${primary_sources} ${sublibrary_files})
 
+target_include_directories(griddyn SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+
 target_link_libraries(griddyn PUBLIC coreObjects)
 target_link_libraries(griddyn PUBLIC utilities)
 
 target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
 
+if(NOT DISABLE_KLU)
 IF (KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
 ELSE(KLU_CMAKE)
 target_link_libraries(griddyn PUBLIC ${SuiteSparse_LIBRARIES})
 ENDIF(KLU_CMAKE)
+endif(DISABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})
