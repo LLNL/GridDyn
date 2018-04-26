@@ -16,14 +16,6 @@ function (build_sundials)
     
     #message(STATUS "KLU_DIR=${SuiteSparse_LIBRARY_DIR}")
 	
-    #generate false dependency project
-    IF (UNIX OR MINGW)
-		set(EXTRA_C_FLAGS -fpic)
-	ELSE()
-		if (MSVC)
-			set(EXTRA_C_FLAGS /MP)
-		endif()
-    ENDIF()
 	message(STATUS "extra c flags ${EXTRA_C_FLAGS}")
 
     set(SUNDIALS_KLU_ENABLE "-DKLU_ENABLE=ON")
@@ -54,6 +46,7 @@ ExternalProject_Add(sundials
 		-DEXAMPLES_ENABLE_CXX=OFF
         -DEXAMPLES_INSTALL=OFF
 		-DSUNDIALS_INDEX_TYPE=int32_t
+        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
         \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
         -DOPENMP_ENABLE=${OPENMP_FOUND}
 	${SUNDIALS_KLU_ENABLE}
@@ -118,11 +111,6 @@ message(STATUS "BUILD SUNDIALS with MINGW")
     
     #message(STATUS "KLU_DIR=${SuiteSparse_LIBRARY_DIR}")
 	
-    #generate false dependency project
-    IF (UNIX)
-    set(EXTRA_C_FLAGS -fpic)
-    ENDIF(UNIX)
-    
     set(SUNDIALS_KLU_ENABLE "-DKLU_ENABLE=ON")
     set(SUNDIALS_KLU_INCLUDE_DIR "-DKLU_INCLUDE_DIR=${SuiteSparse_DIRECT_INCLUDE_DIR}")
     set(SUNDIALS_KLU_LIBRARY_DIR "-DKLU_LIBRARY_DIR=${SuiteSparse_DIRECT_LIBRARY_DIR}")
@@ -153,6 +141,7 @@ ExternalProject_Add(sundials
 		-DEXAMPLES_ENABLE_CXX=OFF
         -DEXAMPLES_INSTALL=OFF
 		-DSUNDIALS_INDEX_TYPE=int32_t
+        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
         \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
         -DOPENMP_ENABLE=${OPENMP_FOUND}
 	${SUNDIALS_KLU_ENABLE}
@@ -160,7 +149,7 @@ ExternalProject_Add(sundials
 	${SUNDIALS_KLU_LIBRARY_DIR}
 	${SUNDIALS_SUITESPARSECONFIG}
         -DCMAKE_C_COMPILER=${c_compiler_string}
-		-DCMAKE_LINKER=${linker_string}
+        -DCMAKE_LINKER=${linker_string}
 		-DCMAKE_DEBUG_POSTFIX=d
         
         

@@ -31,14 +31,15 @@ ExternalProject_Add(minizip
     UPDATE_COMMAND " "
 	BINARY_DIR ${binary_dir_string}/ThirdParty/Minizip
 	 
-    CMAKE_ARGS 
+    CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${binary_dir_string}/libs
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
 		-DCMAKE_MODULE_PATH=${project_src_dir_string}/config/cmake
 		-DZLIB_LOCATION=${zlib_includes_string}
 		-DCMAKE_C_COMPILER=${c_compiler_string}
 		-DCMAKE_LINKER=${linker_string}
-		
+        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
+
 	INSTALL_DIR ${binary_dir_string}/libs
 	)")
 
