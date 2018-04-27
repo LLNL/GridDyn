@@ -94,7 +94,9 @@ if [[ "$USE_MPI" ]]; then
     if [[ ! -d "${mpi_install_path}" ]]; then
         # if mpi_implementation isn't set, then the mpi implementation requested wasn't recognized
         if [[ ! -z "${mpi_implementation}" ]]; then
+            echo "*** build ${mpi_implementation}"
             travis_wait ./scripts/install-dependency.sh ${mpi_implementation} ${mpi_version} ${mpi_install_path}
+            echo "*** built ${mpi_implementation} successfully"
         fi
     fi
 fi

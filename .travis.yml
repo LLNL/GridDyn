@@ -146,9 +146,9 @@ script:
   - make -j2
   
   # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests 
-  - if [[ "$TRAVIS_BRANCH" == *quicktest* ]]; ctest -L Quick ;fi
-  - if [[ "$TRAVIS_BRANCH" == *nightlytest* ]]; ctest -L Nightly ;fi
-  - if [[ "$TRAVIS_BRANCH" == *releasetest* ]]; ctest -L Release ;fi
+  - if [[ "$TRAVIS_BRANCH" == *quicktest* ]]; ctest -L Quick ; fi
+  - if [[ "$TRAVIS_BRANCH" == *nightlytest* ]]; ctest -L Nightly ; fi
+  - if [[ "$TRAVIS_BRANCH" == *releasetest* ]]; ctest -L Release ; fi
 
 notifications:
     email: false
