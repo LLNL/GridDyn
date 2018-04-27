@@ -20,7 +20,7 @@
 
 static std::string pFlow_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
-BOOST_AUTO_TEST_SUITE (mainexe_tests)
+BOOST_AUTO_TEST_SUITE (mainexe_tests, * boost::unit_test::label("quick"))
 
 
 BOOST_AUTO_TEST_CASE (mainexe_test1)

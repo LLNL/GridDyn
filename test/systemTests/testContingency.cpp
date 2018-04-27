@@ -21,7 +21,7 @@ using namespace griddyn;
 
 static const std::string contingency_test_directory (GRIDDYN_TEST_DIRECTORY "/contingency_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (contingency_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (contingency_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace boost::filesystem;
 BOOST_AUTO_TEST_CASE (contingency_test1)

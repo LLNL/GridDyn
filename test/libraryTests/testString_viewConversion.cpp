@@ -18,7 +18,7 @@
 #include <iostream>
 
 
-BOOST_AUTO_TEST_SUITE (strViewconversion_tests)
+BOOST_AUTO_TEST_SUITE (strViewconversion_tests, * boost::unit_test::label("quick"))
 
 
 BOOST_AUTO_TEST_CASE (simple_integer_conversions_test)

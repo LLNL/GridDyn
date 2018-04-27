@@ -22,7 +22,7 @@
 
 #define EXCITER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/exciter_tests/"
 
-BOOST_FIXTURE_TEST_SUITE(exciter_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(exciter_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
 
 BOOST_AUTO_TEST_CASE (root_exciter_test)

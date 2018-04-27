@@ -26,7 +26,7 @@
 #define BLOCK_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/block_tests/"
 
 static const std::string block_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/block_tests/");
-BOOST_FIXTURE_TEST_SUITE (block_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (block_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
 using namespace griddyn::blocks;
 BOOST_AUTO_TEST_CASE (test_gain_block)

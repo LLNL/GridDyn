@@ -21,7 +21,7 @@
 using namespace griddyn;
 #define ROOTS_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/rootFinding_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (root_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (root_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (root_test1)

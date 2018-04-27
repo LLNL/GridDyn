@@ -24,7 +24,7 @@
 
 #include "utilities/simpleQueue.hpp"
 
-BOOST_AUTO_TEST_SUITE (simple_queue_tests)
+BOOST_AUTO_TEST_SUITE (simple_queue_tests, * boost::unit_test::label("quick"))
 
 /** test basic operations */
 BOOST_AUTO_TEST_CASE (basic_tests)

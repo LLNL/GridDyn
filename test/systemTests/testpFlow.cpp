@@ -25,7 +25,7 @@
 using namespace griddyn;
 static std::string pFlow_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (pFlow_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (pFlow_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 /** test to make sure the basic power flow loads and runs*/
 BOOST_AUTO_TEST_CASE (pFlow_test1)

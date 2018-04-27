@@ -30,7 +30,7 @@
 
 #define INPUT_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/input_tests/"
 
-BOOST_FIXTURE_TEST_SUITE(input_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(input_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 

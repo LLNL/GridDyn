@@ -16,7 +16,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(operatingBoundary_tests)
+BOOST_AUTO_TEST_SUITE(operatingBoundary_tests, * boost::unit_test::label("quick"))
 
 using namespace utilities;
 BOOST_AUTO_TEST_CASE (opbound_test1)

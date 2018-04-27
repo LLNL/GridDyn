@@ -33,7 +33,7 @@ static const std::string fmu_directory (GRIDDYN_TEST_DIRECTORY "/fmi_tests/test_
 // create a test fixture that makes sure everything gets deleted properly
 
 using namespace boost::filesystem;
-BOOST_FIXTURE_TEST_SUITE (fmi_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (fmi_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (test_fmi_xml)
 {

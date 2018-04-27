@@ -20,7 +20,7 @@
 
 #define HVDC_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/dcLink_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (hvdc_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (hvdc_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 #ifdef ENABLE_EXPERIMENTAL_TEST_CASES
 BOOST_AUTO_TEST_CASE (hvdc_test1)

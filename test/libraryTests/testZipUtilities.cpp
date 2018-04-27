@@ -19,7 +19,7 @@
 
 static const std::string zip_test_directory (GRIDDYN_TEST_DIRECTORY "/zip_tests/");
 
-BOOST_AUTO_TEST_SUITE (zipUtilities_tests)
+BOOST_AUTO_TEST_SUITE (zipUtilities_tests, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (unzip_test)
 {

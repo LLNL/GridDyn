@@ -526,12 +526,30 @@ install (EXPORT griddyn-targets
 # CTest
 # -------------------------------------------------------------
 
-enable_testing()
-add_test(NAME testComponents COMMAND testComponents)
+if(TEST_ENABLE)
+    enable_testing()
+    add_test(NAME testComponents COMMAND testComponents)
+    add_test(NAME testLibrary COMMAND testLibrary)
+    add_test(NAME testSystem COMMAND testSystem)
+    add_test(NAME testExtra COMMAND testExtra)
+    set_tests_properties(testComponents testLibrary testSystem PROPERTIES LABELS "TESTLABEL;Nightly;Release")
+    set_property(TEST testExtra PROPERTY LABELS TESTLABEL Release)
 
-add_test(NAME testLibrary COMMAND testLibrary)
+    # Runs a subset of the overall tests
+    add_test(NAME testComponentsQuick COMMAND testComponents --run_test=@quick)
+    add_test(NAME testLibraryQuick COMMAND testLibrary --run_test=@quick)
+    add_test(NAME testSystemQuick COMMAND testSystem --run_test=@quick)
+    set_tests_properties(testComponentsQuick testLibraryQuick testSystemQuick PROPERTIES LABELS "TESTLABEL;Quick;CI")
 
-add_test(NAME testSystem COMMAND testSystem)
+    if(BUILD_GRIDDYN_SHARED_LIBRARY)
+        add_test(NAME testSharedLibrary COMMAND testSharedLibrary)
+        set_property(TEST testSharedLibrary PROPERTY LABELS TESTLABEL Nightly;Release)
+
+        add_test(NAME testSharedLibraryQuick COMMAND testSharedLibrary --run_test=@quick)
+        set_property(TEST testSharedLibraryQuick PROPERTY LABELS TESTLABEL Quick;CI)
+    endif()
+endif()
+
 #####################################################
 ######################### swig ######################
 #####################################################

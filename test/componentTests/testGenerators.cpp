@@ -19,7 +19,7 @@
 
 #define GEN_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/gen_tests/"
 
-BOOST_FIXTURE_TEST_SUITE(gen_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(gen_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 
