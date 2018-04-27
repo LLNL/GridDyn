@@ -54,11 +54,7 @@ ENDIF(MSVC)
 # Minimum version of Boost required for building GridDyn
 set(BOOST_MINIMUM_VERSION 1.56)
 
-IF(MPI_ENABLE)
-  find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS program_options unit_test_framework filesystem mpi system date_time REQUIRED)
-ELSE(MPI_ENABLE)
-  find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS program_options unit_test_framework filesystem system date_time REQUIRED)
-ENDIF(MPI_ENABLE)
+find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS program_options unit_test_framework filesystem system date_time REQUIRED)
 
 # Minimum version of Boost required for building test suite
 if (Boost_VERSION LESS 106100)

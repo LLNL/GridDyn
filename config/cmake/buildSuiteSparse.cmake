@@ -36,6 +36,7 @@ ExternalProject_Add(suitesparse
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
+        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		-DCMAKE_LINKER=${linker_string}
 		-DBUILD_METIS=OFF
 		-DConfigPackageLocation=${PROJECT_BINARY_DIR}/cmake

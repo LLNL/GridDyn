@@ -23,7 +23,7 @@
 #include <iostream>
 #include <random>
 
-BOOST_AUTO_TEST_SUITE (matrixData_tests)
+BOOST_AUTO_TEST_SUITE (matrixData_tests, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (test_block_compute)
 {

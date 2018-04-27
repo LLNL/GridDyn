@@ -19,7 +19,7 @@
 
 using namespace utilities::string_viewOps;
 using utilities::string_view;
-BOOST_AUTO_TEST_SUITE (strViewop_tests)
+BOOST_AUTO_TEST_SUITE (strViewop_tests, * boost::unit_test::label("quick"))
 
 
 /** test trim*/

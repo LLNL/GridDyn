@@ -20,7 +20,7 @@
 
 using namespace stringOps;
 
-BOOST_AUTO_TEST_SUITE (stringop_tests)
+BOOST_AUTO_TEST_SUITE (stringop_tests, * boost::unit_test::label("quick"))
 
 /** test conversion to lower case*/
 BOOST_AUTO_TEST_CASE (convert_to_lower_case_test)

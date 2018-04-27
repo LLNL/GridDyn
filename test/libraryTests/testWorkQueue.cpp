@@ -17,7 +17,7 @@
 #include <boost/test/unit_test.hpp>
 #include <chrono>
 #include <iostream>
-BOOST_AUTO_TEST_SUITE (workQueue_tests)
+BOOST_AUTO_TEST_SUITE (workQueue_tests, * boost::unit_test::label("quick"))
 
 // some tests only make sense if multithreading is enabled
 

@@ -23,7 +23,7 @@
 static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 using namespace griddyn;
 
-BOOST_AUTO_TEST_SUITE (readerInfo_tests)
+BOOST_AUTO_TEST_SUITE (readerInfo_tests, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (readerInfo_test_defines)
 {

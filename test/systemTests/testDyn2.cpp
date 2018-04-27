@@ -22,7 +22,7 @@
 #define DYN2_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/dyn_tests2/"
 
 using namespace griddyn;
-BOOST_FIXTURE_TEST_SUITE (dyn_tests2, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (dyn_tests2, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 
 BOOST_AUTO_TEST_CASE (dyn_test_simpleEvent)

@@ -20,7 +20,7 @@
 
 #define SOURCE_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/source_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (source_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (source_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 using namespace griddyn::sources;

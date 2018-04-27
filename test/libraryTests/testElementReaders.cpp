@@ -22,7 +22,7 @@
 
 static const std::string elementReaderTestDirectory (GRIDDYN_TEST_DIRECTORY "/element_reader_tests/");
 
-BOOST_AUTO_TEST_SUITE (elementReader_tests)
+BOOST_AUTO_TEST_SUITE (elementReader_tests, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (tinyxmlElementReader_test1)
 {

@@ -34,7 +34,7 @@ using namespace griddyn;
 
 static const std::string fault_test_directory (GRIDDYN_TEST_DIRECTORY "/fault_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (fault_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (fault_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (fault_test1)
 {

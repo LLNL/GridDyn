@@ -22,7 +22,7 @@
 using namespace griddyn;
 static std::string pFlow_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (output_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (output_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 
 BOOST_AUTO_TEST_CASE (output_test1)

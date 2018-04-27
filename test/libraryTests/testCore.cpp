@@ -26,7 +26,7 @@
 using namespace gridUnits;
 using namespace griddyn;
 
-BOOST_AUTO_TEST_SUITE (core_tests)
+BOOST_AUTO_TEST_SUITE (core_tests, * boost::unit_test::label("quick"))
 
 
 BOOST_AUTO_TEST_CASE (coreObject_test)

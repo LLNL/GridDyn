@@ -20,7 +20,7 @@
 // test case for coreObject object
 
 
-BOOST_AUTO_TEST_SUITE(condition_tests)
+BOOST_AUTO_TEST_SUITE(condition_tests, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 

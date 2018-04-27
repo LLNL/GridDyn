@@ -29,7 +29,7 @@ using namespace griddyn::loads;
 static const std::string load_test_directory (GRIDDYN_TEST_DIRECTORY "/load_tests/");
 static const std::string gridlabd_test_directory (GRIDDYN_TEST_DIRECTORY "/gridlabD_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (load_tests, gridLoadTestFixture)
+BOOST_FIXTURE_TEST_SUITE (load_tests, gridLoadTestFixture, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (basic_load_test)
 {

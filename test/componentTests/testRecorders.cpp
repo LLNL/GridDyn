@@ -26,7 +26,7 @@
 #define RECORDER_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/recorder_tests/"
 static const std::string collector_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/recorder_tests/");
 
-BOOST_FIXTURE_TEST_SUITE(recorder_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(recorder_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
 BOOST_AUTO_TEST_CASE (tsMulti_tests)
 {

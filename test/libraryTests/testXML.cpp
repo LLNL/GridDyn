@@ -29,7 +29,7 @@
 static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/");
 // create a test fixture that makes sure everything gets deleted properly
 
-BOOST_FIXTURE_TEST_SUITE(xml_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(xml_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 BOOST_AUTO_TEST_CASE (xml_test1)

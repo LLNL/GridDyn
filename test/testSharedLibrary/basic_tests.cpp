@@ -23,7 +23,7 @@ static const std::string ieee_test_directory = std::string(GRIDDYN_TEST_DIRECTOR
 static const std::string matlab_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/matlab_test_files/");
 static const std::string other_test_directory = std::string(GRIDDYN_TEST_DIRECTORY "/other_test_cases/");
 
-BOOST_AUTO_TEST_SUITE (basic_tests)
+BOOST_AUTO_TEST_SUITE (basic_tests, * boost::unit_test::label("quick"))
 
 /** just a check that in the simple case we do actually get the time back we requested*/
 BOOST_AUTO_TEST_CASE (simple_load_test) 

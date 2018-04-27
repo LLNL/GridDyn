@@ -58,6 +58,7 @@ jobs:
             - g++-6
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+        - USE_MPI=mpich
 
     - <<: *linux_base
       addons:
@@ -79,7 +80,6 @@ jobs:
             - llvm-toolchain-precise-3.5
           packages:
             - libstdc++-6-dev
-            - libiomp5
             - clang-3.5
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-3.5' && CXX='clang++-3.5'"
@@ -92,10 +92,12 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_VALGRIND=true
+        - USE_MPI=mpich
     - <<: *daily_linux
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_COVERAGE=true
+        - USE_MPI=mpich
     - <<: *daily_linux
       addons:
         apt:
@@ -105,6 +107,7 @@ jobs:
             - g++-5
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC='gcc-5' && CXX='g++-5'"
+        - USE_MPI=mpich
     - <<: *daily_linux
       compiler: clang
       addons:
@@ -119,6 +122,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - CXX_STANDARD=17
+        - USE_MPI=mpich
 
 branches:
   except:
@@ -135,8 +139,16 @@ script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON -DAUTOBUILD_KLU=ON"
+  - if [[ "$USE_MPI" ]]; then GRIDDYN_OPTION_FLAGS+=" -DMPI_ENABLE=ON" ; fi
+  - if [[ "$USE_MPI" ]]; then CC=${CI_DEPENDENCY_DIR}/mpi/bin/mpicc ; CXX=${CI_DEPENDENCY_DIR}/mpi/bin/mpic++ ; fi
   - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
   - make -j2
+  
+  # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests 
+  - export CTEST_OUTPUT_ON_FAILURE=true
+  - if [[ "$TRAVIS_BRANCH" == *quicktest* ]]; then ctest -L Quick ; fi
+  - if [[ "$TRAVIS_BRANCH" == *nightlytest* ]]; then ctest -L Nightly ; fi
+  - if [[ "$TRAVIS_BRANCH" == *releasetest* ]]; then ctest -L Release ; fi
 
 notifications:
     email: false

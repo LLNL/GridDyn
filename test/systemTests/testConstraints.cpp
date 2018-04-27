@@ -22,7 +22,7 @@ using namespace griddyn;
 
 #define CONSTRAINT_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/constraint_tests/"
 
-BOOST_FIXTURE_TEST_SUITE (constraint_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE (constraint_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 BOOST_AUTO_TEST_CASE (constraint_test1)
 {

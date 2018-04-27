@@ -23,7 +23,7 @@
 
 #define GOVERNOR_TEST_DIRECTORY GRIDDYN_TEST_DIRECTORY "/governor_tests/"
 
-BOOST_FIXTURE_TEST_SUITE(governor_tests, gridDynSimulationTestFixture)
+BOOST_FIXTURE_TEST_SUITE(governor_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
 

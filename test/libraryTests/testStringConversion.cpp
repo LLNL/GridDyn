@@ -17,7 +17,7 @@
 #include <iostream>
 #include <type_traits>
 
-BOOST_AUTO_TEST_SUITE (stringconversion_tests)
+BOOST_AUTO_TEST_SUITE (stringconversion_tests, * boost::unit_test::label("quick"))
 
 /** test conversion to lower case*/
 BOOST_AUTO_TEST_CASE (simple_integer_conversions_test)
