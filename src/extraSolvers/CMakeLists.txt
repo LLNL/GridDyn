@@ -156,10 +156,18 @@ ELSEIF(BUILD_BRAID_SOLVER)
 	message(warning "Braid requires MPI to function")
 ENDIF()
 
-add_library(extraSolverLibrary ${extra_solver_sources} ${extra_solver_headers})
+find_library(UMFPACK_LIBRARY umfpack HINTS /lib64)
+INCLUDE_DIRECTORIES(/usr/include/suitesparse)
+
+find_library(LAPACKE_LIBRARY lapacke HINTS /lib64)
+INCLUDE_DIRECTORIES(/usr/include/lapacke)
+
+add_library(extraSolverLibrary STATIC ${extra_solver_sources} ${extra_solver_headers})
 set_target_properties (extraSolverLibrary PROPERTIES FOLDER libraries)
 
 target_link_libraries(extraSolverLibrary PUBLIC griddyn)
+target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARY})
+target_link_libraries(extraSolverLibrary PUBLIC ${UMFPACK_LIBRARY})
 
 if (BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
 #source_group("paradae" FILES ${paradae_sources} ${paradae_headers})

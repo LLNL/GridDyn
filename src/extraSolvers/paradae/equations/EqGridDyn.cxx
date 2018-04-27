@@ -13,7 +13,7 @@
 #include "../math/paradaeArrayData.h"
 #include "../common/Timer.h"
 #include "griddyn/gridDynSimulation.h"
-#include "fileInput/FileInput.h"
+#include "fileInput/fileInput.h"
 #include "griddyn/simulation/gridSimulation.h"
 #include "coupling/GhostSwingBus.h"
 #include "fileInput/gridDynRunner.h"

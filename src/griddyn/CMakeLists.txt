@@ -548,6 +548,7 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
+target_include_directories(griddyn PRIVATE ${SuiteSparse_KLU_INCLUDE_DIR})
 target_include_directories(griddyn PRIVATE ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
 target_include_directories(griddyn PRIVATE ${SUNDIALS_INCLUDE_DIRS})
 #create a griddyn_config.h file for program options

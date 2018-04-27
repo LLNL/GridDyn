@@ -10,7 +10,7 @@
 * LLNS Copyright End
 */
 
-#include "griddyn/solvers/SolverInterface.h"
+#include "griddyn/solvers/solverInterface.h"
 #include "braidInterface.h"
 #include "griddyn/gridDynSimulation.h"
 #include "core/coreObjectTemplates.hpp"
@@ -36,7 +36,7 @@ using namespace std;
 //-------------------------------------------------------------------
 // paradaeArrayData definition copied from paradae/src/math/paradaeArrayData.cxx
 //-------------------------------------------------------------------
-
+/*
 paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
 {
     J = mat;
@@ -95,7 +95,7 @@ matrixElement<double> paradaeArrayData::element(index_t N) const
 {
     return { J->GetRowIndex(N), J->GetColIndex(N), J->GetValue(N) };
 }
-
+*/
 
 namespace griddyn
 {
@@ -190,14 +190,14 @@ braidSolver::braidSolver(gridDynSimulation *gds, const solverMode& sMode) : Solv
 {
 }
 
-std::unique_ptr<SolverInterface> braidSolver::clone(bool fullCopy = false) const
+std::unique_ptr<SolverInterface> braidSolver::clone(bool fullCopy) const
 {
     std::unique_ptr<SolverInterface> si = std::make_unique<braidSolver>();
     braidSolver::cloneTo(si.get(), fullCopy);
     return si;
 }
 
-void braidSolver::cloneTo(SolverInterface *si, bool fullCopy = false) const
+void braidSolver::cloneTo(SolverInterface *si, bool fullCopy) const
 {
     SolverInterface::cloneTo(si, fullCopy);
     auto bos = dynamic_cast<braidSolver *>(si);
@@ -419,7 +419,8 @@ int braidSolver::RunBraid(ODEProblem* ode, MapParam* param, Real* &timegrid, int
     braid_SetTimeGrid(core, my_TimeGrid);
     braid_SetSpatialRefine(core, my_SpatialRefine);
     braid_SetSpatialCoarsen(core, my_SpatialCoarsen);
-    braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell, my_PropagateShell);
+    //braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell, my_PropagateShell);
+    braid_SetShell(core, my_InitShell, my_CloneShell, my_FreeShell);
 
     // User-specified parameters
     int cutoff = param->GetIntParam("braid_cutoff", 100000);
