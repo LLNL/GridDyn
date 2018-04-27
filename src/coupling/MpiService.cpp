@@ -19,6 +19,9 @@ namespace griddyn
 namespace mpi
 {
 
+std::unique_ptr<MpiService> MpiService::m_pInstance;
+std::mutex MpiService::startupLock;  //!< mutex protecting the instance
+
 MpiService *MpiService::instance(int *argc, char **argv[], int threadingLevel)
 {
     std::lock_guard<std::mutex> lock(startupLock);

@@ -156,17 +156,19 @@ ELSEIF(BUILD_BRAID_SOLVER)
 	message(warning "Braid requires MPI to function")
 ENDIF()
 
-find_library(UMFPACK_LIBRARY umfpack HINTS /lib64)
-INCLUDE_DIRECTORIES(/usr/include/suitesparse)
+find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
 
-find_library(LAPACKE_LIBRARY lapacke HINTS /lib64)
-INCLUDE_DIRECTORIES(/usr/include/lapacke)
+
+find(LAPACKE)
+if (LAPACKE_FOUND)
+INCLUDE_DIRECTORIES(${LAPACKE_INCLUDE_DIRS})
+endif()
 
 add_library(extraSolverLibrary STATIC ${extra_solver_sources} ${extra_solver_headers})
 set_target_properties (extraSolverLibrary PROPERTIES FOLDER libraries)
 
 target_link_libraries(extraSolverLibrary PUBLIC griddyn)
-target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARY})
+target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARIES})
 target_link_libraries(extraSolverLibrary PUBLIC ${UMFPACK_LIBRARY})
 
 if (BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
@@ -188,6 +190,8 @@ IF (GRIDDYN_HAVE_MPI)
 target_compile_definitions(extraSolverLibrary PRIVATE ${MPI_CXX_COMPILE_FLAGS})
 target_include_directories(extraSolverLibrary PRIVATE ${MPI_CXX_INCLUDE_PATH})
 ENDIF(GRIDDYN_HAVE_MPI)
+
+target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})
 
 INSTALL(TARGETS extraSolverLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
