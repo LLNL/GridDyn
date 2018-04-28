@@ -25,9 +25,11 @@
 using namespace std;
 using namespace griddyn;
 
-EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_)
+EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_, solverMode *mode_)
+
 {
-  n=gds_->stateSize(cDaeSolverMode);
+  //n=gds_->stateSize(cDaeSolverMode);
+  n=gds_->stateSize(*mode_);
   t0=t0_;
   Tmax=Tmax_;
   N_unistep=N_unistep_;
@@ -39,6 +41,7 @@ EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSi
       abort();
     }
   gds=gds_;
+  mode = mode_;
   name="EquationGridDyn";
 
   // Matt's original code
@@ -70,7 +73,8 @@ EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSi
 void EquationGridDyn::function(const Real t, const Vector& y, const Vector& dy, const Vector& state, Vector& Fydy)
 {
   nb_calls++;
-  gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(),cDaeSolverMode);
+  //gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(),cDaeSolverMode);
+  gds->residualFunction(t,y.GetData(),dy.GetData(),Fydy.GetData(), *mode);
 }
 
 void EquationGridDyn::jacobian_ypcdy(const Real t, const Vector& y, const Vector& dy, const Vector& state, const Real cj,Matrix& J)
@@ -78,7 +82,8 @@ void EquationGridDyn::jacobian_ypcdy(const Real t, const Vector& y, const Vector
   nb_calls_jac++;
   SparseMatrix& pJ=dynamic_cast<SparseMatrix&>(J);
   paradaeArrayData a1(&pJ);
-  gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
+  //gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
+  gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,*mode);
 }
 
 void EquationGridDyn::init(const Real t,Vector& y)

@@ -32,74 +32,8 @@
 
 using namespace std;
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-// paradaeArrayData definition copied from paradae/src/math/paradaeArrayData.cxx
-//-------------------------------------------------------------------
-/*
-paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
-{
-    J = mat;
-    setRowLimit(static_cast<count_t>(mat->GetM()));
-    setColLimit(static_cast<count_t>(mat->GetM()));
-}
-
-void paradaeArrayData::clear()
-{
-    J->FillKeepingStruct(0);
-}
-
-void paradaeArrayData::assign(index_t X, index_t Y, double num)
-{
-    (*J)(X, Y) += num;
-}
-
-void paradaeArrayData::setMatrix(SparseMatrix* mat)
-{
-    J = mat;
-    setRowLimit(static_cast<count_t>(mat->GetM()));
-    setColLimit(static_cast<count_t>(mat->GetM()));
-}
-
-count_t paradaeArrayData::size() const
-{
-    return static_cast<count_t> (J->GetNNZ());
-}
-
-count_t paradaeArrayData::capacity() const
-{
-    return static_cast<count_t> (J->GetNNZ());
-}
-
-index_t paradaeArrayData::rowIndex(index_t N) const
-{
-    return J->GetRowIndex(N);
-}
-
-index_t paradaeArrayData::colIndex(index_t N) const
-{
-    return J->GetColIndex(N);
-}
-
-double paradaeArrayData::val(index_t N) const
-{
-    return J->GetValue(N);
-}
-
-double paradaeArrayData::at(index_t rowN, index_t colN) const
-{
-    return (*J)(rowN, colN);
-}
-
-matrixElement<double> paradaeArrayData::element(index_t N) const
-{
-    return { J->GetRowIndex(N), J->GetColIndex(N), J->GetValue(N) };
-}
-*/
-
 namespace griddyn
 {
-
 
 
 //-------------------------------------------------------------------
@@ -260,7 +194,7 @@ void braidSolver::initialize(coreTime t0)
     solveTime = t0;
 
     // USE  EquationGridDyn(t0_,Tmax_,N_unistep_,gds_,y0_); 
-    int n = m_gds->stateSize(cDaeSolverMode);
+    int n = m_gds->stateSize(mode);//cDaeSolverMode);
     SVector y0_(n, 0.0), y0p_(n, 0.0);
 
     // Compute global time domain values
@@ -269,9 +203,8 @@ void braidSolver::initialize(coreTime t0)
     double dt = static_cast<double> (m_gds->getStepTime());
     int N_unistep_ = ceil((stopTime - static_cast<double> (tStart)) / dt);
 
-    m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), cDaeSolverMode);
-    equation = new EquationGridDyn(static_cast<double> (tStart), stopTime, N_unistep_, m_gds, y0_);
-
+    m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode); //cDaeSolverMode);
+    equation = new EquationGridDyn(static_cast<double> (tStart), stopTime, N_unistep_, m_gds, y0_, &mode);
 }
 
 double braidSolver::get(const std::string & param) const

@@ -266,6 +266,12 @@ int gridDynSimulation::dynamicDAE (coreTime tStop)
     }
 
     nextStopTime = (std::min) (tStop, EvQ->getNextTime ());
+
+    // TODO Needs a Braid IFDEF
+    //If running Braid, integrate over entire simulation interval
+    nextStopTime = tStop;
+    //Braid ENDIF
+
     // go into the main loop
     int smStep = 0;
     while (timeReturn < tStop)
