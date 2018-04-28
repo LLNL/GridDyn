@@ -17,7 +17,7 @@
 #include "fileInput/fileInput.h"
 #include "loadFMIExportObjects.h"
 #include "core/coreOwningPtr.hpp"
-#include "griddynCombined/libraryLoader.h"
+#include "gridDynCombined/libraryLoader.h"
 #include <boost/filesystem.hpp>
 
 namespace griddyn
