@@ -20,7 +20,7 @@ set(GRIDDYN_VERSION_MAJOR 0)
 set(GRIDDYN_VERSION_MINOR 9)
 set(GRIDDYN_VERSION_PATCH 0)
 set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH})
-set(GRIDDYN_DATE 3-20-2018)
+set(GRIDDYN_DATE 4-28-2018)
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -165,7 +165,11 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 # -------------------------------------------------------------
 # Enable OpenMP support?
 # -------------------------------------------------------------
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+OPTION(OPENMP_ENABLE "Enable openMP support" OFF)
+else()
 OPTION(OPENMP_ENABLE "Enable openMP support" ON)
+endif()
 
 
 IF(OPENMP_ENABLE)

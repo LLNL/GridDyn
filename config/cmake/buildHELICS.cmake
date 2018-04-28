@@ -34,17 +34,22 @@ ExternalProject_Add(helics
      
     CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX=${binary_dir_string}/libs
-		-DBOOST_ROOT=${BOOST_ROOT}
+		-DBOOST_INSTALL_PATH=${BOOST_ROOT}
+		-DUSE_BOOST_STATIC_LIBS=${USE_BOOST_STATIC_LIBS}
 		-DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
 		-DBUILD_HELICS_TESTS=OFF
 		-DBUILD_HELICS_EXAMPLES=OFF
 		-DBUILD_C_SHARED_LIB=OFF
-		-DBUILD_PYTHON=OFF
+		-DBUILD_PYTHON_INTERFACE=OFF
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
+		-DCMAKE_LINKER=${linker_string}
+		-DENABLE_CXX_17=${ENABLE_CXX_17}
+		-DMPI_ENABLE=${GRIDDYN_HAVE_MPI}
 		-DZeroMQ_ENABLE=ON
 		-DZeroMQ_INSTALL_PATH:PATH=${zmq_target}/
-        -DCMAKE_LINKER=${linker_string}
+		-DZMQ_USE_STATIC_LIBRARY=${ZMQ_USE_STATIC_LIBRARY}
+        
         
     INSTALL_DIR ${binary_dir_string}/libs
 
@@ -55,7 +60,7 @@ ExternalProject_Add(helics
 if (NOT BUILD_RELEASE_ONLY)
 	
 	message(STATUS "Configuring HELICS Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_debug.log")
-	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compilier_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
+	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
          -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_debug.log
@@ -70,7 +75,7 @@ if (NOT BUILD_RELEASE_ONLY)
   endif()
   
   message(STATUS "Configuring HELICS Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_release.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compilier_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
+    execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
          -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config_release.log
