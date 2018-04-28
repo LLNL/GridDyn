@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(getObject_tests)
 
     auto bus2 = gridDynObject_getSubObject(obj, "bus", 8);
     gridDynObject_free(obj); //just making sure the bus object is disconnected from obj
-    BOOST_CHECK_NE(bus2, nullptr);
+    BOOST_CHECK(bus2 != nullptr);
 
     double result;
     auto status = gridDynObject_getValue(bus2, "voltage", &result);

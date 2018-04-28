@@ -19,7 +19,7 @@ before_build:
   # Make the build directory if it doesn't already exist
   - IF NOT EXIST build mkdir build
   - cd build
-  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DBUILD_RELEASE_ONLY=ON
+  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DBUILD_SHARED_FMI_LIBRARY=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DBUILD_RELEASE_ONLY=ON
   - cd ..
 
 build:
@@ -28,10 +28,15 @@ build:
   verbosity: minimal
 
 after_build:
-
+  - cd build
+  - cpack -B %cd%/installer-output
+  - cd ..
+  
 test_script:
   - cd build
   # For controlling which tests get run:
   # ctest -I <start>,<end>,<stride>,<list of test numbers>
+  - cd ..
 
 artifacts:
+  - path: build/installer-output/*.exe
