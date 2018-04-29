@@ -14,7 +14,7 @@ function (build_helics)
 	escape_string(binary_dir_string ${CMAKE_BINARY_DIR})
     set(trigger_build_dir ${binary_dir_string}/autobuild/force_helics)
 
-    get_filename_component(ZeroMQ_TARGET ${ZeroMQ_INSTALL_DIR} DIRECTORY)
+    get_filename_component(ZeroMQ_TARGET ${ZeroMQ_INSTALL_PATH} DIRECTORY)
 	escape_string(zmq_target "${ZeroMQ_TARGET}")
 	message(STATUS "BUILDING HELICS WITH ZMQ target=${ZeroMQ_TARGET}")
     #mktemp dir in build tree

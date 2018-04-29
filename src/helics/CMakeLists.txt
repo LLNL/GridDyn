@@ -40,7 +40,7 @@ add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 
 set_target_properties (helicsLib PROPERTIES FOLDER libraries)
 target_include_directories(helicsLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(helicsLib PUBLIC ${HELICS_INCLUDE_DIR})
+target_include_directories(helicsLib PUBLIC $<BUILD_INTERFACE:${HELICS_INCLUDE_DIR}>)  
 message(status "helics include ${HELICS_INCLUDE_DIR}")
 message(status "helics libraries ${HELICS_STATIC_LIBRARY}")
 

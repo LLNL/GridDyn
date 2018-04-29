@@ -9,8 +9,10 @@ SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJ
 find_file(HELICS_IMPORT_FILE HELICSImport.cmake
 	HINTS ${HELICS_INSTALL_PATH}
 		${HELICS_PATH_HINTS}
-	PATH_SUFFIXES cmake/HELICS/
-				lib/cmake/HELICS/)
+	PATH_SUFFIXES 
+			lib/cmake/HELICS/
+			cmake/HELICS/
+				)
 				
 	message(status ${HELICS_IMPORT_FILE})
 
@@ -24,10 +26,10 @@ find_file(HELICS_IMPORT_FILE HELICSImport.cmake
 				set(FORCE_HELICS_REBUILD OFF CACHE BOOL "force rebuild of helics" FORCE)
 			ENDIF(FORCE_HELICS_REBUILD)
 		ENDIF(AUTOBUILD_HELICS)
-		message(status "loading ${HELICS_IMPORT_FILE}")
+		message(STATUS "loading ${HELICS_IMPORT_FILE}")
 		include("${HELICS_IMPORT_FILE}")
 	else()
-		message(status "couldn't find ${HELICS_IMPORT_FILE}")
+		message(STATUS "couldn't find ${HELICS_IMPORT_FILE}")
 		OPTION(AUTOBUILD_HELICS "enable HELICS to automatically download and build" OFF)
 		IF(AUTOBUILD_HELICS)
 			include(buildHELICS)
