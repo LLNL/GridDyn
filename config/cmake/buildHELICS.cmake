@@ -27,7 +27,7 @@ function (build_helics)
 ExternalProject_Add(helics
     SOURCE_DIR ${binary_dir_string}/Download/helics
     GIT_REPOSITORY  https://github.com/GMLC-TDC/HELICS-src.git
-	GIT_TAG develop
+	GIT_TAG cmake_configure_update
     DOWNLOAD_COMMAND " " 
     UPDATE_COMMAND " " 
     BINARY_DIR ${binary_dir_string}/ThirdParty/helics

@@ -77,7 +77,7 @@ else()
 	set(ZMQ_DEPENDENCY ${ZeroMQ_LIBRARY})
 endif()
 
-	message(status "zmq lib ${ZMQ_DEPENDENCY}")
+	message(STATUS "zmq lib ${ZMQ_DEPENDENCY}")
 target_link_libraries(zmqInterfaceLibrary PUBLIC ${ZMQ_DEPENDENCY} )
 target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn)
 
