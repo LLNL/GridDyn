@@ -51,7 +51,7 @@ GriddynRunner::~GriddynRunner () = default;
 
 int GriddynRunner::InitializeFromString(const std::string &cmdargs)
 {
-	utilities::stringToCmdLine args(cmdargs);
+	utilities::StringToCmdLine args(cmdargs);
 	return Initialize(args.getArgCount(), args.getArgV());
 
 }

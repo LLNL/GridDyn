@@ -19,11 +19,11 @@
 namespace utilities
 {
 /** class used to convert a string into command line arguments*/
-class stringToCmdLine
+class StringToCmdLine
 {
 public:
 	/** construct from a string*/
-	stringToCmdLine(const std::string &cmdString);
+	StringToCmdLine(const std::string &cmdString);
 	/** load a string
 	@param cmdString a single string containing command line arguments
 	*/
@@ -42,3 +42,4 @@ private:
 };
 } // namespace utilities
 #endif
+

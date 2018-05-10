@@ -62,7 +62,7 @@ OPTION(BUILD_OCTAVE_INTERFACE "Build Octave extension" OFF)
 OPTION(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 OPTION(DISABLE_SWIG "Disable the use of swig to generate interface code and use repo code" OFF)
-OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
+OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of GridDyn binary shared library" OFF)
 
 IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_SHARED_FMI_LIBRARY OR BUILD_PYTHON_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE OR BUILD_MATLAB_INTERFACE)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -393,7 +393,6 @@ endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 
-
 # -------------------------------------------------------------
 # Enable HELICS executable
 # -------------------------------------------------------------
@@ -578,7 +577,9 @@ endif()
 # -------------------------------------------------------------
 # CPack
 # -------------------------------------------------------------
+OPTION(ENABLE_PACKAGE_BUILD "Add projects for making packages and installers for HELICS" OFF)
 
+IF(ENABLE_PACKAGE_BUILD)
 set(CPACK_PACKAGE_NAME "GridDyn")
 set(CPACK_PACKAGE_VENDOR "Lawrence Livermore National Security LLC")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GridDyn Installer")
@@ -634,4 +635,4 @@ set(CPACK_SOURCE_IGNORE_FILES  "/Build*/;/build*/;/.git/")
 
 #THIS LINE MUST BE LAST
 include(CPack)
-
+ENDIF(ENABLE_PACKAGE_BUILD)

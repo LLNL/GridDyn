@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE (splitLineBracket_tests)
 
 BOOST_AUTO_TEST_CASE (string2cmdLine_test)
 {
-    utilities::stringToCmdLine cmdargs ("--arg1 --arg2=bob --arg3=\"string1 string2\" --arg3=\"\"bob\"\"");
+    utilities::StringToCmdLine cmdargs ("--arg1 --arg2=bob --arg3=\"string1 string2\" --arg3=\"\"bob\"\"");
 
     BOOST_CHECK_EQUAL (cmdargs.getArgCount (), 5);
 

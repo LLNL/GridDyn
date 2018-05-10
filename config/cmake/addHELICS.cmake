@@ -1,8 +1,7 @@
 
 IF (MSVC)
 	set(HELICS_PATH_HINTS
-		C:/local/helics_1_0_3
-		C:/local/helics_1_0_0)
+		C:/local/helics_1_1_0)
 ENDIF(MSVC)
 
 SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")

@@ -89,19 +89,37 @@ bool jsonReaderElement::loadFile (const std::string &fileName)
 
 bool jsonReaderElement::parse (const std::string &inputString)
 {
-    doc = std::make_shared<Json_gd::Value> ();
+    std::ifstream file(inputString);
+    doc = std::make_shared<Json_gd::Value>();
 
-    Json_gd::Reader stringReader;
-    bool ok = stringReader.parse (inputString, *doc.get (), false);
-    if (ok)
+    if (file.is_open())
     {
-        current = std::make_shared<jsonElement> (*doc, "string");
-        return true;
+        Json_gd::CharReaderBuilder rbuilder;
+        std::string errs;
+        bool ok = Json_gd::parseFromStream(rbuilder, file, doc.get(), &errs);
+        if (!ok)
+        {
+            std::cerr << "Read error in stream::" << errs << '\n';
+            doc = nullptr;
+            clear();
+            return false;
+        }
     }
-        std::cerr << "Read error in stream::" << stringReader.getFormattedErrorMessages () << '\n';
-        doc = nullptr;
-        clear ();
-        return false;
+    else
+    {
+        Json_gd::CharReaderBuilder rbuilder;
+        std::string errs;
+        std::istringstream jstring(inputString);
+        bool ok = Json_gd::parseFromStream(rbuilder, jstring, doc.get(), &errs);
+        if (!ok)
+        {
+            std::cerr << "Read error in stream::" << errs << '\n';
+            doc = nullptr;
+            clear();
+            return false;
+        }
+    }
+    return true;
 }
 
 std::string jsonReaderElement::getName () const { return current->name; }
