@@ -5,16 +5,19 @@ IF (MSVC)
 		C:/local/helics_1_0_0)
 ENDIF(MSVC)
 
+include(GNUInstallDirs)
+
 SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
 find_file(HELICS_IMPORT_FILE HELICSImport.cmake
 	HINTS ${HELICS_INSTALL_PATH}
 		${HELICS_PATH_HINTS}
-	PATH_SUFFIXES 
+	PATH_SUFFIXES
+            ${CMAKE_INSTALL_LIBDIR}/cmake/HELICS/
 			lib/cmake/HELICS/
 			cmake/HELICS/
 				)
 				
-	message(status ${HELICS_IMPORT_FILE})
+	message(STATUS ${HELICS_IMPORT_FILE})
 
 	if (EXISTS ${HELICS_IMPORT_FILE})
 		IF (AUTOBUILD_HELICS)
@@ -34,6 +37,6 @@ find_file(HELICS_IMPORT_FILE HELICSImport.cmake
 		IF(AUTOBUILD_HELICS)
 			include(buildHELICS)
 			build_helics()
-			include(${HELICS_INSTALL_PATH}/lib/cmake/HELICS/HELICSImport.cmake)
+            include(${HELICS_INSTALL_PATH}/${CMAKE_INSTALL_LIBDIR}/cmake/HELICS/HELICSImport.cmake)
 		ENDIF(AUTOBUILD_HELICS)
 	endif()
