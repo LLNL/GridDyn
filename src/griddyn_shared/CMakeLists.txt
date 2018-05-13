@@ -29,18 +29,22 @@ griddyn_exportObjectMathFunctions.cpp
 griddyn_exportEvents.cpp
 )
 
+include(GenerateExportHeader)
+
 add_library(griddyn_shared_lib SHARED ${griddyn_lib_sources} ${griddyn_lib_public_headers} ${griddyn_lib_internal_headers})
-target_compile_definitions(griddyn_shared_lib PRIVATE -DBUILD_DLL=1)
+
+set_target_properties(griddyn_shared_lib PROPERTIES CXX_VISIBILITY_PRESET hidden C_VISIBILITY_PRESET hidden)
+
+generate_export_header(griddyn_shared_lib
+	BASE_NAME griddyn
+    EXPORT_FILE_NAME griddyn_shared_export.h)
+	
+target_include_directories(griddyn_shared_lib PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 
 set_target_properties (griddyn_shared_lib PROPERTIES FOLDER interfaces)
 
-IF(UNIX)
-  target_compile_options(griddyn_shared_lib PRIVATE -fvisibility=hidden)
-ELSE(UNIX)
-  IF(MINGW)
- target_compile_options(griddyn_shared_lib PRIVATE -fvisibility=hidden)
-  ENDIF(MINGW)
-ENDIF(UNIX)
 
 target_link_libraries(griddyn_shared_lib PRIVATE gridDynCombined)
 if (UNIX OR MINGW)
@@ -54,9 +58,17 @@ INSTALL(TARGETS griddyn_shared_lib EXPORT griddyn-targets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-# Todo when minimum CMake version becomes 3.6: re-add EXCLUDE_FROM_ALL to these two install FILES commands for griddyn_shared_lib
-INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.6)
+	INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime EXCLUDE_FROM_ALL)
+INSTALL(FILES $<TARGET_LINKER_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries EXCLUDE_FROM_ALL)
+ELSE()
+	INSTALL(FILES $<TARGET_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 INSTALL(FILES $<TARGET_LINKER_FILE:griddyn_shared_lib> DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+ENDIF()
+
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/griddyn_shared_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/shared COMPONENT headers)
+
 
 INSTALL(FILES ${griddyn_lib_public_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/shared

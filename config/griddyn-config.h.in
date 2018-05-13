@@ -45,7 +45,7 @@
 
 #cmakedefine DIME_ENABLE
 
-#cmakedefine GRIDDYN_BOOST_STATIC
+#cmakedefine BOOST_STATIC
 
 #define GRIDYN_BOOST_VERSION_LEVEL @BOOST_VERSION_LEVEL@
 

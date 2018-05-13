@@ -67,14 +67,11 @@ INSTALL(TARGETS dimeLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_L
 
 ENDIF(DIME_ENABLE)
 
-target_include_directories(zmqInterfaceLibrary PRIVATE ${ZeroMQ_INCLUDE_DIR})
-
-
 if (ZMQ_USE_STATIC_LIBRARY)
-	set(ZMQ_DEPENDENCY ${ZeroMQ_STATIC_LIBRARY})
+	set(ZMQ_DEPENDENCY libzmq-static)
 	target_add_definitions(zmqInterfaceLibrary PUBLIC -DZMQ_STATIC)
 else()
-	set(ZMQ_DEPENDENCY ${ZeroMQ_LIBRARY})
+	set(ZMQ_DEPENDENCY libzmq)
 endif()
 
 	message(STATUS "zmq lib ${ZMQ_DEPENDENCY}")

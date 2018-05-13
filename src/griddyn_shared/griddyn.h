@@ -22,9 +22,9 @@
 
 #if defined _WIN32 || defined __CYGWIN__
 /* Note: both gcc & MSVC on Windows support this syntax. */
-#define GRIDDYN_Export __declspec(dllimport)
+#define GRIDDYN_EXPORT __declspec(dllimport)
 #else
-#define GRIDDYN_Export
+#define GRIDDYN_EXPORT
 #endif  // defined _WIN32 || defined __CYGWIN__
 #include "griddyn_export.h"
 #include "griddyn_export_advanced.h"

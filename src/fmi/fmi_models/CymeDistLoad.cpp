@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
-#include "json/json.h"
+#include "json/jsoncpp.h"
 #include <fstream>
 #include <iostream>
 

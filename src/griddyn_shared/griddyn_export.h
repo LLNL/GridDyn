@@ -21,30 +21,15 @@
 #ifndef GRIDDYN_EXPORT_C_H_
 #define GRIDDYN_EXPORT_C_H_
 
+#include "griddyn_shared_export.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdlib.h>
 
-/*
-Export GRIDDYN API functions on Windows and under GCC.
-If custom linking is desired then the GRIDDYN_Export must be
-defined before including this file. For instance,
-it may be set to __declspec(dllimport).
-*/
-#if !defined(GRIDDYN_Export) 
-#if defined _WIN32 || defined __CYGWIN__
-#if defined(BUILD_DLL)
-#define GRIDDYN_Export __declspec(dllexport)
-#else // BUILD_DLL
-#define GRIDDYN_Export __declspec(dllimport)
-#endif //BUILD_DLL
-#else // defined _WIN32 || defined __CYGWIN__ 
-// Alwasy defined on Linux
-#define GRIDDYN_Export __attribute__ ((visibility ("default")))
-#endif // defined _WIN32 || defined __CYGWIN__
-#endif ////defined(GRIDDYN_Export)
+
 
 
 /** typedef a gridDynObject to a void * to represent an object in GridDyn*/
@@ -100,33 +85,33 @@ exist even if the gridDynObject representing it is freed
 @param[in] objectType  the specific type of the component to create
 @return a gridDynObject that represents the newly created object
 */
-GRIDDYN_Export gridDynObject gridDynObject_create (const char *componentType, const char *objectType);
+GRIDDYN_EXPORT gridDynObject gridDynObject_create (const char *componentType, const char *objectType);
 
 /** clone an object from an existing object
 @details a new object is constructed that is a clone of the original object
 @param[in] obj the original object
 @return a gridDynObject that represents the newly created object
 */
-GRIDDYN_Export gridDynObject gridDynObject_clone(gridDynObject const obj);
+GRIDDYN_EXPORT gridDynObject gridDynObject_clone(gridDynObject const obj);
 
 /** free the object,  which may result in object destruction if it is not being used elsewhere
 @param[in] obj the object to free
 */
-GRIDDYN_Export void gridDynObject_free (gridDynObject obj);
+GRIDDYN_EXPORT void gridDynObject_free (gridDynObject obj);
 
 /** add an object to another in the hierarchy
 @param[in] parentObject the object to which another is being added
 @param[in] objectToAdd  the object being added
 @return 0 if successful, non-zero otherwise
 */
-GRIDDYN_Export griddyn_status gridDynObject_add (gridDynObject parentObject, gridDynObject objectToAdd);
+GRIDDYN_EXPORT griddyn_status gridDynObject_add (gridDynObject parentObject, gridDynObject objectToAdd);
 
 /** remove an object from another in the hierarchy
 @param[in] parentObject the object to which another is being added
 @param[in] objectToRemove  the object being removed
 @return 0 if successful, non-zero otherwise success is defined as the object not being present in the parent
 */
-GRIDDYN_Export griddyn_status gridDynObject_remove (gridDynObject parentObject, gridDynObject objectToRemove);
+GRIDDYN_EXPORT griddyn_status gridDynObject_remove (gridDynObject parentObject, gridDynObject objectToRemove);
 
 /** set a string parameter in an object
 @param[in] obj the object to set the property of
@@ -134,7 +119,7 @@ GRIDDYN_Export griddyn_status gridDynObject_remove (gridDynObject parentObject, 
 @param[in] value the desired value of the parameter
 @return 0 on success, negative otherwise
 */
-GRIDDYN_Export griddyn_status gridDynObject_setString (gridDynObject obj, const char *parameter, const char *value);
+GRIDDYN_EXPORT griddyn_status gridDynObject_setString (gridDynObject obj, const char *parameter, const char *value);
 
 /** set a value parameter in an object
 @details the units are either not needed or assumed to be the default units often pu
@@ -143,7 +128,7 @@ GRIDDYN_Export griddyn_status gridDynObject_setString (gridDynObject obj, const 
 @param[in] value the desired value of the parameter
 @return 0 on success, negative otherwise
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynObject_setValue(gridDynObject obj, const char *parameter, double value);
 
 /** set a value parameter in an object
@@ -153,7 +138,7 @@ gridDynObject_setValue(gridDynObject obj, const char *parameter, double value);
 @param[in] units a description of the units which correspond to the parameter
 @return 0 on success, negative otherwise
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynObject_setValueUnits (gridDynObject obj, const char *parameter, double value, const char *units);
 
 /** set a string parameter in an object
@@ -162,7 +147,7 @@ gridDynObject_setValueUnits (gridDynObject obj, const char *parameter, double va
 @param[in] value the desired value of the parameter
 @return 0 on success, negative otherwise
 */
-GRIDDYN_Export griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int val);
+GRIDDYN_EXPORT griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int val);
 
 /** query the value of a string in an object
 @param[in] obj the object to query
@@ -170,14 +155,14 @@ GRIDDYN_Export griddyn_status gridDynObject_setFlag (gridDynObject obj, const ch
 @param[out] value the storage location for the string
 @param[in] N the max size of the string
 @return the size of the string returned in value*/
-GRIDDYN_Export griddyn_status gridDynObject_getString (const gridDynObject obj, const char *parameter, char *value, int N);
+GRIDDYN_EXPORT griddyn_status gridDynObject_getString (const gridDynObject obj, const char *parameter, char *value, int N);
 
 /** query the value of an object parameter
 @param[in] obj the object to query
 @param[in] parameter the name of the parameter to query
 @param[out] result the location to store the result
 @return 0 if the value is valid or griddyn_unknown_parameter Otherwise*/
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynObject_getValue (const gridDynObject obj, const char *parameter, double *result);
 
 /** query the value of an object parameter
@@ -186,7 +171,7 @@ gridDynObject_getValue (const gridDynObject obj, const char *parameter, double *
 @param[in] units the desired output units
 @param[out] result the location to store the result
 @return 0 if the value is valid or griddyn_unknown_parameter Otherwise*/
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynObject_getValueUnits(const gridDynObject obj, const char *parameter, const char *units, double *result);
 
 /** query the value of an object parameter
@@ -194,13 +179,13 @@ gridDynObject_getValueUnits(const gridDynObject obj, const char *parameter, cons
 @param[in] parameter the name of the parameter to query
 @param[out] result the value of the flag 0 if false otherwise(usually 1) if true
 @return 0 if the flag is found griddyn_unknown_parameter Otherwise*/
-GRIDDYN_Export griddyn_status gridDynObject_getFlag (const gridDynObject obj, const char *flag, int *result);
+GRIDDYN_EXPORT griddyn_status gridDynObject_getFlag (const gridDynObject obj, const char *flag, int *result);
 
 /** find an object within another object
 @param[in] obj the object as the basis of the search
 @param[in] objectToFind a string describing the object
 @return a gridDynObject with the found object,  nullptr if not found*/
-GRIDDYN_Export gridDynObject gridDynObject_find (const gridDynObject obj, const char *objectToFind);
+GRIDDYN_EXPORT gridDynObject gridDynObject_find (const gridDynObject obj, const char *objectToFind);
 
 /** get a subobject of a particular object by type and index
 @param[in] obj the object to use as the basis for the search
@@ -208,7 +193,7 @@ GRIDDYN_Export gridDynObject gridDynObject_find (const gridDynObject obj, const 
 @param[in] N  the index of the object to retrieve
 @return a gridDynObject as indicated by the index or a nullptr
 */
-GRIDDYN_Export gridDynObject gridDynObject_getSubObject (const gridDynObject obj, const char *componentType, int N);
+GRIDDYN_EXPORT gridDynObject gridDynObject_getSubObject (const gridDynObject obj, const char *componentType, int N);
 
 /** get a subobject of a particular object by type and index
 @param[in] obj the object to use as the basis for the search
@@ -216,17 +201,17 @@ GRIDDYN_Export gridDynObject gridDynObject_getSubObject (const gridDynObject obj
 @param[in] ID  the user identifier for the object
 @return a gridDynObject as indicated by the user ID
 */
-GRIDDYN_Export gridDynObject gridDynObject_findByUserId (const gridDynObject obj, const char *componentType, int ID);
+GRIDDYN_EXPORT gridDynObject gridDynObject_findByUserId (const gridDynObject obj, const char *componentType, int ID);
 /** get the parent of an object
 @param[in] obj the object to get the parent of
 @return the parent of the object in question or a nullptr if the object is a root object
 */
-GRIDDYN_Export gridDynObject gridDynObject_getParent (const gridDynObject obj);
+GRIDDYN_EXPORT gridDynObject gridDynObject_getParent (const gridDynObject obj);
 /** get a const char * to a string representing the componentType of the object
 @param[in] obj the object to query
 @return a pointer to a type string.  The memory is managed internally and does not need to be freed the pointers
 are to a fixed set of strings and should not be modified*/
-GRIDDYN_Export const char *gridDynObject_getType (const gridDynObject obj);
+GRIDDYN_EXPORT const char *gridDynObject_getType (const gridDynObject obj);
 
 // functions for the gridDyn Simulation
 /** create a new simulation object
@@ -234,19 +219,19 @@ GRIDDYN_Export const char *gridDynObject_getType (const gridDynObject obj);
 @param[in] name  the name of the simulation to create
 @return a reference to the simulation object
 */
-GRIDDYN_Export gridDynSimReference gridDynSimulation_create (const char *type, const char *name);
+GRIDDYN_EXPORT gridDynSimReference gridDynSimulation_create (const char *type, const char *name);
 
 /** free the simulation memory
 @param[in] sim the simulation runner reference object
 */
-GRIDDYN_Export void gridDynSimulation_free (gridDynSimReference sim);
+GRIDDYN_EXPORT void gridDynSimulation_free (gridDynSimReference sim);
 
 /** free the simulation memory
 @param[in] sim the simulation runner reference object
 @param[in] initializationString
 @return error code if not successful
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynSimulation_initializeFromString (gridDynSimReference sim, const char *initializationString);
 
 /** free the simulation memory
@@ -255,7 +240,7 @@ gridDynSimulation_initializeFromString (gridDynSimReference sim, const char *ini
 @param[in] argv the argument values from the command line arguments
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynSimulation_initializeFromArgs (gridDynSimReference sim, int argc, char * argv[], int ignoreUnrecognized);
 
 /** load a simulation file or add a file to the existing simulation
@@ -264,7 +249,7 @@ gridDynSimulation_initializeFromArgs (gridDynSimReference sim, int argc, char * 
 @param[in] fileType the type of the file set to null string to enable automatic detection based on the extension
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynSimulation_loadfile (gridDynSimReference sim, const char *fileName, const char *fileType);
 
 /** add a command to the GridDyn Command queue
@@ -274,57 +259,57 @@ queue
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_addCommand (gridDynSimReference sim, const char *command);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_addCommand (gridDynSimReference sim, const char *command);
 
 /** initialize the simulation so it is ready to execute a power flow
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_powerflowInitialize (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_powerflowInitialize (gridDynSimReference sim);
 
 /** run a power flow calculation on the current simulation
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_powerflow (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_powerflow (gridDynSimReference sim);
 
 /** initialize the simulation so it is ready to execute a dynamic simulation
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_dynamicInitialize (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_dynamicInitialize (gridDynSimReference sim);
 
 /** reset the simulation to time 0
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_reset (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_reset (gridDynSimReference sim);
 
 /** get the current simulation time
 @param sim the simulation runner reference object
 @return the simulation time in seconds
 */
-GRIDDYN_Export double gridDynSimulation_getCurrentTime(gridDynSimReference sim);
+GRIDDYN_EXPORT double gridDynSimulation_getCurrentTime(gridDynSimReference sim);
 /** run the command queue of the simulation
 @details if the command queue is empty it will try to run a dynamic simulation if the models are capable of that
 otherwise it runs a power flow and stops
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_run (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_run (gridDynSimReference sim);
 
 /** run the simulation to a particular time
 @param[in] sim the simulation runner reference object
 @param[in] runToTime the time to execute the simulator to
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_runTo (gridDynSimReference sim, double runToTime);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_runTo (gridDynSimReference sim, double runToTime);
 
 /** step the simulator one event step
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_Step (gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_Step (gridDynSimReference sim);
 
 /** run the command queue of the simulation asynchronously
 @details if the command queue is empty it will try to run a dynamic simulation if the models are capable of that
@@ -332,30 +317,30 @@ otherwise it runs a power flow and stops this function will return immediately
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_runAsync(gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_runAsync(gridDynSimReference sim);
 
 /** run the simulation to a particular time but return and run asynchronously
 @param[in] sim the simulation runner reference object
 @param[in] runToTime the time to execute the simulator to
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_runToAsync(gridDynSimReference sim, double runToTime);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_runToAsync(gridDynSimReference sim, double runToTime);
 
 /** step the simulator one event step
 @param[in] sim the simulation runner reference object
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_StepAsync(gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_StepAsync(gridDynSimReference sim);
 /** query the status of a simulation
 @param[in] sim the simulation runner reference object
 @return will return GRIDDYN_PENDING if an Async operation is ongoing, otherwise will return the execution state
 */
-GRIDDYN_Export int gridDynSimulation_getStatus(gridDynSimReference sim);
+GRIDDYN_EXPORT int gridDynSimulation_getStatus(gridDynSimReference sim);
 /** get an object reference for the simulation object that can be used in the gridDynDbject functions
 @param[in] sim the simulation runner reference object
 @return a gridDynObject that can be used in the gridDynObject_* functions
 */
-GRIDDYN_Export gridDynObject getSimulationObject (gridDynSimReference sim);
+GRIDDYN_EXPORT gridDynObject getSimulationObject (gridDynSimReference sim);
 
 // mathematical function for using the simulation as a function evaluator
 /** get a solverKey value that can be used for the solverKey input in the other math functions
@@ -363,30 +348,30 @@ GRIDDYN_Export gridDynObject getSimulationObject (gridDynSimReference sim);
 @param[in] solverType  the type or name of a solver used in GridDyn
 @return a solverKey object used in functions that require a solverKey
 */
-GRIDDYN_Export solverKey gridDynSimulation_getSolverKey (gridDynSimReference sim, const char *solverType);
+GRIDDYN_EXPORT solverKey gridDynSimulation_getSolverKey (gridDynSimReference sim, const char *solverType);
 
 /** free a solver key
 @param[in] key the solver key to be freed that is no longer needed
 */
-GRIDDYN_Export void gridDynSolverKey_free (solverKey key);
+GRIDDYN_EXPORT void gridDynSolverKey_free (solverKey key);
 
 /** get the simulation state size
 @param[in] sim the simulation runner reference object
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return  the state size of the system if <=0 an error was encountered
 */
-GRIDDYN_Export int gridDynSimulation_stateSize (gridDynSimReference sim, solverKey key);
+GRIDDYN_EXPORT int gridDynSimulation_stateSize (gridDynSimReference sim, solverKey key);
 
 /** get the number of buses in the simulation
 @param[in] sim the simulation runner reference object
 @return  the number of buses in the simulation
 */
-GRIDDYN_Export int gridDynSimulation_busCount(gridDynSimReference sim);
+GRIDDYN_EXPORT int gridDynSimulation_busCount(gridDynSimReference sim);
 /** get the number of lines in the simulation
 @param[in] sim the simulation runner reference object
 @return  the number of lines in the simulation
 */
-GRIDDYN_Export int gridDynSimulation_lineCount(gridDynSimReference sim);
+GRIDDYN_EXPORT int gridDynSimulation_lineCount(gridDynSimReference sim);
 /** get a set of data from the simulation
 @param[in] sim the simulation runner reference object
 @param datatype a string defining what data to retrieve from the simulation
@@ -394,7 +379,7 @@ GRIDDYN_Export int gridDynSimulation_lineCount(gridDynSimReference sim);
 @param maxSize the size of the memory location specified by voltages
 @return  the number of points written
 */
-GRIDDYN_Export int gridDynSimulation_getResults(gridDynSimReference sim, const char *datatype, double *data, int maxSize);
+GRIDDYN_EXPORT int gridDynSimulation_getResults(gridDynSimReference sim, const char *datatype, double *data, int maxSize);
 
 /** have the simulation guess at all the state variables
 @param[in] sim the simulation runner reference object
@@ -405,7 +390,7 @@ differential variables must be the same size as ::states
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_guessState (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_guessState (gridDynSimReference sim,
                                                  double time,
                                                  double *states,
                                                  double *dstate_dt,
@@ -420,7 +405,7 @@ differential states
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_setState (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_setState (gridDynSimReference sim,
                                                double time,
                                                const double *states,
                                                const double *dstate_dt,
@@ -433,7 +418,7 @@ are algebraic
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_getStateVariableTypes (gridDynSimReference sim, double *types, solverKey key);
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_getStateVariableTypes (gridDynSimReference sim, double *types, solverKey key);
 
 /** compute the residual values for all states in the system
 @details the residual function will result in all very small values if the states are self consistent
@@ -446,7 +431,7 @@ f(x,x')=0 if everything is correct
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_residual (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_residual (gridDynSimReference sim,
                                                double time,
                                                double *resid,
                                                const double *states,
@@ -461,7 +446,7 @@ GRIDDYN_Export griddyn_status gridDynSimulation_residual (gridDynSimReference si
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_derivative (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_derivative (gridDynSimReference sim,
                                                  double time,
                                                  double *deriv,
                                                  const double *states,
@@ -475,7 +460,7 @@ GRIDDYN_Export griddyn_status gridDynSimulation_derivative (gridDynSimReference 
 @param[in] key the index of the solver to use (the value should be retrieved by ::gridDynSimulation_getSolverKey)
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_algebraicUpdate (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_algebraicUpdate (gridDynSimReference sim,
                                                       double time,
                                                       double *update,
                                                       const double *states,
@@ -494,7 +479,7 @@ derivative of state
 sparse matrix
 @return 0 if successful an error code otherwise
 */
-GRIDDYN_Export griddyn_status gridDynSimulation_jacobian (gridDynSimReference sim,
+GRIDDYN_EXPORT griddyn_status gridDynSimulation_jacobian (gridDynSimReference sim,
                                                double time,
                                                const double *states,
                                                const double *dstate_dt,
@@ -508,7 +493,7 @@ GRIDDYN_Export griddyn_status gridDynSimulation_jacobian (gridDynSimReference si
 @param[in] queryString a string representing a value to query
 @return a singleQueryObject
 */
-GRIDDYN_Export gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, const char *queryString);
+GRIDDYN_EXPORT gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, const char *queryString);
 
 /** create a query object to retrieve a set of values repeatedly
 @details can be one or more values that can be retrieved to a vector
@@ -516,23 +501,23 @@ GRIDDYN_Export gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, 
 @param[in] queryString a string representing a value to query
 @return a vectorQueryObject
 */
-GRIDDYN_Export gridDynVectorQuery gridDynVectorQuery_create (gridDynObject obj, const char *queryString);
+GRIDDYN_EXPORT gridDynVectorQuery gridDynVectorQuery_create (gridDynObject obj, const char *queryString);
 
 /** release the memory from a single query object
 @param[in] query the query object to free
 */
-GRIDDYN_Export void gridDynSingleQuery_free (gridDynSingleQuery query);
+GRIDDYN_EXPORT void gridDynSingleQuery_free (gridDynSingleQuery query);
 
 /** release the memory from a vector query object
 @param[in] query the query object to free
 */
-GRIDDYN_Export void gridDynVectorQuery_free (gridDynVectorQuery query);
+GRIDDYN_EXPORT void gridDynVectorQuery_free (gridDynVectorQuery query);
 
 /** get the result from a single query
 @param[in] query the single query to run
 @return the value retrieved by the query
 */
-GRIDDYN_Export double gridDynSingleQuery_run (gridDynSingleQuery query);
+GRIDDYN_EXPORT double gridDynSingleQuery_run (gridDynSingleQuery query);
 
 /** get the results from a Vector query
 @param[in] query the vector query to run
@@ -540,28 +525,28 @@ GRIDDYN_Export double gridDynSingleQuery_run (gridDynSingleQuery query);
 @param[in] N the maximum size of the memory location
 @return the value retrieved by the query
 */
-GRIDDYN_Export griddyn_status gridDynVectorQuery_run (gridDynVectorQuery query, double *data, int N);
+GRIDDYN_EXPORT griddyn_status gridDynVectorQuery_run (gridDynVectorQuery query, double *data, int N);
 
 /** add additional measurements to a vector query
 @param[in] query the vector query object to append measurements
 @param[in] obj the object to get the measurement from
 @param[in] queryString a string describing the new queries to add
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynVectorQuery_append (gridDynVectorQuery query, gridDynObject obj, const char *queryString);
 /** change the data a single query gets
 @param[in] query the single query object to alter
 @param[in] obj the object to get the measurement from
 @param[in] queryString a string describing the new queries to add
 */
-GRIDDYN_Export griddyn_status
+GRIDDYN_EXPORT griddyn_status
 gridDynSingleQuery_update (gridDynSingleQuery query, gridDynObject obj, const char *queryString);
 
 /** change the data a vector query gets
 @param[in] query the vector query object to alter
 @param[in] obj the object to get the measurement from
 @param[in] queryString a string describing the new queries
-*/ GRIDDYN_Export griddyn_status
+*/ GRIDDYN_EXPORT griddyn_status
 gridDynVectorQuery_update (gridDynVectorQuery query, gridDynObject obj, const char *queryString);
 
 // functions for handling events
@@ -571,24 +556,24 @@ gridDynVectorQuery_update (gridDynVectorQuery query, gridDynObject obj, const ch
 @param[in] obj the target object of the event can be nullptr
 @return a gridDynEvent object used in the other functions
 */
-GRIDDYN_Export gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject obj);
+GRIDDYN_EXPORT gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject obj);
 /** delete the event
 @param[in] evnt  the event object to be freed
 */
-GRIDDYN_Export void gridDynEvent_free (gridDynEvent evnt);
+GRIDDYN_EXPORT void gridDynEvent_free (gridDynEvent evnt);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_trigger (gridDynEvent evnt);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_trigger (gridDynEvent evnt);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
 @param[in] sim the simulation object to schedule the event on
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_schedule (gridDynEvent evnt, gridDynSimReference sim);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_schedule (gridDynEvent evnt, gridDynSimReference sim);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
@@ -596,7 +581,7 @@ GRIDDYN_Export griddyn_status gridDynEvent_schedule (gridDynEvent evnt, gridDynS
 @param[in] value the new value to set for the parameter
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_setValue (gridDynEvent evnt, const char *parameter, double value);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_setValue (gridDynEvent evnt, const char *parameter, double value);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
@@ -604,7 +589,7 @@ GRIDDYN_Export griddyn_status gridDynEvent_setValue (gridDynEvent evnt, const ch
 @param[in] value the new value to set for the parameter
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_setString (gridDynEvent evnt, const char *parameter, const char *value);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_setString (gridDynEvent evnt, const char *parameter, const char *value);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
@@ -612,14 +597,14 @@ GRIDDYN_Export griddyn_status gridDynEvent_setString (gridDynEvent evnt, const c
 @param[in] val the value to set the flag to (0 for false, otherwise for true)
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_setFlag (gridDynEvent evnt, const char *flag, int val);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_setFlag (gridDynEvent evnt, const char *flag, int val);
 
 /** trigger the action described by the event
 @param[in] evnt the event object to perform the action on
 @param[in] obj the object for the event to act upon
 @return 0 for success or an error code representing an issue
 */
-GRIDDYN_Export griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject obj);
+GRIDDYN_EXPORT griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject obj);
 
 /** @} */ //end of the C-api group
 
