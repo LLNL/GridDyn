@@ -79,11 +79,19 @@ void EquationGridDyn::function(const Real t, const Vector& y, const Vector& dy, 
 
 void EquationGridDyn::jacobian_ypcdy(const Real t, const Vector& y, const Vector& dy, const Vector& state, const Real cj,Matrix& J)
 {
+  //J.dump(std::cout);
   nb_calls_jac++;
   SparseMatrix& pJ=dynamic_cast<SparseMatrix&>(J);
   paradaeArrayData a1(&pJ);
   //gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,cDaeSolverMode);
   gds->jacobianFunction(t,y.GetData(),dy.GetData(),a1,cj,*mode);
+  //static int switcheroo = 0;
+  //if(switcheroo == 0)
+  //{
+  //   std::cout << "\n\n  Time value " << t << "\n\n";
+  //   J.dump("new_jac.txt");
+  //   switcheroo = 1;
+  //}
 }
 
 void EquationGridDyn::init(const Real t,Vector& y)

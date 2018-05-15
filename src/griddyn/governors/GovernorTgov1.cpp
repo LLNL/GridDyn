@@ -178,7 +178,7 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
         md.assignCheckCol (refI, inputLocs[govpSetInLocation], -T2 / T1 / T3);
         if (linkOmega)
         {
-            md.assign (refI, inputLocs[govOmegaInLocation], -K * T2 / (T1) / T3);
+            md.assign (refI, inputLocs[govOmegaInLocation], K * T2 / (T1) / T3);
         }
         md.assign (refI, refI, -1 / T3 - sD.cj);
     }

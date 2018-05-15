@@ -204,6 +204,7 @@ void braidSolver::initialize(coreTime t0)
     int N_unistep_ = ceil((stopTime - static_cast<double> (tStart)) / dt);
 
     m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode); //cDaeSolverMode);
+    //y0_.dump("new_code_init_con.txt");
     equation = new EquationGridDyn(static_cast<double> (tStart), stopTime, N_unistep_, m_gds, y0_, &mode);
 }
 
