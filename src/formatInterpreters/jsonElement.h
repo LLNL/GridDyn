@@ -10,18 +10,9 @@
 * LLNS Copyright End
 */
 
-#ifndef JSON_ELEMENT_H_
-#define JSON_ELEMENT_H_
 #pragma once
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4702)
-#include "json/json.h"
-#pragma warning(pop)
-#else
-#include "json/json.h"
-#endif
+#include "json/jsoncpp.h"
 
 class jsonElement
 {
@@ -52,6 +43,3 @@ private:
 	bool arraytype = false;
 
 };
-
-
-#endif

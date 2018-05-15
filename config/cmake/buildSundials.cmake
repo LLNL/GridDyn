@@ -32,7 +32,7 @@ function (build_sundials)
 ExternalProject_Add(sundials
     SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/sundials
     GIT_REPOSITORY  https://github.com/llnl/sundials.git
-    GIT_TAG v3.1.0
+    GIT_TAG v3.1.1
     UPDATE_COMMAND " " 
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/sundials
      

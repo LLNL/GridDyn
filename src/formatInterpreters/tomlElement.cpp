@@ -23,7 +23,7 @@ tomlElement::tomlElement (toml::Value vElement, std::string newName)
     {
         arraytype = true;
         arrayIndex = 0;
-        while ((arrayIndex < element.size ()) && (element.find(arrayIndex)->empty ()))
+        while ((arrayIndex < static_cast<int>(element.size ())) && (element.find(arrayIndex)->empty ()))
         {
             ++arrayIndex;
         }

@@ -22,7 +22,7 @@ function (build_helics)
 
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 3.4)
+    cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(helics
     SOURCE_DIR ${binary_dir_string}/Download/helics
@@ -41,7 +41,6 @@ ExternalProject_Add(helics
 		-DBUILD_HELICS_TESTS=OFF
 		-DBUILD_HELICS_EXAMPLES=OFF
 		-DBUILD_C_SHARED_LIB=OFF
-		-DBUILD_PYTHON_INTERFACE=OFF
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
 		-DCMAKE_LINKER=${linker_string}

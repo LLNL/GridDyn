@@ -1,10 +1,7 @@
 /*
-Copyright (C) 2017-2018, Battelle Memorial Institute
-All rights reserved.
-
-This software was modified by Pacific Northwest National Laboratory, operated by the Battelle Memorial Institute;
-the National Renewable Energy Laboratory, operated by the Alliance for Sustainable Energy, LLC; and the Lawrence
-Livermore National Laboratory, operated by Lawrence Livermore National Security, LLC.
+Copyright © 2017-2018,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
+All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 /*
 * LLNS Copyright Start
@@ -23,6 +20,7 @@ Livermore National Laboratory, operated by Lawrence Livermore National Security,
 #pragma once
 
 #include "BlockingQueue.hpp"
+#include "TripWire.hpp"
 #include <fstream>
 #include <atomic>
 #include <thread>
@@ -37,10 +35,12 @@ namespace utilities
     class LoggingCore
     {
     private:
+        static std::atomic<bool> fastShutdown; //set to true to enable a fast shutdown
         std::thread loggingThread;	//!< the thread object containing the thread running the actual Logger
         std::vector<std::function<void(std::string &&message)>> functions; //!< container for the functions
         std::mutex functionLock;    //!< lock for updating the functions
         BlockingQueue<std::pair<int32_t, std::string>> loggingQueue;  //!< the actual queue containing the strings to log
+        tripwire::TripWireDetector tripDetector;
     public:
         /** default constructor*/
         LoggingCore();
@@ -70,6 +70,8 @@ namespace utilities
         void haltOperations(int);
         /** update a callback for a particular instance*/
         void updateProcessingFunction(int index, std::function<void(std::string &&message)> newFunction);
+        /** enable a fast shutdown in situations where a thread may be force-ably terminated*/
+        static void setFastShutdown();
     private:
         void processingLoop();
     };
@@ -204,6 +206,7 @@ public:
     static void closeLogger(const std::string &loggerName = "");
    /** sends a message to the default Logger*/
     static void logMessage(const std::string &message);
+
     /*destructor*/
     virtual ~LoggerManager();
     /** get the name of the logger*/
@@ -216,3 +219,4 @@ public:
 };
 }//namespace utilities
 #endif
+

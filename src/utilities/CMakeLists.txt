@@ -31,6 +31,7 @@ set(utilities_sources
 	matrixDataSparse.cpp
 	OperatingBoundary.cpp
 	stringToCmdLine.cpp
+	TripWire.cpp
 	)
 
 set(utilities_headers
@@ -65,6 +66,7 @@ set(utilities_headers
 	matrixDataFilter.hpp
 	matrixDataCustomWriteOnly.hpp
 	functionInterpreter.h
+	TripWire.hpp
 	workQueue.h
 	simpleQueue.hpp
 	zipUtilities.h

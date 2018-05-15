@@ -99,16 +99,23 @@ set(testMain_headers
 
 	)
 
+#add a baseline library for underlying dependencies and flags for test executables
+add_library(griddyn_test_base INTERFACE)
+target_link_libraries(griddyn_test_base INTERFACE ${Boost_LIBRARIES_test})
+target_link_libraries(griddyn_test_base INTERFACE griddyn_base)
+
+target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
+
+target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}")
+target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYNSERVER_LOCATION="${GRIDYNSERVER_BINARY_LOC}")
+target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYNINSTALL_LOCATION="${CMAKE_INSTALL_PREFIX}")
 
 add_executable(testLibrary ${testLibrary_sources} ${testMain_headers})
 add_executable(testComponents ${testComponent_sources} ${testMain_headers})
 add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 
-set_target_properties (testLibrary PROPERTIES FOLDER tests)
-set_target_properties (testComponents PROPERTIES FOLDER tests)
-set_target_properties (testSystem PROPERTIES FOLDER tests)
-set_target_properties (testExtra PROPERTIES FOLDER tests)
+set_target_properties (testLibrary testComponents testSystem  testExtra PROPERTIES FOLDER tests)
 
 FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
 
@@ -120,11 +127,7 @@ STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
 ENDIF(WIN32)
 #message(${test_dir})
 
-ADD_DEFINITIONS(-DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
 
-ADD_DEFINITIONS(-DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}")
-ADD_DEFINITIONS(-DGRIDDYNSERVER_LOCATION="${GRIDYNSERVER_BINARY_LOC}")
-ADD_DEFINITIONS(-DGRIDDYNINSTALL_LOCATION="${CMAKE_INSTALL_PREFIX}")
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
 add_custom_command(TARGET testComponents POST_BUILD        # Adds a post-build event to testComponents
@@ -133,25 +136,16 @@ add_custom_command(TARGET testComponents POST_BUILD        # Adds a post-build e
         $<TARGET_FILE_DIR:testComponents>)                 # <--this is out-file path
 endforeach(keyfile)
 
-target_link_libraries(testLibrary gridDynCombined)
-target_link_libraries(testComponents ${executable_only_components} gridDynCombined)
-target_link_libraries(testSystem gridDynCombined)
-target_link_libraries(testExtra gridDynCombined)
+target_link_libraries(testLibrary gridDynCombined griddyn_test_base)
+target_link_libraries(testComponents ${executable_only_components} gridDynCombined griddyn_test_base)
+target_link_libraries(testSystem gridDynCombined griddyn_test_base)
+target_link_libraries(testExtra gridDynCombined griddyn_test_base)
 
-target_include_directories(testLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(testComponents SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(testSystem SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(testExtra SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-
-target_link_libraries(testLibrary ${Boost_LIBRARIES_test})
-target_link_libraries(testComponents ${Boost_LIBRARIES_test})
-target_link_libraries(testSystem ${Boost_LIBRARIES_test})
-target_link_libraries(testExtra ${Boost_LIBRARIES_test})
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-install(DIRECTORY DESTINATION bin/test/)
-INSTALL(TARGETS testLibrary RUNTIME DESTINATION bin/test/)
-INSTALL(TARGETS testComponents RUNTIME DESTINATION bin/test/)
-INSTALL(TARGETS testSystem RUNTIME DESTINATION bin/test/)
-INSTALL(TARGETS testExtra RUNTIME DESTINATION bin/test/)
-INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION bin/test/)
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)
+INSTALL(TARGETS testLibrary RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)
+INSTALL(TARGETS testComponents RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)
+INSTALL(TARGETS testSystem RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)
+INSTALL(TARGETS testExtra RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)
+INSTALL(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR}/test/)

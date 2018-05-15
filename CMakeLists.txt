@@ -57,14 +57,23 @@ endif()
 
 
 OPTION(BUILD_PYTHON_INTERFACE "Build Python extension" OFF)
+OPTION(BUILD_PYTHON2_INTERFACE "Build Python 2.7 extension" OFF)
 OPTION(BUILD_MATLAB_INTERFACE "Build Matlab Extension" OFF)
 OPTION(BUILD_OCTAVE_INTERFACE "Build Octave extension" OFF)
 OPTION(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
-OPTION(DISABLE_SWIG "Disable the use of swig to generate interface code and use repo code" OFF)
-OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
+if (BUILD_PYTHON_INTERFACE OR BUILD_PYTHON2_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
+	set(INTERFACE_BUILD ON)
+	HIDE_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY)
+	SHOW_VARIABLE(DISABLE_SWIG BOOL "Disable the use of swig to generate interface code and use repo code" OFF)
+else()
+	set(INTERFACE_BUILD OFF)
+	HIDE_VARIABLE(DISABLE_SWIG)
+	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary shared library" ON)
+endif()
 
-IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_SHARED_FMI_LIBRARY OR BUILD_PYTHON_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE OR BUILD_MATLAB_INTERFACE)
+
+IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_SHARED_FMI_LIBRARY OR INTERFACE_BUILD)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ELSE()
 OPTION(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
@@ -101,7 +110,7 @@ ENDIF(UNIX)
 
 IF (BUILD_MATLAB_INTERFACE OR BUILD_OCTAVE_INTERFACE OR USE_BOOST_STATIC_LIBS)
   set(Boost_USE_STATIC_LIBS ON)
-  set(GRIDDYN_BOOST_STATIC ON)
+  set(BOOST_STATIC ON)
 
 ENDIF ()
 
@@ -393,7 +402,6 @@ endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 
-
 # -------------------------------------------------------------
 # Enable HELICS executable
 # -------------------------------------------------------------
@@ -578,7 +586,9 @@ endif()
 # -------------------------------------------------------------
 # CPack
 # -------------------------------------------------------------
+OPTION(ENABLE_PACKAGE_BUILD "Add projects for making packages and installers for HELICS" OFF)
 
+IF(ENABLE_PACKAGE_BUILD)
 set(CPACK_PACKAGE_NAME "GridDyn")
 set(CPACK_PACKAGE_VENDOR "Lawrence Livermore National Security LLC")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GridDyn Installer")
@@ -634,4 +644,4 @@ set(CPACK_SOURCE_IGNORE_FILES  "/Build*/;/build*/;/.git/")
 
 #THIS LINE MUST BE LAST
 include(CPack)
-
+ENDIF(ENABLE_PACKAGE_BUILD)

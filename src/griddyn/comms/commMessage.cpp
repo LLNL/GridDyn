@@ -45,7 +45,7 @@ commMessage::commMessage(std::uint32_t type) : m_messageType(type)
     payload = corePayloadFactory::instance().createPayload(type);
 }
 
-commMessage::commMessage(std::uint32_t type, std::uint32_t code) : m_messageType(type), code(code)
+commMessage::commMessage(std::uint32_t type, std::uint32_t messagecode) : m_messageType(type), code(messagecode)
 {
     payload = corePayloadFactory::instance().createPayload(type);
 }
