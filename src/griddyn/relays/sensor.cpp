@@ -538,6 +538,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (cm::SET_SUCCESS);
+                assert(gres->getPayload<cm>());
                 gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
                 commLink->transmit (sourceID, std::move (gres));
             }
@@ -547,6 +548,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage>(cm::SET_FAIL);
+                assert(gres->getPayload<cm>());
                 gres->getPayload<cm>()->m_actionID = (m->m_actionID > 0) ? m->m_actionID : instructionCounter;
                 commLink->transmit (sourceID, std::move (gres));
             }
@@ -558,6 +560,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         val = get (convertToLowerCase (m->m_field), gridUnits::getUnits (m->m_units));
         auto reply = std::make_shared<commMessage> (cm::GET_RESULT);
         auto rep = reply->getPayload<cm>();
+        assert(rep);
         rep->m_field = m->m_field;
         rep->m_value = val;
         rep->m_time = prevTime;

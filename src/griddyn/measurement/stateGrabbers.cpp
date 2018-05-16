@@ -515,7 +515,7 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
         if (offset != kInvalidLocation)
         {
             prevIndex = 1;
-            fptr = [&](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+            fptr = [this](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
                 if (sMode.offsetIndex != prevIndex)
                 {
                     offset = static_cast<gridSecondary *> (comp)->findIndex (field, sMode);
@@ -524,7 +524,7 @@ void stateGrabber::secondaryLoadInfo (const std::string &fld)
                 return (offset != kNullLocation) ? sD.state[offset] : kNullVal;
             };
             jacMode = jacobian_mode::computed;
-            jacIfptr = [=](gridComponent * /*comp*/, const stateData & /*sD*/, matrixData<double> &md,
+            jacIfptr = [this](gridComponent * /*comp*/, const stateData & /*sD*/, matrixData<double> &md,
                            const solverMode & /*sMode*/) { md.assignCheckCol (0, offset, 1.0); };
         }
         else

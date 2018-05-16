@@ -524,11 +524,8 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
     if (isFunctionName (op_name, function_type::arg2))
     {
         opptr = get2ArgFunction (op_name);
-        vectorGrab = bgrabber1->vectorGrab;
-        if ((bgrabber1->loaded) && (bgrabber2->loaded))
-        {
-            loaded = true;
-        }
+        vectorGrab = (bgrabber1) ? bgrabber1->vectorGrab : false;
+        loaded = opGrabber::checkIfLoaded();
     }
     else if (isFunctionName (op_name, function_type::vect_arg2))
     {
@@ -549,24 +546,18 @@ void opGrabber::updateField (const std::string &fld)
     if (isFunctionName (op_name, function_type::arg2))
     {
         opptr = get2ArgFunction (op_name);
-        vectorGrab = bgrabber1->vectorGrab;
-        if ((bgrabber1->loaded) && (bgrabber2->loaded))
-        {
-            loaded = true;
-        }
+        vectorGrab = (bgrabber1) ? bgrabber1->vectorGrab : false;
+        loaded = opGrabber::checkIfLoaded();
     }
     else if (isFunctionName (op_name, function_type::vect_arg2))
     {
         opptrV = get2ArrayFunction (op_name);
         vectorGrab = false;
-        if ((bgrabber1->loaded) && (bgrabber2->loaded))
-        {
-            loaded = true;
-        }
+        loaded = opGrabber::checkIfLoaded();
     }
 }
 
-bool opGrabber::checkIfLoaded () { return ((bgrabber1->loaded) && (bgrabber2->loaded)); }
+bool opGrabber::checkIfLoaded () { return (((bgrabber1) && (bgrabber1->loaded)) && ((bgrabber2) && (bgrabber2->loaded))); }
 void opGrabber::getDesc (stringVec &desc_list) const
 {
     if (vectorGrab)
@@ -606,8 +597,14 @@ void opGrabber::cloneTo (gridGrabber *ggb) const
     {
         return;
     }
-    ogb->bgrabber1 = bgrabber1->clone ();
-    ogb->bgrabber2 = bgrabber2->clone ();
+    if (bgrabber1)
+    {
+        ogb->bgrabber1 = bgrabber1->clone();
+    }
+    if (bgrabber2)
+    {
+        ogb->bgrabber2 = bgrabber2->clone();
+    }
     ogb->op_name = op_name;
     ogb->opptr = opptr;
     ogb->opptrV = opptrV;

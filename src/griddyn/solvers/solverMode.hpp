@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef SOLVERMODE_H_
-#define SOLVERMODE_H_
+#pragma once
 
 #include "../gridDynDefinitions.hpp"
 #include <bitset>
@@ -171,4 +170,3 @@ inline bool hasAlgebraic (const solverMode &sMode) { return sMode.algebraic; }
  **/
 inline bool isExtended (const solverMode &sMode) { return sMode.extended_state; }
 }  // namespace griddyn
-#endif
