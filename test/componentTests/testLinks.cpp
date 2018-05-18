@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE (link_test_switches)
 {
     auto B1 = new gridBus ();
     auto B2 = new gridBus ();
-    auto L1 = new acLine (0.005, 0.2);
+    auto L1 = std::make_unique<acLine> (0.005, 0.2);
     L1->updateBus (B1, 1);
     L1->updateBus (B2, 2);
     B2->set ("angle", -0.2);
