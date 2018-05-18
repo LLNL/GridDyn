@@ -53,6 +53,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+      script:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
     # XCode 8gm, OS X 10.11
