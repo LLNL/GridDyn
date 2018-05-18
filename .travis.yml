@@ -66,7 +66,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
         #   via the "travis encrypt" command using the project repo's public key
-        - secure: "E0FTSviJ7BCcANQ4zAmxeGmRjQDontAqMRKi5k5T1z9fmJQ0sQLrsmPbehpWQaT8jDfn/mQU8CyPEoA3/tEchfV2oeE5b/xViQwQf+rAT3ni0HhMQKjYo33l1rjugyculcu3prMsj9502/Rshejxz2ANVjZMryyFTp1jC5UqCjBXDH33O4rnMD1xMysHi2cqULwatfgtal5xilIngvD9jLHh3B0RLVU1pDfrksLzJrCR85xVDg6BpduUgyCktjLD5+UnZmj8sxmkxpskLSoH9ULsPm3NKqunXGLLL8fUnamCdiD3dUPENhmCsWlNcZf5qbbTh5S1qF0ffeEfStYPfiFING0gAXIgBoNhDZhj0Sa1XP+ncByt9Ebg8h7KDTF4GVaTC25BXJLmz5hdTpz3SdqnbwoucrKECbgKZq2c57TOaqpW+DjpebFS032ZifdG15+SkyZwqgcu44XrMYuwsb6vG3Vu1SFnzK8ffeIyi/O97rBn2sbebvtdgn5CN6fJmOtjIBN1MfFxh1aOxRP+JUG4Jy4BQTVQUPWIDjvfnyg28OKxv6zMV2AvAtD7elyox6lyj5FvE+NImXZJoRJGHwN2Y81X+Kj4FNMczVhnQH00s/4fCUMTjzPzy0ehnhTIwYXhNmsBQQdrHuD2Xmb6oeMxXf2IKacPj65qq6K/SPQ="
+        - secure: "pbj3KbIyknUxBKySwaEZiIHxGFH6UKTj1xjLNhWlfFWmyHzlMaA7tfm4QkXGoFJojckwMX6sGGyXjgM1H8BFRICPzMjilCkrOWVhm9ZcoE1uNorqx4MxwfqGnMjERAHjDd0wiKwoiDUI0vSyPV7ms4KoNoWXr8sGRF1zvOjWHkkJwdLlnyr/lp6iSmLldF9WXd/jM31msI1b8QKoI5jbgRFYA4Ys/Qjl516ng+YKHP3lQD0z3qFGKpe/cKB0bnIc66rQRNOBsX4T/eRcQ5kMRcyDX3xWI4+gbbSKtVEvoZlvnLL8ANy+BcSjrdHQBjhQ7SZsvm68eMK+hRoGyH2KTHEYcogWxpv0l6ZfIalOdIaYnR2Yx4vWZ0xRf3UleIcELDI/6oTYiWjVV2PQqdvRlwI52/1zSSc2qgsifJuPCME/g7tiQarjCT603/icmsKtn9mVq2dMN9YPEcmrh07gjPsQMk0YynQugvC8TBwabV0ptwZf+V+yj5SexdptMK1CrccusMml2jr114cxRenDEKNrfyTwN6UZhmf/ll1EZ3AKOHI+xdm2UUgzZBWQvRbnkZ7EInuU/3/AmKUpFpiVsQfIYeSSj/nLAtbgfKw1ncNSo65uW4Oo8z1QbGTrvfwBE7roJAL1oSqT+exydyte5EgflUVfvi/wNrD37GcU5X0=" 
     # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
