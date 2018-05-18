@@ -53,6 +53,14 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+        coverity_scan:
+          project:
+            name: "LLNL/GridDyn"
+            description: "GridDyn is an open-source power transmission simulation software package"
+          notification_email: mast9@llnl.gov
+          build_command_prepend: cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command: make
+          branch_pattern: coverity_scan
       script: true
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
@@ -166,16 +174,6 @@ script:
 
   # Run CI tests
   - ../scripts/run-ci-tests.sh
-
-addons:
-  coverity_scan:
-    project:
-      name: "LLNL/GridDyn"
-      description: "GridDyn is an open-source power transmission simulation software package"
-    notification_email: mast9@llnl.gov
-    build_command_prepend: cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
-    build_command: make
-    branch_pattern: coverity_scan
 
 notifications:
     email: false
