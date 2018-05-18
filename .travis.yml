@@ -28,10 +28,11 @@ _basic_env:
         - g++-6
         - valgrind
 - &linux_base
-  if: type != cron
+  if: type != cron AND branch != coverity_scan
   os: linux
   compiler: gcc
 - &osx_base
+  if: branch != coverity_scan
   os: osx
   compiler: clang
 
@@ -42,6 +43,18 @@ jobs:
     - os: osx
 
   include:
+    - # Coverity static analysis job
+      if: branch = coverity_scan
+      os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
     # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
