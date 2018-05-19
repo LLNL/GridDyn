@@ -58,10 +58,7 @@ jobs:
             name: "LLNL/GridDyn"
             description: "GridDyn is an open-source power transmission simulation software package"
           notification_email: mast9@llnl.gov
-          build_command_prepend:
-            - echo $(which gcc-6)
-            - cov-configure --comptype gcc --compiler $(which gcc-6)
-            - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --comptype gcc --compiler $(which gcc-6) && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
           build_command: make
           branch_pattern: coverity_scan
       script: cat cov-int/build-log.txt
