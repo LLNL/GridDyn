@@ -61,7 +61,7 @@ jobs:
           build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --comptype gcc --compiler $(which gcc-6) && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
           build_command: make
           branch_pattern: coverity_scan
-      script: ls -l cov-int && cat cov-int/scm-log.txt
+      script: ls -l cov-int && cat cov-int/scm_log.txt
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
