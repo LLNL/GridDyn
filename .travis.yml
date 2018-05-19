@@ -58,7 +58,7 @@ jobs:
             name: "LLNL/GridDyn"
             description: "GridDyn is an open-source power transmission simulation software package"
           notification_email: mast9@llnl.gov
-          build_command_prepend: cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command_prepend: cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
           build_command: make
           branch_pattern: coverity_scan
       script: true
