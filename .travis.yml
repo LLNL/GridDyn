@@ -47,6 +47,11 @@ jobs:
       if: branch = coverity_scan
       os: linux
       compiler: gcc
+      cache:
+        ccache: false
+        directories:
+          - dependencies
+          - build/libs
       addons:
         apt:
           sources:
