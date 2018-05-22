@@ -8,7 +8,7 @@ function (build_suitesparse install_path)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
 	escape_string(linker_string ${CMAKE_LINKER})
-	
+
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_suitesparse)
 
     #mktemp dir in build tree
@@ -23,7 +23,7 @@ function (build_suitesparse install_path)
 
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 3.4)
+    cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(suitesparse
     SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/suitesparse
@@ -36,10 +36,11 @@ ExternalProject_Add(suitesparse
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
+		-DBUILD_SHARED_LIBS=${USE_KLU_SHARED}
         -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
+		\"-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}\"
 		-DCMAKE_LINKER=${linker_string}
 		-DBUILD_METIS=OFF
-		-DConfigPackageLocation=${PROJECT_BINARY_DIR}/cmake
         
       
     INSTALL_DIR ${install_path}

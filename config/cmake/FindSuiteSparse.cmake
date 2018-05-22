@@ -147,7 +147,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 
 		## try to find include dir (looking for very important header file)
 		find_path(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR	
-			NAMES 		${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
+			NAMES 			${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
 						${suitesparseComp}.hpp ${suitesparseCompLC}.hpp ${suitesparseCompUC}.hpp
 			HINTS			${SuiteSparse_DIR_INCLUDE}
 						${SuiteSparse_DIR}/include
@@ -351,6 +351,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	set(ADDITIONAL_SEARCH_DIRS 
 		${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/lib
+		${SuiteSparse_DIR}/lib64
 		${SuiteSparse_DIR}/lapack_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/lapack_windows/x${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/blas_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
@@ -361,9 +362,13 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 		${SuiteSparse_DIR}/lib/lapack_windows
 		${SuiteSparse_DIR}/lib/blas_windows
 		${SuiteSparse_DIR}/lib/lapack_blas_windows
+		${SuiteSparse_DIR}/lib64/lapack_windows
+		${SuiteSparse_DIR}/lib64/blas_windows
+		${SuiteSparse_DIR}/lib64/lapack_blas_windows
 		${SuiteSparse_DIR}/lapack_blas_windows
 		${SuiteSparse_DIR}/lapack_blas_windows/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 		${SuiteSparse_DIR}/lapack_blas_windows/lib
+		${SuiteSparse_DIR}/lapack_blas_windows/lib64
 		${SuiteSparse_DIR}/${CMAKE_INSTALL_LIBDIR}
 		${SuiteSparse_DIR}/lapack_windows/${CMAKE_INSTALL_LIBDIR}
 		${SuiteSparse_DIR}/blas_windows/${CMAKE_INSTALL_LIBDIR}
@@ -378,6 +383,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 		NAMES 		blas cblas libblas
 		HINTS			${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					${SuiteSparse_BLAS_DIR}}/lib
+					${SuiteSparse_BLAS_DIR}}/lib64
 					${SuiteSparse_BLAS_DIR}
 					${SuiteSparse_BLAS_DIR}/${CMAKE_INSTALL_LIBDIR}
 					${ADDITIONAL_SEARCH_DIRS}
@@ -390,7 +396,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 					/opt/local/lib
 					/usr/${CMAKE_INSTALL_LIBDIR}
 					/usr/local/${CMAKE_INSTALL_LIBDIR}
-		PATH_SUFFIXES	Release Debug
+		PATH_SUFFIXES	Release Debug lib64
 	)
 	if(NOT SuiteSparse_BLAS_LIBRARY)
 		if (SuiteSparse_VERBOSE)
@@ -419,6 +425,9 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 					/usr/lib
 					/usr/local/lib
 					/opt/local/lib
+					/usr/lib64
+					/usr/local/lib64
+					/opt/local/lib64
 					/opt/local/${CMAKE_INSTALL_LIBDIR}
 					/usr/${CMAKE_INSTALL_LIBDIR}
 					/usr/local/${CMAKE_INSTALL_LIBDIR}
@@ -462,6 +471,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 		set(SuiteSparse_DLL_SEARCH_DIRS
 			${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 			${SuiteSparse_LAPACK_DIR}/lib
+			${SuiteSparse_LAPACK_DIR}/lib64
 			${SuiteSparse_LAPACK_DIR}
 			${SuiteSparse_LAPACK_DIR}/bin
 			${SuiteSparse_LAPACK_DIR}/bin/${SuiteSparse_SEARCH_BIN_POSTFIX_1}
