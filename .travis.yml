@@ -52,18 +52,18 @@ jobs:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
+            - g++-4.9
         coverity_scan:
           project:
             name: "LLNL/GridDyn"
             description: "GridDyn is an open-source power transmission simulation software package"
           notification_email: mast9@llnl.gov
-          build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --comptype gcc --compiler $(which gcc-6) && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command_prepend: echo $(which gcc-4.9) && ls -l && cov-configure --comptype gcc --compiler $(which gcc-4.9) && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
           build_command: make
           branch_pattern: coverity_scan
       script: ls -l cov-int && cat cov-int/scm_log.txt
       env:
-        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
         #   via the "travis encrypt" command using the project repo's public key
         - secure: "pbj3KbIyknUxBKySwaEZiIHxGFH6UKTj1xjLNhWlfFWmyHzlMaA7tfm4QkXGoFJojckwMX6sGGyXjgM1H8BFRICPzMjilCkrOWVhm9ZcoE1uNorqx4MxwfqGnMjERAHjDd0wiKwoiDUI0vSyPV7ms4KoNoWXr8sGRF1zvOjWHkkJwdLlnyr/lp6iSmLldF9WXd/jM31msI1b8QKoI5jbgRFYA4Ys/Qjl516ng+YKHP3lQD0z3qFGKpe/cKB0bnIc66rQRNOBsX4T/eRcQ5kMRcyDX3xWI4+gbbSKtVEvoZlvnLL8ANy+BcSjrdHQBjhQ7SZsvm68eMK+hRoGyH2KTHEYcogWxpv0l6ZfIalOdIaYnR2Yx4vWZ0xRf3UleIcELDI/6oTYiWjVV2PQqdvRlwI52/1zSSc2qgsifJuPCME/g7tiQarjCT603/icmsKtn9mVq2dMN9YPEcmrh07gjPsQMk0YynQugvC8TBwabV0ptwZf+V+yj5SexdptMK1CrccusMml2jr114cxRenDEKNrfyTwN6UZhmf/ll1EZ3AKOHI+xdm2UUgzZBWQvRbnkZ7EInuU/3/AmKUpFpiVsQfIYeSSj/nLAtbgfKw1ncNSo65uW4Oo8z1QbGTrvfwBE7roJAL1oSqT+exydyte5EgflUVfvi/wNrD37GcU5X0=" 
