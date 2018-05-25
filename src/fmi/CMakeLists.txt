@@ -63,17 +63,10 @@ set(fmiImport_headers
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
-IF(UNIX)
-  add_compile_options(-fvisibility=hidden)
-ELSE(UNIX)
-  IF(MINGW)
- add_compile_options(-fvisibility=hidden)
-  ENDIF(MINGW)
-ENDIF(UNIX)
-
-
-
 add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
+
+set_target_properties(fmiGDLibrary PROPERTIES CXX_VISIBILITY_PRESET hidden C_VISIBILITY_PRESET hidden)
+
 
 target_include_directories(fmiGDLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 
