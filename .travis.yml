@@ -44,7 +44,7 @@ jobs:
 
   include:
     # Coverity static analysis job
-    -  if: branch = coverity_scan
+    - if: branch = coverity_scan
       os: linux
       compiler: gcc
       cache:
