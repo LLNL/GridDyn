@@ -40,7 +40,7 @@ add_library(helicsLib STATIC ${griddynHELICS_sources} ${griddynHELICS_headers})
 
 set_target_properties (helicsLib PROPERTIES FOLDER libraries)
 target_include_directories(helicsLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_include_directories(helicsLib PUBLIC $<BUILD_INTERFACE:${HELICS_INCLUDE_DIR}>)  
+
 message(STATUS "helics include ${HELICS_INCLUDE_DIR}")
 message(STATUS "helics libraries ${HELICS_STATIC_LIBRARY}")
 
@@ -57,30 +57,10 @@ ENDIF(WIN32)
 #message(${test_dir})
 
 target_compile_definitions(helicsLib PUBLIC -DHELICS_TEST_DIRECTORY="${test_dir}" )
-if (NOT HELICS_BROKER)
-find_program(HELICS_BROKER helics_broker
-	HINTS ${HELICS_INSTALL_PATH}
-		${HELICS_INCLUDE_PATH}/../
-	PATH_SUFFIXES bin
-	)
-endif()
+
 target_compile_definitions(helicsLib PUBLIC -DHELICS_BROKER_EXECUTABLE="${HELICS_BROKER}")
 
-if (NOT HELICS_PLAYER)
-find_program(HELICS_PLAYER helics_player
-	HINTS ${HELICS_INSTALL_PATH}
-		${HELICS_INCLUDE_PATH}/../
-	PATH_SUFFIXES bin
-	)
-endif()
 target_compile_definitions(helicsLib PUBLIC -DHELICS_PLAYER_EXECUTABLE="${HELICS_PLAYER}")
-if (NOT HELICS_RECORDER)
-find_program(HELICS_RECORDER helics_recorder
-	HINTS ${HELICS_INSTALL_PATH}
-		${HELICS_INCLUDE_PATH}/../
-	PATH_SUFFIXES bin
-	)
-endif()
 target_compile_definitions(helicsLib PUBLIC -DHELICS_RECORDER_EXECUTABLE="${HELICS_RECORDER}")
 
 target_link_libraries(helicsLib PUBLIC Helics::helics-static fileInput)

@@ -11,7 +11,7 @@ function (build_helics)
 	
 	#message(STATUS "${CMAKE_CXX_COMPILER} to ${compiler_string}")
 	
-	escape_string(binary_dir_string ${CMAKE_BINARY_DIR})
+	escape_string(install_location_string ${HELICS_INSTALL_PATH})
     set(trigger_build_dir ${binary_dir_string}/autobuild/force_helics)
 
     get_filename_component(ZeroMQ_TARGET ${ZeroMQ_INSTALL_PATH} DIRECTORY)
@@ -33,7 +33,7 @@ ExternalProject_Add(helics
     BINARY_DIR ${binary_dir_string}/ThirdParty/helics
      
     CMAKE_ARGS 
-        -DCMAKE_INSTALL_PREFIX=${binary_dir_string}/libs
+        -DCMAKE_INSTALL_PREFIX=${install_location_string}
 		-DBOOST_INSTALL_PATH=${BOOST_ROOT}
 		-DUSE_BOOST_STATIC_LIBS=${USE_BOOST_STATIC_LIBS}
         -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
@@ -49,6 +49,7 @@ ExternalProject_Add(helics
 		-DZeroMQ_ENABLE=ON
 		-DZeroMQ_INSTALL_PATH:PATH=${zmq_target}/
 		-DZMQ_USE_STATIC_LIBRARY=${ZMQ_USE_STATIC_LIBRARY}
+		-DAUTOBUILD_INSTALL_PATH=${AUTOBUILD_INSTALL_PATH}
         
         
     INSTALL_DIR ${binary_dir_string}/libs

@@ -9,7 +9,7 @@
 # LLNS Copyright End
 
 #project name
-project(GridDyn)
+project(GRIDDYN)
 
 #states that Cmake version > 3.5
 cmake_minimum_required(VERSION 3.5)
@@ -19,14 +19,43 @@ cmake_policy(VERSION 3.5)
 set(GRIDDYN_VERSION_MAJOR 0)
 set(GRIDDYN_VERSION_MINOR 9)
 set(GRIDDYN_VERSION_PATCH 0)
-set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH})
+set(GRIDDYN_VERSION_BUILD )
+if (NOT GRIDDYN_VERSION_BUILD)
+	set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH})
+	set (GRIDDYN_VERSION_UNDERSCORE "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}")
+else()
+	set(GRIDDYN_VERSION ${GRIDDYN_VERSION_MAJOR}.${GRIDDYN_VERSION_MINOR}.${GRIDDYN_VERSION_PATCH}-${GRIDDYN_VERSION_BUILD})
+	set (GRIDDYN_VERSION_UNDERSCORE "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}-${GRIDDYN_VERSION_BUILD}")
+endif()
+
 set(GRIDDYN_DATE 4-28-2018)
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/cmake)
+#-----------------------------------------------------------------------------
+# set the module path and include some common macros
+#-----------------------------------------------------------------------------
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
+include(extraMacros)
 
+#-----------------------------------------------------------------------------
+# set the install path to a local directory
+#-----------------------------------------------------------------------------
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	 if (WIN32)
+		if (MSYS)
+				set (CMAKE_INSTALL_PREFIX "/usr/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/" CACHE PATH "default install path" FORCE )
+		else(MSYS)
+			set (CMAKE_INSTALL_PREFIX "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/" CACHE PATH "default install path" FORCE )
+		endif(MSYS)
+
+	endif(WIN32)
+endif()
+
+SHOW_VARIABLE(AUTOBUILD_INSTALL_PATH PATH
+  "location to install the autobuild libraries and Headers" "${PROJECT_BINARY_DIR}/libs")
+  
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(extraMacros)
 
@@ -36,6 +65,12 @@ FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/logs)
 IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source build is not supported. Please, use an empty directory for building the project.")
 ENDIF()
+
+OPTION(BUILD_HELICS_TESTS "Enable the test Executables to be built" ON)
+# enable testing
+if (BUILD_HELICS_TESTS)
+	enable_testing ()
+endif(BUILD_HELICS_TESTS)
 
 #add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
@@ -52,34 +87,38 @@ set_property(CACHE COMPILER_OPTIMIZATION_LEVEL PROPERTY STRINGS ${optimization_l
 OPTION(BUILD_SHARED_FMI_LIBRARY "Enable construction of a binary fmi shared library for GridDyn" OFF)
 
 if (NOT CMAKE_DEBUG_POSTFIX)
-set(CMAKE_DEBUG_POSTFIX d)
+	set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
 
 OPTION(BUILD_PYTHON_INTERFACE "Build Python extension" OFF)
-OPTION(BUILD_PYTHON2_INTERFACE "Build Python 2.7 extension" OFF)
+OPTION(BUILD_PYTHON2_INTERFACE "Build Python2.7 extension(Requires swig and will not build if \"PYTHON_INTERFACE\" is active)" OFF)
 OPTION(BUILD_MATLAB_INTERFACE "Build Matlab Extension" OFF)
-OPTION(BUILD_OCTAVE_INTERFACE "Build Octave extension" OFF)
+OPTION(BUILD_OCTAVE_INTERFACE "Build Octave extension (very experimental)" OFF)
 OPTION(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 if (BUILD_PYTHON_INTERFACE OR BUILD_PYTHON2_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
 	set(INTERFACE_BUILD ON)
-	HIDE_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY)
+	HIDE_VARIABLE(BUILD_GRIDDYN_SHARED_LIB)
 	SHOW_VARIABLE(DISABLE_SWIG BOOL "Disable the use of swig to generate interface code and use repo code" OFF)
 else()
 	set(INTERFACE_BUILD OFF)
 	HIDE_VARIABLE(DISABLE_SWIG)
-	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary shared library" ON)
+	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary C based shared library" ON)
+endif()
+
+OPTION(BUILD_CXX_SHARED_LIB "Build a Shared Libraries of the CXX interface" OFF)
+mark_as_advanced(BUILD_CXX_SHARED_LIB)
+
+if (INTERFACE_BUILD OR BUILD_GRIDDYN_SHARED_LIB OR BUILD_CXX_SHARED_LIB OR BUILD_SHARED_FMI_LIBRARY)
+	set(BUILD_SHARED_LIBS ON)
+else()
+	OPTION(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
 endif()
 
 
-IF(BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_SHARED_FMI_LIBRARY OR INTERFACE_BUILD)
-	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-ELSE()
-OPTION(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
-IF(USE_POSITION_INDEPENDENT_CODE)
+IF(BUILD_SHARED_LIBS OR USE_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-ENDIF()
 ENDIF()
 
 include(compiler_flags)
@@ -92,27 +131,13 @@ IF (VERSION_OPTION)
 	ENDIF (MSVC)
 ENDIF(VERSION_OPTION)
 
-IF(UNIX)
-  # Since default builds of boost library under Unix don't use
-  # CMake, turn off using CMake build and find include/libs the
-  # regular way.
-  set(Boost_NO_BOOST_CMAKE ON)
-  set(Boost_USE_MULTITHREADED      OFF)   # Needed if MT libraries not built
-  option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
-ELSE(UNIX)
-  IF(MINGW)
-  option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" OFF)
-  ELSE(MINGW)
-  #this would most likely be MSVC
-   option (USE_BOOST_STATIC_LIBS "Build using boost static Libraries" ON)
-  ENDIF(MINGW)
-ENDIF(UNIX)
-
-IF (BUILD_MATLAB_INTERFACE OR BUILD_OCTAVE_INTERFACE OR USE_BOOST_STATIC_LIBS)
-  set(Boost_USE_STATIC_LIBS ON)
-  set(BOOST_STATIC ON)
-
-ENDIF ()
+# -------------------------------------------------------------
+# BOOST  find the boost libraries
+# -------------------------------------------------------------
+set(BOOST_REQUIRED_LIBRARIES program_options unit_test_framework filesystem system date_time timer chrono)
+include(addBoost)
+set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
+target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 
 # -------------------------------------------------------------
 # add coverage target
@@ -138,44 +163,11 @@ ENDIF ()
 # -------------------------------------------------------------
 
 #message(STATUS ${CMAKE_CXX_FLAGS})
-set(CONFIGURE_TARGET_LOCATION ${PROJECT_BINARY_DIR}/libs/include/griddyn/)
+set(CONFIGURE_TARGET_LOCATION ${AUTOBUILD_INSTALL_PATH}/include/griddyn/)
 include(configGenerator)
-INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/compiler-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
+INSTALL(FILES ${AUTOBUILD_INSTALL_PATH}/include/griddyn/compiler-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
 
 include(ExternalProject)
-
-
-
-
-# -------------------------------------------------------------
-# setting the RPATH
-# -------------------------------------------------------------
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-
-SET(CMAKE_BUILD_RPATH "${CMAKE_BINARY_DIR}/libs/bin;${CMAKE_BINARY_DIR}/libs/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-
-# the RPATH to be used when installing, but only if it's not a system directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-ENDIF("${isSystemDir}" STREQUAL "-1")
-
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-    list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-ENDIF("${isSystemDir}" STREQUAL "-1")
 
 
 #########################################################################################
@@ -220,13 +212,13 @@ OPTION(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
 # -------------------------------------------------------------
 
 IF (NOT DISABLE_MULTITHREADING)
-if (NOT WIN32)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-elseif (MSYS)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-endif()
-find_package(Threads REQUIRED)
-target_link_libraries(griddyn_base INTERFACE Threads::Threads)
+	if (NOT WIN32)
+		set(THREADS_PREFER_PTHREAD_FLAG ON)
+	elseif (MSYS)
+		set(THREADS_PREFER_PTHREAD_FLAG ON)
+	endif()
+	find_package(Threads REQUIRED)
+	target_link_libraries(griddyn_base INTERFACE Threads::Threads)
 ENDIF(NOT DISABLE_MULTITHREADING)
 
 # -------------------------------------------------------------
@@ -235,9 +227,10 @@ ENDIF(NOT DISABLE_MULTITHREADING)
 
 OPTION(MPI_ENABLE "Enable MPI networking library" OFF)
 IF (MPI_ENABLE)
-	find_package(MPI)
+	include(addMPI)
 	if (MPI_C_FOUND)
-   set(GRIDDYN_HAVE_MPI TRUE)
+		set(GRIDDYN_HAVE_MPI TRUE)
+		target_link_libraries(griddyn_base INTERFACE MPI::MPI_C)
 	else()
 		set(GRIDDYN_HAVE_MPI FALSE)
 	endif (MPI_C_FOUND)
@@ -269,25 +262,50 @@ set(optional_system_test_files)
 set (optional_library_key_headers )
 set (optional_library_functions )
 
+
+
 # -------------------------------------------------------------
-# BOOST  find the boost libraries
+# setting the RPATH
 # -------------------------------------------------------------
-include(addBoost)
-set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
-message(STATUS "Using Boost include files : ${Boost_INCLUDE_DIR}")
-message(STATUS "Using Boost libraries ${Boost_LIBRARY_DIRS}")
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+
+SET(CMAKE_BUILD_RPATH "${AUTOBUILD_INSTALL_PATH}/bin;$${AUTOBUILD_INSTALL_PATH}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+ENDIF("${isSystemDir}" STREQUAL "-1")
 
 if (NOT Boost_USE_STATIC_LIBS)
 	list(APPEND CMAKE_INSTALL_RPATH ${Boost_LIBRARY_DIRS})
 	list(APPEND CMAKE_BUILD_RPATH ${Boost_LIBRARY_DIRS})
 endif()
 
+
 # -------------------------------------------------------------
 # global include directories
 # -------------------------------------------------------------
 target_include_directories(griddyn_base INTERFACE
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/libs/include>
+	$<BUILD_INTERFACE:${AUTOBUILD_INSTALL_PATH}/include>
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
 	$<INSTALL_INTERFACE:include>
 )
@@ -574,13 +592,11 @@ if(TEST_ENABLE)
 endif()
 
 #####################################################
-######################### swig ######################
+#########swig interface builds ######################
 #####################################################
 
-#option(WITH_PYTHON3 "Use Python 3.*" OFF)
-
-if (BUILD_PYTHON_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
-add_subdirectory(swig)
+if (INTERFACE_BUILD)
+	add_subdirectory(swig)
 endif()
 
 

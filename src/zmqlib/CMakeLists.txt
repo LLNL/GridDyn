@@ -8,8 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-
-
 set(zmqLibrary_sources
 	zmqLibrary/zmqContextManager.cpp
 	zmqLibrary/zmqHelper.cpp
@@ -59,7 +57,6 @@ set(dimeInterface_headers
 	)
 
 add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
-target_include_directories(dimeLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
 set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
 
