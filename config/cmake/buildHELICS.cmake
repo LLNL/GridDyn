@@ -10,7 +10,8 @@ function (build_helics)
 	escape_string(linker_string ${CMAKE_LINKER})
 	
 	#message(STATUS "${CMAKE_CXX_COMPILER} to ${compiler_string}")
-	
+    escape_string(binary_dir_string ${PROJECT_BINARY_DIR})
+
 	escape_string(install_location_string ${HELICS_INSTALL_PATH})
     set(trigger_build_dir ${binary_dir_string}/autobuild/force_helics)
 
@@ -52,7 +53,7 @@ ExternalProject_Add(helics
 		-DAUTOBUILD_INSTALL_PATH=${AUTOBUILD_INSTALL_PATH}
         
         
-    INSTALL_DIR ${binary_dir_string}/libs
+    INSTALL_DIR ${install_location_string}
 
     )")
 
