@@ -88,10 +88,13 @@ set(testExtra_sources
 	extraTests/largeContingencyTests.cpp
 	extraTests/largeInputTests.cpp
 	extraTests/objectSizeReport.cpp
-	extraTests/extraFMUtests.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 )
+
+if(FMI_ENABLE)
+    list(APPEND testExtra_sources extraTests/extraFMUtests.cpp)
+endif()
 
 set(testMain_headers
 	testHelper.h

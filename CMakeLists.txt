@@ -55,7 +55,7 @@ endif()
 
 SHOW_VARIABLE(AUTOBUILD_INSTALL_PATH PATH
   "location to install the autobuild libraries and Headers" "${PROJECT_BINARY_DIR}/libs")
-  
+
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(extraMacros)
 
@@ -99,18 +99,18 @@ OPTION(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 if (BUILD_PYTHON_INTERFACE OR BUILD_PYTHON2_INTERFACE OR BUILD_MATLAB_INTERFACE OR BUILD_JAVA_INTERFACE OR BUILD_OCTAVE_INTERFACE)
 	set(INTERFACE_BUILD ON)
-	HIDE_VARIABLE(BUILD_GRIDDYN_SHARED_LIB)
+	HIDE_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY)
 	SHOW_VARIABLE(DISABLE_SWIG BOOL "Disable the use of swig to generate interface code and use repo code" OFF)
 else()
 	set(INTERFACE_BUILD OFF)
 	HIDE_VARIABLE(DISABLE_SWIG)
-	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary C based shared library" ON)
+	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary C based shared library" OFF)
 endif()
 
 OPTION(BUILD_CXX_SHARED_LIB "Build a Shared Libraries of the CXX interface" OFF)
 mark_as_advanced(BUILD_CXX_SHARED_LIB)
 
-if (INTERFACE_BUILD OR BUILD_GRIDDYN_SHARED_LIB OR BUILD_CXX_SHARED_LIB OR BUILD_SHARED_FMI_LIBRARY)
+if (INTERFACE_BUILD OR BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_CXX_SHARED_LIB OR BUILD_SHARED_FMI_LIBRARY)
 	set(BUILD_SHARED_LIBS ON)
 else()
 	OPTION(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
@@ -500,11 +500,9 @@ IF(BUILD_SHARED_FMI_LIBRARY)
 	add_subdirectory(src/fmi_export)
 ENDIF(BUILD_SHARED_FMI_LIBRARY)
 
-OPTION(BUILD_GRIDDYN_SHARED_LIBRARY "Enable construction of griddyn binary shared library" OFF)
-
-IF(BUILD_GRIDDYN_SHARED_LIBRARY)
+IF(BUILD_SHARED_LIBS)
 	add_subdirectory(src/griddyn_shared)
-ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
+ENDIF(BUILD_SHARED_LIBS)
 
 add_subdirectory(src/gridDynMain)
 
@@ -530,9 +528,9 @@ OPTION(TEST_ENABLE "Enable unit testing construction" ON)
 IF (TEST_ENABLE)
 	#message(STATUS "otcf:${optional_component_test_files}")
 	add_subdirectory(test)
-IF(BUILD_GRIDDYN_SHARED_LIBRARY)
+IF(BUILD_SHARED_LIBS)
 	add_subdirectory(test/testSharedLibrary)
-ENDIF(BUILD_GRIDDYN_SHARED_LIBRARY)
+ENDIF(BUILD_SHARED_LIBS)
 	#enable_testing()
 	#add_test(NAME gridDynTest COMMAND testCore)
 ENDIF(TEST_ENABLE)
