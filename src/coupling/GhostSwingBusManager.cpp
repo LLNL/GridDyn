@@ -11,11 +11,15 @@
 */
 
 #include "GhostSwingBusManager.h"
-
+#include "MpiService.h"
 #include <iostream>
 #include <cstddef>
 #include <cstring>
 #include <cassert>
+
+#ifdef GRIDDYN_HAVE_MPI
+#include <mpi.h>
+#endif
 
 using namespace std;
 
@@ -32,8 +36,8 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Instance ()
 {
   if (!m_pInstance)
     {
-#ifdef HAVE_MPI
-      throw("GhostSwingBusManager Instance does not exist!");
+#ifdef GRIDDYN_HAVE_MPI
+      throw(std::runtime_error("GhostSwingBusManager Instance does not exist!"));
 #else  //mainly for convenience on a windows system for testing purposes the GhostSwingBus doesn't do anything without MPI
       m_pInstance = std::shared_ptr<GhostSwingBusManager> (new GhostSwingBusManager (nullptr, nullptr));
 #endif
@@ -53,29 +57,16 @@ std::shared_ptr<GhostSwingBusManager> GhostSwingBusManager::Initialize (int* arg
 
 bool GhostSwingBusManager::isInstance ()
 {
-  return m_pInstance != 0;
+  return static_cast<bool>(m_pInstance);
 }
 
 GhostSwingBusManager::GhostSwingBusManager (int* argc, char **argv[])
 {
 
-#ifdef HAVE_MPI
-  int flag;
+#ifdef GRIDDYN_HAVE_MPI
+    servicer = mpi::MpiService::instance(argc, argv);
 
-  MPI_Initialized (&flag);
-
-  if (!flag)
-    {
-      MPI_Init (argc, argv);
-      m_mpiInitCalled = true;
-    }
-
-  // get number of tasks
-  MPI_Comm_size (MPI_COMM_WORLD, &m_numTasks);
-
-  // get taskId of this task
-  MPI_Comm_rank (MPI_COMM_WORLD, &m_taskId);
-
+    m_numTasks = servicer->getCommSize();
   m_mpiSendRequests.resize (m_numTasks);
   m_mpiRecvRequests.resize (m_numTasks);
 
@@ -107,11 +98,11 @@ int GhostSwingBusManager::createGridlabDInstance (string arguments)
       cout << "Task: " << taskId << " creating new GridLAB-D instance with args " << arguments << endl;
     }
 
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
   char *arguments_c = const_cast<char*> (arguments.c_str ());
   m_initializeCompleted[taskId] = false;
-
-  MPI_Isend (arguments_c, arguments.size (), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);
+  auto token = servicer->getToken();
+  MPI_Isend (arguments_c, static_cast<int>(arguments.size ()), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);
 
 #else
   if (taskId >= m_numTasks)
@@ -164,8 +155,8 @@ void GhostSwingBusManager::sendVoltageStep (int taskId, cvec &voltage, unsigned 
   m_voltSendMessage[taskId].deltaTime = deltaTime;
 
 
-#ifdef HAVE_MPI
-
+#ifdef GRIDDYN_HAVE_MPI
+  auto token = servicer->getToken();
   if (!m_initializeCompleted[taskId])
     {
       MPI_Status status;
@@ -202,8 +193,9 @@ void GhostSwingBusManager::sendStopMessage (int taskId)
     {
       cout << "Sending STOP message to Distribution task " << taskId << endl;
     }
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
   // Blocking send to gridlabd task
+  auto token = servicer->getToken();
   MPI_Send (&m_voltSendMessage[taskId], 1, MPI_BYTE, taskId, STOPTAG, MPI_COMM_WORLD);
 #endif
 }
@@ -219,10 +211,10 @@ void GhostSwingBusManager::getCurrent (int taskId, cvec &current)
       cout << "Transmission *waiting* to get current from Task: " << taskId << endl;
     }
 
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
   {
     MPI_Status status;
-
+    auto token = servicer->getToken();
     // Make sure async Send has completed.
     MPI_Wait (&m_mpiSendRequests[taskId], &status);
 
@@ -263,16 +255,11 @@ void GhostSwingBusManager::endSimulation ()
       sendStopMessage (i);
     }
 
-#ifdef HAVE_MPI
+#ifdef GRIDDYN_HAVE_MPI
 
   if (g_printStuff)
     {
       cout << "end task : " << m_taskId << endl;
-    }
-
-  if (m_mpiInitCalled)
-    {
-      MPI_Finalize ();
     }
 #endif
   //clear the shared_ptr, the object will probably get deleted at this point and will be unable to be called
