@@ -28,13 +28,13 @@ std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const 
     return checkResid (gds, time, gds->getSolverInterface (sMode));
 }
 
-std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd)
+std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<SolverInterface> &sd)
 {
     return checkResid (gds, gds->getSimulationTime(), sd);
 }
 
 std::pair<double, int>
-checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<solverInterface> &sd)
+checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<SolverInterface> &sd)
 {
     const solverMode &sMode = sd->getSolverMode ();
     std::vector<double> resid;
@@ -580,7 +580,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
         {
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, solverInterface::ic_modes::fixed_diff, true);
+            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -623,7 +623,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
             }
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, solverInterface::ic_modes::fixed_diff, true);
+            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -650,7 +650,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
             }
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, solverInterface::ic_modes::fixed_diff, true);
+            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -678,7 +678,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
                 state[vsi[mm]] = v[mm];
             }
             std::copy (state, state + ssize, tempState.begin ());
-            sd->calcIC (gds->getSimulationTime(), 0.001, solverInterface::ic_modes::fixed_diff, true);
+            sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             std::copy (tempState.begin (), tempState.begin () + ssize, state);
         }
     }

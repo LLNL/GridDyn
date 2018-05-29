@@ -65,10 +65,10 @@ bool isSUNMatrixSetup (SUNMatrix J);
 void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize);
 
 #endif
-/** brief abstract base class for SUNDIALS based solverInterface objects doesn't really do anything on its own
-just provides common functionality to SUNDIALS solverInterface objects
+/** brief abstract base class for SUNDIALS based SolverInterface objects doesn't really do anything on its own
+just provides common functionality to SUNDIALS SolverInterface objects
 */
-class sundialsInterface : public solverInterface
+class sundialsInterface : public SolverInterface
 {
   protected:
     count_t maxNNZ = 0;  //!< the maximum number of non-zeros that might be needed
@@ -84,7 +84,7 @@ class sundialsInterface : public solverInterface
 	SUNLinearSolver LS=nullptr; //!< the link to the linear solver to use
   public:
     explicit sundialsInterface (const std::string &objName = "sundials");
-    /** @brief constructor loading the solverInterface structure*
+    /** @brief constructor loading the SolverInterface structure*
     @param[in] gds  the gridDynSimulation to link with
     @param[in] sMode the solverMode for the solver
     */
@@ -93,9 +93,9 @@ class sundialsInterface : public solverInterface
      */
     virtual ~sundialsInterface ();
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
     virtual double *state_data () noexcept override;
     virtual double *deriv_data () noexcept override;
     virtual const double *state_data () const noexcept override;

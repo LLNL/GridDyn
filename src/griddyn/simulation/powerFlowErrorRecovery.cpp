@@ -18,7 +18,7 @@
 
 namespace griddyn
 {
-powerFlowErrorRecovery::powerFlowErrorRecovery (gridDynSimulation *gds, std::shared_ptr<solverInterface> sd)
+powerFlowErrorRecovery::powerFlowErrorRecovery (gridDynSimulation *gds, std::shared_ptr<SolverInterface> sd)
     : sim (gds), solver (std::move (sd))
 {
 }
@@ -77,7 +77,7 @@ powerFlowErrorRecovery::recovery_return_codes powerFlowErrorRecovery::attemptFix
 
 void powerFlowErrorRecovery::reset () { attempt_number = 0; }
 
-void powerFlowErrorRecovery::updateInfo (std::shared_ptr<solverInterface> sd) { solver = std::move (sd); }
+void powerFlowErrorRecovery::updateInfo (std::shared_ptr<SolverInterface> sd) { solver = std::move (sd); }
 int powerFlowErrorRecovery::attempts () const { return attempt_number; }
 // Try any non-reversible adjustments which might be out there
 bool powerFlowErrorRecovery::powerFlowFix1 ()

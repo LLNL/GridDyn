@@ -11,21 +11,21 @@
 cmake_minimum_required (VERSION 3.5)
 
 # set variable shared_sources with the sources for the coupling library
-set(shared_sources
+set(coupling_sources
     GhostSwingBusManager.cpp
+	MpiService.cpp
     )
 
-set(shared_headers
+set(coupling_headers
     GhostSwingBusManager.h
 	GhostSwingBusMessageTypes.h
+	MpiService.h
     )
     
 # require MPI for this project
 
-set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
+add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})
 
-add_library(coupling_static_lib STATIC ${shared_sources} ${shared_headers})
 target_link_libraries(coupling_static_lib PUBLIC griddyn_base)
 set_target_properties (coupling_static_lib PROPERTIES FOLDER libraries)
 INSTALL(TARGETS coupling_static_lib EXPORT griddyn-targets  DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)

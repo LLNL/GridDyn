@@ -1069,11 +1069,11 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
     }
     // writing the state vector
     auto &currentMode = gds->getCurrentMode (sMode);
-    auto solverInterface = gds->getSolverInterface (currentMode);
+    auto SolverInterface = gds->getSolverInterface (currentMode);
 
     matrixDataSparse<double> md;
 
-    stateData sD (gds->getSimulationTime(), solverInterface->state_data (), solverInterface->deriv_data ());
+    stateData sD (gds->getSimulationTime(), SolverInterface->state_data (), SolverInterface->deriv_data ());
 
     sD.cj = 10000;
     gds->jacobianElements (noInputs, sD, md, noInputLocs, currentMode);
@@ -1081,7 +1081,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
     stringVec stateNames;
     gds->getStateName (stateNames, currentMode);
 
-    count_t dsize = solverInterface->size ();
+    count_t dsize = SolverInterface->size ();
     bFile.write (reinterpret_cast<char *> (&dsize), sizeof (count_t));
     for (auto &stN : stateNames)
     {

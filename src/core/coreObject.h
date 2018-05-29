@@ -10,8 +10,6 @@
  * LLNS Copyright End
 */
 
-#ifndef COREOBJECT_H_
-#define COREOBJECT_H_
 #pragma once
 
 #include "coreDefinitions.hpp"
@@ -346,7 +344,7 @@ private:
 	coreObject(id_type_t coid);
 };
 
-/** @brief function to set multiple flags on a object separated by ; or ,
+/** @brief helper function to set multiple flags on a object separated by ; or ,
 @details the flags can be turned off by putting a - in front of the flag
 @param[in] obj the object to set the flags on
 @param[in] flags  the list of flags to set
@@ -459,4 +457,3 @@ print_level stringToPrintLevel(const std::string &level);
 #endif
 
 }//namespace griddyn
-#endif

@@ -22,7 +22,7 @@ namespace solvers
 {
 /** @brief class implementing a Gauss Seidel solver for algebraic variables in a power system
  */
-class basicOdeSolver : public solverInterface
+class basicOdeSolver : public SolverInterface
 {
 private:
 	std::vector<double> state;  //!< state data/
@@ -33,15 +33,15 @@ private:
 public:
 	/** @brief default constructor*/
 	explicit basicOdeSolver(const std::string &objName = "basicOde");
-	/** alternate constructor to feed to solverInterface
+	/** alternate constructor to feed to SolverInterface
 	@param[in] gds  the gridDynSimulation to link to
 	@param[in] sMode the solverMode to solve with
 	*/
 	basicOdeSolver(gridDynSimulation *gds, const solverMode &sMode);
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
 	double *state_data() noexcept override;
 	double *deriv_data() noexcept override;
 	double *type_data() noexcept override;

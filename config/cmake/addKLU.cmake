@@ -53,7 +53,7 @@ if(KLU_ENABLE)
         message(FATAL_ERROR "suitesparse not found, check for errors during autobuilding")
       else(AUTOBUILD_KLU)
         # Autobuild isn't enabled and the user didn't supply a location, search for a system copy
-        find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
+		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF UMFPACK SUITESPARSECONFIG CXSPARSE)
 	    if(SuiteSparse_FOUND) 
 	      set(KLU_CMAKE FALSE)
           get_filename_component(SuiteSparse_DIRECT_LIBRARY_DIR ${SuiteSparse_KLU_LIBRARY_RELEASE} DIRECTORY)

@@ -36,8 +36,7 @@ if (BRAID_DIR)
 
   add_library(braid::braid STATIC IMPORTED)
   set_property(TARGET braid::braid PROPERTY IMPORTED_LOCATION ${BRAID_LIBRARY})
-  set_target_properties(braid::braid PROPERTIES
-				INTERFACE_INCLUDE_DIRECTORIES "${BRAID_INCLUDE_DIR}")
+  set_property(TARGET braid::braid PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${BRAID_INCLUDE_DIR})
 else(BRAID_DIR)
   set(BRAID_FOUND FALSE)
 endif(BRAID_DIR)

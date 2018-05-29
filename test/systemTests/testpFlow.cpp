@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE (pflow_test_dcflow)
     auto ns = makeSolver ("kinsol");
     ns->setName ("dcflow");
     ns->set ("mode", "dc, algebraic");
-    gds->add (std::shared_ptr<solverInterface> (std::move (ns)));
+    gds->add (std::shared_ptr<SolverInterface> (std::move (ns)));
 
     auto smode = gds->getSolverMode ("dcflow");
     gds->set ("defpowerflow", "dcflow");
@@ -402,7 +402,7 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, pflow_test_line_modes, dat
     }
 
 
-    gds->add (std::shared_ptr<solverInterface> (std::move (ns)));
+    gds->add (std::shared_ptr<SolverInterface> (std::move (ns)));
     auto smode = gds->getSolverMode (approx);
     gds->set ("defpowerflow", approx);
     gds->pFlowInitialize (0.0);
