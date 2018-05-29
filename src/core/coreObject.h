@@ -51,7 +51,7 @@ class coreObject
 {
 private:
 	//this is used much more frequently than any other so it gets its own boolean at the beginning of the object
-	bool enabled = true;     //!< enabled indicator 
+	bool enabled = true;     //!< enabled indicator
 	bool updates_enabled = false; //!< indicator that updates are enabled
 protected:
 	bool extra_bool = false;  //!< an extra flag for derived classes to use
@@ -113,7 +113,7 @@ public:
   * @param[in] message the log message
   */
   virtual void log (coreObject *object, print_level level, const std::string &message);
-  
+
   /**
   * @brief increment the reference counter for the object
   */
@@ -317,7 +317,7 @@ public:
   {
     return nextUpdateTime;
   }
-  
+
   /**@brief return the last time the object had its state set or was updated
   */
   coreTime currentTime () const noexcept
