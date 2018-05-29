@@ -125,6 +125,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		endif()
 	endif()
 		
+	
 	## Look for each component the same way :
 	##  * For include dir the reference file is the <component>.h
 	##	* for library fileName the reference is the <component> itself (cmake will prepend/append necessary prefix/suffix according to the platform)
@@ -147,9 +148,9 @@ macro(SuiteSparse_FIND_COMPONENTS )
 
 		## try to find include dir (looking for very important header file)
 		find_path(SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR	
-			NAMES 			${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
+			NAMES 		${suitesparseComp}.h ${suitesparseCompLC}.h ${suitesparseCompUC}.h ${suitesparseComp_ALT}.h
 						${suitesparseComp}.hpp ${suitesparseCompLC}.hpp ${suitesparseCompUC}.hpp
-			HINTS			${SuiteSparse_DIR_INCLUDE}
+			HINTS		${SuiteSparse_DIR_INCLUDE}
 						${SuiteSparse_DIR}/include
 						${SuiteSparse_DIR}/include/suitesparse
 						${SuiteSparse_DIR}/suitesparse/include
@@ -158,7 +159,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 						${${suitesparseCompUC}_DIR}/include
 						${${suitesparseCompUC}_DIR}/${suitesparseComp}/include
 						${${suitesparseCompUC}_DIR}
-			PATHS			/opt/local/include
+			PATHS		/opt/local/include
 						/usr/include
 						/usr/local/include
 						/usr/include/suitesparse
@@ -192,7 +193,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE 
 			NAMES 		lib${suitesparseComp} 	lib${suitesparseCompLC} lib${suitesparseCompUC}
 						${suitesparseComp} 		${suitesparseCompLC} 	${suitesparseCompUC}
-			HINTS			${SuiteSparse_DIR_LIB}
+			HINTS		${SuiteSparse_DIR_LIB}
 						${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						${${suitesparseCompUC}_DIR}/lib
@@ -213,7 +214,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		find_library(SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG 
 			NAMES 		${suitesparseComp}d		${suitesparseCompLC}d 		${suitesparseCompUC}d
 						lib${suitesparseComp}d 	lib${suitesparseCompLC}d 	lib${suitesparseCompUC}d
-			HINTS			${SuiteSparse_DIR_LIB_DEBUG}
+			HINTS		${SuiteSparse_DIR_LIB_DEBUG}
 						${SuiteSparse_DIR_LIB}
 						${SuiteSparse_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 						${${suitesparseCompUC}_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
@@ -282,6 +283,18 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			endif ()
 		else()
 			list(APPEND SuiteSparse_LIBRARIES	optimized "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}" debug "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}")
+			if (TARGET SuiteSparse::${suitesparseCompLC})
+			else()
+				add_library(SuiteSparse::${suitesparseCompLC} STATIC IMPORTED)
+				set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+				set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+			endif()
+			set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+				IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+				IMPORTED_LOCATION_RELEASE "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
+				IMPORTED_LOCATION_DEBUG "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}"
+			)
+			list(APPEND SuiteSparse_ACTUAL_TARGETS "SuiteSparse::${suitesparseCompLC}")
 		endif()
 		
 		## here we allow to find at least the include OR the lib dir and just warn if one of both missing
@@ -289,6 +302,8 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			set(SuiteSparse_${suitesparseCompUC}_FOUND OFF)
 		else()
 			set(SuiteSparse_${suitesparseCompUC}_FOUND ON)
+			set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+				INTERFACE_INCLUDE_DIRECTORIES "${SuiteSparse_${suitesparseCompUC}_INCLUDE_DIR}")
 		endif()
 		
 		## if one or both (include dir or filepath lib), then we provide a new cmake cache variable for the search. Otherwise we don't need anymore to expose all intermediate variables
@@ -315,9 +330,13 @@ macro(SuiteSparse_FIND_COMPONENTS )
 		## special definition needed for metis
 		if(NOT ${suitesparseComp} MATCHES "metis")
 			set(SuiteSparse_${suitesparseCompUC}_DEFINITIONS "-DNPARTITION")
-			add_definitions(${SuiteSparse_${suitesparseCompUC}_DEFINITIONS})
+			#add_definitions(${SuiteSparse_${suitesparseCompUC}_DEFINITIONS})
 			if(SuiteSparse_VERBOSE)
 				message(STATUS "      * SuiteSparse_${suitesparseCompUC}_DEFINITIONS = ${SuiteSparse_${suitesparseCompUC}_DEFINITIONS}")
+			endif()
+			if (TARGET SuiteSparse::${suitesparseCompLC})
+				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+					INTERFACE_COMPILE_DEFINITIONS "NPARTITION")
 			endif()
 		endif()
 		
@@ -335,6 +354,7 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			break() ## one component not found is enough to failed
 		endif()
 	endforeach()
+	
 endmacro()
 
 ## Default behavior if user doesn't use the COMPONENTS flag in find_package(SuiteSparse ...) command
@@ -381,7 +401,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 	## try to find blas lib
 	find_library(SuiteSparse_BLAS_LIBRARY 
 		NAMES 		blas cblas libblas
-		HINTS			${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		HINTS		${SuiteSparse_BLAS_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					${SuiteSparse_BLAS_DIR}}/lib
 					${SuiteSparse_BLAS_DIR}}/lib64
 					${SuiteSparse_BLAS_DIR}
@@ -403,19 +423,31 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 			# Send all msgs as "STATUS": We'll send an error at the bottom, only if "REQUIRED" is set.
 			message(STATUS "   Failed to find SuiteSparse_BLAS_LIBRARY. Set it manually or set the SuiteSparse_BLAS_DIR to look for it inside.")
 		endif()
-			set(SuiteSparse_BLAS_DIR "$ENV{SuiteSparse_BLAS_DIR}" CACHE PATH "blas root directory")
+		set(SuiteSparse_BLAS_DIR "$ENV{SuiteSparse_BLAS_DIR}" CACHE PATH "blas root directory")
 	else()
 		if(DEFINED SuiteSparse_BLAS_DIR)
 			mark_as_advanced(SuiteSparse_BLAS_DIR)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_BLAS_LIBRARY})
+		add_library(SuiteSparse::blas STATIC IMPORTED)
+		set_target_properties(SuiteSparse::blas PROPERTIES
+			IMPORTED_LOCATION "${SuiteSparse_BLAS_LIBRARY}"
+		)
+		if (TARGET blas)
+		else()
+			add_library(blas STATIC IMPORTED)
+			set_target_properties(blas PROPERTIES
+				IMPORTED_LOCATION "${SuiteSparse_BLAS_LIBRARY}"
+			)
+		endif()
 	endif()
 	
 	## try to find lapack lib
 	find_library(SuiteSparse_LAPACK_LIBRARY 
 		NAMES 		lapack liblapack
-		HINTS			${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
+		HINTS		${SuiteSparse_LAPACK_DIR}/lib${SuiteSparse_SEARCH_LIB_POSTFIX}
 					${SuiteSparse_LAPACK_DIR}/lib
+					${SuiteSparse_LAPACK_DIR}/lib64
 					${SuiteSparse_LAPACK_DIR}
 					${SuiteSparse_LAPACK_DIR}/${CMAKE_INSTALL_LIBDIR}
 					${ADDITIONAL_SEARCH_DIRS}
@@ -431,7 +463,7 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 					/opt/local/${CMAKE_INSTALL_LIBDIR}
 					/usr/${CMAKE_INSTALL_LIBDIR}
 					/usr/local/${CMAKE_INSTALL_LIBDIR}
-		PATH_SUFFIXES	Release Debug
+		PATH_SUFFIXES	Release Debug lib64
 	)
 	if(NOT SuiteSparse_LAPACK_LIBRARY)
 		if (SuiteSparse_VERBOSE)
@@ -444,6 +476,17 @@ if(SuiteSparse_USE_LAPACK_BLAS)
 			mark_as_advanced(SuiteSparse_LAPACK_DIR)
 		endif()
 		list(APPEND SuiteSparse_LAPACK_BLAS_LIBRARIES ${SuiteSparse_LAPACK_LIBRARY})
+		add_library(SuiteSparse::lapack STATIC IMPORTED)
+		set_target_properties(SuiteSparse::lapack PROPERTIES
+			IMPORTED_LOCATION "${SuiteSparse_LAPACK_LIBRARY}"
+		)
+		if (TARGET lapack)
+		else()
+			add_library(lapack STATIC IMPORTED)
+			set_target_properties(lapack PROPERTIES
+				IMPORTED_LOCATION "${SuiteSparse_LAPACK_LIBRARY}"
+			)
+		endif()
 	endif()
 		
 	## well, now append to the SuiteSparse_LIBRARIES and print infos if VERBOSE
@@ -546,3 +589,108 @@ IF(NOT SuiteSparse_FOUND)
     ENDIF()
   ENDIF()
 ENDIF()
+
+## now clean up the targets and create the linkages
+if (SuiteSparse_FOUND)
+ if (TARGET SuiteSparse::amd)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::amd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+  if (TARGET SuiteSparse::btf)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::btf PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::camd)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::camd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::colamd)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::colamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::ccolamd)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::ccolamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::cholamd)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::cholamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::suitesparseconfig;blas;lapack"
+	)
+	else()
+	set_target_properties(SuiteSparse::cholamd PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;blas;lapack")
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::cxsparse)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::cxsparse PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::ldl)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::ldl PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::suitesparseconfig"
+	)
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::klu)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::klu PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::colamd;SuiteSparse::btf;SuiteSparse::suitesparseconfig"
+	)
+	else()
+	set_target_properties(SuiteSparse::klu PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::colamd;SuiteSparse::btf")
+	endif()
+ endif()
+ 
+ if (TARGET SuiteSparse::umfpack)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::umfpack PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::cholmod;SuiteSparse::suitesparseconfig;blas;lapack"
+	)
+	else()
+	set_target_properties(SuiteSparse::umfpack PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::amd;SuiteSparse::camd;SuiteSparse::colamd;SuiteSparse::ccolamd;SuiteSparse::cholmod;blas;lapack")
+	endif()
+ endif()
+ 
+  if (TARGET SuiteSparse::spqr)
+	if (TARGET SuiteSparse::suitesparseconfig)
+		set_target_properties(SuiteSparse::spqr PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::camd;SuiteSparse::ccolamd;SuiteSparse::cholmod;SuiteSparse::suitesparseconfig;blas;lapack"
+	)
+	else()
+	set_target_properties(SuiteSparse::spqr PROPERTIES
+		INTERFACE_LINK_LIBRARIES "SuiteSparse::camd;SuiteSparse::ccolamd;SuiteSparse::cholmod;blas;lapack")
+	endif()
+ endif()
+
+
+endif()

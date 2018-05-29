@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -227,11 +228,11 @@ inline time_t timegm(std::tm* timeptr)
 {
     return _mkgmtime(timeptr);
 }
-
 // On Windows, Visual Studio does not define gmtime_r. However, mingw might
 // do (or might not do). See https://github.com/mayah/tinytoml/issues/25,
+
 #ifndef gmtime_r
-inline struct tm* gmtime_r(const time_t* t, struct tm* r)
+inline struct tm* gmtime_safe(const time_t* t, struct tm* r)
 {
     // gmtime is threadsafe in windows because it uses TLS
     struct tm *theTm = gmtime(t);
@@ -242,7 +243,17 @@ inline struct tm* gmtime_r(const time_t* t, struct tm* r)
         return 0;
     }
 }
+#else
+inline struct tm* gmtime_safe(const time_t* t, struct tm* r)
+{
+    return gmtime_r(t, r);
+}
 #endif  // gmtime_r
+#else // _WIN32
+inline struct tm* gmtime_safe(const time_t* t, struct tm* r)
+{
+    return gmtime_r(t, r);
+}
 #endif  // _WIN32
 
 namespace internal {
@@ -1351,7 +1362,7 @@ inline void Value::write(std::ostream* os, const std::string& keyPrefix, int ind
     case TIME_TYPE: {
         time_t tt = std::chrono::system_clock::to_time_t(*time_);
         std::tm t;
-        gmtime_r(&tt, &t);
+        gmtime_safe(&tt, &t);
         char buf[256];
         snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
         (*os) << buf;

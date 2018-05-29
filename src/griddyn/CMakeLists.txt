@@ -523,14 +523,10 @@ target_include_directories(griddyn SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_link_libraries(griddyn PUBLIC coreObjects)
 target_link_libraries(griddyn PUBLIC utilities)
 
-target_link_libraries(griddyn PUBLIC ${SUNDIALS_LIBRARIES})
+target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
 
 if(NOT DISABLE_KLU)
-IF (KLU_CMAKE)
-target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
-ELSE(KLU_CMAKE)
-target_link_libraries(griddyn PUBLIC ${SuiteSparse_LIBRARIES})
-ENDIF(KLU_CMAKE)
+	target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
 endif(NOT DISABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
@@ -551,11 +547,10 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
-target_include_directories(griddyn PRIVATE ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
-target_include_directories(griddyn PRIVATE ${SUNDIALS_INCLUDE_DIRS})
+#target_include_directories(griddyn PRIVATE ${SUNDIALS_INCLUDE_DIRS})
 #create a griddyn_config.h file for program options
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h)
-INSTALL(FILES ${PROJECT_BINARY_DIR}/libs/include/griddyn/griddyn-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h)
+INSTALL(FILES ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)
 
 INSTALL(TARGETS griddyn EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 

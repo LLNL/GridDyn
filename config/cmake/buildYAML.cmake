@@ -10,7 +10,7 @@ function (build_yaml)
 
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 3.4)
+    cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(yaml-cpp
     SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/yaml-cpp
@@ -20,7 +20,7 @@ ExternalProject_Add(yaml-cpp
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/yaml-cpp
      
     CMAKE_ARGS 
-        -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/libs
+        -DCMAKE_INSTALL_PREFIX=${AUTOBUILD_INSTALL_PATH}
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DYAML_CPP_BUILD_TOOLS=OFF
 		-DYAML_CPP_BUILD_TESTS=OFF
@@ -30,7 +30,7 @@ ExternalProject_Add(yaml-cpp
         -DCMAKE_LINKER=${CMAKE_LINKER}
 		-DINSTALL_CMAKE_DIR=${PROJECT_BINARY_DIR}/cmake
         
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/libs
+    INSTALL_DIR ${AUTOBUILD_INSTALL_PATH}
     )")
 
 

@@ -207,6 +207,19 @@ macro(SUNDIALS_FIND_COMPONENTS )
 			endif ()
 		else()
 			list(APPEND SUNDIALS_LIBRARIES	optimized "${SUNDIALS_${sundialsCompUC}_LIBRARY_RELEASE}" debug "${SUNDIALS_${sundialsCompUC}_LIBRARY_DEBUG}")
+			if (TARGET SUNDIALS::${sundialsCompLC})
+			else()
+			add_library(SUNDIALS::${sundialsCompLC} STATIC IMPORTED)
+			set_property(TARGET SUNDIALS::${sundialsCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+			set_property(TARGET SUNDIALS::${sundialsCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+			
+			endif()
+			set_target_properties(SUNDIALS::${sundialsCompLC} PROPERTIES
+				IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+				IMPORTED_LOCATION_RELEASE "${SUNDIALS_${sundialsCompUC}_LIBRARY_RELEASE}"
+				IMPORTED_LOCATION_DEBUG "${SUNDIALS_${sundialsCompUC}_LIBRARY_DEBUG}"
+			)
+			list(APPEND SUNDIALS_ACTUAL_TARGETS "SUNDIALS::${sundialsCompLC}")
 		endif()
 		
 		## here we allow to find at least the include OR the lib dir and just warn if one of both missing
@@ -214,6 +227,10 @@ macro(SUNDIALS_FIND_COMPONENTS )
 			set(SUNDIALS_${sundialsCompUC}_FOUND OFF)
 		else()
 			set(SUNDIALS_${sundialsCompUC}_FOUND ON)
+			if(SUNDIALS_${sundialsCompUC}_INCLUDE_DIR)
+				set_target_properties(SUNDIALS::${sundialsCompLC} PROPERTIES
+					INTERFACE_INCLUDE_DIRECTORIES "${SUNDIALS_${sundialsCompUC}_INCLUDE_DIR}")
+			endif()
 		endif()
 		
 		## if one of both (include dir or filepath lib), then we provide a new cmake cache variable for the search. Otherwise we don't need anymore to expose all intermediates variables
@@ -271,11 +288,6 @@ SUNDIALS_FIND_COMPONENTS()
 if(SUNDIALS_INCLUDE_DIRS)
 	list(REMOVE_DUPLICATES SUNDIALS_INCLUDE_DIRS)
 endif()
-if(SUNDIALS_LIBRARIES)
-	#list(REMOVE_DUPLICATES SUNDIALS_LIBRARIES)
-endif()
-
-
 
 
 if(SUNDIALS_VERBOSE)
@@ -293,6 +305,14 @@ IF(NOT SUNDIALS_FOUND)
       MESSAGE(STATUS "ERROR: SUNDIALS was not found.")
     ENDIF()
   ENDIF()
+ELSE()
+# add the linkages to the targets
+if (TARGET SUNDIALS::SUNDIALS)
+else()
+ add_library(SUNDIALS::SUNDIALS INTERFACE IMPORTED)
+endif()
+ set_target_properties(SUNDIALS::SUNDIALS PROPERTIES INTERFACE_LINK_LIBRARIES "${SUNDIALS_ACTUAL_TARGETS}")
+ set_target_properties(SUNDIALS::SUNDIALS PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${SUNDIALS_INCLUDE_DIRS}")
 ENDIF()
 
 

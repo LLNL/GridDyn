@@ -1,5 +1,5 @@
 if(NOT DEFINED SUNDIALS_DIR)
-  set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs CACHE PATH "path to SUNDIALS")
+  set(SUNDIALS_DIR ${AUTOBUILD_INSTALL_PATH} CACHE PATH "path to SUNDIALS")
 endif()
 
 SHOW_VARIABLE(SUNDIALS_DIR PATH
@@ -9,12 +9,11 @@ SHOW_VARIABLE(SUNDIALS_DIR PATH
   
   set(SUNDIALS_REQUIRED IDA KINSOL SUNMATRIXDENSE SUNLINSOLDENSE)
   if (OPENMP_FOUND)
-  list(APPEND SUNDIALS_REQUIRED nvecopenmp)
-  
+	list(APPEND SUNDIALS_REQUIRED nvecopenmp)
   endif(OPENMP_FOUND)
   
   if (KLU_ENABLE)
-  list(APPEND SUNDIALS_REQUIRED sunmatrixsparse sunlinsolklu)
+	list(APPEND SUNDIALS_REQUIRED sunmatrixsparse sunlinsolklu)
   endif(KLU_ENABLE)
   
 find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
@@ -27,9 +26,9 @@ find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONEN
 		IF(FORCE_SUNDIALS_REBUILD)
 			include(buildSundials)
 			if (MINGW)
-			build_sundialsMINGW()
+				build_sundialsMINGW()
 			else(MINGW)
-			build_sundials()
+				build_sundials()
 			endif(MINGW)
 			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
 		ENDIF(FORCE_SUNDIALS_REBUILD)
@@ -37,12 +36,12 @@ find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONEN
 	   IF(FORCE_SUNDIALS_REBUILD)
 			include(buildSundials)
 			if (MINGW)
-			build_sundialsMINGW()
+				build_sundialsMINGW()
 			else(MINGW)
-			build_sundials()
+				build_sundials()
 			endif(MINGW)
 			set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
-			set(SUNDIALS_LIBRARIES NOT_FOUND CACHE FORCE)
+			set(SUNDIALS_LIBRARIES NOT_FOUND FORCE)
 			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
 			set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
 			find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
@@ -67,7 +66,6 @@ find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONEN
 	message( "Double check spelling specified libraries (search is case sensitive)")
   endif(SUNDIALS_FOUND)
   endif(SUNDIALS_FOUND)
-
 
 if (SUNDIALS_ARKODE_FOUND)
 set(LOAD_ARKODE TRUE)
