@@ -17,12 +17,12 @@
 #include <fstream>
 #include <iostream>
 
-static const std::string nullStr{ "" };
+static const std::string nullStr{};
 
 bool isElement (const toml::Value &testValue);
 bool isAttribute (const toml::Value &testValue);
 
-tomlReaderElement::tomlReaderElement () noexcept {}
+tomlReaderElement::tomlReaderElement () noexcept = default;
 tomlReaderElement::tomlReaderElement (const std::string &fileName) { tomlReaderElement::loadFile (fileName); }
 void tomlReaderElement::clear ()
 {
@@ -270,11 +270,7 @@ double tomlReaderElement::getAttributeValue (const std::string &attributeName) c
     {
         return v->asNumber();
     }
-    else
-    {
-        return numeric_conversionComplete(v->as<std::string>(), readerNullVal);
-    }
-
+    return numeric_conversionComplete(v->as<std::string>(), readerNullVal);
 }
 
 std::shared_ptr<readerElement> tomlReaderElement::firstChild () const
@@ -363,7 +359,7 @@ void tomlReaderElement::moveToNextSibling ()
         return;
     }
     // there are no more elements in a potential array
-   
+
     auto &tab = parents.back()->getElement().as<toml::Table>();
     auto elementIterator = tab.begin();
     auto elementEnd = tab.end();

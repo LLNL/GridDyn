@@ -22,7 +22,7 @@ static const std::string nullStr = std::string ("");
 bool isElement (const Json_gd::Value &testValue);
 bool isAttribute (const Json_gd::Value &testValue);
 
-jsonReaderElement::jsonReaderElement () noexcept {}
+jsonReaderElement::jsonReaderElement () noexcept = default;
 jsonReaderElement::jsonReaderElement (const std::string &fileName) { jsonReaderElement::loadFile (fileName); }
 void jsonReaderElement::clear ()
 {
