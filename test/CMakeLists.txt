@@ -106,6 +106,16 @@ add_library(griddyn_test_base INTERFACE)
 target_link_libraries(griddyn_test_base INTERFACE Boostlibs::test)
 target_link_libraries(griddyn_test_base INTERFACE griddyn_base)
 
+FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
+
+IF(WIN32)
+	#there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4
+	#this will probably fail on macs yet
+
+	STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
+ENDIF(WIN32)
+#message(${test_dir})
+
 target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
 
 target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYNMAIN_LOCATION="${GRIDYNMAIN_BINARY_LOC}")
@@ -118,16 +128,6 @@ add_executable(testSystem ${testSystem_sources} ${testMain_headers})
 add_executable(testExtra ${testExtra_sources} ${testMain_headers})
 
 set_target_properties (testLibrary testComponents testSystem  testExtra PROPERTIES FOLDER tests)
-
-FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
-
-IF(WIN32)
-#there are 4 slashes because cmake escapes "\" and regex escapes it so I need 4
-#this will probably fail on macs yet
-
-STRING(REGEX REPLACE "\\\\" "\\\\\\\\" test_dir ${test_dir})
-ENDIF(WIN32)
-#message(${test_dir})
 
 
 
