@@ -22,6 +22,8 @@
 #include <cmath>
 #include <algorithm>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 BackwardDiff::BackwardDiff()
@@ -561,3 +563,5 @@ void Solver_App_BDF::EvaluateFunAndJac(const Vector& x, Vector& gx, bool require
     }
   //update_jacobian=true;
 }
+} // namespace paradae
+} // namespace griddyn

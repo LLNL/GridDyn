@@ -13,7 +13,8 @@
 #define SDIRK_12_h
 
 #include "RungeKutta_SDIRK.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -29,5 +30,7 @@ public:
   SDIRK_12(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_SDIRK_12";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

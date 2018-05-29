@@ -11,6 +11,9 @@
 */
 #include "Equation_ODE.h"
 
+namespace griddyn {
+namespace paradae {
+
 void Equation_ODE::function(const Real t, const Vector& y, const Vector& dy, const Vector& state, Vector& Fydy)
 {
   function_ode(t,y,state,Fydy);
@@ -74,3 +77,5 @@ void Equation_ODE::approx_jacobian_ode(const Real t, const Vector& y, const Vect
       yh(j)-=h;
     }
 }
+} // namespace paradae
+} // namespace griddyn

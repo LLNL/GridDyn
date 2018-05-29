@@ -19,6 +19,8 @@
 
 namespace griddyn
 {
+namespace braid {
+using namespace paradae;
 
 /** @brief class implementing XBraid algorithms for power system DAEs
  */

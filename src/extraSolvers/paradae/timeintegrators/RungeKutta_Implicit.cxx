@@ -18,7 +18,8 @@
 #include <cmath>
 
 using namespace std;
-
+namespace griddyn {
+namespace paradae {
 RungeKutta_Implicit::RungeKutta_Implicit(Equation* eq, bool varstep):RungeKutta(eq,varstep)
 {
   CurrentJacobian=NULL;
@@ -169,3 +170,5 @@ void Solver_App_IRK::EvaluateFunAndJac(const Vector& allK, Vector& gx, bool requ
     }
   //update_jacobian=true;
 }
+} // namespace paradae
+} // namespace griddyn

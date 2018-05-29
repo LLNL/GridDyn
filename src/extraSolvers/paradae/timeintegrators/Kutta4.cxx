@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "Kutta4.h"
-
+namespace griddyn {
+namespace paradae {
 Kutta4::Kutta4(Equation* eq):RungeKutta_Explicit(eq,false)
 {
   nb_steps=4;
@@ -24,3 +25,5 @@ Kutta4::Kutta4(Equation* eq):RungeKutta_Explicit(eq,false)
   rk_b(0)=Real(1./6.);rk_b(1)=Real(1./3.);rk_b(2)=Real(1./3.);rk_b(3)=Real(1./6.);
   rk_c(1)=Real(1./2.);rk_c(2)=Real(1./2.);rk_c(3)=Real(1.0);
 }
+} // namespace paradae
+} // namespace griddyn

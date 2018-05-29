@@ -13,15 +13,17 @@ cmake_minimum_required (VERSION 3.5)
 # set variable shared_sources with the sources for the coupling library
 set(coupling_sources
     GhostSwingBusManager.cpp
-	MpiService.cpp
     )
 
 set(coupling_headers
     GhostSwingBusManager.h
 	GhostSwingBusMessageTypes.h
-	MpiService.h
     )
-    
+   
+if (GRIDDYN_HAVE_MPI)
+	list(APPEND coupling_sources MpiService.cpp)	
+	list(APPEND coupling_headers MpiService.h)
+endif(GRIDDYN_HAVE_MPI)
 # require MPI for this project
 
 add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})

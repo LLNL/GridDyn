@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iomanip>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 void Vector::Fill(Real fill_)
@@ -165,3 +167,5 @@ ostream& operator<<(ostream& output, const Vector& vec)
   vec.dump(output);
   return output;
 }
+} // namespace paradae
+} // namespace griddyn

@@ -20,7 +20,8 @@ namespace griddyn
     class solverMode;
 }
 
-
+namespace griddyn {
+namespace paradae {
 /** @brief class that connects ParaDAE and GridDyn 
  */
 class EquationGridDyn : public Equation_DAE_full {
@@ -38,5 +39,7 @@ public:
   virtual ~EquationGridDyn(){};
 };
 
+} // namespace paradae
+} // namespace griddyn
 
 

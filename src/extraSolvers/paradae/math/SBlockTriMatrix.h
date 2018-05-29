@@ -14,6 +14,8 @@
 
 #include "DBlockTriMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 class SBlockTriMatrix : public DBlockTriMatrix {
 private:
   void operator=(const SBlockTriMatrix& mat){};
@@ -38,5 +40,7 @@ public:
 
   virtual void dump(std::ostream& output) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

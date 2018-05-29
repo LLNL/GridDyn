@@ -12,7 +12,8 @@
 #pragma once
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -27,3 +28,5 @@ public:
   ExpMidPoint(Equation* eq);
   virtual std::string GetName(){return "RK_ExpMidPoint_2";};
 };
+} // namespace paradae
+} // namespace griddyn

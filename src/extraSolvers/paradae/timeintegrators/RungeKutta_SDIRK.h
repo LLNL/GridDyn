@@ -15,7 +15,8 @@
 #include "RungeKutta_Implicit.h"
 
 //class SMultiVector;
-
+namespace griddyn {
+namespace paradae {
 class Solver_App_SDIRK : public Solver_App_IRK {
   int current_step;
   SVector b;
@@ -36,5 +37,7 @@ public:
   virtual bool SolveInnerSteps(Real t, Real used_dt, const Vector& x0, SMultiVector& allK);
   virtual ~RungeKutta_SDIRK(){};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

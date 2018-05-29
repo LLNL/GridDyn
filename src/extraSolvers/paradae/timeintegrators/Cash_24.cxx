@@ -19,7 +19,8 @@
 //  ---------------------------------------------------------------------------------------------------
 //                4 | 0.896869652944  0.0182725272734 -0.0845900310706 -0.266418670647  0.435866521508
 //                2 | 1.056462161070 -0.0564621610705  0.0              0.0             0.0
-
+namespace griddyn {
+namespace paradae {
 Cash_24::Cash_24(Equation* eq, bool variable_step):RungeKutta_SDIRK(eq,variable_step)
 {
   nb_steps=5;
@@ -58,3 +59,5 @@ Cash_24::Cash_24(Equation* eq, bool variable_step):RungeKutta_SDIRK(eq,variable_
   rk_c(3)=0.924556761814;
   rk_c(4)=1.0;
 }
+} // namespace paradae
+} // namespace griddyn

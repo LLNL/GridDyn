@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "SDIRK_12.h"
-
+namespace griddyn {
+namespace paradae {
 SDIRK_12::SDIRK_12(Equation* eq, bool variable_step):RungeKutta_SDIRK(eq,variable_step)
 {
   nb_steps=2;
@@ -27,3 +28,5 @@ SDIRK_12::SDIRK_12(Equation* eq, bool variable_step):RungeKutta_SDIRK(eq,variabl
   rk_c(0)=1;rk_c(1)=0;
   rk_binf(0)=1;rk_binf(1)=0;
 }
+} // namespace paradae
+} // namespace griddyn

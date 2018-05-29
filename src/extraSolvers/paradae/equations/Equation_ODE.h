@@ -14,6 +14,9 @@
 
 #include "Equation.h"
 
+namespace griddyn {
+namespace paradae {
+
 class Equation_ODE : public Equation {
 public:
   // Equation_ODE specific
@@ -30,5 +33,7 @@ public:
   virtual void Get_dy_from_y(const Real t, const Vector& y, const Vector& state, Vector& dy){function_ode(t,y,state,dy);};
   virtual type_Equation GetTypeEq(){return ODE;};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

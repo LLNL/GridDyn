@@ -13,6 +13,9 @@
 #include <climits>
 #include <fstream>
 
+namespace griddyn {
+namespace paradae {
+
 NewtonStats newton_stats;
 
 using namespace std;
@@ -205,3 +208,5 @@ void NewtonStats::ShowStats()
 	}
     }
 }
+} // namespace paradae
+} // namespace griddyn

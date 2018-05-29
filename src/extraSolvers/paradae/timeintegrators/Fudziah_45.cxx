@@ -11,7 +11,8 @@
 */
 #include "Fudziah_45.h"
 #include <cmath>
-
+namespace griddyn {
+namespace paradae {
 Fudziah_45::Fudziah_45(Equation* eq, bool variable_step):RungeKutta_DIRK(eq,variable_step)
 {
   nb_steps=7;
@@ -43,3 +44,5 @@ Fudziah_45::Fudziah_45(Equation* eq, bool variable_step):RungeKutta_DIRK(eq,vari
 
   rk_c(0)=0.0;rk_c(1)=2*gamma;rk_c(2)=3*gamma+gamma*sqrt(3);rk_c(3)=0.4;rk_c(4)=0.75;rk_c(5)=0.9;rk_c(6)=1.0;
 }
+} // namespace paradae
+} // namespace griddyn

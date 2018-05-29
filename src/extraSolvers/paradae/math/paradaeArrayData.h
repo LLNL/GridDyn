@@ -15,6 +15,8 @@
 #include "utilities/matrixData.hpp"
 #include "../math/SparseMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 class paradaeArrayData : public matrixData<double>
 {
  private:
@@ -34,5 +36,7 @@ class paradaeArrayData : public matrixData<double>
   double at (index_t rowN, index_t colN) const ;
   matrixElement<double> element (index_t N) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

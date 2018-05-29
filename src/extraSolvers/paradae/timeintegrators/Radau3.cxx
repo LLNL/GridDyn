@@ -15,7 +15,8 @@
 // 1   | 3/4   1/4
 // -----------------
 //     | 3/4   1/4
-
+namespace griddyn {
+namespace paradae {
 Radau3::Radau3(Equation* eq):RungeKutta_Implicit(eq,false)
 {
   nb_steps=2;
@@ -31,3 +32,5 @@ Radau3::Radau3(Equation* eq):RungeKutta_Implicit(eq,false)
   rk_b(0)=Real(3./4.);rk_b(1)=Real(1./4.);
   rk_c(0)=Real(1./3.);rk_c(1)=Real(1.);
 }
+} // namespace paradae
+} // namespace griddyn

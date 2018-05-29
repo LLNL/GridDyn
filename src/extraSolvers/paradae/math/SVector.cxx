@@ -16,6 +16,8 @@
 #include <iostream>
 #include <ctime>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 SVector::SVector(int m_, Real fill_)
@@ -162,3 +164,5 @@ SVector SVector::Rand(int n, Real a, Real b)
     res.data[i]=(b-a)*Real(rand())/Real(RAND_MAX)+a;
   return res;
 }
+} // namespace paradae
+} // namespace griddyn

@@ -13,12 +13,15 @@
 #define RungeKutta_Explicit_h
 
 #include "RungeKutta.h"
-
+namespace griddyn {
+namespace paradae {
 class RungeKutta_Explicit : public RungeKutta {
 public:
   RungeKutta_Explicit(Equation* eq, bool varstep);
   ~RungeKutta_Explicit(){};
   virtual bool SolveInnerSteps(Real t, Real used_dt, const Vector& x0, SMultiVector& allK);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

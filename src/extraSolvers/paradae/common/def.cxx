@@ -14,6 +14,8 @@
 #include "../math/SVector.h"
 #include "../math/IVanderExt.h"
 #include "../math/IVander.h"
+namespace griddyn {
+namespace paradae {
 
 using namespace std;
 
@@ -115,3 +117,6 @@ void operator delete[](void* ptr, const nothrow_t&)
   free((void*)(&p[-1]));
 }
 #endif
+
+} // namespace paradae
+} // namespace griddyn

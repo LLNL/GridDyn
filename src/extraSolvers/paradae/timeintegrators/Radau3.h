@@ -13,7 +13,8 @@
 #define Radau3_h
 
 #include "RungeKutta_Implicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -28,5 +29,7 @@ public:
   Radau3(Equation* eq);
   virtual std::string GetName(){return "RK_Radau_3";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

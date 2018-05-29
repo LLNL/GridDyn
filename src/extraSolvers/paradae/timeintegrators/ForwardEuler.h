@@ -13,7 +13,8 @@
 #define ForwardEuler_h
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|c}
@@ -27,5 +28,7 @@ public:
   ForwardEuler(Equation* eq);
   virtual std::string GetName(){return "RK_FEuler_1";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

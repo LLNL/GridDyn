@@ -16,6 +16,8 @@
 #include "../math/Vector.h"
 #include "Solver.h"
 
+namespace griddyn {
+namespace paradae {
 enum LS_error {LS_NOT_CONVERGED, LS_INF_NAN};
 
 class LinearSearch : Solver{
@@ -25,5 +27,7 @@ public:
   LinearSearch(int max_iter_);
   int Solve(Solver_App* app, Vector& x);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

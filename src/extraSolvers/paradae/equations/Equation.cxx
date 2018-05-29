@@ -14,6 +14,9 @@
 #include <cmath>
 #include <algorithm>
 
+namespace griddyn {
+namespace paradae {
+
 using namespace std;
 
 Equation::Equation():nb_calls(0),
@@ -294,3 +297,5 @@ void Equation::approx_jacobian_dy(const Real t, const Vector& y,const Vector& dy
       dyh(j)-=h;
     }
 }
+} // namespace paradae
+} // namespace griddyn

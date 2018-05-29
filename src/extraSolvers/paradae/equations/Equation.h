@@ -18,6 +18,9 @@
 #include "../math/VirtualMatrix.h"
 #include "../math/IPoly.h"
 
+namespace griddyn {
+namespace paradae {
+
 enum type_Equation {ODE, DAE};
 
 class RootManager {
@@ -130,5 +133,7 @@ public:
   inline int GetNSRoots(){return roots.GetNSRoots();};
   virtual int GetNState(){return 0;};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

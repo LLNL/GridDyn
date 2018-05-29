@@ -12,6 +12,8 @@
 #include "LineSearch.h"
 #include <cmath>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 LinearSearch::LinearSearch(int max_iter_)
@@ -77,3 +79,5 @@ int LinearSearch::Solve(Solver_App* app,Vector& x)
 
   return it;
 }
+} // namespace paradae
+} // namespace griddyn

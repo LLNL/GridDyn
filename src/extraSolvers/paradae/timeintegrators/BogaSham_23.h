@@ -13,7 +13,8 @@
 #define BogaSham_23_h
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cccc}
@@ -31,5 +32,7 @@ public:
   BogaSham_23(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_ExpBS_23";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

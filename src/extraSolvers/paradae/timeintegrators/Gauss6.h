@@ -13,7 +13,8 @@
 #define Gauss6_h
 
 #include "RungeKutta_Implicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|ccc}
@@ -29,5 +30,7 @@ public:
   Gauss6(Equation* eq);
   virtual std::string GetName(){return "RK_Gauss_6";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "Billington_23.h"
-
+namespace griddyn {
+namespace paradae {
 Billington_23::Billington_23(Equation* eq, bool variable_step):RungeKutta_SDIRK(eq,variable_step)
 {
   nb_steps=3;
@@ -38,3 +39,5 @@ Billington_23::Billington_23(Equation* eq, bool variable_step):RungeKutta_SDIRK(
   rk_c(1)=-18+27*sq2/2.0;//1.091883092037;
   rk_c(2)=2-sq2/2.0;//1.292893218813;
 }
+} // namespace paradae
+} // namespace griddyn

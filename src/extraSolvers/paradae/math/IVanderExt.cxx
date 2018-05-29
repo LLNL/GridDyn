@@ -13,6 +13,8 @@
 #include "PVector.h"
 #include "SVector.h"
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 IVanderExt::IVanderExt(int n):DenseMatrix(n+1)
@@ -142,3 +144,5 @@ void IVanderExt::Interp(const SMultiVector& xn, const Vector& dx, SMultiVector& 
     }
   new_dx.AXPBY(coeffs(n),1.0,dx);
 }
+} // namespace paradae
+} // namespace griddyn

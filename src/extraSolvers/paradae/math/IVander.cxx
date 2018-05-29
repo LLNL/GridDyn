@@ -13,6 +13,8 @@
 #include "PVector.h"
 #include "SVector.h"
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 IVander::IVander(int n):DenseMatrix(n)
@@ -134,3 +136,5 @@ void IVander::Interp(const SMultiVector& xn, const Vector& dx, SMultiVector& new
       new_dx.AXPBY(coeffs(m-1-j)/Dt,1.0,subvec_xn);
     }
 }
+} // namespace paradae
+} // namespace griddyn

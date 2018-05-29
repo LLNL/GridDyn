@@ -19,6 +19,8 @@
 #include <typeinfo>
 #include <iostream>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 DBlockTriMatrix::DBlockTriMatrix(int m_, int s_, bool isdense_):VirtualMatrix(m_),s(s_),isdense(isdense_)
@@ -416,3 +418,5 @@ void DBlockTriMatrix::dump(ostream& output) const
       output << endl;
     }
 }
+} // namespace paradae
+} // namespace griddyn

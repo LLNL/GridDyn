@@ -17,6 +17,8 @@
 #include "PMultiVector.h"
 #include "DenseMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 class IPoly {
   // y values and associated times
   PMultiVector tyy;
@@ -38,5 +40,7 @@ public:
   void GetValueDY(Real t, Vector& yp);
   inline int GetXSize(){return nx;};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

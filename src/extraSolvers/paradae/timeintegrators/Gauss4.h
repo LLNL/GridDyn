@@ -13,7 +13,8 @@
 #define Gauss4_h
 
 #include "RungeKutta_Implicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -28,5 +29,7 @@ public:
   Gauss4(Equation* eq);
   virtual std::string GetName(){return "RK_Gauss_4";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

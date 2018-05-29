@@ -18,7 +18,8 @@
 // --------------------------
 //      | 2/9  1/3  4/9  0
 //      | 7/24 1/4  1/3  1/8
-
+namespace griddyn {
+namespace paradae {
 BogaSham_23::BogaSham_23(Equation* eq, bool variable_step):RungeKutta_Explicit(eq,variable_step)
 {
   nb_steps=4;
@@ -34,3 +35,5 @@ BogaSham_23::BogaSham_23(Equation* eq, bool variable_step):RungeKutta_Explicit(e
   rk_binf(0)=Real(7./24.);rk_binf(1)=Real(1./4.);rk_binf(2)=Real(1./3.);rk_binf(3)=Real(1./8.);
   rk_c(1)=Real(1./2.);rk_c(2)=Real(3./4.);rk_c(3)=Real(1.);
 }
+} // namespace paradae
+} // namespace griddyn

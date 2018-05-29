@@ -18,7 +18,7 @@
 #include "fileInput/fileInput.h"
 #include "griddyn/gridDynSimulation.h"
 
-#include "gridDynCombined/libraryLoader.h"
+#include "gridDynLoader/libraryLoader.h"
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 

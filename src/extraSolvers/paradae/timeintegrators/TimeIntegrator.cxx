@@ -11,7 +11,8 @@
 */
 #include "TimeIntegrator.h"
 #include <cmath>
-
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 DATA_Struct::DATA_Struct(int nx, int nb, int ng, int ns):tprev(nb,1),
@@ -171,3 +172,6 @@ RCODE TimeIntegrator::PostStep(DATA_Struct& val, bool success_solver, bool found
       return WARN_ROOT;
     }
 }
+
+} // namespace paradae
+} // namespace griddyn

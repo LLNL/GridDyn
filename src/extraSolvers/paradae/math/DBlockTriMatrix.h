@@ -16,6 +16,8 @@
 #include "DenseMatrix.h"
 #include "SparseMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 class DBlockTriMatrix : public VirtualMatrix {
 protected:
   Matrix** diag;
@@ -47,5 +49,7 @@ public:
 
   virtual void dump(std::ostream& output) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

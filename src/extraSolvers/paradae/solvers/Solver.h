@@ -15,7 +15,8 @@
 #include "../math/SVector.h"
 #include "../math/VirtualMatrix.h"
 #include <cmath>
-
+namespace griddyn {
+namespace paradae {
 class Solver_App{
 public:
   bool update_jacobian;
@@ -48,3 +49,5 @@ public:
   virtual ~Solver(){};
   virtual int Solve(Solver_App* app,Vector& x) = 0;
 };
+} // namespace paradae
+} // namespace griddyn

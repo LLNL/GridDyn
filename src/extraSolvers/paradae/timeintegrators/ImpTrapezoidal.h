@@ -13,7 +13,8 @@
 #define ImpTrapezoidal_h
 
 #include "RungeKutta_DIRK.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -28,5 +29,7 @@ public:
   ImpTrapezoidal(Equation* eq);
   virtual std::string GetName(){return "RK_ImpTrap_2";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

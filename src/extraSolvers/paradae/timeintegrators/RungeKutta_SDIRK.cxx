@@ -13,7 +13,8 @@
 #include "../math/DBlockTriMatrix.h"
 #include "../math/PMultiVector.h"
 #include "../solvers/Newton.h"
-
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 RungeKutta_SDIRK::RungeKutta_SDIRK(Equation* eq, bool varstep):RungeKutta_Implicit(eq,varstep)
@@ -136,3 +137,5 @@ void Solver_App_SDIRK::EvaluateFunAndJac(const Vector& Ki, Vector& gx, bool requ
     }
   //update_jacobian=true;
 }
+} // namespace paradae
+} // namespace griddyn

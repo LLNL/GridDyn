@@ -12,7 +12,8 @@
 #pragma once
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|ccc}
@@ -28,3 +29,5 @@ public:
   Kutta3(Equation* eq);
   virtual std::string GetName(){return "RK_Kutta_3";};
 };
+} // namespace paradae
+} // namespace griddyn

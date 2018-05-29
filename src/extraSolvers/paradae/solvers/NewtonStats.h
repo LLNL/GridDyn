@@ -17,6 +17,8 @@
 #include <map>
 #include <list>
 
+namespace griddyn {
+namespace paradae {
 enum NSType {sequential, braid};
 
 class NewtonStats{
@@ -48,3 +50,6 @@ public:
 };
 
 extern NewtonStats newton_stats;
+} // namespace paradae
+} // namespace griddyn
+

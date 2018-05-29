@@ -167,13 +167,16 @@ find_library(UMFPACK_LIBRARY umfpack HINTS ${SuiteSparse_DIRECT_LIBRARY_DIR})
 add_library(extraSolverLibrary STATIC ${extra_solver_sources} ${extra_solver_headers})
 set_target_properties (extraSolverLibrary PROPERTIES FOLDER libraries)
 
-find_library(LAPACKE_LIBRARY lapacke HINTS /lib64)
+if (WIN32)
+else(WIN32)
+find_library(LAPACKE_LIBRARY lapacke HINTS /lib64 PATHS ${AUTOBUILD_INSTALL_PATH}/lib)
 target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARY})
 INCLUDE_DIRECTORIES(/usr/include/lapacke)
+endif(WIN32)
 
 target_link_libraries(extraSolverLibrary PUBLIC griddyn)
 target_link_libraries(extraSolverLibrary PUBLIC ${LAPACKE_LIBRARIES})
-target_link_libraries(extraSolverLibrary PUBLIC ${UMFPACK_LIBRARY})
+target_link_libraries(extraSolverLibrary PUBLIC SuiteSparse::umfpack)
 
 if (BUILD_PARADAE_SOLVERS OR BUILD_BRAID_SOLVER)
 #source_group("paradae" FILES ${paradae_sources} ${paradae_headers})
@@ -191,8 +194,7 @@ target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
 
 IF (GRIDDYN_HAVE_MPI)
-target_compile_definitions(extraSolverLibrary PRIVATE ${MPI_CXX_COMPILE_FLAGS})
-target_include_directories(extraSolverLibrary PRIVATE ${MPI_CXX_INCLUDE_PATH})
+	target_link_libraries(MPI::MPI_C)
 ENDIF(GRIDDYN_HAVE_MPI)
 
 target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})

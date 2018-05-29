@@ -13,7 +13,8 @@
 #define DormPrince_45_h
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|ccccccc}
@@ -34,5 +35,7 @@ public:
   DormPrince_45(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_ExpDP_45";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

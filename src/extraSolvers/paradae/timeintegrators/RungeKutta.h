@@ -20,7 +20,8 @@
 #include "../solvers/Solver.h"
 #include "../equations/Equation.h"
 #include "../timeintegrators/TimeIntegrator.h"
-
+namespace griddyn {
+namespace paradae {
 class RungeKutta;
 
 class Solver_App_RK : public Solver_App {
@@ -66,5 +67,7 @@ public:
   inline Vector& GetBinf() {return rk_binf;};
   inline Vector& GetC() {return rk_c;};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

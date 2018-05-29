@@ -16,6 +16,8 @@
 #include "Vector.h"
 #include "SMultiVector.h"
 
+namespace griddyn {
+namespace paradae {
 class IVander : public DenseMatrix {
   void Build2();
   void Build3();
@@ -27,5 +29,7 @@ public:
   IVander(int n);
   void Interp(const SMultiVector& xn, const Vector& dx, SMultiVector& new_xn, Vector& new_dx, Real dt, Real Dt) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

@@ -11,6 +11,8 @@
 */
 #include "VirtualMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 std::ostream& operator<<(std::ostream& output, const VirtualMatrix& mat)
 {
   mat.dump(output);
@@ -24,4 +26,6 @@ void VirtualMatrix::dump(std::string filename) const
   this->dump(file);
   file.close();
 }
+} // namespace paradae
+} // namespace griddyn
 

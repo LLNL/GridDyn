@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "DormPrince_45.h"
-
+namespace griddyn {
+namespace paradae {
 DormPrince_45::DormPrince_45(Equation* eq, bool variable_step):RungeKutta_Explicit(eq,variable_step)
 {
   nb_steps=7;
@@ -30,3 +31,5 @@ DormPrince_45::DormPrince_45(Equation* eq, bool variable_step):RungeKutta_Explic
   rk_binf(0)=Real(5179./57600.);rk_binf(1)=Real(0.);rk_binf(2)=Real(7571./16695.);rk_binf(3)=Real(393./640.);rk_binf(4)=Real(-92097./339200.);rk_binf(5)=Real(187./2100.);rk_binf(6)=Real(1./40.);
   rk_c(1)=0.2;rk_c(2)=0.3;rk_c(3)=0.8;rk_c(4)=Real(8./9.);rk_c(5)=1.0;rk_c(6)=1.0;
 }
+} // namespace paradae
+} // namespace griddyn

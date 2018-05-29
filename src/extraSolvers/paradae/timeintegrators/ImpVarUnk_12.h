@@ -12,7 +12,8 @@
 #pragma once
 
 #include "RungeKutta_DIRK.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cccc}
@@ -30,4 +31,6 @@ public:
   ImpVarUnk_12(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_Imp_12";};
 };
+} // namespace paradae
+} // namespace griddyn
 

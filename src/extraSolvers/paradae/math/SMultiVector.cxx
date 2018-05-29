@@ -14,6 +14,8 @@
 #include <iostream>
 #include <cstring>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 SMultiVector::SMultiVector(int ns_, int nx_, Real fill_):SVector(ns_*nx_,fill_),nx(nx_),ns(ns_)
@@ -349,3 +351,6 @@ void SMultiVector::PushAndPop(Real v)
     memmove(data+nx,data,(m-nx)*sizeof(Real));
   data[0]=v;
 }
+
+} // namespace paradae
+} // namespace griddyn

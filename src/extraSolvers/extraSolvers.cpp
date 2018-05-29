@@ -27,7 +27,7 @@ void loadExtraSolvers (const std::string &subset)
     if ((subset.empty()) || (subset == "braid"))
     {
 #ifdef ENABLE_BRAID
-        auto bfact=std::make_shared<childClassFactory<braidSolver, SolverInterface>>(stringVec{ "braid"});
+        auto bfact=std::make_shared<childClassFactory<braid::braidSolver, SolverInterface>>(stringVec{ "braid"});
         extraFactories.push_back(bfact);
 #endif
     }

@@ -14,7 +14,8 @@
 // 1 | 1
 // ------
 //   | 1
-
+namespace griddyn {
+namespace paradae {
 BackwardEuler::BackwardEuler(Equation* eq):RungeKutta_DIRK(eq,false)
 {
   nb_steps=1;
@@ -25,3 +26,5 @@ BackwardEuler::BackwardEuler(Equation* eq):RungeKutta_DIRK(eq,false)
   rk_binf.Resize(nb_steps);
   rk_c.Resize(nb_steps,1.0);
 }
+} // namespace paradae
+} // namespace griddyn

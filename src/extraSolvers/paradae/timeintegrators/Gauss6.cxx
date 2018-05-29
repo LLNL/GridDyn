@@ -11,7 +11,8 @@
 */
 #include <cmath>
 #include "Gauss6.h"
-
+namespace griddyn {
+namespace paradae {
 Gauss6::Gauss6(Equation* eq):RungeKutta_Implicit(eq,false)
 {
   nb_steps=3;
@@ -29,3 +30,5 @@ Gauss6::Gauss6(Equation* eq):RungeKutta_Implicit(eq,false)
   rk_b(0)=Real(5./18.);rk_b(1)=Real(4./9.);rk_b(2)=Real(5./18.);
   rk_c(0)=Real(1./2.)-sq15/10.;rk_c(1)=Real(1./2.);rk_c(2)=Real(1./2.)+sq15/10.;
 }
+} // namespace paradae
+} // namespace griddyn

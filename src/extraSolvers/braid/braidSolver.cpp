@@ -34,8 +34,8 @@ using namespace std;
 
 namespace griddyn
 {
-
-
+namespace braid{
+using namespace paradae;
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 // Functions taken from Matt's paradae/src/programs/rk_braid.cxx
@@ -59,11 +59,11 @@ void BuildGrid(ODEProblem* ode, const MapParam& param, int& Nsteps, Real*& timeg
         int iroot;
         for (int i = 1; i < Nsteps; i++)
         {
-            t = t0 + i*dt;
+            t = t0 + i * dt;
             scheduled_root = ode->GetEq()->CheckScheduledRoots(timegrid[idx - 1], t, iroot);
             timegrid[idx] = t;
             idx++;
-            if (scheduled_root && abs(t - t0 - i*dt) > 1e-12)
+            if (scheduled_root && abs(t - t0 - i * dt) > 1e-12)
                 i--;
         }
         Nsteps = idx;
@@ -87,7 +87,7 @@ void BuildGrid(ODEProblem* ode, const MapParam& param, int& Nsteps, Real*& timeg
             timelist.push_back(t);
         }
         Nsteps = timelist.size();
-        int Nfsteps = refine_by*(Nsteps - 1) + 1;
+        int Nfsteps = refine_by * (Nsteps - 1) + 1;
         if (Nfsteps <= 1)
         {
             cerr << "Error reading the file " << gridfile << " for time grid." << endl;
@@ -101,7 +101,7 @@ void BuildGrid(ODEProblem* ode, const MapParam& param, int& Nsteps, Real*& timeg
         {
             Real dt = (*it - timegrid[idx]) / refine_by;
             for (int i = 1; i < refine_by; i++)
-                timegrid[idx + i] = timegrid[idx] + i*dt;
+                timegrid[idx + i] = timegrid[idx] + i * dt;
             timegrid[idx + refine_by] = *it;
             idx += refine_by;
         }
@@ -119,6 +119,7 @@ braidSolver::braidSolver(const std::string &objName) : SolverInterface(objName)
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = true;
+    flags[block_mode_only] = true;
 }
 braidSolver::braidSolver(gridDynSimulation *gds, const solverMode& sMode) : SolverInterface(gds, sMode)
 {
@@ -268,7 +269,7 @@ int braidSolver::RunBraid(ODEProblem* ode, MapParam* param, Real* &timegrid, int
     if (TI->GetType() == BDF)
     {
         int toadd = (TI->GetNbSteps() - (Ngridpoints%TI->GetNbSteps())) % TI->GetNbSteps();
-        Tmax += udt*toadd;
+        Tmax += udt * toadd;
         Nsteps += toadd;
 
         equation->SetTmax(Tmax);
@@ -514,5 +515,5 @@ int braidSolver::calcIC(coreTime t0, coreTime tstep0, ic_modes mode, bool constr
 
     return 0;
 }
-
+} //namespace braid
 } //namespace griddyn

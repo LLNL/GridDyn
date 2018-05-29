@@ -28,10 +28,15 @@
   \end{array}
   \f]
  */
+
+namespace griddyn {
+namespace paradae {
 class Cash_34 : public RungeKutta_SDIRK {
 public:
   Cash_34(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_ImpCa_34";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

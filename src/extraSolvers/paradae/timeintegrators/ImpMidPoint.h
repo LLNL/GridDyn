@@ -13,7 +13,8 @@
 #define ImpMidPoint_h
 
 #include "RungeKutta_DIRK.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|c}
@@ -27,5 +28,7 @@ public:
   ImpMidPoint(Equation* eq);
   virtual std::string GetName(){return "RK_ImpMidPoint_2";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

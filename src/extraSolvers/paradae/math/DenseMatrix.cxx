@@ -18,6 +18,8 @@
 #include <iostream>
 #include "lapacke_utils.h"
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 DenseMatrix::DenseMatrix(int m_, Real fill_):Matrix(m_),f_data(NULL),f_ipiv(NULL)
@@ -397,3 +399,5 @@ void DenseMatrix::dump(ostream& output) const
       output << endl;
     }
 }
+} // namespace paradae
+} // namespace griddyn

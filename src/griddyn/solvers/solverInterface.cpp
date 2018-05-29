@@ -305,6 +305,7 @@ static const std::map<std::string, int> solverFlagMap{
   {"newton", use_newton_flag},
   {"print_resid",print_residuals},
   {"print_residuals",print_residuals},
+  {"block_mode_only", block_mode_only}
 };
 
 void SolverInterface::setFlag (const std::string &flag, bool val)
@@ -467,6 +468,22 @@ void SolverInterface::setApproximation (const std::string &approx)
     }
 }
 
+bool SolverInterface::getFlag(const std::string &flag) const
+{
+    auto flgInd = mapFind(solverFlagMap, flag, -60);
+    if (flgInd > -32)
+    {
+        if (flgInd > 0)
+        {
+            return flags[flgInd];
+        }
+        else
+        {
+            return !flags[-flgInd];
+        }
+        return false;
+    }
+}
 void SolverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move (msk); }
 void SolverInterface::addMaskElement (index_t newMaskElement) { maskElements.push_back (newMaskElement); }
 void SolverInterface::addMaskElements (const std::vector<index_t> &newMsk)

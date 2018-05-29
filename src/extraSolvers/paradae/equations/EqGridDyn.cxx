@@ -22,6 +22,9 @@
 #include <boost/container/small_vector.hpp>
 #include <cmath>
 
+namespace griddyn {
+namespace paradae {
+
 using namespace std;
 using namespace griddyn;
 
@@ -107,3 +110,5 @@ void EquationGridDyn::root_init_state(const Real t, Vector& state)
 }
 */
 
+} // namespace paradae
+} // namespace griddyn

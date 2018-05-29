@@ -267,10 +267,12 @@ int gridDynSimulation::dynamicDAE (coreTime tStop)
 
     nextStopTime = (std::min) (tStop, EvQ->getNextTime ());
 
-    // TODO Needs a Braid IFDEF
-    //If running Braid, integrate over entire simulation interval
-    //nextStopTime = tStop;
-    //Braid ENDIF
+
+    //If running in block mode, integrate over entire simulation interval
+    if (dynData->getFlag("block_mode_only"))
+    { //this is primarily for braid
+        nextStopTime = tStop;
+    }
 
     // go into the main loop
     int smStep = 0;

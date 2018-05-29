@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <string>
 
+namespace griddyn {
+namespace paradae {
 #define REAL_ 2
 
 #if REAL_ == 1
@@ -58,4 +60,9 @@ void operator delete(void* ptr) noexcept;
 void operator delete[](void* ptr) noexcept;
 void operator delete(void* ptr, const std::nothrow_t&);
 void operator delete[](void* ptr, const std::nothrow_t&);
+
+
+
 #endif
+} // namespace paradae
+} // namespace griddyn

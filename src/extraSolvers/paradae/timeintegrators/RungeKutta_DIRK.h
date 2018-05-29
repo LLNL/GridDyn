@@ -13,7 +13,8 @@
 #define RungeKutta_DIRK_h
 
 #include "RungeKutta_Implicit.h"
-
+namespace griddyn {
+namespace paradae {
 class Solver_App_DIRK : public Solver_App_IRK {
 public:
   Solver_App_DIRK(Real rtol, const Vector& atol, Real t_, Real dt_,const Vector& x0_, RungeKutta_Implicit* rk_);
@@ -30,5 +31,7 @@ public:
   virtual Solver_App_RK* BuildSolverApp(Real t, Real dt,const Vector& x0);
   virtual ~RungeKutta_DIRK(){};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

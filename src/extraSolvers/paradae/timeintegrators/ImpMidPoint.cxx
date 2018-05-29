@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "ImpMidPoint.h"
-
+namespace griddyn {
+namespace paradae {
 ImpMidPoint::ImpMidPoint(Equation* eq):RungeKutta_DIRK(eq,false)
 {
   nb_steps=1;
@@ -21,3 +22,5 @@ ImpMidPoint::ImpMidPoint(Equation* eq):RungeKutta_DIRK(eq,false)
   rk_binf.Resize(nb_steps);
   rk_c.Resize(nb_steps,0.5);
 }
+} // namespace paradae
+} // namespace griddyn

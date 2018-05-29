@@ -11,6 +11,8 @@
 */
 #include "Solver.h"
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 void Solver_App::ApproxJacobian(const Vector& x, bool do_facto)
@@ -44,3 +46,5 @@ void Solver_App::ApproxJacobian(const Vector& x, const Vector& fx, bool do_facto
       CurrentJacobian->Factorize();
     }
 }
+} // namespace paradae
+} // namespace griddyn

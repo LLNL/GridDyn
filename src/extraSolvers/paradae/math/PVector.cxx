@@ -14,6 +14,8 @@
 #include <iostream>
 #include <cstring>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 PVector::PVector(const Vector& v)
@@ -41,3 +43,5 @@ void PVector::Set(int m_,Real* data_)
   m=m_;
   data=data_;
 }
+} // namespace paradae
+} // namespace griddyn

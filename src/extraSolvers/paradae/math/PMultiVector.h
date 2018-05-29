@@ -14,6 +14,8 @@
 
 #include "PVector.h"
 
+namespace griddyn {
+namespace paradae {
 class SMultiVector;
 class SVector;
 
@@ -32,5 +34,7 @@ public:
   int GetXSize()const{return nx;};
   int GetSSize()const{return ns;};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

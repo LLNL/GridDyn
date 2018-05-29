@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "ForwardEuler.h"
-
+namespace griddyn {
+namespace paradae {
 ForwardEuler::ForwardEuler(Equation* eq):RungeKutta_Explicit(eq,false)
 {
   nb_steps=1;
@@ -22,3 +23,5 @@ ForwardEuler::ForwardEuler(Equation* eq):RungeKutta_Explicit(eq,false)
 
   rk_b(0)=Real(1);
 }
+} // namespace paradae
+} // namespace griddyn

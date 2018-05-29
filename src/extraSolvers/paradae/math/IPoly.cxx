@@ -17,6 +17,8 @@
 #include <cmath>
 #include <cfloat>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 IPoly::IPoly(const PMultiVector& tyy_, const PMultiVector& yy_):tyy(tyy_),yy(yy_)
@@ -137,3 +139,5 @@ void IPoly::GetValueDY(Real t, Vector& dy)
       dy.AXPBY(vec_t(i+nyy)/(max_time-min_time),1.0,yi);
     }
 }
+} // namespace paradae
+} // namespace griddyn

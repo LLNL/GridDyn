@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "ImpVarUnk_12.h"
-
+namespace griddyn {
+namespace paradae {
 ImpVarUnk_12::ImpVarUnk_12(Equation* eq, bool variable_step):RungeKutta_DIRK(eq,variable_step)
 {
   nb_steps=4;
@@ -29,3 +30,5 @@ ImpVarUnk_12::ImpVarUnk_12(Equation* eq, bool variable_step):RungeKutta_DIRK(eq,
   rk_c(0)=1;rk_c(1)=1;rk_c(2)=4./9.;rk_c(3)=1./3.;
   rk_binf(0)=1;rk_binf(1)=0;rk_binf(2)=0;rk_binf(3)=0;
 }
+} // namespace paradae
+} // namespace griddyn

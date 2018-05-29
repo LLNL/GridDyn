@@ -17,6 +17,8 @@
 #define HAVE_LAPACK_CONFIG_H
 #define LAPACK_COMPLEX_CPP
 
+namespace griddyn {
+namespace paradae {
 typedef int lapack_int;
 
 class DenseMatrix : public Matrix {
@@ -49,5 +51,7 @@ public:
 
   virtual void dump(std::ostream& output) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

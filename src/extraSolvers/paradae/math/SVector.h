@@ -14,6 +14,8 @@
 
 #include "Vector.h"
 
+namespace griddyn {
+namespace paradae {
 class PVector;
 
 class SVector : public Vector {
@@ -32,5 +34,7 @@ public:
 
   static SVector Rand(int n, Real a=0, Real b=1);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

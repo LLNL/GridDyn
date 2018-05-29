@@ -16,6 +16,8 @@
 #include <fstream>
 #include <iomanip>
 
+namespace griddyn {
+namespace paradae {
 class Vector;
 
 class VirtualMatrix {
@@ -70,3 +72,5 @@ public:
   virtual void SetIJV(int n_, int nnz_, int* ival, int* jval, Real* vval) = 0;
 };
 
+} // namespace paradae
+} // namespace griddyn

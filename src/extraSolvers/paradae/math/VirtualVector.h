@@ -13,6 +13,9 @@
 #define VirtualVector_h
 
 #include "../common/def.h"
+
+namespace griddyn {
+namespace paradae {
 class Vector;
 
 class VirtualVector {
@@ -23,5 +26,7 @@ public:
   virtual void SetSubVec(int i, const Vector& vec) = 0;
   virtual Vector GetSubVec(int i, int l)const = 0;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

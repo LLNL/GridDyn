@@ -10,7 +10,8 @@
 * LLNS Copyright End
 */
 #include "ExpTrapezoidal.h"
-
+namespace griddyn {
+namespace paradae {
 ExpTrapezoidal::ExpTrapezoidal(Equation* eq):RungeKutta_Explicit(eq,false)
 {
   nb_steps=2;
@@ -27,3 +28,5 @@ ExpTrapezoidal::ExpTrapezoidal(Equation* eq):RungeKutta_Explicit(eq,false)
   rk_b(1)=1./(2.*alpha);
   rk_c(1)=alpha;
 }
+} // namespace paradae
+} // namespace griddyn

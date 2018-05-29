@@ -21,6 +21,8 @@
 #include <typeinfo>
 #include <iostream>
 
+namespace griddyn {
+namespace paradae {
 using namespace std;
 
 SBlockTriMatrix::SBlockTriMatrix(int m_, int s_, bool isdense_)
@@ -385,3 +387,5 @@ void SBlockTriMatrix::dump(ostream& output) const
       output << endl;
     }
 }
+} // namespace paradae
+} // namespace griddyn

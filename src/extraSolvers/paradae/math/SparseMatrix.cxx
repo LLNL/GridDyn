@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace griddyn {
+namespace paradae {
 SparseMatrix::SparseMatrix(int m_, int nnz_):Matrix(m_),nnz(nnz_),numeric(NULL)
 {
   rowptr=new int[m+1];
@@ -658,3 +660,5 @@ void SparseMatrix::dump(ostream& output) const
 	}
     }
 }
+} // namespace paradae
+} // namespace griddyn

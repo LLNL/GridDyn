@@ -15,6 +15,8 @@
 #include <cstring>
 #include "../common/def.h"
 
+namespace griddyn {
+namespace paradae {
 class Vector {
 protected:
   int m;
@@ -44,3 +46,5 @@ public:
 
 std::ostream& operator<<(std::ostream& output, const Vector& vec);
 
+} // namespace paradae
+} // namespace griddyn

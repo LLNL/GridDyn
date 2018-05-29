@@ -14,6 +14,8 @@
 
 #include "Vector.h"
 
+namespace griddyn {
+namespace paradae {
 class PVector : public Vector {
 public:
   PVector():Vector(){};
@@ -23,5 +25,7 @@ public:
   PVector& operator=(const PVector& v);
   void Set(int m_, Real* data_);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

@@ -13,6 +13,8 @@
 
 #include "paradaeArrayData.h"
 
+namespace griddyn {
+namespace paradae {
 paradaeArrayData::paradaeArrayData(SparseMatrix* mat)
 {
   J=mat;
@@ -72,5 +74,8 @@ matrixElement<double> paradaeArrayData::element(index_t N) const
 {
   return {J->GetRowIndex(N), J->GetColIndex(N), J->GetValue(N)};
 }
+
+} // namespace paradae
+} // namespace griddyn
 
 #endif

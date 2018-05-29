@@ -14,6 +14,8 @@
 
 #include "../math/VirtualMatrix.h"
 
+namespace griddyn {
+namespace paradae {
 class SparseMatrix : public Matrix {
   int nnz;
   int* rowptr;
@@ -52,5 +54,7 @@ public:
   int GetColIndex(int idx_nnz) const;
   Real GetValue(int idx_nnz) const;
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

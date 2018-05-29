@@ -13,7 +13,8 @@
 #define FE_ExpTrap_12_h
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -29,5 +30,7 @@ public:
   FE_ExpTrap_12(Equation* eq, bool variable_step=false);
   virtual std::string GetName(){return "RK_ExpFE_12";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

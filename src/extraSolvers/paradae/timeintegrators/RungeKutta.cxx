@@ -17,7 +17,8 @@
 #include <algorithm>
 
 using namespace std;
-
+namespace griddyn {
+namespace paradae {
 RungeKutta::RungeKutta()
 {
 }
@@ -187,3 +188,5 @@ Real Solver_App_RK::FxNorm(const Vector& fx, Real tol_) const
     }
   return sqrt(res/fx.GetM());
 }
+} // namespace paradae
+} // namespace griddyn

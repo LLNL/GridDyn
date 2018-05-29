@@ -15,7 +15,8 @@
 #include "RungeKutta.h"
 #include "../math/PVector.h"
 #include "../math/SMultiVector.h"
-
+namespace griddyn {
+namespace paradae {
 class RungeKutta_Implicit;
 
 class Solver_App_IRK : public Solver_App_RK {
@@ -47,5 +48,7 @@ public:
   virtual VirtualMatrix* GetCurrentJac(){return CurrentJacobian;};
   virtual void SetDenseMatrix(bool dense_mat_=true);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

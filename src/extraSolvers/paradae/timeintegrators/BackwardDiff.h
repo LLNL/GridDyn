@@ -23,6 +23,8 @@
 #include "../equations/Equation.h"
 #include "TimeIntegrator.h"
 
+namespace griddyn {
+namespace paradae {
 enum BDF_type {BDF_1=1, BDF_2=2, BDF_3=3,BDF_4=4, BDF_5=5, BDF_6=6};
 
 enum BDF_error {BDF_ORDER_NOT_IMPLEMENTED, BDF_FAILED_IMPLICIT_STEP};
@@ -94,5 +96,7 @@ public:
   void ComputeUnknown(Vector& var, const Vector& unk, const PMultiVector& xprev, const Vector& dxprev);
   void ComputeBDFCoeff(Real tn, const SMultiVector& tprev, const SMultiVector& xprev, const Vector& dxprev);
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

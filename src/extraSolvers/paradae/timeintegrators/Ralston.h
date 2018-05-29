@@ -13,7 +13,8 @@
 #define Ralston_h
 
 #include "RungeKutta_Explicit.h"
-
+namespace griddyn {
+namespace paradae {
 /*!
   Butcher tableau:
   \f[\begin{array}{c|cc}
@@ -28,5 +29,7 @@ public:
   Ralston(Equation* eq);
   virtual std::string GetName(){return "RK_Ralston_2";};
 };
+} // namespace paradae
+} // namespace griddyn
 
 #endif

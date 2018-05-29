@@ -11,7 +11,8 @@
 */
 #include "RungeKutta_Explicit.h"
 #include "../math/PVector.h"
-
+namespace griddyn {
+namespace paradae {
 RungeKutta_Explicit::RungeKutta_Explicit(Equation* eq, bool varstep):RungeKutta(eq,varstep)
 {
 }
@@ -36,3 +37,5 @@ bool RungeKutta_Explicit::SolveInnerSteps(Real t, Real used_dt, const Vector& x0
 
   return true;
 }
+} // namespace paradae
+} // namespace griddyn
