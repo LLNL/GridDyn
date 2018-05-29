@@ -128,7 +128,9 @@ public:
 
 private:
   static bool g_printStuff;  //!< public boolean to change whether things are printed or not
+#ifndef GRIDDYN_HAVE_MPI
   mpi::MpiService *servicer; //!< pointer to the global MpiService
+#endif
   /**
    * Singleton so prevent external construction and copying of this
    * class.

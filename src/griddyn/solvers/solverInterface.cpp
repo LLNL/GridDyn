@@ -481,8 +481,8 @@ bool SolverInterface::getFlag(const std::string &flag) const
         {
             return !flags[-flgInd];
         }
-        return false;
     }
+    return false;
 }
 void SolverInterface::setMaskElements (std::vector<index_t> msk) { maskElements = std::move (msk); }
 void SolverInterface::addMaskElement (index_t newMaskElement) { maskElements.push_back (newMaskElement); }

@@ -291,11 +291,11 @@ public:
     return id;
   }
   /** turn on updates for an object
-  @param[in] enable a boolean defining whether to turn updates on(true) or off (false)
+  @param[in] upd_enabled a boolean defining whether to turn updates on(true) or off (false)
   */
-  void enable_updates(bool enable = true)
+  void enable_updates(bool upd_enabled = true)
   {
-	  updates_enabled = enable;
+	  updates_enabled = upd_enabled;
 	  alert(this, UPDATE_REQUIRED);
   }
   /** check if an object has updates
