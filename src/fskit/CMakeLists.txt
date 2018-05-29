@@ -29,7 +29,7 @@ set (fskit_headers
 
 find_package(FSKIT)
 
-add_library(fskitLibrary ${fskit_sources} ${fskit_headers})
+add_library(fskitLibrary STATIC ${fskit_sources} ${fskit_headers})
 
 target_include_directories(fskitLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
