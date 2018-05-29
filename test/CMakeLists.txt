@@ -88,20 +88,22 @@ set(testExtra_sources
 	extraTests/largeContingencyTests.cpp
 	extraTests/largeInputTests.cpp
 	extraTests/objectSizeReport.cpp
-	extraTests/extraFMUtests.cpp
 	testHelperFunctions.cpp
 	exeTestHelper.cpp
 )
 
+if(FMI_ENABLE)
+    list(APPEND testExtra_sources extraTests/extraFMUtests.cpp)
+endif()
+
 set(testMain_headers
 	testHelper.h
 	exeTestHelper.h
-
 	)
 
 #add a baseline library for underlying dependencies and flags for test executables
 add_library(griddyn_test_base INTERFACE)
-target_link_libraries(griddyn_test_base INTERFACE ${Boost_LIBRARIES_test})
+target_link_libraries(griddyn_test_base INTERFACE Boostlibs::test)
 target_link_libraries(griddyn_test_base INTERFACE griddyn_base)
 
 target_compile_definitions(griddyn_test_base INTERFACE -DGRIDDYN_TEST_DIRECTORY="${test_dir}" )
@@ -136,10 +138,10 @@ add_custom_command(TARGET testComponents POST_BUILD        # Adds a post-build e
         $<TARGET_FILE_DIR:testComponents>)                 # <--this is out-file path
 endforeach(keyfile)
 
-target_link_libraries(testLibrary gridDynCombined griddyn_test_base)
-target_link_libraries(testComponents ${executable_only_components} gridDynCombined griddyn_test_base)
-target_link_libraries(testSystem gridDynCombined griddyn_test_base)
-target_link_libraries(testExtra gridDynCombined griddyn_test_base)
+target_link_libraries(testLibrary fileInput griddyn_test_base)
+target_link_libraries(testComponents ${executable_only_components} fileInput griddyn_test_base)
+target_link_libraries(testSystem fileInput griddyn_test_base)
+target_link_libraries(testExtra fileInput griddyn_test_base)
 
 
 #message(${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

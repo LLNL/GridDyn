@@ -25,9 +25,8 @@ set(shared_headers
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
-
 add_library(coupling_static_lib STATIC ${shared_sources} ${shared_headers})
-target_include_directories(coupling_static_lib PUBLIC ${MPI_INCLUDE_PATH})
+target_link_libraries(coupling_static_lib PUBLIC griddyn_base)
 set_target_properties (coupling_static_lib PROPERTIES FOLDER libraries)
 INSTALL(TARGETS coupling_static_lib EXPORT griddyn-targets  DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 

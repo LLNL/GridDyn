@@ -16,7 +16,7 @@
 #include "core/coreExceptions.h"
 #include "fileInput/gridDynRunner.h"
 
-#include "gridDynCombined/libraryLoader.h"
+#include "gridDynLoader/libraryLoader.h"
 #include <boost/format.hpp>
 #ifdef HELICS_EXECUTABLE
 #include "helics/helicsRunner.h"

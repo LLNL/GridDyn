@@ -61,21 +61,14 @@ set(fmiImport_headers
 	fmi_import/fmiLibraryManager.h
 	)
 
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-add_library(fmiGDLibrary ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
-
-set_target_properties(fmiGDLibrary PROPERTIES CXX_VISIBILITY_PRESET hidden C_VISIBILITY_PRESET hidden)
-
-
-target_include_directories(fmiGDLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+add_library(fmiGDLibrary STATIC ${fmiGD_sources} ${fmiImport_sources} ${fmiImport_headers} ${fmiGD_headers})
 
 source_group("gridDynFMU" FILES ${fmiGD_sources} ${fmiGD_headers})
 source_group("FMUImport" FILES ${fmiImport_sources} ${fmiImport_headers})
 
 set_target_properties (fmiGDLibrary PROPERTIES FOLDER fmi)
 
-target_link_libraries(fmiGDLibrary griddyn)
+target_link_libraries(fmiGDLibrary griddyn formatInterpreter)
 
 INSTALL(TARGETS fmiGDLibrary
 		EXPORT griddyn-targets

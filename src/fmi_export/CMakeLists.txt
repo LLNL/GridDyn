@@ -8,15 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
-IF(UNIX)
-  add_compile_options(-fvisibility=hidden)
-ELSE(UNIX)
-  IF(MINGW)
- add_compile_options(-fvisibility=hidden)
-  ENDIF(MINGW)
-ENDIF(UNIX)
 
 set(fmiShared_headers
 fmiRunner.h
@@ -56,18 +47,19 @@ fmiGridDynExport.cpp
 )
 
 add_library(fmiGridDynSharedLib SHARED ${fmiShared_sources} ${fmiShared_headers})
-target_include_directories(fmiGridDynSharedLib SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+
+set_target_properties(fmiGridDynSharedLib PROPERTIES CXX_VISIBILITY_PRESET hidden C_VISIBILITY_PRESET hidden)
 
 set_target_properties (fmiGridDynSharedLib PROPERTIES FOLDER fmi)
 
 add_library(fmiBuilder STATIC ${fmiBuilder_sources} ${fmiBuilder_headers})
-target_include_directories(fmiBuilder SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
+
 target_link_libraries(fmiBuilder PUBLIC fileInput)
 
 set_target_properties (fmiBuilder PROPERTIES FOLDER fmi)
 
 
-target_link_libraries(fmiGridDynSharedLib PRIVATE gridDynCombined)
+target_link_libraries(fmiGridDynSharedLib PRIVATE fileInput)
 
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 

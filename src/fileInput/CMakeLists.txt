@@ -76,8 +76,7 @@ set (fileInput_sources
 	)
 add_library(fileInput STATIC ${fileInput_sources})
 
-target_include_directories(fileInput SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-target_link_libraries(fileInput PUBLIC griddyn_optional formatInterpreter griddyn)
+target_link_libraries(fileInput PUBLIC gridDynLoader formatInterpreter)
 source_group("Elements"  FILES  ${elementReader_sources})
 source_group("formatSpecific"  FILES  ${formattedfileInput_sources})
 source_group("general" FILES ${reader_sources})

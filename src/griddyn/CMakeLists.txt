@@ -518,13 +518,10 @@ ${block_headers}
 
 add_library(griddyn STATIC ${simulation_sources} ${model_files} ${core_sources} ${primary_sources} ${sublibrary_files})
 
-target_include_directories(griddyn SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
-
 target_link_libraries(griddyn PUBLIC coreObjects)
-target_link_libraries(griddyn PUBLIC utilities)
 
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
-
+target_link_libraries(griddyn PUBLIC coupling_static_lib)
 if(NOT DISABLE_KLU)
 	target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
 endif(NOT DISABLE_KLU)
@@ -547,7 +544,6 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
-#target_include_directories(griddyn PRIVATE ${SUNDIALS_INCLUDE_DIRS})
 #create a griddyn_config.h file for program options
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h)
 INSTALL(FILES ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn COMPONENT headers)

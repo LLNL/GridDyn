@@ -1,7 +1,7 @@
 # LLNS Copyright Start
 # Copyright (c) 2014-2018, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
@@ -15,7 +15,7 @@ file(REMOVE_RECURSE ${PROJECT_BINARY_DIR}/libraryLoader.cpp)
 file(WRITE ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 "/*LLNS Copyright Start\n"
 " *Copyright (c) 2014-2018, Lawrence Livermore National Security\n"
-" *This work was performed under the auspices of the U.S. Department\n" 
+" *This work was performed under the auspices of the U.S. Department\n"
 " *of Energy by Lawrence Livermore National Laboratory in part under\n"
 " *Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.\n"
 " *Produced at the Lawrence Livermore National Laboratory.\n"
@@ -25,7 +25,7 @@ file(WRITE ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 " */\n"
 "\n"
 "//automatically generated file\n"
-"\#include \"gridDynCombined/libraryLoader.h\"\n"
+"\#include \"gridDynLoader/libraryLoader.h\"\n"
 "\#include \"griddyn/griddyn-config.h\"\n"
 )
 
@@ -54,9 +54,9 @@ file(APPEND ${PROJECT_BINARY_DIR}/libraryLoader.cpp
 "}\n"
 "}//namespace griddyn")
 
-add_library(gridDynCombined STATIC libraryLoader.h ${PROJECT_BINARY_DIR}/libraryLoader.cpp)
+add_library(gridDynLoader STATIC libraryLoader.h ${PROJECT_BINARY_DIR}/libraryLoader.cpp)
 
-set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
+set_target_properties (gridDynLoader PROPERTIES FOLDER libraries)
 
 #message("optlibs: ${griddyn_optional_libraries}")
 #message("optheaders: ${griddyn_optional_include_dirs}")
@@ -65,15 +65,13 @@ set_target_properties (gridDynCombined PROPERTIES FOLDER libraries)
 
 
 #fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
-target_link_libraries(gridDynCombined fileInput coupling_static_lib griddyn_optional)
-
+target_link_libraries(gridDynLoader griddyn_optional)
 
 if(DL_REQUIRED OR FMI_ENABLE)
-	target_link_libraries(gridDynCombined ${CMAKE_DL_LIBS})
+	target_link_libraries(gridDynLoader ${CMAKE_DL_LIBS})
 endif(DL_REQUIRED OR FMI_ENABLE)
 
-
-INSTALL(TARGETS gridDynCombined EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS gridDynLoader EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES libraryLoader.h
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
