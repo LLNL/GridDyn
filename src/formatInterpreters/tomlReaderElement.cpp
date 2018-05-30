@@ -21,8 +21,8 @@ static const std::string nullStr{};
 
 bool isElement (const toml::Value &testValue);
 bool isAttribute (const toml::Value &testValue);
-
-tomlReaderElement::tomlReaderElement () noexcept = default;
+//this is not using default for Gcc 4.9 compatibility
+tomlReaderElement::tomlReaderElement() noexcept {};
 tomlReaderElement::tomlReaderElement (const std::string &fileName) { tomlReaderElement::loadFile (fileName); }
 void tomlReaderElement::clear ()
 {
