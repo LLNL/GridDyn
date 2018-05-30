@@ -19,7 +19,6 @@ set(coupling_headers
     GhostSwingBusManager.h
 	GhostSwingBusMessageTypes.h
     )
-   
 if (GRIDDYN_HAVE_MPI)
 	list(APPEND coupling_sources MpiService.cpp)	
 	list(APPEND coupling_headers MpiService.h)

@@ -11,15 +11,15 @@
 */
 
 #include "GhostSwingBusManager.h"
+#ifdef GRIDDYN_HAVE_MPI
 #include "MpiService.h"
+#include <mpi.h>
+#endif
 #include <iostream>
 #include <cstddef>
 #include <cstring>
 #include <cassert>
 
-#ifdef GRIDDYN_HAVE_MPI
-#include <mpi.h>
-#endif
 
 using namespace std;
 
