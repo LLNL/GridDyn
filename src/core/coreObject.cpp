@@ -69,10 +69,10 @@ coreObject *coreObject::clone (coreObject *obj) const
 
 void coreObject::updateName ()
 {
-	if (name.empty())
-	{
-		return;
-	}
+    if (name.empty())
+    {
+        return;
+    }
     switch (name.back ())
     {
     case '$':
@@ -166,10 +166,10 @@ void coreObject::set (const std::string &param, const std::string &val)
     {
         setDescription (val);
     }
-	else if ((param.empty())|| (param.front() == '#'))
-	{
-		// comment parameter meant to do nothing
-	}
+    else if ((param.empty())|| (param.front() == '#'))
+    {
+        // comment parameter meant to do nothing
+    }
     else
     {
         if (val == "true")
@@ -193,9 +193,9 @@ void coreObject::set (const std::string &param, const std::string &val)
                 LOG_WARNING("parameter " + param + " not found");
                 throw (unrecognizedParameter(param));
             }
-          
+
         }
-       
+
     }
 }
 
@@ -260,10 +260,10 @@ void coreObject::setFlag (const std::string &flag, bool val)
     {
         alert (this, UPDATE_REQUIRED);
     }
-	else if ((flag.empty()) || (flag.front() == '#'))
-	{
-		// comment parameter meant to do nothing
-	}
+    else if ((flag.empty()) || (flag.front() == '#'))
+    {
+        // comment parameter meant to do nothing
+    }
     else
     {
         auto lower = convertToLowerCase(flag);
@@ -345,10 +345,10 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
     {
         setUserID (static_cast<index_t> (val));
     }
-   else if ((param.empty()) || (param.front() == '#'))
-	{
-		// comment parameter meant to do nothing
-	}
+    else if ((param.empty()) || (param.front() == '#'))
+    {
+        // comment parameter meant to do nothing
+    }
     else
     {
         try

@@ -20,11 +20,9 @@ public:
 	int elementIndex = 0;
 	std::string name;
 	int arrayIndex = 0;
-	tomlElement() noexcept
-	{
-	}
+	tomlElement() = default;
 	tomlElement(toml::Value vElement, std::string newName);
-	
+
 	void clear();
 	const toml::Value &getElement() const
 	{
@@ -43,5 +41,3 @@ private:
 	bool arraytype = false;
 
 };
-
-

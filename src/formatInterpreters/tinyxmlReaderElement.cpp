@@ -23,7 +23,7 @@
 
 #include "utilities/stringConversion.h"
 
-tinyxmlReaderElement::tinyxmlReaderElement () noexcept {}
+tinyxmlReaderElement::tinyxmlReaderElement () noexcept = default;
 tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName) { loadFile (fileName); }
 tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, const ticpp::Element *ticppParent)
     : element (ticppElement), parent (ticppParent)
@@ -250,13 +250,9 @@ std::shared_ptr<readerElement> tinyxmlReaderElement::firstChild () const
     }
     if (child != nullptr)
     {
-        auto a = std::make_shared<tinyxmlReaderElement> (child, element);
-        return a;
+        return std::make_shared<tinyxmlReaderElement> (child, element);
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 std::shared_ptr<readerElement> tinyxmlReaderElement::firstChild (const std::string &childName) const
@@ -274,10 +270,7 @@ std::shared_ptr<readerElement> tinyxmlReaderElement::firstChild (const std::stri
     {
         return std::make_shared<tinyxmlReaderElement> (child, element);
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 void tinyxmlReaderElement::moveToNextSibling ()
@@ -333,7 +326,7 @@ void tinyxmlReaderElement::moveToParent ()
         element = parent;
         att = nullptr;
         auto temp = element->Parent (false);
-        if (temp)
+        if (temp != nullptr)
         {
             if (temp->Type () == TiXmlNode::ELEMENT)
             {

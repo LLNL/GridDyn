@@ -13,7 +13,7 @@
 #include "readerElement.h"
 #include "utilities/stringConversion.h"
 
-readerAttribute::readerAttribute () {}
+readerAttribute::readerAttribute () = default;
 readerAttribute::readerAttribute (std::string attName, std::string attText) : name (std::move(attName)), text (std::move(attText)) {}
 void readerAttribute::set (const std::string &attName, const std::string &attText)
 {
