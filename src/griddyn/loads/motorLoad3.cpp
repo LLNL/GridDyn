@@ -620,6 +620,7 @@ void motorLoad3::rootTest (const IOdata & /*inputs*/, const stateData &sD, doubl
     {
         double slip = Loc.diffStateLoc[0];
         roots[ro] = 1.0 - slip;
+      //  printf("[%f] slip=%f\n", static_cast<double>(sD.time), slip);
     }
 }
 

@@ -103,6 +103,14 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
         if (totalRoots > 0)
         {
             setRootOffset (0, sm);
+            opFlags[has_roots] = true;
+            opFlags[has_alg_roots] = (offsets.local().total.algRoots > 0);
+
+        }
+        else
+        {
+            opFlags[has_roots] = false;
+            opFlags[has_alg_roots] = false;
         }
     }
 
@@ -1031,14 +1039,24 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
         offsets.local ().local.algRoots = 0;
         offsets.local ().local.diffRoots = 0;
         opFlags[has_roots] = false;
+        opFlags[has_alg_roots] = false; 
     }
     else
     {
         nRoots = rootSize (sMode);
         if (rootSize (sMode) > 0)
         {
-            setRootOffset (0, sMode);
+            opFlags[has_roots] = true;
+            setRootOffset (0, sMode); 
+            opFlags[has_alg_roots] = (offsets.local().total.algRoots > 0);
+
         }
+        else
+        {
+            opFlags[has_roots] = false;
+            opFlags[has_alg_roots] = false;
+        }
+        
     }
     if (controlFlags[constraints_disabled])
     {

@@ -194,7 +194,7 @@ target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
 
 IF (GRIDDYN_HAVE_MPI)
-	target_link_libraries(MPI::MPI_C)
+	target_link_libraries(extraSolverLibrary PUBLIC MPI::MPI_C)
 ENDIF(GRIDDYN_HAVE_MPI)
 
 target_include_directories(extraSolverLibrary PRIVATE ${SuiteSparse_DIRECT_INCLUDE_DIR})
