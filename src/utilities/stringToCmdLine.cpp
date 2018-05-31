@@ -16,7 +16,7 @@
 
 namespace utilities
 {
-StringToCmdLine::StringToCmdLine(const std::string &cmdString)
+StringToCmdLine::StringToCmdLine(const std::string &cmdString) : argCount(0)
 {
 	load(cmdString);
 }
@@ -63,4 +63,3 @@ void StringToCmdLine::load (const std::string &cmdString)
 }
 
 } //namespace utilities
-

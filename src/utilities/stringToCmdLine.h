@@ -37,7 +37,7 @@ public:
 private:
 	std::vector<std::string> stringCap; //!< the locations for the captured strings
 	std::vector<char *> stringPtrs; //!< vector of char * pointers matching stringCap
-	int argCount = 0;	//!< the number of arguments
+	int argCount;	//!< the number of arguments
 
 };
 } // namespace utilities
