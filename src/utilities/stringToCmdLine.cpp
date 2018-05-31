@@ -18,6 +18,11 @@ namespace utilities
 {
 static std::string nullstr;
 
+StringToCmdLine::StringToCmdLine (const std::string &cmdString)
+{
+    load(cmdString);
+}
+
 void StringToCmdLine::load (const std::string &cmdString)
 {
     stringCap = stringOps::splitlineQuotes (cmdString, " \t\n\r", stringOps::default_quote_chars,
