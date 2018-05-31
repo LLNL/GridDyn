@@ -1,5 +1,5 @@
 /*
-Copyright © 2017-2018,
+Copyright Â© 2017-2018,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
@@ -76,7 +76,7 @@ namespace utilities
         void processingLoop();
     };
 
-/** class implementing a thread safe Logger 
+/** class implementing a thread safe Logger
 @details the Logger uses a queuing mechanism and condition variable to store messages to a queue and print/display them
 in a single thread allowing for asynchronous logging
 */
@@ -193,7 +193,7 @@ private:
     static std::map<std::string, std::shared_ptr<LoggerManager>> loggers; //!< container for pointers to all the available contexts
     std::string name;  //!< context name
     std::shared_ptr<LoggingCore> loggingControl; //!< pointer to the actual Logger
-   LoggerManager(const std::string &loggingName);
+   LoggerManager(std::string loggerName);
 
 public:
     /** get a pointer to a logging manager so it cannot go out of scope*/
@@ -219,4 +219,3 @@ public:
 };
 }//namespace utilities
 #endif
-

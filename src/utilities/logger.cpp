@@ -1,5 +1,5 @@
 /*
-Copyright © 2017-2018,
+Copyright Â© 2017-2018,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
@@ -343,7 +343,7 @@ void LoggerManager::logMessage (const std::string &message)
 
 LoggerManager::~LoggerManager () = default;
 
-LoggerManager::LoggerManager (const std::string &loggerName) : name (loggerName)
+LoggerManager::LoggerManager (std::string loggerName) : name (std::move(loggerName))
 {
     loggingControl = std::make_shared<LoggingCore> ();
 }

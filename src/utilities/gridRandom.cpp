@@ -30,7 +30,7 @@ std::uniform_int_distribution<int> gridRandom::s_uintdist;
 bool gridRandom::seeded = false;
 unsigned int gridRandom::actual_seed = 0;
 
-gridRandom::gridRandom (dist_type_t dist, double param1, double param2) : param1_ (param1), param2_ (param2)
+gridRandom::gridRandom (dist_type_t dist, double param1, double param2) : m_dist(dist), param1_ (param1), param2_ (param2)
 {
     setDistribution (dist);
     if (!seeded)
