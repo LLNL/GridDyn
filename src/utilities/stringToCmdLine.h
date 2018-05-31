@@ -21,24 +21,23 @@ namespace utilities
 /** class used to convert a string into command line arguments*/
 class StringToCmdLine
 {
-public:
-	/** construct from a string*/
-	StringToCmdLine(const std::string &cmdString);
-	/** load a string
-	@param cmdString a single string containing command line arguments
-	*/
-	void load(const std::string &cmdString);
-	/** get the number of separate arguments corresponding to argc*/
-	int getArgCount() const { return argCount; }
-	/** get the argument values corresponding to char *argv[]
-	*/
-	auto getArgV() { return stringPtrs.data(); }
+  public:
+    /** construct from a string*/
+    StringToCmdLine(const std::string &cmdString) : argCount(0) { load(cmdString); }
+    /** load a string
+    @param cmdString a single string containing command line arguments
+    */
+    void load(const std::string &cmdString);
+    /** get the number of separate arguments corresponding to argc*/
+    int getArgCount() const { return argCount; }
+    /** get the argument values corresponding to char *argv[]
+    */
+    auto getArgV() { return stringPtrs.data(); }
 
-private:
-	std::vector<std::string> stringCap; //!< the locations for the captured strings
-	std::vector<char *> stringPtrs; //!< vector of char * pointers matching stringCap
-	int argCount;	//!< the number of arguments
-
+  private:
+    std::vector<std::string> stringCap; //!< the locations for the captured strings
+    std::vector<char *> stringPtrs;     //!< vector of char * pointers matching stringCap
+    int argCount;                       //!< the number of arguments
 };
 } // namespace utilities
 #endif

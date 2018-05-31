@@ -343,7 +343,7 @@ void LoggerManager::logMessage (const std::string &message)
 
 LoggerManager::~LoggerManager () = default;
 
-LoggerManager::LoggerManager (std::string loggerName) : name (std::move(loggerName))
+LoggerManager::LoggerManager (const std::string &loggerName) : name (loggerName)
 {
     loggingControl = std::make_shared<LoggingCore> ();
 }
