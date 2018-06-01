@@ -191,7 +191,7 @@ script:
   - ../scripts/run-ci-tests.sh
 
   # Gather coverage results
-  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info gcov-6 && popd ; fi
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info ${GCOV_TOOL} && popd ; fi
 
   # Submit coverage results to coveralls
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && coveralls --lcov-file coverage.info.cleaned && popd ; fi
