@@ -30,6 +30,7 @@ CC=gcc CXX=g++ cmake .. \
     -DBUILD_BRAID_SOLVER=ON \
     -DBRAID_INSTALL_DIR=/g/g18/schroder/powergrid/braid_2_2 \
     -DUSE_POSITION_INDEPENDENT_CODE=ON \
+#    -DDISABLE_MULTITHREADING=ON \
 
 
 
