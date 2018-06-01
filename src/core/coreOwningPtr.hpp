@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef CORE_OWNING_PTR_H_
-#define CORE_OWNING_PTR_H_
+#pragma once
 
 #include "core/coreObject.h"
 #include <memory>
@@ -24,9 +22,9 @@ using removeFunction_t = void (*) (coreObject *obj);
 
 /** template class for defining a (potentially shared) owning ptr for the coreObject
 @details uses a custom deleter to operate on the reference counter inside of the core object
-intended to be used when there are multiple owners with independent lifes and for direct instantiated objects where
+intended to be used when there are multiple owners with independent lives and for direct instantiated objects where
 the delete function should not be called
-shared pointers of coreObjects are not recommended due to the hiearchal nature of the objects
+shared pointers of coreObjects are not recommended due to the hierarchal nature of the objects
 in a block
 */
 template <class X>
