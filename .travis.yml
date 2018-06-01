@@ -127,6 +127,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_COVERAGE=true
+        - GCOV_TOOL=gcov-6
         - USE_MPI=mpich
     - <<: *daily_linux
       addons:
@@ -170,7 +171,7 @@ before_script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
   - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON -DAUTOBUILD_KLU=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DAUTOBUILD_ZMQ=ON"
-  - if [[ "$RUN_COVERAGE" ]]; then GRIDDYN_OPTION_FLAGS+=" -DCMAKE_BUILD_TYPE=Coverage" ; fi
+  - if [[ "$RUN_COVERAGE" ]]; then GRIDDYN_OPTION_FLAGS+=" -DTEST_CODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Coverage" ; fi
 
   - if [[ "$ENABLE_HELICS" ]]; then GRIDDYN_OPTION_FLAGS+=" -DHELICS_EXECUTABLE=ON -DAUTOBUILD_HELICS=ON" ; fi
   - if [[ "$ENABLE_FMI" ]]; then GRIDDYN_OPTION_FLAGS+=" -DBUILD_SHARED_FMI_LIBRARY=ON" ; else GRIDDYN_OPTION_FLAGS+=" -DFMI_ENABLE=OFF" ; fi
@@ -182,11 +183,21 @@ script:
   - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
   - make -j2
 
+  # Setup counters for coverage
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh setup-counters && popd ; fi
+
   # Run CI tests
   - ../scripts/run-ci-tests.sh
 
+  # Gather coverage results
+    - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info gcov-6 && popd ; fi
+
   # Submit coverage results to coveralls
-  - if [[ "$RUN_COVERAGE" ]]; then coveralls -i src ; fi
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && coveralls --lcov-file coverage.info.cleaned && popd ; fi
+
+  # Submit coverage results to codecov.io
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && bash <(curl -s https://codecov.io/bash) && popd ; fi
+
 notifications:
     email: false
 
