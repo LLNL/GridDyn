@@ -16,7 +16,7 @@
 
 using namespace tinyxml2;
 //this is not using default for gcc 4.9 compatibility
-tinyxml2ReaderElement::tinyxml2ReaderElement() noexcept {};
+tinyxml2ReaderElement::tinyxml2ReaderElement() noexcept {}
 tinyxml2ReaderElement::tinyxml2ReaderElement (const std::string &fileName) { tinyxml2ReaderElement::loadFile (fileName); }
 tinyxml2ReaderElement::tinyxml2ReaderElement (const XMLElement *xmlElement, const XMLElement *xmlParent)
     : element (xmlElement), parent (xmlParent)

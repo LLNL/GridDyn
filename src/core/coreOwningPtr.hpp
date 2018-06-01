@@ -147,4 +147,3 @@ coreObject");
 */
 
 }  // namespace griddyn
-#endif

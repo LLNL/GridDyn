@@ -23,7 +23,7 @@
 
 #include "utilities/stringConversion.h"
 //this is not using default for gcc 4.9 compatibility
-tinyxmlReaderElement::tinyxmlReaderElement() noexcept {};
+tinyxmlReaderElement::tinyxmlReaderElement() noexcept {}
 tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName) { loadFile (fileName); }
 tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, const ticpp::Element *ticppParent)
     : element (ticppElement), parent (ticppParent)
