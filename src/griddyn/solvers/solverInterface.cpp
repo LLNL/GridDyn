@@ -477,10 +477,7 @@ bool SolverInterface::getFlag(const std::string &flag) const
         {
             return flags[flgInd];
         }
-        else
-        {
-            return !flags[-flgInd];
-        }
+        return !flags[-flgInd];
     }
     return false;
 }
