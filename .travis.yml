@@ -27,6 +27,7 @@ _basic_env:
       packages:
         - g++-6
         - valgrind
+        - lcov
 - &linux_base
   if: type != cron AND branch != coverity_scan
   os: linux
