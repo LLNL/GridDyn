@@ -9,12 +9,9 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef GENMODEL3_H_
-#define GENMODEL3_H_
+#pragma once
 
 #include "GenModelClassical.h"
-
 
 namespace griddyn
 {
@@ -49,4 +46,3 @@ public:
 
 }//namespace genmodels
 }//namespace griddyn
-#endif //GRIDDYNGENMODEL_H_

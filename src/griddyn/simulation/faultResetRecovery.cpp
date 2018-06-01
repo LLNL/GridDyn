@@ -19,7 +19,7 @@ namespace griddyn
 {
 bool checkResetVoltages (const std::vector<double> &prev, const std::vector<double> &curr);
 
-faultResetRecovery::faultResetRecovery (gridDynSimulation *gds, std::shared_ptr<solverInterface> sd)
+faultResetRecovery::faultResetRecovery (gridDynSimulation *gds, std::shared_ptr<SolverInterface> sd)
     : sim (gds), solver (std::move (sd))
 {
     sim->getVoltage (initVolts);
@@ -74,7 +74,7 @@ int faultResetRecovery::attemptFix ()
 
 void faultResetRecovery::reset () { attempt_number = 0; }
 
-void faultResetRecovery::updateInfo (std::shared_ptr<solverInterface> sd) { solver = std::move (sd); }
+void faultResetRecovery::updateInfo (std::shared_ptr<SolverInterface> sd) { solver = std::move (sd); }
 int faultResetRecovery::attempts () const { return attempt_number; }
 // Try any non-reversable adjustments which might be out there
 int faultResetRecovery::faultResetFix1 ()
@@ -105,7 +105,7 @@ int faultResetRecovery::faultResetFix1 ()
         }
     }
 
-    return solver->calcIC (timeCurr, sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+    return solver->calcIC (timeCurr, sim->probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
 }
 
 int faultResetRecovery::faultResetFix2 (reset_levels rlevel)
@@ -120,7 +120,7 @@ int faultResetRecovery::faultResetFix2 (reset_levels rlevel)
     sim->guessState (timeCurr, solver->state_data (), solver->deriv_data (), solver->getSolverMode ());
     // int mmatch = JacobianCheck(sim, solver->getSolverMode());
 
-    retval = solver->calcIC (timeCurr, sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+    retval = solver->calcIC (timeCurr, sim->probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
     if (retval != 0)
     {
         // try local converge with mode which only deals with low voltage buses
@@ -128,7 +128,7 @@ int faultResetRecovery::faultResetFix2 (reset_levels rlevel)
                        converge_mode::voltage_only, 0.05);
         // std::vector<double> cVolts;
         // sim->getVoltage(cVolts, solver->state_data(), solver->getSolverMode());
-        retval = solver->calcIC (timeCurr, sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+        retval = solver->calcIC (timeCurr, sim->probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
     }
     return retval;
 }
@@ -156,7 +156,7 @@ int faultResetRecovery::faultResetFix3 ()
         }
         //  dynData->printStates(true);
         retval =
-          solver->calcIC (sim->getSimulationTime(), sim->probeStepTime, solverInterface::ic_modes::fixed_diff, true);
+          solver->calcIC (sim->getSimulationTime(), sim->probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
 
         if (retval == 0)
         {
@@ -174,7 +174,7 @@ int faultResetRecovery::faultResetFix3 ()
                            solver->getSolverMode (), converge_mode::block_iteration, 0.1);
             // dynData->printStates(true);
             retval = solver->calcIC (sim->getSimulationTime(), sim->probeStepTime,
-                                     solverInterface::ic_modes::fixed_diff, true);
+                                     SolverInterface::ic_modes::fixed_diff, true);
             if (retval == 0)
             {
                 solver->getCurrentData ();

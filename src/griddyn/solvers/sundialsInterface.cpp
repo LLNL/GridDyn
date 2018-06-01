@@ -41,20 +41,20 @@ namespace griddyn
 {
 namespace solvers
 {
-static childClassFactory<kinsolInterface, solverInterface> kinFactory (stringVec{"kinsol", "algebraic"});
-static childClassFactory<idaInterface, solverInterface> idaFactory (stringVec{"ida", "dae", "dynamic"});
+static childClassFactory<kinsolInterface, SolverInterface> kinFactory (stringVec{"kinsol", "algebraic"});
+static childClassFactory<idaInterface, SolverInterface> idaFactory (stringVec{"ida", "dae", "dynamic"});
 #ifdef LOAD_CVODE
-static childClassFactory<cvodeInterface, solverInterface>
+static childClassFactory<cvodeInterface, SolverInterface>
   cvodeFactory (stringVec{"cvode", "dyndiff", "differential"});
 #endif
 
 #ifdef LOAD_ARKODE
-static childClassFactory<arkodeInterface, solverInterface> arkodeFactory (stringVec{"arkode"});
+static childClassFactory<arkodeInterface, SolverInterface> arkodeFactory (stringVec{"arkode"});
 #endif
 
-sundialsInterface::sundialsInterface (const std::string &objName) : solverInterface (objName) { tolerance = 1e-8; }
+sundialsInterface::sundialsInterface (const std::string &objName) : SolverInterface (objName) { tolerance = 1e-8; }
 sundialsInterface::sundialsInterface (gridDynSimulation *gds, const solverMode &sMode)
-    : solverInterface (gds, sMode)
+    : SolverInterface (gds, sMode)
 {
     tolerance = 1e-8;
 }
@@ -81,16 +81,16 @@ sundialsInterface::~sundialsInterface ()
 }
 
 
-std::unique_ptr<solverInterface> sundialsInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> sundialsInterface::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<sundialsInterface>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<sundialsInterface>();
 	sundialsInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void sundialsInterface::cloneTo(solverInterface *si, bool fullCopy) const
+void sundialsInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 {
-	solverInterface::cloneTo(si, fullCopy);
+	SolverInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<sundialsInterface *>(si);
 	if (ai == nullptr)
 	{
@@ -214,7 +214,7 @@ double sundialsInterface::get (const std::string &param) const
     {
         return static_cast<double> (maxNNZ);
     }
-    return solverInterface::get (param);
+    return SolverInterface::get (param);
 }
 
 void sundialsInterface::KLUReInit(sparse_reinit_modes reinitMode)
@@ -348,7 +348,7 @@ void sundialsErrorHandlerFunc (int error_code,
     {
         return;
     }
-    auto sd = reinterpret_cast<solverInterface *> (user_data);
+    auto sd = reinterpret_cast<SolverInterface *> (user_data);
     std::string message = "SUNDIALS ERROR(" + std::to_string (error_code) + ") in Module (" +
                           std::string (module) + ") function " + std::string (function) + "::" + std::string (msg);
     sd->logMessage (error_code, message);

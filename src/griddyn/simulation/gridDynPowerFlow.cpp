@@ -259,7 +259,7 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode, change_code change
             pFlowData->setMaxNonZeros (jacSize (sMode));
             if (!controlFlags[dense_solver])
             {
-                pFlowData->sparseReInit (solverInterface::sparse_reinit_modes::resize);
+                pFlowData->sparseReInit (SolverInterface::sparse_reinit_modes::resize);
             }
         }
         else
@@ -277,7 +277,7 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode, change_code change
             }
             if ((!controlFlags[dense_solver]) && (opFlags[jacobian_count_change_flag]))
             {
-                pFlowData->sparseReInit (solverInterface::sparse_reinit_modes::resize);
+                pFlowData->sparseReInit (SolverInterface::sparse_reinit_modes::resize);
             }
         }
         opFlags &= RESET_CHANGE_FLAG_MASK;
@@ -298,7 +298,7 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode, change_code change
     }
 }
 
-// we initialize all the objects in the simulation and the default solverInterface
+// we initialize all the objects in the simulation and the default SolverInterface
 // all other solver data objects would be initialized by a reInitPFlow(xxx) call;
 int gridDynSimulation::pFlowInitialize (coreTime time0)
 {

@@ -1,79 +1,115 @@
 /*
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
-Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
-*/
 #pragma once
 
-#include "../../common/BlockingQueue.hpp"
-#include "../ActionMessage.hpp"
-#include "MpiComms.h"
-#include "helics/helics-config.h"
-#include <atomic>
-#include <functional>
-#include <list>
+#include "griddyn/griddyn-config.h"
+
 #include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
-#include <utility>
-#include <vector>
 
-#include <mpi.h>
-
-namespace helics
+namespace griddyn
 {
 namespace mpi
 {
-/** service for using MPI to communicate*/
+/** service object to get a singular point for startup and shutdown of MPI*/
 class MpiService
 {
-  public:
-    static MpiService &getInstance ();
-    static void setMpiCommunicator (MPI_Comm communicator);
-    static void setStartServiceThread (bool start);
-
-    std::string addMpiComms (MpiComms *comm);
-    void removeMpiComms (MpiComms *comm);
-    std::string getAddress (MpiComms *comm);
-    int getRank ();
-    int getTag (MpiComms *comm);
-
-    void sendMessage (std::string address, std::vector<char> message)
+public:
+    /** helper class for ordering MPI calls*/
+    class tokenholder
     {
-        txMessageQueue.emplace (address, std::move (message));
-    }
+    public:
+        explicit tokenholder(std::unique_lock<std::mutex> lock, bool lockable=true) : m_lock(std::move(lock)),needsLocking(lockable)
+        {
+        }
+        /** release the token*/
+        void release()
+        {
+            if (needsLocking)
+            {
+                if (m_lock.owns_lock()) {
+                    m_lock.unlock();
+                }
+            }
+            
+        }
+        /** reclaim the token*/
+        void claim()
+        {
+            if (needsLocking)
+            {
+                if (!m_lock.owns_lock()) {
+                    m_lock.lock();
+                }
+            }
+        }
 
-    void sendAndReceiveMessages ();
-    void drainRemainingMessages ();
+    private:
+        std::unique_lock<std::mutex> m_lock; //!< unique lock for managing the mutex
+        bool needsLocking; //!< flag indicating whether we even need to bother with locking
+    };
+  public:
+      using token = std::unique_ptr<tokenholder>;
+    /**
+     * Create a new instance of the MpiService.  This should be
+     * called at the program launch with the command line arguments
+     * since this method invoke MPI_Thread_Init.
+     *
+     * Note that argc and argv may NOT be the same on return, just as in
+     * MPI_Init.
+     */
+    static MpiService *
+    instance (int *argc, char **argv[], int threadingLevel=0);  // only constructor that creates Instance
+
+    /**
+     * Return the current instance of the singleton.
+     */
+    static MpiService *instance (int threadingLevel=0);
+
+    int getRank () const { return commRank; };
+    int getCommSize () const { return commSize; };
+    int getThreadingLevel () const { return mpiThreadingLevel; };
+
+    /** get a token for executing MPI calls
+    @throws runtime_error if a token cannot be obtained
+    @return a token object. The token can be released or claimed
+    */
+    token getToken();
+
+    ~MpiService ();
 
   private:
-    MpiService ();
-    ~MpiService ();
+     
+
+    MpiService (int *argc, char **argv[], int threadingLevel);
+
+    /**
+     * Singleton instance.
+     */
+    static std::unique_ptr<MpiService> m_pInstance;
+    static std::mutex startupLock;  //!< mutex protecting the instance
     MpiService (const MpiService &) = delete;
     MpiService &operator= (const MpiService &) = delete;
 
-    int commRank;
-    static MPI_Comm mpiCommunicator;
-    static bool startServiceThread;
-
-    std::vector<MpiComms *> comms;
-    std::list<std::pair<MPI_Request, std::vector<char>>> send_requests;
-    BlockingQueue<std::pair<std::string, std::vector<char>>> txMessageQueue;
-
-    bool helics_initialized_mpi;
-    std::atomic<int> comms_connected;
-    std::atomic<bool> startup_flag;
-    std::atomic<bool> stop_service;
-    std::unique_ptr<std::thread> service_thread;
-
-    void startService ();
-    void serviceLoop ();
-
-    bool initMPI ();
+    int commRank = -1;  //!< the rank of the MPI instance
+    int commSize = -1;  //!< total number of objects in the MPI comm
+    int mpiThreadingLevel = -1; //!< the threading level supported by the MPI library
+    bool initialized_mpi = false;  //!< indicator that this instance started MPI
+    std::thread::id tid;    //!< the current thread id (only used for MPI_THREAD_SINGLE or FUNNELED
+    std::mutex tokenLock;   //!< mutex protecting MPI calls
 };
 
-} // namespace mpi
-}  // namespace helics
-
+}  // namespace mpi
+}  // namespace griddyn

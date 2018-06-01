@@ -72,14 +72,14 @@ cvodeInterface::~cvodeInterface ()
     }
 }
 
-std::unique_ptr<solverInterface> cvodeInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> cvodeInterface::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<cvodeInterface>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<cvodeInterface>();
 	cvodeInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void cvodeInterface::cloneTo(solverInterface *si, bool fullCopy) const
+void cvodeInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 {
 	sundialsInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<cvodeInterface *>(si);
@@ -133,7 +133,7 @@ void cvodeInterface::set (const std::string &param, const std::string &val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
 }
 
@@ -165,7 +165,7 @@ void cvodeInterface::set (const std::string &param, double val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
     if (checkStepUpdate)
     {

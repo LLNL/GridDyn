@@ -36,9 +36,9 @@ if (BRAID_DIR)
 
   add_library(braid::braid STATIC IMPORTED)
   set_property(TARGET braid::braid PROPERTY IMPORTED_LOCATION ${BRAID_LIBRARY})
-  target_include_directories(braid::braid PUBLIC ${BRAID_INCLUDE_DIR})
+  set_property(TARGET braid::braid PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${BRAID_INCLUDE_DIR})
 else(BRAID_DIR)
-  set(BRAID_FOUND NO)
+  set(BRAID_FOUND FALSE)
 endif(BRAID_DIR)
 
 find_package_handle_standard_args(BRAID DEFAULT_MSG BRAID_LIBRARY BRAID_INCLUDE_DIR)

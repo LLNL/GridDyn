@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-
-#ifndef GRIDDYN_EXTRA_MODELS_H_
-#define GRIDDYN_EXTRA_MODELS_H_
+#pragma once
 
 #include <string>
 namespace griddyn
@@ -25,5 +22,3 @@ others will be added as the library grows
 void loadExtraModels(const std::string &subset = "");
 }//namespace griddyn
 
-
-#endif

@@ -91,26 +91,24 @@ include(buildMiniZip)
 ###########################################
 # building zlib
 ###########################################
-set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
+set(ZLIB_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/zlib-targets.cmake)
-build_zlib()
+if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
+	build_zlib()
 endif()
-include(${PROJECT_BINARY_DIR}/libs/cmake/zlib-targets.cmake)
+include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
 
 ###########################################
 # building minizip
 ###########################################
-set(ZLIB_INCLUDES ${PROJECT_BINARY_DIR}/libs/include)
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
-build_minizip()
+set(ZLIB_INCLUDES ${AUTOBUILD_INSTALL_PATH}/include)
+if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
+	build_minizip()
 endif()
 include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
 
 
 target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib griddyn_base)
-target_include_directories(utilities SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
-target_link_libraries(utilities PUBLIC ${Boost_LIBRARIES_core})
 set_target_properties (utilities PROPERTIES FOLDER libraries)
 
 IF (ENABLE_64_BIT_INDEXING)

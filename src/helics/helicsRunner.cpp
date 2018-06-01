@@ -1,6 +1,6 @@
 /*
  * LLNS Copyright Start
- * Copyright (c) 2017, Lawrence Livermore National Security
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -18,7 +18,7 @@
 #include "fileInput/fileInput.h"
 #include "griddyn/gridDynSimulation.h"
 
-#include "gridDynCombined/libraryLoader.h"
+#include "gridDynLoader/libraryLoader.h"
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 

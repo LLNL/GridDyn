@@ -21,23 +21,23 @@ namespace griddyn
 {
 namespace solvers
 {
-basicOdeSolver::basicOdeSolver (const std::string &objName) : solverInterface (objName)
+basicOdeSolver::basicOdeSolver (const std::string &objName) : SolverInterface (objName)
 {
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = false;
 }
-basicOdeSolver::basicOdeSolver (gridDynSimulation *gds, const solverMode &sMode) : solverInterface (gds, sMode) {}
-std::unique_ptr<solverInterface> basicOdeSolver::clone (bool fullCopy) const
+basicOdeSolver::basicOdeSolver (gridDynSimulation *gds, const solverMode &sMode) : SolverInterface (gds, sMode) {}
+std::unique_ptr<SolverInterface> basicOdeSolver::clone (bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<basicOdeSolver>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<basicOdeSolver>();
 	basicOdeSolver::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void basicOdeSolver::cloneTo(solverInterface *si, bool fullCopy) const
+void basicOdeSolver::cloneTo(SolverInterface *si, bool fullCopy) const
 {
-	solverInterface::cloneTo(si, fullCopy);
+	SolverInterface::cloneTo(si, fullCopy);
 	auto bos = dynamic_cast<basicOdeSolver *>(si);
 	if (bos == nullptr)
 	{
@@ -84,7 +84,7 @@ double basicOdeSolver::get (const std::string &param) const
     {
         return deltaT;
     }
-    return solverInterface::get (param);
+    return SolverInterface::get (param);
 }
 void basicOdeSolver::set (const std::string &param, const std::string &val)
 {
@@ -93,7 +93,7 @@ void basicOdeSolver::set (const std::string &param, const std::string &val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
 }
 void basicOdeSolver::set (const std::string &param, double val)
@@ -104,7 +104,7 @@ void basicOdeSolver::set (const std::string &param, double val)
     }
     else
     {
-        solverInterface::set (param, val);
+        SolverInterface::set (param, val);
     }
 }
 

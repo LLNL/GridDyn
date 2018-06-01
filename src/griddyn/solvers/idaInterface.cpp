@@ -65,14 +65,14 @@ idaInterface::~idaInterface ()
     }
 }
 
-std::unique_ptr<solverInterface> idaInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> idaInterface::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<idaInterface>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<idaInterface>();
 	idaInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void idaInterface::cloneTo(solverInterface *si, bool fullCopy) const
+void idaInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 {
 	sundialsInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<idaInterface *>(si);

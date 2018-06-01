@@ -16,13 +16,13 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-
-static const std::string nullStr = std::string ("");
+//default initialized empty string
+static const std::string nullStr;
 
 bool isElement (const Json_gd::Value &testValue);
 bool isAttribute (const Json_gd::Value &testValue);
-
-jsonReaderElement::jsonReaderElement () noexcept {}
+//this is not using default for gcc 4.9 compatibility
+jsonReaderElement::jsonReaderElement() noexcept {}
 jsonReaderElement::jsonReaderElement (const std::string &fileName) { jsonReaderElement::loadFile (fileName); }
 void jsonReaderElement::clear ()
 {

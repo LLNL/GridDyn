@@ -26,7 +26,7 @@ namespace griddyn
 class gridDynSimulation;
 class gridComponent;
 class solverMode;
-class solverInterface;
+class SolverInterface;
 class coreObject;
 
 const double resid_check_tol = 1e-5;
@@ -63,9 +63,9 @@ int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double resid
 */
 int residualCheck (gridDynSimulation *gds, coreTime time, const solverMode &sMode, double residTol = resid_check_tol, bool useStateNames = false);
 
-std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<solverInterface> &sd);
+std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<SolverInterface> &sd);
 
-std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<solverInterface> &sd);
+std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<SolverInterface> &sd);
 
 std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const solverMode &sMode);
 

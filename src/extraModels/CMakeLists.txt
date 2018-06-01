@@ -20,7 +20,7 @@ set(extra_headers
 	txLifeSpan.h
 	)
 
-add_library(extraModelLibrary ${extra_sources} ${extra_headers})
+add_library(extraModelLibrary STATIC ${extra_sources} ${extra_headers})
 set_target_properties (extraModelLibrary PROPERTIES FOLDER libraries)
 
 target_link_libraries(extraModelLibrary PUBLIC griddyn)

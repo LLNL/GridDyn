@@ -80,7 +80,7 @@ coreObject *gridDynSimulation::clone (coreObject *obj) const
     sim->default_ordering = default_ordering;
     sim->powerFlowFile = powerFlowFile;
     sim->defaultDynamicSolverMethod = defaultDynamicSolverMethod;
-    // std::vector < std::shared_ptr < solverInterface >> solverInterfaces;
+    // std::vector < std::shared_ptr < SolverInterface >> solverInterfaces;
     // std::vector<gridComponent *>singleStepObjects;
     // now clone the solverInterfaces
     auto solverInterfaceCount = static_cast<count_t> (solverInterfaces.size ());
@@ -804,7 +804,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
 
 bool gridDynSimulation::hasDynamics () const { return (diffSize (*defDAEMode) > 0); }
 
-// need to update probably with a new field in solverInterface
+// need to update probably with a new field in SolverInterface
 count_t gridDynSimulation::nonZeros (const solverMode &sMode) const
 {
     return getSolverInterface (sMode)->nonZeros ();
@@ -1412,7 +1412,7 @@ int gridDynSimulation::makeReady (gridState_t desiredState, const solverMode &sM
             break;
         }
     }
-    // now check the solverInterface
+    // now check the SolverInterface
     auto sd = getSolverInterface (sMode);
     if (!(sd))  // we need to create the solver
     {
@@ -1448,9 +1448,9 @@ void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t nonZero
     getSolverInterface (sMode)->setMaxNonZeros (nonZeros);
 }
 
-std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)
+std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)
 {
-    std::shared_ptr<solverInterface> solveD;
+    std::shared_ptr<SolverInterface> solveD;
 	if (isValidIndex(sMode.offsetIndex,solverInterfaces))
     {
         solveD = solverInterfaces[sMode.offsetIndex];
@@ -1466,7 +1466,7 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const so
     return solveD;
 }
 
-std::shared_ptr<const solverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode) const
+std::shared_ptr<const SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode) const
 {
 	if (isValidIndex(sMode.offsetIndex, solverInterfaces))
     {
@@ -1475,7 +1475,7 @@ std::shared_ptr<const solverInterface> gridDynSimulation::getSolverInterface (co
     return nullptr;
 }
 
-void gridDynSimulation::add (std::shared_ptr<solverInterface> nSolver)
+void gridDynSimulation::add (std::shared_ptr<SolverInterface> nSolver)
 {
     auto oI = nSolver->getSolverMode ().offsetIndex;
 
@@ -1570,7 +1570,7 @@ solverMode gridDynSimulation::getSolverMode (const std::string &solverType)
         }
         else
         {
-            std::shared_ptr<solverInterface> sd = makeSolver (solverType);
+            std::shared_ptr<SolverInterface> sd = makeSolver (solverType);
             if (sd)
             {
                 add (sd);
@@ -1676,19 +1676,19 @@ const solverMode *gridDynSimulation::getSolverModePtr (index_t index) const
     return nullptr;
 }
 
-std::shared_ptr<const solverInterface> gridDynSimulation::getSolverInterface (index_t index) const
+std::shared_ptr<const SolverInterface> gridDynSimulation::getSolverInterface (index_t index) const
 {
     return (isValidIndex (index, solverInterfaces)) ? solverInterfaces[index] : nullptr;
 }
 
-std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (index_t index)
+std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (index_t index)
 {
     return (isValidIndex (index, solverInterfaces)) ? solverInterfaces[index] : nullptr;
 }
 
-std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const std::string &solverName)
+std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const std::string &solverName)
 {
-    // just run through the list of solverInterface objects and find the first one that matches the name
+    // just run through the list of SolverInterface objects and find the first one that matches the name
     if (solverName == "powerflow")
     {
         return getSolverInterface (*defPowerFlowMode);
@@ -1723,7 +1723,7 @@ std::shared_ptr<solverInterface> gridDynSimulation::getSolverInterface (const st
     return nullptr;
 }
 
-std::shared_ptr<solverInterface> gridDynSimulation::updateSolver (const solverMode &sMode)
+std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMode &sMode)
 {
     auto kIndex = sMode.offsetIndex;
     solverMode sm = sMode;
@@ -1845,7 +1845,7 @@ void gridDynSimulation::checkOffsets (const solverMode &sMode)
     }
 }
 
-void gridDynSimulation::getSolverReady (std::shared_ptr<solverInterface> &solver)
+void gridDynSimulation::getSolverReady (std::shared_ptr<SolverInterface> &solver)
 {
     auto ss = stateSize (solver->getSolverMode ());
     if (ss != solver->size ())

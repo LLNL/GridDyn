@@ -79,14 +79,14 @@ kinsolInterface::~kinsolInterface ()
     }
 }
 
-std::unique_ptr<solverInterface> kinsolInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> kinsolInterface::clone(bool fullCopy) const
 {
-	std::unique_ptr<solverInterface> si = std::make_unique<kinsolInterface>();
+	std::unique_ptr<SolverInterface> si = std::make_unique<kinsolInterface>();
 	kinsolInterface::cloneTo(si.get(),fullCopy);
 	return si;
 }
 
-void kinsolInterface::cloneTo(solverInterface *si, bool fullCopy) const
+void kinsolInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 {
 	sundialsInterface::cloneTo(si, fullCopy);
 	auto ai = dynamic_cast<kinsolInterface *>(si);

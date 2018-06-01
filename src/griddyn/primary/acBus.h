@@ -294,7 +294,7 @@ public:
 
   virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
   /** @brief function used for returning the mode of the bus
-   depends on the interaction of the solverInterface and the bus type
+   depends on the interaction of the SolverInterface and the bus type
   @param[in] sMode the corresponding solverMode to the state
   @return the system mode
   **/

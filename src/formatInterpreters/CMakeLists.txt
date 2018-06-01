@@ -33,35 +33,35 @@ ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 
 #SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
-include(buildYAML)
-include(buildTinyXML2)
-include(buildTICPP)
+
+
 
 ###########################################
 # building yaml
 #########################################
 OPTION(ENABLE_YAML "enable yaml file support in GridDyn" OFF)
 if (ENABLE_YAML)
-set(YAML_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
+	include(buildYAML)
+	set(YAML_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/libs/cmake/yaml-cpp-targets.cmake)
-build_yaml()
-endif()
-include(${PROJECT_BINARY_DIR}/libs/cmake/yaml-cpp-targets.cmake)
+	if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
+		build_yaml()
+	endif()
+	include(${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
 
 endif(ENABLE_YAML)
 
 if (YAML_FOUND)
-list(APPEND elementReader_files
-yamlReaderElement.cpp
-yamlElement.cpp)
+	list(APPEND elementReader_files
+	yamlReaderElement.cpp
+	yamlElement.cpp)
 
-list(APPEND elementReader_headers
-yamlReaderElement.h
-yamlElement.h)
+	list(APPEND elementReader_headers
+	yamlReaderElement.h
+	yamlElement.h)
 
-list(APPEND optional_library_test_files ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp)
-set (optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
+	list(APPEND optional_library_test_files ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp)
+	set (optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
 
 ENDIF(YAML_FOUND)
 

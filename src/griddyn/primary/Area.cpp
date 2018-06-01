@@ -1968,7 +1968,6 @@ void Area::jacobianElements (const IOdata &inputs,
 
 void Area::updateFlags (bool /*dynOnly*/)
 {
-    rootObjects.clear ();
     pFlowAdjustObjects.clear ();
     opFlags &= (~flagMask);  // clear the cascading flags
 
@@ -1977,10 +1976,6 @@ void Area::updateFlags (bool /*dynOnly*/)
         if (obj->isEnabled ())
         {
             opFlags |= obj->cascadingFlags ();
-            if (obj->checkFlag (has_roots))
-            {
-                rootObjects.push_back (obj);
-            }
             if (obj->checkFlag (has_powerflow_adjustments))
             {
                 pFlowAdjustObjects.push_back (obj);
@@ -2141,11 +2136,16 @@ void Area::loadRootSizes (const solverMode &sMode)
         so.local.algRoots = selfSizes.first;
         so.local.diffRoots = selfSizes.second;
     }
+    rootObjects.clear();
     for (auto &obj : primaryObjects)
     {
         if (!(obj->isRootCountLoaded (sMode)))
         {
             obj->loadRootSizes (sMode);
+        }
+        if (obj->checkFlag(has_roots))
+        {
+            rootObjects.push_back(obj);
         }
         so.addRootSizes (obj->getOffsets (sMode));
     }

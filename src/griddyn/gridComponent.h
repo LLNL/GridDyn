@@ -10,8 +10,6 @@
  * LLNS Copyright End
 */
 
-#ifndef GRIDCOMPONENT_H_
-#define GRIDCOMPONENT_H_
 #pragma once 
 
 #include "core/coreObject.h"
@@ -760,4 +758,3 @@ void printStateNames (const gridComponent *comp, const solverMode &sMode);
 
 
 }//namespace griddyn
-#endif

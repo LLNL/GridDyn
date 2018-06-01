@@ -71,7 +71,7 @@ helicsCommunicator::initialize ()
     {
         throw(griddyn::executionFailure(nullptr, "unable to connect with HELICS coordinator"));
     }
-    index=coord->addEndpoint(getName(), "", target);
+    index=coord->addEndpoint(getName(), std::string(), target);
 }
 
 void helicsCommunicator::disconnect()

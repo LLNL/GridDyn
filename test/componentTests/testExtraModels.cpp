@@ -10,7 +10,7 @@
  * LLNS Copyright End
 */
 
-#include "gridDynCombined/libraryLoader.h"
+#include "gridDynLoader/libraryLoader.h"
 #include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

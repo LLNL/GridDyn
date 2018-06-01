@@ -19,14 +19,14 @@ namespace griddyn
 {
 namespace solvers
 {
-/** @brief solverInterface interfacing to the SUNDIALS kinsol solver
+/** @brief SolverInterface interfacing to the SUNDIALS kinsol solver
  */
 class kinsolInterface : public sundialsInterface
 {
   public:
     /** @brief constructor*/
     explicit kinsolInterface (const std::string &objName = "kinsol");
-    /** @brief constructor loading the solverInterface structure*
+    /** @brief constructor loading the SolverInterface structure*
     @param[in] gds  the gridDynSimulation to link with
     @param[in] sMode the solverMode for the solver
     */
@@ -35,9 +35,9 @@ class kinsolInterface : public sundialsInterface
      */
     virtual ~kinsolInterface ();
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;

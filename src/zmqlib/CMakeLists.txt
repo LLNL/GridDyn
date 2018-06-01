@@ -1,5 +1,5 @@
 # LLNS Copyright Start
-# Copyright (c) 2017, Lawrence Livermore National Security
+# Copyright (c) 2014-2018, Lawrence Livermore National Security
 # This work was performed under the auspices of the U.S. Department
 # of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -36,7 +36,7 @@ set(zmqInterface_headers
 	zmqInterface.h
 	)
 
-add_library(zmqInterfaceLibrary ${zmqLibrary_sources} ${zmqLibrary_headers} ${zmqInterface_sources} ${zmqInterface_headers})
+add_library(zmqInterfaceLibrary STATIC ${zmqLibrary_sources} ${zmqLibrary_headers} ${zmqInterface_sources} ${zmqInterface_headers})
 set_target_properties (zmqInterfaceLibrary PROPERTIES FOLDER libraries)
 
 IF(DIME_ENABLE)
@@ -56,7 +56,7 @@ set(dimeInterface_headers
 	dimeInterface.h
 	)
 
-add_library(dimeLibrary ${dimeInterface_sources} ${dimeInterface_headers})
+add_library(dimeLibrary STATIC ${dimeInterface_sources} ${dimeInterface_headers})
 target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
 set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
 
@@ -72,8 +72,8 @@ else()
 endif()
 
 	message(STATUS "zmq lib ${ZMQ_DEPENDENCY}")
-target_link_libraries(zmqInterfaceLibrary PUBLIC ${ZMQ_DEPENDENCY} )
-target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn)
+target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn ${ZMQ_DEPENDENCY} )
+
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
 

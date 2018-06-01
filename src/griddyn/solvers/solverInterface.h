@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _SOLVER_INTERFACE_H_
-#define _SOLVER_INTERFACE_H_
 #pragma once
 
 #include "core/helperObject.h"
@@ -76,9 +74,10 @@ enum solver_flags : int
     allocated_flag = 6,  //!< if the solver has been allocated
     initialized_flag = 7,  //!< flag indicating if these vectors have been initialized
     fileCapture_flag = 8,
-    directLogging_flag = 9,  //!< flag telling the solverInterface to capture a log directly from the solver
+    directLogging_flag = 9,  //!< flag telling the SolverInterface to capture a log directly from the solver
     use_newton_flag = 11,
     use_bdf_flag = 12,
+    block_mode_only=13, //!< flag indicating that the solver only supports block mode
     extra_solver_flag1 = 16,
     extra_solver_flag2 = 17,
     extra_solver_flag3 = 18,
@@ -94,11 +93,11 @@ enum solver_flags : int
     print_residuals = 28,
 };
 /** @brief class defining the data related to a specific solver
- the solverInterface class is the base class for solvers for the GridDyn power systems program
-a particular solverInterface class will contain the interface and calls necessary to implement a particular solver
+ the SolverInterface class is the base class for solvers for the GridDyn power systems program
+a particular SolverInterface class will contain the interface and calls necessary to implement a particular solver
 methodology
 */
-class solverInterface : public helperObject
+class SolverInterface : public helperObject
 {
   public:
     /** @brief enumeration of solver call modes*/
@@ -106,6 +105,7 @@ class solverInterface : public helperObject
     {
         normal,  //!< normal operation
         single_step,  //!< single step operation
+        block, //!< the solver runs in a block mode all at once
     };
     /** @brief enumeration of initiaL condition call modes*/
     enum class ic_modes
@@ -149,25 +149,25 @@ class solverInterface : public helperObject
     /** @brief default constructor
      * @param[in] objName  the name of the solver
      */
-    explicit solverInterface (const std::string &objName = "");
+    explicit SolverInterface (const std::string &objName = "");
 
     /** @brief alternate constructor
     @param[in] gds  gridDynSimulation to link with
     @param[in] sMode the solverMode associated with the solver
     */
-    solverInterface (gridDynSimulation *gds, const solverMode &sMode);
+    SolverInterface (gridDynSimulation *gds, const solverMode &sMode);
 
     /** @brief make a copy of the solver interface
     @param[in] fullCopy set to true to initialize and copy over all data to the new object
-    @return a unique ptr to the clones solverInterface
+    @return a unique ptr to the clones SolverInterface
     */
-    virtual std::unique_ptr<solverInterface> clone (bool fullCopy = false) const;
+    virtual std::unique_ptr<SolverInterface> clone (bool fullCopy = false) const;
 
     /** @brief make a copy of the solver interface
     @param[in] si a ptr to an existing interface that data should be copied to
     @param[in] fullCopy set to true to initialize and copy over all data to the new object
     */
-    virtual void cloneTo (solverInterface *si, bool fullCopy = false) const;
+    virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const;
     /** @brief get a pointer to the state data
     @return a pointer to a double array with the state data
     */
@@ -264,6 +264,10 @@ class solverInterface : public helperObject
     @param[in] val the value of the property to set
     */
     virtual void setFlag (const std::string &flag, bool val = true) override;
+    /** @brief get a flag parameter from a solver
+    @param[in] flag  a string with the name of the flag to set
+    */
+    virtual bool getFlag(const std::string &flag) const override;
     /** get the last time the solver was called*/
     coreTime getSolverTime () const { return solveTime; }
     /** @brief perform the solver calculations
@@ -277,7 +281,7 @@ class solverInterface : public helperObject
     @param[in] nonZeroCount  the number of elements to potentially store
     */
     virtual void setMaxNonZeros (count_t nonZeroCount);
-    /** @brief check if the solverInterface has been initialized
+    /** @brief check if the SolverInterface has been initialized
     @return true if initialized false if not
     */
     bool isInitialized () const { return flags[initialized_flag]; }
@@ -365,15 +369,14 @@ class solverInterface : public helperObject
 
 /** @brief make a solver from a particular mode
 @param[in] gds  the gridDynSimulation to link to
-@param[in] sMode the solverMode to construct the solverInterface from
-@return a unique_ptr to a solverInterface object
+@param[in] sMode the solverMode to construct the SolverInterface from
+@return a unique_ptr to a SolverInterface object
 */
-std::unique_ptr<solverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode);
+std::unique_ptr<SolverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode);
 /** @brief make a solver from a string
-@param[in] type the type of solverInterface to create
-@return a unique_ptr to a solverInterface object
+@param[in] type the type of SolverInterface to create
+@return a unique_ptr to a SolverInterface object
 */
-std::unique_ptr<solverInterface> makeSolver (const std::string &type, const std::string &name = "");
+std::unique_ptr<SolverInterface> makeSolver (const std::string &type, const std::string &name = "");
 
 }  // namespace griddyn
-#endif

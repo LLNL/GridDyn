@@ -228,12 +228,12 @@ ENDIF(NOT DISABLE_MULTITHREADING)
 OPTION(MPI_ENABLE "Enable MPI networking library" OFF)
 IF (MPI_ENABLE)
 	include(addMPI)
-	if (MPI_C_FOUND)
+	if (TARGET MPI::MPI_C)
 		set(GRIDDYN_HAVE_MPI TRUE)
 		target_link_libraries(griddyn_base INTERFACE MPI::MPI_C)
 	else()
 		set(GRIDDYN_HAVE_MPI FALSE)
-	endif (MPI_C_FOUND)
+	endif ()
 ELSE(MPI_ENABLE)
 	set(GRIDDYN_HAVE_MPI FALSE)
 ENDIF(MPI_ENABLE)
@@ -246,7 +246,7 @@ ENDIF(MPI_ENABLE)
 option(DISABLE_KLU "disable KLU (not recommended [slow], turn on AUTOBUILD_KLU if your system doesn't have SuiteSparse installed)" OFF)
 
 if(NOT DISABLE_KLU)
-    include(addKLU)
+    include(addKLU_targets)
 else()
     set(KLU_ENABLE OFF CACHE BOOL "Disable KLU support" FORCE)
 endif()
@@ -274,9 +274,11 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
-SET(CMAKE_BUILD_RPATH "${AUTOBUILD_INSTALL_PATH}/bin;$${AUTOBUILD_INSTALL_PATH}/lib")
+SET(CMAKE_BUILD_RPATH "${AUTOBUILD_INSTALL_PATH}/bin;${AUTOBUILD_INSTALL_PATH}/lib;${AUTOBUILD_INSTALL_PATH}/lib64")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
@@ -306,8 +308,12 @@ endif()
 target_include_directories(griddyn_base INTERFACE
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 	$<BUILD_INTERFACE:${AUTOBUILD_INSTALL_PATH}/include>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_include_directories(griddyn_base SYSTEM INTERFACE
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
-	$<INSTALL_INTERFACE:include>
+	$<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>
 )
 
 # -------------------------------------------------------------
@@ -357,6 +363,19 @@ if (LOAD_EXTRA_MODELS)
 ENDIF(LOAD_EXTRA_MODELS)
 
 # -------------------------------------------------------------
+# Enable compilation of extraSolvers?
+# -------------------------------------------------------------
+
+OPTION(LOAD_EXTRA_SOLVERS "Compile and load extraSolvers" OFF)
+# If extra solvers are used enabled try to locate the libraries
+# link against them.
+
+if (LOAD_EXTRA_SOLVERS)
+  add_subdirectory(src/extraSolvers)
+  target_link_libraries(griddyn_optional INTERFACE extraSolverLibrary)
+ENDIF(LOAD_EXTRA_SOLVERS)
+
+# -------------------------------------------------------------
 # Enable FMI support?
 # -------------------------------------------------------------
 
@@ -369,7 +388,7 @@ IF (FMI_ENABLE)
 		message(WARNING "FMI support requires BOOST 1.61 or higher")
 	ELSE()
 		add_subdirectory(src/fmi)
-		target_link_libraries(griddyn_optional INTERFACE fmiGDLibrary)
+		target_link_libraries(griddyn_optional PUBLIC INTERFACE fmiGDLibrary)
 		SET(DL_REQUIRED ON)
 	ENDIF()
 ENDIF(FMI_ENABLE)
@@ -428,7 +447,8 @@ endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 OPTION(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
 # If HELICS_EXECUTABLE is load the helics directory
-# link against them.
+# link against them.  the variable is here since we would enable the zmq libraries with it on and that should be done
+#before actually including helics
 
 IF (HELICS_EXECUTABLE)
 	SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
@@ -490,11 +510,11 @@ IF(OPTIMIZATION_ENABLE)
 	target_link_libraries(griddyn_optional INTERFACE optimization)
 ENDIF(OPTIMIZATION_ENABLE)
 
-add_subdirectory(src/fileInput)
-
 add_subdirectory(src/coupling)
 
-add_subdirectory(src/gridDynCombined)
+add_subdirectory(src/gridDynLoader)
+
+add_subdirectory(src/fileInput)
 
 IF(BUILD_SHARED_FMI_LIBRARY)
 	add_subdirectory(src/fmi_export)

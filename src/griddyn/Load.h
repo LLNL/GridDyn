@@ -10,8 +10,6 @@
  * LLNS Copyright End
 */
 
-#ifndef GRIDDYN_LOAD_H_
-#define GRIDDYN_LOAD_H_
 #pragma once
 
 #include "gridSecondary.h"
@@ -115,4 +113,3 @@ private:
 };
 
 }//namespace griddyn
-#endif

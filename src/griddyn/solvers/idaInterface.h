@@ -19,7 +19,7 @@ namespace griddyn
 {
 namespace solvers
 {
-/** @brief solverInterface interfacing to the SUNDIALS IDA solver
+/** @brief SolverInterface interfacing to the SUNDIALS IDA solver
  */
 class idaInterface : public sundialsInterface
 {
@@ -41,9 +41,9 @@ class idaInterface : public sundialsInterface
     /** @brief destructor*/
     ~idaInterface ();
 
-	virtual std::unique_ptr<solverInterface> clone(bool fullCopy = false) const override;
+	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 
-	virtual void cloneTo(solverInterface *si, bool fullCopy = false) const override;
+	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
 
     virtual void allocate (count_t size, count_t numRoots = 0) override;
     void setMaxNonZeros (count_t size) override;

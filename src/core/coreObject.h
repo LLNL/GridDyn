@@ -10,8 +10,6 @@
  * LLNS Copyright End
 */
 
-#ifndef COREOBJECT_H_
-#define COREOBJECT_H_
 #pragma once
 
 #include "coreDefinitions.hpp"
@@ -51,7 +49,7 @@ class coreObject
 {
 private:
 	//this is used much more frequently than any other so it gets its own boolean at the beginning of the object
-	bool enabled = true;     //!< enabled indicator 
+	bool enabled = true;     //!< enabled indicator
 	bool updates_enabled = false; //!< indicator that updates are enabled
 protected:
 	bool extra_bool = false;  //!< an extra flag for derived classes to use
@@ -113,7 +111,7 @@ public:
   * @param[in] message the log message
   */
   virtual void log (coreObject *object, print_level level, const std::string &message);
-  
+
   /**
   * @brief increment the reference counter for the object
   */
@@ -293,11 +291,11 @@ public:
     return id;
   }
   /** turn on updates for an object
-  @param[in] enable a boolean defining whether to turn updates on(true) or off (false)
+  @param[in] upd_enabled a boolean defining whether to turn updates on(true) or off (false)
   */
-  void enable_updates(bool enable = true)
+  void enable_updates(bool upd_enabled = true)
   {
-	  updates_enabled = enable;
+	  updates_enabled = upd_enabled;
 	  alert(this, UPDATE_REQUIRED);
   }
   /** check if an object has updates
@@ -317,7 +315,7 @@ public:
   {
     return nextUpdateTime;
   }
-  
+
   /**@brief return the last time the object had its state set or was updated
   */
   coreTime currentTime () const noexcept
@@ -346,7 +344,7 @@ private:
 	coreObject(id_type_t coid);
 };
 
-/** @brief function to set multiple flags on a object separated by ; or ,
+/** @brief helper function to set multiple flags on a object separated by ; or ,
 @details the flags can be turned off by putting a - in front of the flag
 @param[in] obj the object to set the flags on
 @param[in] flags  the list of flags to set
@@ -459,4 +457,3 @@ print_level stringToPrintLevel(const std::string &level);
 #endif
 
 }//namespace griddyn
-#endif

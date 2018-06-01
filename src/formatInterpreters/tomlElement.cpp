@@ -12,7 +12,7 @@
 
 #include "tomlElement.h"
 
-static const std::string nullStr{ "" };
+static const std::string nullStr{};
 
 tomlElement::tomlElement (toml::Value vElement, std::string newName)
     : name (std::move (newName)), element (std::move (vElement))
@@ -38,4 +38,3 @@ void tomlElement::clear ()
     arraytype = false;
     name = nullStr;
 }
-

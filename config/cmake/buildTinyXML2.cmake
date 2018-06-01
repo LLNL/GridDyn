@@ -10,7 +10,7 @@ function (build_tinyxml2)
 
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 3.4)
+    cmake_minimum_required(VERSION 3.5)
     include(ExternalProject)
 ExternalProject_Add(tinyxml2
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2
@@ -19,7 +19,7 @@ ExternalProject_Add(tinyxml2
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/tinyxml2
      
     CMAKE_ARGS 
-        -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/libs
+        -DCMAKE_INSTALL_PREFIX=${AUTOBUILD_INSTALL_PATH}
 		-DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_MODULE_PATH=${PROJECT_SOURCE_DIR}/config/cmake
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
@@ -27,7 +27,7 @@ ExternalProject_Add(tinyxml2
         -DCMAKE_LINKER=${CMAKE_LINKER}
         -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
    
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/libs
+    INSTALL_DIR ${AUTOBUILD_INSTALL_PATH}
     )")
 
 
