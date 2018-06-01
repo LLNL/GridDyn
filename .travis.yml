@@ -197,7 +197,7 @@ script:
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && coveralls --gcov ${GCOV_TOOL} --lcov-file coverage.info.cleaned > /dev/null && popd ; fi
 
   # Submit coverage results to codecov.io
-  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && bash <(curl -s https://codecov.io/bash) -x ${GCOV_TOOL} && popd ; fi
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && bash <(curl -s https://codecov.io/bash) -x ${GCOV_TOOL} > /dev/null && popd ; fi
 
 notifications:
     email: false
