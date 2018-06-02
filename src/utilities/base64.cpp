@@ -1,6 +1,6 @@
 /*
    base64.cpp and base64.h
-   Copyright (C) 2004-2008 René Nyffenegger
+   Copyright (C) 2004-2008 RenÃ© Nyffenegger
    This source code is provided 'as-is', without any express or implied
    warranty. In no event will the author be held liable for any damages
    arising from the use of this software.
@@ -14,9 +14,10 @@
    2. Altered source versions must be plainly marked as such, and must not be
       misrepresented as being the original source code.
    3. This notice may not be removed or altered from any source distribution.
-   René Nyffenegger rene.nyffenegger@adp-gmbh.ch
+   RenÃ© Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
    modified by Philip Top LLNL 2017:  added charMapper objects instead of find and C++ based overloads
+   modified by Corey McNeish LLNL 2017:  added type suffixes to integer constants
 */
 
 #include "base64.h"
@@ -32,7 +33,7 @@ static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 static const charMapper<unsigned char> b64Map = base64Mapper ();
 
-static inline bool is_base64 (unsigned char c) { return (b64Map[c] < 0xFF); }
+static inline bool is_base64 (unsigned char c) { return (b64Map[c] < 0xFFu); }
 std::string base64_encode (unsigned char const *bytes_to_encode, int32_t in_len)
 {
     std::string ret;
@@ -45,10 +46,10 @@ std::string base64_encode (unsigned char const *bytes_to_encode, int32_t in_len)
         char_array_3[ii++] = *(bytes_to_encode++);
         if (ii == 3)
         {
-            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-            char_array_4[3] = char_array_3[2] & 0x3f;
+            char_array_4[0] = (char_array_3[0] & 0xfcu) >> 2u;
+            char_array_4[1] = ((char_array_3[0] & 0x03u) << 4u) + ((char_array_3[1] & 0xf0u) >> 4u);
+            char_array_4[2] = ((char_array_3[1] & 0x0fu) << 2u) + ((char_array_3[2] & 0xc0u) >> 6u);
+            char_array_4[3] = char_array_3[2] & 0x3fu;
 
             for (ii = 0; (ii < 4); ii++)
             {
@@ -65,10 +66,10 @@ std::string base64_encode (unsigned char const *bytes_to_encode, int32_t in_len)
             char_array_3[jj] = '\0';
         }
 
-        char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
-        char_array_4[3] = char_array_3[2] & 0x3f;
+        char_array_4[0] = (char_array_3[0] & 0xfcu) >> 2u;
+        char_array_4[1] = ((char_array_3[0] & 0x03u) << 4u) + ((char_array_3[1] & 0xf0u) >> 4u);
+        char_array_4[2] = ((char_array_3[1] & 0x0fu) << 2u) + ((char_array_3[2] & 0xc0u) >> 6u);
+        char_array_4[3] = char_array_3[2] & 0x3fu;
 
         for (int jj = 0; (jj < ii + 1); ++jj)
         {
@@ -89,15 +90,15 @@ std::vector<unsigned char> base64_decode (std::string const &encoded_string)
     auto in_len = encoded_string.size ();
     int i = 0;
     int j = 0;
-    int in_ = 0;
+    int in = 0;
     unsigned char char_array_4[4], char_array_3[3];
     std::vector<unsigned char> ret;
     ret.reserve (in_len);
 
-    while (((in_len--) != 0u) && (encoded_string[in_] != '=') && is_base64 (encoded_string[in_]))
+    while (((in_len--) != 0u) && (encoded_string[in] != '=') && is_base64 (encoded_string[in]))
     {
-        char_array_4[i++] = encoded_string[in_];
-        in_++;
+        char_array_4[i++] = encoded_string[in];
+        in++;
         if (i == 4)
         {
             char_array_4[0] = b64Map[char_array_4[0]];
@@ -105,9 +106,9 @@ std::vector<unsigned char> base64_decode (std::string const &encoded_string)
             char_array_4[2] = b64Map[char_array_4[2]];
             char_array_4[3] = b64Map[char_array_4[3]];
 
-            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+            char_array_3[0] = (char_array_4[0] << 2u) + ((char_array_4[1] & 0x30u) >> 4u);
+            char_array_3[1] = ((char_array_4[1] & 0xfu) << 4u) + ((char_array_4[2] & 0x3cu) >> 2u);
+            char_array_3[2] = ((char_array_4[2] & 0x3u) << 6u) + char_array_4[3];
 
             ret.push_back (char_array_3[0]);
             ret.push_back (char_array_3[1]);
@@ -128,9 +129,9 @@ std::vector<unsigned char> base64_decode (std::string const &encoded_string)
         char_array_4[2] = b64Map[char_array_4[2]];
         char_array_4[3] = b64Map[char_array_4[3]];
 
-        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+        char_array_3[0] = (char_array_4[0] << 2u) + ((char_array_4[1] & 0x30u) >> 4u);
+        char_array_3[1] = ((char_array_4[1] & 0xfu) << 4u) + ((char_array_4[2] & 0x3cu) >> 2u);
+        char_array_3[2] = ((char_array_4[2] & 0x3u) << 6u) + char_array_4[3];
 
         for (j = 0; (j < i - 1); j++)
         {

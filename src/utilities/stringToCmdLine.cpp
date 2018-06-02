@@ -16,12 +16,12 @@
 
 namespace utilities
 {
-StringToCmdLine::StringToCmdLine(const std::string &cmdString)
-{
-	load(cmdString);
-}
-
 static std::string nullstr;
+
+StringToCmdLine::StringToCmdLine (const std::string &cmdString)
+{
+    load(cmdString);
+}
 
 void StringToCmdLine::load (const std::string &cmdString)
 {
@@ -59,8 +59,6 @@ void StringToCmdLine::load (const std::string &cmdString)
         stringPtrs[ii] = &(stringCap[ii - 1][0]);
     }
     stringPtrs[0] = &(nullstr[0]);
-
 }
 
 } //namespace utilities
-

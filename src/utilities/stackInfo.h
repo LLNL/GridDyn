@@ -13,8 +13,8 @@
 #ifndef STACKINFO_H_
 #define STACKINFO_H_
 
- #include <cstdio>
+#include <iostream>
 
-void printStackTrace ( FILE *out = stderr, size_t max_frames = 63 );
+void printStackTrace ( std::ostream &out = std::cerr, size_t max_frames = 63 );
 
 #endif

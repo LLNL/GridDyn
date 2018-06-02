@@ -14,15 +14,23 @@
 
 #ifdef __GNUC__
 #ifndef _WIN32
-#include <cstdlib>
 #include <cxxabi.h>
-#include <errno.h>
 #include <execinfo.h>
 #include <vector>
+#include <sstream>
+#include <iomanip>
+#include <memory>
 
-void printStackTrace (FILE *out, size_t max_frames)
+template<typename T>
+inline bool not_null(T* ptr) {
+    return ptr != nullptr;
+}
+
+void printStackTrace (std::ostream &out, size_t max_frames)
 {
-    fprintf (out, "stack trace:\n");
+    std::stringstream msg;
+    msg << "stack trace:\n";
+    msg << std::right; // all formatting is aligned right
 
     // storage array for stack trace address data
     std::vector<void *> addrlist (max_frames + 1);
@@ -32,14 +40,14 @@ void printStackTrace (FILE *out, size_t max_frames)
 
     if (addrlen == 0)
     {
-        fprintf (out, "  \n");
+        msg << "  \n";
         return;
     }
 
     // resolve addresses into strings containing "fileName(function+address)",
     // Actually it will be ## program address function + offset
     // this array must be free()-ed
-    char **symbollist = backtrace_symbols (addrlist.data (), addrlen);
+    auto symbollist = std::unique_ptr<char *, decltype(free)*> { backtrace_symbols (addrlist.data (), addrlen), free };
 
     size_t funcnamesize = 1024;
     char funcname[1024];
@@ -48,14 +56,14 @@ void printStackTrace (FILE *out, size_t max_frames)
     // address of this function.
     for (size_t i = 4; i < addrlen; i++)
     {
-        char *begin_name = NULL;
-        char *begin_offset = NULL;
-        char *end_offset = NULL;
+        char *begin_name = nullptr;
+        char *begin_offset = nullptr;
+        char *end_offset = nullptr;
 
 // find parentheses and +address offset surrounding the mangled name
 #ifdef DARWIN
         // OSX style stack trace
-        for (char *p = symbollist[i]; *p; ++p)
+        for (char *p = symbollist.get()[i]; *p != 0; ++p)
         {
             if ((*p == '_') && (*(p - 1) == ' '))
             {
@@ -67,7 +75,7 @@ void printStackTrace (FILE *out, size_t max_frames)
             }
         }
 
-        if (begin_name && begin_offset && (begin_name < begin_offset))
+        if (not_null(begin_name) && not_null(begin_offset) && (begin_name < begin_offset))
         {
             *begin_name++ = '\0';
             *begin_offset++ = '\0';
@@ -80,19 +88,28 @@ void printStackTrace (FILE *out, size_t max_frames)
             if (status == 0)
             {
                 funcname = ret;  // use possibly realloc()-ed string
-                fprintf (out, "  %-30s %-40s %s\n", symbollist[i], funcname, begin_offset);
+                //fprintf (out, "  %-30s %-40s %s\n", symbollist[i], funcname, begin_offset);
+                msg << "  "
+                    << std::setw(30) << symbollist.get()[i] << " "
+                    << std::setw(40) << funcname            << " "
+                    << std::setw(0)  << begin_offset        << "\n";
             }
             else
             {
                 // demangling failed. Output function name as a C function with
                 // no arguments.
-                fprintf (out, "  %-30s %-38s() %s\n", symbollist[i], begin_name, begin_offset);
+                //fprintf (out, "  %-30s %-38s() %s\n", symbollist[i], begin_name, begin_offset);
+                msg << "  " <<
+                    << std::setw(30) << symbollist.get()[i] << ' '
+                    << std::setw(38) << begin_name          << "() "
+                    << std::setw(0)  << begin_offset        << "\n";
+
             }
 
 #else  // !DARWIN - but is posix
         // not OSX style
         // ./module(function+0x15c) [0x8048a6d]
-        for (char *p = symbollist[i]; *p; ++p)
+        for (char *p = symbollist.get()[i]; *p != 0; ++p)
         {
             if (*p == '(')
             {
@@ -102,17 +119,17 @@ void printStackTrace (FILE *out, size_t max_frames)
             {
                 begin_offset = p;
             }
-            else if (*p == ')' && (begin_offset || begin_name))
+            else if (*p == ')' && (not_null(begin_offset) || not_null(begin_name)))
             {
                 end_offset = p;
             }
         }
 
-        if (begin_name && end_offset && (begin_name < end_offset))
+        if (not_null(begin_name) && not_null(end_offset) && (begin_name < end_offset))
         {
             *begin_name++ = '\0';
             *end_offset++ = '\0';
-            if (begin_offset)
+            if (not_null(begin_offset))
             {
                 *begin_offset++ = '\0';
             }
@@ -122,37 +139,48 @@ void printStackTrace (FILE *out, size_t max_frames)
             // __cxa_demangle():
 
             int status = 0;
-            char *ret = abi::__cxa_demangle (begin_name, funcname, &funcnamesize, &status);
+            char *ret = abi::__cxa_demangle (begin_name, &funcname[0], &funcnamesize, &status);
             char *fname = begin_name;
             if (status == 0)
             {
                 fname = ret;
             }
 
-            if (begin_offset)
+            if (not_null(begin_offset))
             {
-                fprintf (out, "  %-30s ( %-40s  + %-6s) %s\n", symbollist[i], fname, begin_offset, end_offset);
+                //fprintf (out, "  %-30s ( %-40s  + %-6s) %s\n", symbollist[i], fname, begin_offset, end_offset);
+                msg << "  "
+                    << std::setw(30) << symbollist.get()[i] << " ( "
+                    << std::setw(40) << fname               << "  + "
+                    << std::setw(6)  << begin_offset        << ") "
+                    << std::setw(0)  << end_offset          << "\n";
             }
             else
             {
-                fprintf (out, "  %-30s ( %-40s    %-6s) %s\n", symbollist[i], fname, "", end_offset);
+                //fprintf (out, "  %-30s ( %-40s    %-6s) %s\n", symbollist[i], fname, "", end_offset);
+                msg << "  "
+                    << std::setw(30) << symbollist.get()[i] << " ( "
+                    << std::setw(40) << fname               << "    "
+                    << std::setw(6)  << ""                  << ") "
+                    << std::setw(0)  << end_offset          << "\n";
             }
 #endif  // !DARWIN - but is posix
         }
         else
         {
             // couldn't parse the line? print the whole line.
-            fprintf (out, "  %-40s\n", symbollist[i]);
+            //fprintf (out, "  %-40s\n", symbollist[i]);
+            msg << "  "
+                << std::setw(40) << symbollist.get()[i] << "\n";
         }
     }
-
-    free (symbollist);
+    out << msg.str();
 }
 #else
-void printStackTrace (FILE * /*out*/, size_t /*max_frames*/) {}
+void printStackTrace (std::ofstream /*out*/, size_t /*max_frames*/) {}
 
 #endif
 #else
-void printStackTrace (FILE * /*out*/, size_t /*max_frames*/) {}
+void printStackTrace (std::ofstream /*out*/, size_t /*max_frames*/) {}
 
 #endif
