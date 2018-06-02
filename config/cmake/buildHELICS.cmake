@@ -10,7 +10,8 @@ function (build_helics)
 	escape_string(linker_string ${CMAKE_LINKER})
 	
 	#message(STATUS "${CMAKE_CXX_COMPILER} to ${compiler_string}")
-	
+    escape_string(binary_dir_string ${PROJECT_BINARY_DIR})
+
 	escape_string(install_location_string ${HELICS_INSTALL_PATH})
     set(trigger_build_dir ${binary_dir_string}/autobuild/force_helics)
 
@@ -27,7 +28,7 @@ function (build_helics)
 ExternalProject_Add(helics
     SOURCE_DIR ${binary_dir_string}/Download/helics
     GIT_REPOSITORY  https://github.com/GMLC-TDC/HELICS-src.git
-	GIT_TAG v1.1.0
+	GIT_TAG develop
     DOWNLOAD_COMMAND " " 
     UPDATE_COMMAND " " 
     BINARY_DIR ${binary_dir_string}/ThirdParty/helics
@@ -36,6 +37,7 @@ ExternalProject_Add(helics
         -DCMAKE_INSTALL_PREFIX=${install_location_string}
 		-DBOOST_INSTALL_PATH=${BOOST_ROOT}
 		-DUSE_BOOST_STATIC_LIBS=${USE_BOOST_STATIC_LIBS}
+        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		-DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
 		-DBUILD_HELICS_TESTS=OFF
 		-DBUILD_HELICS_EXAMPLES=OFF
@@ -51,7 +53,7 @@ ExternalProject_Add(helics
 		-DAUTOBUILD_INSTALL_PATH=${AUTOBUILD_INSTALL_PATH}
         
         
-    INSTALL_DIR ${binary_dir_string}/libs
+    INSTALL_DIR ${install_location_string}
 
     )")
 
