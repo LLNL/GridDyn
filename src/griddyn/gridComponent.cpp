@@ -15,7 +15,6 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stackInfo.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 #include <cassert>
@@ -1241,7 +1240,7 @@ void gridComponent::guessState (coreTime time, double state[], double dstate_dt[
                 printf ("%s::%s in mode %d %d ds=%d, do=%d\n", getParent ()->getName ().c_str (),
                         getName ().c_str (), static_cast<int> (isLocal (sMode)), static_cast<int> (isDAE (sMode)),
                         static_cast<int> (so.total.diffSize), static_cast<int> (so.diffOffset));
-                printStackTrace ();
+                //printStackTrace ();
             }
             assert (so.diffOffset != kNullLocation);
             count_t stateCount = localStates.algSize + localStates.diffSize;
