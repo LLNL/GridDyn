@@ -7,6 +7,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include "TripWire.hpp"
 namespace tripwire
 {
+
 triplineType TripWire::getline ()
 {
     static triplineType staticline = std::make_shared<std::atomic<bool>> (false);
@@ -19,4 +20,5 @@ bool TripWireDetector::isTripped () const { return lineDetector->load (); }
 TripWireTrigger::TripWireTrigger () : lineTrigger (TripWire::getline ()) {}
 
 TripWireTrigger::~TripWireTrigger () { lineTrigger->store (true); }
-}
+
+}//namespace tripwire

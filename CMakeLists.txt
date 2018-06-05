@@ -55,7 +55,7 @@ endif()
 
 SHOW_VARIABLE(AUTOBUILD_INSTALL_PATH PATH
   "location to install the autobuild libraries and Headers" "${PROJECT_BINARY_DIR}/libs")
-  
+
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(extraMacros)
 
@@ -104,7 +104,7 @@ if (BUILD_PYTHON_INTERFACE OR BUILD_PYTHON2_INTERFACE OR BUILD_MATLAB_INTERFACE 
 else()
 	set(INTERFACE_BUILD OFF)
 	HIDE_VARIABLE(DISABLE_SWIG)
-	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary C based shared library" ON)
+	SHOW_VARIABLE(BUILD_GRIDDYN_SHARED_LIBRARY BOOL "Enable construction of GridDyn binary C based shared library" OFF)
 endif()
 
 OPTION(BUILD_CXX_SHARED_LIB "Build a Shared Libraries of the CXX interface" OFF)
@@ -144,15 +144,17 @@ target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 # -------------------------------------------------------------
  option (TEST_CODE_COVERAGE "Build a target for testing code coverage" OFF)
  if (TEST_CODE_COVERAGE)
- include(CodeCoverage)
+  if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+   include(CodeCoverage)
 
- set(COVERAGE_EXCLUDES 'ThirdParty/*' 'tests/*' 'swig/*' 'examples/*')
- add_compile_options(${COVERAGE_COMPILER_FLAGS})
-  SETUP_TARGET_FOR_COVERAGE(
-     NAME griddyn_coverage                    # New target name
-     EXECUTABLE CTest # Executable in PROJECT_BINARY_DIR
-	)
-
+   set(COVERAGE_EXCLUDES 'usr/*' 'dependencies/*' 'ThirdParty/*' 'test/*' 'tests/*' 'swig/*' 'examples/*')
+    SETUP_TARGET_FOR_COVERAGE(
+       NAME griddyn_coverage                    # New target name
+       EXECUTABLE ctest -R testShared # Executable in PROJECT_BINARY_DIR
+	  )
+  else()
+   message(FATAL_ERROR "CMAKE_BUILD_TYPE must be set to Coverage for testing code coverage")
+  endif()
  endif(TEST_CODE_COVERAGE)
 
  include(GNUInstallDirs)

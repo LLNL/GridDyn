@@ -21,7 +21,7 @@ saturation::saturation (satType_t sT) : type (sT)
     computeParam ();
 }
 
-saturation::saturation (const std::string &satType)
+saturation::saturation (const std::string &satType) : type(satType_t::none)
 {
     setType (satType);
     loadFunctions ();

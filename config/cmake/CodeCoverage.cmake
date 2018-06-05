@@ -42,7 +42,11 @@
 # - Merged with modified version from github.com/ufz/ogs
 #
 # 2018-02-07, Philip Top LLNL
-#  -altered add flags functions to use generator expressions
+# - Altered add flags functions to use generator expressions
+#
+# Ryan Mast LLNL
+# - Allow use of "Coverage" CMake build type
+#
 # USAGE:
 #
 # 1. Copy this file into your cmake modules path.
@@ -113,8 +117,8 @@ mark_as_advanced(
     CMAKE_EXE_LINKER_FLAGS_COVERAGE
     CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading")
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    message(WARNING "Code coverage results with an optimised (non-Debug/Coverage) build may be misleading")
 endif() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
