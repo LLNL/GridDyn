@@ -154,6 +154,16 @@ public:
   @param[in] comp the component to add
   */
   void addSubObject(gridComponent *comp);
+  /** remove a grid object to the subObject container
+  @param[in] comp the component to add
+  */
+  void removeSubObject(gridComponent *comp);
+  /** replace a grid object to the subObject container
+  @param[in] newObj the component to add
+  @param[in] oldObj the component to replace
+  */
+  void replaceSubObject(gridComponent *newObj, gridComponent *oldObj);
+
   virtual void remove(coreObject *obj) override;
   /** @brief method for checking a specific known flag
   @param[in] flagID the index of the flag to check

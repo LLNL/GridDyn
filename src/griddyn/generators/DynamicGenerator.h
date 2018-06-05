@@ -152,7 +152,7 @@ public:
   virtual void generateSubModelInputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode);
   virtual void generateSubModelInputLocs (const IOlocs &inputLocs, const stateData &sD, const solverMode &sMode);
 
-  gridSubModel * replaceSubObject (gridSubModel *newObject, gridSubModel *oldObject,index_t newIndex);
+  gridSubModel * replaceModel (gridSubModel *newObject, gridSubModel *oldObject,index_t newIndex);
 
   void buildDynModel (dynModel_t dynModel);
   

@@ -1752,8 +1752,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
     sd->set ("tolerance", tols.rtol);
     if ((pState >= gridState_t::INITIALIZED) && (!isDynamic (sm)))
     {
-        auto ss = stateSize (sm);  // statesize calculates rootsize along the way so we do this first
-        // so the rootSize(sm) call is much quicker
+        auto ss = stateSize (sm); 
         sd->allocate (ss, rootSize (sm));
         checkOffsets (sm);
         guessState (currentTime, sd->state_data (), nullptr, sm);
@@ -1761,8 +1760,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
     }
     else if (pState >= gridState_t::DYNAMIC_INITIALIZED)
     {
-        auto ss = stateSize (sm);  // statesize calculates rootsize along the way so we do this first
-        // so the rootSize(sm) call is much quicker
+        auto ss = stateSize (sm);  
         sd->allocate (ss, rootSize (sm));
         checkOffsets (sm);
 

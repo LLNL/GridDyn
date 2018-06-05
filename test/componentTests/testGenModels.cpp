@@ -53,19 +53,21 @@ BOOST_AUTO_TEST_CASE (model_test2)  // Jacobian code check
     std::string fileName = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
 
-    gds = readSimXMLFile (fileName);
-
-
-    Generator *gen = gds->getGen (0);
+    
     auto cof = coreObjectFactory::instance ();
     auto genlist = cof->getTypeNames ("genmodel");
 
     for (auto &gname : genlist)
     {
-		if (gname.compare(0, 3, "fmi") == 0)
-		{
-			continue;
-		}
+        //skip any fmi model
+        if (gname.compare(0, 3, "fmi") == 0)
+        {
+            continue;
+        }
+        gds = readSimXMLFile(fileName);
+
+        Generator *gen = gds->getGen(0);
+        
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         gen->add (obj);
@@ -88,11 +90,6 @@ BOOST_AUTO_TEST_CASE (model_test2_withr)  // Jacobian code check
 {
     std::string fileName = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
-
-    gds = readSimXMLFile (fileName);
-
-
-    Generator *gen = gds->getGen (0);
     auto cof = coreObjectFactory::instance ();
     auto genlist = cof->getTypeNames ("genmodel");
 
@@ -102,6 +99,9 @@ BOOST_AUTO_TEST_CASE (model_test2_withr)  // Jacobian code check
 		{
 			continue;
 		}
+        gds = readSimXMLFile(fileName);
+
+        Generator *gen = gds->getGen(0);
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         // just set the resistance to make sure the models can handle that parameter
@@ -123,11 +123,6 @@ BOOST_AUTO_TEST_CASE (model_test2_alg_diff_tests)  // test the algebraic updates
 {
     std::string fileName = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
-
-    gds = readSimXMLFile (fileName);
-
-
-    Generator *gen = gds->getGen (0);
     auto cof = coreObjectFactory::instance ();
 
     auto genlist = cof->getTypeNames ("genmodel");
@@ -138,6 +133,9 @@ BOOST_AUTO_TEST_CASE (model_test2_alg_diff_tests)  // test the algebraic updates
 		{
 			continue;
 		}
+        gds = readSimXMLFile(fileName);
+
+        Generator *gen = gds->getGen(0);
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         // just set the resistance to make sure the models can handle that parameter
@@ -153,11 +151,14 @@ BOOST_AUTO_TEST_CASE (model_test2_alg_diff_tests)  // test the algebraic updates
         BOOST_REQUIRE_MESSAGE (mmatch == 0, "Model " << gname << " derivative issue");
         mmatch = runAlgebraicCheck (gds, cDaeSolverMode, false);
         BOOST_REQUIRE_MESSAGE (mmatch == 0, "Model " << gname << " algebraic issue");
-
-        mmatch = runJacobianCheck (gds, cDynDiffSolverMode, false);
-        BOOST_REQUIRE_MESSAGE (mmatch == 0, "Model " << gname << " Jacobian dynDiff issue");
-        mmatch = runJacobianCheck (gds, cDynAlgSolverMode, false);
-        BOOST_REQUIRE_MESSAGE (mmatch == 0, "Model " << gname << " Jacobian dynAlg issue");
+        if (gds->diffSize(cDaeSolverMode) > 0)
+        {
+            mmatch = runJacobianCheck(gds, cDynDiffSolverMode, false);
+            BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian dynDiff issue");
+            mmatch = runJacobianCheck(gds, cDynAlgSolverMode, false);
+            BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian dynAlg issue");
+        }
+        
     }
 }
 #endif
