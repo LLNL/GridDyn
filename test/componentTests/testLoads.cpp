@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(file_load_test2)
 	BOOST_CHECK_CLOSE(val, tod, 0.0001);
 
 }
-
+#ifndef GRIDDYN_HAVE_MPI
 BOOST_AUTO_TEST_CASE (gridDynLoad_test1)
 {
     std::string fileName = gridlabd_test_directory + "IEEE_13_mod.xml";
@@ -392,6 +392,7 @@ BOOST_AUTO_TEST_CASE (gridDynLoad_test1)
     gds->run ();
     requireStates (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
+#endif 
 
 BOOST_AUTO_TEST_CASE (motor_test1)
 {
