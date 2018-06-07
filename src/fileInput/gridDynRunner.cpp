@@ -58,18 +58,20 @@ int GriddynRunner::InitializeFromString(const std::string &cmdargs)
 
 int GriddynRunner::Initialize (int argc, char *argv[], readerInfo &ri, bool allowUnrecognized)
 {
-    m_startTime = std::chrono::high_resolution_clock::now ();
+    
 
     if (!m_gds)
     {
         m_gds = std::make_shared<gridDynSimulation> ();
         // gridDynSimulation::setInstance(m_gds.get());  // peer to gridDynSimulation::GetInstance ();
     }
+    m_gds->log(nullptr, print_level::summary, "GridDyn version:" GRIDDYN_VERSION_STRING);
     // TODO:: do something different with this
     GhostSwingBusManager::Initialize (&argc, &argv);
 
     vm = std::make_unique<po::variables_map> ();
 
+    m_startTime = std::chrono::high_resolution_clock::now();
     auto ret = argumentParser (argc, argv, *vm, allowUnrecognized);
     if (ret != FUNCTION_EXECUTION_SUCCESS)
     {
@@ -86,7 +88,7 @@ int GriddynRunner::Initialize (int argc, char *argv[], readerInfo &ri, bool allo
         return (ret);
     }
     m_stopTime = std::chrono::high_resolution_clock::now ();
-    m_gds->log (nullptr, print_level::summary, GRIDDYN_VERSION_STRING);
+    
 
     std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
     m_gds->log (m_gds.get (), print_level::normal,
