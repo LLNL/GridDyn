@@ -10,8 +10,6 @@
  * LLNS Copyright End
 */
 
-#ifndef GRIDPRIMARY_H_
-#define GRIDPRIMARY_H_
 #pragma once
 
 #include "gridComponent.h"
@@ -167,5 +165,3 @@ public:
 };
 
 }//namespace griddyn
-
-#endif

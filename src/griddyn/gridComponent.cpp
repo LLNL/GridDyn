@@ -1496,10 +1496,15 @@ void gridComponent::loadRootSizes (const solverMode &sMode)
     if ((so.total.diffRoots > 0) || (so.total.algRoots > 0))
     {
         opFlags.set (has_roots);
+        if (so.total.algRoots > 0)
+        {
+            opFlags.set(has_alg_roots);
+        }
     }
     else
     {
         opFlags.reset(has_roots);
+        opFlags.reset(has_alg_roots);
     }
 }
 
