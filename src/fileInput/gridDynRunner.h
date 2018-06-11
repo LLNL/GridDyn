@@ -127,14 +127,7 @@ public:
 	  return m_gds;
   }
 
-  std::shared_ptr<gridDynSimulation> &getSim()
-  {
-      if (!m_gds)
-      {
-          m_gds = std::make_shared<gridDynSimulation>();
-      }
-	  return m_gds;
-  }
+  std::shared_ptr<gridDynSimulation> &getSim();
 
   virtual bool isReady() const;
 protected:

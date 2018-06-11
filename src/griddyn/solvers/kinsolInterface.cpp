@@ -70,11 +70,6 @@ kinsolInterface::~kinsolInterface ()
     // clear the memory,  the sundialsInterface destructor will clear the rest
     if (flags[initialized_flag])
     {
-        if (m_kinsolInfoFile != nullptr)
-        {
-            fclose (m_kinsolInfoFile);
-        }
-
         KINFree (&solverMem);
     }
 }
@@ -94,7 +89,6 @@ void kinsolInterface::cloneTo(SolverInterface *si, bool fullCopy) const
 	{
 		return;
 	}
-	ai->kinsolPrintLevel = kinsolPrintLevel;
 }
 
 
@@ -187,22 +181,22 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     {
         if (!(solverLogFile.empty ()))
         {
-            if (!m_kinsolInfoFile)
+            if (!m_sundialsInfoFile)
             {
-                m_kinsolInfoFile = fopen (solverLogFile.c_str (), "w");
+                m_sundialsInfoFile = fopen (solverLogFile.c_str (), "w");
             }
         }
         else
         {
-            if (!m_kinsolInfoFile)
+            if (!m_sundialsInfoFile)
             {
                 solverLogFile = "kinsol.out";
-                m_kinsolInfoFile = fopen ("kinsol.out", "w");
+                m_sundialsInfoFile = fopen ("kinsol.out", "w");
             }
         }
-        int retval = KINSetInfoFile (solverMem, m_kinsolInfoFile);
+        int retval = KINSetInfoFile (solverMem, m_sundialsInfoFile);
         check_flag (&retval, "KINSetInfoFile", 1);
-        retval = KINSetPrintLevel (solverMem, kinsolPrintLevel);
+        retval = KINSetPrintLevel (solverMem, solverPrintLevel);
         check_flag (&retval, "KINSetPrintLevel", 1);
     }
 
@@ -296,17 +290,9 @@ void kinsolInterface::set (const std::string &param, const std::string &val)
 
 void kinsolInterface::set (const std::string &param, double val)
 {
-    if (param == "kinsolprintlevel")
+    if (param.empty())
     {
-        auto lv = static_cast<int> (val);
-        if ((lv >= 0) && (lv <= 3))
-        {
-            kinsolPrintLevel = lv;
-        }
-        else
-        {
-            throw (invalidParameterValue (param));
-        }
+       
     }
     else
     {

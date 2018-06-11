@@ -228,7 +228,7 @@ void gridDynSimulation::reInitpFlow (const solverMode &sMode, change_code change
     }
     if (opFlags[reset_voltage_flag])
     {
-        reset (reset_levels::full);
+        //reset (reset_levels::full);
         opFlags.reset (reset_voltage_flag);
     }
 

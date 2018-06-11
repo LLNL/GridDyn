@@ -294,20 +294,21 @@ void acLine::set (const std::string &param, double val, units_t unitType)
         }
         return;
     }
-
-    if (param == "length")
+    std::string outparam;
+    stringOps::trailingStringInt(param, outparam, 1);
+    if (outparam == "length")
     {
         length = unitConversionDistance (val, unitType, km);
     }
-    else if ((param == "tap") || (param == "ratio"))
+    else if ((outparam == "tap") || (param == "ratio"))
     {
         tap = val;
     }
-    else if (param == "tapangle")
+    else if (outparam == "tapangle")
     {
         tapAngle = unitConversion (val, unitType, rad);
     }
-    else if (param == "fault")
+    else if (outparam == "fault")
     {
         double temp = val;
         if (unitType != defUnit)
@@ -338,11 +339,11 @@ void acLine::set (const std::string &param, double val, units_t unitType)
                   temp :
                   (-1.0);  // fault must have some value between 0 and 1 and cannot be 0 or 1
     }
-    else if (param == "minangle")
+    else if (outparam == "minangle")
     {
         minAngle = unitConversion (val, unitType, rad);
     }
-    else if (param == "maxangle")
+    else if (outparam == "maxangle")
     {
         maxAngle = unitConversion (val, unitType, rad);
     }
@@ -382,15 +383,17 @@ double acLine::get (const std::string &param, units_t unitType) const
         }
         return val;
     }
-    if (param == "impedance")
+    std::string outparam;
+    stringOps::trailingStringInt(param, outparam, 1);
+    if (outparam == "impedance")
     {
         val = std::hypot (r, x);
     }
-    else if (param == "tap")
+    else if (outparam == "tap")
     {
         val = tap;
     }
-    else if (param == "tapangle")
+    else if (outparam == "tapangle")
     {
         val = tapAngle;
     }

@@ -218,6 +218,15 @@ void GriddynRunner::StepAsync(coreTime time)
 	async_ret = std::async(std::launch::async, [this, time] {return Step(time); });
 }
 
+std::shared_ptr<gridDynSimulation>& GriddynRunner::getSim()
+{
+    if (!m_gds)
+    {
+        m_gds = std::make_shared<gridDynSimulation>();
+    }
+    return m_gds;
+}
+
 bool GriddynRunner::isReady() const
 {
 	return (async_ret.valid()) ? (async_ret.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : true;

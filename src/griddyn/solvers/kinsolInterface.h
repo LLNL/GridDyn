@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _KINSOL_SOLVER_INTERFACE_H_
-#define _KINSOL_SOLVER_INTERFACE_H_
+#pragma once
 
 #include "sundialsInterface.h"
 
@@ -54,8 +52,6 @@ class kinsolInterface : public sundialsInterface
     friend int kinsolJac (N_Vector state, N_Vector resid, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 
   private:
-    FILE *m_kinsolInfoFile = nullptr;  //!<direct file reference for input to the solver itself
-    int kinsolPrintLevel = 1;  //!< print level for the solver
 #if MEASURE_TIMINGS > 0
     double kinTime = 0;  //!< the total time spent in kinsol
     double residTime = 0;	//!< the total time spent in the residual calls
@@ -68,4 +64,3 @@ class kinsolInterface : public sundialsInterface
 }//namespace solvers
 }//namespace griddyn
 
-#endif

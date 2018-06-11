@@ -23,6 +23,8 @@ add_executable(shared_library_tests ${shared_library_test_sources} ${shared_libr
 target_include_directories(shared_library_tests SYSTEM PUBLIC ${Boost_INCLUDE_DIR})
 target_include_directories(shared_library_tests PUBLIC ${PROJECT_SOURCE_DIR}/src/griddyn_shared)
 
+set_target_properties (shared_library_tests PROPERTIES FOLDER tests)
+
 
 
 FILE(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/test/test_files test_dir)

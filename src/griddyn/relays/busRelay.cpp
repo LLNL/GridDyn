@@ -59,7 +59,7 @@ std::string commType;
 */
 void busRelay::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else

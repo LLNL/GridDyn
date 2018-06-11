@@ -80,6 +80,7 @@ class sundialsInterface : public SolverInterface
     N_Vector scale = nullptr;  //!< scaling vector
     N_Vector types = nullptr;  //!< type data
     void *solverMem = nullptr;  //!< the memory used by a specific solver internally
+	 FILE *m_sundialsInfoFile = nullptr;  //!<direct file reference for input to the solver itself	
 	SUNMatrix J=nullptr; //!< sundials matrix to use
 	SUNLinearSolver LS=nullptr; //!< the link to the linear solver to use
   public:

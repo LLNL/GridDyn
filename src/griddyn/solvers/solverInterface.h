@@ -129,6 +129,7 @@ class SolverInterface : public helperObject
     std::vector<index_t> maskElements;  //!< vector of constant states in any problem
     std::string solverLogFile;  //!< file name and location of log file reference
     solver_print_level printLevel = solver_print_level::s_error_trap;  //!< print_level for solver
+    int solverPrintLevel = 1;  //!< print level for internal solver logging
     count_t rootCount = 0;  //!< the number of root finding functions
     count_t solverCallCount = 0;  //!< the number of times the solver has been called
     count_t jacCallCount = 0;  //!< the number of times the Jacobian function has been called

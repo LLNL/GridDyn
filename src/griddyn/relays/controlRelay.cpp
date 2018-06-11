@@ -322,6 +322,10 @@ change_code controlRelay::executeAction (index_t actionNum)
                 if (opFlags[link_type_source])
                 {
                     val = m_sourceObject->get (cact.field + m_terminal_key, cact.unitType);
+                    if (val == kNullVal)
+                    {
+                        val = m_sourceObject->get(cact.field, cact.unitType);
+                    }
                 }
                 else
                 {
