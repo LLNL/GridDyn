@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -39,13 +39,13 @@ namespace solvers
 int cvodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
 
 int cvodeJac (realtype time,
-                    N_Vector state,
-                    N_Vector dstate_dt,
-                    SUNMatrix J,
-                    void *user_data,
-                    N_Vector tmp1,
-                    N_Vector tmp2,
-                    N_Vector tmp3);
+              N_Vector state,
+              N_Vector dstate_dt,
+              SUNMatrix J,
+              void *user_data,
+              N_Vector tmp1,
+              N_Vector tmp2,
+              N_Vector tmp3);
 
 int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
@@ -72,26 +72,25 @@ cvodeInterface::~cvodeInterface ()
     }
 }
 
-std::unique_ptr<SolverInterface> cvodeInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> cvodeInterface::clone (bool fullCopy) const
 {
-	std::unique_ptr<SolverInterface> si = std::make_unique<cvodeInterface>();
-	cvodeInterface::cloneTo(si.get(),fullCopy);
-	return si;
+    std::unique_ptr<SolverInterface> si = std::make_unique<cvodeInterface> ();
+    cvodeInterface::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
-void cvodeInterface::cloneTo(SolverInterface *si, bool fullCopy) const
+void cvodeInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-	sundialsInterface::cloneTo(si, fullCopy);
-	auto ai = dynamic_cast<cvodeInterface *>(si);
-	if (ai == nullptr)
-	{
-		return;
-	}
-	ai->maxStep = maxStep;
-	ai->minStep = minStep;
-	ai->step = step;
+    sundialsInterface::cloneTo (si, fullCopy);
+    auto ai = dynamic_cast<cvodeInterface *> (si);
+    if (ai == nullptr)
+    {
+        return;
+    }
+    ai->maxStep = maxStep;
+    ai->minStep = minStep;
+    ai->step = step;
 }
-
 
 void cvodeInterface::allocate (count_t stateCount, count_t numRoots)
 {
@@ -296,7 +295,6 @@ void cvodeInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-
 static const std::map<int, std::string> cvodeRetCodes{
   {CV_MEM_NULL, "The solver memory argument was NULL"},
   {CV_ILL_INPUT, "One of the function inputs is illegal"},
@@ -319,7 +317,6 @@ static const std::map<int, std::string> cvodeRetCodes{
   {CV_BAD_K, "Bad K"},
   {CV_BAD_DKY, "Bad DKY"},
 };
-
 
 void cvodeInterface::initialize (coreTime time0)
 {
@@ -359,39 +356,36 @@ void cvodeInterface::initialize (coreTime time0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        J = SUNDenseMatrix(svsize, svsize);
-        check_flag((void *)J, "SUNDenseMatrix", 0);
+        J = SUNDenseMatrix (svsize, svsize);
+        check_flag ((void *)J, "SUNDenseMatrix", 0);
         /* Create KLU solver object */
-        LS = SUNDenseLinearSolver(state, J);
-        check_flag((void *)LS, "SUNDenseLinearSolver", 0);
+        LS = SUNDenseLinearSolver (state, J);
+        check_flag ((void *)LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
-        J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
-        check_flag((void *)J, "SUNSparseMatrix", 0);
+        J = SUNSparseMatrix (svsize, svsize, jsize, CSR_MAT);
+        check_flag ((void *)J, "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
-        LS = SUNKLU(state, J);
-        check_flag((void *)LS, "SUNKLU", 0);
-
+        LS = SUNKLU (state, J);
+        check_flag ((void *)LS, "SUNKLU", 0);
     }
 #else
-    J = SUNDenseMatrix(svsize, svsize);
-    check_flag((void *)J, "SUNSparseMatrix", 0);
+    J = SUNDenseMatrix (svsize, svsize);
+    check_flag ((void *)J, "SUNSparseMatrix", 0);
     /* Create KLU solver object */
-    LS = SUNDenseLinearSolver(state, J);
-    check_flag((void *)LS, "SUNDenseLinearSolver", 0);
+    LS = SUNDenseLinearSolver (state, J);
+    check_flag ((void *)LS, "SUNDenseLinearSolver", 0);
 #endif
 
+    retval = CVDlsSetLinearSolver (solverMem, LS, J);
 
-    
-    retval = CVDlsSetLinearSolver(solverMem, LS, J);
+    check_flag (&retval, "IDADlsSetLinearSolver", 1);
 
-    check_flag(&retval, "IDADlsSetLinearSolver", 1);
-
-    retval = CVDlsSetJacFn(solverMem, cvodeJac);
-    check_flag(&retval, "IDADlsSetJacFn", 1);
+    retval = CVDlsSetJacFn (solverMem, cvodeJac);
+    check_flag (&retval, "IDADlsSetJacFn", 1);
 
     retval = CVodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "CVodeSetMaxNonlinIters", 1);
@@ -419,10 +413,7 @@ void cvodeInterface::initialize (coreTime time0)
     flags.set (initialized_flag);
 }
 
-void cvodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
-{
-    KLUReInit(sparseReinitMode);
-}
+void cvodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
 
 void cvodeInterface::setRootFinding (count_t numRoots)
 {
@@ -527,15 +518,14 @@ int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_dat
     return FUNCTION_EXECUTION_SUCCESS;
 }
 
-
 int cvodeJac (realtype time,
-                    N_Vector state,
-                    N_Vector dstate_dt,
-                    SUNMatrix J,
-                    void *user_data,
-                    N_Vector tmp1,
-                    N_Vector tmp2,
-                    N_Vector /*tmp3*/)
+              N_Vector state,
+              N_Vector dstate_dt,
+              SUNMatrix J,
+              void *user_data,
+              N_Vector tmp1,
+              N_Vector tmp2,
+              N_Vector /*tmp3*/)
 {
     return sundialsJac (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
 }

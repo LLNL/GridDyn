@@ -27,11 +27,13 @@ _basic_env:
       packages:
         - g++-6
         - valgrind
+        - lcov
 - &linux_base
-  if: type != cron
+  if: type != cron AND branch != coverity_scan
   os: linux
   compiler: gcc
 - &osx_base
+  if: branch != coverity_scan
   os: osx
   compiler: clang
 
@@ -42,6 +44,35 @@ jobs:
     - os: osx
 
   include:
+    # Coverity static analysis job
+    - if: branch = coverity_scan
+      os: linux
+      compiler: gcc
+      cache:
+        ccache: false
+        directories:
+          - dependencies
+          - build/libs
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+        coverity_scan:
+          project:
+            name: "LLNL/GridDyn"
+            description: "GridDyn is an open-source power transmission simulation software package"
+          notification_email: mast9@llnl.gov
+          build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --compiler $(which gcc-6) -- -fPIC -std=c++14 && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command: make
+          branch_pattern: coverity_scan
+      script: ls -l cov-int && cat cov-int/build-log.txt
+      env:
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
+        # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+        #   via the "travis encrypt" command using the project repo's public key
+        - secure: "pbj3KbIyknUxBKySwaEZiIHxGFH6UKTj1xjLNhWlfFWmyHzlMaA7tfm4QkXGoFJojckwMX6sGGyXjgM1H8BFRICPzMjilCkrOWVhm9ZcoE1uNorqx4MxwfqGnMjERAHjDd0wiKwoiDUI0vSyPV7ms4KoNoWXr8sGRF1zvOjWHkkJwdLlnyr/lp6iSmLldF9WXd/jM31msI1b8QKoI5jbgRFYA4Ys/Qjl516ng+YKHP3lQD0z3qFGKpe/cKB0bnIc66rQRNOBsX4T/eRcQ5kMRcyDX3xWI4+gbbSKtVEvoZlvnLL8ANy+BcSjrdHQBjhQ7SZsvm68eMK+hRoGyH2KTHEYcogWxpv0l6ZfIalOdIaYnR2Yx4vWZ0xRf3UleIcELDI/6oTYiWjVV2PQqdvRlwI52/1zSSc2qgsifJuPCME/g7tiQarjCT603/icmsKtn9mVq2dMN9YPEcmrh07gjPsQMk0YynQugvC8TBwabV0ptwZf+V+yj5SexdptMK1CrccusMml2jr114cxRenDEKNrfyTwN6UZhmf/ll1EZ3AKOHI+xdm2UUgzZBWQvRbnkZ7EInuU/3/AmKUpFpiVsQfIYeSSj/nLAtbgfKw1ncNSo65uW4Oo8z1QbGTrvfwBE7roJAL1oSqT+exydyte5EgflUVfvi/wNrD37GcU5X0=" 
     # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
@@ -97,6 +128,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_COVERAGE=true
+        - GCOV_TOOL=gcov-6
         - USE_MPI=mpich
     - <<: *daily_linux
       addons:
@@ -134,18 +166,38 @@ before_install:
 
 install:
   - source scripts/install-ci-dependencies.sh
+  - if [[ "$RUN_COVERAGE" ]]; then pip install --user cpp-coveralls ; fi
 
-script:
+before_script:
   - mkdir -p build && cd build
   - export GRIDDYN_DEPENDENCY_FLAGS="-DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
-  - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON -DAUTOBUILD_KLU=ON -DBUILD_SHARED_FMI_LIBRARY=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON"
+  - export GRIDDYN_OPTION_FLAGS="-DBUILD_RELEASE_ONLY=ON -DAUTOBUILD_KLU=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DAUTOBUILD_ZMQ=ON"
+  - if [[ "$RUN_COVERAGE" ]]; then GRIDDYN_OPTION_FLAGS+=" -DTEST_CODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Coverage" ; fi
+
+  - if [[ "$ENABLE_HELICS" ]]; then GRIDDYN_OPTION_FLAGS+=" -DHELICS_EXECUTABLE=ON -DAUTOBUILD_HELICS=ON" ; fi
+  - if [[ "$ENABLE_FMI" ]]; then GRIDDYN_OPTION_FLAGS+=" -DBUILD_SHARED_FMI_LIBRARY=ON" ; else GRIDDYN_OPTION_FLAGS+=" -DFMI_ENABLE=OFF" ; fi
+
   - if [[ "$USE_MPI" ]]; then GRIDDYN_OPTION_FLAGS+=" -DMPI_ENABLE=ON" ; fi
   - if [[ "$USE_MPI" ]]; then CC=${CI_DEPENDENCY_DIR}/mpi/bin/mpicc ; CXX=${CI_DEPENDENCY_DIR}/mpi/bin/mpic++ ; fi
+
+script:
   - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
   - make -j2
 
+  # Setup counters for coverage
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh setup-counters && popd ; fi
+
   # Run CI tests
   - ../scripts/run-ci-tests.sh
+
+  # Gather coverage results
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info ${GCOV_TOOL} && popd ; fi
+
+  # Submit coverage results to coveralls
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && coveralls --gcov ${GCOV_TOOL} --lcov-file coverage.info.cleaned > /dev/null && popd ; fi
+
+  # Submit coverage results to codecov.io
+  - if [[ "$RUN_COVERAGE" ]]; then pushd .. && bash <(curl -s https://codecov.io/bash) -x ${GCOV_TOOL} > /dev/null && popd ; fi
 
 notifications:
     email: false

@@ -5,6 +5,8 @@ IF (MSVC)
 		C:/local/helics_1_1_0)
 ENDIF(MSVC)
 
+include(GNUInstallDirs)
+
 SHOW_VARIABLE(HELICS_INSTALL_PATH PATH "path to the helics installation" "${PROJECT_BINARY_DIR}/libs")
 
 

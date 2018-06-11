@@ -408,11 +408,11 @@ void DynamicGenerator::add (gridSubModel *obj)
 {
     if (dynamic_cast<Exciter *> (obj) != nullptr)
     {
-        ext = static_cast<Exciter *> (replaceSubObject (obj, ext, exciter_loc));
+        ext = static_cast<Exciter *> (replaceModel (obj, ext, exciter_loc));
     }
     else if (dynamic_cast<GenModel *> (obj) != nullptr)
     {
-        genModel = static_cast<GenModel *> (replaceSubObject (obj, genModel, genmodel_loc));
+        genModel = static_cast<GenModel *> (replaceModel (obj, genModel, genmodel_loc));
         if (m_Rs != 0.0)
         {
             obj->set ("rs", m_Rs);
@@ -424,7 +424,7 @@ void DynamicGenerator::add (gridSubModel *obj)
     }
     else if (dynamic_cast<Governor *> (obj) != nullptr)
     {
-        gov = static_cast<Governor *> (replaceSubObject (obj, gov, governor_loc));
+        gov = static_cast<Governor *> (replaceModel (obj, gov, governor_loc));
         // mesh up the Pmax and Pmin giving priority to the new gov
         double govpmax = gov->get ("pmax");
         double govpmin = gov->get ("pmin");
@@ -441,14 +441,14 @@ void DynamicGenerator::add (gridSubModel *obj)
     }
     else if (dynamic_cast<Stabilizer *> (obj) != nullptr)
     {
-        pss = static_cast<Stabilizer *> (replaceSubObject (obj, pss, pss_loc));
+        pss = static_cast<Stabilizer *> (replaceModel (obj, pss, pss_loc));
     }
     else if (dynamic_cast<Source *> (obj) != nullptr)
     {
         auto src = static_cast<Source *> (obj);
         if ((src->purpose_ == "power") || (src->purpose_ == "pset"))
         {
-            pSetControl = static_cast<Source *> (replaceSubObject (obj, pSetControl, pset_loc));
+            pSetControl = static_cast<Source *> (replaceModel (obj, pSetControl, pset_loc));
             if (dynamic_cast<scheduler *> (pSetControl) != nullptr)
             {
                 sched = static_cast<scheduler *> (pSetControl);
@@ -456,11 +456,11 @@ void DynamicGenerator::add (gridSubModel *obj)
         }
         else if ((src->purpose_ == "voltage") || (src->purpose_ == "vset"))
         {
-            vSetControl = static_cast<Source *> (replaceSubObject (obj, vSetControl, vset_loc));
+            vSetControl = static_cast<Source *> (replaceModel (obj, vSetControl, vset_loc));
         }
         else if ((pSetControl == nullptr) && (src->purpose_.empty ()))
         {
-            pSetControl = static_cast<Source *> (replaceSubObject (obj, pSetControl, pset_loc));
+            pSetControl = static_cast<Source *> (replaceModel (obj, pSetControl, pset_loc));
         }
         else
         {
@@ -469,7 +469,7 @@ void DynamicGenerator::add (gridSubModel *obj)
     }
     else if (dynamic_cast<isocController *> (obj) != nullptr)
     {
-        isoc = static_cast<isocController *> (replaceSubObject (obj, isoc, isoc_control));
+        isoc = static_cast<isocController *> (replaceModel (obj, isoc, isoc_control));
         subInputLocs.inputLocs[isoc_control].resize (1);
         subInputs.inputs[isoc_control].resize (1);
     }
@@ -477,32 +477,15 @@ void DynamicGenerator::add (gridSubModel *obj)
     {
         throw (unrecognizedObjectException (this));
     }
-    if (opFlags[dyn_initialized])
-    {
-        alert (this, STATE_COUNT_CHANGE);
-    }
+    
 }
 
 gridSubModel *
-DynamicGenerator::replaceSubObject (gridSubModel *newObject, gridSubModel *oldObject, index_t newIndex)
+DynamicGenerator::replaceModel (gridSubModel *newObject, gridSubModel *oldObject, index_t newIndex)
 {
-    if (oldObject != nullptr)
-    {
-        if (isSameObject (newObject, oldObject))
-        {
-            return newObject;
-        }
-        remove (oldObject);
-    }
-
-    newObject->set ("basefreq", systemBaseFrequency);
+    replaceSubObject(newObject, oldObject);
     newObject->locIndex = newIndex;
-    addSubObject (newObject);
-    if (opFlags[dyn_initialized])
-    {
-        offsets.unload (true);
-        alert (this, OBJECT_COUNT_CHANGE);
-    }
+    
     if (newIndex >= static_cast<index_t> (subInputs.inputs.size ()))
     {
         subInputs.inputs.resize (newIndex + 1);

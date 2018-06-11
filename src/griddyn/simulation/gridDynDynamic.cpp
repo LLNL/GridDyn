@@ -32,7 +32,7 @@
 //#include <iostream>
 namespace griddyn
 {
-static IOdata kNullVec;  //!<  this is a purposely created empty vector which gets used for functions that take as
+static IOdata kNullOutputVec;  //!<  this is a purposely created empty vector which gets used for functions that take as
 //! an input a vector but don't use it.
 
 // --------------- dynamic program ---------------
@@ -70,12 +70,7 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
     // run any events before the simulation
     // In most cases this should be none but users can manipulate the times if they choose
     EvQ->executeEvents (tStart - 0.001);
-    /*
-    if (nextEventTime <= tStart)
-    {
-            nextEventTime = runEvents(tStart);
-    }
-    */
+
     dynInitializeA (tStart, lower_flags (controlFlags));
 
     count_t ssize = stateSize (sm);
@@ -118,8 +113,8 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
 
     // dynInitializeB
     dynData->set ("tolerance", tols.rtol);
-    // run the dynamic initialization part B
-    dynInitializeB (noInputs, noInputs, kNullVec);
+    // run the dynamic initialization part B there is no actual output from an area currently
+    dynInitializeB (noInputs, noInputs, kNullOutputVec);
 
     // check if any updates need to take place
     // run any 0 time events

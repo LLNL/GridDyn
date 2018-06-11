@@ -2149,6 +2149,7 @@ void Area::loadRootSizes (const solverMode &sMode)
         }
         so.addRootSizes (obj->getOffsets (sMode));
     }
+    so.rootsLoaded = true;
 }
 
 void Area::loadJacobianSizes (const solverMode &sMode)

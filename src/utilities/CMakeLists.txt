@@ -13,7 +13,6 @@
 set(utilities_sources
 	gridRandom.cpp
 	saturation.cpp
-	stackInfo.cpp
 	stringOps.cpp
 	string_viewOps.cpp
 	ThreePhaseFunctions.cpp
@@ -49,7 +48,6 @@ set(utilities_headers
 	optionalDef.hpp
 	gridRandom.h
 	saturation.h
-	stackInfo.h
 	vectData.hpp
 	matrixData.hpp
 	matrixOps.h

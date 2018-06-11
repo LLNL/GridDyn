@@ -15,7 +15,6 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stackInfo.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 #include <cassert>
@@ -1057,31 +1056,81 @@ void gridComponent::addSubObject (gridComponent *comp)
     {
         return;
     }
-    for (auto &sobj : subObjectList)
+    if (std::any_of(subObjectList.begin(),subObjectList.end(), [comp](const coreObject *so) { return isSameObject(so, comp); }))
     {
-        if (isSameObject (sobj, comp))
-        {
-            return;
-        }
+         return;
     }
     comp->setParent (this);
     comp->addOwningReference ();
     comp->systemBaseFrequency = systemBaseFrequency;
     comp->systemBasePower = systemBasePower;
     subObjectList.push_back (comp);
+    if (opFlags[pFlow_initialized])
+    {
+        offsets.unload(true);
+        alert(this, OBJECT_COUNT_INCREASE);
+        opFlags[dyn_initialized] = false;
+        opFlags[pFlow_initialized] = false;
+    }
 }
 
+void gridComponent::removeSubObject(gridComponent *obj)
+{
+    if (!subObjectList.empty())
+    {
+        auto rmobj = std::find_if(subObjectList.begin(), subObjectList.end(),
+            [obj](coreObject *so) { return isSameObject(so, obj); });
+        if (rmobj != subObjectList.end())
+        {
+            removeReference(*rmobj, this);
+            subObjectList.erase(rmobj);
+            if (opFlags[pFlow_initialized])
+            {
+                offsets.unload(true);
+                alert(this, OBJECT_COUNT_DECREASE);
+            }
+        }
+    }
+}
+
+void gridComponent::replaceSubObject(gridComponent *newObj, gridComponent *oldObj)
+{
+    if (subObjectList.empty())
+    {
+        return addSubObject(newObj);
+    }
+    if (newObj == nullptr)
+    {
+        return removeSubObject(oldObj);
+    }
+    auto repobj = std::find_if(subObjectList.begin(), subObjectList.end(),
+        [oldObj](const coreObject *so) { return isSameObject(so, oldObj); });
+    if (repobj != subObjectList.end())
+    {
+        removeReference(*repobj, this);
+        newObj->setParent(this);
+        newObj->addOwningReference();
+        newObj->systemBaseFrequency = systemBaseFrequency;
+        newObj->systemBasePower = systemBasePower;
+        *repobj = newObj;
+        if (opFlags[pFlow_initialized])
+        {
+            offsets.unload(true);
+            alert(this, OBJECT_COUNT_CHANGE);
+            opFlags[dyn_initialized] = false;
+            opFlags[pFlow_initialized] = false;
+        }
+    }
+    else
+    {
+        return addSubObject(newObj);
+    }
+}
 void gridComponent::remove (coreObject *obj)
 {
-    if (!subObjectList.empty ())
+    if (dynamic_cast<gridComponent *>(obj))
     {
-        auto rmobj = std::find_if (subObjectList.begin (), subObjectList.end (),
-                                   [obj](coreObject *so) { return isSameObject (so, obj); });
-        if (rmobj != subObjectList.end ())
-        {
-            removeReference (*rmobj, this);
-            subObjectList.erase (rmobj);
-        }
+        removeSubObject(static_cast<gridComponent *>(obj));
     }
 }
 
@@ -1191,7 +1240,7 @@ void gridComponent::guessState (coreTime time, double state[], double dstate_dt[
                 printf ("%s::%s in mode %d %d ds=%d, do=%d\n", getParent ()->getName ().c_str (),
                         getName ().c_str (), static_cast<int> (isLocal (sMode)), static_cast<int> (isDAE (sMode)),
                         static_cast<int> (so.total.diffSize), static_cast<int> (so.diffOffset));
-                printStackTrace ();
+                //printStackTrace ();
             }
             assert (so.diffOffset != kNullLocation);
             count_t stateCount = localStates.algSize + localStates.diffSize;
@@ -1563,9 +1612,9 @@ static const std::map<int, int> alertFlags{
   std::make_pair (JAC_COUNT_INCREASE, 4),
   std::make_pair (JAC_COUNT_DECREASE, 4),
   std::make_pair (JAC_COUNT_CHANGE, 4),
-  std::make_pair (OBJECT_COUNT_INCREASE, 3),
-  std::make_pair (OBJECT_COUNT_DECREASE, 3),
-  std::make_pair (OBJECT_COUNT_CHANGE, 3),
+  std::make_pair (OBJECT_COUNT_INCREASE, 5),
+  std::make_pair (OBJECT_COUNT_DECREASE, 5),
+  std::make_pair (OBJECT_COUNT_CHANGE, 5),
   std::make_pair (CONSTRAINT_COUNT_DECREASE, 1),
   std::make_pair (CONSTRAINT_COUNT_INCREASE, 1),
   std::make_pair (CONSTRAINT_COUNT_CHANGE, 1),
@@ -1590,12 +1639,18 @@ void gridComponent::alert (coreObject *object, int code)
             {
             case 3:
                 offsets.stateUnload ();
+                offsets.JacobianUnload(true);
                 break;
             case 2:
                 offsets.rootUnload (true);
                 break;
             case 4:
                 offsets.JacobianUnload (true);
+                break;
+            case 5:
+                offsets.stateUnload();
+                offsets.JacobianUnload(true);
+                offsets.rootUnload(true);
                 break;
             default:
                 break;

@@ -9,12 +9,11 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
 /** 
 @file
 @brief define the simulation object itself and several helper classes and enumerations*/
-
-#pragma once
 
 
 // header files
