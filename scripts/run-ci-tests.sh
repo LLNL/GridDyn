@@ -3,7 +3,7 @@
 # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
 export CTEST_OUTPUT_ON_FAILURE=true
 
-TEST_CONFIG="CI"
+TEST_CONFIG="Continuous"
 if [[ "$1" ]]; then
     test_label=$(tr '[:upper:]' '[:lower:]' <<< $1)
     case "${test_label}" in
@@ -17,7 +17,7 @@ if [[ "$1" ]]; then
             TEST_CONFIG="Release"
             ;;
         *)
-            TEST_CONFIG="CI"
+            TEST_CONFIG="Continuous"
             ;;
     esac
 
@@ -34,7 +34,7 @@ elif [[ "$TRAVIS" == "true" ]]; then
             TEST_CONFIG="Release"
             ;;
         *)
-            TEST_CONFIG="CI"
+            TEST_CONFIG="Continuous"
             ;;
     esac
 fi

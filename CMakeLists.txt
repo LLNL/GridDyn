@@ -66,12 +66,6 @@ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source build is not supported. Please, use an empty directory for building the project.")
 ENDIF()
 
-OPTION(BUILD_HELICS_TESTS "Enable the test Executables to be built" ON)
-# enable testing
-if (BUILD_HELICS_TESTS)
-	enable_testing ()
-endif(BUILD_HELICS_TESTS)
-
 #add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
 
@@ -586,26 +580,28 @@ install (EXPORT griddyn-targets
 # -------------------------------------------------------------
 
 if(TEST_ENABLE)
-    enable_testing()
+    include(CTest)
+    find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
+
     add_test(NAME testComponents COMMAND testComponents)
     add_test(NAME testLibrary COMMAND testLibrary)
     add_test(NAME testSystem COMMAND testSystem)
     add_test(NAME testExtra COMMAND testExtra)
-    set_tests_properties(testComponents testLibrary testSystem PROPERTIES LABELS "TESTLABEL;Nightly;Release")
+    set_property(TEST testComponents testLibrary testSystem PROPERTY LABELS Nightly Release)
     set_property(TEST testExtra PROPERTY LABELS TESTLABEL Release)
 
     # Runs a subset of the overall tests
     add_test(NAME testComponentsQuick COMMAND testComponents --run_test=@quick)
     add_test(NAME testLibraryQuick COMMAND testLibrary --run_test=@quick)
     add_test(NAME testSystemQuick COMMAND testSystem --run_test=@quick)
-    set_tests_properties(testComponentsQuick testLibraryQuick testSystemQuick PROPERTIES LABELS "TESTLABEL;Quick;CI")
+    set_property(TEST testComponentsQuick testLibraryQuick testSystemQuick PROPERTY LABELS Quick Continuous)
 
     if(BUILD_GRIDDYN_SHARED_LIBRARY)
         add_test(NAME testSharedLibrary COMMAND shared_library_tests)
-        set_property(TEST testSharedLibrary PROPERTY LABELS TESTLABEL Nightly;Release)
+        set_property(TEST testSharedLibrary PROPERTY LABELS Nightly Release)
 
         add_test(NAME testSharedLibraryQuick COMMAND shared_library_tests --run_test=@quick)
-        set_property(TEST testSharedLibraryQuick PROPERTY LABELS TESTLABEL Quick;CI)
+        set_property(TEST testSharedLibraryQuick PROPERTY LABELS Quick Continuous)
     endif()
 endif()
 
