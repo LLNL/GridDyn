@@ -26,7 +26,7 @@
 
 namespace griddyn {
 namespace extra {
-txThermalModel::txThermalModel(const std::string &objName) :sensor(objName)
+txThermalModel::txThermalModel(const std::string &objName) : sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model
 	outputStrings = { {"ambient","ambientTemp","airTemp"}, {"top_oil","top_oil_temp"}, {"hot_spot","hot_spot_temp"} }; //preset the outputNames
@@ -35,7 +35,7 @@ txThermalModel::txThermalModel(const std::string &objName) :sensor(objName)
 
 coreObject * txThermalModel::clone(coreObject *obj) const
 {
-	txThermalModel *nobj = cloneBase<txThermalModel, sensor>(this, obj);
+	auto *nobj = cloneBase<txThermalModel, sensor>(this, obj);
 	if (nobj==nullptr)
 	{
 		return obj;
@@ -246,7 +246,7 @@ void txThermalModel::add(coreObject * /*obj*/)
 
 void txThermalModel::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
-	if (!(m_sourceObject))
+	if (m_sourceObject == nullptr)
 	{
 		return sensor::dynObjectInitializeA(time0, flags);
 	}

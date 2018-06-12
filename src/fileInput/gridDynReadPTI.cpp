@@ -366,7 +366,7 @@ void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
         {
           temp2 = opt.prefix + '_' + temp;
         }
-      else
+        else
         {
           temp2 = opt.prefix + '_' + temp2;
         }
@@ -537,8 +537,8 @@ void ptiReadGen (Generator *gen, const std::string &line, basicReaderInfo & /*op
     }
 
     // get the power generation
-    double p = numeric_conversion<double> (strvec[2], 0.0);
-    double q = numeric_conversion<double> (strvec[3], 0.0);
+    auto p = numeric_conversion<double> (strvec[2], 0.0);
+    auto q = numeric_conversion<double> (strvec[3], 0.0);
   if (p != 0.0)
     {
       gen->set ("p", p, MW);
@@ -558,7 +558,7 @@ void ptiReadGen (Generator *gen, const std::string &line, basicReaderInfo & /*op
     {
       gen->set ("qmin", q, MVAR);
     }
-    double V = numeric_conversion<double> (strvec[6], 0.0);
+    auto V = numeric_conversion<double> (strvec[6], 0.0);
   if (V > 0)
     {
       gen->set ("vset", V);

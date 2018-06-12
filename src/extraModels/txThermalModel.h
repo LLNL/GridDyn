@@ -43,10 +43,10 @@ protected:
 	double cutoutTemp = 0;  //!<[C] the temp at which the breakers are tripped
 	double alarmDelay = 300;  //!<[s] delay time on the alarms and cutout;
 private:
-	double rating;  //!< transformer rating
-	double Plossr;  //!<  the losses at rated power
-	double m_C;   //!< transformer thermal capacity
-	double m_k;   //!< transformer radiation constant
+	double rating = 0.0;  //!< transformer rating
+	double Plossr = 0.0;  //!<  the losses at rated power
+	double m_C = 0.0;   //!< transformer thermal capacity
+	double m_k = 0.0;   //!< transformer radiation constant
 public:
 	/** @brief constructor*/
 	txThermalModel(const std::string &objName="txThermal_$");

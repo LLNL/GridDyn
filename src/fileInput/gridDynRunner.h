@@ -23,7 +23,7 @@
 
 #ifndef GRIDDYN_PENDING
 #define GRIDDYN_PENDING (25)
-#endif 
+#endif
  //forward declaration for boost::program_options::variables_map
 namespace boost {
 namespace program_options {
@@ -58,10 +58,10 @@ public:
    * Initialize a simulation run from command line arguments.
    @param[in] argc the number of console arguments
    @param[in] argv the actual console arguments
-   @param[in] ignoreUnrecognized set to true to indicate that the unrecognized arguments should be ignored
+   @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be allowed
    @return >0 normal stop,  0 normal, <0 error
    */
-  virtual int Initialize (int argc, char *argv[],bool ignoreUnrecognized);
+  virtual int Initialize (int argc, char *argv[], bool allowUnrecognized);
   /**
   * Initialize a simulation run from command line arguments using a given readerInfo structure
   @param[in] argc the number of console arguments
@@ -69,7 +69,7 @@ public:
   @param[in] ri the readerInfo structure that contains any additional reader information
   @return >0 normal stop,  0 normal, <0 error
   */
-  virtual int Initialize(int argc, char *argv[], readerInfo &ri,bool ignoreUnrecognized=false);
+  virtual int Initialize(int argc, char *argv[], readerInfo &ri, bool allowUnrecognized=false);
   /** initialization the simulation object so it is ready to run*/
   virtual void simInitialize();
   /**
@@ -172,4 +172,3 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
 
 }//namespace griddyn
 #endif
-

@@ -540,7 +540,7 @@ void cdfReadBranch (coreObject *parentObject,
         lnk->set ("maxtapangle", X, deg);
         break;
     default:
-        printf ("unrecognized line code %d\n", code);
+        std::cout << "unrecognized line code " << std::to_string (code) << std::endl;
         return;
     }
 

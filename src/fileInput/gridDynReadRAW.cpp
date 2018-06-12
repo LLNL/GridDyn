@@ -225,12 +225,12 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
                 busList[index]->setUserID (index);
 
                 rawReadBus (busList[index], line, opt);
-				auto tobj = parentObject->find(busList[index]->getName());
+                auto tobj = parentObject->find(busList[index]->getName());
                 if (tobj==nullptr)
                 {
                     parentObject->add (busList[index]);
                 }
-				else
+				            else
                 {
                     auto prevName = busList[index]->getName ();
                     busList[index]->setName (prevName + '_' +
@@ -583,7 +583,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
         bus->disable ();
     }
     bus->set ("type", temp);
-	if (opt.version >= 31)
+    if (opt.version >= 31)
     {
         // skip the load flow area and loss zone for now
         // skip the owner information
@@ -948,13 +948,13 @@ void rawReadBranch (coreObject *parentObject,
         }
     }
 
-    double R = numeric_conversion (strvec[3], 0.0);
-    double X = numeric_conversion (strvec[4], 0.0);
+    auto R = numeric_conversion<double> (strvec[3], 0.0);
+    auto X = numeric_conversion<double> (strvec[4], 0.0);
     // get line impedances and resistance
     lnk->set ("r", R);
     lnk->set ("x", X);
     // get line capacitance
-    double val = numeric_conversion (strvec[5], 0.0);
+    auto val = numeric_conversion<double> (strvec[5], 0.0);
     lnk->set ("b", val);
 
     int status;
@@ -976,7 +976,7 @@ void rawReadBranch (coreObject *parentObject,
     }
     if (opt.version <= 26)  // transformers described in this section and in TX adj section
     {
-        val = numeric_conversion (strvec[9], 0.0);
+        val = numeric_conversion<double> (strvec[9], 0.0);
         if (val != 0.0)
         {
             lnk->set ("tap", val);
@@ -1264,8 +1264,8 @@ int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
 
     // get the branch impedance
 
-    double R = numeric_conversion<double> (strvec2[0], 0.0);
-    double X = numeric_conversion<double> (strvec2[1], 0.0);
+    auto R = numeric_conversion<double> (strvec2[0], 0.0);
+    auto X = numeric_conversion<double> (strvec2[1], 0.0);
 
     lnk->set ("r", R);
     lnk->set ("x", X);
@@ -1283,7 +1283,7 @@ int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
 
     // TODO:PT get the other parameters (not critical for power flow)
 
-    double val = numeric_conversion<double> (strvec3[0], 0.0);
+    auto val = numeric_conversion<double> (strvec3[0], 0.0);
     if (val != 0)
     {
         lnk->set ("tap", val);
@@ -1297,7 +1297,7 @@ int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
     // SGS set this for adjustable transformers....is this correct?
     if (abs (code) > 0)
     {
-        int cbus = numeric_conversion<int> (strvec3[7], 0);
+        auto cbus = numeric_conversion<int> (strvec3[7], 0);
         if (cbus != 0)
         {
             static_cast<links::adjustableTransformer *> (lnk)->setControlBus (busList[cbus]);
@@ -1373,16 +1373,16 @@ void rawReadSwitchedShunt (coreObject *parentObject,
         busList[index]->add (ld);
     }
 
-    int mode = numeric_conversion<int> (strvec[1], 0);
-	int shift = 0;
-	if (opt.version > 32)
-	{
+    auto mode = numeric_conversion<int> (strvec[1], 0);
+    int shift = 0;
+    if (opt.version > 32)
+    {
 		shift = 2;
-	}
-    double high = numeric_conversion<double> (strvec[2+shift], 0.0);
-    double low = numeric_conversion<double> (strvec[3+shift], 0.0);
+    }
+    auto high = numeric_conversion<double> (strvec[2+shift], 0.0);
+    auto low = numeric_conversion<double> (strvec[3+shift], 0.0);
     // get the controlled bus
-    int cbus = numeric_conversion<int> (strvec[4+shift], -1);
+    auto cbus = numeric_conversion<int> (strvec[4+shift], -1);
 
     if (cbus < 0)
     {
@@ -1499,10 +1499,10 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     {
         start = 5;
     }
-	else if (opt.version > 32)
-	{
-		start = 9;
-	}
+    else if (opt.version > 32)
+    {
+        start = 9;
+    }
     size_t ksize = strvec.size () - 1;
     for (size_t kk = start + 1; kk < ksize; kk += 2)
     {
