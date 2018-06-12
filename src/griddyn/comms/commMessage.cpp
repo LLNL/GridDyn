@@ -43,11 +43,13 @@ REGISTER_MESSAGE_TYPE (m15, "ALARM CLEARED EVENT", commMessage::ALARM_CLEARED_EV
 commMessage::commMessage(std::uint32_t type) : m_messageType(type)
 {
     payload = corePayloadFactory::instance().createPayload(type);
+    ptype = payloadType_t::shared;
 }
 
 commMessage::commMessage(std::uint32_t type, std::uint32_t messagecode) : m_messageType(type), code(messagecode)
 {
     payload = corePayloadFactory::instance().createPayload(type);
+    ptype = payloadType_t::shared;
 }
 
 std::string commMessage::to_string() const
