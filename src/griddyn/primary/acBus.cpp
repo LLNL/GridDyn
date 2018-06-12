@@ -10,7 +10,6 @@
  * LLNS Copyright End
  */
 
-// headers
 #include "../Area.h"
 
 #include "../Generator.h"

@@ -354,6 +354,7 @@ void DynamicGenerator::setState (coreTime time,
         }
         Pset += dPdt * (time - prevTime);
         Pset = valLimit (Pset, Pmin, Pmax);
+        updateLocalCache(noInputs, emptyStateData, cLocalSolverMode);
     }
     else if (stateSize (sMode) > 0)
     {

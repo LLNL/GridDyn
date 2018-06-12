@@ -65,4 +65,26 @@ BOOST_AUTO_TEST_CASE (source_test1)
     delete src1;
 }
 
+
+BOOST_AUTO_TEST_CASE(sinesource_test)
+{
+    auto src1 = new sineSource("ss", 0.0);
+    src1->set("freq", 1.0);
+    src1->set("amp", 1.0);
+    auto src2 = new sineSource("ss", 0.0);
+    src2->set("freq", 1.0);
+    src2->set("amp", 1.0);
+    src1->pFlowInitializeA(0.0, 0);
+    src2->pFlowInitializeA(0.0, 0);
+    src1->dynInitializeA(0.0, 0);
+    src2->dynInitializeA(0.0, 0);
+    for (double t = 0.2; t < 4.9; t += 0.2)
+    {
+        src1->updateOutput(t);
+        BOOST_CHECK_SMALL(std::abs( src1->getOutput() - src2->computeOutput(t)),1e-7);
+        BOOST_CHECK_SMALL(std::abs(src1->getOutput()-sin(2.0*griddyn::kPI*t)), 1e-7);
+    }
+    delete src1;
+    delete src2;
+}
 BOOST_AUTO_TEST_SUITE_END ()

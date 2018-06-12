@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef SINE_SOURCE_H_
-#define SINE_SOURCE_H_
+#pragma once
 
 #include "pulseSource.h"
 
@@ -48,6 +46,4 @@ public:
 };
 }//namespace sources
 }//namespace griddyn
-
-#endif
 

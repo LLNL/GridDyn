@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef GRIDSOURCE_H_
-#define GRIDSOURCE_H_
 #pragma once
 #include "gridSubModel.h"
 
@@ -66,4 +63,4 @@ public:
 };
 
 }//namespace griddyn
-#endif
+

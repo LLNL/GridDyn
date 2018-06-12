@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef SOURCELOAD_H_
-#define SOURCELOAD_H_
 #pragma once
 
 #include "zipLoad.h"
@@ -81,5 +78,3 @@ private:
 };
 }//namespace loads
 }//namespace griddyn
-
-#endif

@@ -9,16 +9,13 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYNGENERATOR_H_
-#define GRIDDYNGENERATOR_H_
 #pragma once
 #include "gridSecondary.h"
 
 namespace utilities
 {
 class OperatingBoundary;
-}  // namespace utiltiies
+}  // namespace utilities
 
 namespace griddyn
 {
@@ -49,8 +46,8 @@ class Generator : public gridSecondary
         indirect_voltage_control_level = object_flag8,  //!< flag indicating that the generator should perform
                                                         //! voltage control indirectly in power flow
         internal_frequency_calculation =
-          object_flag9,  //!<flag indicating that the generator computes the frequency internally
-        isochronous_operation = object_flag10,  //!<flag telling the generator to operation is isochronous mode
+          object_flag9,  //!< flag indicating that the generator computes the frequency internally
+        isochronous_operation = object_flag10,  //!< flag telling the generator to operation is isochronous mode
     };
     /** @brief enum indicating subModel locations in the subObject structure*/
 
@@ -63,7 +60,7 @@ class Generator : public gridSecondary
     parameter_t dQdt = 0.0;  //!< define the reactive power ramp
     parameter_t Qmax = kBigNum;  //!< [pu mbase] max steady state reactive power values for Power flow analysis
     parameter_t Qmin = -kBigNum;  //!< [pu mbase] min steady state reactive power values for Power flow analysis
-	parameter_t Qbias = 0.0;		//!<[pu] targetted Q output for generators with remote voltage control 
+    parameter_t Qbias = 0.0;  //!<[pu] targetted Q output for generators with remote voltage control
     parameter_t Pmax = kBigNum;  //!< [pu mbase]max steady state real power values for the generator
     parameter_t Pmin = -kBigNum;  //!< [pu mbase] min steady state real power values for the generator
     parameter_t participation = 1.0;  //!< [%]a participation factor used in auto allocating load.
@@ -109,9 +106,9 @@ class Generator : public gridSecondary
     @throw unrecognizedObjectError is object is not valid*/
     virtual void add (gridSubModel *obj);
 
-	virtual stateSizes LocalStateSizes(const solverMode &sMode) const override;
+    virtual stateSizes LocalStateSizes (const solverMode &sMode) const override;
 
-	virtual count_t LocalJacobianCount(const solverMode &sMode) const override;
+    virtual count_t LocalJacobianCount (const solverMode &sMode) const override;
 
     virtual void algebraicUpdate (const IOdata &inputs,
                                   const stateData &sD,
@@ -168,10 +165,10 @@ class Generator : public gridSecondary
 
     virtual double getAdjustableCapacityUp (coreTime time = maxTime) const override;
     virtual double getAdjustableCapacityDown (coreTime time = maxTime) const override;
-      /** @brief get the maximum generation attainable in a specific amount of time
-      @param[in] time  the time window to achieve the generation
-      @return the max real power*/
-      virtual double getPmax (coreTime time = maxTime) const;
+    /** @brief get the maximum generation attainable in a specific amount of time
+    @param[in] time  the time window to achieve the generation
+    @return the max real power*/
+    virtual double getPmax (coreTime time = maxTime) const;
     /** @brief get the maximum reactive generation attainable in a specific amount of time
     @param[in] time  the time window to achieve the generation
     @param[in] Ptest the real power output corresponding to the desired attainable generation
@@ -194,26 +191,25 @@ class Generator : public gridSecondary
                                          std::uint32_t flags,
                                          check_level_t level) override;  // only applicable in pFlow
     virtual coreObject *find (const std::string &object) const override;
-	/** get the frequency the generator is operating at
-	@param[in] sD the current stateData
-	@param[in] sMode the solvermode corresponding to the state
-	@param[out] freqOffset the location of the frequency state in the sD arrays
-	@return the current frequency the generator is operating at
-	*/
+    /** get the frequency the generator is operating at
+    @param[in] sD the current stateData
+    @param[in] sMode the solvermode corresponding to the state
+    @param[out] freqOffset the location of the frequency state in the sD arrays
+    @return the current frequency the generator is operating at
+    */
     virtual double getFreq (const stateData &sD, const solverMode &sMode, index_t *freqOffset = nullptr) const;
-	/** get the internal angle of the generator
-	@param[in] sD the current stateData
-	@param[in] sMode the solvermode corresponding to the state
-	@param[out] angleOffset the location of the frequency state in the sD arrays
-	@return the current angle of  the generator is operating at
-	*/
-	virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset = nullptr) const;
+    /** get the internal angle of the generator
+    @param[in] sD the current stateData
+    @param[in] sMode the solvermode corresponding to the state
+    @param[out] angleOffset the location of the frequency state in the sD arrays
+    @return the current angle of  the generator is operating at
+    */
+    virtual double getAngle (const stateData &sD, const solverMode &sMode, index_t *angleOffset = nullptr) const;
 
   protected:
-	/** set the non-local bus that the generator controls
-	@param[in] newRemoteBus the bus the generate is monitoring and controlling*/
+    /** set the non-local bus that the generator controls
+    @param[in] newRemoteBus the bus the generate is monitoring and controlling*/
     void setRemoteBus (coreObject *newRemoteBus);
 };
 
 }  // namespace griddyn
-#endif

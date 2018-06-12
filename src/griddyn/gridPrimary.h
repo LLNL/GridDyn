@@ -73,6 +73,8 @@ public:
 	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
 	virtual double get(const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+
+    virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;
   /** @brief get the residual computation for object requiring a delay
     basically calls the residual calculation on the delayed objects
   @param[in] sD the data representing the current state to operate on

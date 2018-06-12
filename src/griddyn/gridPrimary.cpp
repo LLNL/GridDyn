@@ -83,6 +83,13 @@ void gridPrimary::converge (coreTime /*time*/,
 {
 }
 
+void gridPrimary::setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode)
+{
+    gridComponent::setState(time, state, dstate_dt, sMode);
+    //update local computations
+    updateLocalCache();
+}
+
 void gridPrimary::delayedResidual (const IOdata &inputs,
                                    const stateData &sD,
                                    double resid[],
