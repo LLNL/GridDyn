@@ -58,7 +58,7 @@ int GriddynRunner::InitializeFromString(const std::string &cmdargs)
 
 int GriddynRunner::Initialize (int argc, char *argv[], readerInfo &ri, bool allowUnrecognized)
 {
-    
+
 
     if (!m_gds)
     {
@@ -88,7 +88,7 @@ int GriddynRunner::Initialize (int argc, char *argv[], readerInfo &ri, bool allo
         return (ret);
     }
     m_stopTime = std::chrono::high_resolution_clock::now ();
-    
+
 
     std::chrono::duration<double> elapsed_t = m_stopTime - m_startTime;
     m_gds->log (m_gds.get (), print_level::normal,
@@ -156,7 +156,7 @@ coreTime GriddynRunner::Run ()
 	{
 		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
 	}
-	
+
 		m_startTime = std::chrono::high_resolution_clock::now();
 		m_gds->run();
 		m_stopTime = std::chrono::high_resolution_clock::now();
@@ -164,7 +164,7 @@ coreTime GriddynRunner::Run ()
 		m_gds->log(m_gds.get(), print_level::summary,
 			m_gds->getName() + " executed in " + std::to_string(elapsed_t.count()) + " seconds");
 		return m_gds->getSimulationTime();
-	
+
 }
 
 
@@ -175,7 +175,7 @@ void GriddynRunner::RunAsync()
 		throw(executionFailure(m_gds.get(), "asynchronous operation ongoing"));
 	}
 	async_ret = std::async(std::launch::async, [this] {return Run(); });
-	
+
 }
 
 coreTime GriddynRunner::Step (coreTime time)
@@ -227,7 +227,7 @@ bool GriddynRunner::isReady() const
 
 int GriddynRunner::getStatus(coreTime &timeReturn)
 {
-	
+
 	timeReturn = m_gds->getSimulationTime();
 	return (isReady())?static_cast<int>(m_gds->currentProcessState()):GRIDDYN_PENDING;
 }
@@ -423,9 +423,9 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 
     // clang-format off
     // input boost controls
-    cmd_only.add_options () 
+    cmd_only.add_options ()
 		("help,h", "produce help message")
-		("config-file", po::value<std::string> (),"specify a configuration file to use") 
+		("config-file", po::value<std::string> (),"specify a configuration file to use")
 		("config-file-output", po::value<std::string> (), "file to store current configuration options")
 		("mpicount", "setup for an MPI run")
 		("version", "print version string")
@@ -471,15 +471,15 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
     po::variables_map cmd_vm;
     try
     {
-        if (!allowUnrecognized)
-        {
-            po::store (po::command_line_parser (argc, argv).options (cmd_line).positional (p).run (), cmd_vm);
-        }
-        else
+        if (allowUnrecognized)
         {
             auto parsed =
               po::command_line_parser (argc, argv).options (cmd_line).positional (p).allow_unregistered ().run ();
             po::store (parsed, cmd_vm);
+        }
+        else
+        {
+            po::store (po::command_line_parser (argc, argv).options (cmd_line).positional (p).run (), cmd_vm);
         }
     }
     catch (std::exception &e)
@@ -505,15 +505,15 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
         return 1;
     }
 
-    if (!allowUnrecognized)
-    {
-        po::store (po::command_line_parser (argc, argv).options (cmd_line).positional (p).run (), vm_map);
-    }
-    else
+    if (allowUnrecognized)
     {
         auto parsed =
           po::command_line_parser (argc, argv).options (cmd_line).positional (p).allow_unregistered ().run ();
         po::store (parsed, vm_map);
+    }
+    else
+    {
+        po::store (po::command_line_parser (argc, argv).options (cmd_line).positional (p).run (), vm_map);
     }
 
     if (cmd_vm.count ("config-file") > 0)

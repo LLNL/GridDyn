@@ -75,7 +75,7 @@ public:
    *
    * Returns taskId for the new instance.
    */
-  int createGridlabDInstance (std::string arguments);
+  int createGridlabDInstance (const std::string& arguments);
 
   /**
    * End the simulation.

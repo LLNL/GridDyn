@@ -80,14 +80,12 @@ GhostSwingBusManager::GhostSwingBusManager (int* argc, char **argv[])
 
   m_voltSendMessage.resize (m_numTasks);
   m_currReceiveMessage.resize (m_numTasks);
-
-  return;
 }
 
 GhostSwingBusManager::~GhostSwingBusManager() = default;
 
 // for Transmission
-int GhostSwingBusManager::createGridlabDInstance (string arguments)
+int GhostSwingBusManager::createGridlabDInstance (const string& arguments)
 {
   assert (arguments.size () <= PATH_MAX * 4); //there is a bug in Visual studio where the sizeof doesn't compile
 
@@ -177,12 +175,11 @@ void GhostSwingBusManager::sendVoltageStep (int taskId, cvec &voltage, unsigned 
 #else
 
   try {
-      dummy_load_eval[taskId](&(m_voltSendMessage[taskId]), &(m_currReceiveMessage[taskId]));
-    }
-  catch (std::bad_function_call)
-    {
-
-    }
+    dummy_load_eval[taskId](&(m_voltSendMessage[taskId]), &(m_currReceiveMessage[taskId]));
+  }
+  catch (const std::bad_function_call&)
+  {
+  }
 
 #endif
 }

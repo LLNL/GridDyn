@@ -67,12 +67,8 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
             if (line[1] == '#')  // new section
             {
                 mState = read_header;
-                continue;
             }
-            else  // general comment line
-            {
-                continue;
-            }
+            continue;
         }
         if (mState == read_header)
         {
@@ -159,14 +155,15 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
             auto lineTokens = split (line);
             if (lineTokens.size () != headers.size ())
             {
-                fprintf (stderr, "line %d length does not match section header\n", lineNumber);
+                std::cerr << "line " << std::to_string (lineNumber)
+                          << " length does not match section header" << std::endl;
                 return;
             }
             // check the identifier
             auto ref = (refkey >= 0) ? trim (lineTokens[refkey]) : "";
             auto type = (typekey >= 0) ? trim (lineTokens[typekey]) : "";
             // find or create the object
-            int index = numeric_conversion<int> (lineTokens[0], -2);
+            auto index = numeric_conversion<int> (lineTokens[0], -2);
             coreObject *obj = nullptr;
             if (index >= 0)
             {
@@ -242,7 +239,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                     auto str = trim (lineTokens[kk]).to_string ();
 
                     str = ri.checkDefines (str);
-                    double val = numeric_conversion (str, kBigNum);
+                    auto val = numeric_conversion<double> (str, kBigNum);
                     gridBus *bus = nullptr;
                     if (val < kHalfBigNum)
                     {
@@ -260,7 +257,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                 else if ((field.compare (0, 4, "from") == 0) && (ObjectMode == "link"))
                 {
                     auto str = ri.checkDefines (trim (lineTokens[kk]).to_string ());
-                    double val = numeric_conversion (str, kBigNum);
+                    auto val = numeric_conversion<double> (str, kBigNum);
                     gridBus *bus = nullptr;
                     if (val < kHalfBigNum)
                     {
@@ -283,7 +280,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                 else if ((field == "bus") && ((ObjectMode == "load") || (ObjectMode == "gen")))
                 {
                     auto str = ri.checkDefines (lineTokens[kk].to_string ());
-                    double val = numeric_conversion (str, kBigNum);
+                    auto val = numeric_conversion<double> (str, kBigNum);
                     gridBus *bus = nullptr;
                     if (val < kHalfBigNum)
                     {
@@ -344,7 +341,7 @@ void loadCSV (coreObject *parentObject, const std::string &fileName, readerInfo 
                 else
                 {
                     auto str = ri.checkDefines (trim (lineTokens[kk]).to_string ());
-                    double val = numeric_conversion (str, kBigNum);
+                    auto val = numeric_conversion<double> (str, kBigNum);
 
                     if (val < kHalfBigNum)
                     {
