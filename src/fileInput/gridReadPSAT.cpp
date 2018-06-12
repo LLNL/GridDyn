@@ -132,10 +132,9 @@ void loadPSAT (coreObject *parentObject, const std::string &filetext, const basi
     {
         if (!(bri.prefix.empty ()))
         {
-            std::string prefix_underscore = bri.prefix + '_';
             for (auto &vk : Vnames)
             {
-                vk = prefix_underscore.append(vk);
+                bri.prefix + '_' + vk;
             }
         }
     }
