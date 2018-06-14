@@ -169,7 +169,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
-        - OPTION_FLAGS=("-DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer'" "-DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer'")
+        - OPTION_FLAGS="-DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer' -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer'"
     - <<: *daily_linux
       compiler: clang
       addons:
@@ -184,7 +184,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
-        - OPTION_FLAGS=("-DCMAKE_C_FLAGS='-fsanitize=memory -fno-omit-frame-pointer'" "-DCMAKE_CXX_FLAGS='-fsanitize=memory -fno-omit-frame-pointer'")
+        - OPTION_FLAGS="-DCMAKE_C_FLAGS='-fsanitize=memory -fno-omit-frame-pointer' -DCMAKE_CXX_FLAGS='-fsanitize=memory -fno-omit-frame-pointer'"
 
 branches:
   except:
@@ -196,7 +196,7 @@ before_install:
 
 install:
   - export GRIDDYN_DEPENDENCY_FLAGS=""
-  - GRIDDYN_OPTION_FLAGS=("${OPTION_FLAGS[@]}")
+  - GRIDDYN_OPTION_FLAGS=("${OPTION_FLAGS}")
   - if [[ "$RUN_COVERAGE" ]]; then GRIDDYN_OPTION_FLAGS+=("-DTEST_CODE_COVERAGE=ON" "-DCMAKE_BUILD_TYPE=Coverage") ; fi
   - if [[ "$ENABLE_HELICS" ]]; then GRIDDYN_OPTION_FLAGS+=("-DHELICS_EXECUTABLE=ON" "-DAUTOBUILD_HELICS=ON") ; fi
   - if [[ "$ENABLE_FMI" ]]; then GRIDDYN_OPTION_FLAGS+=("-DBUILD_SHARED_FMI_LIBRARY=ON") ; else GRIDDYN_OPTION_FLAGS+=("-DFMI_ENABLE=OFF") ; fi
