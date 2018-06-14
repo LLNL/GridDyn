@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef GENMODEL4_H_
-#define GENMODEL4_H_
+#pragma once
 
 #include "GenModel3.h"
 #include "utilities/saturation.h"
@@ -51,4 +49,3 @@ public:
 
 }//namespace genmodels
 }//namespace griddyn
-#endif //GENMODEL4_H_

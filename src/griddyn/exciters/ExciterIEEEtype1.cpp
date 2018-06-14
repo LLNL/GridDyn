@@ -23,7 +23,7 @@ namespace exciters
 {
 ExciterIEEEtype1::ExciterIEEEtype1(const std::string &objName) : Exciter(objName)
 {
-	// default values
+	// default values that are different from inherited default values
 	Ka = 20;
 	Ta = 0.04;
 

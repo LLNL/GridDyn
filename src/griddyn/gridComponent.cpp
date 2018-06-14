@@ -1925,7 +1925,7 @@ void gridComponent::updateFlags (bool dynamicsFlags)
             opFlags |= subobj->cascadingFlags ();
         }
     }
-    if (dynamicsFlags)
+    if ((opFlags[dyn_initialized])&&(dynamicsFlags))
     {
         setupDynFlags ();
     }
