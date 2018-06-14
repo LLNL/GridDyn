@@ -510,7 +510,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 
     if (cmd_vm.count ("version") > 0)
     {
-        std::cout << GRIDDYN_VERSION_STRING << '\n';
+        //std::cout << GRIDDYN_VERSION_STRING << '\n';
         return 1;
     }
 

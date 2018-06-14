@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE (mainexe_test1)
         if (out.compare(0, 15, "GridDyn version") != 0)
         {
             printf("mismatch out string\n");
-            printf("out=%s\n", out.c_str());
+            printf("out=%s||\n", out.c_str());
         }
     }
     else
