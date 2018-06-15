@@ -24,7 +24,7 @@
     </relay>
     <relay flags="comm_enabled" name="t2">
       <commtype>basic</commtype>
-      <terminal>1</terminal>
+      <terminal>2</terminal>
       <type>zonal</type>
       <zones>2</zones>
       <delay>10,10</delay>
