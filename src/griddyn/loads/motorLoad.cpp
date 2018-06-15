@@ -127,19 +127,19 @@ stateSizes motorLoad::LocalStateSizes(const solverMode &sMode) const
 
 count_t motorLoad::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
+	count_t localJacSize = 0;
 	if (isDynamic(sMode))
 	{
 		if (!isAlgebraicOnly(sMode))
 		{
-			jacSize = 4;
+			localJacSize = 4;
 		}
 	}
 	else if (!opFlags[init_transient])
 	{
-		jacSize = 4;
+		localJacSize = 4;
 	}
-	return jacSize;
+	return localJacSize;
 }
 
 std::pair<count_t, count_t> motorLoad::LocalRootCount(const solverMode &/*sMode*/) const

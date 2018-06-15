@@ -250,8 +250,8 @@ std::shared_ptr<readerElement> tinyxml2ReaderElement::firstChild () const
     }
     if (child != nullptr)
     {
-        auto firstChild = std::make_shared<tinyxml2ReaderElement> (child, element);
-        return firstChild;
+        auto child1 = std::make_shared<tinyxml2ReaderElement> (child, element);
+        return child1;
     }
     return nullptr;
 }
@@ -269,8 +269,8 @@ std::shared_ptr<readerElement> tinyxml2ReaderElement::firstChild (const std::str
     }
     if (child != nullptr)
     {
-        auto firstChild = std::make_shared<tinyxml2ReaderElement> (child, element);
-        return firstChild;
+        auto child1 = std::make_shared<tinyxml2ReaderElement> (child, element);
+        return child1;
     }
     return nullptr;
 }
