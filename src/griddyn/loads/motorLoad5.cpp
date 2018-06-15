@@ -173,13 +173,13 @@ stateSizes motorLoad5::LocalStateSizes(const solverMode &sMode) const
 
 count_t motorLoad5::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
+	count_t localJacSize = 0;
 	if (isDynamic(sMode))
 	{
-		jacSize = 8;
+		localJacSize = 8;
 		if (!isAlgebraicOnly(sMode))
 		{
-			jacSize += 27;
+			localJacSize += 27;
 		}
 	}
 	else
@@ -187,14 +187,14 @@ count_t motorLoad5::LocalJacobianCount(const solverMode &sMode) const
 
 		if (opFlags[init_transient])
 		{
-			jacSize = 31;
+			localJacSize = 31;
 		}
 		else
 		{
-			jacSize = 35;
+			localJacSize = 35;
 		}
 	}
-	return jacSize;
+	return localJacSize;
 }
 
 // set properties

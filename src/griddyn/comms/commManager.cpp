@@ -35,7 +35,7 @@ commManager::commManager (const commManager &cm)
     }
 }
 
-commManager::commManager (commManager &&cm) = default;
+commManager::commManager (commManager &&) = default;
 
 commManager &commManager::operator= (const commManager &cm)
 {
@@ -59,7 +59,7 @@ commManager &commManager::operator= (const commManager &cm)
     }
     return *this;
 }
-commManager &commManager::operator= (commManager &&cm) = default;
+commManager &commManager::operator= (commManager &&) = default;
 
 commManager::~commManager () = default;
 

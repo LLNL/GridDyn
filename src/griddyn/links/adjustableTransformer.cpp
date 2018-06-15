@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,14 +8,15 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // headers
 #include "adjustableTransformer.h"
+#include "../gridBus.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../gridBus.h"
+#include "griddyn/griddyn-config.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/matrixDataTranslate.hpp"
 #include "utilities/stringOps.h"
@@ -23,7 +24,6 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-#include "griddyn/griddyn-config.h"
 
 /*
 enum control_mode_t{ manual_control=0, voltage_control=1, MW_control=2, MVar_control=3};
@@ -680,9 +680,9 @@ void adjustableTransformer::pFlowObjectInitializeA (coreTime time0, std::uint32_
     return acLine::pFlowObjectInitializeA (time0, flags);
 }
 
-stateSizes adjustableTransformer::LocalStateSizes(const solverMode &sMode) const
+stateSizes adjustableTransformer::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes lcStates;
+    stateSizes lcStates;
     if (isDynamic (sMode))
     {
         if (opFlags[continuous_flag])
@@ -694,7 +694,7 @@ stateSizes adjustableTransformer::LocalStateSizes(const solverMode &sMode) const
             case control_mode_t::voltage_control:
             case control_mode_t::MVar_control:
             case control_mode_t::MW_control:
-				lcStates.algSize = 1;
+                lcStates.algSize = 1;
                 break;
             }
         }
@@ -703,53 +703,52 @@ stateSizes adjustableTransformer::LocalStateSizes(const solverMode &sMode) const
     {
         if ((opFlags[continuous_flag]) && (!opFlags[no_pFlow_adjustments]))
         {
-			lcStates.algSize = 1;
+            lcStates.algSize = 1;
         }
     }
-	return lcStates;
+    return lcStates;
 }
 
-
-count_t adjustableTransformer::LocalJacobianCount(const solverMode &sMode) const
+count_t adjustableTransformer::LocalJacobianCount (const solverMode &sMode) const
 {
-	count_t jacSize = 0;
-	if (isDynamic(sMode))
-	{
-		if (opFlags[continuous_flag])
-		{
-			switch (cMode)
-			{
-			case control_mode_t::manual_control:
-				break;
-			case control_mode_t::voltage_control:
-				jacSize = 2;
-				break;
-			case control_mode_t::MVar_control:
-			case control_mode_t::MW_control:
-				jacSize = 5;
-				break;
-			}
-		}
-	}
-	else
-	{
-		if ((opFlags[continuous_flag]) && (!opFlags[no_pFlow_adjustments]))
-		{
-			switch (cMode)
-			{
-			case control_mode_t::manual_control:
-				break;
-			case control_mode_t::voltage_control:
-				jacSize = 2;
-				break;
-			case control_mode_t::MVar_control:
-			case control_mode_t::MW_control:
-				jacSize = 5;
-				break;
-			}
-		}
-	}
-	return jacSize;
+    count_t localJacSize = 0;
+    if (isDynamic (sMode))
+    {
+        if (opFlags[continuous_flag])
+        {
+            switch (cMode)
+            {
+            case control_mode_t::manual_control:
+                break;
+            case control_mode_t::voltage_control:
+                localJacSize = 2;
+                break;
+            case control_mode_t::MVar_control:
+            case control_mode_t::MW_control:
+                localJacSize = 5;
+                break;
+            }
+        }
+    }
+    else
+    {
+        if ((opFlags[continuous_flag]) && (!opFlags[no_pFlow_adjustments]))
+        {
+            switch (cMode)
+            {
+            case control_mode_t::manual_control:
+                break;
+            case control_mode_t::voltage_control:
+                localJacSize = 2;
+                break;
+            case control_mode_t::MVar_control:
+            case control_mode_t::MW_control:
+                localJacSize = 5;
+                break;
+            }
+        }
+    }
+    return localJacSize;
 }
 
 void adjustableTransformer::getStateName (stringVec &stNames,
@@ -793,7 +792,7 @@ void adjustableTransformer::reset (reset_levels level)
             {
                 break;
             }
-			FALLTHROUGH
+            FALLTHROUGH
         case control_mode_t::MVar_control:
         {
             double midTap = (minTap + maxTap) / 2.0;

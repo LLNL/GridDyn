@@ -2887,24 +2887,24 @@ stateSizes acBus::LocalStateSizes(const solverMode &sMode) const
 
 count_t acBus::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
+	count_t totaljacSize = 0;
 	if (hasAlgebraic(sMode))
 	{
 		if (isDC(sMode))
 		{
-			jacSize = 1 + getDependencyCount(sMode);
+			totaljacSize = 1 + getDependencyCount(sMode);
 		}
 		else
 		{
-			jacSize = 4 + getDependencyCount(sMode);
+			totaljacSize = 4 + getDependencyCount(sMode);
 		}
 		// check for slave bus mode
 		if (opFlags[slave_bus])
 		{
-			jacSize -= (isDC(sMode)) ? 1 : 4;
+			totaljacSize -= (isDC(sMode)) ? 1 : 4;
 		}
 	}
-	return jacSize;
+	return totaljacSize;
 }
 
 int acBus::getMode (const solverMode &sMode) const

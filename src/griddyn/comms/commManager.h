@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef _COMM_MANAGER_H_
-#define _COMM_MANAGER_H_
+#pragma once
 #include <string>
 #include <cstdint>
 #include <memory>
@@ -77,4 +75,4 @@ public:
 };
 }//namespace comms
 }//namespace griddyn
-#endif
+

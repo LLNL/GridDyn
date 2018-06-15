@@ -1517,6 +1517,7 @@ public:
   */
   Element ( TiXmlElement* element );
 
+  
   /**
   Constructor that allows you to set the element text
   @param value The value of the element.
@@ -1530,6 +1531,7 @@ public:
     SetText ( text );
   }
 
+  using NodeImp<TiXmlElement>::operator=;
   /**
   Access the first attribute in this element.
 
