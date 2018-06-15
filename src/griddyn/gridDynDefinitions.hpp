@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_TYPES_H_
-#define GRIDDYN_TYPES_H_
 #pragma once
 #include "core/coreDefinitions.hpp"
 
@@ -127,4 +125,3 @@ const IOdata noInputs{};
 const IOlocs noInputLocs{};
 
 }  // namespace griddyn
-#endif

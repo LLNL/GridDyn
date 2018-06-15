@@ -469,7 +469,7 @@ void savePowerFlowCdf (gridDynSimulation *gds, const std::string &fileName)
 
     double basePower = gds->get ("basepower");
     // Title Data
-    fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", "GridDyn " GRIDDYN_VERSION_STRING,
+    fprintf (fp, " 0 /0 /0  %20s %5d 2016  %27s\n", "GridDyn " GRIDDYN_VERSION_STRING_SHORT,
              static_cast<int> (basePower), gds->getName ().c_str ());
 
     // Bus Data
