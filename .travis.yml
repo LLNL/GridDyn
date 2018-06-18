@@ -169,7 +169,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
-        - JOB_OPTION_FLAGS="-DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer' -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer'"
+        - JOB_OPTION_FLAGS="-C../scripts/asan-cache.cmake"
     - <<: *daily_linux
       compiler: clang
       addons:
@@ -184,7 +184,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
-        - JOB_OPTION_FLAGS="-DCMAKE_C_FLAGS='-fsanitize=memory -fno-omit-frame-pointer' -DCMAKE_CXX_FLAGS='-fsanitize=memory -fno-omit-frame-pointer'"
+        - JOB_OPTION_FLAGS="-C../scripts/msan-cache.cmake"
 
 branches:
   except:
@@ -218,8 +218,7 @@ script:
   - echo "Script opt flags:"
   - echo ${GRIDDYN_OPTION_FLAGS}
   - pwd
-  - echo cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${JOB_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
-  - cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${JOB_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+  - cmake ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${JOB_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
   - echo !!
   - make -j2
 
