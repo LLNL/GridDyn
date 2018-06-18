@@ -1,2 +1,2 @@
-set(CMAKE_C_FLAGS "-fsanitizer=memory -fno-omit-frame-pointer" CACHE STRING "Flags used by the compiler during all build types.")
-set(CMAKE_CXX_FLAGS "-fsanitizer=memory -fno-omit-frame-pointer" CACHE STRING "Flags used by the compiler during all build types.")
+set(CMAKE_C_FLAGS "-fsanitize=memory -fno-omit-frame-pointer" CACHE STRING "Flags used by the compiler during all build types.")
+set(CMAKE_CXX_FLAGS "-fsanitize=memory -fno-omit-frame-pointer" CACHE STRING "Flags used by the compiler during all build types.")

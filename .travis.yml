@@ -219,8 +219,7 @@ script:
   - echo ${GRIDDYN_OPTION_FLAGS}
   - pwd
   - cmake ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} ${JOB_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
-  - echo !!
-  - make -j2
+  - cmake --build . -- -j2
 
   # Setup counters for coverage
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh setup-counters && popd ; fi
