@@ -38,7 +38,7 @@ ExternalProject_Add(suitesparse
         -DCMAKE_C_COMPILER=${c_compiler_string}
 		-DBUILD_SHARED_LIBS=${USE_KLU_SHARED}
         -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-		\"-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}\"
+		\"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
 		-DCMAKE_LINKER=${linker_string}
 		-DBUILD_METIS=OFF
         

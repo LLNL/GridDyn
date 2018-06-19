@@ -70,7 +70,7 @@ ExternalProject_Add(libzmq
 		-DBUILD_STATIC=${zmq_static_build}
 		-DBUILD_SHARED=${zmq_shared_build}
 		\"-DCMAKE_CXX_FLAGS=${extra_cxx_flags}\"
-		\"-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}\"
+		\"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
 		-DENABLE_CPACK=OFF
 		-DLIBZMQ_PEDANTIC=OFF
 		-DWITH_PERF_TOOL=OFF
