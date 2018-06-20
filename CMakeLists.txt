@@ -462,32 +462,31 @@ endif(HELICS_EXECUTABLE)
 # Enable ZMQ interfacing
 # -------------------------------------------------------------
 
-option(DIME_ENABLE "Enable connection with Dime" OFF)
+option(ENABLE_NETWORKING_LIBRARY "Enable network based communiation components" OFF)
 
+cmake_dependent_option(DIME_ENABLE "Enable connection with Dime" OFF "ENABLE_NETWORKING_LIBRARY" OFF)
+cmake_dependent_option(TCP_ENABLE "Enable TCP connection library" ON "ENABLE_NETWORKING_LIBRARY" OFF)
 if (DIME_ENABLE)
-set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
+	set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
 endif(DIME_ENABLE)
 
-option(ZMQ_ENABLE "Enable ZMQ networking library" ${ZMQ_NEEDED})
+HIDE_VARIABLE(ZMQ_NEEDED)
+
+cmake_dependent_option(ZMQ_ENABLE "Enable ZMQ networking library" OFF "NOT ZMQ_NEEDED" OFF)
+
 # If ZMQ library is enabled try to locate it and link against it
 
 if ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 	include(addZeroMQ)
-	# ZMQ_INCLUDE_DIR, where to find zmq.h
-# ZMQ_LIBRARY, the library needed to use ZMQ
-# ZMQ_FOUND, if false, you cannot build anything that requires ZMQ.
-	if (ZeroMQ_FOUND)
-		add_subdirectory(src/zmqlib)
-		if (DIME_ENABLE)
-			target_link_libraries(griddyn_optional INTERFACE dimeLibrary)
-		else(DIME_ENABLE)
-			target_link_libraries(griddyn_optional INTERFACE zmqInterfaceLibrary)
-		endif(DIME_ENABLE)
-	else(ZeroMQ_FOUND)
+	if (NOT ZeroMQ_FOUND)
 		message(SEND_ERROR "unable to locate zmq library")
 	endif(ZeroMQ_FOUND)
 endif((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 
+if (ENABLE_NETWORKING_LIBRARY)
+	add_subdirectory(src/networking)
+	target_link_libraries(griddyn_optional INTERFACE networkLibrary)
+endif()
 
 if (HELICS_EXECUTABLE)
 	include(addHELICS)
