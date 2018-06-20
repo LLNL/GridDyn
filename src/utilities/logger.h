@@ -14,7 +14,6 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
 #pragma once
 
 #include "BlockingQueue.hpp"
@@ -214,4 +213,3 @@ class LoggerManager
     }
 };
 }//namespace utilities
-#endif
