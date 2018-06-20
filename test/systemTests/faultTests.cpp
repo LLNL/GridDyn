@@ -34,9 +34,9 @@ using namespace griddyn;
 
 static const std::string fault_test_directory (GRIDDYN_TEST_DIRECTORY "/fault_tests/");
 
-BOOST_FIXTURE_TEST_SUITE (fault_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
+BOOST_FIXTURE_TEST_SUITE (fault_tests, gridDynSimulationTestFixture)
 
-BOOST_AUTO_TEST_CASE (fault_test1)
+BOOST_AUTO_TEST_CASE (fault_test1, *boost::unit_test::label("quick"))
 {
     std::string fileName = fault_test_directory + "fault_test1.xml";
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE (fault_test1)
 }
 
 // testing with an exciter added
-BOOST_AUTO_TEST_CASE (fault_test2)
+BOOST_AUTO_TEST_CASE (fault_test2, *boost::unit_test::label("quick"))
 {
     std::string fileName = fault_test_directory + "fault_test1.xml";
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE (fault_test2)
 //#endif
 
 // testing with a governor added
-BOOST_AUTO_TEST_CASE (fault_test3)
+BOOST_AUTO_TEST_CASE (fault_test3, *boost::unit_test::label("quick"))
 {
     std::string fileName = fault_test_directory + "fault_test1.xml";
 
