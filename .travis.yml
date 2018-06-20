@@ -146,12 +146,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-trusty-4.0
           packages:
             - libstdc++-6-dev
-            - clang-5.0
+            - clang-4.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
         - CXX_STANDARD=17
         - USE_MPI=mpich
@@ -161,12 +161,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-trusty-4.0
           packages:
             - libstdc++-6-dev
-            - clang-5.0
+            - clang-4.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
         - JOB_OPTION_FLAGS="-C../scripts/asan-cache.cmake"
@@ -176,12 +176,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-trusty-4.0
           packages:
             - libstdc++-6-dev
-            - clang-5.0
+            - clang-4.0
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='clang-5.0' && CXX='clang++-5.0'"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
         - USE_MPI=mpich
         - JOB_OPTION_FLAGS="-C../scripts/msan-cache.cmake"
