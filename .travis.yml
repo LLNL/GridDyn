@@ -228,7 +228,7 @@ script:
   - if [[ "$RUN_VALGRIND" != "true" ]]; then ../scripts/run-ci-tests.sh ; fi
 
   # Run Valgrind on a test case
-  - if [[ "$RUN_VALGRIND" == "true" ]]; ctest -T memcheck -L Valgrind then ; fi
+  - if [[ "$RUN_VALGRIND" == "true" ]]; then ctest -T memcheck -L Valgrind ; fi
 
   # Gather coverage results
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info ${GCOV_TOOL} && popd ; fi
