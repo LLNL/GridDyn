@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef GRIDDYN_RELAY_H_
-#define GRIDDYN_RELAY_H_
 #pragma once
 
 #include "gridPrimary.h"
@@ -376,5 +373,3 @@ private:
 };
 
 }//namespace griddyn
-
-#endif

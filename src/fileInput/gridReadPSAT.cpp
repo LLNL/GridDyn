@@ -65,7 +65,7 @@ void loadPsatBreakerArray (coreObject *parentObject, const mArray &brkr, const s
 void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const std::vector<gridBus *> &busList);
 void loadPsatMotorArray (coreObject *parentObject, const mArray &mtr, const std::vector<gridBus *> &busList);
 /** load a PSAT PMU data*/
-void loadPsatPmuArray(coreObject *parentObject, const mArray &mtr, const std::vector<gridBus *> &busList);
+void loadPsatPmuArray(coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList);
 void loadOtherObjectData (coreObject *parentObject,
                           const std::string &filetext,
                           const std::vector<gridBus *> &busList);
@@ -134,7 +134,7 @@ void loadPSAT (coreObject *parentObject, const std::string &filetext, const basi
         {
             for (auto &vk : Vnames)
             {
-                vk = bri.prefix + '_' + vk;
+                bri.prefix + '_' + vk;
             }
         }
     }
@@ -217,7 +217,7 @@ void loadPSATBusArray (coreObject *parentObject,
             bus->setUserID (static_cast<int> (ind1));
             parentObject->add (bus);
         }
-        
+
 
         bus->set ("basevoltage", buses[kk][1]);
         if (buses[kk].size () > 2)
@@ -280,7 +280,7 @@ void loadPSATBusArray (coreObject *parentObject,
         {
         }
     }
-  
+
 	for (auto &pqInfo:PQ)
     {
         auto ind1 = static_cast<size_t> (pqInfo[0]);
@@ -465,7 +465,7 @@ void loadPSATLinkArray (coreObject *parentObject, const mArray &lnks, const std:
         lnk->updateBus (bus2, 2);
         parentObject->add (lnk);
 		bool tx = (lnkInfo[6] != 0.0);
-   
+
         if (tx)
         {
             lnk->set ("r", lnkInfo[7]);
@@ -524,7 +524,7 @@ void loadPSATLinkArrayB (coreObject *parentObject, const mArray &lnks, const std
         lnk->updateBus (bus2, 2);
         parentObject->add (lnk);
 		bool tx = (lnkInfo[6] != 0.0);
-      
+
         if (tx)
         {
             lnk->set ("r", lnkInfo[7]);
@@ -695,9 +695,9 @@ void loadPSATPHSArray (coreObject *parentObject, const mArray &phs, const std::v
 {
 	for (auto &phsInfo:phs)
     {
-        index_t ind1 = static_cast<index_t> (phsInfo[0]);
+        auto ind1 = static_cast<index_t> (phsInfo[0]);
         auto bus1 = busList[ind1];
-        index_t ind2 = static_cast<index_t> (phsInfo[1]);
+        auto ind2 = static_cast<index_t> (phsInfo[1]);
         auto bus2 = busList[ind2];
         auto lnk = new links::adjustableTransformer ();
 
@@ -763,7 +763,7 @@ void loadPSATSynArray (coreObject * /*parentObject*/, const mArray &syn, const s
 {
     using namespace genmodels;
 
-    
+
 
     int index = 1;
     for (auto genData : syn)
@@ -778,7 +778,8 @@ void loadPSATSynArray (coreObject * /*parentObject*/, const mArray &syn, const s
         gen->setUserID (index);
         ++index;
         auto mode = genData[4];
-		GenModel *gm = nullptr;
+
+        GenModel *gm = nullptr;
         if (mode < 2.1)  // second order classical model
         {
             gm = new GenModel ();
@@ -1005,7 +1006,7 @@ void loadPsatFaultArray (coreObject *parentObject, const mArray &fault, const st
 
 void loadPsatPmuArray(coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList)
 {
-	gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot());
+	auto *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot());
 	if (gds == nullptr)
 	{  // cant add the sensors if there is no simulation
 		return;
@@ -1034,8 +1035,8 @@ void loadPsatBreakerArray (coreObject *parentObject,
                            const mArray &brkr,
                            const std::vector<gridBus *> & /*busList*/)
 {
-   
-    gridSimulation *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
+
+    auto *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
     if (gds == nullptr)
     {  // cant make faults if we don't have access to the simulation
         return;

@@ -69,7 +69,7 @@ coreObject *gridSimulation::clone (coreObject *obj) const
     sim->minUpdateTime = minUpdateTime;  // minimum time period to go between updates; for the hybrid simultaneous
     // partitioned solution
     sim->maxUpdateTime = maxUpdateTime;  //(s) max time period to go between updates
-    sim->absTime = absTime;  // [s] seconds in unix time;
+    sim->absTime = absTime;  // [s] seconds in UNIX time;
 
     EvQ->cloneTo (sim->EvQ.get ());
     sim->EvQ->mapObjectsOnto (sim);
@@ -341,20 +341,41 @@ void gridSimulation::log (coreObject *object, print_level level, const std::stri
         key = "||ERROR||";
         ++errorCount;
     }
-    if (!customLogger)
+    //drop the preliminary information in a certain circumstance
+    if (level == print_level::summary)
     {
-        gridLog->log (static_cast<int> (level), simtime + cname + "::" + key + message);
+        if (isSameObject(object, this))
+        {
+            if (currentTime == timeZero)
+            {
+                if (!customLogger)
+                {
+                    gridLog->log(static_cast<int> (level), message);
+                }
+                else
+                {
+                    customLogger(static_cast<int> (level), message);
+                }
+                return;
+            }
+        }
     }
-    else
-    {
-        customLogger (static_cast<int> (level), simtime + cname + "::" + key + message);
-    }
+
+        if (!customLogger)
+        {
+            gridLog->log(static_cast<int> (level), simtime + cname + "::" + key + message);
+        }
+        else
+        {
+            customLogger(static_cast<int> (level), simtime + cname + "::" + key + message);
+        }
+   
 }
 
 
 static const std::map<int, std::string> alertStrings{
   {TRANSLINE_ANGLE_TRIP, "angle limit trip"},
-  {TRANSLINE_LIMIT_TRIP, "transline limit trip"},
+  {TRANSLINE_LIMIT_TRIP, "transmission line limit trip"},
   {GENERATOR_UNDERFREQUENCY_TRIP, "generator underfrequency trip"},
   {GENERATOR_OVERSPEED_TRIP, "generator overspeed trip"},
   {GENERATOR_FAULT, "generator fault"},

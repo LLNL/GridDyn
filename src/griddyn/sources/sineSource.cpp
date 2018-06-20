@@ -112,6 +112,7 @@ void sineSource::updateOutput (coreTime time)
     }
 
     m_output = baseValue + (mult * addComponent);
+    m_tempOut = m_output;
     prevTime = time;
 }
 
@@ -122,7 +123,7 @@ void sineSource::set (const std::string &param, double val, gridUnits::units_t u
     {
         Amp = val;
     }
-    else if (param == "frequency")
+    else if ((param == "frequency")||(param=="freq")||(param=="f"))
     {
         frequency = val;
         sinePeriod = 1.0 / frequency;

@@ -1369,6 +1369,7 @@ public:
   Constructor.
   */
   Comment ( const std::string& comment );
+  using NodeImp<TiXmlComment>::operator=;
 };
 
 /** Wrapper around TiXmlText */
@@ -1407,6 +1408,7 @@ public:
   {
     m_impRC->InitRef ();
   }
+  using NodeImp<TiXmlText>::operator=;
 };
 
 /** Wrapper around TiXmlDocument */
@@ -1438,6 +1440,7 @@ public:
    */
   Document ( const std::string& documentName );
 
+  using NodeImp<TiXmlDocument>::operator=;
   /**
   Load a file using the current document value. Throws if load is unsuccessful.
 
@@ -1514,6 +1517,7 @@ public:
   */
   Element ( TiXmlElement* element );
 
+  
   /**
   Constructor that allows you to set the element text
   @param value The value of the element.
@@ -1527,6 +1531,7 @@ public:
     SetText ( text );
   }
 
+  using NodeImp<TiXmlElement>::operator=;
   /**
   Access the first attribute in this element.
 
@@ -1885,6 +1890,7 @@ public:
   */
   Declaration ( const std::string& version, const std::string& encoding, const std::string& standalone );
 
+  using NodeImp<TiXmlDeclaration>::operator=;
   /**
   Version. Will return an empty string if none was found.
   */
@@ -1920,6 +1926,7 @@ public:
   */
   StylesheetReference ( const std::string& type, const std::string& href );
 
+  using NodeImp<TiXmlStylesheetReference >::operator=;
   /**
   Type. Will return an empty string if none was found.
   */

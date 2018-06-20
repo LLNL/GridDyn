@@ -501,7 +501,7 @@ System base, MVA
 double epcReadSolutionParamters (coreObject *parentObject, string_view line)
 {
     auto tokens = split (line, " ", delimiter_compression::on);
-    double val = numeric_conversion (tokens[1], 0.0);
+    auto val = numeric_conversion<double> (tokens[1], 0.0);
     if (tokens[0] == "tap")
     {
     }
@@ -567,13 +567,13 @@ void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicRea
     bus->setName (temp2);
 
     // get the localBaseVoltage
-    double bv = numeric_conversion<double> (strvec[2], -1.0);
+    auto bv = numeric_conversion<double> (strvec[2], -1.0);
     if (bv > 0.0)
     {
         bus->set ("basevoltage", bv);
     }
 
-    int type = numeric_conversion<int> (strvec[3], 1);
+    auto type = numeric_conversion<int> (strvec[3], 1);
 
     switch (type)
     {
@@ -595,13 +595,13 @@ void epcReadBus (gridBus *bus, string_view line, double /*base*/, const basicRea
     // skip the load flow area and loss zone for now
     // skip the owner information
     // get the voltage and angle specifications
-    double vm = numeric_conversion<double> (strvec[4], 0.0);
+    auto vm = numeric_conversion<double> (strvec[4], 0.0);
     if (vm != 0)
     {
         bus->set ("vtarget", vm);
     }
     vm = numeric_conversion<double> (strvec[5], 0.0);
-    double va = numeric_conversion<double> (strvec[6], 0.0);
+    auto va = numeric_conversion<double> (strvec[6], 0.0);
     if (va != 0)
     {
         bus->set ("angle", va, deg);
@@ -657,12 +657,12 @@ void epcReadDCBus (dcBus *bus, string_view line, double /*base*/, const basicRea
     bus->setName (temp2);
 
     // get the localBaseVoltage
-    double bv = numeric_conversion<double> (strvec[2], -1.0);
+    auto bv = numeric_conversion<double> (strvec[2], -1.0);
     if (bv > 0.0)
     {
         bus->set ("basevoltage", bv);
     }
-    int type = numeric_conversion<int> (strvec[3], 1);
+    auto type = numeric_conversion<int> (strvec[3], 1);
     switch (type)
     {
     case 1:
@@ -684,7 +684,7 @@ void epcReadDCBus (dcBus *bus, string_view line, double /*base*/, const basicRea
     // skip the load flow area and loss zone for now
     // skip the owner information
     // get the voltage and angle specifications
-    double vm = numeric_conversion<double> (strvec[7], 0.0);
+    auto vm = numeric_conversion<double> (strvec[7], 0.0);
     if (vm != 0)
     {
         bus->set ("v", vm);
@@ -725,8 +725,8 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
     // skip the area and zone information for now
 
     // get the constant power part of the load
-    double p = numeric_conversion<double> (strvec[6], 0.0);
-    double q = numeric_conversion<double> (strvec[7], 0.0);
+    auto p = numeric_conversion<double> (strvec[6], 0.0);
+    auto q = numeric_conversion<double> (strvec[7], 0.0);
     if (p != 0.0)
     {
         ld->set ("p", p, MW);
@@ -793,8 +793,8 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
     // skip the area and zone information for now
 
     // get the constant power part of the load
-    double p = numeric_conversion<double> (strvec[13], 0.0);
-    double q = numeric_conversion<double> (strvec[14], 0.0);
+    auto p = numeric_conversion<double> (strvec[13], 0.0);
+    auto q = numeric_conversion<double> (strvec[14], 0.0);
     if (p != 0.0)
     {
         ld->set ("yp", p, puMW);
@@ -810,11 +810,11 @@ void epcReadSwitchShunt(loads::svd *ld, string_view line, double base)
 	auto strvec = splitlineBracket(line, " :", default_bracket_chars, delimiter_compression::on);
 
 
-	int mode = numeric_conversion<int>(strvec[1], 0);
-	double high = numeric_conversion<double>(strvec[12], 0.0);
-	double low = numeric_conversion<double>(strvec[13], 0.0);
+	auto mode = numeric_conversion<int>(strvec[1], 0);
+	auto high = numeric_conversion<double>(strvec[12], 0.0);
+	auto low = numeric_conversion<double>(strvec[13], 0.0);
 	// get the controlled bus
-	int cbus = numeric_conversion<int>(strvec[4], -1);
+	auto cbus = numeric_conversion<int>(strvec[4], -1);
 
 	/*
 	if (cbus < 0)
@@ -986,8 +986,8 @@ void epcReadGen (Generator *gen, string_view line, double /*base*/)
     }
 
     // get the power generation
-    double p = numeric_conversion<double> (strvec[13], 0.0);
-    double q = numeric_conversion<double> (strvec[16], 0.0);
+    auto p = numeric_conversion<double> (strvec[13], 0.0);
+    auto q = numeric_conversion<double> (strvec[16], 0.0);
     if (p != 0.0)
     {
         gen->set ("p", p, MW);
@@ -1019,7 +1019,7 @@ void epcReadGen (Generator *gen, string_view line, double /*base*/)
         gen->set ("qmin", q, MVAR);
     }
     // get the machine base
-    double mb = numeric_conversion<double> (strvec[19], 0.0);
+    auto mb = numeric_conversion<double> (strvec[19], 0.0);
     gen->set ("mbase", mb);
 
     mb = numeric_conversion<double> (strvec[22], 0.0);
@@ -1083,9 +1083,9 @@ void epcReadBranch (coreObject *parentObject,
 
     // get the name of the from bus
 
-    int ind1 = numeric_conversion<int> (strvec[0], 0);
+    auto ind1 = numeric_conversion<int> (strvec[0], 0);
 
-    int ind2 = numeric_conversion<int> (strvec[3], 0);
+    auto ind2 = numeric_conversion<int> (strvec[3], 0);
 
     gridBus *bus1 = busList[ind1 - 1];
     gridBus *bus2 = busList[ind2 - 1];
@@ -1112,8 +1112,8 @@ void epcReadBranch (coreObject *parentObject,
         lnk->disable ();
     }
 
-    double R = numeric_conversion<double> (strvec[10], 0.0);
-    double X = numeric_conversion<double> (strvec[11], 0.0);
+    auto R = numeric_conversion<double> (strvec[10], 0.0);
+    auto X = numeric_conversion<double> (strvec[11], 0.0);
 
     lnk->set ("r", R);
     lnk->set ("x", X);
@@ -1123,7 +1123,7 @@ void epcReadBranch (coreObject *parentObject,
     // get the branch impedance
 
     // get line capacitance
-    double val = numeric_conversion<double> (strvec[12], 0.0);
+    auto val = numeric_conversion<double> (strvec[12], 0.0);
     if (val != 0)
     {
         lnk->set ("b", val);
@@ -1166,9 +1166,9 @@ void epcReadDCBranch (coreObject *parentObject,
 
     // get the name of the from bus
 
-    int ind1 = numeric_conversion<int> (strvec[0], 0);
+    auto ind1 = numeric_conversion<int> (strvec[0], 0);
 
-    int ind2 = numeric_conversion<int> (strvec[3], 0);
+    auto ind2 = numeric_conversion<int> (strvec[3], 0);
 
     dcBus *bus1 = dcbusList[ind1 - 1];
     dcBus *bus2 = dcbusList[ind2 - 1];
@@ -1195,8 +1195,8 @@ void epcReadDCBranch (coreObject *parentObject,
         lnk->disable ();
     }
 
-    double R = numeric_conversion<double> (strvec[11], 0.0);
-    double X = numeric_conversion<double> (strvec[12], 0.0);
+    auto R = numeric_conversion<double> (strvec[11], 0.0);
+    auto X = numeric_conversion<double> (strvec[12], 0.0);
 
     lnk->set ("r", R);
     lnk->set ("x", X);
@@ -1212,7 +1212,7 @@ void epcReadDCBranch (coreObject *parentObject,
     {
         // lnk->set("b", val);
     }
-    double val = numeric_conversion<double> (strvec[14], 0.0);
+    auto val = numeric_conversion<double> (strvec[14], 0.0);
     if (val != 0)
     {
         lnk->set ("ratinga", val);
@@ -1249,9 +1249,9 @@ void epcReadTX (coreObject *parentObject,
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
     // get the name of the from bus
 
-    int ind1 = numeric_conversion<int> (strvec[0], 0);
+    auto ind1 = numeric_conversion<int> (strvec[0], 0);
 
-    int ind2 = numeric_conversion<int> (strvec[3], 0);
+    auto ind2 = numeric_conversion<int> (strvec[3], 0);
 
     gridBus *bus1 = busList[ind1 - 1];
     gridBus *bus2 = busList[ind2 - 1];
@@ -1312,8 +1312,8 @@ void epcReadTX (coreObject *parentObject,
     double tbase = base;
     tbase = numeric_conversion<double> (strvec[22], 0.0);
     // primary and secondary winding resistance
-    double R = numeric_conversion<double> (strvec[23], 0.0);
-    double X = numeric_conversion<double> (strvec[24], 0.0);
+    auto R = numeric_conversion<double> (strvec[23], 0.0);
+    auto X = numeric_conversion<double> (strvec[24], 0.0);
 
     lnk->set ("r", R * tbase / base);
     lnk->set ("x", X * tbase / base);

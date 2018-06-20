@@ -35,7 +35,7 @@ class solverException : public std::exception
   protected:
     int errorCode;  //<!* the actual solver Error Code
   public:
-    explicit solverException (int code = 0) : errorCode (code){};
+    explicit solverException (int ecode = 0) : errorCode (ecode){};
     virtual const char *what () const noexcept override
     {
         return (std::string ("solver Exception:error code=") + std::to_string (errorCode)).c_str ();
@@ -50,7 +50,7 @@ class InvalidSolverOperation : public solverException
 {
   protected:
   public:
-    explicit InvalidSolverOperation (int code = 0) : solverException (code){};
+    explicit InvalidSolverOperation (int ecode = 0) : solverException (ecode){};
     virtual const char *what () const noexcept override
     {
         return (std::string ("invalid solver operation:error code=") + std::to_string (errorCode)).c_str ();
@@ -129,6 +129,7 @@ class SolverInterface : public helperObject
     std::vector<index_t> maskElements;  //!< vector of constant states in any problem
     std::string solverLogFile;  //!< file name and location of log file reference
     solver_print_level printLevel = solver_print_level::s_error_trap;  //!< print_level for solver
+    int solverPrintLevel = 1;  //!< print level for internal solver logging
     count_t rootCount = 0;  //!< the number of root finding functions
     count_t solverCallCount = 0;  //!< the number of times the solver has been called
     count_t jacCallCount = 0;  //!< the number of times the Jacobian function has been called

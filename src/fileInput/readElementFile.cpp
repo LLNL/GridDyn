@@ -313,7 +313,7 @@ void objSetAttributes (coreObject *obj,
             continue;
         }
 
-        else if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
+        if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
         {
             std::string strVal = att.getText ();
             ri.checkFileParam (strVal);
@@ -387,46 +387,44 @@ void paramLoopElement (coreObject *obj,
             element->moveToNextSibling ();
             continue;
         }
-        else  // get all the parameter fields
+        // get all the parameter fields
+        auto param=getElementParam (element);
+        if (param.valid)
         {
-            auto param=getElementParam (element);
-            if (param.valid)
+            if (param.stringType)
             {
-                if (param.stringType)
+                if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
                 {
-                    if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
+                    ri.checkFileParam (param.strVal);
+                    objectParameterSet (component, obj, param);
+                }
+                else if ((param.field.find ("workdir") != std::string::npos) ||
+                         (param.field.find ("directory") != std::string::npos))
+                {
+                    ri.checkDirectoryParam (param.strVal);
+                    objectParameterSet (component, obj, param);
+                }
+                else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
+                {
+                    paramStringProcess (param, ri);
+                    try
                     {
-                        ri.checkFileParam (param.strVal);
-                        objectParameterSet (component, obj, param);
+                        setMultipleFlags(obj, param.strVal);
                     }
-                    else if ((param.field.find ("workdir") != std::string::npos) ||
-                             (param.field.find ("directory") != std::string::npos))
+                    catch (const unrecognizedParameter &)
                     {
-                        ri.checkDirectoryParam (param.strVal);
-                        objectParameterSet (component, obj, param);
-                    }
-                    else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
-                    {
-                        paramStringProcess (param, ri);
-						try
-						{
-							setMultipleFlags(obj, param.strVal);
-						}
-						catch (const unrecognizedParameter &)
-						{
-							WARNPRINT(READER_WARN_ALL, "unrecognized flag in " <<param.strVal << "\n");
-						}
-                    }
-                    else
-                    {
-                        paramStringProcess (param, ri);
-                        objectParameterSet (component, obj, param);
+                        WARNPRINT(READER_WARN_ALL, "unrecognized flag in " <<param.strVal << "\n");
                     }
                 }
                 else
                 {
+                    paramStringProcess (param, ri);
                     objectParameterSet (component, obj, param);
                 }
+            }
+            else
+            {
+                objectParameterSet (component, obj, param);
             }
         }
         element->moveToNextSibling ();
@@ -457,19 +455,19 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & 
             {
                 readerConfig::setDefaultXMLReader (cfgAtt.getText ());
             }
-			else if ((cfgname == "seed"))
-			{
-				try
-				{
-					auto seed = std::stoll(cfgAtt.getText());
-					utilities::gridRandom::setSeed(seed);
-				}
-				catch (const std::invalid_argument &)
-				{
-					WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
-				}
-				
-			}
+            else if ((cfgname == "seed"))
+            {
+                try
+                {
+                    auto seed = std::stoll(cfgAtt.getText());
+                    utilities::gridRandom::setSeed(seed);
+                }
+                catch (const std::invalid_argument &)
+                {
+                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                }
+
+            }
             cfgAtt = sim->getNextAttribute ();
         }
 

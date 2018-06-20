@@ -99,7 +99,7 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
         {
             setRootOffset (0, sm);
             opFlags[has_roots] = true;
-            opFlags[has_alg_roots] = (offsets.local().total.algRoots > 0);
+            opFlags[has_alg_roots] = (offsets.getOffsets(sm).total.algRoots > 0);
 
         }
         else

@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef BUS_RELAY_H_
-#define BUS_RELAY_H_
+#pragma once
 
 #include "../Relay.h"
 namespace griddyn
@@ -48,4 +46,3 @@ protected:
 };
 }//namespace relays
 }//namespace griddyn
-#endif

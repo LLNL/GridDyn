@@ -34,7 +34,7 @@ txLifeSpan::txLifeSpan(const std::string &objName):sensor(objName)
 
 coreObject * txLifeSpan::clone(coreObject *obj) const
 {
-	txLifeSpan *nobj = cloneBase<txLifeSpan, sensor>(this, obj);
+	auto *nobj = cloneBase<txLifeSpan, sensor>(this, obj);
 	if (nobj==nullptr)
 	{
 		return obj;
@@ -107,7 +107,7 @@ void txLifeSpan::set (const std::string &param, double val, units_t unitType)
 
 double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) const
 {
-	
+
 	return sensor::get(param, unitType);
 }
 
@@ -118,7 +118,7 @@ void txLifeSpan::add(coreObject * /*obj*/)
 
 void txLifeSpan::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-	if (!(m_sourceObject))
+	if (m_sourceObject == nullptr)
 	{
 		return sensor::dynObjectInitializeA(time0, flags);
 	}
@@ -140,7 +140,7 @@ void txLifeSpan::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 	if (!opFlags[dyn_initialized])
 	{
 		sensor::setFlag("sampled", true);
-		if (inputStrings.size() == 0)
+		if (inputStrings.empty())
 		{
 			//assume we are connected to a temperature sensor
 			sensor::set("input0", "hot_spot");
@@ -155,9 +155,9 @@ void txLifeSpan::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 		auto g1 = std::make_shared<customGrabber>();
 		g1->setGrabberFunction("rate", [this](coreObject *)->double {return Faa; });
 		sensor::add(g1);
-		
+
 		sensor::set("output2", "input1");
-		if (m_sinkObject)
+		if (m_sinkObject != nullptr)
 		{
 			auto ge = std::make_unique<Event>();
 			ge->setTarget(m_sinkObject, "g");
@@ -184,7 +184,7 @@ void txLifeSpan::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 				setActionTrigger(2, 0);
 			}
 		}
-		
+
 	}
 	return sensor::dynObjectInitializeA(time0, flags);
 }
@@ -221,12 +221,12 @@ void txLifeSpan::updateA(coreTime time)
 void txLifeSpan::timestep(coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
 {
 	updateA(time);
-	
+
 }
 
 void txLifeSpan::actionTaken(index_t ActionNum, index_t /*conditionNum*/,  change_code /*actionReturn*/, coreTime /*actionTime*/)
 {
-	if (m_sinkObject)
+	if (m_sinkObject != nullptr)
 	{
 		if (ActionNum == 0)
 		{

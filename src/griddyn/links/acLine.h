@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef ACLINE_H_
-#define ACLINE_H_
+#pragma once
 
 #include "../Link.h"
 namespace griddyn
@@ -261,7 +259,5 @@ protected:
   void switchChange (int switchNum) override;
 };
 
-
 }//namespace griddyn
-#endif
 

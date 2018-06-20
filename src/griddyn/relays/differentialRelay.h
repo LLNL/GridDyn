@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-#ifndef DIFFERENTIAL_RELAY_H_
-#define DIFFERENTIAL_RELAY_H_
-
 #include "../Relay.h"
 #include "../comms/commMessage.h"
 namespace griddyn
@@ -56,4 +53,3 @@ protected:
 
 }//namespace relays
 }//namespace griddyn
-#endif

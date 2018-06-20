@@ -8,8 +8,6 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-cmake_minimum_required (VERSION 3.5)
-
 # set variable shared_sources with the sources for the coupling library
 set(coupling_sources
     GhostSwingBusManager.cpp

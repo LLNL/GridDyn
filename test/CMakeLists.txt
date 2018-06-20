@@ -18,7 +18,6 @@ set(testComponent_sources
 	componentTests/testAdjustableTX.cpp
 	componentTests/testGenModels.cpp
 	componentTests/testdcLinks.cpp
-	componentTests/testGridLab.cpp
 	componentTests/testLinks.cpp
 	componentTests/testRelays.cpp
 	componentTests/testBlocks.cpp
@@ -32,6 +31,9 @@ set(testComponent_sources
 	exeTestHelper.cpp
 	)
 
+	if (NOT GRIDDYN_HAVE_MPI)
+	list(APPEND testComponent_sources componentTests/testGridLab.cpp)
+	endif()
 
 	list(APPEND testComponent_sources ${optional_component_test_files})
 

@@ -367,7 +367,7 @@ public:
       {
         m_nextTime = time;
       }
-    return change_code::parameter_change;
+    return change_code::no_change;
   }
 
   virtual void updateTime () override

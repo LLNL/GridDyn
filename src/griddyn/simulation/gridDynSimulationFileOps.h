@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYN_SIMULATION_FILE_OPS_H_
-#define GRIDDYN_SIMULATION_FILE_OPS_H_
+#pragma once
 
 #include "../solvers/solverMode.hpp"
 
@@ -244,4 +242,4 @@ void saveContingencyOutput (const std::vector<std::shared_ptr<contingency>> &con
 
 
 }//namespace griddyn
-#endif
+

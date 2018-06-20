@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDBUS_H_
-#define GRIDBUS_H_
 #pragma once
 // headers
 #include "gridPrimary.h"
@@ -489,4 +486,4 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink = false, bool printD
 gridBus *getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec);
 
 }//namespace griddyn
-#endif
+

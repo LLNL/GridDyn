@@ -65,6 +65,7 @@ void SolverInterface::cloneTo (SolverInterface *si, bool fullCopy) const
     }
     si->tolerance = tolerance;
     si->flags = flags;
+    si->solverPrintLevel = solverPrintLevel;
     if (fullCopy)
     {
         si->maskElements = maskElements;
@@ -200,7 +201,30 @@ void SolverInterface::set (const std::string &param, const std::string &val)
             throw (invalidParameterValue (plevel));
         }
     }
-
+    else if (param == "solverprintlevel")
+    {
+        auto plevel = convertToLowerCase(val);
+        if (plevel == "trace")
+        {
+            solverPrintLevel = 3;
+        }
+        else if (plevel == "debug")
+        {
+            solverPrintLevel = 2;
+        }
+        else if (plevel == "log")
+        {
+            solverPrintLevel = 1;
+        }
+        else if (plevel == "none")
+        {
+            solverPrintLevel = 0;
+        }
+        else
+        {
+            throw (invalidParameterValue(plevel));
+        }
+    }
     else if ((param == "pair") || (param == "pairedmode"))
     {
         if (m_gds != nullptr)
@@ -272,7 +296,18 @@ void SolverInterface::set (const std::string &param, double val)
             throw (invalidParameterValue (param));
         }
     }
-
+    else if (param == "solverprintlevel")
+    {
+        auto lv = static_cast<int> (val);
+        if ((lv >= 0) && (lv <= 3))
+        {
+            solverPrintLevel = lv;
+        }
+        else
+        {
+            throw (invalidParameterValue(param));
+        }
+    }
     else if (param == "maskElement")
     {
         addMaskElement (static_cast<index_t> (val));
@@ -477,10 +512,7 @@ bool SolverInterface::getFlag(const std::string &flag) const
         {
             return flags[flgInd];
         }
-        else
-        {
-            return !flags[-flgInd];
-        }
+        return !flags[-flgInd];
     }
     return false;
 }

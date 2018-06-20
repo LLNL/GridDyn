@@ -101,17 +101,17 @@ stateSizes dcBus::LocalStateSizes(const solverMode &sMode) const
 
 count_t dcBus::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
+	count_t localJacSize = 0;
 	if (hasAlgebraic(sMode))
 	{
-		jacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size());
+		localJacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size());
 		// check for slave bus mode
 		if (opFlags[slave_bus])
 		{
-			jacSize -= 1;
+			localJacSize -= 1;
 		}
 	}
-	return jacSize;
+	return localJacSize;
 }
 
 change_code dcBus::powerFlowAdjust (const IOdata & /*inputs*/, std::uint32_t flags, check_level_t level)

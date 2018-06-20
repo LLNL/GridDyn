@@ -306,7 +306,7 @@ int gridDynSimulation::checkNetwork (network_check_type checkType)
                     {
                         if (networkBus->Network == nn)
                         {
-                            LOG_DEBUG ("Network " + std::to_string (nn) + " bus " +
+                            LOG_NORMAL ("Network " + std::to_string (nn) + " disconnect bus " +
                                        std::to_string (networkBus->getUserID ()) + ":" + networkBus->getName ());
                             networkBus->disconnect ();
                         }

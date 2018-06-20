@@ -52,7 +52,7 @@ public:
 	virtual void timestep(coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 	virtual void updateA(coreTime time) override;
 
-	void actionTaken(index_t conditionNum, index_t ActionNum, change_code actionReturn, coreTime /*actionTime*/) override;
+	void actionTaken(index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime /*actionTime*/) override;
 };
 
 }//namespace extra

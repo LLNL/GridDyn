@@ -106,6 +106,19 @@ bool exeTestRunner::findFileLocation (const std::string &baseLocation, const std
         exeString = tryPathR2.string ();
         return true;
     }
+    auto tryPathbin1 = sourcePath / "bin" / target;
+    if (boost::filesystem::exists(tryPathbin1))
+    {
+        exeString = tryPathbin1.string();
+        return true;
+    }
+
+    auto tryPathbin2 = sourcePath / "bin" / (target + ".exe");
+    if (boost::filesystem::exists(tryPathbin2))
+    {
+        exeString = tryPathbin2.string();
+        return true;
+    }
 
     boost::filesystem::path tryPatht1 = target;
     if (boost::filesystem::exists (tryPatht1))

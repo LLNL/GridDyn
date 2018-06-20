@@ -1,4 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil;  c-set-offset 'innamespace 0; -*- */
 /*
  * -----------------------------------------------------------------
  * LLNS Copyright Start
@@ -76,7 +75,7 @@ bool GriddynFederatedSimulator::Finalize (void)
 // Method used by Variable Step Size simulator
 std::tuple<fskit::Time,bool> GriddynFederatedSimulator::TimeAdvancement (const fskit::Time& time)
 {
-  griddyn::coreTime gdTime, gdRetTime;
+  griddyn::coreTime gdTime;
 
   // Convert fskit time to coreTime used by Griddyn
   gdTime.setBaseTimeCode (time.GetRaw ());
@@ -88,10 +87,14 @@ std::tuple<fskit::Time,bool> GriddynFederatedSimulator::TimeAdvancement (const f
     {
       try
         {
-          gdRetTime = m_griddyn->Step (gdTime);
+          auto gdRetTime = m_griddyn->Step (gdTime);
           //assert(gdRetTime <= gdTime);
           m_currentGriddynTime = gdRetTime;
           m_currentFskitTime = fskit::Time (gdRetTime.getBaseTimeCode ());
+
+          // Time should not advance beyond granted time.
+          assert(m_currentFskitTime <= time);
+
           {
             // Next event time should now be larger than granted time
             griddyn::coreTime griddynNextEventTime = m_griddyn->getNextEvent ();
@@ -100,7 +103,7 @@ std::tuple<fskit::Time,bool> GriddynFederatedSimulator::TimeAdvancement (const f
         }
       catch (...)
         {
-          std::cout << "Griddyn stopping due to runtime_error" << std::endl;
+         // std::cout << "Griddyn stopping due to runtime_error" << std::endl;
           stopSimulation = true;
         }
     }
@@ -117,6 +120,8 @@ void GriddynFederatedSimulator::StartTimeAdvancement (const fskit::Time& time)
 // Method used by Discrete Event simulator
 std::tuple<bool,bool> GriddynFederatedSimulator::TestTimeAdvancement (void)
 {
+
+    // SGS fixme, should this be a while loop to ensure granted time is reached?
   std::tuple<fskit::Time,bool> result = TimeAdvancement(m_grantedTime);
   return std::make_tuple (true, std::get<1>(result));
 }

@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef EXCITER_IEEE_TYPE1_H_
-#define EXCITER_IEEE_TYPE1_H_
+#pragma once
 
 #include "../Exciter.h"
 namespace griddyn
@@ -58,6 +56,3 @@ public:
 
 }//namespace griddyn
 
-
-
-#endif //GRIDDYNEXCITER_H_

@@ -268,8 +268,9 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_cases, data::xrang
           auto cmp = compareBus(b2, b1, false);
           if (cmp == false)
           {
-          std::cout << "bus " << kk <<" id["<<b1->getUserID()<< "] does not match" << '\n';
-          cmp = compareBus(b1, b2, false,true);
+              //useful to enable if there is ever an error but can make spurious warnings
+         // std::cout << "bus " << kk <<" id["<<b1->getUserID()<< "] does not match" << '\n';
+          //cmp = compareBus(b1, b2, false,true);
           }
           b2->setVoltageAngle(volts1[kk], ang1[kk]);
 

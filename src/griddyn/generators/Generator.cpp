@@ -508,7 +508,7 @@ void Generator::generationAdjust (double adjustment)
 
 void Generator::setFlag (const std::string &flag, bool val)
 {
-    if (flag == "capabiltycurve")
+    if (flag == "capabilitycurve")
     {
         opFlags.set (use_capability_curve, val);
         if ((val) && (!bounds))
@@ -651,10 +651,6 @@ void Generator::set (const std::string &param, double val, units_t unitType)
         {
             bounds->setValidRange (Pmin, Pmax);
         }
-    }
-    else if ((param == "basevoltage") ||(param=="vbase")|| (param == "basev") || (param == "bv") || (param == "base voltage"))
-    {
-        gridSecondary::set (param, val, unitType);
     }
     else if (param == "remote")
     {
