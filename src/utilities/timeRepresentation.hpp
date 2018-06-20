@@ -304,7 +304,7 @@ class TimeRepresentation
 #endif
   public:
     /** default constructor*/
-    TimeRepresentation () noexcept {};
+    TimeRepresentation ()=default;
 
   private:
 /** explicit means to generate a constexpr TimeRepresentation at time 0, negTime and maxTime and min time delta*/
@@ -338,10 +338,13 @@ class TimeRepresentation
 #ifdef _DEBUG
     /** normal time constructor from a double representation of seconds*/
     constexpr TimeRepresentation (double t) noexcept : timecode_ (Tconv::convert (t)), dtime_ (t) {}
-    TimeRepresentation (std::int64_t count, timeUnits units) noexcept
-        : timecode_ (Tconv::fromCount (count, units)){DOUBLETIME} TimeRepresentation (
+    TimeRepresentation(std::int64_t count, timeUnits units) noexcept
+        : timecode_(Tconv::fromCount(count, units)) {
+        DOUBLETIME
+    };
+    TimeRepresentation (
             std::chrono::nanoseconds nsTime) noexcept
-        : timecode (Tconv::convert (nsTime))
+        : timecode_ (Tconv::convert (nsTime))
     {
         DOUBLETIME
     }
@@ -396,7 +399,7 @@ class TimeRepresentation
         return *this;
     }
     /** direct conversion to chrono nanoseconds*/
-    operator std::chrono::nanoseconds ()
+    std::chrono::nanoseconds to_ns() const
     {
         return std::chrono::nanoseconds (Tconv::toCount (timecode_, timeUnits::ns));
     }

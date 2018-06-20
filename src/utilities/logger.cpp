@@ -150,7 +150,7 @@ LoggingCore::~LoggingCore ()
     {
         if (!tripDetector.isTripped ())
         {
-    loggingQueue.emplace (-1, "!!>close");
+            loggingQueue.emplace (-1, "!!>close");
         }
     }
     else
