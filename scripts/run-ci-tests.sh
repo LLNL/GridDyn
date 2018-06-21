@@ -14,7 +14,8 @@ do
             ;;
         --asan)
             echo "Tests using address sanitizer"
-            NO_CTEST=true
+            ASAN_OPTIONS=detect_leaks=0
+            LSAN_OPTIONS=verbosity=1:log_threads=1
             ;;
         --msan)
             echo "Tests using memory sanitizer"
@@ -23,8 +24,8 @@ do
             echo "Disable tests using ctest as a runner"
             NO_CTEST=true
             ;;
-        --disable-ci-tests)
-            DISABLE_TESTS=true
+        --disable-unit-tests)
+            DISABLE_UNIT_TESTS=true
             ;;
         *)
             TEST_CONFIG=$i
@@ -43,8 +44,8 @@ if [[ "$NO_CTEST" == "true" ]]; then
         echo "-- Valgrind will not run"
     fi
 
-    # ASan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
-    ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    # LSan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
+    # ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
 else
     # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
     export CTEST_OUTPUT_ON_FAILURE=true
@@ -91,7 +92,7 @@ else
     fi
 
     # Run the CI tests last so that the execution status is used for the pass/fail status shown
-    if [[ "$DISABLE_TESTS" != "true" ]]; then
+    if [[ "$DISABLE_UNIT_TESTS" != "true" ]]; then
         echo "Running ${TEST_CONFIG} tests"
         ctest -L ${TEST_CONFIG}
     fi
