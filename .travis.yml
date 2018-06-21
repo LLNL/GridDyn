@@ -64,7 +64,7 @@ jobs:
             name: "LLNL/GridDyn"
             description: "GridDyn is an open-source power transmission simulation software package"
           notification_email: mast9@llnl.gov
-          build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --compiler $(which gcc-6) -- -fPIC -std=c++14 && cmake .. ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON
+          build_command_prepend: echo $(which gcc-6) && ls -l && cov-configure --compiler $(which gcc-6) -- -fPIC -std=c++14 && cmake ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
           build_command: make
           branch_pattern: coverity_scan
       script: ls -l cov-int && cat cov-int/build-log.txt
@@ -123,6 +123,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_VALGRIND=true
+        - DISABLE_CI_TESTS=true
         - USE_MPI=mpich
     - <<: *daily_linux
       env:
@@ -168,6 +169,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
+        - RUN_ASAN=true
         - USE_MPI=mpich
         - JOB_OPTION_FLAGS="-C../scripts/asan-cache.cmake"
     - <<: *daily_linux
@@ -183,6 +185,7 @@ jobs:
       env:
         - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
         - CCACHE_CPP2=yes
+        - RUN_MSAN=true
         - USE_MPI=mpich
         - JOB_OPTION_FLAGS="-C../scripts/msan-cache.cmake"
 
@@ -208,7 +211,16 @@ install:
   - if [[ "$USE_MPI" ]]; then CC=${CI_DEPENDENCY_DIR}/mpi/bin/mpicc ; CXX=${CI_DEPENDENCY_DIR}/mpi/bin/mpic++ ; fi
 
   - OPTION_FLAGS_ARR+=("-DBUILD_RELEASE_ONLY=ON" "-DAUTOBUILD_KLU=ON" "-DAUTOBUILD_SuiteSparse=ON" "-DBUILD_GRIDDYN_SHARED_LIBRARY=ON" "-DAUTOBUILD_ZMQ=ON")
-  - GRIDDYN_OPTION_FLAGS=${OPTION_FLAGS_ARR[@]}
+  - export GRIDDYN_OPTION_FLAGS=${OPTION_FLAGS_ARR[@]}
+
+  - TEST_FLAGS_ARR=()
+  - if [[ "$RUN_VALGRIND" ]]; then TEST_FLAGS_ARR+=("--valgrind") ; fi
+  - if [[ "$RUN_CACHEGRIND" ]]; then TEST_FLAGS_ARR+=("--cachegrind") ; fi
+  - if [[ "$RUN_ASAN" ]]; then TEST_FLAGS_ARR+=("--asan" "--no-ctest") ; fi # ASan has issues running under CTest
+  - if [[ "$RUN_MSAN" ]]; then TEST_FLAGS_ARR+=("--msan") ; fi
+  - if [[ "$NO_CTEST" ]]; then TEST_FLAGS_ARR+=("--no-ctest") ; fi
+  - if [[ "$DISABLE_CI_TESTS" ]]; then TEST_FLAGS_ARR+=("--disable-ci-tests") ; fi
+  - export CI_TEST_FLAGS=${TEST_FLAGS_ARR[@]}
  
 before_script:
   - mkdir -p build && cd build
@@ -221,13 +233,7 @@ script:
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh setup-counters && popd ; fi
 
   # Run CI tests
-  - if [[ "$RUN_VALGRIND" != "true" ]]; then ../scripts/run-ci-tests.sh ; fi
-
-  # Run Valgrind on a test case
-  - if [[ "$RUN_VALGRIND" == "true" ]]; then ctest -T memcheck -L Valgrind && cat Testing/Temporary/MemoryChecker.1.log ; fi
-
-  # Run Cachegrind
-  - if [[ "$RUN_CACHEGRIND" == "true" ]]; then valgrind --tool=cachegrind src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml ; fi
+  - ../scripts/run-ci-tests.sh ${CI_TEST_FLAGS}
 
   # Gather coverage results
   - if [[ "$RUN_COVERAGE" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info --gcov ${GCOV_TOOL} --coveralls --codecov && popd ; fi

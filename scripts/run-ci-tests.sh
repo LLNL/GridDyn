@@ -1,44 +1,98 @@
 #!/bin/bash
 
-# Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
-export CTEST_OUTPUT_ON_FAILURE=true
-
-TEST_CONFIG="Continuous"
-if [[ "$1" ]]; then
-    test_label=$(tr '[:upper:]' '[:lower:]' <<< $1)
-    case "${test_label}" in
-        *quick*)
-            TEST_CONFIG="Quick"
+#TEST_CONFIG="Continuous"
+for i in "$@"
+do
+    case $i in
+        --valgrind)
+            echo "Running Valgrind tests"
+            RUN_VALGRIND=true
             ;;
-        *nightly*)
-            TEST_CONFIG="Nightly"
+        --cachegrind)
+            echo "Running cachegrind tests"
+            RUN_CACHEGRIND=true
             ;;
-        *release*)
-            TEST_CONFIG="Release"
+        --asan)
+            echo "Tests using address sanitizer"
+            NO_CTEST=true
             ;;
-        *)
-            TEST_CONFIG="Continuous"
+        --msan)
+            echo "Tests using memory sanitizer"
             ;;
-    esac
-
-# If no argument was given, but we are running in Travis, check the branch name for tests to run
-elif [[ "$TRAVIS" == "true" ]]; then
-    case "${TRAVIS_BRANCH}" in
-        *quicktest*)
-            TEST_CONFIG="Quick"
+        --no-ctest)
+            echo "Disable tests using ctest as a runner"
+            NO_CTEST=true
             ;;
-        *nightlytest*)
-            TEST_CONFIG="Nightly"
-            ;;
-        *releasetest*)
-            TEST_CONFIG="Release"
+        --disable-ci-tests)
+            DISABLE_TESTS=true
             ;;
         *)
-            TEST_CONFIG="Continuous"
+            TEST_CONFIG=$i
+            TEST_CONFIG_GIVEN=true
             ;;
     esac
+done
+
+if [[ "$RUN_CACHEGRIND" == "true" ]]; then
+    valgrind --tool=cachegrind src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
 fi
 
-echo "Running ${TEST_CONFIG} tests"
+if [[ "$NO_CTEST" == "true" ]]; then
+    echo "CTest disabled, full set of CI tests may not run"
+    if [[ "$RUN_VALGRIND" == "true" ]]; then
+        echo "-- Valgrind will not run"
+    fi
 
-ctest -L ${TEST_CONFIG}
+    # ASan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
+    src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+else
+    # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
+    export CTEST_OUTPUT_ON_FAILURE=true
+
+    TEST_CONFIG="Continuous"
+    if [[ "$TEST_CONFIG_GIVEN" == "true" ]]; then
+        test_label=$(tr '[:upper:]' '[:lower:]' <<< $TEST_CONFIG)
+        case "${test_label}" in
+            *quick*)
+                TEST_CONFIG="Quick"
+                ;;
+            *nightly*)
+                TEST_CONFIG="Nightly"
+                ;;
+            *release*)
+                TEST_CONFIG="Release"
+                ;;
+            *)
+                TEST_CONFIG="Continuous"
+                ;;
+        esac
+
+    # If no argument was given, but we are running in Travis, check the branch name for tests to run
+    elif [[ "$TRAVIS" == "true" ]]; then
+        case "${TRAVIS_BRANCH}" in
+            *quicktest*)
+                TEST_CONFIG="Quick"
+                ;;
+            *nightlytest*)
+                TEST_CONFIG="Nightly"
+                ;;
+            *releasetest*)
+                TEST_CONFIG="Release"
+                ;;
+            *)
+                TEST_CONFIG="Continuous"
+                ;;
+        esac
+    fi
+
+    if [[ "$RUN_VALGRIND" == "true" ]]; then
+        echo "Running Valgrind tests"
+        ctest -T memcheck -L Valgrind && cat Testing/Temporary/MemoryChecker.1.log
+    fi
+
+    # Run the CI tests last so that the execution status is used for the pass/fail status shown
+    if [[ "$DISABLE_TESTS" != "true" ]]; then
+        echo "Running ${TEST_CONFIG} tests"
+        ctest -L ${TEST_CONFIG}
+    fi
+fi
