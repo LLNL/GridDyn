@@ -44,7 +44,7 @@ if [[ "$NO_CTEST" == "true" ]]; then
     fi
 
     # ASan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
-    LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
 else
     # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
     export CTEST_OUTPUT_ON_FAILURE=true
