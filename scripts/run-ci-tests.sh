@@ -14,8 +14,8 @@ do
             ;;
         --asan)
             echo "Tests using address sanitizer"
-            ASAN_OPTIONS=detect_leaks=0
-            LSAN_OPTIONS=verbosity=1:log_threads=1
+            export ASAN_OPTIONS=detect_leaks=0
+            export LSAN_OPTIONS=verbosity=1:log_threads=1
             ;;
         --msan)
             echo "Tests using memory sanitizer"
