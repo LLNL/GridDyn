@@ -216,10 +216,10 @@ install:
   - TEST_FLAGS_ARR=()
   - if [[ "$RUN_VALGRIND" ]]; then TEST_FLAGS_ARR+=("--valgrind") ; fi
   - if [[ "$RUN_CACHEGRIND" ]]; then TEST_FLAGS_ARR+=("--cachegrind") ; fi
-  - if [[ "$RUN_ASAN" ]]; then TEST_FLAGS_ARR+=("--asan" "--no-ctest") ; fi # ASan has issues running under CTest
+  - if [[ "$RUN_ASAN" ]]; then TEST_FLAGS_ARR+=("--asan") ; fi
   - if [[ "$RUN_MSAN" ]]; then TEST_FLAGS_ARR+=("--msan") ; fi
   - if [[ "$NO_CTEST" ]]; then TEST_FLAGS_ARR+=("--no-ctest") ; fi
-  - if [[ "$DISABLE_CI_TESTS" ]]; then TEST_FLAGS_ARR+=("--disable-ci-tests") ; fi
+  - if [[ "$DISABLE_CI_TESTS" ]]; then TEST_FLAGS_ARR+=("--disable-unit-tests") ; fi
   - export CI_TEST_FLAGS=${TEST_FLAGS_ARR[@]}
  
 before_script:
