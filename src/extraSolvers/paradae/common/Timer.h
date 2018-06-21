@@ -19,6 +19,9 @@
 #include "def.h"
 #include "../math/SVector.h"
 
+namespace griddyn {
+namespace paradae {
+
 #ifndef TIMER_INTRUSION   // 0->global 1->init,run,out 2->feval,jaceval,facto,solve
 #define TIMER_INTRUSION 1
 #endif
@@ -78,5 +81,8 @@ public:
 };
 
 extern Timer global_timer;
+
+} //namespace paradae
+} //namespace griddyn
 
 #endif

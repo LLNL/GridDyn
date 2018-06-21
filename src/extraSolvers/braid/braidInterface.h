@@ -67,5 +67,5 @@ public:
     /** execute the braid solve*/
     virtual int RunBraid(ODEProblem* ode, MapParam* param, Real* &timegrid, int Ngridpoints);
 };
-
+} //namespace braid
 } //namespace griddyn

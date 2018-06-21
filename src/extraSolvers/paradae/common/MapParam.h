@@ -17,6 +17,8 @@
 #include <mpi.h>
 #include "def.h"
 
+namespace griddyn {
+namespace paradae {
 class SVector;
 
 class MapParam : public std::map<std::string,std::string> {
@@ -33,3 +35,5 @@ public:
   SVector GetVectorParam(std::string key, SVector default_val) const;
   int GetMpiRank()const{return mpi_rank;};
 };
+} //namespace paradae
+} //namespace griddyn

@@ -21,12 +21,9 @@
 #ifdef STATS_NEWTON
 #include "solvers/NewtonStats.h"
 #endif
-namespace griddyn
-{
-namespace braid
-{
+
 using namespace std;
-using namespace paradae;
+using namespace griddyn::paradae;
 
 _braid_App_struct::_braid_App_struct(ODEProblem* ode_)
     :ode(ode_)
@@ -99,6 +96,11 @@ void _braid_App_struct::DumpDataStruct()
         cout << "# gprev   = " << alloc_data.gprev << endl;
     cout << "# sprev   = " << alloc_data.sprev << endl;
 }
+
+namespace griddyn
+{
+namespace braid
+{
 
 void
 my_Step_OnOnePoint(braid_App        app,

@@ -19,6 +19,9 @@
 
 using namespace std;
 
+namespace griddyn {
+namespace paradae {
+
 void TimedElem::Start(string name_)
 {
   if (!is_started)
@@ -174,3 +177,6 @@ void Timer::ShowStats(int deps)
 }
 
 Timer global_timer;
+
+} //namespace paradae
+} //namespace griddyn

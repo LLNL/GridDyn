@@ -19,6 +19,9 @@
 
 using namespace std;
 
+namespace griddyn {
+namespace paradae {
+
 template<typename T>
 void export_param(int mpi_rank, string key, T value, T default_value)
 {
@@ -196,3 +199,6 @@ SVector MapParam::GetVectorParam(string key, SVector default_val) const
   export_param(mpi_rank,key,val,default_val);
   return val;
 }
+
+} //namespace paradae
+} //namespace griddyn

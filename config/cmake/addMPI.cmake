@@ -19,7 +19,7 @@ if (NOT MPI_C_FOUND)
 if(MSVC) #the cmake find MPI doesn't completely work for visual studio 2017
 
 	if (NOT MPI_CXX_COMPILER)
-		message(STATUS "not mpi cxx compiler")
+      #message(STATUS "not mpi cxx compiler")
 		# For building MPI programs the selected Visual Studio compiler is used,
 		#namely cl.exe.
 		# So there is no need to set a specific MPI compiler.
@@ -36,6 +36,11 @@ if(MSVC) #the cmake find MPI doesn't completely work for visual studio 2017
 		endif()
 		set(MPI_C_FOUND TRUE CACHE BOOL "MPI C FOUND" FORCE)
 	endif()
+else()
+   #message(STATUS "MPI ${MPIEXEC} yyyyyy88888 ${MPI_C_LIBRARIES}")
+   if (MPIEXEC AND MPI_C_LIBRARIES) #if we found this then the target was found
+      set(MPI_C_FOUND TRUE)
+   endif()
 endif()
 endif()
 ############################################################
@@ -45,9 +50,11 @@ if(MPI_C_FOUND)
 if (TARGET MPI::MPI_C)
 else()
 	if (MPI_C_LIBRARIES)
+      #message(STATUS "222222222 ${MPI_C_LIBRARIES}")
 		add_library(MPI::MPI_C STATIC IMPORTED)
 		set_target_properties(MPI::MPI_C PROPERTIES IMPORT_LOCATION "${MPI_C_LIBRARIES}")
 	else()
+      #message(STATUS "333333333 ${MPI_C_LIBRARIES}")
 		add_library(MPI::MPI_C INTERFACE IMPORTED)
 	endif()
 	set_property(TARGET MPI::MPI_C PROPERTY INTERFACE_LINK_LIBRARIES "")
@@ -59,4 +66,6 @@ else()
 	set_target_properties(MPI::MPI_C PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${MPI_C_COMPILE_DEFINITIONS}")
 
 endif()
+else()
+   #message(STATUS "XXXXXXXXX MPI_C Not Found")
 endif()
