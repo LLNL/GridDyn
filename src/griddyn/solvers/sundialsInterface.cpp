@@ -84,6 +84,14 @@ sundialsInterface::~sundialsInterface ()
         {
             fclose(m_sundialsInfoFile);
         }
+        if (LS != nullptr)
+        {
+            SUNLinSolFree(LS);
+        }
+        if (J != nullptr)
+        {
+            
+        }
     }
 }
 
