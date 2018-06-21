@@ -1,8 +1,8 @@
 
 IF (MSVC)
 	set(HELICS_PATH_HINTS
-		C:/local/helics_1_1_1
-		C:/local/helics_1_1_0)
+		C:/local/helics_1_2_1
+		C:/local/helics_1_2_0)
 ENDIF(MSVC)
 
 include(GNUInstallDirs)

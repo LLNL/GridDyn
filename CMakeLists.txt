@@ -39,7 +39,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #-----------------------------------------------------------------------------
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
 include(extraMacros)
-
+include(CMakeDependentOption)
 #-----------------------------------------------------------------------------
 # set the install path to a local directory
 #-----------------------------------------------------------------------------
@@ -480,8 +480,8 @@ if ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 	include(addZeroMQ)
 	if (NOT ZeroMQ_FOUND)
 		message(SEND_ERROR "unable to locate zmq library")
-	endif(ZeroMQ_FOUND)
-endif((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+	endif()
+endif()
 
 if (ENABLE_NETWORKING_LIBRARY)
 	add_subdirectory(src/networking)
