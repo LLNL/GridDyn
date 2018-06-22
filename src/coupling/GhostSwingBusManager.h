@@ -161,9 +161,6 @@ private:
   int m_numTasks = 20;
 #ifdef GRIDDYN_HAVE_MPI
   int m_taskId = 0;
-
-  char m_hostname[256];
-
   /*
    * Async send requests
    */
@@ -195,14 +192,6 @@ private:
    */
   std::vector<VoltageMessage> m_voltSendMessage;
   std::vector<CurrentMessage> m_currReceiveMessage;
-
-
-  /*
-   * Did manager call MPI_Init.
-   */
-#ifdef GRIDDYN_HAVE_MPI
-  bool m_mpiInitCalled = false;
-#endif
 };
 
 }//namespace griddyn

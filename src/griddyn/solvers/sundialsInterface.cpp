@@ -90,7 +90,7 @@ sundialsInterface::~sundialsInterface ()
         }
         if (J != nullptr)
         {
-            
+            SUNMatDestroy(J);
         }
     }
 }
