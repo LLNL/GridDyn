@@ -34,7 +34,7 @@
 #ifndef PROTECTION_MESSAGE_H
 #define PROTECTION_MESSAGE_H
 
-#include "griddyn-config.h"
+#include "griddyn/griddyn-config.h"
 
 #include <string>
 #ifdef GRIDDYN_HAVE_FSKIT

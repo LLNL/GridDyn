@@ -87,6 +87,10 @@ if (NOT BOOST_REQUIRED_LIBRARIES)
 	set(BOOST_REQUIRED_LIBRARIES program_options unit_test_framework filesystem system date_time timer chrono)
 endif()
 
+if (FSKIT_ENABLE)
+    list(APPEND BOOST_REQUIRED_LIBRARIES serialization mpi)
+endif()
+
 # Minimum version of Boost required for building GridDyn
 set(BOOST_MINIMUM_VERSION 1.56)
 set(Boost_USE_STATIC_LIBS   ${USE_BOOST_STATIC_LIBS})

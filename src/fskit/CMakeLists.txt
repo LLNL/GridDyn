@@ -35,7 +35,7 @@ target_include_directories(fskitLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
 target_link_libraries(fskitLibrary fileInput ${FSKIT_LIBRARIES})
 
-INSTALL(TARGETS fskitLibrary DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+INSTALL(TARGETS fskitLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES ${fskit_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fskit

@@ -13,7 +13,7 @@
 #ifndef FSKIT_COMMUNICATOR_H
 #define FSKIT_COMMUNICATOR_H
 
-#include "comms/Communicator.h"
+#include "griddyn/comms/Communicator.h"
 #include <fskit/logical-process.h>
 #include <fskit/event-message.h>
 #include <boost/serialization/serialization.hpp>
