@@ -80,25 +80,25 @@ source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
 INSTALL(TARGETS zmqInterfaceLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 INSTALL(FILES ${zmqLibrary_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/zmqlib
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
    COMPONENT headers)
 
  IF(DIME_ENABLE)
   list(APPEND griddyn_optional_libraries dimeLibrary)
   INSTALL(FILES ${dimeInterface_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/zmqlib
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
    COMPONENT headers)
  ELSE(DIME_ENABLE)
   list(APPEND griddyn_optional_libraries zmqInterfaceLibrary)
  ENDIF(DIME_ENABLE)
 
 
-list (APPEND optional_library_key_headers zmqlib/zmqInterface.h)
+list (APPEND optional_library_key_headers networking/zmqInterface.h)
 list (APPEND optional_library_functions loadZMQLibrary)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
 
-list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/src/zmqlib/test/zmqTest.cpp)
+list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 

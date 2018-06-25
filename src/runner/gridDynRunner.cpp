@@ -19,7 +19,7 @@
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
 #include "coupling/GhostSwingBusManager.h"
-#include "fileInput.h"
+#include "fileInput/fileInput.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"

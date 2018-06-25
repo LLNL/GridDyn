@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 #include "griddyn/gridDynSimulation.h"
 
 #include "griddyn_export.h"

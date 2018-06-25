@@ -9,13 +9,10 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
+#pragma once
+#include "../runner/gridDynRunner.h"
 
-#ifndef _HELICS_RUNNER_H_
-#define _HELICS_RUNNER_H_
-
-#include "fileInput/gridDynRunner.h"
-
-#include "core/coreOwningPtr.hpp"
+#include "../core/coreOwningPtr.hpp"
 
 namespace helics
 {
@@ -59,4 +56,3 @@ private:
 
 }//namespace helicsLib
 }//namespace griddyn
-#endif

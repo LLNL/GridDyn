@@ -14,7 +14,7 @@
 #define HELICS_GHOSTBUS_HEADER_
 #pragma once
 
-#include "griddyn/gridBus.h"
+#include "../griddyn/gridBus.h"
 namespace griddyn
 {
 namespace helicsLib

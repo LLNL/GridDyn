@@ -14,7 +14,6 @@ set (reader_sources
 	stringInterpret.cpp
 	readerHelper.cpp
 	fileInput.cpp
-	gridDynRunner.cpp
 	gridParameter.cpp
 	readerInfo.cpp
 	)
@@ -59,7 +58,6 @@ set(fileInput_headers
 	readElement.h
 	readerHelper.h
 	fileInput.h
-	gridDynRunner.h
 	elementReaderTemplates.hpp
 	readerInfo.h
 	gridParameter.h

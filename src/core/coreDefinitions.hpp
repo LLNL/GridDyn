@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include "utilities/indexTypes.hpp"
-#include "utilities/timeRepresentation.hpp"
+#include "../utilities/indexTypes.hpp"
+#include "../utilities/timeRepresentation.hpp"
 
 #include <string>
 #include <vector>

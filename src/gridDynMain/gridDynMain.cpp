@@ -14,7 +14,7 @@
 #include "griddyn/griddyn-config.h"
 #include "griddyn/gridDynSimulation.h"
 #include "core/coreExceptions.h"
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 
 #include "gridDynLoader/libraryLoader.h"
 #include <boost/format.hpp>

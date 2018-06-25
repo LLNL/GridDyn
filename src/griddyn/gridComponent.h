@@ -11,7 +11,7 @@
 */
 #pragma once 
 
-#include "core/coreObject.h"
+#include "../core/coreObject.h"
 #include "gridComponentHelperClasses.h"
 
 #include <bitset>

@@ -11,7 +11,7 @@
 */
 #pragma once
 
-#include "griddyn/measurement/collector.h"
+#include "../griddyn/measurement/collector.h"
 #include <utility>
 
 namespace griddyn

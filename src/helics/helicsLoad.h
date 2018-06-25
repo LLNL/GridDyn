@@ -9,12 +9,10 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
+#pragma once
 
-#ifndef HELICS_LOAD_HEADER_
-#define HELICS_LOAD_HEADER_
-
-#include "griddyn/loads/rampLoad.h"
-#include "helics/helicsSupport.h"
+#include "../griddyn/loads/rampLoad.h"
+#include "helicsSupport.h"
 namespace griddyn
 {
 namespace helicsLib
@@ -63,4 +61,3 @@ private:
 
 }// namespace helicsLib
 } // namespace griddyn
-#endif

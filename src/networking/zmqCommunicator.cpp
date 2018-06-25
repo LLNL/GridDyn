@@ -16,7 +16,7 @@
 
 #include "zmqLibrary/zmqProxyHub.h"
 #include "zmqLibrary/zmqReactor.h"
-#include <zmqlib/cppzmq/zmq_addon.hpp>
+#include "cppzmq/zmq_addon.hpp"
 
 #include "griddyn/comms/commMessage.h"
 

@@ -13,12 +13,12 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "../test/testHelper.h"
-#include "zmqlib/zmqInterface.h"
-#include "zmqlib/zmqLibrary/zmqSocketDescriptor.h"
-#include "zmqlib/zmqLibrary/zmqContextManager.h"
-#include "zmqlib/zmqLibrary/zmqHelper.h"
-#include "zmqlib/zmqLibrary/zmqReactor.h"
-#include "zmqlib/dimeCollector.h"
+#include "networking/zmqInterface.h"
+#include "networking/zmqLibrary/zmqSocketDescriptor.h"
+#include "networking/zmqLibrary/zmqContextManager.h"
+#include "networking/zmqLibrary/zmqHelper.h"
+#include "networking/zmqLibrary/zmqReactor.h"
+#include "networking/dimeCollector.h"
 
 #include <chrono>
 #include <thread>

@@ -11,7 +11,7 @@
  */
 
 #pragma once
-#include "core/coreDefinitions.hpp"
+#include "../core/coreDefinitions.hpp"
 
 namespace griddyn
 {

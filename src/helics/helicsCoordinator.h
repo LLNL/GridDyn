@@ -11,12 +11,12 @@
  */
 #pragma once
 
-#include "core/coreObject.h"
+#include "../core/coreObject.h"
 
-#include "core/coreExceptions.h"
+#include "../core/coreExceptions.h"
 #include "helics/helics.hpp"
 #include "helicsSupport.h"
-#include "utilities/stringConversion.h"
+#include "../utilities/stringConversion.h"
 #include <complex>
 #include <unordered_map>
 #include <mutex>

@@ -516,6 +516,8 @@ add_subdirectory(src/gridDynLoader)
 
 add_subdirectory(src/fileInput)
 
+add_subdirectory(src/runner)
+
 if(BUILD_SHARED_FMI_LIBRARY)
 	add_subdirectory(src/fmi_export)
 endif(BUILD_SHARED_FMI_LIBRARY)

@@ -143,13 +143,13 @@ BOOST_AUTO_TEST_CASE(build_small_test_case)
 	gridDynObject_free(bus1);
 	gridDynObject_free(ld1);
 	gridDynObject_free(lnk);
-	gridDynSimulation_free(sim);
-
+    gridDynObject_free(obj);
+    gridDynSimulation_free(sim);
 	double V2;
 	gridDynObject_getValue(bus2, "voltage", &V2);
 	BOOST_CHECK_EQUAL(V, V2);
 	gridDynObject_free(bus2);
-    gridDynObject_free(obj);
+   
 }
 
 BOOST_AUTO_TEST_SUITE_END ()

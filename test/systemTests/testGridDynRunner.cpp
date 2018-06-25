@@ -14,7 +14,7 @@
 
 #include "../testHelper.h"
 #include "../exeTestHelper.h"
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <iostream>
