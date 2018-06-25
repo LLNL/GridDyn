@@ -8,6 +8,12 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
+set(networking_sources
+	networkingInterface.cpp)
+set(networking_headers
+	networkingInterface.h)
+
+if ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 set(zmqLibrary_sources
 	zmqLibrary/zmqContextManager.cpp
 	zmqLibrary/zmqHelper.cpp
@@ -29,15 +35,18 @@ set(zmqInterface_sources
 	zmqInterface.cpp
 	)
 
-
-
 set(zmqInterface_headers
 	zmqCommunicator.h
 	zmqInterface.h
 	)
 
-add_library(zmqInterfaceLibrary STATIC ${zmqLibrary_sources} ${zmqLibrary_headers} ${zmqInterface_sources} ${zmqInterface_headers})
-set_target_properties (zmqInterfaceLibrary PROPERTIES FOLDER libraries)
+list(APPEND networking_sources ${zmqLibrary_sources})
+list(APPEND networking_headers ${zmqLibrary_headers})
+list(APPEND networking_sources ${zmqInterface_sources})
+list(APPEND networking_headers ${zmqInterface_headers})
+	
+endif()
+
 
 IF(DIME_ENABLE)
 set(dimeInterface_sources
@@ -55,46 +64,69 @@ set(dimeInterface_headers
 	dimeRunner.h
 	dimeInterface.h
 	)
+	list(APPEND networking_sources ${dimeInterface_sources})
+	list(APPEND networking_headers ${dimeInterface_headers})
+endif()
 
-add_library(dimeLibrary STATIC ${dimeInterface_sources} ${dimeInterface_headers})
-target_link_libraries(dimeLibrary PUBLIC zmqInterfaceLibrary)
-set_target_properties (dimeLibrary PROPERTIES FOLDER libraries)
+IF(TCP_ENABLE)
+set(tcpInterface_sources
+	AsioServiceManager.cpp
+	tcpCommunicator.cpp
+	tcpInterface.cpp
+	TcpHelperClasses.cpp
+	tcpCollector.cpp
+	)
 
-INSTALL(TARGETS dimeLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+set(tcpInterface_headers
+	AsioServiceManager.h
+	tcpCommunicator.h
+	tcpInterface.h
+	TcpHelperClasses.h
+	tcpCollector.h
+	)
+	list(APPEND networking_sources ${tcpInterface_sources})
+	list(APPEND networking_headers ${tcpInterface_headers})
+endif()
 
-ENDIF(DIME_ENABLE)
 
+add_library(networking STATIC ${networking_sources} ${networking_headers} )
+set_target_properties (networking PROPERTIES FOLDER libraries)
+
+
+INSTALL(TARGETS networking EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+
+if ((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+target_compile_definitions(networking PRIVATE -DZMQ_ENABLE)
 if (ZMQ_USE_STATIC_LIBRARY)
 	set(ZMQ_DEPENDENCY libzmq-static)
-	target_add_definitions(zmqInterfaceLibrary PUBLIC -DZMQ_STATIC)
+	target_compile_definitions(networking PUBLIC -DZMQ_STATIC)
 else()
 	set(ZMQ_DEPENDENCY libzmq)
 endif()
 
 	message(STATUS "zmq lib ${ZMQ_DEPENDENCY}")
-target_link_libraries(zmqInterfaceLibrary PUBLIC griddyn ${ZMQ_DEPENDENCY} )
-
+target_link_libraries(networking PUBLIC griddyn ${ZMQ_DEPENDENCY} )
 
 source_group("ZMQLibrary" FILES ${zmqLibrary_sources} ${zmqLibrary_headers})
+source_group("zmqinterface" FILES ${zmqInterface_sources} ${zmqInterface_headers})
+endif()
 
-INSTALL(TARGETS zmqInterfaceLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+if (DIME_ENABLE)
+	source_group("dime" FILES ${dimeInterface_sources} ${dimeInterface_headers})
+	target_compile_definitions(networking PRIVATE -DDIME_ENABLE)
+endif()
 
-INSTALL(FILES ${zmqLibrary_headers}
+if (TCP_ENABLE)
+	source_group("tcp" FILES ${tcpInterface_sources} ${tcpInterface_headers})
+	target_compile_definitions(networking PRIVATE -DTCP_ENABLE)
+endif()
+
+INSTALL(FILES ${networking_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
    COMPONENT headers)
 
- IF(DIME_ENABLE)
-  list(APPEND griddyn_optional_libraries dimeLibrary)
-  INSTALL(FILES ${dimeInterface_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
-   COMPONENT headers)
- ELSE(DIME_ENABLE)
-  list(APPEND griddyn_optional_libraries zmqInterfaceLibrary)
- ENDIF(DIME_ENABLE)
-
-
-list (APPEND optional_library_key_headers networking/zmqInterface.h)
-list (APPEND optional_library_functions loadZMQLibrary)
+list (APPEND optional_library_key_headers networking/networkingInterface.h)
+list (APPEND optional_library_functions loadNetworkingLibrary)
 
 set (optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
 set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)

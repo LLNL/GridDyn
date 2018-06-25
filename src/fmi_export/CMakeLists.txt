@@ -54,12 +54,12 @@ set_target_properties (fmiGridDynSharedLib PROPERTIES FOLDER fmi)
 
 add_library(fmiBuilder STATIC ${fmiBuilder_sources} ${fmiBuilder_headers})
 
-target_link_libraries(fmiBuilder PUBLIC fileInput)
+target_link_libraries(fmiBuilder PUBLIC runner)
 
 set_target_properties (fmiBuilder PROPERTIES FOLDER fmi)
 
 
-target_link_libraries(fmiGridDynSharedLib PRIVATE fileInput)
+target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -102,7 +102,7 @@ ENDIF(WIN32)
 target_compile_definitions(fmiBuilder PRIVATE -DGRIDDYNFMILIBRARY_BINARY_LOC="${GRIDDYNFMILIBRARY_BINARY_LOC}")
 target_compile_definitions(fmiBuilder PRIVATE -DFMILIBRARY_TYPE="${FMILIBRARY_TYPE}")
 
-list(APPEND optional_component_test_files ${PROJECT_SOURCE_DIR}/src/fmi_export/testFMIExport.cpp)
+list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/testFMIExport.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
 list(APPEND executable_only_components fmiBuilder)

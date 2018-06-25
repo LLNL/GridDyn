@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef ZMQ_COMMUNICATOR_HEADER_
-#define ZMQ_COMMUNICATOR_HEADER_
+#pragma once
 
 #include "griddyn/comms/Communicator.h"
 #include "zmqLibrary/zmqSocketDescriptor.h"
@@ -20,23 +18,23 @@
 namespace griddyn
 {
 /** namespace containing zmq specific interface objects*/
-namespace zmqInterface
+namespace tcpLib
 {
 /** class implementing a general communicator to work across zmq channels*/
-class zmqCommunicator:public Communicator
+class tcpCommunicator:public Communicator
 {
 
 public:
 	/** default constructor*/
-	zmqCommunicator() = default;
+	tcpCommunicator() = default;
 	/** construct with object name*/
-	explicit zmqCommunicator(const std::string &name);
+	explicit tcpCommunicator(const std::string &name);
 	/** construct with object name and id*/
-	zmqCommunicator(const std::string &name, std::uint64_t id);
+    tcpCommunicator(const std::string &name, std::uint64_t id);
 	/** construct with id*/
-	explicit zmqCommunicator(std::uint64_t id);
+	explicit tcpCommunicator(std::uint64_t id);
 	/** destructor*/
-	virtual ~zmqCommunicator();
+	virtual ~tcpCommunicator();
 	
 	virtual std::unique_ptr<Communicator> clone() const override;
 
@@ -66,10 +64,10 @@ protected:
 		transmit_only=6,//!< flag indicating whether the communicator is transmit only
 	};
 	std::bitset<32> flags;	//!< storage for the flags
-	std::unique_ptr<zmq::socket_t> txSocket;  //!< the transmission socket
+	//std::unique_ptr<zmq::socket_t> txSocket;  //!< the transmission socket
 private:
-	zmqlib::zmqSocketDescriptor txDescriptor;  //!< socket description for transmit socket
-	zmqlib::zmqSocketDescriptor rxDescriptor;  //!< socket description for the receive socket
+	//zmqlib::zmqSocketDescriptor txDescriptor;  //!< socket description for transmit socket
+	//zmqlib::zmqSocketDescriptor rxDescriptor;  //!< socket description for the receive socket
 
 	std::string proxyName;		//!< the address of the local proxy to use
 	std::string contextName;			//!< the context to use
@@ -79,12 +77,11 @@ protected:
 	/** handle a zmq message*/
 	virtual void messageHandler(const zmq::multipart_t &msg);
 	/** add a header to a message*/
-	virtual void addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
+	//virtual void addHeader(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
 	/** add the body from a regular commMessage*/
-	virtual void addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
+	//virtual void addMessageBody(zmq::multipart_t &msg, std::shared_ptr<commMessage> &message);
 	
 };
 
-}//namespace zmqInterface
+}//namespace tcpLib
 }//namespace griddyn
-#endif

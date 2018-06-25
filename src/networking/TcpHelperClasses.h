@@ -10,11 +10,11 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <string>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include "../../common/GuardedTypes.hpp"
+#include <mutex>
 
-namespace helics
+namespace griddyn
 {
-namespace tcp
+namespace tcpLib
 {
 /** tcp socket generation for a receiving server*/
 class TcpRxConnection : public std::enable_shared_from_this<TcpRxConnection>
@@ -220,8 +220,9 @@ class TcpServer : public std::enable_shared_from_this<TcpServer>
     std::function<size_t (TcpRxConnection::pointer, const char *, size_t)> dataCall;
     std::function<bool(TcpRxConnection::pointer, const boost::system::error_code &error)> errorCall;
     std::atomic<bool> halted{ false };
-    guarded<std::vector<std::shared_ptr<TcpRxConnection>>> connections;
+    std::vector<std::shared_ptr<TcpRxConnection>> connections;
+    std::mutex connectionsMutex; 
 };
 
-}  // namespace tcp
-}  // namespace helics
+}  // namespace tcpLib
+}  // namespace griddyn

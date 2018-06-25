@@ -9,13 +9,8 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef ZMQ_INTERFACE_HEADER_
-#define ZMQ_INTERFACE_HEADER_
-
+#pragma once
 namespace griddyn
 {
-void loadZMQLibrary();
+void loadTcpLibrary();
 }//namespace griddyn
-
-#endif

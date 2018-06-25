@@ -485,7 +485,7 @@ endif()
 
 if (ENABLE_NETWORKING_LIBRARY)
 	add_subdirectory(src/networking)
-	target_link_libraries(griddyn_optional INTERFACE networkLibrary)
+	target_link_libraries(griddyn_optional INTERFACE networking)
 endif()
 
 if (HELICS_EXECUTABLE)

@@ -9,28 +9,26 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef DIME_COLLECTOR_HEADER_
-#define DIME_COLLECTOR_HEADER_
+#pragma once
 
 #include "griddyn/measurement/collector.h"
 
-class dimeClientInterface;
-
 namespace griddyn
 {
-namespace dimeLib
+namespace tcpLib
 {
-class dimeCollector :public collector
+class TcpConnection;
+
+class tcpCollector :public collector
 {
 private:
 	std::string server;
-	std::string processName;
-	std::unique_ptr<dimeClientInterface> dime;
+	std::string port;
+    std::shared_ptr<TcpConnection> connection;
 public:
-	dimeCollector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
-	explicit dimeCollector(const std::string &name);
-	~dimeCollector();
+	tcpCollector(coreTime time0 = timeZero, coreTime period = timeOneSecond);
+	explicit tcpCollector(const std::string &name);
+	~tcpCollector();
 
 	virtual std::unique_ptr<collector> clone() const override;
 
@@ -45,6 +43,5 @@ public:
 
 };
 
-}//namespace dimeLib
+}//namespace tcpLib
 }//namespace griddyn
-#endif

@@ -10,10 +10,9 @@
 * LLNS Copyright End
 */
 
-#include "zmqInterface.h"
-#include "dimeCommunicator.h"
-#include "dimeCollector.h"
-#include "zmqCommunicator.h"
+#include "tcpInterface.h"
+#include "tcpCommunicator.h"
+#include "tcpCollector.h"
 
 #include "core/factoryTemplates.hpp"
 #include "core/objectFactory.hpp"
@@ -22,9 +21,11 @@
 namespace griddyn
 {
 
-static childClassFactory<zmqInterface::zmqCommunicator, Communicator> zmqComm(std::vector<std::string>{"zmq"});
+static childClassFactory<tcpLib::tcpCollector, collector> tcpcol(std::vector<std::string> {"tcp"});
 
-void loadZMQLibrary()
+static childClassFactory<tcpLib::tcpCommunicator, Communicator> tcpComm(std::vector<std::string>{"tcp"});
+
+void loadTcpLibrary()
 {
 	static int loaded = 0;
 

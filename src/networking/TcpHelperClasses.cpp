@@ -8,9 +8,9 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <iostream>
 #include <thread>
 
-namespace helics
+namespace griddyn
 {
-namespace tcp
+namespace tcpLib
 {
 using boost::asio::ip::tcp;
 
@@ -285,10 +285,10 @@ void TcpServer::start ()
     bool exp = false;
     if (accepting.compare_exchange_strong (exp, true))
     {
-        auto connects = connections.lock();
-        if (!connects->empty ())
+        std::lock_guard<std::mutex> lock(connectionsMutex);
+        if (!connections.empty ())
         {
-            for (auto &conn :*connects)
+            for (auto &conn :connections)
             {
                 if (!conn->isReceiving())
                 {
@@ -313,11 +313,11 @@ void TcpServer::handle_accept (TcpRxConnection::pointer new_connection, const bo
         new_connection->setDataCall (dataCall);
         new_connection->setErrorCall (errorCall);
         {  //scope for the connection lock
-            auto connects = connections.lock();
+            std::lock_guard<std::mutex> lock(connectionsMutex);
           //  new_connection->index = static_cast<int> (connects->size());
             // the previous 3 calls have to be made before this call since they could be used immediately
             new_connection->start();
-            connects->push_back(std::move(new_connection));
+            connections.push_back(std::move(new_connection));
         }
         accepting = false;
         if (!halted)
@@ -340,8 +340,8 @@ void TcpServer::close ()
 {
     halted = true;
     acceptor_.close();
-    auto connects = connections.lock();
-    for (auto &conn : *connects)
+    std::lock_guard<std::mutex> lock(connectionsMutex);
+    for (auto &conn : connections)
     {
         conn->close ();
     }
@@ -349,8 +349,8 @@ void TcpServer::close ()
     {
         std::this_thread::yield ();
     }
-    connects->clear ();
+    connections.clear ();
 }
 
-}  // namespace tcp
-}  // namespace helics
+}  // namespace tcpLib
+}  // namespace griddyn

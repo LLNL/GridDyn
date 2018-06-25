@@ -10,83 +10,89 @@
 * LLNS Copyright End
 */
 
-#include "dimeCollector.h"
-#include "dimeClientInterface.h"
-
+#include "tcpCollector.h"
+#include "AsioServiceManager.h"
+#include "TcpHelperClasses.h"
 
 namespace griddyn
 {
-namespace dimeLib
+namespace tcpLib
 {
-dimeCollector::dimeCollector(coreTime time0, coreTime period):collector(time0,period)
-{
-
-}
-
-dimeCollector::dimeCollector(const std::string &collectorName):collector(collectorName)
+tcpCollector::tcpCollector(coreTime time0, coreTime period):collector(time0,period)
 {
 
 }
 
-dimeCollector::~dimeCollector()
+tcpCollector::tcpCollector(const std::string &collectorName):collector(collectorName)
 {
-	if (dime)
+
+}
+
+tcpCollector::~tcpCollector()
+{
+	if (connection)
 	{
-		dime->close();
+		connection->close();
 	}
 }
-std::unique_ptr<collector> dimeCollector::clone() const
+std::unique_ptr<collector> tcpCollector::clone() const
 {
-	std::unique_ptr<collector> col = std::make_unique<dimeCollector>();
-	dimeCollector::cloneTo(col.get());
+	std::unique_ptr<collector> col = std::make_unique<tcpCollector>();
+	tcpCollector::cloneTo(col.get());
 	return col;
 }
 
-void dimeCollector::cloneTo(collector *col) const
+void tcpCollector::cloneTo(collector *col) const
 {
 	collector::cloneTo(col);
-	auto dc = dynamic_cast<dimeCollector *>(col);
+	auto dc = dynamic_cast<tcpCollector *>(col);
 	if (dc==nullptr)
 	{
 		return;
 	}
 	dc->server = server;
-	dc->processName = processName;
+	dc->port = port;
 }
 
-change_code dimeCollector::trigger(coreTime time)
+change_code tcpCollector::trigger(coreTime time)
 {
-	if (!dime)
+	if (!connection)
 	{
-		dime = std::make_unique<dimeClientInterface>(processName, server);
-		dime->init();
+		connection = TcpConnection::create(AsioServiceManager::getService(),server,port);
 	}
 	auto out=collector::trigger(time);
 	//figure out what to do with the data
 	for (size_t kk = 0; kk < points.size(); ++kk)
 	{
-		dime->send_var(points[kk].colname, data[kk]);
+		//connection->send_var(points[kk].colname, data[kk]);
 	}
 	
 	return out;
 }
 
 
-void dimeCollector::set(const std::string &param, double val)
+void tcpCollector::set(const std::string &param, double val)
 {
+    if (param == "port")
+    {
+        port = std::to_string(val);
+    }
+    else
+    {
+        collector::set(param, val);
+    }
 	
-	collector::set(param, val);
 }
 
-void dimeCollector::set(const std::string &param, const std::string &val)
+void tcpCollector::set(const std::string &param, const std::string &val)
 {
 	if (param == "server")
 	{
 		server = val;
 	}
-	else if (param == "processname")
+	else if (param == "port")
 	{
-		processName = val;
+		port = val;
 	}
 	else
 	{
@@ -95,7 +101,7 @@ void dimeCollector::set(const std::string &param, const std::string &val)
 	
 }
 
-const std::string &dimeCollector::getSinkName() const
+const std::string &tcpCollector::getSinkName() const
 {
 	return server;
 }
