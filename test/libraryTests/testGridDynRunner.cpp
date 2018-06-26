@@ -13,7 +13,7 @@
 // test case for element readers
 
 #include "../exeTestHelper.h"
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 #include "../testHelper.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
