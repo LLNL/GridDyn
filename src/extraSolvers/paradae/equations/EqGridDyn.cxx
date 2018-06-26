@@ -16,7 +16,7 @@
 #include "fileInput/fileInput.h"
 #include "griddyn/simulation/gridSimulation.h"
 #include "coupling/GhostSwingBus.h"
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 
 #include <boost/program_options.hpp>
 #include <boost/container/small_vector.hpp>
