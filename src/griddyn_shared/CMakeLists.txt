@@ -46,7 +46,7 @@ target_include_directories(griddyn_shared_lib PUBLIC
 set_target_properties (griddyn_shared_lib PROPERTIES FOLDER interfaces)
 
 
-target_link_libraries(griddyn_shared_lib PRIVATE fileInput)
+target_link_libraries(griddyn_shared_lib PRIVATE runner)
 if (UNIX OR MINGW)
 	if (NOT APPLE)
 		target_link_libraries(griddyn_shared_lib PRIVATE -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export.txt)
