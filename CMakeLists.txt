@@ -115,9 +115,9 @@ mark_as_advanced(BUILD_CXX_SHARED_LIB)
 
 if (INTERFACE_BUILD OR BUILD_GRIDDYN_SHARED_LIBRARY OR BUILD_CXX_SHARED_LIB OR BUILD_SHARED_FMI_LIBRARY)
 	set(BUILD_SHARED_LIBS ON)
-else()
-	option(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF)
 endif()
+cmake_dependent_option(USE_POSITION_INDEPENDENT_CODE "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library" OFF "NOT BUILD_SHARED_LIBS" OFF)
+
 
 
 if(BUILD_SHARED_LIBS OR USE_POSITION_INDEPENDENT_CODE)
