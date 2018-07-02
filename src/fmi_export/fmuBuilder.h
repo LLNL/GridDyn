@@ -17,7 +17,7 @@
 #include <vector>
 #include <string>
 
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 #include "core/coreOwningPtr.hpp"
 
 namespace griddyn

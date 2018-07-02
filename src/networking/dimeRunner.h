@@ -13,11 +13,8 @@
 #ifndef _DIME_RUNNER_H_
 #define _DIME_RUNNER_H_
 
-#include "fileInput/gridDynRunner.h"
-
+#include "runner/gridDynRunner.h"
 #include "core/coreOwningPtr.hpp"
-
-
 
 namespace griddyn
 {

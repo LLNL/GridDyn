@@ -13,7 +13,7 @@
 #ifndef _FMI_RUNNER_H_
 #define _FMI_RUNNER_H_
 
-#include "fileInput/gridDynRunner.h"
+#include "runner/gridDynRunner.h"
 #include "fmi/FMI2/fmi2FunctionTypes.h"
 
 #include "core/coreOwningPtr.hpp"

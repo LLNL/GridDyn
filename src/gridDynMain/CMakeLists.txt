@@ -20,7 +20,7 @@ add_executable(griddynMain ${griddynMain_sources} ${griddynMain_headers})
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
 message(STATUS "execOnly:${executable_only_components}")
-target_link_libraries(griddynMain ${executable_only_components} runner)
+target_link_libraries(griddynMain ${executable_only_components} runner networking)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
 add_custom_command(TARGET griddynMain POST_BUILD        # Adds a post-build event to griddynMain
