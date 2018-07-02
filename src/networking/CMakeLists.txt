@@ -44,7 +44,7 @@ list(APPEND networking_sources ${zmqLibrary_sources})
 list(APPEND networking_headers ${zmqLibrary_headers})
 list(APPEND networking_sources ${zmqInterface_sources})
 list(APPEND networking_headers ${zmqInterface_headers})
-	
+
 endif()
 
 
@@ -123,7 +123,7 @@ endif()
 
 INSTALL(FILES ${networking_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
-   COMPONENT headers)
+  COMPONENT headers)
 
 list (APPEND optional_library_key_headers networking/networkingInterface.h)
 list (APPEND optional_library_functions loadNetworkingLibrary)
@@ -133,4 +133,3 @@ set (optional_library_functions  ${optional_library_functions} PARENT_SCOPE)
 
 list(APPEND optional_component_test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/zmqTest.cpp)
 set (optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
-
