@@ -17,6 +17,7 @@
 #include <string>
 #include <exception>
 #include <memory>
+#include "json/jsoncpp.h"
 
 class initFailure :public std::exception
 {

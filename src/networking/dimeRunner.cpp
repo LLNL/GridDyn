@@ -14,7 +14,7 @@
 
 
 // headers
-#include "gridDynSimulation.h"
+#include "griddyn/gridDynSimulation.h"
 #include "fileInput/fileInput.h"
 #include "coupling/GhostSwingBusManager.h"
 #include "dimeRunner.h"
@@ -51,10 +51,9 @@ dimeRunner::dimeRunner()
 
 dimeRunner::~dimeRunner() = default;
 
-dimeRunner::dimeRunner(std::shared_ptr<gridDynSimulation> sim):GriddynRunner(sim)
+dimeRunner::dimeRunner(std::shared_ptr<gridDynSimulation> sim) : GriddynRunner(sim)
 {
 	loadDimeLibrary();
-
 }
 
 int dimeRunner::Initialize(int argc, char * argv[])

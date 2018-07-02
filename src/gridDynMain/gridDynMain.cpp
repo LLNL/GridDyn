@@ -23,7 +23,7 @@
 #endif
 
 #ifdef DIME_ENABLE
-#include "zmqlib/dimeRunner.h"
+#include "networking/dimeRunner.h"
 #endif
 
 #ifdef BUILD_SHARED_FMI_LIBRARY
