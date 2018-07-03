@@ -14,7 +14,7 @@
 
 fmi2Object::fmi2Object(fmi2Component cmp, std::shared_ptr<const fmiInfo> keyInfo, std::shared_ptr<const fmiCommonFunctions> comFunc):comp(cmp), info(std::move (keyInfo)), commonFunctions(std::move(comFunc))
 {
-	
+
 }
 
 fmi2Object::~fmi2Object()
@@ -71,6 +71,9 @@ void fmi2Object::setMode(fmuMode mode)
 		case fmuMode::stepMode:
 			fmi2Object::setMode(fmuMode::initializationMode); //go into initialization first
 			ret = commonFunctions->fmi2ExitInitializationMode(comp);
+            break;
+        default:
+            break;
 		}
 		break;
 	case fmuMode::initializationMode:
@@ -166,7 +169,7 @@ void fmi2Object::set(const fmiVariableSet &vrset, fmi2Integer value[])
 
 void fmi2Object::set(const fmiVariableSet &vrset, fmi2Real value[])
 {
-	
+
 	auto retval = commonFunctions->fmi2SetReal(comp, vrset.getValueRef(), vrset.getVRcount(), value);
 	if (retval != fmi2Status::fmi2OK)
 	{
@@ -312,7 +315,7 @@ void fmi2Object::setOutputVariables(const std::vector<std::string> &outNames)
 			activeOutputs.push(vI.valueRef);
 			activeOutputIndices.push_back(vI.index);
 		}
-		//TODO:: what to do if this condition is not valid?  
+		//TODO:: what to do if this condition is not valid?
 	}
 }
 
@@ -443,7 +446,7 @@ std::vector<std::string> fmi2Object::getOutputNames() const
 			oVec.push_back(info->getVariableInfo(os).name);
 		}
 	}
-	
+
 	return oVec;
 }
 
@@ -494,7 +497,7 @@ bool fmi2Object::isVariable(const std::string &var, fmi_variable_type_t type)
 {
 	auto &vi = info->getVariableInfo(var);
 	if (vi.index >= 0)
-	{	
+	{
 		if (vi.type == type)
 		{
 			return true;
