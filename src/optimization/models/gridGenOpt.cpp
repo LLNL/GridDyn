@@ -427,7 +427,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
           Pcoeff[num] = val;
           return;
         }
-      catch (std::invalid_argument)
+      catch (std::invalid_argument const&)
         {
           //if it doesn't work just let it pass through to the lower statements
         }
@@ -446,7 +446,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
           Qcoeff[num] = val;
           return;
         }
-      catch (std::invalid_argument)
+      catch (std::invalid_argument const&)
         {
           //if it doesn't work just let it pass through to the lower statements
         }
@@ -574,5 +574,3 @@ gridOptObject *gridGenOpt::getArea (index_t index) const
 }
 
 }// namespace griddyn
-
-
