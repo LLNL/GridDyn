@@ -1251,7 +1251,7 @@ void busPowers::reset ()
     linkP = 0.0;
 	loadP = 0.0;
     genP = 0.0;
-   
+
 	linkQ = 0.0;
     loadQ = 0.0;
 	genQ = 0.0;
@@ -1793,23 +1793,23 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpValues, bool printDiff)
     }
     else
     {
-        for (size_t kk = 0; kk < bus1->attachedLinks.size (); ++kk)
+        for (auto& bus1Link : bus1->attachedLinks)
         {
-			auto b1id1 = bus1->attachedLinks[kk]->getBus(1)->getID();
-			auto b1id2 = bus1->attachedLinks[kk]->getBus(2)->getID();
-			for (size_t jj = 0; jj < bus2->attachedLinks.size(); ++jj)
+			auto b1id1 = bus1Link->getBus(1)->getID();
+			auto b1id2 = bus1Link->getBus(2)->getID();
+			for (auto& bus2Link : bus2->attachedLinks)
 			{
-				if ((isSameObject(bus2->attachedLinks[jj]->getBus(1), b1id1))&& (isSameObject(bus2->attachedLinks[jj]->getBus(2), b1id2)))
+				if ((isSameObject(bus2Link->getBus(1), b1id1))&& (isSameObject(bus2Link->getBus(2), b1id2)))
 				{
-					if (!compareLink(bus1->attachedLinks[kk], bus2->attachedLinks[jj], false, printDiff))
+					if (!compareLink(bus1Link, bus2Link, false, printDiff))
 					{
 						cmp = false;
 					}
 					break;
 				}
-				if ((isSameObject(bus2->attachedLinks[jj]->getBus(2), b1id1)) && (isSameObject(bus2->attachedLinks[jj]->getBus(1), b1id2)))
+				if ((isSameObject(bus2Link->getBus(2), b1id1)) && (isSameObject(bus2Link->getBus(1), b1id2)))
 				{
-					if (!compareLink(bus1->attachedLinks[kk], bus2->attachedLinks[jj], false, printDiff))
+					if (!compareLink(bus1Link, bus2Link, false, printDiff))
 					{
 						cmp = false;
 					}
