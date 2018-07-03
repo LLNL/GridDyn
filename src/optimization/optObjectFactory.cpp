@@ -19,10 +19,7 @@ optComponentFactory::optComponentFactory (const std::string component) : name (c
 
 }
 
-optComponentFactory::~optComponentFactory ()
-{
-
-}
+optComponentFactory::~optComponentFactory () = default;
 
 void optComponentFactory::registerFactory (optFactory *optFac)
 {
