@@ -189,11 +189,9 @@ void aggregateLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 
 void aggregateLoad::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-    IOdata out = desiredOutput;
-
     for (auto &ld : subLoads)
     {
-        ld->dynInitializeB (inputs, out, fieldSet);
+        ld->dynInitializeB (inputs, desiredOutput, fieldSet);
     }
 }
 
