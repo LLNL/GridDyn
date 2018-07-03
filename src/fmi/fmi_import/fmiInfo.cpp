@@ -725,7 +725,7 @@ void loadDependencies(std::shared_ptr<readerElement> &rd, std::vector<int> &stor
 		auto dep = str2vector<int>(attDep.getText(), 0, " ");
 		auto depknd = (attDepKind.isValid()) ? stringOps::splitline(attDepKind.getText(), " ", stringOps::delimiter_compression::on) : stringVector();
 		store.push_back(row - 1);
-		auto validdepkind = (depknd.size() > 0);
+		auto validdepkind = !depknd.empty();
 		for (size_t kk = 0; kk<dep.size(); ++kk)
 		{
 

@@ -44,7 +44,7 @@ void compoundEventPlayer::cloneTo(Event *gE) const
 	{
 		return;
 	}
-	
+
 }
 
 void compoundEventPlayer::setTime (coreTime time) { triggerTime = time; }
@@ -240,7 +240,7 @@ void compoundEventPlayer::loadEventFile (const std::string &fileName)
     ts.loadFile (eFile);
 
     currIndex = 0;
-    if (ts.size () > 0)
+    if (!ts.empty())
     {
         triggerTime = ts.time (0);
     }
