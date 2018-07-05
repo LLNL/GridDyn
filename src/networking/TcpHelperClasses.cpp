@@ -29,10 +29,7 @@ void TcpRxConnection::start ()
     connection_state_t exp = connection_state_t::halted;
     if (state.compare_exchange_strong (exp, connection_state_t::receiving))
     {
-        if (receiving == false)
-        {
-            receiving = true;
-        }
+        receiving = true;
         socket_.async_receive (boost::asio::buffer (data.data () + residBufferSize,
                                                     data.size () - residBufferSize),
                                [this](const boost::system::error_code &error,
@@ -178,7 +175,7 @@ void TcpRxConnection::close ()
     {
         std::this_thread::yield();
     }
-   
+
 }
 
 TcpConnection::pointer TcpConnection::create (boost::asio::io_service &io_service,

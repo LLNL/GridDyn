@@ -24,7 +24,7 @@ optComponentFactory::~optComponentFactory () = default;
 void optComponentFactory::registerFactory (optFactory *optFac)
 {
   auto ret = m_factoryMap.insert (std::pair<std::string, optFactory *> (optFac->name, optFac));
-  if (ret.second == false)
+  if (!ret.second)
     {
       ret.first->second = optFac;
     }
