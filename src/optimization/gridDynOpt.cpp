@@ -138,7 +138,7 @@ void gridDynOptimization::set (const std::string &param,  const std::string &val
 
 void gridDynOptimization::setFlag (const std::string &flag, bool val)
 {
-  
+
   //int nval = static_cast<int> (val);
   /*
   constraints_disabled = 1,
@@ -197,7 +197,7 @@ double gridDynOptimization::get (const std::string &param, gridUnits::units_t un
     {
       val = tols.voltageTolerance;
     }
-  if (param == "angletolerance")
+  else if (param == "angletolerance")
     {
       val = tols.angleTolerance;
     }
