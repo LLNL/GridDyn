@@ -1,8 +1,8 @@
 /*
 * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department 
- * of Energy by Lawrence Livermore National Laboratory in part under 
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
  * Produced at the Lawrence Livermore National Laboratory.
  * All rights reserved.
@@ -29,12 +29,12 @@ namespace griddyn
 {
 namespace fmi
 {
-fmiMESubModel::fmiMESubModel(const std::string &newName, std::shared_ptr<fmi2ModelExchangeObject> fmi):gridSubModel(newName), me(fmi)
+fmiMESubModel::fmiMESubModel(const std::string &newName, std::shared_ptr<fmi2ModelExchangeObject> fmi) : gridSubModel(newName), me(std::move(fmi))
 {
 
 }
 
-fmiMESubModel::fmiMESubModel(std::shared_ptr<fmi2ModelExchangeObject> fmi) : me(fmi)
+fmiMESubModel::fmiMESubModel(std::shared_ptr<fmi2ModelExchangeObject> fmi) : me(std::move(fmi))
 {
 
 }
@@ -70,7 +70,7 @@ void fmiMESubModel::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 }
 void fmiMESubModel::pFlowObjectInitializeB()
 {
-	
+
     if (opFlags[pflow_init_required])
     {
 		//printf("enter continuous time mode\n");
@@ -84,13 +84,13 @@ void fmiMESubModel::pFlowObjectInitializeB()
 
 void fmiMESubModel::dynObjectInitializeA (coreTime time0, std::uint32_t /*flags*/)
 {
-    
+
 	prevTime = time0;
 }
 
 void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /*desiredOutput*/, IOdata & /*inputSet*/)
 {
-	
+
 	if (opFlags[pflow_init_required])
 	{
 		//printf("GridDyn Dyn B pflowINit required\n");
@@ -114,7 +114,7 @@ void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /
 						oEst[pp]->update(prevTime, val, inputs, m_state.data());
 					}
 				}
-				
+
 			}
 			opFlags.set(dyn_initialized);
 		}
@@ -132,9 +132,9 @@ void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /
 		{
 			me->getStates(m_state.data());
 		}
-		
+
 		oEst.resize(m_outputSize);
-		probeFMU();  //probe the fmu 
+		probeFMU();  //probe the fmu
 		if (opFlags[use_output_estimator])
 		{
 			//if we require the use of output estimators flag that to the simulation and load the information for the estimator
@@ -158,7 +158,7 @@ void fmiMESubModel::getParameterStrings(stringVec &pstr, paramStringType pstype)
 	{
 	case paramStringType::all:
 		pstr.reserve(pstr.size() + info->getCounts("params")+info->getCounts("inputs")-m_inputSize);
-		
+
 		for (int kk = 0; kk < vcnt; ++kk)
 		{
 			if (info->getVariableInfo(kk).type == fmi_variable_type_t::string)
@@ -170,7 +170,7 @@ void fmiMESubModel::getParameterStrings(stringVec &pstr, paramStringType pstype)
 				pstr.push_back(info->getVariableInfo(kk).name);
 			}
 		}
-		
+
 		gridSubModel::getParameterStrings(pstr, paramStringType::numeric);
 		pstr.reserve(pstr.size() + strpcnt + 1);
 		pstr.push_back("#");
@@ -288,7 +288,7 @@ void fmiMESubModel::set (const std::string &param, const std::string &val)
 		{
 			throw(invalidParameterValue(param));
 		}
-		
+
 	}
 	else if (param == "outputs")
 	{
@@ -370,7 +370,7 @@ void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_
                 paramBuffer.set(param, val, unitType);
             }
         }
-		
+
 	}
 
 }
@@ -393,7 +393,7 @@ double fmiMESubModel::get(const std::string &param, gridUnits::units_t unitType)
 			return gridSubModel::get(param, unitType);
 		}
 	}
-	
+
 }
 
 stateSizes fmiMESubModel::LocalStateSizes(const solverMode &sMode) const
@@ -453,15 +453,15 @@ void fmiMESubModel::setState(coreTime time, const double state[], const double d
 			m_state.assign(state + loc, state + loc + m_stateSize);
 			m_dstate_dt.assign(dstate_dt + loc, dstate_dt + loc + m_stateSize);
 		}
-		
+
 		me->setTime(time);
 		int eventMode;
 		int terminate;
 		me->completedIntegratorStep(true, &eventMode, &terminate);
-		
+
 		if ((opFlags[use_output_estimator]) && (!opFlags[fixed_output_interval]))
 		{
-			
+
 			IOdata ip(m_inputSize);
 
 			me->getCurrentInputs(ip.data());
@@ -493,7 +493,7 @@ void fmiMESubModel::setState(coreTime time, const double state[], const double d
 		int eventMode;
 		int terminate;
 		me->completedIntegratorStep(true, &eventMode, &terminate);
-		
+
 
 	}
 	prevTime = time;
@@ -543,9 +543,9 @@ void fmiMESubModel::getStateName(stringVec &stNames, const solverMode &sMode, co
 			{
 				stNames[loc + kk] = prefix + getName() + ':' +  fmistNames[kk];
 			}
-			
+
 		}
-		
+
 	}
 	else if (!isDynamic(sMode) && (opFlags[pflow_init_required]))
 	{
@@ -682,7 +682,7 @@ double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 		}
 		else if (mode == refMode_t::level4)  //for input dependencies only
 		{
-			
+
 			me->set(vy, &val2);
 			me->completedIntegratorStep(false, &evmd, &term);
 			me->get(vx, &out2);
@@ -712,7 +712,7 @@ double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 			{
 				res = oEst[depIndex]->stateDiff[refIndex];
 			}
-			
+
 		}
 		else if (mode == refMode_t::level8) //use the estimators
 		{
@@ -724,9 +724,9 @@ double fmiMESubModel::getPartial(int depIndex, int refIndex, refMode_t mode)
 			{
 				res = oEst[depIndex]->inputDiff[refIndex]; //TODO:: this is wrong
 			}
-	
+
 		}
-		
+
 	}
 	return res;
 }
@@ -841,10 +841,10 @@ void fmiMESubModel::timestep(coreTime time, const IOdata &inputs, const solverMo
 		// set states at t = time and perform one step
 		vectorMultAdd(m_state, der_x, static_cast<double>(h), m_state);
 		me->setStates(m_state.data());
-		
+
 		// get event indicators at t = time
 		me->completedIntegratorStep(false, &eventMode, &terminateSim);
-		
+
 		h = (curTime + h > Tend) ? (Tend - curTime) : localIntegrationTime;
 
 	}
@@ -884,7 +884,7 @@ void fmiMESubModel::ioPartialDerivatives(const IOdata &inputs, const stateData &
 				}
 			}
 		}
-	
+
 }
 
 void fmiMESubModel::outputPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &md, const solverMode &sMode)
@@ -922,7 +922,7 @@ void fmiMESubModel::outputPartialDerivatives(const IOdata &inputs, const stateDa
 
 			}
 		}
-		
+
 	}
 
 }
@@ -980,7 +980,7 @@ double fmiMESubModel::getOutput(const IOdata &inputs, const stateData &sD, const
 	if (me->getCurrentMode() >= fmuMode::initializationMode)
 	{
 		//updateInfo(inputs, sD, sMode);
-		
+
 		if ((opFlags[use_output_estimator]) && (!sD.empty()) && (!opFlags[fixed_output_interval]) && (isDynamic(sMode)))
 		{
 			if (outputInformation[outputNum].refMode >= refMode_t::level4)
@@ -1046,7 +1046,7 @@ void fmiMESubModel::updateLocalCache(const IOdata &inputs, const stateData &sD, 
 			{
 				me->completedIntegratorStep(false, &eventMode, &terminateSim);
 			}
-			
+
 		}
 	}
 	else if (!inputs.empty())
@@ -1087,7 +1087,7 @@ void fmiMESubModel::resetState()
 void fmiMESubModel::probeFMU()
 {
 	refMode_t defMode = (m_stateSize>0)?refMode_t::level1:refMode_t::level4;
-	
+
 	if (opFlags[reprobe_flag])
 	{
 		defMode = (m_stateSize>0) ? refMode_t::direct : refMode_t::level4;
