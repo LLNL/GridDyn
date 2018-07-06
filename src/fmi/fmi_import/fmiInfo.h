@@ -85,7 +85,7 @@ public:
 	double factor = 1.0;
 	double offset = 0.0;
 	std::vector<unitDef> baseUnits;
-	
+
 	std::vector<unitDef> displayUnits;
 
 };
@@ -114,10 +114,10 @@ public:
 	fmiVariableSet();
 	fmiVariableSet(fmi2ValueReference newvr);
 	fmiVariableSet(const fmiVariableSet &vset);
-	fmiVariableSet(fmiVariableSet &&vset);
+	fmiVariableSet(fmiVariableSet &&vset) noexcept;
 
 	fmiVariableSet& operator=(const fmiVariableSet & other);
-	fmiVariableSet& operator=(fmiVariableSet && other);
+	fmiVariableSet& operator=(fmiVariableSet && other) noexcept;
 
 	const fmi2ValueReference *getValueRef() const;
 	size_t getVRcount() const;

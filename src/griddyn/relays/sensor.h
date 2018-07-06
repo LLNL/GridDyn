@@ -55,10 +55,10 @@ public:
     processed,        //!<processed output
     direct,        //!<direct from an input
   };
-  
+
 protected:
-	
-  std::vector<int> blockInputs; //!< the number of the input Source 
+
+  std::vector<int> blockInputs; //!< the number of the input Source
   //PT leaving outputs as int (vs index_t) as negative values here are meaningful and useful
   std::vector<int> outputs;  //!< locations of output values
   std::vector<stringVec> outputStrings; //!< names for the outputs
@@ -107,11 +107,11 @@ public:
   //dynamic functions for evaluation with a limit exceeded
   virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
   virtual void jacobianElements (const IOdata &inputs, const stateData &sD, matrixData<double> &md, const IOlocs &inputLocs, const solverMode &sMode) override;
-  
+
   virtual void residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
   virtual void derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode) override;
   virtual void algebraicUpdate (const IOdata &inputs, const stateData &sD, double update[], const solverMode &sMode, double alpha) override;
- 
+
   virtual double getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outNum = 0) const override;
   virtual double getOutput(index_t outNum = 0) const override;
   virtual index_t getOutputLoc (const solverMode &sMode, index_t outNum) const override;
@@ -147,7 +147,7 @@ public:
   virtual void rootTrigger (coreTime time, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
 
   virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual void getObjects(std::vector<coreObject *> &objects) const override;

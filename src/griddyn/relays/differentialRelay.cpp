@@ -200,7 +200,7 @@ void differentialRelay::actionTaken (index_t ActionNum,
 
     if (opFlags[use_commLink])
     {
-       
+
         if (ActionNum == 0)
         {
 			auto P = std::make_shared<relayMessage>(relayMessage::BREAKER_TRIP_EVENT);
@@ -231,7 +231,7 @@ void differentialRelay::conditionCleared (index_t /*conditionNum*/, coreTime /*t
     }
 }
 
-void differentialRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> message)
+void differentialRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> const& message)
 {
     switch (message->getMessageType ())
     {

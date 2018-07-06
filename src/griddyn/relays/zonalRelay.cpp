@@ -327,7 +327,7 @@ void zonalRelay::conditionCleared (index_t conditionNum, coreTime /*triggerTime*
     }
 }
 
-void zonalRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> message)
+void zonalRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> const& message)
 {
     switch (message->getMessageType ())
     {

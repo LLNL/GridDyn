@@ -117,6 +117,7 @@ void ThreePhaseLoad::setFlag (const std::string &flag, bool val)
 void ThreePhaseLoad::set (const std::string &param, const std::string &val)
 {
     if (param[0] != '#')
+    {
         Load::set (param, val);
     }
 }

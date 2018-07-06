@@ -115,7 +115,7 @@ bool testCopyFile (path const& source, path const& dest, bool overwrite = false)
 
     try
     {
-        copy_file (source, dest, copy_option);
+        copy_file (source, dest, option);
         return true;
     }
     catch (filesystem_error const& e)

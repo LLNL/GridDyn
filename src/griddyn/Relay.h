@@ -45,7 +45,7 @@ public:
     triggered,  //!< the relay condition is triggered and waiting a timeout
     disabled,  //!< the relay condition is disabled and not scanning
   };
-  
+
 
 protected:
   /** flags for the relayFlags data*/
@@ -99,7 +99,7 @@ protected:
   std::bitset<32> relayFlags = 0;		//!< a set of extra relays flags that derived classes can use beyond the opFlags
   // comm fields
   comms::commManager cManager;    //!< structure object to store and manage the communicator information
-  
+
   std::shared_ptr<Communicator> commLink;             //!<communicator link
 
   coreTime m_nextSampleTime = maxTime;        //!< the next time to sample the conditions
@@ -138,7 +138,7 @@ public:
   virtual void updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber);
   /**
   *@brief update a specific condition
-  @param[in] gc a condition object to associate with a relay condition 
+  @param[in] gc a condition object to associate with a relay condition
   @param[in] conditionNumber the index of the condition to update with the new condition object
   **/
   virtual void updateCondition (std::shared_ptr<Condition> gc,  index_t conditionNumber);
@@ -163,7 +163,7 @@ public:
   @param[in] newStatus the updated status of the condition active, triggered, disabled
   */
   void setConditionStatus (index_t conditionNumber, condition_status_t newStatus = condition_status_t::active);
-  /** 
+  /**
   @brief remove an action from service
   @param[in] actionNumber the index of the action to remove from service
   */
@@ -178,7 +178,7 @@ public:
   @param[in] actionNumber the index of the action to retrieve
   @return a shared pointer associated with particular action*/
   std::shared_ptr<eventAdapter> getAction (index_t actionNumber);
-  /** 
+  /**
   @brief get the status of one of the relays conditions
   @param[in] the index of the condition
   @return an enumeration of the condition status (active, triggered, or disabled)
@@ -251,7 +251,7 @@ public:
   @param[in] sourceID  the source of the comm message
   @param[in] message the actual message to process
   */
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message);
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message);
   /** send and alarm message
   @param[in] code the identifier to put in the alarm message
   @throw  if no commlink is present
@@ -275,7 +275,7 @@ protected:
 	@param[in] alertChange true if the function should send alerts to its parent object if the number of roots changes
 	*/
   virtual void updateRootCount (bool alertChange = true);
-  /** do something when an action is taken 
+  /** do something when an action is taken
   @param ActionNum  the index of the action that was executed
   @param conditionNum the index of the condition that triggered the action
   @param actionReturn  the return code of the action execution
@@ -339,7 +339,7 @@ public:
   std::vector < std::vector < mcondTrig >> multiConditionTriggers;               //!<a vector for action which have multiple triggers
   std::vector<index_t> conditionsWithRoots;			//!< indices of the conditions with root finding functions attached to them
 private:
- 
+
 	/** clear all the conditional checks that have passed the initial trigger but not the full time duration for a particular condition
 	@param[in] conditionNumber the index of the condition to clear
 	*/
@@ -357,7 +357,7 @@ private:
   @param[in] minimumDelayTime  ignore all trigger delays below the minimumDelayTime
   */
   change_code triggerCondition (index_t conditionNum,coreTime conditionTriggerTime, coreTime minimumDelayTime);
-  
+
   /** check and if all conditions hold execute a multi-condition trigger
   @param[in] conditionNum  the index of the condition that was just triggered that might also trigger a multi-condition
   @param[in] conditionTriggerTime the time of the trigger
@@ -366,7 +366,7 @@ private:
   change_code multiConditionCheckExecute (index_t conditionNum, coreTime conditionTriggerTime, coreTime minimumDelayTime);
   /** evaluate a conditon awaiting a delay and execute the action if appropriate
   @param[in] cond the condition to check
-  @param[in] checkTime the time to check 
+  @param[in] checkTime the time to check
   @return a change code indicating the effect of any action Taken
   */
   change_code evaluateCondCheck (condCheckTime &cond, coreTime checkTime);

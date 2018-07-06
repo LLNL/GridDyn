@@ -60,6 +60,7 @@ void fmiCollector::set(const std::string &param, double val)
 void fmiCollector::set(const std::string &param, const std::string &val)
 {
 	if (param.front() != '#')
+    {
 		collector::set(param, val);
 	}
 }
