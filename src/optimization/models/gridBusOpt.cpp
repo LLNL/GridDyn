@@ -420,7 +420,7 @@ void gridBusOpt::add (coreObject *obj)
     }
   else
   {
-	  throw(unrecognizedObjectException(this));
+      throw(unrecognizedObjectException(this));
   }
 }
 
@@ -436,7 +436,7 @@ void gridBusOpt::add (gridLoadOpt *ld)
     }
   else if (ld->getID () != obj->getID ())
     {
-	  throw(objectAddFailure(this));
+        throw(objectAddFailure(this));
     }
 }
 
@@ -452,7 +452,7 @@ void gridBusOpt::add (gridGenOpt *gen)
     }
   else if (gen->getID () != obj->getID ())
     {
-	  throw(objectAddFailure(this));
+        throw(objectAddFailure(this));
     }
 }
 
@@ -537,214 +537,190 @@ void gridBusOpt::remove (gridLinkOpt *lnk)
 
 void gridBusOpt::setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType)
 {
-
-  if ((type == "gen") || (type == "generator"))
+    if ((type == "gen") || (type == "generator"))
     {
-      for (auto &gen : genList)
+        for (auto &gen : genList)
         {
-          gen->set (param, val, unitType);
+            gen->set (param, val, unitType);
         }
     }
-  else if (type == "load")
+    else if (type == "load")
     {
-      for (auto &ld : loadList)
+        for (auto &ld : loadList)
         {
-          ld->set (param, val, unitType);
+            ld->set (param, val, unitType);
         }
     }
-
 }
 
 // set properties
 void gridBusOpt::set (const std::string &param,  const std::string &val)
 {
-	if (param[0] == '#')
+    if (param[0] != '#')
     {
-
-    }
-  else
-    {
-      gridOptObject::set (param, val);
+        gridOptObject::set (param, val);
     }
 }
 
 void gridBusOpt::set (const std::string &param, double val, units_t unitType)
 {
-
-
-  if ((param == "voltagetolerance")||(param == "vtol"))
+    if ((param == "voltagetolerance")||(param == "vtol"))
     {
 
     }
-  else if ((param == "angleetolerance") || (param == "atol"))
+    else if ((param == "angleetolerance") || (param == "atol"))
     {
 
     }
-  else
+    else
     {
-      gridOptObject::set (param, val, unitType);
+        gridOptObject::set (param, val, unitType);
     }
-
 }
-
-
-
 
 coreObject *gridBusOpt::find (const std::string &objName) const
 {
-  coreObject *obj = nullptr;
-  if ((objName == getName()) || (objName == "bus"))
+    coreObject *obj = nullptr;
+    if ((objName == getName()) || (objName == "bus"))
     {
-      return const_cast<gridBusOpt *> (this);
+        return const_cast<gridBusOpt *> (this);
     }
-  for (auto ob : genList)
+    for (auto ob : genList)
     {
-      if (objName == ob->getName ())
+        if (objName == ob->getName ())
         {
-          obj = ob;
-          break;
+            obj = ob;
+            break;
         }
     }
-  if (obj == nullptr)
+    if (obj == nullptr)
     {
-      for (auto ob : loadList)
+        for (auto ob : loadList)
         {
-          if (objName == ob->getName ())
+            if (objName == ob->getName ())
             {
-              obj = ob;
-              break;
+                obj = ob;
+                break;
             }
         }
     }
-  return obj;
+    return obj;
 }
 
 coreObject *gridBusOpt::getSubObject (const std::string &typeName, index_t num) const
 {
-  if (typeName == "link")
+    if (typeName == "link")
     {
-      return getLink (num - 1);
+        return getLink (num - 1);
     }
-  else if (typeName == "load")
+    if (typeName == "load")
     {
       return getLoad (num - 1);
     }
-  else if ((typeName == "gen") || (typeName == "generator"))
+    if ((typeName == "gen") || (typeName == "generator"))
     {
       return getGen (num - 1);
     }
-  else
-    {
-      return nullptr;
-    }
+    return nullptr;
 }
 
 coreObject *gridBusOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
-  if (typeName == "load")
+    if (typeName == "load")
     {
-      for (auto &LD : loadList)
+        for (auto &LD : loadList)
         {
-          if (LD->getUserID () == searchID)
+            if (LD->getUserID () == searchID)
             {
-              return LD;
+                return LD;
             }
         }
     }
-  else if ((typeName == "gen") || (typeName == "generator"))
+    else if ((typeName == "gen") || (typeName == "generator"))
     {
-      for (auto &gen : genList)
+        for (auto &gen : genList)
         {
-          if (gen->getUserID () == searchID)
+            if (gen->getUserID () == searchID)
             {
-              return gen;
+                return gen;
             }
         }
     }
-  return nullptr;
+    return nullptr;
 }
 
 gridOptObject *gridBusOpt::getLink (index_t x) const
 {
-  return (isValidIndex(x,linkList)) ? linkList[x] : nullptr;
-
+    return (isValidIndex(x,linkList)) ? linkList[x] : nullptr;
 }
 
 gridOptObject *gridBusOpt::getLoad (index_t x) const
 {
-  return (isValidIndex(x, loadList)) ? loadList[x] : nullptr;
+    return (isValidIndex(x, loadList)) ? loadList[x] : nullptr;
 }
 
 gridOptObject *gridBusOpt::getGen (index_t x) const
 {
-  return (isValidIndex(x, genList)) ? genList[x] : nullptr;
+    return (isValidIndex(x, genList)) ? genList[x] : nullptr;
 }
 
 
 double gridBusOpt::get (const std::string &param, gridUnits::units_t unitType) const
 {
-  double fval = kNullVal;
-  count_t ival = kInvalidCount;
-  if (param == "gencount")
+    double fval = kNullVal;
+    count_t ival = kInvalidCount;
+    if (param == "gencount")
     {
-      ival = static_cast<count_t> (genList.size ());
+        ival = static_cast<count_t> (genList.size ());
     }
-  else if (param == "linkcount")
+    else if (param == "linkcount")
     {
-      ival = static_cast<count_t> (linkList.size ());
+        ival = static_cast<count_t> (linkList.size ());
     }
-  else if (param == "loadcount")
+    else if (param == "loadcount")
     {
-      ival = static_cast<count_t> (loadList.size ());
+        ival = static_cast<count_t> (loadList.size ());
     }
-  else
+    else
     {
-      fval = coreObject::get (param,unitType);
+        fval = coreObject::get (param,unitType);
     }
-  return (ival != kInvalidCount) ? static_cast<double> (ival) : fval;
+    return (ival != kInvalidCount) ? static_cast<double> (ival) : fval;
 }
-
-
-
 
 gridBusOpt * getMatchingBus (gridBusOpt *bus, gridOptObject *src, gridOptObject *sec)
 {
-  if (bus->isRoot())
+    if (bus->isRoot())
     {
-      return nullptr;
+        return nullptr;
     }
-  if (isSameObject(bus->getParent (),src))    //if this is true then things are easy
+    if (isSameObject(bus->getParent (),src))    //if this is true then things are easy
     {
-      return static_cast<gridBusOpt *> (sec->getBus (bus->locIndex));
+        return static_cast<gridBusOpt *> (sec->getBus (bus->locIndex));
     }
-  else
+    auto *par = dynamic_cast<gridOptObject *> (bus->getParent ());
+    if (par == nullptr)
     {
-      gridOptObject *par;
-      std::vector<index_t> lkind;
-      par = dynamic_cast<gridOptObject *> (bus->getParent ());
-      if (par == nullptr)
-        {
-          return nullptr;
-        }
-      lkind.push_back (bus->locIndex);
-      while (par->getID () != src->getID ())
-        {
-          lkind.push_back (par->locIndex);
-          par = dynamic_cast<gridOptObject *> (par->getParent ());
-          if (par == nullptr)
-            {
-              return nullptr;
-            }
-        }
-      //now work our way backwards through the secondary
-      par = sec;
-      for (auto kk = lkind.size () - 1; kk > 0; --kk)
-        {
-          par = par->getArea (lkind[kk]);
-        }
-      return static_cast<gridBusOpt *> (par->getBus (lkind[0]));
-
+        return nullptr;
     }
+    std::vector<index_t> lkind;
+    lkind.push_back (bus->locIndex);
+    while (par->getID () != src->getID ())
+    {
+        lkind.push_back (par->locIndex);
+        par = dynamic_cast<gridOptObject *> (par->getParent ());
+        if (par == nullptr)
+        {
+            return nullptr;
+        }
+    }
+    //now work our way backwards through the secondary
+    par = sec;
+    for (auto kk = lkind.size () - 1; kk > 0; --kk)
+    {
+        par = par->getArea (lkind[kk]);
+    }
+    return static_cast<gridBusOpt *> (par->getBus (lkind[0]));
 }
 
 }// namespace griddyn

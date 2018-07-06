@@ -178,10 +178,7 @@ void derivativeBlock::set (const std::string &param, double val, gridUnits::unit
         {
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            m_T1 = val;
-        }
+        m_T1 = val;
     }
     else
     {

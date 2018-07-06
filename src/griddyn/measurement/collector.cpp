@@ -469,11 +469,8 @@ void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
             }
             throw (addFailureException ());
         }
-        else
-        {
-            obj->log (obj, print_level::warning, "unable to create collector no field or offset specified");
-            addWarning ("unable to create collector no field or offset specified");
-        }
+        obj->log (obj, print_level::warning, "unable to create collector no field or offset specified");
+        addWarning ("unable to create collector no field or offset specified");
     }
     else
     {

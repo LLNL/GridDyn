@@ -45,95 +45,90 @@ gridDynOptimization::~gridDynOptimization ()
 coreObject *gridDynOptimization::clone (coreObject *obj) const
 {
   gridDynOptimization *sim = cloneBase<gridDynOptimization, gridDynSimulation> (this, obj);
-  if (sim == nullptr)
+    if (sim == nullptr)
     {
-      return obj;
+        return obj;
     }
 
-  return sim;
+    return sim;
 }
 
 void gridDynOptimization::setupOptOffsets (const optimMode &oMode, int setupMode)
 {
 
-  if (setupMode == 0)      //no distinction between Voltage, angle, and others
+    if (setupMode == 0)      //no distinction between Voltage, angle, and others
     {
-      areaOpt->setOffset (1, 0, oMode);
-      return;
+        areaOpt->setOffset (1, 0, oMode);
+        return;
     }
-  optimOffsets baseOffset;
-  if (setupMode == 1) //use all the distinct categories
+    optimOffsets baseOffset;
+    if (setupMode == 1) //use all the distinct categories
     {
-      baseOffset.setOffset (1);
-      baseOffset.constraintOffset = 0;
+        baseOffset.setOffset (1);
+        baseOffset.constraintOffset = 0;
     }
-  else if (setupMode == 2) //discriminate continuous and discrete objective variables
+    else if (setupMode == 2) //discriminate continuous and discrete objective variables
     {
-      baseOffset.constraintOffset = 0;
-      baseOffset.contOffset = 1;
-      baseOffset.intOffset = 0;
+        baseOffset.constraintOffset = 0;
+        baseOffset.contOffset = 1;
+        baseOffset.intOffset = 0;
     }
 
-  //call the area setOffset function to distribute the offsets
-  areaOpt->setOffsets (baseOffset, oMode);
-
-
+    //call the area setOffset function to distribute the offsets
+    areaOpt->setOffsets (baseOffset, oMode);
 }
-
-
 
 // --------------- set properties ---------------
 void gridDynOptimization::set (const std::string &param,  const std::string &val)
 {
 
-  if (param == "flags")
+    if (param == "flags")
     {
-      auto v = stringOps::splitline (val);
-	  stringOps::trim(v);
-      for (auto &flagstr : v)
+        auto v = stringOps::splitline (val);
+        stringOps::trim(v);
+        for (auto &flagstr : v)
         {
-          setFlag (flagstr, true);
+            setFlag (flagstr, true);
         }
     }
-  else if ((param == "defaultoptmode") || (param == "defaultopt"))
+    else if ((param == "defaultoptmode") || (param == "defaultopt"))
     {
 
-      auto ocf = coreOptObjectFactory::instance ();
-      if (ocf->isValidType (val))
+        auto ocf = coreOptObjectFactory::instance ();
+        if (ocf->isValidType (val))
         {
-          defaultOptMode = val;
-          ocf->setDefaultType (val);
+            defaultOptMode = val;
+            ocf->setDefaultType (val);
         }
     }
 
-  else if (param == "optimization_mode")
+    else if (param == "optimization_mode")
     {
       /*default_solution,
   dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
   steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
-      auto temp = convertToLowerCase(val);
-      if ((temp == "dcopf") || (temp == "opf"))
+        auto temp = convertToLowerCase(val);
+        if ((temp == "dcopf") || (temp == "opf"))
         {
-          optimization_mode = DCOPF;
+            optimization_mode = DCOPF;
         }
-      else if ((temp == "acopf") || (temp == "ac"))
+        else if ((temp == "acopf") || (temp == "ac"))
         {
-          optimization_mode = ACOPF;
+            optimization_mode = ACOPF;
         }
-      else if (temp == "bidstack")
+        else if (temp == "bidstack")
         {
-          optimization_mode = bidstack;
+            optimization_mode = bidstack;
         }
-      else
+        else
         {
-          LOG_WARNING ("unknown optimization mode " + temp);
+            LOG_WARNING ("unknown optimization mode " + temp);
         }
     }
-  else
+    else
     {
-      gridDynSimulation::set (param, val);
+        gridDynSimulation::set (param, val);
     }
-
 }
 
 void gridDynOptimization::setFlag (const std::string &flag, bool val)
@@ -147,150 +142,130 @@ void gridDynOptimization::setFlag (const std::string &flag, bool val)
   ignore_voltage_limits = 4,
   power_adjust_enabled = 5,
   dcFlow_initialization = 6,*/
-  if (flag.empty())
+    if (!flag.empty())
     {
-
-    }
-  else
-    {
-      gridDynSimulation::setFlag (flag, val);
+        gridDynSimulation::setFlag (flag, val);
     }
 }
 
 void gridDynOptimization::setFlags (size_t param, int val)
 {
-  if (param > 32)
+    if (param > 32)
     {
-	  throw(unrecognizedParameter("flag"+std::to_string(param)));
+        throw(unrecognizedParameter("flag"+std::to_string(param)));
     }
 
-  controlFlags.set (param, (val > 0));
-
+    controlFlags.set (param, (val > 0));
 }
 
 void gridDynOptimization::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-  if (param == "optimtol")
+    if (param == "optimtol")
     {
-      tols.rtol = val;
+        tols.rtol = val;
     }
 
-  else
+    else
     {
-      //out = setFlags (param, val);
-	  try
-	  {
-		  gridDynSimulation::set(param, val, unitType);
-	  }
-	  catch (const unrecognizedParameter &)
-	  {
-		  setFlag(param, (val > 0.1));
-	  }
+        //out = setFlags (param, val);
+        try
+        {
+            gridDynSimulation::set(param, val, unitType);
+        }
+        catch (const unrecognizedParameter &)
+        {
+            setFlag(param, (val > 0.1));
+        }
     }
 }
 
 
 double gridDynOptimization::get (const std::string &param, gridUnits::units_t unitType) const
 {
-  double val;
-  if (param == "voltagetolerance")
+    double val;
+    if (param == "voltagetolerance")
     {
-      val = tols.voltageTolerance;
+        val = tols.voltageTolerance;
     }
-  else if (param == "angletolerance")
+    if (param == "angletolerance")
     {
-      val = tols.angleTolerance;
+        val = tols.angleTolerance;
     }
-  else
+    else
     {
-      val = gridDynSimulation::get (param,unitType);
+        val = gridDynSimulation::get (param,unitType);
     }
-  return val;
+    return val;
 }
 
-
-coreObject * gridDynOptimization::find (const std::string &objName) const
+coreObject* gridDynOptimization::find (const std::string &objName) const
 {
-  if (objName == "optroot")
+    if (objName == "optroot")
     {
-      return areaOpt;
+        return areaOpt;
     }
-  else if (objName.substr (0, 3) == "opt")
+    else if (objName.substr (0, 3) == "opt")
     {
-      return areaOpt->find (objName.substr (3));
+        return areaOpt->find (objName.substr (3));
     }
-  else
+    else
     {
-      return gridDynSimulation::find (objName);
+        return gridDynSimulation::find (objName);
     }
-
 }
 
-coreObject * gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
+coreObject* gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
 {
-  if (typeName.substr (0, 3) == "opt")
+    if (typeName.substr (0, 3) == "opt")
     {
-      return areaOpt->getSubObject (typeName.substr (3), num);
+        return areaOpt->getSubObject (typeName.substr (3), num);
     }
-  else
+    else
     {
-      return gridDynSimulation::getSubObject (typeName, num);
+        return gridDynSimulation::getSubObject (typeName, num);
     }
 }
-coreObject * gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject* gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
 {
-  if (typeName.substr (0, 3) == "opt")
+    if (typeName.substr (0, 3) == "opt")
     {
-      return areaOpt->findByUserID (typeName.substr (3), searchID);
+        return areaOpt->findByUserID (typeName.substr (3), searchID);
     }
-  else
+    else
     {
-      return gridDynSimulation::findByUserID (typeName, searchID);
+        return gridDynSimulation::findByUserID (typeName, searchID);
     }
 }
-
 
 gridOptObject * gridDynOptimization::getOptData (coreObject *obj)
 {
-  if (obj!=nullptr)
+    if (obj!=nullptr)
     {
-      coreObject *nobj = areaOpt->find (obj->getName ());
-      if (nobj)
+        coreObject *nobj = areaOpt->find (obj->getName ());
+        if (nobj)
         {
-          return static_cast<gridOptObject *> (nobj);
+            return static_cast<gridOptObject *> (nobj);
         }
-      else
-        {
-          return nullptr;
-        }
+        return nullptr;
     }
-  else
-    {
-      return areaOpt;
-    }
+    return areaOpt;
 }
 
 gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
 {
-  gridOptObject *oo = getOptData (obj);
-  if (oo)
+    gridOptObject *oo = getOptData (obj);
+    if (oo)
     {
-      return oo;
+        return oo;
     }
-  else
+    if (!(obj->isRoot()))
     {
-      if (!(obj->isRoot()))
-        {
-          auto oop = makeOptObjectPath (obj->getParent ());
-          oo = coreOptObjectFactory::instance ()->createObject (obj);
-          oop->add (oo);
-          return oo;
-        }
-      else
-        {
-          return nullptr;
-        }
+        auto oop = makeOptObjectPath (obj->getParent ());
+        oo = coreOptObjectFactory::instance ()->createObject (obj);
+        oop->add (oo);
+        return oo;
     }
+    return nullptr;
 }
 
 optimizerInterface *gridDynOptimization::updateOptimizer (const optimMode &oMode)
