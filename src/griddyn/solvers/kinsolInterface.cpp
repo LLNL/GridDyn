@@ -223,30 +223,30 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix(svsize, svsize);
-        check_flag((void *)J, "SUNDenseMatrix", 0);
+        check_flag(reinterpret_cast<void *>(J), "SUNDenseMatrix", 0);
         /* Create KLU solver object */
         LS = SUNDenseLinearSolver(state, J);
-        check_flag((void *)LS, "SUNDenseLinearSolver", 0);
+        check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
         J = SUNSparseMatrix(svsize, svsize, maxNNZ, CSR_MAT);
-        check_flag((void *)J, "SUNSparseMatrix", 0);
+        check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
         LS = SUNKLU(state, J);
-        check_flag((void *)LS, "SUNKLU", 0);
+        check_flag(reinterpret_cast<void *>(LS), "SUNKLU", 0);
 
         retval=SUNKLUSetOrdering(LS, 0);
         check_flag(&retval, "SUNKLUSetOrdering", 1);
     }
 #else
     J = SUNDenseMatrix(svsize, svsize);
-    check_flag((void *)J, "SUNSparseMatrix", 0);
+    check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
     /* Create KLU solver object */
     LS = SUNDenseLinearSolver(state, J);
-    check_flag((void *)LS, "SUNDenseLinearSolver", 0);
+    check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
 #endif
 
     retval = KINDlsSetLinearSolver(solverMem, LS, J);
@@ -292,7 +292,7 @@ void kinsolInterface::set (const std::string &param, double val)
 {
     if (param.empty())
     {
-       
+
     }
     else
     {

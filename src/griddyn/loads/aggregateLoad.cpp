@@ -114,14 +114,16 @@ void aggregateLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         // do a first pass of loading
         double rem = 1.0;
 
-        setP (((aggregateLoad *)sLoad)->getP ());  // so this composite load function has direct access to the
+        aggregateLoad* sLoadRepr = dynamic_cast<aggregateLoad*>(sLoad);
+        assert(sLoadRepr != nullptr);
+        setP (sLoadRepr->getP ());  // so this composite load function has direct access to the
         // zipLoad variables seems a little odd to need to do this but
         // seems to be a requirement in C++
-        setQ (((aggregateLoad *)sLoad)->getQ ());
-        setIp (((aggregateLoad *)sLoad)->getIp ());
-        setIq (((aggregateLoad *)sLoad)->getIq ());
-        setYp (((aggregateLoad *)sLoad)->getYp ());
-        setYq (((aggregateLoad *)sLoad)->getYq ());
+        setQ (sLoadRepr->getQ ());
+        setIp (sLoadRepr->getIp ());
+        setIq (sLoadRepr->getIq ());
+        setYp (sLoadRepr->getYp ());
+        setYq (sLoadRepr->getYq ());
 
         for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
