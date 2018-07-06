@@ -44,52 +44,52 @@ runner_t getFmiRunner(fmi2Component comp)
 	return runner.get();
 }
 
-fmi2Status fmi2SetDebugLogging (fmi2Component comp, fmi2Boolean loggingOn, size_t nCategories, const fmi2String categories[]) 
-{ 
-	auto runner = getFmiRunner(comp);
-	if (runner == nullptr)
-	{
-		return fmi2Error;
-	}
-	std::bitset<7> logCat = 0;
-	logCat[0] = true;
-	if (loggingOn)
-	{
-		for (size_t ii = 0; ii < nCategories; ++ii)
-		{
-			std::string lcat(categories[ii]);
-			if (lcat == "logError")
-			{
-				logCat[1] = true;
-			}
-			else if (lcat == "logWarning")
-			{
-				logCat[2] = true;
-			}
-			else if (lcat == "logSummary")
-			{
-				logCat[3] = true;
-			}
-			else if (lcat == "logNormal")
-			{
-				logCat[4] = true;
-			}
-			else if (lcat == "logDebug")
-			{
-				logCat[5] = true;
-			}
+fmi2Status fmi2SetDebugLogging (fmi2Component comp, fmi2Boolean loggingOn, size_t nCategories, const fmi2String categories[])
+{
+    auto runner = getFmiRunner(comp);
+    if (runner == nullptr)
+    {
+        return fmi2Error;
+    }
+    std::bitset<7> logCat = 0;
+    logCat[0] = true;
+    if (loggingOn)
+    {
+        for (size_t ii = 0; ii < nCategories; ++ii)
+        {
+            std::string lcat(categories[ii]);
+            if (lcat == "logError")
+            {
+                logCat[1] = true;
+            }
+            else if (lcat == "logWarning")
+            {
+                logCat[2] = true;
+            }
+            else if (lcat == "logSummary")
+            {
+                logCat[3] = true;
+            }
+            else if (lcat == "logNormal")
+            {
+                logCat[4] = true;
+            }
+            else if (lcat == "logDebug")
+            {
+                logCat[5] = true;
+            }
             else if (lcat == "logTrace")
             {
                 logCat[6] = true;
             }
-			else
-			{
-				return fmi2Warning;
-			}
-		}
-	}
-	runner->setLoggingCategories(logCat);
-	return fmi2OK;
+            else
+            {
+                return fmi2Warning;
+            }
+        }
+    }
+    runner->setLoggingCategories(logCat);
+    return fmi2OK;
 }
 
 
@@ -164,8 +164,8 @@ void fmi2FreeInstance (fmi2Component comp)
 		fmiRunnerInstances[p->first] = nullptr;
         delete p;
 	}
-	
-    
+
+
 }
 
 /* Enter and exit initialization mode, terminate and reset */
@@ -228,8 +228,8 @@ fmi2Status fmi2Terminate (fmi2Component comp)
 
     return fmi2OK;
 }
-fmi2Status fmi2Reset (fmi2Component comp) 
-{ 
+fmi2Status fmi2Reset (fmi2Component comp)
+{
 	auto runner = getFmiRunner(comp);
 	if (runner == nullptr)
 	{
@@ -308,7 +308,7 @@ fmi2Status fmi2GetBoolean (fmi2Component comp, const fmi2ValueReference vr[], si
 			}
 			value[ii] = (res>0.1)?fmi2True:fmi2False;
 		}
-        
+
     }
     return ret;
 }
@@ -378,7 +378,7 @@ fmi2SetInteger (fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, c
 				ret = fmi2Warning;
 			}
 		}
-        
+
     }
     return ret;
 }
@@ -449,7 +449,7 @@ fmi2Status fmi2FreeFMUstate (fmi2Component /*comp*/, fmi2FMUstate *FMUstate)
 		return fmi2OK;
     }
 	return fmi2Discard;
-    
+
 }
 fmi2Status fmi2SerializedFMUstateSize (fmi2Component /*comp*/, fmi2FMUstate /*FMUstate*/, size_t * /*size*/)
 {
@@ -518,12 +518,12 @@ fmi2Status fmi2DoStep (fmi2Component comp,
 
 	runner->Step(currentCommunicationPoint + communicationStepSize);
 	return fmi2OK;
-    
+
 }
 fmi2Status fmi2CancelStep (fmi2Component /*comp*/) { return fmi2Discard; }
 
 /* Inquire slave status */
-fmi2Status fmi2GetStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Status *status) 
+fmi2Status fmi2GetStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Status *status)
 {
 	auto runner = getFmiRunner(comp);
 	if (runner == nullptr)
@@ -538,7 +538,7 @@ fmi2Status fmi2GetStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Status
 	return fmi2Discard;
 }
 
-fmi2Status fmi2GetRealStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Real *status) 
+fmi2Status fmi2GetRealStatus (fmi2Component comp, const fmi2StatusKind s, fmi2Real *status)
 {
 	auto runner = getFmiRunner(comp);
 	if (runner == nullptr)

@@ -238,7 +238,7 @@ void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
     {
 
     }
-    else if ((param == "angleetolerance") || (param == "atol"))
+    else if ((param == "angletolerance") || (param == "atol"))
     {
 
     }

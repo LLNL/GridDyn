@@ -391,50 +391,50 @@ gridBusOpt::~gridBusOpt ()
 
 void gridBusOpt::add (coreObject *obj)
 {
-  auto ld = dynamic_cast<gridLoadOpt *> (obj);
-  if (ld)
+    auto ld = dynamic_cast<gridLoadOpt *> (obj);
+    if (ld)
     {
-      return add (ld);
+        return add (ld);
     }
 
-  auto gen = dynamic_cast<gridGenOpt *> (obj);
-  if (gen)
+    auto gen = dynamic_cast<gridGenOpt *> (obj);
+    if (gen)
     {
-      return add (gen);
+        return add (gen);
     }
 
-  auto lnk = dynamic_cast<gridLinkOpt *> (obj);
-  if (lnk)
+    auto lnk = dynamic_cast<gridLinkOpt *> (obj);
+    if (lnk)
     {
-      return add (lnk);
+        return add (lnk);
     }
 
-  if (dynamic_cast<gridBus *> (obj))
+    if (dynamic_cast<gridBus *> (obj))
     {
-      bus = static_cast<gridBus *> (obj);
-      if (getName().empty ())
+        bus = static_cast<gridBus *> (obj);
+        if (getName().empty ())
         {
-          setName(bus->getName ());
+            setName(bus->getName ());
         }
-      setUserID(bus->getUserID ());
+        setUserID(bus->getUserID ());
     }
-  else
-  {
-      throw(unrecognizedObjectException(this));
-  }
+    else
+    {
+        throw(unrecognizedObjectException(this));
+    }
 }
 
 // add load
 void gridBusOpt::add (gridLoadOpt *ld)
 {
-  coreObject *obj = find (ld->getName ());
-  if (obj == nullptr)
+    coreObject *obj = find (ld->getName ());
+    if (obj == nullptr)
     {
-      ld->locIndex = static_cast<index_t> (loadList.size ());
-      loadList.push_back (ld);
-      ld->setParent (this);
+        ld->locIndex = static_cast<index_t> (loadList.size ());
+        loadList.push_back (ld);
+        ld->setParent (this);
     }
-  else if (ld->getID () != obj->getID ())
+    else if (ld->getID () != obj->getID ())
     {
         throw(objectAddFailure(this));
     }
@@ -443,14 +443,14 @@ void gridBusOpt::add (gridLoadOpt *ld)
 // add generator
 void gridBusOpt::add (gridGenOpt *gen)
 {
-  coreObject *obj = find (gen->getName ());
-  if (obj == nullptr)
+    coreObject *obj = find (gen->getName ());
+    if (obj == nullptr)
     {
-      gen->locIndex = static_cast<index_t> (genList.size ());
-      genList.push_back (gen);
-      gen->setParent (this);
+        gen->locIndex = static_cast<index_t> (genList.size ());
+        genList.push_back (gen);
+        gen->setParent (this);
     }
-  else if (gen->getID () != obj->getID ())
+    else if (gen->getID () != obj->getID ())
     {
         throw(objectAddFailure(this));
     }
@@ -568,7 +568,7 @@ void gridBusOpt::set (const std::string &param, double val, units_t unitType)
     {
 
     }
-    else if ((param == "angleetolerance") || (param == "atol"))
+    else if ((param == "angletolerance") || (param == "atol"))
     {
 
     }

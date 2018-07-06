@@ -73,9 +73,9 @@ stateGrabber::stateGrabber (index_t noffset, coreObject *obj)
 
 std::unique_ptr<stateGrabber> stateGrabber::clone() const
 {
-	auto sg = std::make_unique<stateGrabber>();
-	cloneTo(sg.get());
-	return sg;
+    auto sg = std::make_unique<stateGrabber>();
+    cloneTo(sg.get());
+    return sg;
 }
 void stateGrabber::cloneTo (stateGrabber *ggb) const
 {
@@ -125,82 +125,82 @@ using namespace gridUnits;
 
 /** map of all the alternate strings that can be used*/
 static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"},
-																{"vol", "voltage"},
-																{"link", "linkreal"},
-																{"linkp", "linkreal"},
-																{"loadq", "loadreactive"},
-																{"loadreactivepower", "loadreactive"},
-																{"load", "loadreal"},
-																{"loadp", "loadreal"},
-																{"reactivegen", "genreactive"},
-																{"genq", "genreactive"},
-																{"gen", "genreal"},
-																{"generation", "genreal"},
-																{"genp", "genreal"},
-																{"realgen", "genreal"},
-																{"f", "freq"},
-																{"frequency", "freq"},
-																{"omega", "freq"},
-																{"a", "angle"},
-																{"ang", "angle"},
-																{"phase", "angle"},
-																{"busgenerationreal", "busgenreal"},
-																{"busp", "busgenreal"},
-																{"busgen", "busgenreal"},
-																{"busgenerationreactive", "busgenreactive"},
-																{"busq", "busgenreactive"},
-																{"linkrealpower", "linkreal"},
-																{"linkp1", "linkreal"},
-																{"linkq", "linkreactive"},
-																{"linkreactivepower", "linkreactive"},
-																{"linkrealpower1", "linkreal"},
-																{"linkq1", "linkreactive"},
-																{"linkreactivepower1", "linkreactive"},
-																{"linkreal1", "linkreal"},
-																{"linkreactive1", "linkreactive"},
-																{"linkrealpower2", "linkreal2"},
-																{"linkq2", "linkreactive2"},
-																{"linkreactivepower2", "linkreactive2"},
-																{"linkp2", "linkreal2"},
-																{"p", "real"},
-																{"q", "reactive"},
-																{"impedance", "z"},
-																{"admittance", "y"},
-																{"impedance1", "z"},
-																{"admittance1", "y"},
-																{"z1", "z"},
-																{"y1", "y"},
-																{"impedance2", "z2"},
-																{"admittance2", "y2"},
-																{"status", "connected"},
-																{"breaker", "switch"},
-																{"breaker1", "switch"},
-																{"switch1", "switch"},
-																{"breaker2", "switch2"},
-																{"i", "current"},
-																{"i1", "current"},
-																{"current1", "current"},
-																{"i2", "current2"},
-																{"imagcurrent1", "imagcurrent"},
-																{"realcurrent1", "realcurrent"},
-																{"lossreal", "loss"},
-																{"angle1", "angle"},
-																{"absangle1", "busangle"},
-																{"voltage1", "voltage"},
-																{"v1", "voltage"},
-																{"v2", "voltage2"},
-																{"output0", "output"},
-																{"cv", "output"},
-																{"o0", "output"},
-																{"currentvalue", "output"},
-																{"deriv0", "deriv"},
-																{"dodt", "deriv"},
-																{"dodt0", "deriv"},
-																{"doutdt", "deriv"},
-																{"doutdt0", "deriv"},
-																{"busangle1","busangle"},
-																{ "absangle","busangle" },
-																{ "absangle1","busangle2" },
+                                                                {"vol", "voltage"},
+                                                                {"link", "linkreal"},
+                                                                {"linkp", "linkreal"},
+                                                                {"loadq", "loadreactive"},
+                                                                {"loadreactivepower", "loadreactive"},
+                                                                {"load", "loadreal"},
+                                                                {"loadp", "loadreal"},
+                                                                {"reactivegen", "genreactive"},
+                                                                {"genq", "genreactive"},
+                                                                {"gen", "genreal"},
+                                                                {"generation", "genreal"},
+                                                                {"genp", "genreal"},
+                                                                {"realgen", "genreal"},
+                                                                {"f", "freq"},
+                                                                {"frequency", "freq"},
+                                                                {"omega", "freq"},
+                                                                {"a", "angle"},
+                                                                {"ang", "angle"},
+                                                                {"phase", "angle"},
+                                                                {"busgenerationreal", "busgenreal"},
+                                                                {"busp", "busgenreal"},
+                                                                {"busgen", "busgenreal"},
+                                                                {"busgenerationreactive", "busgenreactive"},
+                                                                {"busq", "busgenreactive"},
+                                                                {"linkrealpower", "linkreal"},
+                                                                {"linkp1", "linkreal"},
+                                                                {"linkq", "linkreactive"},
+                                                                {"linkreactivepower", "linkreactive"},
+                                                                {"linkrealpower1", "linkreal"},
+                                                                {"linkq1", "linkreactive"},
+                                                                {"linkreactivepower1", "linkreactive"},
+                                                                {"linkreal1", "linkreal"},
+                                                                {"linkreactive1", "linkreactive"},
+                                                                {"linkrealpower2", "linkreal2"},
+                                                                {"linkq2", "linkreactive2"},
+                                                                {"linkreactivepower2", "linkreactive2"},
+                                                                {"linkp2", "linkreal2"},
+                                                                {"p", "real"},
+                                                                {"q", "reactive"},
+                                                                {"impedance", "z"},
+                                                                {"admittance", "y"},
+                                                                {"impedance1", "z"},
+                                                                {"admittance1", "y"},
+                                                                {"z1", "z"},
+                                                                {"y1", "y"},
+                                                                {"impedance2", "z2"},
+                                                                {"admittance2", "y2"},
+                                                                {"status", "connected"},
+                                                                {"breaker", "switch"},
+                                                                {"breaker1", "switch"},
+                                                                {"switch1", "switch"},
+                                                                {"breaker2", "switch2"},
+                                                                {"i", "current"},
+                                                                {"i1", "current"},
+                                                                {"current1", "current"},
+                                                                {"i2", "current2"},
+                                                                {"imagcurrent1", "imagcurrent"},
+                                                                {"realcurrent1", "realcurrent"},
+                                                                {"lossreal", "loss"},
+                                                                {"angle1", "angle"},
+                                                                {"absangle1", "busangle"},
+                                                                {"voltage1", "voltage"},
+                                                                {"v1", "voltage"},
+                                                                {"v2", "voltage2"},
+                                                                {"output0", "output"},
+                                                                {"cv", "output"},
+                                                                {"o0", "output"},
+                                                                {"currentvalue", "output"},
+                                                                {"deriv0", "deriv"},
+                                                                {"dodt", "deriv"},
+                                                                {"dodt0", "deriv"},
+                                                                {"doutdt", "deriv"},
+                                                                {"doutdt0", "deriv"},
+                                                                {"busangle1","busangle"},
+                                                                { "absangle","busangle" },
+                                                                { "absangle1","busangle2" },
 };
 
 #define FUNCTION_SIGNATURE [](gridComponent * obj, const stateData &sD, const solverMode &sMode)
@@ -240,11 +240,11 @@ static const std::map<std::string, objJacFunction> busJacFunctions{
   {"angle", JAC_FUNCTION_SIGNATURE_NO_STATE{
               md.assignCheckCol (0, static_cast<gridBus *> (obj)->getOutputLoc (sMode, angleInLocation), 1.0);}},
  { "busangle", JAC_FUNCTION_SIGNATURE_NO_STATE{
-	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, angleInLocation), 1.0); } },
-	{ "freq", JAC_FUNCTION_SIGNATURE_NO_STATE{
-	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
-	{ "busfreq", JAC_FUNCTION_SIGNATURE_NO_STATE{
-	md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
+    md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, angleInLocation), 1.0); } },
+    { "freq", JAC_FUNCTION_SIGNATURE_NO_STATE{
+    md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
+    { "busfreq", JAC_FUNCTION_SIGNATURE_NO_STATE{
+    md.assignCheckCol(0, static_cast<gridBus *> (obj)->getOutputLoc(sMode, frequencyInLocation), 1.0); } },
 };
 
 static const std::map<std::string, fstateobjectPair> areaFunctions{
@@ -360,20 +360,20 @@ void stateGrabber::objectLoadInfo (const std::string &fld)
         }
         else
         {
-		
-			auto index = cobj->lookupOutputIndex(fieldStr);
-			if (index != kNullLocation)
-			{
-				fptr = [index](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-					return comp->getOutput(noInputs, sD, sMode, index);
-				};
-			}
-			else
-			{
-				fptr = nullptr;
-				loaded = false;
-			}
-			
+
+            auto index = cobj->lookupOutputIndex(fieldStr);
+            if (index != kNullLocation)
+            {
+                fptr = [index](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+                    return comp->getOutput(noInputs, sD, sMode, index);
+                };
+            }
+            else
+            {
+                fptr = nullptr;
+                loaded = false;
+            }
+
         }
     }
 }
@@ -442,19 +442,19 @@ void stateGrabber::relayLoadInfo (const std::string &fld)
             loaded = false;
         }
     }
-	else if ((fld == "blockderiv") || (fld == "dblockdt") || (fld == "dbdt"))
-	{
-		if (dynamic_cast<sensor *> (cobj) != nullptr)
-		{
-			fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
-				return static_cast<sensor *> (comp)->getBlockDerivOutput(sD, sMode, num);
-			};
-		}
-		else
-		{
-			loaded = false;
-		}
-	}
+    else if ((fld == "blockderiv") || (fld == "dblockdt") || (fld == "dbdt"))
+    {
+        if (dynamic_cast<sensor *> (cobj) != nullptr)
+        {
+            fptr = [num](gridComponent *comp, const stateData &sD, const solverMode &sMode) {
+                return static_cast<sensor *> (comp)->getBlockDerivOutput(sD, sMode, num);
+            };
+        }
+        else
+        {
+            loaded = false;
+        }
+    }
     else if ((fieldStr == "input") || (fieldStr == "i"))
     {
         if (dynamic_cast<sensor *> (cobj) != nullptr)
@@ -596,18 +596,18 @@ void customStateGrabber::setGrabberJacFunction (objJacFunction nJfptr)
 
 std::unique_ptr<stateGrabber> customStateGrabber::clone() const
 {
-	std::unique_ptr<stateGrabber> sg = std::make_unique<customStateGrabber>();
-	cloneTo(sg.get());
-	return sg;
+    std::unique_ptr<stateGrabber> sg = std::make_unique<customStateGrabber>();
+    cloneTo(sg.get());
+    return sg;
 }
 void customStateGrabber::cloneTo(stateGrabber *ggb) const
 {
-	stateGrabber::cloneTo(ggb);
-	auto csg = dynamic_cast<customStateGrabber *>(ggb);
-	if (csg == nullptr)
-	{
-		return;
-	}
+    stateGrabber::cloneTo(ggb);
+    auto csg = dynamic_cast<customStateGrabber *>(ggb);
+    if (csg == nullptr)
+    {
+        return;
+    }
 }
 
 
@@ -643,32 +643,32 @@ void stateFunctionGrabber::updateField (const std::string &fld)
 
 std::unique_ptr<stateGrabber> stateFunctionGrabber::clone() const
 {
-	std::unique_ptr<stateGrabber> sg = std::make_unique<stateFunctionGrabber>();
-	cloneTo(sg.get());
-	return sg;
+    std::unique_ptr<stateGrabber> sg = std::make_unique<stateFunctionGrabber>();
+    cloneTo(sg.get());
+    return sg;
 }
 
 void stateFunctionGrabber::cloneTo(stateGrabber *ggb) const
 {
-	stateGrabber::cloneTo(ggb);
-	auto sfg= dynamic_cast<stateFunctionGrabber *>(ggb);
-	if (sfg == nullptr)
-	{
-		return;
-	}
-	if (bgrabber)
-	{
-		if (sfg->bgrabber)
-		{
-			bgrabber->cloneTo(sfg->bgrabber.get());
-		}
-		else
-		{
-			sfg->bgrabber = bgrabber->clone();
-		}
-	}
-	sfg->function_name = function_name;
-	sfg->opptr = opptr;
+    stateGrabber::cloneTo(ggb);
+    auto sfg= dynamic_cast<stateFunctionGrabber *>(ggb);
+    if (sfg == nullptr)
+    {
+        return;
+    }
+    if (bgrabber)
+    {
+        if (sfg->bgrabber)
+        {
+            bgrabber->cloneTo(sfg->bgrabber.get());
+        }
+        else
+        {
+            sfg->bgrabber = bgrabber->clone();
+        }
+    }
+    sfg->function_name = function_name;
+    sfg->opptr = opptr;
 }
 
 double stateFunctionGrabber::grabData (const stateData &sD, const solverMode &sMode)
@@ -743,43 +743,43 @@ void stateOpGrabber::updateField (const std::string &opName)
 
 std::unique_ptr<stateGrabber> stateOpGrabber::clone() const
 {
-	std::unique_ptr<stateGrabber> sg = std::make_unique<stateOpGrabber>();
-	cloneTo(sg.get());
-	return sg;
+    std::unique_ptr<stateGrabber> sg = std::make_unique<stateOpGrabber>();
+    cloneTo(sg.get());
+    return sg;
 }
 
 void stateOpGrabber::cloneTo(stateGrabber *ggb) const
 {
-	stateGrabber::cloneTo(ggb);
-	auto sog = dynamic_cast<stateOpGrabber *>(ggb);
-	if (sog == nullptr)
-	{
-		return;
-	}
-	if (bgrabber1)
-	{
-		if (sog->bgrabber1)
-		{
-			bgrabber1->cloneTo(sog->bgrabber1.get());
-		}
-		else
-		{
-			sog->bgrabber1 = bgrabber1->clone();
-		}
-	}
-	if (bgrabber2)
-	{
-		if (sog->bgrabber2)
-		{
-			bgrabber2->cloneTo(sog->bgrabber2.get());
-		}
-		else
-		{
-			sog->bgrabber2 = bgrabber2->clone();
-		}
-	}
-	sog->op_name = op_name;
-	sog->opptr = opptr;
+    stateGrabber::cloneTo(ggb);
+    auto sog = dynamic_cast<stateOpGrabber *>(ggb);
+    if (sog == nullptr)
+    {
+        return;
+    }
+    if (bgrabber1)
+    {
+        if (sog->bgrabber1)
+        {
+            bgrabber1->cloneTo(sog->bgrabber1.get());
+        }
+        else
+        {
+            sog->bgrabber1 = bgrabber1->clone();
+        }
+    }
+    if (bgrabber2)
+    {
+        if (sog->bgrabber2)
+        {
+            bgrabber2->cloneTo(sog->bgrabber2.get());
+        }
+        else
+        {
+            sog->bgrabber2 = bgrabber2->clone();
+        }
+    }
+    sog->op_name = op_name;
+    sog->opptr = opptr;
 }
 
 double stateOpGrabber::grabData (const stateData &sD, const solverMode &sMode)

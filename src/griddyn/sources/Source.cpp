@@ -49,7 +49,7 @@ coreObject *Source::clone (coreObject *obj) const
     gS->m_tempOut = m_tempOut;
     gS->lastTime = lastTime;
     gS->purpose_ = purpose_;
-	gS->outputUnits_ = outputUnits_;
+    gS->outputUnits_ = outputUnits_;
     return gS;
 }
 
@@ -59,10 +59,10 @@ void Source::set (const std::string &param, const std::string &val)
     {
         purpose_ = val;
     }
-	else if ((param == "units") || (param == "outputunits"))
-	{
-		outputUnits_ = gridUnits::getUnits(val);
-	}
+    else if ((param == "units") || (param == "outputunits"))
+    {
+        outputUnits_ = gridUnits::getUnits(val);
+    }
     else
     {
         gridSubModel::set (param, val);
@@ -127,7 +127,7 @@ double Source::getOutput (index_t outputNum) const { return (outputNum == 0) ? m
 
 gridUnits::units_t Source::outputUnits(index_t outputNum) const
 {
-	return (outputNum == 0) ? outputUnits_ : gridUnits::defUnit;
+    return (outputNum == 0) ? outputUnits_ : gridUnits::defUnit;
 }
 
 index_t Source::getOutputLoc (const solverMode & /*sMode*/, index_t /*outputNum*/) const { return kNullLocation; }
