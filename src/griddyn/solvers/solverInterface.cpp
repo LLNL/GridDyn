@@ -571,7 +571,7 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
         }
         throw (std::bad_alloc ());
     }
-    else if (opt == 1)
+    if (opt == 1)
     {
         // Check if flag < 0
         errflag = static_cast<int *> (flagvalue);

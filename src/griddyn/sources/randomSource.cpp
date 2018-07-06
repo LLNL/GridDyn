@@ -128,11 +128,8 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
         {
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            param1_t = val;
-            timeParamUpdate ();
-        }
+        param1_t = val;
+        timeParamUpdate ();
     }
     else if (param == "max_t")
     {
@@ -153,10 +150,7 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
             LOG_WARNING ("mean_t parameter must be > 0");
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            param1_t = val;
-        }
+        param1_t = val;
     }
     else if (param == "scale_t")
     {
@@ -165,10 +159,7 @@ void randomSource::set (const std::string &param, double val, gridUnits::units_t
             LOG_WARNING ("scale_t parameter must be > 0");
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            param2_t = val;
-        }
+        param2_t = val;
     }
     else if (param == "param1_t")
     {

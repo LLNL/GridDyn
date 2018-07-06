@@ -197,7 +197,7 @@ void gridDynAction::process (const std::string &operation)
                 {
                     throw (invalidParameterValue (cmd));
                 }
-                else if (sz > 2)
+                if (sz > 2)
                 {
                     val_double = test;
                     val_double2 = numeric_conversion (ssep[3], kNullVal);

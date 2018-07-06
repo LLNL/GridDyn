@@ -41,13 +41,6 @@ std::unique_ptr<collector> fmiCollector::clone() const
 void fmiCollector::cloneTo(collector *gr) const
 {
 	collector::cloneTo(gr);
-
-	auto nrec = dynamic_cast<fmiCollector *>(gr);
-	if (nrec == nullptr)
-	{
-		return;
-	}
-	
 }
 
 change_code fmiCollector::trigger(coreTime time)
@@ -59,23 +52,14 @@ change_code fmiCollector::trigger(coreTime time)
 
 void fmiCollector::set(const std::string &param, double val)
 {
-	if (param.front() == '#')
-	{
-
-	}
-	else
+	if (param.front() != '#')
 	{
 		collector::set(param, val);
 	}
 }
 void fmiCollector::set(const std::string &param, const std::string &val)
 {
-	if (param.front() == '#')
-	{
-
-	}
-	else
-	{
+	if (param.front() != '#')
 		collector::set(param, val);
 	}
 }
@@ -87,10 +71,7 @@ const std::string &fmiCollector::getSinkName() const
 	{
 		return coord->getFMIName();
 	}
-	else
-	{
-		return defFMIName;
-	}
+	return defFMIName;
 }
 
 
@@ -128,9 +109,7 @@ void fmiCollector::dataPointAdded(const collectorPoint& cp)
 		{
 			//TODO:: deal with output vectors later
 		}
-		
 	}
-	
 }
 
 }//namespace fmi

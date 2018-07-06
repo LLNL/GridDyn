@@ -299,10 +299,7 @@ void aggregateLoad::set (const std::string &param, double val, gridUnits::units_
             LOG_WARNING ("fraction specification count exceeds load count");
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            fraction[num] = val;
-        }
+        fraction[num] = val;
     }
     else
     {

@@ -37,14 +37,13 @@ gridLinkOpt::gridLinkOpt (const std::string &objName) : gridOptObject (objName)
 
 gridLinkOpt::gridLinkOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),link (dynamic_cast<Link *> (obj))
 {
-
-  if (link)
+    if (link)
     {
-      if (getName().empty ())
+        if (getName().empty ())
         {
-          setName(link->getName ());
+            setName(link->getName ());
         }
-      setUserID(link->getUserID ());
+        setUserID(link->getUserID ());
     }
 }
 
@@ -112,34 +111,32 @@ void gridLinkOpt::loadSizes (const optimMode &oMode)
 
 void gridLinkOpt::add (coreObject *obj)
 {
-  if (dynamic_cast<Link *> (obj))
+    auto *tmpLink = dynamic_cast<Link *>(obj);
+    if (tmpLink)
     {
-
-      link = static_cast<Link *> (obj);
-      if (getName().empty ())
+        link = tmpLink;
+        if (getName().empty ())
         {
-          setName(link->getName ());
+            setName(link->getName ());
         }
-      setUserID(link->getUserID ());
+        setUserID(link->getUserID ());
     }
-  else
-  {
-	  throw(unrecognizedObjectException(this));
-  }
-
+    else
+    {
+        throw(unrecognizedObjectException(this));
+    }
 }
-
-
 
 void gridLinkOpt::remove (coreObject *)
 {
 
-  
 }
 
 void gridLinkOpt::setValues (const optimData &, const optimMode &)
 {
+
 }
+
 //for saving the state
 void gridLinkOpt::guessState (double /*time*/, double /*val*/[], const optimMode &)
 {
@@ -150,7 +147,6 @@ void gridLinkOpt::getVariableType (double /*sdata*/[], const optimMode &)
 {
 
 }
-
 
 void gridLinkOpt::getTols (double /*tols*/[], const optimMode &)
 {
@@ -172,9 +168,11 @@ void gridLinkOpt::quadraticObj (const optimData &, vectData<double> & /*linObj*/
 
 void gridLinkOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &)
 {
+
 }
 void gridLinkOpt::constraintJacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &)
 {
+
 }
 
 double gridLinkOpt::objValue (const optimData &, const optimMode &)
@@ -188,31 +186,29 @@ void gridLinkOpt::gradient (const optimData &, double /*deriv*/[], const optimMo
 {
 
 }
+
 void gridLinkOpt::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &)
 {
 
 }
+
 void gridLinkOpt::getConstraints (const optimData &, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
 {
 
 }
+
 void gridLinkOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const std::string & /*prefix*/)
 {
 
 }
 
-
 void gridLinkOpt::disable ()
 {
-	coreObject::disable();
-
+    coreObject::disable();
 }
 
 void gridLinkOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/)
 {
-
-
-
 
 }
 
@@ -223,133 +219,114 @@ gridLinkOpt::~gridLinkOpt ()
 
 }
 
-
 // set properties
 void gridLinkOpt::set (const std::string &param,  const std::string &val)
 {
-  if (param == "#")
+    if (param == "#")
     {
 
     }
-  else
+    else
     {
-      gridOptObject::set (param, val);
+        gridOptObject::set (param, val);
     }
 }
 
 void gridLinkOpt::set (const std::string &param, double val, units_t unitType)
 {
-
-  if ((param == "voltagetolerance") || (param == "vtol"))
+    if ((param == "voltagetolerance") || (param == "vtol"))
     {
 
     }
-  else if ((param == "angleetolerance") || (param == "atol"))
+    else if ((param == "angleetolerance") || (param == "atol"))
     {
 
     }
-  else
+    else
     {
-      gridOptObject::set (param, val, unitType);
+        gridOptObject::set (param, val, unitType);
     }
-
-
 }
-
-
-
 
 coreObject *gridLinkOpt::find (const std::string &objName) const
 {
-  if ((objName == getName()) || (objName == "link"))
+    if ((objName == getName()) || (objName == "link"))
     {
-      return const_cast<gridLinkOpt *> (this);
+        return const_cast<gridLinkOpt *> (this);
     }
-  if ((objName == "b1") || (objName == "bus1")||(objName == "bus"))
+    if ((objName == "b1") || (objName == "bus1")||(objName == "bus"))
     {
-      return B1;
+        return B1;
     }
-  if ((objName == "b2") || (objName == "bus2"))
+    if ((objName == "b2") || (objName == "bus2"))
     {
-      return B2;
+        return B2;
     }
 
-  return (coreObject::find (objName));
+    return (coreObject::find (objName));
 }
 
 coreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num) const
 {
-  if (typeName == "bus")
+    if (typeName == "bus")
     {
-      if (num == 1)
+        if (num == 1)
         {
-          return B1;
+            return B1;
         }
-      else if (num == 2)
+        else if (num == 2)
         {
-          return B2;
+            return B2;
         }
     }
-  return nullptr;
+    return nullptr;
 }
 
 coreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
-  if (typeName == "bus")
+    if (typeName == "bus")
     {
-      if (B1->getUserID () == searchID)
+        if (B1->getUserID () == searchID)
         {
-          return B1;
+            return B1;
         }
-      else if (B2->getUserID () == searchID)
+        if (B2->getUserID () == searchID)
         {
-          return B2;
+            return B2;
         }
     }
 
-  return nullptr;
+    return nullptr;
 }
 
 
 
 gridOptObject *gridLinkOpt::getBus (index_t x) const
 {
-  if (x == 1)
+    if (x == 1)
     {
-      return B1;
+        return B1;
     }
-  else if (x == 2)
+    if (x == 2)
     {
-      return B2;
+        return B2;
     }
-  else
-    {
-      return nullptr;
-    }
-
+    return nullptr;
 }
 
 gridOptObject *gridLinkOpt::getArea (index_t /*index*/) const
 {
-  return dynamic_cast<gridOptObject *> (getParent());
+    return dynamic_cast<gridOptObject *> (getParent());
 }
-
 
 double gridLinkOpt::get (const std::string &param, gridUnits::units_t unitType) const
 {
-  double val = kNullVal;
-  if (param[0] == '#')
+    double val = kNullVal;
+    if (param[0] != '#')
     {
+        val = gridOptObject::get (param, unitType);
     }
-  else
-    {
-      val = gridOptObject::get (param, unitType);
-    }
-  return val;
+    return val;
 }
 
 }// namespace griddyn
-
-
-
-

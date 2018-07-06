@@ -425,10 +425,7 @@ double Relay::get(const std::string &param, gridUnits::units_t unitType) const
 		coreObject *tobj = const_cast<Relay*>(this);
 		return unitConversion(fptr.first(tobj), fptr.second, unitType, systemBasePower);
 	}
-	else
-	{
-		return gridPrimary::get(param, unitType);
-	}
+	return gridPrimary::get(param, unitType);
 }
 
 void Relay::setFlag (const std::string &flag, bool val)

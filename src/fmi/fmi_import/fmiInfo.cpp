@@ -125,17 +125,13 @@ const std::string emptyString="";
 
 const std::string &fmiInfo::getString(const std::string &field) const
 {
-	auto fnd = headerInfo.find(field);
-	if (fnd != headerInfo.end())
-	{
-		return fnd->second;
-	}
-	else
-	{
-		return emptyString;
-	}
+    auto fnd = headerInfo.find(field);
+    if (fnd != headerInfo.end())
+    {
+        return fnd->second;
+    }
+    return emptyString;
 }
-
 
 double fmiInfo::getReal(const std::string &field) const
 {
@@ -183,14 +179,11 @@ const variableInformation& fmiInfo::getVariableInfo(const std::string &variableN
 
 const variableInformation& fmiInfo::getVariableInfo(unsigned int index) const
 {
-	if (index < variables.size())
-	{
-		return variables[index];
-	}
-	else
-	{
-		return emptyVI;
-	}
+    if (index < variables.size())
+    {
+        return variables[index];
+    }
+    return emptyVI;
 }
 
 fmiVariableSet fmiInfo::getReferenceSet(const std::vector<std::string > &variableList) const

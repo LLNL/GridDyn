@@ -41,7 +41,6 @@ fmiMESubModel::fmiMESubModel(std::shared_ptr<fmi2ModelExchangeObject> fmi) : me(
 
 fmiMESubModel::~fmiMESubModel() = default;
 
-
 coreObject * fmiMESubModel::clone(coreObject *obj) const
 {
 	auto *gco = cloneBase<fmiMESubModel, gridSubModel>(this, obj);
@@ -49,12 +48,10 @@ coreObject * fmiMESubModel::clone(coreObject *obj) const
 	{
 		return obj;
 	}
-
 	return gco;
 }
 
 bool fmiMESubModel::isLoaded() const { return static_cast<bool>(me); }
-
 
 void fmiMESubModel::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
@@ -70,7 +67,6 @@ void fmiMESubModel::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 }
 void fmiMESubModel::pFlowObjectInitializeB()
 {
-
     if (opFlags[pflow_init_required])
     {
 		//printf("enter continuous time mode\n");
@@ -84,19 +80,16 @@ void fmiMESubModel::pFlowObjectInitializeB()
 
 void fmiMESubModel::dynObjectInitializeA (coreTime time0, std::uint32_t /*flags*/)
 {
-
 	prevTime = time0;
 }
 
 void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /*desiredOutput*/, IOdata & /*inputSet*/)
 {
-
 	if (opFlags[pflow_init_required])
 	{
 		//printf("GridDyn Dyn B pflowINit required\n");
 		if (opFlags[pFlow_initialized])
 		{
-
 			me->getStates(m_state.data());
 			me->setTime(prevTime - 0.01);
 
@@ -143,8 +136,6 @@ void fmiMESubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /
 		}
 		me->setTime(prevTime - 0.01);
 	}
-
-
 }
 
 
@@ -256,55 +247,53 @@ stringVec fmiMESubModel::getOutputNames () const { return me->getOutputNames ();
 
 stringVec fmiMESubModel::getInputNames () const { return me->getInputNames (); }
 
-
-
 void fmiMESubModel::set (const std::string &param, const std::string &val)
 {
-	if ((param == "fmu")||(param=="file"))
-	{
-		if (!(me))
-		{
-			try
-			{
-				//printf("loading instance of fmi %s\n", val.c_str());
-				me = fmiLibraryManager::instance().createModelExchangeObject(val, getName());
-			}
-			catch (const boost::filesystem::filesystem_error &fse)
-			{
-				//printf("error loading object %s\n",fse.what());
-				LOG_ERROR(std::string("file system error") + fse.what());
-			}
+    if ((param == "fmu")||(param=="file"))
+    {
+        if (!(me))
+        {
+            try
+            {
+                //printf("loading instance of fmi %s\n", val.c_str());
+                me = fmiLibraryManager::instance().createModelExchangeObject(val, getName());
+            }
+            catch (const boost::filesystem::filesystem_error &fse)
+            {
+                //printf("error loading object %s\n",fse.what());
+                LOG_ERROR(std::string("file system error") + fse.what());
+            }
             if (!me)
             {
-				//printf("unable to load ME object\n");
+                //printf("unable to load ME object\n");
                 LOG_ERROR("Unable to load FMU " + getName());
             }
             if (!paramBuffer.empty())
             {
                 paramBuffer.apply(me);
             }
-		}
-		else
-		{
-			throw(invalidParameterValue(param));
-		}
+        }
+        else
+        {
+            throw(invalidParameterValue(param));
+        }
 
-	}
-	else if (param == "outputs")
-	{
-		auto ssep = stringOps::splitline(val);
-		stringOps::trim(ssep);
-		me->setOutputVariables(ssep);
-		m_outputSize = me->outputSize();
-	}
-	else if (param == "inputs")
-	{
-		auto ssep = stringOps::splitline(val);
-		stringOps::trim(ssep);
-		me->setInputVariables(ssep);
-		m_inputSize = me->inputSize();
-		//updateDependencyInfo();
-	}
+    }
+    else if (param == "outputs")
+    {
+        auto ssep = stringOps::splitline(val);
+        stringOps::trim(ssep);
+        me->setOutputVariables(ssep);
+        m_outputSize = me->outputSize();
+    }
+    else if (param == "inputs")
+    {
+        auto ssep = stringOps::splitline(val);
+        stringOps::trim(ssep);
+        me->setInputVariables(ssep);
+        m_inputSize = me->inputSize();
+        //updateDependencyInfo();
+    }
     else
     {
         if (me)
@@ -332,19 +321,17 @@ void fmiMESubModel::set (const std::string &param, const std::string &val)
                 paramBuffer.set(param, val);
             }
         }
-	}
-
+    }
 }
 
 void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-
-	if ((param == "timestep") || (param == "localintegrationtime"))
-	{
-		localIntegrationTime = val;
-	}
-	else
-	{
+    if ((param == "timestep") || (param == "localintegrationtime"))
+    {
+        localIntegrationTime = val;
+    }
+    else
+    {
         if (me)
         {
             bool isparam = me->isParameter(param, fmi_variable_type_t::numeric);
@@ -370,75 +357,45 @@ void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_
                 paramBuffer.set(param, val, unitType);
             }
         }
-
-	}
-
+    }
 }
 
 double fmiMESubModel::get(const std::string &param, gridUnits::units_t unitType) const
 {
-
-	if (param == "localintegrationtime")
-	{
-		return static_cast<double>(localIntegrationTime);
-	}
-	else
-	{
-		if ((me) &&(me->isVariable(param, fmi_variable_type_t::numeric)))
-		{
-			return me->get<double>(param);
-		}
-		else
-		{
-			return gridSubModel::get(param, unitType);
-		}
-	}
-
+    if (param == "localintegrationtime")
+    {
+        return static_cast<double>(localIntegrationTime);
+    }
+    if ((me) &&(me->isVariable(param, fmi_variable_type_t::numeric)))
+    {
+        return me->get<double>(param);
+    }
+    return gridSubModel::get(param, unitType);
 }
 
 stateSizes fmiMESubModel::LocalStateSizes(const solverMode &sMode) const
 {
 	stateSizes SS;
-	if (hasDifferential(sMode))
+	if (hasDifferential(sMode) or (!isDynamic(sMode) and opFlags[pflow_init_required]))
 	{
 		SS.diffSize = m_stateSize;
-	}
-	else if (!isDynamic(sMode))
-	{
-		if (opFlags[pflow_init_required])
-		{
-			SS.algSize = m_stateSize;
-		}
-		else
-		{
-		}
 	}
 	return SS;
 }
 
 count_t fmiMESubModel::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
-		if (hasDifferential(sMode))
-		{
-		jacSize = m_jacElements;
-		}
-		else if (!isDynamic(sMode))
-		{
-			if (opFlags[pflow_init_required])
-			{
-			jacSize = m_jacElements;
-			}
-			else
-			{
-			}
-		}
-	return jacSize;
+    count_t jacSize = 0;
+    if (hasDifferential(sMode) or (!isDynamic(sMode) and opFlags[pflow_init_required]))
+    {
+        jacSize = m_jacElements;
+    }
+    return jacSize;
 }
 
 std::pair<count_t, count_t> fmiMESubModel::LocalRootCount(const solverMode &sMode) const
 {
-	return{ 0,m_eventCount };
+    return{ 0, m_eventCount };
 }
 
 
@@ -479,7 +436,6 @@ void fmiMESubModel::setState(coreTime time, const double state[], const double d
 				}
 			}
 		}
-
 	}
 	else if (!isDynamic(sMode) && (opFlags[pflow_init_required]))
 	{
@@ -493,8 +449,6 @@ void fmiMESubModel::setState(coreTime time, const double state[], const double d
 		int eventMode;
 		int terminate;
 		me->completedIntegratorStep(true, &eventMode, &terminate);
-
-
 	}
 	prevTime = time;
 }

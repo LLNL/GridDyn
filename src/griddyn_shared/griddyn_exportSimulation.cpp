@@ -19,10 +19,6 @@
 
 using namespace griddyn;
 
-
-
-
-
 gridDynSimReference gridDynSimulation_create(const char *type, const char *name)
 {
 	GriddynRunner *sim;
@@ -31,31 +27,26 @@ gridDynSimReference gridDynSimulation_create(const char *type, const char *name)
 	{
 		return nullptr;
 	}
-	else if (typeStr == "buildfmu")
+	if (typeStr == "buildfmu")
 	{
 		return nullptr;
 	}
-	else if (typeStr == "dime")
+	if (typeStr == "dime")
 	{
 		return nullptr;
 	}
-	else if (typeStr == "buildgdz")
+	if (typeStr == "buildgdz")
 	{
 		return nullptr;
 	}
-	else
-	{
-		sim = new GriddynRunner();
-		
-	}
+
+	sim = new GriddynRunner();
 	if (sim != nullptr)
 	{
 		sim->getSim()->setName(name);
 	}
-	
 
 	return reinterpret_cast<gridDynSimReference>(sim);
-	
 }
 
 
@@ -97,7 +88,7 @@ griddyn_status gridDynSimulation_loadfile(gridDynSimReference sim, const char *f
 	{
 		return griddyn_invalid_object;
 	}
-	
+
 	try
 	{
 		auto typestr = std::string(fileType);
@@ -132,7 +123,7 @@ griddyn_status gridDynSimulation_addCommand(gridDynSimReference sim, const char 
 		return griddyn_ok;
 	}
 	return griddyn_add_failure;
-	
+
 }
 
 griddyn_status gridDynSimulation_run(gridDynSimReference sim)

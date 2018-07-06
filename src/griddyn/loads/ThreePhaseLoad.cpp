@@ -78,9 +78,7 @@ void ThreePhaseLoad::setLoad (double Plevel, double Qlevel, units_t unitType)
 
 static const stringVec locNumStrings{"pa", "pb", "pc", "qa", "qb", "qc"};
 
-static const stringVec locStrStrings{
-
-};
+static const stringVec locStrStrings{};
 
 static const stringVec flagStrings{"use_abs_angle","ignore_phase","three_phase_inputs","three_phase_outputs"};
 
@@ -118,11 +116,7 @@ void ThreePhaseLoad::setFlag (const std::string &flag, bool val)
 // set properties
 void ThreePhaseLoad::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
-    {
-    }
-    else
-    {
+    if (param[0] != '#')
         Load::set (param, val);
     }
 }
@@ -472,11 +466,7 @@ const std::vector<stringVec> &ThreePhaseLoad::inputNames() const
 	{
 		return inputNamesStr3phase;
 	}
-	else
-	{
-		return Load::inputNames();
-	}
-	
+	return Load::inputNames();
 }
 
 static const std::vector<stringVec> outputNamesStr3phase
@@ -495,10 +485,7 @@ const std::vector<stringVec> &ThreePhaseLoad::outputNames() const
 	{
 		return outputNamesStr3phase;
 	}
-	else
-	{
-		return Load::outputNames();
-	}
+	return Load::outputNames();
 }
 
 }  // namespace loads

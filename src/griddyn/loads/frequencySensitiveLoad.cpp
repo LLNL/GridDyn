@@ -52,8 +52,8 @@ coreObject *frequencySensitiveLoad::clone(coreObject *obj) const
 void frequencySensitiveLoad::pFlowObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
 	Load::pFlowObjectInitializeA(time0, flags);
-	 auto Psched = subLoad->getRealPower();
-	 dPdf = -H / 30.0 * Psched;
+	auto Psched = subLoad->getRealPower();
+	dPdf = -H / 30.0 * Psched;
 
 }
 
@@ -64,10 +64,10 @@ void frequencySensitiveLoad::dynObjectInitializeA(coreTime time0, std::uint32_t 
 
 void frequencySensitiveLoad::timestep(coreTime time, const IOdata &inputs, const solverMode & sMode)
 {
-	
+
 	subLoad->timestep(time, inputs, sMode);
 	double freq = (inputs.size() > 2) ? inputs[frequencyInLocation] : 1.0;
-	
+
 	updateOutputs(freq);
 }
 
@@ -82,11 +82,9 @@ void frequencySensitiveLoad::updateOutputs(double frequency)
 
 static const stringVec locNumStrings{ "h", "m"};
 
-static const stringVec locStrStrings{
+static const stringVec locStrStrings{};
 
-};
-
-static const stringVec flagStrings{ };
+static const stringVec flagStrings{};
 
 void frequencySensitiveLoad::getParameterStrings(stringVec &pstr, paramStringType pstype) const
 {
@@ -117,18 +115,15 @@ double frequencySensitiveLoad::get(const std::string &param, units_t unitType) c
 	{
 		return dPdf;
 	}
-	else if (param == "h")
+	if (param == "h")
 	{
 		return H;
 	}
-	else if (param == "m")
+	if (param == "m")
 	{
 		return M;
 	}
-	else
-	{
-		return subLoad->get(param, unitType);
-	}
+	return subLoad->get(param, unitType);
 }
 
 void frequencySensitiveLoad::set(const std::string &param, double val, units_t unitType)
@@ -165,12 +160,8 @@ void frequencySensitiveLoad::setState(coreTime time, const double state[], const
 	prevTime = time;
 }
 
-
-
-
 double frequencySensitiveLoad::getRealPower() const
 {
-	
 	return Pout;
 }
 
@@ -188,7 +179,7 @@ double frequencySensitiveLoad::getRealPower(const IOdata &inputs, const stateDat
 
 double frequencySensitiveLoad::getReactivePower(const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
 {
-	
+
 	double Qr= subLoad->getReactivePower(inputs,sD,sMode);
 	double freq = (inputs.size() >= frequencyInLocation) ? inputs[frequencyInLocation] : bus->getFreq(sD, sMode);
 	return Qr + Qr*(freq - 1.0)*M;
@@ -196,7 +187,7 @@ double frequencySensitiveLoad::getReactivePower(const IOdata &inputs, const stat
 
 double frequencySensitiveLoad::getRealPower(const double V) const
 {
-	
+
 	double Pr = subLoad->getRealPower(V);
 	double freq = bus->getFreq();
 	return Pr + Pr*(freq - 1.0)*M;
@@ -222,7 +213,7 @@ void frequencySensitiveLoad::outputPartialDerivatives(const IOdata &inputs,
 	}
 }
 
-count_t frequencySensitiveLoad::outputDependencyCount(index_t num, const solverMode &sMode) const 
+count_t frequencySensitiveLoad::outputDependencyCount(index_t num, const solverMode &sMode) const
 {
 	return subLoad->outputDependencyCount(num, sMode);
 }
@@ -233,10 +224,8 @@ void frequencySensitiveLoad::ioPartialDerivatives(const IOdata & /*inputs*/,
 	const IOlocs &/*inputLocs*/,
 	const solverMode &/*sMode*/)
 {
-	
+
 }
-
-
 
 } // namespace loads
 }  // namespace griddyn

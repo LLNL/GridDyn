@@ -118,10 +118,10 @@ void schedulerRamp::dynObjectInitializeB (const IOdata &inputs, const IOdata &de
     scheduler::dynObjectInitializeB (inputs, desiredOutput, fieldSet);
     if (reserveAvail > 0)
     {
-        // if (resDispatch==nullptr)
-        //	{
-        //		reserveDispatcherLink();
-        //	}
+        //  if (resDispatch==nullptr)
+        //  {
+        //      reserveDispatcherLink();
+        //  }
     }
     while (!pTarget.empty ())
     {
@@ -295,23 +295,24 @@ void schedulerRamp::set (const std::string &param, double val, gridUnits::units_
         // check to updateP the reservedispatcher
         if (temp != reserveAvail)
         {
-            /*	if (reserveAvail==0)
-                    {
-                            reserveAvail=temp;
-                            if (resDispatch==nullptr)
-                            {
-                                    reserveDispatcherLink(nullptr);
-                            }
-                    }
-                    else
-                    {
-                            reserveAvail=temp;
-                            if (resDispatch!=nullptr)
-                            {
-                                    resDispatch->schedChange();
-                            }
-                    }
-  */
+            /*
+            if (reserveAvail==0)
+            {
+                reserveAvail=temp;
+                if (resDispatch==nullptr)
+                {
+                    reserveDispatcherLink(nullptr);
+                }
+            }
+            else
+            {
+                reserveAvail=temp;
+                if (resDispatch!=nullptr)
+                {
+                    resDispatch->schedChange();
+                }
+            }
+            */
         }
     }
     else if (param == "reserveramptime")
@@ -358,18 +359,16 @@ void schedulerRamp::updatePTarget ()
         nextUpdateTime = maxTime;
         return;
     }
-    else
+
+    target = (pTarget.front ()).target;
+    time = (pTarget.front ()).time;
+    if (target > (Pmax - reserveAvail))
     {
-        target = (pTarget.front ()).target;
-        time = (pTarget.front ()).time;
-        if (target > (Pmax - reserveAvail))
-        {
-            target = (Pmax - reserveAvail);
-        }
-        else if (target < Pmin)
-        {
-            target = Pmin;
-        }
+        target = (Pmax - reserveAvail);
+    }
+    else if (target < Pmin)
+    {
+        target = Pmin;
     }
 
     tsched tempTarget;
