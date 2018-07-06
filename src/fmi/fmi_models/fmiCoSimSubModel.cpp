@@ -29,7 +29,7 @@ namespace griddyn
 namespace fmi
 {
 
-fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) :gridSubModel(newName), cs(std::move(fmi))
+fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) : gridSubModel(newName), cs(std::move(fmi))
 {
 
 }

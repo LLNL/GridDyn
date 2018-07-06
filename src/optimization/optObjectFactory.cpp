@@ -14,7 +14,7 @@
 
 namespace griddyn
 {
-optComponentFactory::optComponentFactory (const std::string component) : name (component)
+optComponentFactory::optComponentFactory (const std::string &component) : name (component)
 {
 
 }
@@ -124,7 +124,7 @@ std::shared_ptr<coreOptObjectFactory> coreOptObjectFactory::instance ()
   return factory;
 }
 
-void coreOptObjectFactory::registerFactory (const std::string  name, std::shared_ptr<optComponentFactory> tf)
+void coreOptObjectFactory::registerFactory (const std::string &name, std::shared_ptr<optComponentFactory> tf)
 {
   m_factoryMap[name] = tf;
 }
@@ -263,7 +263,7 @@ bool coreOptObjectFactory::isValidObject (const std::string &optType, const std:
 }
 
 
-void coreOptObjectFactory::setDefaultType (const std::string defType)
+void coreOptObjectFactory::setDefaultType (const std::string &defType)
 {
   auto mfind = m_factoryMap.find (defType);
   if (mfind != m_factoryMap.end ())

@@ -14,7 +14,7 @@
 
 
 fmi2ModelExchangeObject::fmi2ModelExchangeObject(fmi2Component cmp, std::shared_ptr<const fmiInfo> keyInfo, std::shared_ptr<const fmiCommonFunctions> comFunc,std::shared_ptr<const fmiModelExchangeFunctions> meFunc)
-    : fmi2Object(cmp, keyInfo, comFunc), ModelExchangeFunctions(std::move(meFunc))
+    : fmi2Object(cmp, std::move(keyInfo), std::move(comFunc)), ModelExchangeFunctions(std::move(meFunc))
 {
 	numIndicators = info->getCounts("events");
 	numStates = info->getCounts("states");

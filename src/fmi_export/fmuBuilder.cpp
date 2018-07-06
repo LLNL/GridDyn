@@ -39,7 +39,7 @@ namespace fmi
 {
 fmuBuilder::fmuBuilder () { loadComponents (); }
 
-fmuBuilder::fmuBuilder (std::shared_ptr<gridDynSimulation> gds) : GriddynRunner (gds) { loadComponents (); }
+fmuBuilder::fmuBuilder (std::shared_ptr<gridDynSimulation> gds) : GriddynRunner (std::move(gds)) { loadComponents (); }
 
 void fmuBuilder::loadComponents ()
 {
@@ -108,34 +108,20 @@ int fmuBuilder::Initialize (int argc, char *argv[])
 }
 using namespace boost::filesystem;
 /** helper function to copy a file and overwrite if requested*/
-bool testCopyFile (path source, path dest, bool overwrite = false)
+bool testCopyFile (path const& source, path const& dest, bool overwrite = false)
 {
-    if (!exists (dest))
+    copy_option option = copy_option::fail_if_exists;
+    if (overwrite) { option = copy_option::overwrite_if_exists; }
+
+    try
     {
-        try
-        {
-            copy_file (source, dest);
-            return true;
-        }
-        catch (filesystem_error &e)
-        {
-            return false;
-        }
+        copy_file (source, dest, copy_option);
+        return true;
     }
-    if (overwrite)
+    catch (filesystem_error const& e)
     {
-        try
-        {
-            remove (dest);
-            copy_file (source, dest);
-            return true;
-        }
-        catch (filesystem_error &e)
-        {
-            return false;
-        }
+        return false;
     }
-    return false;
 }
 
 void fmuBuilder::MakeFmu (const std::string &fmuLocation)
@@ -231,8 +217,8 @@ void fmuBuilder::MakeFmu (const std::string &fmuLocation)
             getSim()->log(nullptr, print_level::error, "zip status failure creating " + fmupath.string() + "returned with error code " + std::to_string(status));
         }
     }
-   
-  
+
+
 }
 
 void fmuBuilder::copySharedLibrary (const std::string &tempdir)
@@ -527,7 +513,7 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
 	doc.InsertFirstChild(dec);
 	//add the main xml root object
     auto pRoot = doc.NewElement ("fmiModelDescription");
-	
+
     doc.InsertEndChild (pRoot);
 
     pRoot->SetAttribute ("fmiVersion", "2.0");
@@ -538,7 +524,7 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
 	{
 		pRoot->SetAttribute("description", desc.c_str());
 	}
-   
+
     pRoot->SetAttribute ("version", getSim ()->getString ("version").c_str ());
 
     // the cosimulation description section
@@ -654,7 +640,7 @@ void fmuBuilder::generateXML (const std::string &xmlfile)
             rType->SetAttribute("start", coord_->getOutput(param.first));
             sVariable->InsertEndChild(rType);
         }
-        
+
         pElement->InsertEndChild (sVariable);
         ++index;
     }

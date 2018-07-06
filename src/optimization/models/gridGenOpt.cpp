@@ -551,7 +551,7 @@ double gridGenOpt::get (const std::string &param, gridUnits::units_t unitType) c
 }
 
 
-void gridGenOpt::loadCostCoeff (std::vector<double> coeff, int mode)
+void gridGenOpt::loadCostCoeff (std::vector<double> const& coeff, int mode)
 {
   if (mode == 0)
     {

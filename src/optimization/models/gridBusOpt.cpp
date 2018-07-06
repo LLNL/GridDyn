@@ -535,7 +535,7 @@ void gridBusOpt::remove (gridLinkOpt *lnk)
 
 
 
-void gridBusOpt::setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType)
+void gridBusOpt::setAll (const std::string &type, const std::string &param, double val, gridUnits::units_t unitType)
 {
 
   if ((type == "gen") || (type == "generator"))
