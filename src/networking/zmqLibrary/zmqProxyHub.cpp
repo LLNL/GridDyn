@@ -126,4 +126,4 @@ namespace zmqlib
         proxyRunning = false;
     }
 
-}
+} // namespace zmqlib

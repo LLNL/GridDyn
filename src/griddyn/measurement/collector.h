@@ -55,7 +55,7 @@ protected:
 	coreTime stopTime = maxTime;  //!< the time to stop collecting
 	coreTime triggerTime = maxTime; //!< the next trigger time for the collector
 	coreTime lastTriggerTime = negTime; //!< the last time the collector was triggered
-	
+
 	/** data structure to capture the grabbers and location for a specific grabber*/
 	class collectorPoint
 	{
@@ -91,13 +91,13 @@ public:
 	virtual void cloneTo(collector *col) const;
 
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
-	
+
 	/** function to grab the data to specific location
-	@param[out] data_ the location to place the captured values
+	@param[out] data the location to place the captured values
 	@param[in] N the size of the data storage location
 	@return the number of data points stored
 	*/
-	count_t grabData(double *data_, index_t N);
+	count_t grabData(double *data, index_t N);
 	virtual change_code trigger(coreTime time) override;
 	/** do a check to check and assign all columns*/
 	void recheckColumns();
@@ -152,7 +152,7 @@ public:
 		return warningCount;
 	}
 	/** get a list of the warnings that were generated on construction
-	@return a vector of the warnings 
+	@return a vector of the warnings
 	*/
 	const std::vector<std::string> &getWarnings() const
 	{

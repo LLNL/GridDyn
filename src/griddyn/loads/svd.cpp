@@ -151,7 +151,7 @@ int svd::checkSetting (double level)
 				opFlags.set(reverse_toggled_flag);
 				return checkSetting(level);
 			}
-            
+
         }
 
         return setting;
@@ -177,7 +177,7 @@ void svd::updateSetting (int step)
 		{
 			auto block = Cblocks.begin();
 			int scount = 0;
-			
+
 			while (step > scount + (*block).first)
 			{
 				scount += (*block).first;
@@ -208,7 +208,7 @@ void svd::updateSetting (int step)
 		}
 		setYq(qlevel);
         currentStep = step;
-       
+
     }
 }
 
@@ -396,7 +396,7 @@ void svd::set (const std::string &param, double val, units_t unitType)
 void svd::addBlock (int steps, double Qstep, gridUnits::units_t unitType)
 {
     Qstep = gridUnits::unitConversion (Qstep, unitType, gridUnits::puMW, systemBasePower);
-    Cblocks.push_back (std::make_pair (steps, Qstep));
+    Cblocks.emplace_back (steps, Qstep);
     Qhigh += steps * Qstep;
     stepCount += steps;
 }

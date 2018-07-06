@@ -27,7 +27,7 @@ static typeFactory<aggregateLoad> glfld ("load", stringVec{"composite", "cluster
 using namespace stringOps;
 aggregateLoad::aggregateLoad (const std::string &objName) : zipLoad (objName)
 {
-    add (new zipLoad (getName () + "sub"));
+    aggregateLoad::add (new zipLoad (getName () + "sub"));
 }
 
 coreObject *aggregateLoad::clone (coreObject *obj) const

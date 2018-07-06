@@ -44,7 +44,7 @@ coreObject *approximatingLoad::clone (coreObject *obj) const
     }
     ld->triggerBound = triggerBound;
     ld->spread = spread;
-  
+
 
 
     ld->cDetail = cDetail;
@@ -72,20 +72,20 @@ void approximatingLoad::add (coreObject *obj)
 
 void approximatingLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-   
+
     m_lastCallTime = time0;
-    
+
     opFlags[preEx_requested] = true;
     rampLoad::pFlowObjectInitializeA (time0, flags);
 	updateA(time0);
 }
 
-void approximatingLoad::pFlowObjectInitializeB () 
+void approximatingLoad::pFlowObjectInitializeB ()
 {
 
 	updateB();
 	rampLoad::pFlowObjectInitializeB();
-	
+
 }
 
 void approximatingLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
@@ -166,7 +166,7 @@ void approximatingLoad::updateA (coreTime time)
                 subLoad->timestep (time, inputs, cLocalSolverMode);
             }
         }
-  
+
     if (cDetail == coupling_detail_t::single)
     {
         run1ApproxA (time, inputs);
@@ -347,7 +347,7 @@ std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues
 	{
 		return res;
 	}
-	
+
 	IOdata cinputs(inputs.begin(), inputs.end());
 	for (auto &V : voltages)
 	{
@@ -363,7 +363,7 @@ std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues
 void approximatingLoad::run1ApproxA (coreTime time, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
-    
+
     auto dt = time - m_lastCallTime;
 
 	std::vector<double> voltages;
@@ -380,7 +380,7 @@ std::vector<double> approximatingLoad::run1ApproxB ()
 	auto res = vres.get();
 	opFlags.reset(waiting_flag);
     return {std::get<1>(res[0]), std::get<2>(res[0]) };
-    
+
 }
 
 void approximatingLoad::run2ApproxA (coreTime time, const IOdata &inputs)
@@ -428,7 +428,7 @@ void approximatingLoad::run3ApproxA (coreTime time, const IOdata &inputs)
 
 	std::vector<double> voltages;
 	double V = inputs[voltageInLocation];
-	
+
 	double r1 = (V - spread) / V;
 	voltages.push_back(V*r1);
 	r1 = (V + spread) / V;
@@ -543,9 +543,6 @@ return retP;
 
 void approximatingLoad::set (const std::string &param, const std::string &val)
 {
-    std::string numstr;
-    int num;
-
     if (param == "detail")
     {
         auto v2 = convertToLowerCase (val);

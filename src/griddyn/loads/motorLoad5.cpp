@@ -83,27 +83,24 @@ void motorLoad5::converge ()
     double Qtest = qPower (V, m_state[2]);
     double im, ir;
     double er, em;
-    double emp, erp;
 
     double Vr = -V * Vcontrol * sin (theta);
     double Vm = V * Vcontrol * cos (theta);
     solve2x2 (Vr, Vm, Vm, -Vr, getP (), Qtest, ir, im);
     double err = 10;
-    double slipp = slip;
     int ccnt = 0;
     double fbs = slip * systemBaseFrequency;
 
     double perr = 10;
-    double dslip = 0;
     while (err > 1e-6)
     {
-        erp = Vr - r * ir + xp * im;
-        emp = Vm - r * im - xp * ir;
+        double erp = Vr - r * ir + xp * im;
+        double emp = Vm - r * im - xp * ir;
         solve2x2 (fbs, -1.0 / T0pp, 1.0 / T0pp, fbs, fbs * erp - erp / T0pp + (xp - xpp) / T0pp * ir,
                   fbs * emp - emp / T0pp + (xp - xpp) / T0pp * im, er, em);
 
-        slipp = (er + (x0 - xp) * im) / T0p / systemBaseFrequency / em;
-        dslip = slipp - slip;
+        double slipp = (er + (x0 - xp) * im) / T0p / systemBaseFrequency / em;
+        double dslip = slipp - slip;
         if (getP () > 0)
         {
             if (slipp < 0)

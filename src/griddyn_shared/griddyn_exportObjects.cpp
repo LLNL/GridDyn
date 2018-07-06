@@ -125,7 +125,7 @@ griddyn_status gridDynObject_add(gridDynObject parentObject, gridDynObject objec
 	{
 		return griddyn_add_failure;
 	}
-	
+
 }
 
 griddyn_status gridDynObject_remove(gridDynObject parentObject, gridDynObject objectToRemove)
@@ -248,7 +248,7 @@ griddyn_status gridDynObject_getString(const gridDynObject obj, const char *para
 	auto s = comp->getString(parameter);
 	strncpy(value, s.c_str(), N);
 	return static_cast<int>(s.size());
-	
+
 }
 
 griddyn_status gridDynObject_getValue(const gridDynObject obj, const char *parameter, double *result)
@@ -272,7 +272,7 @@ griddyn_status gridDynObject_getValue(const gridDynObject obj, const char *param
 	{
 		return griddyn_unknown_parameter;
 	}
-	
+
 }
 
 
@@ -317,7 +317,7 @@ griddyn_status gridDynObject_getFlag(const gridDynObject obj, const char *flag, 
         *result = (res) ? 1 : 0;
 		return griddyn_ok;
 	}
-	catch (const unrecognizedParameter)
+	catch (const unrecognizedParameter &)
 	{
 		return griddyn_unknown_parameter;
 	}

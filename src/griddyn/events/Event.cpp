@@ -94,8 +94,8 @@ void Event::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
 	{
 		m_obj = searchObj;
 	}
-	
-	
+
+
 	armed = checkArmed();
 }
 
@@ -121,13 +121,13 @@ void Event::loadField(coreObject *searchObj, const std::string &newfield)
 	{
 		setName(stringOps::trim(newfield.substr(renameloc + 4)));
 		fdata = objInfo(newfield.substr(0,renameloc),searchObj);
-		
+
 	}
 	else
 	{
 		fdata = objInfo(newfield, searchObj);
 	}
-	
+
 	field = fdata.m_field;
 	if (fdata.m_unitType != gridUnits::units_t::defUnit)
 	{
@@ -140,7 +140,7 @@ void Event::loadField(coreObject *searchObj, const std::string &newfield)
 		{
 			setName(m_obj->getName()+":"+field);
 		}
-		
+
 	}
 	armed = checkArmed();
 }
@@ -244,7 +244,7 @@ void Event::setValue (double val, gridUnits::units_t newUnits)
 			  unitType = newUnits;
 		  }
 	  }
-	  
+
   }
 }
 
@@ -328,14 +328,14 @@ void Event::updateObject(coreObject *gco, object_update_mode mode)
 			else
 			{
 				throw(objectUpdateFailException());
-			}		
-			
+			}
+
 		}
 		else
 		{
 			setTarget(gco);
 		}
-		
+
 	}
 }
 
@@ -355,7 +355,7 @@ bool Event::setTarget ( coreObject *gdo,const std::string &var)
 	{
 		m_obj = gdo;
 		setName(m_obj->getName());
-		
+
 	}
   if (!var.empty ())
     {
@@ -499,7 +499,7 @@ void EventInfo::loadString(const std::string &eventString, coreObject *rootObj)
     { //now we get into file based event
 	  auto posEndFile = vstring.find_first_of('}', posFile);
       file = vstring.substr (posE + 1,posEndFile-posFile-1);
-      
+
       int col = stringOps::trailingStringInt (file, file, 0);
 	  columns.push_back(col);
 	  auto posPlus= vstring.find_first_of('+',posEndFile);
@@ -551,7 +551,7 @@ std::unique_ptr<Event> make_event (EventInfo &gdEI, coreObject *rootObject)
 		}
 	}
 	auto evType = findEventType(gdEI);
-	
+
 	switch (evType)
 	{
 		using namespace events;
@@ -578,7 +578,7 @@ std::unique_ptr<Event> make_event (EventInfo &gdEI, coreObject *rootObject)
 	default:
 		break;
 	}
- 
+
   return ev;
 }
 
