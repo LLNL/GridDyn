@@ -297,7 +297,7 @@ void scheduler::insertTarget (tsched ts)
     }
 }
 
-void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
+void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
 {
     using namespace comms;
     auto sm = message->getPayload<schedulerMessagePayload>();
@@ -311,7 +311,7 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
     case schedulerMessagePayload::STARTUP:
         break;
     case schedulerMessagePayload::UPDATE_TARGETS:  //
-        clearSchedule (); 
+        clearSchedule ();
 		FALLTHROUGH
     case schedulerMessagePayload::ADD_TARGETS:
         setTarget (sm->m_time, sm->m_target);

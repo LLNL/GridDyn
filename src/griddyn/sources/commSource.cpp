@@ -131,7 +131,7 @@ void commSource::updateA (coreTime time)
 
 using controlMessagePayload = griddyn::comms::controlMessagePayload;
 
-void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
+void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
 {
     auto m = message->getPayload<controlMessagePayload>();
 

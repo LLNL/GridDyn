@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef SCHEDULER_H_
-#define SCHEDULER_H_
 #pragma once
 
 #include "../Source.h"
@@ -81,7 +79,7 @@ class scheduler : public Source
   protected:
     virtual void insertTarget (tsched ts);
     void clearSchedule ();
-    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message);
+    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message);
 };
 
 /** @brief scheduler that can deal with ramping of the power on a continuous basis
@@ -157,7 +155,7 @@ class schedulerRamp : public scheduler
     virtual void updatePTarget ();
     virtual void insertTarget (tsched ts) override;
 
-    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
 };
 
 /** @brief scheduler targeted at handling regulation management
@@ -216,8 +214,7 @@ class schedulerReg : public schedulerRamp
     virtual double getMin (coreTime time = maxTime) const override;
 
   protected:
-    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
+    virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
 };
 
 }  // namespace griddyn
-#endif /*SCHEDULER_H_*/

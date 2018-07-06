@@ -29,7 +29,11 @@ namespace griddyn
 namespace fmi
 {
 
+<<<<<<< 130b70118144250bd28cd029454fd43303d3f673
 fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) :gridSubModel(newName), cs(std::move(fmi))
+=======
+fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) : gridSubModel(newName), cs(std::move(fmi))
+>>>>>>> Convert most string parameters to const&, convert read-only shared_ptrs to const&, convert a read-only vector to const&, rewrite testCopyFile
 {
 
 }
