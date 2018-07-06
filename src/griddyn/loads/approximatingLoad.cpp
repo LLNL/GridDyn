@@ -55,15 +55,15 @@ coreObject *approximatingLoad::clone (coreObject *obj) const
 
 void approximatingLoad::add (coreObject *obj)
 {
-	if (dynamic_cast<Load *> (obj) != nullptr)
-	{
-		if (subLoad != nullptr)
-		{
-			gridSecondary::remove(subLoad);
-		}
-		subLoad = static_cast<Load *>(obj);
-		addSubObject(subLoad);
-	}
+    if (dynamic_cast<Load *> (obj) != nullptr)
+    {
+        if (subLoad != nullptr)
+        {
+            gridSecondary::remove(subLoad);
+        }
+        subLoad = static_cast<Load *>(obj);
+        addSubObject(subLoad);
+    }
     else
     {
         throw (unrecognizedObjectException (this));
@@ -77,15 +77,13 @@ void approximatingLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
 
     opFlags[preEx_requested] = true;
     rampLoad::pFlowObjectInitializeA (time0, flags);
-	updateA(time0);
+    updateA(time0);
 }
 
 void approximatingLoad::pFlowObjectInitializeB ()
 {
-
-	updateB();
-	rampLoad::pFlowObjectInitializeB();
-
+    updateB();
+    rampLoad::pFlowObjectInitializeB();
 }
 
 void approximatingLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
@@ -128,10 +126,10 @@ void approximatingLoad::timestep (coreTime time, const IOdata &inputs, const sol
 {
     double V = inputs[voltageInLocation];
     double th = inputs[angleInLocation];
-	if (subLoad)
-	{
-		subLoad->timestep(time, inputs, sMode);
-	}
+    if (subLoad)
+    {
+        subLoad->timestep(time, inputs, sMode);
+    }
 
 
     if (cDetail == coupling_detail_t::single)
@@ -342,22 +340,22 @@ void approximatingLoad::updateLocalCache (const IOdata &inputs, const stateData 
 
 std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues(const std::vector<double> &inputs, const std::vector<double> &voltages)
 {
-	std::vector<std::tuple<double, double, double>> res;
-	if (subLoad == nullptr)
-	{
-		return res;
-	}
+    std::vector<std::tuple<double, double, double>> res;
+    if (subLoad == nullptr)
+    {
+        return res;
+    }
 
-	IOdata cinputs(inputs.begin(), inputs.end());
-	for (auto &V : voltages)
-	{
-		cinputs[voltageInLocation] = V;
-		subLoad->updateLocalCache(cinputs, emptyStateData, cLocalSolverMode);
-		auto Psub = subLoad->getRealPower(cinputs, emptyStateData, cLocalSolverMode);
-		auto Qsub = subLoad->getReactivePower(cinputs, emptyStateData, cLocalSolverMode);
-		res.emplace_back(V, Psub, Qsub);
-	}
-	return res;
+    IOdata cinputs(inputs.begin(), inputs.end());
+    for (auto &V : voltages)
+    {
+        cinputs[voltageInLocation] = V;
+        subLoad->updateLocalCache(cinputs, emptyStateData, cLocalSolverMode);
+        auto Psub = subLoad->getRealPower(cinputs, emptyStateData, cLocalSolverMode);
+        auto Qsub = subLoad->getReactivePower(cinputs, emptyStateData, cLocalSolverMode);
+        res.emplace_back(V, Psub, Qsub);
+    }
+    return res;
 }
 
 void approximatingLoad::run1ApproxA (coreTime time, const IOdata &inputs)
@@ -366,52 +364,52 @@ void approximatingLoad::run1ApproxA (coreTime time, const IOdata &inputs)
 
     auto dt = time - m_lastCallTime;
 
-	std::vector<double> voltages;
-	voltages.push_back(inputs[voltageInLocation]);
-	std::vector<double> inputb(inputs.begin(), inputs.end());
-	auto wb=make_workBlock([inputb, voltages,this]() {return getLoadValues(inputb, voltages); });
-	vres = wb->get_future();
-	workQueue::instance()->addWorkBlock(std::move(wb));
-	opFlags.set(waiting_flag);
+    std::vector<double> voltages;
+    voltages.push_back(inputs[voltageInLocation]);
+    std::vector<double> inputb(inputs.begin(), inputs.end());
+    auto wb=make_workBlock([inputb, voltages,this]() {return getLoadValues(inputb, voltages); });
+    vres = wb->get_future();
+    workQueue::instance()->addWorkBlock(std::move(wb));
+    opFlags.set(waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run1ApproxB ()
 {
-	auto res = vres.get();
-	opFlags.reset(waiting_flag);
+    auto res = vres.get();
+    opFlags.reset(waiting_flag);
     return {std::get<1>(res[0]), std::get<2>(res[0]) };
 
 }
 
 void approximatingLoad::run2ApproxA (coreTime time, const IOdata &inputs)
 {
-	assert(!opFlags[waiting_flag]);  // this should not happen;
+    assert(!opFlags[waiting_flag]);  // this should not happen;
 
-	auto dt = time - m_lastCallTime;
+    auto dt = time - m_lastCallTime;
 
-	std::vector<double> voltages;
-	double V = inputs[voltageInLocation];
-	voltages.push_back(V);
-	double r1 = (V + spread) / V;
-	voltages.push_back(V*r1);
-	std::vector<double> inputb(inputs.begin(), inputs.end());
-	auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
-	vres = wb->get_future();
-	workQueue::instance()->addWorkBlock(std::move(wb));
+    std::vector<double> voltages;
+    double V = inputs[voltageInLocation];
+    voltages.push_back(V);
+    double r1 = (V + spread) / V;
+    voltages.push_back(V*r1);
+    std::vector<double> inputb(inputs.begin(), inputs.end());
+    auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
+    vres = wb->get_future();
+    workQueue::instance()->addWorkBlock(std::move(wb));
     opFlags.set (waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run2ApproxB ()
 {
     assert (opFlags[waiting_flag]);  // this should not happen;
-	auto res = vres.get();
-	opFlags.reset(waiting_flag);
-	double V1 = std::get<0>(res[0]);
-	double P1 = std::get<1>(res[0]);
-	double Q1 = std::get<2>(res[0]);
-	double V2 = std::get<0>(res[1]);
-	double P2 = std::get<1>(res[1]);
-	double Q2 = std::get<2>(res[1]);
+    auto res = vres.get();
+    opFlags.reset(waiting_flag);
+    double V1 = std::get<0>(res[0]);
+    double P1 = std::get<1>(res[0]);
+    double Q1 = std::get<2>(res[0]);
+    double V2 = std::get<0>(res[1]);
+    double P2 = std::get<1>(res[1]);
+    double Q2 = std::get<2>(res[1]);
     std::vector<double> retP (4);
     retP[2] = (P2 - P1) / (V2 - V1);
     retP[3] = (Q2 - Q1) / (V2 - V1);
@@ -422,39 +420,39 @@ std::vector<double> approximatingLoad::run2ApproxB ()
 
 void approximatingLoad::run3ApproxA (coreTime time, const IOdata &inputs)
 {
-	assert(!opFlags[waiting_flag]);  // this should not happen;
+    assert(!opFlags[waiting_flag]);  // this should not happen;
 
-	auto dt = time - m_lastCallTime;
+    auto dt = time - m_lastCallTime;
 
-	std::vector<double> voltages;
-	double V = inputs[voltageInLocation];
+    std::vector<double> voltages;
+    double V = inputs[voltageInLocation];
 
-	double r1 = (V - spread) / V;
-	voltages.push_back(V*r1);
-	r1 = (V + spread) / V;
-	voltages.push_back(V*r1);
-	voltages.push_back(V);
-	std::vector<double> inputb(inputs.begin(),inputs.end());
-	auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
-	vres = wb->get_future();
-	workQueue::instance()->addWorkBlock(std::move(wb));
-	opFlags.set(waiting_flag);
+    double r1 = (V - spread) / V;
+    voltages.push_back(V*r1);
+    r1 = (V + spread) / V;
+    voltages.push_back(V*r1);
+    voltages.push_back(V);
+    std::vector<double> inputb(inputs.begin(),inputs.end());
+    auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
+    vres = wb->get_future();
+    workQueue::instance()->addWorkBlock(std::move(wb));
+    opFlags.set(waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run3ApproxB ()
 {
-	assert(opFlags[waiting_flag]);  // this should not happen;
-	auto res = vres.get();
-	opFlags.reset(waiting_flag);
-	double V1 = std::get<0>(res[0]);
-	double P1 = std::get<1>(res[0]);
-	double Q1 = std::get<2>(res[0]);
-	double V2 = std::get<0>(res[1]);
-	double P2 = std::get<1>(res[1]);
-	double Q2 = std::get<2>(res[1]);
-	double V3 = std::get<0>(res[2]);
-	double P3 = std::get<1>(res[2]);
-	double Q3 = std::get<2>(res[2]);
+    assert(opFlags[waiting_flag]);  // this should not happen;
+    auto res = vres.get();
+    opFlags.reset(waiting_flag);
+    double V1 = std::get<0>(res[0]);
+    double P1 = std::get<1>(res[0]);
+    double Q1 = std::get<2>(res[0]);
+    double V2 = std::get<0>(res[1]);
+    double P2 = std::get<1>(res[1]);
+    double Q2 = std::get<2>(res[1]);
+    double V3 = std::get<0>(res[2]);
+    double P3 = std::get<1>(res[2]);
+    double Q3 = std::get<2>(res[2]);
 #if 0
   a1 = P1 / ((V1 - V2) * (V1 - V3));
   double a2 = P2 / ((V2 - V1) * (V2 - V3));

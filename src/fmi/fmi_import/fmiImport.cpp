@@ -319,8 +319,8 @@ path fmiLibrary::findSoPath (fmutype_t type)
             return sopath;
         }
 #ifdef MACOS
-		sopath /= "darwin64";
-		sopath /= identifier + ".so";
+        sopath /= "darwin64";
+        sopath /= identifier + ".so";
 #endif
     }
     else

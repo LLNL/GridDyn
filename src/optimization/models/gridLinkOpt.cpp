@@ -112,21 +112,19 @@ void gridLinkOpt::loadSizes (const optimMode &oMode)
 
 void gridLinkOpt::add (coreObject *obj)
 {
-  if (dynamic_cast<Link *> (obj))
+    if (dynamic_cast<Link *> (obj))
     {
-
-      link = static_cast<Link *> (obj);
-      if (getName().empty ())
+        link = static_cast<Link *> (obj);
+        if (getName().empty ())
         {
-          setName(link->getName ());
+            setName(link->getName ());
         }
-      setUserID(link->getUserID ());
+        setUserID(link->getUserID ());
     }
-  else
-  {
-	  throw(unrecognizedObjectException(this));
-  }
-
+    else
+    {
+        throw(unrecognizedObjectException(this));
+    }
 }
 
 
@@ -134,7 +132,7 @@ void gridLinkOpt::add (coreObject *obj)
 void gridLinkOpt::remove (coreObject *)
 {
 
-  
+
 }
 
 void gridLinkOpt::setValues (const optimData &, const optimMode &)
@@ -204,8 +202,7 @@ void gridLinkOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const
 
 void gridLinkOpt::disable ()
 {
-	coreObject::disable();
-
+    coreObject::disable();
 }
 
 void gridLinkOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/)
@@ -244,7 +241,7 @@ void gridLinkOpt::set (const std::string &param, double val, units_t unitType)
     {
 
     }
-  else if ((param == "angleetolerance") || (param == "atol"))
+  else if ((param == "angletolerance") || (param == "atol"))
     {
 
     }
@@ -349,7 +346,3 @@ double gridLinkOpt::get (const std::string &param, gridUnits::units_t unitType) 
 }
 
 }// namespace griddyn
-
-
-
-

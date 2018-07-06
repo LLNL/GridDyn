@@ -260,51 +260,51 @@ stringVec fmiMESubModel::getInputNames () const { return me->getInputNames (); }
 
 void fmiMESubModel::set (const std::string &param, const std::string &val)
 {
-	if ((param == "fmu")||(param=="file"))
-	{
-		if (!(me))
-		{
-			try
-			{
-				//printf("loading instance of fmi %s\n", val.c_str());
-				me = fmiLibraryManager::instance().createModelExchangeObject(val, getName());
-			}
-			catch (const boost::filesystem::filesystem_error &fse)
-			{
-				//printf("error loading object %s\n",fse.what());
-				LOG_ERROR(std::string("file system error") + fse.what());
-			}
+    if ((param == "fmu")||(param=="file"))
+    {
+        if (!(me))
+        {
+            try
+            {
+                //printf("loading instance of fmi %s\n", val.c_str());
+                me = fmiLibraryManager::instance().createModelExchangeObject(val, getName());
+            }
+            catch (const boost::filesystem::filesystem_error &fse)
+            {
+                //printf("error loading object %s\n",fse.what());
+                LOG_ERROR(std::string("file system error") + fse.what());
+            }
             if (!me)
             {
-				//printf("unable to load ME object\n");
+                //printf("unable to load ME object\n");
                 LOG_ERROR("Unable to load FMU " + getName());
             }
             if (!paramBuffer.empty())
             {
                 paramBuffer.apply(me);
             }
-		}
-		else
-		{
-			throw(invalidParameterValue(param));
-		}
+        }
+        else
+        {
+            throw(invalidParameterValue(param));
+        }
 
-	}
-	else if (param == "outputs")
-	{
-		auto ssep = stringOps::splitline(val);
-		stringOps::trim(ssep);
-		me->setOutputVariables(ssep);
-		m_outputSize = me->outputSize();
-	}
-	else if (param == "inputs")
-	{
-		auto ssep = stringOps::splitline(val);
-		stringOps::trim(ssep);
-		me->setInputVariables(ssep);
-		m_inputSize = me->inputSize();
-		//updateDependencyInfo();
-	}
+    }
+    else if (param == "outputs")
+    {
+        auto ssep = stringOps::splitline(val);
+        stringOps::trim(ssep);
+        me->setOutputVariables(ssep);
+        m_outputSize = me->outputSize();
+    }
+    else if (param == "inputs")
+    {
+        auto ssep = stringOps::splitline(val);
+        stringOps::trim(ssep);
+        me->setInputVariables(ssep);
+        m_inputSize = me->inputSize();
+        //updateDependencyInfo();
+    }
     else
     {
         if (me)
@@ -332,8 +332,7 @@ void fmiMESubModel::set (const std::string &param, const std::string &val)
                 paramBuffer.set(param, val);
             }
         }
-	}
-
+    }
 }
 
 void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_t unitType)

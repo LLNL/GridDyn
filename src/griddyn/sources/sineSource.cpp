@@ -128,19 +128,19 @@ void sineSource::set (const std::string &param, double val, gridUnits::units_t u
         frequency = val;
         sinePeriod = 1.0 / frequency;
     }
-	else if ((param == "period")||(param=="sineperiod"))
-	{
-		sinePeriod = val;
-		frequency = 1.0 / val;
-	}
-	else if (param == "pulseperiod")
-	{
-		pulseSource::set("period", val, unitType);
-	}
-	else if (param == "pulseamplitude")
-	{
-		pulseSource::set("amplitude", val, unitType);
-	}
+    else if ((param == "period")||(param=="sineperiod"))
+    {
+        sinePeriod = val;
+        frequency = 1.0 / val;
+    }
+    else if (param == "pulseperiod")
+    {
+        pulseSource::set("period", val, unitType);
+    }
+    else if (param == "pulseamplitude")
+    {
+        pulseSource::set("amplitude", val, unitType);
+    }
     else if (param == "phase")
     {
         phase = val;

@@ -86,7 +86,7 @@ Relay *readRelayElement (std::shared_ptr<readerElement> &element, readerInfo &ri
         }
     }
 
-	if (targetObj != nullptr)
+    if (targetObj != nullptr)
     {
         relay->setSource (targetObj);
         relay->setSink (targetObj);

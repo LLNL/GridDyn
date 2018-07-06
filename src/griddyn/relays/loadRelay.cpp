@@ -110,24 +110,24 @@ void loadRelay::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     ge->setValue (0.0);
 
     add (std::move (ge));
-	add(std::shared_ptr<Condition>(make_condition("voltage", "<", cutoutVoltage, m_sourceObject)));
-	add(std::shared_ptr<Condition>(make_condition("frequency", "<", cutoutFrequency, m_sourceObject)));
+    add(std::shared_ptr<Condition>(make_condition("voltage", "<", cutoutVoltage, m_sourceObject)));
+    add(std::shared_ptr<Condition>(make_condition("frequency", "<", cutoutFrequency, m_sourceObject)));
     if (cutoutVoltage < 2.0)
     {  
         setActionTrigger (0, 0, voltageDelay);
     }
-	else
-	{
-		setConditionStatus(0, condition_status_t::disabled);
-	}
+    else
+    {
+        setConditionStatus(0, condition_status_t::disabled);
+    }
     if (cutoutFrequency < 2.0)
-    {   
+    {
         setActionTrigger (0, 1, frequencyDelay);
     }
-	else
-	{
-		setConditionStatus(1, condition_status_t::disabled);
-	}
+    else
+    {
+        setConditionStatus(1, condition_status_t::disabled);
+    }
 
     Relay::dynObjectInitializeA (time0, flags);
 }
@@ -138,8 +138,8 @@ void loadRelay::actionTaken (index_t ActionNum,
                              coreTime /*actionTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d action %d") % conditionNum % ActionNum).str ());
-	((void)(ActionNum));
-	((void)(conditionNum));
+    ((void)(ActionNum));
+    ((void)(conditionNum));
     /*
     if (opFlags.test (use_commLink))
     {
@@ -173,7 +173,7 @@ void loadRelay::actionTaken (index_t ActionNum,
 void loadRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d triggered") % conditionNum).str ());
-	((void)(conditionNum));
+    ((void)(conditionNum));
     /*
     if (conditionNum < m_condition_level)
     {
@@ -214,7 +214,7 @@ void loadRelay::conditionTriggered (index_t conditionNum, coreTime /*triggerTime
 void loadRelay::conditionCleared (index_t conditionNum, coreTime /*triggerTime*/)
 {
     LOG_NORMAL ((boost::format ("condition %d cleared") % conditionNum).str ());
-	((void)(conditionNum));
+    ((void)(conditionNum));
     /*for (size_t kk = 0; kk < m_zones; ++kk)
    {
    if (cStates[kk] == condition_status_t::active)

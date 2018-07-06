@@ -34,10 +34,10 @@ solverMode::solverMode (index_t index):offsetIndex(index)
         differential = false;
         dynamic = false;
     }
-	else if (index == dae)  // predefined dae
+    else if (index == dae)  // predefined dae
     {
-		dynamic = true;
-		differential = true;
+        dynamic = true;
+        differential = true;
         algebraic = true;
     }
     else if (index == dynamic_algebraic)  // predefined dynAlg
@@ -83,7 +83,7 @@ void stateSizes::addRootSizes (const stateSizes &arg)
 
 void stateSizes::addJacobianSizes(const stateSizes &arg)
 {
-	jacSize += arg.jacSize;
+    jacSize += arg.jacSize;
 }
 
 count_t stateSizes::totalSize () const { return vSize + aSize + algSize + diffSize; }
@@ -116,10 +116,10 @@ void solverOffsets::rootCountReset ()
 
 void solverOffsets::JacobianCountReset()
 {
-	local.JacobianReset();
-	total.JacobianReset();
+    local.JacobianReset();
+    total.JacobianReset();
 
-	jacobianLoaded = false;
+    jacobianLoaded = false;
 }
 
 
@@ -240,7 +240,7 @@ void solverOffsets::addJacobianSizes (const solverOffsets &offsets)
 
 void solverOffsets::addRootSizes(const solverOffsets &offsets)
 {
-	total.addRootSizes(offsets.total);
+    total.addRootSizes(offsets.total);
 }
 
 void solverOffsets::localStateLoad (bool finishedLoading)
@@ -327,7 +327,7 @@ offsetTable::offsetTable () noexcept : offsetContainer (DEFAULT_OFFSET_CONTAINER
     // most simulations use the first 1 and powerflow(2) and likely dynamic DAE(3)  and often 4 and 5 for dynamic
     // partitioned
 #if DEFAULT_OFFSET_CONTAINER_SIZE==0
-	offsetContainer.resize(1);
+    offsetContainer.resize(1);
 #endif
     offsetContainer[0].sMode = cLocalSolverMode;
 }
@@ -351,7 +351,7 @@ bool offsetTable::isRootCountLoaded (const solverMode &sMode) const
 
 bool offsetTable::isJacobianCountLoaded(const solverMode &sMode) const
 {
-	return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].jacobianLoaded;
+    return isValidIndex(sMode.offsetIndex) && offsetContainer[sMode.offsetIndex].jacobianLoaded;
 }
 
 solverOffsets &offsetTable::getOffsets (const solverMode &sMode)
@@ -486,7 +486,7 @@ void offsetTable::unload (bool dynamic_only)
             {
                 so.stateLoaded = false;
                 so.rootsLoaded = false;
-				so.jacobianLoaded = false;
+                so.jacobianLoaded = false;
                 so.diffOffset = kNullLocation;
                 so.algOffset = kNullLocation;
             }
@@ -498,7 +498,7 @@ void offsetTable::unload (bool dynamic_only)
         {
             so.stateLoaded = false;
             so.rootsLoaded = false;
-			so.jacobianLoaded = false;
+            so.jacobianLoaded = false;
             so.diffOffset = kNullLocation;
             so.algOffset = kNullLocation;
         }
@@ -552,23 +552,23 @@ void offsetTable::rootUnload (bool dynamic_only)
 }
 void offsetTable::JacobianUnload(bool dynamic_only)
 {
-	if (dynamic_only)
-	{
-		for (auto &so : offsetContainer)
-		{
-			if (isDynamic(so.sMode))
-			{
-				so.jacobianLoaded = false;
-			}
-		}
-	}
-	else
-	{
-		for (auto &so : offsetContainer)
-		{
-			so.jacobianLoaded = false;
-		}
-	}
+    if (dynamic_only)
+    {
+        for (auto &so : offsetContainer)
+        {
+            if (isDynamic(so.sMode))
+            {
+                so.jacobianLoaded = false;
+            }
+        }
+    }
+    else
+    {
+        for (auto &so : offsetContainer)
+        {
+            so.jacobianLoaded = false;
+        }
+    }
 }
 
 void offsetTable::localUpdateAll (bool dynamic_only)
@@ -584,7 +584,7 @@ void offsetTable::localUpdateAll (bool dynamic_only)
                 so.total.diffRoots = so.local.diffRoots = lc.local.diffRoots;
                 so.total.jacSize = so.local.jacSize = lc.local.jacSize;
                 so.rootsLoaded = true;
-				so.jacobianLoaded = true;
+                so.jacobianLoaded = true;
             }
         }
     }

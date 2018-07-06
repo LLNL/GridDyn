@@ -77,19 +77,19 @@ coreObject *gridRelayOpt::clone (coreObject *obj) const
 
 void gridRelayOpt::add (coreObject *obj)
 {
-  if (dynamic_cast<Relay *> (obj))
+    if (dynamic_cast<Relay *> (obj))
     {
-      relay = static_cast<Relay *> (obj);
-      if (getName().empty ())
+        relay = static_cast<Relay *> (obj);
+        if (getName().empty ())
         {
-          setName(relay->getName ());
+            setName(relay->getName ());
         }
-      setUserID(relay->getUserID ());
+        setUserID(relay->getUserID ());
     }
-  else
-  {
-	  throw(unrecognizedObjectException(this));
-  }
+    else
+    {
+        throw(unrecognizedObjectException(this));
+    }
 }
 
 count_t gridRelayOpt::objSize (const optimMode &)
@@ -207,8 +207,7 @@ void gridRelayOpt::getObjName (stringVec & /*objNames*/, const optimMode &, cons
 
 void gridRelayOpt::disable ()
 {
-	gridOptObject::disable();
-
+    gridOptObject::disable();
 }
 
 void gridRelayOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/)
@@ -247,7 +246,7 @@ void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
     {
 
     }
-  else if ((param == "angleetolerance") || (param == "atol"))
+  else if ((param == "angletolerance") || (param == "atol"))
     {
 
     }
@@ -315,7 +314,3 @@ double gridRelayOpt::get (const std::string &param, gridUnits::units_t unitType)
 }
 
 }// namespace griddyn
-
-
-
-
