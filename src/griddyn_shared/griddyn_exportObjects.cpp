@@ -73,7 +73,7 @@ gridDynObject gridDynObject_create(const char *componentType, const char *object
 	{
 		return nullptr;
 	}
-	gridComponent *comp = dynamic_cast<gridComponent *>(newObject);
+	auto *comp = dynamic_cast<gridComponent *>(newObject);
 	if (comp == nullptr)
 	{
 		return nullptr;
@@ -92,7 +92,7 @@ gridDynObject gridDynObject_clone(constGridDynObject obj)
 		return nullptr;
 	}
 	auto newObject = comp->clone();
-	gridComponent *comp_clone = dynamic_cast<gridComponent *>(newObject);
+	auto *comp_clone = dynamic_cast<gridComponent *>(newObject);
 	if (comp_clone == nullptr)
 	{
 		return nullptr;

@@ -53,7 +53,7 @@ gridGenOpt::gridGenOpt (coreObject *obj, const std::string &objName) : gridOptOb
 
 coreObject *gridGenOpt::clone (coreObject *obj) const
 {
-  gridGenOpt *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
+  auto *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
   if (nobj == nullptr)
     {
       return obj;

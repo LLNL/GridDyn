@@ -300,7 +300,7 @@ void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 
         md.compact();
         assert(M->NNZ >= static_cast<int> (md.size()));
-        int sz = static_cast<int> (md.size());
+        auto sz = static_cast<int> (md.size());
         /*
       auto itel = md.begin();
       for (int kk = 0; kk < sz; ++kk)
@@ -437,7 +437,7 @@ int sundialsJac (realtype time,
         {
             if (!sd->jacFile.empty ())
             {
-                long int val = static_cast<long int> (sd->get ("nliterations"));
+                auto val = static_cast<long int> (sd->get ("nliterations"));
                 writeArray (time, 1, val, sd->mode.offsetIndex, *a1, sd->jacFile);
             }
         }

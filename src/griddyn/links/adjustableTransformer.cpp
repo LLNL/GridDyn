@@ -184,7 +184,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     {
         if (val > 2.5)
         {
-            index_t cbnum = static_cast<int> (val);
+            auto cbnum = static_cast<int> (val);
             if ((B1 != nullptr) && (cbnum == B1->getUserID ()))
             {
                 controlNum = 1;

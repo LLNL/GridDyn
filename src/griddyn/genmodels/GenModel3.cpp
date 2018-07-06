@@ -30,7 +30,7 @@ GenModel3::GenModel3 (const std::string &objName) : GenModelClassical (objName)
 
 coreObject *GenModel3::clone (coreObject *obj) const
 {
-    GenModel3 *gd = cloneBase<GenModel3, GenModelClassical> (this, obj);
+    auto *gd = cloneBase<GenModel3, GenModelClassical> (this, obj);
     if (gd == nullptr)
     {
         return obj;

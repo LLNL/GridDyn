@@ -39,7 +39,7 @@ GovernorReheat::GovernorReheat (const std::string &objName) : Governor (objName)
 
 coreObject *GovernorReheat::clone (coreObject *obj) const
 {
-    GovernorReheat *gov = cloneBase<GovernorReheat, Governor> (this, obj);
+    auto *gov = cloneBase<GovernorReheat, Governor> (this, obj);
     if (gov == nullptr)
     {
         return obj;

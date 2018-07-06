@@ -434,24 +434,24 @@ void gridAreaOpt::add (coreObject *obj)
         setUserID (area->getUserID ());
         return;
     }
-    auto sa = dynamic_cast<gridAreaOpt *> (obj);
+    auto *sa = dynamic_cast<gridAreaOpt *> (obj);
     if (sa != nullptr)
     {
         return add (sa);
     }
 
-    auto bus = dynamic_cast<gridBusOpt *> (obj);
+    auto *bus = dynamic_cast<gridBusOpt *> (obj);
     if (bus != nullptr)
     {
         return add (bus);
     }
 
-    auto lnk = dynamic_cast<gridLinkOpt *> (obj);
+    auto *lnk = dynamic_cast<gridLinkOpt *> (obj);
     if (lnk != nullptr)
     {
         return add (lnk);
     }
-    auto relay = dynamic_cast<gridRelayOpt *> (obj);
+    auto *relay = dynamic_cast<gridRelayOpt *> (obj);
     if (relay != nullptr)
     {
         return add (relay);
@@ -461,24 +461,24 @@ void gridAreaOpt::add (coreObject *obj)
 
 void gridAreaOpt::remove (coreObject *obj)
 {
-    auto sa = dynamic_cast<gridAreaOpt *> (obj);
+    auto *sa = dynamic_cast<gridAreaOpt *> (obj);
     if (sa)
     {
         return remove (sa);
     }
 
-    auto bus = dynamic_cast<gridBusOpt *> (obj);
+    auto *bus = dynamic_cast<gridBusOpt *> (obj);
     if (bus)
     {
         return remove (bus);
     }
 
-    auto lnk = dynamic_cast<gridLinkOpt *> (obj);
+    auto *lnk = dynamic_cast<gridLinkOpt *> (obj);
     if (lnk)
     {
         return remove (lnk);
     }
-    auto relay = dynamic_cast<gridRelayOpt *> (obj);
+    auto *relay = dynamic_cast<gridRelayOpt *> (obj);
     if (relay)
     {
         return remove (relay);
@@ -889,7 +889,7 @@ gridAreaOpt *getMatchingArea (gridAreaOpt *area, gridOptObject *src, gridOptObje
     }
 
     std::vector<int> lkind;
-    auto par = dynamic_cast<gridOptObject *> (area->getParent ());
+    auto *par = dynamic_cast<gridOptObject *> (area->getParent ());
     if (par == nullptr)
     {
         return nullptr;

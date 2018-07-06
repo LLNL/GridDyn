@@ -77,7 +77,7 @@ bool fmiInfo::checkFlag(fmuCapabilityFlags flag) const
 
 int fmiInfo::getCounts(const std::string &countType) const
 {
-	size_t cnt = size_t(-1);
+	auto cnt = size_t(-1);
 	if (countType == "variables")
 	{
 		cnt = variables.size();

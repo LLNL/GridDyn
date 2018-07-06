@@ -25,7 +25,7 @@ gridOptObject::gridOptObject (const std::string &objName) : coreObject (objName)
 
 coreObject *gridOptObject::clone (coreObject *obj) const
 {
-  gridOptObject *nobj = cloneBase<gridOptObject, coreObject> (this, obj);
+  auto *nobj = cloneBase<gridOptObject, coreObject> (this, obj);
   if (nobj == nullptr)
     {
       return obj;

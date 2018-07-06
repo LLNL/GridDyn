@@ -232,7 +232,7 @@ void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vecto
     for (const auto &excLine : excData)
     {
         Exciter *exc = nullptr;
-        index_t ind1 = static_cast<index_t> (excLine[0]);
+        auto ind1 = static_cast<index_t> (excLine[0]);
       
 		if (isValidIndex(ind1,genList))
         {
@@ -276,7 +276,7 @@ void loadGenGovArray (coreObject * /*parentObject*/, mArray &govData, std::vecto
     {
         Governor *gov = nullptr;
 		Generator *gen = nullptr;
-        index_t ind1 = static_cast<index_t> (govLine[0]);
+        auto ind1 = static_cast<index_t> (govLine[0]);
 		if (isValidIndex(ind1,genList))
         {
             gen = genList[ind1-1];//zero based in C vs 1 based in matlab

@@ -262,7 +262,7 @@ void svd::set (const std::string &param, const std::string &val)
         auto bin = stringOps::splitline (val);
         for (size_t kk = 0; kk < bin.size () - 1; ++kk)
         {
-            int cnt = numeric_conversion<int> (bin[kk], 0);
+            auto cnt = numeric_conversion<int> (bin[kk], 0);
             double bsize = numeric_conversion (bin[kk + 1], 0.0);
             if (cnt > 0)
             {

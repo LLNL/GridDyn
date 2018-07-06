@@ -41,7 +41,7 @@ Exciter::Exciter(const std::string &objName) : gridSubModel(objName) { m_inputSi
 // cloning function
 coreObject *Exciter::clone (coreObject *obj) const
 {
-    Exciter *gdE = cloneBase<Exciter, gridSubModel> (this, obj);
+    auto *gdE = cloneBase<Exciter, gridSubModel> (this, obj);
     if (gdE == nullptr)
     {
         return obj;

@@ -29,7 +29,7 @@ namespace genmodels
 GenModelInverter::GenModelInverter (const std::string &objName) : GenModel (objName) {}
 coreObject *GenModelInverter::clone (coreObject *obj) const
 {
-    GenModelInverter *gd = cloneBase<GenModelInverter, GenModel> (this, obj);
+    auto *gd = cloneBase<GenModelInverter, GenModel> (this, obj);
     if (gd==nullptr)
     {
         return obj;
