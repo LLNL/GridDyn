@@ -121,7 +121,7 @@ int fmiInfo::getCounts(const std::string &countType) const
 	return static_cast<int>(cnt);
 }
 
-const std::string emptyString="";
+const std::string emptyString;
 
 const std::string &fmiInfo::getString(const std::string &field) const
 {

@@ -156,7 +156,7 @@ void idaInterface::logSolverStats (print_level logLevel, bool iconly) const
     long int nst, nre, nreLS, netf, ncfn, nge;
     realtype tolsfac, hlast, hcur;
 
-    std::string logstr = "";
+    std::string logstr;
 
     int retval = IDAGetNumResEvals (solverMem, &nre);
     check_flag (&retval, "IDAGetNumResEvals", 1);
