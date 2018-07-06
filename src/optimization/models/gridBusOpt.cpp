@@ -471,19 +471,19 @@ void gridBusOpt::add (gridLinkOpt *lnk)
 
 void gridBusOpt::remove (coreObject *obj)
 {
-  auto ld = dynamic_cast<gridLoadOpt *> (obj);
+  auto *ld = dynamic_cast<gridLoadOpt *> (obj);
   if (ld)
     {
       return (remove (ld));
     }
 
-  auto gen = dynamic_cast<gridGenOpt *> (obj);
+  auto *gen = dynamic_cast<gridGenOpt *> (obj);
   if (gen)
     {
       return(remove (gen));
     }
 
-  auto lnk = dynamic_cast<gridLinkOpt *> (obj);
+  auto *lnk = dynamic_cast<gridLinkOpt *> (obj);
   if (lnk)
     {
       return(remove (lnk));

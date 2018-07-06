@@ -38,7 +38,7 @@ GovernorHydro::GovernorHydro (const std::string &objName) : GovernorIeeeSimple (
 
 coreObject *GovernorHydro::clone (coreObject *obj) const
 {
-    GovernorHydro *gov = cloneBase<GovernorHydro, GovernorIeeeSimple> (this, obj);
+    auto *gov = cloneBase<GovernorHydro, GovernorIeeeSimple> (this, obj);
     if (gov == nullptr)
     {
         return obj;

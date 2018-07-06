@@ -97,7 +97,7 @@ int GhostSwingBusManager::createGridlabDInstance (const string& arguments)
     }
 
 #ifdef GRIDDYN_HAVE_MPI
-  char *arguments_c = const_cast<char*> (arguments.c_str ());
+  auto *arguments_c = const_cast<char*> (arguments.c_str ());
   m_initializeCompleted[taskId] = false;
   auto token = servicer->getToken();
   MPI_Isend (arguments_c, static_cast<int>(arguments.size ()), MPI_CHAR, taskId, MODELSPECTAG, MPI_COMM_WORLD, &m_mpiSendRequests[taskId]);

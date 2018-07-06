@@ -138,7 +138,7 @@ std::string compoundEventPlayer::to_string ()
 {
     // @time1[,time2,time3,... |+ period] >[rootobj::obj:]field(units) = val1,[val2,val3,...]
     std::stringstream ss;
-    index_t Ntargets = static_cast<index_t> (ts.size ());
+    auto Ntargets = static_cast<index_t> (ts.size ());
     if (eFile.empty ())
     {
         ss << '@' << triggerTime;

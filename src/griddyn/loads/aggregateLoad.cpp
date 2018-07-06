@@ -71,7 +71,7 @@ void aggregateLoad::add (zipLoad *ld)
 
 void aggregateLoad::add (coreObject *obj)
 {
-    zipLoad *ld = dynamic_cast<zipLoad *> (obj);
+    auto *ld = dynamic_cast<zipLoad *> (obj);
     if (ld != nullptr)
     {
         return add (ld);

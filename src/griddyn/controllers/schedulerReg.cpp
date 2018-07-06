@@ -41,7 +41,7 @@ schedulerReg::schedulerReg (double initialValue, double initialReg, const std::s
 
 coreObject *schedulerReg::clone (coreObject *obj) const
 {
-    schedulerReg *nobj = cloneBase<schedulerReg, schedulerRamp> (this, obj);
+    auto *nobj = cloneBase<schedulerReg, schedulerRamp> (this, obj);
     if (nobj == nullptr)
     {
         return nobj;

@@ -299,7 +299,7 @@ void matrixDataToSUNMatrix (matrixData<double> &md, SUNMatrix J, count_t svsize)
 
 		md.compact();
 		assert(M->NNZ >= static_cast<int> (md.size()));
-		int sz = static_cast<int> (md.size());
+		auto sz = static_cast<int> (md.size());
 		/*
 	  auto itel = md.begin();
 	  for (int kk = 0; kk < sz; ++kk)

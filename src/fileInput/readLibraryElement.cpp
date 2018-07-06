@@ -250,7 +250,7 @@ void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo &ri
             continue;
         }
         auto args = element->getAttributeValue ("args");
-        int nargs = static_cast<int> (args);
+        auto nargs = static_cast<int> (args);
         if (args == kNullVal)
         {
             nargs = 0;

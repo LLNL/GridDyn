@@ -44,7 +44,7 @@ gridDynOptimization::~gridDynOptimization ()
 
 coreObject *gridDynOptimization::clone (coreObject *obj) const
 {
-  gridDynOptimization *sim = cloneBase<gridDynOptimization, gridDynSimulation> (this, obj);
+  auto *sim = cloneBase<gridDynOptimization, gridDynSimulation> (this, obj);
   if (sim == nullptr)
     {
       return obj;

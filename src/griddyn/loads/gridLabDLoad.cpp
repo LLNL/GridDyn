@@ -88,7 +88,7 @@ void gridLabDLoad::gridLabDInitialize ()
 
 coreObject *gridLabDLoad::clone (coreObject *obj) const
 {
-    auto ld = cloneBase<gridLabDLoad, rampLoad> (this, obj);
+    auto *ld = cloneBase<gridLabDLoad, rampLoad> (this, obj);
     if (ld == nullptr)
     {
         return obj;
