@@ -1260,11 +1260,10 @@ void busPowers::reset ()
 
 bool busPowers::needsUpdate (const stateData &sD) const
 {
-    if ((sD.empty ())||(sD.seqID==0)|| (sD.seqID != seqID))
-    {
-        return true;
-    }
-    return false;
+    bool empty = sD.empty();
+    bool zeroSeqID = sD.seqID == 0;
+    bool differentSeqID = sD.seqID != seqID;
+    return empty or zeroSeqID or differentSeqID;
 }
 
 // computed power at bus

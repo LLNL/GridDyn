@@ -220,7 +220,7 @@ void schedulerReg::regSettings (bool active, double upFrac, double downFrac)
     {
         if (regEnabled)
         {
-            if (active == false)
+            if (!active)
             {
                 if (agc != nullptr)
                 {
@@ -348,10 +348,10 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
     }
     else if (param == "regenabled")
     {
-        bool active = (val > 0) ? true : false;
+        bool active = val > 0;
         if (regEnabled)
         {
-            if (active == false)
+            if (!active)
             {
                 if (agc)
                 {

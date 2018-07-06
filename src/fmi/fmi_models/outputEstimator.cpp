@@ -46,24 +46,23 @@ double outputEstimator::estimate(coreTime t, const IOdata &inputs, const double 
 
 bool outputEstimator::update(coreTime t, double val, const IOdata &inputs, const double state[])
 {
-	time = t;
+    time = t;
 
-	double pred = estimate(t, inputs, state);
-	prevValue = val;
-	for (size_t kk = 0; kk < stateDep.size(); ++kk)
-	{
-		prevStates[kk] = state[stateDep[kk]];
-	}
-	for (size_t kk = 0; kk < inputDep.size(); ++kk)
-	{
-		prevInputs[kk] = inputs[inputDep[kk]];
-	}
-	double diff = (std::abs)(pred - val);
-	if ((diff>1e-4) && (diff / (std::max)(std::abs( pred), std::abs(val))>0.02))
-	{
-		return true;
-	}
-	return false;
+    double pred = estimate(t, inputs, state);
+    prevValue = val;
+    for (size_t kk = 0; kk < stateDep.size(); ++kk)
+    {
+        prevStates[kk] = state[stateDep[kk]];
+    }
+    for (size_t kk = 0; kk < inputDep.size(); ++kk)
+    {
+        prevInputs[kk] = inputs[inputDep[kk]];
+    }
+    double diff = (std::abs)(pred - val);
+    double scaled_error = diff / (std::max)(std::abs(pred), std::abs(val));
+    bool diff_large_enough = diff > 1e-4;
+    bool scaled_error_large_enough = scaled_error > 0.02;
+    return diff_large_enough and scaled_error_large_enough;
 }
 
 }//namespace fmi

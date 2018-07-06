@@ -58,7 +58,7 @@ coreObject * fmiCoSimSubModel::clone(coreObject *obj) const
 
 bool fmiCoSimSubModel::isLoaded() const
 {
-	return (cs) ? true : false;
+	return static_cast<bool>(cs);
 }
 
 void fmiCoSimSubModel::dynObjectInitializeA(coreTime time, std::uint32_t flags)
