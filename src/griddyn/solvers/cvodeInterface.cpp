@@ -329,7 +329,7 @@ void cvodeInterface::initialize (coreTime time0)
 
     // dynInitializeB CVode - Sundials
 
-    int retval = CVodeSetUserData (solverMem, reinterpret_cast<void *> (this));
+    int retval = CVodeSetUserData (solverMem, static_cast<void *> (this));
     check_flag (&retval, "CVodeSetUserData", 1);
 
     // guessState an initial condition
@@ -357,27 +357,27 @@ void cvodeInterface::initialize (coreTime time0)
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix (svsize, svsize);
-        check_flag (reinterpret_cast<void *>(J), "SUNDenseMatrix", 0);
+        check_flag (static_cast<void *>(J), "SUNDenseMatrix", 0);
         /* Create KLU solver object */
         LS = SUNDenseLinearSolver (state, J);
-        check_flag (reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+        check_flag (static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
         J = SUNSparseMatrix (svsize, svsize, jsize, CSR_MAT);
-        check_flag (reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+        check_flag (static_cast<void *>(J), "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
         LS = SUNKLU (state, J);
-        check_flag (reinterpret_cast<void *>(LS), "SUNKLU", 0);
+        check_flag (static_cast<void *>(LS), "SUNKLU", 0);
     }
 #else
     J = SUNDenseMatrix (svsize, svsize);
-    check_flag (reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+    check_flag (static_cast<void *>(J), "SUNSparseMatrix", 0);
     /* Create KLU solver object */
     LS = SUNDenseLinearSolver (state, J);
-    check_flag (reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+    check_flag (static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
 #endif
 
     retval = CVDlsSetLinearSolver (solverMem, LS, J);
@@ -390,7 +390,7 @@ void cvodeInterface::initialize (coreTime time0)
     retval = CVodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "CVodeSetMaxNonlinIters", 1);
 
-    retval = CVodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
+    retval = CVodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, static_cast<void *> (this));
     check_flag (&retval, "CVodeSetErrHandlerFn", 1);
 
     if (maxStep > 0.0)

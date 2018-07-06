@@ -318,20 +318,20 @@ void idaInterface::initialize (coreTime t0)
     if (flags[dense_flag])
     {
 		J = SUNDenseMatrix(svsize, svsize);
-		check_flag(reinterpret_cast<void *>(J), "SUNDenseMatrix", 0);
+		check_flag(static_cast<void *>(J), "SUNDenseMatrix", 0);
 		/* Create KLU solver object */
 		LS = SUNDenseLinearSolver(state, J);
-		check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+		check_flag(static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
     }
     else
     {
 		/* Create sparse SUNMatrix */
 		J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
-		check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+		check_flag(static_cast<void *>(J), "SUNSparseMatrix", 0);
 
 		/* Create KLU solver object */
 		LS = SUNKLU(state, J);
-		check_flag(reinterpret_cast<void *>(LS), "SUNKLU", 0);
+		check_flag(static_cast<void *>(LS), "SUNKLU", 0);
 
         retval = SUNKLUSetOrdering(LS, 0);
         check_flag(&retval, "SUNKLUSetOrdering", 1);
@@ -339,10 +339,10 @@ void idaInterface::initialize (coreTime t0)
     }
 #else
 	J = SUNDenseMatrix(svsize, svsize);
-	check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+	check_flag(static_cast<void *>(J), "SUNSparseMatrix", 0);
 	/* Create KLU solver object */
 	LS = SUNDenseLinearSolver(state, J);
-	check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+	check_flag(static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
 #endif
 
 	retval = IDADlsSetLinearSolver(solverMem, LS, J);
@@ -360,7 +360,7 @@ void idaInterface::initialize (coreTime t0)
     retval = IDASetId (solverMem, types);
     check_flag (&retval, "IDASetId", 1);
 
-    retval = IDASetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
+    retval = IDASetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, static_cast<void *> (this));
     check_flag (&retval, "IDASetErrHandlerFn", 1);
 
     setConstraints ();

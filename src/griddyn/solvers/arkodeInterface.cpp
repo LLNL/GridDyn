@@ -324,7 +324,7 @@ void arkodeInterface::initialize (coreTime time0)
 
     // dynInitializeB CVode - Sundials
 
-    int retval = ARKodeSetUserData (solverMem, reinterpret_cast<void *> (this));
+    int retval = ARKodeSetUserData (solverMem, static_cast<void *> (this));
     check_flag (&retval, "ARKodeSetUserData", 1);
 
     // guessState an initial condition
@@ -352,28 +352,28 @@ void arkodeInterface::initialize (coreTime time0)
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix(svsize, svsize);
-        check_flag(reinterpret_cast<void *>(J), "SUNDenseMatrix", 0);
+        check_flag(static_cast<void *>(J), "SUNDenseMatrix", 0);
         /* Create KLU solver object */
         LS = SUNDenseLinearSolver(state, J);
-        check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+        check_flag(static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
         J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
-        check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+        check_flag(static_cast<void *>(J), "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
         LS = SUNKLU(state, J);
-        check_flag(reinterpret_cast<void *>(LS), "SUNKLU", 0);
+        check_flag(static_cast<void *>(LS), "SUNKLU", 0);
 
     }
 #else
     J = SUNDenseMatrix(svsize, svsize);
-    check_flag(reinterpret_cast<void *>(J), "SUNSparseMatrix", 0);
+    check_flag(static_cast<void *>(J), "SUNSparseMatrix", 0);
     /* Create KLU solver object */
     LS = SUNDenseLinearSolver(state, J);
-    check_flag(reinterpret_cast<void *>(LS), "SUNDenseLinearSolver", 0);
+    check_flag(static_cast<void *>(LS), "SUNDenseLinearSolver", 0);
 #endif
 
 
@@ -388,7 +388,7 @@ void arkodeInterface::initialize (coreTime time0)
     retval = ARKodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "ARKodeSetMaxNonlinIters", 1);
 
-    retval = ARKodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, reinterpret_cast<void *> (this));
+    retval = ARKodeSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, static_cast<void *> (this));
     check_flag (&retval, "ARKodeSetErrHandlerFn", 1);
 
     if (maxStep > 0.0)

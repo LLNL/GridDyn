@@ -139,7 +139,7 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
         NVECTOR_DESTROY (prev_omp, state);
     }
     state = NVECTOR_NEW (use_omp, stateCount);
-    check_flag (reinterpret_cast<void *>(state), "NVECTOR_NEW", 0);
+    check_flag (static_cast<void *>(state), "NVECTOR_NEW", 0);
 
     if (hasDifferential (mode))
     {
@@ -148,7 +148,7 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
             NVECTOR_DESTROY (prev_omp, dstate_dt);
         }
         dstate_dt = NVECTOR_NEW (use_omp, stateCount);
-        check_flag (reinterpret_cast<void *>(dstate_dt), "NVECTOR_NEW", 0);
+        check_flag (static_cast<void *>(dstate_dt), "NVECTOR_NEW", 0);
         N_VConst (ZERO, dstate_dt);
     }
     if (abstols != nullptr)
@@ -156,21 +156,21 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
         NVECTOR_DESTROY (prev_omp, abstols);
     }
     abstols = NVECTOR_NEW (use_omp, stateCount);
-    check_flag (reinterpret_cast<void *>(abstols), "NVECTOR_NEW", 0);
+    check_flag (static_cast<void *>(abstols), "NVECTOR_NEW", 0);
 
     if (consData != nullptr)
     {
         NVECTOR_DESTROY (prev_omp, consData);
     }
     consData = NVECTOR_NEW (use_omp, stateCount);
-    check_flag (reinterpret_cast<void *>(consData), "NVECTOR_NEW", 0);
+    check_flag (static_cast<void *>(consData), "NVECTOR_NEW", 0);
 
     if (scale != nullptr)
     {
         NVECTOR_DESTROY (prev_omp, scale);
     }
     scale = NVECTOR_NEW (use_omp, stateCount);
-    check_flag (reinterpret_cast<void *>(scale), "NVECTOR_NEW", 0);
+    check_flag (static_cast<void *>(scale), "NVECTOR_NEW", 0);
 
     N_VConst (ONE, scale);
 
@@ -181,7 +181,7 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
             NVECTOR_DESTROY (prev_omp, types);
         }
         types = NVECTOR_NEW (use_omp, stateCount);
-        check_flag (reinterpret_cast<void *>(types), "NVECTOR_NEW", 0);
+        check_flag (static_cast<void *>(types), "NVECTOR_NEW", 0);
 
         N_VConst (ONE, types);
     }
