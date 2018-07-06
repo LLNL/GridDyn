@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(load_zmq_context_manager)
 	auto testContextManager = zmqContextManager::getContextPointer("context1");
 	BOOST_CHECK(testContextManager->getName() == "context1");
 	auto defaultContext = zmqContextManager::getContextPointer();
-	BOOST_CHECK(defaultContext->getName()=="");
+	BOOST_CHECK(defaultContext->getName().empty());
 
 	auto &alternativeContext = zmqContextManager::getContext("context1");
 	//make sure these two methods point at the same thing
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_socket_descriptor)
 	zDescriptor.addOperation(socket_ops::bind, "inproc://1");
 
 	zDescriptor.type = socket_type::pub;
-	
+
 
 	zmqSocketDescriptor zDescriptor2("test_socketr");
 	zDescriptor2.addOperation(socket_ops::connect, "inproc://1");
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_socket_descriptor)
 	sock2.recv(&rxMessage);
 
 	BOOST_CHECK(rxMessage.size() == mess1.size());
-	
+
 	std::string mess2(static_cast<const char *>(rxMessage.data()), rxMessage.size());
 
 	BOOST_CHECK(mess2 == mess1);

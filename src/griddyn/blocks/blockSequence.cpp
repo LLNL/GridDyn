@@ -254,7 +254,7 @@ void blockSequence::rootTrigger (coreTime time,
                                  const solverMode &sMode)
 {
     size_t cnt = sequence.size ();
-    IOdata inAct{inputs.size () > 0 ? inputs[0] + bias : kNullVal, getRateInput (inputs)};
+    IOdata inAct{inputs.empty() ? kNullVal : inputs[0] + bias, getRateInput (inputs)};
 
     for (size_t ii = 0; ii < cnt; ++ii)
     {
