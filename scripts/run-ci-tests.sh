@@ -20,6 +20,9 @@ do
         --msan)
             echo "Tests using memory sanitizer"
             ;;
+        --ubsan)
+            echo "Tests using undefined behavior sanitizer"
+            ;;
         --no-ctest)
             echo "Disable tests using ctest as a runner"
             NO_CTEST=true
