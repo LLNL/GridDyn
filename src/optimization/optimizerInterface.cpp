@@ -49,7 +49,6 @@ double optimizerInterface::get (const std::string & /*param*/) const
 
 int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError)
 {
-    int *errflag;
     // Check if SUNDIALS function returned nullptr pointer - no memory allocated
     if (opt == 0 && flagvalue == nullptr)
     {
@@ -62,7 +61,7 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
     if (opt == 1)
     {
         // Check if flag < 0
-        errflag = (int *)flagvalue;
+        int* errflag = reinterpret_cast<int *>(flagvalue);
         if (*errflag < 0)
         {
             if (printError)
