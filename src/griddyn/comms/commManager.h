@@ -38,11 +38,11 @@ private:
 public:
 	commManager();
 	commManager(const commManager &cm);
-	commManager(commManager &&cm) noexcept;
+	commManager(commManager &&cm);
 	~commManager();
 
 	commManager &operator=(const commManager &cm);
-	commManager &operator=(commManager &&cm) noexcept;
+	commManager &operator=(commManager &&cm);
 
 	bool set(const std::string &param, const std::string &val);
 	bool set(const std::string &param, double val);

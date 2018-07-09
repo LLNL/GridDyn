@@ -21,54 +21,53 @@ fmiVariableSet::fmiVariableSet(fmi2ValueReference newvr) : vrset({ newvr })
 }
 fmiVariableSet::fmiVariableSet(const fmiVariableSet &vset) = default;
 
-fmiVariableSet::fmiVariableSet(fmiVariableSet &&vset) noexcept = default;
+fmiVariableSet::fmiVariableSet(fmiVariableSet &&vset) = default;
 
 
 fmiVariableSet& fmiVariableSet::operator=(const fmiVariableSet & other) = default;
 
 
-fmiVariableSet& fmiVariableSet::operator=(fmiVariableSet && other) noexcept = default;
+fmiVariableSet& fmiVariableSet::operator=(fmiVariableSet && other) = default;
 
 
 const fmi2ValueReference *fmiVariableSet::getValueRef() const
 {
-	return vrset.data();
+    return vrset.data();
 }
 
 size_t fmiVariableSet::getVRcount() const
 {
-	return vrset.size();
+    return vrset.size();
 }
 
 fmi_variable_type_t fmiVariableSet::getType() const
 {
-	return type.value();
+    return type.value();
 }
 
 void fmiVariableSet::push(fmi2ValueReference newvr)
 {
-	vrset.push_back(newvr);
+    vrset.push_back(newvr);
 }
 
 void fmiVariableSet::push(const fmiVariableSet &vset)
 {
-	vrset.reserve(vset.vrset.size() + vrset.size());
-	vrset.insert(vrset.end(), vset.vrset.begin(), vset.vrset.end());
+    vrset.reserve(vset.vrset.size() + vrset.size());
+    vrset.insert(vrset.end(), vset.vrset.begin(), vset.vrset.end());
 }
 
 void fmiVariableSet::reserve(size_t newSize)
 {
-	vrset.reserve(newSize);
+    vrset.reserve(newSize);
 }
 
 void fmiVariableSet::clear()
 {
-	vrset.clear();
+    vrset.clear();
 }
 
 void fmiVariableSet::remove(fmi2ValueReference rmvr)
 {
-	auto rm=std::remove(vrset.begin(), vrset.end(), rmvr);
-	vrset.erase(rm, vrset.end());
-
+    auto rm=std::remove(vrset.begin(), vrset.end(), rmvr);
+    vrset.erase(rm, vrset.end());
 }

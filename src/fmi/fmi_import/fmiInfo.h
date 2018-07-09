@@ -13,8 +13,7 @@
 /** @file
 @brief file containing classes and types for managing information about FMU's
 */
-#ifndef FMI_INFORMATION_H_
-#define FMI_INFORMATION_H_
+
 #pragma once
 
 #include "utilities/matrixDataOrdered.hpp"
@@ -228,5 +227,3 @@ enum class fmuMode
 
 
 bool checkType(const variableInformation& info, fmi_variable_type_t type, fmi_causality_type_t caus);
-
-#endif
