@@ -17,7 +17,7 @@
 #include "../fmi_import/fmiLibraryManager.h"
 #include "../fmi_import/fmiObjects.h"
 #include "utilities/vectorOps.hpp"
-#include  "utilities/matrixData.hpp"
+#include "utilities/matrixData.hpp"
 #include "outputEstimator.h"
 #include "utilities/stringOps.h"
 #include "core/coreExceptions.h"
@@ -375,12 +375,17 @@ double fmiMESubModel::get(const std::string &param, gridUnits::units_t unitType)
 
 stateSizes fmiMESubModel::LocalStateSizes(const solverMode &sMode) const
 {
-	stateSizes SS;
-	if (hasDifferential(sMode) or (!isDynamic(sMode) and opFlags[pflow_init_required]))
-	{
-		SS.diffSize = m_stateSize;
-	}
-	return SS;
+    stateSizes SS;
+    if (hasDifferential(sMode))
+    {
+        SS.diffSize = m_stateSize;
+    }
+
+    else if (!isDynamic(sMode) and opFlags[pflow_init_required])
+    {
+        SS.algSize = m_stateSize;
+    }
+    return SS;
 }
 
 count_t fmiMESubModel::LocalJacobianCount(const solverMode &sMode) const

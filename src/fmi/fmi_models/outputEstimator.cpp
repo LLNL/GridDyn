@@ -21,7 +21,7 @@ namespace griddyn
 namespace fmi
 {
 
-outputEstimator::outputEstimator(std::vector<int> sDep, std::vector<int> iDep) : stateDep(std::move(sDep)), inputDep(iDep)
+outputEstimator::outputEstimator(std::vector<int> sDep, std::vector<int> iDep) : stateDep(std::move(sDep)), inputDep(std::move(iDep))
 {
 	stateDiff.resize(stateDep.size(), 0);
 	inputDiff.resize(inputDep.size(), 0);
