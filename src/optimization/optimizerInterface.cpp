@@ -16,16 +16,15 @@
 
 namespace griddyn
 {
+
 static childClassFactory<basicOptimizer, optimizerInterface> basicFac(stringVec{ "basic","pricestack" });
 
 optimizerInterface::optimizerInterface(const std::string &optName):name(optName)
 {
-
 }
 
 optimizerInterface::optimizerInterface (gridDynOptimization *gdo, const optimMode &oMode) : mode (oMode),m_gdo (gdo)
 {
-
 }
 
 void optimizerInterface::setOptimizationData (gridDynOptimization *gdo, const optimMode &oMode)
@@ -39,7 +38,6 @@ void optimizerInterface::setOptimizationData (gridDynOptimization *gdo, const op
 
 void optimizerInterface::initializeJacArray (count_t /*size*/)
 {
-
 }
 
 double optimizerInterface::get (const std::string & /*param*/) const
@@ -85,12 +83,10 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
 
 basicOptimizer::basicOptimizer(const std::string &optName):optimizerInterface(optName)
 {
-
 }
 
 basicOptimizer::basicOptimizer(gridDynOptimization *gdo, const optimMode &oMode) : optimizerInterface(gdo, oMode)
 {
-
 }
 
 int basicOptimizer::allocate (count_t size)

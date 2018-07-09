@@ -29,7 +29,7 @@
 
 namespace griddyn
 {
-static classFactory<Event> evntFac(std::vector<std::string>{ "event", "simple","single" },"event");
+static classFactory<Event> evntFac(std::vector<std::string>{ "event", "simple","single" }, "event");
 namespace events
 {
 static childClassFactory<Player, Event> playerFac(std::vector<std::string>{ "player", "timeseries", "file" });
@@ -42,19 +42,19 @@ static childClassFactory<interpolatingPlayer, Event> interpPlay(std::vector<std:
 static childClassFactory<reversibleEvent, Event> revEvnt(std::vector<std::string>{"reversible", "undo", "rollback"});
 }//namespace events
 
-Event::Event(const std::string &eventName):helperObject(eventName),triggerTime(negTime)
+Event::Event (const std::string &eventName)
+    : helperObject (eventName), triggerTime (negTime), eventId (static_cast<count_t> (getID ()))
 {
-    eventId=static_cast<count_t>(getID());
 }
 
-Event::Event (coreTime time0): triggerTime(time0)
+Event::Event (coreTime time0)
+    : triggerTime (time0), eventId (static_cast<count_t> (getID ()))
 {
-    eventId=static_cast<count_t>(getID());
 }
 
-Event::Event(const EventInfo &gdEI, coreObject *rootObject)
+Event::Event (const EventInfo &gdEI, coreObject *rootObject)
+    : eventId (static_cast<count_t> (getID ()))
 {
-    eventId = static_cast<count_t>(getID());
     Event::updateEvent(gdEI, rootObject);
 }
 

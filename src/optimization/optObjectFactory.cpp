@@ -14,9 +14,9 @@
 
 namespace griddyn
 {
+
 optComponentFactory::optComponentFactory (const std::string &component) : name (component)
 {
-
 }
 
 optComponentFactory::~optComponentFactory () = default;
