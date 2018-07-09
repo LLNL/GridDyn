@@ -43,7 +43,7 @@ gridDynObject creategridDynObject(gridComponent *comp)
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp);
-	return reinterpret_cast<void *>(ptr);
+	return ptr;
 }
 
 gridComponent *getComponentPointer(gridDynObject obj)
@@ -79,7 +79,7 @@ gridDynObject gridDynObject_create(const char *componentType, const char *object
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp);
-	return reinterpret_cast<gridDynObject>(ptr);
+	return ptr;
 }
 
 
@@ -98,7 +98,7 @@ gridDynObject gridDynObject_clone(const gridDynObject obj)
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp_clone);
-	return reinterpret_cast<gridDynObject>(ptr);
+	return ptr;
 }
 
 void gridDynObject_free(gridDynObject obj)
