@@ -22,6 +22,9 @@ import parser
 def identity(x):
     return x
 
+def filter_if(predicate, args):
+    return [value for keep, value in [(predicate(arg), arg) for arg in args] if keep]
+
 def filter_apply(predicate, function, arg):
     # arg = (thing to filter by, thing to run the function on)
     pred = predicate(arg[0])
@@ -63,27 +66,27 @@ def get_chunks(filename):
     return chunks
 
 ## pipeline
-default_before_chunks = get_chunks('default_before.tidy')
+#default_before_chunks = get_chunks('default_before.tidy')
 default_after_chunks =  get_chunks('default_after.tidy')
-all_before_chunks = get_chunks('all_before.tidy')
+#all_before_chunks = get_chunks('all_before.tidy')
 all_after_chunks =  get_chunks('all_after.tidy')
 
-unique_default_before_chunks = set(default_before_chunks)
-unique_all_before_chunks = set(all_before_chunks)
-before_chunks = unique_default_before_chunks | unique_all_before_chunks
+#unique_default_before_chunks = set(default_before_chunks)
+#unique_all_before_chunks = set(all_before_chunks)
+#before_chunks = unique_default_before_chunks | unique_all_before_chunks
 
 unique_default_after_chunks = set(default_after_chunks)
 unique_all_after_chunks = set(all_after_chunks)
 after_chunks = unique_default_after_chunks | unique_all_after_chunks
 
-fixed_chunks = before_chunks - after_chunks
-new_chunks = after_chunks - before_chunks
+#fixed_chunks = before_chunks - after_chunks
+#new_chunks = after_chunks - before_chunks
 
 chunks = after_chunks
 
-print('fixed: {}'.format(len(fixed_chunks)))
-print('new: {}'.format(len(new_chunks)))
-print('total now: {}'.format(len(chunks)))
+#print('fixed: {}'.format(len(fixed_chunks)))
+#print('new: {}'.format(len(new_chunks)))
+#print('total now: {}'.format(len(chunks)))
 
 # create map[guideline] -> list of chunks violating that guideline
 guidelines = set(chunk.guideline for chunk in chunks)
@@ -105,16 +108,17 @@ guideline_priority.sort(key=lambda x: x[1])
 for k, v in guideline_priority:
     print('{}: {}'.format(k, v))
 
-guidelines = [
 
-    'readability-named-parameter',
-    'cppcoreguidelines-pro-bounds-array-to-pointer-decay',
-    'readability-inconsistent-declaration-parameter-name',
-    'readability-implicit-bool-conversion',
-    'cppcoreguidelines-owning-memory',
-    'cppcoreguidelines-pro-type-cstyle-cast',
-    'hicpp-vararg'
-]
+not_comment = lambda line: line.strip()[0] != '#'
+not_empty = lambda line: line.strip() != ''
+
+
+with open('guideline_notes.txt', 'r') as f:
+    guidelines = f.readlines()
+
+guidelines = filter_if(not_comment, guidelines)
+guidelines = filter_if(not_empty, guidelines)
+guidelines = [l.strip() for l in guidelines]
 
 def separator(color='red'):
     colormap = {
@@ -125,11 +129,13 @@ def separator(color='red'):
     str = colormap[color] + '='*50 + decolor
     return str
 
-# print(separator('green'))
-# for i in guideline_map[guidelines[0]]:
-#     print(i.original)
-#     print(separator())
-#
-# filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
-# for filename in sorted(filenames):
-#     print(filename)
+print(separator('green'))
+# only grab first guideline
+for i in guideline_map[guidelines[0]]:
+    print(i.original)
+    print(separator())
+
+filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
+print('\nFiles referenced:')
+for filename in sorted(filenames):
+    print('\t{}'.format(filename))
