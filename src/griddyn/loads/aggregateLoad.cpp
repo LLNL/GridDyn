@@ -180,6 +180,8 @@ void aggregateLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 
 void aggregateLoad::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
+    // Please note that something might need to be done with desiredOutput
+    // before it is fed into dynInitializeB
     for (auto &ld : subLoads)
     {
         ld->dynInitializeB (inputs, desiredOutput, fieldSet);

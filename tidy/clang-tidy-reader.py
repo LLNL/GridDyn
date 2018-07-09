@@ -22,9 +22,6 @@ import parser
 def identity(x):
     return x
 
-def filter_if(predicate, args):
-    return [value for keep, value in [(predicate(arg), arg) for arg in args] if keep]
-
 def filter_apply(predicate, function, arg):
     # arg = (thing to filter by, thing to run the function on)
     pred = predicate(arg[0])
@@ -33,7 +30,7 @@ def filter_apply(predicate, function, arg):
         fun = function(arg[1])
     return pred, fun
 
-def filter(results):
+def filter_pair(results):
     # keep things in list that go (True, _)
     return [value for keep, value in results if keep]
 
@@ -57,7 +54,7 @@ def get_chunks(filename):
         linenos = range(len(lines))
         print('Read {} lines of file {}'.format(len(lines), filename))
 
-    line_starts = filter(map(filter_apply_is_start, zip(lines, linenos)))
+    line_starts = filter_pair(map(filter_apply_is_start, zip(lines, linenos)))
     line_ranges = get_line_ranges(line_starts, len(lines))
 
     get_chunk_from_lines = lambda line_range: get_chunk(line_range, lines)
@@ -116,8 +113,8 @@ not_empty = lambda line: line.strip() != ''
 with open('guideline_notes.txt', 'r') as f:
     guidelines = f.readlines()
 
-guidelines = filter_if(not_comment, guidelines)
-guidelines = filter_if(not_empty, guidelines)
+guidelines = filter(not_comment, guidelines)
+guidelines = filter(not_empty, guidelines)
 guidelines = [l.strip() for l in guidelines]
 
 def separator(color='red'):
@@ -126,8 +123,8 @@ def separator(color='red'):
         'green': '\033[32m',
     }
     decolor = '\033[0m'
-    str = colormap[color] + '='*50 + decolor
-    return str
+    sep = colormap[color] + '='*50 + decolor
+    return sep
 
 print(separator('green'))
 # only grab first guideline
