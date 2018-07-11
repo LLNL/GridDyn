@@ -8,12 +8,12 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-#project name
-project(GRIDDYN VERSION 0.9.0)
-
-#states that Cmake version > 3.5
+# cmake >= 3.5 required
 cmake_minimum_required(VERSION 3.5)
 cmake_policy(VERSION 3.5)
+
+#project name
+project(GRIDDYN VERSION 0.9.0)
 
 #version number
 set(GRIDDYN_VERSION_BUILD )
