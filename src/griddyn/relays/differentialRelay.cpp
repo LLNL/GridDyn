@@ -231,7 +231,7 @@ void differentialRelay::conditionCleared (index_t /*conditionNum*/, coreTime /*t
     }
 }
 
-void differentialRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> const& message)
+void differentialRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> message)
 {
     switch (message->getMessageType ())
     {

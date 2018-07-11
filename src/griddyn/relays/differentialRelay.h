@@ -43,7 +43,7 @@ public:
   virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
   virtual void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 protected:
   virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime actionTime) override;
   virtual void conditionTriggered (index_t conditionNum, coreTime triggerTime) override;

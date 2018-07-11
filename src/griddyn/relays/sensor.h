@@ -147,7 +147,7 @@ public:
   virtual void rootTrigger (coreTime time, const IOdata &inputs, const std::vector<int> &rootMask, const solverMode &sMode) override;
   virtual change_code rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
 
   virtual void updateObject(coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
   virtual void getObjects(std::vector<coreObject *> &objects) const override;

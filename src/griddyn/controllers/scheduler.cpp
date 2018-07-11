@@ -297,7 +297,7 @@ void scheduler::insertTarget (tsched ts)
     }
 }
 
-void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
+void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
     auto sm = message->getPayload<schedulerMessagePayload>();

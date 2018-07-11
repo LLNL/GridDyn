@@ -156,7 +156,7 @@ void controlRelay::actionTaken (index_t ActionNum,
 
 using cm = griddyn::comms::controlMessagePayload;
 
-void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
+void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     auto m = message->getPayload<cm>();
     index_t actnum;

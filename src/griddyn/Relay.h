@@ -251,7 +251,7 @@ public:
   @param[in] sourceID  the source of the comm message
   @param[in] message the actual message to process
   */
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message);
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message);
   /** send and alarm message
   @param[in] code the identifier to put in the alarm message
   @throw  if no commlink is present

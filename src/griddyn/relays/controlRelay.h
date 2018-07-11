@@ -93,7 +93,7 @@ public:
 protected:
   virtual void actionTaken (index_t ActionNum, index_t conditionNum, change_code actionReturn, coreTime actionTime) override;
 
-  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message) override;
+  virtual void receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) override;
   std::string generateAutoName (int code);
   std::string generateCommName() override;
 

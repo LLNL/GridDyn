@@ -514,7 +514,7 @@ void sensor::generateInputGrabbers ()
 
 }
 using cm = comms::controlMessagePayload;
-void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
+void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
     auto m = message->getPayload<cm>();

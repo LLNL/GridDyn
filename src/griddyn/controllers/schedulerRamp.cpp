@@ -596,7 +596,7 @@ double schedulerRamp::get (const std::string &param, gridUnits::units_t unitType
     return val;
 }
 
-void schedulerRamp::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> const& message)
+void schedulerRamp::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
    // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
