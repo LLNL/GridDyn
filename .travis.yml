@@ -126,6 +126,7 @@ jobs:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
+            - valgrind
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - RUN_VALGRIND=true
