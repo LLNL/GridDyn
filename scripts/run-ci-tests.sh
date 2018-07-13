@@ -94,6 +94,7 @@ else
 
     if [[ "$RUN_VALGRIND" == "true" ]]; then
         echo "Running Valgrind tests"
+        valgrind --track-origins=yes --leak-check=full --tool=memcheck src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
         ctest -T memcheck -L Valgrind --verbose && cat Testing/Temporary/MemoryChecker.1.log
     fi
 
