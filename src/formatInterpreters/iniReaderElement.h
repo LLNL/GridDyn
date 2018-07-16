@@ -15,20 +15,15 @@
 #include <memory>
 #include <vector>
 
-namespace toml
-{
-	class Value;
-    struct ParseResult;
-}
+class INIReader;
 
-class tomlElement;
 
-/** @brief class defines a reader element around the toml reader*/
-class tomlReaderElement : public readerElement
+/** @brief class defines a reader element around the ini reader*/
+class iniReaderElement : public readerElement
 {
 public:
-  tomlReaderElement () noexcept;
-  explicit tomlReaderElement (const std::string &fileName);
+  iniReaderElement () noexcept;
+  explicit iniReaderElement (const std::string &fileName);
 
   std::shared_ptr<readerElement> clone () const override;
 
@@ -71,12 +66,12 @@ private:
   void clear ();
 private:
   
-  std::shared_ptr<toml::ParseResult> doc;             //!<document root
-  std::vector<std::shared_ptr<tomlElement>> parents;
-  std::shared_ptr<tomlElement> current;
-  int iteratorCount = 0;
+  std::shared_ptr<INIReader> doc;             //!<document root
+  std::string currentSection;
+  int iteratorIndex = 0;
+  int sectionIndex = 0;
 
-  std::vector<std::shared_ptr<tomlReaderElement> > bookmarks;
+  std::vector<std::pair<std::string, int> > bookmarks;
 };
 
 
