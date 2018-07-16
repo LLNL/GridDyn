@@ -78,6 +78,14 @@ sundialsInterface::~sundialsInterface ()
     {
         NVECTOR_DESTROY (use_omp, consData);
     }
+    if (scale != nullptr)
+    {
+        NVECTOR_DESTROY (use_omp, scale);
+    }
+    if (types != nullptr)
+    {
+        NVECTOR_DESTROY (use_omp, types);
+    }
     if (flags[initialized_flag])
     {
         if (m_sundialsInfoFile != nullptr)
