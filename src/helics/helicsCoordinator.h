@@ -82,7 +82,7 @@ public:
     std::unordered_map<std::string, int32_t> pubMap_;  //!< map of all the publication names
     std::unordered_map<std::string, int32_t> eptMap_;  //!< map of all the endpoints
   public:
-    explicit helicsCoordinator (const std::string &fedName = "");
+    explicit helicsCoordinator (const std::string &fedName = std::string());
 
     /** register the information as part of a federate in HELICS
     @return a shared pointer to the federate object itself

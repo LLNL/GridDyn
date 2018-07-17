@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef HELICS_GHOSTBUS_HEADER_
-#define HELICS_GHOSTBUS_HEADER_
 #pragma once
 
 #include "../griddyn/gridBus.h"
@@ -53,4 +50,3 @@ private:
 
 }// namespace helicsLib
 } // namespace griddyn
-#endif

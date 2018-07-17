@@ -11,7 +11,6 @@
 */
 #pragma once
 #include "../runner/gridDynRunner.h"
-
 #include "../core/coreOwningPtr.hpp"
 
 namespace helics
@@ -37,7 +36,7 @@ private:
 	std::shared_ptr<helics::Federate> fed_;  //!< pointer to the helics federate object
 public:
 	helicsRunner();
-	helicsRunner(std::shared_ptr<gridDynSimulation> sim);
+	explicit helicsRunner(std::shared_ptr<gridDynSimulation> sim);
 	~helicsRunner();
 private:
 	using GriddynRunner::Initialize;

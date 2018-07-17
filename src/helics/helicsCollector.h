@@ -40,5 +40,5 @@ protected:
 	void dataPointAdded(const collectorPoint &cp) override;
 };
 
-}// namespace helicsLib
+} // namespace helicsLib
 } // namespace griddyn

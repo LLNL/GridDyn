@@ -20,6 +20,7 @@ namespace helicsLib
 class helicsCoordinator;
 enum class helicsValueType :char;
 
+/** class defining a load object that links with a helics source*/
 class helicsLoad:public loads::rampLoad
 {
 public:

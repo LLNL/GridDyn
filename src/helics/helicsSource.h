@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef HELICS_SOURCE_HEADER_
-#define HELICS_SOURCE_HEADER_
+#pragma once
 
 #include "../griddyn/sources/rampSource.h"
 #include "helicsSupport.h"
@@ -60,6 +58,5 @@ private:
 	void updateSubscription();
 };
 
-}// namespace helicsLib
+} // namespace helicsLib
 } // namespace griddyn
-#endif
