@@ -4,7 +4,7 @@
 # TODO parallelize this?
 for i in $(ls ../src); do
     echo "Directory: $i"
-    files=$(find ../src/$i | grep -E '.cpp|.hpp')
+    files=$(find ../src/$i | grep -E '\.cpp$|\.hpp$|\.h$|\.cc$|\.cxx$')
     for f in $files; do
         clang-format -i $f
     done

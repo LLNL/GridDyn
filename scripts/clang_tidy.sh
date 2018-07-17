@@ -5,7 +5,7 @@
 filename=../tidy/$(basename $(pwd))_$(date +%m%d%y%H%M).tidy
 echo "Writing to $filename"
 for i in $(ls ../src); do
-    files=$(find ../src/$i | grep .cpp)
+    files=$(find ../src/$i | grep -E '\.cpp$|\.cc$|\.cxx$')
     echo $files
     clang-tidy $files >> $filename
 done
