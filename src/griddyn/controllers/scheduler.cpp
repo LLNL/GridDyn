@@ -45,7 +45,7 @@ scheduler::scheduler (double initialValue, const std::string &objName) : schedul
 
 coreObject *scheduler::clone (coreObject *obj) const
 {
-    scheduler *nobj = cloneBase<scheduler, Source> (this, obj);
+    auto *nobj = cloneBase<scheduler, Source> (this, obj);
     if (nobj == nullptr)
     {
         return obj;
@@ -311,7 +311,7 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
     case schedulerMessagePayload::STARTUP:
         break;
     case schedulerMessagePayload::UPDATE_TARGETS:  //
-        clearSchedule (); 
+        clearSchedule ();
 		FALLTHROUGH
     case schedulerMessagePayload::ADD_TARGETS:
         setTarget (sm->m_time, sm->m_target);

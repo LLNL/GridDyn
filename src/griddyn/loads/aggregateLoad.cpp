@@ -27,7 +27,7 @@ static typeFactory<aggregateLoad> glfld ("load", stringVec{"composite", "cluster
 using namespace stringOps;
 aggregateLoad::aggregateLoad (const std::string &objName) : zipLoad (objName)
 {
-    add (new zipLoad (getName () + "sub"));
+    aggregateLoad::add (new zipLoad (getName () + "sub"));
 }
 
 coreObject *aggregateLoad::clone (coreObject *obj) const
@@ -71,7 +71,7 @@ void aggregateLoad::add (zipLoad *ld)
 
 void aggregateLoad::add (coreObject *obj)
 {
-    zipLoad *ld = dynamic_cast<zipLoad *> (obj);
+    auto *ld = dynamic_cast<zipLoad *> (obj);
     if (ld != nullptr)
     {
         return add (ld);
@@ -114,14 +114,15 @@ void aggregateLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         // do a first pass of loading
         double rem = 1.0;
 
-        setP (((aggregateLoad *)sLoad)->getP ());  // so this composite load function has direct access to the
-        // zipLoad variables seems a little odd to need to do this but
-        // seems to be a requirement in C++
-        setQ (((aggregateLoad *)sLoad)->getQ ());
-        setIp (((aggregateLoad *)sLoad)->getIp ());
-        setIq (((aggregateLoad *)sLoad)->getIq ());
-        setYp (((aggregateLoad *)sLoad)->getYp ());
-        setYq (((aggregateLoad *)sLoad)->getYq ());
+        // we know sLoad is actually an aggregateLoad
+        auto aggregateSLoad = static_cast<aggregateLoad *> (sLoad);
+
+        setP (aggregateSLoad->getP ());
+        setQ (aggregateSLoad->getQ ());
+        setIp (aggregateSLoad->getIp ());
+        setIq (aggregateSLoad->getIq ());
+        setYp (aggregateSLoad->getYp ());
+        setYq (aggregateSLoad->getYq ());
 
         for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
@@ -189,11 +190,11 @@ void aggregateLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 
 void aggregateLoad::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
-    IOdata out = desiredOutput;
-
+    // Please note that something might need to be done with desiredOutput
+    // before it is fed into dynInitializeB
     for (auto &ld : subLoads)
     {
-        ld->dynInitializeB (inputs, out, fieldSet);
+        ld->dynInitializeB (inputs, desiredOutput, fieldSet);
     }
 }
 
@@ -299,10 +300,7 @@ void aggregateLoad::set (const std::string &param, double val, gridUnits::units_
             LOG_WARNING ("fraction specification count exceeds load count");
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            fraction[num] = val;
-        }
+        fraction[num] = val;
     }
     else
     {

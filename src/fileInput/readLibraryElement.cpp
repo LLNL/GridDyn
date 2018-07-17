@@ -46,21 +46,21 @@ static const std::map<std::string, std::function<coreObject *(std::shared_ptr<re
   loadFunctionMap{
     // clang-format off
     {"genmodel", READSIGNATURE{return ElementReader (cd, static_cast<GenModel *>(nullptr), "genmodel", ri, nullptr);}},
-{"exciter", READSIGNATURE{return ElementReader (cd, static_cast<Exciter *>(nullptr), "exciter", ri, nullptr);}},
-{"governor", READSIGNATURE{return ElementReader (cd, static_cast<Governor *>(nullptr), "governor", ri, nullptr);}},
-{"pss", READSIGNATURE{return ElementReader (cd, static_cast<Stabilizer *>(nullptr), "pss", ri, nullptr);}},
-{"source", READSIGNATURE{return ElementReader (cd, static_cast<Source *>(nullptr), "source", ri, nullptr);}},
-{"controlblock", READSIGNATURE{return ElementReader (cd, static_cast<Block *>(nullptr), "controlblock", ri, nullptr);}},
-{"generator", READSIGNATURE{return ElementReader (cd, static_cast<Generator *>(nullptr), "generator", ri, nullptr);}},
-{"load", READSIGNATURE{return ElementReader (cd, static_cast<Load *>(nullptr), "load", ri, nullptr);}},
-{"bus", READSIGNATURE{return readBusElement (cd, ri, nullptr);}},
-{"relay", READSIGNATURE{return readRelayElement (cd, ri, nullptr);}},
-{"area", READSIGNATURE{return readAreaElement (cd, ri, nullptr);}},
-{"link", READSIGNATURE{return readLinkElement (cd, ri, nullptr, false);}},
-{"scheduler", READSIGNATURE{return ElementReader (cd, static_cast<scheduler *>(nullptr), "scheduler", ri, nullptr);}},
-{"agc", READSIGNATURE{return ElementReader (cd, static_cast<AGControl *>(nullptr), "agc", ri, nullptr);}},
-{"econ", READSIGNATURE{return readEconElement (cd, ri, nullptr);}},
-{"reservedispatcher",READSIGNATURE{return ElementReader (cd, static_cast<reserveDispatcher *>(nullptr), "reserveDispatcher", ri, nullptr);}},
+    {"exciter", READSIGNATURE{return ElementReader (cd, static_cast<Exciter *>(nullptr), "exciter", ri, nullptr);}},
+    {"governor", READSIGNATURE{return ElementReader (cd, static_cast<Governor *>(nullptr), "governor", ri, nullptr);}},
+    {"pss", READSIGNATURE{return ElementReader (cd, static_cast<Stabilizer *>(nullptr), "pss", ri, nullptr);}},
+    {"source", READSIGNATURE{return ElementReader (cd, static_cast<Source *>(nullptr), "source", ri, nullptr);}},
+    {"controlblock", READSIGNATURE{return ElementReader (cd, static_cast<Block *>(nullptr), "controlblock", ri, nullptr);}},
+    {"generator", READSIGNATURE{return ElementReader (cd, static_cast<Generator *>(nullptr), "generator", ri, nullptr);}},
+    {"load", READSIGNATURE{return ElementReader (cd, static_cast<Load *>(nullptr), "load", ri, nullptr);}},
+    {"bus", READSIGNATURE{return readBusElement (cd, ri, nullptr);}},
+    {"relay", READSIGNATURE{return readRelayElement (cd, ri, nullptr);}},
+    {"area", READSIGNATURE{return readAreaElement (cd, ri, nullptr);}},
+    {"link", READSIGNATURE{return readLinkElement (cd, ri, nullptr, false);}},
+    {"scheduler", READSIGNATURE{return ElementReader (cd, static_cast<scheduler *>(nullptr), "scheduler", ri, nullptr);}},
+    {"agc", READSIGNATURE{return ElementReader (cd, static_cast<AGControl *>(nullptr), "agc", ri, nullptr);}},
+    {"econ", READSIGNATURE{return readEconElement (cd, ri, nullptr);}},
+    {"reservedispatcher",READSIGNATURE{return ElementReader (cd, static_cast<reserveDispatcher *>(nullptr), "reserveDispatcher", ri, nullptr);}},
 // clang-format on
 }
 ;
@@ -250,7 +250,7 @@ void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo &ri
             continue;
         }
         auto args = element->getAttributeValue ("args");
-        int nargs = static_cast<int> (args);
+        auto nargs = static_cast<int> (args);
         if (args == kNullVal)
         {
             nargs = 0;
@@ -310,10 +310,7 @@ void loadTranslations (std::shared_ptr<readerElement> &element, readerInfo &ri)
                 element->moveToNextSibling (translateString);
                 continue;
             }
-            else
-            {
-                ri.addTranslate (def, component);
-            }
+            ri.addTranslate (def, component);
         }
         else
         {

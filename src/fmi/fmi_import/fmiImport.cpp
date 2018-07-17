@@ -87,7 +87,7 @@ void fmiLibrary::loadFMU (const std::string &fmupath, const std::string &extract
 
 int fmiLibrary::getCounts (const std::string &countType) const
 {
-    size_t cnt = size_t (-1);
+    auto cnt = size_t (-1);
     if (countType == "meobjects")
     {
         cnt = mecount;
@@ -319,8 +319,8 @@ path fmiLibrary::findSoPath (fmutype_t type)
             return sopath;
         }
 #ifdef MACOS
-		sopath /= "darwin64";
-		sopath /= identifier + ".so";
+        sopath /= "darwin64";
+        sopath /= identifier + ".so";
 #endif
     }
     else

@@ -57,7 +57,7 @@ void fileLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
     }
     if (!found)
     {
-        index_t Ncol = static_cast<index_t> (schedLoad.columns ());
+        auto Ncol = static_cast<index_t> (schedLoad.columns ());
         for (index_t kk = 0; (kk < Ncol) && (kk < 8); ++kk)
         {
             columnkey[kk] = kk;
@@ -87,7 +87,7 @@ void fileLoad::updateA (coreTime time)
 
     prevTime = schedLoad.time (currIndex);
     auto dt = (currIndex < count - 1) ? (schedLoad.time (currIndex + 1) - prevTime) : maxTime;
-    index_t Ncol = static_cast<index_t> (schedLoad.columns ());
+    auto Ncol = static_cast<index_t> (schedLoad.columns ());
     for (index_t pp = 0; pp < Ncol; ++pp)
     {
         if (columnkey[pp] < 0)

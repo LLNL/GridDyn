@@ -60,7 +60,7 @@ static childTypeFactory<GenModel8, GenModel> gfgm8 ("genmodel", stringVec{"8", "
 GenModel::GenModel(const std::string &objName) : gridSubModel(objName) { m_inputSize = 4; m_outputSize = 2; }
 coreObject *GenModel::clone (coreObject *obj) const
 {
-    GenModel *gd = cloneBase<GenModel, gridSubModel> (this, obj);
+    auto *gd = cloneBase<GenModel, gridSubModel> (this, obj);
     if (gd==nullptr)
     {
         return obj;

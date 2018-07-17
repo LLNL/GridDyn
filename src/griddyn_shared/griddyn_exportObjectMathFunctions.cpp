@@ -79,7 +79,6 @@ void TranslateToLocal(const std::vector<double> &orig, double *newData, const gr
 
 void CopyFromLocal(std::vector<double> &dest, const double *localData, const gridComponent *comp, const solverMode &sMode)
 {
-	auto offset = comp->getOffsets(sMode);
 	auto offsets = comp->getOffsets(sMode);
 	const double *cData = localData;
 	for (index_t ii = 0; ii < offsets.total.vSize; ii++)

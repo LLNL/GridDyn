@@ -200,7 +200,7 @@ std::string Player::to_string()
 		{
 			ss << '+' << period << '|';
 		}
-		else if (ts.size() > 0)
+		else if (!ts.empty())
 		{
 			for (auto nn = currIndex + 1; nn < static_cast<index_t>(ts.size()); ++nn)
 			{
@@ -218,7 +218,7 @@ std::string Player::to_string()
 			ss << '(' << gridUnits::to_string(unitType) << ')';
 		}
 		ss << " = " << value;
-		if (ts.size() > 0)
+		if (!ts.empty())
 		{
 			for (index_t nn = currIndex + 1; nn < static_cast<index_t>(ts.size()); ++nn)
 			{

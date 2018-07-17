@@ -142,35 +142,35 @@ void GovernorSteamTCSR::set (const std::string &param, const std::string &val)
 void GovernorSteamTCSR::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
     // param   = gridDynSimulation::toLower(param);
-    if (param.compare ("k") == 0)
+    if (param == "k")
     {
         K = val;
     }
-    else if (param.compare ("t1") == 0)
+    else if (param == "t1")
     {
         T1 = val;
     }
-    else if (param.compare ("t2") == 0)
+    else if (param == "t2")
     {
         T2 = val;
     }
-    else if (param.compare ("t3") == 0)
+    else if (param == "t3")
     {
         T3 = val;
     }
-    else if (param.compare ("pup") == 0)
+    else if (param == "pup")
     {
         Pup = val;
     }
-    else if (param.compare ("pdown") == 0)
+    else if (param == "pdown")
     {
         Pdown = val;
     }
-    else if (param.compare ("pmax") == 0)
+    else if (param == "pmax")
     {
         Pmax = val;
     }
-    else if (param.compare ("pmin") == 0)
+    else if (param == "pmin")
     {
         Pmin = val;
     }

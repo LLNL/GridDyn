@@ -41,7 +41,7 @@ do
 done
 
 if [[ "$RUN_CACHEGRIND" == "true" ]]; then
-    valgrind --tool=cachegrind src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    valgrind --tool=cachegrind src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
 fi
 
 if [[ "$NO_CTEST" == "true" ]]; then
@@ -51,7 +51,7 @@ if [[ "$NO_CTEST" == "true" ]]; then
     fi
 
     # LSan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
-    # ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    # ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
 else
     # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
     export CTEST_OUTPUT_ON_FAILURE=true

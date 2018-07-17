@@ -94,7 +94,7 @@ void AsioServiceManager::closeService (const std::string &serviceName)
             ptr->loopRet.get ();
         }
 
-        
+
     }
 }
 
@@ -196,7 +196,7 @@ void AsioServiceManager::haltServiceLoop ()
     }
 }
 
-void serviceProcessingLoop (std::shared_ptr<AsioServiceManager> ptr)
+void serviceProcessingLoop (std::shared_ptr<AsioServiceManager> const& ptr)
 {
     try
     {

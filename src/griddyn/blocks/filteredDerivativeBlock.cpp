@@ -183,10 +183,7 @@ void filteredDerivativeBlock::set (const std::string &param, double val, gridUni
         {
             throw (invalidParameterValue (param));
         }
-        else
-        {
-            m_T2 = val;
-        }
+        m_T2 = val;
     }
     else
     {

@@ -173,33 +173,21 @@ void delayBlock::blockJacobianElements (double input,
 void delayBlock::set (const std::string &param, const std::string &val) { return coreObject::set (param, val); }
 void delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-    // param   = gridDynSimulation::toLower(param);
-
+    // param = gridDynSimulation::toLower(param);
     if ((param == "t1") || (param == "t"))
     {
         if (opFlags[dyn_initialized])
         {
-            if (opFlags[simplified])
+            if (!opFlags[simplified])
             {
-                m_T1 = val;  // doesn't matter, parameter doesn't get used in simplified
-                // mode
-            }
-            else
-            {
+                // parameter doesn't get used in simplified mode
                 if (std::abs (val) < kMin_Res)
                 {
                     throw (invalidParameterValue (param));
                 }
-                else
-                {
-                    m_T1 = val;
-                }
             }
         }
-        else
-        {
-            m_T1 = val;
-        }
+        m_T1 = val;
     }
     else
     {

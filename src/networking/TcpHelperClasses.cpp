@@ -29,7 +29,7 @@ void TcpRxConnection::start ()
     connection_state_t exp = connection_state_t::halted;
     if (state.compare_exchange_strong (exp, connection_state_t::receiving))
     {
-        if (receiving == false)
+        if (!receiving)
         {
             receiving = true;
         }
@@ -178,7 +178,7 @@ void TcpRxConnection::close ()
     {
         std::this_thread::yield();
     }
-   
+
 }
 
 TcpConnection::pointer TcpConnection::create (boost::asio::io_service &io_service,

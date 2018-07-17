@@ -159,7 +159,7 @@ void readerInfo::replaceLockedDefinition (const std::string &def, const std::str
 
 std::string readerInfo::checkDefines (const std::string &input)
 {
-    std::string out = input; 
+    std::string out = input;
     int repcnt = 0;
     bool rep (true);
     while (rep)
@@ -193,32 +193,29 @@ std::string readerInfo::checkDefines (const std::string &input)
                     rep = true;
                     break;  // break out of inner loop
                 }
-                else
+                // try a recursive interpretation of the string block to convert a numeric result back into a
+                // string
+                double val = interpretString (temp, *this);
+                if (!std::isnan (val))
                 {
-                    // try a recursive interpretation of the string block to convert a numeric result back into a
-                    // string
-                    double val = interpretString (temp, *this);
-                    if (!std::isnan (val))
+                    if (std::abs (trunc (val) - val) < 1e-9)
                     {
-                        if (std::abs (trunc (val) - val) < 1e-9)
-                        {
-                            // out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) + out.substr
-                            // (pos2 + 1);
-                            out.replace (pos1, pos2 - pos1 + 1, std::to_string (static_cast<int> (val)));
-                        }
-                        else
-                        {
-                            // out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 + 1);
-                            auto str = std::to_string (val);
-                            while (str.back () == '0')  // remove trailing zeros
-                            {
-                                str.pop_back ();
-                            }
-                            out.replace (pos1, pos2 - pos1 + 1, str);
-                        }
-                        rep = true;
-                        break;  // break out of inner loop
+                        // out = out.substr (0, pos1) + std::to_string (static_cast<int> (val)) + out.substr
+                        // (pos2 + 1);
+                        out.replace (pos1, pos2 - pos1 + 1, std::to_string (static_cast<int> (val)));
                     }
+                    else
+                    {
+                        // out = out.substr (0, pos1) + std::to_string (val) + out.substr (pos2 + 1);
+                        auto str = std::to_string (val);
+                        while (str.back () == '0')  // remove trailing zeros
+                        {
+                            str.pop_back ();
+                        }
+                        out.replace (pos1, pos2 - pos1 + 1, str);
+                    }
+                    rep = true;
+                    break;  // break out of inner loop
                 }
                 pos1 = pos2;
             }
@@ -276,7 +273,7 @@ coreObject *readerInfo::findLibraryObject (const std::string &objName) const
 		return retval->second.first;
     }
 	return nullptr;
-   
+
 }
 
 const std::string libraryLabel = "library";

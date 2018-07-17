@@ -45,7 +45,7 @@ coreObject *pmu::clone (coreObject *obj) const
 
     nobj->Tv = Tv;
     nobj->Ttheta = Ttheta;
-	nobj->Trocof = Trocof;
+    nobj->Trocof = Trocof;
     nobj->Tcurrent = Tcurrent;
     nobj->transmissionPeriod = transmissionPeriod;
     nobj->sampleRate = sampleRate;
@@ -90,45 +90,45 @@ void pmu::set (const std::string &param, double val, units_t unitType)
     if ((param == "tv") || (param == "voltagedelay"))
     {
         Tv = val;
-		if (opFlags[dyn_initialized])
-		{
+        if (opFlags[dyn_initialized])
+        {
 
-		}
+        }
     }
     else if ((param == "ttheta") || (param == "tangle") || (param == "angledelay"))
     {
         Ttheta = val;
-		if (opFlags[dyn_initialized])
-		{
+        if (opFlags[dyn_initialized])
+        {
 
-		}
+        }
     }
-	else if (param == "trocof")
-	{
-		Trocof = val;
-		if (opFlags[dyn_initialized])
-		{
+    else if (param == "trocof")
+    {
+        Trocof = val;
+        if (opFlags[dyn_initialized])
+        {
 
-		}
-	}
-	else if ((param == "tcurrent") || (param == "tI") || (param == "currentdelay"))
-	{
-		Tcurrent=val;
-		if (opFlags[dyn_initialized])
-		{
+        }
+    }
+    else if ((param == "tcurrent") || (param == "tI") || (param == "currentdelay"))
+    {
+        Tcurrent=val;
+        if (opFlags[dyn_initialized])
+        {
 
-		}
-	}
+        }
+    }
     else if ((param == "transmitrate") || (param == "rate"))
     {
-		transmissionPeriod = (val >= kMin_Res) ? 1.0 / val : kBigNum;
-		
-    }
-	else if ((param == "transmitperiod") || (param == "period"))
-	{
-		transmissionPeriod = unitConversionTime(val,unitType,gridUnits::sec);
+        transmissionPeriod = (val >= kMin_Res) ? 1.0 / val : kBigNum;
 
-	}
+    }
+    else if ((param == "transmitperiod") || (param == "period"))
+    {
+        transmissionPeriod = unitConversionTime(val,unitType,gridUnits::sec);
+
+    }
     else if (param == "samplerate")
     {
         sampleRate = val;
@@ -153,18 +153,18 @@ double pmu::get (const std::string &param, gridUnits::units_t unitType) const
     {
         return Tcurrent;
     }
-	if (param == "trocof")
-	{
-		return Trocof;
-	}
+    if (param == "trocof")
+    {
+        return Trocof;
+    }
     if ((param == "transmitrate") || (param == "rate"))
     {
         return 1.0/transmissionPeriod;
     }
-	if (param == "transmitperiod")
-	{
-		return transmissionPeriod;
-	}
+    if (param == "transmitperiod")
+    {
+        return transmissionPeriod;
+    }
     if (param == "samplerate")
     {
         return sampleRate;
@@ -299,7 +299,7 @@ void pmu::createFilterBlocks ()
         }
         auto fblock = new blocks::filteredDerivativeBlock ("freq");
         fblock->set ("t1", Ttheta);
-		fblock->set("t2", Trocof);
+        fblock->set("t2", Trocof);
         add (fblock);
         set ("blockinput" + std::to_string (fblock->locIndex), 1);
         setupOutput (fblock->locIndex, "block" + std::to_string (fblock->locIndex));
@@ -309,55 +309,55 @@ void pmu::createFilterBlocks ()
 
 void pmu::updateA (coreTime time)
 {
-	sensor::updateA(time);
+    sensor::updateA(time);
     if (time >= nextTransmitTime)
     {
-		generateAndTransmitMessage();
-		nextTransmitTime = lastTransmitTime + transmissionPeriod;
-		if (nextTransmitTime <= time)
-		{
-			nextTransmitTime = time + transmissionPeriod;
-		}
+        generateAndTransmitMessage();
+        nextTransmitTime = lastTransmitTime + transmissionPeriod;
+        if (nextTransmitTime <= time)
+        {
+            nextTransmitTime = time + transmissionPeriod;
+        }
     }
 
 }
 
 coreTime pmu::updateB()
 {
-	sensor::updateB();
-	if (nextUpdateTime > nextTransmitTime)
-	{
-		nextUpdateTime = nextTransmitTime;
-	}
-	return nextUpdateTime;
+    sensor::updateB();
+    if (nextUpdateTime > nextTransmitTime)
+    {
+        nextUpdateTime = nextTransmitTime;
+    }
+    return nextUpdateTime;
 }
 
 void pmu::generateAndTransmitMessage() const
 {
-	if (opFlags[use_commLink])
-	{
-		auto &oname = outputNames();
+    if (opFlags[use_commLink])
+    {
+        auto &oname = outputNames();
 
-		auto cm = std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
+        auto cm = std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
 
         auto payload = cm->getPayload<comms::controlMessagePayload>();
-		auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
+        auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
 
 
         payload->multiFields.resize(res.size());
         payload->multiValues.resize(res.size());
         payload->multiUnits.resize(res.size());
         payload->m_time = prevTime;
-		for (index_t ii = 0; ii < static_cast<index_t>(res.size()); ++ii)
-		{
+        for (index_t ii = 0; ii < static_cast<index_t>(res.size()); ++ii)
+        {
             payload->multiFields[ii] = oname[ii][0];
             payload->multiValues[ii] = res[ii];
             payload->multiUnits[ii] = gridUnits::to_string(outputUnits(ii));
-		}
-		
-		cManager.send(std::move(cm));
-		
-	}
+        }
+
+        cManager.send(std::move(cm));
+
+    }
 
 }
 

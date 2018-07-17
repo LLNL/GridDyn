@@ -101,7 +101,7 @@ protected:
 
   index_t findAction (std::uint64_t actionID);
   index_t getFreeAction ();
-  
+
 
   std::unique_ptr<functionEventAdapter> generateGetEvent (coreTime eventTime, std::uint64_t sourceID, comms::controlMessagePayload *message);
   std::unique_ptr<functionEventAdapter> generateSetEvent (coreTime eventTime, std::uint64_t sourceID, comms::controlMessagePayload *message);

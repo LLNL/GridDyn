@@ -16,31 +16,28 @@
 
 std::shared_ptr<fmiLibrary> fmiLibraryManager::getLibrary(const std::string &libFile)
 {
-	std::unique_lock<std::mutex> lock(libraryLock);
-	auto fnd = quickReferenceLibraries.find(libFile);
-	std::string fmilib;
-	if (fnd != quickReferenceLibraries.end())
-	{
-		fmilib = fnd->second;
-	}
-	else
-	{
-		fmilib = libFile;
-	}
-	auto fndLib = libraries.find(fmilib);
-	if (fndLib != libraries.end())
-	{
-		return fndLib->second;
-	}
-	else
-	{
-		lock.unlock();
-		//this can be a big operation so free the lock while it is occurring
-		auto newLib = std::make_shared<fmiLibrary>(libFile);
-		lock.lock();
-		libraries.emplace(fmilib, newLib);
-		return newLib;
-	}
+    std::unique_lock<std::mutex> lock(libraryLock);
+    auto fnd = quickReferenceLibraries.find(libFile);
+    std::string fmilib;
+    if (fnd != quickReferenceLibraries.end())
+    {
+        fmilib = fnd->second;
+    }
+    else
+    {
+        fmilib = libFile;
+    }
+    auto fndLib = libraries.find(fmilib);
+    if (fndLib != libraries.end())
+    {
+        return fndLib->second;
+    }
+    lock.unlock();
+    //this can be a big operation so free the lock while it is occurring
+    auto newLib = std::make_shared<fmiLibrary>(libFile);
+    lock.lock();
+    libraries.emplace(fmilib, newLib);
+    return newLib;
 }
 
 std::unique_ptr<fmi2ModelExchangeObject> fmiLibraryManager::createModelExchangeObject(const std::string &fmuIdentifier, const std::string &ObjectName)

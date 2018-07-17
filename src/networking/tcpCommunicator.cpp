@@ -251,7 +251,7 @@ void tcpCommunicator::messageHandler(const multipart_t &msg)
 	//size should be either 2 or 3
 	auto msgBody = (sz == 2) ? msg.peek(1) : msg.peek(2);
 
-	std::string msgString((const char *)(msgBody->data()), msgBody->size());
+	std::string msgString(static_cast<const char *>(msgBody->data()), msgBody->size());
     std::shared_ptr<commMessage> gdMsg;
 	gdMsg->from_datastring(msgString);
 

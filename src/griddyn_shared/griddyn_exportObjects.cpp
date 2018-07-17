@@ -43,7 +43,7 @@ gridDynObject creategridDynObject(gridComponent *comp)
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp);
-	return reinterpret_cast<void *>(ptr);
+	return ptr;
 }
 
 gridComponent *getComponentPointer(gridDynObject obj)
@@ -73,13 +73,13 @@ gridDynObject gridDynObject_create(const char *componentType, const char *object
 	{
 		return nullptr;
 	}
-	gridComponent *comp = dynamic_cast<gridComponent *>(newObject);
+	auto *comp = dynamic_cast<gridComponent *>(newObject);
 	if (comp == nullptr)
 	{
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp);
-	return reinterpret_cast<gridDynObject>(ptr);
+	return ptr;
 }
 
 
@@ -92,14 +92,13 @@ gridDynObject gridDynObject_clone(const gridDynObject obj)
 		return nullptr;
 	}
 	auto newObject = comp->clone();
-	gridComponent *comp_clone = dynamic_cast<gridComponent *>(newObject);
+	auto *comp_clone = dynamic_cast<gridComponent *>(newObject);
 	if (comp_clone == nullptr)
 	{
 		return nullptr;
 	}
 	auto ptr = new coreOwningPtr<gridComponent>(comp_clone);
-	return reinterpret_cast<gridDynObject>(ptr);
-
+	return ptr;
 }
 
 void gridDynObject_free(gridDynObject obj)
@@ -125,7 +124,6 @@ griddyn_status gridDynObject_add(gridDynObject parentObject, gridDynObject objec
 	{
 		return griddyn_add_failure;
 	}
-	
 }
 
 griddyn_status gridDynObject_remove(gridDynObject parentObject, gridDynObject objectToRemove)
@@ -248,7 +246,6 @@ griddyn_status gridDynObject_getString(const gridDynObject obj, const char *para
 	auto s = comp->getString(parameter);
 	strncpy(value, s.c_str(), N);
 	return static_cast<int>(s.size());
-	
 }
 
 griddyn_status gridDynObject_getValue(const gridDynObject obj, const char *parameter, double *result)
@@ -272,7 +269,6 @@ griddyn_status gridDynObject_getValue(const gridDynObject obj, const char *param
 	{
 		return griddyn_unknown_parameter;
 	}
-	
 }
 
 
@@ -299,7 +295,6 @@ griddyn_status gridDynObject_getValueUnits(const gridDynObject obj, const char *
 	{
 		return griddyn_unknown_parameter;
 	}
-
 }
 
 
@@ -317,7 +312,7 @@ griddyn_status gridDynObject_getFlag(const gridDynObject obj, const char *flag, 
         *result = (res) ? 1 : 0;
 		return griddyn_ok;
 	}
-	catch (const unrecognizedParameter)
+	catch (const unrecognizedParameter &)
 	{
 		return griddyn_unknown_parameter;
 	}

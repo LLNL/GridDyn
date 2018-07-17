@@ -112,11 +112,7 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 void gridSecondary::set (const std::string &param, const std::string &val) { gridComponent::set (param, val); }
 void gridSecondary::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-	if (param.empty())
-	{
-
-	}
-    else
+    if (!param.empty())
     {
         gridComponent::set (param, val, unitType);
     }
@@ -199,56 +195,56 @@ IOdata gridSecondary::predictOutputs (coreTime /*predictionTime*/,
 
 static const std::vector<stringVec> inputNamesStr
 {
-	{ "voltage","v","volt" },
-	{ "angle","theta","ang","a" },
-	{ "frequency","freq","f","omega" },
+    { "voltage","v","volt" },
+    { "angle","theta","ang","a" },
+    { "frequency","freq","f","omega" },
 };
 
 const std::vector<stringVec> &gridSecondary::inputNames() const
 {
-	return inputNamesStr;
+    return inputNamesStr;
 }
 
 static const std::vector<stringVec> outputNamesStr
 {
-	{ "p","power","realpower","real"},
-	{ "q","reactive","reactivepower" },
+    { "p","power","realpower","real"},
+    { "q","reactive","reactivepower" },
 };
 
 const std::vector<stringVec> &gridSecondary::outputNames() const
 {
-	return outputNamesStr;
+    return outputNamesStr;
 }
 
 gridUnits::units_t gridSecondary::inputUnits(index_t inputNum) const
-{ 
-	switch (inputNum)
-	{
-	case voltageInLocation:
-		return gridUnits::puV;
-	case angleInLocation:
-		return gridUnits::rad;
-	case frequencyInLocation:
-		return gridUnits::puHz;
-	default:
-		return gridUnits::defUnit;
-	}
-	
+{
+    switch (inputNum)
+    {
+    case voltageInLocation:
+        return gridUnits::puV;
+    case angleInLocation:
+        return gridUnits::rad;
+    case frequencyInLocation:
+        return gridUnits::puHz;
+    default:
+        return gridUnits::defUnit;
+    }
+
 }
 
 
 gridUnits::units_t gridSecondary::outputUnits(index_t outputNum) const
-{ 
-	switch (outputNum)
-	{
-	case PoutLocation:
-		return gridUnits::puMW;
-	case QoutLocation:
-		return gridUnits::puMW;
-	
-	default:
-		return gridUnits::defUnit;
-	}
+{
+    switch (outputNum)
+    {
+    case PoutLocation:
+        return gridUnits::puMW;
+    case QoutLocation:
+        return gridUnits::puMW;
+
+    default:
+        return gridUnits::defUnit;
+    }
 }
 
 }  // namespace griddyn

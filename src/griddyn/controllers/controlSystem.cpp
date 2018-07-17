@@ -23,7 +23,7 @@ controlSystem::~controlSystem () {}
 
 coreObject *controlSystem::clone (coreObject *obj) const
 {
-    controlSystem *cs = cloneBase<controlSystem, gridSubModel> (this, obj);
+    auto *cs = cloneBase<controlSystem, gridSubModel> (this, obj);
     if (cs == nullptr)
     {
         return obj;

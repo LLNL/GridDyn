@@ -323,24 +323,24 @@ void SolverInterface::set (const std::string &param, double val)
 }
 
 static const std::map<std::string, int> solverFlagMap{
-  {"filecapture", fileCapture_flag},
-  {"directlogging", directLogging_flag},
-  {"solver_log", directLogging_flag},
-  {"dense", dense_flag},
-  {"sparse", -dense_flag},
-  {"parallel", parallel_flag},
-  {"serial", -parallel_flag},
-  {"mask", useMask_flag},
-  {"constantjacobian", constantJacobian_flag},
-  {"omp", use_omp_flag},
-  {"useomp", use_omp_flag},
-  {"bdf", use_bdf_flag},
-  {"adams", -use_bdf_flag},
-  {"functional", -use_newton_flag},
-  {"newton", use_newton_flag},
-  {"print_resid",print_residuals},
-  {"print_residuals",print_residuals},
-  {"block_mode_only", block_mode_only}
+    {"filecapture", fileCapture_flag},
+    {"directlogging", directLogging_flag},
+    {"solver_log", directLogging_flag},
+    {"dense", dense_flag},
+    {"sparse", -dense_flag},
+    {"parallel", parallel_flag},
+    {"serial", -parallel_flag},
+    {"mask", useMask_flag},
+    {"constantjacobian", constantJacobian_flag},
+    {"omp", use_omp_flag},
+    {"useomp", use_omp_flag},
+    {"bdf", use_bdf_flag},
+    {"adams", -use_bdf_flag},
+    {"functional", -use_newton_flag},
+    {"newton", use_newton_flag},
+    {"print_resid",print_residuals},
+    {"print_residuals", print_residuals},
+    {"block_mode_only", block_mode_only}
 };
 
 void SolverInterface::setFlag (const std::string &flag, bool val)
@@ -561,7 +561,7 @@ void SolverInterface::printStates (bool stateNames)
 
 void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError) const
 {
-    int *errflag;
+    // TODO delete either this or optimizerInterface::check_flag
     // Check if SUNDIALS function returned nullptr pointer - no memory allocated
     if (opt == 0 && flagvalue == nullptr)
     {
@@ -571,10 +571,10 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
         }
         throw (std::bad_alloc ());
     }
-    else if (opt == 1)
+    if (opt == 1)
     {
         // Check if flag < 0
-        errflag = reinterpret_cast<int *> (flagvalue);
+        auto *errflag = reinterpret_cast<int *> (flagvalue);
         if (*errflag < 0)
         {
             if (printError)
@@ -585,6 +585,7 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
             throw (solverException (*errflag));
         }
     }
+    // TODO missing if (opt == 2 and flagvalue == nullptr)?
 }
 
 int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode) { return -101; }

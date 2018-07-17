@@ -27,7 +27,7 @@ namespace genmodels
 GenModel5::GenModel5 (const std::string &objName) : GenModel4 (objName) {}
 coreObject *GenModel5::clone (coreObject *obj) const
 {
-    GenModel5 *gd = cloneBase<GenModel5, GenModel4> (this, obj);
+    auto *gd = cloneBase<GenModel5, GenModel4> (this, obj);
     if (gd == nullptr)
     {
         return obj;

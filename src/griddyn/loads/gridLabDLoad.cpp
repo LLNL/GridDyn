@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -88,7 +88,7 @@ void gridLabDLoad::gridLabDInitialize ()
 
 coreObject *gridLabDLoad::clone (coreObject *obj) const
 {
-    gridLabDLoad *ld = cloneBase<gridLabDLoad, rampLoad> (this, obj);
+    auto *ld = cloneBase<gridLabDLoad, rampLoad> (this, obj);
     if (ld == nullptr)
     {
         return obj;
@@ -583,9 +583,9 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
         }
     }
 
-    
+
     return {retP, retQ};
-    
+
 }
 
 void gridLabDLoad::run2GridLabA (coreTime time, const IOdata &inputs)

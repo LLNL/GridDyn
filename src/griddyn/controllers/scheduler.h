@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef SCHEDULER_H_
-#define SCHEDULER_H_
 #pragma once
 
 #include "../Source.h"
@@ -220,4 +218,3 @@ class schedulerReg : public schedulerRamp
 };
 
 }  // namespace griddyn
-#endif /*SCHEDULER_H_*/
