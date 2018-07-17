@@ -207,13 +207,13 @@ index_t GovernorIeeeSimple::findIndex (const std::string &field, const solverMod
 
 void GovernorIeeeSimple::rootTest (const IOdata &inputs,
                                    const stateData &sD,
-                                   double root[],
+                                   double roots[],
                                    const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /*if (opFlags.test (uses_deadband))
       {
-        Governor::rootTest (inputs, sD, root, sMode);
+        Governor::rootTest (inputs, sD, roots, sMode);
         ++rootOffset;
       }
           */
@@ -225,7 +225,7 @@ void GovernorIeeeSimple::rootTest (const IOdata &inputs,
 
         if (!opFlags[p_limited])
         {
-            root[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
+            roots[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
             if (Pmech > Pmax)
             {
                 opFlags.set (p_limit_high);
@@ -235,7 +235,7 @@ void GovernorIeeeSimple::rootTest (const IOdata &inputs,
         {
             // double omega = getControlFrequency (inputs);
             double omega = inputs[govOmegaInLocation];
-            root[rootOffset] =
+            roots[rootOffset] =
               (inputs[govpSetInLocation] - Pmech - K * Loc.diffStateLoc[1] - K * T2 * (omega - 1.0) / T1) / T3;
         }
         ++rootOffset;
@@ -259,7 +259,7 @@ void GovernorIeeeSimple::rootTrigger (coreTime /*time*/,
           */
     if (opFlags.test (uses_plimits))
     {
-        if (rootMask[rootOffset])
+        if (rootMask[rootOffset] != 0)
         {
             if (opFlags.test (p_limited))
             {

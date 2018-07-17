@@ -39,7 +39,7 @@ gridBusOpt::gridBusOpt (const std::string &objName) : gridOptObject (objName) {}
 gridBusOpt::gridBusOpt (coreObject *obj, const std::string &objName)
     : gridOptObject (objName), bus (dynamic_cast<gridBus *> (obj))
 {
-    if (bus)
+    if (bus != nullptr)
     {
         if (getName ().empty ())
         {
@@ -381,24 +381,24 @@ gridBusOpt::~gridBusOpt ()
 void gridBusOpt::add (coreObject *obj)
 {
     auto ld = dynamic_cast<gridLoadOpt *> (obj);
-    if (ld)
+    if (ld != nullptr)
     {
         return add (ld);
     }
 
     auto gen = dynamic_cast<gridGenOpt *> (obj);
-    if (gen)
+    if (gen != nullptr)
     {
         return add (gen);
     }
 
     auto lnk = dynamic_cast<gridLinkOpt *> (obj);
-    if (lnk)
+    if (lnk != nullptr)
     {
         return add (lnk);
     }
 
-    if (dynamic_cast<gridBus *> (obj))
+    if (dynamic_cast<gridBus *> (obj) != nullptr)
     {
         bus = static_cast<gridBus *> (obj);
         if (getName ().empty ())
@@ -461,19 +461,19 @@ void gridBusOpt::add (gridLinkOpt *lnk)
 void gridBusOpt::remove (coreObject *obj)
 {
     auto *ld = dynamic_cast<gridLoadOpt *> (obj);
-    if (ld)
+    if (ld != nullptr)
     {
         return (remove (ld));
     }
 
     auto *gen = dynamic_cast<gridGenOpt *> (obj);
-    if (gen)
+    if (gen != nullptr)
     {
         return (remove (gen));
     }
 
     auto *lnk = dynamic_cast<gridLinkOpt *> (obj);
-    if (lnk)
+    if (lnk != nullptr)
     {
         return (remove (lnk));
     }

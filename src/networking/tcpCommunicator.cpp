@@ -51,7 +51,7 @@ void tcpCommunicator::cloneTo (Communicator *comm) const
     zmqComm->flags = flags;
 }
 
-void tcpCommunicator::transmit (const std::string &destName, std::shared_ptr<commMessage> message)
+void tcpCommunicator::transmit (const std::string &destName, std::shared_ptr<commMessage> /* message */)
 {
     zmq::multipart_t txmsg;
     if (!flags[no_transmit_dest])
@@ -63,7 +63,7 @@ void tcpCommunicator::transmit (const std::string &destName, std::shared_ptr<com
     // txmsg.send(*txSocket);
 }
 
-void tcpCommunicator::transmit (std::uint64_t destID, std::shared_ptr<commMessage> message)
+void tcpCommunicator::transmit (std::uint64_t destID, std::shared_ptr<commMessage> /* message */)
 {
     zmq::multipart_t txmsg;
     if (!flags[no_transmit_dest])

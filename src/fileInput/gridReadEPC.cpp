@@ -39,7 +39,7 @@ void epcReadBus (gridBus *bus, string_view line, double base, const basicReaderI
 void epcReadDCBus (dcBus *bus, string_view line, double base, const basicReaderInfo &bri);
 void epcReadLoad (zipLoad *ld, string_view line, double base);
 void epcReadFixedShunt (zipLoad *ld, string_view line, double base);
-void epcReadSwitchShunt (loads::svd *ld, string_view line, double base);
+void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */);
 void epcReadGen (Generator *gen, string_view line, double base);
 void epcReadBranch (coreObject *parentObject,
                     string_view line,
@@ -805,7 +805,7 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
     }
 }
 
-void epcReadSwitchShunt (loads::svd *ld, string_view line, double base)
+void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */)
 {
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 

@@ -300,7 +300,7 @@ void gridComponent::pFlowInitializeA (coreTime time0, std::uint32_t flags)
         {
             localBaseVoltage = 120.0;
         }
-        else if (dynamic_cast<gridComponent *> (getParent ()))
+        else if (dynamic_cast<gridComponent *> (getParent ()) != nullptr)
         {
             localBaseVoltage = static_cast<gridComponent *> (getParent ())->localBaseVoltage;
         }
@@ -1129,7 +1129,7 @@ void gridComponent::replaceSubObject (gridComponent *newObj, gridComponent *oldO
 }
 void gridComponent::remove (coreObject *obj)
 {
-    if (dynamic_cast<gridComponent *> (obj))
+    if (dynamic_cast<gridComponent *> (obj) != nullptr)
     {
         removeSubObject (static_cast<gridComponent *> (obj));
     }
@@ -2031,11 +2031,11 @@ void gridComponent::outputPartialDerivatives (const IOdata & /*inputs*/,
     }
 }
 
-count_t gridComponent::outputDependencyCount (index_t num, const solverMode &sMode) const
+count_t gridComponent::outputDependencyCount (index_t outputNum, const solverMode &sMode) const
 {
     /* assume the output is a state and act accordingly*/
 
-    index_t oLoc = getOutputLoc (sMode, num);
+    index_t oLoc = getOutputLoc (sMode, outputNum);
     return (oLoc == kInvalidLocation) ? 0 : 1;
 }
 

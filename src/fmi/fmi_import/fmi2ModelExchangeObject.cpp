@@ -126,9 +126,9 @@ void fmi2ModelExchangeObject::setTime (fmi2Real time)
         }
     }
 }
-void fmi2ModelExchangeObject::setStates (const fmi2Real x[])
+void fmi2ModelExchangeObject::setStates (const fmi2Real states[])
 {
-    auto ret = ModelExchangeFunctions->fmi2SetContinuousStates (comp, x, numStates);
+    auto ret = ModelExchangeFunctions->fmi2SetContinuousStates (comp, states, numStates);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
@@ -150,17 +150,17 @@ void fmi2ModelExchangeObject::getEventIndicators (fmi2Real eventIndicators[]) co
         handleNonOKReturnValues (ret);
     }
 }
-void fmi2ModelExchangeObject::getStates (fmi2Real x[]) const
+void fmi2ModelExchangeObject::getStates (fmi2Real states[]) const
 {
-    auto ret = ModelExchangeFunctions->fmi2GetContinuousStates (comp, x, numStates);
+    auto ret = ModelExchangeFunctions->fmi2GetContinuousStates (comp, states, numStates);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
-void fmi2ModelExchangeObject::getNominalsOfContinuousStates (fmi2Real x_nominal[]) const
+void fmi2ModelExchangeObject::getNominalsOfContinuousStates (fmi2Real nominalValues[]) const
 {
-    auto ret = ModelExchangeFunctions->fmi2GetNominalsOfContinuousStates (comp, x_nominal, numStates);
+    auto ret = ModelExchangeFunctions->fmi2GetNominalsOfContinuousStates (comp, nominalValues, numStates);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);

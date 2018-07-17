@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYNGOVERNOR_H_
-#define GRIDDYNGOVERNOR_H_
 #pragma once
 
 #include "gridSubModel.h"
@@ -92,5 +90,3 @@ class Governor : public gridSubModel
 };
 
 }  // namespace griddyn
-
-#endif  // GRIDGOVERNOR_H_

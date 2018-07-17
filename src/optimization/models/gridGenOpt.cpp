@@ -35,7 +35,7 @@ gridGenOpt::gridGenOpt (const std::string &objName) : gridOptObject (objName) {}
 gridGenOpt::gridGenOpt (coreObject *obj, const std::string &objName)
     : gridOptObject (objName), gen (dynamic_cast<Generator *> (obj))
 {
-    if (gen)
+    if (gen != nullptr)
     {
         if (getName ().empty ())
         {
@@ -68,7 +68,7 @@ coreObject *gridGenOpt::clone (coreObject *obj) const
 
 void gridGenOpt::add (coreObject *obj)
 {
-    if (dynamic_cast<Generator *> (obj))
+    if (dynamic_cast<Generator *> (obj) != nullptr)
     {
         gen = static_cast<Generator *> (obj);
         setName (gen->getName ());
@@ -104,7 +104,7 @@ void gridGenOpt::loadSizes (const optimMode &oMode)
     oo.localLoad (true);
 }
 
-void gridGenOpt::setValues (const optimData &, const optimMode & /*oMode*/) {}
+void gridGenOpt::setValues (const optimData & /* oD */, const optimMode & /*oMode*/) {}
 
 // for saving the state
 void gridGenOpt::guessState (double /*time*/, double /*val*/[], const optimMode & /*oMode*/)
@@ -112,9 +112,9 @@ void gridGenOpt::guessState (double /*time*/, double /*val*/[], const optimMode 
     // optimOffsets *oo = offsets.getOffsets (oMode);
 }
 
-void gridGenOpt::getVariableType (double /*sdata*/[], const optimMode &) {}
+void gridGenOpt::getVariableType (double /*sdata*/[], const optimMode & /* oMode */) {}
 
-void gridGenOpt::getTols (double /*tols*/[], const optimMode &) {}
+void gridGenOpt::getTols (double /*tols*/[], const optimMode & /* oMode */) {}
 
 void gridGenOpt::valueBounds (double time, double upperLimit[], double lowerLimit[], const optimMode &oMode)
 {
@@ -155,7 +155,7 @@ void gridGenOpt::valueBounds (double time, double upperLimit[], double lowerLimi
     }
 }
 
-void gridGenOpt::linearObj (const optimData &, vectData<double> &linObj, const optimMode &oMode)
+void gridGenOpt::linearObj (const optimData & /* oD */, vectData<double> &linObj, const optimMode &oMode)
 {
     auto &oo = offsets.getOffsets (oMode);
     if (optFlags[piecewise_linear_cost])
@@ -172,7 +172,7 @@ void gridGenOpt::linearObj (const optimData &, vectData<double> &linObj, const o
         }
     }
 }
-void gridGenOpt::quadraticObj (const optimData &,
+void gridGenOpt::quadraticObj (const optimData & /* oD */,
                                vectData<double> &linObj,
                                vectData<double> &quadObj,
                                const optimMode &oMode)
@@ -346,17 +346,21 @@ void gridGenOpt::jacobianElements (const optimData &oD, matrixData<double> &md, 
     }
 }
 
-void gridGenOpt::getConstraints (const optimData &,
+void gridGenOpt::getConstraints (const optimData & /* oD */,
                                  matrixData<double> & /*cons*/,
                                  double /*upperLimit*/[],
                                  double /*lowerLimit*/[],
-                                 const optimMode &)
+                                 const optimMode & /* oMode */)
 {
 }
 
-void gridGenOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &) {}
+void gridGenOpt::constraintValue (const optimData & /* oD */, double /*cVals*/[], const optimMode & /* oMode */) {}
 
-void gridGenOpt::constraintJacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &) {}
+void gridGenOpt::constraintJacobianElements (const optimData & /* oD */,
+                                             matrixData<double> & /*md*/,
+                                             const optimMode & /* oMode */)
+{
+}
 
 void gridGenOpt::getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix)
 {
@@ -382,13 +386,11 @@ void gridGenOpt::set (const std::string &param, const std::string &val)
 
 void gridGenOpt::set (const std::string &param, double val, units_t unitType)
 {
-    unsigned long num = 0;
-
     if (param[0] == 'p')
     {
         try
         {
-            num = std::stoul (param.substr (1));
+            auto num = std::stoul (param.substr (1));
             if (num > Pcoeff.size ())
             {
                 Pcoeff.resize (num + 1);
@@ -405,7 +407,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
     {
         try
         {
-            num = std::stoul (param.substr (1));
+            auto num = std::stoul (param.substr (1));
             if (num > Qcoeff.size ())
             {
                 Qcoeff.resize (num + 1);

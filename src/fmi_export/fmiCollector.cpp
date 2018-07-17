@@ -74,38 +74,35 @@ void fmiCollector::set (const std::string &param, const std::string &val)
 static const std::string defFMIName ("fmi");
 const std::string &fmiCollector::getSinkName () const
 {
-    if (coord)
+    if (coord != nullptr)
     {
         return coord->getFMIName ();
     }
-    else
-    {
-        return defFMIName;
-    }
+    return defFMIName;
 }
 
 coreObject *fmiCollector::getOwner () const { return coord; }
 
 void fmiCollector::dataPointAdded (const collectorPoint &cp)
 {
-    if (!coord)
+    if (coord == nullptr)
     {
         // find the coordinator first
         auto gobj = cp.dataGrabber->getObject ();
-        if (gobj)
+        if (gobj != nullptr)
         {
             auto rto = gobj->getRoot ();
-            if (rto)
+            if (rto != nullptr)
             {
                 auto fmiCont = rto->find ("fmiCoordinator");
-                if (dynamic_cast<fmiCoordinator *> (fmiCont))
+                if (dynamic_cast<fmiCoordinator *> (fmiCont) != nullptr)
                 {
                     coord = static_cast<fmiCoordinator *> (fmiCont);
                 }
             }
         }
     }
-    if (coord)
+    else
     {
         if (cp.columnCount == 1)
         {

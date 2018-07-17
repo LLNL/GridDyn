@@ -206,7 +206,7 @@ void reserveDispatcher::remove (schedulerRamp *sched)
 
 void reserveDispatcher::add (coreObject *obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj))
+    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
     {
         add (static_cast<schedulerRamp *> (obj));
     }
@@ -228,7 +228,7 @@ void reserveDispatcher::add (schedulerRamp *sched)
 
 void reserveDispatcher::remove (coreObject *obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj))
+    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
     {
         remove (static_cast<schedulerRamp *> (obj));
     }

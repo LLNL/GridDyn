@@ -89,7 +89,7 @@ class fmiMESubModel : public gridSubModel
 
     virtual count_t LocalJacobianCount (const solverMode &sMode) const override;
 
-    virtual std::pair<count_t, count_t> LocalRootCount (const solverMode &sMode) const override;
+    virtual std::pair<count_t, count_t> LocalRootCount (const solverMode & /* sMode */) const override;
     virtual void
     residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode) override;
     virtual void
@@ -117,13 +117,17 @@ class fmiMESubModel : public gridSubModel
                               const solverMode &sMode) override;
 
     IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
-    virtual double
-    getDoutdt (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
-    virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+    virtual double getDoutdt (const IOdata &inputs,
+                              const stateData &sD,
+                              const solverMode &sMode,
+                              index_t outputNum = 0) const override;
+    virtual double getOutput (const IOdata &inputs,
+                              const stateData &sD,
+                              const solverMode &sMode,
+                              index_t outputNum = 0) const override;
 
     virtual double getOutput (index_t outputNum = 0) const override;
-    virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const override;
+    virtual index_t getOutputLoc (const solverMode &sMode, index_t outputNum = 0) const override;
 
     virtual void
     setState (coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;

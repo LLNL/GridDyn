@@ -153,10 +153,10 @@ class fmiLibrary
     */
     explicit fmiLibrary (const std::string &fmupath);
     /** construct an fmilibrary object from the fmu path
-    @param[in] the path to the fmu
-    @param[in] the extraction path for the fmu
+    @param[in] fmupath the path to the fmu
+    @param[in] extractPath the extraction path for the fmu
     */
-    fmiLibrary (const std::string &fmupath, const std::string &extractLoc);
+    fmiLibrary (const std::string &fmupath, const std::string &extractPath);
     /** check if the xml file for the fmu has been loaded
     @return true if loaded false if not*/
     bool isXmlLoaded () const { return xmlLoaded; }
@@ -168,9 +168,9 @@ class fmiLibrary
     void loadFMU (const std::string &fmupath);
     /** load the FMU from the fmu path
     @param[in] fmupath the fmu
-    @param[in] extractLoc the path to extract the fmu to
+    @param[in] extractPath the path to extract the fmu to
     */
-    void loadFMU (const std::string &fmupath, const std::string &extractLoc);
+    void loadFMU (const std::string &fmupath, const std::string &extractPath);
     std::shared_ptr<fmiInfo> getInfo () const { return information; }
     void close ();
     const std::string &getName () const { return modelName; }
@@ -224,10 +224,10 @@ class fmiLibrary
 @param[in] status the status of the message
 @param[in] message
 */
-void loggerFunc (fmi2ComponentEnvironment compEnv,
-                 fmi2String instanceName,
-                 fmi2Status status,
-                 fmi2String category,
+void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
+                 fmi2String /* instanceName */,
+                 fmi2Status /* status */,
+                 fmi2String /* category */,
                  fmi2String message,
                  ...);
 

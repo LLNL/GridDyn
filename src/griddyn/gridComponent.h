@@ -171,7 +171,7 @@ see gridComponent::dynInitializeA for more details
     /** remove a grid object to the subObject container
     @param[in] comp the component to add
     */
-    void removeSubObject (gridComponent *comp);
+    void removeSubObject (gridComponent *obj);
     /** replace a grid object to the subObject container
     @param[in] newObj the component to add
     @param[in] oldObj the component to replace
@@ -608,15 +608,15 @@ see gridComponent::dynInitializeA for more details
     @param[in] sMode the solver mode to consider
     @return the count of the output Dependencies
     */
-    virtual count_t outputDependencyCount (index_t num, const solverMode &sMode) const;
+    virtual count_t outputDependencyCount (index_t outputNum, const solverMode &sMode) const;
     /**
-    *@brief compute the partial derivatives of the output states with respect to inputs
-    @param[in] inputs the inputs for the secondary object
-    * @param[in] sD the current state data for the simulation
-    * @param[out] md  the array to store the information in
-    * @param[in] inputLocs the vector of input argument locations
-    * @param[in] sMode the operations mode
-    **/
+     * @brief compute the partial derivatives of the output states with respect to inputs
+     * @param[in] inputs the inputs for the secondary object
+     * @param[in] sD the current state data for the simulation
+     * @param[out] md  the array to store the information in
+     * @param[in] inputLocs the vector of input argument locations
+     * @param[in] sMode the operations mode
+     **/
     virtual void ioPartialDerivatives (const IOdata &inputs,
                                        const stateData &sD,
                                        matrixData<double> &md,
@@ -706,7 +706,7 @@ see gridComponent::dynInitializeA for more details
     @param[in] outputName the name of the output
     @return the index number of the output
     */
-    index_t lookupOutputIndex (const std::string &outName) const;
+    index_t lookupOutputIndex (const std::string &outputName) const;
     /**
     *@brief get a single output based on local data
     @param[in] outputNum the index of the output being requested
@@ -721,7 +721,7 @@ see gridComponent::dynInitializeA for more details
     @param[in] num the number of the state being requested
     @return the value of the state requested
     **/
-    virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const;
+    virtual index_t getOutputLoc (const solverMode &sMode, index_t outputNum = 0) const;
     /**
     *@brief get a vector state indices for the output
     @ details used in cases where the state of one object is used int the computation of another for computation of

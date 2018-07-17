@@ -48,13 +48,11 @@ bool iniReaderElement::loadFile (const std::string &fileName)
         iteratorIndex = 0;
         return true;
     }
-    else
-    {
-        std::cerr << "unable to open file " << fileName << '\n';
-        doc = nullptr;
-        clear ();
-        return false;
-    }
+
+    std::cerr << "unable to open file " << fileName << '\n';
+    doc = nullptr;
+    clear ();
+    return false;
 }
 
 bool iniReaderElement::parse (const std::string & /*inputString*/) { return false; }

@@ -65,7 +65,7 @@ int dimeRunner::Initialize (int argc, char *argv[])
     po::store (parsed, dimeOptions);
     po::notify (dimeOptions);
 
-    if (dimeOptions.count ("test"))
+    if (dimeOptions.count ("test") != 0u)
     {
         /*if (griddyn::helicsLib::runDimetests())
         {

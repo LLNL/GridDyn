@@ -33,7 +33,7 @@ coreObject *controlSystem::clone (coreObject *obj) const
 
 void controlSystem::add (coreObject *obj)
 {
-    if (dynamic_cast<Block *> (obj))
+    if (dynamic_cast<Block *> (obj) != nullptr)
     {
         add (static_cast<Block *> (obj));
     }

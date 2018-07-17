@@ -132,7 +132,7 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
         logstr += "Number of Jacobian function calls = " + std::to_string (nfeD) + '\n';
     }
 
-    if (m_gds)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }
@@ -145,16 +145,15 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
 static const std::map<int, std::string> kinRetCodes{
   {KIN_MEM_NULL, "Null solver Memory"},
   {KIN_ILL_INPUT, "Illegal Input"},
-  {KIN_NO_MALLOC, " No memory allocation"},
+  {KIN_NO_MALLOC, "No memory allocation"},
   {KIN_MEM_FAIL, "Memory Allocation failed"},
-  {KIN_LINESEARCH_NONCONV, "linesearch failed to converge"},
-  {KIN_MAXITER_REACHED, " Max iteration reached"},
+  {KIN_LINESEARCH_NONCONV, "Linesearch failed to converge"},
+  {KIN_MAXITER_REACHED, "Max iteration reached"},
   {KIN_MXNEWT_5X_EXCEEDED, "Five consecutive steps have been taken that satisfy a scaled step length test"},
   {KIN_LINESEARCH_BCFAIL,
    "The linesearch algorithm was unable to satisfy the beta -condition for nbcfails iterations"},
-  {KIN_LINSOLV_NO_RECOVERY,
-   "The user - supplied routine preconditioner solve function failed recoverably, but the "
-   "preconditioner is already current"},
+  {KIN_LINSOLV_NO_RECOVERY, "The user-supplied routine preconditioner solve function failed recoverably, but the "
+                            "preconditioner is already current"},
   {KIN_LINIT_FAIL, "The linear solver's initialization function failed"},
   {KIN_LSETUP_FAIL, "The linear solver's setup function failed in an unrecoverable manner"},
   {KIN_LSOLVE_FAIL, "The linear solver's solve function failed in an unrecoverable manner"},
@@ -173,14 +172,14 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     {
         if (!(solverLogFile.empty ()))
         {
-            if (!m_sundialsInfoFile)
+            if (m_sundialsInfoFile == nullptr)
             {
                 m_sundialsInfoFile = fopen (solverLogFile.c_str (), "w");
             }
         }
         else
         {
-            if (!m_sundialsInfoFile)
+            if (m_sundialsInfoFile == nullptr)
             {
                 solverLogFile = "kinsol.out";
                 m_sundialsInfoFile = fopen ("kinsol.out", "w");
@@ -192,7 +191,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
         check_flag (&retval, "KINSetPrintLevel", 1);
     }
 
-    int retval = KINSetUserData (solverMem, (void *)(this));
+    int retval = KINSetUserData (solverMem, this);
     check_flag (&retval, "KINSetUserData", 1);
 
     // retval = KINSetFuncNormTol (solverMem, 1.e-9);

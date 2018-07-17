@@ -245,8 +245,6 @@ void gridLabDLoad::timestep (coreTime time, const IOdata &inputs, const solverMo
             }
         }
     }
-#else
-    [&sMode] {}();
 #endif
 
     if (cDetail == coupling_detail_t::single)
@@ -1262,5 +1260,5 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage *vm, Curre
     cm->numThreePhaseCurrent = vm->numThreePhaseVoltage;
 }
 #endif  // GRIDDYN_HAVE_MPI
-}  // namespace griddyn
+}  // namespace loads
 }  // namespace griddyn

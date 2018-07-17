@@ -378,9 +378,9 @@ void schedulerRamp::updatePTarget ()
         pTarget.pop_front ();
         rempower = target - PCurr;
         // ignore small variations
-        if ((rempower <= 0.0001) & (rempower >= -0.0001))
+        if ((rempower <= 0.0001) and (rempower >= -0.0001))
         {
-            rempower = 0;
+            rempower = 0.0;
         }
         lastTargetTime = time;
         if (pTarget.empty ())
@@ -398,7 +398,7 @@ void schedulerRamp::updatePTarget ()
         }
         else
         {
-            if (rempower != 0)
+            if (rempower != 0.0)
             {
                 // assume we were ramp limited so just keep ramping
                 remtime = rempower / PRampCurr;
@@ -415,9 +415,9 @@ void schedulerRamp::updatePTarget ()
     }
     double td = (time - prevTime);
     double pdiff = target - PCurr;
-    if (rempower == 0)
+    if (rempower == 0.0)
     {
-        if ((pdiff < 0.0001) & (pdiff > -0.0001))
+        if ((pdiff < 0.0001) and (pdiff > -0.0001))
         {
             PRampCurr = 0;
             nextUpdateTime = time;
@@ -442,7 +442,7 @@ void schedulerRamp::updatePTarget ()
     case midPoint:
         if (td >= rampTime)
         {
-            if (rempower)
+            if (rempower != 0.0)
             {
                 /*keep ramp until we would begin ramping for the next target*/
                 remtime = rempower / PRampCurr;
@@ -532,9 +532,9 @@ void schedulerRamp::updatePTarget ()
         }
         break;
     case delayed:
-        if (rempower)
+        if (rempower != 0.0)
         {
-            if (rempower > 0)
+            if (rempower > 0.0)
             {
                 remtime = rempower / rampLimitUp;
             }

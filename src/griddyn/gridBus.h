@@ -424,7 +424,7 @@ class gridBus : public gridPrimary
     virtual change_code
     rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-    friend bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink, bool printDiff);
+    friend bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpValues, bool printDiff);
     virtual void updateFlags (bool dynOnly = false) override;
     // for registering and removing power control objects
 
@@ -470,7 +470,7 @@ useful during development
 @param[in] printDiff  true if the diffs are to be printed
 @return true if match
 */
-bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink = false, bool printDiff = false);
+bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpValues = false, bool printDiff = false);
 
 /** @brief find the matching bus in a different tree
   searches a cloned object tree to find the corresponding bus

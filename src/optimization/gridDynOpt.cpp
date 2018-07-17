@@ -195,14 +195,11 @@ coreObject *gridDynOptimization::find (const std::string &objName) const
     {
         return areaOpt;
     }
-    else if (objName.substr (0, 3) == "opt")
+    if (objName.substr (0, 3) == "opt")
     {
         return areaOpt->find (objName.substr (3));
     }
-    else
-    {
-        return gridDynSimulation::find (objName);
-    }
+    return gridDynSimulation::find (objName);
 }
 
 coreObject *gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
@@ -211,10 +208,7 @@ coreObject *gridDynOptimization::getSubObject (const std::string &typeName, inde
     {
         return areaOpt->getSubObject (typeName.substr (3), num);
     }
-    else
-    {
-        return gridDynSimulation::getSubObject (typeName, num);
-    }
+    return gridDynSimulation::getSubObject (typeName, num);
 }
 coreObject *gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
 {
@@ -222,10 +216,7 @@ coreObject *gridDynOptimization::findByUserID (const std::string &typeName, inde
     {
         return areaOpt->findByUserID (typeName.substr (3), searchID);
     }
-    else
-    {
-        return gridDynSimulation::findByUserID (typeName, searchID);
-    }
+    return gridDynSimulation::findByUserID (typeName, searchID);
 }
 
 gridOptObject *gridDynOptimization::getOptData (coreObject *obj)
@@ -233,7 +224,7 @@ gridOptObject *gridDynOptimization::getOptData (coreObject *obj)
     if (obj != nullptr)
     {
         coreObject *nobj = areaOpt->find (obj->getName ());
-        if (nobj)
+        if (nobj != nullptr)
         {
             return static_cast<gridOptObject *> (nobj);
         }
@@ -245,7 +236,7 @@ gridOptObject *gridDynOptimization::getOptData (coreObject *obj)
 gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
 {
     gridOptObject *oo = getOptData (obj);
-    if (oo)
+    if (oo != nullptr)
     {
         return oo;
     }

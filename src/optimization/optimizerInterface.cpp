@@ -28,7 +28,7 @@ optimizerInterface::optimizerInterface (gridDynOptimization *gdo, const optimMod
 void optimizerInterface::setOptimizationData (gridDynOptimization *gdo, const optimMode &oMode)
 {
     mode = oMode;
-    if (gdo)
+    if (gdo != nullptr)
     {
         m_gdo = gdo;
     }
@@ -52,7 +52,7 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
     if (opt == 1)
     {
         // Check if flag < 0
-        int *errflag = reinterpret_cast<int *> (flagvalue);
+        auto *errflag = reinterpret_cast<int *> (flagvalue);
         if (*errflag < 0)
         {
             if (printError)

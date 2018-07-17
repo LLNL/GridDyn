@@ -57,22 +57,25 @@ class fmiCoordinator : public griddyn::coreObject
     std::map<std::string, index_t> vrNames;  //!< structure to store the names of all the valueReferences
   public:
     explicit fmiCoordinator (const std::string &name = "");
+
     /** register a new parameter
-    @param[in] name the name of the parameter
+    @param[in] paramName the name of the parameter
     @param[in] evnt a pointer to an event
     */
-    void registerParameter (const std::string &name, fmiEvent *evnt);
+    void registerParameter (const std::string &paramName, fmiEvent *evnt);
+
     /** register a new input
-    @param[in] name the name of the parameter
+    @param[in] inputName the name of the parameter
     @param[in] evnt a pointer to an event
     */
-    void registerInput (const std::string &name, fmiEvent *evnt);
+    void registerInput (const std::string &inputName, fmiEvent *evnt);
+
     /** register a new output
-    @param[in] name the name of the parameter
+    @param[in] outputName the name of the parameter
     @param[in] column the column index into the collector
-    @param[in] evnt a pointer to a collector
+    @param[in] out a pointer to a collector
     */
-    void registerOutput (const std::string &name, int column, fmiCollector *col);
+    void registerOutput (const std::string &outputName, int column, fmiCollector *out);
 
     /** send a numerical input to the appropriate location
     @param[in] vr the fmi Value Reference
@@ -80,21 +83,25 @@ class fmiCoordinator : public griddyn::coreObject
     @return true if successful
     */
     bool sendInput (index_t vr, double val);
+
     /** send a string input to the appropriate location
     @param[in] vr the fmi Value Reference
     @param[in] val the string to place
     @return true if successful
     */
     bool sendInput (index_t vr, const char *s);
+
     /** get a numerical output
     @param[in] vr the fmi Value Reference
     @return the numberical output
     */
     double getOutput (index_t vr);
+
     /** get the numerical outputs from the underlying simulation and store them to a local buffer
     @param[in] time the time to get the outputs for
     */
     void updateOutputs (coreTime time);
+
     /** get a string representing the FMIName of the current simulation*/
     const std::string &getFMIName () const;
     /** get a vector of the inputs*/

@@ -38,7 +38,7 @@ fmiCoSimSubModel::~fmiCoSimSubModel () {}
 coreObject *fmiCoSimSubModel::clone (coreObject *obj) const
 {
     auto *gco = cloneBase<fmiCoSimSubModel, gridSubModel> (this, obj);
-    if (!(gco))
+    if (gco == nullptr)
     {
         return obj;
     }
@@ -306,17 +306,11 @@ double fmiCoSimSubModel::get (const std::string &param, gridUnits::units_t unitT
     {
         return localIntegrationTime;
     }
-    else
+    if (cs->isVariable (param, fmi_variable_type_t::numeric))
     {
-        if (cs->isVariable (param, fmi_variable_type_t::numeric))
-        {
-            return cs->get<double> (param);
-        }
-        else
-        {
-            return gridSubModel::get (param, unitType);
-        }
+        return cs->get<double> (param);
     }
+    return gridSubModel::get (param, unitType);
 }
 
 const static double gap = 1e-8;
@@ -558,7 +552,7 @@ IOdata fmiCoSimSubModel::getOutputs (const IOdata &inputs, const stateData &sD, 
 double fmiCoSimSubModel::getDoutdt (const IOdata & /*inputs*/,
                                     const stateData &sD,
                                     const solverMode &sMode,
-                                    index_t num) const
+                                    index_t outputNum) const
 {
     return 0;
 }

@@ -45,7 +45,7 @@ class reserveDispatcher : public coreObject
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
     virtual ~reserveDispatcher ();
 
-    virtual double dynInitializeA (coreTime time0, double dispatch);
+    virtual double dynInitializeA (coreTime time0, double dispatchSet);
 
     void moveSchedulers (reserveDispatcher *rD);
 

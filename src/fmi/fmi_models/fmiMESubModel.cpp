@@ -397,7 +397,7 @@ count_t fmiMESubModel::LocalJacobianCount (const solverMode &sMode) const
     return jacSize;
 }
 
-std::pair<count_t, count_t> fmiMESubModel::LocalRootCount (const solverMode &sMode) const
+std::pair<count_t, count_t> fmiMESubModel::LocalRootCount (const solverMode & /* sMode */) const
 {
     return {0, m_eventCount};
 }

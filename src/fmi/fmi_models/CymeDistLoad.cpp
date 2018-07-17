@@ -31,7 +31,7 @@ CymeDistLoadME::CymeDistLoadME (const std::string &objName) : fmiMELoad3phase (o
     configIndex = indexCounter++;
 }
 
-coreObject *CymeDistLoadME::clone (coreObject *obj) const { return nullptr; }
+coreObject *CymeDistLoadME::clone (coreObject * /* obj */) const { return nullptr; }
 
 void CymeDistLoadME::set (const std::string &param, const std::string &val)
 {

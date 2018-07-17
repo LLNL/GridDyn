@@ -77,9 +77,9 @@ void fmiLibrary::loadFMU (const std::string &fmupath)
     loadInformation ();
 }
 
-void fmiLibrary::loadFMU (const std::string &fmupath, const std::string &extractLoc)
+void fmiLibrary::loadFMU (const std::string &fmupath, const std::string &extractPath)
 {
-    extractDirectory = extractLoc;
+    extractDirectory = extractPath;
     fmuName = fmupath;
     loadInformation ();
 }
@@ -451,10 +451,10 @@ void fmiLibrary::makeCallbackFunctions ()
 }
 
 #define STRING_BUFFER_SIZE 1000
-void loggerFunc (fmi2ComponentEnvironment compEnv,
-                 fmi2String instanceName,
-                 fmi2Status status,
-                 fmi2String category,
+void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
+                 fmi2String /* instanceName */,
+                 fmi2Status /* status */,
+                 fmi2String /* category */,
                  fmi2String message,
                  ...)
 {

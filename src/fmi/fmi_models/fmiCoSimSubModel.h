@@ -51,7 +51,7 @@ class fmiCoSimSubModel : public gridSubModel
     fmiCoSimSubModel (std::shared_ptr<fmi2CoSimObject> fmi = nullptr);
     virtual ~fmiCoSimSubModel ();
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
-    virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
+    virtual void dynObjectInitializeA (coreTime time, std::uint32_t flags) override;
     virtual void
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
@@ -72,10 +72,14 @@ class fmiCoSimSubModel : public gridSubModel
                                        const solverMode &sMode) override;
 
     IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
-    virtual double
-    getDoutdt (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
-    virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+    virtual double getDoutdt (const IOdata &inputs,
+                              const stateData &sD,
+                              const solverMode &sMode,
+                              index_t outputNum = 0) const override;
+    virtual double getOutput (const IOdata &inputs,
+                              const stateData &sD,
+                              const solverMode &sMode,
+                              index_t outputNum = 0) const override;
 
     virtual double getOutput (index_t outputNum = 0) const override;
 

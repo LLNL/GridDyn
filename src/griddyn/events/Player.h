@@ -46,7 +46,7 @@ class Player : public Event
     Player (const EventInfo &gdEI, coreObject *rootObject);
     virtual std::unique_ptr<Event> clone () const override;
 
-    virtual void cloneTo (Event *evnt) const override;
+    virtual void cloneTo (Event *gE) const override;
 
     virtual void updateEvent (const EventInfo &gdEI, coreObject *rootObject) override;
     virtual change_code trigger () override;

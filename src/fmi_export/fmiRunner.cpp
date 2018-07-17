@@ -78,7 +78,7 @@ coreTime fmiRunner::Run () { return GriddynRunner::Run (); }
 
 void fmiRunner::StepAsync (coreTime time)
 {
-    if (stepFinished)
+    if (stepFinished != nullptr)
     {
         async_retFMI = std::async (std::launch::async, [this, time] {
             fmiRunner::Step (time);
@@ -116,7 +116,7 @@ void fmiRunner::logger (int level, const std::string &logMessage)
 {
     if (loggingCategories[level])
     {
-        if (loggerFunc)
+        if (loggerFunc != nullptr)
         {
             switch (level)
             {

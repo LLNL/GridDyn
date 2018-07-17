@@ -35,7 +35,7 @@ void basicReaderInfo::setFlag (int flagID)
 }
 
 readerInfo::readerInfo () { loadDefaultDefines (); }
-readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (std::move (bri)) {}
+readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (bri) {}
 readerInfo::~readerInfo ()
 {
     for (auto &libObj : library)

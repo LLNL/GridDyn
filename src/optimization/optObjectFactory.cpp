@@ -105,7 +105,7 @@ std::shared_ptr<coreOptObjectFactory> coreOptObjectFactory::instance ()
 
 void coreOptObjectFactory::registerFactory (const std::string &name, std::shared_ptr<optComponentFactory> tf)
 {
-    m_factoryMap[name] = tf;
+    m_factoryMap[name] = std::move (tf);
 }
 
 stringVec coreOptObjectFactory::getFactoryNames ()
@@ -192,13 +192,11 @@ std::shared_ptr<optComponentFactory> coreOptObjectFactory::getFactory (const std
     {
         return (m_factoryMap[factoryName]);
     }
-    else  // make a new factory
-    {
-        auto tf = std::make_shared<optComponentFactory> ();
-        tf->name = factoryName;
-        m_factoryMap.insert (std::pair<std::string, std::shared_ptr<optComponentFactory>> (factoryName, tf));
-        return tf;
-    }
+    // make a new factory
+    auto tf = std::make_shared<optComponentFactory> ();
+    tf->name = factoryName;
+    m_factoryMap.insert (std::pair<std::string, std::shared_ptr<optComponentFactory>> (factoryName, tf));
+    return tf;
 }
 
 bool coreOptObjectFactory::isValidType (const std::string &optType)
@@ -235,7 +233,7 @@ void coreOptObjectFactory::prepObjects (const std::string &optType,
     if (mfind != m_factoryMap.end ())
     {
         auto obfact = m_factoryMap[optType]->getFactory (typeName);
-        if (obfact)
+        if (obfact != nullptr)
         {
             obfact->prepObjects (numObjects, obj);
         }
@@ -250,7 +248,7 @@ void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t num
     }
 
     auto obfact = m_factoryMap[m_defaultType]->getFactory (typeName);
-    if (obfact)
+    if (obfact != nullptr)
     {
         obfact->prepObjects (numObjects, obj);
     }

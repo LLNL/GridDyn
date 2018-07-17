@@ -628,7 +628,7 @@ void motorLoad3::rootTrigger (coreTime /*time*/,
                               const std::vector<int> &rootMask,
                               const solverMode &sMode)
 {
-    if (!rootMask[offsets.getRootOffset (sMode)])
+    if (rootMask[offsets.getRootOffset (sMode)] == 0)
     {
         return;
     }

@@ -585,7 +585,7 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     // TODO missing if (opt == 2 and flagvalue == nullptr)?
 }
 
-int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode) { return -101; }
+int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode /* stepMode */) { return -101; }
 void SolverInterface::logSolverStats (print_level /*logLevel*/, bool /*iconly*/) const {}
 void SolverInterface::logErrorWeights (print_level /*logLevel*/) const {}
 void SolverInterface::logMessage (int errorCode, const std::string &message)

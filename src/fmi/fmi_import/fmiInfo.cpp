@@ -16,17 +16,17 @@
 
 fmiInfo::fmiInfo () {}
 
-fmiInfo::fmiInfo (const std::string &fileName) { loadFile (fileName); }
+fmiInfo::fmiInfo (const std::string &xmlFile) { loadFile (xmlFile); }
 
-int fmiInfo::loadFile (const std::string &fileName)
+int fmiInfo::loadFile (const std::string &xmlFile)
 {
-    std::shared_ptr<readerElement> rd = std::make_shared<tinyxml2ReaderElement> (fileName);
+    std::shared_ptr<readerElement> rd = std::make_shared<tinyxml2ReaderElement> (xmlFile);
     if (!rd->isValid ())
     {
         return (-1);
     }
-    headerInfo["xmlfile"] = fileName;
-    headerInfo["xmlfilename"] = fileName;
+    headerInfo["xmlfile"] = xmlFile;
+    headerInfo["xmlfilename"] = xmlFile;
 
     loadFmiHeader (rd);
     loadUnitInformation (rd);
@@ -155,10 +155,7 @@ const variableInformation &fmiInfo::getVariableInfo (const std::string &variable
     {
         return variables[variablefind->second];
     }
-    else
-    {
-        return emptyVI;
-    }
+    return emptyVI;
 }
 
 const variableInformation &fmiInfo::getVariableInfo (unsigned int index) const

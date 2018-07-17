@@ -37,11 +37,11 @@ void parameterOperator::setTarget (gridComponent *target, const std::string &fie
     checkField ();
 }
 
-void parameterOperator::updateObject (coreObject *gco, object_update_mode mode)
+void parameterOperator::updateObject (coreObject *target, object_update_mode mode)
 {
     if (mode == object_update_mode::direct)
     {
-        auto nobj = dynamic_cast<gridComponent *> (gco);
+        auto nobj = dynamic_cast<gridComponent *> (target);
         if (nobj != nullptr)
         {
             comp = nobj;
@@ -49,7 +49,7 @@ void parameterOperator::updateObject (coreObject *gco, object_update_mode mode)
     }
     else
     {
-        auto newTarget = dynamic_cast<gridComponent *> (findMatchingObject (comp, gco));
+        auto newTarget = dynamic_cast<gridComponent *> (findMatchingObject (comp, target));
         if (newTarget != nullptr)
         {
             setTarget (newTarget);

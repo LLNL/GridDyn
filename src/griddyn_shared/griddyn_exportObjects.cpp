@@ -225,7 +225,8 @@ griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int v
     }
     try
     {
-        comp->set (flag, (val != 0));
+        // ???
+        comp->set (flag, static_cast<double> (val != 0));
         return griddyn_ok;
     }
     catch (const unrecognizedParameter &)

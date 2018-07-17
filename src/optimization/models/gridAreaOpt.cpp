@@ -36,7 +36,7 @@ gridAreaOpt::gridAreaOpt (const std::string &objName) : gridOptObject (objName) 
 gridAreaOpt::gridAreaOpt (coreObject *obj, const std::string &objName)
     : gridOptObject (objName), area (dynamic_cast<Area *> (obj))
 {
-    if (area)
+    if (area != nullptr)
     {
         if (getName ().empty ())
         {
@@ -182,7 +182,7 @@ void gridAreaOpt::dynObjectInitializeA (std::uint32_t flags)
     // make sure all links have an opt object
     Lnk = area->getLink (kk);
 
-    while (Lnk)
+    while (Lnk != nullptr)
     {
         found = false;
         for (auto oa : linkList)
@@ -424,7 +424,7 @@ void gridAreaOpt::setOffset (index_t offset, index_t constraintOffset, const opt
 
 void gridAreaOpt::add (coreObject *obj)
 {
-    if (dynamic_cast<Area *> (obj))
+    if (dynamic_cast<Area *> (obj) != nullptr)
     {
         area = static_cast<Area *> (obj);
         if (getName ().empty ())
@@ -462,24 +462,24 @@ void gridAreaOpt::add (coreObject *obj)
 void gridAreaOpt::remove (coreObject *obj)
 {
     auto *sa = dynamic_cast<gridAreaOpt *> (obj);
-    if (sa)
+    if (sa != nullptr)
     {
         return remove (sa);
     }
 
     auto *bus = dynamic_cast<gridBusOpt *> (obj);
-    if (bus)
+    if (bus != nullptr)
     {
         return remove (bus);
     }
 
     auto *lnk = dynamic_cast<gridLinkOpt *> (obj);
-    if (lnk)
+    if (lnk != nullptr)
     {
         return remove (lnk);
     }
     auto *relay = dynamic_cast<gridRelayOpt *> (obj);
-    if (relay)
+    if (relay != nullptr)
     {
         return remove (relay);
     }

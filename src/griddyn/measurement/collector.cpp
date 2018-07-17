@@ -278,7 +278,7 @@ void collector::recheckColumns ()
     recheck = false;
 }
 
-count_t collector::grabData (double *data, index_t N)
+count_t collector::grabData (double *data_out, index_t N)
 {
     std::vector<double> vals;
     count_t currentCount = 0;
@@ -293,18 +293,18 @@ count_t collector::grabData (double *data, index_t N)
             datapoint.dataGrabber->grabVectorData (vals);
             if (static_cast<index_t> (datapoint.column + vals.size ()) < N)
             {
-                std::copy (vals.begin (), vals.end (), data + datapoint.column);
+                std::copy (vals.begin (), vals.end (), data_out + datapoint.column);
                 currentCount = (std::max) (currentCount, datapoint.column + static_cast<index_t> (vals.size ()));
             }
             else if (datapoint.column < N)
             {
-                std::copy (vals.begin (), vals.begin () + (N - datapoint.column - 1), data + datapoint.column);
+                std::copy (vals.begin (), vals.begin () + (N - datapoint.column - 1), data_out + datapoint.column);
                 currentCount = N;
             }
         }
         else if (datapoint.column < N)
         {
-            data[datapoint.column] = datapoint.dataGrabber->grabData ();
+            data_out[datapoint.column] = datapoint.dataGrabber->grabData ();
             currentCount = (std::max) (currentCount, datapoint.column + 1);
         }
     }

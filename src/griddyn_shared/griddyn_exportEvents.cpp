@@ -24,7 +24,7 @@ using namespace griddyn;
 gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject obj)
 {
     auto evnt = new std::shared_ptr<Event> (make_event (eventString, getComponentPointer (obj)));
-    if (evnt)
+    if (evnt != nullptr)
     {
         return reinterpret_cast<void *> (evnt);
     }

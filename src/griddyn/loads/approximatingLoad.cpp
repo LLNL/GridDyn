@@ -122,7 +122,7 @@ void approximatingLoad::timestep (coreTime time, const IOdata &inputs, const sol
 {
     double V = inputs[voltageInLocation];
     double th = inputs[angleInLocation];
-    if (subLoad)
+    if (subLoad != nullptr)
     {
         subLoad->timestep (time, inputs, sMode);
     }
@@ -152,7 +152,7 @@ void approximatingLoad::updateA (coreTime time)
     inputs[voltageInLocation] = V;
     inputs[angleInLocation] = th;
 
-    if (subLoad)
+    if (subLoad != nullptr)
     {
         if (subLoad->currentTime () < time)
         {
@@ -700,5 +700,5 @@ change_code approximatingLoad::rootCheck (const IOdata &inputs,
     return change_code::no_change;
 }
 
-}  // namespace griddyn
+}  // namespace loads
 }  // namespace griddyn

@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace fmi
 {
-fmiCoordinator::fmiCoordinator (const std::string &) : coreObject ("fmiCoordinator") {}
+fmiCoordinator::fmiCoordinator (const std::string & /* unused */) : coreObject ("fmiCoordinator") {}
 
 static auto searchFunc = [](const auto &vp1, const auto &vp2) { return (vp1.first < vp2.first); };
 

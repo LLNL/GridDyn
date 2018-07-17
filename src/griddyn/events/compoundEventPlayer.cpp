@@ -54,7 +54,10 @@ void compoundEventPlayer::setTimeValue (coreTime time, double val)
     value = val;
 }
 
-void compoundEventPlayer::setTimeValue (const std::vector<coreTime> &, const std::vector<double> &) {}
+void compoundEventPlayer::setTimeValue (const std::vector<coreTime> & /* times */,
+                                        const std::vector<double> & /* vals */)
+{
+}
 
 void compoundEventPlayer::set (const std::string &param, double val)
 {

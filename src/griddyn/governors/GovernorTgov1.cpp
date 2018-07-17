@@ -41,7 +41,7 @@ GovernorTgov1::GovernorTgov1 (const std::string &objName) : GovernorIeeeSimple (
 coreObject *GovernorTgov1::clone (coreObject *obj) const
 {
     auto *gov = cloneBase<GovernorTgov1, GovernorIeeeSimple> (this, obj);
-    if (!gov)
+    if (gov == nullptr)
     {
         return obj;
     }
@@ -180,12 +180,12 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
     // K * (omega - Wref) / systemBaseFrequency) / T1) / T3;
 }
 
-void GovernorTgov1::rootTest (const IOdata &inputs, const stateData &sD, double root[], const solverMode &sMode)
+void GovernorTgov1::rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /* if (opFlags.test (uses_deadband))
        {
-         Governor::rootTest (inputs, sD, root, sMode);
+         Governor::rootTest (inputs, sD, roots, sMode);
          ++rootOffset;
        }*/
     if (opFlags[uses_plimits])
@@ -198,11 +198,11 @@ void GovernorTgov1::rootTest (const IOdata &inputs, const stateData &sD, double 
         {
             // double omega = getControlFrequency (inputs);
             double omega = inputs[govOmegaInLocation];
-            root[rootOffset] = (-Pmech + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
+            roots[rootOffset] = (-Pmech + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
         }
         else
         {
-            root[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
+            roots[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
             if (Pmech > Pmax)
             {
                 opFlags.set (p_limit_high);
@@ -229,7 +229,7 @@ void GovernorTgov1::rootTrigger (coreTime /*time*/,
           */
     if (opFlags[uses_plimits])
     {
-        if (rootMask[rootOffset])
+        if (rootMask[rootOffset] != 0)
         {
             if (opFlags[p_limited])
             {

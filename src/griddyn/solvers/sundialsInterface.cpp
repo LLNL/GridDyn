@@ -137,6 +137,8 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
     {
         return;
     }
+
+    // where is flags coming from?
     bool prev_omp = use_omp;
     _unused (prev_omp);  // looks unused if OPENMP is not available
     use_omp = flags[use_omp];
@@ -225,7 +227,10 @@ const double *sundialsInterface::deriv_data () const noexcept
 }
 // output solver stats
 
-double *sundialsInterface::type_data () noexcept { return (types) ? NVECTOR_DATA (use_omp, types) : nullptr; }
+double *sundialsInterface::type_data () noexcept
+{
+    return (types != nullptr) ? NVECTOR_DATA (use_omp, types) : nullptr;
+}
 const double *sundialsInterface::type_data () const noexcept
 {
     return (types != nullptr) ? NVECTOR_DATA (use_omp, types) : nullptr;

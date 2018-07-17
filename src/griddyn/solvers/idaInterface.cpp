@@ -97,7 +97,7 @@ void idaInterface::allocate (count_t stateCount, count_t numRoots)
     rootsfound.resize (numRoots);
 
     // allocate the solverMemory
-    if (solverMem)
+    if (solverMem != nullptr)
     {
         IDAFree (&(solverMem));
     }
@@ -208,7 +208,7 @@ void idaInterface::logSolverStats (print_level logLevel, bool iconly) const
         logstr += "Number of nonlinear conv. failures = " + std::to_string (ncfn) + '\n';
     }
 
-    if (m_gds)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }

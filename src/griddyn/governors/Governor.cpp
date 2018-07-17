@@ -57,7 +57,7 @@ Governor::Governor (const std::string &objName)
 coreObject *Governor::clone (coreObject *obj) const
 {
     auto *gov = cloneBase<Governor, gridSubModel> (this, obj);
-    if (!gov)
+    if (gov == nullptr)
     {
         return obj;
     }
@@ -233,17 +233,17 @@ void Governor::jacobianElements (const IOdata &inputs,
           */
 }
 
-void Governor::rootTest (const IOdata & /*inputs*/, const stateData &sD, double root[], const solverMode &sMode)
+void Governor::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
     IOdata i{cb.getOutput (kNullVec, sD, sMode)};
     if (dbb.checkFlag (has_roots))
     {
-        dbb.rootTest (i, sD, root, sMode);
+        dbb.rootTest (i, sD, roots, sMode);
     }
     // cb should not have roots
     if (delay.checkFlag (has_roots))
     {
-        delay.rootTest (i, sD, root, sMode);
+        delay.rootTest (i, sD, roots, sMode);
     }
 }
 

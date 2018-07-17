@@ -17,7 +17,7 @@
 namespace griddyn
 {
 // work in progress
-void numericJacobianCalculation (gridComponent *comp,
+void numericJacobianCalculation (gridComponent * /* comp */,
                                  const IOdata &inputs,
                                  const stateData &sD,
                                  matrixData<double> &md,

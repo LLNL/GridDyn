@@ -115,8 +115,10 @@ class gridSecondary : public gridComponent
     @param[in] num the number of the state being requested
     @return the value of the state being requested
     **/
-    virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+    virtual double getOutput (const IOdata &inputs,
+                              const stateData &sD,
+                              const solverMode &sMode,
+                              index_t outputNum = 0) const override;
 
     /**
     *@brief get a single state based on local data

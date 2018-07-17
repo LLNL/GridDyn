@@ -34,7 +34,7 @@ gridLinkOpt::gridLinkOpt (const std::string &objName) : gridOptObject (objName) 
 gridLinkOpt::gridLinkOpt (coreObject *obj, const std::string &objName)
     : gridOptObject (objName), link (dynamic_cast<Link *> (obj))
 {
-    if (link)
+    if (link != nullptr)
     {
         if (getName ().empty ())
         {
@@ -99,7 +99,7 @@ void gridLinkOpt::loadSizes (const optimMode &oMode)
 void gridLinkOpt::add (coreObject *obj)
 {
     auto *tmpLink = dynamic_cast<Link *> (obj);
-    if (tmpLink)
+    if (tmpLink != nullptr)
     {
         link = tmpLink;
         if (getName ().empty ())
@@ -116,50 +116,64 @@ void gridLinkOpt::add (coreObject *obj)
 
 void gridLinkOpt::remove (coreObject *) {}
 
-void gridLinkOpt::setValues (const optimData &, const optimMode &) {}
+void gridLinkOpt::setValues (const optimData & /* oD */, const optimMode & /* oMode */) {}
 
 // for saving the state
-void gridLinkOpt::guessState (double /*time*/, double /*val*/[], const optimMode &) {}
+void gridLinkOpt::guessState (double /*time*/, double /*val*/[], const optimMode & /* oMode */) {}
 
-void gridLinkOpt::getVariableType (double /*sdata*/[], const optimMode &) {}
+void gridLinkOpt::getVariableType (double /*sdata*/[], const optimMode & /* oMode */) {}
 
-void gridLinkOpt::getTols (double /*tols*/[], const optimMode &) {}
+void gridLinkOpt::getTols (double /*tols*/[], const optimMode & /* oMode */) {}
 void gridLinkOpt::valueBounds (double /*time*/,
                                double /*upperLimit*/[],
                                double /*lowerLimit*/[],
-                               const optimMode &)
+                               const optimMode & /* oMode */)
 {
 }
 
-void gridLinkOpt::linearObj (const optimData &, vectData<double> & /*linObj*/, const optimMode &) {}
+void gridLinkOpt::linearObj (const optimData & /* oD */,
+                             vectData<double> & /*linObj*/,
+                             const optimMode & /* oMode */)
+{
+}
 
-void gridLinkOpt::quadraticObj (const optimData &,
+void gridLinkOpt::quadraticObj (const optimData & /* oD */,
                                 vectData<double> & /*linObj*/,
                                 vectData<double> & /*quadObj*/,
-                                const optimMode &)
+                                const optimMode & /* oMode */)
 {
 }
 
-void gridLinkOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &) {}
+void gridLinkOpt::constraintValue (const optimData & /* oD */, double /*cVals*/[], const optimMode & /* oMode */)
+{
+}
 
-void gridLinkOpt::constraintJacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &) {}
+void gridLinkOpt::constraintJacobianElements (const optimData & /* oD */,
+                                              matrixData<double> & /*md*/,
+                                              const optimMode & /* oMode */)
+{
+}
 
-double gridLinkOpt::objValue (const optimData &, const optimMode &)
+double gridLinkOpt::objValue (const optimData & /* oD */, const optimMode & /* oMode */)
 {
     double cost = 0;
 
     return cost;
 }
 
-void gridLinkOpt::gradient (const optimData &, double /*deriv*/[], const optimMode &) {}
+void gridLinkOpt::gradient (const optimData & /* oD */, double /*deriv*/[], const optimMode & /* oMode */) {}
 
-void gridLinkOpt::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &) {}
+void gridLinkOpt::jacobianElements (const optimData & /* oD */,
+                                    matrixData<double> & /*md*/,
+                                    const optimMode & /* oMode */)
+{
+}
 
-void gridLinkOpt::getConstraints (const optimData &,
+void gridLinkOpt::getConstraints (const optimData & /* oD */,
                                   matrixData<double> & /*cons*/,
                                   double /*upperLimit*/[],
                                   double /*lowerLimit*/[],
-                                  const optimMode &)
+                                  const optimMode & /* oMode */)
 {
 }
 
@@ -224,7 +238,7 @@ coreObject *gridLinkOpt::getSubObject (const std::string &typeName, index_t num)
         {
             return B1;
         }
-        else if (num == 2)
+        if (num == 2)
         {
             return B2;
         }

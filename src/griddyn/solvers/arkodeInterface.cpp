@@ -192,7 +192,7 @@ double arkodeInterface::get (const std::string &param) const
 #ifdef KLU_ENABLE
 //	CVodeCVodeSlsGetNumJacEvals(solverMem, &val);
 #else
-        ARKodeDlsGetNumJacEvals (solverMem, &val);
+        ARKDlsGetNumJacEvals (solverMem, &val);
 #endif
     }
     else

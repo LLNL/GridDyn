@@ -35,30 +35,32 @@ fmi2CoSimObject::fmi2CoSimObject (fmi2Component cmp,
                                   std::shared_ptr<const fmiInfo> keyInfo,
                                   std::shared_ptr<const fmiCommonFunctions> comFunc,
                                   std::shared_ptr<const fmiCoSimFunctions> csFunc)
-    : fmi2Object (std::move (cmp), std::move (keyInfo), std::move (comFunc)), CoSimFunctions (std::move (csFunc))
+    : fmi2Object (cmp, std::move (keyInfo), std::move (comFunc)), CoSimFunctions (std::move (csFunc))
 {
 }
 
-void fmi2CoSimObject::setInputDerivatives (int order, const fmi2Real value[])
+void fmi2CoSimObject::setInputDerivatives (int order, const fmi2Real dIdt[])
 {
     auto ret =
       CoSimFunctions->fmi2SetRealInputDerivatives (comp, activeInputs.getValueRef (), activeInputs.getVRcount (),
-                                                   derivOrder[order].data (), value);
+                                                   derivOrder[order].data (), dIdt);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
-void fmi2CoSimObject::getOutputDerivatives (int order, fmi2Real value[]) const
+
+void fmi2CoSimObject::getOutputDerivatives (int order, fmi2Real dOdt[]) const
 {
     auto ret =
       CoSimFunctions->fmi2GetRealOutputDerivatives (comp, activeOutputs.getValueRef (),
-                                                    activeOutputs.getVRcount (), derivOrder[order].data (), value);
+                                                    activeOutputs.getVRcount (), derivOrder[order].data (), dOdt);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
+
 void fmi2CoSimObject::doStep (fmi2Real currentCommunicationPoint,
                               fmi2Real communicationStepSize,
                               fmi2Boolean noSetFMUStatePriorToCurrentPoint)

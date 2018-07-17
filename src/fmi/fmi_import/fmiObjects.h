@@ -57,7 +57,7 @@ class fmi2Object
     bool exceptionOnWarning = false;  //!< flag indicating that an exception should be thrown on a fmiWarning
   public:
     fmi2Object (fmi2Component cmp,
-                std::shared_ptr<const fmiInfo> info,
+                std::shared_ptr<const fmiInfo> keyInfo,
                 std::shared_ptr<const fmiCommonFunctions> comFunc);
     virtual ~fmi2Object ();
     void setupExperiment (fmi2Boolean toleranceDefined,
@@ -237,9 +237,9 @@ class fmi2ModelExchangeObject : public fmi2Object
 {
   public:
     fmi2ModelExchangeObject (fmi2Component cmp,
-                             std::shared_ptr<const fmiInfo> info,
+                             std::shared_ptr<const fmiInfo> keyInfo,
                              std::shared_ptr<const fmiCommonFunctions> comFunc,
-                             std::shared_ptr<const fmiModelExchangeFunctions> MEFunc);
+                             std::shared_ptr<const fmiModelExchangeFunctions> meFunc);
     void newDiscreteStates (fmi2EventInfo *fmi2eventInfo);
     /** call for a completed integrator step
     @param[in] noSetFMUStatePriorToCurrentPoint flag indicating that the state will not be updated at a prior time
@@ -254,7 +254,7 @@ class fmi2ModelExchangeObject : public fmi2Object
                                   fmi2Boolean *terminatesSimulation);
     void setTime (fmi2Real time);
     void setStates (const fmi2Real states[]);
-    void getDerivatives (fmi2Real deriv[]) const;
+    void getDerivatives (fmi2Real derivatives[]) const;
     void getEventIndicators (fmi2Real eventIndicators[]) const;
     /** get the current values for the states
     @param[out] states the location to store the state data states must have sufficent space allocated for the
@@ -297,7 +297,7 @@ class fmi2CoSimObject : public fmi2Object
   public:
     /**constructor*/
     fmi2CoSimObject (fmi2Component cmp,
-                     std::shared_ptr<const fmiInfo> info,
+                     std::shared_ptr<const fmiInfo> keyInfo,
                      std::shared_ptr<const fmiCommonFunctions> comFunc,
                      std::shared_ptr<const fmiCoSimFunctions> csFunc);
     /** set the input derivatives of particular order

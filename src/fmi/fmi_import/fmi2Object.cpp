@@ -36,15 +36,15 @@ void fmi2Object::setupExperiment (fmi2Boolean toleranceDefined,
 
 fmuMode fmi2Object::getCurrentMode () const { return currentMode; }
 
-void fmi2Object::setMode (fmuMode mode)
+void fmi2Object::setMode (fmuMode newMode)
 {
-    if (mode == fmuMode::error)
+    if (newMode == fmuMode::error)
     {
         currentMode = fmuMode::error;
         throw (fmiErrorException ());
     }
     fmi2Status ret = fmi2Error;
-    if (mode == fmuMode::terminated)
+    if (newMode == fmuMode::terminated)
     {
         currentMode = fmuMode::terminated;
         ret = commonFunctions->fmi2Terminate (comp);
@@ -53,7 +53,7 @@ void fmi2Object::setMode (fmuMode mode)
     switch (currentMode)
     {
     case fmuMode::instantiatedMode:
-        switch (mode)
+        switch (newMode)
         {
         case fmuMode::initializationMode:
             if (inputSize () == 0)
@@ -78,7 +78,7 @@ void fmi2Object::setMode (fmuMode mode)
         }
         break;
     case fmuMode::initializationMode:
-        if ((mode == fmuMode::eventMode) || (mode == fmuMode::stepMode))
+        if ((newMode == fmuMode::eventMode) || (newMode == fmuMode::stepMode))
         {
             // printf("calling exit initMode\n");
             if (!commonFunctions->fmi2ExitInitializationMode)
@@ -95,9 +95,9 @@ void fmi2Object::setMode (fmuMode mode)
 
     if (ret == fmi2OK)
     {
-        currentMode = mode;
+        currentMode = newMode;
     }
-    else if (currentMode == mode)
+    else if (currentMode == newMode)
     {
         ret = fmi2OK;
     }
@@ -223,44 +223,44 @@ void fmi2Object::setFlag (const std::string &param, bool val)
     }
 }
 
-void fmi2Object::getFMUState (fmi2FMUstate *FMUstate)
+void fmi2Object::getFMUState (fmi2FMUstate *FMUState)
 {
-    auto ret = commonFunctions->fmi2GetFMUstate (comp, FMUstate);
+    auto ret = commonFunctions->fmi2GetFMUstate (comp, FMUState);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
-void fmi2Object::setFMUState (fmi2FMUstate FMUstate)
+void fmi2Object::setFMUState (fmi2FMUstate FMUState)
 {
-    auto ret = commonFunctions->fmi2SetFMUstate (comp, FMUstate);
+    auto ret = commonFunctions->fmi2SetFMUstate (comp, FMUState);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
 
-size_t fmi2Object::serializedStateSize (fmi2FMUstate FMUstate)
+size_t fmi2Object::serializedStateSize (fmi2FMUstate FMUState)
 {
     size_t sz;
-    auto ret = commonFunctions->fmi2SerializedFMUstateSize (comp, FMUstate, &sz);
+    auto ret = commonFunctions->fmi2SerializedFMUstateSize (comp, FMUState, &sz);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
     return sz;
 }
-void fmi2Object::serializeState (fmi2FMUstate FMUstate, fmi2Byte serializedState[], size_t size)
+void fmi2Object::serializeState (fmi2FMUstate FMUState, fmi2Byte serializedState[], size_t size)
 {
-    auto ret = commonFunctions->fmi2SerializeFMUstate (comp, FMUstate, serializedState, size);
+    auto ret = commonFunctions->fmi2SerializeFMUstate (comp, FMUState, serializedState, size);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);
     }
 }
-void fmi2Object::deSerializeState (const fmi2Byte serializedState[], size_t size, fmi2FMUstate *FMUstate)
+void fmi2Object::deSerializeState (const fmi2Byte serializedState[], size_t size, fmi2FMUstate *FMUState)
 {
-    auto ret = commonFunctions->fmi2DeSerializeFMUstate (comp, serializedState, size, FMUstate);
+    auto ret = commonFunctions->fmi2DeSerializeFMUstate (comp, serializedState, size, FMUState);
     if (ret != fmi2Status::fmi2OK)
     {
         handleNonOKReturnValues (ret);

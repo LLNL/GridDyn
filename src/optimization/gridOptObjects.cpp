@@ -391,48 +391,69 @@ void gridOptObject::dynObjectInitializeA (std::uint32_t /*flags*/) {}
 
 void gridOptObject::dynObjectInitializeB (std::uint32_t /*flags*/) {}
 
-void gridOptObject::loadSizes (const optimMode &) {}
+void gridOptObject::loadSizes (const optimMode & /* unused */) {}
 
-void gridOptObject::setValues (const optimData &, const optimMode &) {}
+void gridOptObject::setValues (const optimData & /* unused */, const optimMode & /* unused */) {}
 
-void gridOptObject::guessState (double /*time*/, double /*val*/[], const optimMode &) {}
+void gridOptObject::guessState (double /*time*/, double /*val*/[], const optimMode & /* unused */) {}
 
-void gridOptObject::getTols (double /*tols*/[], const optimMode &) {}
+void gridOptObject::getTols (double /*tols*/[], const optimMode & /* unused */) {}
 
-void gridOptObject::valueBounds (double /*time*/, double /*upLimit*/[], double /*lowerLimit*/[], const optimMode &)
+void gridOptObject::valueBounds (double /*time*/,
+                                 double /*upLimit*/[],
+                                 double /*lowerLimit*/[],
+                                 const optimMode & /* unused */)
 {
 }
 
-void gridOptObject::linearObj (const optimData &, vectData<double> & /*linObj*/, const optimMode &) {}
+void gridOptObject::linearObj (const optimData & /* unused */,
+                               vectData<double> & /*linObj*/,
+                               const optimMode & /* unused */)
+{
+}
 
-void gridOptObject::quadraticObj (const optimData &,
+void gridOptObject::quadraticObj (const optimData & /* unused */,
                                   vectData<double> & /*linObj*/,
                                   vectData<double> & /*quadObj*/,
-                                  const optimMode &)
+                                  const optimMode & /* unused */)
 {
 }
 
-double gridOptObject::objValue (const optimData &, const optimMode &) { return 0; }
+double gridOptObject::objValue (const optimData & /* unused */, const optimMode & /* unused */) { return 0; }
 
-void gridOptObject::gradient (const optimData &, double /*grad*/[], const optimMode &) {}
+void gridOptObject::gradient (const optimData & /* unused */, double /*grad*/[], const optimMode & /* unused */) {}
 
-void gridOptObject::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &) {}
+void gridOptObject::jacobianElements (const optimData &,
+                                      matrixData<double> & /*md*/,
+                                      const optimMode & /* unused */)
+{
+}
 
-void gridOptObject::getConstraints (const optimData &,
+void gridOptObject::getConstraints (const optimData & /* unused */,
                                     matrixData<double> & /*cons*/,
                                     double /*upperLimit*/[],
                                     double /*lowerLimit*/[],
-                                    const optimMode &)
+                                    const optimMode & /* unused */)
 {
 }
 
-void gridOptObject::constraintValue (const optimData &, double /*cVals*/[], const optimMode &) {}
-
-void gridOptObject::constraintJacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &)
+void gridOptObject::constraintValue (const optimData & /* unused */,
+                                     double /*cVals*/[],
+                                     const optimMode & /* unused */)
 {
 }
 
-void gridOptObject::hessianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &) {}
+void gridOptObject::constraintJacobianElements (const optimData & /* unused */,
+                                                matrixData<double> & /*md*/,
+                                                const optimMode & /* unused */)
+{
+}
+
+void gridOptObject::hessianElements (const optimData & /* unused */,
+                                     matrixData<double> & /*md*/,
+                                     const optimMode & /* unused */)
+{
+}
 
 gridOptObject *gridOptObject::getBus (index_t /*index*/) const { return nullptr; }
 

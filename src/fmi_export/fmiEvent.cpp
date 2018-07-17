@@ -103,13 +103,13 @@ void fmiEvent::updateObject (coreObject *gco, object_update_mode mode)
 
 void fmiEvent::findCoordinator ()
 {
-    if (m_obj)
+    if (m_obj != nullptr)
     {
         auto rto = m_obj->getRoot ();
-        if (rto)
+        if (rto != nullptr)
         {
             auto fmiCont = rto->find ("fmiCoordinator");
-            if (dynamic_cast<fmiCoordinator *> (fmiCont))
+            if (dynamic_cast<fmiCoordinator *> (fmiCont) != nullptr)
             {
                 if (!isSameObject (fmiCont, coord))
                 {

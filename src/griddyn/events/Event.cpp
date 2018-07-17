@@ -98,7 +98,7 @@ void Event::updateEvent (const EventInfo &gdEI, coreObject *rootObject)
 
 bool Event::checkArmed ()
 {
-    if (m_obj)
+    if (m_obj != nullptr)
     {
         if (!field.empty ())
         {
