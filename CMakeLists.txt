@@ -236,6 +236,10 @@ else(MPI_ENABLE)
 	set(GRIDDYN_HAVE_MPI FALSE)
 endif(MPI_ENABLE)
 
+### just check some intenal options
+if (BUILD_DEBUG_ONLY AND BUILD_RELEASE_ONLY)
+message(fatal "BOTH BUILD_DEBUG_ONLY AND BUILD_RELEASE_ONLY cannot be specified together otherwise nothing works")
+endif()
 
 # -------------------------------------------------------------
 # Find (and test) the KLU libraries

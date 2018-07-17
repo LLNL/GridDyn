@@ -1443,9 +1443,9 @@ int gridDynSimulation::countMpiObjects (bool printInfo) const
     return gridlabdObjects;
 }
 
-void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t nonZeros)
+void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t numberNonZeros)
 {
-    getSolverInterface (sMode)->setMaxNonZeros (nonZeros);
+    getSolverInterface (sMode)->setMaxNonZeros (numberNonZeros);
 }
 
 std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)

@@ -240,7 +240,7 @@ void iniReaderElement::moveToNextSibling ()
     ++sectionIndex;
     iteratorIndex = 0;
     auto &secs = doc->Sections ();
-	if (sectionIndex >= secs.size())
+	if (sectionIndex >= static_cast<int>(secs.size()))
 	{
         currentSection = ';';
         return;
