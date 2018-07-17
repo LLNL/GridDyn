@@ -298,11 +298,11 @@ std::shared_ptr<collector> gridSimulation::findCollector (const std::string &col
             return col;
         }
     }
-	auto ind = stringOps::trailingStringInt(collectorName);
-	if (isValidIndex(ind, collectorList))
-	{
-		return collectorList[ind];
-	}
+    auto ind = stringOps::trailingStringInt(collectorName);
+    if (isValidIndex(ind, collectorList))
+    {
+        return collectorList[ind];
+    }
     return nullptr;
 }
 
@@ -369,7 +369,7 @@ void gridSimulation::log (coreObject *object, print_level level, const std::stri
         {
             customLogger(static_cast<int> (level), simtime + cname + "::" + key + message);
         }
-   
+
 }
 
 

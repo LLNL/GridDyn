@@ -40,7 +40,7 @@ dcLink::dcLink (double rP, double Lp, const std::string &objName) : Link (objNam
 
 coreObject *dcLink::clone (coreObject *obj) const
 {
-    dcLink *nobj = cloneBase<dcLink, Link> (this, obj);
+    auto *nobj = cloneBase<dcLink, Link> (this, obj);
     if (nobj == nullptr)
     {
         return obj;

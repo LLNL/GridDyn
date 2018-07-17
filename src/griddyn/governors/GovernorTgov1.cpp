@@ -40,7 +40,7 @@ GovernorTgov1::GovernorTgov1 (const std::string &objName) : GovernorIeeeSimple (
 
 coreObject *GovernorTgov1::clone (coreObject *obj) const
 {
-    GovernorTgov1 *gov = cloneBase<GovernorTgov1, GovernorIeeeSimple> (this, obj);
+    auto *gov = cloneBase<GovernorTgov1, GovernorIeeeSimple> (this, obj);
     if (!gov)
     {
         return obj;

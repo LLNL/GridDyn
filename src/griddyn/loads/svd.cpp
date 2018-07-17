@@ -91,71 +91,67 @@ int svd::checkSetting (double level)
     {
         return ((level >= Qlow) && (level <= Qhigh)) ? 1 : -1;
     }
-    else
-    {
-        int setting = 0;
-		double totalQ = Qlow;
-		if (!opFlags[reverse_control_flag])
+
+    int setting = 0;
+	double totalQ = Qlow;
+	if (!opFlags[reverse_control_flag])
+	{
+		auto block = Cblocks.begin();
+		while (std::abs(totalQ) < std::abs(level))
 		{
-			auto block = Cblocks.begin();
-			while (std::abs(totalQ) < std::abs(level))
+			for (int kk = 0; kk < (*block).first; ++kk)
 			{
-				for (int kk = 0; kk < (*block).first; ++kk)
+				totalQ += (*block).second;
+				++setting;
+				if (std::abs(totalQ - level) < 0.00001)
 				{
-					totalQ += (*block).second;
-					++setting;
-					if (std::abs(totalQ - level) < 0.00001)
-					{
-						return setting;
-					}
-				}
-				++block;
-				if (block == Cblocks.end())
-				{
-					break;
+					return setting;
 				}
 			}
+			++block;
+			if (block == Cblocks.end())
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		auto block = Cblocks.rbegin();
+		while (std::abs(totalQ) < std::abs(level))
+		{
+			for (int kk = 0; kk < (*block).first; ++kk)
+			{
+				totalQ += (*block).second;
+				++setting;
+				if (std::abs(totalQ - level) < 0.00001)
+				{
+					return setting;
+				}
+			}
+			++block;
+			if (block == Cblocks.rend())
+			{
+				break;
+			}
+		}
+	}
+    if (std::abs (totalQ) > std::abs (level))
+    {
+		if (opFlags[reverse_toggled_flag])
+		{
+			opFlags.flip(reverse_control_flag);
+			opFlags.reset(reverse_toggled_flag);
+			LOG_WARNING("unable to match requested level");
 		}
 		else
 		{
-			auto block = Cblocks.rbegin();
-			while (std::abs(totalQ) < std::abs(level))
-			{
-				for (int kk = 0; kk < (*block).first; ++kk)
-				{
-					totalQ += (*block).second;
-					++setting;
-					if (std::abs(totalQ - level) < 0.00001)
-					{
-						return setting;
-					}
-				}
-				++block;
-				if (block == Cblocks.rend())
-				{
-					break;
-				}
-			}
+			opFlags.flip(reverse_control_flag);
+			opFlags.set(reverse_toggled_flag);
+			return checkSetting(level);
 		}
-        if (std::abs (totalQ) > std::abs (level))
-        {
-			if (opFlags[reverse_toggled_flag])
-			{
-				opFlags.flip(reverse_control_flag);
-				opFlags.reset(reverse_toggled_flag);
-				LOG_WARNING("unable to match requested level");
-			}
-			else
-			{
-				opFlags.flip(reverse_control_flag);
-				opFlags.set(reverse_toggled_flag);
-				return checkSetting(level);
-			}
-            
-        }
-
-        return setting;
     }
+    return setting;
 }
 
 void svd::updateSetting (int step)
@@ -177,7 +173,7 @@ void svd::updateSetting (int step)
 		{
 			auto block = Cblocks.begin();
 			int scount = 0;
-			
+
 			while (step > scount + (*block).first)
 			{
 				scount += (*block).first;
@@ -208,7 +204,6 @@ void svd::updateSetting (int step)
 		}
 		setYq(qlevel);
         currentStep = step;
-       
     }
 }
 
@@ -267,7 +262,7 @@ void svd::set (const std::string &param, const std::string &val)
         auto bin = stringOps::splitline (val);
         for (size_t kk = 0; kk < bin.size () - 1; ++kk)
         {
-            int cnt = numeric_conversion<int> (bin[kk], 0);
+            auto cnt = numeric_conversion<int> (bin[kk], 0);
             double bsize = numeric_conversion (bin[kk + 1], 0.0);
             if (cnt > 0)
             {
@@ -396,7 +391,7 @@ void svd::set (const std::string &param, double val, units_t unitType)
 void svd::addBlock (int steps, double Qstep, gridUnits::units_t unitType)
 {
     Qstep = gridUnits::unitConversion (Qstep, unitType, gridUnits::puMW, systemBasePower);
-    Cblocks.push_back (std::make_pair (steps, Qstep));
+    Cblocks.emplace_back (steps, Qstep);
     Qhigh += steps * Qstep;
     stepCount += steps;
 }

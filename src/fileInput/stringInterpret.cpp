@@ -147,7 +147,7 @@ double interpretString_sv (string_view command, readerInfo &ri)
 
 double interpretStringBlock (string_view command, readerInfo &ri)
 {
-    double val = numeric_conversionComplete<double> (command, std::nan ("0"));
+    auto val = numeric_conversionComplete<double> (command, std::nan ("0"));
     if (std::isnan (val))
     {
         std::string ncommand = ri.checkDefines (command.to_string ());

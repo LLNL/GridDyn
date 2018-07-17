@@ -10,8 +10,7 @@
  * LLNS Copyright End
 */
 
-#ifndef EVENTQUEUE_H_
-#define EVENTQUEUE_H_
+#pragma once
 
 #include "eventAdapters.h"
 
@@ -65,7 +64,7 @@ public:
   @arg newEventObject  a pointer to the event object being inserted
   @return the event ID of the newly created event adapter
   */
-  template< class X>
+  template<class X>
   auto insert(X *newEventObject)
   {
     auto ev = std::shared_ptr<eventAdapter>(std::make_unique < eventTypeAdapter < X >> (newEventObject));
@@ -85,7 +84,7 @@ public:
     return insert(std::move(ev));
   }
 
-  
+
 
   /** @brief get the next event time
         @return the next Event time
@@ -168,5 +167,3 @@ public:
 };
 
 }//namespace griddyn
-
-#endif

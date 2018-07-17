@@ -13,7 +13,8 @@
 #include "fmiObjects.h"
 
 
-fmi2ModelExchangeObject::fmi2ModelExchangeObject(fmi2Component cmp, std::shared_ptr<const fmiInfo> keyInfo, std::shared_ptr<const fmiCommonFunctions> comFunc,std::shared_ptr<const fmiModelExchangeFunctions> meFunc) :fmi2Object(cmp,keyInfo,comFunc),ModelExchangeFunctions(meFunc)
+fmi2ModelExchangeObject::fmi2ModelExchangeObject(fmi2Component cmp, std::shared_ptr<const fmiInfo> keyInfo, std::shared_ptr<const fmiCommonFunctions> comFunc,std::shared_ptr<const fmiModelExchangeFunctions> meFunc)
+    : fmi2Object(cmp, std::move(keyInfo), std::move(comFunc)), ModelExchangeFunctions(std::move(meFunc))
 {
 	numIndicators = info->getCounts("events");
 	numStates = info->getCounts("states");
@@ -31,7 +32,7 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 	{
 	case fmuMode::instantiatedMode:
 	case fmuMode::initializationMode:
-		
+
 		if (mode == fmuMode::continuousTimeMode)
 		{
 			printf(" entering event mode\n");
@@ -47,7 +48,7 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 			{
 				ret = fmi2OK;
 			}
-			
+
 		}
 		else
 		{
@@ -92,7 +93,7 @@ void fmi2ModelExchangeObject::setMode(fmuMode mode)
 	{
 		handleNonOKReturnValues(ret);
 	}
-	
+
 }
 
 void fmi2ModelExchangeObject::newDiscreteStates(fmi2EventInfo* fmi2eventInfo)
@@ -121,7 +122,7 @@ void fmi2ModelExchangeObject::setTime(fmi2Real time)
 			handleNonOKReturnValues(ret);
 		}
 	}
-	
+
 }
 void fmi2ModelExchangeObject::setStates(const fmi2Real x[])
 {

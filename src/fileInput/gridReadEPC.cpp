@@ -1028,7 +1028,7 @@ void epcReadGen (Generator *gen, string_view line, double /*base*/)
     mb = numeric_conversion<double> (strvec[23], 0.0);
     gen->set ("xs", mb);
 
-    int rbus = numeric_conversion<int> (strvec[6], 0);
+    auto rbus = numeric_conversion<int> (strvec[6], 0);
 
     if (rbus != 0)
     {

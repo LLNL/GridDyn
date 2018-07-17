@@ -51,7 +51,7 @@ dimeRunner::dimeRunner()
 
 dimeRunner::~dimeRunner() = default;
 
-dimeRunner::dimeRunner(std::shared_ptr<gridDynSimulation> sim) : GriddynRunner(sim)
+dimeRunner::dimeRunner(std::shared_ptr<gridDynSimulation> sim) : GriddynRunner(std::move(sim))
 {
 	loadDimeLibrary();
 }

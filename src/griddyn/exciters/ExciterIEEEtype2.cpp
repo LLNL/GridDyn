@@ -28,7 +28,7 @@ ExciterIEEEtype2::ExciterIEEEtype2(const std::string &objName) : ExciterIEEEtype
 // cloning function
 coreObject *ExciterIEEEtype2::clone(coreObject *obj) const
 {
-	ExciterIEEEtype2 *gdE = cloneBase<ExciterIEEEtype2, ExciterIEEEtype1>(this, obj);
+	auto *gdE = cloneBase<ExciterIEEEtype2, ExciterIEEEtype1>(this, obj);
 	if (gdE == nullptr)
 	{
 		return obj;

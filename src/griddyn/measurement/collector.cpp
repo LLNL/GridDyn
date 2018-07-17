@@ -48,7 +48,7 @@ std::unique_ptr<collector> collector::clone() const
 
 void collector::cloneTo (collector *col) const
 {
-   
+
 	col->reqPeriod = reqPeriod;
 	col->timePeriod = timePeriod;
 	col->setName (getName ());
@@ -77,7 +77,7 @@ void collector::cloneTo (collector *col) const
 			{
 				col->points[kk].dataGrabber = points[kk].dataGrabber->clone();
 			}
-            
+
 			if (col->points[kk].dataGrabberSt)
 			{
 				if (points[kk].dataGrabberSt)
@@ -89,7 +89,7 @@ void collector::cloneTo (collector *col) const
 			{
 				col->points[kk].dataGrabberSt = points[kk].dataGrabberSt->clone();
 			}
-          
+
 			col->points[kk].column = points[kk].column;
         }
     }
@@ -279,7 +279,7 @@ void collector::recheckColumns ()
     recheck = false;
 }
 
-count_t collector::grabData(double *data_, index_t N)
+count_t collector::grabData(double *data, index_t N)
 {
 	std::vector<double> vals;
 	count_t currentCount = 0;
@@ -294,19 +294,19 @@ count_t collector::grabData(double *data_, index_t N)
 			datapoint.dataGrabber->grabVectorData(vals);
 			if (static_cast<index_t>(datapoint.column + vals.size()) < N)
 			{
-				std::copy(vals.begin(), vals.end(), data_ + datapoint.column);
+				std::copy(vals.begin(), vals.end(), data + datapoint.column);
 				currentCount = (std::max)(currentCount, datapoint.column + static_cast<index_t>(vals.size()));
 			}
 			else if (datapoint.column < N)
 			{
-				std::copy(vals.begin(), vals.begin() + (N - datapoint.column-1), data_ + datapoint.column);
+				std::copy(vals.begin(), vals.begin() + (N - datapoint.column-1), data + datapoint.column);
 				currentCount = N;
 			}
-			
+
 		}
 		else if (datapoint.column<N)
 		{
-			data_[datapoint.column] = datapoint.dataGrabber->grabData();
+			data[datapoint.column] = datapoint.dataGrabber->grabData();
 			currentCount = (std::max)(currentCount, datapoint.column + 1);
 		}
 	}
@@ -469,11 +469,8 @@ void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
             }
             throw (addFailureException ());
         }
-        else
-        {
-            obj->log (obj, print_level::warning, "unable to create collector no field or offset specified");
-            addWarning ("unable to create collector no field or offset specified");
-        }
+        obj->log (obj, print_level::warning, "unable to create collector no field or offset specified");
+        addWarning ("unable to create collector no field or offset specified");
     }
     else
     {

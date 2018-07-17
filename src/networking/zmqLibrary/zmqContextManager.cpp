@@ -92,4 +92,4 @@ namespace zmqlib
         zcontext = std::make_unique<zmq::context_t>();
     }
 
-}
+} // namespace zmqlib

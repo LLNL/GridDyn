@@ -77,7 +77,7 @@ bool fmiInfo::checkFlag(fmuCapabilityFlags flag) const
 
 int fmiInfo::getCounts(const std::string &countType) const
 {
-	size_t cnt = size_t(-1);
+	auto cnt = size_t(-1);
 	if (countType == "variables")
 	{
 		cnt = variables.size();
@@ -121,21 +121,17 @@ int fmiInfo::getCounts(const std::string &countType) const
 	return static_cast<int>(cnt);
 }
 
-const std::string emptyString="";
+static const std::string emptyString;
 
 const std::string &fmiInfo::getString(const std::string &field) const
 {
-	auto fnd = headerInfo.find(field);
-	if (fnd != headerInfo.end())
-	{
-		return fnd->second;
-	}
-	else
-	{
-		return emptyString;
-	}
+    auto fnd = headerInfo.find(field);
+    if (fnd != headerInfo.end())
+    {
+        return fnd->second;
+    }
+    return emptyString;
 }
-
 
 double fmiInfo::getReal(const std::string &field) const
 {
@@ -183,14 +179,11 @@ const variableInformation& fmiInfo::getVariableInfo(const std::string &variableN
 
 const variableInformation& fmiInfo::getVariableInfo(unsigned int index) const
 {
-	if (index < variables.size())
-	{
-		return variables[index];
-	}
-	else
-	{
-		return emptyVI;
-	}
+    if (index < variables.size())
+    {
+        return variables[index];
+    }
+    return emptyVI;
 }
 
 fmiVariableSet fmiInfo::getReferenceSet(const std::vector<std::string > &variableList) const
@@ -721,11 +714,11 @@ void loadDependencies(std::shared_ptr<readerElement> &rd, std::vector<int> &stor
 		auto att = rd->getAttribute("index");
 		auto attDep = rd->getAttribute(depString);
 		auto attDepKind = rd->getAttribute(depKindString);
-		index_t row = static_cast<index_t>(att.getValue());
+		auto row = static_cast<index_t>(att.getValue());
 		auto dep = str2vector<int>(attDep.getText(), 0, " ");
 		auto depknd = (attDepKind.isValid()) ? stringOps::splitline(attDepKind.getText(), " ", stringOps::delimiter_compression::on) : stringVector();
 		store.push_back(row - 1);
-		auto validdepkind = (depknd.size() > 0);
+		auto validdepkind = !depknd.empty();
 		for (size_t kk = 0; kk<dep.size(); ++kk)
 		{
 

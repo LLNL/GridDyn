@@ -66,7 +66,7 @@ change_code tcpCollector::trigger(coreTime time)
 	{
 		//connection->send_var(points[kk].colname, data[kk]);
 	}
-	
+
 	return out;
 }
 
@@ -81,7 +81,7 @@ void tcpCollector::set(const std::string &param, double val)
     {
         collector::set(param, val);
     }
-	
+
 }
 
 void tcpCollector::set(const std::string &param, const std::string &val)
@@ -98,7 +98,7 @@ void tcpCollector::set(const std::string &param, const std::string &val)
 	{
 		collector::set(param, val);
 	}
-	
+
 }
 
 const std::string &tcpCollector::getSinkName() const
@@ -106,5 +106,5 @@ const std::string &tcpCollector::getSinkName() const
 	return server;
 }
 
-}//namespace dimeLib
+}//namespace tcpLib
 }//namespace griddyn

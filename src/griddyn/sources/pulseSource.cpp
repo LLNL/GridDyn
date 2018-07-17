@@ -178,10 +178,10 @@ void pulseSource::set (const std::string &param, double val, units_t unitType)
     {
         period = val;
     }
-	else if (param == "frequency")
-	{
-		period = 1.0 / val;
-	}
+    else if (param == "frequency")
+    {
+        period = 1.0 / val;
+    }
     else if (param == "dutycycle")
     {
         dutyCycle = val;

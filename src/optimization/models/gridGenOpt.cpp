@@ -53,7 +53,7 @@ gridGenOpt::gridGenOpt (coreObject *obj, const std::string &objName) : gridOptOb
 
 coreObject *gridGenOpt::clone (coreObject *obj) const
 {
-  gridGenOpt *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
+  auto *nobj = cloneBase<gridGenOpt, gridOptObject> (this, obj);
   if (nobj == nullptr)
     {
       return obj;
@@ -427,7 +427,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
           Pcoeff[num] = val;
           return;
         }
-      catch (std::invalid_argument)
+      catch (std::invalid_argument const&)
         {
           //if it doesn't work just let it pass through to the lower statements
         }
@@ -446,7 +446,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
           Qcoeff[num] = val;
           return;
         }
-      catch (std::invalid_argument)
+      catch (std::invalid_argument const&)
         {
           //if it doesn't work just let it pass through to the lower statements
         }
@@ -551,7 +551,7 @@ double gridGenOpt::get (const std::string &param, gridUnits::units_t unitType) c
 }
 
 
-void gridGenOpt::loadCostCoeff (std::vector<double> coeff, int mode)
+void gridGenOpt::loadCostCoeff (std::vector<double> const& coeff, int mode)
 {
   if (mode == 0)
     {
@@ -574,5 +574,3 @@ gridOptObject *gridGenOpt::getArea (index_t index) const
 }
 
 }// namespace griddyn
-
-

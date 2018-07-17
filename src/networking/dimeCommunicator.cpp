@@ -19,7 +19,7 @@ namespace griddyn
 {
 namespace dimeLib
 {
-dimeCommunicator::dimeCommunicator() :zmqCommunicator()
+dimeCommunicator::dimeCommunicator()
 {
 
 }
@@ -77,9 +77,9 @@ void dimeCommunicator::set(const std::string &param, const std::string &val)
 {
 	if (param.empty())
 	{
-		
+
 	}
-	
+
 	else
 	{
 		zmqCommunicator::set(param, val);
@@ -94,9 +94,9 @@ void dimeCommunicator::set(const std::string &param, double val)
 
 void dimeCommunicator::setFlag(const std::string &flag, bool val)
 {
-	if (flag.empty()) 
+	if (flag.empty())
 	{
-		
+
 	}
 	else
 	{

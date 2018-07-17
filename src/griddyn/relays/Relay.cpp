@@ -232,7 +232,7 @@ double Relay::getConditionValue (index_t conditionNumber) const
     {
 		return conditions[conditionNumber]->getVal(1);
     }
-    
+
 	return kNullVal;
 }
 
@@ -326,7 +326,7 @@ void Relay::updateAction (std::shared_ptr<Event> ge, index_t actionNumber)
 	{
         throw (invalidParameterValue ("actionNumber"));
     }
-    
+
 }
 
 void Relay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
@@ -425,10 +425,7 @@ double Relay::get(const std::string &param, gridUnits::units_t unitType) const
 		coreObject *tobj = const_cast<Relay*>(this);
 		return unitConversion(fptr.first(tobj), fptr.second, unitType, systemBasePower);
 	}
-	else
-	{
-		return gridPrimary::get(param, unitType);
-	}
+	return gridPrimary::get(param, unitType);
 }
 
 void Relay::setFlag (const std::string &flag, bool val)
@@ -840,7 +837,7 @@ std::unique_ptr<eventAdapter> Relay::make_alarm (const std::string &val)
     return nullptr;
 }
 
-void Relay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_ptr<commMessage> /*message*/) {}
+void Relay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message) {}
 
 void Relay::sendAlarm (std::uint32_t code)
 {

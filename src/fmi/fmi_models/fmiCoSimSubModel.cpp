@@ -29,12 +29,12 @@ namespace griddyn
 namespace fmi
 {
 
-fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) :gridSubModel(newName), cs(fmi)
+fmiCoSimSubModel::fmiCoSimSubModel(const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi) : gridSubModel(newName), cs(std::move(fmi))
 {
 
 }
 
-fmiCoSimSubModel::fmiCoSimSubModel(std::shared_ptr<fmi2CoSimObject> fmi) : cs(fmi)
+fmiCoSimSubModel::fmiCoSimSubModel(std::shared_ptr<fmi2CoSimObject> fmi) : cs(std::move(fmi))
 {
 
 }
@@ -58,7 +58,7 @@ coreObject * fmiCoSimSubModel::clone(coreObject *obj) const
 
 bool fmiCoSimSubModel::isLoaded() const
 {
-	return (cs) ? true : false;
+	return static_cast<bool>(cs);
 }
 
 void fmiCoSimSubModel::dynObjectInitializeA(coreTime time, std::uint32_t flags)
@@ -119,7 +119,7 @@ void fmiCoSimSubModel::dynObjectInitializeB(const IOdata &inputs, const IOdata &
 
 		cs->getStates(m_state.data());
 		oEst.resize(m_outputSize);
-		probeFMU();  //probe the fmu 
+		probeFMU();  //probe the fmu
 		if (opFlags[use_output_estimator])
 		{
 			//if we require the use of output estimators flag that to the simulation and load the information for the estimator
@@ -258,7 +258,7 @@ void fmiCoSimSubModel::set(const std::string &param, const std::string &val)
 	{
 		if (!(cs))
 		{
-			
+
 			cs = fmiLibraryManager::instance().createCoSimulationObject(val, getName());
 		}
 		else
@@ -511,7 +511,7 @@ void fmiCoSimSubModel::timestep(coreTime time, const IOdata &inputs, const solve
 
 	return out;
 	*/
-	
+
 }
 
 void fmiCoSimSubModel::ioPartialDerivatives(const IOdata &inputs, const stateData &sD, matrixData<double> &md, const IOlocs &inputLocs, const solverMode &sMode)

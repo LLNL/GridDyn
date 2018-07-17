@@ -10,10 +10,7 @@
  * LLNS Copyright End
 */
 
-#ifndef GD_OPT_OBJECT_FACTORY_H_
-#define GD_OPT_OBJECT_FACTORY_H_
 #pragma once
-
 
 #include "gridOptObjects.h"
 #include <map>
@@ -31,12 +28,13 @@ class optFactory
 public:
 	std::string  name;
 	int m_level = 0;
-	optFactory(const std::string & /*component*/, const std::string objName, int level = 0) : name(objName), m_level(level)
+    optFactory(const std::string &component, const std::string &objName, int level = 0) : name(objName), m_level(level)
 	{
 
 	}
-	optFactory(const stringVec & /*component*/, const std::string objName, int level = 0) : name(objName), m_level(level)
+	optFactory(const stringVec &component, const std::string &objName, int level = 0) : name(objName), m_level(level)
 	{
+
 	}
 	virtual gridOptObject * makeObject(coreObject *obj) = 0;
 	virtual gridOptObject * makeObject() = 0;
@@ -62,7 +60,7 @@ public:
 	optComponentFactory()
 	{
 	}
-	optComponentFactory(const std::string typeName);
+	optComponentFactory(const std::string &typeName);
 	~optComponentFactory();
 	stringVec getObjNames();
 	gridOptObject * makeObject(coreObject *obj);
@@ -89,7 +87,7 @@ public:
 	{
 	}
 	static std::shared_ptr<coreOptObjectFactory> instance();
-	void registerFactory(const std::string name, std::shared_ptr<optComponentFactory> tf);
+	void registerFactory(const std::string &name, std::shared_ptr<optComponentFactory> tf);
 	void registerFactory(std::shared_ptr<optComponentFactory> tf);
 	stringVec getFactoryNames();
 	stringVec getObjNames(const std::string &typeName);
@@ -100,7 +98,7 @@ public:
 	std::shared_ptr<optComponentFactory> getFactory(const std::string &optComponent);
 	bool isValidType(const std::string &obComponent);
 	bool isValidObject(const std::string &optComponent, const std::string &objName);
-	void setDefaultType(const std::string defComponent);
+	void setDefaultType(const std::string &defComponent);
 	void prepObjects(const std::string &optComponent, const std::string &optName, count_t numObjects, coreObject *baseObj);
 	void prepObjects(const std::string &objName, count_t numObjects, coreObject *baseObj);
 private:
@@ -162,7 +160,7 @@ private:
 	bool useBlock = false;
 	gridOptObjectHolder<Ntype, gdType> *gOOH = nullptr;
 public:
-	optObjectFactory(const std::string &component, const std::string objName, int level = 0, bool makeDefault = false) : optFactory(component, objName, level)
+	optObjectFactory(const std::string &component, const std::string &objName, int level = 0, bool makeDefault = false) : optFactory(component, objName, level)
 	{
 
 		auto coof = coreOptObjectFactory::instance();
@@ -175,7 +173,7 @@ public:
 
 	}
 
-	optObjectFactory(const stringVec &components, const std::string objName, int level = 0, bool makeDefault = false) : optFactory(components[0], objName, level)
+	optObjectFactory(const stringVec &components, const std::string &objName, int level = 0, bool makeDefault = false) : optFactory(components[0], objName, level)
 	{
 		auto coof = coreOptObjectFactory::instance();
 		for (auto &tname : components)
@@ -280,11 +278,3 @@ public:
 };
 
 }// namespace griddyn
-
-
-
-
-
-
-
-#endif

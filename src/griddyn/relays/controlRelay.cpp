@@ -218,16 +218,16 @@ void controlRelay::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commM
 		{
 			if (measureDelay <= kSmallTime)
 			{
-				
+
 			}
 			else
 			{
-				
+
 			}
 		}
 		else
 		{
-			
+
 		}
         break;
     case cm::GET_PERIODIC:
