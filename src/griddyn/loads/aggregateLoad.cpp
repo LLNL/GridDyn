@@ -114,6 +114,16 @@ void aggregateLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         // do a first pass of loading
         double rem = 1.0;
 
+        // we know sLoad is actually an aggregateLoad
+        auto aggregateSLoad = static_cast<aggregateLoad *> (sLoad);
+
+        setP (aggregateSLoad->getP ());
+        setQ (aggregateSLoad->getQ ());
+        setIp (aggregateSLoad->getIp ());
+        setIq (aggregateSLoad->getIq ());
+        setYp (aggregateSLoad->getYp ());
+        setYq (aggregateSLoad->getYq ());
+
         for (size_t nn = 0; nn < subLoads.size (); ++nn)
         {
             if (fraction[nn] > 0)

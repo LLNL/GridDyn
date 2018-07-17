@@ -29,7 +29,10 @@ void TcpRxConnection::start ()
     connection_state_t exp = connection_state_t::halted;
     if (state.compare_exchange_strong (exp, connection_state_t::receiving))
     {
-        receiving = true;
+        if (!receiving)
+        {
+            receiving = true;
+        }
         socket_.async_receive (boost::asio::buffer (data.data () + residBufferSize,
                                                     data.size () - residBufferSize),
                                [this](const boost::system::error_code &error,

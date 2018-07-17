@@ -574,7 +574,7 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     if (opt == 1)
     {
         // Check if flag < 0
-        int *errflag = reinterpret_cast<int *> (flagvalue);
+        auto *errflag = reinterpret_cast<int *> (flagvalue);
         if (*errflag < 0)
         {
             if (printError)
