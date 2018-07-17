@@ -34,7 +34,7 @@ GenModelGENROU::GenModelGENROU (const std::string &objName) : GenModel5 (objName
 
 coreObject *GenModelGENROU::clone (coreObject *obj) const
 {
-    GenModelGENROU *gd = cloneBase<GenModelGENROU, GenModel5> (this, obj);
+    auto *gd = cloneBase<GenModelGENROU, GenModel5> (this, obj);
     if (gd == nullptr)
     {
         return obj;

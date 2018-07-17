@@ -40,7 +40,7 @@ dcLink::dcLink (double rP, double Lp, const std::string &objName) : Link (objNam
 
 coreObject *dcLink::clone (coreObject *obj) const
 {
-    dcLink *nobj = cloneBase<dcLink, Link> (this, obj);
+    auto *nobj = cloneBase<dcLink, Link> (this, obj);
     if (nobj == nullptr)
     {
         return obj;
@@ -178,22 +178,22 @@ stateSizes dcLink::LocalStateSizes(const solverMode &sMode) const
 
 count_t dcLink::LocalJacobianCount(const solverMode &sMode) const
 {
-	count_t jacSize = 0;
+	count_t jacCount = 0;
 	if (isDynamic(sMode))
 	{
 		if (x != 0.0)
 		{
 			if (!isAlgebraicOnly(sMode))
 			{
-				jacSize = 3;
+				jacCount = 3;
 			}
 		}
 	}
 	else if (r <= 0.0)  // superconducting
 	{
-		jacSize = 2;
+		jacCount = 2;
 	}
-	return jacSize;
+	return jacCount;
 }
 
 void dcLink::ioPartialDerivatives (id_type_t busId,

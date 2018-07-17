@@ -44,7 +44,7 @@ MpiService *MpiService::instance(int threadingLevel)
 
 MpiService::MpiService (int *argc, char **argv[], int threadingLevel)
 {
-    // Initialize MPI with MPI_THREAD_FUNNELED  
+    // Initialize MPI with MPI_THREAD_FUNNELED
     int mpi_initialized;
 
     MPI_Initialized(&mpi_initialized);
@@ -131,4 +131,4 @@ MpiService::token MpiService::getToken()
 }
 
 }  // namespace mpi
-}  // namespace helics
+}  // namespace griddyn

@@ -8,30 +8,30 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(griddynMain_sources
+set(gridDynMain_sources
 	gridDynMain.cpp
 	)
 
-set(griddynMain_headers
+set(gridDynMain_headers
 	)
 
-add_executable(griddynMain ${griddynMain_sources} ${griddynMain_headers})
+add_executable(gridDynMain ${gridDynMain_sources} ${gridDynMain_headers})
 
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
 message(STATUS "execOnly:${executable_only_components}")
 
-target_link_libraries(griddynMain ${executable_only_components} runner)
+target_link_libraries(gridDynMain ${executable_only_components} runner)
 
 if(DIME_ENABLE)
-    target_link_libraries(griddynMain networking)
+    target_link_libraries(gridDynMain networking)
 endif(DIME_ENABLE)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
-add_custom_command(TARGET griddynMain POST_BUILD        # Adds a post-build event to griddynMain
+add_custom_command(TARGET gridDynMain POST_BUILD        # Adds a post-build event to gridDynMain
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
         "${keyfile}"      # <--this is in-file
-        $<TARGET_FILE_DIR:griddynMain>)                 # <--this is out-file path
+        $<TARGET_FILE_DIR:gridDynMain>)                 # <--this is out-file path
 endforeach(keyfile)
 
-INSTALL(TARGETS griddynMain RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+INSTALL(TARGETS gridDynMain RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

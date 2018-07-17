@@ -82,7 +82,7 @@ if (NOT BUILD_RELEASE_ONLY)
         )
 	
 	endif()
-	
+  if (NOT BUILD_DEBUG_ONLY)	
 	message(STATUS "Configuring Sundials Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config_release.log")	
 	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
@@ -96,6 +96,7 @@ if (NOT BUILD_RELEASE_ONLY)
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build_release.log
         )
+endif()
 
 endfunction()
 
@@ -184,6 +185,7 @@ if (NOT BUILD_RELEASE_ONLY)
 	
 	endif()
 	
+if (NOT BUILD_DEBUG_ONLY)
 	message(STATUS "Configuring Sundials Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config_release.log")	
 	execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
@@ -197,5 +199,6 @@ if (NOT BUILD_RELEASE_ONLY)
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build_release.log
         )
+endif()
 
 endfunction()

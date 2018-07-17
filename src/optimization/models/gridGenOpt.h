@@ -84,7 +84,7 @@ public:
   // parameter get functions
   virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
-  virtual void loadCostCoeff (std::vector<double> coeff,int mode);
+  virtual void loadCostCoeff (std::vector<double> const& coeff, int mode);
   // find components
 
   virtual gridOptObject * getBus (index_t index) const override;

@@ -84,7 +84,7 @@ public:
   virtual void setOffsets (const optimOffsets &newOffsets, const optimMode &oMode) override;
   virtual void setOffset (index_t offset, index_t constraintOffset, const optimMode &oMode) override;
 
-  void setAll (const std::string &type, std::string param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
+  void setAll (const std::string &type, const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit);
   void set (const std::string &param,  const std::string &val) override;
   void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
   // parameter get functions

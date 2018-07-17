@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(test_zmq_core)
 
 BOOST_AUTO_TEST_CASE(test_main_exe)
 {
-	exeTestRunner mainExeRunner(GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "griddynMain");
+	exeTestRunner mainExeRunner(GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");
 	if (mainExeRunner.isActive())
 	{
 		auto brk = runBroker("2");

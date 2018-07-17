@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef HELICS_SUPPORT_HEADER_
-#define HELICS_SUPPORT_HEADER_
-
+#pragma once
 
 #include "helics/helics.hpp"
 #include "../griddyn/gridDynDefinitions.hpp"
@@ -34,4 +31,3 @@ std::future<int> runRecorder(const std::string &cmd_args);
 
 }// namespace helicsLib
 } // namespace griddyn
-#endif

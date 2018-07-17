@@ -25,7 +25,7 @@ namespace helicsLib
 
 class helicsCoordinator;
 
-
+/** class defining a Griddyn coordinator to communicate through HELICS*/
 class helicsCommunicator
   : public griddyn::Communicator
     
@@ -33,8 +33,8 @@ class helicsCommunicator
 public:
 
     helicsCommunicator() = default;
-  helicsCommunicator (std::string name);
-  helicsCommunicator (std::string m_name, std::uint64_t id);
+  explicit helicsCommunicator (const std::string &name);
+  helicsCommunicator (const std::string &m_name, std::uint64_t id);
 
   virtual ~helicsCommunicator() = default;
 

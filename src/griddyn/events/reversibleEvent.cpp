@@ -31,8 +31,6 @@ reversibleEvent::reversibleEvent(const EventInfo &gdEI, coreObject *rootObject):
 	ggrab = createGrabber(field, m_obj);
 	ggrab->outputUnits = unitType;
 	canUndo = ggrab->loaded;
-
-	
 }
 
 void reversibleEvent::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
@@ -63,7 +61,7 @@ void reversibleEvent::cloneTo(Event *gE) const
 	nE->ggrab = createGrabber(field, m_obj);
 	nE->ggrab->outputUnits = ggrab->outputUnits;
 	nE->canUndo = canUndo;
-	
+
 }
 
 
@@ -97,7 +95,7 @@ change_code reversibleEvent::trigger()
     {
         return Event::trigger();
     }
-	
+
 }
 
 change_code reversibleEvent::trigger(coreTime time)
@@ -130,11 +128,7 @@ change_code reversibleEvent::trigger(coreTime time)
         }
         return ret;
     }
-    else
-    {
-        return Event::trigger(time);
-    }
-	
+    return Event::trigger(time);
 }
 
 bool reversibleEvent::setTarget(coreObject *gdo, const std::string &var)
@@ -177,7 +171,7 @@ change_code reversibleEvent::undo()
 		setValue(undoValue);
 		hasUndo = false;
 		return Event::trigger();
-		
+
 	}
 	return change_code::not_triggered;
 }

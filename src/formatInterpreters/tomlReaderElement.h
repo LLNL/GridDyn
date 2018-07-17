@@ -9,7 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
 #pragma once
 
 #include "readerElement.h"

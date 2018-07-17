@@ -41,7 +41,7 @@ do
 done
 
 if [[ "$RUN_CACHEGRIND" == "true" ]]; then
-    valgrind --track-origins=yes --tool=cachegrind src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    valgrind --track-origins=yes --tool=cachegrind src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
 fi
 
 if [[ "$NO_CTEST" == "true" ]]; then
@@ -51,7 +51,7 @@ if [[ "$NO_CTEST" == "true" ]]; then
     fi
 
     # LSan doesn't like being run under CTest; running a single dynamics case instead of hardcoding commands for all unit tests
-    # ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+    # ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
 else
     # Include quicktest, nightlytest, or releasetest in the branch name to run a particular set of tests
     export CTEST_OUTPUT_ON_FAILURE=true
@@ -94,7 +94,7 @@ else
 
     if [[ "$RUN_VALGRIND" == "true" ]]; then
         echo "Running Valgrind tests"
-        valgrind --track-origins=yes --leak-check=full --tool=memcheck src/gridDynMain/griddynMain ../examples/179busDynamicTest.xml
+        valgrind --track-origins=yes --leak-check=full --tool=memcheck src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
         ctest -T memcheck -L Valgrind --verbose && cat Testing/Temporary/MemoryChecker.1.log
     fi
 

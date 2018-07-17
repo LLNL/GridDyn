@@ -48,7 +48,8 @@ ExternalProject_Add(suitesparse
 
 
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
-
+	
+  if (NOT BUILD_DEBUG_ONLY)
 	message(STATUS "Configuring SuiteSparse Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
@@ -62,6 +63,7 @@ ExternalProject_Add(suitesparse
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build_release.log
         )
+endif()
 	
 if (NOT BUILD_RELEASE_ONLY)	
 	message(STATUS "Configuring SuiteSparse Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_debug.log")

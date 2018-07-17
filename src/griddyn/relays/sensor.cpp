@@ -69,7 +69,7 @@ coreObject *sensor::clone (coreObject *obj) const
 				{
 					nobj->dataSources[kk] = dataSources[kk]->clone();
 				}
-                
+
             }
             else
             {
@@ -102,7 +102,7 @@ coreObject *sensor::clone (coreObject *obj) const
             }
             else
             {
-                nobj->outGrabbers.push_back (outGrabbers[kk]->clone ()); 
+                nobj->outGrabbers.push_back (outGrabbers[kk]->clone ());
             }
 			nobj->outGrabbers[kk]->updateObject(nobj);
         }
@@ -161,7 +161,7 @@ void sensor::add (std::shared_ptr<grabberSet> dGr)
 		}
 		dataSources[cnum] = std::move(dGr);
 	}
-    
+
 }
 
 void sensor::add (std::shared_ptr<gridGrabber> dGr)
@@ -233,7 +233,7 @@ void sensor::set (const std::string &param, const std::string &val)
             if (num >= 0)
             {
 				ensureSizeAtLeast(outputStrings, num + sp.size());
-                
+
                 for (auto &istr : sp)
                 {
 					outputStrings[num] = { getTailString(istr, ':') };
@@ -251,7 +251,7 @@ void sensor::set (const std::string &param, const std::string &val)
 			m_outputSize = static_cast<count_t>(outputStrings.size());
         }
 		m_inputSize = static_cast<count_t>(inputStrings.size());
-		
+
     }
     else if (param == "condition")
     {
@@ -299,7 +299,7 @@ void sensor::set (const std::string &param, const std::string &val)
     {
 		setupOutput(num, val);
 
-        
+
     }
     else if ((iparam == "blockinput") || (iparam == "process"))
     {
@@ -421,18 +421,15 @@ void sensor::set (const std::string &param, double val, gridUnits::units_t unitT
         {
             throw (invalidParameterValue (param));
         }
+        if (num < 0)
+        {
+            outputs.push_back (static_cast<int> (val));
+        }
         else
         {
-            if (num < 0)
+            if (num < static_cast<int> (outputs.size ()))
             {
-                outputs.push_back (static_cast<int> (val));
-            }
-            else
-            {
-                if (num < static_cast<int> (outputs.size ()))
-                {
-                    outputs[num] = static_cast<int> (val);
-                }
+                outputs[num] = static_cast<int> (val);
             }
         }
     }
@@ -444,21 +441,17 @@ void sensor::set (const std::string &param, double val, gridUnits::units_t unitT
 
 double sensor::get (const std::string &param, gridUnits::units_t unitType) const
 {
-	index_t ind = lookupOutputIndex(param);
-	if (ind != kNullLocation)
-	{
-		return getOutput(ind);
-	}
-    
-        if (param == "terminal")
-        {
-            return static_cast<double> (m_terminal);
-        }
-        else
-        {
-            return Relay::get (param, unitType);
-        }
+    index_t ind = lookupOutputIndex(param);
+    if (ind != kNullLocation)
+    {
+        return getOutput(ind);
+    }
 
+    if (param == "terminal")
+    {
+        return static_cast<double> (m_terminal);
+    }
+    return Relay::get (param, unitType);
 }
 
 void sensor::updateObject (coreObject *obj, object_update_mode mode)
@@ -518,7 +511,7 @@ void sensor::generateInputGrabbers ()
 
         dataSources[ii] = std::make_shared<grabberSet> (istr, target_obj, opFlags[sampled_only]);
     }
-	
+
 }
 using cm = comms::controlMessagePayload;
 void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
@@ -576,9 +569,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
     case cm::CANCEL_FAIL:
     case cm::CANCEL_SUCCESS:
     case cm::GET_RESULT_MULTIPLE:
-        break;
     case cm::CANCEL:
-
         break;
     case controlMessagePayload::GET_MULTIPLE:
     {
@@ -667,7 +658,7 @@ double sensor::getInput (const stateData &sD, const solverMode &sMode, index_t i
 
 void sensor::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-    
+
     if (dynamic_cast<Link *> (m_sourceObject)!=nullptr)
     {
         opFlags.set (link_type_source);
@@ -752,7 +743,7 @@ void sensor::dynObjectInitializeB (const IOdata & inputs,
                 outGrabbers.push_back (nullptr);
             }
         }
-		
+
     }
 	//do a verification check on the output codes
 	int blkcnt = 0;
@@ -772,7 +763,7 @@ void sensor::dynObjectInitializeB (const IOdata & inputs,
 				{
 					outputs[kk] = 0;
 				}
-				
+
 			}
 			++blkcnt;
 			break;
@@ -819,7 +810,7 @@ void sensor::dynObjectInitializeB (const IOdata & inputs,
 
 	//generate the output
 	fieldSet = getOutputs(inputs, emptyStateData, cLocalSolverMode);
-	
+
 }
 
 void sensor::updateA (coreTime time)
@@ -968,7 +959,7 @@ IOdata sensor::getOutputs (const IOdata &inputs, const stateData &sD, const solv
 double
 sensor::getOutput (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode, index_t outNum) const
 {
-    
+
 	if (!isValidIndex(outNum,outputMode))
     {
         return kNullVal;

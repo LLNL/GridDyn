@@ -854,10 +854,7 @@ void loadState (gridDynSimulation *gds, const std::string &fileName, const solve
             gds->log (gds, print_level::error, "no state file specified");
             throw (invalidFileName ());
         }
-        else
-        {
-            filePath = boost::filesystem::path (stateFile);
-        }
+        filePath = boost::filesystem::path (stateFile);
     }
 
     if (!boost::filesystem::exists (filePath))

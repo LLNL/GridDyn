@@ -37,10 +37,7 @@ solverKey gridDynSimulation_getSolverKey (gridDynSimReference sim, const char *s
 void gridDynSolverKey_free (solverKey key)
 {
     auto skey = reinterpret_cast<const solverKeyInfo *> (key);
-    if (skey != nullptr)
-    {
-        delete skey;
-    }
+    delete skey;
 }
 
 griddyn_status gridDynSimulation_busCount (gridDynSimReference sim)

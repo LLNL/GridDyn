@@ -47,6 +47,7 @@ if (NOT BUILD_RELEASE_ONLY)
         )
 endif()
 	
+if (NOT BUILD_DEBUG_ONLY)
 message(STATUS "Configuring zlib Autobuild for release: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log")	
 execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
         -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
@@ -59,5 +60,5 @@ execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_build_release.log
         )
-
+endif()
 endfunction()

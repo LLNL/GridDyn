@@ -17,7 +17,7 @@
 
 #include <array>
 /**the co-simulation functions need an array of the derivative order, which for the primary function calls
-will be all identical, so there was no need to have to reconstruct this every time so this function just builds 
+will be all identical, so there was no need to have to reconstruct this every time so this function just builds
 a common case to handle a large majority of cases without any additional copying or allocation
 */
 auto makeDerivOrderBlocks()
@@ -66,7 +66,7 @@ void fmi2CoSimObject::doStep(fmi2Real currentCommunicationPoint, fmi2Real commun
 		{
 			handleNonOKReturnValues(ret);
 		}
-		
+
 	}
 	else
 	{
@@ -95,44 +95,36 @@ fmi2Real fmi2CoSimObject::getLastStepTime() const
 
 bool fmi2CoSimObject::isPending()
 {
-	if (stepPending)
-	{
-		fmi2Status status;
-		auto ret = CoSimFunctions->fmi2GetStatus(comp, fmi2StatusKind::fmi2DoStepStatus, &status);
-		if (ret != fmi2Status::fmi2OK)
-		{
-			handleNonOKReturnValues(ret);
-		}
-		if (status == fmi2Status::fmi2Pending)
-		{
-			return true;
-		}
-		else
-		{
-			stepPending = false;
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+    if (!stepPending)
+    {
+        return false;
+    }
+
+    fmi2Status status;
+    auto ret = CoSimFunctions->fmi2GetStatus(comp, fmi2StatusKind::fmi2DoStepStatus, &status);
+    if (ret != fmi2Status::fmi2OK)
+    {
+        handleNonOKReturnValues(ret);
+    }
+    if (status != fmi2Status::fmi2Pending)
+    {
+        stepPending = false;
+        return false;
+    }
+    return true;
 }
 
 std::string fmi2CoSimObject::getStatus() const
 {
-	if (stepPending)
-	{
-		fmi2String s;
-		auto ret = CoSimFunctions->fmi2GetStringStatus(comp, fmi2StatusKind::fmi2PendingStatus, &s);
-		if (ret != fmi2Status::fmi2OK)
-		{
-			handleNonOKReturnValues(ret);
-		}
-		return std::string(s);
-	}
-	else
-	{
-		return "";
-	}
+    if (stepPending)
+    {
+        fmi2String s;
+        auto ret = CoSimFunctions->fmi2GetStringStatus(comp, fmi2StatusKind::fmi2PendingStatus, &s);
+        if (ret != fmi2Status::fmi2OK)
+        {
+            handleNonOKReturnValues(ret);
+        }
+        return std::string(s);
+    }
+    return "";
 }

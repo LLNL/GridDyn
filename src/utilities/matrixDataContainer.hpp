@@ -30,7 +30,7 @@ class matrixDataContainer : public matrixData<ValueT>
     matrixDataContainer () noexcept = default;
     /** @brief constructor
     */
-    explicit matrixDataContainer (matrixData<ValueT> &input) { setArray (&input); };
+    explicit matrixDataContainer (matrixData<ValueT> &input) { matrixDataContainer::setArray (&input); };
     void clear () override { md->clear (); };
     void assign (index_t row, index_t col, ValueT num) override = 0;
 

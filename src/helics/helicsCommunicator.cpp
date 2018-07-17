@@ -25,14 +25,14 @@ namespace helicsLib
 {
  
 
-helicsCommunicator::helicsCommunicator (std::string id)
+helicsCommunicator::helicsCommunicator (const std::string &id)
   : Communicator (id)
    
 {
 
 }
 
-helicsCommunicator::helicsCommunicator (std::string name, std::uint64_t id)  : Communicator (name,id)                                                                   
+helicsCommunicator::helicsCommunicator (const std::string &name, std::uint64_t id)  : Communicator (name,id)                                                                   
 {
   
 }

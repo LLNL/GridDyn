@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef HELICS_LIBRARY_HEADER_
-#define HELICS_LIBRARY_HEADER_
-
+#pragma once
 namespace griddyn
 {
 
@@ -23,6 +20,3 @@ void loadHELICSLibrary();
 void loadHelicsReaderInfoDefinitions(readerInfo &ri);
 
 } // namespace griddyn
-
-
-#endif

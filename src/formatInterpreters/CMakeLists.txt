@@ -18,6 +18,7 @@ tinyxmlReaderElement.h
 readerElement.h
 tomlElement.h
 tomlReaderElement.h
+iniReaderElement.h
 )
 
 set (elementReader_files
@@ -28,6 +29,7 @@ tinyxmlReaderElement.cpp
 readerElement.cpp
 tomlElement.cpp
 tomlReaderElement.cpp
+iniReaderElement.cpp
 ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
 

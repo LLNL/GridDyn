@@ -163,16 +163,15 @@ static const std::string valueString ("value");
 
 gridParameter getElementParam(const std::shared_ptr<readerElement> &element)
 {
-	gridParameter P;
-	getElementParam(element, P);
-	return P;
+    gridParameter P;
+    getElementParam(element, P);
+    return P;
 }
 
 void getElementParam (const std::shared_ptr<readerElement> &element, gridParameter &param)
 {
-
-		param.paramUnits = gridUnits::defUnit;
-		param.valid = false;
+    param.paramUnits = gridUnits::defUnit;
+    param.valid = false;
     std::string fieldName = convertToLowerCase (element->getName ());
 
     if (fieldName == "param")
@@ -185,10 +184,10 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
         if (pname.empty ())
         {
             // no name or field attribute so just read the string and see if we can process it
-			param.fromString (element->getText ());
-			return;
+            param.fromString (element->getText ());
+            return;
         }
-		param.paramUnits = readUnits (element, pname);
+        param.paramUnits = readUnits (element, pname);
         if (pname.back () == ')')
         {
             auto p = pname.find_last_of ('(');
@@ -197,36 +196,36 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
                 pname.erase (p);
             }
         }
-		param.field = convertToLowerCase (pname);
+        param.field = convertToLowerCase (pname);
         if (element->hasAttribute (valueString))
         {
-			param.value = element->getAttributeValue (valueString);
+            param.value = element->getAttributeValue (valueString);
             if (param.value == readerNullVal)
             {
-				checkForEndUnits(param, element->getAttributeText(valueString));
+                checkForEndUnits(param, element->getAttributeText(valueString));
             }
             else
             {
-				param.stringType = false;
+                param.stringType = false;
             }
         }
         else
         {
-			param.value = element->getValue ();
+            param.value = element->getValue ();
             if (param.value == readerNullVal)
             {
-				checkForEndUnits(param, element->getText());
+                checkForEndUnits(param, element->getText());
             }
             else
             {
-				param.stringType = false;
+                param.stringType = false;
             }
         }
     }
     // all other properties
     else
     {
-		param.paramUnits = readUnits (element, fieldName);
+        param.paramUnits = readUnits (element, fieldName);
         if (fieldName.back () == ')')
         {
             auto p = fieldName.find_last_of ('(');
@@ -235,38 +234,38 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
                 fieldName.erase (p);
             }
         }
-		param.field = fieldName;
-		param.value = element->getValue ();
+        param.field = fieldName;
+        param.value = element->getValue ();
         if (param.value == readerNullVal)
         {
-			checkForEndUnits(param, element->getText());
+            checkForEndUnits(param, element->getText());
         }
         else
         {
-			param.stringType = false;
+            param.stringType = false;
         }
     }
-	param.valid = true;
+    param.valid = true;
 }
 
 void checkForEndUnits(gridParameter &param, const std::string &paramStr)
 {
-	double val = numeric_conversion(paramStr, readerNullVal);
-	if (val != readerNullVal)
-	{
-		auto N = paramStr.find_last_of("012345689. )]");
-		auto Unit = gridUnits::getUnits(paramStr.substr(N + 1));
-		if (Unit != gridUnits::defUnit)
-		{
-			param.value = val;
-			param.paramUnits = Unit;
-			param.stringType = false;
-			return;
-		}
+    double val = numeric_conversion(paramStr, readerNullVal);
+    if (val != readerNullVal)
+    {
+        auto N = paramStr.find_last_of("012345689. )]");
+        auto Unit = gridUnits::getUnits(paramStr.substr(N + 1));
+        if (Unit != gridUnits::defUnit)
+        {
+            param.value = val;
+            param.paramUnits = Unit;
+            param.stringType = false;
+            return;
+        }
 
-	}
-	param.strVal = paramStr;
-	param.stringType = true;
+    }
+    param.strVal = paramStr;
+    param.stringType = true;
 }
 
 static const IgnoreListType keywords{"type",      "ref",      "number",        "index",   "retype",
@@ -297,7 +296,7 @@ void objSetAttributes (coreObject *obj,
             {
                 std::string ustring = fieldName.substr (p + 1, fieldName.length () - 2 - p);
                 unitType = gridUnits::getUnits (ustring);
-				fieldName = fieldName.substr (0, p - 1);
+                fieldName = fieldName.substr (0, p - 1);
             }
         }
         auto ifind = keywords.find (fieldName);
@@ -331,7 +330,7 @@ void objSetAttributes (coreObject *obj,
         {
                 try
                 {
-					setMultipleFlags(obj, att.getText());
+                    setMultipleFlags(obj, att.getText());
                 }
                 catch (const unrecognizedParameter &)
                 {
@@ -487,19 +486,19 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & 
             {
                 readerConfig::setDefaultXMLReader (sim->getText ());
             }
-			else if ((fieldName == "seed"))
-			{
-				try
-				{
-					auto seed = std::stoll(cfgAtt.getText());
-					utilities::gridRandom::setSeed(seed);
-				}
-				catch (const std::invalid_argument &)
-				{
-					WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
-				}
+            else if ((fieldName == "seed"))
+            {
+                try
+                {
+                    auto seed = std::stoll(cfgAtt.getText());
+                    utilities::gridRandom::setSeed(seed);
+                }
+                catch (const std::invalid_argument &)
+                {
+                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                }
 
-			}
+            }
             sim->moveToNextSibling ();
         }
 
