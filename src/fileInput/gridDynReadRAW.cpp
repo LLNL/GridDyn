@@ -12,13 +12,13 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
+#include "fileInput.h"
 #include "griddyn/Generator.h"
+#include "griddyn/Load.h"
 #include "griddyn/gridBus.h"
 #include "griddyn/gridDynSimulation.h"
-#include "fileInput.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
-#include "griddyn/Load.h"
 #include "griddyn/loads/svd.h"
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
@@ -225,12 +225,12 @@ void loadRAW (coreObject *parentObject, const std::string &fileName, const basic
                 busList[index]->setUserID (index);
 
                 rawReadBus (busList[index], line, opt);
-                auto tobj = parentObject->find(busList[index]->getName());
-                if (tobj==nullptr)
+                auto tobj = parentObject->find (busList[index]->getName ());
+                if (tobj == nullptr)
                 {
                     parentObject->add (busList[index]);
                 }
-				            else
+                else
                 {
                     auto prevName = busList[index]->getName ();
                     busList[index]->setName (prevName + '_' +
@@ -481,7 +481,7 @@ static const std::map<std::string, sections> sectionNames{
   {"BEGIN AREA INTERCHANGE DATA", unknown},
   {"BEGIN TWO-TERMINAL DC LINE DATA", unknown},
   {"BEGIN TRANSFORMER IMPEDANCE CORRECTION DATA", unknown},
-  { "BEGIN IMPEDANCE CORRECTION DATA", unknown },
+  {"BEGIN IMPEDANCE CORRECTION DATA", unknown},
   {"BEGIN MULTI-TERMINAL DC LINE DATA", unknown},
   {"BEGIN MULTI-SECTION LINE GROUP DATA", unknown},
   {"BEGIN ZONE DATA", unknown},
@@ -495,7 +495,6 @@ static const std::map<std::string, sections> sectionNames{
   {"BEGIN TRANSFORMER DATA", tx},
 };
 
-
 sections findSectionType (const std::string &line)
 {
     for (auto &sname : sectionNames)
@@ -505,12 +504,12 @@ sections findSectionType (const std::string &line)
         {
             return sname.second;
         }
-		auto l2 = convertToUpperCase(line);
-		ts = l2.find(sname.first);
-		if (ts != std::string::npos)
-		{
-			return sname.second;
-		}
+        auto l2 = convertToUpperCase (line);
+        ts = l2.find (sname.first);
+        if (ts != std::string::npos)
+        {
+            return sname.second;
+        }
     }
     return unknown;
 }
@@ -767,11 +766,11 @@ void rawReadGen (Generator *gen, const std::string &line, basicReaderInfo &opt)
             gen->set ("vtarget", V);
             // for raw files the bus doesn't necessarily set a control point it comes from the generator, so we
             // have to set it here.
-			if (!opt.checkFlag(no_generator_bus_voltage_reset))
-			{
-				gen->getParent()->set("vtarget", V);
-				gen->getParent()->set("voltage", V);
-			}
+            if (!opt.checkFlag (no_generator_bus_voltage_reset))
+            {
+                gen->getParent ()->set ("vtarget", V);
+                gen->getParent ()->set ("voltage", V);
+            }
         }
         else
         {
@@ -795,13 +794,13 @@ void rawReadGen (Generator *gen, const std::string &line, basicReaderInfo &opt)
     auto x = numeric_conversion<double> (strvec[10], 0.0);
     gen->set ("xs", x);
 
-    if (!opt.checkFlag(ignore_step_up_transformer))
+    if (!opt.checkFlag (ignore_step_up_transformer))
     {
         r = numeric_conversion<double> (strvec[11], 0.0);
         x = numeric_conversion<double> (strvec[12], 0.0);
         if ((r != 0) || (x != 0))  // need to add a step up transformer
         {
-            auto oBus = static_cast<gridBus *> (gen->find("bus"));
+            auto oBus = static_cast<gridBus *> (gen->find ("bus"));
             gridBus *nBus = busfactory->makeTypeObject ();
             auto lnk =
               new acLine (r * opt.base / mb,
@@ -1190,7 +1189,7 @@ int rawReadTX (coreObject *parentObject, stringVec &txlines, std::vector<gridBus
     std::string name;
     int ind1, ind2;
     std::tie (name, ind1, ind2) =
-      generateBranchName (strvec, busList, (opt.prefix.empty ()) ? "tx_" : opt.prefix + "_tx_",3);
+      generateBranchName (strvec, busList, (opt.prefix.empty ()) ? "tx_" : opt.prefix + "_tx_", 3);
 
     int ind3 = std::stoi (strvec[2]);
     int tline = 4;
@@ -1377,27 +1376,27 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     int shift = 0;
     if (opt.version > 32)
     {
-		shift = 2;
+        shift = 2;
     }
-    auto high = numeric_conversion<double> (strvec[2+shift], 0.0);
-    auto low = numeric_conversion<double> (strvec[3+shift], 0.0);
+    auto high = numeric_conversion<double> (strvec[2 + shift], 0.0);
+    auto low = numeric_conversion<double> (strvec[3 + shift], 0.0);
     // get the controlled bus
-    auto cbus = numeric_conversion<int> (strvec[4+shift], -1);
+    auto cbus = numeric_conversion<int> (strvec[4 + shift], -1);
 
     if (cbus < 0)
     {
-        trimString (strvec[4+shift]);
-        if (strvec[4+shift] == "I")
+        trimString (strvec[4 + shift]);
+        if (strvec[4 + shift] == "I")
         {
             cbus = index;
         }
-        else if (strvec[4+shift].empty ())
+        else if (strvec[4 + shift].empty ())
         {
             cbus = index;
         }
         else
         {
-            rbus = static_cast<gridBus *> (parentObject->find (strvec[4+shift]));
+            rbus = static_cast<gridBus *> (parentObject->find (strvec[4 + shift]));
             if (rbus != nullptr)
             {
                 cbus = rbus->getUserID ();
@@ -1427,7 +1426,7 @@ void rawReadSwitchedShunt (coreObject *parentObject,
             ld->setControlBus (rbus);
         }
 
-        temp = numeric_conversion<double> (strvec[5+shift], 0.0);
+        temp = numeric_conversion<double> (strvec[5 + shift], 0.0);
         if (temp > 0)
         {
             ld->set ("participation", temp / 100.0);
@@ -1441,7 +1440,7 @@ void rawReadSwitchedShunt (coreObject *parentObject,
         {
             ld->setControlBus (rbus);
         }
-        temp = numeric_conversion<double> (strvec[5+shift], 0.0);
+        temp = numeric_conversion<double> (strvec[5 + shift], 0.0);
         if (temp > 0)
         {
             ld->set ("participation", temp / 100.0);

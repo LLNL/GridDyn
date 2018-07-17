@@ -87,7 +87,7 @@ bool iniReaderElement::hasAttribute (const std::string &attributeName) const
 
 bool iniReaderElement::hasElement (const std::string &elementName) const
 {
-    if (!currentSection.empty())
+    if (!currentSection.empty ())
     {
         return false;
     }
@@ -232,21 +232,21 @@ void iniReaderElement::moveToNextSibling ()
     {
         return;
     }
-	if (currentSection.empty())
-	{
+    if (currentSection.empty ())
+    {
         currentSection = ';';
         return;
-	}
+    }
     ++sectionIndex;
     iteratorIndex = 0;
     auto &secs = doc->Sections ();
-	if (sectionIndex >= static_cast<int>(secs.size()))
-	{
+    if (sectionIndex >= static_cast<int> (secs.size ()))
+    {
         currentSection = ';';
         return;
-	}
+    }
     int ccnt = 0;
-   
+
     auto csec = secs.begin ();
     while (ccnt < sectionIndex)
     {
@@ -267,16 +267,17 @@ void iniReaderElement::moveToNextSibling (const std::string &siblingName)
     {
         return;
     }
-	if (currentSection.find(siblingName) != 0)
-	{
+    if (currentSection.find (siblingName) != 0)
+    {
         currentSection = ';';
         return;
-	}
+    }
 }
 
-void iniReaderElement::moveToParent () { 
-	currentSection = ""; 
-sectionIndex = 0;
+void iniReaderElement::moveToParent ()
+{
+    currentSection = "";
+    sectionIndex = 0;
     iteratorIndex = 0;
 }
 
@@ -294,7 +295,7 @@ std::shared_ptr<readerElement> iniReaderElement::nextSibling (const std::string 
     return newElement;
 }
 
-void iniReaderElement::bookmark () { bookmarks.emplace_back (currentSection,sectionIndex); }
+void iniReaderElement::bookmark () { bookmarks.emplace_back (currentSection, sectionIndex); }
 
 void iniReaderElement::restore ()
 {

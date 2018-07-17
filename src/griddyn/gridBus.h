@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -17,7 +17,6 @@
 
 namespace griddyn
 {
-
 // forward classes
 class Link;
 class Load;
@@ -35,20 +34,20 @@ class busPowers
   public:
     double linkP = 0.0;  //!< [puMW]    reactive power coming from Links
     double loadP = 0.0;  //!< [puMW] real power coming from the loads
-	double genP = 0.0;  //!< [puMW] real power from the generators
+    double genP = 0.0;  //!< [puMW] real power from the generators
 
-	double linkQ = 0.0;  //!< [pu]    reactive power coming from Links
+    double linkQ = 0.0;  //!< [pu]    reactive power coming from Links
     double loadQ = 0.0;  //!< [puMW]  reactive  power coming from Loads
     double genQ = 0.0;  //!< [puMW]  reactive power from the generators
     index_t seqID = 0;  //!< the sequence id of the latest state from which the powers are computed
     busPowers () {}
-	/**reset all the powers to 0*/
+    /**reset all the powers to 0*/
     void reset ();
-	/** check if the busPowers needs an update based on the stateData*/
+    /** check if the busPowers needs an update based on the stateData*/
     bool needsUpdate (const stateData &sD) const;
-	/** calculate the real power inbalance*/
+    /** calculate the real power inbalance*/
     double sumP () const { return (linkP + loadP + genP); }
-	/** calculate the reactive power inbalance*/
+    /** calculate the reactive power inbalance*/
     double sumQ () const { return (linkQ + loadQ + genQ); }
 };
 
@@ -67,46 +66,47 @@ class gridBus : public gridPrimary
     static const int low_voltage_check_flag = object_flag1;
     // afix is a fixed angle bus for power flow
     /* @brief enumeration to define potential busTypes for power flow*/
-    enum class busType:char
+    enum class busType : char
     {
         PQ = 0,  //!< a bus that defines the real and reactive power calculates V and theta
-        afix = 1,	//!< a bus that defines the angle and reactive power calculates V and P
-        PV = 2,	//!< a bus that defines P and V computes Q and angle  
-        SLK = 3	//!< a bus that defines V and theta and computes P & Q
+        afix = 1,  //!< a bus that defines the angle and reactive power calculates V and P
+        PV = 2,  //!< a bus that defines P and V computes Q and angle
+        SLK = 3  //!< a bus that defines V and theta and computes P & Q
     };
     /* @brief enumeration to define potential busTypes for dynamic calculations*/
-    enum class dynBusType:char
+    enum class dynBusType : char
     {
         normal = 0,  //!< a bus that computes V and theta
-        fixAngle = 1,	//!< a bus that computes V and has a fixed theta 
-        fixVoltage = 2,	//!< a bus that has a known voltage and computes theta
-        dynSLK = 3	//!< a dynamic bus that knows both V and theta
+        fixAngle = 1,  //!< a bus that computes V and has a fixed theta
+        fixVoltage = 2,  //!< a bus that has a known voltage and computes theta
+        dynSLK = 3  //!< a dynamic bus that knows both V and theta
     };
-	//network is left as a public parameter since it has no impact on the calculations but is useful for other object to define easily
+    // network is left as a public parameter since it has no impact on the calculations but is useful for other
+    // object to define easily
     int32_t Network = 0;  //!<  the network a bus belongs to for labeling purposes
   protected:
-	  busType type = busType::PQ;  //!< [busType] bus type: PV, PQ, or slack/swing
-	  dynBusType dynType = dynBusType::normal;  //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types
-												//!as for power flow but for dynamic simulations
-	  //2 byte gap here
-	  double angle = 0.0;  //!< [rad]     voltage angle
-	  double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
-	  double freq = 1.0;  //!<[puHz] estimated actual frequency
-	  busPowers S;  //!< storage for the power computation from the various sources;
-	  objVector<Generator *> attachedGens;  //!< list of the attached generators
-	 objVector<Load *> attachedLoads;  //!<  list of all the loads
+    busType type = busType::PQ;  //!< [busType] bus type: PV, PQ, or slack/swing
+    dynBusType dynType = dynBusType::normal;  //!< dynamic bus type normal, fixAngle, fixVoltage, dynSLK same types
+                                              //! as for power flow but for dynamic simulations
+    // 2 byte gap here
+    double angle = 0.0;  //!< [rad]     voltage angle
+    double voltage = 1.0;  //!< [puV]    per unit voltage magnitude
+    double freq = 1.0;  //!<[puHz] estimated actual frequency
+    busPowers S;  //!< storage for the power computation from the various sources;
+    objVector<Generator *> attachedGens;  //!< list of the attached generators
+    objVector<Load *> attachedLoads;  //!<  list of all the loads
     objVector<Link *> attachedLinks;  //!< list of the attached links
-    
-	IOdata outputs;  //!< the current output values
-	IOlocs outLocs;  //!< the current output locations
-  
+
+    IOdata outputs;  //!< the current output values
+    IOlocs outLocs;  //!< the current output locations
+
     parameter_t localBaseVoltage = 120;  //!< [kV]    base voltage level
-    
+
     parameter_t Vtol = -1.0;  //!<[pu] voltage tolerance value <0 implies automatic setting from global levels
     parameter_t Atol = -1.0;  //!<[rad] angle tolerance  value <0 implies automatic setting from global levels
-    
+
     coreTime lowVtime = negTime;  //!< the last time a low voltage alert was triggered
-   
+
   public:
     /** @brief default constructor*/
     explicit gridBus (const std::string &objName = "bus_$");
@@ -115,7 +115,6 @@ class gridBus : public gridPrimary
     @param[in] angleStart the initial angle
     */
     gridBus (double voltageStart, double angleStart, const std::string &objName = "bus_$");
-
 
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
     // add components
@@ -136,7 +135,7 @@ class gridBus : public gridPrimary
     /** @brief  remove a Link object*/
     virtual void remove (Link *lnk);
     // deal with control alerts
-    virtual void alert(coreObject *obj, int code) override;
+    virtual void alert (coreObject *obj, int code) override;
 
     // dynInitializeB
   protected:
@@ -195,12 +194,12 @@ class gridBus : public gridPrimary
                                   double update[],
                                   const solverMode &sMode,
                                   double alpha) override;
-	/** do an update on the voltage similar to the algebraic update function but only looking at voltage
-	@param[in] sD the state data to update
-	@param[out] update the location to place the computed update
-	@param[in] sMode the solverMode associated with the state data
-	@param[in] alpha the scale associated with the update
-	*/
+    /** do an update on the voltage similar to the algebraic update function but only looking at voltage
+    @param[in] sD the state data to update
+    @param[out] update the location to place the computed update
+    @param[in] sMode the solverMode associated with the state data
+    @param[in] alpha the scale associated with the update
+    */
     virtual void voltageUpdate (const stateData &sD, double update[], const solverMode &sMode, double alpha);
 
     virtual void converge (coreTime time,
@@ -218,7 +217,6 @@ class gridBus : public gridPrimary
 
   public:
     void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
-
 
     /** @brief a faster function to set the voltage and angle of a bus*
     @param[in] Vnew  the new voltage
@@ -298,30 +296,29 @@ class gridBus : public gridPrimary
      * @return the bus real generation
      **/
     double getGenerationReal () const { return S.genP; }
-	/** @brief get the bus real generation as listed by the generators
-	@details this only makes a difference for buses which do some automatic calculations in the power flow
-	* @return the bus real generation
-	**/
-	double getGenerationRealNominal() const;
+    /** @brief get the bus real generation as listed by the generators
+    @details this only makes a difference for buses which do some automatic calculations in the power flow
+    * @return the bus real generation
+    **/
+    double getGenerationRealNominal () const;
     /** @brief get the bus reactive generation
      * @return the bus reactive generation
      **/
     double getGenerationReactive () const { return S.genQ; }
-	/** @brief get the bus reactive generation as listed by the generators
-	@details this only makes a difference for buses which do some automatic calculations in the power flow
-	* @return the bus real generation
-	**/
-	double getGenerationReactiveNominal() const;
+    /** @brief get the bus reactive generation as listed by the generators
+    @details this only makes a difference for buses which do some automatic calculations in the power flow
+    * @return the bus real generation
+    **/
+    double getGenerationReactiveNominal () const;
 
-	/** @brief get the maximumreal power generation
-	* @return the maximum real power generation
-	**/
+    /** @brief get the maximumreal power generation
+     * @return the maximum real power generation
+     **/
     virtual double getMaxGenReal () const { return kBigNum; }
     /** @brief get the maximum reactive power generation
      * @return the maximum reactive power generation
      **/
     virtual double getMaxGenReactive () const { return kBigNum; }
-	
 
     double getLoadReal () const { return S.loadP; }
     /** @brief get the reactive power Load
@@ -385,7 +382,7 @@ class gridBus : public gridPrimary
                               const solverMode &sMode,
                               index_t outNum = 0) const override;
 
-	virtual double getOutput(index_t outNum = 0) const override;
+    virtual double getOutput (index_t outNum = 0) const override;
 
     /** @brief get the voltage
     * @param[in] state the system state
@@ -427,7 +424,6 @@ class gridBus : public gridPrimary
     virtual change_code
     rootCheck (const IOdata &inputs, const stateData &sD, const solverMode &sMode, check_level_t level) override;
 
-
     friend bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink, bool printDiff);
     virtual void updateFlags (bool dynOnly = false) override;
     // for registering and removing power control objects
@@ -449,8 +445,9 @@ class gridBus : public gridPrimary
     /** @brief  remove an object from power control on a bus*/
     virtual void removePowerControl (gridComponent *comp);
 
-	virtual const std::vector<stringVec> &outputNames() const override;
-	gridUnits::units_t outputUnits(index_t outputNum) const override;
+    virtual const std::vector<stringVec> &outputNames () const override;
+    gridUnits::units_t outputUnits (index_t outputNum) const override;
+
   protected:
     /** @brief
     @param[in] sD  the statDdata to compute the Error for
@@ -463,7 +460,6 @@ class gridBus : public gridPrimary
     template <class X>
     friend void addObject (gridBus *bus, X *obj, objVector<X *> &OVector);
 };
-
 
 /** @brief compare 2 buses
   check a number of bus parameters to see if they match, probably not that useful of function any more ,but it was
@@ -485,5 +481,4 @@ bool compareBus (gridBus *bus1, gridBus *bus2, bool cmpLink = false, bool printD
 */
 gridBus *getMatchingBus (gridBus *bus, const gridPrimary *src, gridPrimary *sec);
 
-}//namespace griddyn
-
+}  // namespace griddyn

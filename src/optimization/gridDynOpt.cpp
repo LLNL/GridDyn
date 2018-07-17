@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,36 +11,32 @@
  */
 
 #include "gridDynOpt.h"
-#include "models/gridAreaOpt.h"
-#include "core/objectFactoryTemplates.hpp"
-#include "optObjectFactory.h"
-#include "gridOptObjects.h"
-#include "utilities/stringOps.h"
-#include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
-//system headers
+#include "core/coreObjectTemplates.hpp"
+#include "core/objectFactoryTemplates.hpp"
+#include "gridOptObjects.h"
+#include "models/gridAreaOpt.h"
+#include "optObjectFactory.h"
+#include "utilities/stringOps.h"
+// system headers
 
-
+#include <cmath>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <cmath>
 #include <map>
 
 namespace griddyn
 {
-static typeFactory< gridDynOptimization> gfo ("simulation", stringVec { "optimization", "optim" });
+static typeFactory<gridDynOptimization> gfo ("simulation", stringVec{"optimization", "optim"});
 
 gridDynOptimization::gridDynOptimization (const std::string &simName) : gridDynSimulation (simName)
 {
-  // defaults
-  areaOpt = new gridAreaOpt (this);
+    // defaults
+    areaOpt = new gridAreaOpt (this);
 }
 
-gridDynOptimization::~gridDynOptimization ()
-{
-  delete areaOpt;
-}
+gridDynOptimization::~gridDynOptimization () { delete areaOpt; }
 
 coreObject *gridDynOptimization::clone (coreObject *obj) const
 {
@@ -55,37 +51,35 @@ coreObject *gridDynOptimization::clone (coreObject *obj) const
 
 void gridDynOptimization::setupOptOffsets (const optimMode &oMode, int setupMode)
 {
-
-    if (setupMode == 0)      //no distinction between Voltage, angle, and others
+    if (setupMode == 0)  // no distinction between Voltage, angle, and others
     {
         areaOpt->setOffset (1, 0, oMode);
         return;
     }
     optimOffsets baseOffset;
-    if (setupMode == 1) //use all the distinct categories
+    if (setupMode == 1)  // use all the distinct categories
     {
         baseOffset.setOffset (1);
         baseOffset.constraintOffset = 0;
     }
-    else if (setupMode == 2) //discriminate continuous and discrete objective variables
+    else if (setupMode == 2)  // discriminate continuous and discrete objective variables
     {
         baseOffset.constraintOffset = 0;
         baseOffset.contOffset = 1;
         baseOffset.intOffset = 0;
     }
 
-    //call the area setOffset function to distribute the offsets
+    // call the area setOffset function to distribute the offsets
     areaOpt->setOffsets (baseOffset, oMode);
 }
 
 // --------------- set properties ---------------
-void gridDynOptimization::set (const std::string &param,  const std::string &val)
+void gridDynOptimization::set (const std::string &param, const std::string &val)
 {
-
     if (param == "flags")
     {
         auto v = stringOps::splitline (val);
-        stringOps::trim(v);
+        stringOps::trim (v);
         for (auto &flagstr : v)
         {
             setFlag (flagstr, true);
@@ -93,7 +87,6 @@ void gridDynOptimization::set (const std::string &param,  const std::string &val
     }
     else if ((param == "defaultoptmode") || (param == "defaultopt"))
     {
-
         auto ocf = coreOptObjectFactory::instance ();
         if (ocf->isValidType (val))
         {
@@ -104,10 +97,10 @@ void gridDynOptimization::set (const std::string &param,  const std::string &val
 
     else if (param == "optimization_mode")
     {
-      /*default_solution,
-  dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
-  steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
-        auto temp = convertToLowerCase(val);
+        /*default_solution,
+    dcflow_only, powerflow_only, iterated_powerflow, contingency_powerflow,
+    steppedP, steppedPQ, dynamic, dyanmic_contingency,*/
+        auto temp = convertToLowerCase (val);
         if ((temp == "dcopf") || (temp == "opf"))
         {
             optimization_mode = DCOPF;
@@ -133,16 +126,15 @@ void gridDynOptimization::set (const std::string &param,  const std::string &val
 
 void gridDynOptimization::setFlag (const std::string &flag, bool val)
 {
-
-  //int nval = static_cast<int> (val);
-  /*
-  constraints_disabled = 1,
-  sparse_solver = 2,
-  threads_enabled = 3,
-  ignore_voltage_limits = 4,
-  power_adjust_enabled = 5,
-  dcFlow_initialization = 6,*/
-    if (!flag.empty())
+    // int nval = static_cast<int> (val);
+    /*
+    constraints_disabled = 1,
+    sparse_solver = 2,
+    threads_enabled = 3,
+    ignore_voltage_limits = 4,
+    power_adjust_enabled = 5,
+    dcFlow_initialization = 6,*/
+    if (!flag.empty ())
     {
         gridDynSimulation::setFlag (flag, val);
     }
@@ -152,7 +144,7 @@ void gridDynOptimization::setFlags (size_t param, int val)
 {
     if (param > 32)
     {
-        throw(unrecognizedParameter("flag"+std::to_string(param)));
+        throw (unrecognizedParameter ("flag" + std::to_string (param)));
     }
 
     controlFlags.set (param, (val > 0));
@@ -167,18 +159,17 @@ void gridDynOptimization::set (const std::string &param, double val, gridUnits::
 
     else
     {
-        //out = setFlags (param, val);
+        // out = setFlags (param, val);
         try
         {
-            gridDynSimulation::set(param, val, unitType);
+            gridDynSimulation::set (param, val, unitType);
         }
         catch (const unrecognizedParameter &)
         {
-            setFlag(param, (val > 0.1));
+            setFlag (param, (val > 0.1));
         }
     }
 }
-
 
 double gridDynOptimization::get (const std::string &param, gridUnits::units_t unitType) const
 {
@@ -193,12 +184,12 @@ double gridDynOptimization::get (const std::string &param, gridUnits::units_t un
     }
     else
     {
-        val = gridDynSimulation::get (param,unitType);
+        val = gridDynSimulation::get (param, unitType);
     }
     return val;
 }
 
-coreObject* gridDynOptimization::find (const std::string &objName) const
+coreObject *gridDynOptimization::find (const std::string &objName) const
 {
     if (objName == "optroot")
     {
@@ -214,7 +205,7 @@ coreObject* gridDynOptimization::find (const std::string &objName) const
     }
 }
 
-coreObject* gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
+coreObject *gridDynOptimization::getSubObject (const std::string &typeName, index_t num) const
 {
     if (typeName.substr (0, 3) == "opt")
     {
@@ -225,7 +216,7 @@ coreObject* gridDynOptimization::getSubObject (const std::string &typeName, inde
         return gridDynSimulation::getSubObject (typeName, num);
     }
 }
-coreObject* gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
+coreObject *gridDynOptimization::findByUserID (const std::string &typeName, index_t searchID) const
 {
     if (typeName.substr (0, 3) == "opt")
     {
@@ -237,9 +228,9 @@ coreObject* gridDynOptimization::findByUserID (const std::string &typeName, inde
     }
 }
 
-gridOptObject * gridDynOptimization::getOptData (coreObject *obj)
+gridOptObject *gridDynOptimization::getOptData (coreObject *obj)
 {
-    if (obj!=nullptr)
+    if (obj != nullptr)
     {
         coreObject *nobj = areaOpt->find (obj->getName ());
         if (nobj)
@@ -258,7 +249,7 @@ gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
     {
         return oo;
     }
-    if (!(obj->isRoot()))
+    if (!(obj->isRoot ()))
     {
         auto oop = makeOptObjectPath (obj->getParent ());
         oo = coreOptObjectFactory::instance ()->createObject (obj);
@@ -270,11 +261,10 @@ gridOptObject *gridDynOptimization::makeOptObjectPath (coreObject *obj)
 
 optimizerInterface *gridDynOptimization::updateOptimizer (const optimMode &oMode)
 {
+    oData[oMode.offsetIndex] = makeOptimizer (this, oMode);
+    optimizerInterface *od = oData[oMode.offsetIndex].get ();
 
-  oData[oMode.offsetIndex] = makeOptimizer (this, oMode);
-  optimizerInterface *od = oData[oMode.offsetIndex].get ();
-
-  return od;
+    return od;
 }
 
-}// namespace griddyn
+}  // namespace griddyn

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "optimizerInterface.h"
 #include "core/factoryTemplates.hpp"
@@ -16,14 +16,12 @@
 
 namespace griddyn
 {
+static childClassFactory<basicOptimizer, optimizerInterface> basicFac (stringVec{"basic", "pricestack"});
 
-static childClassFactory<basicOptimizer, optimizerInterface> basicFac(stringVec{ "basic","pricestack" });
+optimizerInterface::optimizerInterface (const std::string &optName) : name (optName) {}
 
-optimizerInterface::optimizerInterface(const std::string &optName):name(optName)
-{
-}
-
-optimizerInterface::optimizerInterface (gridDynOptimization *gdo, const optimMode &oMode) : mode (oMode),m_gdo (gdo)
+optimizerInterface::optimizerInterface (gridDynOptimization *gdo, const optimMode &oMode)
+    : mode (oMode), m_gdo (gdo)
 {
 }
 
@@ -36,14 +34,9 @@ void optimizerInterface::setOptimizationData (gridDynOptimization *gdo, const op
     }
 }
 
-void optimizerInterface::initializeJacArray (count_t /*size*/)
-{
-}
+void optimizerInterface::initializeJacArray (count_t /*size*/) {}
 
-double optimizerInterface::get (const std::string & /*param*/) const
-{
-    return kNullVal;
-}
+double optimizerInterface::get (const std::string & /*param*/) const { return kNullVal; }
 
 int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname, int opt, bool printError)
 {
@@ -52,21 +45,22 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
     {
         if (printError)
         {
-            m_gdo->log (m_gdo,print_level::error, funcname + " failed - returned nullptr pointer");
+            m_gdo->log (m_gdo, print_level::error, funcname + " failed - returned nullptr pointer");
         }
-        return(1);
+        return (1);
     }
     if (opt == 1)
     {
         // Check if flag < 0
-        int* errflag = reinterpret_cast<int *>(flagvalue);
+        int *errflag = reinterpret_cast<int *> (flagvalue);
         if (*errflag < 0)
         {
             if (printError)
             {
-                m_gdo->log (m_gdo, print_level::error, funcname + " failed with flag = " + std::to_string (*errflag));
+                m_gdo->log (m_gdo, print_level::error,
+                            funcname + " failed with flag = " + std::to_string (*errflag));
             }
-            return(1);
+            return (1);
         }
     }
     else if (opt == 2 && flagvalue == nullptr)
@@ -76,16 +70,14 @@ int optimizerInterface::check_flag (void *flagvalue, const std::string &funcname
         {
             m_gdo->log (m_gdo, print_level::error, funcname + " failed MEMORY_ERROR- returned nullptr pointer");
         }
-        return(1);
+        return (1);
     }
     return 0;
 }
 
-basicOptimizer::basicOptimizer(const std::string &optName):optimizerInterface(optName)
-{
-}
+basicOptimizer::basicOptimizer (const std::string &optName) : optimizerInterface (optName) {}
 
-basicOptimizer::basicOptimizer(gridDynOptimization *gdo, const optimMode &oMode) : optimizerInterface(gdo, oMode)
+basicOptimizer::basicOptimizer (gridDynOptimization *gdo, const optimMode &oMode) : optimizerInterface (gdo, oMode)
 {
 }
 
@@ -110,7 +102,7 @@ void basicOptimizer::dynObjectInitializeA (double /*t0*/)
         //  return (-2);
     }
     initialized = true;
-    //return FUNCTION_EXECUTION_SUCCESS;
+    // return FUNCTION_EXECUTION_SUCCESS;
 }
 
 std::shared_ptr<optimizerInterface> makeOptimizer (gridDynOptimization *gdo, const optimMode &oMode)
@@ -130,10 +122,9 @@ std::shared_ptr<optimizerInterface> makeOptimizer (gridDynOptimization *gdo, con
     return od;
 }
 
-
 std::shared_ptr<optimizerInterface> makeOptimizer (const std::string &type)
 {
-    return coreClassFactory<optimizerInterface>::instance()->createObject(type);
+    return coreClassFactory<optimizerInterface>::instance ()->createObject (type);
 }
 
-}// namespace griddyn
+}  // namespace griddyn

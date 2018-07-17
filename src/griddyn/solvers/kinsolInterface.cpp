@@ -40,12 +40,7 @@ namespace griddyn
 namespace solvers
 {
 int kinsolFunc (N_Vector state, N_Vector resid, void *user_data);
-int kinsolJac ( N_Vector state,
-                    N_Vector resid,
-                    SUNMatrix J,
-                    void *user_data,
-                    N_Vector tmp1,
-                    N_Vector tmp2);
+int kinsolJac (N_Vector state, N_Vector resid, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 
 // int kinsolAlgFunc (N_Vector u, N_Vector f, void *user_data);
 // int kinsolAlgJacDense (long int N, N_Vector u, N_Vector f, DlsMat J, void *user_data, N_Vector tmp1, N_Vector
@@ -74,23 +69,22 @@ kinsolInterface::~kinsolInterface ()
     }
 }
 
-std::unique_ptr<SolverInterface> kinsolInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> kinsolInterface::clone (bool fullCopy) const
 {
-	std::unique_ptr<SolverInterface> si = std::make_unique<kinsolInterface>();
-	kinsolInterface::cloneTo(si.get(),fullCopy);
-	return si;
+    std::unique_ptr<SolverInterface> si = std::make_unique<kinsolInterface> ();
+    kinsolInterface::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
-void kinsolInterface::cloneTo(SolverInterface *si, bool fullCopy) const
+void kinsolInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-	sundialsInterface::cloneTo(si, fullCopy);
-	auto ai = dynamic_cast<kinsolInterface *>(si);
-	if (ai == nullptr)
-	{
-		return;
-	}
+    sundialsInterface::cloneTo (si, fullCopy);
+    auto ai = dynamic_cast<kinsolInterface *> (si);
+    if (ai == nullptr)
+    {
+        return;
+    }
 }
-
 
 void kinsolInterface::allocate (count_t stateCount, count_t /*numRoots*/)
 {
@@ -148,7 +142,6 @@ void kinsolInterface::logSolverStats (print_level logLevel, bool /*iconly*/) con
     }
 }
 
-
 static const std::map<int, std::string> kinRetCodes{
   {KIN_MEM_NULL, "Null solver Memory"},
   {KIN_ILL_INPUT, "Illegal Input"},
@@ -169,7 +162,6 @@ static const std::map<int, std::string> kinRetCodes{
   {KIN_FIRST_SYSFUNC_ERR, "The system function failed recoverably at the first call"},
   {KIN_REPTD_SYSFUNC_ERR, "The system function had repeated recoverable errors"},
 };
-
 
 void kinsolInterface::initialize (coreTime /*t0*/)
 {
@@ -218,43 +210,42 @@ void kinsolInterface::initialize (coreTime /*t0*/)
 
     check_flag (&retval, "KINInit", 1);
 
-
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        J = SUNDenseMatrix(svsize, svsize);
-        check_flag(J, "SUNDenseMatrix", 0);
+        J = SUNDenseMatrix (svsize, svsize);
+        check_flag (J, "SUNDenseMatrix", 0);
         /* Create KLU solver object */
-        LS = SUNDenseLinearSolver(state, J);
-        check_flag(LS, "SUNDenseLinearSolver", 0);
+        LS = SUNDenseLinearSolver (state, J);
+        check_flag (LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
-        J = SUNSparseMatrix(svsize, svsize, maxNNZ, CSR_MAT);
-        check_flag(J, "SUNSparseMatrix", 0);
+        J = SUNSparseMatrix (svsize, svsize, maxNNZ, CSR_MAT);
+        check_flag (J, "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
-        LS = SUNKLU(state, J);
-        check_flag(LS, "SUNKLU", 0);
+        LS = SUNKLU (state, J);
+        check_flag (LS, "SUNKLU", 0);
 
-        retval=SUNKLUSetOrdering(LS, 0);
-        check_flag(&retval, "SUNKLUSetOrdering", 1);
+        retval = SUNKLUSetOrdering (LS, 0);
+        check_flag (&retval, "SUNKLUSetOrdering", 1);
     }
 #else
-    J = SUNDenseMatrix(svsize, svsize);
-    check_flag(J, "SUNSparseMatrix", 0);
+    J = SUNDenseMatrix (svsize, svsize);
+    check_flag (J, "SUNSparseMatrix", 0);
     /* Create KLU solver object */
-    LS = SUNDenseLinearSolver(state, J);
-    check_flag(LS, "SUNDenseLinearSolver", 0);
+    LS = SUNDenseLinearSolver (state, J);
+    check_flag (LS, "SUNDenseLinearSolver", 0);
 #endif
 
-    retval = KINDlsSetLinearSolver(solverMem, LS, J);
+    retval = KINDlsSetLinearSolver (solverMem, LS, J);
 
-    check_flag(&retval, "KINDlsSetLinearSolver", 1);
+    check_flag (&retval, "KINDlsSetLinearSolver", 1);
 
-    retval = KINDlsSetJacFn(solverMem, kinsolJac);
-    check_flag(&retval, "KINDlsSetJacFn", 1);
+    retval = KINDlsSetJacFn (solverMem, kinsolJac);
+    check_flag (&retval, "KINDlsSetJacFn", 1);
 
     retval = KINSetMaxSetupCalls (solverMem, 1);  // exact Newton
     check_flag (&retval, "KINSetMaxSetupCalls", 1);
@@ -269,17 +260,13 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     check_flag (&retval, "KINSetErrHandlerFn", 1);
 
     flags.set (initialized_flag);
-
 }
 
-void kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
-{
-    KLUReInit(sparseReinitMode);
-}
+void kinsolInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
 
 void kinsolInterface::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -290,9 +277,8 @@ void kinsolInterface::set (const std::string &param, const std::string &val)
 
 void kinsolInterface::set (const std::string &param, double val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
-
     }
     else
     {
@@ -305,11 +291,11 @@ double kinsolInterface::get (const std::string &param) const
     long int val = -1;
     if (param == "jac calls")
     {
-       KINDlsGetNumJacEvals (solverMem, &val);
+        KINDlsGetNumJacEvals (solverMem, &val);
     }
     else if (param == "nliterations")
     {
-        KINGetNumNonlinSolvIters(solverMem, &val);
+        KINGetNumNonlinSolvIters (solverMem, &val);
     }
 #if MEASURE_TIMINGS > 0
     else if (param == "kintime")
@@ -388,7 +374,7 @@ int kinsolInterface::solve (coreTime tStop, coreTime &tReturn, step_mode /*mode*
         auto mvec = findMissing (&a1);
     }
 #endif
-    tReturn = (retval >= 0) ? solveTime : m_gds->getSimulationTime();
+    tReturn = (retval >= 0) ? solveTime : m_gds->getSimulationTime ();
     ++solverCallCount;
     if (retval == KIN_REPTD_SYSFUNC_ERR)
     {
@@ -453,15 +439,10 @@ int kinsolFunc (N_Vector state, N_Vector resid, void *user_data)
     return ret;
 }
 
-int kinsolJac(N_Vector state,
-    N_Vector /*f*/,
-    SUNMatrix J,
-    void *user_data,
-    N_Vector tmp1,
-    N_Vector tmp2)
+int kinsolJac (N_Vector state, N_Vector /*f*/, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2)
 {
     auto sd = reinterpret_cast<kinsolInterface *> (user_data);
-    return sundialsJac(sd->solveTime, 0, state, nullptr, J, user_data, tmp1, tmp2);
+    return sundialsJac (sd->solveTime, 0, state, nullptr, J, user_data, tmp1, tmp2);
 }
 
 }  // namespace solvers

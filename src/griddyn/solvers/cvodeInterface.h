@@ -24,14 +24,14 @@ namespace solvers
 class cvodeInterface : public sundialsInterface
 {
   public:
-    count_t icCount = 0;	//!< total number of initial condition calls
+    count_t icCount = 0;  //!< total number of initial condition calls
 
   private:
     matrixDataSparse<double> a1;  //!< array structure for holding the Jacobian information
-    std::vector<double> tempState;  //!<temporary holding location for a state vector
-    double maxStep = -1.0; //!< the maximum step size permitted
-    double minStep = -1.0;	//!< the minimum step size permitted
-    double step = 0.0;	//!< the requested step size
+    std::vector<double> tempState;  //!< temporary holding location for a state vector
+    double maxStep = -1.0;  //!< the maximum step size permitted
+    double minStep = -1.0;  //!< the minimum step size permitted
+    double step = 0.0;  //!< the requested step size
 
   public:
     /** @brief constructor*/
@@ -44,9 +44,9 @@ class cvodeInterface : public sundialsInterface
     /** @brief destructor*/
     virtual ~cvodeInterface ();
 
-	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
+    virtual std::unique_ptr<SolverInterface> clone (bool fullCopy = false) const override;
 
-	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
+    virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void setMaxNonZeros (count_t nonZeroCount) override;
@@ -65,13 +65,13 @@ class cvodeInterface : public sundialsInterface
     friend int cvodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
 
     friend int cvodeJac (realtype time,
-                               N_Vector state,
-                               N_Vector dstate_dt,
-                               SUNMatrix J,
-                               void *user_data,
-                               N_Vector tmp1,
-                               N_Vector tmp2,
-                               N_Vector tmp3);
+                         N_Vector state,
+                         N_Vector dstate_dt,
+                         SUNMatrix J,
+                         void *user_data,
+                         N_Vector tmp1,
+                         N_Vector tmp2,
+                         N_Vector tmp3);
 
     friend int cvodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
@@ -79,7 +79,7 @@ class cvodeInterface : public sundialsInterface
     void loadMaskElements ();
 };
 
-}//namespace solvers
-}//namespace griddyn
+}  // namespace solvers
+}  // namespace griddyn
 
 #endif

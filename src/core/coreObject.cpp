@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "coreObject.h"
 #include "coreExceptions.h"
@@ -29,7 +29,7 @@ coreObject::coreObject (const std::string &objName) : m_refCount (0), m_oid (s_o
 {
     static nullObject nullObject0 (0);
     // not using updateName since in many cases the id has not been set yet
-    if (!name.empty()&&(name.back () == '#'))
+    if (!name.empty () && (name.back () == '#'))
     {
         name.pop_back ();
         appendInteger (name, m_oid);
@@ -69,7 +69,7 @@ coreObject *coreObject::clone (coreObject *obj) const
 
 void coreObject::updateName ()
 {
-    if (name.empty())
+    if (name.empty ())
     {
         return;
     }
@@ -166,7 +166,7 @@ void coreObject::set (const std::string &param, const std::string &val)
     {
         setDescription (val);
     }
-    else if ((param.empty())|| (param.front() == '#'))
+    else if ((param.empty ()) || (param.front () == '#'))
     {
         // comment parameter meant to do nothing
     }
@@ -174,28 +174,26 @@ void coreObject::set (const std::string &param, const std::string &val)
     {
         if (val == "true")
         {
-            setFlag(param, true);
+            setFlag (param, true);
         }
         else if (val == "false")
         {
-            setFlag(param, false);
+            setFlag (param, false);
         }
         else
         {
-            auto lower = convertToLowerCase(param);
+            auto lower = convertToLowerCase (param);
             if (lower != param)
             {
-                set(lower, val);
-                LOG_WARNING(std::string("parameters should be lower case \"") + param + "\" is not");
+                set (lower, val);
+                LOG_WARNING (std::string ("parameters should be lower case \"") + param + "\" is not");
             }
             else
             {
-                LOG_WARNING("parameter " + param + " not found");
-                throw (unrecognizedParameter(param));
+                LOG_WARNING ("parameter " + param + " not found");
+                throw (unrecognizedParameter (param));
             }
-
         }
-
     }
 }
 
@@ -260,21 +258,21 @@ void coreObject::setFlag (const std::string &flag, bool val)
     {
         alert (this, UPDATE_REQUIRED);
     }
-    else if ((flag.empty()) || (flag.front() == '#'))
+    else if ((flag.empty ()) || (flag.front () == '#'))
     {
         // comment parameter meant to do nothing
     }
     else
     {
-        auto lower = convertToLowerCase(flag);
+        auto lower = convertToLowerCase (flag);
         if (lower != flag)
         {
-            setFlag(lower, val);
-            LOG_WARNING(std::string("flags should be lower case \"") + flag + "\" is not");
+            setFlag (lower, val);
+            LOG_WARNING (std::string ("flags should be lower case \"") + flag + "\" is not");
         }
         else
         {
-            throw (unrecognizedParameter(flag));
+            throw (unrecognizedParameter (flag));
         }
     }
 }
@@ -345,7 +343,7 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
     {
         setUserID (static_cast<index_t> (val));
     }
-    else if ((param.empty()) || (param.front() == '#'))
+    else if ((param.empty ()) || (param.front () == '#'))
     {
         // comment parameter meant to do nothing
     }
@@ -353,15 +351,15 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
     {
         try
         {
-            setFlag(param, (val > 0.1));
+            setFlag (param, (val > 0.1));
         }
         catch (const unrecognizedParameter &e)
         {
-            auto lower = convertToLowerCase(param);
+            auto lower = convertToLowerCase (param);
             if (lower != param)
             {
-                set(lower, val, unitType);
-                LOG_WARNING(std::string("parameters should be lower case \"") + param + "\" is not");
+                set (lower, val, unitType);
+                LOG_WARNING (std::string ("parameters should be lower case \"") + param + "\" is not");
             }
             else
             {
@@ -419,8 +417,8 @@ coreTime coreObject::updateB ()
 void coreObject::enable () { enabled = true; }
 void coreObject::disable () { enabled = false; }
 bool coreObject::isEnabled () const { return enabled; }
-//core objects are cloneable derived classes may not be
-bool coreObject::isCloneable() const { return true; }
+// core objects are cloneable derived classes may not be
+bool coreObject::isCloneable () const { return true; }
 void coreObject::alert (coreObject *object, int code) { parent->alert (object, code); }
 void coreObject::log (coreObject *object, print_level level, const std::string &message)
 {

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -15,7 +15,6 @@
 #include "../gridDynSimulation.h"
 #include "utilities/vectorOps.hpp"
 
-
 #include "../simulation/gridDynSimulationFileOps.h"
 #include "sundialsMatrixData.h"
 #include "utilities/matrixCreation.h"
@@ -28,12 +27,12 @@
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
-#include <sunlinsol/sunlinsol_dense.h>
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <map>
 #include <string>
+#include <sunlinsol/sunlinsol_dense.h>
 
 namespace griddyn
 {
@@ -42,15 +41,15 @@ namespace solvers
 int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
 
 int idaJac (realtype time,
-                  realtype sD,
-                  N_Vector state,
-                  N_Vector dstate_dt,
-                  N_Vector resid,
-                  SUNMatrix J,
-                  void *user_data,
-                  N_Vector tmp1,
-                  N_Vector tmp2,
-                  N_Vector tmp3);
+            realtype sD,
+            N_Vector state,
+            N_Vector dstate_dt,
+            N_Vector resid,
+            SUNMatrix J,
+            void *user_data,
+            N_Vector tmp1,
+            N_Vector tmp2,
+            N_Vector tmp3);
 
 int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data);
 
@@ -65,22 +64,21 @@ idaInterface::~idaInterface ()
     }
 }
 
-std::unique_ptr<SolverInterface> idaInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> idaInterface::clone (bool fullCopy) const
 {
-	std::unique_ptr<SolverInterface> si = std::make_unique<idaInterface>();
-	idaInterface::cloneTo(si.get(),fullCopy);
-	return si;
+    std::unique_ptr<SolverInterface> si = std::make_unique<idaInterface> ();
+    idaInterface::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
-void idaInterface::cloneTo(SolverInterface *si, bool fullCopy) const
+void idaInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-	sundialsInterface::cloneTo(si, fullCopy);
-	auto ai = dynamic_cast<idaInterface *>(si);
-	if (ai == nullptr)
-	{
-		return;
-	}
-
+    sundialsInterface::cloneTo (si, fullCopy);
+    auto ai = dynamic_cast<idaInterface *> (si);
+    if (ai == nullptr)
+    {
+        return;
+    }
 }
 
 void idaInterface::allocate (count_t stateCount, count_t numRoots)
@@ -134,7 +132,7 @@ double idaInterface::get (const std::string &param) const
     }
     else if (param == "jac calls")
     {
-       IDADlsGetNumJacEvals (solverMem, &val);
+        IDADlsGetNumJacEvals (solverMem, &val);
     }
     else
     {
@@ -248,7 +246,6 @@ void idaInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-
 static const std::map<int, std::string> idaRetCodes{
   {IDA_MEM_NULL, "The solver memory argument was NULL"},
   {IDA_ILL_INPUT, "One of the function inputs is illegal"},
@@ -279,7 +276,6 @@ static const std::map<int, std::string> idaRetCodes{
   {IDA_BAD_K, "Bad K"},
   {IDA_BAD_DKY, "Bad DKY"},
 };
-
 
 void idaInterface::initialize (coreTime t0)
 {
@@ -317,40 +313,39 @@ void idaInterface::initialize (coreTime t0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-		J = SUNDenseMatrix(svsize, svsize);
-		check_flag(J, "SUNDenseMatrix", 0);
-		/* Create KLU solver object */
-		LS = SUNDenseLinearSolver(state, J);
-		check_flag(LS, "SUNDenseLinearSolver", 0);
+        J = SUNDenseMatrix (svsize, svsize);
+        check_flag (J, "SUNDenseMatrix", 0);
+        /* Create KLU solver object */
+        LS = SUNDenseLinearSolver (state, J);
+        check_flag (LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
-		/* Create sparse SUNMatrix */
-		J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
-		check_flag(J, "SUNSparseMatrix", 0);
+        /* Create sparse SUNMatrix */
+        J = SUNSparseMatrix (svsize, svsize, jsize, CSR_MAT);
+        check_flag (J, "SUNSparseMatrix", 0);
 
-		/* Create KLU solver object */
-		LS = SUNKLU(state, J);
-		check_flag(LS, "SUNKLU", 0);
+        /* Create KLU solver object */
+        LS = SUNKLU (state, J);
+        check_flag (LS, "SUNKLU", 0);
 
-        retval = SUNKLUSetOrdering(LS, 0);
-        check_flag(&retval, "SUNKLUSetOrdering", 1);
-
+        retval = SUNKLUSetOrdering (LS, 0);
+        check_flag (&retval, "SUNKLUSetOrdering", 1);
     }
 #else
-	J = SUNDenseMatrix(svsize, svsize);
-	check_flag(J, "SUNSparseMatrix", 0);
-	/* Create KLU solver object */
-	LS = SUNDenseLinearSolver(state, J);
-	check_flag(LS, "SUNDenseLinearSolver", 0);
+    J = SUNDenseMatrix (svsize, svsize);
+    check_flag (J, "SUNSparseMatrix", 0);
+    /* Create KLU solver object */
+    LS = SUNDenseLinearSolver (state, J);
+    check_flag (LS, "SUNDenseLinearSolver", 0);
 #endif
 
-	retval = IDADlsSetLinearSolver(solverMem, LS, J);
+    retval = IDADlsSetLinearSolver (solverMem, LS, J);
 
-	check_flag(&retval, "IDADlsSetLinearSolver", 1);
+    check_flag (&retval, "IDADlsSetLinearSolver", 1);
 
-	retval = IDADlsSetJacFn(solverMem, idaJac);
-	check_flag(&retval, "IDADlsSetJacFn", 1);
+    retval = IDADlsSetJacFn (solverMem, idaJac);
+    check_flag (&retval, "IDADlsSetJacFn", 1);
 
     retval = IDASetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "IDASetMaxNonlinIters", 1);
@@ -368,10 +363,7 @@ void idaInterface::initialize (coreTime t0)
     flags.set (initialized_flag);
 }
 
-void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
-{
-    KLUReInit(sparseReinitMode);
-}
+void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
 
 void idaInterface::setRootFinding (count_t numRoots)
 {
@@ -600,15 +592,15 @@ int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *go
 }
 
 int idaJac (realtype time,
-                  realtype cj,
-                  N_Vector state,
-                  N_Vector dstate_dt,
-                  N_Vector /*resid*/,
-                  SUNMatrix J,
-                  void *user_data,
-                  N_Vector tmp1,
-                  N_Vector tmp2,
-                  N_Vector /*tmp3*/)
+            realtype cj,
+            N_Vector state,
+            N_Vector dstate_dt,
+            N_Vector /*resid*/,
+            SUNMatrix J,
+            void *user_data,
+            N_Vector tmp1,
+            N_Vector tmp2,
+            N_Vector /*tmp3*/)
 {
     return sundialsJac (time, cj, state, dstate_dt, J, user_data, tmp1, tmp2);
 }

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -70,48 +70,47 @@ void dcBus::pFlowObjectInitializeB ()
     propogatePower ();
 }
 
-
-stateSizes dcBus::LocalStateSizes(const solverMode &sMode) const
+stateSizes dcBus::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes busSS;
-	if (hasAlgebraic(sMode))
-	{
-		busSS.vSize = 1;
-		
-		// check for slave bus mode
-		if (opFlags[slave_bus])
-		{
-			busSS.vSize = 0;
-		}
+    stateSizes busSS;
+    if (hasAlgebraic (sMode))
+    {
+        busSS.vSize = 1;
 
-		if (isExtended(sMode))  // in extended state mode we have P and Q as states
-		{
-			if (isDC(sMode))
-			{
-				busSS.algSize = 1;
-			}
-			else
-			{
-				busSS.algSize = 2;
-			}
-		}
-	}
-	return busSS;
+        // check for slave bus mode
+        if (opFlags[slave_bus])
+        {
+            busSS.vSize = 0;
+        }
+
+        if (isExtended (sMode))  // in extended state mode we have P and Q as states
+        {
+            if (isDC (sMode))
+            {
+                busSS.algSize = 1;
+            }
+            else
+            {
+                busSS.algSize = 2;
+            }
+        }
+    }
+    return busSS;
 }
 
-count_t dcBus::LocalJacobianCount(const solverMode &sMode) const
+count_t dcBus::LocalJacobianCount (const solverMode &sMode) const
 {
-	count_t localJacSize = 0;
-	if (hasAlgebraic(sMode))
-	{
-		localJacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size());
-		// check for slave bus mode
-		if (opFlags[slave_bus])
-		{
-			localJacSize -= 1;
-		}
-	}
-	return localJacSize;
+    count_t localJacSize = 0;
+    if (hasAlgebraic (sMode))
+    {
+        localJacSize = 1 + 2 * static_cast<count_t> (attachedLinks.size ());
+        // check for slave bus mode
+        if (opFlags[slave_bus])
+        {
+            localJacSize -= 1;
+        }
+    }
+    return localJacSize;
 }
 
 change_code dcBus::powerFlowAdjust (const IOdata & /*inputs*/, std::uint32_t flags, check_level_t level)
@@ -307,7 +306,7 @@ void dcBus::set (const std::string &param, const std::string &val)
 
 void dcBus::set (const std::string &param, double val, units_t unitType)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else

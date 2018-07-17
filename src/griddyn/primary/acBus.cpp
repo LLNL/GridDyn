@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -18,11 +18,11 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreOwningPtr.hpp"
 
-#include "acBus.h"
 #include "../blocks/derivativeBlock.h"
+#include "../simulation/contingency.h"
+#include "acBus.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
-#include "../simulation/contingency.h"
 #include "utilities/vectorOps.hpp"
 //#include "matrixDataSparse.hpp"
 #include "utilities/stringOps.h"
@@ -186,7 +186,7 @@ void acBus::alert (coreObject *obj, int code)
         {
             reconnect ();
         }
-    FALLTHROUGH
+        FALLTHROUGH
     default:
         gridPrimary::alert (obj, code);
     }
@@ -1180,7 +1180,10 @@ void acBus::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode
 }
 
 static const stringVec locNumStrings{
-  "vtarget", "atarget", "p", "q",
+  "vtarget",
+  "atarget",
+  "p",
+  "q",
 };
 static const stringVec locStrStrings{"pflowtype", "dyntype"};
 
@@ -1297,7 +1300,8 @@ void acBus::set (const std::string &param, const std::string &val)
 
 void acBus::set (const std::string &param, double val, units_t unitType)
 {
-    if ((param == "voltage") || (param == "vol")||(param=="v")||(param=="vmag")||(param=="v0")||(param=="voltage0"))
+    if ((param == "voltage") || (param == "vol") || (param == "v") || (param == "vmag") || (param == "v0") ||
+        (param == "voltage0"))
     {
         voltage = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
         if ((type == busType::PV) || (type == busType::SLK))
@@ -1305,7 +1309,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             vTarget = voltage;
         }
     }
-    else if ((param == "angle") || (param == "ang")||(param=="a")||(param=="theta")||(param=="angle0"))
+    else if ((param == "angle") || (param == "ang") || (param == "a") || (param == "theta") || (param == "angle0"))
     {
         angle = unitConversion (val, unitType, rad);
         if ((type == busType::SLK) || (type == busType::afix))
@@ -2852,59 +2856,58 @@ count_t acBus::getDependencyCount (const solverMode &sMode) const
     return sum;
 }
 
-
-stateSizes acBus::LocalStateSizes(const solverMode &sMode) const
+stateSizes acBus::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes busSS;
-	if (hasAlgebraic(sMode))
-	{
-		busSS.aSize = 1;
-		if (isAC(sMode))
-		{
-			busSS.vSize = 1;
-		}
-		// check for slave bus mode
-		if (opFlags[slave_bus])
-		{
-			busSS.vSize = 0;
-			busSS.aSize = 0;
-		}
+    stateSizes busSS;
+    if (hasAlgebraic (sMode))
+    {
+        busSS.aSize = 1;
+        if (isAC (sMode))
+        {
+            busSS.vSize = 1;
+        }
+        // check for slave bus mode
+        if (opFlags[slave_bus])
+        {
+            busSS.vSize = 0;
+            busSS.aSize = 0;
+        }
 
-		if (isExtended(sMode))  // in extended state mode we have P and Q as states
-		{
-			if (isDC(sMode))
-			{
-				busSS.algSize = 1;
-			}
-			else
-			{
-				busSS.algSize = 2;
-			}
-		}
-	}
-	return busSS;
+        if (isExtended (sMode))  // in extended state mode we have P and Q as states
+        {
+            if (isDC (sMode))
+            {
+                busSS.algSize = 1;
+            }
+            else
+            {
+                busSS.algSize = 2;
+            }
+        }
+    }
+    return busSS;
 }
 
-count_t acBus::LocalJacobianCount(const solverMode &sMode) const
+count_t acBus::LocalJacobianCount (const solverMode &sMode) const
 {
-	count_t totaljacSize = 0;
-	if (hasAlgebraic(sMode))
-	{
-		if (isDC(sMode))
-		{
-			totaljacSize = 1 + getDependencyCount(sMode);
-		}
-		else
-		{
-			totaljacSize = 4 + getDependencyCount(sMode);
-		}
-		// check for slave bus mode
-		if (opFlags[slave_bus])
-		{
-			totaljacSize -= (isDC(sMode)) ? 1 : 4;
-		}
-	}
-	return totaljacSize;
+    count_t totaljacSize = 0;
+    if (hasAlgebraic (sMode))
+    {
+        if (isDC (sMode))
+        {
+            totaljacSize = 1 + getDependencyCount (sMode);
+        }
+        else
+        {
+            totaljacSize = 4 + getDependencyCount (sMode);
+        }
+        // check for slave bus mode
+        if (opFlags[slave_bus])
+        {
+            totaljacSize -= (isDC (sMode)) ? 1 : 4;
+        }
+    }
+    return totaljacSize;
 }
 
 int acBus::getMode (const solverMode &sMode) const
@@ -3104,20 +3107,20 @@ double acBus::getAdjustableCapacityDown (coreTime time) const
 
 double acBus::getdPdf () const { return 0; }
 /** @brief get the tie error (may be deprecated in the future)
-* @return the tie error
-**/
+ * @return the tie error
+ **/
 double acBus::getTieError () const { return tieError; }
 /** @brief get the frequency response
-* @return the tie error
-**/
+ * @return the tie error
+ **/
 double acBus::getFreqResp () const { return 0; }
 /** @brief get available regulation
-* @return the available regulation
-**/
+ * @return the available regulation
+ **/
 double acBus::getRegTotal () const { return 0; }
 /** @brief get the scheduled power
-* @return the scheduled power
-**/
+ * @return the scheduled power
+ **/
 double acBus::getSched () const { return 0; }
 
 double acBus::get (const std::string &param, units_t unitType) const

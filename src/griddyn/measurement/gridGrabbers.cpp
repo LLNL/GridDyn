@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "gridGrabbers.h"
 #include "../Area.h"
@@ -18,12 +18,12 @@
 #include "../Relay.h"
 #include "core/coreExceptions.h"
 
-#include "grabberInterpreter.hpp"
 #include "../gridBus.h"
 #include "../gridSubModel.h"
-#include "objectGrabbers.h"
 #include "../relays/sensor.h"
 #include "../simulation/gridSimulation.h"
+#include "grabberInterpreter.hpp"
+#include "objectGrabbers.h"
 #include "utilities/functionInterpreter.h"
 #include "utilities/vectorOps.hpp"
 #include <algorithm>
@@ -40,11 +40,11 @@ gridGrabber::gridGrabber (const std::string &fld, coreObject *obj)
     gridGrabber::updateField (fld);
 }
 
-std::unique_ptr<gridGrabber> gridGrabber::clone() const
+std::unique_ptr<gridGrabber> gridGrabber::clone () const
 {
-	auto ggb = std::make_unique<gridGrabber>();
-	gridGrabber::cloneTo(ggb.get());
-	return ggb;
+    auto ggb = std::make_unique<gridGrabber> ();
+    gridGrabber::cloneTo (ggb.get ());
+    return ggb;
 }
 
 void gridGrabber::cloneTo (gridGrabber *ggb) const
@@ -136,7 +136,8 @@ double gridGrabber::grabData ()
         val = fptr (cobj);
         if (outputUnits != defUnit)
         {
-            val = unitConversion (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get("basevoltage"));
+            val =
+              unitConversion (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get ("basevoltage"));
         }
     }
     else
@@ -156,7 +157,7 @@ void gridGrabber::grabVectorData (std::vector<double> &vdata)
         if (outputUnits != defUnit)
         {
             auto localBasePower = cobj->get ("basepower");
-			auto localBaseVoltage = cobj->get("basevoltage");
+            auto localBaseVoltage = cobj->get ("basevoltage");
             for (auto &v : vdata)
             {
                 v = unitConversion (v, inputUnits, outputUnits, localBasePower, localBaseVoltage);
@@ -196,7 +197,7 @@ void gridGrabber::updateObject (coreObject *obj, object_update_mode mode)
         }
         if (cobj != nullptr)
         {
-			makeDescription();
+            makeDescription ();
         }
     }
     else
@@ -420,22 +421,22 @@ void functionGrabber::getDesc (std::vector<std::string> &desc_list) const
     }
 }
 
-std::unique_ptr<gridGrabber> functionGrabber::clone() const
+std::unique_ptr<gridGrabber> functionGrabber::clone () const
 {
-	std::unique_ptr<gridGrabber> fgrab = std::make_unique<functionGrabber>();
-	functionGrabber::cloneTo(fgrab.get());
-	return fgrab;
+    std::unique_ptr<gridGrabber> fgrab = std::make_unique<functionGrabber> ();
+    functionGrabber::cloneTo (fgrab.get ());
+    return fgrab;
 }
 
-void  functionGrabber::cloneTo (gridGrabber *ggb) const
+void functionGrabber::cloneTo (gridGrabber *ggb) const
 {
-	gridGrabber::cloneTo(ggb);
-	auto fgb = dynamic_cast<functionGrabber *>(ggb);
+    gridGrabber::cloneTo (ggb);
+    auto fgb = dynamic_cast<functionGrabber *> (ggb);
 
-	if (fgb == nullptr)
-	{
-		return;
-	}
+    if (fgb == nullptr)
+    {
+        return;
+    }
     fgb->bgrabber = bgrabber->clone ();
     fgb->function_name = function_name;
     fgb->opptr = opptr;
@@ -525,7 +526,7 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
     {
         opptr = get2ArgFunction (op_name);
         vectorGrab = (bgrabber1) ? bgrabber1->vectorGrab : false;
-        loaded = opGrabber::checkIfLoaded();
+        loaded = opGrabber::checkIfLoaded ();
     }
     else if (isFunctionName (op_name, function_type::vect_arg2))
     {
@@ -547,17 +548,20 @@ void opGrabber::updateField (const std::string &fld)
     {
         opptr = get2ArgFunction (op_name);
         vectorGrab = (bgrabber1) ? bgrabber1->vectorGrab : false;
-        loaded = opGrabber::checkIfLoaded();
+        loaded = opGrabber::checkIfLoaded ();
     }
     else if (isFunctionName (op_name, function_type::vect_arg2))
     {
         opptrV = get2ArrayFunction (op_name);
         vectorGrab = false;
-        loaded = opGrabber::checkIfLoaded();
+        loaded = opGrabber::checkIfLoaded ();
     }
 }
 
-bool opGrabber::checkIfLoaded () { return (((bgrabber1) && (bgrabber1->loaded)) && ((bgrabber2) && (bgrabber2->loaded))); }
+bool opGrabber::checkIfLoaded ()
+{
+    return (((bgrabber1) && (bgrabber1->loaded)) && ((bgrabber2) && (bgrabber2->loaded)));
+}
 void opGrabber::getDesc (stringVec &desc_list) const
 {
     if (vectorGrab)
@@ -581,29 +585,29 @@ void opGrabber::getDesc (stringVec &desc_list) const
     }
 }
 
-std::unique_ptr<gridGrabber> opGrabber::clone() const
+std::unique_ptr<gridGrabber> opGrabber::clone () const
 {
-	std::unique_ptr<gridGrabber> ograb = std::make_unique<opGrabber>();
-	opGrabber::cloneTo(ograb.get());
-	return ograb;
+    std::unique_ptr<gridGrabber> ograb = std::make_unique<opGrabber> ();
+    opGrabber::cloneTo (ograb.get ());
+    return ograb;
 }
 
 void opGrabber::cloneTo (gridGrabber *ggb) const
 {
-	gridGrabber::cloneTo(ggb);
-	auto ogb = dynamic_cast<opGrabber *>(ggb);
+    gridGrabber::cloneTo (ggb);
+    auto ogb = dynamic_cast<opGrabber *> (ggb);
 
-    if (ogb==nullptr)
+    if (ogb == nullptr)
     {
         return;
     }
     if (bgrabber1)
     {
-        ogb->bgrabber1 = bgrabber1->clone();
+        ogb->bgrabber1 = bgrabber1->clone ();
     }
     if (bgrabber2)
     {
-        ogb->bgrabber2 = bgrabber2->clone();
+        ogb->bgrabber2 = bgrabber2->clone ();
     }
     ogb->op_name = op_name;
     ogb->opptr = opptr;

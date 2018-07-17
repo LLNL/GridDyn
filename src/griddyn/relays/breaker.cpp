@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,19 +8,19 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "breaker.h"
 #include "../measurement/Condition.h"
 
 #include "../Link.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../events/Event.h"
 #include "../gridBus.h"
 #include "../gridSecondary.h"
 #include "../measurement/grabberSet.h"
 #include "../measurement/gridGrabbers.h"
 #include "../measurement/stateGrabber.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixDataSparse.hpp"
 
 #include <boost/format.hpp>
@@ -32,7 +32,7 @@ namespace griddyn
 namespace relays
 {
 using namespace gridUnits;
-breaker::breaker (const std::string &objName) : Relay (objName),useCTI(extra_bool)
+breaker::breaker (const std::string &objName) : Relay (objName), useCTI (extra_bool)
 {
     opFlags.set (continuous_flag);
 }
@@ -80,7 +80,7 @@ std::string commType;
 */
 void breaker::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -106,7 +106,7 @@ void breaker::set (const std::string &param, double val, gridUnits::units_t unit
     }
     else if ((param == "maxrecloseattempts") || (param == "reclosers"))
     {
-        maxRecloseAttempts = static_cast<decltype(maxRecloseAttempts)> (val);
+        maxRecloseAttempts = static_cast<decltype (maxRecloseAttempts)> (val);
     }
     else if ((param == "minclearingtime") || (param == "cleartime"))
     {
@@ -269,23 +269,23 @@ void breaker::updateA (coreTime time)
     lastUpdateTime = time;
 }
 
-stateSizes breaker::LocalStateSizes(const solverMode &sMode) const
+stateSizes breaker::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes SS;
-	if ((!isAlgebraicOnly(sMode)) && (recloserTap > 0))
-	{
-		SS.diffSize = 1;
-	}
-	return SS;
+    stateSizes SS;
+    if ((!isAlgebraicOnly (sMode)) && (recloserTap > 0))
+    {
+        SS.diffSize = 1;
+    }
+    return SS;
 }
 
-count_t breaker::LocalJacobianCount(const solverMode &sMode) const
+count_t breaker::LocalJacobianCount (const solverMode &sMode) const
 {
-	if ((!isAlgebraicOnly(sMode)) && (recloserTap > 0))
-	{
-		return 12;
-	}
-	return 0;
+    if ((!isAlgebraicOnly (sMode)) && (recloserTap > 0))
+    {
+        return 12;
+    }
+    return 0;
 }
 
 void breaker::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)

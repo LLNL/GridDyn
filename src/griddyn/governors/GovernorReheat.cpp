@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,13 +8,13 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
-#include "core/coreObjectTemplates.hpp"
-#include "core/objectFactory.hpp"
+#include "GovernorReheat.h"
 #include "../Generator.h"
 #include "../gridBus.h"
-#include "GovernorReheat.h"
+#include "core/coreObjectTemplates.hpp"
+#include "core/objectFactory.hpp"
 #include "utilities/matrixData.hpp"
 
 namespace griddyn
@@ -55,9 +55,7 @@ coreObject *GovernorReheat::clone (coreObject *obj) const
 // destructor
 GovernorReheat::~GovernorReheat () {}
 // initial conditions
-void GovernorReheat::dynObjectInitializeB (const IOdata &inputs,
-                                                  const IOdata &desiredOutput,
-                                                  IOdata &fieldSet)
+void GovernorReheat::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {
     if (Wref < 0)
     {
@@ -85,10 +83,7 @@ void GovernorReheat::dynObjectInitializeB (const IOdata &inputs,
 }
 
 // residual
-void GovernorReheat::residual (const IOdata &inputs,
-                                      const stateData &sD,
-                                      double resid[],
-                                      const solverMode &sMode)
+void GovernorReheat::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode);
     const double *gsp = sD.dstate_dt + offset;
@@ -119,9 +114,9 @@ void GovernorReheat::residual (const IOdata &inputs,
 }
 
 void GovernorReheat::derivative (const IOdata &inputs,
-                                        const stateData &sD,
-                                        double deriv[],
-                                        const solverMode &sMode)
+                                 const stateData &sD,
+                                 double deriv[],
+                                 const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode);
     const double *gs = sD.state + offset;
@@ -142,10 +137,10 @@ void GovernorReheat::derivative (const IOdata &inputs,
 }
 
 void GovernorReheat::jacobianElements (const IOdata &inputs,
-                                              const stateData &sD,
-                                              matrixData<double> &md,
-                                              const IOlocs &inputLocs,
-                                              const solverMode &sMode)
+                                       const stateData &sD,
+                                       matrixData<double> &md,
+                                       const IOlocs &inputLocs,
+                                       const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode);
     if (isAlgebraicOnly (sMode))
@@ -235,10 +230,7 @@ index_t GovernorReheat::findIndex (const std::string &field, const solverMode & 
 }
 
 // set parameters
-void GovernorReheat::set (const std::string &param, const std::string &val)
-{
-    Governor::set (param, val);
-}
+void GovernorReheat::set (const std::string &param, const std::string &val) { Governor::set (param, val); }
 
 void GovernorReheat::set (const std::string &param, double val, units_t unitType)
 {
@@ -268,5 +260,5 @@ void GovernorReheat::set (const std::string &param, double val, units_t unitType
         Governor::set (param, val, unitType);
     }
 }
-}//namespace governors
-}//namespace griddyn
+}  // namespace governors
+}  // namespace griddyn

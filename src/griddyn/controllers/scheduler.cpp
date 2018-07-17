@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -15,8 +15,8 @@
 #include "../comms/schedulerMessage.h"
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
-#include "utilities/timeSeries.hpp"
 #include "griddyn/griddyn-config.h"
+#include "utilities/timeSeries.hpp"
 namespace griddyn
 {
 using namespace gridUnits;
@@ -300,7 +300,7 @@ void scheduler::insertTarget (tsched ts)
 void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-    auto sm = message->getPayload<schedulerMessagePayload>();
+    auto sm = message->getPayload<schedulerMessagePayload> ();
     switch (message->getMessageType ())
     {
     case schedulerMessagePayload::CLEAR_TARGETS:
@@ -312,7 +312,7 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
         break;
     case schedulerMessagePayload::UPDATE_TARGETS:  //
         clearSchedule ();
-		FALLTHROUGH
+        FALLTHROUGH
     case schedulerMessagePayload::ADD_TARGETS:
         setTarget (sm->m_time, sm->m_target);
         break;

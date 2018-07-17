@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,9 +11,9 @@
  */
 
 #include "reserveDispatcher.h"
-#include "AGControl.h"
 #include "../Area.h"
 #include "../Generator.h"
+#include "AGControl.h"
 #include "core/coreExceptions.h"
 #include "scheduler.h"
 

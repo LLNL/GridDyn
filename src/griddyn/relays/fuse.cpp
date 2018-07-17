@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,12 +8,10 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "fuse.h"
 #include "../Link.h"
-#include "core/coreExceptions.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../events/Event.h"
 #include "../events/eventQueue.h"
 #include "../gridBus.h"
@@ -22,6 +20,8 @@
 #include "../measurement/grabberSet.h"
 #include "../measurement/gridGrabbers.h"
 #include "../measurement/stateGrabber.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixDataSparse.hpp"
 
 #include <cmath>
@@ -32,10 +32,7 @@ namespace griddyn
 namespace relays
 {
 using namespace gridUnits;
-fuse::fuse (const std::string &objName) : Relay (objName),useI2T(extra_bool)
-{
-    opFlags.set (continuous_flag);
-}
+fuse::fuse (const std::string &objName) : Relay (objName), useI2T (extra_bool) { opFlags.set (continuous_flag); }
 
 coreObject *fuse::clone (coreObject *obj) const
 {
@@ -55,7 +52,7 @@ coreObject *fuse::clone (coreObject *obj) const
 
 void fuse::setFlag (const std::string &flag, bool val)
 {
-    if (flag.empty())
+    if (flag.empty ())
     {
     }
     else
@@ -66,7 +63,7 @@ void fuse::setFlag (const std::string &flag, bool val)
 
 void fuse::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -111,7 +108,7 @@ void fuse::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     auto ge = std::make_shared<Event> ();
 
-    if (dynamic_cast<Link *> (m_sourceObject)!=nullptr)
+    if (dynamic_cast<Link *> (m_sourceObject) != nullptr)
     {
         add (std::shared_ptr<Condition> (
           make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject)));
@@ -235,23 +232,23 @@ change_code fuse::setupFuseEvaluation ()
     return change_code::jacobian_change;
 }
 
-stateSizes fuse::LocalStateSizes(const solverMode &sMode) const
+stateSizes fuse::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes SS;
-	if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
-	{
-		SS.diffSize = 1;
-	}
-	return SS;
+    stateSizes SS;
+    if ((!isAlgebraicOnly (sMode)) && (mp_I2T > 0.0))
+    {
+        SS.diffSize = 1;
+    }
+    return SS;
 }
 
-count_t fuse::LocalJacobianCount(const solverMode &sMode) const
+count_t fuse::LocalJacobianCount (const solverMode &sMode) const
 {
-	if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
-	{
-		return 12;
-	}
-	return 0;
+    if ((!isAlgebraicOnly (sMode)) && (mp_I2T > 0.0))
+    {
+        return 12;
+    }
+    return 0;
 }
 
 void fuse::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)

@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace events
 {
-compoundEventPlayer::compoundEventPlayer() = default;
+compoundEventPlayer::compoundEventPlayer () = default;
 
 compoundEventPlayer::compoundEventPlayer (const std::string &eventName) : compoundEvent (eventName) {}
 compoundEventPlayer::compoundEventPlayer (EventInfo &gdEI, coreObject *rootObject)
@@ -29,22 +29,21 @@ compoundEventPlayer::compoundEventPlayer (EventInfo &gdEI, coreObject *rootObjec
 {
 }
 
-std::unique_ptr<Event> compoundEventPlayer::clone() const
+std::unique_ptr<Event> compoundEventPlayer::clone () const
 {
-	std::unique_ptr<Event> upE = std::make_unique<compoundEventPlayer>(getName());
-	cloneTo(upE.get());
-	return upE;
+    std::unique_ptr<Event> upE = std::make_unique<compoundEventPlayer> (getName ());
+    cloneTo (upE.get ());
+    return upE;
 }
 
-void compoundEventPlayer::cloneTo(Event *gE) const
+void compoundEventPlayer::cloneTo (Event *gE) const
 {
-	compoundEvent::cloneTo(gE);
-	auto nE = dynamic_cast<compoundEventPlayer *>(gE);
-	if (nE == nullptr)
-	{
-		return;
-	}
-
+    compoundEvent::cloneTo (gE);
+    auto nE = dynamic_cast<compoundEventPlayer *> (gE);
+    if (nE == nullptr)
+    {
+        return;
+    }
 }
 
 void compoundEventPlayer::setTime (coreTime time) { triggerTime = time; }
@@ -240,7 +239,7 @@ void compoundEventPlayer::loadEventFile (const std::string &fileName)
     ts.loadFile (eFile);
 
     currIndex = 0;
-    if (!ts.empty())
+    if (!ts.empty ())
     {
         triggerTime = ts.time (0);
     }

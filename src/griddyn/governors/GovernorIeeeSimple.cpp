@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,13 +8,13 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
-#include "core/coreObjectTemplates.hpp"
-#include "core/objectFactory.hpp"
+#include "GovernorIeeeSimple.h"
 #include "../Generator.h"
 #include "../gridBus.h"
-#include "GovernorIeeeSimple.h"
+#include "core/coreObjectTemplates.hpp"
+#include "core/objectFactory.hpp"
 #include "utilities/matrixData.hpp"
 
 namespace griddyn
@@ -65,8 +65,8 @@ void GovernorIeeeSimple::dynObjectInitializeA (coreTime time0, std::uint32_t fla
 
 // initial conditions
 void GovernorIeeeSimple::dynObjectInitializeB (const IOdata & /*inputs*/,
-                                                      const IOdata &desiredOutput,
-                                                      IOdata &fieldSet)
+                                               const IOdata &desiredOutput,
+                                               IOdata &fieldSet)
 {
     if (Wref < 0)
     {
@@ -79,9 +79,9 @@ void GovernorIeeeSimple::dynObjectInitializeB (const IOdata & /*inputs*/,
 
 // residual
 void GovernorIeeeSimple::residual (const IOdata &inputs,
-                                          const stateData &sD,
-                                          double resid[],
-                                          const solverMode &sMode)
+                                   const stateData &sD,
+                                   double resid[],
+                                   const solverMode &sMode)
 {
     if (isAlgebraicOnly (sMode))
     {
@@ -95,9 +95,9 @@ void GovernorIeeeSimple::residual (const IOdata &inputs,
 }
 
 void GovernorIeeeSimple::derivative (const IOdata &inputs,
-                                            const stateData &sD,
-                                            double deriv[],
-                                            const solverMode &sMode)
+                                     const stateData &sD,
+                                     double deriv[],
+                                     const solverMode &sMode)
 {
     auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
@@ -139,10 +139,10 @@ void GovernorIeeeSimple::timestep (coreTime time, const IOdata &inputs, const so
 }
 
 void GovernorIeeeSimple::jacobianElements (const IOdata & /*inputs*/,
-                                                  const stateData &sD,
-                                                  matrixData<double> &md,
-                                                  const IOlocs &inputLocs,
-                                                  const solverMode &sMode)
+                                           const stateData &sD,
+                                           matrixData<double> &md,
+                                           const IOlocs &inputLocs,
+                                           const solverMode &sMode)
 {
     if (isAlgebraicOnly (sMode))
     {
@@ -206,9 +206,9 @@ index_t GovernorIeeeSimple::findIndex (const std::string &field, const solverMod
 }
 
 void GovernorIeeeSimple::rootTest (const IOdata &inputs,
-                                          const stateData &sD,
-                                          double root[],
-                                          const solverMode &sMode)
+                                   const stateData &sD,
+                                   double root[],
+                                   const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /*if (opFlags.test (uses_deadband))
@@ -243,9 +243,9 @@ void GovernorIeeeSimple::rootTest (const IOdata &inputs,
 }
 
 void GovernorIeeeSimple::rootTrigger (coreTime /*time*/,
-                                             const IOdata &inputs,
-                                             const std::vector<int> &rootMask,
-                                             const solverMode &sMode)
+                                      const IOdata &inputs,
+                                      const std::vector<int> &rootMask,
+                                      const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /*if (opFlags.test (uses_deadband))
@@ -280,10 +280,7 @@ void GovernorIeeeSimple::rootTrigger (coreTime /*time*/,
 }
 
 // set parameters
-void GovernorIeeeSimple::set (const std::string &param, const std::string &val)
-{
-    Governor::set (param, val);
-}
+void GovernorIeeeSimple::set (const std::string &param, const std::string &val) { Governor::set (param, val); }
 
 void GovernorIeeeSimple::set (const std::string &param, double val, units_t unitType)
 {
@@ -311,5 +308,5 @@ void GovernorIeeeSimple::set (const std::string &param, double val, units_t unit
     }
 }
 
-}//namespace governors
-}//namespace griddyn
+}  // namespace governors
+}  // namespace griddyn

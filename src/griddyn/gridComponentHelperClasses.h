@@ -33,37 +33,38 @@ enum operation_flags
     // indicator flags 0 -15 are general indicators flags which default false
 
     // typically cascading flags
-    has_constraints = 0,  //!<flag indicating if an object uses constraints
-    has_roots = 1,  //!<flag indicating if an object uses root finding
-    has_alg_roots = 2,  //!< flag indicated the object has roots dependent on algebraic states and thus must be evaluated after a initial condition update
-    has_powerflow_adjustments = 3,  //!<flag indicating if an object has voltage adjustments for power flow
-    preEx_requested = 4,  //!<flag indicating if an object requests pre-execution
-    uses_bus_frequency = 5,  //!<flag indicating if an object uses bus frequency calculation
+    has_constraints = 0,  //!< flag indicating if an object uses constraints
+    has_roots = 1,  //!< flag indicating if an object uses root finding
+    has_alg_roots = 2,  //!< flag indicated the object has roots dependent on algebraic states and thus must be
+                        //!< evaluated after a initial condition update
+    has_powerflow_adjustments = 3,  //!< flag indicating if an object has voltage adjustments for power flow
+    preEx_requested = 4,  //!< flag indicating if an object requests pre-execution
+    uses_bus_frequency = 5,  //!< flag indicating if an object uses bus frequency calculation
     has_pflow_states = 6,  //!< indicator if the object has power flow states if in question
     has_dyn_states = 7,  //!< indicator if the object has dynamic states if in question
     has_differential_states = 8,  //!< indicator if the object has differential states
     not_cloneable = 9,  //!< flag indicating that an object should not be cloned
     extra_cascading_flag = 10,  //!< reserved for future use
-    // end of typically cascading flags
+                                // end of typically cascading flags
 
     // for handling remote voltage control capabilities
     remote_voltage_control = 11,  //!< indicator that the object controls a remote bus voltage at a specific level
-    local_voltage_control = 12,  //!<indicator that the object controls the local bus voltage at a specific level
+    local_voltage_control = 12,  //!< indicator that the object controls the local bus voltage at a specific level
     indirect_voltage_control = 13,  //!< flag indicating the object must use indirect means to control the voltage
     adjustable_Q = 14,  //!< flag indicating that an object has controllable reactive power for power flow
                         // for handling remote power control capabilities
     remote_power_control = 15,  //!< indicator that the object controls a remote bus voltage at a specific level
-    local_power_control = 16,  //!<indicator that the object controls the local bus voltage at a specific level
+    local_power_control = 16,  //!< indicator that the object controls the local bus voltage at a specific level
     indirect_power_control = 17,  //!< flag indicating the object must use indirect means to control the voltage
     adjustable_P = 18,  //!< flag indicating that the object has adjustable power setting and can be used by slack
-                        //!bus for control of angle
+                        //! bus for control of angle
 
     // some indicator flags for local objects
     pFlow_initialized = 19,  //!< indicator that powerFlow initialization has been completed
     dyn_initialized = 20,  //!<  indicator that dynamic Initialization has been completed
-    object_armed_flag = 21,  //!<basically an extra object flag if the object has a trigger mechanism of some sort
+    object_armed_flag = 21,  //!< basically an extra object flag if the object has a trigger mechanism of some sort
     late_b_initialize = 22,  //!< flag indicating the object would like to be initialized after most other objects
-                             //!only acknowledged by areas and then only within the area
+                             //! only acknowledged by areas and then only within the area
     error_flag = 23,  //!< flag indicating the object has an error
 
     // flags  24- 31 indicating some sort of condition change
@@ -92,7 +93,8 @@ enum operation_flags
     object_flag12 = 43,
 
     // flags 43 - 45 state control
-    no_powerflow_operations = 44,  //!< flag indicating there is not nor will ever there be power flow states or checks
+    no_powerflow_operations =
+      44,  //!< flag indicating there is not nor will ever there be power flow states or checks
     no_dynamics = 45,  //!< flag indicating there is not nor will ever there be dynamic states
 
     disable_flag_updates = 46,  // flag to temporarily disable flag updates from the alert function
@@ -105,24 +107,24 @@ enum operation_flags
     differential_output =
       50,  //!< flag that the model has a differential state variable that is the primary output
     no_gridcomponent_set = 51,  //!< flag indicating skipping of the gridComponent set function for parent setting
-                             //!without throwing an error
+                                //! without throwing an error
     being_deleted = 52,  //!<  flag indicating the object is in the process of being deleted NOTE::useful for some
-                         //!large objects with components allocated in larger fashion so we skip over some steps in
-                         //!object removal
+                         //! large objects with components allocated in larger fashion so we skip over some steps
+                         //! in object removal
     separate_processing = 53,  //!< flag indicating that the object math functions will be handled by the parent
-                               //!object and should be skipped by the gridComponent Model
+                               //! object and should be skipped by the gridComponent Model
     /*flags 54-63 are intended for object capabilities*/
 
     multipart_calculation_capable =
       54,  //!< flag indicating the object is capable of using pre and post execution functions
-    has_subobject_pflow_states = 55, //!< flag indicating that the object has a subobject with pflow states
+    has_subobject_pflow_states = 55,  //!< flag indicating that the object has a subobject with pflow states
     extra_capability_flag1 = 56,  //!< flag reserved for future use
-    dc_only = 57,  //!<flag indicating the object must be attached to a DC bus
-    dc_capable = 58,  //!<flag indicating the object can be attached to a DC bus
-    dc_terminal2 = 59,  //!<flag indicating the terminal 2 must be a DC bus
-    three_phase_only = 61,  //!<flag indicating the object must be attached to a 3 phase bus
-    three_phase_capable = 62,  //!<flag indicating the object can be attached to a 3 phase bus
-    three_phase_terminal2 = 63,  //!<flag indicating the terminal 2 must be attached to a 3 phase bus
+    dc_only = 57,  //!< flag indicating the object must be attached to a DC bus
+    dc_capable = 58,  //!< flag indicating the object can be attached to a DC bus
+    dc_terminal2 = 59,  //!< flag indicating the terminal 2 must be a DC bus
+    three_phase_only = 61,  //!< flag indicating the object must be attached to a 3 phase bus
+    three_phase_capable = 62,  //!< flag indicating the object can be attached to a 3 phase bus
+    three_phase_terminal2 = 63,  //!< flag indicating the terminal 2 must be attached to a 3 phase bus
 
 };
 /** alternate names for some of the flags*/
@@ -257,9 +259,9 @@ enum class check_level_t
 {
     reversable_only = 0,
     full_check = 1,
-    low_voltage_check = 3, //!< check for low voltages
+    low_voltage_check = 3,  //!< check for low voltages
     complete_state_check = 4,
-	high_angle_trip=5,  //!< disconnect all lines with phase differential greater than pi/2;
+    high_angle_trip = 5,  //!< disconnect all lines with phase differential greater than pi/2;
 };
 
 /** @brief helper class for containing sizes to group the data*/
@@ -275,18 +277,18 @@ class stateSizes
     count_t diffRoots = 0;  //!< number of roots on purely differential states
     count_t algRoots = 0;  //!< number of roots based algebraic components
 
-    count_t jacSize = 0;  //!<upper bound on number of Jacobian entries
-	//NOTE:  there is 4 bytes of padding here
+    count_t jacSize = 0;  //!< upper bound on number of Jacobian entries
+    // NOTE:  there is 4 bytes of padding here
 
     /** reset the sizes to all zeros*/
     void reset ();
     /** reset just the sizes related to states to 0*/
     void stateReset ();
     /** reset the root counter and  sizes to 0*/
-	void rootReset() { algRoots = diffRoots = 0; };
+    void rootReset () { algRoots = diffRoots = 0; };
 
-	/** reset the Jacobian counter and  sizes to 0*/
-	void JacobianReset() { jacSize = 0; };
+    /** reset the Jacobian counter and  sizes to 0*/
+    void JacobianReset () { jacSize = 0; };
     /** add another stateSizes object to this one
     @param[in] arg the stateSizes object to combine*/
     void add (const stateSizes &arg);
@@ -297,10 +299,10 @@ class stateSizes
     /** add just the root and Jacobian information
     @param[in] arg the update to add to the calling object*/
     void addRootSizes (const stateSizes &arg);
-	/** add just the Jacobian information
-	@param[in] arg the update to add to the calling object*/
-	void addJacobianSizes(const stateSizes &arg);
-	/** get the total count*/
+    /** add just the Jacobian information
+    @param[in] arg the update to add to the calling object*/
+    void addJacobianSizes (const stateSizes &arg);
+    /** get the total count*/
     count_t totalSize () const;
 };
 
@@ -318,11 +320,11 @@ class solverOffsets
     index_t rootOffset = kNullLocation;  //!< location for the root offsets
                                          // total object sizes
 
-    bool stateLoaded = false;  //!<flag indicating the state sizes have been loaded
+    bool stateLoaded = false;  //!< flag indicating the state sizes have been loaded
     bool jacobianLoaded = false;  //!< flag indicated Jacobian size is loaded
     bool rootsLoaded = false;  //!< flag indicated root size is loaded
-	bool offetLoaded = false;  //!<flag indicating that offsets have been loaded
-    solverMode sMode = cLocalSolverMode;  //!<the reference solverMode
+    bool offetLoaded = false;  //!< flag indicating that offsets have been loaded
+    solverMode sMode = cLocalSolverMode;  //!< the reference solverMode
 
     // local objectSizes
     stateSizes total;  //!< container for total state sizes;
@@ -339,9 +341,9 @@ class solverOffsets
     /** @brief reset the solverOffset root components
      */
     void rootCountReset ();
-	/** @brief reset the solverOffset Jacobian component
-	*/
-	void JacobianCountReset();
+    /** @brief reset the solverOffset Jacobian component
+     */
+    void JacobianCountReset ();
 
     /** @brief reset the solverOffset state components
      */
@@ -369,14 +371,14 @@ class solverOffsets
     /** @brief merge the sizes of two solverOffsets state Sizes
       @param offsets the solverOffset object to use as the sizes
       */
-    void addStateSizes (const solverOffsets&offsets);
+    void addStateSizes (const solverOffsets &offsets);
 
     /** @brief add the Root count parameters to the sizes
      */
     void addRootSizes (const solverOffsets &offsets);
-	/** @brief add the Jacobian parameters to the sizes
-	*/
-	void addJacobianSizes(const solverOffsets &offsets);
+    /** @brief add the Jacobian parameters to the sizes
+     */
+    void addJacobianSizes (const solverOffsets &offsets);
 
     /** @brief load the local state variables to the sizes
     @param finishedLoading set the stateLoaded flag to the given value
@@ -385,7 +387,7 @@ class solverOffsets
     /** @brief load the local information to the total
     @param finishedLoading set the stateLoaded flag to the given value
     */
-    void localLoadAll(bool finishedLoading = false);
+    void localLoadAll (bool finishedLoading = false);
 
     /** @brief set the offsets from another solverOffset object
     @param newOffsets the solverOffset object to use as the sizes
@@ -397,10 +399,12 @@ class solverOffsets
     */
     void setOffset (index_t newOffset);
 
-	void setLoaded() { stateLoaded = jacobianLoaded = rootsLoaded = true; };
-	void setLoaded(bool dynOnly) {
-		stateLoaded = (!dynOnly) ? stateLoaded : true; jacobianLoaded = rootsLoaded = true;
-	}
+    void setLoaded () { stateLoaded = jacobianLoaded = rootsLoaded = true; };
+    void setLoaded (bool dynOnly)
+    {
+        stateLoaded = (!dynOnly) ? stateLoaded : true;
+        jacobianLoaded = rootsLoaded = true;
+    }
 };
 
 /**@brief local state pointers
@@ -439,9 +443,9 @@ class stateData
     const double *algState =
       nullptr;  //!< the algebraic state data (for cases where state contains only differential components)
     double *scratch1 = nullptr;  //!< scratch space the objects can use for calculations (if not null it should be
-                                 //!the same size as state
+                                 //! the same size as state
     double *scratch2 = nullptr;  //!< scratch space the objects can use for calculations (if not null it should be
-                                 //!the same size as state
+                                 //! the same size as state
     coreTime altTime = 0.0;  //!< the time corresponding to the other part of the state
     index_t pairIndex = kNullLocation;  //!< the index of the mode the paired data comes from
 
@@ -492,11 +496,11 @@ class offsetTable
      *@return a flag (true) if loaded (false) if not
      */
     bool isRootCountLoaded (const solverMode &sMode) const;
-	/** @brief check whether the Jacobian information is loaded
-	*@param[in] sMode the solverMode we are interested in
-	*@return a flag (true) if loaded (false) if not
-	*/
-	bool isJacobianCountLoaded(const solverMode &sMode) const;
+    /** @brief check whether the Jacobian information is loaded
+     *@param[in] sMode the solverMode we are interested in
+     *@return a flag (true) if loaded (false) if not
+     */
+    bool isJacobianCountLoaded (const solverMode &sMode) const;
     /** @brief set the offsets for a solverMode
      *@param[in] sMode the solverMode we are interested in
      *@return a pointer to the
@@ -627,10 +631,10 @@ class offsetTable
      *@param[in] dynamic_only only unload the dynamic solverObjects
      */
     void rootUnload (bool dynamic_only = false);
-	/** @brief unload the Jacobian information for the solverOffsets
-	*@param[in] dynamic_only only unload the dynamic solverObjects
-	*/
-	void JacobianUnload(bool dynamic_only = false);
+    /** @brief unload the Jacobian information for the solverOffsets
+     *@param[in] dynamic_only only unload the dynamic solverObjects
+     */
+    void JacobianUnload (bool dynamic_only = false);
     /** @brief update all solverOffsets with the local information
      *@param[in] dynamic_only only unload the dynamic solverObjects
      */
@@ -638,7 +642,7 @@ class offsetTable
     /** @brief get the size of the solverOffsets
      *@return the size
      */
-    count_t size () const { return static_cast<count_t>(offsetContainer.size()); }
+    count_t size () const { return static_cast<count_t> (offsetContainer.size ()); }
     /** @brief get the solverMode corresponding to an index
      *@return a solverMode object
      */
@@ -647,11 +651,12 @@ class offsetTable
      *@return a solverMode object
      */
     const solverMode &find (const solverMode &tMode) const;
-	private:
-		bool isValidIndex(index_t index) const 
-		{
-			return ((index >= 0) && (index < static_cast<count_t>(offsetContainer.size())));
-		}
+
+  private:
+    bool isValidIndex (index_t index) const
+    {
+        return ((index >= 0) && (index < static_cast<count_t> (offsetContainer.size ())));
+    }
 };
 
 }  // namespace griddyn

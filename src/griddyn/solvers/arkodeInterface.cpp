@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "arkodeInterface.h"
 
@@ -37,13 +37,13 @@ namespace solvers
 {
 int arkodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
 int arkodeJac (realtype time,
-                    N_Vector state,
-                    N_Vector dstate_dt,
-                    SUNMatrix J,
-                    void *user_data,
-                    N_Vector tmp1,
-                    N_Vector tmp2,
-                    N_Vector tmp3);
+               N_Vector state,
+               N_Vector dstate_dt,
+               SUNMatrix J,
+               void *user_data,
+               N_Vector tmp1,
+               N_Vector tmp2,
+               N_Vector tmp3);
 
 int arkodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_data);
 
@@ -70,24 +70,24 @@ arkodeInterface::~arkodeInterface ()
     }
 }
 
-std::unique_ptr<SolverInterface> arkodeInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> arkodeInterface::clone (bool fullCopy) const
 {
-	std::unique_ptr<SolverInterface> si = std::make_unique<arkodeInterface>();
-	arkodeInterface::cloneTo(si.get(),fullCopy);
-	return si;
+    std::unique_ptr<SolverInterface> si = std::make_unique<arkodeInterface> ();
+    arkodeInterface::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
-void arkodeInterface::cloneTo(SolverInterface *si, bool fullCopy) const
+void arkodeInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-	sundialsInterface::cloneTo(si, fullCopy);
-	auto ai = dynamic_cast<arkodeInterface *>(si);
-	if (ai == nullptr)
-	{
-		return;
-	}
-	ai->maxStep = maxStep;
-	ai->minStep = minStep;
-	ai->step = step;
+    sundialsInterface::cloneTo (si, fullCopy);
+    auto ai = dynamic_cast<arkodeInterface *> (si);
+    if (ai == nullptr)
+    {
+        return;
+    }
+    ai->maxStep = maxStep;
+    ai->minStep = minStep;
+    ai->step = step;
 }
 
 void arkodeInterface::allocate (count_t stateCount, count_t numRoots)
@@ -126,7 +126,7 @@ void arkodeInterface::setMaxNonZeros (count_t nonZeroCount)
 
 void arkodeInterface::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -288,7 +288,6 @@ void arkodeInterface::logErrorWeights (print_level logLevel) const
     NVECTOR_DESTROY (use_omp, ele);
 }
 
-
 static const std::map<int, std::string> arkodeRetCodes{
   {ARK_MEM_NULL, "The solver memory argument was NULL"},
   {ARK_ILL_INPUT, "One of the function inputs is illegal"},
@@ -312,7 +311,6 @@ static const std::map<int, std::string> arkodeRetCodes{
   {ARK_BAD_DKY, "Bad DKY"},
 
 };
-
 
 void arkodeInterface::initialize (coreTime time0)
 {
@@ -351,39 +349,36 @@ void arkodeInterface::initialize (coreTime time0)
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
-        J = SUNDenseMatrix(svsize, svsize);
-        check_flag(J, "SUNDenseMatrix", 0);
+        J = SUNDenseMatrix (svsize, svsize);
+        check_flag (J, "SUNDenseMatrix", 0);
         /* Create KLU solver object */
-        LS = SUNDenseLinearSolver(state, J);
-        check_flag(LS, "SUNDenseLinearSolver", 0);
+        LS = SUNDenseLinearSolver (state, J);
+        check_flag (LS, "SUNDenseLinearSolver", 0);
     }
     else
     {
         /* Create sparse SUNMatrix */
-        J = SUNSparseMatrix(svsize, svsize, jsize, CSR_MAT);
-        check_flag(J, "SUNSparseMatrix", 0);
+        J = SUNSparseMatrix (svsize, svsize, jsize, CSR_MAT);
+        check_flag (J, "SUNSparseMatrix", 0);
 
         /* Create KLU solver object */
-        LS = SUNKLU(state, J);
-        check_flag(LS, "SUNKLU", 0);
-
+        LS = SUNKLU (state, J);
+        check_flag (LS, "SUNKLU", 0);
     }
 #else
-    J = SUNDenseMatrix(svsize, svsize);
-    check_flag(J, "SUNSparseMatrix", 0);
+    J = SUNDenseMatrix (svsize, svsize);
+    check_flag (J, "SUNSparseMatrix", 0);
     /* Create KLU solver object */
-    LS = SUNDenseLinearSolver(state, J);
-    check_flag(LS, "SUNDenseLinearSolver", 0);
+    LS = SUNDenseLinearSolver (state, J);
+    check_flag (LS, "SUNDenseLinearSolver", 0);
 #endif
 
+    retval = ARKDlsSetLinearSolver (solverMem, LS, J);
 
+    check_flag (&retval, "IDADlsSetLinearSolver", 1);
 
-    retval = ARKDlsSetLinearSolver(solverMem, LS, J);
-
-    check_flag(&retval, "IDADlsSetLinearSolver", 1);
-
-    retval = ARKDlsSetJacFn(solverMem, arkodeJac);
-    check_flag(&retval, "IDADlsSetJacFn", 1);
+    retval = ARKDlsSetJacFn (solverMem, arkodeJac);
+    check_flag (&retval, "IDADlsSetJacFn", 1);
 
     retval = ARKodeSetMaxNonlinIters (solverMem, 20);
     check_flag (&retval, "ARKodeSetMaxNonlinIters", 1);
@@ -410,10 +405,7 @@ void arkodeInterface::initialize (coreTime time0)
     flags.set (initialized_flag);
 }
 
-void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode)
-{
-    KLUReInit(sparseReinitMode);
-}
+void arkodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
 
 void arkodeInterface::setRootFinding (count_t numRoots)
 {
@@ -514,17 +506,16 @@ int arkodeRootFunc (realtype time, N_Vector state, realtype *gout, void *user_da
 }
 
 int arkodeJac (realtype time,
-                     N_Vector state,
-                     N_Vector dstate_dt,
-                     SUNMatrix J,
-                     void *user_data,
-                     N_Vector tmp1,
-                     N_Vector tmp2,
-                     N_Vector /*tmp3*/)
+               N_Vector state,
+               N_Vector dstate_dt,
+               SUNMatrix J,
+               void *user_data,
+               N_Vector tmp1,
+               N_Vector tmp2,
+               N_Vector /*tmp3*/)
 {
     return sundialsJac (time, 0.0, state, dstate_dt, J, user_data, tmp1, tmp2);
 }
-
 
 }  // namespace solvers
 }  // namespace griddyn

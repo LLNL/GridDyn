@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,11 +8,11 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "core/coreExceptions.h"
-#include "griddyn/Generator.h"
 #include "fileInput.h"
+#include "griddyn/Generator.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/loads/zipLoad.h"
@@ -107,7 +107,7 @@ void loadCDF (coreObject *parentObject, const std::string &fileName, const basic
                     {
                         if (index < 100000000)
                         {
-                            busList.resize (2 * index+1, nullptr);
+                            busList.resize (2 * index + 1, nullptr);
                         }
                         else
                         {
@@ -649,4 +649,4 @@ double convertBV (std::string &bv)
     return val;
 }
 
-}//namespace griddyn
+}  // namespace griddyn

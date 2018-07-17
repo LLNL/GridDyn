@@ -8,14 +8,14 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "gridLabDLoad.h"
+#include "../gridBus.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "coupling/GhostSwingBusManager.h"
-#include "../gridBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
 
@@ -583,9 +583,7 @@ std::vector<double> gridLabDLoad::runGridLabB (bool unbalancedAlert)
         }
     }
 
-
     return {retP, retQ};
-
 }
 
 void gridLabDLoad::run2GridLabA (coreTime time, const IOdata &inputs)
@@ -957,7 +955,7 @@ std::cout << "SGS : gridLabDLoad::run3GridLabB retP[0] = " << retP[0] << " [1] =
 #endif
 
 return retP;
-}
+}  // namespace loads
 
 void gridLabDLoad::set (const std::string &param, const std::string &val)
 {
@@ -1216,7 +1214,8 @@ void gridLabDLoad::run_dummy_load (index_t kk, VoltageMessage *vm, CurrentMessag
     {
         auto vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
-        auto rP = dummy_load[kk]->getRealPower ({vtest / localBaseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
+        auto rP =
+          dummy_load[kk]->getRealPower ({vtest / localBaseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
         auto rQ =
           dummy_load[kk]->getReactivePower ({vtest / localBaseVoltage * 0.001}, emptyStateData, cLocalSolverMode);
         auto vcom = std::complex<double> (vtest, 0);
@@ -1242,8 +1241,8 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage *vm, Curre
     {
         auto vtest = std::hypot (vm->voltage[ii].real[0], vm->voltage[ii].imag[0]);
 
-        auto rP =
-          dummy_load_forward[kk]->getRealPower ({vtest / localBaseVoltage / 1000}, emptyStateData, cLocalSolverMode);
+        auto rP = dummy_load_forward[kk]->getRealPower ({vtest / localBaseVoltage / 1000}, emptyStateData,
+                                                        cLocalSolverMode);
         auto rQ = dummy_load_forward[kk]->getReactivePower ({vtest / localBaseVoltage / 1000}, emptyStateData,
                                                             cLocalSolverMode);
         auto vcom = std::complex<double> (vtest, 0);
@@ -1263,5 +1262,5 @@ void gridLabDLoad::run_dummy_load_forward (index_t kk, VoltageMessage *vm, Curre
     cm->numThreePhaseCurrent = vm->numThreePhaseVoltage;
 }
 #endif  // GRIDDYN_HAVE_MPI
-}  // namespace loads
+}  // namespace griddyn
 }  // namespace griddyn

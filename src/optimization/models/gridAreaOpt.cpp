@@ -12,15 +12,15 @@
 
 // headers
 #include "gridAreaOpt.h"
+#include "../optObjectFactory.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
-#include "griddyn/Area.h"
-#include "griddyn/gridBus.h"
 #include "gridBusOpt.h"
 #include "gridLinkOpt.h"
 #include "gridRelayOpt.h"
+#include "griddyn/Area.h"
 #include "griddyn/Link.h"
-#include "../optObjectFactory.h"
+#include "griddyn/gridBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectData.hpp"
 #include "utilities/vectorOps.hpp"
@@ -145,7 +145,7 @@ void gridAreaOpt::dynObjectInitializeA (std::uint32_t flags)
             newObj.push_back (oo);
         }
         ++kk;
-		areaObj = area->getArea (kk);
+        areaObj = area->getArea (kk);
     }
     for (auto no : newObj)
     {
