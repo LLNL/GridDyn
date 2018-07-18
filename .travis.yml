@@ -131,7 +131,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - RUN_VALGRIND=true
         - DISABLE_CI_TESTS=true
-        - BUILD_TYPE=Debug
+        - BUILD_TYPE=RelWithDebInfo
         - USE_MPI=mpich
     - <<: *daily_linux
       env:
@@ -236,7 +236,7 @@ before_script:
   - mkdir -p build && cd build
  
 script:
-  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON -DCMAKE_CXX_FLAGS="-g" -DCMAKE_C_FLAGS="-g" ..
+  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
   - cmake --build . -- -j2
 
   # Setup counters for coverage
