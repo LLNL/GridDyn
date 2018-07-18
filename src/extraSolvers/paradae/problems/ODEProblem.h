@@ -9,9 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-#ifndef ODEProblem_h
-#define ODEProblem_h
-
+#pragma once
 #include "mpi.h"
 #include "../common/def.h"
 #include "../common/MapParam.h"
@@ -52,6 +50,5 @@ public:
     inline bool PrintSolution() { return print_solution; };
     inline bool PrintAllITERSolution() { return print_all_iter_solution; };
 };
-} //namespace paradea
+} //namespace paradae
 } //namespace griddyn
-#endif

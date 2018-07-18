@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef OPTIONALDEFS_H_
-#define OPTIONALDEFS_H_
 #pragma once
 
 #include "griddyn/compiler-config.h"
@@ -40,6 +37,4 @@ using optional = boost::optional<X>;
 }  // namespace utilities
 
 #endif
-#endif
-
 #endif

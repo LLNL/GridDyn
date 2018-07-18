@@ -27,7 +27,7 @@ class MapParam : public std::map<std::string,std::string> {
 public:
   MapParam(){mpi_rank=0;};
   MapParam(MPI_Comm comm_);
-  void ReadFile(std::string filename);
+  void ReadFile(const std::string &filename);
   Real GetRealParam(std::string key, Real default_val=-1.) const;
   int GetIntParam(std::string key, int default_val=-1) const;
   std::string GetStrParam(std::string key, std::string default_val="") const;
