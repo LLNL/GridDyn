@@ -28,8 +28,7 @@ namespace paradae {
 using namespace std;
 using namespace griddyn;
 
-EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_, solverMode *mode_)
-
+EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSimulation *gds_, const Vector& y0_, solverMode *mode_, vector<double> &discontinuities)
 {
   //n=gds_->stateSize(cDaeSolverMode);
   n=gds_->stateSize(*mode_);
@@ -47,19 +46,22 @@ EquationGridDyn::EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, gridDynSi
   mode = mode_;
   name="EquationGridDyn";
 
-  // Matt's original code
-  //roots=RootManager(1,1,0,1e-10);
-  //roots.is_active(0)=1;
-  //roots.n_sactive=1;
-  //roots.t_sroot(0)=5;
-
-  // Code for up to 100 square pulse discontinuities
-  roots=RootManager(100,1,0,1e-10);
-  roots.n_sactive=100;
-  for (int i=0; i<100; i++)
+  // Old code setting up 100 square pulse discontinuities at t=[0.5, 1.5, 2.5, ...]
+  //roots=RootManager(100,1,0,1e-10);
+  //roots.n_sactive=100;
+  //for (int i=0; i<100; i++)
+  //{
+  //    roots.is_active(i) = 1; 
+  //    roots.t_sroot(i) = 0.5 + i;
+  //}
+  
+  // New code, import discontinuity locations from XML file
+  roots=RootManager(discontinuities.size(), 1, 0, 1e-10);
+  roots.n_sactive=discontinuities.size();
+  for (int i=0; i<discontinuities.size(); i++)
   {
       roots.is_active(i) = 1; 
-      roots.t_sroot(i) = 0.5 + i;
+      roots.t_sroot(i) = discontinuities[i];
   }
   
   // This will print out all of the variable names
