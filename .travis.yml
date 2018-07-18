@@ -127,7 +127,7 @@ jobs:
           packages:
             - g++-4.9
             - valgrind
-            - libc6-dbg
+            - libstdc++-6-dev
       env:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
         - RUN_VALGRIND=true
