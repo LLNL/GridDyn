@@ -62,61 +62,6 @@ def get_chunks(filename):
     chunks = list(map(get_chunk_from_lines, line_ranges))
     return chunks
 
-## pipeline
-#default_before_chunks = get_chunks('default_before.tidy')
-default_after_chunks =  get_chunks('default_after.tidy')
-#all_before_chunks = get_chunks('all_before.tidy')
-all_after_chunks =  get_chunks('all_after.tidy')
-
-#unique_default_before_chunks = set(default_before_chunks)
-#unique_all_before_chunks = set(all_before_chunks)
-#before_chunks = unique_default_before_chunks | unique_all_before_chunks
-
-unique_default_after_chunks = set(default_after_chunks)
-unique_all_after_chunks = set(all_after_chunks)
-after_chunks = unique_default_after_chunks | unique_all_after_chunks
-
-#fixed_chunks = before_chunks - after_chunks
-#new_chunks = after_chunks - before_chunks
-
-chunks = after_chunks
-
-#print('fixed: {}'.format(len(fixed_chunks)))
-#print('new: {}'.format(len(new_chunks)))
-#print('total now: {}'.format(len(chunks)))
-
-# create map[guideline] -> list of chunks violating that guideline
-guidelines = set(chunk.guideline for chunk in chunks)
-guideline_map = {}
-for guideline in guidelines:
-    guideline_map[guideline] = []
-
-for chunk in chunks:
-    guideline_map[chunk.guideline].append(chunk)
-
-# sort each list by filename
-filename_key = lambda x: x.file_name
-for guideline in guidelines:
-    guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
-
-guideline_priority = [(k, len(v)) for k, v in guideline_map.iteritems()]
-guideline_priority.sort(key=lambda x: x[1])
-
-for k, v in guideline_priority:
-    print('{}: {}'.format(k, v))
-
-
-not_comment = lambda line: line.strip()[0] != '#'
-not_empty = lambda line: line.strip() != ''
-
-
-with open('guideline_notes.txt', 'r') as f:
-    guidelines = f.readlines()
-
-guidelines = filter(not_comment, guidelines)
-guidelines = filter(not_empty, guidelines)
-guidelines = [l.strip() for l in guidelines]
-
 def separator(color='red'):
     colormap = {
         'red': '\033[31m',
@@ -126,13 +71,62 @@ def separator(color='red'):
     sep = colormap[color] + '='*50 + decolor
     return sep
 
-print(separator('green'))
-# only grab first guideline
-for i in guideline_map[guidelines[0]]:
-    print(i.original)
-    print(separator())
+## pipeline
+if __name__ == '__main__':
+    import sys
+    filenames = sys.argv[2:]
+    if len(filenames) == []:
+        print("Usage: {} guidelines.txt file1.tidy [file2.tidy ...]".format(sys.argv[0]))
+        sys.exit(-1)
 
-filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
-print('\nFiles referenced:')
-for filename in sorted(filenames):
-    print('\t{}'.format(filename))
+    chunks = set()
+    for filename in filenames:
+        chunks |= set(get_chunks(filename))
+
+    print('Total warnings: {}'.format(len(chunks)))
+
+    # create map[guideline] -> list of chunks violating that guideline
+    guidelines = set(chunk.guideline for chunk in chunks)
+    guideline_map = {}
+    for guideline in guidelines:
+        guideline_map[guideline] = []
+
+    for chunk in chunks:
+        guideline_map[chunk.guideline].append(chunk)
+
+    # sort each list by filename
+    filename_key = lambda x: x.file_name
+    for guideline in guidelines:
+        guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
+
+    # sort all guidelines by how many warnings apply
+    guideline_priority = [(k, len(v)) for k, v in guideline_map.iteritems()]
+    guideline_priority.sort(key=lambda x: x[1])
+
+    # print all guideline warning counts
+    for k, v in guideline_priority:
+        print(' * {}: {}'.format(k, v))
+
+    # predicates: line is not a comment, line is not empty
+    not_comment = lambda line: line.strip()[0] != '#'
+    not_empty = lambda line: line.strip() != ''
+
+    with open(sys.argv[1], 'r') as f:
+        guidelines = f.readlines()
+
+    guidelines = filter(not_comment, guidelines)
+    guidelines = filter(not_empty, guidelines)
+    guidelines = [l.strip() for l in guidelines]
+
+    # separators are more for visual cues than anything else
+    print(separator('green'))
+    # print all warnings from the first guideline only
+    for i in guideline_map[guidelines[0]]:
+        print(i.original)
+        print(separator('red'))
+
+    # print filenames referenced by the warnings printed
+    filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
+    print('\nFiles referenced:')
+    for filename in sorted(filenames):
+        print('\t{}'.format(filename))

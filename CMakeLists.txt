@@ -559,8 +559,10 @@ endif(TEST_ENABLE)
 
 set(GRIDDYN_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for GriddynConfig.cmake")
 
-file(GLOB efiles "examples/*")
+file(GLOB efiles "examples/*.*")
 install(FILES ${efiles} DESTINATION examples COMPONENT examples)
+file(GLOB ebraidfiles "examples/braid_examples/*.*")
+install(FILES ${ebraidfiles} DESTINATION examples/braid_examples COMPONENT examples)
 
 set(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
 install(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
