@@ -185,7 +185,6 @@ ExternalProject_Add(sundials
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log
         )
 	
-	endif()
 	
 endfunction()
 
@@ -266,7 +265,4 @@ message(STATUS "Configuring Sundials Autobuild for ${CMAKE_BUILD_TYPE}: logging 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log
         )
-	
-	endif()
-
-endfunction()
+	endfunction()
