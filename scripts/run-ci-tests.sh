@@ -94,8 +94,7 @@ else
 
     if [[ "$RUN_VALGRIND" == "true" ]]; then
         echo "Running Valgrind tests"
-        valgrind --track-origins=yes --leak-check=full --tool=memcheck src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
-        ctest -T memcheck -L Valgrind --verbose && cat Testing/Temporary/MemoryChecker.1.log
+        ctest -T memcheck -L Valgrind && cat Testing/Temporary/MemoryChecker.1.log
     fi
 
     # Run the CI tests last so that the execution status is used for the pass/fail status shown
