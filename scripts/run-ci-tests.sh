@@ -41,7 +41,7 @@ do
 done
 
 if [[ "$RUN_CACHEGRIND" == "true" ]]; then
-    valgrind --tool=cachegrind src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
+    valgrind --track-origins=yes --tool=cachegrind src/gridDynMain/gridDynMain ../examples/179busDynamicTest.xml
 fi
 
 if [[ "$NO_CTEST" == "true" ]]; then
