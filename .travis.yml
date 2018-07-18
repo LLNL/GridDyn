@@ -120,16 +120,19 @@ jobs:
    # Jobs for daily valgrind and code coverage tests
    # ------------------------------------------------
     - <<: *daily_linux
+      compiler: clang
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
           packages:
-            - g++-4.9
+            - clang-4.0
             - valgrind
             - libstdc++-6-dev
       env:
-        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-4.9 && CXX=g++-4.9"
+        - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
+        - CCACHE_CPP2=yes
         - RUN_VALGRIND=true
         - DISABLE_CI_TESTS=true
         - BUILD_TYPE=RelWithDebInfo
