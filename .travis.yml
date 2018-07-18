@@ -120,19 +120,8 @@ jobs:
    # Jobs for daily valgrind and code coverage tests
    # ------------------------------------------------
     - <<: *daily_linux
-      compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
-          packages:
-            - clang-4.0
-            - valgrind
-            - libstdc++-6-dev
       env:
-        - MATRIX_EVAL="COMPILER=clang && CC='clang-4.0' && CXX='clang++-4.0'"
-        - CCACHE_CPP2=yes
+        - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         - RUN_VALGRIND=true
         - DISABLE_CI_TESTS=true
         - BUILD_TYPE=RelWithDebInfo
@@ -213,8 +202,8 @@ install:
   - export GRIDDYN_DEPENDENCY_FLAGS=""
   - OPTION_FLAGS_ARR=()
   - if [[ "$ENABLE_HELICS" ]]; then OPTION_FLAGS_ARR+=("-DHELICS_EXECUTABLE=ON" "-DAUTOBUILD_HELICS=ON") ; fi
-  - if [[ "$ENABLE_FMI" ]]; then OPTION_FLAG_ARRS+=("-DBUILD_SHARED_FMI_LIBRARY=ON") ; else OPTION_FLAGS_ARR+=("-DFMI_ENABLE=OFF") ; fi
-  - if [[ "$BUILD_TYPE" ]]; then OPTION_FLAG_ARRS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}") ; fi
+  - if [[ "$ENABLE_FMI" ]]; then OPTION_FLAGS_ARR+=("-DBUILD_SHARED_FMI_LIBRARY=ON") ; else OPTION_FLAGS_ARR+=("-DFMI_ENABLE=OFF") ; fi
+  - if [[ "$BUILD_TYPE" ]]; then OPTION_FLAGS_ARR+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}") ; fi
   - if [[ "$BUILD_TYPE" == "Coverage" ]]; then OPTION_FLAGS_ARR+=("-DTEST_CODE_COVERAGE=ON") ; fi
   
   - source scripts/install-ci-dependencies.sh
