@@ -282,6 +282,7 @@ void gridBus::alert (coreObject *obj, int code)
             reconnect ();
         }
         FALLTHROUGH
+        // FALLTHROUGH
     default:
         gridPrimary::alert (obj, code);
     }
@@ -1263,7 +1264,7 @@ bool busPowers::needsUpdate (const stateData &sD) const
     bool empty = sD.empty();
     bool zeroSeqID = sD.seqID == 0;
     bool differentSeqID = sD.seqID != seqID;
-    return empty or zeroSeqID or differentSeqID;
+    return (empty || zeroSeqID || differentSeqID);
 }
 
 // computed power at bus

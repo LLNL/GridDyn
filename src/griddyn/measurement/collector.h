@@ -97,7 +97,7 @@ public:
 	@param[in] N the size of the data storage location
 	@return the number of data points stored
 	*/
-	count_t grabData(double *data, index_t N);
+	count_t grabData(double *outputData, index_t N);
 	virtual change_code trigger(coreTime time) override;
 	/** do a check to check and assign all columns*/
 	void recheckColumns();

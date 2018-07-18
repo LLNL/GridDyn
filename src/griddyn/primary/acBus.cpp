@@ -186,7 +186,9 @@ void acBus::alert (coreObject *obj, int code)
         {
             reconnect ();
         }
+		
     FALLTHROUGH
+        // FALLTHROUGH
     default:
         gridPrimary::alert (obj, code);
     }

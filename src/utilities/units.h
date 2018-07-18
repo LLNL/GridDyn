@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYN_UNITS_
-#define GRIDDYN_UNITS_
+#pragma once
 
 #include <string>
 
@@ -198,4 +196,3 @@ specified units
 */
 double unitConversionTemperature (double val, const units_t in, const units_t out);
 }//namespace gridUnits
-#endif
