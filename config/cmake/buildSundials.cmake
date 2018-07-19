@@ -107,7 +107,12 @@ endif()
 endfunction()
 
 function (build_sundials_mingw)
-
+ set(valid_btypes "Release;Debug;RelWithDebInfo;MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btype)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
 #message(STATUS "BUILD SUNDIALS MINGW")
 	include(escape_string)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
@@ -180,16 +185,16 @@ ExternalProject_Add(sundials
 
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
 
-	message(STATUS "Configuring Sundials Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log")
+	message(STATUS "Configuring Sundials Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log
         )
 	
-	message(STATUS "Building Sundials Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+	message(STATUS "Building Sundials Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log")	
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${LOCAL_BUILD_TYPE}
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log
         )
@@ -198,7 +203,13 @@ ExternalProject_Add(sundials
 endfunction()
 
 function (build_sundials)
-
+message(STATUS "BUILD SUNDIALS UNIX")
+	set(valid_btypes "Release;Debug;RelWithDebInfo;MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btype)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
 	include(escape_string)
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
 	escape_string(c_compiler_string ${CMAKE_C_COMPILER})
@@ -264,16 +275,16 @@ ExternalProject_Add(sundials
 
 
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
-message(STATUS "Configuring Sundials Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log")
+message(STATUS "Configuring Sundials Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config.log
         )
 	
-	message(STATUS "Building Sundials Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log")	
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+	message(STATUS "Building Sundials Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log")	
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${LOCAL_BUILD_TYPE}
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_build.log
         )

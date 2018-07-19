@@ -7,6 +7,13 @@
 #
 function (build_libzmq)
 
+set(valid_btypes "Release;Debug;RelWithDebInfo;MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btype)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
+	
 set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_libzmq)
 
 	include(escape_string)
@@ -115,15 +122,15 @@ if (NOT BUILD_RELEASE_ONLY)
         )
 endif()
 else(MSVC) #for non visual studio platforms just autobuild the specified build type
-	message(STATUS "Configuring ZeroMQ Autobuild for ${CMAKE_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config.log")
+	message(STATUS "Configuring ZeroMQ Autobuild for ${LOCAL_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
-	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
+	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config.log
         )
 
-	message(STATUS "Building ZeroMQ ${CMAKE_BUILD_TYPE} build logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_build.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+	message(STATUS "Building ZeroMQ ${LOCAL_BUILD_TYPE} build logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_build.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${LOCAL_BUILD_TYPE}
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_build.log
         )

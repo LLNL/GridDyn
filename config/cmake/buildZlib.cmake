@@ -3,6 +3,13 @@
 
 function (build_zlib)
 
+set(valid_btypes "Release;Debug;RelWithDebInfo;MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btype)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
+	
     set(trigger_build_dir ${CMAKE_BINARY_DIR}/autobuild/force_zlib)
 
     #mktemp dir in build tree
@@ -68,15 +75,15 @@ execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE
         )
 endif()
 else(MSVC)
-message(STATUS "Configuring zlib Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config.log")	
+message(STATUS "Configuring zlib Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config.log")	
 execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
-        -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config.log
         )
 		
-	message(STATUS "Building zlib Autobuild for ${CMAKE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_build.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+	message(STATUS "Building zlib Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_build.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${LOCAL_BUILD_TYPE}
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_build.log
         )
