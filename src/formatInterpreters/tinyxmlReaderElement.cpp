@@ -30,7 +30,14 @@ tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, 
 {
 }
 
-tinyxmlReaderElement::~tinyxmlReaderElement() = default;
+tinyxmlReaderElement::~tinyxmlReaderElement()
+{
+    element = nullptr;
+    parent = nullptr;
+    att = nullptr;
+    bookmarks.clear ();
+    doc = nullptr;
+}
 void tinyxmlReaderElement::clear ()
 {
     element = nullptr;

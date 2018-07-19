@@ -98,7 +98,7 @@ public:
       case payloadType_t::vector:
           return reinterpret_cast<payLoadType *>(payload_V.data());
       case payloadType_t::raw:
-          return reinterpret_cast<payLoadType *>(payloadData);
+          return (payloadData != nullptr) ? reinterpret_cast<payLoadType *> (payloadData) : nullptr;
       }
       
   }
