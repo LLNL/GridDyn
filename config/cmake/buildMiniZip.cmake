@@ -2,7 +2,7 @@
 # 
 
 function (build_minizip)
- set(valid_btypes "Release;Debug;RelWithDebInfo;MinSizeRel")
+ set(valid_btypes Release Debug RelWithDebInfo MinSizeRel)
 	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btypes)
 		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 	else()
