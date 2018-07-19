@@ -12,6 +12,7 @@
 
   <solver name="braid">
      <printlevel>1</printlevel>
+     <configfile>braid_params.ini</configfile>
   </solver>
 
   <defdae>braid</defdae>

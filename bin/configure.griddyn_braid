@@ -28,7 +28,7 @@ CC=gcc CXX=g++ cmake .. \
     -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
     -DLOAD_EXTRA_SOLVERS=ON \
     -DBUILD_BRAID_SOLVER=ON \
-    -DBRAID_INSTALL_DIR=/g/g18/schroder/powergrid/braid_2_2 \
+    -DBRAID_INSTALL_DIR=/g/g18/schroder/powergrid/powergrid_sandbox/braid/braid \
     -DUSE_POSITION_INDEPENDENT_CODE=ON \
 #    -DDISABLE_MULTITHREADING=ON \
 

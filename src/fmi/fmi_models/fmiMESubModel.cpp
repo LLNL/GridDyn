@@ -381,7 +381,7 @@ stateSizes fmiMESubModel::LocalStateSizes(const solverMode &sMode) const
         SS.diffSize = m_stateSize;
     }
 
-    else if (!isDynamic(sMode) and opFlags[pflow_init_required])
+    else if (!isDynamic(sMode) && opFlags[pflow_init_required])
     {
         SS.algSize = m_stateSize;
     }
@@ -391,7 +391,7 @@ stateSizes fmiMESubModel::LocalStateSizes(const solverMode &sMode) const
 count_t fmiMESubModel::LocalJacobianCount(const solverMode &sMode) const
 {
     count_t jacSize = 0;
-    if (hasDifferential(sMode) or (!isDynamic(sMode) and opFlags[pflow_init_required]))
+    if (hasDifferential(sMode) || (!isDynamic(sMode) && opFlags[pflow_init_required]))
     {
         jacSize = m_jacElements;
     }

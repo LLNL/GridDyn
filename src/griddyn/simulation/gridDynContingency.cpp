@@ -129,7 +129,6 @@ void runContingencyAnalysis (std::vector<std::shared_ptr<contingency>> &contList
     {
         wqI->addWorkBlock (cList);
     }
-    contList.back ()->wait ();
     if (output.compare (0, 6, "file:/") == 0)
     {
         saveContingencyOutput (contList, output.substr (7));

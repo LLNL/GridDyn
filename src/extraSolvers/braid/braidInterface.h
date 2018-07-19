@@ -33,8 +33,8 @@ private:
     std::vector<double> type;    //!< type data
     coreTime deltaT = 0.005;     //!< the default time step
     coreTime tStart = 0.0;       //!< the start time 
-	std::string configFile{"params_griddyn.ini"}; //!< file containing additional braid configuration data
-    std::vector<double> discontinuities;
+	std::string configFile{"braid_params.ini"}; //!< file containing additional braid configuration data
+    std::vector<double> discontinuities;  //<! vector containing any known event (discontinuity) locations 
   public:
     /** @brief default constructor*/
     explicit braidSolver(const std::string &objName = "braid");

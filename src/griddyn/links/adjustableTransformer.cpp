@@ -793,6 +793,7 @@ void adjustableTransformer::reset (reset_levels level)
                 break;
             }
             FALLTHROUGH
+            // FALLTHROUGH
         case control_mode_t::MVar_control:
         {
             double midTap = (minTap + maxTap) / 2.0;
