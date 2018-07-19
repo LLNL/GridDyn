@@ -33,7 +33,9 @@ private:
     std::vector<double> type;    //!< type data
     coreTime deltaT = 0.005;     //!< the default time step
     coreTime tStart = 0.0;       //!< the start time 
-public:
+	std::string configFile{"params_griddyn.ini"}; //!< file containing additional braid configuration data
+    std::vector<double> discontinuities;
+  public:
     /** @brief default constructor*/
     explicit braidSolver(const std::string &objName = "braid");
     /** alternate constructor to feed to solverInterface
@@ -42,7 +44,7 @@ public:
     */
     braidSolver(gridDynSimulation *gds, const solverMode &sMode);
 
-    Equation* equation;
+    Equation* equation=nullptr;
 
     virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
 

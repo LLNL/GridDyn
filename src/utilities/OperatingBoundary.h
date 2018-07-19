@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef OPERATING_BOUNDARY_H_
-#define OPERATING_BOUNDARY_H_
-
+#pragma once
 
 #include <string>
 #include <vector>
@@ -88,4 +85,3 @@ private:
 
 } // namespace utilities
 
-#endif  //OPERATING_BOUNDARY_H_

@@ -59,7 +59,7 @@ void StringTrim(string & s)
 
 
 
-void MapParam::ReadFile(string filename)
+void MapParam::ReadFile(const string &filename)
 {
   string line;
   ifstream file;

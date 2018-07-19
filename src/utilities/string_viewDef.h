@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef STRINGVIEWDEFS_H_
-#define STRINGVIEWDEFS_H_
 #pragma once
 
 #include "griddyn/compiler-config.h"
@@ -51,8 +48,3 @@ namespace utilities
 {
 	using string_viewVector = std::vector<string_view>;
 }
-
-
-
-#endif //STRINGVIEWDEFS_H_
-

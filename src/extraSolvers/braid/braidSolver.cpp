@@ -29,6 +29,7 @@
 #include "../paradae/timeintegrators/TimeIntegrator.h"
 #include "../paradae/math/paradaeArrayData.h"
 #include <sstream>
+#include "utilities/string_viewConversion.h"
 
 using namespace std;
 
@@ -224,10 +225,15 @@ double braidSolver::get(const std::string & param) const
 void braidSolver::set(const std::string &param, const std::string &val)
 {
 
-    if (param[0] == '#')
+    if ((param == "configfile")||(param=="file")||(param=="config_file"))
     {
-
+        configFile = val;
     }
+	else if (param == "discontinuities")
+	{
+        discontinuities = str2vector<double> (val,0.0);
+        std::sort (discontinuities.begin (), discontinuities.end (), std::less<> ());
+	}
     else
     {
         SolverInterface::set(param, val);
@@ -469,7 +475,7 @@ int braidSolver::solve(coreTime tStop, coreTime &tReturn, step_mode stepMode)
     }
 
     MapParam param(comm);
-    param.ReadFile("params_griddyn.ini");
+    param.ReadFile(configFile);
 
     int Nsteps = equation->GetNsteps();
     ODEProblem ode(comm);
