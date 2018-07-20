@@ -71,6 +71,14 @@ def separator(color='red'):
     sep = colormap[color] + '='*50 + decolor
     return sep
 
+def unwrap(list_of_lists):
+    # there's a way to do this with comprehensions but this is more clear
+    res = []
+    for list in list_of_lists:
+        for el in list:
+            res.append(el)
+    return res
+
 ## pipeline
 if __name__ == '__main__':
     import sys
@@ -95,6 +103,8 @@ if __name__ == '__main__':
         guideline_map[chunk.guideline].append(chunk)
 
     # sort each list by filename
+    # TODO filename sort is bad (directories are handled strangely),
+    #      also need to break ties with line num
     filename_key = lambda x: x.file_name
     for guideline in guidelines:
         guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
