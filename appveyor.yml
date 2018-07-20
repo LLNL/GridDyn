@@ -29,7 +29,8 @@ build:
 
 after_build:
   - cd build
-  - cpack -G "Visual Studio 14 2015 Win64" -B %cd%/installer-output
+  # TODO G/P/Version should be variables
+  - cpack -G "Visual Studio 14 2015 Win64" -P GridDyn -D CPACK_PACKAGE_VERSION="0.9.1" -B %cd%/installer-output
   - cd ..
   
 test_script:
