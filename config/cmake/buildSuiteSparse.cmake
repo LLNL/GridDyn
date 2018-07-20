@@ -2,12 +2,16 @@
 # 
 
 function (build_suitesparse install_path)
+if (CMAKE_BUILD_TYPE)
 	list(APPEND valid_btypes "Release" "Debug" "RelWithDebInfo" "MinSizeRel")
 	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btypes)
 		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 	else()
 		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
 	endif()
+else ()
+	set(LOCAL_BUILD_TYPE "Release")
+endif()
 	include(escape_string)
 	
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
