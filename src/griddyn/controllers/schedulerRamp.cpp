@@ -378,7 +378,7 @@ void schedulerRamp::updatePTarget ()
         pTarget.pop_front ();
         rempower = target - PCurr;
         // ignore small variations
-        if ((rempower <= 0.0001) and (rempower >= -0.0001))
+        if ((rempower <= 0.0001) && (rempower >= -0.0001))
         {
             rempower = 0.0;
         }

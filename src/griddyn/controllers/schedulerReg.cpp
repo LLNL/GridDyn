@@ -147,7 +147,7 @@ void schedulerReg::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     schedulerRamp::dynObjectInitializeA (time0, flags);
     pr = (m_Base >= kHalfBigNum) ? regMax : m_Base;
 
-    if ((regUpFrac > 0) or (regDownFrac > 0))
+    if ((regUpFrac > 0) || (regDownFrac > 0))
     {
         if (agc == nullptr)
         {

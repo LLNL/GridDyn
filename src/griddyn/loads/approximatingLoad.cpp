@@ -523,15 +523,15 @@ std::vector<double> approximatingLoad::run3ApproxB ()
         X3 = ((V2 - V1) * (Q3 - Q1) + (V1 - V3) * (Q2 - Q1)) / ((V1 - V3) * (b2 - b1) + (b1 - b3) * (V1 - V2));
         X2 = (Q2 - Q1 + b1 * X3 - b2 * X3) / (V2 - V1);
         X1 = Q1 - V1 * X2 - b1 * X3;
+
+        retP[1] = X1;
+        retP[3] = X2;
+        retP[5] = X3;
+    }
 #endif
 
-    retP[1] = X1;
-    retP[3] = X2;
-    retP[5] = X3;
+    return retP;
 }
-
-return retP;
-}  // namespace loads
 
 void approximatingLoad::set (const std::string &param, const std::string &val)
 {
@@ -700,5 +700,5 @@ change_code approximatingLoad::rootCheck (const IOdata &inputs,
     return change_code::no_change;
 }
 
-}  // namespace loads
-}  // namespace griddyn
+} // namespace loads
+} // namespace griddyn
