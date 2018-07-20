@@ -21,6 +21,7 @@ set(griddynHELICS_sources
 	helicsRunner.cpp
 	helicsCoordinator.cpp
 	helicsCommunicator.cpp
+	helicsEvent.cpp
 	)
 
 set(griddynHELICS_headers
@@ -33,6 +34,7 @@ set(griddynHELICS_headers
 	helicsSupport.h
 	helicsCoordinator.h
 	helicsCommunicator.h
+	helicsEvent.h
 	)
 
 

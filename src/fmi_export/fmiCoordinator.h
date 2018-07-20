@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _FMI_COORDINATOR_H_
-#define _FMI_COORDINATOR_H_
+#pragma once
 
 #include "core/coreObject.h"
 #include <mutex>
@@ -28,13 +26,13 @@ class fmiCollector;
 class fmiCoordinator : public griddyn::coreObject
 {
   private:
-	  /** defining a small stucture for containing inputs*/
+	  /** defining a small structure for containing inputs*/
     typedef struct
     {
         std::string name;
         fmiEvent *evnt;
     } inputSet;
-	/** defining a small stucture for containing outputs as members of a collector*/
+	/** defining a small structure for containing outputs as members of a collector*/
     typedef struct
     {
         std::string name;
@@ -42,7 +40,7 @@ class fmiCoordinator : public griddyn::coreObject
         index_t outIndex;
         fmiCollector *col;
     } outputSet;
-	/** apropriate aliases*/
+	/** appropriate aliases*/
     using vrInputPair = std::pair<index_t, inputSet>;
     using vrOutputPair = std::pair<index_t, outputSet>;
 
@@ -107,9 +105,7 @@ class fmiCoordinator : public griddyn::coreObject
 	@return kNullLocation if name is not found*/
 	index_t findVR(const std::string &varName) const;
 
-	/** capture a helper object 
-	@param[in] ho  the helper object to capture*/
-    void addHelper (std::shared_ptr<helperObject> ho);
+    virtual void addHelper (std::shared_ptr<helperObject> ho) override;
     
     static bool isStringParameter(const vrInputPair &param);
 };

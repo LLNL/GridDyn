@@ -13,6 +13,7 @@
 #include "helicsCoordinator.h"
 #include "helics/helics.hpp"
 #include "helics/core/core-exceptions.hpp"
+#include "helics/helicsEvent.h"
 
 #include "helics/flag-definitions.h"
 #include "utilities/stringConversion.h"
@@ -119,6 +120,13 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         ++ii;
     }
     fed->enterInitializationState ();
+	for (auto evnt : events)
+	{
+		if (evnt->initNeeded())
+		{
+            evnt->initialize ();
+		}
+	}
     return fed;
 }
 
@@ -277,6 +285,34 @@ bool helicsCoordinator::hasMessage(int32_t index) const
 }
 
 
+helics::Publication *helicsCoordinator::getPublicationPointer(int32_t index)
+{
+    if (isValidIndex (index, pubs_))
+    {
+        return &pubs_[index];
+    }
+    return nullptr;
+}
+
+helics::Subscription *helicsCoordinator::getSubscriptionPointer(int32_t index)
+{
+    if (isValidIndex (index, subs_))
+    {
+        return &subs_[index];
+    }
+    return nullptr;
+}
+
+helics::Endpoint *helicsCoordinator::getEndpointPointer(int32_t index)
+{
+    if (isValidIndex (index, epts_))
+    {
+        return &epts_[index];
+    }
+    return nullptr;
+}
+
+
 int32_t
 helicsCoordinator::addPublication (const std::string &pubName, helics::helics_type_t  type, gridUnits::units_t unitType)
 {
@@ -382,11 +418,14 @@ void helicsCoordinator::setEndpointTarget(int32_t index, const std::string &targ
     }
 }
 
-void helicsCoordinator::addHelper (std::shared_ptr<helperObject> /*ho*/)
+void helicsCoordinator::addHelper (std::shared_ptr<helperObject> ho)
 {
-    // std::lock_guard<std::mutex> hLock(helperProtector);
-    // helpers.push_back(std::move(ho));
+    std::lock_guard<std::mutex> hLock(helperProtector);
+    helpers.push_back(std::move(ho));
 }
+
+void helicsCoordinator::addEvent(helicsEvent *evnt) { events.push_back (evnt); }
+void helicsCoordinator::addCollector(helicsCollector *col) { collectors.push_back (col); }
 
 int32_t helicsCoordinator::getSubscriptionIndex (const std::string &subName) const
 {
@@ -405,15 +444,10 @@ int32_t helicsCoordinator::getEndpointIndex(const std::string &eptName) const
 
 void helicsCoordinator::finalize ()
 {
-    if (vFed_)
+    if (fed)
     {
-        vFed_->finalize ();
+        fed->finalize ();
     }
-    else if (mFed_)
-    {
-        mFed_->finalize ();
-    }
-
 }
 }  // namespace helics
 }  // namespace griddyn

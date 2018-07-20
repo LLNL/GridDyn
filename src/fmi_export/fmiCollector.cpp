@@ -101,7 +101,7 @@ coreObject *fmiCollector::getOwner() const
 
 void fmiCollector::dataPointAdded(const collectorPoint& cp)
 {
-	if (!coord)
+	if (coord==nullptr)
 	{
 		//find the coordinator first
 		auto gobj = cp.dataGrabber->getObject();
@@ -118,7 +118,7 @@ void fmiCollector::dataPointAdded(const collectorPoint& cp)
 			}
 		}
 	}
-	if (coord)
+	if (coord!=nullptr)
 	{
 		if (cp.columnCount == 1)
 		{

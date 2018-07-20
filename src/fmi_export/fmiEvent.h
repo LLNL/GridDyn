@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef _FMI_EVENT_H_
-#define _FMI_EVENT_H_
-
+#pragma once
 #include "griddyn/events/reversibleEvent.h"
 
 namespace griddyn
@@ -43,7 +40,7 @@ public:
 	/** default constructor taking optional eventType
 	*/
 	fmiEvent(fmiEventType type = fmiEventType::input);
-	/** event constructor taking an eventInfo structure and root obejct*/
+	/** event constructor taking an eventInfo structure and root object*/
 	fmiEvent(const EventInfo &gdEI, coreObject *rootObject);
 
 	virtual std::unique_ptr<Event> clone() const override;
@@ -67,4 +64,3 @@ private:
 
 }//namespace fmi
 }//namespace griddyn
-#endif

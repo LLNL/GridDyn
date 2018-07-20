@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef REVERSIBLE_EVENT_H_
-#define REVERSIBLE_EVENT_H_
 #pragma once
 
 #include "Event.h"
@@ -58,4 +55,3 @@ public:
 };
 }//namespace events
 }//namespace griddyn
-#endif

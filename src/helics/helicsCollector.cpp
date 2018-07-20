@@ -13,8 +13,11 @@
 #include "helicsCollector.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
+#include "core/coreObject.h"
 
 #include "utilities/stringOps.h"
+#include "griddyn/measurement/gridGrabbers.h"
+#include "helicsCoordinator.h"
 
 namespace griddyn
 {
@@ -49,10 +52,34 @@ void helicsCollector::cloneTo(collector *col) const
 
 void helicsCollector::dataPointAdded(const collectorPoint& cp)
 {
-	if (!cp.colname.empty())
-	{
-		
-	}
+    if (coord == nullptr)
+    {
+        // find the coordinator first
+        auto gobj = cp.dataGrabber->getObject ();
+        if (gobj)
+        {
+            auto rto = gobj->getRoot ();
+            if (rto)
+            {
+                auto hCoord = rto->find ("helics");
+                if (dynamic_cast<helicsCoordinator *> (hCoord))
+                {
+                    coord = static_cast<helicsCoordinator *> (hCoord);
+                }
+            }
+        }
+    }
+    if (coord != nullptr)
+    {
+        if (cp.columnCount == 1)
+        {
+            coord->addPublication (cp.colname, helics::helics_type_t::helicsDouble, cp.dataGrabber->outputUnits);
+        }
+        else
+        {
+            // TODO:: deal with output vectors later
+        }
+    }
 }
 
 change_code helicsCollector::trigger(coreTime time)
@@ -131,6 +158,9 @@ const std::string &helicsCollector::getSinkName() const
 {
 	return helicsName;
 }
+
+
+
 
 }// namespace helicsLib
 } // namespace griddyn

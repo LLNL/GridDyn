@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef EVENTINTERFACE_H_
-#define EVENTINTERFACE_H_
 #pragma once
 
 #include "griddyn/gridDynDefinitions.hpp"
@@ -54,7 +51,7 @@ public:
   {
 
   }
-  /** get an event code refering to the type of event
+  /** get an event code referring to the type of event
   @details this is not connected to the typeid or class system but a subset of events
   primarily intended to inform of events that only impact a specific process possibly external
   @return the eventCode*/
@@ -65,4 +62,3 @@ public:
 };
 
 }//namespace griddyn
-#endif
