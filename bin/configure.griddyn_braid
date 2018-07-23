@@ -9,6 +9,7 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
+#######
 #CC=mpicc CXX=mpic++ cmake .. \
 #	 -DSUNDIALS_DIR=$SUNDIALS_DIR \
 #     -DSuiteSparse_DIR=$SuiteSparse_DIR \
@@ -16,13 +17,20 @@
 
 #export SUNDIALS_DIR=~/powergrid/sundials-2.7.0-nopenmp/build/install
 #-DSUNDIALS_DIR=$SUNDIALS_DIR \
+######
+   
 export INSTALL_DIR=./install
+
+# Can choose between
+#    -DCMAKE_BUILD_TYPE=debug \
+# Or,
+#    -DCMAKE_BUILD_TYPE=release \
 
 CC=gcc CXX=g++ cmake .. \
     -DMPI_ENABLE=ON \
     -DOPENMP_ENABLE=OFF \
     -DSUNDIALS_OPENMP=OFF \
-    -DCMAKE_BUILD_TYPE=debug \
+    -DCMAKE_BUILD_TYPE=release \
     -DBUILD_SHARED_LIBS=OFF \
     -DOPTIMIZATION_ENABLE=ON \
     -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
