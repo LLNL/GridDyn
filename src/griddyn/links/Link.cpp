@@ -99,7 +99,11 @@ void Link::updateBus (gridBus *bus, index_t busNumber)
             B1->remove (this);
         }
         B1 = bus;
-        B1->add (this);
+        if (B1 != nullptr)
+        {
+            B1->add(this);
+        }
+        
     }
     else if (busNumber == 2)
     {
@@ -108,7 +112,10 @@ void Link::updateBus (gridBus *bus, index_t busNumber)
             B2->remove (this);
         }
         B2 = bus;
-        B2->add (this);
+        if (B2 != nullptr)
+        {
+            B2->add(this);
+        }
     }
     else
     {

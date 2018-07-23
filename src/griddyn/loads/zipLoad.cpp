@@ -185,7 +185,7 @@ void zipLoad::setFlag (const std::string &flag, bool val)
 // set properties
 void zipLoad::set (const std::string &param, const std::string &val)
 {
-    if (param[0] == '#')
+    if (param.empty())
     {
     }
     else

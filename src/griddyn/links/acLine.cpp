@@ -1051,17 +1051,39 @@ void acLine::faultCalc ()
 
 void acLine::loadLinkInfo ()
 {
-    linkInfo.v1 = B1->getVoltage ();
-    linkInfo.v2 = B2->getVoltage ();
-    linkInfo.theta1 = B1->getAngle () - B2->getAngle () - tapAngle;
-    linkInfo.theta2 = -linkInfo.theta1;
+    if (isConnected())
+    {
+        linkInfo.v1 = B1->getVoltage();
+        linkInfo.v2 = B2->getVoltage();
+        linkInfo.theta1 = B1->getAngle() - B2->getAngle() - tapAngle;
+        linkInfo.theta2 = -linkInfo.theta1;
 
-    linkComp.sinTheta1 = sin (linkInfo.theta1);
-    linkComp.cosTheta1 = cos (linkInfo.theta1);
-    linkComp.sinTheta2 = -linkComp.sinTheta1;
-    linkComp.cosTheta2 = linkComp.cosTheta1;
+        linkComp.sinTheta1 = sin(linkInfo.theta1);
+        linkComp.cosTheta1 = cos(linkInfo.theta1);
+        linkComp.sinTheta2 = -linkComp.sinTheta1;
+        linkComp.cosTheta2 = linkComp.cosTheta1;
 
-    linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
+        linkComp.Vmx = linkInfo.v1 * linkInfo.v2 / tap;
+    }
+    else
+    {
+        linkInfo.theta1 = 0.0;
+        linkInfo.theta2 = 0.0;
+        if (!opFlags[switch1_open_flag])
+        {
+            linkInfo.v1 = B1->getVoltage();
+        }
+        if (!opFlags[switch2_open_flag])
+        {
+            linkInfo.v2 = B2->getVoltage();
+        }
+        linkComp.sinTheta1 = 0.0;
+        linkComp.cosTheta1 = 1.0;
+        linkComp.sinTheta2 = 0.0;
+        linkComp.cosTheta2 = 1.0;
+        return;
+    }
+   
     linkInfo.seqID = 0;
     constLinkInfo = linkInfo;  // update the constant linkInfo
     constLinkComp = linkComp;
