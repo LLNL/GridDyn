@@ -38,5 +38,8 @@ test_script:
   # ctest -I <start>,<end>,<stride>,<list of test numbers>
   - cd ..
 
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 artifacts:
   - path: build/installer-output/*.exe
