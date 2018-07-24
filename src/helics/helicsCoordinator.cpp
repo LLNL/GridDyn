@@ -73,6 +73,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     }
     catch (const helics::RegistrationFailure &e)
     {
+        LOG_WARNING("failed to register as HELICS federate");
         return nullptr;
       }
         vFed_ = dynamic_cast<helics::ValueFederate*>(cfed.get());
@@ -120,6 +121,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         ++ii;
     }
     fed->enterInitializationState ();
+    LOG_SUMMARY("entered HELICS initialization state");
 	for (auto evnt : events)
 	{
 		if (evnt->initNeeded())

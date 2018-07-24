@@ -59,7 +59,7 @@ change_code fmiCollector::trigger(coreTime time)
 
 void fmiCollector::set(const std::string &param, double val)
 {
-	if (param.front() == '#')
+	if (param.empty())
 	{
 
 	}
@@ -70,7 +70,7 @@ void fmiCollector::set(const std::string &param, double val)
 }
 void fmiCollector::set(const std::string &param, const std::string &val)
 {
-	if (param.front() == '#')
+	if (param.empty())
 	{
 
 	}
@@ -83,7 +83,7 @@ void fmiCollector::set(const std::string &param, const std::string &val)
 static const std::string defFMIName("fmi");
 const std::string &fmiCollector::getSinkName() const
 {
-	if (coord)
+	if (coord!=nullptr)
 	{
 		return coord->getFMIName();
 	}

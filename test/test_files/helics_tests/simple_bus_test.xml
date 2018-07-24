@@ -25,9 +25,9 @@
 	<period>2</period>
    </helics>
    <collector type="helics" period=6>
-   <field>2.4*bus1::voltage as mag1</field>
-   <field>2.4*loadbus::voltage as mag2</field>
-   <field>bus1::angle(deg) as ang1</field>
-   <field>loadbus::angle(deg) as ang2</field>
+   <field>bus1:voltage as mag1</field>
+   <field>loadbus:voltage as mag2</field>
+   <field>bus1:angle(deg) as ang1</field>
+   <field>loadbus:angle(deg) as ang2</field>
    </collector>
 </griddyn>

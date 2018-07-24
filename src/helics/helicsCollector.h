@@ -23,8 +23,22 @@ class helicsCoordinator;
 class helicsCollector : public collector
 {
   private:
+    class pubInformation
+    {
+      public:
+        std::string colname;
+        int32_t pubIndex = -1;
+        bool vectorPub = false;
+        pubInformation () = default;
+        pubInformation (const std::string &cname, int32_t index, bool vectorPublish = false)
+            : colname (cname), pubIndex (index), vectorPub (vectorPublish)
+        {
+        }
+    };
+
     std::vector<std::pair<std::string, std::string>> complexPairs;
     std::vector<std::string> cnames;
+    std::vector<pubInformation> pubs;
     helicsCoordinator *coord = nullptr;  //!< the coordinator for interaction with the helics interface
   public:
     helicsCollector (coreTime time0 = timeZero, coreTime period = timeOneSecond);
