@@ -10,26 +10,30 @@
  * LLNS Copyright End
  */
 
-#include "griddyn/Generator.h"
+#include "../test/exeTestHelper.h"
+#include "../test/testHelper.h"
 #include "core/objectFactory.hpp"
+#include "griddyn/Generator.h"
 #include "griddyn/gridBus.h"
+#include "helics/apps/Player.hpp"
+#include "helics/apps/BrokerApp.hpp"
+#include "helics/apps/Recorder.hpp"
 #include "helics/helicsCoordinator.h"
 #include "helics/helicsLibrary.h"
 #include "helics/helicsLoad.h"
 #include "helics/helicsRunner.h"
 #include "helics/helicsSource.h"
 #include "helics/helicsSupport.h"
-#include "../test/testHelper.h"
+#include "utilities/stringToCmdLine.h"
 #include "utilities/string_viewOps.h"
 #include <complex>
+#include <fstream>
 #include <future>
 #include <iostream>
 #include <memory>
-#include <fstream>
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include "../test/exeTestHelper.h"
 
 BOOST_FIXTURE_TEST_SUITE (helics_tests, gridDynSimulationTestFixture)
 using namespace griddyn;
@@ -141,16 +145,16 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
     helicsCoordinator coord;
     auto ind1 = coord.addPublication ("pub1", helics::helics_type_t::helicsDouble);
     auto ind2 = coord.addSubscription ("pub1");
-    BOOST_CHECK_GE(ind1, 0);
-    BOOST_CHECK_GE(ind2, 0);
+    BOOST_CHECK_GE (ind1, 0);
+    BOOST_CHECK_GE (ind2, 0);
     coord.set ("coretype", "test");
     coord.set ("init", "1");
     coord.set ("name", "coordtest");
 
     auto fed = coord.RegisterAsFederate ();
 
-   // BOOST_CHECK (fed->currentState () == helics::Federate::op_states::startup);
-   // fed->enterInitializationState ();
+    // BOOST_CHECK (fed->currentState () == helics::Federate::op_states::startup);
+    // fed->enterInitializationState ();
     BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::initialization);
     fed->enterExecutionState ();
     BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::execution);
@@ -183,7 +187,7 @@ BOOST_AUTO_TEST_CASE (load_helics_xml)
     BOOST_REQUIRE (dynamic_cast<helicsSource *> (obj) != nullptr);
     // as a note sources are source with respect to GridDyn not HELICS
     auto src = static_cast<helicsSource *> (obj);
-	BOOST_REQUIRE(src != nullptr);
+    BOOST_REQUIRE (src != nullptr);
     src->set ("valkey", "sourceValue");
     src->set ("period", 2);
     src->set ("value", 0.4);
@@ -228,7 +232,7 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 {
     helics::FederateInfo fi ("helics_load_test");
     fi.coreType = helics::core_type::TEST;
-	fi.coreName = "test2";
+    fi.coreName = "test2";
     fi.coreInitString = "2";
     auto vFed = std::make_shared<helics::ValueFederate> (fi);
     // register the publications
@@ -254,10 +258,10 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 
     auto resT = std::async (std::launch::async, [&]() { return hR->Step (3.0); });
     auto tm = vFed->requestTime (3.0);
-	while (tm < 3.0)
-	{
-		tm = vFed->requestTime(3.0);
-	}
+    while (tm < 3.0)
+    {
+        tm = vFed->requestTime (3.0);
+    }
     BOOST_CHECK_EQUAL (tm, 3.0);
 
     double tret = resT.get ();
@@ -267,10 +271,10 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 
     resT = std::async (std::launch::async, [&]() { return hR->Step (7.0); });
     tm = vFed->requestTime (7.0);
-	while (tm < 7.0)
-	{
-		tm = vFed->requestTime(7.0);
-	}
+    while (tm < 7.0)
+    {
+        tm = vFed->requestTime (7.0);
+    }
     BOOST_CHECK_EQUAL (tm, 7.0);
 
     tret = resT.get ();
@@ -283,102 +287,163 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
     delete hR;
 }
 
-BOOST_AUTO_TEST_CASE(test_recorder_player)
+BOOST_AUTO_TEST_CASE (test_recorder_player)
 {
-	auto brk = runBroker("2");
-	auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=25 2> playerout.txt");
-	auto rec = runRecorder(helics_test_directory + "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt 2> recout.txt");
+    auto brk = runBroker ("2");
+    auto play = runPlayer (helics_test_directory + "source_player.txt --name=player --stop=25 2> playerout.txt");
+    auto rec =
+      runRecorder (helics_test_directory +
+                   "recorder_capture_list.txt --name=rec --stop=25 --output=rec_capture.txt 2> recout.txt");
 
-    BOOST_CHECK(play.get() == 0);
-	BOOST_CHECK(rec.get() == 0);
-	
-	BOOST_CHECK(brk.get() == 0);
-	BOOST_CHECK(boost::filesystem::exists("rec_capture.txt"));
+    BOOST_CHECK (play.get () == 0);
+    BOOST_CHECK (rec.get () == 0);
 
-	std::ifstream inFile("rec_capture.txt");
-	std::string line;
-	std::getline(inFile, line);
-	std::getline(inFile, line);
-	BOOST_CHECK(!line.empty());
-	using namespace utilities::string_viewOps;
-	auto lineEle = split(line, whiteSpaceCharacters, delimiter_compression::on);
-	BOOST_REQUIRE_GE(lineEle.size(), 3);
-	BOOST_CHECK_EQUAL(lineEle[0], "3");
-	BOOST_CHECK_EQUAL(lineEle[1], "gen");
-	BOOST_CHECK_EQUAL(lineEle[2], "40");
+    BOOST_CHECK (brk.get () == 0);
+    BOOST_CHECK (boost::filesystem::exists ("rec_capture.txt"));
 
-	std::getline(inFile, line);
-	std::getline(inFile, line);
-	BOOST_CHECK(!line.empty());
+    std::ifstream inFile ("rec_capture.txt");
+    std::string line;
+    std::getline (inFile, line);
+    std::getline (inFile, line);
+    BOOST_CHECK (!line.empty ());
+    using namespace utilities::string_viewOps;
+    auto lineEle = split (line, whiteSpaceCharacters, delimiter_compression::on);
+    BOOST_REQUIRE_GE (lineEle.size (), 3);
+    BOOST_CHECK_EQUAL (lineEle[0], "3");
+    BOOST_CHECK_EQUAL (lineEle[1], "gen");
+    BOOST_CHECK_EQUAL (lineEle[2], "40");
 
-	lineEle = split(line, whiteSpaceCharacters, delimiter_compression::on);
-	BOOST_REQUIRE_GE(lineEle.size(), 3);
-	BOOST_CHECK_EQUAL(lineEle[0], "11");
-	BOOST_CHECK_EQUAL(lineEle[1], "gen");
-	BOOST_CHECK_EQUAL(lineEle[2], "50");
-	inFile.close();
-	remove("rec_capture.txt");
+    std::getline (inFile, line);
+    std::getline (inFile, line);
+    BOOST_CHECK (!line.empty ());
+
+    lineEle = split (line, whiteSpaceCharacters, delimiter_compression::on);
+    BOOST_REQUIRE_GE (lineEle.size (), 3);
+    BOOST_CHECK_EQUAL (lineEle[0], "11");
+    BOOST_CHECK_EQUAL (lineEle[1], "gen");
+    BOOST_CHECK_EQUAL (lineEle[2], "50");
+    inFile.close ();
+    remove ("rec_capture.txt");
 }
 
-
-BOOST_AUTO_TEST_CASE(test_zmq_core)
+BOOST_AUTO_TEST_CASE (test_zmq_core)
 {
-	auto hR = new helicsRunner();
-	hR->InitializeFromString(helics_test_directory + "helics_test3.xml");
+    auto hR = new helicsRunner ();
+    hR->InitializeFromString (helics_test_directory + "helics_test3.xml");
 
-	
-	auto sim = hR->getSim();
+    auto sim = hR->getSim ();
 
-	auto genObj = sim->find("bus2::gen1");
-	BOOST_REQUIRE(genObj != nullptr);
-	auto src = static_cast<Source *>(genObj->find("source"));
-	BOOST_REQUIRE(src != nullptr);
-	auto brk = runBroker("2");
-	auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=24");
+    auto genObj = sim->find ("bus2::gen1");
+    BOOST_REQUIRE (genObj != nullptr);
+    auto src = static_cast<Source *> (genObj->find ("source"));
+    BOOST_REQUIRE (src != nullptr);
+    auto brk = runBroker ("2");
+    auto play = runPlayer (helics_test_directory + "source_player.txt --name=player --stop=24");
 
-	hR->simInitialize();
+    hR->simInitialize ();
 
-	auto tret= hR->Step(5.0);
-	
-	BOOST_CHECK_EQUAL(tret, 5.0);
+    auto tret = hR->Step (5.0);
 
-	BOOST_CHECK_CLOSE(src->getOutput(), 0.40,0.00001);
-	tret = hR->Step(9.0);
-	BOOST_CHECK_CLOSE(src->getOutput(), 0.45,0.000001);
-	tret = hR->Step(13.0);
-	BOOST_CHECK_CLOSE(src->getOutput(), 0.50,0.00000001);
-	tret = hR->Step(17.0);
-	BOOST_CHECK_CLOSE(src->getOutput(), 0.55,0.00000001);
-	tret = hR->Step(24.0);
-	BOOST_CHECK_CLOSE(src->getOutput(),0.65, 0.00000001);
-	
-	BOOST_CHECK(play.get() == 0);
-	hR->Finalize();
-	delete hR;
-	sim = nullptr;
-	BOOST_CHECK(brk.get() == 0);
-	//BOOST_CHECK_CLOSE(src->getOutput(), 0.5, 0.00001);
-	
+    BOOST_CHECK_EQUAL (tret, 5.0);
+
+    BOOST_CHECK_CLOSE (src->getOutput (), 0.40, 0.00001);
+    tret = hR->Step (9.0);
+    BOOST_CHECK_CLOSE (src->getOutput (), 0.45, 0.000001);
+    tret = hR->Step (13.0);
+    BOOST_CHECK_CLOSE (src->getOutput (), 0.50, 0.00000001);
+    tret = hR->Step (17.0);
+    BOOST_CHECK_CLOSE (src->getOutput (), 0.55, 0.00000001);
+    tret = hR->Step (24.0);
+    BOOST_CHECK_CLOSE (src->getOutput (), 0.65, 0.00000001);
+
+    BOOST_CHECK (play.get () == 0);
+    hR->Finalize ();
+    delete hR;
+    sim = nullptr;
+    BOOST_CHECK (brk.get () == 0);
+    // BOOST_CHECK_CLOSE(src->getOutput(), 0.5, 0.00001);
 }
 
-BOOST_AUTO_TEST_CASE(test_main_exe)
+BOOST_AUTO_TEST_CASE (test_collector)
 {
-	exeTestRunner mainExeRunner(GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");
-	if (mainExeRunner.isActive())
-	{
-		auto brk = runBroker("2");
-		auto play = runPlayer(helics_test_directory + "source_player.txt --name=player --stop=24");
-		auto out = mainExeRunner.runCaptureOutput(helics_test_directory + "helics_test3.xml --helics");
-		auto res = out.find("HELICS");
-		BOOST_CHECK(res != std::string::npos);
-		BOOST_CHECK(play.get() == 0);
-		BOOST_CHECK(brk.get() == 0);
-	}
-	else
-	{
-		std::cout << "Unable to locate main executable:: skipping test\n";
-	}
+    auto hR = std::make_unique<helicsRunner> ();
+    hR->InitializeFromString (helics_test_directory + "simple_bus_test1.xml");
 
+    auto sim = hR->getSim ();
+
+    auto brk = helics::apps::BrokerApp ("2");
+    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
+    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+
+    auto fut = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
+    hR->simInitialize ();
+
+    auto tret = hR->Run ();
+
+    BOOST_CHECK_EQUAL (tret, 240.0);
+
+    fut.get ();
+    hR->Finalize ();
+    auto pts = rec.pointCount ();
+    BOOST_CHECK_EQUAL (pts, 41 * 4);
+    rec.finalize ();
+    // I want this freed first PT
+    hR = nullptr;
+    sim = nullptr;
+}
+
+BOOST_AUTO_TEST_CASE (test_event)
+{
+    auto hR = std::make_unique<helicsRunner> ();
+    hR->InitializeFromString (helics_test_directory + "simple_bus_test1_event.xml");
+
+    auto sim = hR->getSim ();
+
+    auto brk = helics::apps::BrokerApp ("3");
+    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
+    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+
+	//add a single point
+    auto play = helics::apps::Player (helics::FederateInfo());
+    play.addPublication ("breaker", helics::helics_type_t::helicsDouble);
+    play.addPoint (120.0, "breaker", 0.0);
+
+    auto fut_rec = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
+    auto fut_play = std::async (std::launch::async, [&play]() { play.run (); });
+    hR->simInitialize ();
+
+    auto tret = hR->Run ();
+
+    BOOST_CHECK_EQUAL (tret, 240.0);
+
+    fut_rec.get ();
+    fut_play.get ();
+    hR->Finalize ();
+    auto pts = rec.pointCount ();
+    BOOST_CHECK_EQUAL (pts, 41 * 4);
+    rec.finalize ();
+    // I want this freed first PT
+    hR = nullptr;
+    sim = nullptr;
+}
+
+BOOST_AUTO_TEST_CASE (test_main_exe)
+{
+    exeTestRunner mainExeRunner (GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");
+    if (mainExeRunner.isActive ())
+    {
+        auto brk = runBroker ("2");
+        auto play = runPlayer (helics_test_directory + "source_player.txt --name=player --stop=24");
+        auto out = mainExeRunner.runCaptureOutput (helics_test_directory + "helics_test3.xml --helics");
+        auto res = out.find ("HELICS");
+        BOOST_CHECK (res != std::string::npos);
+        BOOST_CHECK (play.get () == 0);
+        BOOST_CHECK (brk.get () == 0);
+    }
+    else
+    {
+        std::cout << "Unable to locate main executable:: skipping test\n";
+    }
 }
 #ifdef ENABLE_EXTRA_HELICS_TEST
 bool testHELICSCollector ()

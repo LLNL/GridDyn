@@ -10,21 +10,21 @@
  * LLNS Copyright End
  */
 
+#include "helics/application_api/Subscriptions.hpp"
 #include "helicsCoordinator.h"
 #include "helicsEvent.h"
-#include "helics/application_api/Subscriptions.hpp"
 
 namespace griddyn
 {
 namespace helicsLib
 {
-helicsEvent::helicsEvent (const std::string &newName) : reversibleEvent (newName) {}
+helicsEvent::helicsEvent (const std::string &newName) : reversibleEvent (newName) { initRequired = true; }
 
-
-helicsEvent::helicsEvent (helicsEventType type) : eventType (type) {}
+helicsEvent::helicsEvent (helicsEventType type) : eventType (type) { initRequired = true; }
 
 helicsEvent::helicsEvent (const EventInfo &gdEI, coreObject *rootObject) : reversibleEvent (gdEI, rootObject)
 {
+    initRequired = true;
     findCoordinator ();
 }
 
@@ -48,7 +48,7 @@ void helicsEvent::cloneTo (Event *evnt) const
 
 void helicsEvent::set (const std::string &param, double val)
 {
-    if (param=="delta")
+    if (param == "delta")
     {
         // valueref = static_cast<unsigned int>(val);
     }
@@ -73,10 +73,34 @@ void helicsEvent::set (const std::string &param, const std::string &val)
             stringEvent = false;
         }
     }
-	else if (param == "key")
-	{
+    else if (param == "key")
+    {
         key = val;
-	}
+        if (subid >= 0)
+        {
+            coord->updateSubscription (subid, key, unitType);
+        }
+        else if (coord != nullptr)
+        {
+            subid = coord->addSubscription (key, unitType);
+        }
+        else
+        {
+            findCoordinator ();
+        }
+    }
+    else if (param == "units")
+    {
+        reversibleEvent::set (param, val);
+        if (subid >= 0)
+        {
+            coord->updateSubscription (subid, key, unitType);
+        }
+        else if (coord == nullptr)
+        {
+            findCoordinator ();
+        }
+    }
     else
     {
         reversibleEvent::set (param, val);
@@ -101,35 +125,36 @@ bool helicsEvent::setTarget (coreObject *gdo, const std::string &var)
 
 coreObject *helicsEvent::getOwner () const { return coord; }
 
-void helicsEvent::initialize()
+void helicsEvent::initialize ()
 {
-    if (coord!=nullptr)
+    if (coord != nullptr)
     {
         findCoordinator ();
-		if (coord == nullptr)
-		{
+        if (coord == nullptr)
+        {
             return;
-		}
+        }
     }
     auto sub = coord->getSubscriptionPointer (subid);
-	if (sub == nullptr)
-	{
+    if (sub == nullptr)
+    {
         return;
-	}
-	if (eventType == helicsEventType::string_parameter)
-	{
-		sub->registerCallback<std::string>([this](const std::string &update, helics::Time /*tval*/) { updateStringValue (update);
+    }
+    if (eventType == helicsEventType::string_parameter)
+    {
+        sub->registerCallback<std::string> ([this](const std::string &update, helics::Time /*tval*/) {
+            updateStringValue (update);
             trigger ();
-		});
-	}
-	else
-	{
+        });
+    }
+    else
+    {
         sub->registerCallback<double> ([this](double update, helics::Time /*tval*/) {
             setValue (update);
             trigger ();
         });
-	}
-    
+    }
+    initRequired = false;
 }
 
 void helicsEvent::updateObject (coreObject *gco, object_update_mode mode)
@@ -151,8 +176,12 @@ void helicsEvent::findCoordinator ()
                 if (!isSameObject (helicsCont, coord))
                 {
                     coord = static_cast<helicsCoordinator *> (helicsCont);
-                    subid=coord->addSubscription (key);
-                   
+                    if (!key.empty ())
+                    {
+                        subid = coord->addSubscription (key, unitType);
+                    }
+                    coord->addEvent (this);
+					
                 }
             }
         }

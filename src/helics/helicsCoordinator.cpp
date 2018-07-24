@@ -100,11 +100,11 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     {
         if (s.unitType != gridUnits::defUnit)
         {
-            subs_[ii] = helics::Subscription(vFed_, s.name, gridUnits::to_string(s.unitType));
+            subs_[ii] = helics::Subscription(helics::interface_availability::optional,vFed_, s.name, gridUnits::to_string(s.unitType));
         }
         else
         {
-            subs_[ii] = helics::Subscription(vFed_, s.name);
+            subs_[ii] = helics::Subscription (helics::interface_availability::optional, vFed_, s.name);
         }
         ++ii;
     }

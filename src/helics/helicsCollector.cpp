@@ -59,6 +59,8 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
                 if (dynamic_cast<helicsCoordinator *> (hCoord))
                 {
                     coord = static_cast<helicsCoordinator *> (hCoord);
+
+					coord->addCollector (this);
                 }
             }
         }
