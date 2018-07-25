@@ -417,7 +417,7 @@ void schedulerRamp::updatePTarget ()
     double pdiff = target - PCurr;
     if (rempower == 0.0)
     {
-        if ((pdiff < 0.0001) and (pdiff > -0.0001))
+        if ((pdiff < 0.0001) && (pdiff > -0.0001))
         {
             PRampCurr = 0;
             nextUpdateTime = time;

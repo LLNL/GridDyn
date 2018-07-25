@@ -74,8 +74,8 @@ def separator(color='red'):
 def unwrap(list_of_lists):
     # there's a way to do this with comprehensions but this is more clear
     res = []
-    for list in list_of_lists:
-        for el in list:
+    for l in list_of_lists:
+        for el in l:
             res.append(el)
     return res
 
