@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
 */
-
-#ifndef CONTINGENCY_H_
-#define CONTINGENCY_H_
+#pragma once
 
 #include "utilities/workQueue.h"
 #include "core/objectOperatorInterface.hpp"
@@ -90,11 +88,11 @@ const extraContingencyInfo emptyExtraInfo{};
 class contingency: public basicWorkBlock,objectOperatorInterface
 {
 private:
-	static std::atomic_int contingencyCount;         //!<static variable counting the number of created lines
+	static std::atomic_int contingencyCount;         //!<static variable counting the number of created contingencies
 public:
   std::string  name;			//!< contingency name
   int id;						//!< contingency id
-  bool completed = false;		//!< boolean indicator if the contingency was run
+  std::atomic<bool> completed{false};		//!< boolean indicator if the contingency was run
 
   std::vector<violation> Violations;	//!< the resulting violations
   double PI = 0.0;     //!<performance index score
@@ -104,7 +102,7 @@ public:
   std::vector<double> Lineflows;		//!< vector of transmission line flows
 protected:
   gridDynSimulation *gds = nullptr;  //!< master simulation object
-  std::promise<int> promise_val;	//!< paired with future for asyncrhonous operation
+  std::promise<int> promise_val;	//!< paired with future for asynchronous operation
   std::shared_future<int> future_ret;	//!< the future object to contain the data that will come upon execution
   std::vector<std::vector < std::shared_ptr < Event >>> eventList; //!< events that describe the contingency
 public:
@@ -175,4 +173,4 @@ size_t buildContingencyList(gridDynSimulation *gds, contingency_mode_t cmode, st
 void runContingencyAnalysis(std::vector<std::shared_ptr<contingency> > &contList, const std::string &output);
 
 }//namespace griddyn
-#endif
+

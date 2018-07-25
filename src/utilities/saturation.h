@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef SATURATION_H_
-#define SATURATION_H_
 #pragma once
 
 #include <functional>
@@ -105,4 +102,3 @@ private:
 };
 
 }//namespace utilities
-#endif

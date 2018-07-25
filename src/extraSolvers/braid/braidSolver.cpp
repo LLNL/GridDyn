@@ -29,6 +29,7 @@
 #include "../paradae/timeintegrators/TimeIntegrator.h"
 #include "../paradae/math/paradaeArrayData.h"
 #include <sstream>
+#include "utilities/string_viewConversion.h"
 
 using namespace std;
 
@@ -206,7 +207,7 @@ void braidSolver::initialize(coreTime t0)
 
     m_gds->guessState(t0, y0_.GetData(), y0p_.GetData(), mode); //cDaeSolverMode);
     //y0_.dump("new_code_init_con.txt");
-    equation = new EquationGridDyn(static_cast<double> (tStart), stopTime, N_unistep_, m_gds, y0_, &mode);
+    equation = new EquationGridDyn(static_cast<double> (tStart), stopTime, N_unistep_, m_gds, y0_, &mode, discontinuities);
 }
 
 double braidSolver::get(const std::string & param) const
@@ -224,10 +225,15 @@ double braidSolver::get(const std::string & param) const
 void braidSolver::set(const std::string &param, const std::string &val)
 {
 
-    if (param[0] == '#')
+    if ((param == "configfile")||(param=="file")||(param=="config_file"))
     {
-
+        configFile = val;
     }
+	else if (param == "discontinuities")
+	{
+        discontinuities = str2vector<double> (val,0.0);
+        std::sort (discontinuities.begin (), discontinuities.end (), std::less<> ());
+	}
     else
     {
         SolverInterface::set(param, val);
@@ -407,7 +413,7 @@ int braidSolver::RunBraid(ODEProblem* ode, MapParam* param, Real* &timegrid, int
     int nrelax = 1;
     int nrelax0 = -1;
     braid_SetStorage(core, -1);
-    braid_SetPrintLevel(core, 1);
+    braid_SetPrintLevel(core, 2);
     braid_SetRefine(core, 1);
     braid_SetNRelax(core, -1, nrelax);
     if (nrelax0 > -1)
@@ -469,7 +475,7 @@ int braidSolver::solve(coreTime tStop, coreTime &tReturn, step_mode stepMode)
     }
 
     MapParam param(comm);
-    param.ReadFile("params_griddyn.ini");
+    param.ReadFile(configFile);
 
     int Nsteps = equation->GetNsteps();
     ODEProblem ode(comm);

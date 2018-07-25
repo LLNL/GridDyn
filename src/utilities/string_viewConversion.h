@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef STRVIEWCONVERSION_H_
-#define STRVIEWCONVERSION_H_
-
+#pragma once
 
 #include "string_viewOps.h"
 #include "charMapper.h"
@@ -229,6 +226,7 @@ X  numeric_conversionComplete(string_view V, const X defValue)
 template<typename X>
 std::vector<X> str2vector(string_view line, const X defValue, string_view delimiters = utilities::string_viewOps::default_delim_chars)
 {
+    line = utilities::string_viewOps::removeBrackets (line);
 	auto tempVec = utilities::string_viewOps::split(line, delimiters);
 	std::vector<X> av;
 	av.reserve(tempVec.size());
@@ -255,7 +253,4 @@ std::vector<X> str2vector(const utilities::string_viewVector &tokens, const X de
 	}
 	return av;
 }
-
-
-#endif
 

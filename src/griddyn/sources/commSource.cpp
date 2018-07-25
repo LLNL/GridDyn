@@ -16,6 +16,7 @@
 #include "../events/eventQueue.h"
 #include "../gridDynSimulation.h"
 #include "core/coreObjectTemplates.hpp"
+#include <cassert>
 
 namespace griddyn
 {
@@ -145,7 +146,9 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
         if (!opFlags[no_message_reply])  // unless told not to respond return with the
         {
             reply = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-            reply->getPayload<controlMessagePayload> ()->m_actionID = m->m_actionID;
+            auto payload = reply->getPayload<controlMessagePayload> ();
+            assert (payload != nullptr);
+            payload->m_actionID = m->m_actionID;
             commLink->transmit (sourceID, reply);
         }
 
@@ -184,7 +187,9 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-                reply->getPayload<controlMessagePayload> ()->m_actionID = m->m_actionID;
+                auto payload = reply->getPayload<controlMessagePayload> ();
+                assert (payload!=nullptr);
+                payload->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, gres);
             }
         }

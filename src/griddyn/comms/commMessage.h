@@ -70,6 +70,7 @@ class commMessage
         ALARM_TRIGGER_EVENT = BASE_RELAY_MESSAGE_NUMBER + 12,
         ALARM_CLEARED_EVENT = BASE_RELAY_MESSAGE_NUMBER + 13,
     };
+
     /**constructor from a message type */
     commMessage () = default;
     explicit commMessage (std::uint32_t type);

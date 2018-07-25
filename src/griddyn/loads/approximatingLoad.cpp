@@ -353,11 +353,11 @@ approximatingLoad::getLoadValues (const std::vector<double> &inputs, const std::
     return res;
 }
 
-void approximatingLoad::run1ApproxA (coreTime time, const IOdata &inputs)
+void approximatingLoad::run1ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    auto dt = time - m_lastCallTime;
+    //auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     voltages.push_back (inputs[voltageInLocation]);
@@ -375,11 +375,11 @@ std::vector<double> approximatingLoad::run1ApproxB ()
     return {std::get<1> (res[0]), std::get<2> (res[0])};
 }
 
-void approximatingLoad::run2ApproxA (coreTime time, const IOdata &inputs)
+void approximatingLoad::run2ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    auto dt = time - m_lastCallTime;
+    //auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     double V = inputs[voltageInLocation];
@@ -412,11 +412,11 @@ std::vector<double> approximatingLoad::run2ApproxB ()
     return retP;
 }
 
-void approximatingLoad::run3ApproxA (coreTime time, const IOdata &inputs)
+void approximatingLoad::run3ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    auto dt = time - m_lastCallTime;
+    //auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     double V = inputs[voltageInLocation];

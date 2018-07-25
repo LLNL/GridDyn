@@ -62,7 +62,7 @@ bool outputEstimator::update(coreTime t, double val, const IOdata &inputs, const
     double scaled_error = diff / (std::max)(std::abs(pred), std::abs(val));
     bool diff_large_enough = diff > 1e-4;
     bool scaled_error_large_enough = scaled_error > 0.02;
-    return diff_large_enough and scaled_error_large_enough;
+    return diff_large_enough && scaled_error_large_enough;
 }
 
 }//namespace fmi

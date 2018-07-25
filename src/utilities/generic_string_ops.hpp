@@ -9,9 +9,6 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef GENERIC_STRING_OPS_H_
-#define GENERIC_STRING_OPS_H_
 #pragma once
 
 /** this file defines some operations that can be performed on string like objects
@@ -159,5 +156,3 @@ std::vector<X> generalized_section_splitting (const X &line,
     }
     return strVec;
 }
-
-#endif

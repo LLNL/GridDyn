@@ -14,12 +14,14 @@
 #include "Equation_DAE_full.h"
 #include "../common/MapParam.h"
 #include <memory>
+#include <vector>
 namespace griddyn
 {
     class gridDynSimulation;
     class solverMode;
 }
 
+using namespace std;
 namespace griddyn {
 namespace paradae {
 /** @brief class that connects ParaDAE and GridDyn 
@@ -28,7 +30,8 @@ class EquationGridDyn : public Equation_DAE_full {
   griddyn::gridDynSimulation *gds;
 public:
   // EquationGridDyn specific
-  EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, griddyn::gridDynSimulation *gds_, const Vector& y0_, griddyn::solverMode *mode_);
+  EquationGridDyn(Real t0_, Real Tmax_, int N_unistep_, griddyn::gridDynSimulation *gds_, const Vector& y0_, griddyn::solverMode *mode_, 
+                  vector<double> &discontinuities);
   static EquationGridDyn Default(const MapParam& param);
   griddyn::solverMode *mode;  //!< to the solverMode
 

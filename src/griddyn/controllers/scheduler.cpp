@@ -310,7 +310,7 @@ void scheduler::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMess
         break;
     case schedulerMessagePayload::STARTUP:
         break;
-    case schedulerMessagePayload::UPDATE_TARGETS:  //
+    case schedulerMessagePayload::UPDATE_TARGETS:
         clearSchedule ();
         FALLTHROUGH
     case schedulerMessagePayload::ADD_TARGETS:
