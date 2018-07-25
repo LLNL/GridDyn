@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE (test_event)
 	//add a single point
     auto play = helics::apps::Player (helics::FederateInfo());
     play.addPublication ("breaker", helics::helics_type_t::helicsDouble);
-    play.addPoint (120.0, "breaker", 0.0);
+    play.addPoint (120.0, "breaker", 1.0);
 
     auto fut_rec = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
     auto fut_play = std::async (std::launch::async, [&play]() { play.run (); });
@@ -421,6 +421,8 @@ BOOST_AUTO_TEST_CASE (test_event)
     hR->Finalize ();
     auto pts = rec.pointCount ();
     BOOST_CHECK_EQUAL (pts, 41 * 4);
+    auto endpt=rec.getValue(163);
+    BOOST_CHECK_EQUAL(numeric_conversion(endpt.second,45.7), 0.0);
     rec.finalize ();
     // I want this freed first PT
     hR = nullptr;

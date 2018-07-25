@@ -375,11 +375,19 @@ void Link::set (const std::string &param, double val, units_t unitType)
     if ((param == "state") || (param == "switch") || (param == "switch1") || (param == "breaker") ||
         (param == "breaker_open") || (param == "breaker1") || (param == "breaker_open1"))
     {
-        switchMode (1, (val > 0));
+        switchMode (1, (val > 0.01));
     }
     else if ((param == "switch2") || (param == "breaker2") || (param == "breaker_open2"))
     {
-        switchMode (2, (val > 0));
+        switchMode (2, (val > 0.01));
+    }
+    else if ((param == "breaker_close1") || (param == "breaker_close"))
+    {
+        switchMode(1, (val <0.01));
+    }
+    else if (param == "breaker_close2")
+    {
+        switchMode(2, (val <0.01));
     }
     else if (param == "pset")
     {
