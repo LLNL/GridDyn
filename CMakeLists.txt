@@ -592,7 +592,7 @@ if(TEST_ENABLE)
     include(CTest)
     find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 
-    add_test(NAME Example179BusDynamicTest COMMAND gridDynMain ${PROJECT_SOURCE_DIR}/examples/179busDynamicTest.xml)
+    add_test(NAME Example179BusDynamicTest COMMAND gridDynMain ${PROJECT_SOURCE_DIR}/examples/test_faulting.xml)
     set_property(TEST Example179BusDynamicTest PROPERTY LABELS Quick Continuous Nightly Valgrind)
 
     add_test(NAME testComponents COMMAND testComponents)
