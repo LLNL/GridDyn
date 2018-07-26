@@ -22,6 +22,8 @@ do
             ;;
         --ubsan)
             echo "Tests using undefined behavior sanitizer"
+            export UBSAN_OPTIONS=print_stacktrace=1
+            CTEST_OPTIONS+=" --verbose"
             ;;
         --no-ctest)
             echo "Disable tests using ctest as a runner"
