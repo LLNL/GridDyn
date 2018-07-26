@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,11 +8,11 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
+#include "GovernorSteamTCSR.h"
 #include "../Generator.h"
 #include "../gridBus.h"
-#include "GovernorSteamTCSR.h"
 #include "utilities/matrixData.hpp"
 namespace griddyn
 {
@@ -67,8 +67,8 @@ coreObject *GovernorSteamTCSR::clone (coreObject *obj) const
 GovernorSteamTCSR::~GovernorSteamTCSR () {}
 // initial conditions
 void GovernorSteamTCSR::dynObjectInitializeB (const IOdata &inputs,
-                                                     const IOdata &desiredOutput,
-                                                     IOdata & /*inputSet*/)
+                                              const IOdata &desiredOutput,
+                                              IOdata & /*inputSet*/)
 {
     m_state[1] = 0;
     m_state[0] = desiredOutput[PoutLocation];
@@ -77,9 +77,9 @@ void GovernorSteamTCSR::dynObjectInitializeB (const IOdata &inputs,
 
 // residual
 void GovernorSteamTCSR::residual (const IOdata & /*inputs*/,
-                                         const stateData & /*sD*/,
-                                         double resid[],
-                                         const solverMode &sMode)
+                                  const stateData & /*sD*/,
+                                  double resid[],
+                                  const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode);
     resid[offset] = 0;
@@ -87,10 +87,10 @@ void GovernorSteamTCSR::residual (const IOdata & /*inputs*/,
 }
 
 void GovernorSteamTCSR::jacobianElements (const IOdata & /*inputs*/,
-                                                 const stateData &sD,
-                                                 matrixData<double> &md,
-                                                 const IOlocs & /*inputLocs*/,
-                                                 const solverMode &sMode)
+                                          const stateData &sD,
+                                          matrixData<double> &md,
+                                          const IOlocs & /*inputLocs*/,
+                                          const solverMode &sMode)
 {
     if (isAlgebraicOnly (sMode))
     {
@@ -134,10 +134,7 @@ index_t GovernorSteamTCSR::findIndex (const std::string &field, const solverMode
 }
 
 // set parameters
-void GovernorSteamTCSR::set (const std::string &param, const std::string &val)
-{
-    coreObject::set (param, val);
-}
+void GovernorSteamTCSR::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 
 void GovernorSteamTCSR::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
@@ -180,5 +177,5 @@ void GovernorSteamTCSR::set (const std::string &param, double val, gridUnits::un
     }
 }
 
-}//namespace governors
-}//namespace griddyn
+}  // namespace governors
+}  // namespace griddyn

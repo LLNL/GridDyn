@@ -13,14 +13,14 @@
 
 #include "../gridDynSimulation.h"
 
-#include "core/coreExceptions.h"
-#include "dynamicInitialConditionRecovery.h"
 #include "../events/eventQueue.h"
-#include "faultResetRecovery.h"
 #include "../gridBus.h"
-#include "gridDynSimulationFileOps.h"
-#include "diagnostics.h"
 #include "../solvers/solverInterface.h"
+#include "core/coreExceptions.h"
+#include "diagnostics.h"
+#include "dynamicInitialConditionRecovery.h"
+#include "faultResetRecovery.h"
+#include "gridDynSimulationFileOps.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 // system libraries
@@ -32,7 +32,8 @@
 //#include <iostream>
 namespace griddyn
 {
-static IOdata kNullOutputVec;  //!<  this is a purposely created empty vector which gets used for functions that take as
+static IOdata
+  kNullOutputVec;  //!<  this is a purposely created empty vector which gets used for functions that take as
 //! an input a vector but don't use it.
 
 // --------------- dynamic program ---------------
@@ -99,8 +100,7 @@ int gridDynSimulation::dynInitialize (coreTime tStart)
         {
             setRootOffset (0, sm);
             opFlags[has_roots] = true;
-            opFlags[has_alg_roots] = (offsets.getOffsets(sm).total.algRoots > 0);
-
+            opFlags[has_alg_roots] = (offsets.getOffsets (sm).total.algRoots > 0);
         }
         else
         {
@@ -270,10 +270,9 @@ int gridDynSimulation::dynamicDAE (coreTime tStop)
 
     nextStopTime = (std::min) (tStop, EvQ->getNextTime ());
 
-
-    //If running in block mode, integrate over entire simulation interval
-    if (dynData->getFlag("block_mode_only"))
-    { //this is primarily for braid
+    // If running in block mode, integrate over entire simulation interval
+    if (dynData->getFlag ("block_mode_only"))
+    {  // this is primarily for braid
         nextStopTime = tStop;
     }
 
@@ -469,7 +468,7 @@ int gridDynSimulation::dynamicPartitioned (coreTime tStop, coreTime tStep)
     }
     // go into the main loop
     int smStep = 0;
-    while (getSimulationTime() < tStop)
+    while (getSimulationTime () < tStop)
     {
         nextStopTime = std::min (tStop, nextEventTime);
 
@@ -831,7 +830,7 @@ int gridDynSimulation::generateDaeDynamicInitialConditions (const solverMode &sM
     }
     if (opFlags[low_bus_voltage])
     {
-        stateData sD (getSimulationTime(), dynData->state_data (), dynData->deriv_data ());
+        stateData sD (getSimulationTime (), dynData->state_data (), dynData->deriv_data ());
 
         rootCheck (noInputs, sD, dynData->getSolverMode (), check_level_t::low_voltage_check);
         // return dynData->calcIC(getSimulationTime(), probeStepTime, SolverInterface::ic_modes::fixed_diff, true);
@@ -1034,7 +1033,7 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
         offsets.local ().local.algRoots = 0;
         offsets.local ().local.diffRoots = 0;
         opFlags[has_roots] = false;
-        opFlags[has_alg_roots] = false; 
+        opFlags[has_alg_roots] = false;
     }
     else
     {
@@ -1042,16 +1041,14 @@ int gridDynSimulation::reInitDyn (const solverMode &sMode)
         if (rootSize (sMode) > 0)
         {
             opFlags[has_roots] = true;
-            setRootOffset (0, sMode); 
-            opFlags[has_alg_roots] = (offsets.local().total.algRoots > 0);
-
+            setRootOffset (0, sMode);
+            opFlags[has_alg_roots] = (offsets.local ().total.algRoots > 0);
         }
         else
         {
             opFlags[has_roots] = false;
             opFlags[has_alg_roots] = false;
         }
-        
     }
     if (controlFlags[constraints_disabled])
     {
@@ -1312,11 +1309,11 @@ int gridDynSimulation::dynAlgebraicSolve (coreTime time,
         ret = sd->solve (time, tret);
         if (ret < 0)
         {
-            if (JacobianCheck(this, sd->getSolverMode()) > 0)
+            if (JacobianCheck (this, sd->getSolverMode ()) > 0)
             {
                 printStateNames (this, sd->getSolverMode ());
             }
-			sd->setFlag("print_resid");
+            sd->setFlag ("print_resid");
         }
     }
     extraStateInformation[sMode.offsetIndex] = nullptr;

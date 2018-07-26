@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "core/coreObjectTemplates.hpp"
 
@@ -113,26 +113,26 @@ void nullBlock::blockResidual (double /*input*/,
 }
 
 void nullBlock::blockAlgebraicUpdate (double /*input*/,
-                             const stateData & /*sD*/,
-                             double /*update*/[],
-                             const solverMode & /*sMode*/)
+                                      const stateData & /*sD*/,
+                                      double /*update*/[],
+                                      const solverMode & /*sMode*/)
 {
 }
 
 void nullBlock::blockDerivative (double /*input*/,
-                               double /*didt*/,
-                               const stateData & /*sD*/,
-                               double /*deriv*/[],
-                               const solverMode & /*sMode*/)
+                                 double /*didt*/,
+                                 const stateData & /*sD*/,
+                                 double /*deriv*/[],
+                                 const solverMode & /*sMode*/)
 {
 }
 
 void nullBlock::blockJacobianElements (double /*input*/,
-                             double /*didt*/,
-                             const stateData & /*sD*/,
-                             matrixData<double> & /*md*/,
-                             index_t /*argLoc*/,
-                             const solverMode & /*sMode*/)
+                                       double /*didt*/,
+                                       const stateData & /*sD*/,
+                                       matrixData<double> & /*md*/,
+                                       index_t /*argLoc*/,
+                                       const solverMode & /*sMode*/)
 {
 }
 

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,16 +8,16 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 // headers
-#include "gridAreaOpt.h"
 #include "gridRelayOpt.h"
 #include "../optObjectFactory.h"
-#include "utilities/vectorOps.hpp"
-#include "utilities/vectData.hpp"
-#include "griddyn/Relay.h"
 #include "core/coreExceptions.h"
+#include "gridAreaOpt.h"
+#include "griddyn/Relay.h"
+#include "utilities/vectData.hpp"
+#include "utilities/vectorOps.hpp"
 #include <cmath>
 #include <utility>
 
@@ -27,295 +27,241 @@ static optObjectFactory<gridRelayOpt, Relay> opRelay ("basic", "relay");
 
 using namespace gridUnits;
 
-gridRelayOpt::gridRelayOpt (const std::string &objName) : gridOptObject (objName)
-{
+gridRelayOpt::gridRelayOpt (const std::string &objName) : gridOptObject (objName) {}
 
-}
-
-gridRelayOpt::gridRelayOpt (coreObject *obj, const std::string &objName) : gridOptObject (objName),relay (dynamic_cast<Relay *> (obj))
+gridRelayOpt::gridRelayOpt (coreObject *obj, const std::string &objName)
+    : gridOptObject (objName), relay (dynamic_cast<Relay *> (obj))
 {
-  if (relay)
+    if (relay != nullptr)
     {
-      if (getName().empty ())
+        if (getName ().empty ())
         {
-          setName(relay->getName ());
+            setName (relay->getName ());
         }
-      setUserID(relay->getUserID ());
+        setUserID (relay->getUserID ());
     }
-
 }
 
 coreObject *gridRelayOpt::clone (coreObject *obj) const
 {
-  gridRelayOpt *nobj;
-  if (obj == nullptr)
+    gridRelayOpt *nobj;
+    if (obj == nullptr)
     {
-      nobj = new gridRelayOpt ();
+        nobj = new gridRelayOpt ();
     }
-  else
+    else
     {
-      nobj = dynamic_cast<gridRelayOpt *> (obj);
-      if (nobj == nullptr)
+        nobj = dynamic_cast<gridRelayOpt *> (obj);
+        if (nobj == nullptr)
         {
-          //if we can't cast the pointer clone at the next lower level
-          gridOptObject::clone (obj);
-          return obj;
+            // if we can't cast the pointer clone at the next lower level
+            gridOptObject::clone (obj);
+            return obj;
         }
     }
-  gridOptObject::clone (nobj);
+    gridOptObject::clone (nobj);
 
+    // now clone all the loads and generators
+    // cloning the links from this component would be bad
+    // clone the generators and loads
 
-  //now clone all the loads and generators
-  //cloning the links from this component would be bad
-  //clone the generators and loads
-
-
-
-  return nobj;
+    return nobj;
 }
-
 
 void gridRelayOpt::add (coreObject *obj)
 {
-  if (dynamic_cast<Relay *> (obj))
+    if (dynamic_cast<Relay *> (obj) != nullptr)
     {
-      relay = static_cast<Relay *> (obj);
-      if (getName().empty ())
+        relay = static_cast<Relay *> (obj);
+        if (getName ().empty ())
         {
-          setName(relay->getName ());
+            setName (relay->getName ());
         }
-      setUserID(relay->getUserID ());
+        setUserID (relay->getUserID ());
     }
-  else
-  {
-	  throw(unrecognizedObjectException(this));
-  }
+    else
+    {
+        throw (unrecognizedObjectException (this));
+    }
 }
 
-count_t gridRelayOpt::objSize (const optimMode &)
+count_t gridRelayOpt::objSize (const optimMode & /* oMode */)
 {
-  count_t objs = 0;
+    count_t objs = 0;
 
-  return objs;
+    return objs;
 }
-count_t gridRelayOpt::contObjSize (const optimMode &)
+count_t gridRelayOpt::contObjSize (const optimMode & /* oMode */)
 {
-  count_t objs = 0;
+    count_t objs = 0;
 
-  return objs;
+    return objs;
 }
 
-count_t gridRelayOpt::intObjSize (const optimMode &)
+count_t gridRelayOpt::intObjSize (const optimMode & /* oMode */)
 {
-  count_t objs = 0;
+    count_t objs = 0;
 
-  return objs;
+    return objs;
 }
 
 count_t gridRelayOpt::constraintSize (const optimMode &oMode)
 {
-  count_t objs = 0;
-  switch (oMode.linMode)
+    count_t objs = 0;
+    switch (oMode.linMode)
     {
     case linearityMode_t::linear:
     case linearityMode_t::quadratic:
     case linearityMode_t::nonlinear:
     default:
-      objs = 0;
+        objs = 0;
     }
 
-  return objs;
+    return objs;
 }
 
-void gridRelayOpt::dynObjectInitializeA (std::uint32_t /*flags*/)
-{
+void gridRelayOpt::dynObjectInitializeA (std::uint32_t /*flags*/) {}
 
+void gridRelayOpt::remove (coreObject *) {}
 
-}
+void gridRelayOpt::setValues (const optimData & /* oD */, const optimMode & /* oMode */) {}
+// for saving the state
+void gridRelayOpt::guessState (double /*time*/, double /*val*/[], const optimMode & /* oMode */) {}
 
+void gridRelayOpt::getVariableType (double /*sdata*/[], const optimMode & /* oMode */) {}
 
-
-void gridRelayOpt::remove (coreObject *)
-{
-
-}
-
-void gridRelayOpt::setValues (const optimData &, const optimMode &)
-{
-}
-//for saving the state
-void gridRelayOpt::guessState (double /*time*/, double /*val*/[], const optimMode &)
-{
-
-}
-
-void gridRelayOpt::getVariableType (double /*sdata*/[], const optimMode &)
-{
-
-}
-
-
-void gridRelayOpt::getTols (double /*tols*/[], const optimMode &)
-{
-
-}
-void gridRelayOpt::valueBounds (double /*time*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
-{
-
-}
-
-void gridRelayOpt::linearObj (const optimData &, vectData<double> & /*linObj*/, const optimMode &)
-{
-
-}
-void gridRelayOpt::quadraticObj (const optimData &, vectData<double> & /*linObj*/, vectData<double> & /*quadObj*/, const optimMode &)
-{
-
-}
-
-void gridRelayOpt::constraintValue (const optimData &, double /*cVals*/[], const optimMode &)
-{
-}
-void gridRelayOpt::constraintJacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &)
+void gridRelayOpt::getTols (double /*tols*/[], const optimMode & /* oMode */) {}
+void gridRelayOpt::valueBounds (double /*time*/,
+                                double /*upperLimit*/[],
+                                double /*lowerLimit*/[],
+                                const optimMode & /* oMode */)
 {
 }
 
-double gridRelayOpt::objValue (const optimData &, const optimMode &)
+void gridRelayOpt::linearObj (const optimData & /* oD */,
+                              vectData<double> & /*linObj*/,
+                              const optimMode & /* oMode */)
 {
-  double cost = 0;
-
-  return cost;
+}
+void gridRelayOpt::quadraticObj (const optimData & /* oD */,
+                                 vectData<double> & /*linObj*/,
+                                 vectData<double> & /*quadObj*/,
+                                 const optimMode & /* oMode */)
+{
 }
 
-void gridRelayOpt::gradient (const optimData &, double /*deriv*/[], const optimMode &)
+void gridRelayOpt::constraintValue (const optimData & /* oD */, double /*cVals*/[], const optimMode & /* oMode */)
 {
-
 }
-void gridRelayOpt::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode &)
+void gridRelayOpt::constraintJacobianElements (const optimData & /* oD */,
+                                               matrixData<double> & /*md*/,
+                                               const optimMode & /* oMode */)
 {
-
-}
-void gridRelayOpt::getConstraints ( const optimData &, matrixData<double> & /*cons*/, double /*upperLimit*/[], double /*lowerLimit*/[], const optimMode &)
-{
-
-}
-void gridRelayOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const std::string & /*prefix*/)
-{
-
 }
 
-
-void gridRelayOpt::disable ()
+double gridRelayOpt::objValue (const optimData & /* oD */, const optimMode & /* oMode */)
 {
-	gridOptObject::disable();
+    double cost = 0;
 
+    return cost;
 }
 
-void gridRelayOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/)
+void gridRelayOpt::gradient (const optimData & /* oD */, double /*deriv*/[], const optimMode & /* oMode */) {}
+void gridRelayOpt::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode & /* oMode */)
 {
-
-
-
-
 }
+void gridRelayOpt::getConstraints (const optimData & /* oD */,
+                                   matrixData<double> & /*cons*/,
+                                   double /*upperLimit*/[],
+                                   double /*lowerLimit*/[],
+                                   const optimMode & /* oMode */)
+{
+}
+void gridRelayOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const std::string & /*prefix*/) {}
+
+void gridRelayOpt::disable () { gridOptObject::disable (); }
+
+void gridRelayOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/) {}
 
 // destructor
-gridRelayOpt::~gridRelayOpt ()
-{
-
-}
-
-
+gridRelayOpt::~gridRelayOpt () {}
 
 // set properties
-void gridRelayOpt::set (const std::string &param,  const std::string &val)
+void gridRelayOpt::set (const std::string &param, const std::string &val)
 {
-  if (param == "#")
+    if (param == "#")
     {
-
     }
-  else
+    else
     {
-      gridOptObject::set (param, val);
+        gridOptObject::set (param, val);
     }
 }
 
 void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
 {
-
-  if ((param == "voltagetolerance") || (param == "vtol"))
+    if ((param == "voltagetolerance") || (param == "vtol"))
     {
-
     }
-  else if ((param == "angleetolerance") || (param == "atol"))
+    else if ((param == "angleetolerance") || (param == "atol"))
     {
-
     }
-  else
+    else
     {
-      gridOptObject::set (param, val, unitType);
+        gridOptObject::set (param, val, unitType);
     }
-
 }
-
-
-
 
 coreObject *gridRelayOpt::find (const std::string &objName) const
 {
-  coreObject *obj = nullptr;
-  if ((objName == getName())|| (objName == "relay"))
+    coreObject *obj = nullptr;
+    if ((objName == getName ()) || (objName == "relay"))
     {
-      return const_cast<gridRelayOpt *> (this);
+        return const_cast<gridRelayOpt *> (this);
     }
 
-  return obj;
+    return obj;
 }
 
 coreObject *gridRelayOpt::getSubObject (const std::string &typeName, index_t /*num*/) const
 {
-  if (typeName == "target")
+    return nullptr;
+    /*
+    if (typeName == "target")
     {
-      return nullptr;
+        return nullptr;
     }
 
-  else
+    else
     {
-      return nullptr;
+        return nullptr;
     }
+    */
 }
 
 coreObject *gridRelayOpt::findByUserID (const std::string &typeName, index_t searchID) const
 {
-  if (typeName == "relay")
+    if (typeName == "relay")
     {
-      if (searchID == getUserID())
+        if (searchID == getUserID ())
         {
-          return const_cast<gridRelayOpt *> (this);
+            return const_cast<gridRelayOpt *> (this);
         }
-
     }
-  return nullptr;
+    return nullptr;
 }
-
-
 
 double gridRelayOpt::get (const std::string &param, gridUnits::units_t unitType) const
 {
-  double val = kNullVal;
-  if (param[0] == '#')
+    double val = kNullVal;
+    if (param[0] == '#')
     {
-
     }
-  else
+    else
     {
-      val = gridOptObject::get (param,unitType);
+        val = gridOptObject::get (param, unitType);
     }
-  return val;
+    return val;
 }
 
-}// namespace griddyn
-
-
-
-
+}  // namespace griddyn

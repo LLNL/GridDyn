@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,14 +8,14 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
-#include "core/coreExceptions.h"
-#include "core/coreObjectTemplates.hpp"
-#include "core/objectFactoryTemplates.hpp"
 #include "../Generator.h"
 #include "../gridBus.h"
 #include "GovernorTypes.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.hpp"
+#include "core/objectFactoryTemplates.hpp"
 #include "utilities/matrixDataSparse.hpp"
 
 namespace griddyn
@@ -25,21 +25,18 @@ static typeFactory<Governor> gfgov1 ("governor", stringVec{"simple", "fast"});
 namespace governors
 {
 static childTypeFactory<GovernorIeeeSimple, Governor>
-gfgovsi("governor", stringVec{ "basic", "ieeesimple" }, "basic");
+  gfgovsi ("governor", stringVec{"basic", "ieeesimple"}, "basic");
 
-static childTypeFactory<GovernorReheat, Governor> gfgovrh("governor", stringVec{ "reheat" });
-static childTypeFactory<GovernorHydro, Governor>
-gfgov2("governor", stringVec{ "ieeehydro", "hydro" });
+static childTypeFactory<GovernorReheat, Governor> gfgovrh ("governor", stringVec{"reheat"});
+static childTypeFactory<GovernorHydro, Governor> gfgov2 ("governor", stringVec{"ieeehydro", "hydro"});
 
-static childTypeFactory<GovernorSteamNR, Governor>
-gfgov3("governor", stringVec{ "ieeesteamnr", "steamnr" });
+static childTypeFactory<GovernorSteamNR, Governor> gfgov3 ("governor", stringVec{"ieeesteamnr", "steamnr"});
 
-static childTypeFactory<GovernorSteamTCSR, Governor>
-gfgov4("governor", stringVec{ "ieeesteamtcsr", "steamtcsr" });
+static childTypeFactory<GovernorSteamTCSR, Governor> gfgov4 ("governor", stringVec{"ieeesteamtcsr", "steamtcsr"});
 
-static childTypeFactory<GovernorTgov1, Governor> gfgov5("governor", stringVec{ "tgov1" });
+static childTypeFactory<GovernorTgov1, Governor> gfgov5 ("governor", stringVec{"tgov1"});
 
-}//namespace governors
+}  // namespace governors
 using namespace gridUnits;
 
 Governor::Governor (const std::string &objName)
@@ -53,14 +50,14 @@ Governor::Governor (const std::string &objName)
     dbb.addOwningReference ();
     cb.addOwningReference ();
     delay.addOwningReference ();
-	m_inputSize = 2;
-	m_outputSize = 1;
+    m_inputSize = 2;
+    m_outputSize = 1;
 }
 
 coreObject *Governor::clone (coreObject *obj) const
 {
     auto *gov = cloneBase<Governor, gridSubModel> (this, obj);
-    if (!gov)
+    if (gov == nullptr)
     {
         return obj;
     }
@@ -152,10 +149,7 @@ void Governor::timestep (coreTime time, const IOdata &inputs, const solverMode &
     delay.step (time, out + inputs[govpSetInLocation]);
 }
 
-void Governor::derivative (const IOdata &inputs,
-                                  const stateData &sD,
-                                  double deriv[],
-                                  const solverMode &sMode)
+void Governor::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
     IOdata i{inputs[govOmegaInLocation]};  // deadband doesn't have any derivatives
     cb.derivative (i, sD, deriv, sMode);
@@ -164,10 +158,10 @@ void Governor::derivative (const IOdata &inputs,
 }
 
 void Governor::jacobianElements (const IOdata &inputs,
-                                        const stateData &sD,
-                                        matrixData<double> &md,
-                                        const IOlocs &inputLocs,
-                                        const solverMode &sMode)
+                                 const stateData &sD,
+                                 matrixData<double> &md,
+                                 const IOlocs &inputLocs,
+                                 const solverMode &sMode)
 {
     cb.blockJacobianElements (inputs[govOmegaInLocation], 0, sD, md, inputLocs[govOmegaInLocation], sMode);
 
@@ -239,20 +233,17 @@ void Governor::jacobianElements (const IOdata &inputs,
           */
 }
 
-void Governor::rootTest (const IOdata & /*inputs*/,
-                                const stateData &sD,
-                                double root[],
-                                const solverMode &sMode)
+void Governor::rootTest (const IOdata & /*inputs*/, const stateData &sD, double roots[], const solverMode &sMode)
 {
     IOdata i{cb.getOutput (kNullVec, sD, sMode)};
     if (dbb.checkFlag (has_roots))
     {
-        dbb.rootTest (i, sD, root, sMode);
+        dbb.rootTest (i, sD, roots, sMode);
     }
     // cb should not have roots
     if (delay.checkFlag (has_roots))
     {
-        delay.rootTest (i, sD, root, sMode);
+        delay.rootTest (i, sD, roots, sMode);
     }
 }
 
@@ -432,26 +423,17 @@ double Governor::get (const std::string &param, gridUnits::units_t unitType) con
     return out;
 }
 
-static const std::vector<stringVec> inputNamesStr
-{
-	{ "omega","frequency","w","f" },
-	{ "pset","setpoint","power" },
+static const std::vector<stringVec> inputNamesStr{
+  {"omega", "frequency", "w", "f"},
+  {"pset", "setpoint", "power"},
 };
 
-const std::vector<stringVec> &Governor::inputNames() const
-{
-	return inputNamesStr;
-}
+const std::vector<stringVec> &Governor::inputNames () const { return inputNamesStr; }
 
-static const std::vector<stringVec> outputNamesStr
-{
-	{ "pmech","power","output","p" },
+static const std::vector<stringVec> outputNamesStr{
+  {"pmech", "power", "output", "p"},
 };
 
-const std::vector<stringVec> &Governor::outputNames() const
-{
-	return outputNamesStr;
-}
+const std::vector<stringVec> &Governor::outputNames () const { return outputNamesStr; }
 
-
-}//namespace griddyn
+}  // namespace griddyn

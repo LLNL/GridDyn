@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
+#include "motorLoad5.h"
+#include "../gridBus.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactory.hpp"
-#include "../gridBus.h"
-#include "motorLoad5.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 
@@ -150,54 +150,53 @@ void motorLoad5::dynObjectInitializeB (const IOdata &inputs,
     }
 }
 
-stateSizes motorLoad5::LocalStateSizes(const solverMode &sMode) const
+stateSizes motorLoad5::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes SS;
-	if (isDynamic(sMode))
-	{
-		SS.algSize = 2;
-		if (!isAlgebraicOnly(sMode))
-		{
-			SS.diffSize = 5;
-		}
-	}
-	else
-	{
-		SS.algSize = 7;
-	}
-	return SS;
+    stateSizes SS;
+    if (isDynamic (sMode))
+    {
+        SS.algSize = 2;
+        if (!isAlgebraicOnly (sMode))
+        {
+            SS.diffSize = 5;
+        }
+    }
+    else
+    {
+        SS.algSize = 7;
+    }
+    return SS;
 }
 
-count_t motorLoad5::LocalJacobianCount(const solverMode &sMode) const
+count_t motorLoad5::LocalJacobianCount (const solverMode &sMode) const
 {
-	count_t localJacSize = 0;
-	if (isDynamic(sMode))
-	{
-		localJacSize = 8;
-		if (!isAlgebraicOnly(sMode))
-		{
-			localJacSize += 27;
-		}
-	}
-	else
-	{
-
-		if (opFlags[init_transient])
-		{
-			localJacSize = 31;
-		}
-		else
-		{
-			localJacSize = 35;
-		}
-	}
-	return localJacSize;
+    count_t localJacSize = 0;
+    if (isDynamic (sMode))
+    {
+        localJacSize = 8;
+        if (!isAlgebraicOnly (sMode))
+        {
+            localJacSize += 27;
+        }
+    }
+    else
+    {
+        if (opFlags[init_transient])
+        {
+            localJacSize = 31;
+        }
+        else
+        {
+            localJacSize = 35;
+        }
+    }
+    return localJacSize;
 }
 
 // set properties
 void motorLoad5::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else

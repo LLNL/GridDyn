@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#include "core/coreObjectTemplates.hpp"
+#include "GovernorTgov1.h"
 #include "../Generator.h"
 #include "../gridBus.h"
-#include "GovernorTgov1.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 
 namespace griddyn
@@ -41,7 +41,7 @@ GovernorTgov1::GovernorTgov1 (const std::string &objName) : GovernorIeeeSimple (
 coreObject *GovernorTgov1::clone (coreObject *obj) const
 {
     auto *gov = cloneBase<GovernorTgov1, GovernorIeeeSimple> (this, obj);
-    if (!gov)
+    if (gov == nullptr)
     {
         return obj;
     }
@@ -52,9 +52,7 @@ coreObject *GovernorTgov1::clone (coreObject *obj) const
 // destructor
 GovernorTgov1::~GovernorTgov1 () {}
 // initial conditions
-void GovernorTgov1::dynObjectInitializeB (const IOdata & /*inputs*/,
-                                                 const IOdata &desiredOutput,
-                                                 IOdata &fieldSet)
+void GovernorTgov1::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata &fieldSet)
 {
     m_state[2] = desiredOutput[PoutLocation];
     m_state[1] = desiredOutput[PoutLocation];
@@ -63,10 +61,7 @@ void GovernorTgov1::dynObjectInitializeB (const IOdata & /*inputs*/,
 }
 
 // residual
-void GovernorTgov1::residual (const IOdata &inputs,
-                                     const stateData &sD,
-                                     double resid[],
-                                     const solverMode &sMode)
+void GovernorTgov1::residual (const IOdata &inputs, const stateData &sD, double resid[], const solverMode &sMode)
 {
     // double omega = getControlFrequency (inputs);
     double omega = inputs[govOmegaInLocation];
@@ -84,10 +79,7 @@ void GovernorTgov1::residual (const IOdata &inputs,
     Loc.destDiffLoc[1] -= Loc.dstateLoc[1];
 }
 
-void GovernorTgov1::derivative (const IOdata &inputs,
-                                       const stateData &sD,
-                                       double deriv[],
-                                       const solverMode &sMode)
+void GovernorTgov1::derivative (const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode)
 {
     auto Loc = offsets.getLocations (sD, deriv, sMode, this);
 
@@ -102,7 +94,7 @@ void GovernorTgov1::derivative (const IOdata &inputs,
     else
     {
         Loc.destDiffLoc[1] = (-gs[1] + inputs[govpSetInLocation] - K * (omega - 1.0)) / T1;
-      //  LOG_WARNING(std::string("gov set =") + std::to_string(K * (omega - 1.0)));
+        //  LOG_WARNING(std::string("gov set =") + std::to_string(K * (omega - 1.0)));
     }
 
     Loc.destDiffLoc[0] = (Loc.diffStateLoc[1] - Loc.diffStateLoc[0] - T2 * Loc.destDiffLoc[1]) / T3;
@@ -122,10 +114,10 @@ void GovernorTgov1::timestep (coreTime time, const IOdata &inputs, const solverM
 }
 
 void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
-                                             const stateData &sD,
-                                             matrixData<double> &md,
-                                             const IOlocs &inputLocs,
-                                             const solverMode &sMode)
+                                      const stateData &sD,
+                                      matrixData<double> &md,
+                                      const IOlocs &inputLocs,
+                                      const solverMode &sMode)
 {
     auto Loc = offsets.getLocations (sD, nullptr, sMode, this);
 
@@ -171,7 +163,7 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
         md.assign (refI + 1, refI + 1, -1 / T1 - sD.cj);
         if (linkOmega)
         {
-            md.assign (refI + 1, inputLocs[govOmegaInLocation],-K / (T1));
+            md.assign (refI + 1, inputLocs[govOmegaInLocation], -K / (T1));
         }
 
         md.assign (refI, refI + 1, (1 + T2 / T1) / T3);
@@ -188,15 +180,12 @@ void GovernorTgov1::jacobianElements (const IOdata & /*inputs*/,
     // K * (omega - Wref) / systemBaseFrequency) / T1) / T3;
 }
 
-void GovernorTgov1::rootTest (const IOdata &inputs,
-                                     const stateData &sD,
-                                     double root[],
-                                     const solverMode &sMode)
+void GovernorTgov1::rootTest (const IOdata &inputs, const stateData &sD, double roots[], const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /* if (opFlags.test (uses_deadband))
        {
-         Governor::rootTest (inputs, sD, root, sMode);
+         Governor::rootTest (inputs, sD, roots, sMode);
          ++rootOffset;
        }*/
     if (opFlags[uses_plimits])
@@ -209,11 +198,11 @@ void GovernorTgov1::rootTest (const IOdata &inputs,
         {
             // double omega = getControlFrequency (inputs);
             double omega = inputs[govOmegaInLocation];
-            root[rootOffset] = (-Pmech + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
+            roots[rootOffset] = (-Pmech + inputs[govpSetInLocation] + K * (omega - 1.0)) / T1;
         }
         else
         {
-            root[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
+            roots[rootOffset] = std::min (Pmax - Pmech, Pmech - Pmin);
             if (Pmech > Pmax)
             {
                 opFlags.set (p_limit_high);
@@ -224,9 +213,9 @@ void GovernorTgov1::rootTest (const IOdata &inputs,
 }
 
 void GovernorTgov1::rootTrigger (coreTime /*time*/,
-                                        const IOdata &inputs,
-                                        const std::vector<int> &rootMask,
-                                        const solverMode &sMode)
+                                 const IOdata &inputs,
+                                 const std::vector<int> &rootMask,
+                                 const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     /*if (opFlags.test (uses_deadband))
@@ -240,7 +229,7 @@ void GovernorTgov1::rootTrigger (coreTime /*time*/,
           */
     if (opFlags[uses_plimits])
     {
-        if (rootMask[rootOffset])
+        if (rootMask[rootOffset] != 0)
         {
             if (opFlags[p_limited])
             {
@@ -271,7 +260,7 @@ void GovernorTgov1::rootTrigger (coreTime /*time*/,
 index_t GovernorTgov1::findIndex (const std::string &field, const solverMode &sMode) const
 {
     index_t ret = kInvalidLocation;
-    if ((field == "pm")||(field=="pmech"))
+    if ((field == "pm") || (field == "pmech"))
     {
         ret = offsets.getAlgOffset (sMode);
     }
@@ -305,5 +294,5 @@ void GovernorTgov1::set (const std::string &param, double val, units_t unitType)
         GovernorIeeeSimple::set (param, val, unitType);
     }
 }
-}//namespace governors
-}//namespace griddyn
+}  // namespace governors
+}  // namespace griddyn

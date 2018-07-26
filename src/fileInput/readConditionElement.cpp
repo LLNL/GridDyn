@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "readElement.h"
 
@@ -116,19 +116,19 @@ bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *pa
         BlockB = (B == '=') ? trim (cond.substr (pos + 2)) : trim (cond.substr (pos + 1));
     }
 
-    ri.setKeyObject(parentObject);
+    ri.setKeyObject (parentObject);
     double aval = interpretString (BlockA.to_string (), ri);
     double bval = interpretString (BlockB.to_string (), ri);
 
-    if (!std::isnan(aval) && !std::isnan(bval))
+    if (!std::isnan (aval) && !std::isnan (bval))
     {
         try
         {
-            eval = compare(aval, bval, A, B);
+            eval = compare (aval, bval, A, B);
         }
         catch (const std::invalid_argument &)
         {
-            WARNPRINT(READER_WARN_IMPORTANT, "invalid comparison operator");
+            WARNPRINT (READER_WARN_IMPORTANT, "invalid comparison operator");
         }
     }
     else if (std::isnan (aval) && (std::isnan (bval)))
@@ -150,8 +150,8 @@ bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *pa
         WARNPRINT (READER_WARN_IMPORTANT, "invalid comparison terms");
     }
 
-    ri.setKeyObject(nullptr);
+    ri.setKeyObject (nullptr);
     return (rev) ? !eval : eval;
 }
 
-}//namespace griddyn
+}  // namespace griddyn

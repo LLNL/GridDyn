@@ -11,13 +11,16 @@
  */
 
 #include "tinyxml2ReaderElement.h"
-#include <tinyxml2/tinyxml2.h>
 #include "utilities/string_viewConversion.h"
+#include <tinyxml2/tinyxml2.h>
 
 using namespace tinyxml2;
-//this is not using default for gcc 4.9 compatibility
-tinyxml2ReaderElement::tinyxml2ReaderElement() noexcept {}
-tinyxml2ReaderElement::tinyxml2ReaderElement (const std::string &fileName) { tinyxml2ReaderElement::loadFile (fileName); }
+// this is not using default for gcc 4.9 compatibility
+tinyxml2ReaderElement::tinyxml2ReaderElement () noexcept {}
+tinyxml2ReaderElement::tinyxml2ReaderElement (const std::string &fileName)
+{
+    tinyxml2ReaderElement::loadFile (fileName);
+}
 tinyxml2ReaderElement::tinyxml2ReaderElement (const XMLElement *xmlElement, const XMLElement *xmlParent)
     : element (xmlElement), parent (xmlParent)
 {
@@ -32,7 +35,7 @@ void tinyxml2ReaderElement::clear ()
     bookmarks.clear ();
 }
 
-bool tinyxml2ReaderElement::isValid () const { return ((element!=nullptr) || ((parent == nullptr) && (doc))); }
+bool tinyxml2ReaderElement::isValid () const { return ((element != nullptr) || ((parent == nullptr) && (doc))); }
 bool tinyxml2ReaderElement::isDocument () const
 {
     if (parent == nullptr)
@@ -62,7 +65,7 @@ bool tinyxml2ReaderElement::loadFile (const std::string &fileName)
         element = doc->FirstChildElement ();
         return true;
     }
-	doc->PrintError();
+    doc->PrintError ();
     doc = nullptr;
     return false;
 }

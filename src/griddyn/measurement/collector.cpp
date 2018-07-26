@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,11 +11,11 @@
  */
 
 #include "collector.h"
+#include "../events/Event.h"
 #include "Recorder.h"
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../events/Event.h"
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
 #include "utilities/stringOps.h"
@@ -39,61 +39,60 @@ collector::collector (const std::string &collectorName)
 {
 }
 
-std::unique_ptr<collector> collector::clone() const
+std::unique_ptr<collector> collector::clone () const
 {
-	auto col = std::make_unique<collector>();
-	cloneTo(col.get());
-	return col;
+    auto col = std::make_unique<collector> ();
+    cloneTo (col.get ());
+    return col;
 }
 
 void collector::cloneTo (collector *col) const
 {
-
-	col->reqPeriod = reqPeriod;
-	col->timePeriod = timePeriod;
-	col->setName (getName ());
-	col->startTime = startTime;
-	col->stopTime = stopTime;
-	col->triggerTime = triggerTime;
-	col->lastTriggerTime = lastTriggerTime;
+    col->reqPeriod = reqPeriod;
+    col->timePeriod = timePeriod;
+    col->setName (getName ());
+    col->startTime = startTime;
+    col->stopTime = stopTime;
+    col->triggerTime = triggerTime;
+    col->lastTriggerTime = lastTriggerTime;
     for (size_t kk = 0; kk < points.size (); ++kk)
     {
         if (kk >= col->points.size ())
         {
             auto ggb = (points[kk].dataGrabber) ? points[kk].dataGrabber->clone () : nullptr;
             auto ggbst = (points[kk].dataGrabberSt) ? points[kk].dataGrabberSt->clone () : nullptr;
-			col->points.emplace_back (std::move(ggb), std::move(ggbst), points[kk].column);
+            col->points.emplace_back (std::move (ggb), std::move (ggbst), points[kk].column);
         }
         else
         {
-			if (col->points[kk].dataGrabber)
-			{
-				if (points[kk].dataGrabber)
-				{
-					points[kk].dataGrabber->cloneTo(col->points[kk].dataGrabber.get());
-				}
-			}
-			else if (points[kk].dataGrabber)
-			{
-				col->points[kk].dataGrabber = points[kk].dataGrabber->clone();
-			}
+            if (col->points[kk].dataGrabber)
+            {
+                if (points[kk].dataGrabber)
+                {
+                    points[kk].dataGrabber->cloneTo (col->points[kk].dataGrabber.get ());
+                }
+            }
+            else if (points[kk].dataGrabber)
+            {
+                col->points[kk].dataGrabber = points[kk].dataGrabber->clone ();
+            }
 
-			if (col->points[kk].dataGrabberSt)
-			{
-				if (points[kk].dataGrabberSt)
-				{
-					points[kk].dataGrabberSt->cloneTo(col->points[kk].dataGrabberSt.get());
-				}
-			}
-			else if (points[kk].dataGrabberSt)
-			{
-				col->points[kk].dataGrabberSt = points[kk].dataGrabberSt->clone();
-			}
+            if (col->points[kk].dataGrabberSt)
+            {
+                if (points[kk].dataGrabberSt)
+                {
+                    points[kk].dataGrabberSt->cloneTo (col->points[kk].dataGrabberSt.get ());
+                }
+            }
+            else if (points[kk].dataGrabberSt)
+            {
+                col->points[kk].dataGrabberSt = points[kk].dataGrabberSt->clone ();
+            }
 
-			col->points[kk].column = points[kk].column;
+            col->points[kk].column = points[kk].column;
         }
     }
-	col->data.resize (data.size ());
+    col->data.resize (data.size ());
 }
 
 void collector::updateObject (coreObject *gco, object_update_mode mode)
@@ -279,42 +278,39 @@ void collector::recheckColumns ()
     recheck = false;
 }
 
-count_t collector::grabData(double *outputData, index_t N)
+count_t collector::grabData (double *data_out, index_t N)
 {
-	std::vector<double> vals;
-	count_t currentCount = 0;
-	if (recheck)
-	{
-		recheckColumns();
-	}
-	for (auto &datapoint : points)
-	{
-		if (datapoint.dataGrabber->vectorGrab)
-		{
-			datapoint.dataGrabber->grabVectorData(vals);
-			if (static_cast<index_t>(datapoint.column + vals.size()) < N)
-			{
-                std::copy (vals.begin (), vals.end (), outputData + datapoint.column);
-				currentCount = (std::max)(currentCount, datapoint.column + static_cast<index_t>(vals.size()));
-			}
-			else if (datapoint.column < N)
-			{
-                std::copy (vals.begin (), vals.begin () + (N - datapoint.column - 1),
-                           outputData + datapoint.column);
-				currentCount = N;
-			}
-
-		}
-		else if (datapoint.column<N)
-		{
-			data[datapoint.column] = datapoint.dataGrabber->grabData();
-			currentCount = (std::max)(currentCount, datapoint.column + 1);
-		}
-	}
-	currentCount = (std::min)(currentCount, N);
-	return currentCount;
+    std::vector<double> vals;
+    count_t currentCount = 0;
+    if (recheck)
+    {
+        recheckColumns ();
+    }
+    for (auto &datapoint : points)
+    {
+        if (datapoint.dataGrabber->vectorGrab)
+        {
+            datapoint.dataGrabber->grabVectorData (vals);
+            if (static_cast<index_t> (datapoint.column + vals.size ()) < N)
+            {
+                std::copy (vals.begin (), vals.end (), data_out + datapoint.column);
+                currentCount = (std::max) (currentCount, datapoint.column + static_cast<index_t> (vals.size ()));
+            }
+            else if (datapoint.column < N)
+            {
+                std::copy (vals.begin (), vals.begin () + (N - datapoint.column - 1), data_out + datapoint.column);
+                currentCount = N;
+            }
+        }
+        else if (datapoint.column < N)
+        {
+            data_out[datapoint.column] = datapoint.dataGrabber->grabData ();
+            currentCount = (std::max) (currentCount, datapoint.column + 1);
+        }
+    }
+    currentCount = (std::min) (currentCount, N);
+    return currentCount;
 }
-
 
 change_code collector::trigger (coreTime time)
 {
@@ -480,15 +476,15 @@ void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
             // if multiple fields were specified by comma or semicolon separation
             auto v = stringOps::splitlineBracket (gdRI.field, ",;");
             int ccol = gdRI.column;
-			auto tempInfo = gdRI;
+            auto tempInfo = gdRI;
             for (const auto &fld : v)
             {
-				tempInfo.field = fld;
+                tempInfo.field = fld;
                 if (ccol >= 0)
                 {
                     /* this wouldn't work if the data was a vector grab, but in that case the recheck flag would be
                      * activated and this information overridden*/
-					tempInfo.column = ccol++;  // post increment intended
+                    tempInfo.column = ccol++;  // post increment intended
                 }
                 add (tempInfo, obj);
             }
@@ -562,13 +558,13 @@ void collector::add (const std::string &field, coreObject *obj)
     }
 }
 
-void collector::reset()
+void collector::reset ()
 {
-	points.clear();
-	data.clear();
-	warnList.clear();
-	warningCount = 0;
-	triggerTime = maxTime;
+    points.clear ();
+    data.clear ();
+    warnList.clear ();
+    warningCount = 0;
+    triggerTime = maxTime;
 }
 
 void collector::flush () {}

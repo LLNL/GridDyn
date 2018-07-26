@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,12 +8,12 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
-#include "core/coreObjectTemplates.hpp"
+#include "GovernorHydro.h"
 #include "../Generator.h"
 #include "../gridBus.h"
-#include "GovernorHydro.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 
 namespace griddyn
@@ -60,13 +60,13 @@ coreObject *GovernorHydro::clone (coreObject *obj) const
 GovernorHydro::~GovernorHydro () {}
 // initial conditions
 void GovernorHydro::dynObjectInitializeB (const IOdata & /*inputs*/,
-                                                 const IOdata &desiredOutput,
-                                                 IOdata & /*fieldSet*/)
+                                          const IOdata &desiredOutput,
+                                          IOdata & /*fieldSet*/)
 {
     m_state[1] = 0;
     m_state[0] = desiredOutput[0];
     auto genObj = find ("gen");
-    if (genObj)
+    if (genObj != nullptr)
     {
         genObj->get ("pset");
     }
@@ -74,9 +74,9 @@ void GovernorHydro::dynObjectInitializeB (const IOdata & /*inputs*/,
 
 // residual
 void GovernorHydro::residual (const IOdata & /*inputs*/,
-                                     const stateData & /*sD*/,
-                                     double resid[],
-                                     const solverMode &sMode)
+                              const stateData & /*sD*/,
+                              double resid[],
+                              const solverMode &sMode)
 {
     auto offset = offsets.getAlgOffset (sMode);
     resid[offset] = 0;
@@ -84,10 +84,10 @@ void GovernorHydro::residual (const IOdata & /*inputs*/,
 }
 
 void GovernorHydro::jacobianElements (const IOdata & /*inputs*/,
-                                             const stateData &sD,
-                                             matrixData<double> &md,
-                                             const IOlocs & /*inputLocs*/,
-                                             const solverMode &sMode)
+                                      const stateData &sD,
+                                      matrixData<double> &md,
+                                      const IOlocs & /*inputLocs*/,
+                                      const solverMode &sMode)
 {
     if (isAlgebraicOnly (sMode))
     {
@@ -172,5 +172,5 @@ void GovernorHydro::set (const std::string &param, double val, gridUnits::units_
     }
 }
 
-}//namespace governors
-}//namespace griddyn
+}  // namespace governors
+}  // namespace griddyn

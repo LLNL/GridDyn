@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "schedulerMessage.h"
 #include "utilities/stringConversion.h"
@@ -35,15 +35,11 @@ REGISTER_MESSAGE_TYPE (m11, "REGISTER AGC DISPATCHER", schedulerMessagePayload::
 REGISTER_MESSAGE_TYPE (m12, "REGISTER RESERVE DISPATCHER", schedulerMessagePayload::REGISTER_RESERVE_DISPATCHER);
 REGISTER_MESSAGE_TYPE (m13, "REGISTER CONTROLLER", schedulerMessagePayload::REGISTER_CONTROLLER);
 
-schedulerMessagePayload::schedulerMessagePayload (
-                                    std::vector<double> time,
-                                    std::vector<double> target)
+schedulerMessagePayload::schedulerMessagePayload (std::vector<double> time, std::vector<double> target)
     : m_time (std::move (time)), m_target (std::move (target))
 {
 }
-void schedulerMessagePayload::loadMessage (
-                                    std::vector<double> time,
-                                    std::vector<double> target)
+void schedulerMessagePayload::loadMessage (std::vector<double> time, std::vector<double> target)
 {
     m_time = std::move (time);
     m_target = std::move (target);
@@ -72,12 +68,15 @@ std::string schedulerMessagePayload::to_string (uint32_t type, uint32_t /*code*/
     return typeString;
 }
 
-void schedulerMessagePayload::from_string (uint32_t type, uint32_t /*code*/,const std::string &fromString, size_t offset)
+void schedulerMessagePayload::from_string (uint32_t type,
+                                           uint32_t /*code*/,
+                                           const std::string &fromString,
+                                           size_t offset)
 {
     std::vector<double> targets;
-    if (fromString.size ()-offset > 1)
+    if (fromString.size () - offset > 1)
     {
-        targets = str2vector (fromString.substr(offset), kNullVal, "@ ");
+        targets = str2vector (fromString.substr (offset), kNullVal, "@ ");
     }
 
     auto loadtargets = [this](std::vector<double> newTargets) {
@@ -94,7 +93,7 @@ void schedulerMessagePayload::from_string (uint32_t type, uint32_t /*code*/,cons
     {
     case SHUTDOWN:
     case STARTUP:
-        m_time.resize(1);
+        m_time.resize (1);
         m_time[0] = targets[0];
         break;
     case ADD_TARGETS:
@@ -102,10 +101,9 @@ void schedulerMessagePayload::from_string (uint32_t type, uint32_t /*code*/,cons
     case UPDATE_RESERVES:
     case USE_RESERVE:
     case UPDATE_REGULATION_TARGET:
-        loadtargets(targets);
+        loadtargets (targets);
         break;
     }
-    
 }
 
 std::string schedulerMessagePayload::makeTargetString (size_t cnt) const

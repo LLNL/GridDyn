@@ -103,10 +103,13 @@ class Chunk(object):
         return hash(self) == hash(other)
 
     def __hash__(self):
-        # TODO this is overly restrictive and probably shouldn't take line_num
-        # into account
+        # TODO this probably shouldn't take line_num into account
+        # drop everything in the path before 'GridDyn'
+        filename = self.file_name.split('/')
+        index = filename.index('GridDyn')
+        filename = '/'.join(filename[index:])
         return hash((
-            self.file_name,
+            filename,
             self.line_num,
             self.position,
             self.warning,

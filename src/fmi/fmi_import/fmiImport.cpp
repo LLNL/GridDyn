@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -16,10 +16,10 @@
 #include "utilities/zipUtilities.h"
 
 #include "utilities/stringOps.h"
+#include <cstdarg>
+#include <map>
 #include <boost/dll/import.hpp>
 #include <boost/dll/shared_library.hpp>
-#include <map>
-#include <cstdarg>
 
 using namespace boost::filesystem;
 
@@ -77,10 +77,9 @@ void fmiLibrary::loadFMU (const std::string &fmupath)
     loadInformation ();
 }
 
-
-void fmiLibrary::loadFMU (const std::string &fmupath, const std::string &extractLoc)
+void fmiLibrary::loadFMU (const std::string &fmupath, const std::string &extractPath)
 {
-    extractDirectory = extractLoc;
+    extractDirectory = extractPath;
     fmuName = fmupath;
     loadInformation ();
 }
@@ -138,7 +137,6 @@ void fmiLibrary::loadInformation ()
     }
 }
 
-
 std::string fmiLibrary::getTypes ()
 {
     if (isSoLoaded ())
@@ -167,13 +165,12 @@ int fmiLibrary::extract ()
     return ret;
 }
 
-
 std::unique_ptr<fmi2ModelExchangeObject> fmiLibrary::createModelExchangeObject (const std::string &name)
 {
-	if (!isSoLoaded())
-	{
-		loadSharedLibrary(fmutype_t::modelExchange);
-	}
+    if (!isSoLoaded ())
+    {
+        loadSharedLibrary (fmutype_t::modelExchange);
+    }
     if (soMeLoaded)
     {
         if (!callbacks)
@@ -196,10 +193,10 @@ std::unique_ptr<fmi2ModelExchangeObject> fmiLibrary::createModelExchangeObject (
 
 std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject (const std::string &name)
 {
-	if (!isSoLoaded())
-	{
-		loadSharedLibrary(fmutype_t::cosimulation);
-	}
+    if (!isSoLoaded ())
+    {
+        loadSharedLibrary (fmutype_t::cosimulation);
+    }
     if (soCoSimLoaded)
     {
         if (!callbacks)
@@ -218,13 +215,12 @@ std::unique_ptr<fmi2CoSimObject> fmiLibrary::createCoSimulationObject (const std
     return nullptr;
 }
 
-
 void fmiLibrary::loadSharedLibrary (fmutype_t type)
 {
-	if (isSoLoaded())
-	{
-		return;
-	}
+    if (isSoLoaded ())
+    {
+        return;
+    }
     auto sopath = findSoPath (type);
     bool loaded = false;
     if (!sopath.empty ())
@@ -254,7 +250,6 @@ void fmiLibrary::loadSharedLibrary (fmutype_t type)
         }
     }
 }
-
 
 path fmiLibrary::findSoPath (fmutype_t type)
 {
@@ -287,7 +282,7 @@ path fmiLibrary::findSoPath (fmutype_t type)
         {
             return "";
         }
-		break;
+        break;
     case fmutype_t::modelExchange:
         if (checkFlag (modelExchangeCapable))
         {
@@ -297,32 +292,33 @@ path fmiLibrary::findSoPath (fmutype_t type)
         {
             return "";
         }
-		break;
+        break;
     }
-	if IF_CONSTEXPR(sizeof (void *) == 8)
-    {
+    if
+        IF_CONSTEXPR (sizeof (void *) == 8)
+        {
 #ifdef _WIN32
-        sopath /= "win64";
-        sopath /= identifier + ".dll";
+            sopath /= "win64";
+            sopath /= identifier + ".dll";
 #else
 #ifdef MACOS
-        sopath /= "darwin64";
-        sopath /= identifier + ".dylib";
+            sopath /= "darwin64";
+            sopath /= identifier + ".dylib";
 #else
-        sopath /= "linux64";
-        sopath /= identifier + ".so";
+            sopath /= "linux64";
+            sopath /= identifier + ".so";
 #endif
 #endif
 
-        if (exists (sopath))
-        {
-            return sopath;
-        }
+            if (exists (sopath))
+            {
+                return sopath;
+            }
 #ifdef MACOS
-        sopath /= "darwin64";
-        sopath /= identifier + ".so";
+            sopath /= "darwin64";
+            sopath /= identifier + ".so";
 #endif
-    }
+        }
     else
     {
 #ifdef _WIN32
@@ -346,7 +342,6 @@ path fmiLibrary::findSoPath (fmutype_t type)
 
     return path ("");
 }
-
 
 void fmiLibrary::loadBaseFunctions ()
 {
@@ -446,26 +441,29 @@ void fmiLibrary::loadCoSimFunctions ()
     CoSimFunctions->fmi2GetStringStatus = lib->get<fmi2GetStringStatusTYPE> ("fmi2GetStringStatus");
 }
 
-
 void fmiLibrary::makeCallbackFunctions ()
 {
     callbacks = std::make_shared<fmi2CallbackFunctions_nc> ();
     callbacks->allocateMemory = &calloc;
     callbacks->freeMemory = &free;
     callbacks->logger = &loggerFunc;
-    callbacks->componentEnvironment = static_cast<void *>(this);
+    callbacks->componentEnvironment = static_cast<void *> (this);
 }
 
 #define STRING_BUFFER_SIZE 1000
-void loggerFunc(fmi2ComponentEnvironment compEnv, fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message, ...)
+void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
+                 fmi2String /* instanceName */,
+                 fmi2Status /* status */,
+                 fmi2String /* category */,
+                 fmi2String message,
+                 ...)
 {
-	std::string temp;
-	temp.resize(STRING_BUFFER_SIZE);
-	va_list arglist;
-	va_start(arglist, message);
-	auto sz=vsnprintf(&(temp[0]), STRING_BUFFER_SIZE,message, arglist);
-	va_end(arglist);
-	temp.resize(std::min(sz, STRING_BUFFER_SIZE));
-	printf("%s\n", temp.c_str());
-
+    std::string temp;
+    temp.resize (STRING_BUFFER_SIZE);
+    va_list arglist;
+    va_start (arglist, message);
+    auto sz = vsnprintf (&(temp[0]), STRING_BUFFER_SIZE, message, arglist);
+    va_end (arglist);
+    temp.resize (std::min (sz, STRING_BUFFER_SIZE));
+    printf ("%s\n", temp.c_str ());
 }

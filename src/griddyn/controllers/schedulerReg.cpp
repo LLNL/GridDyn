@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,8 +10,8 @@
  * LLNS Copyright End
  */
 
-#include "AGControl.h"
 #include "../comms/schedulerMessage.h"
+#include "AGControl.h"
 #include "core/coreObjectTemplates.hpp"
 #include "scheduler.h"
 
@@ -147,7 +147,7 @@ void schedulerReg::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     schedulerRamp::dynObjectInitializeA (time0, flags);
     pr = (m_Base >= kHalfBigNum) ? regMax : m_Base;
 
-    if ((regUpFrac > 0) | (regDownFrac > 0))
+    if ((regUpFrac > 0) || (regDownFrac > 0))
     {
         if (agc == nullptr)
         {
@@ -314,7 +314,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
     else if ((param == "rating") || (param == "base"))
     {
         m_Base = val;
-        if (agc)
+        if (agc != nullptr)
         {
             agc->regChange ();
         }
@@ -324,7 +324,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
         temp = val;
         regUpFrac = temp;
         regDownFrac = temp;
-        if (agc)
+        if (agc != nullptr)
         {
             agc->regChange ();
         }
@@ -332,7 +332,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
     else if (param == "regupfrac")
     {
         regUpFrac = val;
-        if (agc)
+        if (agc != nullptr)
         {
             agc->regChange ();
         }
@@ -341,7 +341,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
     {
         regDownFrac = val;
 
-        if (agc)
+        if (agc != nullptr)
         {
             agc->regChange ();
         }
@@ -353,7 +353,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
         {
             if (!active)
             {
-                if (agc)
+                if (agc != nullptr)
                 {
                     agc->remove (this);
                 }
@@ -365,7 +365,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
             if (active)
             {
                 regEnabled = true;
-                if (agc)
+                if (agc != nullptr)
                 {
                     agc->add (this);
                 }
@@ -397,7 +397,7 @@ void schedulerReg::set (const std::string &param, double val, gridUnits::units_t
 void schedulerReg::dispatcherLink ()
 {
     agc = static_cast<AGControl *> (find ("agc"));
-    if (agc)
+    if (agc != nullptr)
     {
         agc->add (this);
     }
@@ -425,7 +425,7 @@ double schedulerReg::get (const std::string &param, gridUnits::units_t unitType)
 void schedulerReg::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-   // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
+    // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
     switch (message->getMessageType ())
     {
     case schedulerMessagePayload::CLEAR_TARGETS:

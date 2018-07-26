@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,16 +8,16 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "approximatingLoad.h"
+#include "../gridBus.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/workQueue.h"
-#include "../gridBus.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
+#include "utilities/workQueue.h"
 #include <complex>
 
 #include <cassert>
@@ -29,7 +29,6 @@ namespace griddyn
 {
 namespace loads
 {
-
 #define CONJUGATE 1
 
 approximatingLoad::approximatingLoad (const std::string &objName) : rampLoad (objName) { enable_updates (); }
@@ -45,8 +44,6 @@ coreObject *approximatingLoad::clone (coreObject *obj) const
     ld->triggerBound = triggerBound;
     ld->spread = spread;
 
-
-
     ld->cDetail = cDetail;
     ld->dynCoupling = dynCoupling;
     ld->pFlowCoupling = pFlowCoupling;
@@ -59,10 +56,10 @@ void approximatingLoad::add (coreObject *obj)
     {
         if (subLoad != nullptr)
         {
-            gridSecondary::remove(subLoad);
+            gridSecondary::remove (subLoad);
         }
-        subLoad = static_cast<Load *>(obj);
-        addSubObject(subLoad);
+        subLoad = static_cast<Load *> (obj);
+        addSubObject (subLoad);
     }
     else
     {
@@ -72,18 +69,17 @@ void approximatingLoad::add (coreObject *obj)
 
 void approximatingLoad::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-
     m_lastCallTime = time0;
 
     opFlags[preEx_requested] = true;
     rampLoad::pFlowObjectInitializeA (time0, flags);
-    updateA(time0);
+    updateA (time0);
 }
 
 void approximatingLoad::pFlowObjectInitializeB ()
 {
-    updateB();
-    rampLoad::pFlowObjectInitializeB();
+    updateB ();
+    rampLoad::pFlowObjectInitializeB ();
 }
 
 void approximatingLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
@@ -114,8 +110,8 @@ void approximatingLoad::dynObjectInitializeA (coreTime time0, std::uint32_t flag
 }
 
 void approximatingLoad::dynObjectInitializeB (const IOdata & /*inputs*/,
-                                         const IOdata & /*desiredOutput*/,
-                                         IOdata & /*fieldSet*/)
+                                              const IOdata & /*desiredOutput*/,
+                                              IOdata & /*fieldSet*/)
 {
     if (opFlags[dual_mode_flag])
     {
@@ -126,11 +122,10 @@ void approximatingLoad::timestep (coreTime time, const IOdata &inputs, const sol
 {
     double V = inputs[voltageInLocation];
     double th = inputs[angleInLocation];
-    if (subLoad)
+    if (subLoad != nullptr)
     {
-        subLoad->timestep(time, inputs, sMode);
+        subLoad->timestep (time, inputs, sMode);
     }
-
 
     if (cDetail == coupling_detail_t::single)
     {
@@ -157,13 +152,13 @@ void approximatingLoad::updateA (coreTime time)
     inputs[voltageInLocation] = V;
     inputs[angleInLocation] = th;
 
-        if (subLoad)
+    if (subLoad != nullptr)
+    {
+        if (subLoad->currentTime () < time)
         {
-            if (subLoad->currentTime () < time)
-            {
-                subLoad->timestep (time, inputs, cLocalSolverMode);
-            }
+            subLoad->timestep (time, inputs, cLocalSolverMode);
         }
+    }
 
     if (cDetail == coupling_detail_t::single)
     {
@@ -337,8 +332,8 @@ void approximatingLoad::updateLocalCache (const IOdata &inputs, const stateData 
     rampLoad::updateLocalCache (inputs, sD, sMode);
 }
 
-
-std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues(const std::vector<double> &inputs, const std::vector<double> &voltages)
+std::vector<std::tuple<double, double, double>>
+approximatingLoad::getLoadValues (const std::vector<double> &inputs, const std::vector<double> &voltages)
 {
     std::vector<std::tuple<double, double, double>> res;
     if (subLoad == nullptr)
@@ -346,14 +341,14 @@ std::vector<std::tuple<double, double, double>> approximatingLoad::getLoadValues
         return res;
     }
 
-    IOdata cinputs(inputs.begin(), inputs.end());
+    IOdata cinputs (inputs.begin (), inputs.end ());
     for (auto &V : voltages)
     {
         cinputs[voltageInLocation] = V;
-        subLoad->updateLocalCache(cinputs, emptyStateData, cLocalSolverMode);
-        auto Psub = subLoad->getRealPower(cinputs, emptyStateData, cLocalSolverMode);
-        auto Qsub = subLoad->getReactivePower(cinputs, emptyStateData, cLocalSolverMode);
-        res.emplace_back(V, Psub, Qsub);
+        subLoad->updateLocalCache (cinputs, emptyStateData, cLocalSolverMode);
+        auto Psub = subLoad->getRealPower (cinputs, emptyStateData, cLocalSolverMode);
+        auto Qsub = subLoad->getReactivePower (cinputs, emptyStateData, cLocalSolverMode);
+        res.emplace_back (V, Psub, Qsub);
     }
     return res;
 }
@@ -365,51 +360,50 @@ void approximatingLoad::run1ApproxA (coreTime /*time*/, const IOdata &inputs)
     //auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
-    voltages.push_back(inputs[voltageInLocation]);
-    std::vector<double> inputb(inputs.begin(), inputs.end());
-    auto wb=make_workBlock([inputb, voltages,this]() {return getLoadValues(inputb, voltages); });
-    vres = wb->get_future();
-    workQueue::instance()->addWorkBlock(std::move(wb));
-    opFlags.set(waiting_flag);
+    voltages.push_back (inputs[voltageInLocation]);
+    std::vector<double> inputb (inputs.begin (), inputs.end ());
+    auto wb = make_workBlock ([inputb, voltages, this]() { return getLoadValues (inputb, voltages); });
+    vres = wb->get_future ();
+    workQueue::instance ()->addWorkBlock (std::move (wb));
+    opFlags.set (waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run1ApproxB ()
 {
-    auto res = vres.get();
-    opFlags.reset(waiting_flag);
-    return {std::get<1>(res[0]), std::get<2>(res[0]) };
-
+    auto res = vres.get ();
+    opFlags.reset (waiting_flag);
+    return {std::get<1> (res[0]), std::get<2> (res[0])};
 }
 
 void approximatingLoad::run2ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
-    assert(!opFlags[waiting_flag]);  // this should not happen;
+    assert (!opFlags[waiting_flag]);  // this should not happen;
 
     //auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     double V = inputs[voltageInLocation];
-    voltages.push_back(V);
+    voltages.push_back (V);
     double r1 = (V + spread) / V;
-    voltages.push_back(V*r1);
-    std::vector<double> inputb(inputs.begin(), inputs.end());
-    auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
-    vres = wb->get_future();
-    workQueue::instance()->addWorkBlock(std::move(wb));
+    voltages.push_back (V * r1);
+    std::vector<double> inputb (inputs.begin (), inputs.end ());
+    auto wb = make_workBlock ([inputb, voltages, this]() { return getLoadValues (inputb, voltages); });
+    vres = wb->get_future ();
+    workQueue::instance ()->addWorkBlock (std::move (wb));
     opFlags.set (waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run2ApproxB ()
 {
     assert (opFlags[waiting_flag]);  // this should not happen;
-    auto res = vres.get();
-    opFlags.reset(waiting_flag);
-    double V1 = std::get<0>(res[0]);
-    double P1 = std::get<1>(res[0]);
-    double Q1 = std::get<2>(res[0]);
-    double V2 = std::get<0>(res[1]);
-    double P2 = std::get<1>(res[1]);
-    double Q2 = std::get<2>(res[1]);
+    auto res = vres.get ();
+    opFlags.reset (waiting_flag);
+    double V1 = std::get<0> (res[0]);
+    double P1 = std::get<1> (res[0]);
+    double Q1 = std::get<2> (res[0]);
+    double V2 = std::get<0> (res[1]);
+    double P2 = std::get<1> (res[1]);
+    double Q2 = std::get<2> (res[1]);
     std::vector<double> retP (4);
     retP[2] = (P2 - P1) / (V2 - V1);
     retP[3] = (Q2 - Q1) / (V2 - V1);
@@ -420,7 +414,7 @@ std::vector<double> approximatingLoad::run2ApproxB ()
 
 void approximatingLoad::run3ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
-    assert(!opFlags[waiting_flag]);  // this should not happen;
+    assert (!opFlags[waiting_flag]);  // this should not happen;
 
     //auto dt = time - m_lastCallTime;
 
@@ -428,31 +422,31 @@ void approximatingLoad::run3ApproxA (coreTime /*time*/, const IOdata &inputs)
     double V = inputs[voltageInLocation];
 
     double r1 = (V - spread) / V;
-    voltages.push_back(V*r1);
+    voltages.push_back (V * r1);
     r1 = (V + spread) / V;
-    voltages.push_back(V*r1);
-    voltages.push_back(V);
-    std::vector<double> inputb(inputs.begin(),inputs.end());
-    auto wb = make_workBlock([inputb, voltages, this]() {return getLoadValues(inputb, voltages); });
-    vres = wb->get_future();
-    workQueue::instance()->addWorkBlock(std::move(wb));
-    opFlags.set(waiting_flag);
+    voltages.push_back (V * r1);
+    voltages.push_back (V);
+    std::vector<double> inputb (inputs.begin (), inputs.end ());
+    auto wb = make_workBlock ([inputb, voltages, this]() { return getLoadValues (inputb, voltages); });
+    vres = wb->get_future ();
+    workQueue::instance ()->addWorkBlock (std::move (wb));
+    opFlags.set (waiting_flag);
 }
 
 std::vector<double> approximatingLoad::run3ApproxB ()
 {
-    assert(opFlags[waiting_flag]);  // this should not happen;
-    auto res = vres.get();
-    opFlags.reset(waiting_flag);
-    double V1 = std::get<0>(res[0]);
-    double P1 = std::get<1>(res[0]);
-    double Q1 = std::get<2>(res[0]);
-    double V2 = std::get<0>(res[1]);
-    double P2 = std::get<1>(res[1]);
-    double Q2 = std::get<2>(res[1]);
-    double V3 = std::get<0>(res[2]);
-    double P3 = std::get<1>(res[2]);
-    double Q3 = std::get<2>(res[2]);
+    assert (opFlags[waiting_flag]);  // this should not happen;
+    auto res = vres.get ();
+    opFlags.reset (waiting_flag);
+    double V1 = std::get<0> (res[0]);
+    double P1 = std::get<1> (res[0]);
+    double Q1 = std::get<2> (res[0]);
+    double V2 = std::get<0> (res[1]);
+    double P2 = std::get<1> (res[1]);
+    double Q2 = std::get<2> (res[1]);
+    double V3 = std::get<0> (res[2]);
+    double P3 = std::get<1> (res[2]);
+    double Q3 = std::get<2> (res[2]);
 #if 0
   a1 = P1 / ((V1 - V2) * (V1 - V3));
   double a2 = P2 / ((V2 - V1) * (V2 - V3));
@@ -529,14 +523,14 @@ std::vector<double> approximatingLoad::run3ApproxB ()
         X3 = ((V2 - V1) * (Q3 - Q1) + (V1 - V3) * (Q2 - Q1)) / ((V1 - V3) * (b2 - b1) + (b1 - b3) * (V1 - V2));
         X2 = (Q2 - Q1 + b1 * X3 - b2 * X3) / (V2 - V1);
         X1 = Q1 - V1 * X2 - b1 * X3;
+
+        retP[1] = X1;
+        retP[3] = X2;
+        retP[5] = X3;
+    }
 #endif
 
-    retP[1] = X1;
-    retP[3] = X2;
-    retP[5] = X3;
-}
-
-return retP;
+    return retP;
 }
 
 void approximatingLoad::set (const std::string &param, const std::string &val)
@@ -667,9 +661,9 @@ void approximatingLoad::set (const std::string &param, double val, gridUnits::un
 // return D[0]=dP/dV D[1]=dP/dtheta,D[2]=dQ/dV,D[3]=dQ/dtheta
 
 void approximatingLoad::rootTest (const IOdata &inputs,
-                             const stateData & /*sD*/,
-                             double roots[],
-                             const solverMode &sMode)
+                                  const stateData & /*sD*/,
+                                  double roots[],
+                                  const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     double V = inputs[voltageInLocation];
@@ -679,9 +673,9 @@ void approximatingLoad::rootTest (const IOdata &inputs,
 }
 
 void approximatingLoad::rootTrigger (coreTime time,
-                                const IOdata & /*inputs*/,
-                                const std::vector<int> &rootMask,
-                                const solverMode &sMode)
+                                     const IOdata & /*inputs*/,
+                                     const std::vector<int> &rootMask,
+                                     const solverMode &sMode)
 {
     int rootOffset = offsets.getRootOffset (sMode);
     if (rootMask[rootOffset] != 0)
@@ -692,9 +686,9 @@ void approximatingLoad::rootTrigger (coreTime time,
 }
 
 change_code approximatingLoad::rootCheck (const IOdata &inputs,
-                                     const stateData &sD,
-                                     const solverMode & /*sMode*/,
-                                     check_level_t /*level*/)
+                                          const stateData &sD,
+                                          const solverMode & /*sMode*/,
+                                          check_level_t /*level*/)
 {
     double V = inputs[voltageInLocation];
     if (std::abs (V - Vprev) > spread * triggerBound)
@@ -706,7 +700,5 @@ change_code approximatingLoad::rootCheck (const IOdata &inputs,
     return change_code::no_change;
 }
 
-
-
-}  // namespace loads
-}  // namespace griddyn
+} // namespace loads
+} // namespace griddyn

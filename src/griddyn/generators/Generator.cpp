@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,15 +8,15 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../controllers/scheduler.h"
+#include "../gridBus.h"
+#include "../measurement/objectGrabbers.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../gridBus.h"
-#include "../measurement/objectGrabbers.h"
 #include "utilities/OperatingBoundary.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/stringOps.h"
@@ -158,37 +158,37 @@ void Generator::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
     gridSecondary::dynObjectInitializeA (time0, flags);
 }
 
-stateSizes Generator::LocalStateSizes(const solverMode &sMode) const
+stateSizes Generator::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes localStates;
-	if (!isEnabled())
-	{
-		return localStates;
-	}
-	if (isPowerFlow(sMode))
-	{
-		if ((isAC(sMode)) && (opFlags[indirect_voltage_control]))
-		{
-			localStates.algSize = 1;
-		}
-	}
-	return localStates;
+    stateSizes localStates;
+    if (!isEnabled ())
+    {
+        return localStates;
+    }
+    if (isPowerFlow (sMode))
+    {
+        if ((isAC (sMode)) && (opFlags[indirect_voltage_control]))
+        {
+            localStates.algSize = 1;
+        }
+    }
+    return localStates;
 }
 
-count_t Generator::LocalJacobianCount(const solverMode &sMode) const
+count_t Generator::LocalJacobianCount (const solverMode &sMode) const
 {
-	if (!isEnabled())
-	{
-		return 0;
-	}
-	if (isPowerFlow(sMode))
-	{
-		if ((isAC(sMode)) && (opFlags[indirect_voltage_control]))
-		{
-			return 2;
-		}
-	}
-	return 0;
+    if (!isEnabled ())
+    {
+        return 0;
+    }
+    if (isPowerFlow (sMode))
+    {
+        if ((isAC (sMode)) && (opFlags[indirect_voltage_control]))
+        {
+            return 2;
+        }
+    }
+    return 0;
 }
 
 // initial conditions of dynamic states
@@ -677,7 +677,6 @@ void Generator::setCapabilityCurve (const std::vector<double> &Ppts,
         opFlags.set (use_capability_curve);
     }
 }
-
 
 void Generator::outputPartialDerivatives (const IOdata & /*inputs*/,
                                           const stateData & /*sD*/,

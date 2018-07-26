@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "jsonReaderElement.h"
 #include "jsonElement.h"
@@ -16,13 +16,13 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-//default initialized empty string
+// default initialized empty string
 static const std::string nullStr;
 
 bool isElement (const Json_gd::Value &testValue);
 bool isAttribute (const Json_gd::Value &testValue);
-//this is not using default for gcc 4.9 compatibility
-jsonReaderElement::jsonReaderElement() noexcept {}
+// this is not using default for gcc 4.9 compatibility
+jsonReaderElement::jsonReaderElement () noexcept {}
 jsonReaderElement::jsonReaderElement (const std::string &fileName) { jsonReaderElement::loadFile (fileName); }
 void jsonReaderElement::clear ()
 {
@@ -75,33 +75,33 @@ bool jsonReaderElement::loadFile (const std::string &fileName)
             return true;
         }
 
-            std::cerr << "file read error in " << fileName << "::" << errs << '\n';
-            doc = nullptr;
-            clear ();
-            return false;
-    }
-
-        std::cerr << "unable to open file " << fileName << '\n';
+        std::cerr << "file read error in " << fileName << "::" << errs << '\n';
         doc = nullptr;
         clear ();
         return false;
+    }
+
+    std::cerr << "unable to open file " << fileName << '\n';
+    doc = nullptr;
+    clear ();
+    return false;
 }
 
 bool jsonReaderElement::parse (const std::string &inputString)
 {
-    std::ifstream file(inputString);
-    doc = std::make_shared<Json_gd::Value>();
+    std::ifstream file (inputString);
+    doc = std::make_shared<Json_gd::Value> ();
 
-    if (file.is_open())
+    if (file.is_open ())
     {
         Json_gd::CharReaderBuilder rbuilder;
         std::string errs;
-        bool ok = Json_gd::parseFromStream(rbuilder, file, doc.get(), &errs);
+        bool ok = Json_gd::parseFromStream (rbuilder, file, doc.get (), &errs);
         if (!ok)
         {
             std::cerr << "Read error in stream::" << errs << '\n';
             doc = nullptr;
-            clear();
+            clear ();
             return false;
         }
     }
@@ -109,13 +109,13 @@ bool jsonReaderElement::parse (const std::string &inputString)
     {
         Json_gd::CharReaderBuilder rbuilder;
         std::string errs;
-        std::istringstream jstring(inputString);
-        bool ok = Json_gd::parseFromStream(rbuilder, jstring, doc.get(), &errs);
+        std::istringstream jstring (inputString);
+        bool ok = Json_gd::parseFromStream (rbuilder, jstring, doc.get (), &errs);
         if (!ok)
         {
             std::cerr << "Read error in stream::" << errs << '\n';
             doc = nullptr;
-            clear();
+            clear ();
             return false;
         }
     }

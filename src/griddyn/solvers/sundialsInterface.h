@@ -29,9 +29,9 @@
 #define NVECTOR_DATA(omp, vec) NV_DATA_S (vec)
 #endif
 
-#include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix      */
-#include <sundials/sundials_types.h>
 #include <sundials/sundials_linearsolver.h>
+#include <sundials/sundials_types.h>
+#include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix      */
 
 #define ONE RCONST (1.0)
 #define ZERO RCONST (0.0)
@@ -76,13 +76,13 @@ class sundialsInterface : public SolverInterface
     N_Vector state = nullptr;  //!< state vector
     N_Vector dstate_dt = nullptr;  //!< dstate_dt information
     N_Vector abstols = nullptr;  //!< tolerance vector
-    N_Vector consData = nullptr;  //!<constraint type Vector
+    N_Vector consData = nullptr;  //!< constraint type Vector
     N_Vector scale = nullptr;  //!< scaling vector
     N_Vector types = nullptr;  //!< type data
     void *solverMem = nullptr;  //!< the memory used by a specific solver internally
-	 FILE *m_sundialsInfoFile = nullptr;  //!<direct file reference for input to the solver itself	
-	SUNMatrix J=nullptr; //!< sundials matrix to use
-	SUNLinearSolver LS=nullptr; //!< the link to the linear solver to use
+    FILE *m_sundialsInfoFile = nullptr;  //!< direct file reference for input to the solver itself
+    SUNMatrix J = nullptr;  //!< sundials matrix to use
+    SUNLinearSolver LS = nullptr;  //!< the link to the linear solver to use
   public:
     explicit sundialsInterface (const std::string &objName = "sundials");
     /** @brief constructor loading the SolverInterface structure*
@@ -94,9 +94,9 @@ class sundialsInterface : public SolverInterface
      */
     virtual ~sundialsInterface ();
 
-	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
+    virtual std::unique_ptr<SolverInterface> clone (bool fullCopy = false) const override;
 
-	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
+    virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const override;
     virtual double *state_data () noexcept override;
     virtual double *deriv_data () noexcept override;
     virtual const double *state_data () const noexcept override;
@@ -113,26 +113,26 @@ class sundialsInterface : public SolverInterface
     void *getSolverMem () const { return solverMem; }
 
     friend int sundialsJac (realtype time,
-                                  realtype cj,
-                                  N_Vector state,
-                                  N_Vector dstate_dt,
-                                  SUNMatrix J,
-                                  void *user_data,
-                                  N_Vector tmp1,
-                                  N_Vector tmp2);
-    protected:
-        void KLUReInit(sparse_reinit_modes mode);
+                            realtype cj,
+                            N_Vector state,
+                            N_Vector dstate_dt,
+                            SUNMatrix J,
+                            void *user_data,
+                            N_Vector tmp1,
+                            N_Vector tmp2);
+
+  protected:
+    void KLUReInit (sparse_reinit_modes mode);
 };
 
-
 int sundialsJac (realtype time,
-                       realtype cj,
-                       N_Vector state,
-                       N_Vector dstate_dt,
-                       SUNMatrix J,
-                       void *user_data,
-                       N_Vector tmp1,
-                       N_Vector tmp2);
+                 realtype cj,
+                 N_Vector state,
+                 N_Vector dstate_dt,
+                 SUNMatrix J,
+                 void *user_data,
+                 N_Vector tmp1,
+                 N_Vector tmp2);
 
 }  // namespace solvers
 }  // namespace griddyn

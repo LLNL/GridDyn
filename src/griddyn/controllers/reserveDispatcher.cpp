@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,9 +11,9 @@
  */
 
 #include "reserveDispatcher.h"
-#include "AGControl.h"
 #include "../Area.h"
 #include "../Generator.h"
+#include "AGControl.h"
 #include "core/coreExceptions.h"
 #include "scheduler.h"
 
@@ -206,7 +206,7 @@ void reserveDispatcher::remove (schedulerRamp *sched)
 
 void reserveDispatcher::add (coreObject *obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj))
+    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
     {
         add (static_cast<schedulerRamp *> (obj));
     }
@@ -228,7 +228,7 @@ void reserveDispatcher::add (schedulerRamp *sched)
 
 void reserveDispatcher::remove (coreObject *obj)
 {
-    if (dynamic_cast<schedulerRamp *> (obj))
+    if (dynamic_cast<schedulerRamp *> (obj) != nullptr)
     {
         remove (static_cast<schedulerRamp *> (obj));
     }
