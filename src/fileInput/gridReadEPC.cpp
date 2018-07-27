@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,13 +11,13 @@
  */
 
 #include "core/coreExceptions.h"
-#include "griddyn/Generator.h"
 #include "fileInput.h"
+#include "griddyn/Generator.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/links/dcLink.h"
-#include "griddyn/loads/zipLoad.h"
 #include "griddyn/loads/svd.h"
+#include "griddyn/loads/zipLoad.h"
 #include "griddyn/primary/acBus.h"
 #include "griddyn/primary/dcBus.h"
 #include "readerHelper.h"
@@ -39,7 +39,7 @@ void epcReadBus (gridBus *bus, string_view line, double base, const basicReaderI
 void epcReadDCBus (dcBus *bus, string_view line, double base, const basicReaderInfo &bri);
 void epcReadLoad (zipLoad *ld, string_view line, double base);
 void epcReadFixedShunt (zipLoad *ld, string_view line, double base);
-void epcReadSwitchShunt(loads::svd *ld, string_view line, double base);
+void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */);
 void epcReadGen (Generator *gen, string_view line, double base);
 void epcReadBranch (coreObject *parentObject,
                     string_view line,
@@ -338,9 +338,9 @@ void loadEPC (coreObject *parentObject, const std::string &fileName, const basic
         else if (tokens[0] == "generator")
         {
             ProcessSectionObject<Generator> (line, file, "generator", busList,
-                                                    [base](Generator *gen, string_view config) {
-                                                        epcReadGen (gen, config, base);
-                                                    });
+                                             [base](Generator *gen, string_view config) {
+                                                 epcReadGen (gen, config, base);
+                                             });
         }
         else if (tokens[0] == "load")
         {
@@ -356,9 +356,10 @@ void loadEPC (coreObject *parentObject, const std::string &fileName, const basic
         }
         else if (tokens[0] == "svd")
         {
-			ProcessSectionObject<loads::svd>(line, file, "svd", busList, [base](loads::svd *ld, string_view config) {
-				epcReadSwitchShunt(ld, config, base);
-			});
+            ProcessSectionObject<loads::svd> (line, file, "svd", busList,
+                                              [base](loads::svd *ld, string_view config) {
+                                                  epcReadSwitchShunt (ld, config, base);
+                                              });
         }
         else if (tokens[0] == "area")
         {
@@ -705,7 +706,7 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 
     // get the load index and name
-	std::string prefix = ld->getParent ()->getName () + "_Load";
+    std::string prefix = ld->getParent ()->getName () + "_Load";
     if (!strvec[3].empty ())
     {
         prefix += '_' + strvec[3].to_string ();
@@ -764,7 +765,6 @@ void epcReadLoad (zipLoad *ld, string_view line, double /*base*/)
 //#shunt data  [1988]         id                               ck  se  long_id_     st ar zone    pu_mw  pu_mvar
 // date_in date_out pid N own part1 own part2 own part3 own part4 --num--  --name--  --kv--
 
-
 void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
 {
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
@@ -805,153 +805,152 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
     }
 }
 
-void epcReadSwitchShunt(loads::svd *ld, string_view line, double base)
+void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */)
 {
-	auto strvec = splitlineBracket(line, " :", default_bracket_chars, delimiter_compression::on);
+    auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 
+    auto mode = numeric_conversion<int> (strvec[1], 0);
+    auto high = numeric_conversion<double> (strvec[12], 0.0);
+    auto low = numeric_conversion<double> (strvec[13], 0.0);
+    // get the controlled bus
+    auto cbus = numeric_conversion<int> (strvec[4], -1);
 
-	auto mode = numeric_conversion<int>(strvec[1], 0);
-	auto high = numeric_conversion<double>(strvec[12], 0.0);
-	auto low = numeric_conversion<double>(strvec[13], 0.0);
-	// get the controlled bus
-	auto cbus = numeric_conversion<int>(strvec[4], -1);
+    /*
+    if (cbus < 0)
+    {
+        trimString(strvec[4]);
+        if (strvec[4] == "I")
+        {
+            cbus = index;
+        }
+        else if (strvec[4].empty())
+        {
+            cbus = index;
+        }
+        else
+        {
+            rbus = static_cast<gridBus *> (parentObject->find(strvec[4]));
+            if (rbus != nullptr)
+            {
+                cbus = rbus->getUserID();
+            }
+        }
+    }
+    else if (cbus == 0)
+    {
+        cbus = index;
+    }
+    else
+    {
+        rbus = busList[cbus];
+    }
 
-	/*
-	if (cbus < 0)
-	{
-		trimString(strvec[4]);
-		if (strvec[4] == "I")
-		{
-			cbus = index;
-		}
-		else if (strvec[4].empty())
-		{
-			cbus = index;
-		}
-		else
-		{
-			rbus = static_cast<gridBus *> (parentObject->find(strvec[4]));
-			if (rbus != nullptr)
-			{
-				cbus = rbus->getUserID();
-			}
-		}
-	}
-	else if (cbus == 0)
-	{
-		cbus = index;
-	}
-	else
-	{
-		rbus = busList[cbus];
-	}
+    switch (mode)
+    {
+    case 0:
+        ld->set("mode", "manual");
+        break;
+    case 1:
+        ld->set("mode", "stepped");
+        ld->set("vmax", high);
+        ld->set("vmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
 
-	switch (mode)
-	{
-	case 0:
-		ld->set("mode", "manual");
-		break;
-	case 1:
-		ld->set("mode", "stepped");
-		ld->set("vmax", high);
-		ld->set("vmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
+        temp = numeric_conversion<double>(strvec[5], 0.0);
+        if (temp > 0)
+        {
+            ld->set("participation", temp / 100.0);
+        }
+        break;
+    case 2:
+        ld->set("mode", "cont");
+        ld->set("vmax", high);
+        ld->set("vmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
+        temp = numeric_conversion<double>(strvec[5], 0.0);
+        if (temp > 0)
+        {
+            ld->set("participation", temp / 100.0);
+        }
+        break;
+    case 3:
+        ld->set("mode", "stepped");
+        ld->set("control", "reactive");
+        ld->set("qmax", high);
+        ld->set("qmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
+        break;
+    case 4:
+        ld->set("mode", "stepped");
+        ld->set("control", "reactive");
+        ld->set("qmax", high);
+        ld->set("qmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
+        // TODO: PT load target object note:unusual condition
+        break;
+    case 5:
+        ld->set("mode", "stepped");
+        ld->set("control", "reactive");
+        ld->set("qmax", high);
+        ld->set("qmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
+        break;
+    case 6:
+        ld->set("mode", "stepped");
+        ld->set("control", "reactive");
+        ld->set("qmax", high);
+        ld->set("qmin", low);
+        if (cbus != static_cast<int> (index))
+        {
+            ld->setControlBus(rbus);
+        }
+        // TODO: PT load target object note:unusual condition
+        break;
+    default:
+        ld->set("mode", "manual");
+        break;
+    }
+    // load the switched shunt blocks
+    int start = 7;
+    if (opt.version <= 27)
+    {
+        start = 5;
+    }
 
-		temp = numeric_conversion<double>(strvec[5], 0.0);
-		if (temp > 0)
-		{
-			ld->set("participation", temp / 100.0);
-		}
-		break;
-	case 2:
-		ld->set("mode", "cont");
-		ld->set("vmax", high);
-		ld->set("vmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
-		temp = numeric_conversion<double>(strvec[5], 0.0);
-		if (temp > 0)
-		{
-			ld->set("participation", temp / 100.0);
-		}
-		break;
-	case 3:
-		ld->set("mode", "stepped");
-		ld->set("control", "reactive");
-		ld->set("qmax", high);
-		ld->set("qmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
-		break;
-	case 4:
-		ld->set("mode", "stepped");
-		ld->set("control", "reactive");
-		ld->set("qmax", high);
-		ld->set("qmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
-		// TODO: PT load target object note:unusual condition
-		break;
-	case 5:
-		ld->set("mode", "stepped");
-		ld->set("control", "reactive");
-		ld->set("qmax", high);
-		ld->set("qmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
-		break;
-	case 6:
-		ld->set("mode", "stepped");
-		ld->set("control", "reactive");
-		ld->set("qmax", high);
-		ld->set("qmin", low);
-		if (cbus != static_cast<int> (index))
-		{
-			ld->setControlBus(rbus);
-		}
-		// TODO: PT load target object note:unusual condition
-		break;
-	default:
-		ld->set("mode", "manual");
-		break;
-	}
-	// load the switched shunt blocks
-	int start = 7;
-	if (opt.version <= 27)
-	{
-		start = 5;
-	}
+    size_t ksize = strvec.size() - 1;
+    for (size_t kk = start + 1; kk < ksize; kk += 2)
+    {
+        auto cnt = numeric_conversion<int>(strvec[kk], 0);
+        auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
+        if ((cnt > 0) && (block != 0.0))
+        {
+            ld->addBlock(cnt, -block, MVAR);
+        }
+        else
+        {
+            break;
+        }
+    }
+    // set the initial value
+    auto initVal = numeric_conversion<double>(strvec[start], 0.0);
 
-	size_t ksize = strvec.size() - 1;
-	for (size_t kk = start + 1; kk < ksize; kk += 2)
-	{
-		auto cnt = numeric_conversion<int>(strvec[kk], 0);
-		auto block = numeric_conversion<double>(strvec[kk + 1], 0.0);
-		if ((cnt > 0) && (block != 0.0))
-		{
-			ld->addBlock(cnt, -block, MVAR);
-		}
-		else
-		{
-			break;
-		}
-	}
-	// set the initial value
-	auto initVal = numeric_conversion<double>(strvec[start], 0.0);
-
-	ld->set("yq", -initVal, MVAR);
-	*/
+    ld->set("yq", -initVal, MVAR);
+    */
 }
 //#generator data  [XXX]    id   ------------long_id_------------    st ---no--     reg_name       prf  qrf  ar
 // zone   pgen   pmax   pmin   qgen   qmax   qmin   mbase   cmp_r cmp_x gen_r gen_x           hbus
@@ -1399,4 +1398,4 @@ void epcReadTX (coreObject *parentObject,
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

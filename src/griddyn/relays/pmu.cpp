@@ -16,14 +16,14 @@
 #include "../Link.h"
 #include "../blocks/delayBlock.h"
 #include "../blocks/filteredDerivativeBlock.h"
-#include "core/coreExceptions.h"
+#include "../comms/Communicator.h"
+#include "../comms/controlMessage.h"
 #include "../events/Event.h"
 #include "../gridBus.h"
 #include "../measurement/Condition.h"
 #include "../measurement/grabberSet.h"
 #include "../measurement/gridGrabbers.h"
-#include "../comms/controlMessage.h"
-#include "../comms/Communicator.h"
+#include "core/coreExceptions.h"
 #include <cmath>
 
 namespace griddyn
@@ -92,7 +92,6 @@ void pmu::set (const std::string &param, double val, units_t unitType)
         Tv = val;
         if (opFlags[dyn_initialized])
         {
-
         }
     }
     else if ((param == "ttheta") || (param == "tangle") || (param == "angledelay"))
@@ -100,7 +99,6 @@ void pmu::set (const std::string &param, double val, units_t unitType)
         Ttheta = val;
         if (opFlags[dyn_initialized])
         {
-
         }
     }
     else if (param == "trocof")
@@ -108,26 +106,22 @@ void pmu::set (const std::string &param, double val, units_t unitType)
         Trocof = val;
         if (opFlags[dyn_initialized])
         {
-
         }
     }
     else if ((param == "tcurrent") || (param == "tI") || (param == "currentdelay"))
     {
-        Tcurrent=val;
+        Tcurrent = val;
         if (opFlags[dyn_initialized])
         {
-
         }
     }
     else if ((param == "transmitrate") || (param == "rate"))
     {
         transmissionPeriod = (val >= kMin_Res) ? 1.0 / val : kBigNum;
-
     }
     else if ((param == "transmitperiod") || (param == "period"))
     {
-        transmissionPeriod = unitConversionTime(val,unitType,gridUnits::sec);
-
+        transmissionPeriod = unitConversionTime (val, unitType, gridUnits::sec);
     }
     else if (param == "samplerate")
     {
@@ -159,7 +153,7 @@ double pmu::get (const std::string &param, gridUnits::units_t unitType) const
     }
     if ((param == "transmitrate") || (param == "rate"))
     {
-        return 1.0/transmissionPeriod;
+        return 1.0 / transmissionPeriod;
     }
     if (param == "transmitperiod")
     {
@@ -194,7 +188,7 @@ void pmu::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
         return;
     }
     // check for 3 phase sensors
-    if (dynamic_cast<gridComponent *> (m_sourceObject))
+    if (dynamic_cast<gridComponent *> (m_sourceObject) != nullptr)
     {
         if (static_cast<gridComponent *> (m_sourceObject)->checkFlag (three_phase_capable))
         {
@@ -249,7 +243,7 @@ void pmu::generateOutputNames ()
         else
         {
             // single phase voltage
-            outputStrings = {{"voltage","v"}, {"angle","ang","theta"}, {"frequency","freq","f"}, {"rocof"}};
+            outputStrings = {{"voltage", "v"}, {"angle", "ang", "theta"}, {"frequency", "freq", "f"}, {"rocof"}};
         }
     }
 }
@@ -299,7 +293,7 @@ void pmu::createFilterBlocks ()
         }
         auto fblock = new blocks::filteredDerivativeBlock ("freq");
         fblock->set ("t1", Ttheta);
-        fblock->set("t2", Trocof);
+        fblock->set ("t2", Trocof);
         add (fblock);
         set ("blockinput" + std::to_string (fblock->locIndex), 1);
         setupOutput (fblock->locIndex, "block" + std::to_string (fblock->locIndex));
@@ -309,22 +303,21 @@ void pmu::createFilterBlocks ()
 
 void pmu::updateA (coreTime time)
 {
-    sensor::updateA(time);
+    sensor::updateA (time);
     if (time >= nextTransmitTime)
     {
-        generateAndTransmitMessage();
+        generateAndTransmitMessage ();
         nextTransmitTime = lastTransmitTime + transmissionPeriod;
         if (nextTransmitTime <= time)
         {
             nextTransmitTime = time + transmissionPeriod;
         }
     }
-
 }
 
-coreTime pmu::updateB()
+coreTime pmu::updateB ()
 {
-    sensor::updateB();
+    sensor::updateB ();
     if (nextUpdateTime > nextTransmitTime)
     {
         nextUpdateTime = nextTransmitTime;
@@ -332,33 +325,30 @@ coreTime pmu::updateB()
     return nextUpdateTime;
 }
 
-void pmu::generateAndTransmitMessage() const
+void pmu::generateAndTransmitMessage () const
 {
     if (opFlags[use_commLink])
     {
-        auto &oname = outputNames();
+        auto &oname = outputNames ();
 
-        auto cm = std::make_shared<commMessage>(comms::controlMessagePayload::GET_RESULT_MULTIPLE);
+        auto cm = std::make_shared<commMessage> (comms::controlMessagePayload::GET_RESULT_MULTIPLE);
 
-        auto payload = cm->getPayload<comms::controlMessagePayload>();
-        auto res = getOutputs(noInputs, emptyStateData, cLocalSolverMode);
+        auto payload = cm->getPayload<comms::controlMessagePayload> ();
+        auto res = getOutputs (noInputs, emptyStateData, cLocalSolverMode);
 
-
-        payload->multiFields.resize(res.size());
-        payload->multiValues.resize(res.size());
-        payload->multiUnits.resize(res.size());
+        payload->multiFields.resize (res.size ());
+        payload->multiValues.resize (res.size ());
+        payload->multiUnits.resize (res.size ());
         payload->m_time = prevTime;
-        for (index_t ii = 0; ii < static_cast<index_t>(res.size()); ++ii)
+        for (index_t ii = 0; ii < static_cast<index_t> (res.size ()); ++ii)
         {
             payload->multiFields[ii] = oname[ii][0];
             payload->multiValues[ii] = res[ii];
-            payload->multiUnits[ii] = gridUnits::to_string(outputUnits(ii));
+            payload->multiUnits[ii] = gridUnits::to_string (outputUnits (ii));
         }
 
-        cManager.send(std::move(cm));
-
+        cManager.send (std::move (cm));
     }
-
 }
 
 }  // namespace relays

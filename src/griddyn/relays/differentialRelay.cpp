@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,17 +8,17 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "differentialRelay.h"
 #include "../Link.h"
 #include "../comms/Communicator.h"
 #include "../comms/relayMessage.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../events/Event.h"
 #include "../events/eventQueue.h"
 #include "../gridBus.h"
 #include "../measurement/Condition.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/timeSeries.hpp"
 
 namespace griddyn
@@ -71,7 +71,7 @@ bool differentialRelay::getFlag (const std::string &flag) const
 
 void differentialRelay::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -117,7 +117,7 @@ void differentialRelay::set (const std::string &param, double val, gridUnits::un
 void differentialRelay::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     // if the target object is a link of some kind
-    if (dynamic_cast<Link *> (m_sourceObject)!=nullptr)
+    if (dynamic_cast<Link *> (m_sourceObject) != nullptr)
     {
         double tap = m_sourceObject->get ("tap");
         if (opFlags[relative_differential_flag])
@@ -163,7 +163,7 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
         opFlags.set (link_mode);
         opFlags.reset (bus_mode);
     }
-    else if (dynamic_cast<gridBus *> (m_sourceObject)!=nullptr)
+    else if (dynamic_cast<gridBus *> (m_sourceObject) != nullptr)
     {
         add (std::shared_ptr<Condition> (make_condition ("abs(load)", "<=", m_max_differential, m_sourceObject)));
         opFlags.set (bus_mode);
@@ -179,7 +179,7 @@ void differentialRelay::pFlowObjectInitializeA (coreTime time0, std::uint32_t fl
     add (std::move (ge));
     if ((opFlags[relative_differential_flag]) && (opFlags[link_mode]) && (m_minLevel > 0.0))
     {
-        setActionMultiTrigger (0,{0, 1}, m_delayTime);
+        setActionMultiTrigger (0, {0, 1}, m_delayTime);
     }
     else
     {
@@ -200,11 +200,10 @@ void differentialRelay::actionTaken (index_t ActionNum,
 
     if (opFlags[use_commLink])
     {
-
         if (ActionNum == 0)
         {
-			auto P = std::make_shared<relayMessage>(relayMessage::BREAKER_TRIP_EVENT);
-            cManager.send (std::move(P));
+            auto P = std::make_shared<relayMessage> (relayMessage::BREAKER_TRIP_EVENT);
+            cManager.send (std::move (P));
         }
     }
 }
@@ -239,7 +238,7 @@ void differentialRelay::receiveMessage (std::uint64_t /*sourceID*/, std::shared_
         triggerAction (0);
         break;
     case relayMessage::BREAKER_CLOSE_COMMAND:
-        if (m_sinkObject!=nullptr)
+        if (m_sinkObject != nullptr)
         {
             m_sinkObject->set ("enable", 1);
         }

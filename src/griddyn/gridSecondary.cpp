@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "gridSecondary.h"
 #include "core/coreObjectTemplates.hpp"
@@ -95,7 +95,8 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
         {
             if (dynamic_cast<gridSubModel *> (subobj) != nullptr)
             {
-                if ((subobj->checkFlag (pflow_init_required))|| (CHECK_CONTROLFLAG(flags, force_constant_pflow_initialization)))
+                if ((subobj->checkFlag (pflow_init_required)) ||
+                    (CHECK_CONTROLFLAG (flags, force_constant_pflow_initialization)))
                 {
                     subobj->pFlowInitializeA (time0, flags);
                 }
@@ -112,7 +113,7 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 void gridSecondary::set (const std::string &param, const std::string &val) { gridComponent::set (param, val); }
 void gridSecondary::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-    if (!param.empty())
+    if (!param.empty ())
     {
         gridComponent::set (param, val, unitType);
     }
@@ -192,31 +193,22 @@ IOdata gridSecondary::predictOutputs (coreTime /*predictionTime*/,
     return out;
 }
 
-
-static const std::vector<stringVec> inputNamesStr
-{
-    { "voltage","v","volt" },
-    { "angle","theta","ang","a" },
-    { "frequency","freq","f","omega" },
+static const std::vector<stringVec> inputNamesStr{
+  {"voltage", "v", "volt"},
+  {"angle", "theta", "ang", "a"},
+  {"frequency", "freq", "f", "omega"},
 };
 
-const std::vector<stringVec> &gridSecondary::inputNames() const
-{
-    return inputNamesStr;
-}
+const std::vector<stringVec> &gridSecondary::inputNames () const { return inputNamesStr; }
 
-static const std::vector<stringVec> outputNamesStr
-{
-    { "p","power","realpower","real"},
-    { "q","reactive","reactivepower" },
+static const std::vector<stringVec> outputNamesStr{
+  {"p", "power", "realpower", "real"},
+  {"q", "reactive", "reactivepower"},
 };
 
-const std::vector<stringVec> &gridSecondary::outputNames() const
-{
-    return outputNamesStr;
-}
+const std::vector<stringVec> &gridSecondary::outputNames () const { return outputNamesStr; }
 
-gridUnits::units_t gridSecondary::inputUnits(index_t inputNum) const
+gridUnits::units_t gridSecondary::inputUnits (index_t inputNum) const
 {
     switch (inputNum)
     {
@@ -229,11 +221,9 @@ gridUnits::units_t gridSecondary::inputUnits(index_t inputNum) const
     default:
         return gridUnits::defUnit;
     }
-
 }
 
-
-gridUnits::units_t gridSecondary::outputUnits(index_t outputNum) const
+gridUnits::units_t gridSecondary::outputUnits (index_t outputNum) const
 {
     switch (outputNum)
     {

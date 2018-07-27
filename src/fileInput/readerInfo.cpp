@@ -1,19 +1,19 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "readerInfo.h"
 #include "core/coreObject.h"
-#include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
+#include "formatInterpreters/readerElement.h"
 #include "griddyn/measurement/collector.h"
 #include "readerHelper.h"
 
@@ -26,17 +26,16 @@ namespace griddyn
 {
 using namespace readerConfig;
 
-void basicReaderInfo::setFlag(int flagID)
+void basicReaderInfo::setFlag (int flagID)
 {
-	if (flagID < 32)
-	{
-		flags |= (1 << flagID);
-	}
+    if (flagID < 32)
+    {
+        flags |= (1 << flagID);
+    }
 }
 
-
 readerInfo::readerInfo () { loadDefaultDefines (); }
-readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (std::move(bri)) {}
+readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (bri) {}
 readerInfo::~readerInfo ()
 {
     for (auto &libObj : library)
@@ -238,8 +237,8 @@ std::string readerInfo::objectNameTranslate (const std::string &input)
         ++repcnt;
         if (repcnt > 15)
         {
-            WARNPRINT (READER_WARN_IMPORTANT, "probable Translation recursion in " << input << "currently "
-                                                                                   << out);
+            WARNPRINT (READER_WARN_IMPORTANT,
+                       "probable Translation recursion in " << input << "currently " << out);
             rep = false;
         }
         auto search = objectTranslations.find (out);
@@ -270,10 +269,9 @@ coreObject *readerInfo::findLibraryObject (const std::string &objName) const
     auto retval = library.find (objName);
     if (retval != library.end ())
     {
-		return retval->second.first;
+        return retval->second.first;
     }
-	return nullptr;
-
+    return nullptr;
 }
 
 const std::string libraryLabel = "library";
@@ -383,8 +381,8 @@ bool readerInfo::checkFileParam (std::string &strVal, bool extra_find)
                 if (boost::filesystem::exists (tempPath))
                 {
                     sourcePath = tempPath;
-                    WARNPRINT (READER_WARN_ALL, "file location path change " << strVal << " mapped to "
-                                                                             << sourcePath.string ());
+                    WARNPRINT (READER_WARN_ALL,
+                               "file location path change " << strVal << " mapped to " << sourcePath.string ());
                     ret = true;
                     break;
                 }
@@ -466,4 +464,4 @@ const std::pair<std::shared_ptr<readerElement>, int> readerInfo::getCustomElemen
 }
 
 const ignoreListType &readerInfo::getIgnoreList () const { return parameterIgnoreStrings; }
-}//namespace griddyn
+}  // namespace griddyn

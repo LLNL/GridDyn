@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "tinyxmlReaderElement.h"
 
@@ -22,9 +22,12 @@
 #endif
 
 #include "utilities/stringConversion.h"
-//this is not using default for gcc 4.9 compatibility
-tinyxmlReaderElement::tinyxmlReaderElement() noexcept {}
-tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName) { tinyxmlReaderElement::loadFile (fileName); }
+// this is not using default for gcc 4.9 compatibility
+tinyxmlReaderElement::tinyxmlReaderElement () noexcept {}
+tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName)
+{
+    tinyxmlReaderElement::loadFile (fileName);
+}
 tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, const ticpp::Element *ticppParent)
     : element (ticppElement), parent (ticppParent)
 {
@@ -38,6 +41,7 @@ tinyxmlReaderElement::~tinyxmlReaderElement()
     bookmarks.clear ();
     doc = nullptr;
 }
+
 void tinyxmlReaderElement::clear ()
 {
     element = nullptr;
@@ -46,7 +50,7 @@ void tinyxmlReaderElement::clear ()
     bookmarks.clear ();
 }
 
-bool tinyxmlReaderElement::isValid () const { return ((element!=nullptr) || ((parent == nullptr) && (doc))); }
+bool tinyxmlReaderElement::isValid () const { return ((element != nullptr) || ((parent == nullptr) && (doc))); }
 bool tinyxmlReaderElement::isDocument () const
 {
     if (parent == nullptr)
@@ -178,7 +182,7 @@ bool tinyxmlReaderElement::hasElement (const std::string &elementName) const
     if (element != nullptr)
     {
         auto testElement = element->FirstChildElement (elementName, false);
-		return (testElement != nullptr);
+        return (testElement != nullptr);
     }
     return false;
 }
@@ -188,7 +192,7 @@ readerAttribute tinyxmlReaderElement::getFirstAttribute ()
     if (element != nullptr)
     {
         att = element->FirstAttribute (false);
-        if (att!=nullptr)
+        if (att != nullptr)
         {
             std::string val;
             att->GetValue (&val);

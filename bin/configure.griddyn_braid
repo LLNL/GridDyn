@@ -1,14 +1,15 @@
 #!/bin/bash
 # LLNS Copyright Start
 # Copyright (c) 2014, Lawrence Livermore National Security
-# This work was performed under the auspices of the U.S. Department 
-# of Energy by Lawrence Livermore National Laboratory in part under 
+# This work was performed under the auspices of the U.S. Department
+# of Energy by Lawrence Livermore National Laboratory in part under
 # Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
 # Produced at the Lawrence Livermore National Laboratory.
 # All rights reserved.
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
+#######
 #CC=mpicc CXX=mpic++ cmake .. \
 #	 -DSUNDIALS_DIR=$SUNDIALS_DIR \
 #     -DSuiteSparse_DIR=$SuiteSparse_DIR \
@@ -16,13 +17,20 @@
 
 #export SUNDIALS_DIR=~/powergrid/sundials-2.7.0-nopenmp/build/install
 #-DSUNDIALS_DIR=$SUNDIALS_DIR \
+######
+
 export INSTALL_DIR=./install
+
+# Can choose between
+#    -DCMAKE_BUILD_TYPE=debug \
+# Or,
+#    -DCMAKE_BUILD_TYPE=release \
 
 CC=gcc CXX=g++ cmake .. \
     -DMPI_ENABLE=ON \
     -DOPENMP_ENABLE=OFF \
     -DSUNDIALS_OPENMP=OFF \
-    -DCMAKE_BUILD_TYPE=debug \
+    -DCMAKE_BUILD_TYPE=release \
     -DBUILD_SHARED_LIBS=OFF \
     -DOPTIMIZATION_ENABLE=ON \
     -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
@@ -31,7 +39,3 @@ CC=gcc CXX=g++ cmake .. \
     -DBRAID_INSTALL_DIR=/g/g18/schroder/powergrid/powergrid_sandbox/braid/braid \
     -DUSE_POSITION_INDEPENDENT_CODE=ON \
 #    -DDISABLE_MULTITHREADING=ON \
-
-
-
-

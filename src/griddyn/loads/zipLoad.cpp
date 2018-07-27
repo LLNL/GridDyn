@@ -1,21 +1,21 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "zipLoad.h"
+#include "../gridBus.h"
 #include "ThreePhaseLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "../gridBus.h"
 #include "otherLoads.h"
 #include "utilities/matrixData.hpp"
 
@@ -44,7 +44,7 @@ static childTypeFactory<exponentialLoad, Load> glexp ("load", stringVec{"exponen
 static childTypeFactory<fDepLoad, Load> glfd ("load", "fdep");
 static childTypeFactory<ThreePhaseLoad, Load> gl3 ("load", stringVec{"3phase", "3p", "threephase"});
 
-static childTypeFactory<approximatingLoad,Load> apld("load", stringVec{ "approx", "approximating" });
+static childTypeFactory<approximatingLoad, Load> apld ("load", stringVec{"approx", "approximating"});
 }  // namespace loads
 
 zipLoad::zipLoad (const std::string &objName) : Load (objName) {}
@@ -259,10 +259,10 @@ double zipLoad::get (const std::string &param, units_t unitType) const
 
 void zipLoad::set (const std::string &param, double val, units_t unitType)
 {
-	if (param.empty())
-	{
-		return;
-	}
+    if (param.empty ())
+    {
+        return;
+    }
     if (param.length () == 1)
     {
         switch (param[0])

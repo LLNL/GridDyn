@@ -14,15 +14,15 @@
 #include "../Area.h"
 #include "../Link.h"
 #include "../Relay.h"
+#include "../gridBus.h"
+#include "../gridDynSimulation.h"
+#include "../measurement/objectGrabbers.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectList.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../gridBus.h"
-#include "../gridDynSimulation.h"
 #include "listMaintainer.h"
-#include "../measurement/objectGrabbers.h"
 #include "utilities/vectorOps.hpp"
 
 namespace griddyn
@@ -2046,11 +2046,11 @@ double Area::getMasterAngle (const stateData &sD, const solverMode &sMode) const
     return 0.0;
 }
 
-stateSizes Area::LocalStateSizes (const solverMode &/*sMode*/) const { return offsets.local ().local; }
+stateSizes Area::LocalStateSizes (const solverMode & /*sMode*/) const { return offsets.local ().local; }
 
 count_t Area::LocalJacobianCount (const solverMode & /*sMode*/) const { return offsets.local ().local.jacSize; }
 
-std::pair<count_t, count_t> Area::LocalRootCount (const solverMode &/*sMode*/) const
+std::pair<count_t, count_t> Area::LocalRootCount (const solverMode & /*sMode*/) const
 {
     auto &lc = offsets.local ().local;
     return std::make_pair (lc.algRoots, lc.diffRoots);
@@ -2103,7 +2103,7 @@ void Area::loadStateSizes (const solverMode &sMode)
         }
     }
     so.stateLoaded = true;
-	opObjectLists->makeList (sMode, primaryObjects);
+    opObjectLists->makeList (sMode, primaryObjects);
 }
 
 void Area::loadRootSizes (const solverMode &sMode)
@@ -2136,16 +2136,16 @@ void Area::loadRootSizes (const solverMode &sMode)
         so.local.algRoots = selfSizes.first;
         so.local.diffRoots = selfSizes.second;
     }
-    rootObjects.clear();
+    rootObjects.clear ();
     for (auto &obj : primaryObjects)
     {
         if (!(obj->isRootCountLoaded (sMode)))
         {
             obj->loadRootSizes (sMode);
         }
-        if (obj->checkFlag(has_roots))
+        if (obj->checkFlag (has_roots))
         {
-            rootObjects.push_back(obj);
+            rootObjects.push_back (obj);
         }
         so.addRootSizes (obj->getOffsets (sMode));
     }
@@ -2170,7 +2170,7 @@ void Area::loadJacobianSizes (const solverMode &sMode)
     {
         so.JacobianCountReset ();
     }
-	auto selfJacCount = LocalJacobianCount(sMode);
+    auto selfJacCount = LocalJacobianCount (sMode);
     if (!(so.jacobianLoaded))
     {
         so.local.jacSize = selfJacCount;

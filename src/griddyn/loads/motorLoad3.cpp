@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,9 +10,9 @@
  * LLNS Copyright End
  */
 
-#include "core/coreObjectTemplates.hpp"
-#include "../gridBus.h"
 #include "motorLoad3.h"
+#include "../gridBus.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 #include <iostream>
@@ -133,54 +133,53 @@ void motorLoad3::dynObjectInitializeB (const IOdata &inputs,
     }
 }
 
-stateSizes motorLoad3::LocalStateSizes(const solverMode &sMode) const
+stateSizes motorLoad3::LocalStateSizes (const solverMode &sMode) const
 {
-	stateSizes SS;
-	if (isDynamic(sMode))
-	{
-		SS.algSize = 2;
-		if (!isAlgebraicOnly(sMode))
-		{
-			SS.diffSize = 3;
-		}
-	}
-	else
-	{
-		SS.algSize = 5;
-	}
-	return SS;
+    stateSizes SS;
+    if (isDynamic (sMode))
+    {
+        SS.algSize = 2;
+        if (!isAlgebraicOnly (sMode))
+        {
+            SS.diffSize = 3;
+        }
+    }
+    else
+    {
+        SS.algSize = 5;
+    }
+    return SS;
 }
 
-count_t motorLoad3::LocalJacobianCount(const solverMode &sMode) const
+count_t motorLoad3::LocalJacobianCount (const solverMode &sMode) const
 {
-	count_t localJacSize = 0;
-	if (isDynamic(sMode))
-	{
-		localJacSize = 8;
-		if (!isAlgebraicOnly(sMode))
-		{
-			localJacSize += 15;
-		}
-	}
-	else
-	{
-
-		if (opFlags[init_transient])
-		{
-			localJacSize = 19;
-		}
-		else
-		{
-			localJacSize = 23;
-		}
-	}
-	return localJacSize;
+    count_t localJacSize = 0;
+    if (isDynamic (sMode))
+    {
+        localJacSize = 8;
+        if (!isAlgebraicOnly (sMode))
+        {
+            localJacSize += 15;
+        }
+    }
+    else
+    {
+        if (opFlags[init_transient])
+        {
+            localJacSize = 19;
+        }
+        else
+        {
+            localJacSize = 23;
+        }
+    }
+    return localJacSize;
 }
 
 // set properties
 void motorLoad3::set (const std::string &param, const std::string &val)
 {
-    if (param.empty())
+    if (param.empty ())
     {
     }
     else
@@ -620,7 +619,7 @@ void motorLoad3::rootTest (const IOdata & /*inputs*/, const stateData &sD, doubl
     {
         double slip = Loc.diffStateLoc[0];
         roots[ro] = 1.0 - slip;
-      //  printf("[%f] slip=%f\n", static_cast<double>(sD.time), slip);
+        //  printf("[%f] slip=%f\n", static_cast<double>(sD.time), slip);
     }
 }
 
@@ -629,7 +628,7 @@ void motorLoad3::rootTrigger (coreTime /*time*/,
                               const std::vector<int> &rootMask,
                               const solverMode &sMode)
 {
-    if (!rootMask[offsets.getRootOffset (sMode)])
+    if (rootMask[offsets.getRootOffset (sMode)] == 0)
     {
         return;
     }
