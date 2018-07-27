@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "Condition.h"
 #include "grabberInterpreter.hpp"
@@ -107,7 +107,7 @@ bool compoundCondition::evalCombinations (count_t trueCount) const
     switch (mode)
     {
     case compound_mode::c_and:
-	case compound_mode::c_all:
+    case compound_mode::c_all:
     default:
         return (trueCount == static_cast<count_t> (conditions.size ()));
     case compound_mode::c_any:
@@ -124,12 +124,12 @@ bool compoundCondition::evalCombinations (count_t trueCount) const
     case compound_mode::c_three_or_more:
         return (trueCount >= 3);
     case compound_mode::c_xor:
-	case compound_mode::c_odd:
+    case compound_mode::c_odd:
         return ((trueCount & 0x01) == 1);
-	case compound_mode::c_even:
-		return ((trueCount & 0x01) == 0);
-	case compound_mode::c_even_min:
-		return ((trueCount!=0)&&((trueCount & 0x01) == 0));
+    case compound_mode::c_even:
+        return ((trueCount & 0x01) == 0);
+    case compound_mode::c_even_min:
+        return ((trueCount != 0) && ((trueCount & 0x01) == 0));
     case compound_mode::c_none:
         return (trueCount == 0);
     }

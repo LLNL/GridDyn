@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,16 +8,13 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "optObjectFactory.h"
 
 namespace griddyn
 {
-
-optComponentFactory::optComponentFactory (const std::string &component) : name (component)
-{
-}
+optComponentFactory::optComponentFactory (const std::string &component) : name (component) {}
 
 optComponentFactory::~optComponentFactory () = default;
 
@@ -31,7 +28,6 @@ void optComponentFactory::registerFactory (optFactory *optFac)
     m_factoryList.push_back (optFac);
 }
 
-
 stringVec optComponentFactory::getObjNames ()
 {
     stringVec tnames;
@@ -43,10 +39,7 @@ stringVec optComponentFactory::getObjNames ()
     return tnames;
 }
 
-gridOptObject *optComponentFactory::makeObject ()
-{
-    return nullptr;
-}
+gridOptObject *optComponentFactory::makeObject () { return nullptr; }
 
 bool optComponentFactory::isValidObject (const std::string &objName)
 {
@@ -82,7 +75,7 @@ gridOptObject *optComponentFactory::makeObject (coreObject *obj)
 
     int mxLevel = -1;
     auto ofm = m_factoryList[0];
-    for (auto &of:m_factoryList)
+    for (auto &of : m_factoryList)
     {
         if (of->m_level > mxLevel)
         {
@@ -102,17 +95,17 @@ gridOptObject *optComponentFactory::makeObject (coreObject *obj)
     return nullptr;
 }
 
-
-//create a high level object factory for the coreObject class
+// create a high level object factory for the coreObject class
 std::shared_ptr<coreOptObjectFactory> coreOptObjectFactory::instance ()
 {
-    static std::shared_ptr<coreOptObjectFactory> factory = std::shared_ptr<coreOptObjectFactory> (new coreOptObjectFactory ());
+    static std::shared_ptr<coreOptObjectFactory> factory =
+      std::shared_ptr<coreOptObjectFactory> (new coreOptObjectFactory ());
     return factory;
 }
 
 void coreOptObjectFactory::registerFactory (const std::string &name, std::shared_ptr<optComponentFactory> tf)
 {
-    m_factoryMap[name] = tf;
+    m_factoryMap[name] = std::move (tf);
 }
 
 stringVec coreOptObjectFactory::getFactoryNames ()
@@ -126,7 +119,7 @@ stringVec coreOptObjectFactory::getFactoryNames ()
     return factoryNames;
 }
 
-std::vector < std::string> coreOptObjectFactory::getObjNames (const std::string &factoryName)
+std::vector<std::string> coreOptObjectFactory::getObjNames (const std::string &factoryName)
 {
     auto mfind = m_factoryMap.find (factoryName);
     if (mfind != m_factoryMap.end ())
@@ -199,13 +192,11 @@ std::shared_ptr<optComponentFactory> coreOptObjectFactory::getFactory (const std
     {
         return (m_factoryMap[factoryName]);
     }
-    else       //make a new factory
-    {
-        auto tf = std::make_shared<optComponentFactory> ();
-        tf->name = factoryName;
-        m_factoryMap.insert (std::pair<std::string, std::shared_ptr<optComponentFactory>> (factoryName, tf));
-        return tf;
-    }
+    // make a new factory
+    auto tf = std::make_shared<optComponentFactory> ();
+    tf->name = factoryName;
+    m_factoryMap.insert (std::pair<std::string, std::shared_ptr<optComponentFactory>> (factoryName, tf));
+    return tf;
 }
 
 bool coreOptObjectFactory::isValidType (const std::string &optType)
@@ -233,13 +224,16 @@ void coreOptObjectFactory::setDefaultType (const std::string &defType)
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &optType, const std::string &typeName, count_t numObjects, coreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &optType,
+                                        const std::string &typeName,
+                                        count_t numObjects,
+                                        coreObject *obj)
 {
     auto mfind = m_factoryMap.find (optType);
     if (mfind != m_factoryMap.end ())
     {
         auto obfact = m_factoryMap[optType]->getFactory (typeName);
-        if (obfact)
+        if (obfact != nullptr)
         {
             obfact->prepObjects (numObjects, obj);
         }
@@ -254,10 +248,10 @@ void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t num
     }
 
     auto obfact = m_factoryMap[m_defaultType]->getFactory (typeName);
-    if (obfact)
+    if (obfact != nullptr)
     {
         obfact->prepObjects (numObjects, obj);
     }
 }
 
-}// namespace griddyn
+}  // namespace griddyn

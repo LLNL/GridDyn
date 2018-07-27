@@ -28,10 +28,8 @@ class gridLoadOpt : public gridOptObject
 
 public:
 protected:
-  gridBusOpt *bus;
-
+  gridBusOpt *bus = nullptr;
   zipLoad *load = nullptr;
-
 
 public:
   gridLoadOpt (const std::string &objName = "");

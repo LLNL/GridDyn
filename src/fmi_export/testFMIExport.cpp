@@ -10,6 +10,7 @@
  * LLNS Copyright End
  */
 
+#include "fileInput/readerInfo.h"
 #include "fmi/fmi_import/fmiImport.h"
 #include "fmi_export/fmiCollector.h"
 #include "fmi_export/fmiCoordinator.h"
@@ -18,7 +19,6 @@
 #include "fmi_export/loadFMIExportObjects.h"
 #include "griddyn/gridBus.h"
 #include "griddyn/loads/ThreePhaseLoad.h"
-#include "fileInput/readerInfo.h"
 #include "griddyn/simulation/diagnostics.h"
 #include "utilities/vectorOps.hpp"
 #include <boost/test/unit_test.hpp>
@@ -26,10 +26,10 @@
 #include <boost/test/floating_point_comparison.hpp>
 // test case for fmi_export functions
 
+#include "../test/testHelper.h"
 #include "core/coreOwningPtr.hpp"
 #include "fmi/fmi_import/fmiObjects.h"
 #include "fmi_export/fmiRunner.h"
-#include "../test/testHelper.h"
 #include <set>
 
 static const std::string fmi_test_directory (GRIDDYN_TEST_DIRECTORY "/fmi_export_tests/");
@@ -120,11 +120,11 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner)
     runner->simInitialize ();
     runner->UpdateOutputs ();
 
-	auto ld_vr = runner->findVR("load");
+    auto ld_vr = runner->findVR ("load");
     auto out = runner->Get (ld_vr);
     BOOST_CHECK_CLOSE (out, 0.5, 0.000001);
 
-	auto in_vr = runner->findVR("power");
+    auto in_vr = runner->findVR ("power");
     runner->Set (in_vr, 0.6);
     runner->Step (1.0);
     out = runner->Get (ld_vr);
@@ -266,12 +266,12 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner2)
     auto ret = runner->Step (10.0);
     BOOST_CHECK_EQUAL (ret, coreTime (10.0));
 
-	auto va_vr = runner->findVR("Bus11_VA");
-	auto vb_vr = runner->findVR("Bus11_VB");
-	auto vc_vr = runner->findVR("Bus11_VC");
-	BOOST_CHECK_NE(va_vr, kNullLocation);
-	BOOST_CHECK_NE(vb_vr, kNullLocation);
-	BOOST_CHECK_NE(vc_vr, kNullLocation);
+    auto va_vr = runner->findVR ("Bus11_VA");
+    auto vb_vr = runner->findVR ("Bus11_VB");
+    auto vc_vr = runner->findVR ("Bus11_VC");
+    BOOST_CHECK_NE (va_vr, kNullLocation);
+    BOOST_CHECK_NE (vb_vr, kNullLocation);
+    BOOST_CHECK_NE (vc_vr, kNullLocation);
     auto val1 = runner->Get (va_vr);
     auto val2 = runner->Get (vb_vr);
     auto val3 = runner->Get (vc_vr);
@@ -281,17 +281,17 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner2)
     BOOST_CHECK_LT (val2, 5200.0);
     BOOST_CHECK_GT (val3, 3500.0);
     BOOST_CHECK_LT (val3, 5200.0);
-    auto val4 = runner->Get (runner->findVR("Bus11_VAngleA"));
-    auto val5 = runner->Get (runner->findVR("Bus11_VAngleB"));
-    auto val6 = runner->Get (runner->findVR("Bus11_VAngleC"));
+    auto val4 = runner->Get (runner->findVR ("Bus11_VAngleA"));
+    auto val5 = runner->Get (runner->findVR ("Bus11_VAngleB"));
+    auto val6 = runner->Get (runner->findVR ("Bus11_VAngleC"));
     BOOST_CHECK_GT (val4, -2000.0);
     BOOST_CHECK_GT (val5, -2000.0);
     BOOST_CHECK_GT (val6, -2000.0);
     auto time = 20.0;
-	const std::set<std::string> currentInputs{ "Bus11_IA","Bus11_IB" ,"Bus11_IC" };
-    for (auto &ifld:currentInputs)
+    const std::set<std::string> currentInputs{"Bus11_IA", "Bus11_IB", "Bus11_IC"};
+    for (auto &ifld : currentInputs)
     {
-		auto ivr = runner->findVR(ifld);
+        auto ivr = runner->findVR (ifld);
         runner->Set (ivr, 100.0);
         ret = runner->Step (time);
         time += 10.0;
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner2)
         auto val1b = runner->Get (va_vr);
         auto val2b = runner->Get (vb_vr);
         auto val3b = runner->Get (vc_vr);
-		//checking that there was a change
+        // checking that there was a change
         BOOST_CHECK_GT (std::abs (val1b - val1), 0.00001);
         BOOST_CHECK_GT (std::abs (val2b - val2), 0.00001);
         BOOST_CHECK_GT (std::abs (val3b - val3), 0.00001);
@@ -311,20 +311,20 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner2)
                            0.5);  // this won't be that close since it is averaged across 3 phases
     }
 
-	const std::set<std::string> currentAngleInputs{ "Bus11_IAngleA","Bus11_IAngleB" ,"Bus11_IAngleC" };
-	double phase = 0.0;
-	for (auto &ifld : currentAngleInputs)
-	{
-		auto ivr = runner->findVR(ifld);
+    const std::set<std::string> currentAngleInputs{"Bus11_IAngleA", "Bus11_IAngleB", "Bus11_IAngleC"};
+    double phase = 0.0;
+    for (auto &ifld : currentAngleInputs)
+    {
+        auto ivr = runner->findVR (ifld);
         runner->Set (ivr, 0.0 + phase * 120.0);
-		
+
         ret = runner->Step (time);
         time += 10.0;
 
         auto val1b = runner->Get (va_vr);
         auto val2b = runner->Get (vb_vr);
         auto val3b = runner->Get (vc_vr);
-		//checking that there was a change
+        // checking that there was a change
         BOOST_CHECK_GT (std::abs (val1b - val1), 0.00001);
         BOOST_CHECK_GT (std::abs (val2b - val2), 0.00001);
         BOOST_CHECK_GT (std::abs (val3b - val3), 0.00001);
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE (test_fmi_runner2)
         {
             diff -= 360.0;
         }
-		phase += 1.0;
+        phase += 1.0;
         BOOST_CHECK_SMALL (diff, 0.1);
     }
 }

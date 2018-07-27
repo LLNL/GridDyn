@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,13 +11,13 @@
  */
 
 #include "gridDynSimulationFileOps.h"
-#include "contingency.h"
-#include "core/coreExceptions.h"
 #include "../gridBus.h"
 #include "../gridDynSimulation.h"
 #include "../links/acLine.h"
 #include "../links/adjustableTransformer.h"
 #include "../solvers/solverInterface.h"
+#include "contingency.h"
+#include "core/coreExceptions.h"
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -754,21 +754,21 @@ void saveStateBinary (gridDynSimulation *gds, const std::string &fileName, const
     if (fileName.empty ())
     {
         auto stateFile = gds->getString ("statefile");
-        writeVector (gds->getSimulationTime(), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
-                     stateFile, append);
+        writeVector (gds->getSimulationTime (), index, STATE_INFORMATION, currentMode.offsetIndex, dsize,
+                     statedata, stateFile, append);
         if (hasDifferential (currentMode))
         {
-            writeVector (gds->getSimulationTime(), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
+            writeVector (gds->getSimulationTime (), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
                          sd->deriv_data (), stateFile);
         }
     }
     else
     {
-        writeVector (gds->getSimulationTime(), index, STATE_INFORMATION, currentMode.offsetIndex, dsize, statedata,
-                     fileName, append);
+        writeVector (gds->getSimulationTime (), index, STATE_INFORMATION, currentMode.offsetIndex, dsize,
+                     statedata, fileName, append);
         if (hasDifferential (currentMode))
         {
-            writeVector (gds->getSimulationTime(), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
+            writeVector (gds->getSimulationTime (), index, DERIVATIVE_INFORMATION, currentMode.offsetIndex, dsize,
                          sd->deriv_data (), fileName);
         }
     }
@@ -1020,7 +1020,7 @@ void captureJacState (gridDynSimulation *gds, const std::string &fileName, const
     auto &currentMode = gds->getCurrentMode (sMode);
     auto sd = gds->getSolverInterface (currentMode);
     matrixDataSparse<double> md;
-    stateData sD (gds->getSimulationTime(), sd->state_data (), sd->deriv_data ());
+    stateData sD (gds->getSimulationTime (), sd->state_data (), sd->deriv_data ());
 
     sD.cj = 10000;
 
@@ -1070,7 +1070,7 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
 
     matrixDataSparse<double> md;
 
-    stateData sD (gds->getSimulationTime(), SolverInterface->state_data (), SolverInterface->deriv_data ());
+    stateData sD (gds->getSimulationTime (), SolverInterface->state_data (), SolverInterface->deriv_data ());
 
     sD.cj = 10000;
     gds->jacobianElements (noInputs, sD, md, noInputLocs, currentMode);
@@ -1101,15 +1101,15 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
 
 void saveContingencyOutput (const std::vector<std::shared_ptr<contingency>> &contList, const std::string &fileName)
 {
-	if (contList.empty())
-	{
+    if (contList.empty())
+    {
         return;
-	}
+    }
     std::ofstream bFile (fileName.c_str (), std::ios::out);
-	while (!contList[0]->isFinished())
-	{
+    while (!contList[0]->isFinished())
+    {
         contList[0]->wait ();
-	}
+    }
     bFile << contList[0]->generateHeader () << "\n";
     for (auto &cont : contList)
     {

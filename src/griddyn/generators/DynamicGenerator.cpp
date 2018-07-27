@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,20 +8,20 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "DynamicGenerator.h"
 #include "../Source.h"
 #include "../Stabilizer.h"
 #include "../controllers/scheduler.h"
-#include "core/coreExceptions.h"
-#include "core/coreObjectTemplates.hpp"
-#include "core/objectFactoryTemplates.hpp"
-#include "core/objectInterpreter.h"
 #include "../exciters/ExciterDC2A.h"
 #include "../genmodels/otherGenModels.h"
 #include "../governors/GovernorTypes.h"
 #include "../gridBus.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.hpp"
+#include "core/objectFactoryTemplates.hpp"
+#include "core/objectInterpreter.h"
 #include "isocController.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"
@@ -172,7 +172,7 @@ void DynamicGenerator::buildDynModel (dynModel_t dynModel)
         {
             add (new genmodels::GenModel6 ());
         }
-		break;
+        break;
     case dynModel_t::detailed:
         if (gov == nullptr)
         {
@@ -186,13 +186,13 @@ void DynamicGenerator::buildDynModel (dynModel_t dynModel)
         {
             add (new genmodels::GenModel8 ());
         }
-		break;
+        break;
     case dynModel_t::model_only:
         if (genModel == nullptr)
         {
             add (new genmodels::GenModel4 ());
         }
-		break;
+        break;
     case dynModel_t::none:
         if (genModel == nullptr)
         {
@@ -273,7 +273,7 @@ void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata 
     m_Pmech = computedInputs[genModelPmechInLocation];
 
     m_Eft = computedInputs[genModelEftInLocation];
-  //  genModel->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+    //  genModel->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
 
     Pset = m_Pmech / scale;
     if (isoc != nullptr)
@@ -290,7 +290,7 @@ void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata 
         localDesiredOutput[0] = m_Eft;
         ext->dynInitializeB (inputArgs, localDesiredOutput, computedInputs);
 
-    //    ext->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+        //    ext->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
         // Vset=inputSetup[1];
     }
     if ((gov != nullptr) && (gov->isEnabled ()))
@@ -305,7 +305,7 @@ void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata 
         }
         gov->dynInitializeB (inputArgs, localDesiredOutput, computedInputs);
 
-   //     gov->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+        //     gov->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
     }
 
     if ((pss != nullptr) && (pss->isEnabled ()))
@@ -314,7 +314,7 @@ void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata 
         inputArgs[1] = kNullVal;
         localDesiredOutput[0] = 0;
         pss->dynInitializeB (inputArgs, desiredOutput, computedInputs);
-    //    pss->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+        //    pss->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
     }
 
     inputArgs.resize (0);
@@ -328,12 +328,12 @@ void DynamicGenerator::dynObjectInitializeB (const IOdata &inputs, const IOdata 
         if (sub->isEnabled ())
         {
             sub->dynInitializeB (inputArgs, localDesiredOutput, computedInputs);
-        //    sub->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+            //    sub->guessState (prevTime, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
         }
     }
 
-  //  m_stateTemp = m_state.data ();
-   // m_dstate_dt_Temp = m_dstate_dt.data ();
+    //  m_stateTemp = m_state.data ();
+    // m_dstate_dt_Temp = m_dstate_dt.data ();
 }
 
 // save an external state to the internal one
@@ -349,12 +349,12 @@ void DynamicGenerator::setState (coreTime time,
             if (subobj->isEnabled ())
             {
                 subobj->setState (time, state, dstate_dt, sMode);
-                //subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
             }
         }
         Pset += dPdt * (time - prevTime);
         Pset = valLimit (Pset, Pmin, Pmax);
-        updateLocalCache(noInputs, emptyStateData, cLocalSolverMode);
+        updateLocalCache (noInputs, emptyStateData, cLocalSolverMode);
     }
     else if (stateSize (sMode) > 0)
     {
@@ -393,7 +393,7 @@ void DynamicGenerator::guessState (coreTime time, double state[], double dstate_
             if (subobj->isEnabled ())
             {
                 subobj->guessState (time, state, dstate_dt, sMode);
-               // subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
+                // subobj->guessState (time, m_state.data (), m_dstate_dt.data (), cLocalbSolverMode);
             }
         }
     }
@@ -478,15 +478,13 @@ void DynamicGenerator::add (gridSubModel *obj)
     {
         throw (unrecognizedObjectException (this));
     }
-    
 }
 
-gridSubModel *
-DynamicGenerator::replaceModel (gridSubModel *newObject, gridSubModel *oldObject, index_t newIndex)
+gridSubModel *DynamicGenerator::replaceModel (gridSubModel *newObject, gridSubModel *oldObject, index_t newIndex)
 {
-    replaceSubObject(newObject, oldObject);
+    replaceSubObject (newObject, oldObject);
     newObject->locIndex = newIndex;
-    
+
     if (newIndex >= static_cast<index_t> (subInputs.inputs.size ()))
     {
         subInputs.inputs.resize (newIndex + 1);
@@ -595,19 +593,18 @@ void DynamicGenerator::algebraicUpdate (const IOdata &inputs,
     }
     updateLocalCache (inputs, sD, sMode);
 
-    //if ((!sD.empty ()) && (!isLocal (sMode)))
-   // {
-        for (auto &sub : getSubObjects ())
+    // if ((!sD.empty ()) && (!isLocal (sMode)))
+    // {
+    for (auto &sub : getSubObjects ())
+    {
+        if (sub->isEnabled ())
         {
-            if (sub->isEnabled ())
-            {
-                sub->algebraicUpdate (subInputs.inputs[sub->locIndex], sD, update,
-                                                                    sMode, alpha);
-            }
+            sub->algebraicUpdate (subInputs.inputs[sub->locIndex], sD, update, sMode, alpha);
         }
-   // }
-   // else
-   // {
+    }
+    // }
+    // else
+    // {
     //    stateData sD2 (0.0, m_state.data ());
     //    for (auto &sub : getSubObjects ())
     //    {
@@ -617,9 +614,8 @@ void DynamicGenerator::algebraicUpdate (const IOdata &inputs,
     //                                                                m_state.data (), cLocalbSolverMode, alpha);
     //        }
     //    }
-   // }
+    // }
 }
-
 
 void DynamicGenerator::setFlag (const std::string &flag, bool val)
 {
@@ -981,7 +977,7 @@ void DynamicGenerator::getStateName (stringVec &stNames, const solverMode &sMode
     {
         Generator::getStateName (stNames, sMode, prefix);
     }
-	gridComponent::getStateName(stNames, sMode, prefix);
+    gridComponent::getStateName (stNames, sMode, prefix);
 }
 
 void DynamicGenerator::rootTest (const IOdata &inputs,
@@ -1187,7 +1183,6 @@ void DynamicGenerator::generateSubModelInputs (const IOdata &inputs, const state
     if ((gov != nullptr) && (gov->isEnabled ()))
     {
         pmech = gov->getOutput (subInputs.inputs[governor_loc], sD, sMode, 0);
-        
     }
     if (std::abs (pmech) > 1e25)
     {

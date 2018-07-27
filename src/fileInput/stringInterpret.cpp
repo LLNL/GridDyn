@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,13 +8,13 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
+#include "core/objectInterpreter.h"
 #include "fileInput.h"
 #include "utilities/functionInterpreter.h"
 #include "utilities/stringConversion.h"
 #include "utilities/string_viewConversion.h"
-#include "core/objectInterpreter.h"
 #include <cctype>
 #include <cmath>
 
@@ -37,8 +37,7 @@ double InterpretFunction (const std::string &command, double val1, double val2, 
 double stringBlocktoDouble (string_view block, readerInfo &ri);
 double interpretString_sv (string_view command, readerInfo &ri);
 
-
-double ObjectQuery(string_view command, coreObject *obj);
+double ObjectQuery (string_view command, coreObject *obj);
 
 double interpretString (const std::string &command, readerInfo &ri) { return interpretString_sv (command, ri); }
 double interpretString_sv (string_view command, readerInfo &ri)
@@ -101,16 +100,15 @@ double interpretString_sv (string_view command, readerInfo &ri)
                     }
                     else if (args.size () == 1)  // if the single argument is a function of multiple arguments
                     {
-						if (cmdBlock == "query")
-						{
-							val = ObjectQuery(args[0], ri.getKeyObject());
-						}
-						else
-						{
-							double v1 = stringBlocktoDouble(args[0], ri);
-							val = InterpretFunction(cmdBlock.to_string(), v1, ri);
-						}
-                       
+                        if (cmdBlock == "query")
+                        {
+                            val = ObjectQuery (args[0], ri.getKeyObject ());
+                        }
+                        else
+                        {
+                            double v1 = stringBlocktoDouble (args[0], ri);
+                            val = InterpretFunction (cmdBlock.to_string (), v1, ri);
+                        }
                     }
                     else
                     {
@@ -119,20 +117,19 @@ double interpretString_sv (string_view command, readerInfo &ri)
                 }
                 else
                 {
-					if (cmdBlock == "query")
-					{
-						val = ObjectQuery(fcallstr, ri.getKeyObject());
-					}
-					else
-					{
-						val = stringBlocktoDouble(fcallstr, ri);
+                    if (cmdBlock == "query")
+                    {
+                        val = ObjectQuery (fcallstr, ri.getKeyObject ());
+                    }
+                    else
+                    {
+                        val = stringBlocktoDouble (fcallstr, ri);
 
-						if (!std::isnan(val))
-						{
-							val = InterpretFunction(cmdBlock.to_string(), val, ri);
-						}
-					}
-                   
+                        if (!std::isnan (val))
+                        {
+                            val = InterpretFunction (cmdBlock.to_string (), val, ri);
+                        }
+                    }
                 }
             }
         }
@@ -169,8 +166,9 @@ void interpretStringBlock (string_view command, readerInfo &ri, std::vector<doub
     auto strSplit = split (command);
     trim (strSplit);
     outputs.resize (strSplit.size ());
-	std::transform(strSplit.begin(), strSplit.end(), outputs.begin(), [&ri](auto &str) {return interpretStringBlock(str, ri); });
-    //for (size_t kk = 0; kk < strSplit.size (); ++kk)
+    std::transform (strSplit.begin (), strSplit.end (), outputs.begin (),
+                    [&ri](auto &str) { return interpretStringBlock (str, ri); });
+    // for (size_t kk = 0; kk < strSplit.size (); ++kk)
     //{
     //    outputs[kk] = interpretStringBlock (strSplit[kk], ri);
     //}
@@ -190,7 +188,7 @@ double addSubStringBlocks (string_view command, readerInfo &ri, size_t rlc)
     return (op == '+') ? valA + valB : valA - valB;
 }
 
-const double nan_val = std::nan("0");
+const double nan_val = std::nan ("0");
 
 double multDivStringBlocks (string_view command, readerInfo &ri, size_t rlc)
 {
@@ -289,20 +287,19 @@ double InterpretFunction (const std::string &command, double val1, double val2, 
     return fval;
 }
 
-
-double ObjectQuery(string_view command, coreObject *obj)
+double ObjectQuery (string_view command, coreObject *obj)
 {
-	if (obj == nullptr)
-	{
-		return nan_val;
-	}
-	objInfo query(command.to_string(), obj);
-	if (!query.m_field.empty())
-	{
-		double val = query.m_obj->get(query.m_field, query.m_unitType);
-		return val;
-	}
-	return nan_val;
+    if (obj == nullptr)
+    {
+        return nan_val;
+    }
+    objInfo query (command.to_string (), obj);
+    if (!query.m_field.empty ())
+    {
+        double val = query.m_obj->get (query.m_field, query.m_unitType);
+        return val;
+    }
+    return nan_val;
 }
 
 double stringBlocktoDouble (string_view block, readerInfo &ri)
@@ -328,4 +325,4 @@ double stringBlocktoDouble (string_view block, readerInfo &ri)
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

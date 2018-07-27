@@ -18,7 +18,6 @@ namespace griddyn
 class gridGrabber;
 namespace events
 {
-
 /** an event that allows undoing,  it is a grabber and event rolled into one */
 class reversibleEvent :public Event
 {
@@ -51,7 +50,6 @@ public:
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	virtual change_code undo();
 	virtual double query();
-
 };
 }//namespace events
 }//namespace griddyn

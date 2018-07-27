@@ -10,20 +10,20 @@
  * LLNS Copyright End
  */
 
+#include "../gridDynSimulation.h"
 #include "../events/Event.h"
 #include "../events/eventQueue.h"
 #include "../gridBus.h"
-#include "../gridDynSimulation.h"
 #include "../loads/gridLabDLoad.h"
 
+#include "../events/parameterOperator.h"
+#include "../solvers/solverInterface.h"
 #include "contingency.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../events/parameterOperator.h"
 #include "gridDynSimulationFileOps.h"
-#include "../solvers/solverInterface.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixData.hpp"
 #include "utilities/stringOps.h"
@@ -92,14 +92,14 @@ coreObject *gridDynSimulation::clone (coreObject *obj) const
     {
         if (solverInterfaces[kk])
         {
-			if (sim->solverInterfaces[kk])
-			{
-				solverInterfaces[kk]->cloneTo(sim->solverInterfaces[kk].get(), true);
-			}
-			else
-			{
-				sim->solverInterfaces[kk] = solverInterfaces[kk]->clone(true);
-			}
+            if (sim->solverInterfaces[kk])
+            {
+                solverInterfaces[kk]->cloneTo (sim->solverInterfaces[kk].get (), true);
+            }
+            else
+            {
+                sim->solverInterfaces[kk] = solverInterfaces[kk]->clone (true);
+            }
             sim->solverInterfaces[kk]->setSimulationData (sim);
         }
     }
@@ -307,7 +307,7 @@ int gridDynSimulation::checkNetwork (network_check_type checkType)
                         if (networkBus->Network == nn)
                         {
                             LOG_NORMAL ("Network " + std::to_string (nn) + " disconnect bus " +
-                                       std::to_string (networkBus->getUserID ()) + ":" + networkBus->getName ());
+                                        std::to_string (networkBus->getUserID ()) + ":" + networkBus->getName ());
                             networkBus->disconnect ();
                         }
                     }
@@ -533,7 +533,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
                 if (outF.is_open ())
                 {
                     outF << "Violations for " << getName () << "at "
-                         << std::to_string (static_cast<double> (getSimulationTime())) << '\n';
+                         << std::to_string (static_cast<double> (getSimulationTime ())) << '\n';
                     for (auto &v : violations)
                     {
                         outF << v.to_string () << '\n';
@@ -730,7 +730,7 @@ int gridDynSimulation::execute (const gridDynAction &cmd)
                     out = eventDrivenPowerflow (t_end, stepTime);
                 }
 
-                if (getSimulationTime() >= stopTime)
+                if (getSimulationTime () >= stopTime)
                 {
                     saveRecorders ();
                 }
@@ -1155,61 +1155,61 @@ double gridDynSimulation::get (const std::string &param, gridUnits::units_t unit
             val = stateSize (*defDAEMode);
         }
     }
-	else if (param == "vcount")
-	{
-		if (pState <= gridState_t::POWERFLOW_COMPLETE)
-		{
-			val = voltageStateCount(*defPowerFlowMode);
-		}
-		else
-		{
-			val = voltageStateCount(*defDAEMode);
-		}
-	}
-	else if (param == "acount")
-	{
-		if (pState <= gridState_t::POWERFLOW_COMPLETE)
-		{
-			val = angleStateCount(*defPowerFlowMode);
-		}
-		else
-		{
-			val = angleStateCount(*defDAEMode);
-		}
-	}
-	else if (param == "algcount")
-	{
-		if (pState <= gridState_t::POWERFLOW_COMPLETE)
-		{
-			val = algSize(*defPowerFlowMode);
-		}
-		else
-		{
-			val = algSize(*defDAEMode);
-		}
-	}
+    else if (param == "vcount")
+    {
+        if (pState <= gridState_t::POWERFLOW_COMPLETE)
+        {
+            val = voltageStateCount (*defPowerFlowMode);
+        }
+        else
+        {
+            val = voltageStateCount (*defDAEMode);
+        }
+    }
+    else if (param == "acount")
+    {
+        if (pState <= gridState_t::POWERFLOW_COMPLETE)
+        {
+            val = angleStateCount (*defPowerFlowMode);
+        }
+        else
+        {
+            val = angleStateCount (*defDAEMode);
+        }
+    }
+    else if (param == "algcount")
+    {
+        if (pState <= gridState_t::POWERFLOW_COMPLETE)
+        {
+            val = algSize (*defPowerFlowMode);
+        }
+        else
+        {
+            val = algSize (*defDAEMode);
+        }
+    }
     else if (param == "jacsize")
     {
         if (pState <= gridState_t::POWERFLOW_COMPLETE)
         {
-            val = jacSize(*defPowerFlowMode);
+            val = jacSize (*defPowerFlowMode);
         }
         else
         {
-            val = jacSize(*defDAEMode);
+            val = jacSize (*defDAEMode);
         }
     }
-	else if ((param == "diffcount")||(param=="diffsize"))
-	{
-		if (pState <= gridState_t::POWERFLOW_COMPLETE)
-		{
-			val = 0;
-		}
-		else
-		{
-			val = diffSize(*defDAEMode);
-		}
-	}
+    else if ((param == "diffcount") || (param == "diffsize"))
+    {
+        if (pState <= gridState_t::POWERFLOW_COMPLETE)
+        {
+            val = 0;
+        }
+        else
+        {
+            val = diffSize (*defDAEMode);
+        }
+    }
     else if (param == "nonzeros")
     {
         if (pState <= gridState_t::POWERFLOW_COMPLETE)
@@ -1451,7 +1451,7 @@ void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t numberN
 std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)
 {
     std::shared_ptr<SolverInterface> solveD;
-	if (isValidIndex(sMode.offsetIndex,solverInterfaces))
+    if (isValidIndex (sMode.offsetIndex, solverInterfaces))
     {
         solveD = solverInterfaces[sMode.offsetIndex];
         if (!solveD)
@@ -1468,7 +1468,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const so
 
 std::shared_ptr<const SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode) const
 {
-	if (isValidIndex(sMode.offsetIndex, solverInterfaces))
+    if (isValidIndex (sMode.offsetIndex, solverInterfaces))
     {
         return solverInterfaces[sMode.offsetIndex];
     }
@@ -1717,9 +1717,9 @@ std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const st
     {
         if ((sd) && (sd->getName () == solverName))
         {
-                return sd;
-            }
+            return sd;
         }
+    }
     return nullptr;
 }
 
@@ -1727,9 +1727,9 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
 {
     auto kIndex = sMode.offsetIndex;
     solverMode sm = sMode;
-	if (!isValidIndex(kIndex,solverInterfaces))
+    if (!isValidIndex (kIndex, solverInterfaces))
     {
-		if ((kIndex > 10000) || (kIndex < 0))
+        if ((kIndex > 10000) || (kIndex < 0))
         {
             kIndex = static_cast<index_t> (solverInterfaces.size ());
             sm.offsetIndex = kIndex;
@@ -1744,7 +1744,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
     }
 
     auto sd = solverInterfaces[kIndex];
-	assert(sd);
+    assert (sd);
     if (controlFlags[dense_solver])
     {
         sd->set ("dense", 1.0);
@@ -1752,7 +1752,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
     sd->set ("tolerance", tols.rtol);
     if ((pState >= gridState_t::INITIALIZED) && (!isDynamic (sm)))
     {
-        auto ss = stateSize (sm); 
+        auto ss = stateSize (sm);
         sd->allocate (ss, rootSize (sm));
         checkOffsets (sm);
         guessState (currentTime, sd->state_data (), nullptr, sm);
@@ -1760,7 +1760,7 @@ std::shared_ptr<SolverInterface> gridDynSimulation::updateSolver (const solverMo
     }
     else if (pState >= gridState_t::DYNAMIC_INITIALIZED)
     {
-        auto ss = stateSize (sm);  
+        auto ss = stateSize (sm);
         sd->allocate (ss, rootSize (sm));
         checkOffsets (sm);
 

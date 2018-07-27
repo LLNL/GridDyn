@@ -11,8 +11,8 @@
  */
 
 #include "elementReaderTemplates.hpp"
-#include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
+#include "formatInterpreters/readerElement.h"
 #include "readElement.h"
 #include "readerHelper.h"
 

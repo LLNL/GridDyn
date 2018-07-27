@@ -1,19 +1,19 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "grabberSource.h"
-#include "core/objectInterpreter.h"
 #include "../measurement/grabberSet.h"
 #include "core/coreObjectTemplates.hpp"
+#include "core/objectInterpreter.h"
 
 namespace griddyn
 {
@@ -22,33 +22,32 @@ namespace sources
 grabberSource::grabberSource (const std::string &objName) : rampSource (objName) {}
 grabberSource::~grabberSource () = default;
 
-coreObject *grabberSource::clone (coreObject *obj) const 
-{ 
-	auto src = cloneBase<grabberSource, Source>(this, obj);
-	if (src == nullptr)
-	{
-		return obj;
-	}
-	src->updateTarget(target);
-	src->updateField(field);
-	src->set("gain", multiplier);
-	if ((gset)&&(!src->gset))
-	{
-		src->pFlowInitializeA(prevTime, 0);
-	}
-	return src;
+coreObject *grabberSource::clone (coreObject *obj) const
+{
+    auto src = cloneBase<grabberSource, Source> (this, obj);
+    if (src == nullptr)
+    {
+        return obj;
+    }
+    src->updateTarget (target);
+    src->updateField (field);
+    src->set ("gain", multiplier);
+    if ((gset) && (!src->gset))
+    {
+        src->pFlowInitializeA (prevTime, 0);
+    }
+    return src;
 }
 
-void grabberSource::setFlag (const std::string &flag, bool val) 
+void grabberSource::setFlag (const std::string &flag, bool val)
 {
-	if (flag.empty())
-	{
-
-	}
-	else
-	{
-		Source::setFlag(flag, val);
-	}
+    if (flag.empty ())
+    {
+    }
+    else
+    {
+        Source::setFlag (flag, val);
+    }
 }
 void grabberSource::set (const std::string &param, const std::string &val)
 {
@@ -82,27 +81,26 @@ void grabberSource::set (const std::string &param, const std::string &val)
 
 void grabberSource::set (const std::string &param, double val, gridUnits::units_t unitType)
 {
-	if ((param == "gain")||(param=="multipler"))
-	{
-		multiplier = val;
-		if (gset)
-		{
-			gset->setGain(multiplier);
-		}
-	}
-	else
-	{
-		Source::set(param, val, unitType);
-	}
-   
+    if ((param == "gain") || (param == "multipler"))
+    {
+        multiplier = val;
+        if (gset)
+        {
+            gset->setGain (multiplier);
+        }
+    }
+    else
+    {
+        Source::set (param, val, unitType);
+    }
 }
 
 double grabberSource::get (const std::string &param, gridUnits::units_t unitType) const
 {
-	if (param == "multiplier")
-	{
-		return multiplier;
-	}
+    if (param == "multiplier")
+    {
+        return multiplier;
+    }
     return Source::get (param, unitType);
 }
 
@@ -110,13 +108,15 @@ void grabberSource::pFlowObjectInitializeA (coreTime /*time0*/, std::uint32_t /*
 {
     coreObject *obj = locateObject (target, this);
     gset = std::make_unique<grabberSet> (field, obj);
-	gset->setGain(multiplier);
+    gset->setGain (multiplier);
 }
 
-void grabberSource::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata & /*desiredOutput*/, IOdata &fieldSet) 
+void grabberSource::dynObjectInitializeB (const IOdata & /*inputs*/,
+                                          const IOdata & /*desiredOutput*/,
+                                          IOdata &fieldSet)
 {
-	fieldSet.resize(1);
-	fieldSet[0] = gset->grabData();
+    fieldSet.resize (1);
+    fieldSet[0] = gset->grabData ();
 }
 IOdata grabberSource::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
@@ -145,7 +145,7 @@ double grabberSource::getOutput (index_t outputNum) const
 
 double grabberSource::getDoutdt (const IOdata & /*inputs*/,
                                  const stateData & /*sD*/,
-                                 const solverMode &/*sMode*/,
+                                 const solverMode & /*sMode*/,
                                  index_t /*outputNum*/) const
 {
     return 0.0;

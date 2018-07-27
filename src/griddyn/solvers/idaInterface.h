@@ -24,12 +24,12 @@ namespace solvers
 class idaInterface : public sundialsInterface
 {
   public:
-    count_t icCount = 0; //!< the number of times the initical condition function was called
+    count_t icCount = 0;  //!< the number of times the initical condition function was called
 
   private:
     matrixDataSparse<double> a1;  //!< array structure for holding the Jacobian information
 
-    std::vector<double> tempState;  //!<temporary holding location for a state vector
+    std::vector<double> tempState;  //!< temporary holding location for a state vector
   public:
     /** @brief constructor*/
     explicit idaInterface (const std::string &objName = "ida");
@@ -41,9 +41,9 @@ class idaInterface : public sundialsInterface
     /** @brief destructor*/
     ~idaInterface ();
 
-	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
+    virtual std::unique_ptr<SolverInterface> clone (bool fullCopy = false) const override;
 
-	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
+    virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const override;
 
     virtual void allocate (count_t size, count_t numRoots = 0) override;
     void setMaxNonZeros (count_t size) override;
@@ -64,15 +64,15 @@ class idaInterface : public sundialsInterface
     friend int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
 
     friend int idaJac (realtype time,
-                             realtype cj,
-                             N_Vector state,
-                             N_Vector dstate_dt,
-                             N_Vector resid,
-                             SUNMatrix J,
-                             void *user_data,
-                             N_Vector tmp1,
-                             N_Vector tmp2,
-                             N_Vector tmp3);
+                       realtype cj,
+                       N_Vector state,
+                       N_Vector dstate_dt,
+                       N_Vector resid,
+                       SUNMatrix J,
+                       void *user_data,
+                       N_Vector tmp1,
+                       N_Vector tmp2,
+                       N_Vector tmp3);
 
     friend int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data);
 
@@ -80,7 +80,7 @@ class idaInterface : public sundialsInterface
     void loadMaskElements ();
 };
 
-}//namespace solvers
-}//namespace griddyn
+}  // namespace solvers
+}  // namespace griddyn
 
 #endif

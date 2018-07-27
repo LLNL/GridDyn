@@ -96,9 +96,8 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
 
     virtual coreTime nextTriggerTime () const override { return triggerTime; }
     virtual bool isArmed () const override { return armed; }
-    bool initNeeded () const { return initRequired; }
     event_execution_mode executionMode () const override { return event_execution_mode::normal; }
-
+    bool initNeeded () const { return initRequired; }
     virtual void set (const std::string &param, double val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void setFlag (const std::string &flag, bool val) override;
@@ -107,9 +106,9 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     virtual void setTime (coreTime time);
     /** set the value associated with a parameter change event
     @param[in] val the new value
-    @param[in] unitType the units associated with the value
+    @param[in] newUnits the units associated with the value
     */
-    virtual void setValue (double val, gridUnits::units_t unitType = gridUnits::defUnit);
+    virtual void setValue (double val, gridUnits::units_t newUnits = gridUnits::defUnit);
     /** generate a string description of the event*/
     virtual std::string to_string ();
     /** update the event target
@@ -117,16 +116,16 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     @param[in] field the new target field for the event
     @return true if the event is armed
     */
-    virtual bool setTarget (coreObject *obj, const std::string &field = "");
+    virtual bool setTarget (coreObject *gdo, const std::string &var = "");
 
-    virtual void updateObject (coreObject *obj, object_update_mode mode = object_update_mode::direct) override;
+    virtual void updateObject (coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 
     virtual coreObject *getObject () const override;
     virtual void getObjects (std::vector<coreObject *> &objects) const override;
 
   protected:
     /** update the target and field of an event*/
-    void loadField (coreObject *gdo, const std::string &field);
+    void loadField (coreObject *searchObj, const std::string &newField);
     /** run a check to see if the event can be armed*/
     virtual bool checkArmed ();
 };

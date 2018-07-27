@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -11,18 +11,17 @@
  */
 #pragma once
 
-/** 
+/**
 @file
 @brief define the simulation object itself and several helper classes and enumerations*/
-
 
 // header files
 #include "simulation/gridDynActions.h"
 #include "simulation/gridSimulation.h"
 // libraries
-#include <queue>
-#include <functional>
 #include "griddyn/griddyn-config.h"
+#include <functional>
+#include <queue>
 namespace griddyn
 {
 #define SINGLE (1)
@@ -60,12 +59,11 @@ enum gd_flags
     save_power_flow_data = 49,
     no_powerflow_error_recovery = 50,
     dae_initialization_for_partitioned = 51,
-	force_extra_powerflow=52,
-	droop_power_flow=53,
+    force_extra_powerflow = 52,
+    droop_power_flow = 53,
 };
 
 // for the status flags bitset
-
 
 // extra local flags
 enum gd_extra_flags
@@ -78,7 +76,6 @@ enum gd_extra_flags
     powerflow_saved = object_flag11,
     low_bus_voltage = object_flag12,
 };
-
 
 /** @brief helper structure for containing tolerances
  */
@@ -155,29 +152,31 @@ class gridDynSimulation : public gridSimulation
     count_t JacobianCallCount = 0;  //!< counter for the number of calls to the Jacobian function
     count_t rootCount = 0;  //!< counter for the number of roots
     count_t busCount = 0;  //!< counter for the number of buses
-    count_t linkCount = 0;  //!<counter for the number of links
+    count_t linkCount = 0;  //!< counter for the number of links
     coreTime probeStepTime = coreTime (1e-3);  //!< initial step size
     double powerAdjustThreshold = 0.01;  //!< tolerance on the power adjust step
     coreTime powerFlowStartTime =
       negTime;  //!< power flow start time  if negTime then it computes based on start time;
     struct tolerances tols;  //!< structure of the tolerances
 
-    std::string powerFlowFile;  //!<the power flow output file if any
+    std::string powerFlowFile;  //!< the power flow output file if any
     std::vector<std::shared_ptr<SolverInterface>> solverInterfaces;  //!< vector of solver data
     std::vector<const double *>
       extraStateInformation;  //!< a vector of additional state information for solveMode pairings
     std::vector<const double *>
       extraDerivInformation;  //!< a vector of additional derivative Information for solverMode pairings
-    std::vector<gridComponent *> singleStepObjects;  //!<objects which require a state update after time step
+    std::vector<gridComponent *> singleStepObjects;  //!< objects which require a state update after time step
     std::vector<gridBus *> slkBusses;  //!< vector of slack buses to aid in powerFlow adjust
     std::queue<gridDynAction> actionQueue;  //!< queue for actions for GridDyn to execute
     std::vector<std::shared_ptr<continuationSequence>> continList;  //!< set of continuation sequences to run
-	std::vector<std::function<int()>> additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the PflowInitializeA step
+    std::vector<std::function<int()>>
+      additionalPowerflowSetupFunctions;  //!< set of additional operations to execute after the PflowInitializeA
+                                          //!< step
   public:
     /** @ constructor to set the name
     @param[in] objName the name of the simulation*/
     explicit gridDynSimulation (const std::string &objName = "gridDynSim_#");
-	~gridDynSimulation();
+    ~gridDynSimulation ();
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
 
     /** @brief set a particular instantiation of the simulation object to be the master for various purposes
@@ -209,7 +208,6 @@ class gridDynSimulation : public gridSimulation
     /** @brief perform a power flow calculation
   @return in indicating success (0) or failure (non-zero)*/
     int powerflow ();
-
 
     /** @brief perform a sensitivity analysis
      this function will likely be changing as the sensitivity analysis is more developed
@@ -257,7 +255,7 @@ class gridDynSimulation : public gridSimulation
     /**@brief step the simulation until the next event or stop point
     @param[out] timeActual the actual time that was achieved
     @return int indicating success (0) or failure (non-zero)*/
-    int step (coreTime &timeActual) { return step (getSimulationTime() + stepTime, timeActual); }
+    int step (coreTime &timeActual) { return step (getSimulationTime () + stepTime, timeActual); }
 
     /**@brief step the simulation until the next event or stop point
     @return int indicating success (0) or failure (non-zero)*/
@@ -348,7 +346,8 @@ class gridDynSimulation : public gridSimulation
     @param[in] sMode the solverMode to solve for
     @return integer indicating success (0) or failure (non-zero)
     */
-    int derivativeFunction (coreTime time, const double state[], double dstate_dt[], const solverMode &sMode) noexcept;
+    int
+    derivativeFunction (coreTime time, const double state[], double dstate_dt[], const solverMode &sMode) noexcept;
 
     /** @brief compute an update to all algebraic states
      compute $x=f(\hat{x})$
@@ -423,7 +422,10 @@ class gridDynSimulation : public gridSimulation
 @param[in] sMode the solverMode to solve related to the differential state information
 @return integer indicating success (0) or failure (non-zero)
 */
-    int dynAlgebraicSolve (coreTime time, const double diffState[], const double deriv[], const solverMode &sMode) noexcept;
+    int dynAlgebraicSolve (coreTime time,
+                           const double diffState[],
+                           const double deriv[],
+                           const solverMode &sMode) noexcept;
 
     // solverMode and SolverInterface search functions
 
@@ -465,7 +467,8 @@ class gridDynSimulation : public gridSimulation
     std::shared_ptr<SolverInterface> getSolverInterface (const solverMode &sMode);
 
     /** @brief get the SolverInterface referenced by name
-    @param[in] solverName string representing the SolverInterface name,  can be customized name or a particular type
+    @param[in] solverName string representing the SolverInterface name,  can be customized name or a particular
+    type
     @return a shared pointer to a SolverInterface
     */
     std::shared_ptr<SolverInterface> getSolverInterface (const std::string &solverName);
@@ -540,9 +543,11 @@ class gridDynSimulation : public gridSimulation
     */
     void fillExtraStateData (stateData &sD, const solverMode &sMode) const;
     /** @brief add an initialization function that will execute prior to the internal initialization in HELICS
-    @param fptr a function object that returns an int.  if the value is non-zero it returns a failure the initialization will halt
+    @param fptr a function object that returns an int.  if the value is non-zero it returns a failure the
+    initialization will halt
     */
-	void addInitOperation(std::function<int()> fptr);
+    void addInitOperation (std::function<int()> fptr);
+
   protected:
     /** @brief makes sure the specified mode has the correct offsets
     @param[in] sMode the solverMode of the offsets to check
@@ -558,8 +563,8 @@ class gridDynSimulation : public gridSimulation
     std::shared_ptr<SolverInterface> updateSolver (const solverMode &sMode);
 
     /** @brief get a pointer to a solverMode based on a string
-    @param[in] solverType the string representing the solverMode, this can be a particular type of solverMode or the name
-    of a solver
+    @param[in] solverType the string representing the solverMode, this can be a particular type of solverMode or
+    the name of a solver
     @return the solverMode named by the string or a blank one if none can be found
     */
     const solverMode *getSolverModePtr (const std::string &solverType) const;
@@ -633,7 +638,6 @@ class gridDynSimulation : public gridSimulation
     */
     int generateDaeDynamicInitialConditions (const solverMode &sMode);
 
-
     /** @brief generate a convergent partitioned solution
     @param[in] sModeAlg the solver mode of the algebraic solver
     @param[in] sModeDiff  the solver mode of the differential solver
@@ -641,16 +645,16 @@ class gridDynSimulation : public gridSimulation
     */
     int generatePartitionedDynamicInitialConditions (const solverMode &sModeAlg, const solverMode &sModeDiff);
 
-	/** @brief load the offset codes for the objects
-	@param[in] sMode the solvermode to setup the offsets for
-	@param[in] offsetOrdering the type of ordering to use
-	*/
+    /** @brief load the offset codes for the objects
+    @param[in] sMode the solvermode to setup the offsets for
+    @param[in] offsetOrdering the type of ordering to use
+    */
     virtual void setupOffsets (const solverMode &sMode, offset_ordering offsetOrdering);
 
     /** @brief function to help with IDA solving steps
-	@param[in] retval the return code from the solver
-	@param[in] timeActual the actual time returned
-	@param[in] dynData the SolverInterface currently in use
+    @param[in] retval the return code from the solver
+    @param[in] timeActual the actual time returned
+    @param[in] dynData the SolverInterface currently in use
      */
     void handleEarlySolverReturn (int retval, coreTime timeActual, std::shared_ptr<SolverInterface> &dynData);
 
@@ -676,7 +680,6 @@ class gridDynSimulation : public gridSimulation
     */
     bool checkEventsForDynamicReset (coreTime cTime, const solverMode &sMode);
 
-
   private:
     void setupDynamicDAE ();
     void setupDynamicPartitioned ();
@@ -686,10 +689,9 @@ class gridDynSimulation : public gridSimulation
                                              std::shared_ptr<SolverInterface> &dynDataAlg,
                                              const solverMode &sModeDiff,
                                              const solverMode &sModeAlg);
-    int
-    runDynamicSolverStep (std::shared_ptr<SolverInterface> &dynData, coreTime nextStop, coreTime &timeActual);
+    int runDynamicSolverStep (std::shared_ptr<SolverInterface> &dynData, coreTime nextStop, coreTime &timeActual);
 
-    static std::atomic<gridDynSimulation *>s_instance;  //!< static variable to set the master simulation instance
+    static std::atomic<gridDynSimulation *> s_instance;  //!< static variable to set the master simulation instance
 };
 
-}//namespace griddyn
+}  // namespace griddyn

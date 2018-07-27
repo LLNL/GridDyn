@@ -13,12 +13,12 @@
 // headers
 #include "acLine.h"
 #include "../Area.h"
+#include "../gridBus.h"
+#include "../simulation/contingency.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../gridBus.h"
-#include "../simulation/contingency.h"
 #include "utilities/matrixDataCompact.hpp"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
@@ -295,7 +295,7 @@ void acLine::set (const std::string &param, double val, units_t unitType)
         return;
     }
     std::string outparam;
-    stringOps::trailingStringInt(param, outparam, 1);
+    stringOps::trailingStringInt (param, outparam, 1);
     if (outparam == "length")
     {
         length = unitConversionDistance (val, unitType, km);
@@ -384,7 +384,7 @@ double acLine::get (const std::string &param, units_t unitType) const
         return val;
     }
     std::string outparam;
-    stringOps::trailingStringInt(param, outparam, 1);
+    stringOps::trailingStringInt (param, outparam, 1);
     if (outparam == "impedance")
     {
         val = std::hypot (r, x);

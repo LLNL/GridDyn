@@ -13,26 +13,25 @@
 
 #include "eventAdapters.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <mutex>
-#include <algorithm>
 namespace griddyn
 {
 class coreObject;
 
 /** @brief class implementing a discrete event queue for a continuous time simulation
  the time check on events includes a tolerance to allow for numerical error in the execution of events
-the event queue works with event adapters which allow for two part execution of some events including a potential delay between
-parts A and B
-the class also includes a null event which does nothing but can be called periodically.
+the event queue works with event adapters which allow for two part execution of some events including a potential
+delay between parts A and B the class also includes a null event which does nothing but can be called periodically.
 */
 class eventQueue
 {
 private:
-
   coreTime timeTols = kSmallTime;  //!< the temporal tolerance on events
   std::vector<std::shared_ptr<eventAdapter>> events; //!< storage location for events
-  std::vector <std::shared_ptr<eventAdapter>> partB_list;  //!< container for immediate events awaiting part B execution
+    std::vector<std::shared_ptr<eventAdapter>>
+      partB_list;  //!< container for immediate events awaiting part B execution
   std::shared_ptr<eventAdapter> nullEvent; //!< nullEvent operation for scheduling of the null event
   mutable std::mutex queuelock_;  //!< a mutex to protect the queue in case of multi-threaded event insertions
 public:
@@ -43,7 +42,8 @@ public:
   virtual ~eventQueue();
 
   /** @brief insert an eventAdapter into the queue
-  take as an input a shared pointer to an object that implements an event interface and makes an eventAdapter out of it
+    take as an input a shared pointer to an object that implements an event interface and makes an eventAdapter out
+    of it
   @arg newEvent  a shared pointer to the eventAdapter object
   @return the event ID of the event adapter
   */
@@ -71,7 +71,8 @@ public:
   }
 
   /** @brief insert an event into the queue
-   take as an input a shared pointer to an object that implements an event interface and makes an eventAdapter out of it
+     take as an input a shared pointer to an object that implements an event interface and makes an eventAdapter
+    out of it
   @tparam X X is a subclass of an eventInterface object
   @arg newEventObject  a pointer to the event object being inserted
   @return the event ID of the newly created event adapter
@@ -79,11 +80,10 @@ public:
   template< class X>
   auto insert (std::shared_ptr<X> newEventObject)
   {
-    auto ev = std::shared_ptr<eventAdapter>(std::make_unique < eventTypeAdapter < std::shared_ptr<X> >> (std::move(newEventObject)));
+        auto ev = std::shared_ptr<eventAdapter> (
+          std::make_unique<eventTypeAdapter<std::shared_ptr<X>>> (std::move (newEventObject)));
     return insert(std::move(ev));
   }
-
-
 
   /** @brief get the next event time
         @return the next Event time
@@ -119,8 +119,8 @@ public:
   */
   virtual change_code executeEventsAonly (coreTime cTime);
 
-  /** @brief Execute second portion of any events where the A portion (could be skipped) was executed by a call to
-  execute A Events only
+    /** @brief Execute second portion of any events where the A portion (could be skipped) was executed by a call
+    to execute A Events only
   @return code describing the effect of the executed events
   */
   virtual change_code executeEventsBonly ();
@@ -148,7 +148,8 @@ public:
   virtual void set (const std::string &param, double val);
 
   /** @brief set the null event time
-   the null event is an event that does nothing setting this time is a way to mark events that can't be described by an event Adapter
+     the null event is an event that does nothing setting this time is a way to mark events that can't be described
+    by an event Adapter
   @param[in] time the time for the null event
   @param[in] period the period of the null event
   */
@@ -156,13 +157,13 @@ public:
 
   /** @brief get the time for the next Null Event*/
   coreTime getNullEventTime () const;
+
   private:
 	  /** @brief check for duplicate events and remove the duplicate
 	  this is important for removing duplicate coreObject events so we don't have two of those being executed
 	  which could cause all sorts of issues with the simulation
 	  */
 	  virtual void checkDuplicates();
-
 };
 
 }//namespace griddyn

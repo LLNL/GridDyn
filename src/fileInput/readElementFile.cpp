@@ -16,10 +16,10 @@
 #include "elementReaderTemplates.hpp"
 #include "griddyn/gridDynSimulation.h"
 #include "readerHelper.h"
-#include <sstream>
-#include <boost/filesystem.hpp>
 #include "utilities/gridRandom.h"
 #include "utilities/stringConversion.h"
+#include <sstream>
+#include <boost/filesystem.hpp>
 
 namespace griddyn
 {
@@ -41,7 +41,7 @@ void loadElementInformation (coreObject *obj,
     readImports (element, ri, obj, true);
 }
 
-void checkForEndUnits(gridParameter &param, const std::string &paramStr);
+void checkForEndUnits (gridParameter &param, const std::string &paramStr);
 
 static const std::string importString ("import");
 void readImports (std::shared_ptr<readerElement> &element,
@@ -55,7 +55,7 @@ void readImports (std::shared_ptr<readerElement> &element,
     }
 
     // run any source files
-    auto bflags = ri.getFlags();
+    auto bflags = ri.getFlags ();
     element->bookmark ();
     element->moveToFirstChild (importString);
     while (element->isValid ())
@@ -115,7 +115,7 @@ void readImports (std::shared_ptr<readerElement> &element,
         }
         std::swap (prefix, ri.prefix);
 
-        ri.setAllFlags(bflags);
+        ri.setAllFlags (bflags);
         element->moveToNextSibling (importString);  // next import file
     }
     element->restore ();
@@ -161,10 +161,10 @@ gridUnits::units_t readUnits (const std::shared_ptr<readerElement> &element, con
 
 static const std::string valueString ("value");
 
-gridParameter getElementParam(const std::shared_ptr<readerElement> &element)
+gridParameter getElementParam (const std::shared_ptr<readerElement> &element)
 {
     gridParameter P;
-    getElementParam(element, P);
+    getElementParam (element, P);
     return P;
 }
 
@@ -202,7 +202,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
             param.value = element->getAttributeValue (valueString);
             if (param.value == readerNullVal)
             {
-                checkForEndUnits(param, element->getAttributeText(valueString));
+                checkForEndUnits (param, element->getAttributeText (valueString));
             }
             else
             {
@@ -214,7 +214,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
             param.value = element->getValue ();
             if (param.value == readerNullVal)
             {
-                checkForEndUnits(param, element->getText());
+                checkForEndUnits (param, element->getText ());
             }
             else
             {
@@ -238,7 +238,7 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
         param.value = element->getValue ();
         if (param.value == readerNullVal)
         {
-            checkForEndUnits(param, element->getText());
+            checkForEndUnits (param, element->getText ());
         }
         else
         {
@@ -248,13 +248,13 @@ void getElementParam (const std::shared_ptr<readerElement> &element, gridParamet
     param.valid = true;
 }
 
-void checkForEndUnits(gridParameter &param, const std::string &paramStr)
+void checkForEndUnits (gridParameter &param, const std::string &paramStr)
 {
-    double val = numeric_conversion(paramStr, readerNullVal);
+    double val = numeric_conversion (paramStr, readerNullVal);
     if (val != readerNullVal)
     {
-        auto N = paramStr.find_last_of("012345689. )]");
-        auto Unit = gridUnits::getUnits(paramStr.substr(N + 1));
+        auto N = paramStr.find_last_of ("012345689. )]");
+        auto Unit = gridUnits::getUnits (paramStr.substr (N + 1));
         if (Unit != gridUnits::defUnit)
         {
             param.value = val;
@@ -262,7 +262,6 @@ void checkForEndUnits(gridParameter &param, const std::string &paramStr)
             param.stringType = false;
             return;
         }
-
     }
     param.strVal = paramStr;
     param.stringType = true;
@@ -312,14 +311,15 @@ void objSetAttributes (coreObject *obj,
             continue;
         }
 
-        if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
+        if ((fieldName.find ("file") != std::string::npos) || (fieldName == "fmu"))
         {
             std::string strVal = att.getText ();
             ri.checkFileParam (strVal);
             gridParameter po (fieldName, strVal);
             objectParameterSet (component, obj, po);
         }
-        else if ((fieldName.find ("workdir") != std::string::npos) || (fieldName.find ("directory") != std::string::npos))
+        else if ((fieldName.find ("workdir") != std::string::npos) ||
+                 (fieldName.find ("directory") != std::string::npos))
         {
             std::string strVal = att.getText ();
             ri.checkDirectoryParam (strVal);
@@ -328,14 +328,14 @@ void objSetAttributes (coreObject *obj,
         }
         else if ((fieldName == "flag") || (fieldName == "flags"))  // read the flags parameter
         {
-                try
-                {
-                    setMultipleFlags(obj, att.getText());
-                }
-                catch (const unrecognizedParameter &)
-                {
-                    WARNPRINT (READER_WARN_ALL, "unrecognized flag " << att.getText() << "\n");
-                }
+            try
+            {
+                setMultipleFlags (obj, att.getText ());
+            }
+            catch (const unrecognizedParameter &)
+            {
+                WARNPRINT (READER_WARN_ALL, "unrecognized flag " << att.getText () << "\n");
+            }
         }
         else
         {
@@ -363,7 +363,6 @@ void paramLoopElement (coreObject *obj,
                        readerInfo &ri,
                        const IgnoreListType &ignoreList)
 {
-
     element->moveToFirstChild ();
     while (element->isValid ())
     {
@@ -387,12 +386,12 @@ void paramLoopElement (coreObject *obj,
             continue;
         }
         // get all the parameter fields
-        auto param=getElementParam (element);
+        auto param = getElementParam (element);
         if (param.valid)
         {
             if (param.stringType)
             {
-                if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
+                if ((param.field.find ("file") != std::string::npos) || (param.field == "fmu"))
                 {
                     ri.checkFileParam (param.strVal);
                     objectParameterSet (component, obj, param);
@@ -408,11 +407,11 @@ void paramLoopElement (coreObject *obj,
                     paramStringProcess (param, ri);
                     try
                     {
-                        setMultipleFlags(obj, param.strVal);
+                        setMultipleFlags (obj, param.strVal);
                     }
                     catch (const unrecognizedParameter &)
                     {
-                        WARNPRINT(READER_WARN_ALL, "unrecognized flag in " <<param.strVal << "\n");
+                        WARNPRINT (READER_WARN_ALL, "unrecognized flag in " << param.strVal << "\n");
                     }
                 }
                 else
@@ -458,14 +457,13 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & 
             {
                 try
                 {
-                    auto seed = std::stoll(cfgAtt.getText());
-                    utilities::gridRandom::setSeed(seed);
+                    auto seed = std::stoll (cfgAtt.getText ());
+                    utilities::gridRandom::setSeed (seed);
                 }
                 catch (const std::invalid_argument &)
                 {
-                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                    WARNPRINT (READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
                 }
-
             }
             cfgAtt = sim->getNextAttribute ();
         }
@@ -490,14 +488,13 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & 
             {
                 try
                 {
-                    auto seed = std::stoll(cfgAtt.getText());
-                    utilities::gridRandom::setSeed(seed);
+                    auto seed = std::stoll (cfgAtt.getText ());
+                    utilities::gridRandom::setSeed (seed);
                 }
                 catch (const std::invalid_argument &)
                 {
-                    WARNPRINT(READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
+                    WARNPRINT (READER_WARN_IMPORTANT, "invalid seed value, must be an integer");
                 }
-
             }
             sim->moveToNextSibling ();
         }
@@ -527,7 +524,7 @@ void setAttributes (helperObject *obj,
         }
         try
         {
-            if ((fieldName.find ("file") != std::string::npos)||(fieldName=="fmu"))
+            if ((fieldName.find ("file") != std::string::npos) || (fieldName == "fmu"))
             {
                 std::string strVal = att.getText ();
                 ri.checkFileParam (strVal);
@@ -537,7 +534,7 @@ void setAttributes (helperObject *obj,
             else
             {
                 double val = att.getValue ();
-                if ((val != readerNullVal)&&(val!=kNullVal))
+                if ((val != readerNullVal) && (val != kNullVal))
                 {
                     LEVELPRINT (READER_VERBOSE_PRINT, component << ": setting " << fieldName << " to " << val);
                     obj->set (fieldName, val);
@@ -594,14 +591,14 @@ void setParams (helperObject *obj,
             continue;
         }
 
-        auto param=getElementParam (element);
+        auto param = getElementParam (element);
         if (param.valid)
         {
             try
             {
                 if (param.stringType)
                 {
-                    if ((param.field.find ("file") != std::string::npos)||(param.field=="fmu"))
+                    if ((param.field.find ("file") != std::string::npos) || (param.field == "fmu"))
                     {
                         ri.checkFileParam (param.strVal);
                         LEVELPRINT (READER_VERBOSE_PRINT,
@@ -655,4 +652,4 @@ void setParams (helperObject *obj,
     element->moveToParent ();
 }
 
-}//namespace griddyn
+}  // namespace griddyn
