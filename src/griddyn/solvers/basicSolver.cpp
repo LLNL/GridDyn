@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "basicSolver.h"
 
@@ -32,23 +32,23 @@ basicSolver::basicSolver (gridDynSimulation *gds, const solverMode &sMode)
     mode.algebraic = true;
 }
 
-std::unique_ptr<SolverInterface> basicSolver::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> basicSolver::clone (bool fullCopy) const
 {
-	std::unique_ptr<SolverInterface> si = std::make_unique<basicSolver>();
-	basicSolver::cloneTo(si.get(),fullCopy);
-	return si;
+    std::unique_ptr<SolverInterface> si = std::make_unique<basicSolver> ();
+    basicSolver::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
-void basicSolver::cloneTo(SolverInterface *si, bool fullCopy) const
+void basicSolver::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-	SolverInterface::cloneTo(si, fullCopy);
-	auto ai = dynamic_cast<basicSolver *>(si);
-	if (ai == nullptr)
-	{
-		return;
-	}
-	ai->algorithm = algorithm;
-	ai->alpha = alpha;
+    SolverInterface::cloneTo (si, fullCopy);
+    auto ai = dynamic_cast<basicSolver *> (si);
+    if (ai == nullptr)
+    {
+        return;
+    }
+    ai->algorithm = algorithm;
+    ai->alpha = alpha;
 }
 
 double *basicSolver::state_data () noexcept { return state.data (); }

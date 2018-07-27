@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,12 +8,12 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "GenModelGENROU.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../Generator.h"
 #include "../gridBus.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectorOps.hpp"
 
@@ -322,5 +322,5 @@ void GenModelGENROU::jacobianElements (const IOdata &inputs,
 static const stringVec genModelGenRouNames{"id", "iq", "delta", "freq", "edp", "eqp", "psid", "psiq"};
 
 stringVec GenModelGENROU::localStateNames () const { return genModelGenRouNames; }
-}//namespace genmodels
-}//namespace griddyn
+}  // namespace genmodels
+}  // namespace griddyn

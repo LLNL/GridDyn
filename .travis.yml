@@ -72,7 +72,7 @@ jobs:
         - MATRIX_EVAL="COMPILER=gcc && CC=gcc-6 && CXX=g++-6"
         # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
         #   via the "travis encrypt" command using the project repo's public key
-        - secure: "pbj3KbIyknUxBKySwaEZiIHxGFH6UKTj1xjLNhWlfFWmyHzlMaA7tfm4QkXGoFJojckwMX6sGGyXjgM1H8BFRICPzMjilCkrOWVhm9ZcoE1uNorqx4MxwfqGnMjERAHjDd0wiKwoiDUI0vSyPV7ms4KoNoWXr8sGRF1zvOjWHkkJwdLlnyr/lp6iSmLldF9WXd/jM31msI1b8QKoI5jbgRFYA4Ys/Qjl516ng+YKHP3lQD0z3qFGKpe/cKB0bnIc66rQRNOBsX4T/eRcQ5kMRcyDX3xWI4+gbbSKtVEvoZlvnLL8ANy+BcSjrdHQBjhQ7SZsvm68eMK+hRoGyH2KTHEYcogWxpv0l6ZfIalOdIaYnR2Yx4vWZ0xRf3UleIcELDI/6oTYiWjVV2PQqdvRlwI52/1zSSc2qgsifJuPCME/g7tiQarjCT603/icmsKtn9mVq2dMN9YPEcmrh07gjPsQMk0YynQugvC8TBwabV0ptwZf+V+yj5SexdptMK1CrccusMml2jr114cxRenDEKNrfyTwN6UZhmf/ll1EZ3AKOHI+xdm2UUgzZBWQvRbnkZ7EInuU/3/AmKUpFpiVsQfIYeSSj/nLAtbgfKw1ncNSo65uW4Oo8z1QbGTrvfwBE7roJAL1oSqT+exydyte5EgflUVfvi/wNrD37GcU5X0=" 
+        - secure: "pbj3KbIyknUxBKySwaEZiIHxGFH6UKTj1xjLNhWlfFWmyHzlMaA7tfm4QkXGoFJojckwMX6sGGyXjgM1H8BFRICPzMjilCkrOWVhm9ZcoE1uNorqx4MxwfqGnMjERAHjDd0wiKwoiDUI0vSyPV7ms4KoNoWXr8sGRF1zvOjWHkkJwdLlnyr/lp6iSmLldF9WXd/jM31msI1b8QKoI5jbgRFYA4Ys/Qjl516ng+YKHP3lQD0z3qFGKpe/cKB0bnIc66rQRNOBsX4T/eRcQ5kMRcyDX3xWI4+gbbSKtVEvoZlvnLL8ANy+BcSjrdHQBjhQ7SZsvm68eMK+hRoGyH2KTHEYcogWxpv0l6ZfIalOdIaYnR2Yx4vWZ0xRf3UleIcELDI/6oTYiWjVV2PQqdvRlwI52/1zSSc2qgsifJuPCME/g7tiQarjCT603/icmsKtn9mVq2dMN9YPEcmrh07gjPsQMk0YynQugvC8TBwabV0ptwZf+V+yj5SexdptMK1CrccusMml2jr114cxRenDEKNrfyTwN6UZhmf/ll1EZ3AKOHI+xdm2UUgzZBWQvRbnkZ7EInuU/3/AmKUpFpiVsQfIYeSSj/nLAtbgfKw1ncNSo65uW4Oo8z1QbGTrvfwBE7roJAL1oSqT+exydyte5EgflUVfvi/wNrD37GcU5X0="
     # XCode 8gm, OS X 10.11
     - <<: *osx_base
       env:
@@ -205,7 +205,7 @@ install:
   - if [[ "$ENABLE_FMI" ]]; then OPTION_FLAGS_ARR+=("-DBUILD_SHARED_FMI_LIBRARY=ON") ; else OPTION_FLAGS_ARR+=("-DFMI_ENABLE=OFF") ; fi
   - if [[ "$BUILD_TYPE" ]]; then OPTION_FLAGS_ARR+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}") ; fi
   - if [[ "$BUILD_TYPE" == "Coverage" ]]; then OPTION_FLAGS_ARR+=("-DTEST_CODE_COVERAGE=ON") ; fi
-  
+
   - source scripts/install-ci-dependencies.sh
   - GRIDDYN_DEPENDENCY_FLAGS+=" -DBOOST_INSTALL_PATH=${CI_DEPENDENCY_DIR}/boost"
   - if [[ "$BUILD_TYPE" == "Coverage" ]]; then pip install --user cpp-coveralls ; fi
@@ -224,10 +224,10 @@ install:
   - if [[ "$NO_CTEST" ]]; then TEST_FLAGS_ARR+=("--no-ctest") ; fi
   - if [[ "$DISABLE_CI_TESTS" ]]; then TEST_FLAGS_ARR+=("--disable-unit-tests") ; fi
   - export CI_TEST_FLAGS=${TEST_FLAGS_ARR[@]}
- 
+
 before_script:
   - mkdir -p build && cd build
- 
+
 script:
   - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
   - cmake --build . -- -j2
@@ -243,4 +243,3 @@ script:
 
 notifications:
     email: false
-

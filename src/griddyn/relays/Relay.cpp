@@ -10,27 +10,27 @@
  * LLNS Copyright End
  */
 
-#include "breaker.h"
-#include "busRelay.h"
 #include "../comms/Communicator.h"
 #include "../comms/relayMessage.h"
+#include "../events/Event.h"
+#include "../events/eventAdapters.h"
+#include "../measurement/Condition.h"
+#include "../measurement/gridGrabbers.h"
+#include "../measurement/objectGrabbers.h"
+#include "../measurement/stateGrabber.h"
+#include "breaker.h"
+#include "busRelay.h"
 #include "controlRelay.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/propertyBuffer.h"
 #include "differentialRelay.h"
-#include "../events/Event.h"
-#include "../events/eventAdapters.h"
 #include "fuse.h"
 #include "loadRelay.h"
-#include "../measurement/Condition.h"
-#include "../measurement/gridGrabbers.h"
-#include "../measurement/stateGrabber.h"
 #include "pmu.h"
 #include "utilities/stringConversion.h"
 #include "zonalRelay.h"
-#include "../measurement/objectGrabbers.h"
 #include <stdexcept>
 #include <boost/format.hpp>
 
@@ -80,7 +80,7 @@ coreObject *Relay::clone (coreObject *obj) const
         }
         else
         {
-            conditions[kk]->cloneTo (nobj->conditions[kk].get());
+            conditions[kk]->cloneTo (nobj->conditions[kk].get ());
         }
     }
     // clone the actions
@@ -93,7 +93,7 @@ coreObject *Relay::clone (coreObject *obj) const
         }
         else
         {
-            actions[kk]->cloneTo (nobj->actions[kk].get());
+            actions[kk]->cloneTo (nobj->actions[kk].get ());
         }
     }
     // clone everything else
@@ -134,7 +134,7 @@ void Relay::add (std::shared_ptr<Condition> gc)
     conditions.push_back (std::move (gc));
     actionTriggers.resize (conditions.size ());
     actionDelays.resize (
-      conditions.size ());  //!<the periods of time in which the condition must be true for an action to occur
+      conditions.size ());  //!< the periods of time in which the condition must be true for an action to occur
     cStates.resize (conditions.size (), condition_status_t::active);  //!< a vector of states for the conditions
     conditionTriggerTimes.resize (conditions.size ());  //!< the times at which the condition triggered
     multiConditionTriggers.resize (conditions.size ());
@@ -159,12 +159,12 @@ void Relay::setActionTrigger (index_t actionNumber, index_t conditionNumber, cor
 {
     if (conditionNumber >= static_cast<index_t> (conditions.size ()))
     {
-		LOG_WARNING("attempted set of invalid conditonNumber");
+        LOG_WARNING ("attempted set of invalid conditonNumber");
         return;
     }
     if (actionNumber >= static_cast<index_t> (actions.size ()))
     {
-		LOG_WARNING("attempted set of invaid actionNumber");
+        LOG_WARNING ("attempted set of invaid actionNumber");
         return;
     }
     // search for an existing entry
@@ -204,67 +204,67 @@ void Relay::setResetMargin (index_t conditionNumber, double margin)
 
 void Relay::setConditionStatus (index_t conditionNumber, condition_status_t newStatus)
 {
-	if (!isValidIndex(conditionNumber,conditions))
+    if (!isValidIndex (conditionNumber, conditions))
     {
         return;
     }
     cStates[conditionNumber] = newStatus;
-	switch (newStatus)
-	{
-	case condition_status_t::disabled:
-		clearCondChecks(conditionNumber);
-		break;
-	case condition_status_t::active:
-		conditions[conditionNumber]->useMargin(false);
-		break;
-	case condition_status_t::triggered:
-		conditions[conditionNumber]->useMargin(true);
-		break;
-	default:
-		break;
-	}
+    switch (newStatus)
+    {
+    case condition_status_t::disabled:
+        clearCondChecks (conditionNumber);
+        break;
+    case condition_status_t::active:
+        conditions[conditionNumber]->useMargin (false);
+        break;
+    case condition_status_t::triggered:
+        conditions[conditionNumber]->useMargin (true);
+        break;
+    default:
+        break;
+    }
     updateRootCount (true);
 }
 
 double Relay::getConditionValue (index_t conditionNumber) const
 {
-	if (isValidIndex(conditionNumber,conditions))
+    if (isValidIndex (conditionNumber, conditions))
     {
-		return conditions[conditionNumber]->getVal(1);
+        return conditions[conditionNumber]->getVal (1);
     }
 
-	return kNullVal;
+    return kNullVal;
 }
 
 double Relay::getConditionValue (index_t conditionNumber, const stateData &sD, const solverMode &sMode) const
 {
-	if (isValidIndex(conditionNumber, conditions))
-	{
-		return conditions[conditionNumber]->getVal(1, sD, sMode);
+    if (isValidIndex (conditionNumber, conditions))
+    {
+        return conditions[conditionNumber]->getVal (1, sD, sMode);
     }
-	return kNullVal;
+    return kNullVal;
 }
 
 bool Relay::checkCondition (index_t conditionNumber) const
 {
-	if (isValidIndex(conditionNumber, conditions))
-	{
-		return conditions[conditionNumber]->checkCondition();
-	}
-	return false;
+    if (isValidIndex (conditionNumber, conditions))
+    {
+        return conditions[conditionNumber]->checkCondition ();
+    }
+    return false;
 }
 
 void Relay::setConditionLevel (index_t conditionNumber, double levelVal)
 {
-	if (isValidIndex(conditionNumber, conditions))
-	{
+    if (isValidIndex (conditionNumber, conditions))
+    {
         conditions[conditionNumber]->setConditionRHS (levelVal);
     }
 }
 
 Relay::condition_status_t Relay::getConditionStatus (index_t conditionNumber)
 {
-	if (isValidIndex(conditionNumber, conditions))
+    if (isValidIndex (conditionNumber, conditions))
     {
         return cStates[conditionNumber];
     }
@@ -300,7 +300,7 @@ void Relay::removeAction (index_t actionNumber)
 
 std::shared_ptr<Condition> Relay::getCondition (index_t conditionNumber)
 {
-	if (isValidIndex(conditionNumber, conditions))
+    if (isValidIndex (conditionNumber, conditions))
     {
         return conditions[conditionNumber];
     }
@@ -309,7 +309,7 @@ std::shared_ptr<Condition> Relay::getCondition (index_t conditionNumber)
 
 std::shared_ptr<eventAdapter> Relay::getAction (index_t actionNumber)
 {
-	if (isValidIndex(actionNumber, actions))
+    if (isValidIndex (actionNumber, actions))
     {
         return actions[actionNumber];
     }
@@ -318,32 +318,31 @@ std::shared_ptr<eventAdapter> Relay::getAction (index_t actionNumber)
 
 void Relay::updateAction (std::shared_ptr<Event> ge, index_t actionNumber)
 {
-	if (isValidIndex(actionNumber, actions))
-	{
-		actions[actionNumber] = std::make_shared<eventTypeAdapter<std::shared_ptr<Event>>>(std::move(ge));
-	}
-	else
-	{
+    if (isValidIndex (actionNumber, actions))
+    {
+        actions[actionNumber] = std::make_shared<eventTypeAdapter<std::shared_ptr<Event>>> (std::move (ge));
+    }
+    else
+    {
         throw (invalidParameterValue ("actionNumber"));
     }
-
 }
 
 void Relay::updateAction (std::shared_ptr<eventAdapter> geA, index_t actionNumber)
 {
-	if (isValidIndex(actionNumber, actions))
-	{
-		actions[actionNumber] = std::move(geA);
-	}
-	else
-	{
-		throw (invalidParameterValue("actionNumber"));
-	}
+    if (isValidIndex (actionNumber, actions))
+    {
+        actions[actionNumber] = std::move (geA);
+    }
+    else
+    {
+        throw (invalidParameterValue ("actionNumber"));
+    }
 }
 
 void Relay::updateCondition (std::shared_ptr<Condition> gc, index_t conditionNumber)
 {
-	if (!isValidIndex(conditionNumber, conditions))
+    if (!isValidIndex (conditionNumber, conditions))
     {
         throw (invalidParameterValue ("conditionNumber"));
     }
@@ -359,12 +358,13 @@ void Relay::set (const std::string &param, const std::string &val)
 {
     if (param == "condition")
     {
-        add (std::shared_ptr<Condition> (make_condition (val, (m_sourceObject!=nullptr) ? m_sourceObject : getParent ())));
+        add (std::shared_ptr<Condition> (
+          make_condition (val, (m_sourceObject != nullptr) ? m_sourceObject : getParent ())));
     }
     else if (param == "action")
     {
         bool isAlarm = false;
-        if ((val.front() == 'a') || (val.front() == 'A'))
+        if ((val.front () == 'a') || (val.front () == 'A'))
         {
             auto e = make_alarm (val);
             if (e)
@@ -375,7 +375,8 @@ void Relay::set (const std::string &param, const std::string &val)
         }
         if (!isAlarm)
         {
-            add (std::shared_ptr<Event> (make_event (val, (m_sinkObject!=nullptr) ? m_sinkObject : getParent ())));
+            add (
+              std::shared_ptr<Event> (make_event (val, (m_sinkObject != nullptr) ? m_sinkObject : getParent ())));
         }
     }
     else
@@ -416,16 +417,15 @@ void Relay::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-
-double Relay::get(const std::string &param, gridUnits::units_t unitType) const
+double Relay::get (const std::string &param, gridUnits::units_t unitType) const
 {
-	auto fptr = getObjectFunction(this, param);
-	if (fptr.first)
-	{
-		coreObject *tobj = const_cast<Relay*>(this);
-		return unitConversion(fptr.first(tobj), fptr.second, unitType, systemBasePower);
-	}
-	return gridPrimary::get(param, unitType);
+    auto fptr = getObjectFunction (this, param);
+    if (fptr.first)
+    {
+        coreObject *tobj = const_cast<Relay *> (this);
+        return unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
+    }
+    return gridPrimary::get (param, unitType);
 }
 
 void Relay::setFlag (const std::string &flag, bool val)
@@ -631,7 +631,7 @@ void Relay::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
             }
         }
     }
-	gridComponent::dynObjectInitializeA(time0, flags);
+    gridComponent::dynObjectInitializeA (time0, flags);
 }
 
 coreObject *Relay::find (const std::string &objName) const
@@ -657,7 +657,7 @@ coreObject *Relay::find (const std::string &objName) const
 
 change_code Relay::triggerAction (index_t actionNumber)
 {
-	if (isValidIndex(actionNumber, actions))
+    if (isValidIndex (actionNumber, actions))
     {
         return executeAction (actionNumber, kNullLocation, prevTime);
     }
@@ -698,7 +698,7 @@ void Relay::updateRootCount (bool alertChange)
             opFlags.reset (has_alg_roots);
             opFlags.reset (has_roots);
         }
-		offsets.rootUnload(true);
+        offsets.rootUnload (true);
         if (alertChange)
         {
             alert (this, ROOT_COUNT_CHANGE);
@@ -749,7 +749,7 @@ void Relay::rootTrigger (coreTime time,
     {
         if (cStates[conditionToCheck] == condition_status_t::active)
         {
-            if (rootMask[ro]!=0)
+            if (rootMask[ro] != 0)
             {
                 triggerCondition (conditionToCheck, time, timeZero);
             }
@@ -757,7 +757,7 @@ void Relay::rootTrigger (coreTime time,
         }
         else if ((cStates[conditionToCheck] == condition_status_t::triggered) && (opFlags[resettable_flag]))
         {
-            if (rootMask[ro]!=0)
+            if (rootMask[ro] != 0)
             {
                 cStates[conditionToCheck] = condition_status_t::active;
                 conditions[conditionToCheck]->useMargin (false);
@@ -844,7 +844,7 @@ void Relay::sendAlarm (std::uint32_t code)
     if (commLink)
     {
         auto m = std::make_shared<comms::relayMessage> (comms::relayMessage::ALARM_TRIGGER_EVENT, code);
-        cManager.send (std::move(m));
+        cManager.send (std::move (m));
         return;
     }
     throw (executionFailure (this, "no communication link"));
@@ -1052,11 +1052,11 @@ void Relay::updateObject (coreObject *obj, object_update_mode mode)
 {
     if (mode == object_update_mode::direct)
     {
-        if (m_sourceObject!=nullptr)
+        if (m_sourceObject != nullptr)
         {
             setSource (obj);
         }
-        if (m_sinkObject!=nullptr)
+        if (m_sinkObject != nullptr)
         {
             setSink (obj);
         }

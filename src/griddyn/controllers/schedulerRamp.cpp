@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,8 +10,8 @@
  * LLNS Copyright End
  */
 
-#include "AGControl.h"
 #include "../comms/schedulerMessage.h"
+#include "AGControl.h"
 #include "core/coreObjectTemplates.hpp"
 #include "reserveDispatcher.h"
 #include "scheduler.h"
@@ -378,9 +378,9 @@ void schedulerRamp::updatePTarget ()
         pTarget.pop_front ();
         rempower = target - PCurr;
         // ignore small variations
-        if ((rempower <= 0.0001) & (rempower >= -0.0001))
+        if ((rempower <= 0.0001) && (rempower >= -0.0001))
         {
-            rempower = 0;
+            rempower = 0.0;
         }
         lastTargetTime = time;
         if (pTarget.empty ())
@@ -398,7 +398,7 @@ void schedulerRamp::updatePTarget ()
         }
         else
         {
-            if (rempower != 0)
+            if (rempower != 0.0)
             {
                 // assume we were ramp limited so just keep ramping
                 remtime = rempower / PRampCurr;
@@ -415,9 +415,9 @@ void schedulerRamp::updatePTarget ()
     }
     double td = (time - prevTime);
     double pdiff = target - PCurr;
-    if (rempower == 0)
+    if (rempower == 0.0)
     {
-        if ((pdiff < 0.0001) & (pdiff > -0.0001))
+        if ((pdiff < 0.0001) && (pdiff > -0.0001))
         {
             PRampCurr = 0;
             nextUpdateTime = time;
@@ -442,7 +442,7 @@ void schedulerRamp::updatePTarget ()
     case midPoint:
         if (td >= rampTime)
         {
-            if (rempower)
+            if (rempower != 0.0)
             {
                 /*keep ramp until we would begin ramping for the next target*/
                 remtime = rempower / PRampCurr;
@@ -532,9 +532,9 @@ void schedulerRamp::updatePTarget ()
         }
         break;
     case delayed:
-        if (rempower)
+        if (rempower != 0.0)
         {
-            if (rempower > 0)
+            if (rempower > 0.0)
             {
                 remtime = rempower / rampLimitUp;
             }
@@ -599,7 +599,7 @@ double schedulerRamp::get (const std::string &param, gridUnits::units_t unitType
 void schedulerRamp::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
     using namespace comms;
-   // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
+    // auto sm = std::dynamic_pointer_cast<schedulerMessage> (message);
     switch (message->getMessageType ())
     {
     case schedulerMessagePayload::CLEAR_TARGETS:

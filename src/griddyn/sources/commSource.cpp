@@ -1,21 +1,22 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "commSource.h"
 #include "../comms/Communicator.h"
 #include "../comms/controlMessage.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../events/eventQueue.h"
 #include "../gridDynSimulation.h"
+#include "core/coreObjectTemplates.hpp"
+#include <cassert>
 
 namespace griddyn
 {
@@ -133,7 +134,7 @@ using controlMessagePayload = griddyn::comms::controlMessagePayload;
 
 void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage> message)
 {
-    auto m = message->getPayload<controlMessagePayload>();
+    auto m = message->getPayload<controlMessagePayload> ();
 
     std::shared_ptr<commMessage> reply;
 
@@ -145,22 +146,27 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
         if (!opFlags[no_message_reply])  // unless told not to respond return with the
         {
             reply = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-            reply->getPayload<controlMessagePayload>()->m_actionID = m->m_actionID;
-            commLink->transmit (sourceID, reply);
+            auto payload = reply->getPayload<controlMessagePayload> ();
+			if (payload != nullptr)
+			{
+                payload->m_actionID = m->m_actionID;
+                commLink->transmit (sourceID, reply);
+			}
+           
         }
 
         break;
     case controlMessagePayload::GET:
     {
-        reply = std::make_shared<commMessage>(controlMessagePayload::GET_RESULT);
+        reply = std::make_shared<commMessage> (controlMessagePayload::GET_RESULT);
 
-        auto rep = reply->getPayload<controlMessagePayload>();
+        auto rep = reply->getPayload<controlMessagePayload> ();
         rep->m_field = "level";
         rep->m_value = m_output;
         rep->m_time = prevTime;
-        commLink->transmit(sourceID, reply);
+        commLink->transmit (sourceID, reply);
     }
-        break;
+    break;
     case controlMessagePayload::SET_SUCCESS:
     case controlMessagePayload::SET_FAIL:
     case controlMessagePayload::GET_RESULT:
@@ -184,8 +190,12 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
-                reply->getPayload<controlMessagePayload>()->m_actionID = m->m_actionID;
-                commLink->transmit (sourceID, gres);
+                auto payload = reply->getPayload<controlMessagePayload> ();
+				if (payload != nullptr)
+				{
+                    payload->m_actionID = m->m_actionID;
+                    commLink->transmit (sourceID, gres);
+				}
             }
         }
         break;

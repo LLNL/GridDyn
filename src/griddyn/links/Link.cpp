@@ -10,18 +10,17 @@
  * LLNS Copyright End
  */
 
-// headers
 #include "../Area.h"
+#include "../gridBus.h"
+#include "../simulation/contingency.h"
+#include "acLine.h"
 #include "acdcConverter.h"
+#include "adjustableTransformer.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "../gridBus.h"
-#include "acLine.h"
-#include "adjustableTransformer.h"
 #include "dcLink.h"
-#include "../simulation/contingency.h"
 #include "utilities/matrixDataCompact.hpp"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
@@ -247,8 +246,8 @@ void Link::switchMode (index_t num, bool mode)
         if (opFlags[pFlow_initialized])
         {
             LOG_DEBUG (
-              "Switch2 changed||state =" + ((opFlags[switch2_open_flag]) ? std::string ("OPEN") :
-                                                                           std::string ("CLOSED")) +
+              "Switch2 changed||state =" +
+              ((opFlags[switch2_open_flag]) ? std::string ("OPEN") : std::string ("CLOSED")) +
               ", link status =" + ((isConnected ()) ? std::string ("CONNECTED") : std::string ("DISCONNECTED")));
             if (isConnected ())
             {
@@ -282,8 +281,8 @@ void Link::switchMode (index_t num, bool mode)
         if (opFlags[pFlow_initialized])
         {
             LOG_DEBUG (
-              "Switch1 changed||state =" + ((opFlags[switch1_open_flag]) ? std::string ("OPEN") :
-                                                                           std::string ("CLOSED")) +
+              "Switch1 changed||state =" +
+              ((opFlags[switch1_open_flag]) ? std::string ("OPEN") : std::string ("CLOSED")) +
               ", link status =" + ((isConnected ()) ? std::string ("CONNECTED") : std::string ("DISCONNECTED")));
             if (isConnected ())
             {
@@ -642,58 +641,58 @@ double Link::getMaxTransfer () const
 
 double Link::getBusAngle (id_type_t busId) const
 {
-	if (busId < 500_ind)
-	{
-		auto B = getBus(busId);
-		if (B != nullptr)
-		{
-			return B->getAngle();
-		}
-	}
-	//these are special cases for getting opposite angles as called by the attached buses
-	if (isSameObject(busId,B2))
-	{
-		return (B1!=nullptr)?B1->getAngle():kNullVal;
-	}
-	if (isSameObject(busId,B1))
-	{
-		return (B2 != nullptr) ? B2->getAngle() : kNullVal;
-	}
-	//now just default to the original behavior
-	auto B = getBus(busId);
-	if (B != nullptr)
-	{
-		return B->getAngle();
-	}
-	return kNullVal;
+    if (busId < 500_ind)
+    {
+        auto B = getBus (busId);
+        if (B != nullptr)
+        {
+            return B->getAngle ();
+        }
+    }
+    // these are special cases for getting opposite angles as called by the attached buses
+    if (isSameObject (busId, B2))
+    {
+        return (B1 != nullptr) ? B1->getAngle () : kNullVal;
+    }
+    if (isSameObject (busId, B1))
+    {
+        return (B2 != nullptr) ? B2->getAngle () : kNullVal;
+    }
+    // now just default to the original behavior
+    auto B = getBus (busId);
+    if (B != nullptr)
+    {
+        return B->getAngle ();
+    }
+    return kNullVal;
 }
 
-double Link::getBusAngle( const stateData &sD, const solverMode &sMode,id_type_t busId ) const
+double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_t busId) const
 {
-	if (busId < 500_ind)
-	{
-		auto B = getBus(busId);
-		if (B != nullptr)
-		{
-			return B->getAngle();
-		}
-	}
-	//these are special cases for getting opposite angles as called by the attached buses
-	if (isSameObject(busId, B2))
-	{
-		return (B1 != nullptr) ? B1->getAngle(sD,sMode) : kNullVal;
-	}
-	if (isSameObject(busId, B1))
-	{
-		return (B2 != nullptr) ? B2->getAngle(sD, sMode) : kNullVal;
-	}
-	//now just default to the original behavior
-	auto B = getBus(busId);
-	if (B != nullptr)
-	{
-		return B->getAngle(sD, sMode);
-	}
-	return kNullVal;
+    if (busId < 500_ind)
+    {
+        auto B = getBus (busId);
+        if (B != nullptr)
+        {
+            return B->getAngle ();
+        }
+    }
+    // these are special cases for getting opposite angles as called by the attached buses
+    if (isSameObject (busId, B2))
+    {
+        return (B1 != nullptr) ? B1->getAngle (sD, sMode) : kNullVal;
+    }
+    if (isSameObject (busId, B1))
+    {
+        return (B2 != nullptr) ? B2->getAngle (sD, sMode) : kNullVal;
+    }
+    // now just default to the original behavior
+    auto B = getBus (busId);
+    if (B != nullptr)
+    {
+        return B->getAngle (sD, sMode);
+    }
+    return kNullVal;
 }
 
 double Link::getVoltage (id_type_t busId) const
@@ -750,8 +749,9 @@ void Link::updateLocalCache ()
 
 gridBus *Link::getBus (index_t busInd) const
 {
-	//for Links it is customary to refer to the buses as 1 and 2, but for indexing schemes they sometimes atart at 0
-	// so this function will return Bus 1 for indices <=1 and Bus if the index is 2.  
+    // for Links it is customary to refer to the buses as 1 and 2, but for indexing schemes they sometimes atart at
+    // 0
+    // so this function will return Bus 1 for indices <=1 and Bus if the index is 2.
     return ((busInd <= 1) || (busInd == B1->getID ())) ?
              B1 :
              (((busInd == 2) || (busInd == B2->getID ())) ? B2 : nullptr);
@@ -817,13 +817,15 @@ double Link::getCurrent (id_type_t busId) const
     double val;
     if (isBus2 (busId, B2))  // from bus
     {
-        val = std::hypot (linkFlows.P2, linkFlows.Q2) / (linkInfo.v2);
+        auto pmag = std::hypot (linkFlows.P2, linkFlows.Q2);
+        val =  (pmag!=0.0)?pmag/linkInfo.v2:0.0;
     }
     else
     {
-        val = std::hypot (linkFlows.P1, linkFlows.Q1) / (linkInfo.v1);
+        auto pmag = std::hypot (linkFlows.P1, linkFlows.Q1);
+        val = (pmag != 0.0) ? pmag / linkInfo.v1 : 0.0;
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 
 double Link::getRealCurrent (id_type_t busId) const
@@ -837,7 +839,7 @@ double Link::getRealCurrent (id_type_t busId) const
     {
         val = linkFlows.P1 / (linkInfo.v1);
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 double Link::getImagCurrent (id_type_t busId) const
 {
@@ -850,7 +852,7 @@ double Link::getImagCurrent (id_type_t busId) const
     {
         val = linkFlows.Q1 / (linkInfo.v1);
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 
 Link *getMatchingLink (Link *lnk, gridPrimary *src, gridPrimary *sec)
@@ -901,41 +903,41 @@ bool compareLink (Link *lnk1, Link *lnk2, bool cmpBus, bool printDiff)
         ret = ret && compareBus (lnk1->getBus (2), lnk2->getBus (2), printDiff);
         return ret;
     }
-	if (typeid(lnk1) != typeid(lnk2))
-	{
-		if (printDiff)
-		{
-			printf("Links are of different types\n");
-		}
-		return false;
-	}
-	if ((dynamic_cast<acLine *>(lnk1) != nullptr) && (dynamic_cast<acLine *>(lnk2) != nullptr))
-	{
-		if (std::abs(lnk1->get("r") - lnk2->get("r")) > 0.0001)
-		{
-			if (printDiff)
-			{
-				printf("Links have different r\n");
-			}
-			return false;
-		}
-		if (std::abs(lnk1->get("x") - lnk2->get("x")) > 0.0001)
-		{
-			if (printDiff)
-			{
-				printf("Links have different x\n");
-			}
-			return false;
-		}
-		if (std::abs(lnk1->get("b") - lnk2->get("b")) > 0.0001)
-		{
-			if (printDiff)
-			{
-				printf("Links have different b\n");
-			}
-			return false;
-		}
-	}
+    if (typeid (lnk1) != typeid (lnk2))
+    {
+        if (printDiff)
+        {
+            printf ("Links are of different types\n");
+        }
+        return false;
+    }
+    if ((dynamic_cast<acLine *> (lnk1) != nullptr) && (dynamic_cast<acLine *> (lnk2) != nullptr))
+    {
+        if (std::abs (lnk1->get ("r") - lnk2->get ("r")) > 0.0001)
+        {
+            if (printDiff)
+            {
+                printf ("Links have different r\n");
+            }
+            return false;
+        }
+        if (std::abs (lnk1->get ("x") - lnk2->get ("x")) > 0.0001)
+        {
+            if (printDiff)
+            {
+                printf ("Links have different x\n");
+            }
+            return false;
+        }
+        if (std::abs (lnk1->get ("b") - lnk2->get ("b")) > 0.0001)
+        {
+            if (printDiff)
+            {
+                printf ("Links have different b\n");
+            }
+            return false;
+        }
+    }
     return true;
 }
 

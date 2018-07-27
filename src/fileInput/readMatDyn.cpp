@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,19 +8,19 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
+#include "fileInput.h"
+#include "griddyn/Governor.h"
+#include "griddyn/Link.h"
 #include "griddyn/events/Event.h"
+#include "griddyn/exciters/ExciterDC1A.h"
 #include "griddyn/generators/DynamicGenerator.h"
+#include "griddyn/genmodels/GenModel4.h"
 #include "griddyn/gridBus.h"
 #include "griddyn/gridDynSimulation.h"
-#include "fileInput.h"
-#include "griddyn/Link.h"
 #include "griddyn/loads/zipLoad.h"
 #include "readerHelper.h"
-#include "griddyn/Governor.h"
-#include "griddyn/exciters/ExciterDC1A.h"
-#include "griddyn/genmodels/GenModel4.h"
 #include "utilities/string_viewConversion.h"
 
 #include <cstdlib>
@@ -38,7 +38,7 @@ void loadGenGovArray (coreObject *parentObject, mArray &govData, std::vector<Gen
 
 void loadMatDyn (coreObject *parentObject, const std::string &filetext, const basicReaderInfo & /*bri*/)
 {
-	string_view ftext = filetext;
+    string_view ftext = filetext;
     mArray M1;
 
     std::vector<Generator *> genList;
@@ -46,7 +46,7 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
     size_t A = ftext.find_first_of ('[', 0);
     size_t B = ftext.find_first_of (']', 0);
     auto tstr = ftext.substr (A + 1, B - A - 1);
-    auto Tline = split(tstr, "\t ,", delimiter_compression::on);
+    auto Tline = split (tstr, "\t ,", delimiter_compression::on);
 
     size_t D = B;
     size_t C;
@@ -121,7 +121,7 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
         }
 
         obj = ngen->getSubObject ("genmodel", 0);
-        if (obj!=nullptr)
+        if (obj != nullptr)
         {
             gen->add (obj);
         }
@@ -142,7 +142,7 @@ void loadMatDyn (coreObject *parentObject, const std::string &filetext, const ba
     for (index_t kk = 1; kk <= b; kk++)
     {
         auto ld = static_cast<zipLoad *> (parentObject->findByUserID ("load", kk));
-        ld->set ("converttoimpedance", 1);  
+        ld->set ("converttoimpedance", 1);
     }
 }
 
@@ -233,13 +233,13 @@ void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vecto
     {
         Exciter *exc = nullptr;
         auto ind1 = static_cast<index_t> (excLine[0]);
-      
-		if (isValidIndex(ind1,genList))
+
+        if (isValidIndex (ind1, genList))
         {
-            Generator *gen = genList[ind1-1]; //zero based in C vs 1 based in matlab
+            Generator *gen = genList[ind1 - 1];  // zero based in C vs 1 based in matlab
             exc = static_cast<Exciter *> (gen->getSubObject ("exciter", 0));
         }
-        if (exc==nullptr)
+        if (exc == nullptr)
         {
             continue;
         }
@@ -269,25 +269,23 @@ void loadGenExcArray (coreObject * /*parentObject*/, mArray &excData, std::vecto
 */
 void loadGenGovArray (coreObject * /*parentObject*/, mArray &govData, std::vector<Generator *> &genList)
 {
-    
-
     /*[genmodel excmodel govmodel H D xd xq xd_tr xq_tr Td_tr Tq_tr]*/
     for (const auto &govLine : govData)
     {
         Governor *gov = nullptr;
-		Generator *gen = nullptr;
+        Generator *gen = nullptr;
         auto ind1 = static_cast<index_t> (govLine[0]);
-		if (isValidIndex(ind1,genList))
+        if (isValidIndex (ind1, genList))
         {
-            gen = genList[ind1-1];//zero based in C vs 1 based in matlab
-			if (gen == nullptr)
-			{
-				//probably throw some sort of error here
-				continue;
-			}
+            gen = genList[ind1 - 1];  // zero based in C vs 1 based in matlab
+            if (gen == nullptr)
+            {
+                // probably throw some sort of error here
+                continue;
+            }
             gov = static_cast<Governor *> (gen->getSubObject ("governor", 0));
         }
-        if (gov==nullptr)
+        if (gov == nullptr)
         {
             continue;
         }
@@ -307,8 +305,7 @@ void loadGenGovArray (coreObject * /*parentObject*/, mArray &govData, std::vecto
 // read matdyn Event files
 void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, const basicReaderInfo & /*bri*/)
 {
-
-	string_view ftext = filetext;
+    string_view ftext = filetext;
     mArray event1, M1;
     auto gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
     if (gds == nullptr)
@@ -334,13 +331,13 @@ void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, con
     {
         B = ftext.find_first_of ('=', A);
         readMatlabArray (filetext, B + 1, M1);
-		for (auto &eventSpec:M1)
+        for (auto &eventSpec : M1)
         {
             auto evnt = std::make_shared<Event> (eventSpec[0]);
             auto ind = static_cast<index_t> (eventSpec[1]);
             auto bus = static_cast<gridBus *> (parentObject->findByUserID ("bus", ind));
             auto ld = bus->getLoad ();
-            if (ld==nullptr)
+            if (ld == nullptr)
             {
                 ld = new zipLoad ();
                 bus->add (ld);
@@ -416,4 +413,4 @@ void loadMatDynEvent (coreObject *parentObject, const std::string &filetext, con
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

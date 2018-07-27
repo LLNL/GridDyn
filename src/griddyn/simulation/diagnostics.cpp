@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "diagnostics.h"
 #include "../gridDynSimulation.h"
@@ -30,7 +30,7 @@ std::pair<double, int> checkResid (gridDynSimulation *gds, coreTime time, const 
 
 std::pair<double, int> checkResid (gridDynSimulation *gds, const std::shared_ptr<SolverInterface> &sd)
 {
-    return checkResid (gds, gds->getSimulationTime(), sd);
+    return checkResid (gds, gds->getSimulationTime (), sd);
 }
 
 std::pair<double, int>
@@ -95,7 +95,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
     double *state = sd->state_data ();
     double *dstate = sd->deriv_data ();
 
-    coreTime timeCurr = gds->getSimulationTime();
+    coreTime timeCurr = gds->getSimulationTime ();
     if ((gds->currentProcessState () <= gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED) &&
         (timeCurr <= gds->getStartTime ()))
     {
@@ -326,7 +326,7 @@ int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double j
 
 int residualCheck (gridDynSimulation *gds, const solverMode &sMode, double residTol, bool useStateNames)
 {
-    return residualCheck (gds, gds->getSimulationTime(), sMode, residTol, useStateNames);
+    return residualCheck (gds, gds->getSimulationTime (), sMode, residTol, useStateNames);
 }
 
 int residualCheck (gridDynSimulation *gds,
@@ -580,7 +580,8 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
         {
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
+            int retval =
+              sd->calcIC (gds->getSimulationTime (), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -623,7 +624,8 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
             }
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
+            int retval =
+              sd->calcIC (gds->getSimulationTime (), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -650,7 +652,8 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
             }
             bFile.write (reinterpret_cast<char *> (state), ssize * sizeof (double));
             std::copy (state, state + ssize, tempState.begin ());
-            int retval = sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
+            int retval =
+              sd->calcIC (gds->getSimulationTime (), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             if (retval < 0)
             {
                 double rval2 = retval;
@@ -678,7 +681,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
                 state[vsi[mm]] = v[mm];
             }
             std::copy (state, state + ssize, tempState.begin ());
-            sd->calcIC (gds->getSimulationTime(), 0.001, SolverInterface::ic_modes::fixed_diff, true);
+            sd->calcIC (gds->getSimulationTime (), 0.001, SolverInterface::ic_modes::fixed_diff, true);
             std::copy (tempState.begin (), tempState.begin () + ssize, state);
         }
     }
@@ -708,12 +711,7 @@ std::vector<index_t> getLocalStates (const gridComponent *comp, const solverMode
 {
     std::vector<index_t> st;
     auto &off = comp->getOffsets (sMode);
-    st.reserve (
-        off.local.algSize +
-        off.local.diffSize +
-        off.local.vSize +
-        off.local.aSize
-    );
+    st.reserve (off.local.algSize + off.local.diffSize + off.local.vSize + off.local.aSize);
     for (index_t ii = 0; ii < off.local.algSize; ++ii)
     {
         st.push_back (off.algOffset + ii);
@@ -887,23 +885,23 @@ bool checkObjectEquivalence (const coreObject *obj1, const coreObject *obj2, boo
     return result;
 }
 
-
-void printStateSizesPretty(const gridComponent *obj, const solverMode &sMode, const std::string &inset)
+void printStateSizesPretty (const gridComponent *obj, const solverMode &sMode, const std::string &inset)
 {
-	auto &off = obj->getOffsets(sMode);
-	printf("%s%s:: ssize=%d, alg=%d, diff=%d local=%d\n", inset.c_str(), obj->getName().c_str(), obj->stateSize(sMode), obj->algSize(sMode), obj->diffSize(sMode), off.local.totalSize());
-	auto subObj = dynamic_cast<gridComponent *>(obj->getSubObject("subobject", 0));
-	int ii = 1;
-	while (subObj != nullptr)
-	{
-		printStateSizesPretty(subObj, sMode, inset + "   ");
-		subObj = dynamic_cast<gridComponent *>(obj->getSubObject("subobject", ii));
-		++ii;
-	}
+    auto &off = obj->getOffsets (sMode);
+    printf ("%s%s:: ssize=%d, alg=%d, diff=%d local=%d\n", inset.c_str (), obj->getName ().c_str (),
+            obj->stateSize (sMode), obj->algSize (sMode), obj->diffSize (sMode), off.local.totalSize ());
+    auto subObj = dynamic_cast<gridComponent *> (obj->getSubObject ("subobject", 0));
+    int ii = 1;
+    while (subObj != nullptr)
+    {
+        printStateSizesPretty (subObj, sMode, inset + "   ");
+        subObj = dynamic_cast<gridComponent *> (obj->getSubObject ("subobject", ii));
+        ++ii;
+    }
 }
 
-void printStateSizes(const gridComponent *comp, const solverMode &sMode)
+void printStateSizes (const gridComponent *comp, const solverMode &sMode)
 {
-	printStateSizesPretty(comp, sMode, "");
+    printStateSizesPretty (comp, sMode, "");
 }
 }  // namespace griddyn

@@ -108,7 +108,7 @@ void cvodeInterface::allocate (count_t stateCount, count_t numRoots)
     rootsfound.resize (numRoots);
 
     // allocate the solverMemory
-    if (solverMem)
+    if (solverMem != nullptr)
     {
         CVodeFree (&(solverMem));
     }
@@ -256,7 +256,7 @@ void cvodeInterface::logSolverStats (print_level logLevel, bool /*iconly*/) cons
     logstr += "Last step                          = " + std::to_string (hlast) + '\n';
     logstr += "Tolerance scale factor             = " + std::to_string (tolsfac) + '\n';
 
-    if (m_gds)
+    if (m_gds != nullptr)
     {
         m_gds->log (m_gds, logLevel, logstr);
     }

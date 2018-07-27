@@ -70,14 +70,14 @@ enum solver_flags : int
     useMask_flag = 2,  //!< if the solver should use a mask to filter out specific states
     parallel_flag = 3,  //!< if the solver should use a parallel version
     locked_flag = 4,  //!< if the solverMode is locked from further updates
-    use_omp_flag = 5,  //!<flag indicating whether to use omp data constructs
+    use_omp_flag = 5,  //!< flag indicating whether to use omp data constructs
     allocated_flag = 6,  //!< if the solver has been allocated
     initialized_flag = 7,  //!< flag indicating if these vectors have been initialized
     fileCapture_flag = 8,
     directLogging_flag = 9,  //!< flag telling the SolverInterface to capture a log directly from the solver
     use_newton_flag = 11,
     use_bdf_flag = 12,
-    block_mode_only=13, //!< flag indicating that the solver only supports block mode
+    block_mode_only = 13,  //!< flag indicating that the solver only supports block mode
     extra_solver_flag1 = 16,
     extra_solver_flag2 = 17,
     extra_solver_flag3 = 18,
@@ -105,7 +105,7 @@ class SolverInterface : public helperObject
     {
         normal,  //!< normal operation
         single_step,  //!< single step operation
-        block, //!< the solver runs in a block mode all at once
+        block,  //!< the solver runs in a block mode all at once
     };
     /** @brief enumeration of initiaL condition call modes*/
     enum class ic_modes
@@ -137,7 +137,7 @@ class SolverInterface : public helperObject
     count_t rootCallCount = 0;
     count_t max_iterations = 10000;  //!< the maximum number of iterations in the solver loop
     solverMode mode;  //!< to the solverMode
-    double tolerance = 1e-8;  //!<the default solver tolerance
+    double tolerance = 1e-8;  //!< the default solver tolerance
     coreTime solveTime = negTime;  //!< storage for the time the solver is called
     std::string jacFile;  //!< the file to write the Jacobian to
     std::string stateFile;  //!< the file to write the state and residual to
@@ -268,7 +268,7 @@ class SolverInterface : public helperObject
     /** @brief get a flag parameter from a solver
     @param[in] flag  a string with the name of the flag to set
     */
-    virtual bool getFlag(const std::string &flag) const override;
+    virtual bool getFlag (const std::string &flag) const override;
     /** get the last time the solver was called*/
     coreTime getSolverTime () const { return solveTime; }
     /** @brief perform the solver calculations

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,11 +8,11 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "core/coreExceptions.h"
-#include "griddyn/Generator.h"
 #include "fileInput.h"
+#include "griddyn/Generator.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/loads/zipLoad.h"
@@ -98,123 +98,123 @@ void loadPSP (coreObject *parentObject, const std::string &fileName, const basic
             }
             break;
         case 5:
-		{
-			bool morebus = true;
-			while (morebus)
-			{
-				if (std::getline(file, line))
-				{
-					temp = line.substr(0, 4);
-					if (temp == "9999")
-					{
-						morebus = false;
-						continue;
-					}
-					// because we can read the line section before the bus section and that is confusing so we just
-					// make sure we read the bus section first
-					if (!nobus)
-					{
-						continue;
-					}
-					if (temp.length() < 4)
-					{
-						continue;
-					}
-					// trimString(temp);
-					index = std::stoi(temp);
-					if (static_cast<size_t> (index) >= busList.size())
-					{
-						busList.resize(2*index+1, nullptr);
-					}
-					if (busList[index] == nullptr)
-					{
-						busList[index] = new acBus();
-						pspReadBus(busList[index], line, base, bri);
-						try
-						{
-							parentObject->add(busList[index]);
-						}
-						catch (const objectAddFailure &)
-						{
-							addToParentRename(busList[index], parentObject);
-						}
-					}
-					else
-					{
-						std::cerr << "Invalid bus code " << index << '\n';
-					}
-				}
-				else
-				{
-					morebus = false;
-				}
-			}
-			if (nobus)
-			{
-				nobus = false;
-				file.seekg(0);  // reset the file now
-			}
-		}
-            break;
+        {
+            bool morebus = true;
+            while (morebus)
+            {
+                if (std::getline (file, line))
+                {
+                    temp = line.substr (0, 4);
+                    if (temp == "9999")
+                    {
+                        morebus = false;
+                        continue;
+                    }
+                    // because we can read the line section before the bus section and that is confusing so we just
+                    // make sure we read the bus section first
+                    if (!nobus)
+                    {
+                        continue;
+                    }
+                    if (temp.length () < 4)
+                    {
+                        continue;
+                    }
+                    // trimString(temp);
+                    index = std::stoi (temp);
+                    if (static_cast<size_t> (index) >= busList.size ())
+                    {
+                        busList.resize (2 * index + 1, nullptr);
+                    }
+                    if (busList[index] == nullptr)
+                    {
+                        busList[index] = new acBus ();
+                        pspReadBus (busList[index], line, base, bri);
+                        try
+                        {
+                            parentObject->add (busList[index]);
+                        }
+                        catch (const objectAddFailure &)
+                        {
+                            addToParentRename (busList[index], parentObject);
+                        }
+                    }
+                    else
+                    {
+                        std::cerr << "Invalid bus code " << index << '\n';
+                    }
+                }
+                else
+                {
+                    morebus = false;
+                }
+            }
+            if (nobus)
+            {
+                nobus = false;
+                file.seekg (0);  // reset the file now
+            }
+        }
+        break;
         case 4:
-		{
-			bool morebranch = true;
-			while (morebranch)
-			{
-				if (std::getline(file, line))
-				{
-					temp = line.substr(0, 4);
-					if (temp == "9999")
-					{
-						morebranch = false;
-						continue;
-					}
-					if (nobus)
-					{
-						continue;
-					}
-					if (temp.length() < 4)
-					{
-						continue;
-					}
-					if (line[6] == 'C')
-					{
-						std::getline(file, line2);
-					}
-					else
-					{
-						line2 = "";
-					}
-					pspReadBranch(parentObject, line, line2, base, busList, bri);
-				}
-				else
-				{
-					morebranch = false;
-				}
-			}
-		}
-            break;
+        {
+            bool morebranch = true;
+            while (morebranch)
+            {
+                if (std::getline (file, line))
+                {
+                    temp = line.substr (0, 4);
+                    if (temp == "9999")
+                    {
+                        morebranch = false;
+                        continue;
+                    }
+                    if (nobus)
+                    {
+                        continue;
+                    }
+                    if (temp.length () < 4)
+                    {
+                        continue;
+                    }
+                    if (line[6] == 'C')
+                    {
+                        std::getline (file, line2);
+                    }
+                    else
+                    {
+                        line2 = "";
+                    }
+                    pspReadBranch (parentObject, line, line2, base, busList, bri);
+                }
+                else
+                {
+                    morebranch = false;
+                }
+            }
+        }
+        break;
         case 15:
-		{
-			bool morebranch = true;
-			while (morebranch)
-			{
-				if (std::getline(file, line))
-				{
-					temp = line.substr(0, 4);
-					if (temp == "9999")
-					{
-						morebranch = false;
-						continue;
-					}
-				}
-				else
-				{
-					morebranch = false;
-				}
-			}
-		}
-            break;
+        {
+            bool morebranch = true;
+            while (morebranch)
+            {
+                if (std::getline (file, line))
+                {
+                    temp = line.substr (0, 4);
+                    if (temp == "9999")
+                    {
+                        morebranch = false;
+                        continue;
+                    }
+                }
+                else
+                {
+                    morebranch = false;
+                }
+            }
+        }
+        break;
         }
     }
     file.close ();
@@ -568,4 +568,4 @@ void pspReadBranch (coreObject *parentObject,
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

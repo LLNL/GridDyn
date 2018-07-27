@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -64,7 +64,6 @@ week	= 405
 
 namespace gridUnits
 {
-
 static std::map<std::string, units_t> name2Unit{
   {"mw", MW},
   {"mws", MW},
@@ -223,7 +222,6 @@ const static std::map<units_t, std::string> unit2Name{
   {K, "K"},
 };
 
-
 // function to convert a string to a unit enumeration value
 
 std::string to_string (units_t unitType) { return mapFind (unit2Name, unitType, std::string ("unknown")); }
@@ -287,16 +285,14 @@ static const std::map<units_t, units_type_t> unit2Type{std::make_pair (MW, elect
                                                        std::make_pair (F, temperature),
                                                        std::make_pair (K, temperature)};
 
-inline bool isPu(const units_t in)
-{
-	return ((in >= pu) && (static_cast<int>(in) < 200));
-}
+inline bool isPu (const units_t in) { return ((in >= pu) && (static_cast<int> (in) < 200)); }
 inline bool conversionNotNeeded (const units_t in, const units_t out)
 {
-    return ((in == defUnit) || (in == out) || (out == defUnit)||(isPu(in)&&(out==pu)));
+    return ((in == defUnit) || (in == out) || (out == defUnit) || (isPu (in) && (out == pu)));
 }
 
-double unitConversionPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
+double
+unitConversionPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -308,17 +304,14 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
     {
     case Watt:
         val = val / 1000.0;  // I know this looks funny, there really shouldn't be a break here convert to KW
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case kW:
         val = val / 1000.0;  // then convert to MW
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case MW:
     case MVAR:
         val = val / basePower;  // now convert to puMW
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case puMW:
     case pu:
         switch (out)
@@ -359,12 +352,10 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case puV:
         val = val * localBaseVoltage;  // convert to kV --localBaseVoltage is defined in kV
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case kV:
         val = val * 1000.0;  // convert to V
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case Volt:
         switch (out)
         {
@@ -375,7 +366,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
             ret = val / 1000.0;
             break;
         case puV:
-		case pu:
+        case pu:
             ret = val / localBaseVoltage / 1000.0;
             break;
         default:
@@ -384,8 +375,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case Ohm:
         val = val / (basePower * 1000000.0 / localBaseVoltage / localBaseVoltage);  // convert to puOhms
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case puOhm:
 
         switch (out)
@@ -421,8 +411,7 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case Amp:
         val = val * localBaseVoltage / basePower / 1000.0;  // convert to puA
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case puA:
 
         switch (out)
@@ -446,12 +435,10 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case MWph:
         val = val / 60.0;
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case MWpmin:
         val = val / 60.0;
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case MWps:
         switch (out)
         {
@@ -479,12 +466,10 @@ double unitConversionPower (double val, const units_t in, const units_t out, dou
         break;
     case puMWph:
         val = val / 60.0;
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case puMWpmin:
         val = val / 60.0;
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case puMWps:
         switch (out)
         {
@@ -711,8 +696,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
     {
     case km:
         val = val * 1000;
-		FALLTHROUGH
-// FALLTHROUGH
+        FALLTHROUGH
     case meter:
         switch (out)
         {
@@ -734,8 +718,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
         break;
     case mile:
         ret = val * 5280;
-		FALLTHROUGH
-        // FALLTHROUGH
+        FALLTHROUGH
     case ft:
         switch (out)
         {

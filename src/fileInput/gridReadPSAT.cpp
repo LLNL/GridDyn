@@ -10,18 +10,18 @@
  * LLNS Copyright End
  */
 
-#include "griddyn/griddyn-config.h"
-#include "griddyn/events/Event.h"
-#include "griddyn/Generator.h"
 #include "fileInput.h"
+#include "griddyn/Generator.h"
+#include "griddyn/events/Event.h"
+#include "griddyn/griddyn-config.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/loads/motorLoad.h"
 #include "griddyn/loads/zipLoad.h"
 #include "griddyn/primary/acBus.h"
+#include "griddyn/relays/pmu.h"
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
-#include "griddyn/relays/pmu.h"
 
 #ifdef OPTIMIZATION_ENABLE
 #include "optimization/gridDynOpt.h"
@@ -31,9 +31,9 @@
 #endif
 
 #include "griddyn/Exciter.h"
-#include "griddyn/governors/GovernorTypes.h"
-#include "griddyn/genmodels/otherGenModels.h"
 #include "griddyn/Stabilizer.h"
+#include "griddyn/genmodels/otherGenModels.h"
+#include "griddyn/governors/GovernorTypes.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -65,7 +65,7 @@ void loadPsatBreakerArray (coreObject *parentObject, const mArray &brkr, const s
 void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const std::vector<gridBus *> &busList);
 void loadPsatMotorArray (coreObject *parentObject, const mArray &mtr, const std::vector<gridBus *> &busList);
 /** load a PSAT PMU data*/
-void loadPsatPmuArray(coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList);
+void loadPsatPmuArray (coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList);
 void loadOtherObjectData (coreObject *parentObject,
                           const std::string &filetext,
                           const std::vector<gridBus *> &busList);
@@ -85,7 +85,7 @@ static const std::vector<
     {"Breaker.con", loadPsatBreakerArray},
     //{ "Supply.con",loadPsatSupplyArray },
     {"Mot.con", loadPsatMotorArray},
-	{ "Pmu.con", loadPsatPmuArray },
+    {"Pmu.con", loadPsatPmuArray},
   };
 
 void loadPSAT (coreObject *parentObject, const std::string &filetext, const basicReaderInfo &bri)
@@ -204,20 +204,19 @@ void loadPSATBusArray (coreObject *parentObject,
     for (size_t kk = 0; kk < buses.size (); ++kk)
     {
         auto ind1 = static_cast<index_t> (buses[kk][0]);
-        if (ind1 >= static_cast<index_t>(busList.size ()))
+        if (ind1 >= static_cast<index_t> (busList.size ()))
         {
             busList.resize (ind1 * 2 + 1);
         }
-		auto bus = busList[ind1];
+        auto bus = busList[ind1];
         if (bus == nullptr)
         {
             busList[ind1] = new acBus (busnames[kk]);
-			bus = busList[ind1];
+            bus = busList[ind1];
             bus->set ("basepower", basepower);
             bus->setUserID (static_cast<int> (ind1));
             parentObject->add (bus);
         }
-
 
         bus->set ("basevoltage", buses[kk][1]);
         if (buses[kk].size () > 2)
@@ -230,9 +229,8 @@ void loadPSATBusArray (coreObject *parentObject,
         }
     }
 
-	for (auto &swInfo:SW)
+    for (auto &swInfo : SW)
     {
-
         auto ind1 = static_cast<size_t> (swInfo[0]);
         auto bus = busList[ind1];
         bus->set ("type", "swing");
@@ -256,7 +254,7 @@ void loadPSATBusArray (coreObject *parentObject,
             gen->set ("p", swInfo[9]);
         }
     }
-	for (auto &pvInfo : PV)
+    for (auto &pvInfo : PV)
     {
         auto ind1 = static_cast<size_t> (pvInfo[0]);
         auto bus = busList[ind1];
@@ -281,7 +279,7 @@ void loadPSATBusArray (coreObject *parentObject,
         }
     }
 
-	for (auto &pqInfo:PQ)
+    for (auto &pqInfo : PQ)
     {
         auto ind1 = static_cast<size_t> (pqInfo[0]);
         auto bus = busList[ind1];
@@ -303,7 +301,7 @@ void loadPSATBusArray (coreObject *parentObject,
 
 void loadPSATGenArray (coreObject * /*parentObject*/, const mArray &gens, const std::vector<gridBus *> &busList)
 {
-	for (auto &genInfo:gens)
+    for (auto &genInfo : gens)
     {
         auto ind1 = static_cast<size_t> (genInfo[0]);
         gridBus *bus = busList[ind1];
@@ -366,9 +364,8 @@ void loadPsatSupplyArray (coreObject * /*parentObject*/,
 #else
 void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const std::vector<gridBus *> &busList)
 {
-
     auto gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot ());
-    if (gdo==nullptr)
+    if (gdo == nullptr)
     {
         return;
     }
@@ -376,7 +373,7 @@ void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const
     {
         auto bus = busList[static_cast<size_t> (genLine[0])];
         auto gen = bus->getGen ();
-        if (gen!=nullptr)
+        if (gen != nullptr)
         {
             continue;
         }
@@ -427,7 +424,7 @@ void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const
         }
     }
 }
-#endif // OPTIMIZATION_ENABLE
+#endif  // OPTIMIZATION_ENABLE
 
 /* Branch data
 Column Variable Description Unit
@@ -449,11 +446,11 @@ y 15 Smax Apparent power limit pu
 */
 
 void loadPSATLinkArray (coreObject *parentObject, const mArray &lnks, const std::vector<gridBus *> &busList)
-{;
+{
+    ;
 
-	for (auto &lnkInfo:lnks)
+    for (auto &lnkInfo : lnks)
     {
-
         auto ind1 = static_cast<index_t> (lnkInfo[0]);
         auto bus1 = busList[ind1];
 
@@ -464,7 +461,7 @@ void loadPSATLinkArray (coreObject *parentObject, const mArray &lnks, const std:
         lnk->updateBus (bus1, 1);
         lnk->updateBus (bus2, 2);
         parentObject->add (lnk);
-		bool tx = (lnkInfo[6] != 0.0);
+        bool tx = (lnkInfo[6] != 0.0);
 
         if (tx)
         {
@@ -512,9 +509,8 @@ void loadPSATLinkArray (coreObject *parentObject, const mArray &lnks, const std:
 
 void loadPSATLinkArrayB (coreObject *parentObject, const mArray &lnks, const std::vector<gridBus *> &busList)
 {
-	for (auto &lnkInfo:lnks)
+    for (auto &lnkInfo : lnks)
     {
-
         auto ind1 = static_cast<index_t> (lnkInfo[0]);
         auto bus1 = busList[ind1];
         auto ind2 = static_cast<index_t> (lnkInfo[1]);
@@ -523,7 +519,7 @@ void loadPSATLinkArrayB (coreObject *parentObject, const mArray &lnks, const std
         lnk->updateBus (bus1, 1);
         lnk->updateBus (bus2, 2);
         parentObject->add (lnk);
-		bool tx = (lnkInfo[6] != 0.0);
+        bool tx = (lnkInfo[6] != 0.0);
 
         if (tx)
         {
@@ -564,8 +560,7 @@ void loadPSATShuntArray (coreObject * /*parentObject*/,
                          const mArray &shunts,
                          const std::vector<gridBus *> &busList)
 {
-
-	for (auto &shuntInfo:shunts)
+    for (auto &shuntInfo : shunts)
     {
         auto ind1 = static_cast<size_t> (shuntInfo[0]);
         auto bus1 = busList[ind1];
@@ -622,8 +617,7 @@ int
 */
 void loadPSATLTCArray (coreObject *parentObject, const mArray &ltc, const std::vector<gridBus *> &busList)
 {
-
-	for (auto &ltcInfo:ltc)
+    for (auto &ltcInfo : ltc)
     {
         auto ind1 = static_cast<index_t> (ltcInfo[0]);
         gridBus *bus1 = busList[ind1];
@@ -693,7 +687,7 @@ void loadPSATLTCArray (coreObject *parentObject, const mArray &ltc, const std::v
 */
 void loadPSATPHSArray (coreObject *parentObject, const mArray &phs, const std::vector<gridBus *> &busList)
 {
-	for (auto &phsInfo:phs)
+    for (auto &phsInfo : phs)
     {
         auto ind1 = static_cast<index_t> (phsInfo[0]);
         auto bus1 = busList[ind1];
@@ -763,15 +757,13 @@ void loadPSATSynArray (coreObject * /*parentObject*/, const mArray &syn, const s
 {
     using namespace genmodels;
 
-
-
     int index = 1;
     for (auto genData : syn)
     {
         auto ind1 = static_cast<size_t> (genData[0]);
         auto bus1 = busList[ind1];
         auto gen = bus1->getGen (0);
-        if (gen==nullptr)
+        if (gen == nullptr)
         {
             continue;
         }
@@ -876,7 +868,6 @@ Column Variable Description Unit
 
 void loadPSATTgArray (coreObject *parentObject, const mArray &tg, const std::vector<gridBus *> & /*busList*/)
 {
-
     Governor *gm = nullptr;
     // gridBus *bus1;
     index_t ind1;
@@ -888,7 +879,7 @@ void loadPSATTgArray (coreObject *parentObject, const mArray &tg, const std::vec
         ind1 = static_cast<index_t> (temp);
 
         auto gen = static_cast<Generator *> (parentObject->findByUserID ("gen", ind1));
-        if (gen==nullptr)
+        if (gen == nullptr)
         {
             continue;
         }
@@ -929,7 +920,7 @@ void loadPSATExcArray (coreObject *parentObject, const mArray &excData, const st
         ind1 = static_cast<index_t> (eData[0]);
 
         gen = static_cast<Generator *> (parentObject->findByUserID ("gen", ind1));
-        if (gen==nullptr)
+        if (gen == nullptr)
         {
             continue;
         }
@@ -962,7 +953,6 @@ void loadPSATExcArray (coreObject *parentObject, const mArray &excData, const st
 
 void loadPsatFaultArray (coreObject *parentObject, const mArray &fault, const std::vector<gridBus *> &busList)
 {
-
     auto gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
     if (gds == nullptr)
     {  // cant make faults if we don't have access to the simulation
@@ -985,8 +975,8 @@ void loadPsatFaultArray (coreObject *parentObject, const mArray &fault, const st
             evnt1->setValue (flt[6]);
             evnt2->setTarget (ld, "r");
             evnt2->setValue (0.0);
-            gds->add (std::move(evnt1));
-            gds->add (std::move(evnt2));
+            gds->add (std::move (evnt1));
+            gds->add (std::move (evnt2));
         }
 
         if (flt[7] != 0)
@@ -997,45 +987,43 @@ void loadPsatFaultArray (coreObject *parentObject, const mArray &fault, const st
             evnt1->setValue (flt[7]);
             evnt2->setTarget (ld, "x");
             evnt2->setValue (0.0);
-            gds->add (std::move(evnt1));
-            gds->add (std::move(evnt2));
+            gds->add (std::move (evnt1));
+            gds->add (std::move (evnt2));
         }
     }
 }
 
-
-void loadPsatPmuArray(coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList)
+void loadPsatPmuArray (coreObject *parentObject, const mArray &pmuData, const std::vector<gridBus *> &busList)
 {
-	auto *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot());
-	if (gds == nullptr)
-	{  // cant add the sensors if there is no simulation
-		return;
-	}
-	index_t count = 1;
-	for (auto &pmuLine : pmuData)
-	{
-		auto ind = static_cast<index_t> (pmuLine[0]);
-		auto bus = busList[ind];
+    auto *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
+    if (gds == nullptr)
+    {  // cant add the sensors if there is no simulation
+        return;
+    }
+    index_t count = 1;
+    for (auto &pmuLine : pmuData)
+    {
+        auto ind = static_cast<index_t> (pmuLine[0]);
+        auto bus = busList[ind];
 
-		auto pmu = new relays::pmu();
-		pmu->setUserID(count);
-		pmu->set("samplerate", pmuLine[2]);
-		pmu->set("tv", pmuLine[3]);
-		pmu->set("ttheta", pmuLine[4]);
-		pmu->setSource(bus);
-		if ((pmuLine.size()>5)&& (pmuLine[5]<0.1))
-		{
-			pmu->disable();
-		}
-		gds->add(pmu);
-	}
+        auto pmu = new relays::pmu ();
+        pmu->setUserID (count);
+        pmu->set ("samplerate", pmuLine[2]);
+        pmu->set ("tv", pmuLine[3]);
+        pmu->set ("ttheta", pmuLine[4]);
+        pmu->setSource (bus);
+        if ((pmuLine.size () > 5) && (pmuLine[5] < 0.1))
+        {
+            pmu->disable ();
+        }
+        gds->add (pmu);
+    }
 }
 
 void loadPsatBreakerArray (coreObject *parentObject,
                            const mArray &brkr,
                            const std::vector<gridBus *> & /*busList*/)
 {
-
     auto *gds = dynamic_cast<gridSimulation *> (parentObject->getRoot ());
     if (gds == nullptr)
     {  // cant make faults if we don't have access to the simulation
@@ -1045,7 +1033,7 @@ void loadPsatBreakerArray (coreObject *parentObject,
     {
         auto ind = static_cast<index_t> (brk[0]);
         auto lnk = static_cast<Link *> (parentObject->findByUserID ("link", ind));
-		double status = 1.0;
+        double status = 1.0;
         if (brk[5] < 0.1)
         {
             lnk->disable ();
@@ -1057,8 +1045,8 @@ void loadPsatBreakerArray (coreObject *parentObject,
         evnt1->setValue ((status < 0.1) ? 1.0 : 0.0);
         evnt2->setTarget (lnk, "enabled");
         evnt2->setValue (status);
-        gds->add (std::move(evnt1));
-        gds->add (std::move(evnt2));
+        gds->add (std::move (evnt1));
+        gds->add (std::move (evnt2));
     }
 }
 
@@ -1075,4 +1063,4 @@ void loadPsatMotorArray (coreObject * /*parentObject*/, const mArray &mtr, const
     }
 }
 
-}//namespace griddyn
+}  // namespace griddyn

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,13 +8,13 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "../Load.h"
-#include "core/coreExceptions.h"
-#include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "../measurement/objectGrabbers.h"
+#include "core/coreExceptions.h"
+#include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 
 #include <cmath>
@@ -149,10 +149,10 @@ double Load::get (const std::string &param, units_t unitType) const
 
 void Load::set (const std::string &param, double val, units_t unitType)
 {
-	if (param.empty())
-	{
-		return;
-	}
+    if (param.empty ())
+    {
+        return;
+    }
     if (param.length () == 1)
     {
         switch (param.front ())
@@ -169,10 +169,10 @@ void Load::set (const std::string &param, double val, units_t unitType)
         checkFaultChange ();
         return;
     }
-	if (param.empty())
-	{
-		return;
-	}
+    if (param.empty ())
+    {
+        return;
+    }
     if (param.back () == '+')  // load increments
     {
         // load increments  allows a delta on the load through the set functions

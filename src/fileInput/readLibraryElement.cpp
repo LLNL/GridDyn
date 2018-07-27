@@ -11,8 +11,8 @@
  */
 
 #include "elementReaderTemplates.hpp"
-#include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
+#include "formatInterpreters/readerElement.h"
 #include "readElement.h"
 #include "readerHelper.h"
 
@@ -250,11 +250,7 @@ void loadCustomSections (std::shared_ptr<readerElement> &element, readerInfo &ri
             continue;
         }
         auto args = element->getAttributeValue ("args");
-        auto nargs = static_cast<int> (args);
-        if (args == kNullVal)
-        {
-            nargs = 0;
-        }
+        int nargs = (args != kNullVal) ? static_cast<int> (args) : 0;
         ri.addCustomElement (name, element, nargs);
         element->moveToNextSibling (directoryString);
     }

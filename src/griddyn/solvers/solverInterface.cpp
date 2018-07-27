@@ -10,11 +10,11 @@
  * LLNS Copyright End
  */
 
+#include "../gridDynSimulation.h"
 #include "basicOdeSolver.h"
 #include "basicSolver.h"
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
-#include "../gridDynSimulation.h"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
 #include "utilities/mapOps.hpp"
@@ -43,16 +43,15 @@ static childClassFactory<basicOdeSolver, solverInterface>
 SolverInterface::SolverInterface (const std::string &objName) : helperObject (objName) {}
 SolverInterface::SolverInterface (gridDynSimulation *gds, const solverMode &sMode) : mode (sMode), m_gds (gds) {}
 
-std::unique_ptr<SolverInterface> SolverInterface::clone(bool fullCopy) const
+std::unique_ptr<SolverInterface> SolverInterface::clone (bool fullCopy) const
 {
-	auto si = std::make_unique<SolverInterface>();
-	SolverInterface::cloneTo(si.get(),fullCopy);
-	return si;
+    auto si = std::make_unique<SolverInterface> ();
+    SolverInterface::cloneTo (si.get (), fullCopy);
+    return si;
 }
 
 void SolverInterface::cloneTo (SolverInterface *si, bool fullCopy) const
 {
-
     si->setName (getName ());
     si->solverLogFile = solverLogFile;
     si->printLevel = printLevel;
@@ -203,7 +202,7 @@ void SolverInterface::set (const std::string &param, const std::string &val)
     }
     else if (param == "solverprintlevel")
     {
-        auto plevel = convertToLowerCase(val);
+        auto plevel = convertToLowerCase (val);
         if (plevel == "trace")
         {
             solverPrintLevel = 3;
@@ -222,7 +221,7 @@ void SolverInterface::set (const std::string &param, const std::string &val)
         }
         else
         {
-            throw (invalidParameterValue(plevel));
+            throw (invalidParameterValue (plevel));
         }
     }
     else if ((param == "pair") || (param == "pairedmode"))
@@ -305,7 +304,7 @@ void SolverInterface::set (const std::string &param, double val)
         }
         else
         {
-            throw (invalidParameterValue(param));
+            throw (invalidParameterValue (param));
         }
     }
     else if (param == "maskElement")
@@ -322,26 +321,24 @@ void SolverInterface::set (const std::string &param, double val)
     }
 }
 
-static const std::map<std::string, int> solverFlagMap{
-    {"filecapture", fileCapture_flag},
-    {"directlogging", directLogging_flag},
-    {"solver_log", directLogging_flag},
-    {"dense", dense_flag},
-    {"sparse", -dense_flag},
-    {"parallel", parallel_flag},
-    {"serial", -parallel_flag},
-    {"mask", useMask_flag},
-    {"constantjacobian", constantJacobian_flag},
-    {"omp", use_omp_flag},
-    {"useomp", use_omp_flag},
-    {"bdf", use_bdf_flag},
-    {"adams", -use_bdf_flag},
-    {"functional", -use_newton_flag},
-    {"newton", use_newton_flag},
-    {"print_resid",print_residuals},
-    {"print_residuals", print_residuals},
-    {"block_mode_only", block_mode_only}
-};
+static const std::map<std::string, int> solverFlagMap{{"filecapture", fileCapture_flag},
+                                                      {"directlogging", directLogging_flag},
+                                                      {"solver_log", directLogging_flag},
+                                                      {"dense", dense_flag},
+                                                      {"sparse", -dense_flag},
+                                                      {"parallel", parallel_flag},
+                                                      {"serial", -parallel_flag},
+                                                      {"mask", useMask_flag},
+                                                      {"constantjacobian", constantJacobian_flag},
+                                                      {"omp", use_omp_flag},
+                                                      {"useomp", use_omp_flag},
+                                                      {"bdf", use_bdf_flag},
+                                                      {"adams", -use_bdf_flag},
+                                                      {"functional", -use_newton_flag},
+                                                      {"newton", use_newton_flag},
+                                                      {"print_resid", print_residuals},
+                                                      {"print_residuals", print_residuals},
+                                                      {"block_mode_only", block_mode_only}};
 
 void SolverInterface::setFlag (const std::string &flag, bool val)
 {
@@ -503,9 +500,9 @@ void SolverInterface::setApproximation (const std::string &approx)
     }
 }
 
-bool SolverInterface::getFlag(const std::string &flag) const
+bool SolverInterface::getFlag (const std::string &flag) const
 {
-    auto flgInd = mapFind(solverFlagMap, flag, -60);
+    auto flgInd = mapFind (solverFlagMap, flag, -60);
     if (flgInd > -32)
     {
         if (flgInd > 0)
@@ -588,7 +585,7 @@ void SolverInterface::check_flag (void *flagvalue, const std::string &funcname, 
     // TODO missing if (opt == 2 and flagvalue == nullptr)?
 }
 
-int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode) { return -101; }
+int SolverInterface::solve (coreTime /*tStop*/, coreTime & /*tReturn*/, step_mode /* stepMode */) { return -101; }
 void SolverInterface::logSolverStats (print_level /*logLevel*/, bool /*iconly*/) const {}
 void SolverInterface::logErrorWeights (print_level /*logLevel*/) const {}
 void SolverInterface::logMessage (int errorCode, const std::string &message)

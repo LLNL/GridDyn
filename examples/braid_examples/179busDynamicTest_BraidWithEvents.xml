@@ -3,7 +3,7 @@
 <griddyn name="test1" version="0.0.1">
   <import file="./powerflowWECC.raw"/>
   <import file="./dynamicsWECC.dyr"/>
-  
+
   <load parent="BUS#141">
      <type>pulse</type>
      <p:pulsetype>square</p:pulsetype>
@@ -17,7 +17,7 @@
   <timestart>0</timestart>
   <timestop>10</timestop>
   <timestep>0.048</timestep>
-  
+
 
   <solver name="braid">
      <printlevel>1</printlevel>
@@ -26,5 +26,5 @@
   </solver>
 
   <defdae>braid</defdae>
-   
+
 </griddyn>

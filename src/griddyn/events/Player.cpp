@@ -1,316 +1,300 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #include "Player.h"
 
+#include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
 #include "utilities/stringOps.h"
-#include "core/coreExceptions.h"
 #include <sstream>
 
 namespace griddyn
 {
 namespace events
 {
-Player::Player(const std::string &eventName) :Event(eventName)
-{
+Player::Player (const std::string &eventName) : Event (eventName) {}
 
+Player::Player (coreTime time0, double loopPeriod) : Event (time0), period (loopPeriod) {}
+
+Player::Player (const EventInfo &gdEI, coreObject *rootObject) : Event (gdEI, rootObject), period (gdEI.period)
+{
+    if (gdEI.file.empty ())
+    {
+        setTimeValue (gdEI.time, gdEI.value);
+    }
+    else
+    {
+        if (!gdEI.columns.empty ())
+        {
+            column = gdEI.columns[0];
+        }
+        loadEventFile (gdEI.file);
+    }
 }
 
-Player::Player(coreTime time0, double loopPeriod) : Event(time0), period(loopPeriod)
+void Player::updateEvent (const EventInfo &gdEI, coreObject *rootObject)
 {
-
+    if (gdEI.file.empty ())
+    {
+        setTimeValue (gdEI.time, gdEI.value);
+    }
+    else
+    {
+        if (!gdEI.columns.empty ())
+        {
+            column = gdEI.columns[0];
+        }
+        loadEventFile (gdEI.file);
+    }
+    Event::updateEvent (gdEI, rootObject);
 }
 
-
-Player::Player(const EventInfo &gdEI, coreObject *rootObject) : Event(gdEI, rootObject), period(gdEI.period)
+std::unique_ptr<Event> Player::clone () const
 {
-	if (gdEI.file.empty())
-	{
-		setTimeValue(gdEI.time, gdEI.value);
-	}
-	else
-	{
-		if (!gdEI.columns.empty())
-		{
-			column = gdEI.columns[0];
-		}
-		loadEventFile(gdEI.file);
-	}
-
+    std::unique_ptr<Event> upE = std::make_unique<Player> (getName ());
+    cloneTo (upE.get ());
+    return upE;
 }
 
-void Player::updateEvent(const EventInfo &gdEI, coreObject *rootObject)
+void Player::cloneTo (Event *gE) const
 {
-	if (gdEI.file.empty())
-	{
-		setTimeValue(gdEI.time, gdEI.value);
-	}
-	else
-	{
-		if (!gdEI.columns.empty())
-		{
-			column = gdEI.columns[0];
-		}
-		loadEventFile(gdEI.file);
-	}
-	Event::updateEvent(gdEI, rootObject);
+    Event::cloneTo (gE);
+    auto nE = dynamic_cast<Player *> (gE);
+    if (nE == nullptr)
+    {
+        return;
+    }
+    nE->period = period;
+    nE->eFile = eFile;
+    nE->ts = ts;
+    nE->column = column;
+    nE->currIndex = currIndex;
+    nE->timeOffset = timeOffset;
 }
 
-std::unique_ptr<Event> Player::clone() const
+void Player::set (const std::string &param, double val)
 {
-	std::unique_ptr<Event> upE = std::make_unique<Player>(getName());
-	cloneTo(upE.get());
-	return upE;
+    if (param == "period")
+    {
+        value = val;
+    }
+    else if (param == "column")
+    {
+        column = static_cast<index_t> (val);
+    }
+    else if (param == "timeoffset")
+    {
+        timeOffset = val;
+    }
+    else
+    {
+        Event::set (param, val);
+    }
 }
 
-void Player::cloneTo(Event *gE) const
+void Player::set (const std::string &param, const std::string &val)
 {
-	Event::cloneTo(gE);
-	auto nE = dynamic_cast<Player *>(gE);
-	if (nE == nullptr)
-	{
-		return;
-	}
-	nE->period = period;
-	nE->eFile = eFile;
-	nE->ts = ts;
-	nE->column = column;
-	nE->currIndex = currIndex;
-	nE->timeOffset = timeOffset;
+    if (param == "file")
+    {
+        loadEventFile (val);
+    }
+    else
+    {
+        Event::set (param, val);
+    }
 }
 
-void Player::set(const std::string &param, double val)
+void Player::setTime (coreTime time) { triggerTime = time; }
+
+void Player::setTimeValue (coreTime time, double val)
 {
-	if (param == "period")
-	{
-		value = val;
-	}
-	else if (param == "column")
-	{
-		column = static_cast<index_t> (val);
-	}
-	else if (param == "timeoffset")
-	{
-		timeOffset = val;
-	}
-	else
-	{
-		Event::set(param, val);
-	}
+    triggerTime = time;
+    value = val;
 }
 
-void Player::set(const std::string &param, const std::string &val)
+void Player::setTimeValue (const std::vector<coreTime> &time, const std::vector<double> &val)
 {
-	if (param == "file")
-	{
-		loadEventFile(val);
-	}
-	else
-	{
-		Event::set(param, val);
-	}
+    ts.reserve (static_cast<fsize_t> (time.size ()));
+
+    ts.addData (time, val);
+
+    currIndex = 0;
+    setNextValue ();
 }
 
-void Player::setTime(coreTime time)
+void Player::setNextValue ()
 {
-	triggerTime = time;
+    if (static_cast<size_t> (currIndex) < ts.size ())
+    {
+        triggerTime = ts.time (currIndex) + timeOffset;
+        value = ts.data (currIndex);
+    }
 }
 
-void Player::setTimeValue(coreTime time, double val)
+void Player::updateTrigger (coreTime time)
 {
-	triggerTime = time;
-	value = val;
+    if (time >= triggerTime)
+    {
+        if (time >= ts.time (currIndex) + timeOffset)
+        {
+            ++currIndex;
+        }
+    }
+    if (static_cast<size_t> (currIndex) >= ts.size ())
+    {
+        if (period > timeZero)  // if we have a period loop the time series
+        {
+            if (time - ts.lastTime () > period)
+            {
+                timeOffset = period + triggerTime;
+            }
+            else
+            {
+                timeOffset += period;
+            }
+
+            currIndex = 0;
+            setNextValue ();
+        }
+        else
+        {
+            armed = false;
+        }
+    }
+    else  // just proceed to the next trigger and Value
+    {
+        setNextValue ();
+    }
 }
 
-void Player::setTimeValue(const std::vector<coreTime> &time, const std::vector<double> &val)
+std::string Player::to_string ()
 {
-
-	ts.reserve(static_cast<fsize_t> (time.size()));
-
-	ts.addData(time, val);
-
-	currIndex = 0;
-	setNextValue();
+    // @time1[,time2,time3,... |+ period] >[rootobj::obj:]field(units) = val1,[val2,val3,...]
+    std::stringstream ss;
+    if (eFile.empty ())
+    {
+        ss << '@' << triggerTime;
+        if (period > timeZero)
+        {
+            ss << '+' << period << '|';
+        }
+        else if (!ts.empty ())
+        {
+            for (auto nn = currIndex + 1; nn < static_cast<index_t> (ts.size ()); ++nn)
+            {
+                ss << ", " << ts.time (nn);
+            }
+            ss << "| ";
+        }
+        else
+        {
+            ss << " | ";
+        }
+        ss << fullObjectName (m_obj) << ':' << field;
+        if (unitType != gridUnits::defUnit)
+        {
+            ss << '(' << gridUnits::to_string (unitType) << ')';
+        }
+        ss << " = " << value;
+        if (!ts.empty ())
+        {
+            for (index_t nn = currIndex + 1; nn < static_cast<index_t> (ts.size ()); ++nn)
+            {
+                ss << ", " << ts.data (nn);
+            }
+        }
+    }
+    else
+    {
+        ss << fullObjectName (m_obj) << ':' << field;
+        if (unitType != gridUnits::defUnit)
+        {
+            ss << '(' << gridUnits::to_string (unitType) << ')';
+        }
+        ss << " = {" << eFile;
+        if (column > 0)
+        {
+            ss << '#' << column;
+        }
+        ss << '}';
+        if (period > timeZero)
+        {
+            ss << '+' << period;
+        }
+    }
+    return ss.str ();
 }
 
-void Player::setNextValue()
+change_code Player::trigger ()
 {
-	if (static_cast<size_t> (currIndex) < ts.size())
-	{
-		triggerTime = ts.time(currIndex) + timeOffset;
-		value = ts.data(currIndex);
-	}
+    try
+    {
+        m_obj->set (field, value, unitType);
+        return change_code::parameter_change;
+    }
+    catch (const std::invalid_argument &)
+    {
+        return change_code::execution_failure;
+    }
 }
 
-void Player::updateTrigger(coreTime time)
+change_code Player::trigger (coreTime time)
 {
-	if (time >= triggerTime)
-	{
-		if (time >= ts.time(currIndex) + timeOffset)
-		{
-			++currIndex;
-		}
-	}
-	if (static_cast<size_t> (currIndex) >= ts.size())
-	{
-		if (period > timeZero)                     //if we have a period loop the time series
-		{
-			if (time - ts.lastTime() > period)
-			{
-				timeOffset = period + triggerTime;
-
-			}
-			else
-			{
-				timeOffset += period;
-			}
-
-			currIndex = 0;
-			setNextValue();
-		}
-		else
-		{
-			armed = false;
-		}
-	}
-	else                   //just proceed to the next trigger and Value
-	{
-		setNextValue();
-	}
+    change_code ret = change_code::not_triggered;
+    if (time + kSmallTime >= triggerTime)
+    {
+        try
+        {
+            m_obj->set (field, value, unitType);
+            ret = change_code::parameter_change;
+        }
+        catch (const std::invalid_argument &)
+        {
+            ret = change_code::execution_failure;
+        }
+        updateTrigger (time);
+    }
+    return ret;
 }
 
-std::string Player::to_string()
+void Player::initialize () {}
+
+bool Player::setTarget (coreObject *gdo, const std::string &var)
 {
-	// @time1[,time2,time3,... |+ period] >[rootobj::obj:]field(units) = val1,[val2,val3,...]
-	std::stringstream ss;
-	if (eFile.empty())
-	{
-		ss << '@' << triggerTime;
-		if (period > timeZero)
-		{
-			ss << '+' << period << '|';
-		}
-		else if (!ts.empty())
-		{
-			for (auto nn = currIndex + 1; nn < static_cast<index_t>(ts.size()); ++nn)
-			{
-				ss << ", " << ts.time(nn);
-			}
-			ss << "| ";
-		}
-		else
-		{
-			ss << " | ";
-		}
-		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
-		{
-			ss << '(' << gridUnits::to_string(unitType) << ')';
-		}
-		ss << " = " << value;
-		if (!ts.empty())
-		{
-			for (index_t nn = currIndex + 1; nn < static_cast<index_t>(ts.size()); ++nn)
-			{
-				ss << ", " << ts.data(nn);
-			}
-		}
-	}
-	else
-	{
-		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
-		{
-			ss << '(' << gridUnits::to_string(unitType) << ')';
-		}
-		ss << " = {" << eFile;
-		if (column > 0)
-		{
-			ss << '#' << column;
-		}
-		ss << '}';
-		if (period > timeZero)
-		{
-			ss << '+' << period;
-		}
-	}
-	return ss.str();
+    if (!var.empty ())
+    {
+        field = var;
+    }
+    m_obj = gdo;
+
+    if (m_obj != nullptr)
+    {
+        setName (m_obj->getName ());
+        armed = true;
+    }
+    return armed;
 }
 
-change_code Player::trigger()
+void Player::loadEventFile (const std::string &fileName)
 {
-	try
-	{
-		m_obj->set(field, value, unitType);
-		return change_code::parameter_change;
-	}
-	catch (const std::invalid_argument &)
-	{
-		return change_code::execution_failure;
-	}
+    if (!fileName.empty ())
+    {
+        eFile = fileName;
+    }
+
+    ts.loadFile (eFile, column);
+
+    currIndex = 0;
+    setNextValue ();
 }
-
-change_code Player::trigger(coreTime time)
-{
-	change_code ret = change_code::not_triggered;
-	if (time + kSmallTime >= triggerTime)
-	{
-		try
-		{
-			m_obj->set(field, value, unitType);
-			ret = change_code::parameter_change;
-		}
-		catch (const std::invalid_argument &)
-		{
-			ret = change_code::execution_failure;
-		}
-		updateTrigger(time);
-	}
-	return ret;
-}
-
-void Player::initialize()
-{
-
-}
-
-bool Player::setTarget(coreObject *gdo, const std::string &var)
-{
-	if (!var.empty())
-	{
-		field = var;
-	}
-	m_obj = gdo;
-
-	if (m_obj != nullptr)
-	{
-		setName(m_obj->getName());
-		armed = true;
-	}
-	return armed;
-}
-
-void Player::loadEventFile(const std::string &fileName)
-{
-	if (!fileName.empty())
-	{
-		eFile = fileName;
-	}
-
-	ts.loadFile(eFile, column);
-
-	currIndex = 0;
-	setNextValue();
-}
-}//namespace events
-}//namespace griddyn
+}  // namespace events
+}  // namespace griddyn
