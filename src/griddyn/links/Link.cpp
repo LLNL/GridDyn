@@ -10,7 +10,6 @@
  * LLNS Copyright End
  */
 
-// headers
 #include "../Area.h"
 #include "acdcConverter.h"
 #include "core/coreExceptions.h"
@@ -817,13 +816,15 @@ double Link::getCurrent (id_type_t busId) const
     double val;
     if (isBus2 (busId, B2))  // from bus
     {
-        val = std::hypot (linkFlows.P2, linkFlows.Q2) / (linkInfo.v2);
+        auto pmag = std::hypot (linkFlows.P2, linkFlows.Q2);
+        val =  (pmag!=0.0)?pmag/linkInfo.v2:0.0;
     }
     else
     {
-        val = std::hypot (linkFlows.P1, linkFlows.Q1) / (linkInfo.v1);
+        auto pmag = std::hypot (linkFlows.P1, linkFlows.Q1);
+        val = (pmag != 0.0) ? pmag / linkInfo.v1 : 0.0;
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 
 double Link::getRealCurrent (id_type_t busId) const
@@ -837,7 +838,7 @@ double Link::getRealCurrent (id_type_t busId) const
     {
         val = linkFlows.P1 / (linkInfo.v1);
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 double Link::getImagCurrent (id_type_t busId) const
 {
@@ -850,7 +851,7 @@ double Link::getImagCurrent (id_type_t busId) const
     {
         val = linkFlows.Q1 / (linkInfo.v1);
     }
-    return (std::isnormal (val) ? val : 0);
+    return (std::isnormal (val) ? val : 0.0);
 }
 
 Link *getMatchingLink (Link *lnk, gridPrimary *src, gridPrimary *sec)

@@ -246,7 +246,7 @@ void gridLabDLoad::timestep (coreTime time, const IOdata &inputs, const solverMo
         }
     }
 #else
-    [&sMode] {}();
+    (void)sMode;
 #endif
 
     if (cDetail == coupling_detail_t::single)

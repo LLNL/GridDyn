@@ -154,12 +154,20 @@ std::string exeTestRunner::runCaptureOutput (const std::string &args) const
     }
     std::string rstr = exeString + " " + args + " > " + outFile;
     //printf ("string %s\n", rstr.c_str ());
-    system (rstr.c_str ());
+    auto out=system (rstr.c_str ());
 
     //printf (" after system call string %s\n", rstr.c_str ());
     std::ifstream t (outFile);
     std::string str ((std::istreambuf_iterator<char> (t)), std::istreambuf_iterator<char> ());
-
+	if (out != 0)
+	{
+        str.push_back ('\n');
+        str.append (exeString);
+        str.append (" returned ");
+        str.append (std::to_string (out));
+        str.push_back ('\n');
+	}
+   
     remove (outFile.c_str ());
     return str;
 }

@@ -9,12 +9,9 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef RAMP_SOURCE_H_
-#define RAMP_SOURCE_H_
+#pragma once
 
 #include "../Source.h"
-
 
 namespace griddyn
 {
@@ -43,6 +40,3 @@ public:
 };
 }//namespace sources
 }//namespace griddyn
-
-#endif
-

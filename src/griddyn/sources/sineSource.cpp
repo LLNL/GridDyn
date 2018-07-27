@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #include "sineSource.h"
 
@@ -48,7 +48,14 @@ coreObject *sineSource::clone (coreObject *obj) const
 
 void sineSource::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
-    lastCycle = time0 - phase / (frequency * 2.0 * kPI);
+    if (frequency <= 0.0)
+    {
+        lastCycle = negTime;
+    }
+	else
+	{
+        lastCycle = time0 - phase / (frequency * 2.0 * kPI);
+	}
     pulseSource::pFlowObjectInitializeA (time0, flags);
     updateOutput (time0);
 }
@@ -123,23 +130,23 @@ void sineSource::set (const std::string &param, double val, gridUnits::units_t u
     {
         Amp = val;
     }
-    else if ((param == "frequency")||(param=="freq")||(param=="f"))
+    else if ((param == "frequency") || (param == "freq") || (param == "f"))
     {
         frequency = val;
         sinePeriod = 1.0 / frequency;
     }
-    else if ((param == "period")||(param=="sineperiod"))
+    else if ((param == "period") || (param == "sineperiod"))
     {
         sinePeriod = val;
         frequency = 1.0 / val;
     }
     else if (param == "pulseperiod")
     {
-        pulseSource::set("period", val, unitType);
+        pulseSource::set ("period", val, unitType);
     }
     else if (param == "pulseamplitude")
     {
-        pulseSource::set("amplitude", val, unitType);
+        pulseSource::set ("amplitude", val, unitType);
     }
     else if (param == "phase")
     {

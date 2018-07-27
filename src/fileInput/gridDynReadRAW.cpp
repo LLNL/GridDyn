@@ -81,7 +81,7 @@ static typeFactory<gridBus> *busfactory = nullptr;
 // get the basic load Factory
 static typeFactory<Load> *ldfactory = nullptr;
 // get the basic Link Factory
-static typeFactory<acLine> *linkfactory = nullptr;
+static childTypeFactory<acLine, Link> *linkfactory = nullptr;
 // get the basic Generator Factory
 static typeFactory<Generator> *genfactory = nullptr;
 
@@ -912,7 +912,7 @@ void rawReadBranch (coreObject *parentObject,
     int ind1, ind2;
     std::tie (name, ind1, ind2) = generateBranchName (strvec, busList, opt.prefix, 2);
 
-    acLine *lnk = linkfactory->makeTypeObject (name);
+    acLine *lnk = linkfactory->makeDirectObject (name);
     // set the base power to that used this model
     lnk->set ("basepower", opt.base);
 

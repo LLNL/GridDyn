@@ -94,7 +94,7 @@ public:
       default:
           return nullptr;
       case payloadType_t::shared:
-          return dynamic_cast<payLoadType *>(payload.get());
+          return (payload)?dynamic_cast<payLoadType *>(payload.get()):nullptr;
       case payloadType_t::vector:
           return reinterpret_cast<payLoadType *>(payload_V.data());
       case payloadType_t::raw:

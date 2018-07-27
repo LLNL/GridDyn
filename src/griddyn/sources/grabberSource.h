@@ -9,12 +9,9 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef GRABBER_SOURCE_H_
-#define GRABBER_SOURCE_H_
+#pragma once
 
 #include "rampSource.h"
-
 
 namespace griddyn
 {
@@ -61,6 +58,3 @@ protected:
 };
 }//namespace sources
 }//namespace griddyn
-
-#endif
-
