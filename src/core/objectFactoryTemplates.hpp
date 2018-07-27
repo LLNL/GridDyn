@@ -315,7 +315,15 @@ class childTypeFactory : public typeFactory<Btype>
         return ret;
     }
 
-    Btype *makeTypeObject (const std::string &objName = "") override  // done this way to make sure calling
+    Btype *makeTypeObject (const std::string &objName = std::string()) override  // done this way to make sure calling
+    // makeTypeObject on the parent works in the
+    // correct polymorphic call
+    {
+        return makeDirectObject (objName);
+    }
+
+	Ntype *
+    makeDirectObject (const std::string &objName = std::string ()) // done this way to make sure calling
     // makeTypeObject on the parent works in the
     // correct polymorphic call
     {

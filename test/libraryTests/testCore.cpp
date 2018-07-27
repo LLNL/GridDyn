@@ -10,7 +10,6 @@
  * LLNS Copyright End
 */
 
-
 #include <boost/test/unit_test.hpp>
 
 #include "core/coreExceptions.h"
@@ -178,6 +177,7 @@ BOOST_AUTO_TEST_CASE (object_factory_test)
     obj = cof->createObject ("load");
     ld = dynamic_cast<zipLoad *> (obj);
     BOOST_CHECK (ld != nullptr);
+    delete ld;
 }
 
 BOOST_AUTO_TEST_CASE (gridDynTime_tests)
