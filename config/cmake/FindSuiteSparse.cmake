@@ -286,14 +286,24 @@ macro(SuiteSparse_FIND_COMPONENTS )
 			if (TARGET SuiteSparse::${suitesparseCompLC})
 			else()
 				add_library(SuiteSparse::${suitesparseCompLC} STATIC IMPORTED)
-				set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-				set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+				if(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE AND SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
+					set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+					set_property(TARGET SuiteSparse::${suitesparseCompLC} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+				endif()
 			endif()
-			set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
-				IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-				IMPORTED_LOCATION_RELEASE "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
-				IMPORTED_LOCATION_DEBUG "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}"
-			)
+			if(SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE AND NOT SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG)
+				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+					IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+					IMPORTED_LOCATION "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
+				)
+			else()
+				set_target_properties(SuiteSparse::${suitesparseCompLC} PROPERTIES
+					IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+					IMPORTED_LOCATION_RELEASE "${SuiteSparse_${suitesparseCompUC}_LIBRARY_RELEASE}"
+					IMPORTED_LOCATION_DEBUG "${SuiteSparse_${suitesparseCompUC}_LIBRARY_DEBUG}"
+				)
+			endif()
+			
 			list(APPEND SuiteSparse_ACTUAL_TARGETS "SuiteSparse::${suitesparseCompLC}")
 		endif()
 		

@@ -31,9 +31,11 @@ find_package(FSKIT)
 
 add_library(fskitLibrary STATIC ${fskit_sources} ${fskit_headers})
 
+find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS mpi serialization REQUIRED)
+
 target_include_directories(fskitLibrary SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(fskitLibrary PUBLIC ${FSKIT_INCLUDE_DIR})
-target_link_libraries(fskitLibrary runner ${FSKIT_LIBRARIES})
+target_link_libraries(fskitLibrary runner ${FSKIT_LIBRARIES} ${Boost_SERIALIZATION_LIBRARY} ${Boost_MPI_LIBRARY})
 
 INSTALL(TARGETS fskitLibrary EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
