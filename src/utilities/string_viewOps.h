@@ -1,14 +1,14 @@
-#pragma once/*
-* LLNS Copyright Start
- * Copyright (c) 2014-2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department
- * of Energy by Lawrence Livermore National Laboratory in part under
- * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
- * Produced at the Lawrence Livermore National Laboratory.
- * All rights reserved.
- * For details, see the LICENSE file.
- * LLNS Copyright End
- */
+#pragma once /*                                                                                                   \
+              * LLNS Copyright Start                                                                              \
+              * Copyright (c) 2014-2018, Lawrence Livermore National Security                                     \
+              * This work was performed under the auspices of the U.S. Department                                 \
+              * of Energy by Lawrence Livermore National Laboratory in part under                                 \
+              * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.                              \
+              * Produced at the Lawrence Livermore National Laboratory.                                           \
+              * All rights reserved.                                                                              \
+              * For details, see the LICENSE file.                                                                \
+              * LLNS Copyright End                                                                                \
+              */
 
 #ifndef STRINGVIEWOPS_H_
 #define STRINGVIEWOPS_H_
@@ -24,7 +24,6 @@
 
 namespace utilities
 {
-
 namespace string_viewOps
 {
 const string_view whiteSpaceCharacters (" \t\n\r\0\v\f");
@@ -60,7 +59,7 @@ outer brackets include [({<  and their matching pair whitespace is also trimmmed
 @param[in] source  the original string
 @return  the string with outer brackets removed
 */
-string_view removeBrackets(string_view str);
+string_view removeBrackets (string_view str);
 
 /** @brief get a string that comes after the last of a specified separator
 @param[in] input  the string to separate
@@ -76,7 +75,6 @@ string_view getTailString (string_view input, char separationCharacter);
 if not found returns the entire string
 */
 string_view getTailString (string_view input, string_view separationCharacters);
-
 
 const string_view default_delim_chars (",;");
 const string_view default_quote_chars (R"raw('"`)raw");
@@ -155,6 +153,6 @@ int trailingStringInt (string_view input, int defNum = -1);
 including negative signs and returns a positive integer or 0 basically the number you would get if
 all non integer characters were erased*/
 int toIntSimple (string_view input);
-}
-}
+}  // namespace string_viewOps
+}  // namespace utilities
 #endif

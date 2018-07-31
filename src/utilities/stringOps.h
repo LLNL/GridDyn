@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -13,12 +13,10 @@
 #ifndef STRINGOPS_H_
 #define STRINGOPS_H_
 
-
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
-
 
 //!< alias for convenience
 using stringVector = std::vector<std::string>;
@@ -47,7 +45,8 @@ void makeUpperCase (std::string &input);
 
 const unsigned int factors[] = {1, 10, 100, 1'000, 10'000, 100'000, 1'000'000, 10'000'000, 100'000'000};
 /**@brief append the text of the integral part of a number to a string*/
-template <typename X> void appendInteger (std::string &input, X val)
+template <typename X>
+void appendInteger (std::string &input, X val)
 {
     if (val < X (0))
     {
@@ -60,15 +59,16 @@ template <typename X> void appendInteger (std::string &input, X val)
         return;
     }
     int digits =
-    (x < 100 ?
-     2 :
-     (x < 1000 ?
-      3 :
-      (x < 10'000 ?
-       4 :
-       (x < 100'000 ?
-        5 :
-        (x < 1'000'000 ? 6 : (x < 10'000'000 ? 7 : (x < 100'000'000 ? 8 : (x < 1'000'000'000 ? 9 : 500))))))));
+      (x < 100 ?
+         2 :
+         (x < 1000 ?
+            3 :
+            (x < 10'000 ?
+               4 :
+               (x < 100'000 ? 5 :
+                              (x < 1'000'000 ?
+                                 6 :
+                                 (x < 10'000'000 ? 7 : (x < 100'000'000 ? 8 : (x < 1'000'000'000 ? 9 : 500))))))));
     if (digits > 9)  // don't deal with really big numbers
     {
         input += std::to_string (x);
@@ -171,7 +171,8 @@ void splitline (const std::string &line,
                 delimiter_compression compression = delimiter_compression::off);
 
 /** @brief split a line into a vector of strings taking into account quote characters
-the delimiter characters are allowed inside the brackets and the resulting vector will take the brackets into account
+the delimiter characters are allowed inside the brackets and the resulting vector will take the brackets into
+account
 @param[in] line  the string to split
 @param[in]  delimiters a string containing the valid delimiter characters
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters
@@ -185,7 +186,8 @@ stringVector splitlineQuotes (const std::string &line,
 
 /** @brief split a line into a vector of strings taking into account bracketing characters
  bracket characters include "()","{}","[]","<>" as well as quote characters ' and "
-the delimiter characters are allowed inside the brackets and the resulting vector will take the brackets into account
+the delimiter characters are allowed inside the brackets and the resulting vector will take the brackets into
+account
 @param[in] line  the string to spit
 @param[in]  delimiters a string containing the valid delimiter characters
 @param[in] compression default off,  if set to delimiter_compression::on will merge multiple sequential delimiters
@@ -196,7 +198,6 @@ stringVector splitlineBracket (const std::string &line,
                                const std::string &delimiters = default_delim_chars,
                                const std::string &bracketChars = default_bracket_chars,
                                delimiter_compression compression = delimiter_compression::off);
-
 
 /** @brief extract a trailing number from a string return the number and the string without the number
 @param[in] input the string to extract the information from
@@ -211,7 +212,6 @@ int trailingStringInt (const std::string &input, std::string &output, int defNum
 @return the numerical value of the trailing number*/
 int trailingStringInt (const std::string &input, int defNum = -1);
 
-
 /**@brief enumeration for string close matches
  */
 enum string_match_type_t
@@ -223,8 +223,8 @@ enum string_match_type_t
 };
 
 /** @brief find a close match in a vector of strings to a test string
- function searches for any of the testStrings in the testStrings vector based on the matchType parameter and returns
-the index into the testStrings vector
+ function searches for any of the testStrings in the testStrings vector based on the matchType parameter and
+returns the index into the testStrings vector
 @param[in] testStrings the vector of strings to search for
 @param[in] iString the string library to search through
 @param[in] matchType the matching type
@@ -260,7 +260,7 @@ Bracket characters include [({<
 @param[in] source  the original string
 @return  the string with brackets removed
 */
-std::string removeBrackets(const std::string &str);
+std::string removeBrackets (const std::string &str);
 
 /** @brief replace a particular key character with a different string
 @param[in] source  the original string
@@ -275,8 +275,6 @@ std::string characterReplace (const std::string &source, char key, const std::st
 @return the string with the character codes removed and replaced with the appropriate character
 */
 std::string xmlCharacterCodeReplace (std::string str);
-}
-
+}  // namespace stringOps
 
 #endif
-

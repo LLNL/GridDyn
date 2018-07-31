@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -31,9 +31,8 @@ enum units_t
     Ohm = 7,
     Amp = 8,
     MWps = 9,  //!< MW/s
-    MWpmin = 10,  //!<MW/min
-    MWph = 11,  //!<MW/hr
-
+    MWpmin = 10,  //!< MW/min
+    MWph = 11,  //!< MW/hr
 
     // rotational speed
     Hz = 51,
@@ -47,10 +46,9 @@ enum units_t
     puOhm = 107,
     puA = 108,
     puMWps = 109,  //!< per unit MW/s
-    puMWpmin = 110,  //!<per unit MW/min
-    puMWph = 111,  //!<per unit MW/hr
+    puMWpmin = 110,  //!< per unit MW/min
+    puMWph = 111,  //!< per unit MW/hr
     puHz = 151,
-
 
     // distance Units
     meter = 201,
@@ -61,7 +59,6 @@ enum units_t
     // angle units
     deg = 301,
     rad = 302,
-
 
     // time units,
     sec = 401,
@@ -124,8 +121,11 @@ units_t getUnits (const std::string &unitString, units_t defValue = defUnit);
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double
-unitConversion (double val, const units_t in, const units_t out, double basePower = 100, double localBaseVoltage = 100);
+double unitConversion (double val,
+                       const units_t in,
+                       const units_t out,
+                       double basePower = 100,
+                       double localBaseVoltage = 100);
 
 /** @brief convert between units of Time
 @param[in] val  the value of the property in input units
@@ -195,4 +195,4 @@ double unitConversionCost (double val, const units_t in, const units_t out, doub
 specified units
 */
 double unitConversionTemperature (double val, const units_t in, const units_t out);
-}//namespace gridUnits
+}  // namespace gridUnits

@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef _MATRIX_DATA_TRANSLATE_H_
 #define _MATRIX_DATA_TRANSLATE_H_
@@ -33,11 +33,8 @@ class matrixDataTranslate : public matrixDataContainer<ValueT>
     std::array<index_t, CT> Trow;  //!< the vector of translations
   public:
     /** @brief constructor
-    */
-    matrixDataTranslate ()
-    {
-        Trow.fill (kNullLocation);
-    };
+     */
+    matrixDataTranslate () { Trow.fill (kNullLocation); };
     explicit matrixDataTranslate (matrixData<ValueT> &input) : matrixDataContainer<ValueT> (input)
     {
         Trow.fill (kNullLocation);
@@ -45,9 +42,9 @@ class matrixDataTranslate : public matrixDataContainer<ValueT>
     inline bool isValidRow (index_t row) const
     {
 #ifdef UNSIGNED_INDEXING
-        return ((row < CT) && (Trow[row] < matrixData<ValueT>::rowLimit()));
+        return ((row < CT) && (Trow[row] < matrixData<ValueT>::rowLimit ()));
 #else
-        return ((row < CT) && (row >= 0) && (Trow[row] < matrixData<ValueT>::rowLimit()));
+        return ((row < CT) && (row >= 0) && (Trow[row] < matrixData<ValueT>::rowLimit ()));
 #endif
     }
     void assign (index_t row, index_t col, ValueT num) override

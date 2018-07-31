@@ -16,9 +16,9 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "coupling/GhostSwingBusManager.h"
+#include "utilities/stringConversion.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
-#include "utilities/stringConversion.h"
 
 #include <cassert>
 #include <cmath>

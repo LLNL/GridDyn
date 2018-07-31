@@ -138,18 +138,19 @@ class matrixData
      *  @return the max col value
      */
     count_t colLimit () const { return colLim; };
-private:
-	/**
-	*  @brief private function for derived classes to notify of a limitUpdate
-	*  @param[rowLimit] the new rowLimit
-	* @param[colLimit] the new colLimit
-	*/
-	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) { (void)(newRowLimit), void(newColLimit); }
-	/**
-	*  @brief get the number of points
-	*  @return the number of points
-	*/
-public:
+
+  private:
+    /**
+     *  @brief private function for derived classes to notify of a limitUpdate
+     *  @param[rowLimit] the new rowLimit
+     * @param[colLimit] the new colLimit
+     */
+    virtual void limitUpdate (index_t newRowLimit, index_t newColLimit) { (void)(newRowLimit), void(newColLimit); }
+    /**
+     *  @brief get the number of points
+     *  @return the number of points
+     */
+  public:
     /**
      *  @brief set the maximum row count
      *  @param[in] limit the new row limit
@@ -169,7 +170,6 @@ public:
         limitUpdate (rowLim, colLim);
     };
 
- 
     virtual count_t size () const = 0;
     /**
      *  @brief get the current capacity

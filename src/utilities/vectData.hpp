@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef _SPARSE_VECTOR_DATA_H_
 #define _SPARSE_VECTOR_DATA_H_
@@ -22,8 +22,8 @@
 #include <vector>
 
 /**
-* class for storing data from the Jacobian computation
-*/
+ * class for storing data from the Jacobian computation
+ */
 template <class Y = double>
 class vectData
 {
@@ -37,14 +37,14 @@ class vectData
   public:
     vectData () {}
     /**
-    * function to clear the data
-    */
+     * function to clear the data
+     */
     void reset () { dVec.resize (0); }
     /**
-    * add a new Jacobian element
-    * @param[in] X the row (X) and column(Y) of the element
-    * @param[in] num the value of the element
-    */
+     * add a new Jacobian element
+     * @param[in] X the row (X) and column(Y) of the element
+     * @param[in] num the value of the element
+     */
     void assign (index_t X, Y num)
     {
         assert (!std::isnan (num));
@@ -52,10 +52,10 @@ class vectData
         dVec.emplace_back (X, num);
     }
     /** assign with a check
-    * add a new Jacobian element if the arguments are valid (X>=0) &&(Y>=0)
-    * @param[in] X the row (X) of the element
-    * @param[in] num the value of the element
-    */
+     * add a new Jacobian element if the arguments are valid (X>=0) &&(Y>=0)
+     * @param[in] X the row (X) of the element
+     * @param[in] num the value of the element
+     */
     void assignCheck (index_t X, Y num)
     {
         if ((X >= 0) && (X < maxRowCount))
@@ -65,27 +65,27 @@ class vectData
         }
     }
     /**
-    * reserve space for the count of the Jacobian
-    * @param[in] size the amount of space to reserve
-    */
+     * reserve space for the count of the Jacobian
+     * @param[in] size the amount of space to reserve
+     */
     void reserve (count_t size) { dVec.reserve (size); }
     /**
-    * get the number of points
-    * @return the number of points
-    */
+     * get the number of points
+     * @return the number of points
+     */
     count_t points () const { return static_cast<count_t> (dVec.size ()); }
     /**
-    * get the maximum number of points the vector can hold
-    * @return the number of points
-    */
+     * get the maximum number of points the vector can hold
+     * @return the number of points
+     */
     count_t capacity () const { return static_cast<count_t> (dVec.capacity ()); }
     /**
-    * sort the index based first on row number than column number
-    */
+     * sort the index based first on row number than column number
+     */
     void sortIndex () { std::sort (dVec.begin (), dVec.end (), compareLocVectData); }
     /**
-    * compact the index merging values with the same row and column number together
-    */
+     * compact the index merging values with the same row and column number together
+     */
     void compact ()
     {
         if (dVec.empty ())
@@ -113,22 +113,22 @@ class vectData
         dVec.resize (++dvb - dVec.begin ());
     }
     /**
-    * get the row value
-    * @param[in] N the element number to return
-    * @return the row of the corresponding index
-    */
+     * get the row value
+     * @param[in] N the element number to return
+     * @return the row of the corresponding index
+     */
     index_t rowIndex (index_t N) { return dVec[N].first; }
     /**
-    * get the column value
-    * @param[in] N the element number to return
-    * @return the column of the corresponding index
-    */
+     * get the column value
+     * @param[in] N the element number to return
+     * @return the column of the corresponding index
+     */
 
     Y val (index_t N) { return dVec[N].second; }
     /**
-    * get the number nonzero of elements in each row
-    * @return a vector of integers with the column counts
-    */
+     * get the number nonzero of elements in each row
+     * @return a vector of integers with the column counts
+     */
 
     Y at (index_t rowN)
     {  // NOTE: function assumes vectData is sorted and compacted

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -38,7 +38,7 @@ class matrixDataOrdered : public matrixData<ValueT>
     /** @brief constructor
     @param[in] rowCount  the number of rows and columns in the matrix
     */
-    explicit matrixDataOrdered (index_t RowCount) : matrixData<ValueT> (RowCount, RowCount),dVec(RowCount) { };
+    explicit matrixDataOrdered (index_t RowCount) : matrixData<ValueT> (RowCount, RowCount), dVec (RowCount){};
     void clear () override
     {
         count = 0;
@@ -75,12 +75,12 @@ class matrixDataOrdered : public matrixData<ValueT>
         }
     }
 
-	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) override
-	{
-		primary_max = keyOrder<index_t, M>::primary(newRowLimit, newColLimit);
-		dVec.resize(primary_max);
-	}
-    
+    virtual void limitUpdate (index_t newRowLimit, index_t newColLimit) override
+    {
+        primary_max = keyOrder<index_t, M>::primary (newRowLimit, newColLimit);
+        dVec.resize (primary_max);
+    }
+
     virtual void reserve (count_t reserveSize) override
     {
         // dVec can't have size 0 since that case is taken by a different template specialization

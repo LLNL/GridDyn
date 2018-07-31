@@ -13,16 +13,16 @@
 #include "zipLoad.h"
 #include "../gridBus.h"
 #include "ThreePhaseLoad.h"
+#include "approximatingLoad.h"
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/matrixData.hpp"
-#include "sourceLoad.h"
-#include "rampLoad.h"
-#include "fileLoad.h"
 #include "exponentialLoad.h"
-#include "approximatingLoad.h"
 #include "fDepLoad.h"
+#include "fileLoad.h"
+#include "rampLoad.h"
+#include "sourceLoad.h"
+#include "utilities/matrixData.hpp"
 
 #include <cmath>
 #include <complex>

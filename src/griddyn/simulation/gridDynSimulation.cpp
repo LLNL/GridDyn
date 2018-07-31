@@ -29,9 +29,9 @@
 #include "utilities/stringOps.h"
 #include <cassert>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <queue>
-#include <fstream>
 
 namespace griddyn
 {
