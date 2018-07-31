@@ -429,6 +429,44 @@ BOOST_AUTO_TEST_CASE (test_event)
     sim = nullptr;
 }
 
+
+BOOST_AUTO_TEST_CASE (test_vector_event)
+{
+    auto hR = std::make_unique<helicsRunner> ();
+    hR->InitializeFromString (helics_test_directory + "simple_bus_test2_event.xml");
+
+    auto sim = hR->getSim ();
+
+    auto brk = helics::apps::BrokerApp ("3");
+    auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
+    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+
+    // add a single point
+    auto play = helics::apps::Player (helics::FederateInfo ());
+    play.addPublication ("breakers", helics::helics_type_t::helicsVector);
+    play.addPoint (120.0, "breakers", "v[0.0,1.0,0.0,0.0]");
+
+    auto fut_rec = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
+    auto fut_play = std::async (std::launch::async, [&play]() { play.run (); });
+    hR->simInitialize ();
+
+    auto tret = hR->Run ();
+
+    BOOST_CHECK_EQUAL (tret, 240.0);
+
+    fut_rec.get ();
+    fut_play.get ();
+    hR->Finalize ();
+    auto pts = rec.pointCount ();
+    BOOST_CHECK_EQUAL (pts, 41 * 4);
+    auto endpt = rec.getValue (163);
+    BOOST_CHECK_EQUAL (numeric_conversion (endpt.second, 45.7), 0.0);
+    rec.finalize ();
+    // I want this freed first PT
+    hR = nullptr;
+    sim = nullptr;
+}
+
 BOOST_AUTO_TEST_CASE (test_main_exe)
 {
     exeTestRunner mainExeRunner (GRIDDYNINSTALL_LOCATION, GRIDDYNMAIN_LOCATION, "gridDynMain");

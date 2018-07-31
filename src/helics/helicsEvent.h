@@ -27,13 +27,14 @@ class helicsEvent :public events::reversibleEvent
     enum class helicsEventType
     {
         parameter,  //!< indicator that the event corresponds to a parameter
-        string_parameter,  //!< indicator that the event is a string parameter    };
+        string_parameter,  //!< indicator that the event is a string parameter
     };
   private:
     helicsCoordinator *coord = nullptr;  //!< pointer the coordinator
     helicsEventType eventType = helicsEventType::parameter;  //!< the type of the event
-    std::string key;  
-	int32_t subid = -1;
+    std::string key;  //!< helics subscription key
+	int32_t subid = -1;  //!< index of the subscription
+    int32_t vectorElement = -1;//element of a vector to use as the event parameter
     double minDelta = 0.0; //!< set the minimum delta for the event to trigger
   public:
     helicsEvent (const EventInfo &gdEI, coreObject *rootObject);

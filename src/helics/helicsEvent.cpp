@@ -10,9 +10,9 @@
  * LLNS Copyright End
  */
 
+#include "helicsEvent.h"
 #include "helics/application_api/Subscriptions.hpp"
 #include "helicsCoordinator.h"
-#include "helicsEvent.h"
 
 namespace griddyn
 {
@@ -43,14 +43,20 @@ void helicsEvent::cloneTo (Event *evnt) const
     {
         return;
     }
-    // gp->valueref = valueref;
+    fe->minDelta = minDelta;
+    fe->vectorElement = vectorElement;
+    fe->key = key;
 }
 
 void helicsEvent::set (const std::string &param, double val)
 {
-    if (param == "delta")
+    if ((param == "element") || (param == "vectorelement"))
     {
-        // valueref = static_cast<unsigned int>(val);
+        vectorElement = static_cast<int32_t> (val);
+    }
+    else if (param == "delta")
+    {
+        minDelta = std::abs (val);
     }
     else
     {
@@ -71,6 +77,12 @@ void helicsEvent::set (const std::string &param, const std::string &val)
         {
             eventType = helicsEventType::parameter;
             stringEvent = false;
+        }
+        else if (val == "vector")
+        {
+            eventType = helicsEventType::parameter;
+            stringEvent = false;
+            vectorElement = 0;
         }
     }
     else if (param == "key")
@@ -149,10 +161,24 @@ void helicsEvent::initialize ()
     }
     else
     {
-        sub->registerCallback<double> ([this](double update, helics::Time /*tval*/) {
-            setValue (update);
-            trigger ();
-        });
+        if (vectorElement >= 0)
+        {
+            sub->registerCallback<std::vector<double>> (
+              [this](const std::vector<double> &update, helics::Time /*tval*/) {
+                  if (vectorElement < static_cast<int32_t> (update.size ()))
+                  {
+                      setValue (update[vectorElement]);
+                      trigger ();
+                  }
+              });
+        }
+        else
+        {
+            sub->registerCallback<double> ([this](double update, helics::Time /*tval*/) {
+                setValue (update);
+                trigger ();
+            });
+        }
     }
     initRequired = false;
 }
@@ -181,7 +207,6 @@ void helicsEvent::findCoordinator ()
                         subid = coord->addSubscription (key, unitType);
                     }
                     coord->addEvent (this);
-					
                 }
             }
         }
