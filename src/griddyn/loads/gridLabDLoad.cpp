@@ -931,9 +931,9 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
         X2 = (Q2 - Q1 + b1 * X3 - b2 * X3) / (V2 - V1);
         X1 = Q1 - V1 * X2 - b1 * X3;
 
-    retP[1] = X1;
-    retP[3] = X2;
-    retP[5] = X3;
+        retP[1] = X1;
+        retP[3] = X2;
+        retP[5] = X3;
     }
 #endif
 
@@ -942,16 +942,17 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
     std::cout << "SGS : gridlabDLaod::run3GridLabB V1 = " << V1 << " V2 = " << V2 << " V3 = " << V3 << '\n';
 
-    std::cout << "SGS : gridlabDLaod::run3GridLabB Vg[0] = " << Vg[0] << " Vg[1] = " << Vg[1] << " Vg[2] = " << Vg[2]
-          << '\n';
-    std::cout << "SGS : gridlabDLaod::run3GridLabB Ig[0] = " << Ig[0] << " Ig[1] = " << Ig[1] << " Ig[2] = " << Ig[2]
-          << '\n';
+    std::cout << "SGS : gridlabDLaod::run3GridLabB Vg[0] = " << Vg[0] << " Vg[1] = " << Vg[1]
+              << " Vg[2] = " << Vg[2] << '\n';
+    std::cout << "SGS : gridlabDLaod::run3GridLabB Ig[0] = " << Ig[0] << " Ig[1] = " << Ig[1]
+              << " Ig[2] = " << Ig[2] << '\n';
 
-    std::cout << "SGS : gridLabDLoad::run3GridLabB P1 = " << P1 << " Q1 = " << Q1 << " P2 = " << P2 << " Q2 = " << Q2
-          << " P3 = " << P3 << " Q3 = " << Q3 << '\n';
+    std::cout << "SGS : gridLabDLoad::run3GridLabB P1 = " << P1 << " Q1 = " << Q1 << " P2 = " << P2
+              << " Q2 = " << Q2 << " P3 = " << P3 << " Q3 = " << Q3 << '\n';
 
     std::cout << "SGS : gridLabDLoad::run3GridLabB retP[0] = " << retP[0] << " [1] = " << retP[1]
-          << " [2] = " << retP[2] << " [3] = " << retP[3] << " [4] = " << retP[4] << " [5] = " << retP[5] << '\n';
+              << " [2] = " << retP[2] << " [3] = " << retP[3] << " [4] = " << retP[4] << " [5] = " << retP[5]
+              << '\n';
 #endif
 
     return retP;

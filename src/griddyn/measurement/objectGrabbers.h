@@ -14,10 +14,10 @@
 #define OBJECT_GRABBERS_H_
 #pragma once
 
+#include "../solvers/solverMode.hpp"
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
 #include "gridGrabbers.h"
-#include "../solvers/solverMode.hpp"
 
 namespace griddyn
 {
@@ -74,23 +74,22 @@ class objectGrabber : public gridGrabber
     }
     std::unique_ptr<gridGrabber> clone () const override
     {
-		std::unique_ptr<gridGrabber> ggb = std::make_unique<objectGrabber>();
-		cloneTo(ggb.get());
+        std::unique_ptr<gridGrabber> ggb = std::make_unique<objectGrabber> ();
+        cloneTo (ggb.get ());
         return ggb;
     }
 
-	void cloneTo(gridGrabber *ggb) const override
-	{
-	
-		gridGrabber::cloneTo(ggb);
-		auto ngb = dynamic_cast<objectGrabber *>(ggb);
-		if (ngb == nullptr)
-		{
-			return;
-		}
+    void cloneTo (gridGrabber *ggb) const override
+    {
+        gridGrabber::cloneTo (ggb);
+        auto ngb = dynamic_cast<objectGrabber *> (ggb);
+        if (ngb == nullptr)
+        {
+            return;
+        }
 
-		ngb->tobject = tobject;
-	}
+        ngb->tobject = tobject;
+    }
 
     void updateField (const std::string &fld) override
     {
@@ -160,26 +159,24 @@ class objectOffsetGrabber : public gridGrabber
         updateOffset (newOffset);
     }
 
-	std::unique_ptr<gridGrabber> clone() const override
-	{
-		std::unique_ptr<gridGrabber> ggb = std::make_unique<objectOffsetGrabber>();
-			objectOffsetGrabber::cloneTo(ggb.get());
-		return ggb;
-	}
+    std::unique_ptr<gridGrabber> clone () const override
+    {
+        std::unique_ptr<gridGrabber> ggb = std::make_unique<objectOffsetGrabber> ();
+        objectOffsetGrabber::cloneTo (ggb.get ());
+        return ggb;
+    }
 
-	void cloneTo(gridGrabber *ggb) const override
-	{
-
-		gridGrabber::cloneTo(ggb);
-		auto ngb = dynamic_cast<objectOffsetGrabber *>(ggb);
-		if (ngb == nullptr)
-		{
-			return;
-		}
-		ngb->offset = offset;
-		ngb->tobject = tobject;
-	}
-    
+    void cloneTo (gridGrabber *ggb) const override
+    {
+        gridGrabber::cloneTo (ggb);
+        auto ngb = dynamic_cast<objectOffsetGrabber *> (ggb);
+        if (ngb == nullptr)
+        {
+            return;
+        }
+        ngb->offset = offset;
+        ngb->tobject = tobject;
+    }
 
     void updateField (const std::string &fld) override
     {

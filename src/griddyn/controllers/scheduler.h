@@ -35,7 +35,7 @@ class scheduler : public Source
     double m_Base = 100;  //!< [MW] generator base power
     double PCurr = 0;  //!<[puMW] current power output
     std::list<tsched> pTarget;  //!< target list
-    std::shared_ptr<Communicator> commLink;  //!<communicator link
+    std::shared_ptr<Communicator> commLink;  //!< communicator link
     comms::commManager cManager;
     std::uint64_t dispatcher_id = 0;  //!< communication id of the dispatcher
   public:

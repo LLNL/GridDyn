@@ -818,7 +818,7 @@ double Link::getCurrent (id_type_t busId) const
     if (isBus2 (busId, B2))  // from bus
     {
         auto pmag = std::hypot (linkFlows.P2, linkFlows.Q2);
-        val =  (pmag!=0.0)?pmag/linkInfo.v2:0.0;
+        val = (pmag != 0.0) ? pmag / linkInfo.v2 : 0.0;
     }
     else
     {

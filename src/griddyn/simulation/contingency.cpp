@@ -119,14 +119,14 @@ contingency::contingency (gridDynSimulation *sim, std::shared_ptr<Event> ge)
 
 void contingency::execute ()
 {
-    auto contSim = std::unique_ptr<gridDynSimulation>(static_cast<gridDynSimulation *> (gds->clone ()));
+    auto contSim = std::unique_ptr<gridDynSimulation> (static_cast<gridDynSimulation *> (gds->clone ()));
     contSim->set ("printlevel", 0);
     int res = FUNCTION_EXECUTION_SUCCESS;
     for (auto &evList : eventList)
     {
         for (auto &ev : evList)
         {
-            ev->updateObject (contSim.get(), object_update_mode::match);
+            ev->updateObject (contSim.get (), object_update_mode::match);
             ev->trigger ();
             ev->updateObject (gds, object_update_mode::match);  // map the event back to the original simulation
         }
@@ -146,18 +146,18 @@ void contingency::execute ()
         Violations.emplace_back (contSim->getName (), CONVERGENCE_FAILURE);
     }
 
-    completed.store(true,std::memory_order::memory_order_release);
+    completed.store (true, std::memory_order::memory_order_release);
     promise_val.set_value (static_cast<int> (Violations.size ()));
 }
 void contingency::reset ()
 {
-    completed.store(false);
+    completed.store (false);
     promise_val = std::promise<int> ();
     future_ret = std::shared_future<int> (promise_val.get_future ());
 }
 
 void contingency::wait () const { future_ret.wait (); }
-bool contingency::isFinished () const { return completed.load(std::memory_order_acquire); }
+bool contingency::isFinished () const { return completed.load (std::memory_order_acquire); }
 
 void contingency::setContingencyRoot (gridDynSimulation *gdSim)
 {

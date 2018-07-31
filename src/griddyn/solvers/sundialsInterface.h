@@ -16,8 +16,8 @@
 #include "solverInterface.h"
 #include "utilities/matrixDataSparse.hpp"
 // SUNDIALS libraries
+#include "griddyn/griddyn-config.h"  // Needed for SUNDIALS_OPENMP define
 #include "nvector/nvector_serial.h"
-#include "griddyn/griddyn-config.h" // Needed for SUNDIALS_OPENMP define
 #ifdef SUNDIALS_OPENMP
 #include "nvector/nvector_openmp.h"
 #include <omp.h>

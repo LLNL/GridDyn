@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -31,7 +31,6 @@ class nullObject final : public coreObject
     /** @brief nullObject constructor which takes a string*/
     explicit nullObject (const std::string &objName);
 
-
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
     /**
      * alert just sinks all alerts and does nothing
@@ -51,11 +50,10 @@ class nullObject final : public coreObject
     */
     virtual coreObject *findByUserID (const std::string &typeName, index_t searchID) const override;
 
-
     /** @brief set the parent
     @details nullObjects do not allow the parents to be set*/
     virtual void setParent (coreObject *parentObj) override;
 };
-}//namespace griddyn
+}  // namespace griddyn
 
 #endif

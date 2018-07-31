@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef ELEMENT_READER_TEMPLATES_H_
 #define ELEMENT_READER_TEMPLATES_H_
@@ -17,8 +17,8 @@
 #include "core/coreExceptions.h"
 #include "core/objectFactory.hpp"
 #include "core/objectInterpreter.h"
-#include "formatInterpreters/readerElement.h"
 #include "fileInput.h"
+#include "formatInterpreters/readerElement.h"
 #include "readElement.h"
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
@@ -28,7 +28,10 @@ namespace griddyn
 const IgnoreListType emptyIgnoreList{};
 
 template <class COMPONENT>
-void loadParentInfo (std::shared_ptr<readerElement> &element, COMPONENT *mobj, readerInfo &ri, coreObject *parentObject)
+void loadParentInfo (std::shared_ptr<readerElement> &element,
+                     COMPONENT *mobj,
+                     readerInfo &ri,
+                     coreObject *parentObject)
 {
     coreObject *newParentObject = getParent (element, ri, parentObject, parentSearchComponent (mobj));
     if (newParentObject)
@@ -74,9 +77,9 @@ const stringVec typeandRetype{"type", "retype"};
 
 template <class COMPONENT>
 COMPONENT *locateObjectFromElement (std::shared_ptr<readerElement> &element,
-                            const std::string &component,
-                            readerInfo &ri,
-                            coreObject *searchObject)
+                                    const std::string &component,
+                                    readerInfo &ri,
+                                    coreObject *searchObject)
 {
     using namespace readerConfig;
     coreObject *obj;
@@ -120,10 +123,10 @@ COMPONENT *locateObjectFromElement (std::shared_ptr<readerElement> &element,
 
 template <class COMPONENT>
 COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
-	COMPONENT *mobj,
-                const std::string &component,
-                readerInfo &ri,
-                coreObject *searchObject)
+                        COMPONENT *mobj,
+                        const std::string &component,
+                        readerInfo &ri,
+                        coreObject *searchObject)
 {
     using namespace readerConfig;
     auto cof = coreObjectFactory::instance ();
@@ -140,8 +143,8 @@ COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
             makeLowerCase (valType);
             if (!tf->isValidType (valType))
             {
-                WARNPRINT (READER_WARN_IMPORTANT, "unknown " << component << " type (" << valType
-                                                             << ") reverting to default type ");
+                WARNPRINT (READER_WARN_IMPORTANT,
+                           "unknown " << component << " type (" << valType << ") reverting to default type ");
             }
             if (objectName.empty ())
             {
@@ -187,8 +190,8 @@ COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
             makeLowerCase (valType);
             if (!tf->isValidType (valType))
             {
-                WARNPRINT (READER_WARN_IMPORTANT, "unknown " << component << " retype reverting to default type"
-                                                             << valType);
+                WARNPRINT (READER_WARN_IMPORTANT,
+                           "unknown " << component << " retype reverting to default type" << valType);
             }
             auto rtObj = dynamic_cast<COMPONENT *> (tf->makeObject (valType, mobj->getName ()));
 
@@ -266,10 +269,10 @@ COMPONENT *buildObject (std::shared_ptr<readerElement> &element,
 
 template <class COMPONENT>
 COMPONENT *ElementReaderSetup (std::shared_ptr<readerElement> &element,
-	COMPONENT *mobj,
-                       const std::string &component,
-                       readerInfo &ri,
-                       coreObject *searchObject)
+                               COMPONENT *mobj,
+                               const std::string &component,
+                               readerInfo &ri,
+                               coreObject *searchObject)
 {
     using namespace readerConfig;
 
@@ -293,10 +296,10 @@ COMPONENT *ElementReaderSetup (std::shared_ptr<readerElement> &element,
 
 template <class COMPONENT>
 COMPONENT *ElementReader (std::shared_ptr<readerElement> &element,
-	COMPONENT *mobj,
-                  const std::string &component,
-                  readerInfo &ri,
-                  coreObject *searchObject)
+                          COMPONENT *mobj,
+                          const std::string &component,
+                          readerInfo &ri,
+                          coreObject *searchObject)
 {
     using namespace readerConfig;
     auto riScope = ri.newScope ();
@@ -309,6 +312,6 @@ COMPONENT *ElementReader (std::shared_ptr<readerElement> &element,
     return mobj;
 }
 
-}//namespace griddyn
+}  // namespace griddyn
 
 #endif

@@ -127,5 +127,5 @@ class gridDynOptimization : public gridDynSimulation
     void setupOptOffsets (const optimMode &oMode, int setupMode);
 };
 
-}// namespace griddyn
+}  // namespace griddyn
 #endif
