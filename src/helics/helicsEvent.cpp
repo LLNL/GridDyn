@@ -139,7 +139,7 @@ coreObject *helicsEvent::getOwner () const { return coord; }
 
 void helicsEvent::initialize ()
 {
-    if (coord != nullptr)
+    if (coord == nullptr)
     {
         findCoordinator ();
         if (coord == nullptr)

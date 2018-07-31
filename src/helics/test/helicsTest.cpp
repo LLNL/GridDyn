@@ -392,6 +392,38 @@ BOOST_AUTO_TEST_CASE (test_collector)
     sim = nullptr;
 }
 
+BOOST_AUTO_TEST_CASE (test_collector_vector)
+{
+    auto hR = std::make_unique<helicsRunner> ();
+    hR->InitializeFromString (helics_test_directory + "simple_bus_test_collector_vec.xml");
+
+    auto sim = hR->getSim ();
+
+    auto brk = helics::apps::BrokerApp ("2");
+    auto cmd = utilities::StringToCmdLine ("--tags=vout");
+    auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
+
+    auto fut = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
+    hR->simInitialize ();
+
+    auto tret = hR->Run ();
+
+    BOOST_CHECK_EQUAL (tret, 240.0);
+
+    fut.get ();
+    hR->Finalize ();
+    auto pts = rec.pointCount ();
+    BOOST_CHECK_EQUAL (pts, 41);
+
+	auto pt1 = rec.getValue (0);
+    BOOST_CHECK_EQUAL (pt1.first, "vout");
+    BOOST_CHECK (pt1.second.compare (0, 3, "v4[") == 0);
+    rec.finalize ();
+    // I want this freed first PT
+    hR = nullptr;
+    sim = nullptr;
+}
+
 BOOST_AUTO_TEST_CASE (test_event)
 {
     auto hR = std::make_unique<helicsRunner> ();

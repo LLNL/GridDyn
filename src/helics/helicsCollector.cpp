@@ -88,9 +88,16 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
     {
         if (cp.columnCount == 1)
         {
-            auto index =
-              coord->addPublication (cp.colname, helics::helics_type_t::helicsDouble, cp.dataGrabber->outputUnits);
-            pubs.emplace_back (cp.colname, index, false);
+			if (pubType == collectorPubType::as_individual)
+			{
+                auto index = coord->addPublication (cp.colname, helics::helics_type_t::helicsDouble,
+                                                    cp.dataGrabber->outputUnits);
+                pubs.emplace_back (cp.colname, index, false);
+			}
+			else
+			{
+                pubs.emplace_back (cp.colname, -1, false);
+			}
         }
         else
         {
@@ -144,7 +151,7 @@ change_code helicsCollector::trigger (coreTime time)
         break;
     case collectorPubType::as_vector:
     case collectorPubType::as_string:
-        coord->publish (subscribe[0], data);
+        coord->publish (mpubIndex, data);
         break;
     }
 

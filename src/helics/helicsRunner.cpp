@@ -67,14 +67,15 @@ int helicsRunner::Initialize (int argc, char *argv[])
 	helicsOp.add_options()
 		("test", "test helics program")
 		("core_type", po::value < std::string >(), "specify the type of core to use (test,local, zmq, mpi)")
-		("core_init", po::value < std::string >(), "specify an init string for the core")
+		("core_init", po::value < std::string >(), "specify an initialization string for the core")
 		("core_name", po::value < std::string >(), "specify the type of core to use")
 		("name", po::value < std::string >(), "specify the name of the federate")
 		("broker", po::value < std::string >(), "specify the broker address")
 		("help","display the help messages")
-		("lookahead", po::value<double>(), "specify the lookahead time")
-	    ("impactwindow", po::value<double>(), "specify the impact window time")
+		("inputdelay", po::value<double>(), "specify the inputdelay time")
+	    ("outputdelay", po::value<double>(), "specify the outputdelay time")
 		("period", po::value<double>(), "specify the synchronization period");
+		("mindelta", po::value<double>(), "specify the minimum time between time grant");
 
 	//clang-format on
     auto parsed =  po::command_line_parser(argc, argv).options(helicsOp).allow_unregistered().run();
@@ -157,17 +158,21 @@ void helicsRunner::setCoordinatorOptions(boost::program_options::variables_map &
 	{
 		coord_->set("broker", helicsOptions["broker"].as<std::string>());
 	}
-	if (helicsOptions.count("lookahead") > 0)
+	if (helicsOptions.count("outputdelay") > 0)
 	{
-		coord_->set("lookahead", helicsOptions["lookahead"].as<double>());
+		coord_->set("outputdelay", helicsOptions["outputdelay"].as<double>());
 	}
-	if (helicsOptions.count("impactwindow") > 0)
+	if (helicsOptions.count("inputdelay") > 0)
 	{
-		coord_->set("impactwindow", helicsOptions["impactwindow"].as<double>());
+		coord_->set("inputdelay", helicsOptions["inputdelay"].as<double>());
 	}
 	if (helicsOptions.count("period") > 0)
 	{
 		coord_->set("period", helicsOptions["period"].as<double>());
+	}
+	if (helicsOptions.count("mindelta") > 0)
+	{
+		coord_->set("mindelta", helicsOptions["mindelta"].as<double>());
 	}
 	
 }
