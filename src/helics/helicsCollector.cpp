@@ -60,7 +60,26 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
                 {
                     coord = static_cast<helicsCoordinator *> (hCoord);
 
-					coord->addCollector (this);
+                    coord->addCollector (this);
+                    switch (pubType)
+                    {
+                    case collectorPubType::as_vector:
+                        if (!pubName.empty())
+                        {
+                            mpubIndex =
+                                coord->addPublication(pubName, helics::helics_type_t::helicsVector);
+                        }
+                        break;
+                    case collectorPubType::as_string:
+                        if (!pubName.empty())
+                        {
+                            mpubIndex =
+                                coord->addPublication(pubName, helics::helics_type_t::helicsString);
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -112,13 +131,23 @@ change_code helicsCollector::trigger (coreTime time)
         // helicsSendComplex(cnames[ii], data[index1], data[index2]);
     }
 
-    for (size_t ii = 0; ii < data.size (); ++ii)
+    switch (pubType)
     {
-        if (subscribe[ii])
+    case collectorPubType::as_individual:
+        for (size_t ii = 0; ii < data.size (); ++ii)
         {
-            coord->publish (pubs[ii].pubIndex, data[ii]);
+            if (subscribe[ii])
+            {
+                coord->publish (pubs[ii].pubIndex, data[ii]);
+            }
         }
+        break;
+    case collectorPubType::as_vector:
+    case collectorPubType::as_string:
+        coord->publish (subscribe[0], data);
+        break;
     }
+
     return out;
 }
 
@@ -135,6 +164,63 @@ void helicsCollector::set (const std::string &param, const std::string &val)
         complexPairs.emplace_back (trim (val.substr (0, commaLoc)),
                                    trim (val.substr (commaLoc + 1, asLoc - 1 - commaLoc)));
         // helicsRegister::instance()->registerPublication(cnames.back(), helicsRegister::dataType::helicsComplex);
+    }
+    else if (param == "pubtype")
+    {
+        if (val == "vector")
+        {
+            pubType = collectorPubType::as_vector;
+            if (mpubIndex >= 0)
+            {
+                coord->updatePublication(mpubIndex, pubName, helics::helics_type_t::helicsVector);
+            }
+        }
+        else if (val == "string")
+        {
+            pubType = collectorPubType::as_string;
+            if (mpubIndex >= 0)
+            {
+                coord->updatePublication(mpubIndex, pubName, helics::helics_type_t::helicsString);
+            }
+        }
+        else if (val == "individual")
+        {
+            pubType = collectorPubType::as_individual;
+        }
+        else
+        {
+            throw (invalidParameterValue ("pubtype must be one of \"vector\",\"string\",\"individual\""));
+        }
+    }
+    else if (param == "pubname")
+    {
+        pubName = val;
+        if (mpubIndex >= 0)
+        {
+            coord->updatePublication(mpubIndex, pubName,helics::helics_type_t::helicsAny);
+        }
+        else if (coord)
+        {
+            switch (pubType)
+            {
+            case collectorPubType::as_vector:
+                if (!pubName.empty())
+                {
+                    mpubIndex =
+                        coord->addPublication(pubName, helics::helics_type_t::helicsVector);
+                }
+                break;
+            case collectorPubType::as_string:
+                if (!pubName.empty())
+                {
+                    mpubIndex =
+                        coord->addPublication(pubName, helics::helics_type_t::helicsString);
+                }
+                break;
+            default:
+                break;
+            }
+        }
     }
     else
     {

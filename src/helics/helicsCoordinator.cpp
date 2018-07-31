@@ -352,7 +352,10 @@ void helicsCoordinator::updatePublication (int32_t index,
             pubI[index].name = pubName;
             pubMap_[pubName] = index;
         }
-        pubI[index].type = type;
+        if (type != helics::helics_type_t::helicsAny)
+        {
+            pubI[index].type = type;
+        }
         if (unitType != gridUnits::defUnit)
         {
             pubI[index].unitType = unitType;

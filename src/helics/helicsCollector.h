@@ -35,10 +35,18 @@ class helicsCollector : public collector
         {
         }
     };
-
+    enum class collectorPubType
+    {
+        as_individual = 0,
+        as_vector=1,
+        as_string=2,
+    };
+    collectorPubType pubType = collectorPubType::as_individual;
     std::vector<std::pair<std::string, std::string>> complexPairs;
     std::vector<std::string> cnames;
     std::vector<pubInformation> pubs;
+    std::string pubName;
+    int32_t mpubIndex = -1;
     helicsCoordinator *coord = nullptr;  //!< the coordinator for interaction with the helics interface
   public:
     helicsCollector (coreTime time0 = timeZero, coreTime period = timeOneSecond);

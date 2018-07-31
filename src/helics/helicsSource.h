@@ -38,6 +38,7 @@ protected:
 	helics::helics_type_t valueType;	//!< the type of value that is used through helics
 	int32_t valueIndex=-1;	//!< the index into the helics coordinator
 	helicsCoordinator *coord_=nullptr;  //!< pointer to the helics coordinator
+    int32_t elementIndex = 0; //!< index into a vector from HELICS
 private:
 	double prevVal = 0;
 public:

@@ -96,17 +96,27 @@ void helicsSource::updateA(coreTime time)
 		prevTime = time;
 		return;
 	}
-	auto res = coord_->getValueAs<double>(valueIndex);
-	if (res == kNullVal)
-	{
-		mp_dOdt = 0.0;
-		prevVal = m_output;
-		prevTime = time;
-		lastTime = time;
-		return;
-	}
+    double cval;
+    if (valueType == helics::helics_type_t::helicsVector)
+    {
+        auto vals = coord_->getValueAs<std::vector<double>>(valueIndex);
+        cval = vals[elementIndex];
+    }
+    else
+    {
+        cval = coord_->getValueAs<double>(valueIndex);
+        if (cval == kNullVal)
+        {
+            mp_dOdt = 0.0;
+            prevVal = m_output;
+            prevTime = time;
+            lastTime = time;
+            return;
+        }
+    }
 	
-	double newVal = unitConversion(res*scaleFactor, inputUnits, outputUnits, systemBasePower);
+	
+	double newVal = unitConversion(cval*scaleFactor, inputUnits, outputUnits, systemBasePower);
 	if (opFlags[use_ramp])
 	{
 		if (opFlags[predictive_ramp]) //ramp uses the previous change to guess into the future
@@ -243,6 +253,10 @@ void helicsSource::set(const std::string &param, double val, gridUnits::units_t 
 		scaleFactor = val;
 		updateSubscription();
 	}
+    else if (param == "element")
+    {
+        elementIndex = static_cast<int>(val);
+    }
 	else
 	{
 		Source::set(param, val, unitType);
