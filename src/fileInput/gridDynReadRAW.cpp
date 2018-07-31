@@ -22,6 +22,7 @@
 #include "griddyn/loads/svd.h"
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
+#include "utilities/stringConversion.h"
 
 #include <cassert>
 #include <cmath>

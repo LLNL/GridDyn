@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef ZIPLOAD_H_
-#define ZIPLOAD_H_
+#pragma once
 
 #include "../Load.h"
+
 namespace griddyn
 {
 /** primary load class supports 3 main types of loads  constant power, constant impedance, constant current
@@ -127,4 +127,3 @@ class zipLoad : public Load
 bool compareLoad (zipLoad *ld1, zipLoad *ld2, bool printDiff = false);
 
 }  // namespace griddyn
-#endif

@@ -13,6 +13,7 @@
 #pragma once
 
 #include "gridSecondary.h"
+
 namespace griddyn
 {
 class gridBus;

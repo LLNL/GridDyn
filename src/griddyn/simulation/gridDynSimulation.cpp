@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <iostream>
 #include <queue>
+#include <fstream>
 
 namespace griddyn
 {

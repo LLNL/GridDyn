@@ -10,10 +10,10 @@
 * LLNS Copyright End
 */
 
-#ifndef GRIDSVD_H_
-#define GRIDSVD_H_
+#pragma once
 
-#include "otherLoads.h"
+#include "rampLoad.h"
+
 namespace griddyn
 {
 namespace loads
@@ -62,7 +62,7 @@ public:
 	virtual void setLoad(double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit) override;
 	virtual void setState(coreTime time, const double state[], const double dstate_dt[], const solverMode &sMode) override;        //for saving the state
 	virtual void guessState(coreTime time, double state[], double dstate_dt[], const solverMode &sMode) override;                //for initial setting of the state
-	
+
 	virtual void getVariableType(double sdata[], const solverMode &sMode) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
@@ -108,4 +108,3 @@ protected:
 };
 } //namespace loads
 } //namespace griddyn
-#endif

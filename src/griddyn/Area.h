@@ -1,4 +1,3 @@
-#pragma once
 /*
  * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
@@ -11,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDAREA_H_
-#define GRIDAREA_H_
 #pragma once
 // headers
 #include "gridPrimary.h"
@@ -474,4 +471,3 @@ class Area : public gridPrimary
 Area *getMatchingArea (Area *area, gridPrimary *src, gridPrimary *sec);
 
 }  // namespace griddyn
-#endif

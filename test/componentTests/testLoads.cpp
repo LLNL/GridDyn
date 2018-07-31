@@ -16,6 +16,9 @@
 #include "griddyn/loads/ThreePhaseLoad.h"
 #include "griddyn/loads/motorLoad5.h"
 #include "griddyn/loads/zipLoad.h"
+#include "griddyn/loads/sourceLoad.h"
+#include "griddyn/loads/fileLoad.h"
+#include "griddyn/loads/fDepLoad.h"
 #include "griddyn/simulation/diagnostics.h"
 #include "../testHelper.h"
 #include <cmath>
@@ -361,7 +364,7 @@ BOOST_AUTO_TEST_CASE (file_load_test1)
 
 BOOST_AUTO_TEST_CASE(file_load_test2)
 {
-	
+
 	std::string fileName = load_test_directory + "testLoad.bin";
 	ld1 = new fileLoad("fload",fileName);
 	auto ldT = static_cast<fileLoad *> (ld1);
@@ -392,7 +395,7 @@ BOOST_AUTO_TEST_CASE (gridDynLoad_test1)
     gds->run ();
     requireStates (gds->currentProcessState (), gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
-#endif 
+#endif
 
 BOOST_AUTO_TEST_CASE (motor_test1)
 {

@@ -18,6 +18,7 @@
 #include "coupling/GhostSwingBusManager.h"
 #include "utilities/stringOps.h"
 #include "utilities/vectorOps.hpp"
+#include "utilities/stringConversion.h"
 
 #include <cassert>
 #include <cmath>

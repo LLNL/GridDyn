@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDLABDLOAD_H_
-#define GRIDLABDLOAD_H_
+#pragma once
 
-#include "otherLoads.h"
+#include "rampLoad.h"
+
 namespace griddyn
 {
 class GhostSwingBusManager;
@@ -126,4 +126,3 @@ class gridLabDLoad : public rampLoad
 };
 }  // namespace loads
 }  // namespace griddyn
-#endif

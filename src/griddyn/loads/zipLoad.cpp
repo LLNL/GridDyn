@@ -16,8 +16,13 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "otherLoads.h"
 #include "utilities/matrixData.hpp"
+#include "sourceLoad.h"
+#include "rampLoad.h"
+#include "fileLoad.h"
+#include "exponentialLoad.h"
+#include "approximatingLoad.h"
+#include "fDepLoad.h"
 
 #include <cmath>
 #include <complex>

@@ -10,11 +10,12 @@
  * LLNS Copyright End
  */
 
-#ifndef APPROXIMATINGLOAD_H_
-#define APPROXIMATINGLOAD_H_
+#pragma once
 
-#include "otherLoads.h"
+#include "rampLoad.h"
+
 #include <future>
+
 namespace griddyn
 {
 class GhostSwingBusManager;
@@ -123,4 +124,3 @@ class approximatingLoad : public rampLoad
 };
 }  // namespace loads
 }  // namespace griddyn
-#endif

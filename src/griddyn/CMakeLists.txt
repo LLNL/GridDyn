@@ -175,7 +175,6 @@ set(submodel_sources
 set(load_headers
 
 	Load.h
-	loads/otherLoads.h
 	loads/rampLoad.h
 	loads/exponentialLoad.h
 	loads/sourceLoad.h
