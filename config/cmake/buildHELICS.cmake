@@ -3,13 +3,6 @@
 
 function (build_helics)
 
-	set(valid_btypes Release Debug RelWithDebInfo MinSizeRel)
-	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btypes)
-		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-	else()
-		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
-	endif()
-	
 	include(escape_string)
 	
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
@@ -103,6 +96,18 @@ if (NOT BUILD_RELEASE_ONLY)
         )
 	endif()
 else(MSVC)
+
+	if (CMAKE_BUILD_TYPE)
+	list(APPEND valid_btypes "Release" "Debug" "RelWithDebInfo" "MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btypes)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
+else ()
+	set(LOCAL_BUILD_TYPE "Release")
+endif()
+	
 	message(STATUS "Configuring HELICS Autobuild for ${LOCAL_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/helics_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string} -D CMAKE_LINKER=${linker_string}
          -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 

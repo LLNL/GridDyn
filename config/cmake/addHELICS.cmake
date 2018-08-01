@@ -1,6 +1,7 @@
 
 IF (MSVC)
 	set(HELICS_PATH_HINTS
+		C:/local/helics_1_3_0
 		C:/local/helics_1_2_1
 		)
 ENDIF(MSVC)

@@ -33,9 +33,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # set the module path and include some common macros
 #-----------------------------------------------------------------------------
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
-include(BuildType)
 include(extraMacros)
 include(CMakeDependentOption)
+#include(BuildType)
 #-----------------------------------------------------------------------------
 # set the install path to a local directory
 #-----------------------------------------------------------------------------
