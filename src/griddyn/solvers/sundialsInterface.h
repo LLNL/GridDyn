@@ -17,7 +17,8 @@
 #include "utilities/matrixDataSparse.hpp"
 // SUNDIALS libraries
 #include "nvector/nvector_serial.h"
-#ifdef HAVE_OPENMP
+#include "griddyn/griddyn-config.h" // Needed for SUNDIALS_OPENMP define
+#ifdef SUNDIALS_OPENMP
 #include "nvector/nvector_openmp.h"
 #include <omp.h>
 #define NVECTOR_DESTROY(omp, vec) (omp) ? N_VDestroy_OpenMP (vec) : N_VDestroy_Serial (vec)

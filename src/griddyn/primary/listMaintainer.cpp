@@ -12,6 +12,9 @@
 
 #include "listMaintainer.h"
 #include "../Area.h"
+
+#include "griddyn/griddyn-config.h"
+
 namespace griddyn
 {
 void fillList (const solverMode &sMode,
@@ -109,7 +112,7 @@ void listMaintainer::jacobianElements (const IOdata &inputs,
     {
         return;
     }
-#ifdef HAVE_OPENMP
+#ifdef GRIDDYN_OPENMP
     if (parJac)
     {
         auto &vz = partialLists[sMode.offsetIndex];
@@ -143,7 +146,7 @@ void listMaintainer::residual (const IOdata &inputs, const stateData &sD, double
         return;
     }
 
-#ifdef HAVE_OPENMP
+#ifdef GRIDDYN_OPENMP
     if (parResid)
     {
         auto &vz = partialLists[sMode.offsetIndex];
@@ -182,7 +185,7 @@ void listMaintainer::algebraicUpdate (const IOdata &inputs,
         return;
     }
 
-#ifdef HAVE_OPENMP
+#ifdef GRIDDYN_OPENMP
 	if (parAlgebraic)
 	{
 		auto &vz = partialLists[sMode.offsetIndex];
@@ -220,7 +223,7 @@ void listMaintainer::derivative (const IOdata &inputs,
     {
         return;
     }
-#ifdef HAVE_OPENMP
+#ifdef GRIDDYN_OPENMP
     if (parDeriv)
     {
         auto &vz = partialLists[sMode.offsetIndex];

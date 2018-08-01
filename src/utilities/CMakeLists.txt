@@ -103,7 +103,7 @@ set(ZLIB_INCLUDES ${AUTOBUILD_INSTALL_PATH}/include)
 if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
 	build_minizip()
 endif()
-include(${PROJECT_BINARY_DIR}/libs/cmake/minizip-targets.cmake)
+include(${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
 
 
 target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib griddyn_base)
