@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -10,7 +10,7 @@
  * LLNS Copyright End
  */
 
- /** @file
+/** @file
  *  @brief define template operations on vectors
  */
 #ifndef VECTOR_OPS_H
@@ -24,7 +24,7 @@
 #include <numeric>
 #include <type_traits>
 #include <vector>
-/** solve a 2x2 matrix problem 
+/** solve a 2x2 matrix problem
 @details solve a 2 variable set of equations Vx=y solve for x
 v11*x1+v12*x2=y1
 v21*x1+v22*x2=y2
@@ -47,7 +47,7 @@ double solve2x2 (double v11, double v12, double v21, double v22, double y1, doub
 std::array<double, 3>
 solve3x3 (const std::array<std::array<double, 3>, 3> &input, const std::array<double, 3> &vals);
 
-/** perform a linear interpolation 
+/** perform a linear interpolation
 @param[in] timeIn a vector of time values
 @param[in] valIn the values of the known vector
 @param[in] timeOut  the desired times in the output vector
@@ -76,7 +76,7 @@ requires that the < operator be defined on the type
 template <class valType>
 KEY_QUAL valType valLimit (valType val, valType lowerLim, valType upperLim)
 {
-    return (val < upperLim) ? ((val < lowerLim) ? lowerLim : val):upperLim;
+    return (val < upperLim) ? ((val < lowerLim) ? lowerLim : val) : upperLim;
 }
 
 /** force a value to be at or below an upper Limit
@@ -88,7 +88,7 @@ KEY_QUAL valType valLimit (valType val, valType lowerLim, valType upperLim)
 template <class valType>
 KEY_QUAL valType valUpperLimit (valType val, valType upperLim)
 {
-    return (val < upperLim) ? val:upperLim;
+    return (val < upperLim) ? val : upperLim;
 }
 
 /** force a value to be at or above a lower Limit
@@ -112,7 +112,7 @@ and a less than operator and != operator
 template <typename M>
 KEY_QUAL M signn (M x)
 {
-    return ((x < M(0)) ? M(-1) : ((x != M(0)) ? M(1) : M(0)));
+    return ((x < M (0)) ? M (-1) : ((x != M (0)) ? M (1) : M (0)));
 }
 
 /** sum a vector
@@ -123,7 +123,7 @@ KEY_QUAL M signn (M x)
 template <class X>
 X sum (const std::vector<X> &a)
 {
-    X sum_of_vector = std::accumulate (a.cbegin (), a.cend (), X(0));
+    X sum_of_vector = std::accumulate (a.cbegin (), a.cend (), X (0));
     return sum_of_vector;
 }
 
@@ -137,7 +137,8 @@ void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize)
     }
 }
 
-/** check that a vector has the requested number of elements if not resize it with all new elements having value = defArg*/
+/** check that a vector has the requested number of elements if not resize it with all new elements having value =
+ * defArg*/
 template <class X>
 void ensureSizeAtLeast (std::vector<X> &a, size_t minRequiredSize, const X &defArg)
 {
@@ -160,14 +161,14 @@ X mean (const std::vector<X> &a)
     return sum_of_vector;
 }
 
-/** calculate the sum of the absolute values of a vector 
+/** calculate the sum of the absolute values of a vector
 @tparam X the type of the vector must define a negation operator and a < operator
 */
 template <class X>
 X absSum (const std::vector<X> &a)
 {
     X sum_of_vector =
-      std::accumulate (a.begin (), a.end (), X (0), [](X a1, X a2) -> X { return a1 + std::abs(a2); });
+      std::accumulate (a.begin (), a.end (), X (0), [](X a1, X a2) -> X { return a1 + std::abs (a2); });
     return sum_of_vector;
 }
 
@@ -180,8 +181,10 @@ X absMax (const std::vector<X> &a)
     // auto result = std::minmax_element (a.begin (), a.end ());
     // return std::max (std::abs (*(result.first)),std::abs (*(result.second)));
 
-    X max_of_vector = std::accumulate (a.begin (), a.end (), X (0),
-		[](X a1, X a2) -> X {auto absA = std::abs(a2); return (a1 <absA) ? absA : a1; });
+    X max_of_vector = std::accumulate (a.begin (), a.end (), X (0), [](X a1, X a2) -> X {
+        auto absA = std::abs (a2);
+        return (a1 < absA) ? absA : a1;
+    });
     return max_of_vector;
 }
 
@@ -247,7 +250,8 @@ std::pair<X, int> minLoc (const std::vector<X> &a)
     return std::make_pair (a1, result - a.begin ());
 }
 
-/** calculate the maximum absolute difference between values in two vectors and return the maximum difference and the location
+/** calculate the maximum absolute difference between values in two vectors and return the maximum difference and
+the location
 @tparam X the type of the vector must have std::abs defined
 @return a pair the first element is the absMax value the second is the index into the vector
 */
@@ -255,16 +259,16 @@ template <class X>
 auto absMaxDiffLoc (const std::vector<X> &a, const std::vector<X> &b)
 {
     int loc = -1;
-    
+
     auto cnt = (std::min) (a.size (), b.size ());
     auto abeg = a.begin ();
     auto acur = abeg;
     auto bcur = b.begin ();
     auto aend = abeg + cnt;
-	auto mdiff = decltype(std::abs(*acur - *bcur))(0);
+    auto mdiff = decltype (std::abs (*acur - *bcur)) (0);
     while (acur < aend)
     {
-		auto adiff = std::abs(*acur - *bcur);
+        auto adiff = std::abs (*acur - *bcur);
         if (adiff > mdiff)
         {
             loc = acur - abeg;
@@ -298,7 +302,7 @@ X product (const std::vector<X> &a)
     return prod_of_vector;
 }
 
-/** calculate the rms value of a vector 
+/** calculate the rms value of a vector
 @tparam X the type of the vector must have std::abs defined
 @return the computed rms value
 */
@@ -316,7 +320,7 @@ X stdev (const std::vector<X> &a)
     X mv = mean (a);
     X sum_of_vector =
       std::accumulate (a.begin (), a.end (), 0.0, [mv](X a1, X a2) -> X { return (a1 + (a2 - mv) * (a2 - mv)); });
-    X ret = X(0);
+    X ret = X (0);
     if (!a.empty ())
     {
         ret = std::sqrt (sum_of_vector / static_cast<X> (a.size ()));
@@ -343,7 +347,7 @@ X medianReorder (std::vector<X> &a)
 template <class X>
 X median (const std::vector<X> &a)
 {
-    std::vector<X> b(a);  // copy the vector
+    std::vector<X> b (a);  // copy the vector
     return medianReorder (b);
 }
 
@@ -354,7 +358,7 @@ template <class X>
 auto diff (const std::vector<X> &a)
 {
     auto cnt = a.size ();
-    std::vector<decltype(a[1]-a[0])> d (cnt);
+    std::vector<decltype (a[1] - a[0])> d (cnt);
     std::adjacent_difference (a.begin (), a.end (), d.begin ());
     return d;
 }
@@ -366,19 +370,19 @@ auto diff (const std::vector<X> &a)
 
 */
 template <class X>
-auto vecFindOp(const std::vector<X> &a, std::function<bool(X)> op) 
+auto vecFindOp (const std::vector<X> &a, std::function<bool(X)> op)
 {
-	auto cnt = a.size();
-	std::vector<decltype (cnt)> locs;
-	locs.reserve(cnt);
-	for (decltype (cnt) ii = 0; ii < cnt; ++ii)
-	{
-		if (op(a[ii]))
-		{
-			locs.push_back(ii);
-		}
-	}
-	return locs;
+    auto cnt = a.size ();
+    std::vector<decltype (cnt)> locs;
+    locs.reserve (cnt);
+    for (decltype (cnt) ii = 0; ii < cnt; ++ii)
+    {
+        if (op (a[ii]))
+        {
+            locs.push_back (ii);
+        }
+    }
+    return locs;
 }
 
 /** generate a vector of indices where the values of a vector are equal to a given value
@@ -592,7 +596,7 @@ template <class X, class Y>
 std::vector<Y> vecFindne (const std::vector<X> &a, X match, size_t start, size_t end)
 {
     auto cnt = a.size ();
-    cnt = std::min (end+1, cnt);
+    cnt = std::min (end + 1, cnt);
     std::vector<Y> locs;
     locs.reserve (cnt);
     for (decltype (cnt) ii = start; ii < cnt; ++ii)
@@ -763,7 +767,7 @@ template <class X>
 void vectorMult (const std::vector<X> &a, const std::vector<X> &b, std::vector<X> &M)
 {
     auto cnt = (std::min) (a.size (), b.size ());
-	M.resize(cnt);
+    M.resize (cnt);
     std::transform (a.begin (), a + cnt, b.begin (), M.begin (), std::multiplies<X> ());
 }
 
@@ -794,10 +798,10 @@ template <class X>
 X compareVec (const std::vector<X> &a,
               const std::vector<X> &b,
               std::vector<X> &diff,
-              typename std::vector<X>::size_type cnt=0)
+              typename std::vector<X>::size_type cnt = 0)
 {
     X sum_of_diff = 0;
-	cnt = (cnt == 0) ? (a.size()) : (std::min) (a.size(), cnt);
+    cnt = (cnt == 0) ? (a.size ()) : (std::min) (a.size (), cnt);
     cnt = (std::min) (b.size (), cnt);
     diff.resize (cnt);
     for (typename std::vector<X>::size_type ii = 0; ii < 0; ++ii)
@@ -814,11 +818,11 @@ X compareVec (const std::vector<X> &a,
 @return the sum of the absolute values of the differences
 */
 template <class X>
-X compareVec (const std::vector<X> &a, const std::vector<X> &b, typename std::vector<X>::size_type cnt=0)
+X compareVec (const std::vector<X> &a, const std::vector<X> &b, typename std::vector<X>::size_type cnt = 0)
 {
     X sum_of_diff = 0;
-	
-    cnt = (cnt==0)?(a.size()):(std::min) (a.size (), cnt);
+
+    cnt = (cnt == 0) ? (a.size ()) : (std::min) (a.size (), cnt);
     cnt = (std::min) (b.size (), cnt);
     for (typename std::vector<X>::size_type ii = 0; ii < cnt; ++ii)
     {
@@ -848,7 +852,8 @@ auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowabl
     return diffs;
 }
 
-/** count the differences between two vectors if the difference is greater than a tolerance, ignore a common mode difference between the two
+/** count the differences between two vectors if the difference is greater than a tolerance, ignore a common mode
+difference between the two
 @param a the first vector
 @param b the second vector
 @param maxAllowableDiff the tolerable difference between two values
@@ -861,7 +866,7 @@ auto countDiffsIgnoreCommon (const std::vector<X> &a, const std::vector<X> &b, X
     stype_t diffs = (std::max) (a.size (), b.size ()) - cnt;
     if (cnt < 3)
     {
-        return stype_t(0);
+        return stype_t (0);
     }
     X commonDiff1 = a[0] - b[0];
     X commonDiff2 = a[1] - b[1];
@@ -904,7 +909,8 @@ auto countDiffs (const std::vector<X> &a, const std::vector<X> &b, X maxAllowabl
     return diffs;
 }
 
-/** count the differences between two vectors if the difference is greater than a tolerance and the a value is valid (ie !=0)
+/** count the differences between two vectors if the difference is greater than a tolerance and the a value is
+valid (ie !=0)
 @param a the first vector
 @param b the second vector
 @param maxAllowableDiff the tolerable difference between two values
@@ -925,7 +931,8 @@ auto countDiffsIfValid (const std::vector<X> &a, const std::vector<X> &b, X maxA
     return diffs;
 }
 
-/** count the differences between two vectors if the difference is greater than a tolerance and call a callback function for each difference
+/** count the differences between two vectors if the difference is greater than a tolerance and call a callback
+function for each difference
 @param a the first vector
 @param b the second vector
 @param maxAllowableDiff the tolerable difference between two values
@@ -951,7 +958,8 @@ auto countDiffsCallback (const std::vector<X> &a,
     return diffs;
 }
 
-/** count the differences between two vectors if the difference is greater than a tolerance and the a value is valid (ie !=0) and call a callback function for each difference
+/** count the differences between two vectors if the difference is greater than a tolerance and the a value is
+valid (ie !=0) and call a callback function for each difference
 @param a the first vector
 @param b the second vector
 @param maxAllowableDiff the tolerable difference between two values
@@ -968,7 +976,7 @@ auto countDiffsIfValidCallback (const std::vector<X> &a,
     stype_t diffs = (std::max) (a.size (), b.size ()) - cnt;
     for (stype_t ii = 0; ii < cnt; ++ii)
     {
-        if ((std::abs (a[ii] - b[ii]) > maxAllowableDiff) && (a[ii] != X(0)))
+        if ((std::abs (a[ii] - b[ii]) > maxAllowableDiff) && (a[ii] != X (0)))
         {
             ++diffs;
             f (ii, a[ii], b[ii]);

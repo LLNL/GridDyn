@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef _MATRIX_DATA_COMPACT_H_
 #define _MATRIX_DATA_COMPACT_H_
@@ -31,7 +31,7 @@ class matrixDataCompact : public matrixData<ValueT>
 
   public:
     /** @brief compact constructor
-    */
+     */
     matrixDataCompact () : matrixData<ValueT> (R, C){};
 
     virtual void clear () override { dVec.fill (0); };
@@ -43,17 +43,17 @@ class matrixDataCompact : public matrixData<ValueT>
 
     virtual count_t size () const override { return R * C; };
     virtual count_t capacity () const override { return R * C; };
-	virtual void limitUpdate(index_t newRowLimit, index_t newColLimit) final override
-	{//the row and col limits cannot change
-		if (newRowLimit != R)
-		{
-			matrixData<ValueT>::setRowLimit(R);
-		}
-		if (newColLimit != C)
-		{
-			matrixData<ValueT>::setColLimit(R);
-		}
-	}
+    virtual void limitUpdate (index_t newRowLimit, index_t newColLimit) final override
+    {  // the row and col limits cannot change
+        if (newRowLimit != R)
+        {
+            matrixData<ValueT>::setRowLimit (R);
+        }
+        if (newColLimit != C)
+        {
+            matrixData<ValueT>::setColLimit (R);
+        }
+    }
     virtual matrixElement<ValueT> element (index_t N) const override { return {N % R, N / R, dVec[N]}; }
     virtual void start () override
     {

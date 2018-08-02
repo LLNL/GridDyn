@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -16,8 +16,8 @@
 #include "../utilities/timeRepresentation.hpp"
 
 #include <string>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 namespace griddyn
 {
@@ -85,9 +85,9 @@ inline bool isValidIndex (index_t index, const std::vector<VX> &vector_obj)
 }
 #endif
 
-template <class IND,class VX>
-inline bool isValidIndex(IND index, const std::vector<VX> &vector_obj)
+template <class IND, class VX>
+inline bool isValidIndex (IND index, const std::vector<VX> &vector_obj)
 {
-	return ((index >= 0) && (index < static_cast<IND> (vector_obj.size())));
+    return ((index >= 0) && (index < static_cast<IND> (vector_obj.size ())));
 }
 }  // namespace griddyn

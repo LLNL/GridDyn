@@ -357,7 +357,7 @@ void approximatingLoad::run1ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    //auto dt = time - m_lastCallTime;
+    // auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     voltages.push_back (inputs[voltageInLocation]);
@@ -379,7 +379,7 @@ void approximatingLoad::run2ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    //auto dt = time - m_lastCallTime;
+    // auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     double V = inputs[voltageInLocation];
@@ -416,7 +416,7 @@ void approximatingLoad::run3ApproxA (coreTime /*time*/, const IOdata &inputs)
 {
     assert (!opFlags[waiting_flag]);  // this should not happen;
 
-    //auto dt = time - m_lastCallTime;
+    // auto dt = time - m_lastCallTime;
 
     std::vector<double> voltages;
     double V = inputs[voltageInLocation];
@@ -700,5 +700,5 @@ change_code approximatingLoad::rootCheck (const IOdata &inputs,
     return change_code::no_change;
 }
 
-} // namespace loads
-} // namespace griddyn
+}  // namespace loads
+}  // namespace griddyn

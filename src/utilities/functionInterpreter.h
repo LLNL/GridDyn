@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -9,7 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
 
 #ifndef FUNCTION_INTERPRETER_H_
 #define FUNCTION_INTERPRETER_H_
@@ -73,7 +72,8 @@ double evalFunction (const std::string &functionName, const std::vector<double> 
 @param[in] arr2 the second array argument for evaluation
 @return the evaluated function or nan;
 */
-double evalFunction (const std::string &functionName, const std::vector<double> &arr1, const std::vector<double> &arr2);
+double
+evalFunction (const std::string &functionName, const std::vector<double> &arr1, const std::vector<double> &arr2);
 
 /** @brief check if a string represents a valid function
 @param[in] functionName the function name to tests
@@ -118,6 +118,5 @@ std::function<double(const std::vector<double> &)> getArrayFunction (const std::
 */
 std::function<double(const std::vector<double> &, const std::vector<double> &)>
 get2ArrayFunction (const std::string &functionName);
-
 
 #endif

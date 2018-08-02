@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -46,13 +46,10 @@ class workBlock : public basicWorkBlock
     /** move constructor*/
     workBlock (workBlock &&wb) = default;
     /** constructor from a packaged task*/
-    workBlock (std::packaged_task<retType ()> &&newTask) : task (std::move (newTask)), loaded(true)
-    {
-        reset ();
-    }
+    workBlock (std::packaged_task<retType ()> &&newTask) : task (std::move (newTask)), loaded (true) { reset (); }
     /** construct from a some sort of functional object*/
     template <typename Func>  // forwarding reference
-    workBlock (Func &&newWork) :  task (std::forward<Func> (newWork)), loaded(true)
+    workBlock (Func &&newWork) : task (std::forward<Func> (newWork)), loaded (true)
     {
         static_assert (std::is_same<decltype (newWork ()), retType>::value, "work does not match type");
         reset ();
@@ -85,7 +82,7 @@ class workBlock : public basicWorkBlock
         loaded = true;
     }
     /** update the task with a new packaged_task
-	@param[in] newTask the packaged task with the correct return type*/
+    @param[in] newTask the packaged task with the correct return type*/
     void updateTask (std::packaged_task<retType ()> &&newTask)
     {
         loaded = false;
@@ -111,10 +108,10 @@ class workBlock : public basicWorkBlock
     std::shared_future<retType> get_future () { return future_ret; }
 
   private:
-	std::packaged_task<retType()> task;  //!< the task to do
+    std::packaged_task<retType ()> task;  //!< the task to do
     std::shared_future<retType> future_ret;  //!< shared future object
-	bool finished;  //!< flag indicating the work has been done
-	bool loaded = false;  //!< flag indicating that the task is loaded
+    bool finished;  //!< flag indicating the work has been done
+    bool loaded = false;  //!< flag indicating that the task is loaded
 };
 
 /** implementation of a workBlock class with void return type
@@ -125,15 +122,14 @@ class workBlock<void> : public basicWorkBlock
 {
   public:
     workBlock () { reset (); };
-    workBlock (std::packaged_task<void()> &&newTask) :  task (std::move (newTask)),loaded(true){ reset (); }
+    workBlock (std::packaged_task<void()> &&newTask) : task (std::move (newTask)), loaded (true) { reset (); }
 
     template <typename Func>
-    workBlock (Func &&newWork) : task (std::forward<Func> (newWork)), loaded(true)
+    workBlock (Func &&newWork) : task (std::forward<Func> (newWork)), loaded (true)
     {
         static_assert (std::is_same<decltype (newWork ()), void>::value, "work does not match type");
         reset ();
     }
-
 
     workBlock (workBlock &&wb) = default;
     workBlock &operator= (workBlock &&wb) = default;
@@ -180,10 +176,10 @@ class workBlock<void> : public basicWorkBlock
     std::shared_future<void> get_future () { return future_ret; }
 
   private:
-	std::packaged_task<void()> task;
+    std::packaged_task<void()> task;
     std::shared_future<void> future_ret;
-	bool finished;
-	bool loaded = false;
+    bool finished;
+    bool loaded = false;
 };
 
 /** make a unique pointer to a workBlock object from a functional object
@@ -237,7 +233,6 @@ medium is executed with X times more frequently than low with X being defined by
 */
 class workQueue
 {
-
   public:
     /** enumeration defining the work block priority*/
     enum class workPriority
@@ -319,8 +314,8 @@ class workQueue
     SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoHigh;  //!< queue containing the work to do
     SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoMed;  //!< queue containing the work to do
     SimpleQueue<std::shared_ptr<basicWorkBlock>> workToDoLow;  //!< queue containing the work to do
-	std::vector<std::thread> threadpool;  //!< the threads
-	std::mutex queueLock;  //!< mutex for condition variable
+    std::vector<std::thread> threadpool;  //!< the threads
+    std::mutex queueLock;  //!< mutex for condition variable
     std::condition_variable queueCondition;  //!< condition variable for waking the threads
     std::atomic<bool> halt{false};  //!< flag indicating the threads should halt
 };

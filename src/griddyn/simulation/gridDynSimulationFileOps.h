@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -20,7 +20,6 @@ class matrixData;
 namespace griddyn
 {
 // forward declare the template class matrixData
-
 
 class solverMode;
 class gridDynSimulation;
@@ -50,7 +49,9 @@ void saveLineData (gridDynSimulation *gds, const std::string &fileName);
 @param[in] gds  the gridDynSimulation object to operate from
 @param[in] fileName the name of the file to save the state to
 */
-void saveStateXML (gridDynSimulation *gds, const std::string &fileName, const solverMode &sMode = cEmptySolverMode);
+void saveStateXML (gridDynSimulation *gds,
+                   const std::string &fileName,
+                   const solverMode &sMode = cEmptySolverMode);
 
 /** @brief save the current state to a binary file
 @param[in] gds  the gridDynSimulation object to operate from
@@ -81,7 +82,9 @@ void loadStateBinary (gridDynSimulation *gds,
 @param[in] gds  the gridDynSimulation object to operate from
 @param[in] fileName the name of the file to load
 */
-void loadStateXML (gridDynSimulation *gds, const std::string &fileName, const solverMode &sMode = cEmptySolverMode);
+void loadStateXML (gridDynSimulation *gds,
+                   const std::string &fileName,
+                   const solverMode &sMode = cEmptySolverMode);
 
 /** @brief capture a Jacobian and a state to a file
 @param[in] gds  the gridDynSimulation object to operate from
@@ -97,7 +100,9 @@ void captureJacState (gridDynSimulation *gds,
 @param[in] fileName the name of the file for storage
 @param[in] sMode the solverMode to get the state from
 */
-void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const solverMode &sMode = cEmptySolverMode);
+void saveJacobian (gridDynSimulation *gds,
+                   const std::string &fileName,
+                   const solverMode &sMode = cEmptySolverMode);
 
 /** @brief save the powerflow results to a file
 @param[in] gds  the gridDynSimulation object to operate from
@@ -240,6 +245,4 @@ class contingency;
 void saveContingencyOutput (const std::vector<std::shared_ptr<contingency>> &contList,
                             const std::string &fileName);
 
-
-}//namespace griddyn
-
+}  // namespace griddyn

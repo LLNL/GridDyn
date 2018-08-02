@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -63,13 +63,13 @@ enum class approxKeyMask : unsigned int
 
 KEY_QUAL unsigned int indexVal (approxKeyMask key) { return static_cast<unsigned int> (key); }
 
-enum defindedSolverModes:index_t
+enum defindedSolverModes : index_t
 {
-	local_mode = 0,
-	power_flow = 1,
-	dae = 2,
-	dynamic_algebraic = 3,
-	dynamic_differential = 4,
+    local_mode = 0,
+    power_flow = 1,
+    dae = 2,
+    dynamic_algebraic = 3,
+    dynamic_differential = 4,
 };
 
 /** @brief class defining how a specific solver operates and how to find information*/
@@ -125,9 +125,9 @@ const solverMode cEmptySolverMode{};
  **/
 inline bool isDC (const solverMode &sMode) { return sMode.approx[dc]; }
 /**
-* @brief determine if the mode is AC only
-**/
-inline bool isAC(const solverMode &sMode) { return !sMode.approx[dc]; }
+ * @brief determine if the mode is AC only
+ **/
+inline bool isAC (const solverMode &sMode) { return !sMode.approx[dc]; }
 /**
  * @brief set the approximation mode to be DC
  **/
@@ -137,10 +137,10 @@ inline void setDC (solverMode &sMode) { sMode.approx.set (dc); }
  **/
 inline bool isDynamic (const solverMode &sMode) { return sMode.dynamic; }
 /**
-* @brief determine if the mode is for power flow 
+* @brief determine if the mode is for power flow
 @details isPowerFlow()==(!isDynamic())
 **/
-inline bool isPowerFlow(const solverMode &sMode) { return !sMode.dynamic; }
+inline bool isPowerFlow (const solverMode &sMode) { return !sMode.dynamic; }
 /**
  * @brief determine if the mode only uses algebraic variables
  **/

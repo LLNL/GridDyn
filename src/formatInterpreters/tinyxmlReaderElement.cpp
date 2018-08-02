@@ -33,7 +33,7 @@ tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, 
 {
 }
 
-tinyxmlReaderElement::~tinyxmlReaderElement()
+tinyxmlReaderElement::~tinyxmlReaderElement ()
 {
     element = nullptr;
     parent = nullptr;

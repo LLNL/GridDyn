@@ -1,14 +1,14 @@
 /*
-* LLNS Copyright Start
-* Copyright (c) 2014-2018, Lawrence Livermore National Security
-* This work was performed under the auspices of the U.S. Department
-* of Energy by Lawrence Livermore National Laboratory in part under
-* Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
-* Produced at the Lawrence Livermore National Laboratory.
-* All rights reserved.
-* For details, see the LICENSE file.
-* LLNS Copyright End
-*/
+ * LLNS Copyright Start
+ * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
+ * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * All rights reserved.
+ * For details, see the LICENSE file.
+ * LLNS Copyright End
+ */
 
 #ifndef COREOBJECTTEMPLATES_H_
 #define COREOBJECTTEMPLATES_H_
@@ -53,14 +53,14 @@ A *cloneBase (const A *originalObject, coreObject *obj)
 }
 
 /**
-* @brief template helper function for the getParameter String function
-* @param[in] gridCOreObject
-* @param[out] return list of available parameter strings  that match the requested type
-* @param[in] list of parameter strings that take numbers as arguments
-* @param[in] list of parameter strings that take strings as arguments
-* @param[in] list of flags
-* @param[in] paramStringType to determine which parameter strings to return
-*/
+ * @brief template helper function for the getParameter String function
+ * @param[in] gridCOreObject
+ * @param[out] return list of available parameter strings  that match the requested type
+ * @param[in] list of parameter strings that take numbers as arguments
+ * @param[in] list of parameter strings that take strings as arguments
+ * @param[in] list of flags
+ * @param[in] paramStringType to determine which parameter strings to return
+ */
 template <class A, class B>
 void getParamString (const A *cobj,
                      stringVec &pstr,

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -20,8 +20,8 @@ namespace griddyn
 namespace comms
 {
 using relayMessage = commMessage;
-  enum relay_message_type_t:std::uint32_t
-  {
+enum relay_message_type_t : std::uint32_t
+{
     NO_EVENT = BASE_RELAY_MESSAGE_NUMBER,
     LOCAL_FAULT_EVENT = BASE_RELAY_MESSAGE_NUMBER + 3,
     REMOTE_FAULT_EVENT = BASE_RELAY_MESSAGE_NUMBER + 4,
@@ -34,9 +34,7 @@ using relayMessage = commMessage;
     BREAKER_OOS_COMMAND = BASE_RELAY_MESSAGE_NUMBER + 11,
     ALARM_TRIGGER_EVENT = BASE_RELAY_MESSAGE_NUMBER + 12,
     ALARM_CLEARED_EVENT = BASE_RELAY_MESSAGE_NUMBER + 13,
-  };
+};
 
-
-
-}//namespace comms
-}//namespace griddyn
+}  // namespace comms
+}  // namespace griddyn

@@ -14,7 +14,9 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectFactory.hpp"
-#include "griddyn/loads/otherLoads.h"
+#include "griddyn/loads/zipLoad.h"
+#include "griddyn/loads/fileLoad.h"
+#include "griddyn/loads/sourceLoad.h"
 #include "griddyn/exciters/ExciterIEEEtype1.h"
 #include "griddyn/Governor.h"
 #include "griddyn/genmodels/GenModel4.h"
@@ -238,14 +240,14 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
 				{
 					std::cout << "unable to clone " << comp << "::" << type << '\n';
 				}
-				
+
 			}
 			delete obj;
-			
+
 
 		}
 	}
-	
+
 }
 
 BOOST_AUTO_TEST_SUITE_END ()
