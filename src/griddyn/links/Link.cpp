@@ -843,6 +843,20 @@ double Link::getCurrent (id_type_t busId) const
     return (std::isnormal (val) ? val : 0.0);
 }
 
+double Link::getCurrentAngle(id_type_t busId) const
+{
+    double val;
+    if (isBus2(busId, B2))  // from bus
+    {
+        val = std::atan2 (linkFlows.Q2, linkFlows.P2);
+    }
+    else
+    {
+        val = std::atan2(linkFlows.Q1, linkFlows.P1);
+    }
+    return val;
+}
+
 double Link::getRealCurrent (id_type_t busId) const
 {
     double val;
