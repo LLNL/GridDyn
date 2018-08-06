@@ -224,6 +224,11 @@ class Link : public gridPrimary
     * @return the magnitude of the current, sign indicated flow direction of the real current
     */
     virtual double getCurrent (id_type_t busId = 0) const;
+    /** @brief get the angle of the current at a particular bus
+    @param[in] busId  either 1 or 2 or the object id of the bus
+    * @return the angle of the current
+    */
+    virtual double getCurrentAngle(id_type_t busId = 0) const;
     /** @brief get the real part of the current at a particular bus
     @param[in] busId  either 1 or 2 or the object id of the bus
     * @return the real part of the current

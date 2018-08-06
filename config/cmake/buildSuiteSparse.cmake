@@ -2,7 +2,16 @@
 # 
 
 function (build_suitesparse install_path)
-
+if (CMAKE_BUILD_TYPE)
+	list(APPEND valid_btypes "Release" "Debug" "RelWithDebInfo" "MinSizeRel")
+	if (${CMAKE_BUILD_TYPE} IN_LIST valid_btypes)
+		set(LOCAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+	else()
+		set(LOCAL_BUILD_TYPE "RelWithDebInfo")
+	endif()
+else ()
+	set(LOCAL_BUILD_TYPE "Release")
+endif()
 	include(escape_string)
 	
 	escape_string(cxx_compiler_string ${CMAKE_CXX_COMPILER})
@@ -48,18 +57,21 @@ ExternalProject_Add(suitesparse
 
 
     file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
-	
+if (MSVC)	
   if (NOT BUILD_DEBUG_ONLY)
-	message(STATUS "Configuring SuiteSparse Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
+  if (NOT MSVC_RELEASE_BUILD_TYPE)
+		set(MSVC_RELEASE_BUILD_TYPE "Release")
+	endif()
+	message(STATUS "Configuring SuiteSparse Autobuild for ${MSVC_RELEASE_BUILD_TYPE}logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
 	    -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=Release -G ${CMAKE_GENERATOR} .. 
+        -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log
         )
 		
-	message(STATUS "Building SuiteSparse release build logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build_release.log")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config Release
+	message(STATUS "Building SuiteSparse ${MSVC_RELEASE_BUILD_TYPE} build logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build_release.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${MSVC_RELEASE_BUILD_TYPE}
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build_release.log
         )
@@ -81,4 +93,19 @@ if (NOT BUILD_RELEASE_ONLY)
         )
 endif()
 
+else(MSVC)
+message(STATUS "Configuring SuiteSparse Autobuild for ${LOCAL_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config.log")
+    execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
+	    -D CMAKE_LINKER=${linker_string}
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} .. 
+        WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config.log
+        )
+		
+	message(STATUS "Building SuiteSparse ${LOCAL_BUILD_TYPE} build logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build.log")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . --config ${LOCAL_BUILD_TYPE}
+        WORKING_DIRECTORY ${trigger_build_dir}/build
+		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_build.log
+        )
+endif(MSVC)
 endfunction()

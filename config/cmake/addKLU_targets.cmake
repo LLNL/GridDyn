@@ -49,7 +49,7 @@ if(KLU_ENABLE)
 
 	if (NOT SuiteSparse_FOUND)
 
-		if (AUTOBUILD_SuiteSparse)
+		if (AUTOBUILD_KLU)
 			include(buildSuiteSparse)
 			build_suitesparse(${SuiteSparse_INSTALL_PATH})
 			find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
@@ -57,7 +57,7 @@ if(KLU_ENABLE)
 					${SuiteSparse_INSTALL_PATH}
 				PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 			)
-		else(AUTOBUILD_SuiteSparse)
+		else(AUTOBUILD_KLU)
 			find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD)
 		if (NOT SuiteSparse_FOUND)
 			if (WIN32 AND NOT MSYS)
@@ -65,7 +65,7 @@ if(KLU_ENABLE)
 			else()
 				OPTION(AUTOBUILD_KLU "enable ZMQ to automatically download and build" OFF)
 			endif()
-			if (AUTOBUILD_SuiteSparse)
+			if (AUTOBUILD_KLU)
 				include(buildSuiteSparse)
 				build_suitesparse(${SuiteSparse_INSTALL_PATH})
 				find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
@@ -73,11 +73,11 @@ if(KLU_ENABLE)
 						${SuiteSparse_INSTALL_PATH}
 					PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 				)
-			endif(AUTOBUILD_SuiteSparse)
+			endif(AUTOBUILD_KLU)
 		endif()
-		endif(AUTOBUILD_SuiteSparse)
+		endif(AUTOBUILD_KLU)
 	else()
-		if(AUTOBUILD_SuiteSparse)
+		if(AUTOBUILD_KLU)
 			option(FORCE_SuiteSparse_REBUILD "force rebuild of SuiteSparse" OFF)
 			 if(FORCE_SuiteSparse_REBUILD )
 				include(buildSuiteSparse)

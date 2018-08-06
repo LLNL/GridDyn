@@ -49,7 +49,7 @@
 ##
 ## Created by jesnault (jerome.esnault@inria.fr) 2014-01-15
 ## Updated by jesnault (jerome.esnault@inria.fr) 2014-01-21
-## Licensed under 3-Claused BSD License. See https://github.com/jlblancoc/sundials-metis-for-windows/blob/master/LICENSE.md
+## Licensed under 3-Claused BSD License. See https://github.com/jlblancoc/suitesparse-metis-for-windows/blob/master/LICENSE.md
 ## File modified for use with SUNDIALS based on the sundials version by Philip Top 2017-01-06
 
 ## check if global root SUNDIALS folder is set or not and cache it in order to let user fill it

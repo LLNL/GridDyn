@@ -22,6 +22,8 @@ do
             ;;
         --ubsan)
             echo "Tests using undefined behavior sanitizer"
+            export UBSAN_OPTIONS=print_stacktrace=1
+            CTEST_OPTIONS+=" --verbose"
             ;;
         --no-ctest)
             echo "Disable tests using ctest as a runner"
@@ -94,7 +96,7 @@ else
 
     if [[ "$RUN_VALGRIND" == "true" ]]; then
         echo "Running Valgrind tests"
-        ctest -T memcheck -L Valgrind && cat Testing/Temporary/MemoryChecker.1.log
+        ctest -T memcheck -L Valgrind && cat Testing/Temporary/MemoryChecker*.log
     fi
 
     # Run the CI tests last so that the execution status is used for the pass/fail status shown
