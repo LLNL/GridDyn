@@ -101,7 +101,7 @@ else
 
     # Run the CI tests last so that the execution status is used for the pass/fail status shown
     if [[ "$DISABLE_UNIT_TESTS" != "true" ]]; then
-        echo "Running ${TEST_CONFIG} tests"
+        echo "Running ${TEST_CONFIG} tests with these options: ${CTEST_OPTIONS}"
         ctest -L ${TEST_CONFIG} ${CTEST_OPTIONS}
     fi
 fi
