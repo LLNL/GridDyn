@@ -8,24 +8,25 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set (runner_sources
-	gridDynRunner.cpp
-	)
+set(runner_sources gridDynRunner.cpp)
 
-set(runner_headers
-	gridDynRunner.h
-	)
-
+set(runner_headers gridDynRunner.h)
 
 add_library(runner STATIC ${runner_sources} ${runner_headers})
 
 target_link_libraries(runner PUBLIC fileInput)
 
-set_target_properties (runner PROPERTIES FOLDER libraries)
+set_target_properties(runner PROPERTIES FOLDER libraries)
 
-INSTALL(TARGETS runner EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+install(
+    TARGETS runner
+    EXPORT griddyn-targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+)
 
-INSTALL(FILES ${runner_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/runner
-  COMPONENT headers)
-
+install(
+    FILES ${runner_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/runner
+    COMPONENT headers
+)

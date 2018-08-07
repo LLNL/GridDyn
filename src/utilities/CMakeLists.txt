@@ -8,78 +8,80 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-#project name
+# project name
 
-set(utilities_sources
-	gridRandom.cpp
-	saturation.cpp
-	stringOps.cpp
-	string_viewOps.cpp
-	ThreePhaseFunctions.cpp
-	matrixOps.cpp
-	stringConversion.cpp
-	units.cpp
-	vectorOps.cpp
-	functionInterpreter.cpp
-	charMapper.cpp
-	workQueue.cpp
-	zipUtilities.cpp
-	base64.cpp
-	matrixCreation.cpp
-	logger.cpp
-	matrixDataSparse.cpp
-	OperatingBoundary.cpp
-	stringToCmdLine.cpp
-	TripWire.cpp
-	)
+set(
+    utilities_sources
+    gridRandom.cpp
+    saturation.cpp
+    stringOps.cpp
+    string_viewOps.cpp
+    ThreePhaseFunctions.cpp
+    matrixOps.cpp
+    stringConversion.cpp
+    units.cpp
+    vectorOps.cpp
+    functionInterpreter.cpp
+    charMapper.cpp
+    workQueue.cpp
+    zipUtilities.cpp
+    base64.cpp
+    matrixCreation.cpp
+    logger.cpp
+    matrixDataSparse.cpp
+    OperatingBoundary.cpp
+    stringToCmdLine.cpp
+    TripWire.cpp
+)
 
-set(utilities_headers
-	units.h
-	dataDictionary.hpp
-	timeSeries.hpp
-	charMapper.h
-	timeSeriesMulti.hpp
-	ThreePhaseFunctions.h
-	vectorOps.hpp
-	generic_string_ops.hpp
-	stringOps.h
-	string_viewOps.h
-	string_viewDef.h
-	optionalDef.hpp
-	gridRandom.h
-	saturation.h
-	vectData.hpp
-	matrixData.hpp
-	matrixOps.h
-	matrixDataCompact.hpp
-	matrixDataSparse.hpp
-	matrixDataSparse_impl.hpp
-	matrixDataBoost.hpp
-	matrixDataSparseSM.hpp
-	matrixDataTranslate.hpp
-	matrixDataContainer.hpp
-	matrixDataScale.hpp
-	matrixDataOrdered.hpp
-	matrixDataOrdering.hpp
-	matrixDataFilter.hpp
-	matrixDataCustomWriteOnly.hpp
-	functionInterpreter.h
-	TripWire.hpp
-	workQueue.h
-	simpleQueue.hpp
-	zipUtilities.h
-	base64.h
-	stringConversion.h
-	string_viewConversion.h
-	mapOps.hpp
-	valuePredictor.hpp
-	matrixCreation.h
-	timeRepresentation.hpp
-	indexTypes.hpp
-	logger.h
-	OperatingBoundary.h
-	stringToCmdLine.h
-	)
+set(
+    utilities_headers
+    units.h
+    dataDictionary.hpp
+    timeSeries.hpp
+    charMapper.h
+    timeSeriesMulti.hpp
+    ThreePhaseFunctions.h
+    vectorOps.hpp
+    generic_string_ops.hpp
+    stringOps.h
+    string_viewOps.h
+    string_viewDef.h
+    optionalDef.hpp
+    gridRandom.h
+    saturation.h
+    vectData.hpp
+    matrixData.hpp
+    matrixOps.h
+    matrixDataCompact.hpp
+    matrixDataSparse.hpp
+    matrixDataSparse_impl.hpp
+    matrixDataBoost.hpp
+    matrixDataSparseSM.hpp
+    matrixDataTranslate.hpp
+    matrixDataContainer.hpp
+    matrixDataScale.hpp
+    matrixDataOrdered.hpp
+    matrixDataOrdering.hpp
+    matrixDataFilter.hpp
+    matrixDataCustomWriteOnly.hpp
+    functionInterpreter.h
+    TripWire.hpp
+    workQueue.h
+    simpleQueue.hpp
+    zipUtilities.h
+    base64.h
+    stringConversion.h
+    string_viewConversion.h
+    mapOps.hpp
+    valuePredictor.hpp
+    matrixCreation.h
+    timeRepresentation.hpp
+    indexTypes.hpp
+    logger.h
+    OperatingBoundary.h
+    stringToCmdLine.h
+)
 
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
 
@@ -91,8 +93,8 @@ include(buildMiniZip)
 # ------------------------------------------------------------
 set(ZLIB_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
-	build_zlib()
+if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
+    build_zlib()
 endif()
 include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
 
@@ -100,25 +102,30 @@ include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
 # building minizip
 # ------------------------------------------------------------
 set(ZLIB_INCLUDES ${AUTOBUILD_INSTALL_PATH}/include)
-if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
-	build_minizip()
+if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
+    build_minizip()
 endif()
 include(${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
 
-
 target_link_libraries(utilities PUBLIC minizip::minizip zlib::zlib griddyn_base)
-set_target_properties (utilities PROPERTIES FOLDER libraries)
+set_target_properties(utilities PROPERTIES FOLDER libraries)
 
-IF (ENABLE_64_BIT_INDEXING)
-target_compile_definitions(utilities PUBLIC -DENABLE_64_BIT_INDEXING)
-ENDIF(ENABLE_64_BIT_INDEXING)
-IF (UNSIGNED_INDEXING)
-target_compile_definitions(utilities PUBLIC -DUNSIGNED_INDEXING)
-ENDIF(UNSIGNED_INDEXING)
+if(ENABLE_64_BIT_INDEXING)
+    target_compile_definitions(utilities PUBLIC -DENABLE_64_BIT_INDEXING)
+endif(ENABLE_64_BIT_INDEXING)
+if(UNSIGNED_INDEXING)
+    target_compile_definitions(utilities PUBLIC -DUNSIGNED_INDEXING)
+endif(UNSIGNED_INDEXING)
 
-INSTALL(TARGETS utilities EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+install(
+    TARGETS utilities
+    EXPORT griddyn-targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+)
 
-
-INSTALL(FILES ${utilities_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/utilities
-  COMPONENT headers)
+install(
+    FILES ${utilities_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/utilities
+    COMPONENT headers
+)

@@ -8,64 +8,63 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-#project name
+# project name
 
-set (elementReader_headers
-jsonReaderElement.h
-jsonElement.h
-tinyxml2ReaderElement.h
-tinyxmlReaderElement.h
-readerElement.h
-tomlElement.h
-tomlReaderElement.h
-iniReaderElement.h
+set(
+    elementReader_headers
+    jsonReaderElement.h
+    jsonElement.h
+    tinyxml2ReaderElement.h
+    tinyxmlReaderElement.h
+    readerElement.h
+    tomlElement.h
+    tomlReaderElement.h
+    iniReaderElement.h
 )
 
-set (elementReader_files
-jsonReaderElement.cpp
-jsonElement.cpp
-tinyxml2ReaderElement.cpp
-tinyxmlReaderElement.cpp
-readerElement.cpp
-tomlElement.cpp
-tomlReaderElement.cpp
-iniReaderElement.cpp
-${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
+set(
+    elementReader_files
+    jsonReaderElement.cpp
+    jsonElement.cpp
+    tinyxml2ReaderElement.cpp
+    tinyxmlReaderElement.cpp
+    readerElement.cpp
+    tomlElement.cpp
+    tomlReaderElement.cpp
+    iniReaderElement.cpp
+    ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
 
-#SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
-
-
-
+# SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
 # ------------------------------------------------------------
 # building yaml
 # ------------------------------------------------------------
-OPTION(ENABLE_YAML "enable yaml file support in GridDyn" OFF)
-if (ENABLE_YAML)
-	include(buildYAML)
-	set(YAML_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
+option(ENABLE_YAML "enable yaml file support in GridDyn" OFF)
+if(ENABLE_YAML)
+    include(buildYAML)
+    set(YAML_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-	if (NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
-		build_yaml()
-	endif()
-	include(${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
+    if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
+        build_yaml()
+    endif()
+    include(${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
 
 endif(ENABLE_YAML)
 
-if (YAML_FOUND)
-	list(APPEND elementReader_files
-	yamlReaderElement.cpp
-	yamlElement.cpp)
+if(YAML_FOUND)
+    list(APPEND elementReader_files yamlReaderElement.cpp yamlElement.cpp)
 
-	list(APPEND elementReader_headers
-	yamlReaderElement.h
-	yamlElement.h)
+    list(APPEND elementReader_headers yamlReaderElement.h yamlElement.h)
 
-	list(APPEND optional_library_test_files ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp)
-	set (optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
+    list(
+        APPEND
+            optional_library_test_files
+            ${PROJECT_SOURCE_DIR}/src/formatInterpreters/test/testYamlReader.cpp
+    )
+    set(optional_library_test_files ${optional_library_test_files} PARENT_SCOPE)
 
-ENDIF(YAML_FOUND)
+endif(YAML_FOUND)
 
 set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
 
@@ -78,33 +77,48 @@ set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 file(GLOB ticppfiles ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.cpp)
 file(GLOB ticpp_headers ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.h)
 
-add_library(tinyxml STATIC ${ticppfiles} ${ticpp_headers}
-	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
-	${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.h)
+add_library(
+    tinyxml
+    STATIC
+    ${ticppfiles}
+    ${ticpp_headers}
+    ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.cpp
+    ${PROJECT_SOURCE_DIR}/ThirdParty/tinyxml2/tinyxml2.h
+)
 
 target_link_libraries(tinyxml griddyn_base)
 target_compile_definitions(tinyxml PUBLIC -DTIXML_USE_TICPP)
 
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_options(tinyxml PRIVATE -Wno-suggest-override)
-ENDIF ()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_compile_options(tinyxml PRIVATE -Wno-suggest-override)
+endif()
 
-set_target_properties (tinyxml PROPERTIES FOLDER libraries)
+set_target_properties(tinyxml PROPERTIES FOLDER libraries)
 
-add_library(formatInterpreter STATIC ${elementReader_files} ${elementReader_headers} )
+add_library(
+    formatInterpreter
+    STATIC
+    ${elementReader_files}
+    ${elementReader_headers}
+)
 target_link_libraries(formatInterpreter PUBLIC tinyxml utilities)
 
-set_target_properties (formatInterpreter PROPERTIES FOLDER libraries)
+set_target_properties(formatInterpreter PROPERTIES FOLDER libraries)
 
+if(YAML_FOUND)
+    target_link_libraries(formatInterpreter PUBLIC yaml-cpp)
 
+endif(YAML_FOUND)
 
-IF (YAML_FOUND)
-target_link_libraries(formatInterpreter PUBLIC yaml-cpp)
+install(
+    TARGETS formatInterpreter tinyxml
+    EXPORT griddyn-targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+)
 
-ENDIF(YAML_FOUND)
-
-INSTALL(TARGETS formatInterpreter tinyxml EXPORT griddyn-targets DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
-
-INSTALL(FILES ${elementReader_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-  COMPONENT headers)
+install(
+    FILES ${elementReader_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
+    COMPONENT headers
+)
