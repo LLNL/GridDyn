@@ -38,9 +38,9 @@ ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 
 
 
-###########################################
+# ------------------------------------------------------------
 # building yaml
-#########################################
+# ------------------------------------------------------------
 OPTION(ENABLE_YAML "enable yaml file support in GridDyn" OFF)
 if (ENABLE_YAML)
 	include(buildYAML)
@@ -71,9 +71,9 @@ set(YAML_FOUND ${YAML_FOUND} PARENT_SCOPE)
 
 set(ZLIB_ROOT_DIR ${PROJECT_BINARY_DIR}/libs)
 
-###########################################
+# ------------------------------------------------------------
 # building ticpp and tinyxml2
-###########################################
+# ------------------------------------------------------------
 
 file(GLOB ticppfiles ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.cpp)
 file(GLOB ticpp_headers ${PROJECT_SOURCE_DIR}/ThirdParty/ticpp/*.h)
@@ -108,6 +108,3 @@ INSTALL(TARGETS formatInterpreter tinyxml EXPORT griddyn-targets DESTINATION ${C
 INSTALL(FILES ${elementReader_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
   COMPONENT headers)
-
-
-

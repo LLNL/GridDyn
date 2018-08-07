@@ -29,16 +29,16 @@ set(GRIDDYN_VERSION_STRING_SHORT "${GRIDDYN_VERSION}")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-#-----------------------------------------------------------------------------
+# ------------------------------------------------------------
 # set the module path and include some common macros
-#-----------------------------------------------------------------------------
+# ------------------------------------------------------------
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
 include(extraMacros)
 include(CMakeDependentOption)
 #include(BuildType)
-#-----------------------------------------------------------------------------
+# ------------------------------------------------------------
 # set the install path to a local directory
-#-----------------------------------------------------------------------------
+# ------------------------------------------------------------
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	 if (WIN32)
 		if (MSYS)
@@ -130,17 +130,17 @@ if (VERSION_OPTION)
 	endif (MSVC)
 endif(VERSION_OPTION)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # BOOST  find the boost libraries
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 set(BOOST_REQUIRED_LIBRARIES program_options unit_test_framework filesystem system date_time timer chrono)
 include(addBoost)
 set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
 target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # add coverage target
-# -------------------------------------------------------------
+# ------------------------------------------------------------
  option (TEST_CODE_COVERAGE "Build a target for testing code coverage" OFF)
  if (TEST_CODE_COVERAGE)
   if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
@@ -157,9 +157,9 @@ target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
  endif(TEST_CODE_COVERAGE)
 
  include(GNUInstallDirs)
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Get some configuration for C++17 as that becomes available
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 #message(STATUS ${CMAKE_CXX_FLAGS})
 set(CONFIGURE_TARGET_LOCATION ${AUTOBUILD_INSTALL_PATH}/include/griddyn/)
@@ -168,13 +168,10 @@ install(FILES ${AUTOBUILD_INSTALL_PATH}/include/griddyn/compiler-config.h DESTIN
 
 include(ExternalProject)
 
-
-#########################################################################################
-
 #include(mergestaticlibs)
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable OpenMP support?
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 option(OPENMP_ENABLE "Enable openMP support" OFF)
 else()
@@ -208,9 +205,9 @@ endif(OPENMP_FOUND)
 option(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Find multithreading headers and includes
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 if (NOT DISABLE_MULTITHREADING)
 	if (NOT WIN32)
@@ -222,9 +219,9 @@ if (NOT DISABLE_MULTITHREADING)
 	target_link_libraries(griddyn_base INTERFACE Threads::Threads)
 endif(NOT DISABLE_MULTITHREADING)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # finding MPI
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(MPI_ENABLE "Enable MPI networking library" OFF)
 if (MPI_ENABLE)
@@ -244,9 +241,9 @@ if (BUILD_DEBUG_ONLY AND BUILD_RELEASE_ONLY)
 message(fatal "BOTH BUILD_DEBUG_ONLY AND BUILD_RELEASE_ONLY cannot be specified together otherwise nothing works")
 endif()
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Find (and test) the KLU libraries
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(DISABLE_KLU "disable KLU (not recommended [slow], turn on AUTOBUILD_KLU if your system doesn't have SuiteSparse installed)" OFF)
 
@@ -256,9 +253,9 @@ else()
     set(KLU_ENABLE OFF CACHE BOOL "Disable KLU support" FORCE)
 endif()
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Sundials
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 include(addSundials)
 set(optional_component_test_files)
@@ -269,9 +266,9 @@ set (optional_library_functions )
 
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # setting the RPATH
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -305,9 +302,9 @@ if (NOT Boost_USE_STATIC_LIBS)
 endif()
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # global include directories
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 target_include_directories(griddyn_base INTERFACE
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 	$<BUILD_INTERFACE:${AUTOBUILD_INSTALL_PATH}/include>
@@ -319,9 +316,9 @@ target_include_directories(griddyn_base SYSTEM INTERFACE
 	$<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>
 )
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # load the required subdirectories
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 add_subdirectory(src/formatInterpreters)
 
@@ -336,9 +333,9 @@ add_subdirectory(src/griddyn)
 
 add_library(griddyn_optional INTERFACE)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable support for Plugins
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
@@ -352,9 +349,9 @@ if (ENABLE_PLUGINS)
 	endif()
 endif(ENABLE_PLUGINS)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable compilation of extraModels?
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(LOAD_EXTRA_MODELS "Compile and load extraModels" ON)
 # If extra models are used enabled try to locate the libraries
@@ -365,9 +362,9 @@ if (LOAD_EXTRA_MODELS)
   target_link_libraries(griddyn_optional INTERFACE extraModelLibrary)
 endif(LOAD_EXTRA_MODELS)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable compilation of extraSolvers?
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(LOAD_EXTRA_SOLVERS "Compile and load extraSolvers" OFF)
 # If extra solvers are used enabled try to locate the libraries
@@ -378,9 +375,9 @@ if (LOAD_EXTRA_SOLVERS)
   target_link_libraries(griddyn_optional INTERFACE extraSolverLibrary)
 endif(LOAD_EXTRA_SOLVERS)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable FMI support?
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(FMI_ENABLE "Enable FMI support" ON)
 
@@ -397,9 +394,9 @@ if (FMI_ENABLE)
 endif(FMI_ENABLE)
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # FSKIT
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(FSKIT_ENABLE "Enable FSKIT support" OFF)
 
@@ -409,9 +406,9 @@ if(FSKIT_ENABLE)
   target_link_libraries(griddyn_optional INTERFACE fskitLibrary)
 endif(FSKIT_ENABLE)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable 64 bit indexing (enable to allow for more than 2^31 objects)--that would be a very big model
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
   option(ENABLE_64_BIT_INDEXING "set all indexing and count variables to 64 bit unsigned (Usually not required)" OFF)
@@ -420,7 +417,7 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
 # ------------------------------------------------------------
 # Enable message logging
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 option(GRIDDYN_DISABLE_LOGGING "disable all normal, debug, and trace logging in GridDyn" OFF)
 if (NOT DISABLE_LOGGING)
 option(GRIDDYN_DISABLE_TRACE_LOGGING "disable trace logging" OFF)
@@ -444,9 +441,9 @@ endif(DOXYGEN_FOUND)
 endif (GRIDDYN_GENERATE_DOXYGEN_DOC)
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable HELICS executable
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
 # If HELICS_EXECUTABLE is load the helics directory
@@ -460,9 +457,9 @@ else(HELICS_EXECUTABLE)
 	HIDE_VARIABLE(HELICS_INSTALL_PATH)
 endif(HELICS_EXECUTABLE)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable ZMQ interfacing
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(ENABLE_NETWORKING_LIBRARY "Enable network based communiation components" OFF)
 
@@ -498,9 +495,9 @@ endif(HELICS_EXECUTABLE)
 
 file(GLOB KEY_LIBRARY_FILES  ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # load the subdirectories
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 
 
@@ -534,18 +531,18 @@ install(TARGETS griddyn_base griddyn_optional
 	EXPORT griddyn-targets
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	COMPONENT libraries)
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable clang analysis and formatting tools
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(ENABLE_CLANG_TOOLS "if clang is found enable some custom targets for clang formatting and tidy" OFF)
 
 if (ENABLE_CLANG_TOOLS)
 include(clang-cxx-dev-tools)
 endif(ENABLE_CLANG_TOOLS)
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Enable testCore construction?
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 option(TEST_ENABLE "Enable unit testing construction" ON)
 
@@ -568,9 +565,9 @@ install(DIRECTORY examples/ DESTINATION examples COMPONENT examples)
 #install(FILES ${ebraidfiles} DESTINATION examples/braid_examples COMPONENT examples)
 
 set(binfiles bin/configure.griddyn bin/pgriddyn bin/pgriddyn_debug)
-install(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+install(PROGRAMS ${binfiles} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT binaries)
 
-install(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+install(FILES ${KEY_LIBRARY_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT binaries)
 
 install (EXPORT griddyn-targets
 	NAMESPACE Griddyn::
@@ -578,18 +575,18 @@ install (EXPORT griddyn-targets
 	COMPONENT libs
 	)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # Future Additions
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 #adding dlls
 # install(FILES ${LOCATION_OF_FILES} DESTINATION bin)
 #file(GLOB docs "docs/manuals/*")
 #install(FILES ${docs} DESTINATION docs)
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # CTest
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 
 if(TEST_ENABLE)
     include(CTest)
@@ -621,9 +618,9 @@ if(TEST_ENABLE)
     endif()
 endif()
 
-#####################################################
-#########swig interface builds ######################
-#####################################################
+# ------------------------------------------------------------
+# swig interface builds
+# ------------------------------------------------------------
 
 if (INTERFACE_BUILD)
 	add_subdirectory(swig)
@@ -631,9 +628,9 @@ endif()
 
 
 
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 # CPack
-# -------------------------------------------------------------
+# ------------------------------------------------------------
 option(ENABLE_PACKAGE_BUILD "Add projects for making packages and installers for HELICS" OFF)
 
 if(ENABLE_PACKAGE_BUILD)
@@ -645,7 +642,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${GRIDDYN_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${GRIDDYN_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${GRIDDYN_VERSION_PATCH})
 
-set(CPACK_COMPONENTS_ALL applications headers libs runtime matlab python java octave examples)
+set(CPACK_COMPONENTS_ALL applications headers libs binaries matlab python java octave examples)
 
 if (WIN32)
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}\\\\LICENSE")
