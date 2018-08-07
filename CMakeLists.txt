@@ -794,9 +794,9 @@ if(TEST_ENABLE)
     set_property(TEST testExtra PROPERTY LABELS TESTLABEL Release)
 
     # Runs a subset of the overall tests
-    add_test(NAME testComponentsQuick COMMAND testComponents --RUN_TEST=@QUICK)
-    add_test(NAME testLibraryQuick COMMAND testLibrary --RUN_TEST=@QUICK)
-    add_test(NAME testSystemQuick COMMAND testSystem --RUN_TEST=@QUICK)
+    add_test(NAME testComponentsQuick COMMAND testComponents --run_test=@quick)
+    add_test(NAME testLibraryQuick COMMAND testLibrary --run_test=@quick)
+    add_test(NAME testSystemQuick COMMAND testSystem --run_test=@quick)
     set_property(
         TEST testComponentsQuick testSystemQuick
         PROPERTY LABELS Quick Continuous
@@ -816,7 +816,7 @@ if(TEST_ENABLE)
 
         add_test(
             NAME testSharedLibraryQuick
-            COMMAND shared_library_tests --RUN_TEST=@QUICK
+            COMMAND shared_library_tests --run_test=@quick
         )
         set_property(
             TEST testSharedLibraryQuick
