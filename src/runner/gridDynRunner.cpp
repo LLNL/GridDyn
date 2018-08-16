@@ -333,9 +333,11 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
     int areas = gds->getInt ("totalareacount");
     int buses = gds->getInt ("totalbuscount");
     int links = gds->getInt ("totallinkcount");
+    int relays = gds->getInt ("totalrelaycount");
     int gens = gds->getInt ("gencount");
-    std::cout << "area count =" << areas << " buses=" << buses << " links= " << links << " gens= " << gens << '\n';
-
+    int loads = gds->getInt ("loadcount");
+    std::cout << "areas=" << areas << " buses=" << buses << " links=" << links << " relays=" << relays << " gens=" << gens << " loads=" << loads << '\n';
+    
     // set any flags used by the system
     if (vm.count ("flags") > 0)
     {
