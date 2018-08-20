@@ -286,103 +286,103 @@ void gridOptObject::getVariableType (double sdata[], const optimMode &oMode)
     }
 }
 
-void gridOptObject::getObjName (stringVec &stNames, const optimMode &oMode, const std::string &prefix)
+void gridOptObject::getObjName (stringVec &objNames, const optimMode &oMode, const std::string &prefix)
 {
     auto &os = offsets.getOffsets (oMode);
     // angle variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.aSize + os.aOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.aSize + os.aOffset + 1)
     {
-        stNames.resize (os.total.aSize + os.aOffset + 1);
+        objNames.resize (os.total.aSize + os.aOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.aSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.aOffset + bb] = getName () + ":angle_" + std::to_string (bb);
+            objNames[os.aOffset + bb] = getName () + ":angle_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.aOffset + bb] = prefix + "::" + getName () + ":angle_" + std::to_string (bb);
+            objNames[os.aOffset + bb] = prefix + "::" + getName () + ":angle_" + std::to_string (bb);
         }
     }
     // voltage variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.vSize + os.vOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.vSize + os.vOffset + 1)
     {
-        stNames.resize (os.total.vSize + os.vOffset + 1);
+        objNames.resize (os.total.vSize + os.vOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.vSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.vOffset + bb] = getName () + ":voltage_" + std::to_string (bb);
+            objNames[os.vOffset + bb] = getName () + ":voltage_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.vOffset + bb] = prefix + "::" + getName () + ":voltage_" + std::to_string (bb);
+            objNames[os.vOffset + bb] = prefix + "::" + getName () + ":voltage_" + std::to_string (bb);
         }
     }
     // real power variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.genSize + os.gOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.genSize + os.gOffset + 1)
     {
-        stNames.resize (os.total.genSize + os.gOffset + 1);
+        objNames.resize (os.total.genSize + os.gOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.genSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.gOffset + bb] = getName () + ":power_" + std::to_string (bb);
+            objNames[os.gOffset + bb] = getName () + ":power_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.gOffset + bb] = prefix + "::" + getName () + ":power_" + std::to_string (bb);
+            objNames[os.gOffset + bb] = prefix + "::" + getName () + ":power_" + std::to_string (bb);
         }
     }
     // angle variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.qSize + os.qOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.qSize + os.qOffset + 1)
     {
-        stNames.resize (os.total.qSize + os.qOffset + 1);
+        objNames.resize (os.total.qSize + os.qOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.qSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.qOffset + bb] = getName () + ":reactive_power_" + std::to_string (bb);
+            objNames[os.qOffset + bb] = getName () + ":reactive_power_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.qOffset + bb] = prefix + "::" + getName () + ":reactive_power_" + std::to_string (bb);
+            objNames[os.qOffset + bb] = prefix + "::" + getName () + ":reactive_power_" + std::to_string (bb);
         }
     }
     // other continuous variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.contSize + os.contOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.contSize + os.contOffset + 1)
     {
-        stNames.resize (os.total.contSize + os.contOffset + 1);
+        objNames.resize (os.total.contSize + os.contOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.contSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.contOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
+            objNames[os.contOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.contOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
+            objNames[os.contOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
         }
     }
     // integer variables
-    if (static_cast<count_t> (stNames.size ()) < os.total.intSize + os.intOffset + 1)
+    if (static_cast<count_t> (objNames.size ()) < os.total.intSize + os.intOffset + 1)
     {
-        stNames.resize (os.total.intSize + os.intOffset + 1);
+        objNames.resize (os.total.intSize + os.intOffset + 1);
     }
     for (index_t bb = 0; bb < os.total.intSize; ++bb)
     {
         if (prefix.empty ())
         {
-            stNames[os.intOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
+            objNames[os.intOffset + bb] = getName () + ":continuous_" + std::to_string (bb);
         }
         else
         {
-            stNames[os.intOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
+            objNames[os.intOffset + bb] = prefix + "::" + getName () + ":continuous_" + std::to_string (bb);
         }
     }
 }

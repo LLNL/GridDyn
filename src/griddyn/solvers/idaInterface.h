@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef _IDA_SOLVER_INTERFACE_H_
-#define _IDA_SOLVER_INTERFACE_H_
+#pragma once
 
 #include "sundialsInterface.h"
 
@@ -46,10 +45,10 @@ class idaInterface : public sundialsInterface
     virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const override;
 
     virtual void allocate (count_t size, count_t numRoots = 0) override;
-    void setMaxNonZeros (count_t size) override;
+    void setMaxNonZeros (count_t nonZeros) override;
     virtual void initialize (coreTime t0) override;
-    virtual void sparseReInit (sparse_reinit_modes mode) override;
-    int calcIC (coreTime time0, coreTime tstep0, ic_modes mode, bool constraints) override;
+    virtual void sparseReInit (sparse_reinit_modes sparseReInitMode) override;
+    int calcIC (coreTime t0, coreTime tstep0, ic_modes initCondMode, bool constraints) override;
     virtual void getCurrentData () override;
     int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
     virtual void getRoots () override;
@@ -82,5 +81,3 @@ class idaInterface : public sundialsInterface
 
 }  // namespace solvers
 }  // namespace griddyn
-
-#endif

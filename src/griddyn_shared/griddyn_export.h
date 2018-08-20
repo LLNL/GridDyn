@@ -397,7 +397,7 @@ extern "C"
     @return  the number of points written
     */
     GRIDDYN_EXPORT int
-    gridDynSimulation_getResults (gridDynSimReference sim, const char *datatype, double *data, int maxSize);
+    gridDynSimulation_getResults (gridDynSimReference sim, const char *dataType, double *data, int maxSize);
 
     /** have the simulation guess at all the state variables
     @param[in] sim the simulation runner reference object

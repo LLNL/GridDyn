@@ -413,7 +413,7 @@ void cvodeInterface::initialize (coreTime time0)
     flags.set (initialized_flag);
 }
 
-void cvodeInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
+void cvodeInterface::sparseReInit (sparse_reinit_modes reInitMode) { KLUReInit (reInitMode); }
 
 void cvodeInterface::setRootFinding (count_t numRoots)
 {

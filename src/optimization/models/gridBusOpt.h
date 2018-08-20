@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDBUSOPT_H_
-#define GRIDBUSOPT_H_
+#pragma once
 
 // headers
 #include "../gridOptObjects.h"
@@ -46,13 +45,13 @@ class gridBusOpt : public gridOptObject
     coreObject *clone (coreObject *obj = nullptr) const override;
     // add components
     void add (coreObject *obj) override;
-    void add (gridLoadOpt *pl);
+    void add (gridLoadOpt *ld);
     void add (gridGenOpt *gen);
     void add (gridLinkOpt *lnk);
 
     // remove components
     void remove (coreObject *obj) override;
-    void remove (gridLoadOpt *pl);
+    void remove (gridLoadOpt *ld);
     void remove (gridGenOpt *gen);
     void remove (gridLinkOpt *lnk);
 
@@ -65,7 +64,7 @@ class gridBusOpt : public gridOptObject
     virtual void getTols (double tols[], const optimMode &oMode) override;
     virtual void getVariableType (double sdata[], const optimMode &oMode) override;
 
-    virtual void valueBounds (double time, double upLimit[], double lowerLimit[], const optimMode &oMode) override;
+    virtual void valueBounds (double time, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
 
     virtual void linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode) override;
     virtual void quadraticObj (const optimData &oD,
@@ -126,4 +125,3 @@ class gridBusOpt : public gridOptObject
 gridBusOpt *getMatchingBusOpt (gridBusOpt *bus, const gridOptObject *src, gridOptObject *sec);
 
 }  // namespace griddyn
-#endif

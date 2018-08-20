@@ -38,7 +38,7 @@ class dimeClientInterface
     std::string address;
 
   public:
-    dimeClientInterface (const std::string &name, const std::string &address = "");
+    dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress = "");
 
     ~dimeClientInterface ();
     /** initialize the connection*/

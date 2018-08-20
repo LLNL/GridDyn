@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDAREAOPT_H_
-#define GRIDAREAOPT_H_
+#pragma once
 
 // headers
 
@@ -50,17 +49,17 @@ class gridAreaOpt : public gridOptObject
     // add components
 
     void add (coreObject *obj) override;
-    void add (gridAreaOpt *pl);
-    void add (gridBusOpt *gen);
+    void add (gridAreaOpt *area);
+    void add (gridBusOpt *bus);
     void add (gridLinkOpt *lnk);
-    void add (gridRelayOpt *rel);
+    void add (gridRelayOpt *relay);
 
     // remove components
     void remove (coreObject *obj) override;
-    void remove (gridAreaOpt *pl);
-    void remove (gridBusOpt *gen);
+    void remove (gridAreaOpt *area);
+    void remove (gridBusOpt *bus);
     void remove (gridLinkOpt *lnk);
-    void remove (gridRelayOpt *rel);
+    void remove (gridRelayOpt *relay);
 
     virtual void dynObjectInitializeA (std::uint32_t flags) override;
     virtual void loadSizes (const optimMode &oMode) override;
@@ -70,7 +69,7 @@ class gridAreaOpt : public gridOptObject
     virtual void getTols (double tols[], const optimMode &oMode) override;
     virtual void getVariableType (double sdata[], const optimMode &oMode) override;
 
-    virtual void valueBounds (double time, double upLimit[], double lowerLimit[], const optimMode &oMode) override;
+    virtual void valueBounds (double time, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
 
     virtual void linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode) override;
     virtual void quadraticObj (const optimData &oD,
@@ -125,4 +124,3 @@ class gridAreaOpt : public gridOptObject
 gridAreaOpt *getMatchingArea (gridAreaOpt *area, gridOptObject *src, gridOptObject *sec);
 
 }  // namespace griddyn
-#endif

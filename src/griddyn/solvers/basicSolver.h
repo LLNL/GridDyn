@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _BASIC_SOLVER_INTERFACE_H_
-#define _BASIC_SOLVER_INTERFACE_H_
 #pragma once
 
 #include "solverInterface.h"
@@ -64,7 +62,7 @@ class basicSolver : public SolverInterface
     const double *state_data () const noexcept override;
     const double *deriv_data () const noexcept override;
     const double *type_data () const noexcept override;
-    virtual void allocate (count_t size, count_t numRoots = 0) override;
+    virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime t0) override;
 
     virtual double get (const std::string &param) const override;
@@ -76,4 +74,3 @@ class basicSolver : public SolverInterface
 
 }  // namespace solvers
 }  // namespace griddyn
-#endif

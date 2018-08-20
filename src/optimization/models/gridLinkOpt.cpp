@@ -263,13 +263,13 @@ coreObject *gridLinkOpt::findByUserID (const std::string &typeName, index_t sear
     return nullptr;
 }
 
-gridOptObject *gridLinkOpt::getBus (index_t x) const
+gridOptObject *gridLinkOpt::getBus (index_t index) const
 {
-    if (x == 1)
+    if (index == 1)
     {
         return B1;
     }
-    if (x == 2)
+    if (index == 2)
     {
         return B2;
     }

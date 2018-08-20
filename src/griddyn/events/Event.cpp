@@ -108,20 +108,20 @@ bool Event::checkArmed ()
     return false;
 }
 
-void Event::loadField (coreObject *searchObj, const std::string &newfield)
+void Event::loadField (coreObject *searchObj, const std::string &newField)
 {
-    auto renameloc = newfield.find (" as ");  // spaces are important
+    auto renameloc = newField.find (" as ");  // spaces are important
                                               // extract out a rename
 
     objInfo fdata;
     if (renameloc != std::string::npos)
     {
-        setName (stringOps::trim (newfield.substr (renameloc + 4)));
-        fdata = objInfo (newfield.substr (0, renameloc), searchObj);
+        setName (stringOps::trim (newField.substr (renameloc + 4)));
+        fdata = objInfo (newField.substr (0, renameloc), searchObj);
     }
     else
     {
-        fdata = objInfo (newfield, searchObj);
+        fdata = objInfo (newField, searchObj);
     }
 
     field = fdata.m_field;

@@ -131,6 +131,9 @@ if __name__ == '__main__':
     # separators are more for visual cues than anything else
     print(separator('green'))
     # print all warnings from the first guideline only
+
+    print("Warnings for guideline: {}".format(guidelines[0]))
+
     for i in guideline_map[guidelines[0]]:
         print(i.original)
         print(separator('red'))

@@ -10,11 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_EVENT_H_
-#define GRIDDYN_EVENT_H_
 #pragma once
-// headers
-//#include "gridDynSimulation.h"
 
 #include "core/coreObject.h"
 #include "core/helperObject.h"
@@ -155,4 +151,3 @@ std::unique_ptr<Event> make_event (EventInfo &gdEI, coreObject *rootObject);
 std::unique_ptr<Event> make_event (const std::string &eventString, coreObject *rootObject);
 
 }  // namespace griddyn
-#endif

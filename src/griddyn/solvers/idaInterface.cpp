@@ -41,7 +41,7 @@ namespace solvers
 int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
 
 int idaJac (realtype time,
-            realtype sD,
+            realtype cj,
             N_Vector state,
             N_Vector dstate_dt,
             N_Vector resid,
@@ -107,11 +107,11 @@ void idaInterface::allocate (count_t stateCount, count_t numRoots)
     sundialsInterface::allocate (stateCount, numRoots);
 }
 
-void idaInterface::setMaxNonZeros (count_t nonZeroCount)
+void idaInterface::setMaxNonZeros (count_t nonZeros)
 {
-    maxNNZ = nonZeroCount;
+    maxNNZ = nonZeros;
     jacCallCount = 0;
-    a1.reserve (nonZeroCount);
+    a1.reserve (nonZeros);
     a1.clear ();
 }
 
@@ -363,7 +363,7 @@ void idaInterface::initialize (coreTime t0)
     flags.set (initialized_flag);
 }
 
-void idaInterface::sparseReInit (sparse_reinit_modes sparseReinitMode) { KLUReInit (sparseReinitMode); }
+void idaInterface::sparseReInit (sparse_reinit_modes sparseReInitMode) { KLUReInit (sparseReInitMode); }
 
 void idaInterface::setRootFinding (count_t numRoots)
 {

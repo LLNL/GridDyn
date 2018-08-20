@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDLINKOPT_H_
-#define GRIDLINKOPT_H_
+#pragma once
 
 // headers
 #include "../gridOptObjects.h"
@@ -106,4 +105,3 @@ class gridLinkOpt : public gridOptObject
 };
 
 }  // namespace griddyn
-#endif

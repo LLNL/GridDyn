@@ -245,14 +245,14 @@ double sundialsInterface::get (const std::string &param) const
     return SolverInterface::get (param);
 }
 
-void sundialsInterface::KLUReInit (sparse_reinit_modes reinitMode)
+void sundialsInterface::KLUReInit (sparse_reinit_modes sparseReInitModes)
 {
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
         return;
     }
-    switch (reinitMode)
+    switch (sparseReInitModes)
     {
     case sparse_reinit_modes::refactor:
     {

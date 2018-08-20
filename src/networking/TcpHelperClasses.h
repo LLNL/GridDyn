@@ -98,7 +98,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection>
     @throw boost::system::system_error on failure
     @return the number of bytes received
     */
-    size_t receive (void *buffer, size_t maxDataSize);
+    size_t receive (void *buffer, size_t maxDataLength);
 
     /**perform an asynchronous send operation
     @param buffer the data to send
