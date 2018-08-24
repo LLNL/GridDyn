@@ -79,6 +79,10 @@ def unwrap(list_of_lists):
             res.append(el)
     return res
 
+def strip_comment(line):
+    idx = line.find('#')
+    return line[:idx].strip()
+
 ## pipeline
 if __name__ == '__main__':
     import sys
@@ -110,7 +114,7 @@ if __name__ == '__main__':
         guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
 
     # sort all guidelines by how many warnings apply
-    guideline_priority = [(k, len(v)) for k, v in guideline_map.iteritems()]
+    guideline_priority = [(k, len(v)) for k, v in guideline_map.items()]
     guideline_priority.sort(key=lambda x: x[1])
 
     # print all guideline warning counts
@@ -124,22 +128,22 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'r') as f:
         guidelines = f.readlines()
 
-    guidelines = filter(not_comment, guidelines)
+    guidelines = map(strip_comment, guidelines)
     guidelines = filter(not_empty, guidelines)
-    guidelines = [l.strip() for l in guidelines]
 
-    # separators are more for visual cues than anything else
-    print(separator('green'))
-    # print all warnings from the first guideline only
+    for guideline in guidelines:
+        # separators are more for visual cues than anything else
+        print(separator('green'))
+        print("Warnings for guideline: {}".format(guideline))
 
-    print("Warnings for guideline: {}".format(guidelines[0]))
-
-    for i in guideline_map[guidelines[0]]:
-        print(i.original)
-        print(separator('red'))
+        for i in guideline_map[guideline]:
+            print(i.original)
+            print(separator('red'))
 
     # print filenames referenced by the warnings printed
-    filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
+    filenames = set()
+    for guideline in guidelines:
+        filenames.add(map(lambda i: i.file_name, guideline_map[guideline]))
     print('\nFiles referenced:')
     for filename in sorted(filenames):
         print('\t{}'.format(filename))
