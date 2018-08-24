@@ -75,7 +75,7 @@ void GovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/,
     m_state[offset + 1] = 0;
     m_state[offset + offset] = desiredOutput[0];
 
-    Pset = ((Generator *)getParent ())->getPset ();
+    Pset = static_cast<Generator *>(getParent ())->getPset ();
 }
 
 // residual

@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _FMI_OBJECTS_H_
-#define _FMI_OBJECTS_H_
 #pragma once
 
 #include "fmiImport.h"
@@ -333,4 +331,3 @@ class fmi2CoSimObject : public fmi2Object
     std::shared_ptr<const fmiCoSimFunctions> CoSimFunctions;
     bool stepPending;
 };
-#endif

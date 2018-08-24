@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef FMI_MODEL_SUPPORT_H_
-#define FMI_MODEL_SUPPORT_H_
+#pragma once
 
 #include <vector>
 
@@ -41,5 +40,3 @@ class vInfo
     std::vector<int> inputDep;  //!< the inputs on which the calculation depends
     std::vector<int> stateDep;  //!< the states on which the calculation depends
 };
-
-#endif
