@@ -38,6 +38,7 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
         size_t rlc2 = m_field.find_last_of (')');
         m_unitType = gridUnits::getUnits (m_field.substr (rlc + 1, rlc2 - rlc - 1));
         m_field = convertToLowerCase (m_field.substr (0, rlc));
+        stringOps::trimString (m_field);
     }
 }
 
