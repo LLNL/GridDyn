@@ -439,7 +439,7 @@ void EventInfo::loadString (const std::string &eventString, coreObject *rootObj)
             }
             else
             {
-                time.emplace_back (std::stod (tstring.substr (0, cstr - 1)));
+                time.emplace_back (std::stod (tstring.substr (0, cstr)));
                 period = std::stod (tstring.substr (cstr + 1, std::string::npos));
             }
         }
