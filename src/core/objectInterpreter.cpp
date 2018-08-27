@@ -24,7 +24,7 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
     {
         m_obj = locateObject (Istring.substr (0, rlc), obj);
 
-        m_field = convertToLowerCase (Istring.substr (rlc + 2, std::string::npos));
+        m_field = convertToLowerCase (Istring.substr (rlc + 1, std::string::npos));
     }
     else
     {
