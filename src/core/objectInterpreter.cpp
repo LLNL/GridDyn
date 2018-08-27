@@ -31,7 +31,6 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
         m_obj = const_cast<coreObject *> (obj);
         m_field = convertToLowerCase (Istring);
     }
-    stringOps::trimString (m_field);
 
     rlc = m_field.find_first_of ('(');
     if (rlc != std::string::npos)
@@ -39,8 +38,9 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
         size_t rlc2 = m_field.find_last_of (')');
         m_unitType = gridUnits::getUnits (m_field.substr (rlc + 1, rlc2 - rlc - 1));
         m_field = convertToLowerCase (m_field.substr (0, rlc));
-        stringOps::trimString (m_field);
     }
+
+    stringOps::trimString (m_field);
 }
 
 // TODO:: convert to using stringView
