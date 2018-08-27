@@ -31,6 +31,7 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
         m_obj = const_cast<coreObject *> (obj);
         m_field = convertToLowerCase (Istring);
     }
+    stringOps::trimString (m_field);
 
     rlc = m_field.find_first_of ('(');
     if (rlc != std::string::npos)
