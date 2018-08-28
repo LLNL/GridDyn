@@ -338,7 +338,7 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
         {
             EventInfo gdEI;
             gdEI.loadString (eS, gds->getRoot ());
-            auto gdE = make_event (gdEI, gds->getRoot ());
+            std::shared_ptr<Event> gdE = make_event (gdEI, gds->getRoot ());
             gds->add (std::move (gdE));
         }
     }
