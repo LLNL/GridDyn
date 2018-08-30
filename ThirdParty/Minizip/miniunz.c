@@ -72,7 +72,7 @@
 static int minizip_printf( const char * format, ... )
 {
 	return 1;
-} 
+}
 
 
 /*
@@ -545,7 +545,35 @@ int do_extract_onefile(uf,filename,opt_extract_without_path,opt_overwrite,passwo
 }
 
 
+/*
+ * Make miniunz const-correct
+ *
+ * When running miniunz from the command line, the os will copy the command line
+ * arguments. Here, we don't have that, so copy the arguments manually.
+ */
 int miniunz(argc,argv)
+    int argc;
+    const char *argv[];
+{
+    int i;
+    int rv;
+    char **new_argv;
+
+    new_argv = malloc((argc+1) * sizeof(const char*));
+    for(i = 0; i < argc; ++i) {
+        new_argv[i] = strdup(argv[i]);
+    }
+    new_argv[argc] = NULL;
+
+    rv = main(argc, new_argv);
+    for(i = 0; i < argc; ++i) {
+        free(new_argv[i]);
+    }
+    free(new_argv);
+    return rv;
+}
+
+int main(argc,argv)
     int argc;
     char *argv[];
 {

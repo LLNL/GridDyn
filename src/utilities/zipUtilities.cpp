@@ -19,11 +19,11 @@
 
 namespace utilities
 {
-static char zipname[] = "minizip";
-static char ziparg_overwrite[] = "-o";
-static char ziparg_append[] = "-a";
-static char ziparg2[] = "-3";
-static char ziparg3[] = "-j";
+static const char* zipname = "minizip";
+static const char* ziparg_overwrite = "-o";
+static const char* ziparg_append = "-a";
+static const char* ziparg2 = "-3";
+static const char* ziparg3 = "-j";
 
 using namespace boost::filesystem;
 
@@ -45,7 +45,7 @@ int zip (const std::string &file, const std::vector<std::string> &filesToZip, zi
 
     -j  exclude path. store only the file name.
     */
-    std::vector<char *> argv{zipname, (mode == zipMode::overwrite) ? ziparg_overwrite : ziparg_append, ziparg2,
+    std::vector<const char *> argv{zipname, (mode == zipMode::overwrite) ? ziparg_overwrite : ziparg_append, ziparg2,
                              ziparg3, fileV.data ()};
     std::vector<std::vector<char>> filez (filesToZip.size ());
     size_t argc = NUMBER_FIXED_ARGS + filesToZip.size ();
@@ -112,7 +112,7 @@ int zipFolder (const std::string &file, const std::string &folderLoc, zipMode mo
 
     std::vector<char> fileV (file.c_str (), file.c_str () + file.size () + 1u);  // 1u for /0 at end of string
 
-    std::vector<char *> argv{zipname, (mode == zipMode::overwrite) ? ziparg_overwrite : ziparg_append, ziparg2,
+    std::vector<const char *> argv{zipname, (mode == zipMode::overwrite) ? ziparg_overwrite : ziparg_append, ziparg2,
                              fileV.data ()};
     std::vector<std::vector<char>> filez (zfiles.size ());
     size_t argc = 4 + zfiles.size ();
@@ -136,10 +136,10 @@ int zipFolder (const std::string &file, const std::string &folderLoc, zipMode mo
     return status;
 }
 
-static char unzipname[] = "miniunz";
-static char unziparg1[] = "-x";
-static char unziparg2[] = "-o";
-static char unziparg4[] = "-d";
+static const char* unzipname = "miniunz";
+static const char* unziparg1 = "-x";
+static const char* unziparg2 = "-o";
+static const char* unziparg4 = "-d";
 
 int unzip (const std::string &file, const std::string &directory)
 {
@@ -158,7 +158,7 @@ int unzip (const std::string &file, const std::string &directory)
 
     std::vector<char> fileV (file.c_str (), file.c_str () + file.size () + 1u);  // 1u for /0 at end of string
     std::vector<char> dirV (directory.c_str (), directory.c_str () + directory.size () + 1u);
-    std::vector<char *> argv{unzipname, unziparg1, unziparg2, fileV.data ()};
+    std::vector<const char *> argv{unzipname, unziparg1, unziparg2, fileV.data ()};
 
     if (!directory.empty ())
     {
