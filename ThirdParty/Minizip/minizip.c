@@ -261,7 +261,7 @@ int isLargeFile(const char* filename)
  */
 int minizip(argc,argv)
     int argc;
-    const char *argv[];
+    const char **argv;
 {
     int i;
     int rv;
@@ -283,7 +283,7 @@ int minizip(argc,argv)
 
 int main(argc,argv)
     int argc;
-    char *argv[];
+    char **argv;
 {
     int i;
     int opt_overwrite=0;
