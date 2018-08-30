@@ -339,6 +339,7 @@ set(
     gridComponentHelperClasses.h
     numericEstimationFunctions.h
     gridDynDefinitions.hpp
+    offsetTable.h
 )
 
 set(
@@ -350,6 +351,7 @@ set(
     gridSubModel.cpp
     gridComponentHelperClasses.cpp
     numericEstimationFunctions.cpp
+    offsetTable.cpp
 )
 
 set(

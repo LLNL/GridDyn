@@ -13,6 +13,7 @@
 
 #include "../core/coreObject.h"
 #include "gridComponentHelperClasses.h"
+#include "offsetTable.h"
 
 #include <bitset>
 
