@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-int minizip(int argc, const char *argv[]); /* Renamed the main function */
+int minizip(int argc, const char **argv); /* Renamed the main function */
 
 #ifdef __cplusplus
 }

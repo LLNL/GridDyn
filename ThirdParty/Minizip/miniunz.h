@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-int miniunz(int argc, const char *argv[]); /* Renamed the main function */
+int miniunz(int argc, const char **argv); /* Renamed the main function */
 #ifdef __cplusplus
 }
 #endif
