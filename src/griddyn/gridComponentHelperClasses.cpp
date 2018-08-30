@@ -16,8 +16,6 @@
 
 namespace griddyn
 {
-static const solverOffsets nullOffsets{};
-
 
 solverMode::solverMode (index_t index):offsetIndex(index)
 {

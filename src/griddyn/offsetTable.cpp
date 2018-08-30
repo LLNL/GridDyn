@@ -423,6 +423,10 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
             {
                 Loc.dstateLoc = sD.dstate_dt + offsetContainer[sD.pairIndex].diffOffset;
             }
+            else
+            {
+                throw std::runtime_error("Missing state required to initialize dstateLoc");
+            }
         }
         else
         {
@@ -452,6 +456,10 @@ Lp offsetTable::getLocations (const stateData &sD, const solverMode &sMode, cons
             else if (sD.fullState != nullptr)
             {
                 Loc.algStateLoc = sD.fullState + offsetContainer[sD.pairIndex].algOffset;
+            }
+            else
+            {
+                throw std::runtime_error("Missing state required to initialize algStateLoc");
             }
         }
         else
