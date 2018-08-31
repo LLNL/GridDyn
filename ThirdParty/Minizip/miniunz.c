@@ -565,7 +565,8 @@ int miniunz(argc,argv)
     }
     new_argv[argc] = NULL;
 
-    rv = main(argc, new_argv);
+    rv = old_main(argc, new_argv);
+
     for(i = 0; i < argc; ++i) {
         free(new_argv[i]);
     }
@@ -573,7 +574,7 @@ int miniunz(argc,argv)
     return rv;
 }
 
-int main(argc,argv)
+int old_main(argc,argv)
     int argc;
     char **argv;
 {
