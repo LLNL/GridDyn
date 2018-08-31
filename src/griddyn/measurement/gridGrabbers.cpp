@@ -332,6 +332,7 @@ void customGrabber::setGrabberFunction (std::function<void(coreObject *, std::ve
 }
 
 bool customGrabber::checkIfLoaded () { return ((fptr) || (fptrV)); }
+
 functionGrabber::functionGrabber (std::shared_ptr<gridGrabber> ggb, std::string func) : bgrabber (std::move (ggb))
 {
     function_name = std::move (func);
@@ -462,6 +463,7 @@ void functionGrabber::updateObject (coreObject *obj, object_update_mode mode)
 }
 
 bool functionGrabber::checkIfLoaded () { return (bgrabber->loaded); }
+
 coreObject *functionGrabber::getObject () const
 {
     if (bgrabber)
@@ -527,6 +529,7 @@ bool opGrabber::checkIfLoaded ()
 {
     return (((bgrabber1) && (bgrabber1->loaded)) && ((bgrabber2) && (bgrabber2->loaded)));
 }
+
 void opGrabber::getDesc (stringVec &desc_list) const
 {
     if (vectorGrab)
