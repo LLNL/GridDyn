@@ -80,7 +80,8 @@ coreObject *Governor::clone (coreObject *obj) const
 }
 
 // destructor
-Governor::~Governor () {}
+Governor::~Governor () = default;
+
 void Governor::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     prevTime = time0;

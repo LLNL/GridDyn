@@ -181,7 +181,7 @@ void gridLoadOpt::getConstraints (const optimData & /*oD*/,
 void gridLoadOpt::getObjName (stringVec & /*objNames*/, const optimMode & /*oMode*/, const std::string & /*prefix*/) {}
 
 // destructor
-gridLoadOpt::~gridLoadOpt () {}
+gridLoadOpt::~gridLoadOpt () = default;
 
 // set properties
 void gridLoadOpt::set (const std::string &param, const std::string &val)

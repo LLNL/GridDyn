@@ -65,7 +65,8 @@ coreObject *GovernorSteamNR::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorSteamNR::~GovernorSteamNR () {}
+GovernorSteamNR::~GovernorSteamNR () = default;
+
 // initial conditions
 void GovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/,
                                             const IOdata &desiredOutput,

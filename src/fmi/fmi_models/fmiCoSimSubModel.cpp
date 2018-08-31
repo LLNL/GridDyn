@@ -35,7 +35,7 @@ fmiCoSimSubModel::fmiCoSimSubModel (const std::string &newName, std::shared_ptr<
 
 fmiCoSimSubModel::fmiCoSimSubModel (std::shared_ptr<fmi2CoSimObject> fmi) : cs (std::move (fmi)) {}
 
-fmiCoSimSubModel::~fmiCoSimSubModel () {}
+fmiCoSimSubModel::~fmiCoSimSubModel () = default;
 
 coreObject *fmiCoSimSubModel::clone (coreObject *obj) const
 {

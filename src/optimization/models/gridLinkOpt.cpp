@@ -184,7 +184,7 @@ void gridLinkOpt::disable () { coreObject::disable (); }
 void gridLinkOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/) {}
 
 // destructor
-gridLinkOpt::~gridLinkOpt () {}
+gridLinkOpt::~gridLinkOpt () = default;
 
 // set properties
 void gridLinkOpt::set (const std::string &param, const std::string &val)

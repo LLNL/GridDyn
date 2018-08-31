@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef TINYXMLREADERELEMENT_H_
-#define TINYXMLREADERELEMENT_H_
+#pragma once
 
 #include "readerElement.h"
 
@@ -37,7 +36,7 @@ class tinyxmlReaderElement : public readerElement
     std::vector<std::pair<const ticpp::Element *, const ticpp::Element *>>
       bookmarks;  //!< storage for recorded locations
   public:
-    tinyxmlReaderElement () noexcept;
+    tinyxmlReaderElement ();
     tinyxmlReaderElement (const std::string &fileName);
     tinyxmlReaderElement (const ticpp::Element *ticppElement, const ticpp::Element *ticppParent);
 
@@ -84,5 +83,3 @@ class tinyxmlReaderElement : public readerElement
   private:
     void clear ();
 };
-
-#endif

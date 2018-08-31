@@ -17,7 +17,7 @@ namespace griddyn
 {
 dispatcher::dispatcher (const std::string &objName) : coreObject (objName) {}
 
-dispatcher::~dispatcher () {}
+dispatcher::~dispatcher () = default;
 coreObject *dispatcher::clone (coreObject * /*obj*/) const { return nullptr; }
 
 void dispatcher::moveSchedulers (dispatcher * /*dis*/) {}

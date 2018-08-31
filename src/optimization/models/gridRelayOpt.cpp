@@ -184,7 +184,7 @@ void gridRelayOpt::disable () { gridOptObject::disable (); }
 void gridRelayOpt::setOffsets (const optimOffsets & /*newOffset*/, const optimMode & /*oMode*/) {}
 
 // destructor
-gridRelayOpt::~gridRelayOpt () {}
+gridRelayOpt::~gridRelayOpt () = default;
 
 // set properties
 void gridRelayOpt::set (const std::string &param, const std::string &val)

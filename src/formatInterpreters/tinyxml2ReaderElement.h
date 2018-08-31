@@ -28,7 +28,7 @@ class XMLAttribute;
 class tinyxml2ReaderElement : public readerElement
 {
   public:
-    tinyxml2ReaderElement () noexcept;
+    tinyxml2ReaderElement ();
     explicit tinyxml2ReaderElement (const std::string &fileName);
 
     tinyxml2ReaderElement (const tinyxml2::XMLElement *xmlElement, const tinyxml2::XMLElement *xmlParent);
