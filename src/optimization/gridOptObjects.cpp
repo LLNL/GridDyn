@@ -391,67 +391,67 @@ void gridOptObject::dynObjectInitializeA (std::uint32_t /*flags*/) {}
 
 void gridOptObject::dynObjectInitializeB (std::uint32_t /*flags*/) {}
 
-void gridOptObject::loadSizes (const optimMode & /* unused */) {}
+void gridOptObject::loadSizes (const optimMode & /*unused*/) {}
 
-void gridOptObject::setValues (const optimData & /* unused */, const optimMode & /* unused */) {}
+void gridOptObject::setValues (const optimData & /*unused*/, const optimMode & /*unused*/) {}
 
-void gridOptObject::guessState (double /*time*/, double /*val*/[], const optimMode & /* unused */) {}
+void gridOptObject::guessState (double /*time*/, double /*val*/[], const optimMode & /*unused*/) {}
 
-void gridOptObject::getTols (double /*tols*/[], const optimMode & /* unused */) {}
+void gridOptObject::getTols (double /*tols*/[], const optimMode & /*unused*/) {}
 
 void gridOptObject::valueBounds (double /*time*/,
                                  double /*upLimit*/[],
                                  double /*lowerLimit*/[],
-                                 const optimMode & /* unused */)
+                                 const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::linearObj (const optimData & /* unused */,
+void gridOptObject::linearObj (const optimData & /*unused*/,
                                vectData<double> & /*linObj*/,
-                               const optimMode & /* unused */)
+                               const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::quadraticObj (const optimData & /* unused */,
+void gridOptObject::quadraticObj (const optimData & /*unused*/,
                                   vectData<double> & /*linObj*/,
                                   vectData<double> & /*quadObj*/,
-                                  const optimMode & /* unused */)
+                                  const optimMode & /*unused*/)
 {
 }
 
-double gridOptObject::objValue (const optimData & /* unused */, const optimMode & /* unused */) { return 0; }
+double gridOptObject::objValue (const optimData & /*unused*/, const optimMode & /*unused*/) { return 0; }
 
-void gridOptObject::gradient (const optimData & /* unused */, double /*grad*/[], const optimMode & /* unused */) {}
+void gridOptObject::gradient (const optimData & /*unused*/, double /*grad*/[], const optimMode & /*unused*/) {}
 
-void gridOptObject::jacobianElements (const optimData &,
+void gridOptObject::jacobianElements (const optimData & /*unused*/,
                                       matrixData<double> & /*md*/,
-                                      const optimMode & /* unused */)
+                                      const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::getConstraints (const optimData & /* unused */,
+void gridOptObject::getConstraints (const optimData & /*unused*/,
                                     matrixData<double> & /*cons*/,
                                     double /*upperLimit*/[],
                                     double /*lowerLimit*/[],
-                                    const optimMode & /* unused */)
+                                    const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::constraintValue (const optimData & /* unused */,
+void gridOptObject::constraintValue (const optimData & /*unused*/,
                                      double /*cVals*/[],
-                                     const optimMode & /* unused */)
+                                     const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::constraintJacobianElements (const optimData & /* unused */,
+void gridOptObject::constraintJacobianElements (const optimData & /*unused*/,
                                                 matrixData<double> & /*md*/,
-                                                const optimMode & /* unused */)
+                                                const optimMode & /*unused*/)
 {
 }
 
-void gridOptObject::hessianElements (const optimData & /* unused */,
+void gridOptObject::hessianElements (const optimData & /*unused*/,
                                      matrixData<double> & /*md*/,
-                                     const optimMode & /* unused */)
+                                     const optimMode & /*unused*/)
 {
 }
 

@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef READERINFO_H_
-#define READERINFO_H_
+#pragma once
 
 // forward declarations
 class readerElement;
@@ -94,7 +93,7 @@ class readerInfo : public basicReaderInfo
     /** @brief construct a reader info object from a basic readerInfo object
     @param[in] bri  a basic reader info object
     */
-    explicit readerInfo (basicReaderInfo bri);
+    explicit readerInfo (basicReaderInfo const& bri);
     /**@brief destructor*/
     ~readerInfo ();
     /** @brief add an object to the library
@@ -244,4 +243,3 @@ class readerInfo : public basicReaderInfo
 };
 
 }  // namespace griddyn
-#endif

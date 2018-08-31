@@ -85,20 +85,20 @@ void gridRelayOpt::add (coreObject *obj)
     }
 }
 
-count_t gridRelayOpt::objSize (const optimMode & /* oMode */)
+count_t gridRelayOpt::objSize (const optimMode & /*oMode*/)
 {
     count_t objs = 0;
 
     return objs;
 }
-count_t gridRelayOpt::contObjSize (const optimMode & /* oMode */)
+count_t gridRelayOpt::contObjSize (const optimMode & /*oMode*/)
 {
     count_t objs = 0;
 
     return objs;
 }
 
-count_t gridRelayOpt::intObjSize (const optimMode & /* oMode */)
+count_t gridRelayOpt::intObjSize (const optimMode & /*oMode*/)
 {
     count_t objs = 0;
 
@@ -122,62 +122,62 @@ count_t gridRelayOpt::constraintSize (const optimMode &oMode)
 
 void gridRelayOpt::dynObjectInitializeA (std::uint32_t /*flags*/) {}
 
-void gridRelayOpt::remove (coreObject *) {}
+void gridRelayOpt::remove (coreObject * /*obj*/) {}
 
-void gridRelayOpt::setValues (const optimData & /* oD */, const optimMode & /* oMode */) {}
+void gridRelayOpt::setValues (const optimData & /*oD*/, const optimMode & /*oMode*/) {}
 // for saving the state
-void gridRelayOpt::guessState (double /*time*/, double /*val*/[], const optimMode & /* oMode */) {}
+void gridRelayOpt::guessState (double /*time*/, double /*val*/[], const optimMode & /*oMode*/) {}
 
-void gridRelayOpt::getVariableType (double /*sdata*/[], const optimMode & /* oMode */) {}
+void gridRelayOpt::getVariableType (double /*sdata*/[], const optimMode & /*oMode*/) {}
 
-void gridRelayOpt::getTols (double /*tols*/[], const optimMode & /* oMode */) {}
+void gridRelayOpt::getTols (double /*tols*/[], const optimMode & /*oMode*/) {}
 void gridRelayOpt::valueBounds (double /*time*/,
                                 double /*upperLimit*/[],
                                 double /*lowerLimit*/[],
-                                const optimMode & /* oMode */)
+                                const optimMode & /*oMode*/)
 {
 }
 
-void gridRelayOpt::linearObj (const optimData & /* oD */,
+void gridRelayOpt::linearObj (const optimData & /*oD*/,
                               vectData<double> & /*linObj*/,
-                              const optimMode & /* oMode */)
+                              const optimMode & /*oMode*/)
 {
 }
-void gridRelayOpt::quadraticObj (const optimData & /* oD */,
+void gridRelayOpt::quadraticObj (const optimData & /*oD*/,
                                  vectData<double> & /*linObj*/,
                                  vectData<double> & /*quadObj*/,
-                                 const optimMode & /* oMode */)
+                                 const optimMode & /*oMode*/)
 {
 }
 
-void gridRelayOpt::constraintValue (const optimData & /* oD */, double /*cVals*/[], const optimMode & /* oMode */)
+void gridRelayOpt::constraintValue (const optimData & /*oD*/, double /*cVals*/[], const optimMode & /*oMode*/)
 {
 }
-void gridRelayOpt::constraintJacobianElements (const optimData & /* oD */,
+void gridRelayOpt::constraintJacobianElements (const optimData & /*oD*/,
                                                matrixData<double> & /*md*/,
-                                               const optimMode & /* oMode */)
+                                               const optimMode & /*oMode*/)
 {
 }
 
-double gridRelayOpt::objValue (const optimData & /* oD */, const optimMode & /* oMode */)
+double gridRelayOpt::objValue (const optimData & /*oD*/, const optimMode & /*oMode*/)
 {
     double cost = 0;
 
     return cost;
 }
 
-void gridRelayOpt::gradient (const optimData & /* oD */, double /*deriv*/[], const optimMode & /* oMode */) {}
-void gridRelayOpt::jacobianElements (const optimData &, matrixData<double> & /*md*/, const optimMode & /* oMode */)
+void gridRelayOpt::gradient (const optimData & /*oD*/, double /*deriv*/[], const optimMode & /*oMode*/) {}
+void gridRelayOpt::jacobianElements (const optimData & /*oD*/, matrixData<double> & /*md*/, const optimMode & /*oMode*/)
 {
 }
-void gridRelayOpt::getConstraints (const optimData & /* oD */,
+void gridRelayOpt::getConstraints (const optimData & /*oD*/,
                                    matrixData<double> & /*cons*/,
                                    double /*upperLimit*/[],
                                    double /*lowerLimit*/[],
-                                   const optimMode & /* oMode */)
+                                   const optimMode & /*oMode*/)
 {
 }
-void gridRelayOpt::getObjName (stringVec & /*objNames*/, const optimMode &, const std::string & /*prefix*/) {}
+void gridRelayOpt::getObjName (stringVec & /*objNames*/, const optimMode & /*oMode*/, const std::string & /*prefix*/) {}
 
 void gridRelayOpt::disable () { gridOptObject::disable (); }
 
