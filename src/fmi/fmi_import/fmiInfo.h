@@ -111,10 +111,10 @@ class fmiVariableSet
     fmiVariableSet ();
     fmiVariableSet (fmi2ValueReference newvr);
     fmiVariableSet (const fmiVariableSet &vset);
-    fmiVariableSet (fmiVariableSet &&vset);
+    fmiVariableSet (fmiVariableSet &&vset) noexcept;
 
     fmiVariableSet &operator= (const fmiVariableSet &other);
-    fmiVariableSet &operator= (fmiVariableSet &&other);
+    fmiVariableSet &operator= (fmiVariableSet &&other) noexcept;
 
     const fmi2ValueReference *getValueRef () const;
     size_t getVRcount () const;
