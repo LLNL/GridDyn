@@ -35,7 +35,7 @@ commManager::commManager (const commManager &cm)
     }
 }
 
-commManager::commManager (commManager &&) = default;
+commManager::commManager (commManager &&) noexcept = default;
 commManager::~commManager () = default;
 
 commManager &commManager::operator= (const commManager &cm)
@@ -61,7 +61,7 @@ commManager &commManager::operator= (const commManager &cm)
     return *this;
 }
 
-commManager &commManager::operator= (commManager &&) = default;
+commManager &commManager::operator= (commManager &&) noexcept = default;
 
 void commManager::setName (const std::string &name) { commName = name; }
 bool commManager::set (const std::string &param, const std::string &val)
