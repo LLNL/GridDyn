@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef OBJECT_GRABBERS_H_
-#define OBJECT_GRABBERS_H_
 #pragma once
 
 #include "../solvers/solverMode.hpp"
@@ -320,4 +318,3 @@ class objectOffsetGrabber : public gridGrabber
 };
 
 }  // namespace griddyn
-#endif

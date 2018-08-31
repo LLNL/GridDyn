@@ -85,17 +85,6 @@ void gridGrabber::updateField (const std::string &fld)
     }
 
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
-    else
-    {
-        if (!customDesc)
-        {
-            desc = "";
-        }
-    }
 }
 
 const std::string &gridGrabber::getDesc () const
@@ -195,24 +184,12 @@ void gridGrabber::updateObject (coreObject *obj, object_update_mode mode)
                 throw (objectUpdateFailException ());
             }
         }
-        if (cobj != nullptr)
-        {
-            makeDescription ();
-        }
     }
     else
     {
         cobj = obj;
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
-    else if (!customDesc)
-    {
-        desc = "";
-    }
 }
 
 void gridGrabber::makeDescription () const
@@ -394,10 +371,6 @@ void functionGrabber::updateField (const std::string &fld)
         vectorGrab = false;
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
 }
 
 void functionGrabber::getDesc (std::vector<std::string> &desc_list) const
@@ -486,10 +459,6 @@ void functionGrabber::updateObject (coreObject *obj, object_update_mode mode)
         bgrabber->updateObject (obj, mode);
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
 }
 
 bool functionGrabber::checkIfLoaded () { return (bgrabber->loaded); }
@@ -534,10 +503,6 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
         vectorGrab = false;
     }
     loaded = opGrabber::checkIfLoaded ();
-    if (loaded)
-    {
-        opGrabber::makeDescription ();
-    }
 }
 
 void opGrabber::updateField (const std::string &fld)
