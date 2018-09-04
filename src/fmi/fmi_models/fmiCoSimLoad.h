@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef FMI_COSIMLOADMODEL_H_
-#define FMI_COSIMLOADMODEL_H_
+#pragma once
 
 #include "fmiCoSimWrapper.hpp"
 #include "griddyn/Load.h"
@@ -45,4 +44,3 @@ class fmiCoSimLoad : public fmiCoSimWrapper<Load>
 
 }  // namespace fmi
 }  // namespace griddyn
-#endif

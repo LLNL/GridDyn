@@ -11,8 +11,9 @@
  */
 
 /** @file
-@brief classes and object to help in the operation of gridComponents
-*/
+ * @brief classes and object to help in the operation of gridComponents
+ */
+
 #pragma once
 
 #include "solvers/solverMode.hpp"
@@ -169,9 +170,9 @@ enum init_control_flags
     low_voltage_checking = 15,  //!< enable low voltage checking on buses
 };
 
-#define CHECK_CONTROLFLAG(flag, flagName) (((flag) & (1 << flagName)) != 0)
-#define SET_CONTROLFLAG(flag, flagName) ((flag) |= (1 << flagName))
-#define CLEAR_CONTROLFLAG(flag, flagName) ((flag) &= (~(1 << flagName)))
+#define CHECK_CONTROLFLAG(flag, flagName) (((flag) & (1U << flagName)) != 0)
+#define SET_CONTROLFLAG(flag, flagName) ((flag) |= (1U << flagName))
+#define CLEAR_CONTROLFLAG(flag, flagName) ((flag) &= (~(1U << flagName)))
 
 /** @brief get the lower 32 bits of a flag variable*
 @param[in] flags the 64 bit flags to get the lower half from

@@ -28,7 +28,7 @@ using namespace readerConfig;
 
 void basicReaderInfo::setFlag (int flagID)
 {
-    if (flagID < 32)
+    if (flagID < 32 && flagID > 0)
     {
         flags |= (1 << flagID);
     }
