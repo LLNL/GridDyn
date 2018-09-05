@@ -18,11 +18,11 @@ fmiVariableSet::fmiVariableSet () = default;
 fmiVariableSet::fmiVariableSet (fmi2ValueReference newvr) : vrset ({newvr}) {}
 fmiVariableSet::fmiVariableSet (const fmiVariableSet &vset) = default;
 
-fmiVariableSet::fmiVariableSet (fmiVariableSet &&vset) noexcept = default;
+fmiVariableSet::fmiVariableSet (fmiVariableSet &&vset) = default;
 
 fmiVariableSet &fmiVariableSet::operator= (const fmiVariableSet &other) = default;
 
-fmiVariableSet &fmiVariableSet::operator= (fmiVariableSet &&other) noexcept = default;
+fmiVariableSet &fmiVariableSet::operator= (fmiVariableSet &&other) = default;
 
 const fmi2ValueReference *fmiVariableSet::getValueRef () const { return vrset.data (); }
 
