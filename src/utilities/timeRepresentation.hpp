@@ -362,7 +362,7 @@ class TimeRepresentation
     }
 #endif
 
-    constexpr TimeRepresentation (const TimeRepresentation &x) noexcept = default;
+    constexpr TimeRepresentation (const TimeRepresentation &x) = default;
     /** generate a TimeRepresentation of the maximum representative value*/
     static constexpr TimeRepresentation maxVal () noexcept
     {
@@ -389,7 +389,7 @@ class TimeRepresentation
     std::int64_t toCount (timeUnits units) const noexcept { return Tconv::toCount (timecode_, units); }
 
     /** default copy operation*/
-    TimeRepresentation &operator= (const TimeRepresentation &x) noexcept = default;
+    TimeRepresentation &operator= (const TimeRepresentation &x) = default;
 
     /** assignment operator from a double representation as seconds*/
     TimeRepresentation &operator= (double t) noexcept
