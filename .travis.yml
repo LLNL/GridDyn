@@ -5,7 +5,7 @@ cache:
   ccache: true
   directories:
     - dependencies
-    - build/libs
+    #- build/libs # disable this for now
 
 before_cache:
   - ${TRAVIS_BUILD_DIR}/scripts/cleanup-cmake.sh

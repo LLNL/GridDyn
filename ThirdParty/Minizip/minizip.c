@@ -253,36 +253,7 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-/*
- * Make minizip const-correct
- *
- * When running minizip from the command line, the os will copy the command line
- * arguments. Here, we don't have that, so copy the arguments manually.
- */
-int minizip(argc,argv)
-    int argc;
-    const char **argv;
-{
-    int i;
-    int rv;
-    char **new_argv;
-
-    new_argv = malloc((argc+1) * sizeof(const char*));
-    for(i = 0; i < argc; ++i) {
-        new_argv[i] = strdup(argv[i]);
-    }
-    new_argv[argc] = NULL;
-
-    rv = old_main(argc, new_argv);
-
-    for(i = 0; i < argc; ++i) {
-        free(new_argv[i]);
-    }
-    free(new_argv);
-    return rv;
-}
-
-int old_main(argc,argv)
+int minizip_main(argc,argv)
     int argc;
     char **argv;
 {
@@ -556,4 +527,34 @@ int old_main(argc,argv)
 
     free(buf);
     return 0;
+}
+
+
+/*
+ * Make minizip const-correct
+ *
+ * When running minizip from the command line, the os will copy the command line
+ * arguments. Here, we don't have that, so copy the arguments manually.
+ */
+int minizip(argc,argv)
+    int argc;
+    const char **argv;
+{
+    int i;
+    int rv;
+    char **new_argv;
+
+    new_argv = malloc((argc+1) * sizeof(const char*));
+    for(i = 0; i < argc; ++i) {
+        new_argv[i] = strdup(argv[i]);
+    }
+    new_argv[argc] = NULL;
+
+    rv = minizip_main(argc, new_argv);
+
+    for(i = 0; i < argc; ++i) {
+        free(new_argv[i]);
+    }
+    free(new_argv);
+    return rv;
 }
