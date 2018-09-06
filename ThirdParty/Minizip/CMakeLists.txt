@@ -50,12 +50,16 @@ endif(WIN32)
 
 set(HEADERS
   crypt.h
-  ioapi.h  
+  ioapi.h
   miniunz.h
   minizip.h
   #mztools.h
   unzip.h
 )
+
+set(INTERNAL_HEADERS
+  argv.h
+ )
 
 if(WIN32)
     set(HEADERS ${HEADERS} iowin32.h)
@@ -65,7 +69,7 @@ if (NOT CMAKE_DEBUG_POSTFIX)
 set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-add_library(minizip ${SOURCES} ${HEADERS})
+add_library(minizip ${SOURCES} ${HEADERS}  ${})
 
 
 	install(TARGETS minizip EXPORT minizip-targets

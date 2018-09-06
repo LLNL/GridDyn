@@ -11,7 +11,7 @@ configuration:
   - Release
 
 cache:
-  - build\libs
+#  - build\libs # reenable this when the minizip pr is merged
 
 install:
 
@@ -31,7 +31,7 @@ after_build:
   - cd build
   - cpack -B %cd%/installer-output
   - cd ..
-  
+
 test_script:
   - cd build
   # For controlling which tests get run:

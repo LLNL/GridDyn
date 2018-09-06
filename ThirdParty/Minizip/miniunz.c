@@ -58,6 +58,8 @@
 
 #include "unzip.h"
 
+#include "argv.h"
+
 #define CASESENSITIVITY (0)
 #define WRITEBUFFERSIZE (8192)
 #define MAXFILENAME (256)
@@ -686,17 +688,9 @@ int miniunz(argc,argv)
     int rv;
     char **new_argv;
 
-    new_argv = malloc((argc+1) * sizeof(const char*));
-    for(i = 0; i < argc; ++i) {
-        new_argv[i] = strdup(argv[i]);
-    }
-    new_argv[argc] = NULL;
-
+    new_argv = copy_argv(argc, argv);
     rv = miniunz_main(argc, new_argv);
+    free_argv(argc, new_argv);
 
-    for(i = 0; i < argc; ++i) {
-        free(new_argv[i]);
-    }
-    free(new_argv);
     return rv;
 }
