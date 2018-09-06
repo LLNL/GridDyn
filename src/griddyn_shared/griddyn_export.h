@@ -30,8 +30,8 @@ extern "C"
 
 #include <stdlib.h>
 
-    /** typedef a gridDynObject to a void * to represent an object in GridDyn*/
-    typedef void *gridDynObject;
+    /** typedef a gridDynObject to a void to represent an object in GridDyn */
+    typedef void gridDynObject;
 
     /** typedef a gridDynSimReference to a void * to represent a simulation object*/
     typedef void *gridDynSimReference;
@@ -84,33 +84,34 @@ extern "C"
     @param[in] objectType  the specific type of the component to create
     @return a gridDynObject that represents the newly created object
     */
-    GRIDDYN_EXPORT gridDynObject gridDynObject_create (const char *componentType, const char *objectType);
+    GRIDDYN_EXPORT gridDynObject *gridDynObject_create (const char *componentType, const char *objectType);
 
     /** clone an object from an existing object
     @details a new object is constructed that is a clone of the original object
     @param[in] obj the original object
     @return a gridDynObject that represents the newly created object
     */
-    GRIDDYN_EXPORT gridDynObject gridDynObject_clone (gridDynObject const obj);
+    GRIDDYN_EXPORT gridDynObject *gridDynObject_clone (gridDynObject const *obj);
 
     /** free the object,  which may result in object destruction if it is not being used elsewhere
     @param[in] obj the object to free
     */
-    GRIDDYN_EXPORT void gridDynObject_free (gridDynObject obj);
+    GRIDDYN_EXPORT void gridDynObject_free (gridDynObject *obj);
 
     /** add an object to another in the hierarchy
     @param[in] parentObject the object to which another is being added
     @param[in] objectToAdd  the object being added
     @return 0 if successful, non-zero otherwise
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_add (gridDynObject parentObject, gridDynObject objectToAdd);
+    GRIDDYN_EXPORT griddyn_status gridDynObject_add (gridDynObject *parentObject, gridDynObject *objectToAdd);
 
     /** remove an object from another in the hierarchy
     @param[in] parentObject the object to which another is being added
     @param[in] objectToRemove  the object being removed
     @return 0 if successful, non-zero otherwise success is defined as the object not being present in the parent
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_remove (gridDynObject parentObject, gridDynObject objectToRemove);
+    GRIDDYN_EXPORT griddyn_status gridDynObject_remove (gridDynObject *parentObject,
+                                                        gridDynObject *objectToRemove);
 
     /** set a string parameter in an object
     @param[in] obj the object to set the property of
@@ -118,7 +119,7 @@ extern "C"
     @param[in] value the desired value of the parameter
     @return 0 on success, negative otherwise
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_setString (gridDynObject obj,
+    GRIDDYN_EXPORT griddyn_status gridDynObject_setString (gridDynObject *obj,
                                                            const char *parameter,
                                                            const char *value);
 
@@ -129,7 +130,7 @@ extern "C"
     @param[in] value the desired value of the parameter
     @return 0 on success, negative otherwise
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_setValue (gridDynObject obj, const char *parameter, double value);
+    GRIDDYN_EXPORT griddyn_status gridDynObject_setValue (gridDynObject *obj, const char *parameter, double value);
 
     /** set a value parameter in an object
     @param[in] obj the object to set the property of
@@ -138,7 +139,7 @@ extern "C"
     @param[in] units a description of the units which correspond to the parameter
     @return 0 on success, negative otherwise
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_setValueUnits (gridDynObject obj,
+    GRIDDYN_EXPORT griddyn_status gridDynObject_setValueUnits (gridDynObject *obj,
                                                                const char *parameter,
                                                                double value,
                                                                const char *units);
@@ -149,7 +150,7 @@ extern "C"
     @param[in] value the desired value of the parameter
     @return 0 on success, negative otherwise
     */
-    GRIDDYN_EXPORT griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int val);
+    GRIDDYN_EXPORT griddyn_status gridDynObject_setFlag (gridDynObject *obj, const char *flag, int val);
 
     /** query the value of a string in an object
     @param[in] obj the object to query
@@ -157,7 +158,7 @@ extern "C"
     @param[out] value the storage location for the string
     @param[in] N the max size of the string
     @return the size of the string returned in value*/
-    GRIDDYN_EXPORT griddyn_status gridDynObject_getString (const gridDynObject obj,
+    GRIDDYN_EXPORT griddyn_status gridDynObject_getString (const gridDynObject *obj,
                                                            const char *parameter,
                                                            char *value,
                                                            int N);
@@ -167,7 +168,7 @@ extern "C"
     @param[in] parameter the name of the parameter to query
     @param[out] result the location to store the result
     @return 0 if the value is valid or griddyn_unknown_parameter Otherwise*/
-    GRIDDYN_EXPORT griddyn_status gridDynObject_getValue (const gridDynObject obj,
+    GRIDDYN_EXPORT griddyn_status gridDynObject_getValue (const gridDynObject *obj,
                                                           const char *parameter,
                                                           double *result);
 
@@ -177,7 +178,7 @@ extern "C"
     @param[in] units the desired output units
     @param[out] result the location to store the result
     @return 0 if the value is valid or griddyn_unknown_parameter Otherwise*/
-    GRIDDYN_EXPORT griddyn_status gridDynObject_getValueUnits (const gridDynObject obj,
+    GRIDDYN_EXPORT griddyn_status gridDynObject_getValueUnits (const gridDynObject *obj,
                                                                const char *parameter,
                                                                const char *units,
                                                                double *result);
@@ -187,13 +188,13 @@ extern "C"
     @param[in] parameter the name of the parameter to query
     @param[out] result the value of the flag 0 if false otherwise(usually 1) if true
     @return 0 if the flag is found griddyn_unknown_parameter Otherwise*/
-    GRIDDYN_EXPORT griddyn_status gridDynObject_getFlag (const gridDynObject obj, const char *flag, int *result);
+    GRIDDYN_EXPORT griddyn_status gridDynObject_getFlag (const gridDynObject *obj, const char *flag, int *result);
 
     /** find an object within another object
     @param[in] obj the object as the basis of the search
     @param[in] objectToFind a string describing the object
     @return a gridDynObject with the found object,  nullptr if not found*/
-    GRIDDYN_EXPORT gridDynObject gridDynObject_find (const gridDynObject obj, const char *objectToFind);
+    GRIDDYN_EXPORT gridDynObject *gridDynObject_find (const gridDynObject *obj, const char *objectToFind);
 
     /** get a subobject of a particular object by type and index
     @param[in] obj the object to use as the basis for the search
@@ -201,9 +202,8 @@ extern "C"
     @param[in] N  the index of the object to retrieve
     @return a gridDynObject as indicated by the index or a nullptr
     */
-    GRIDDYN_EXPORT gridDynObject gridDynObject_getSubObject (const gridDynObject obj,
-                                                             const char *componentType,
-                                                             int N);
+    GRIDDYN_EXPORT gridDynObject *
+    gridDynObject_getSubObject (const gridDynObject *obj, const char *componentType, int N);
 
     /** get a subobject of a particular object by type and index
     @param[in] obj the object to use as the basis for the search
@@ -211,19 +211,18 @@ extern "C"
     @param[in] ID  the user identifier for the object
     @return a gridDynObject as indicated by the user ID
     */
-    GRIDDYN_EXPORT gridDynObject gridDynObject_findByUserId (const gridDynObject obj,
-                                                             const char *componentType,
-                                                             int ID);
+    GRIDDYN_EXPORT gridDynObject *
+    gridDynObject_findByUserId (const gridDynObject *obj, const char *componentType, int ID);
     /** get the parent of an object
     @param[in] obj the object to get the parent of
     @return the parent of the object in question or a nullptr if the object is a root object
     */
-    GRIDDYN_EXPORT gridDynObject gridDynObject_getParent (const gridDynObject obj);
+    GRIDDYN_EXPORT gridDynObject *gridDynObject_getParent (const gridDynObject *obj);
     /** get a const char * to a string representing the componentType of the object
     @param[in] obj the object to query
     @return a pointer to a type string.  The memory is managed internally and does not need to be freed the
     pointers are to a fixed set of strings and should not be modified*/
-    GRIDDYN_EXPORT const char *gridDynObject_getType (const gridDynObject obj);
+    GRIDDYN_EXPORT const char *gridDynObject_getType (const gridDynObject *obj);
 
     // functions for the gridDyn Simulation
     /** create a new simulation object
@@ -356,7 +355,7 @@ extern "C"
     @param[in] sim the simulation runner reference object
     @return a gridDynObject that can be used in the gridDynObject_* functions
     */
-    GRIDDYN_EXPORT gridDynObject getSimulationObject (gridDynSimReference sim);
+    GRIDDYN_EXPORT gridDynObject *getSimulationObject (gridDynSimReference sim);
 
     // mathematical function for using the simulation as a function evaluator
     /** get a solverKey value that can be used for the solverKey input in the other math functions
@@ -522,7 +521,7 @@ extern "C"
     @param[in] queryString a string representing a value to query
     @return a singleQueryObject
     */
-    GRIDDYN_EXPORT gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, const char *queryString);
+    GRIDDYN_EXPORT gridDynSingleQuery gridDynSingleQuery_create (gridDynObject *obj, const char *queryString);
 
     /** create a query object to retrieve a set of values repeatedly
     @details can be one or more values that can be retrieved to a vector
@@ -530,7 +529,7 @@ extern "C"
     @param[in] queryString a string representing a value to query
     @return a vectorQueryObject
     */
-    GRIDDYN_EXPORT gridDynVectorQuery gridDynVectorQuery_create (gridDynObject obj, const char *queryString);
+    GRIDDYN_EXPORT gridDynVectorQuery gridDynVectorQuery_create (gridDynObject *obj, const char *queryString);
 
     /** release the memory from a single query object
     @param[in] query the query object to free
@@ -562,7 +561,7 @@ extern "C"
     @param[in] queryString a string describing the new queries to add
     */
     GRIDDYN_EXPORT griddyn_status gridDynVectorQuery_append (gridDynVectorQuery query,
-                                                             gridDynObject obj,
+                                                             gridDynObject *obj,
                                                              const char *queryString);
     /** change the data a single query gets
     @param[in] query the single query object to alter
@@ -570,7 +569,7 @@ extern "C"
     @param[in] queryString a string describing the new queries to add
     */
     GRIDDYN_EXPORT griddyn_status gridDynSingleQuery_update (gridDynSingleQuery query,
-                                                             gridDynObject obj,
+                                                             gridDynObject *obj,
                                                              const char *queryString);
 
     /** change the data a vector query gets
@@ -579,7 +578,7 @@ extern "C"
     @param[in] queryString a string describing the new queries
     */
     GRIDDYN_EXPORT griddyn_status gridDynVectorQuery_update (gridDynVectorQuery query,
-                                                             gridDynObject obj,
+                                                             gridDynObject *obj,
                                                              const char *queryString);
 
     // functions for handling events
@@ -589,7 +588,7 @@ extern "C"
     @param[in] obj the target object of the event can be nullptr
     @return a gridDynEvent object used in the other functions
     */
-    GRIDDYN_EXPORT gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject obj);
+    GRIDDYN_EXPORT gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject *obj);
     /** delete the event
     @param[in] evnt  the event object to be freed
     */
@@ -639,7 +638,7 @@ extern "C"
     @param[in] obj the object for the event to act upon
     @return 0 for success or an error code representing an issue
     */
-    GRIDDYN_EXPORT griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject obj);
+    GRIDDYN_EXPORT griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject *obj);
 
     /** @} */  // end of the C-api group
 
