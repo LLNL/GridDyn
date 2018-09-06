@@ -36,6 +36,7 @@ endif(MSVC)
 
 include_directories(${ZLIB_LOCATION}/include)
 set(SOURCES
+  argv.c
   ioapi.c
   miniunz.c
   minizip.c
