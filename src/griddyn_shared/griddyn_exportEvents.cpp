@@ -21,7 +21,7 @@
 
 using namespace griddyn;
 
-gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject *obj)
+gridDynEvent gridDynEvent_create (const char *eventString, gridDynObject obj)
 {
     auto evnt = new std::shared_ptr<Event> (make_event (eventString, getComponentPointer (obj)));
     if (evnt != nullptr)
@@ -148,7 +148,7 @@ griddyn_status gridDynEvent_setFlag (gridDynEvent evnt, const char *flag, int va
     }
 }
 
-griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject *obj)
+griddyn_status gridDynEvent_setTarget (gridDynEvent evnt, gridDynObject obj)
 {
     if (evnt == nullptr)
     {

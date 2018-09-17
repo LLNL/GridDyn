@@ -19,7 +19,7 @@
 
 using namespace griddyn;
 
-gridDynSingleQuery gridDynSingleQuery_create (gridDynObject *obj, const char *queryString)
+gridDynSingleQuery gridDynSingleQuery_create (gridDynObject obj, const char *queryString)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -40,7 +40,7 @@ gridDynSingleQuery gridDynSingleQuery_create (gridDynObject *obj, const char *qu
     return reinterpret_cast<gridDynSingleQuery> (grabber);
 }
 
-gridDynVectorQuery gridDynVectorQuery_create (gridDynObject *obj, const char *queryString)
+gridDynVectorQuery gridDynVectorQuery_create (gridDynObject obj, const char *queryString)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -91,7 +91,7 @@ griddyn_status gridDynVectorQuery_run (gridDynVectorQuery query, double *data, i
     return mGrabber->grabData (data, N);
 }
 
-griddyn_status gridDynVectorQuery_append (gridDynVectorQuery query, gridDynObject *obj, const char *queryString)
+griddyn_status gridDynVectorQuery_append (gridDynVectorQuery query, gridDynObject obj, const char *queryString)
 {
     if (query == nullptr)
     {
@@ -109,7 +109,7 @@ griddyn_status gridDynVectorQuery_append (gridDynVectorQuery query, gridDynObjec
     return griddyn_ok;
 }
 
-griddyn_status gridDynSingleQuery_update (gridDynSingleQuery query, gridDynObject *obj, const char *queryString)
+griddyn_status gridDynSingleQuery_update (gridDynSingleQuery query, gridDynObject obj, const char *queryString)
 {
     if (query == nullptr)
     {
@@ -131,7 +131,7 @@ griddyn_status gridDynSingleQuery_update (gridDynSingleQuery query, gridDynObjec
     return griddyn_ok;
 }
 
-griddyn_status gridDynVectorQuery_update (gridDynVectorQuery query, gridDynObject *obj, const char *queryString)
+griddyn_status gridDynVectorQuery_update (gridDynVectorQuery query, gridDynObject obj, const char *queryString)
 {
     if (query == nullptr)
     {

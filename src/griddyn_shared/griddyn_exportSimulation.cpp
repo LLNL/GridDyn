@@ -237,7 +237,7 @@ int gridDynSimulation_getStatus (gridDynSimReference sim)
     return res;
 }
 
-gridDynObject* getSimulationObject (gridDynSimReference sim)
+gridDynObject getSimulationObject (gridDynSimReference sim)
 {
     auto runner = reinterpret_cast<GriddynRunner *> (sim);
 

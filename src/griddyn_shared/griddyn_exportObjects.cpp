@@ -35,7 +35,7 @@
 #include <map>
 using namespace griddyn;
 
-gridDynObject *creategridDynObject (gridComponent *comp)
+gridDynObject creategridDynObject (gridComponent *comp)
 {
     if (comp == nullptr)
     {
@@ -45,7 +45,7 @@ gridDynObject *creategridDynObject (gridComponent *comp)
     return ptr;
 }
 
-gridComponent *getComponentPointer (gridDynObject *obj)
+gridComponent *getComponentPointer (gridDynObject obj)
 {
     if (obj != nullptr)
     {
@@ -55,7 +55,7 @@ gridComponent *getComponentPointer (gridDynObject *obj)
     return nullptr;
 }
 
-const gridComponent *getConstComponentPointer (const gridDynObject *obj)
+const gridComponent *getConstComponentPointer (gridDynObject obj)
 {
     if (obj != nullptr)
     {
@@ -65,7 +65,7 @@ const gridComponent *getConstComponentPointer (const gridDynObject *obj)
     return nullptr;
 }
 
-gridDynObject *gridDynObject_create (const char *componentType, const char *objectType)
+gridDynObject gridDynObject_create (const char *componentType, const char *objectType)
 {
     auto newObject = coreObjectFactory::instance ()->createObject (componentType, objectType);
     if (newObject == nullptr)
@@ -81,7 +81,7 @@ gridDynObject *gridDynObject_create (const char *componentType, const char *obje
     return ptr;
 }
 
-gridDynObject *gridDynObject_clone (const gridDynObject *obj)
+gridDynObject gridDynObject_clone (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -99,7 +99,7 @@ gridDynObject *gridDynObject_clone (const gridDynObject *obj)
     return ptr;
 }
 
-void gridDynObject_free (gridDynObject *obj)
+void gridDynObject_free (gridDynObject obj)
 {
     if (obj != nullptr)
     {
@@ -108,7 +108,7 @@ void gridDynObject_free (gridDynObject *obj)
     }
 }
 
-griddyn_status gridDynObject_add (gridDynObject *parentObject, gridDynObject *objectToAdd)
+griddyn_status gridDynObject_add (gridDynObject parentObject, gridDynObject objectToAdd)
 {
     gridComponent *parent = getComponentPointer (parentObject);
     coreObject *child = getComponentPointer (objectToAdd);
@@ -124,7 +124,7 @@ griddyn_status gridDynObject_add (gridDynObject *parentObject, gridDynObject *ob
     }
 }
 
-griddyn_status gridDynObject_remove (gridDynObject *parentObject, gridDynObject *objectToRemove)
+griddyn_status gridDynObject_remove (gridDynObject parentObject, gridDynObject objectToRemove)
 {
     gridComponent *parent = getComponentPointer (parentObject);
     coreObject *child = getComponentPointer (objectToRemove);
@@ -144,7 +144,7 @@ griddyn_status gridDynObject_remove (gridDynObject *parentObject, gridDynObject 
     }
 }
 
-griddyn_status gridDynObject_setString (gridDynObject *obj, const char *parameter, const char *value)
+griddyn_status gridDynObject_setString (gridDynObject obj, const char *parameter, const char *value)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -167,7 +167,7 @@ griddyn_status gridDynObject_setString (gridDynObject *obj, const char *paramete
     }
 }
 
-griddyn_status gridDynObject_setValue (gridDynObject *obj, const char *parameter, double value)
+griddyn_status gridDynObject_setValue (gridDynObject obj, const char *parameter, double value)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -191,7 +191,7 @@ griddyn_status gridDynObject_setValue (gridDynObject *obj, const char *parameter
 }
 
 griddyn_status
-gridDynObject_setValueUnits (gridDynObject *obj, const char *parameter, double value, const char *units)
+gridDynObject_setValueUnits (gridDynObject obj, const char *parameter, double value, const char *units)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -215,7 +215,7 @@ gridDynObject_setValueUnits (gridDynObject *obj, const char *parameter, double v
     }
 }
 
-griddyn_status gridDynObject_setFlag (gridDynObject *obj, const char *flag, int val)
+griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int val)
 {
     gridComponent *comp = getComponentPointer (obj);
 
@@ -235,7 +235,7 @@ griddyn_status gridDynObject_setFlag (gridDynObject *obj, const char *flag, int 
     }
 }
 
-griddyn_status gridDynObject_getString (const gridDynObject *obj, const char *parameter, char *value, int N)
+griddyn_status gridDynObject_getString (gridDynObject obj, const char *parameter, char *value, int N)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -248,7 +248,7 @@ griddyn_status gridDynObject_getString (const gridDynObject *obj, const char *pa
     return static_cast<int> (s.size ());
 }
 
-griddyn_status gridDynObject_getValue (const gridDynObject *obj, const char *parameter, double *result)
+griddyn_status gridDynObject_getValue (gridDynObject obj, const char *parameter, double *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -272,7 +272,7 @@ griddyn_status gridDynObject_getValue (const gridDynObject *obj, const char *par
 }
 
 griddyn_status
-gridDynObject_getValueUnits (const gridDynObject *obj, const char *parameter, const char *units, double *result)
+gridDynObject_getValueUnits (gridDynObject obj, const char *parameter, const char *units, double *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -297,7 +297,7 @@ gridDynObject_getValueUnits (const gridDynObject *obj, const char *parameter, co
     }
 }
 
-griddyn_status gridDynObject_getFlag (const gridDynObject *obj, const char *flag, int *result)
+griddyn_status gridDynObject_getFlag (gridDynObject obj, const char *flag, int *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -317,7 +317,7 @@ griddyn_status gridDynObject_getFlag (const gridDynObject *obj, const char *flag
     }
 }
 
-gridDynObject *gridDynObject_find (const gridDynObject *obj, const char *objectToFind)
+gridDynObject gridDynObject_find (gridDynObject obj, const char *objectToFind)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -338,7 +338,7 @@ gridDynObject *gridDynObject_find (const gridDynObject *obj, const char *objectT
     return creategridDynObject (compNew);
 }
 
-gridDynObject *gridDynObject_getSubObject (const gridDynObject *obj, const char *componentType, int N)
+gridDynObject gridDynObject_getSubObject (gridDynObject obj, const char *componentType, int N)
 {
     auto comp = getConstComponentPointer (obj);
     if (comp == nullptr)
@@ -359,7 +359,7 @@ gridDynObject *gridDynObject_getSubObject (const gridDynObject *obj, const char 
     return creategridDynObject (compNew);
 }
 
-gridDynObject *gridDynObject_findByUserId (const gridDynObject *obj, const char *componentType, int ID)
+gridDynObject gridDynObject_findByUserId (gridDynObject obj, const char *componentType, int ID)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -380,7 +380,7 @@ gridDynObject *gridDynObject_findByUserId (const gridDynObject *obj, const char 
     return creategridDynObject (compNew);
 }
 
-gridDynObject *gridDynObject_getParent (const gridDynObject *obj)
+gridDynObject gridDynObject_getParent (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
     if (comp == nullptr)
@@ -413,7 +413,7 @@ static const char *sensor_str = "sensor";
 static const char *submodel_str = "submodel";
 static const char *unknown_str = "unknown";
 
-const char *gridDynObject_getType (const gridDynObject *obj)
+const char *gridDynObject_getType (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
 
