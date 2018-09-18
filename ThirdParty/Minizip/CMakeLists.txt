@@ -70,7 +70,7 @@ if (NOT CMAKE_DEBUG_POSTFIX)
 set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-add_library(minizip ${SOURCES} ${HEADERS}  ${})
+add_library(minizip ${SOURCES} ${HEADERS})
 
 
 	install(TARGETS minizip EXPORT minizip-targets

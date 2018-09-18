@@ -11,7 +11,7 @@ char **copy_argv(int argc, const char** argv) {
 
         new_argv[i] = malloc((len+1) * sizeof(char));
         memcpy(new_argv[i], item, len);
-        new_argv[i][len-1] = '\0';
+        new_argv[i][len] = '\0';
     }
     new_argv[argc] = NULL;
     return new_argv;
