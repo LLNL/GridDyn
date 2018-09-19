@@ -15,6 +15,239 @@ cmake_policy(VERSION 3.5)
 # project name
 project(GRIDDYN VERSION 0.9.0)
 
+# -------
+# options
+# -------
+include(CMakeDependentOption)
+
+option(
+    BUILD_HELICS_TESTS
+    "Enable the test Executables to be built"
+    ON
+)
+
+option(
+    ENABLE_EXTRA_COMPILER_WARNINGS
+    "disable compiler warning for GridDyn build"
+    ON
+)
+
+option(
+    BUILD_SHARED_FMI_LIBRARY
+    "Enable construction of a binary fmi shared library for GridDyn"
+    OFF
+)
+
+option(
+    BUILD_PYTHON_INTERFACE
+    "Build Python extension"
+    OFF
+)
+
+option(
+    BUILD_PYTHON2_INTERFACE
+    "Build Python2.7 extension (conflicts with \"PYTHON_INTERFACE\", requires swig)"
+    OFF
+)
+
+option(
+    BUILD_MATLAB_INTERFACE
+    "Build Matlab Extension"
+    OFF
+)
+
+option(
+    BUILD_OCTAVE_INTERFACE
+    "Build Octave extension (very experimental)"
+    OFF
+)
+
+option(
+    BUILD_JAVA_INTERFACE
+    "Build Java extension"
+    OFF
+)
+
+option(
+    BUILD_CXX_SHARED_LIB
+    "Build a Shared Libraries of the CXX interface"
+    OFF
+)
+
+cmake_dependent_option(
+    USE_POSITION_INDEPENDENT_CODE
+    "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library"
+    OFF
+    "NOT BUILD_SHARED_LIBS"
+    OFF
+)
+
+option(
+    TEST_CODE_COVERAGE
+    "Build a target for testing code coverage"
+    OFF
+)
+
+option(
+    OPENMP_ENABLE
+    "Enable openMP support"
+    ON
+)
+
+# TODO these should be dependent on OPENMP_FOUND
+option(
+    SUNDIALS_OPENMP
+    "Enable SUNDIALS NVector openMP implementation"
+    ON
+)
+
+option(
+    GRIDDYN_OPENMP
+    "Enable openmp internal to GridDyn--not used yet"
+    OFF
+)
+
+option(
+    DISABLE_MULTITHREADING
+    "disable multithreading in GridDyn libraries"
+    OFF
+)
+
+option(
+    MPI_ENABLE
+    "Enable MPI networking library"
+    OFF
+)
+
+option(
+    DISABLE_KLU
+    "disable KLU (not recommended [slow], turn on AUTOBUILD_KLU if your system doesn't have SuiteSparse installed)"
+    OFF
+)
+
+option(
+    ENABLE_PLUGINS
+    "Enable support for plugin modules"
+    OFF
+)
+
+option(
+    LOAD_EXTRA_MODELS
+    "Compile and load extraModels"
+    ON
+)
+
+option(
+    LOAD_EXTRA_SOLVERS
+    "Compile and load extraSolvers"
+    OFF
+)
+
+option(
+    FMI_ENABLE
+    "Enable FMI support"
+    ON
+)
+
+option(
+    FSKIT_ENABLE
+    "Enable FSKIT support"
+    OFF
+)
+
+# TODO depend on CMAKE_SIZEOF_VOID_P?
+# TODO make sure this is adequately tested and consistently used. (I think it affects index_t?)
+option(
+    ENABLE_64_BIT_INDEXING
+    "set all indexing and count variables to 64 bit unsigned (Usually not required)"
+    OFF
+)
+
+option(
+    GRIDDYN_DISABLE_LOGGING
+    "disable all normal, debug, and trace logging in GridDyn"
+    OFF
+)
+
+# TODO dependent on NOT GRIDDYN_DISABLE_LOGGING
+option(
+    GRIDDYN_DISABLE_TRACE_LOGGING
+    "disable trace logging"
+    OFF
+)
+
+option(
+    GRIDDYN_DISABLE_DEBUG_LOGGING
+    "disable debug logging"
+    OFF
+)
+
+option(
+    GRIDDYN_GENERATE_DOXYGEN_DOC
+    "Generate Doxygen doc target"
+    OFF
+)
+
+option(
+    HELICS_EXECUTABLE
+    "Enable the HELICS executable to be built"
+    OFF
+)
+
+option(
+    ENABLE_NETWORKING_LIBRARY
+    "Enable network based communiation components"
+    OFF
+)
+
+cmake_dependent_option(
+    DIME_ENABLE
+    "Enable connection with Dime"
+    OFF
+    "ENABLE_NETWORKING_LIBRARY"
+    OFF
+)
+
+cmake_dependent_option(
+    TCP_ENABLE
+    "Enable TCP connection library"
+    ON
+    "ENABLE_NETWORKING_LIBRARY"
+    OFF
+)
+
+cmake_dependent_option(
+    ZMQ_ENABLE
+    "Enable ZMQ networking library"
+    OFF
+    "NOT ZMQ_NEEDED"
+    OFF
+)
+
+option(
+    OPTIMIZATION_ENABLE
+    "Enable Optimization libraries"
+    OFF
+)
+
+option(
+    ENABLE_CLANG_TOOLS
+    "if clang is found enable some custom targets for clang formatting and tidy"
+    OFF
+)
+
+option(
+    TEST_ENABLE
+    "Enable unit testing construction"
+    ON
+)
+
+option(
+    ENABLE_PACKAGE_BUILD
+    "Add projects for making packages and installers for HELICS"
+    OFF
+)
+
 # version number
 set(GRIDDYN_VERSION_BUILD)
 set(
@@ -42,7 +275,6 @@ set(
     CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
 )
 include(extraMacros)
-include(CMakeDependentOption)
 # include(BuildType)
 # ------------------------------------------------------------
 # set the install path to a local directory
@@ -90,7 +322,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     )
 endif()
 
-option(BUILD_HELICS_TESTS "Enable the test Executables to be built" ON)
 # enable testing
 if(BUILD_HELICS_TESTS)
     enable_testing()
@@ -99,10 +330,6 @@ endif(BUILD_HELICS_TESTS)
 # add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
 
-option(
-    ENABLE_EXTRA_COMPILER_WARNINGS "disable compiler warning for GridDyn build"
-    ON
-)
 
 show_variable(
     COMPILER_OPTIMIZATION_LEVEL
@@ -118,24 +345,11 @@ set_property(
     PROPERTY STRINGS ${optimization_levels}
 )
 
-option(
-    BUILD_SHARED_FMI_LIBRARY
-    "Enable construction of a binary fmi shared library for GridDyn" OFF
-)
 
 if(NOT CMAKE_DEBUG_POSTFIX)
     set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-option(BUILD_PYTHON_INTERFACE "Build Python extension" OFF)
-option(
-    BUILD_PYTHON2_INTERFACE
-    "Build Python2.7 extension(Requires swig and will not build if \"PYTHON_INTERFACE\" is active)"
-    OFF
-)
-option(BUILD_MATLAB_INTERFACE "Build Matlab Extension" OFF)
-option(BUILD_OCTAVE_INTERFACE "Build Octave extension (very experimental)" OFF)
-option(BUILD_JAVA_INTERFACE "Build Java extension" OFF)
 
 if(
     BUILD_PYTHON_INTERFACE
@@ -163,7 +377,6 @@ else()
     )
 endif()
 
-option(BUILD_CXX_SHARED_LIB "Build a Shared Libraries of the CXX interface" OFF)
 mark_as_advanced(BUILD_CXX_SHARED_LIB)
 
 if(
@@ -174,13 +387,7 @@ if(
 )
     set(BUILD_SHARED_LIBS ON)
 endif()
-cmake_dependent_option(
-    USE_POSITION_INDEPENDENT_CODE
-    "Build the libraries with Position independent code Useful if only building the static library and it will be used later in a shared library"
-    OFF
-    "NOT BUILD_SHARED_LIBS"
-    OFF
-)
+
 
 if(BUILD_SHARED_LIBS OR USE_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -219,7 +426,6 @@ target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 # ------------------------------------------------------------
 # add coverage target
 # ------------------------------------------------------------
-option(TEST_CODE_COVERAGE "Build a target for testing code coverage" OFF)
 if(TEST_CODE_COVERAGE)
     if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
         include(CodeCoverage)
@@ -271,9 +477,7 @@ include(ExternalProject)
 # Enable OpenMP support?
 # ------------------------------------------------------------
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    option(OPENMP_ENABLE "Enable openMP support" OFF)
-else()
-    option(OPENMP_ENABLE "Enable openMP support" ON)
+    # TODO look at OPENMP_ENABLE
 endif()
 
 if(OPENMP_ENABLE)
@@ -300,13 +504,6 @@ else(OPENMP_ENABLE)
     set(OPENMP_FOUND FALSE)
 endif(OPENMP_ENABLE)
 
-if(OPENMP_FOUND)
-    option(SUNDIALS_OPENMP "Enable SUNDIALS NVector openMP implementation" ON)
-    option(GRIDDYN_OPENMP "Enable openmp internal to GridDyn--not used yet" OFF)
-endif(OPENMP_FOUND)
-
-option(DISABLE_MULTITHREADING "disable multithreading in GridDyn libraries" OFF)
-
 # ------------------------------------------------------------
 # Find multithreading headers and includes
 # ------------------------------------------------------------
@@ -325,7 +522,6 @@ endif(NOT DISABLE_MULTITHREADING)
 # finding MPI
 # ------------------------------------------------------------
 
-option(MPI_ENABLE "Enable MPI networking library" OFF)
 if(MPI_ENABLE)
     include(addMPI)
     if(TARGET MPI::MPI_C)
@@ -350,11 +546,7 @@ endif()
 # Find (and test) the KLU libraries
 # ------------------------------------------------------------
 
-option(
-    DISABLE_KLU
-    "disable KLU (not recommended [slow], turn on AUTOBUILD_KLU if your system doesn't have SuiteSparse installed)"
-    OFF
-)
+
 
 if(NOT DISABLE_KLU)
     include(addKLU_targets)
@@ -461,7 +653,6 @@ add_library(griddyn_optional INTERFACE)
 # Enable support for Plugins
 # ------------------------------------------------------------
 
-option(ENABLE_PLUGINS "Enable support for plugin modules" OFF)
 
 if(ENABLE_PLUGINS)
     if(BOOST_VERSION_LEVEL==0)
@@ -477,7 +668,6 @@ endif(ENABLE_PLUGINS)
 # Enable compilation of extraModels?
 # ------------------------------------------------------------
 
-option(LOAD_EXTRA_MODELS "Compile and load extraModels" ON)
 # If extra models are used enabled try to locate the libraries
 # link against them.
 
@@ -490,7 +680,6 @@ endif(LOAD_EXTRA_MODELS)
 # Enable compilation of extraSolvers?
 # ------------------------------------------------------------
 
-option(LOAD_EXTRA_SOLVERS "Compile and load extraSolvers" OFF)
 # If extra solvers are used enabled try to locate the libraries
 # link against them.
 
@@ -502,8 +691,6 @@ endif(LOAD_EXTRA_SOLVERS)
 # ------------------------------------------------------------
 # Enable FMI support?
 # ------------------------------------------------------------
-
-option(FMI_ENABLE "Enable FMI support" ON)
 
 if(FMI_ENABLE)
     if(BOOST_VERSION_LEVEL==0)
@@ -520,8 +707,6 @@ endif(FMI_ENABLE)
 # FSKIT
 # ------------------------------------------------------------
 
-option(FSKIT_ENABLE "Enable FSKIT support" OFF)
-
 if(FSKIT_ENABLE)
     set(GRIDDYN_HAVE_FSKIT 1)
     add_subdirectory(src/fskit)
@@ -529,30 +714,8 @@ if(FSKIT_ENABLE)
 endif(FSKIT_ENABLE)
 
 # ------------------------------------------------------------
-# Enable 64 bit indexing (enable to allow for more than 2^31 objects)--that would be a very big model
-# ------------------------------------------------------------
-
-if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-    option(
-        ENABLE_64_BIT_INDEXING
-        "set all indexing and count variables to 64 bit unsigned (Usually not required)"
-        OFF
-    )
-endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-
-# ------------------------------------------------------------
 # Enable message logging
 # ------------------------------------------------------------
-option(
-    GRIDDYN_DISABLE_LOGGING
-    "disable all normal, debug, and trace logging in GridDyn" OFF
-)
-if(NOT DISABLE_LOGGING)
-    option(GRIDDYN_DISABLE_TRACE_LOGGING "disable trace logging" OFF)
-    option(GRIDDYN_DISABLE_DEBUG_LOGGING "disable debug logging" OFF)
-endif()
-
-option(GRIDDYN_GENERATE_DOXYGEN_DOC "Generate Doxygen doc target" OFF)
 
 if(GRIDDYN_GENERATE_DOXYGEN_DOC)
     find_package(Doxygen)
@@ -581,7 +744,6 @@ endif(GRIDDYN_GENERATE_DOXYGEN_DOC)
 # Enable HELICS executable
 # ------------------------------------------------------------
 
-option(HELICS_EXECUTABLE "Enable the HELICS executable to be built" OFF)
 # If HELICS_EXECUTABLE is load the helics directory
 # link against them.  the variable is here since we would enable the zmq libraries with it on and that should be done
 # before actually including helics
@@ -602,37 +764,12 @@ endif(HELICS_EXECUTABLE)
 # Enable ZMQ interfacing
 # ------------------------------------------------------------
 
-option(
-    ENABLE_NETWORKING_LIBRARY "Enable network based communiation components" OFF
-)
-
-cmake_dependent_option(
-    DIME_ENABLE
-    "Enable connection with Dime"
-    OFF
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-cmake_dependent_option(
-    TCP_ENABLE
-    "Enable TCP connection library"
-    ON
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
 if(DIME_ENABLE)
     set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
 endif(DIME_ENABLE)
 
 hide_variable(ZMQ_NEEDED)
 
-cmake_dependent_option(
-    ZMQ_ENABLE
-    "Enable ZMQ networking library"
-    OFF
-    "NOT ZMQ_NEEDED"
-    OFF
-)
 
 # If ZMQ library is enabled try to locate it and link against it
 
@@ -660,7 +797,6 @@ message(STATUS "key files ${KEY_LIBRARY_FILES}")
 # load the subdirectories
 # ------------------------------------------------------------
 
-option(OPTIMIZATION_ENABLE "Enable Optimization libraries" OFF)
 # If OPTIMIZATION is enabled try to locate the libraries
 # link against them.
 if(OPTIMIZATION_ENABLE)
@@ -696,11 +832,6 @@ install(
 # Enable clang analysis and formatting tools
 # ------------------------------------------------------------
 
-option(
-    ENABLE_CLANG_TOOLS
-    "if clang is found enable some custom targets for clang formatting and tidy"
-    OFF
-)
 
 if(ENABLE_CLANG_TOOLS)
     include(clang-cxx-dev-tools)
@@ -709,7 +840,6 @@ endif(ENABLE_CLANG_TOOLS)
 # Enable testCore construction?
 # ------------------------------------------------------------
 
-option(TEST_ENABLE "Enable unit testing construction" ON)
 
 if(TEST_ENABLE)
     # message(STATUS "otcf:${optional_component_test_files}")
@@ -840,10 +970,6 @@ endif()
 # ------------------------------------------------------------
 # CPack
 # ------------------------------------------------------------
-option(
-    ENABLE_PACKAGE_BUILD
-    "Add projects for making packages and installers for HELICS" OFF
-)
 
 if(ENABLE_PACKAGE_BUILD)
     set(CPACK_PACKAGE_NAME "GridDyn")

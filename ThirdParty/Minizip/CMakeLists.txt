@@ -40,7 +40,6 @@ set(SOURCES
   ioapi.c
   miniunz.c
   minizip.c
-  #mztools.c
   unzip.c
   zip.c
 )
@@ -54,7 +53,6 @@ set(HEADERS
   ioapi.h
   miniunz.h
   minizip.h
-  #mztools.h
   unzip.h
 )
 
