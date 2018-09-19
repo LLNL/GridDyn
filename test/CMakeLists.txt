@@ -32,7 +32,7 @@ set(
     exeTestHelper.cpp
 )
 
-if(NOT GRIDDYN_HAVE_MPI)
+if(NOT ENABLE_MPI)
     list(APPEND testComponent_sources componentTests/testGridLab.cpp)
 endif()
 
@@ -98,7 +98,7 @@ set(
     exeTestHelper.cpp
 )
 
-if(FMI_ENABLE)
+if(ENABLE_FMI)
     list(APPEND testExtra_sources extraTests/extraFMUtests.cpp)
 endif()
 

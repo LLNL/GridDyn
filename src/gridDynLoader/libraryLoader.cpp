@@ -19,13 +19,13 @@
 #include "extraModels.h"
 #endif
 
-#ifdef FMI_ENABLE
+#ifdef ENABLE_FMI
 #include "fmiGDinfo.h"
 #endif
 
 void loadLibraries()
 {
-#ifdef FMI_ENABLE
+#ifdef ENABLE_FMI
 	loadFmiLibrary();
 #endif
 

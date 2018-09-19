@@ -112,7 +112,7 @@ void listMaintainer::jacobianElements (const IOdata &inputs,
     {
         return;
     }
-#ifdef GRIDDYN_OPENMP
+#ifdef ENABLE_OPENMP_GRIDDYN
     if (parJac)
     {
         auto &vz = partialLists[sMode.offsetIndex];
@@ -146,7 +146,7 @@ void listMaintainer::residual (const IOdata &inputs, const stateData &sD, double
         return;
     }
 
-#ifdef GRIDDYN_OPENMP
+#ifdef ENABLE_OPENMP_GRIDDYN
     if (parResid)
     {
         auto &vz = partialLists[sMode.offsetIndex];
@@ -185,7 +185,7 @@ void listMaintainer::algebraicUpdate (const IOdata &inputs,
         return;
     }
 
-#ifdef GRIDDYN_OPENMP
+#ifdef ENABLE_OPENMP_GRIDDYN
 	if (parAlgebraic)
 	{
 		auto &vz = partialLists[sMode.offsetIndex];
@@ -211,7 +211,7 @@ void listMaintainer::algebraicUpdate (const IOdata &inputs,
 	}
 #endif
 
-    
+
 }
 
 void listMaintainer::derivative (const IOdata &inputs,
@@ -223,7 +223,7 @@ void listMaintainer::derivative (const IOdata &inputs,
     {
         return;
     }
-#ifdef GRIDDYN_OPENMP
+#ifdef ENABLE_OPENMP_GRIDDYN
     if (parDeriv)
     {
         auto &vz = partialLists[sMode.offsetIndex];
@@ -299,7 +299,7 @@ void listMaintainer::delayedAlgebraicUpdate (const IOdata &inputs,
 
 bool listMaintainer::isListValid (const solverMode &sMode) const
 {
-   
+
 	if (isValidIndex(sMode.offsetIndex,objectLists))
     {
         return (sModeLists[sMode.offsetIndex].offsetIndex != kNullLocation);

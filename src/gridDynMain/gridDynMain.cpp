@@ -18,7 +18,7 @@
 
 #include "gridDynLoader/libraryLoader.h"
 #include <boost/format.hpp>
-#ifdef HELICS_EXECUTABLE
+#ifdef ENABLE_HELICS_EXECUTABLE
 #include "helics/helicsRunner.h"
 #endif
 
@@ -26,7 +26,7 @@
 #include "networking/dimeRunner.h"
 #endif
 
-#ifdef BUILD_SHARED_FMI_LIBRARY
+#ifdef ENABLE_FMI_EXPORT
 #include "fmi_export/fmuBuilder.h"
 #endif
 
@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
     gridDynSimulation::setInstance (gds.get ());  // peer to gridDynSimulation::GetInstance ();
 
     // TODO: This was removed earlier. Need a way to get access to extraModels with gridDynMain executable.
-    // If always loading them when available isn't desired, alternate mechanism is required (command line arg, config file?) 
+    // If always loading them when available isn't desired, alternate mechanism is required (command line arg, config file?)
     loadLibraries ();
 
     auto execMode = execMode_t::normal;
@@ -67,14 +67,14 @@ int main (int argc, char *argv[])
 			execMode = execMode_t::buildgdz;
 			break;
 		}
-#ifdef BUILD_SHARED_FMI_LIBRARY
+#ifdef ENABLE_FMI_EXPORT
         if (strncmp ("--buildfmu", argv[ii], 10)==0)
         {
             execMode = execMode_t::buildfmu;
             break;
         }
 #endif
-#ifdef HELICS_EXECUTABLE
+#ifdef ENABLE_HELICS_EXECUTABLE
         if (strcmp ("--helics", argv[ii])==0)
         {
             execMode = execMode_t::helics;
@@ -125,7 +125,7 @@ int main (int argc, char *argv[])
     }
         return 0;
     case execMode_t::buildfmu:
-#ifdef BUILD_SHARED_FMI_LIBRARY
+#ifdef ENABLE_FMI_EXPORT
     {
 		gds->log(nullptr, print_level::summary,
 			std::string("Building FMI through FMI builder"));
@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
         return 0;
     case execMode_t::helics:
     {
-#ifdef HELICS_EXECUTABLE
+#ifdef ENABLE_HELICS_EXECUTABLE
         auto runner = std::make_unique<helicsLib::helicsRunner> (gds);
 		gds->log(nullptr, print_level::summary,
 			std::string("Executing through HELICS runner"));

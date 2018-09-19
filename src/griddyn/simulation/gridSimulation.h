@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRID_SIMULATION_H_
-#define GRID_SIMULATION_H_
 #pragma once
 
 // header files
@@ -83,10 +80,10 @@ class gridSimulation : public Area
     std::string recordDirectory;  //!< folder location for storing recorded files
     std::string version;  //!< storage for the version string
     coreTime state_record_period = negTime;  //!< how often to record the state
-#ifdef DISABLE_MULTITHREADING
-    std::unique_ptr<utilities::LoggerNoThread> gridLog;  //!< the object that does the logging
-#else
+#ifdef ENABLE_MULTITHREADING
     std::unique_ptr<utilities::Logger> gridLog;  //!< the object that does the logging
+#else
+    std::unique_ptr<utilities::LoggerNoThread> gridLog;  //!< the object that does the logging
 #endif
     std::function<void(int, const std::string &)> customLogger;  //!< callback for a custom logging function
     std::shared_ptr<functionEventAdapter>
@@ -253,4 +250,3 @@ sec
 coreObject *findMatchingObject (coreObject *obj1, gridPrimary *src, gridPrimary *sec);
 
 }  // namespace griddyn
-#endif

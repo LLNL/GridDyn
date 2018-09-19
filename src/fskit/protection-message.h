@@ -37,14 +37,9 @@
 #include "griddyn/griddyn-config.h"
 
 #include <string>
-#ifdef GRIDDYN_HAVE_FSKIT
 #include <fskit/event-message.h>
 
 class ProtectionMessage : public fskit::EventMessage
-#else
-#include <boost/serialization/serialization.hpp>
-class ProtectionMessage
-#endif
 {
 public:
   enum MESSAGE_TYPE

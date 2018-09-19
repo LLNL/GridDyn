@@ -561,9 +561,9 @@ target_link_libraries(griddyn PUBLIC coreObjects)
 
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
 target_link_libraries(griddyn PUBLIC coupling_static_lib)
-if(NOT DISABLE_KLU)
+if(ENABLE_KLU)
     target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
-endif(NOT DISABLE_KLU)
+endif(ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})

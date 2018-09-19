@@ -81,9 +81,10 @@ set_target_properties(gridDynLoader PROPERTIES FOLDER libraries)
 # fileInput needs to come first since it can depend on some of the optional libraries which in turn depend on the gridDyn Libraries and the external libraries
 target_link_libraries(gridDynLoader griddyn_optional)
 
-if(DL_REQUIRED OR FMI_ENABLE)
+# TODO ENABLE_FMI should mark DL_REQUIRED
+if(DL_REQUIRED OR ENABLE_FMI)
     target_link_libraries(gridDynLoader ${CMAKE_DL_LIBS})
-endif(DL_REQUIRED OR FMI_ENABLE)
+endif(DL_REQUIRED OR ENABLE_FMI)
 
 install(
     TARGETS gridDynLoader

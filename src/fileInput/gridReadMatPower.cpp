@@ -20,7 +20,7 @@
 #include "griddyn/links/acLine.h"
 #include "griddyn/loads/zipLoad.h"
 
-#ifdef OPTIMIZATION_ENABLE
+#ifdef ENABLE_OPTIMIZATION
 #include "optimization/gridDynOpt.h"
 #include "optimization/models/gridGenOpt.h"
 #include "optimization/optObjectFactory.h"
@@ -175,6 +175,7 @@ void loadBusArray (coreObject *parentObject,
     }
 }
 /*
+see: http://www.pserc.cornell.edu/matpower/docs/ref/matpower6.0/idx_gen.html
 GEN BUS 1 bus number
 PG 2 real power output (MW)
 QG 3 reactive power output (MVAr)
@@ -183,8 +184,8 @@ QMIN 5 minimum reactive power output (MVAr)
 VG 6 voltage magnitude setpoint (pu)
 MBASE 7 total MVA base of machine, defaults to baseMVA
 GEN STATUS 8 machine status,
-> 0 = machine in-service
- 0 = machine out-of-service
+> 0 - machine in-service
+<= 0 - machine out-of-service
 PMAX 9 maximum real power output (MW)
 PMIN 10 minimum real power output (MW)
 PC1* 11 lower real power output of PQ capability curve (MW)
@@ -299,22 +300,23 @@ int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *>
     return (kk - 1);
 }
 /*
-MODEL 1 cost model, 1 = piecewise linear, 2 = polynomial
-gridState_t::STARTUP 2 startup cost in US dollars*
-SHUTDOWN 3 shutdown cost in US dollars*
-NCOST 4 number of cost coeficients for polynomial cost function,
-or number of data points for piecewise linear
-COST 5 parameters dening total cost function f(p) begin in this column,
-units of f and p are $/hr and MW (or MVAr), respectively
-(MODEL = 1) ) p0; f0; p1; f1; : : : ; pn; fn
-where p0 < p1 <    < pn and the cost f(p) is dened by
-the coordinates (p0; f0), (p1; f1), . . . , (pn; fn)
-of the end/break-points of the piecewise linear cost
-(MODEL = 2) ) cn; : : : ; c1; c0
-n + 1 coeficients of n-th order polynomial cost, starting with
-highest order, where cost is f(p) = cnpn +    + c1p + c0
+see: http://www.pserc.cornell.edu/matpower/docs/ref/matpower5.0/idx_cost.html
+MODEL                   1 cost model, 1 = piecewise linear, 2 = polynomial
+gridState_t::STARTUP    2 startup cost in US dollars*
+SHUTDOWN                3 shutdown cost in US dollars*
+NCOST                   4 number of cost coefficients for polynomial cost function,
+                          or number of data points for piecewise linear
+COST                    5 parameters defining total cost function f(p) begin in this column,
+                          units of f and p are $/hr and MW (or MVAr), respectively
+                          (MODEL = 1) : p0, f0, p1, f1, ..., pn, fn
+                            where p0 < p1 < ... < pn and the cost f(p) is defined by
+                            the coordinates (p0, f0), (p1, f1), ... , (pn, fn)
+                            of the end/break-points of the piecewise linear cost
+                          (MODEL = 2) ) cn, ..., c1, c0
+                            n + 1 coefficients of n-th order polynomial cost, starting with
+                            highest order, where cost is f(p) = cn*p^n + ... + c1*p + c0
 */
-#ifdef OPTIMIZATION_ENABLE
+#ifdef ENABLE_OPTIMIZATION
 void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
 {
     auto gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot ());
@@ -377,7 +379,9 @@ void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
 #else
 void loadGenCostArray (coreObject * /*parentObject*/, mArray & /*genCost*/, int /*gencount*/) {}
 #endif
-/* Branch data
+/*
+see: http://www.pserc.cornell.edu/matpower/docs/ref/matpower6.0/idx_brch.html
+Branch data
 F BUS 1 \from" bus number
 T BUS 2 \to" bus number
 BR R 3 resistance (pu)
@@ -386,13 +390,13 @@ BR B 5 total line charging susceptance (pu)
 RATE A 6 MVA rating A (long term rating)
 RATE B 7 MVA rating B (short term rating)
 RATE C 8 MVA rating C (emergency rating)
-TAP 9 transformer o nominal turns ratio, (taps at \from" bus,
+TAP 9 transformer off nominal turns ratio, (taps at \from" bus,
 impedance at \to" bus, i.e. if r = x = 0, tap = jVf j
 jVtj )
 SHIFT 10 transformer phase shift angle (degrees), positive ) delay
 BR STATUS 11 initial branch status, 1 = in-service, 0 = out-of-service
-ANGMIN* 12 minimum angle difference, ft (degrees)
-ANGMAX* 13 maximum angle difference, f t (degrees)
+ANGMIN* 12 minimum angle difference, angle(Vf) - angle(Vt) (degrees)
+ANGMAX* 13 maximum angle difference, angle(Vf) - angle(Vt) (degrees)
 PF† 14 real power injected at \from" bus end (MW)
 QF† 15 reactive power injected at \from" bus end (MVAr)
 PT† 16 real power injected at \to" bus end (MW)

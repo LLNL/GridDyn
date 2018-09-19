@@ -33,10 +33,10 @@ namespace griddyn
 gridSimulation::gridSimulation (const std::string &objName) : Area (objName), simulationTime(timeZero)
 {
     EvQ = std::make_unique<eventQueue> ();
-#ifdef DISABLE_MULTITHREADING
-    gridLog = std::make_unique<utilities::LoggerNoThread> ();
-#else
+#ifdef ENABLE_MULTITHREADING
     gridLog = std::make_unique<utilities::Logger> ();
+#else
+    gridLog = std::make_unique<utilities::LoggerNoThread> ();
 #endif
 }
 
