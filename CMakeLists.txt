@@ -173,7 +173,7 @@ cmake_dependent_option(
     OFF
 )
 
-option(
+cmake_dependent_option(
     ENABLE_GRIDDYN_DEBUG_LOGGING
     "enable debug logging"
     ON
