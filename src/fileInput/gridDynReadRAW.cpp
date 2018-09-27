@@ -522,7 +522,7 @@ void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt)
     double va;
     int type;
 
-    auto strvec = splitline (line);
+    auto strvec = splitlineQuotes (line);
     // get the bus name
     auto temp = trim (strvec[0]);
     auto temp2 = trim (removeQuotes (strvec[1]));
@@ -1375,7 +1375,9 @@ void rawReadSwitchedShunt (coreObject *parentObject,
 
     auto mode = numeric_conversion<int> (strvec[1], 0);
     int shift = 0;
-    if (opt.version > 32)
+	//TODO:  this may not be totally correct right now
+	//VERSION 32 has some ambiguity in the interpretation
+	if (opt.version >= 32)
     {
         shift = 2;
     }
@@ -1499,7 +1501,7 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     {
         start = 5;
     }
-    else if (opt.version > 32)
+    else if (opt.version >= 32)
     {
         start = 9;
     }
