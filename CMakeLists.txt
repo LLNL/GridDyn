@@ -82,21 +82,6 @@ option(
     ON
 )
 
-cmake_dependent_option(
-    ENABLE_OPENMP_SUNDIALS
-    "Enable SUNDIALS NVector openMP implementation"
-    ON
-    "ENABLE_OPENMP"
-    OFF
-)
-
-cmake_dependent_option(
-    ENABLE_OPENMP_GRIDDYN
-    "Enable openmp internal to GridDyn--not used yet"
-    OFF
-    "ENABLE_OPENMP"
-    OFF
-)
 
 option(
     # TODO this needs to be accounted for in the source code
@@ -148,38 +133,12 @@ option(
     OFF
 )
 
-
-set(EXTENDED_INDEXING_ALLOWED "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-# TODO make sure this is adequately tested and consistently used
-cmake_dependent_option(
-    ENABLE_64_BIT_INDEXING
-    "set all indexing and count variables to 64 bit unsigned (Usually not required)"
-    OFF
-    "EXTENDED_INDEXING_ALLOWED"
-    OFF
-)
-
 option(
     ENABLE_GRIDDYN_LOGGING
     "enable all normal, debug, and trace logging in GridDyn"
     ON
 )
 
-cmake_dependent_option(
-    ENABLE_GRIDDYN_TRACE_LOGGING
-    "enable trace logging"
-    ON
-    "ENABLE_GRIDDYN_LOGGING"
-    OFF
-)
-
-cmake_dependent_option(
-    ENABLE_GRIDDYN_DEBUG_LOGGING
-    "enable debug logging"
-    ON
-    "ENABLE_GRIDDYN_LOGGING"
-    OFF
-)
 
 option(
     ENABLE_GRIDDYN_DOXYGEN
@@ -195,31 +154,7 @@ option(
 
 option(
     ENABLE_NETWORKING_LIBRARY
-    "Enable network based communiation components"
-    OFF
-)
-
-cmake_dependent_option(
-    DIME_ENABLE
-    "Enable connection with Dime"
-    OFF
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-
-cmake_dependent_option(
-    TCP_ENABLE
-    "Enable TCP connection library"
-    ON
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-
-cmake_dependent_option(
-    ZMQ_ENABLE
-    "Enable ZMQ networking library"
-    OFF
-    "NOT ZMQ_NEEDED"
+    "Enable network based communication components"
     OFF
 )
 
@@ -244,6 +179,49 @@ option(
 option(
     ENABLE_PACKAGE_BUILD
     "Add projects for making packages and installers for HELICS"
+    OFF
+)
+
+# dependent options
+set(EXTENDED_INDEXING_ALLOWED "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+# TODO make sure this is adequately tested and consistently used
+cmake_dependent_option(
+    ENABLE_64_BIT_INDEXING
+    "set all indexing and count variables to 64 bit unsigned (Usually not required)"
+    OFF
+    "EXTENDED_INDEXING_ALLOWED"
+    OFF
+)
+
+cmake_dependent_option(
+    ENABLE_TCP
+    "Enable TCP connection library"
+    ON
+    "ENABLE_NETWORKING_LIBRARY"
+    OFF
+)
+
+cmake_dependent_option(
+    ENABLE_DIME
+    "Enable connection with Dime"
+    OFF
+    "ENABLE_NETWORKING_LIBRARY"
+    OFF
+)
+
+cmake_dependent_option(
+    ENABLE_GRIDDYN_TRACE_LOGGING
+    "enable trace logging"
+    ON
+    "ENABLE_GRIDDYN_LOGGING"
+    OFF
+)
+
+cmake_dependent_option(
+    ENABLE_GRIDDYN_DEBUG_LOGGING
+    "enable debug logging"
+    ON
+    "ENABLE_GRIDDYN_LOGGING"
     OFF
 )
 
@@ -275,7 +253,6 @@ set(
 )
 
 include(extraMacros)
-# include(BuildType)
 
 # ------------------------------------------------------------
 # set the install path to a local directory
@@ -297,7 +274,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
                 FORCE
             )
         endif(MSYS)
-
     endif(WIN32)
 endif()
 
@@ -311,7 +287,6 @@ show_variable(
 mark_as_advanced(AUTOBUILD_INSTALL_PATH)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-include(extraMacros)
 
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/logs)
 
@@ -492,10 +467,24 @@ if(ENABLE_OPENMP)
         )
 
         set(ENABLE_OPENMP OFF)
-        set(ENABLE_OPENMP_SUNDIALS OFF)
-        set(ENABLE_OPENMP_GRIDDYN OFF)
     endif(OPENMP_FOUND)
 endif(ENABLE_OPENMP)
+
+cmake_dependent_option(
+    ENABLE_OPENMP_SUNDIALS
+    "Enable SUNDIALS NVector openMP implementation"
+    ON
+    "ENABLE_OPENMP"
+    OFF
+)
+
+cmake_dependent_option(
+    ENABLE_OPENMP_GRIDDYN
+    "Enable openmp internal to GridDyn--not used yet"
+    OFF
+    "ENABLE_OPENMP"
+    OFF
+)
 
 # ------------------------------------------------------------
 # Find multithreading headers and includes
@@ -747,16 +736,23 @@ endif(ENABLE_HELICS_EXECUTABLE)
 # Enable ZMQ interfacing
 # ------------------------------------------------------------
 
-if(DIME_ENABLE)
+if(ENABLE_DIME)
     set(ZMQ_NEEDED ON CACHE BOOL "ZMQ is needed" FORCE)
-endif(DIME_ENABLE)
+endif(ENABLE_DIME)
 
 hide_variable(ZMQ_NEEDED)
 
 
 # If ZMQ library is enabled try to locate it and link against it
+cmake_dependent_option(
+    ENABLE_ZMQ
+    "Enable ZMQ networking library"
+    OFF
+    "NOT ZMQ_NEEDED"
+    OFF
+)
 
-if((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+if((ENABLE_ZMQ) OR (ZMQ_NEEDED))
     include(addZeroMQ)
     if(NOT ZeroMQ_FOUND)
         message(SEND_ERROR "unable to locate zmq library")
