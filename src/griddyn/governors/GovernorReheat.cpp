@@ -53,7 +53,8 @@ coreObject *GovernorReheat::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorReheat::~GovernorReheat () {}
+GovernorReheat::~GovernorReheat () = default;
+
 // initial conditions
 void GovernorReheat::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
 {

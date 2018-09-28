@@ -506,6 +506,7 @@ void gridLabDLoad::runGridLabA (coreTime time, const IOdata &inputs)
             {
                 if (opFlags[dyn_initialized])
                 {
+                    (void) kk; // ignore for loop conversion suggestion
                     // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk], Vg, tInt);
                 }
             }
@@ -625,6 +626,7 @@ void gridLabDLoad::run2GridLabA (coreTime time, const IOdata &inputs)
             {
                 if (opFlags[dyn_initialized])
                 {
+                    (void) kk; // ignore for loop conversion suggestion
                     // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk], Vg, tInt);
                 }
             }
@@ -763,6 +765,7 @@ void gridLabDLoad::run3GridLabA (coreTime time, const IOdata &inputs)
             {
                 if (opFlags[dyn_initialized])
                 {
+                    (void) kk; // ignore for loop conversion suggestion
                     // GhostSwingBusManager::Instance ()->sendVoltageStep (forward_task_id[kk], Vg, tInt);
                 }
             }

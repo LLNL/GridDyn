@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GHOSTSWINGBUSMANAGER_H_
-#define GHOSTSWINGBUSMANAGER_H_
+#pragma once
 
 #include "GhostSwingBusMessageTypes.h"
 #include "griddyn/griddyn-config.h"
@@ -185,4 +184,3 @@ class GhostSwingBusManager
 };
 
 }  // namespace griddyn
-#endif /* GHOSTSWINGBUSMANAGER_H_ */

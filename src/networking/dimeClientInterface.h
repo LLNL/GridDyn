@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef DIME_CLIENT_INTERFACE_HEADER_
-#define DIME_CLIENT_INTERFACE_HEADER_
+#pragma once
 
 #include "cppzmq/zmq_addon.hpp"
 #include "json/jsoncpp.h"
@@ -38,7 +37,7 @@ class dimeClientInterface
     std::string address;
 
   public:
-    dimeClientInterface (const std::string &name, const std::string &address = "");
+    dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress = "");
 
     ~dimeClientInterface ();
     /** initialize the connection*/
@@ -49,11 +48,11 @@ class dimeClientInterface
     void sync ();
     /** send a variable to server*/
     void send_var (const std::string &varName, double val, const std::string &recipient = "");
-    void broadcast (const std::string &varName, double val) { send_var (varName, val); }
+    void broadcast (const std::string &varName, double val);
 
     void get_devices ();
 
   private:
     std::unique_ptr<zmq::socket_t> socket;
+    std::unique_ptr<Json_gd::StreamWriter> writer{};
 };
-#endif

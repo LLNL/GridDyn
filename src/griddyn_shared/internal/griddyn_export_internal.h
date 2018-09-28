@@ -20,7 +20,7 @@ gridDynObject creategridDynObject (griddyn::gridComponent *comp);
 /** get the component pointer from a gridDynObject*/
 griddyn::gridComponent *getComponentPointer (gridDynObject obj);
 /** get the const component pointer from a const gridDynObject*/
-const griddyn::gridComponent *getConstComponentPointer (const gridDynObject obj);
+const griddyn::gridComponent *getConstComponentPointer (gridDynObject obj);
 
 /** data class for storing some solver information and data buffers*/
 class solverKeyInfo

@@ -28,14 +28,14 @@ using namespace readerConfig;
 
 void basicReaderInfo::setFlag (int flagID)
 {
-    if (flagID < 32)
+    if (flagID < 32 && flagID >= 0)
     {
         flags |= (1 << flagID);
     }
 }
 
 readerInfo::readerInfo () { loadDefaultDefines (); }
-readerInfo::readerInfo (basicReaderInfo bri) : basicReaderInfo (bri) {}
+readerInfo::readerInfo (basicReaderInfo const& bri) : basicReaderInfo (bri) {}
 readerInfo::~readerInfo ()
 {
     for (auto &libObj : library)

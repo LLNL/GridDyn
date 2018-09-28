@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef ZIP_UTILITIES_H_
-#define ZIP_UTILITIES_H_
+#pragma once
 
 #include <vector>
 
@@ -49,5 +48,3 @@ int zipFolder (const std::string &file, const std::string &folderLoc, zipMode mo
 */
 int unzip (const std::string &file, const std::string &directory = "");
 }  // namespace utilities
-
-#endif

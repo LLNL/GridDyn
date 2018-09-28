@@ -18,6 +18,7 @@
 #include "utilities/stringOps.h"
 #include <cstdarg>
 #include <map>
+#include <array>
 #include <boost/dll/import.hpp>
 #include <boost/dll/shared_library.hpp>
 
@@ -458,12 +459,10 @@ void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
                  fmi2String message,
                  ...)
 {
-    std::string temp;
-    temp.resize (STRING_BUFFER_SIZE);
+    std::array<char, STRING_BUFFER_SIZE> temp;
     va_list arglist;
     va_start (arglist, message);
-    auto sz = vsnprintf (&(temp[0]), STRING_BUFFER_SIZE, message, arglist);
+    vsnprintf (temp.data (), STRING_BUFFER_SIZE, message, arglist);
     va_end (arglist);
-    temp.resize (std::min (sz, STRING_BUFFER_SIZE));
-    printf ("%s\n", temp.c_str ());
+    printf ("%s\n", temp.data ());
 }

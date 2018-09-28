@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE (basic_stability_test1)
         gds = readSimXMLFile (fileName);
         Generator *gen = gds->getGen (0);
         gds->consolePrintLevel = print_level::no_print;
-		
+
         auto obj = cof->createObject ("exciter", excname);
         BOOST_CHECK (obj != nullptr);
         auto fnd = parameters.find (excname);

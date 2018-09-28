@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef READERELEMENT_H_
-#define READERELEMENT_H_
+#pragma once
 
 #include <exception>
 #include <memory>
@@ -108,5 +107,3 @@ class readerElement
     /** @brief restore the last bookmarked location */
     virtual void restore () = 0;
 };
-
-#endif

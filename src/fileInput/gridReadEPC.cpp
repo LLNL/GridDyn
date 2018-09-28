@@ -24,6 +24,7 @@
 #include "utilities/stringConversion.h"
 #include "utilities/stringOps.h"
 #include "utilities/string_viewConversion.h"
+
 #include <cstdlib>
 #include <fstream>
 #include <functional>
@@ -31,6 +32,8 @@
 
 namespace griddyn
 {
+const static bool unimplemented = false;
+
 using namespace gridUnits;
 using namespace utilities::string_viewOps;
 using utilities::string_view;
@@ -805,8 +808,10 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
     }
 }
 
-void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */)
+void epcReadSwitchShunt (loads::svd* /*ld*/, string_view /*line*/, double /*base*/)
 {
+    assert (unimplemented);
+    /*
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 
     auto mode = numeric_conversion<int> (strvec[1], 0);
@@ -815,7 +820,6 @@ void epcReadSwitchShunt (loads::svd *ld, string_view line, double /* base */)
     // get the controlled bus
     auto cbus = numeric_conversion<int> (strvec[4], -1);
 
-    /*
     if (cbus < 0)
     {
         trimString(strvec[4]);

@@ -19,7 +19,7 @@ namespace griddyn
 {
 controlSystem::controlSystem (const std::string &objName) : gridSubModel (objName) {}
 
-controlSystem::~controlSystem () {}
+controlSystem::~controlSystem () = default;
 
 coreObject *controlSystem::clone (coreObject *obj) const
 {

@@ -79,6 +79,11 @@ def unwrap(list_of_lists):
             res.append(el)
     return res
 
+def strip_comment(line):
+    # delete everything after the first '#'
+    idx = line.find('#')
+    return line[:idx].strip()
+
 ## pipeline
 if __name__ == '__main__':
     import sys
@@ -105,38 +110,40 @@ if __name__ == '__main__':
     # sort each list by filename
     # TODO filename sort is bad (directories are handled strangely),
     #      also need to break ties with line num
-    filename_key = lambda x: x.file_name
-    for guideline in guidelines:
-        guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
+    # filename_key = lambda x: x.file_name
+    # for guideline in guidelines:
+    #     guideline_map[guideline] = sorted(guideline_map[guideline], key=filename_key)
 
     # sort all guidelines by how many warnings apply
-    guideline_priority = [(k, len(v)) for k, v in guideline_map.iteritems()]
-    guideline_priority.sort(key=lambda x: x[1])
+    # guideline_priority = [(k, len(v)) for k, v in guideline_map.items()]
+    # guideline_priority.sort(key=lambda x: x[1])
 
     # print all guideline warning counts
-    for k, v in guideline_priority:
-        print(' * {}: {}'.format(k, v))
+    # for k, v in guideline_priority:
+    #     print(' * {}: {}'.format(k, v))
 
-    # predicates: line is not a comment, line is not empty
-    not_comment = lambda line: line.strip()[0] != '#'
     not_empty = lambda line: line.strip() != ''
 
     with open(sys.argv[1], 'r') as f:
         guidelines = f.readlines()
 
-    guidelines = filter(not_comment, guidelines)
-    guidelines = filter(not_empty, guidelines)
-    guidelines = [l.strip() for l in guidelines]
+    guidelines = map(strip_comment, guidelines)
+    guidelines = list(filter(not_empty, guidelines))
 
-    # separators are more for visual cues than anything else
-    print(separator('green'))
-    # print all warnings from the first guideline only
-    for i in guideline_map[guidelines[0]]:
-        print(i.original)
-        print(separator('red'))
+    for guideline in guidelines:
+        # separators are more for visual cues than anything else
+        print(separator('green'))
+        print("Warnings for guideline: {}".format(guideline))
+
+        for i in guideline_map[guideline]:
+            print(i.original)
+            print(separator('red'))
 
     # print filenames referenced by the warnings printed
-    filenames = set(map(lambda i: i.file_name, guideline_map[guidelines[0]]))
+    filenames = set()
+    for guideline in guidelines:
+        for filename in map(lambda i: i.file_name, guideline_map[guideline]):
+            filenames.add(filename)
     print('\nFiles referenced:')
     for filename in sorted(filenames):
         print('\t{}'.format(filename))

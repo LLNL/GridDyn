@@ -58,6 +58,8 @@
 
 #include "unzip.h"
 
+#include "argv.h"
+
 #define CASESENSITIVITY (0)
 #define WRITEBUFFERSIZE (8192)
 #define MAXFILENAME (256)
@@ -72,7 +74,7 @@
 static int minizip_printf( const char * format, ... )
 {
 	return 1;
-} 
+}
 
 
 /*
@@ -544,10 +546,9 @@ int do_extract_onefile(uf,filename,opt_extract_without_path,opt_overwrite,passwo
         return 1;
 }
 
-
-int miniunz(argc,argv)
+int miniunz_main(argc,argv)
     int argc;
-    char *argv[];
+    char **argv;
 {
     const char *zipfilename=NULL;
     const char *filename_to_extract=NULL;
@@ -671,4 +672,25 @@ int miniunz(argc,argv)
     unzClose(uf);
 
     return ret_value;
+}
+
+/*
+ * Make miniunz const-correct
+ *
+ * When running miniunz from the command line, the os will copy the command line
+ * arguments. Here, we don't have that, so copy the arguments manually.
+ */
+int miniunz(argc,argv)
+    int argc;
+    const char **argv;
+{
+    int i;
+    int rv;
+    char **new_argv;
+
+    new_argv = copy_argv(argc, argv);
+    rv = miniunz_main(argc, new_argv);
+    free_argv(argc, new_argv);
+
+    return rv;
 }

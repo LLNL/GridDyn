@@ -10,11 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_EVENT_H_
-#define GRIDDYN_EVENT_H_
 #pragma once
-// headers
-//#include "gridDynSimulation.h"
 
 #include "core/coreObject.h"
 #include "core/helperObject.h"
@@ -129,7 +125,8 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     /** udpate the target and field of an event*/
     void loadField (coreObject *searchObj, const std::string &newField);
     /** run a check to see if the event can be armed*/
-    virtual bool checkArmed ();
+    // Note: please remove calls to checkArmed in the constructor before making this virtual
+    bool checkArmed ();
 };
 
 /** construct a simple parameter change event
@@ -155,4 +152,3 @@ std::unique_ptr<Event> make_event (EventInfo &gdEI, coreObject *rootObject);
 std::unique_ptr<Event> make_event (const std::string &eventString, coreObject *rootObject);
 
 }  // namespace griddyn
-#endif

@@ -1361,17 +1361,15 @@ void rawReadSwitchedShunt (coreObject *parentObject,
     double temp;
     if (index > busList.size ())
     {
-        std::cerr << "Invalid bus number for load " << index << '\n';
+        throw std::runtime_error("Invalid bus number for load " + std::to_string(index));
     }
     if (busList[index] == nullptr)
     {
-        std::cerr << "Invalid bus number for load " << index << '\n';
+        throw std::runtime_error("Invalid bus number for load " + std::to_string(index));
     }
-    else
-    {
-        ld = new loads::svd ();
-        busList[index]->add (ld);
-    }
+
+    ld = new loads::svd ();
+    busList[index]->add (ld);
 
     auto mode = numeric_conversion<int> (strvec[1], 0);
     int shift = 0;

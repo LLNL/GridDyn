@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRID_GRABBER_H_
-#define GRID_GRABBER_H_
+#pragma once
 
 #include "../gridDynDefinitions.hpp"
 #include "core/objectOperatorInterface.hpp"
@@ -191,4 +190,3 @@ class opGrabber : public gridGrabber
 };
 
 }  // namespace griddyn
-#endif

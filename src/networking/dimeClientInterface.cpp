@@ -41,8 +41,6 @@ void dimeClientInterface::init ()
 {
     auto context = zmqlib::zmqContextManager::getContextPointer ();
 
-    char buffer[10];
-
     socket = std::make_unique<zmq::socket_t> (context->getBaseContext (), zmq::socket_type::req);
     socket->connect (address);
 
@@ -51,13 +49,14 @@ void dimeClientInterface::init ()
     outgoing["name"] = name;
     outgoing["listen_to_events"] = false;
 
-    Json_gd::FastWriter fw;
+    std::stringstream ss;
+    writer->write(outgoing, &ss);
 
-    std::string out = fw.write (outgoing);
-    socket->send (out.c_str (), out.size ());
+    socket->send (ss.str());
 
-    auto sz = socket->recv (buffer, 10, 0);
-    if ((sz != 2) || (buffer[0] != 'O') || (buffer[1] != 'K'))
+    char buffer[3] = {};
+    auto sz = socket->recv (buffer, 3, 0);
+    if ((sz != 2) || (strncmp(buffer, "OK", 3) != 0))
     {
         throw initFailure ();
     }
@@ -71,10 +70,10 @@ void dimeClientInterface::close ()
         outgoing["command"] = "exit";
         outgoing["name"] = name;
 
-        Json_gd::FastWriter fw;
+        std::stringstream ss;
+        writer->write(outgoing, &ss);
 
-        std::string out = fw.write (outgoing);
-        socket->send (out.c_str (), out.size ());
+        socket->send (ss.str ());
 
         socket->close ();
     }
@@ -103,21 +102,20 @@ void encodeVariableMessage (Json_gd::Value &data, double val)
 void dimeClientInterface::send_var (const std::string &varName, double val, const std::string &recipient)
 {
     // outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
-    char buffer[10];
-
     Json_gd::Value outgoing;
 
     outgoing["command"] = (recipient.empty ()) ? "broadcast" : "send";
 
     outgoing["name"] = name;
     outgoing["args"] = varName;
-    Json_gd::FastWriter fw;
 
-    std::string out = fw.write (outgoing);
+    std::stringstream ss;
+    writer->write(outgoing, &ss);
+    socket->send (ss.str());
 
-    socket->send (out.c_str (), out.size ());
-
-    auto sz = socket->recv (buffer, 10, 0);
+    char buffer[3];
+    auto sz = socket->recv (buffer, 3, 0);
+    // TODO check recv value
 
     Json_gd::Value outgoingData;
     outgoingData["command"] = "response";
@@ -130,14 +128,20 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     outgoingData["meta"]["var_name"] = varName;
     encodeVariableMessage (outgoingData, val);
 
-    out = fw.write (outgoingData);
+    std::stringstream().swap(ss); // reset ss
+    writer->write(outgoingData, &ss);
+    socket->send (ss.str ());
 
-    socket->send (out.c_str (), out.size ());
-    sz = socket->recv (buffer, 10, 0);
-    if (sz != 2)
+    sz = socket->recv (buffer, 3, 0);
+    if (sz != 2) // TODO check for "OK"
     {
         throw (sendFailure ());
     }
+}
+
+void dimeClientInterface::broadcast (const std::string &varName, double val)
+{
+    send_var (varName, val);
 }
 
 void dimeClientInterface::get_devices () {}

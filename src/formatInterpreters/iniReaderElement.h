@@ -21,7 +21,7 @@ class INIReader;
 class iniReaderElement : public readerElement
 {
   public:
-    iniReaderElement () noexcept;
+    iniReaderElement ();
     explicit iniReaderElement (const std::string &fileName);
 
     std::shared_ptr<readerElement> clone () const override;

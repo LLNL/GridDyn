@@ -9,9 +9,9 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+
 #pragma once
-#ifndef GRIDOPTOBJECT_H_
-#define GRIDOPTOBJECT_H_
+
 #include "core/coreObject.h"
 #include "optHelperClasses.h"
 #include <array>
@@ -293,4 +293,3 @@ class gridOptObject : public coreObject
 void printObjStateNames (gridOptObject *obj, const optimMode &oMode);
 
 }  // namespace griddyn
-#endif

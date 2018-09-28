@@ -17,7 +17,7 @@
 
 namespace griddyn
 {
-gridParameter::gridParameter () {}
+gridParameter::gridParameter () = default;
 gridParameter::gridParameter (const std::string &str) { fromString (str); }
 gridParameter::gridParameter (std::string fld, double val) : field (std::move (fld)), value (val), valid (true) {}
 gridParameter::gridParameter (std::string fld, std::string val)

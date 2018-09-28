@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef JSONREADERELEMENT_H_
-#define JSONREADERELEMENT_H_
 #pragma once
 
 #include "readerElement.h"
@@ -29,7 +27,7 @@ class jsonElement;
 class jsonReaderElement : public readerElement
 {
   public:
-    jsonReaderElement () noexcept;
+    jsonReaderElement ();
     explicit jsonReaderElement (const std::string &fileName);
 
     std::shared_ptr<readerElement> clone () const override;
@@ -81,5 +79,3 @@ class jsonReaderElement : public readerElement
 
     std::vector<std::shared_ptr<jsonReaderElement>> bookmarks;
 };
-
-#endif

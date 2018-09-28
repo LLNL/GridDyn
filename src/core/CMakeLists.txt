@@ -10,33 +10,33 @@
 
 set(
     coreObject_headers
-    propertyBuffer.h
     coreDefinitions.hpp
-    coreProperties.hpp
-    objectFactory.hpp
-    objectFactoryTemplates.hpp
-    factoryTemplates.hpp
     coreExceptions.h
-    coreOwningPtr.hpp
-    helperObject.h
     coreObject.h
-    nullObject.h
     coreObjectList.h
     coreObjectTemplates.hpp
-    objectOperatorInterface.hpp
+    coreOwningPtr.hpp
+    coreProperties.hpp
+    factoryTemplates.hpp
+    helperObject.h
+    nullObject.h
+    objectFactory.hpp
+    objectFactoryTemplates.hpp
     objectInterpreter.h
+    objectOperatorInterface.hpp
+    propertyBuffer.h
 )
 
 set(
     coreObject_sources
-    objectFactory.cpp
-    coreObject.cpp
-    nullObject.cpp
-    coreObjectList.cpp
     coreExceptions.cpp
+    coreObject.cpp
+    coreObjectList.cpp
     helperObject.cpp
-    propertyBuffer.cpp
+    nullObject.cpp
+    objectFactory.cpp
     objectInterpreter.cpp
+    propertyBuffer.cpp
 )
 
 add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})

@@ -27,7 +27,7 @@ class matrixDataContainer : public matrixData<ValueT>
   public:
     matrixData<ValueT> *md;  //!< the matrix this class contains
   public:
-    matrixDataContainer () noexcept = default;
+    matrixDataContainer () = default;
     /** @brief constructor
     */
     explicit matrixDataContainer (matrixData<ValueT> &input) { matrixDataContainer::setArray (&input); };

@@ -58,7 +58,7 @@ class optComponentFactory
     gridOptObject *makeObject ();
     void registerFactory (optFactory *optFac);
     bool isValidObject (const std::string &objName);
-    optFactory *getFactory (const std::string &objName);
+    optFactory *getFactory (const std::string &typeName);
 
   protected:
     optMap m_factoryMap;
@@ -79,20 +79,20 @@ class coreOptObjectFactory
     void registerFactory (const std::string &name, std::shared_ptr<optComponentFactory> tf);
     void registerFactory (std::shared_ptr<optComponentFactory> tf);
     stringVec getFactoryNames ();
-    stringVec getObjNames (const std::string &typeName);
-    gridOptObject *createObject (const std::string &optComponet, const std::string &objName);
-    gridOptObject *createObject (const std::string &optComponent, coreObject *obj);
+    stringVec getObjNames (const std::string &factoryName);
+    gridOptObject *createObject (const std::string &optType, const std::string &typeName);
+    gridOptObject *createObject (const std::string &optType, coreObject *obj);
     gridOptObject *createObject (coreObject *obj);
-    gridOptObject *createObject (const std::string &objName);
-    std::shared_ptr<optComponentFactory> getFactory (const std::string &optComponent);
+    gridOptObject *createObject (const std::string &typeName);
+    std::shared_ptr<optComponentFactory> getFactory (const std::string &factoryName);
     bool isValidType (const std::string &obComponent);
-    bool isValidObject (const std::string &optComponent, const std::string &objName);
-    void setDefaultType (const std::string &defComponent);
-    void prepObjects (const std::string &optComponent,
-                      const std::string &optName,
+    bool isValidObject (const std::string &optType, const std::string &objName);
+    void setDefaultType (const std::string &defType);
+    void prepObjects (const std::string &optType,
+                      const std::string &typeName,
                       count_t numObjects,
                       coreObject *baseObj);
-    void prepObjects (const std::string &objName, count_t numObjects, coreObject *baseObj);
+    void prepObjects (const std::string &typeName, count_t numObjects, coreObject *baseObj);
 
   private:
     coreOptObjectFactory () {}

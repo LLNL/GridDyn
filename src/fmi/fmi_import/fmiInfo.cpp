@@ -14,7 +14,7 @@
 #include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "utilities/stringConversion.h"
 
-fmiInfo::fmiInfo () {}
+fmiInfo::fmiInfo () = default;
 
 fmiInfo::fmiInfo (const std::string &xmlFile) { loadFile (xmlFile); }
 

@@ -65,7 +65,8 @@ coreObject *GovernorSteamNR::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorSteamNR::~GovernorSteamNR () {}
+GovernorSteamNR::~GovernorSteamNR () = default;
+
 // initial conditions
 void GovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/,
                                             const IOdata &desiredOutput,
@@ -75,7 +76,7 @@ void GovernorSteamNR::dynObjectInitializeB (const IOdata & /*inputs*/,
     m_state[offset + 1] = 0;
     m_state[offset + offset] = desiredOutput[0];
 
-    Pset = ((Generator *)getParent ())->getPset ();
+    Pset = static_cast<Generator *>(getParent ())->getPset ();
 }
 
 // residual

@@ -38,7 +38,7 @@ class grabberSource : public rampSource
 
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
     /** update the target field of the grabber*/
-    void updateField (const std::string &newfield);
+    void updateField (const std::string &newField);
 
     /** update the target object of the grabber*/
     void updateTarget (const std::string &newTarget);
@@ -54,7 +54,7 @@ class grabberSource : public rampSource
 
     virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
     virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum = 0) const override;
 
     virtual double getOutput (index_t outputNum = 0) const override;
 

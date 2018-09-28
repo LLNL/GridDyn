@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE (model_test2)  // Jacobian code check
     std::string fileName = std::string (GENMODEL_TEST_DIRECTORY "test_model1.xml");
 
 
-    
+
     auto cof = coreObjectFactory::instance ();
     auto genlist = cof->getTypeNames ("genmodel");
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE (model_test2)  // Jacobian code check
         gds = readSimXMLFile(fileName);
 
         Generator *gen = gds->getGen(0);
-        
+
         auto obj = cof->createObject ("genmodel", gname);
         BOOST_CHECK (obj != nullptr);
         gen->add (obj);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE (model_test2_alg_diff_tests)  // test the algebraic updates
             mmatch = runJacobianCheck(gds, cDynAlgSolverMode, false);
             BOOST_REQUIRE_MESSAGE(mmatch == 0, "Model " << gname << " Jacobian dynAlg issue");
         }
-        
+
     }
 }
 #endif

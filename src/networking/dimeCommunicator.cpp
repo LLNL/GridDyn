@@ -19,7 +19,7 @@ namespace griddyn
 {
 namespace dimeLib
 {
-dimeCommunicator::dimeCommunicator () {}
+dimeCommunicator::dimeCommunicator () = default;
 
 dimeCommunicator::dimeCommunicator (const std::string &name) : zmqCommunicator (name) {}
 

@@ -27,7 +27,7 @@ class tomlElement;
 class tomlReaderElement : public readerElement
 {
   public:
-    tomlReaderElement () noexcept;
+    tomlReaderElement ();
     explicit tomlReaderElement (const std::string &fileName);
 
     std::shared_ptr<readerElement> clone () const override;

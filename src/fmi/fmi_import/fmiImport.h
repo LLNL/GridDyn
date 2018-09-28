@@ -9,9 +9,6 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _FMI_IMPORT_H_
-#define _FMI_IMPORT_H_
 #pragma once
 
 #include "fmiInfo.h"
@@ -230,5 +227,3 @@ void loggerFunc (fmi2ComponentEnvironment /* compEnv */,
                  fmi2String /* category */,
                  fmi2String message,
                  ...);
-
-#endif
