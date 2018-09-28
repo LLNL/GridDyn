@@ -1,5 +1,5 @@
 ##############################################################################
-#Copyright © 2017-2018,
+#Copyright Â© 2017-2018,
 #Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 #All rights reserved. See LICENSE file and DISCLAIMER for more details.
 ##############################################################################
@@ -212,4 +212,3 @@ endif()
 
 #message(STATUS "Using Boost core debug libraries : ${Boost_LIBRARIES_core_debug}")
 #message(STATUS "Using Boost core release libraries : ${Boost_LIBRARIES_core_release}")
-

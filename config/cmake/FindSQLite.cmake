@@ -1,4 +1,3 @@
-
 #-------------------------------------------------------------------------------
 # Copyright (c) 2013-2013, Lars Baehren <lbaehren@gmail.com>
 # All rights reserved.
@@ -62,7 +61,7 @@ if (NOT SQLITE_FOUND)
       if (SQLITE_VERSION)
           string (REGEX REPLACE "Version: " "" SQLITE_VERSION ${SQLITE_VERSION})
           string (REGEX REPLACE "\\." ";" SQLITE_VERSION ${SQLITE_VERSION})
-          ## 
+          ##
           list (GET SQLITE_VERSION 0 SQLITE_VERSION_MAJOR)
           list (GET SQLITE_VERSION 1 SQLITE_VERSION_MINOR)
           list (GET SQLITE_VERSION 2 SQLITE_VERSION_PATCH)
