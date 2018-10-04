@@ -23,7 +23,7 @@
 #include <ida/ida_direct.h>
 #include <sundials/sundials_math.h>
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -310,7 +310,7 @@ void idaInterface::initialize (coreTime t0)
 
     retval = IDASetMaxNumSteps (solverMem, 1500);
     check_flag (&retval, "IDASetMaxNumSteps", 1);
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix (svsize, svsize);

@@ -19,7 +19,7 @@
 #cmakedefine ENABLE_OPENMP_SUNDIALS
 #cmakedefine ENABLE_OPENMP_GRIDDYN
 
-#cmakedefine KLU_ENABLE
+#cmakedefine ENABLE_KLU
 
 #cmakedefine ENABLE_FMI
 #cmakedefine ENABLE_FMI_EXPORT

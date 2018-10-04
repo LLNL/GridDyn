@@ -52,7 +52,7 @@ void sundialsErrorHandlerFunc (int error_code,
                                char *msg,
                                void *user_data);
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 /** @brief check if the matrix is setup already
  *@param[in] J the matrix to check
  *@return true if the matrix has been loaded already false otherwise
