@@ -788,14 +788,14 @@ change_code Relay::rootCheck (const IOdata & /*inputs*/,
     return change_code::no_change;
 }
 
-void Relay::clearCondChecks (index_t condNum)
+void Relay::clearCondChecks (index_t conditionNumber)
 {
     auto cc = condChecks;
     condChecks.resize (0);
     coreTime mTime = nextUpdateTime;
     for (auto &cond : cc)
     {
-        if (cond.conditionNum != condNum)
+        if (cond.conditionNum != conditionNumber)
         {
             condChecks.push_back (cond);
             if (cond.testTime < mTime)
@@ -894,20 +894,20 @@ Relay::triggerCondition (index_t conditionNum, coreTime conditionTriggerTime, co
     return eventReturn;
 }
 
-change_code Relay::executeAction (index_t actionNum, index_t conditionNum, coreTime actionTime)
+change_code Relay::executeAction (index_t actionNumber, index_t conditionNumber, coreTime actionTime)
 {
-    auto eventReturn = actions[actionNum]->execute (actionTime);
+    auto eventReturn = actions[actionNumber]->execute (actionTime);
     ++actionsTakenCount;
-    actionTaken (actionNum, conditionNum, eventReturn, actionTime);
+    actionTaken (actionNumber, conditionNumber, eventReturn, actionTime);
     return eventReturn;
 }
 
 change_code
-Relay::multiConditionCheckExecute (index_t conditionNum, coreTime conditionTriggerTime, coreTime minimumDelayTime)
+Relay::multiConditionCheckExecute (index_t conditionNumber, coreTime conditionTriggerTime, coreTime minimumDelayTime)
 {
     change_code eventReturn = change_code::no_change;
     // now check the multiCondition triggers
-    for (auto &mct : multiConditionTriggers[conditionNum])
+    for (auto &mct : multiConditionTriggers[conditionNumber])
     {
         bool all_triggered = false;
         for (auto &cn : mct.multiConditions)
@@ -922,7 +922,7 @@ Relay::multiConditionCheckExecute (index_t conditionNum, coreTime conditionTrigg
         {
             if (mct.delayTime <= minimumDelayTime)
             {
-                auto iret = executeAction (mct.actionNum, conditionNum, prevTime);
+                auto iret = executeAction (mct.actionNum, conditionNumber, prevTime);
                 if (iret > eventReturn)
                 {
                     eventReturn = iret;
@@ -930,7 +930,7 @@ Relay::multiConditionCheckExecute (index_t conditionNum, coreTime conditionTrigg
             }
             else
             {
-                condChecks.emplace_back (conditionNum, mct.actionNum, conditionTriggerTime + mct.delayTime, true);
+                condChecks.emplace_back (conditionNumber, mct.actionNum, conditionTriggerTime + mct.delayTime, true);
                 nextUpdateTime = std::min (nextUpdateTime, conditionTriggerTime + mct.delayTime);
                 alert (this, UPDATE_TIME_CHANGE);
             }

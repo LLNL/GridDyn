@@ -147,12 +147,11 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
         {
             reply = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
             auto payload = reply->getPayload<controlMessagePayload> ();
-			if (payload != nullptr)
-			{
+            if (payload != nullptr)
+            {
                 payload->m_actionID = m->m_actionID;
                 commLink->transmit (sourceID, reply);
-			}
-           
+            }
         }
 
         break;
@@ -191,11 +190,11 @@ void commSource::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMes
             {
                 auto gres = std::make_shared<commMessage> (controlMessagePayload::SET_SUCCESS);
                 auto payload = reply->getPayload<controlMessagePayload> ();
-				if (payload != nullptr)
-				{
+                if (payload != nullptr)
+                {
                     payload->m_actionID = m->m_actionID;
                     commLink->transmit (sourceID, gres);
-				}
+                }
             }
         }
         break;

@@ -267,16 +267,16 @@ BOOST_DATA_TEST_CASE_F (gridDynSimulationTestFixture, compare_block_test, data::
     rel1->add (bb1);
     rel2->add (bb2);
     int retval = gds->dynInitialize ();
-	
+
     BOOST_CHECK_EQUAL (retval, 0);
-	
+
     int mmatch = runJacobianCheck (gds, cDaeSolverMode, 1e-5);
     if (mmatch > 0)
     {
         printf (" mismatching Jacobian in %s\n", plist.first.c_str ());
         BOOST_REQUIRE_EQUAL (mmatch, 0);
     }
-	
+
     mmatch = runResidualCheck (gds, cDaeSolverMode);
     if (mmatch > 0)
     {

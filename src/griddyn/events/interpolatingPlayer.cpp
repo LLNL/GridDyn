@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace events
 {
-interpolatingPlayer::interpolatingPlayer(const std::string &eventName) :Player(eventName)
+interpolatingPlayer::interpolatingPlayer(const std::string &eventName) : Player(eventName)
 {
 
 }
@@ -127,7 +127,7 @@ void interpolatingPlayer::setNextValue()
 	{
 		slope = (ts.data(currIndex+1) - ts.data(currIndex)) / (ts.time(currIndex+1) - ts.time(currIndex));
 	}
-	
+
 		if (useSlopeField)
 		{
 			value = ts.data(currIndex);
@@ -151,7 +151,7 @@ void interpolatingPlayer::setNextValue()
 			{
 				value = ts.data(currIndex - 1) + slope*(triggerTime - ts.time(currIndex - 1));
 			}
-			
+
 		}
 }
 
@@ -244,7 +244,7 @@ change_code interpolatingPlayer::trigger(coreTime time)
 			{
 				m_obj->set(field, value, unitType);
 			}
-			
+
 			ret = change_code::parameter_change;
 		}
 		catch (const std::invalid_argument &)
@@ -257,5 +257,3 @@ change_code interpolatingPlayer::trigger(coreTime time)
 }
 }//namespace events
 }//namespace griddyn
-
-

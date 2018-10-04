@@ -33,9 +33,9 @@ class kinsolInterface : public sundialsInterface
      */
     virtual ~kinsolInterface ();
 
-	virtual std::unique_ptr<SolverInterface> clone(bool fullCopy = false) const override;
+    virtual std::unique_ptr<SolverInterface> clone (bool fullCopy = false) const override;
 
-	virtual void cloneTo(SolverInterface *si, bool fullCopy = false) const override;
+    virtual void cloneTo (SolverInterface *si, bool fullCopy = false) const override;
     virtual void allocate (count_t stateCount, count_t numRoots = 0) override;
     virtual void initialize (coreTime time0) override;
     virtual void sparseReInit (sparse_reinit_modes sparseReinitMode) override;
@@ -49,18 +49,18 @@ class kinsolInterface : public sundialsInterface
     virtual void set (const std::string &param, double val) override;
     // wrapper functions used by kinsol and ida to call the internal functions
     friend int kinsolFunc (N_Vector state, N_Vector resid, void *user_data);
-    friend int kinsolJac (N_Vector state, N_Vector resid, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2);
+    friend int
+    kinsolJac (N_Vector state, N_Vector resid, SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2);
 
   private:
 #if MEASURE_TIMINGS > 0
     double kinTime = 0;  //!< the total time spent in kinsol
-    double residTime = 0;	//!< the total time spent in the residual calls
-    double jacTime = 0;	//!< the total time spent in the Jacobian calls
-    double jac1Time = 0;	//!< the total time spent in the first Jacobian call
-    double kinsol1Time = 0;	//!< the total time spent in kinsol
+    double residTime = 0;  //!< the total time spent in the residual calls
+    double jacTime = 0;  //!< the total time spent in the Jacobian calls
+    double jac1Time = 0;  //!< the total time spent in the first Jacobian call
+    double kinsol1Time = 0;  //!< the total time spent in kinsol
 #endif
 };
 
-}//namespace solvers
-}//namespace griddyn
-
+}  // namespace solvers
+}  // namespace griddyn

@@ -499,15 +499,15 @@ void gridAreaOpt::add (gridBusOpt *bus)
     }
 }
 
-void gridAreaOpt::add (gridAreaOpt *newArea)
+void gridAreaOpt::add (gridAreaOpt *area)
 {
-    if (!isMember (newArea))
+    if (!isMember (area))
     {
-        areaList.push_back (newArea);
-        newArea->setParent (this);
-        newArea->locIndex = static_cast<index_t> (areaList.size ()) - 1;
-        optObList.insert (newArea);
-        objectList.push_back (newArea);
+        areaList.push_back (area);
+        area->setParent (this);
+        area->locIndex = static_cast<index_t> (areaList.size ()) - 1;
+        optObList.insert (area);
+        objectList.push_back (area);
     }
 }
 
@@ -590,19 +590,19 @@ void gridAreaOpt::remove (gridLinkOpt *lnk)
 }
 
 // remove area
-void gridAreaOpt::remove (gridAreaOpt *rarea)
+void gridAreaOpt::remove (gridAreaOpt *area)
 {
-    if (areaList[rarea->locIndex]->getID () == rarea->getID ())
+    if (areaList[area->locIndex]->getID () == area->getID ())
     {
-        areaList[rarea->locIndex]->setParent (nullptr);
-        areaList.erase (areaList.begin () + rarea->locIndex);
-        for (auto kk = rarea->locIndex; kk < static_cast<index_t> (areaList.size ()); ++kk)
+        areaList[area->locIndex]->setParent (nullptr);
+        areaList.erase (areaList.begin () + area->locIndex);
+        for (auto kk = area->locIndex; kk < static_cast<index_t> (areaList.size ()); ++kk)
         {
             areaList[kk]->locIndex = kk;
         }
         auto oLb = objectList.begin ();
         auto oLe = objectList.end ();
-        auto aid = rarea->getID ();
+        auto aid = area->getID ();
         while (oLb != oLe)
         {
             if ((*oLb)->getID () == aid)
@@ -830,23 +830,23 @@ coreObject *gridAreaOpt::findByUserID (const std::string &typeName, index_t sear
 }
 
 // check bus members
-bool gridAreaOpt::isMember (coreObject *object) const { return optObList.isMember (object); }
+bool gridAreaOpt::isMember (coreObject *obj) const { return optObList.isMember (obj); }
 
-gridOptObject *gridAreaOpt::getBus (index_t x) const { return (isValidIndex (x, busList)) ? busList[x] : nullptr; }
+gridOptObject *gridAreaOpt::getBus (index_t index) const { return (isValidIndex (index, busList)) ? busList[index] : nullptr; }
 
-gridOptObject *gridAreaOpt::getLink (index_t x) const
+gridOptObject *gridAreaOpt::getLink (index_t index) const
 {
-    return (isValidIndex (x, linkList)) ? linkList[x] : nullptr;
+    return (isValidIndex (index, linkList)) ? linkList[index] : nullptr;
 }
 
-gridOptObject *gridAreaOpt::getArea (index_t x) const
+gridOptObject *gridAreaOpt::getArea (index_t index) const
 {
-    return (isValidIndex (x, areaList)) ? areaList[x] : nullptr;
+    return (isValidIndex (index, areaList)) ? areaList[index] : nullptr;
 }
 
-gridOptObject *gridAreaOpt::getRelay (index_t x) const
+gridOptObject *gridAreaOpt::getRelay (index_t index) const
 {
-    return (isValidIndex (x, relayList)) ? relayList[x] : nullptr;
+    return (isValidIndex (index, relayList)) ? relayList[index] : nullptr;
 }
 
 double gridAreaOpt::get (const std::string &param, gridUnits::units_t unitType) const

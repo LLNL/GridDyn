@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _FMI_OBJECTS_H_
-#define _FMI_OBJECTS_H_
 #pragma once
 
 #include "fmiImport.h"
@@ -179,7 +177,7 @@ class fmi2Object
     void getCurrentInputs (fmi2Real inputs[]);
     void getOutputs (fmi2Real outputs[]) const;
     fmi2Real getOutput (size_t outNum) const;
-    void deSerializeState (const fmi2Byte serializedState[], size_t size, fmi2FMUstate *FMUstate);
+    void deSerializeState (const fmi2Byte serializedState[], size_t size, fmi2FMUstate *FMUState);
     void getDirectionalDerivative (const fmi2ValueReference vUnknown_ref[],
                                    size_t nUnknown,
                                    const fmi2ValueReference vKnown_ref[],
@@ -333,4 +331,3 @@ class fmi2CoSimObject : public fmi2Object
     std::shared_ptr<const fmiCoSimFunctions> CoSimFunctions;
     bool stepPending;
 };
-#endif

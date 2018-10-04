@@ -8,33 +8,26 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(griddynServer_sources
-	gridDynServerMain.cpp
-	gridDynServer.cpp
-	)
+set(griddynServer_sources gridDynServerMain.cpp gridDynServer.cpp)
 
-set(griddynServer_headers
-	gridDynServer.h
-	)
+set(griddynServer_headers gridDynServer.h)
 
 link_directories(${external_link_directories})
-
 
 set(GRIDYNSERVER_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
 add_executable(griddynServer ${griddynServer_sources} ${griddynServer_headers})
 target_include_directories(griddynServer SYSTEM PRIVATE ${Boost_INCLUDE_DIR})
 
-INCLUDE_DIRECTORIES(.)
+include_directories(.)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/formatInterpreter)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/griddyn)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynFileInput)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/utilities)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/coupling)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
+include_directories(${PROJECT_SOURCE_DIR}/src/formatInterpreter)
+include_directories(${PROJECT_SOURCE_DIR}/src/griddyn)
+include_directories(${PROJECT_SOURCE_DIR}/src/gridDynFileInput)
+include_directories(${PROJECT_SOURCE_DIR}/src/utilities)
+include_directories(${PROJECT_SOURCE_DIR}/src/coupling)
+include_directories(${PROJECT_SOURCE_DIR}/src/gridDynCombined)
 
+target_link_libraries(griddynServer gridDynCombined)
 
-target_link_libraries(griddynServer gridDynCombined )
-
-INSTALL(TARGETS griddynServer RUNTIME DESTINATION bin)
+install(TARGETS griddynServer RUNTIME DESTINATION bin)

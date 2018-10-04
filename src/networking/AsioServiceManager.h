@@ -44,7 +44,7 @@ class AsioServiceManager
     std::mutex runningLoopLock;  // lock protecting the nullwork object the return future
 
     std::future<void> loopRet;
-    AsioServiceManager (const std::string &contextName);
+    AsioServiceManager (const std::string &serviceName);
 
     /** servicing helper class to manage lifetimes of a service loop*/
     class servicer

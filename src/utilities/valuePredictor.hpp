@@ -42,11 +42,11 @@ class valuePredictor
     // default copy and copy constructors
     valuePredictor (const valuePredictor &ref) = default;  //!< copy constructor does the default thing
     /** move constructor*/
-	valuePredictor (valuePredictor &&ref) noexcept = default;
+	valuePredictor (valuePredictor &&ref) = default;
 	/** copy operator*/
     valuePredictor &operator= (const valuePredictor &ref) = default;
 	/** move operator*/
-    valuePredictor &operator= (valuePredictor &&ref) noexcept = default;
+    valuePredictor &operator= (valuePredictor &&ref) = default;
     /** update the known values
      *@details sets the known values and computes the ramp rate
      *The values input should correspond to the reduction in values so 0.0 for no saturation

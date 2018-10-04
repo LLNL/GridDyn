@@ -1101,12 +1101,12 @@ void saveJacobian (gridDynSimulation *gds, const std::string &fileName, const so
 
 void saveContingencyOutput (const std::vector<std::shared_ptr<contingency>> &contList, const std::string &fileName)
 {
-    if (contList.empty())
+    if (contList.empty ())
     {
         return;
     }
     std::ofstream bFile (fileName.c_str (), std::ios::out);
-    while (!contList[0]->isFinished())
+    while (!contList[0]->isFinished ())
     {
         contList[0]->wait ();
     }

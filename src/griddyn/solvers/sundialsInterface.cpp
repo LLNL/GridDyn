@@ -138,10 +138,9 @@ void sundialsInterface::allocate (count_t stateCount, count_t /*numRoots*/)
         return;
     }
 
-    // where is flags coming from?
     bool prev_omp = use_omp;
     _unused (prev_omp);  // looks unused if OPENMP is not available
-    use_omp = flags[use_omp];
+    use_omp = flags[use_omp_flag];
     flags.reset (initialized_flag);
     if (state != nullptr)
     {
@@ -245,14 +244,14 @@ double sundialsInterface::get (const std::string &param) const
     return SolverInterface::get (param);
 }
 
-void sundialsInterface::KLUReInit (sparse_reinit_modes reinitMode)
+void sundialsInterface::KLUReInit (sparse_reinit_modes sparseReInitModes)
 {
 #ifdef KLU_ENABLE
     if (flags[dense_flag])
     {
         return;
     }
-    switch (reinitMode)
+    switch (sparseReInitModes)
     {
     case sparse_reinit_modes::refactor:
     {

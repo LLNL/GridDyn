@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -13,9 +13,8 @@
 #ifndef AGCONTROL_H_
 #define AGCONTROL_H_
 
-
-#include "griddyn/gridSubModel.h"
 #include "core/coreOwningPtr.hpp"
+#include "griddyn/gridSubModel.h"
 
 namespace griddyn
 {
@@ -28,76 +27,73 @@ namespace blocks
 class pidBlock;
 class delayBlock;
 class deadbandBlock;
-}
+}  // namespace blocks
 
 class Communicator;
 class AGControl : public gridSubModel
 {
-public:
-  enum agcType
-  {
-    basicAGC,
-    batteryAGC,
-    battDR,
-  };
-protected:
-  double KI = 0.005;
-  double KP = 1.0;
-  double beta = 8.0;
-  double deadband = 20;
+  public:
+    enum agcType
+    {
+        basicAGC,
+        batteryAGC,
+        battDR,
+    };
 
-  double Tf = 8.0;
-  double Tr = 15;
-  double ACE = 0;
-  double fACE = 0;
-  double freg = 0;
-  double reg = 0;
-  double regUpAvailable = 0;
-  double regDownAvailable = 0;
+  protected:
+    double KI = 0.005;
+    double KP = 1.0;
+    double beta = 8.0;
+    double deadband = 20;
 
-  coreOwningPtr<blocks::pidBlock> pid;
-  coreOwningPtr<blocks::delayBlock> filt1;
-  coreOwningPtr<blocks::delayBlock> filt2;
-  coreOwningPtr<blocks::deadbandBlock> db;
+    double Tf = 8.0;
+    double Tr = 15;
+    double ACE = 0;
+    double fACE = 0;
+    double freg = 0;
+    double reg = 0;
+    double regUpAvailable = 0;
+    double regDownAvailable = 0;
 
-  count_t schedCount = 0;
+    coreOwningPtr<blocks::pidBlock> pid;
+    coreOwningPtr<blocks::delayBlock> filt1;
+    coreOwningPtr<blocks::delayBlock> filt2;
+    coreOwningPtr<blocks::deadbandBlock> db;
 
-  std::vector<schedulerReg *> schedList;
-  std::vector<double> upRat;
-  std::vector<double> downRat;
-  std::shared_ptr<Communicator> comms;
-public:
-  AGControl (const std::string &objName = "AGC_#");
-  virtual coreObject * clone (coreObject *obj = nullptr) const override;
-  virtual ~AGControl ();
+    count_t schedCount = 0;
 
-  virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
+    std::vector<schedulerReg *> schedList;
+    std::vector<double> upRat;
+    std::vector<double> downRat;
+    std::shared_ptr<Communicator> comms;
 
+  public:
+    AGControl (const std::string &objName = "AGC_#");
+    virtual coreObject *clone (coreObject *obj = nullptr) const override;
+    virtual ~AGControl ();
 
-  virtual void updateA (coreTime time) override;
+    virtual void
+    dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
-  virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
+    virtual void updateA (coreTime time) override;
 
-  virtual double getOutput(const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
- 
-  virtual double getOutput(index_t /*num*/ = 0) const override;
-  virtual void add (coreObject *obj) override;
-  virtual void add (schedulerReg *sched);
-  virtual void remove (coreObject *obj) override;
-  virtual void set (const std::string &param,  const std::string &val) override;
-  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 
-  double getACE ()
-  {
-    return ACE;
-  }
-  double getfACE ()
-  {
-    return fACE;
-  }
+    virtual double
+    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
 
-  virtual void regChange ();
+    virtual double getOutput (index_t /*num*/ = 0) const override;
+    virtual void add (coreObject *obj) override;
+    virtual void add (schedulerReg *sched);
+    virtual void remove (coreObject *obj) override;
+    virtual void set (const std::string &param, const std::string &val) override;
+    virtual void
+    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
 
+    double getACE () { return ACE; }
+    double getfACE () { return fACE; }
+
+    virtual void regChange ();
 };
 
 /*
@@ -139,5 +135,5 @@ protected:
 };
 
 */
-}//namespace griddyn
+}  // namespace griddyn
 #endif

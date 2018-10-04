@@ -5,7 +5,7 @@ cache:
   ccache: true
   directories:
     - dependencies
-    - build/libs
+    #- build/libs # reenable this when the minizip pr is merged
 
 before_cache:
   - ${TRAVIS_BUILD_DIR}/scripts/cleanup-cmake.sh
@@ -196,6 +196,7 @@ branches:
     - gh-pages
 
 before_install:
+  - 
   - eval "${MATRIX_EVAL}"
   - $CXX --version
 

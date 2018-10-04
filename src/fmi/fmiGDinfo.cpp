@@ -77,7 +77,7 @@ using namespace griddyn;
 class fmiPlugin : public gridDynPlugInApi
 {
     static std::vector<std::shared_ptr<objectFactory>> fmiFactories;
-    fmiPlugin (){};
+    fmiPlugin () = default;
 
   public:
     std::string name () const override { return "fmi"; }

@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -8,7 +8,7 @@
  * All rights reserved.
  * For details, see the LICENSE file.
  * LLNS Copyright End
-*/
+ */
 
 #ifndef GRABBER_INTERPRETER_H_
 #define GRABBER_INTERPRETER_H_
@@ -28,7 +28,7 @@ const std::string mdiv1String = "*/^";
 const std::string mdiv2String = "*%^";
 const std::string psubString = "+-";
 
-bool isOperatorOutsideBlocks(const std::vector<std::pair<size_t, size_t>> &blocks, size_t loc);
+bool isOperatorOutsideBlocks (const std::vector<std::pair<size_t, size_t>> &blocks, size_t loc);
 template <class baseX, class opX, class funcX>
 class grabberInterpreter
 {
@@ -53,98 +53,94 @@ class grabberInterpreter
         const std::string &mdivstr = (command.find_last_of ('?') == std::string::npos) ? mdiv1String : mdiv2String;
         std::unique_ptr<baseX> ggb = nullptr;
 
-		std::vector<std::pair<size_t, size_t>> outer_chunks;
+        std::vector<std::pair<size_t, size_t>> outer_chunks;
         // check for functions
-		
+
         size_t endParenthesisLocation = std::string::npos;
         size_t firstParenthesisLocation = command.find_first_of ('(', 0);
-		while (endParenthesisLocation != command.length())
-		{
-			if (firstParenthesisLocation != std::string::npos)
-			{
-				endParenthesisLocation = pChunckEnd(command, firstParenthesisLocation + 1);
-				if (endParenthesisLocation == std::string::npos)
-				{
-					endParenthesisLocation = command.length();
-				}
-			}
-			outer_chunks.emplace_back(firstParenthesisLocation, endParenthesisLocation);
-			if (endParenthesisLocation < command.length())
-			{
-				firstParenthesisLocation = command.find_first_of('(', endParenthesisLocation + 1);
-				endParenthesisLocation = std::string::npos;
-			}
-			else
-			{
-				break;
-			}
-			
-		}
-      
-        
-        if ((outer_chunks[0].first== 0) && (outer_chunks[0].second== command.length () - 1))
+        while (endParenthesisLocation != command.length ())
         {
-            return interpretGrabberBlock (command.substr (1, outer_chunks[0].second - 1), obj);
-        }
-		size_t operatorLocation;
-		operatorLocation = command.find_first_of(psubString, 0);
-		while (operatorLocation != std::string::npos)
-		{
-			if (isOperatorOutsideBlocks(outer_chunks, operatorLocation))
-			{
-				return addSubGrabberBlocks(command, obj, operatorLocation);
-			}
-			operatorLocation = command.find_first_of(psubString, operatorLocation+1);
-		}
-       
-		operatorLocation = command.find_first_of(mdivstr, 0);
-		while (operatorLocation != std::string::npos)
-		{
-			if (isOperatorOutsideBlocks(outer_chunks, operatorLocation))
-			{
-				return multDivGrabberBlocks(command, obj, operatorLocation);
-			}
-			operatorLocation = command.find_first_of(mdivstr, operatorLocation + 1);
-		}
-       
-            if (outer_chunks[0].first != std::string::npos)
+            if (firstParenthesisLocation != std::string::npos)
             {
-                std::string cmdBlock = command.substr (0, outer_chunks[0].first);
-                if (isFunctionName (cmdBlock))
+                endParenthesisLocation = pChunckEnd (command, firstParenthesisLocation + 1);
+                if (endParenthesisLocation == std::string::npos)
                 {
-                    std::string fcallstr =
-                      stringOps::trim (command.substr (outer_chunks[0].first + 1,
-						  outer_chunks[0].second - outer_chunks[0].first - 1));
-
-					auto gstr = stringOps::splitlineBracket(fcallstr);
-					if (gstr.size() == 1)
-					{
-						std::unique_ptr<baseX> ggbA = interpretGrabberBlock(fcallstr, obj);
-						if (ggbA)
-						{
-							ggb = std::make_unique<funcX>(std::move(ggbA), cmdBlock);
-						}
-					}
-					else if (gstr.size() == 2)
-					{
-						std::unique_ptr<baseX> ggbA= interpretGrabberBlock(gstr[0], obj);
-						std::unique_ptr<baseX> ggbB = interpretGrabberBlock(gstr[1], obj);
-						if ((ggbA) && (ggbB))
-						{
-							ggb = std::make_unique<opX>(std::move(ggbA), std::move(ggbB), cmdBlock);
-						}
-					}
-                   
+                    endParenthesisLocation = command.length ();
                 }
-                else  // not a function call so must be units description
-                {
-                    ggb = singleBlockInterpreter (command, obj);
-                }
+            }
+            outer_chunks.emplace_back (firstParenthesisLocation, endParenthesisLocation);
+            if (endParenthesisLocation < command.length ())
+            {
+                firstParenthesisLocation = command.find_first_of ('(', endParenthesisLocation + 1);
+                endParenthesisLocation = std::string::npos;
             }
             else
             {
+                break;
+            }
+        }
+
+        if ((outer_chunks[0].first == 0) && (outer_chunks[0].second == command.length () - 1))
+        {
+            return interpretGrabberBlock (command.substr (1, outer_chunks[0].second - 1), obj);
+        }
+        size_t operatorLocation;
+        operatorLocation = command.find_first_of (psubString, 0);
+        while (operatorLocation != std::string::npos)
+        {
+            if (isOperatorOutsideBlocks (outer_chunks, operatorLocation))
+            {
+                return addSubGrabberBlocks (command, obj, operatorLocation);
+            }
+            operatorLocation = command.find_first_of (psubString, operatorLocation + 1);
+        }
+
+        operatorLocation = command.find_first_of (mdivstr, 0);
+        while (operatorLocation != std::string::npos)
+        {
+            if (isOperatorOutsideBlocks (outer_chunks, operatorLocation))
+            {
+                return multDivGrabberBlocks (command, obj, operatorLocation);
+            }
+            operatorLocation = command.find_first_of (mdivstr, operatorLocation + 1);
+        }
+
+        if (outer_chunks[0].first != std::string::npos)
+        {
+            std::string cmdBlock = command.substr (0, outer_chunks[0].first);
+            if (isFunctionName (cmdBlock))
+            {
+                std::string fcallstr = stringOps::trim (
+                  command.substr (outer_chunks[0].first + 1, outer_chunks[0].second - outer_chunks[0].first - 1));
+
+                auto gstr = stringOps::splitlineBracket (fcallstr);
+                if (gstr.size () == 1)
+                {
+                    std::unique_ptr<baseX> ggbA = interpretGrabberBlock (fcallstr, obj);
+                    if (ggbA)
+                    {
+                        ggb = std::make_unique<funcX> (std::move (ggbA), cmdBlock);
+                    }
+                }
+                else if (gstr.size () == 2)
+                {
+                    std::unique_ptr<baseX> ggbA = interpretGrabberBlock (gstr[0], obj);
+                    std::unique_ptr<baseX> ggbB = interpretGrabberBlock (gstr[1], obj);
+                    if ((ggbA) && (ggbB))
+                    {
+                        ggb = std::make_unique<opX> (std::move (ggbA), std::move (ggbB), cmdBlock);
+                    }
+                }
+            }
+            else  // not a function call so must be units description
+            {
                 ggb = singleBlockInterpreter (command, obj);
             }
+        }
+        else
+        {
+            ggb = singleBlockInterpreter (command, obj);
+        }
 
         return ggb;
     }

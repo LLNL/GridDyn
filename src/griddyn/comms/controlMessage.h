@@ -67,7 +67,7 @@ class controlMessagePayload : public CommPayload
     @param[in] val the value associated with the field
     @param[in] time the time for a schedule
     */
-    controlMessagePayload ( const std::string &fld, double val, coreTime time)
+    controlMessagePayload (const std::string &fld, double val, coreTime time)
         : m_field (fld), m_value (val), m_time (time)
     {
     }
@@ -80,14 +80,14 @@ class controlMessagePayload : public CommPayload
     template <class Archive>
     void serialize (Archive &ar)
     {
-        ar(cereal::base_class<CommPayload>(this));
-        ar(m_actionID, m_field, m_units, m_value, m_time);
-        ar(multiFields, multiValues, multiUnits);
+        ar (cereal::base_class<CommPayload> (this));
+        ar (m_actionID, m_field, m_units, m_value, m_time);
+        ar (multiFields, multiValues, multiUnits);
     }
 };
 
 }  // namespace comms
 }  // namespace griddyn
 
-CEREAL_REGISTER_TYPE(griddyn::comms::controlMessagePayload)
+CEREAL_REGISTER_TYPE (griddyn::comms::controlMessagePayload)
 #endif

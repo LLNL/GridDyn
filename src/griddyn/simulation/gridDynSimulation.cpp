@@ -29,6 +29,7 @@
 #include "utilities/stringOps.h"
 #include <cassert>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <queue>
 
@@ -1443,9 +1444,9 @@ int gridDynSimulation::countMpiObjects (bool printInfo) const
     return gridlabdObjects;
 }
 
-void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t numberNonZeros)
+void gridDynSimulation::setMaxNonZeros (const solverMode &sMode, count_t nonZeros)
 {
-    getSolverInterface (sMode)->setMaxNonZeros (numberNonZeros);
+    getSolverInterface (sMode)->setMaxNonZeros (nonZeros);
 }
 
 std::shared_ptr<SolverInterface> gridDynSimulation::getSolverInterface (const solverMode &sMode)

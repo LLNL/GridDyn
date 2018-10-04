@@ -85,17 +85,6 @@ void gridGrabber::updateField (const std::string &fld)
     }
 
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
-    else
-    {
-        if (!customDesc)
-        {
-            desc = "";
-        }
-    }
 }
 
 const std::string &gridGrabber::getDesc () const
@@ -195,24 +184,12 @@ void gridGrabber::updateObject (coreObject *obj, object_update_mode mode)
                 throw (objectUpdateFailException ());
             }
         }
-        if (cobj != nullptr)
-        {
-            makeDescription ();
-        }
     }
     else
     {
         cobj = obj;
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
-    else if (!customDesc)
-    {
-        desc = "";
-    }
 }
 
 void gridGrabber::makeDescription () const
@@ -355,6 +332,7 @@ void customGrabber::setGrabberFunction (std::function<void(coreObject *, std::ve
 }
 
 bool customGrabber::checkIfLoaded () { return ((fptr) || (fptrV)); }
+
 functionGrabber::functionGrabber (std::shared_ptr<gridGrabber> ggb, std::string func) : bgrabber (std::move (ggb))
 {
     function_name = std::move (func);
@@ -394,10 +372,6 @@ void functionGrabber::updateField (const std::string &fld)
         vectorGrab = false;
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
 }
 
 void functionGrabber::getDesc (std::vector<std::string> &desc_list) const
@@ -486,13 +460,10 @@ void functionGrabber::updateObject (coreObject *obj, object_update_mode mode)
         bgrabber->updateObject (obj, mode);
     }
     loaded = checkIfLoaded ();
-    if (loaded)
-    {
-        makeDescription ();
-    }
 }
 
 bool functionGrabber::checkIfLoaded () { return (bgrabber->loaded); }
+
 coreObject *functionGrabber::getObject () const
 {
     if (bgrabber)
@@ -534,10 +505,6 @@ opGrabber::opGrabber (std::shared_ptr<gridGrabber> ggb1, std::shared_ptr<gridGra
         vectorGrab = false;
     }
     loaded = opGrabber::checkIfLoaded ();
-    if (loaded)
-    {
-        opGrabber::makeDescription ();
-    }
 }
 
 void opGrabber::updateField (const std::string &fld)
@@ -562,6 +529,7 @@ bool opGrabber::checkIfLoaded ()
 {
     return (((bgrabber1) && (bgrabber1->loaded)) && ((bgrabber2) && (bgrabber2->loaded)));
 }
+
 void opGrabber::getDesc (stringVec &desc_list) const
 {
     if (vectorGrab)

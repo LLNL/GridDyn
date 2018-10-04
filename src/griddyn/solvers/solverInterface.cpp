@@ -523,13 +523,13 @@ void SolverInterface::addMaskElements (const std::vector<index_t> &newMsk)
     }
 }
 
-void SolverInterface::printStates (bool stateNames)
+void SolverInterface::printStates (bool getNames)
 {
     auto *state = state_data ();
     auto *dstate = deriv_data ();
     auto *type = type_data ();
     stringVec stName;
-    if (stateNames)
+    if (getNames)
     {
         m_gds->getStateName (stName, mode);
     }
@@ -539,7 +539,7 @@ void SolverInterface::printStates (bool stateNames)
         {
             std::cout << ((type[ii] == 1) ? 'D' : 'A') << '-';
         }
-        if (stateNames)
+        if (getNames)
         {
             std::cout << '[' << ii << "]:" << stName[ii] << '=';
         }

@@ -57,7 +57,8 @@ coreObject *GovernorHydro::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorHydro::~GovernorHydro () {}
+GovernorHydro::~GovernorHydro () = default;
+
 // initial conditions
 void GovernorHydro::dynObjectInitializeB (const IOdata & /*inputs*/,
                                           const IOdata &desiredOutput,

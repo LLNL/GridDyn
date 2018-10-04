@@ -50,7 +50,8 @@ coreObject *GovernorTgov1::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorTgov1::~GovernorTgov1 () {}
+GovernorTgov1::~GovernorTgov1 () = default;
+
 // initial conditions
 void GovernorTgov1::dynObjectInitializeB (const IOdata & /*inputs*/, const IOdata &desiredOutput, IOdata &fieldSet)
 {

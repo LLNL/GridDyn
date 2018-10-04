@@ -9,9 +9,8 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+
 #pragma once
-// headers
-//#include "gridDynSimulation.h"
 
 #include "core/coreObject.h"
 #include "core/helperObject.h"
@@ -127,7 +126,8 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     /** update the target and field of an event*/
     void loadField (coreObject *searchObj, const std::string &newField);
     /** run a check to see if the event can be armed*/
-    virtual bool checkArmed ();
+    // Note: please remove calls to checkArmed in the constructor before making this virtual
+    bool checkArmed ();
 };
 
 /** construct a simple parameter change event

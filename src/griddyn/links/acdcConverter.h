@@ -22,7 +22,7 @@ namespace blocks
 {
 class pidBlock;
 class delayBlock;
-}
+}  // namespace blocks
 
 namespace links
 {
@@ -56,13 +56,13 @@ class acdcConverter : public Link
     double angle = 0.0;  //!< converter firing or extinction angle
     parameter_t Idcmax = kBigNum;  //!<[puA] max reference current
     parameter_t Idcmin = -kBigNum;  //!<[puA] min reference current
-    parameter_t mp_Ki = 0.03;  //!<integral gain angle control
-    parameter_t mp_Kp = 0.97;  //!<proportional gain angle control
+    parameter_t mp_Ki = 0.03;  //!< integral gain angle control
+    parameter_t mp_Kp = 0.97;  //!< proportional gain angle control
     double Idc = 0.0;  //!< storage for dc current
     mode_t type = mode_t::bidirectional;  //!< converter type
     parameter_t vTarget = 1.0;  //!< [puV] ac voltage target
-    parameter_t mp_controlKi = -0.03;  //!<integral gain angle control
-    parameter_t mp_controlKp = -0.97;  //!<proportional gain angle control
+    parameter_t mp_controlKi = -0.03;  //!< integral gain angle control
+    parameter_t mp_controlKp = -0.97;  //!< proportional gain angle control
     parameter_t tD = 0.01;  //!< controller time delay
     parameter_t baseTap = 1.0;  //!< base l evel tap of the converter
     double dirMult = 1.0;
@@ -70,9 +70,9 @@ class acdcConverter : public Link
     parameter_t maxAngle = kPI / 2.0;  //!< [rad]  maximum tap angle
     control_mode_t control_mode = control_mode_t::voltage;
 
-    coreOwningPtr<blocks::pidBlock> firingAngleControl;  //!<block controlling firing angle
-    coreOwningPtr<blocks::pidBlock> powerLevelControl;  //!<block controlling power
-    coreOwningPtr<blocks::delayBlock> controlDelay;  //!<delayblock for control of tap
+    coreOwningPtr<blocks::pidBlock> firingAngleControl;  //!< block controlling firing angle
+    coreOwningPtr<blocks::pidBlock> powerLevelControl;  //!< block controlling power
+    coreOwningPtr<blocks::delayBlock> controlDelay;  //!< delayblock for control of tap
 
   public:
     explicit acdcConverter (const std::string &objName = "acdcConveter_$");
@@ -107,7 +107,7 @@ class acdcConverter : public Link
     // dynInitializeB dynamics
     // virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags);
 
-	using Link::ioPartialDerivatives;
+    using Link::ioPartialDerivatives;
     virtual void ioPartialDerivatives (id_type_t busId,
                                        const stateData &sD,
                                        matrixData<double> &md,

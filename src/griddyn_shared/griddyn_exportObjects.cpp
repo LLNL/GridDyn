@@ -55,11 +55,11 @@ gridComponent *getComponentPointer (gridDynObject obj)
     return nullptr;
 }
 
-const gridComponent *getConstComponentPointer (const gridDynObject obj)
+const gridComponent *getConstComponentPointer (gridDynObject obj)
 {
     if (obj != nullptr)
     {
-        auto cptr = reinterpret_cast<coreOwningPtr<const gridComponent> *> (obj);
+        auto cptr = reinterpret_cast<coreOwningPtr<gridComponent>const *> (obj);
         return cptr->get ();
     }
     return nullptr;
@@ -81,7 +81,7 @@ gridDynObject gridDynObject_create (const char *componentType, const char *objec
     return ptr;
 }
 
-gridDynObject gridDynObject_clone (const gridDynObject obj)
+gridDynObject gridDynObject_clone (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -235,7 +235,7 @@ griddyn_status gridDynObject_setFlag (gridDynObject obj, const char *flag, int v
     }
 }
 
-griddyn_status gridDynObject_getString (const gridDynObject obj, const char *parameter, char *value, int N)
+griddyn_status gridDynObject_getString (gridDynObject obj, const char *parameter, char *value, int N)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -248,7 +248,7 @@ griddyn_status gridDynObject_getString (const gridDynObject obj, const char *par
     return static_cast<int> (s.size ());
 }
 
-griddyn_status gridDynObject_getValue (const gridDynObject obj, const char *parameter, double *result)
+griddyn_status gridDynObject_getValue (gridDynObject obj, const char *parameter, double *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -272,7 +272,7 @@ griddyn_status gridDynObject_getValue (const gridDynObject obj, const char *para
 }
 
 griddyn_status
-gridDynObject_getValueUnits (const gridDynObject obj, const char *parameter, const char *units, double *result)
+gridDynObject_getValueUnits (gridDynObject obj, const char *parameter, const char *units, double *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -297,7 +297,7 @@ gridDynObject_getValueUnits (const gridDynObject obj, const char *parameter, con
     }
 }
 
-griddyn_status gridDynObject_getFlag (const gridDynObject obj, const char *flag, int *result)
+griddyn_status gridDynObject_getFlag (gridDynObject obj, const char *flag, int *result)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -317,7 +317,7 @@ griddyn_status gridDynObject_getFlag (const gridDynObject obj, const char *flag,
     }
 }
 
-gridDynObject gridDynObject_find (const gridDynObject obj, const char *objectToFind)
+gridDynObject gridDynObject_find (gridDynObject obj, const char *objectToFind)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -338,7 +338,7 @@ gridDynObject gridDynObject_find (const gridDynObject obj, const char *objectToF
     return creategridDynObject (compNew);
 }
 
-gridDynObject gridDynObject_getSubObject (const gridDynObject obj, const char *componentType, int N)
+gridDynObject gridDynObject_getSubObject (gridDynObject obj, const char *componentType, int N)
 {
     auto comp = getConstComponentPointer (obj);
     if (comp == nullptr)
@@ -359,7 +359,7 @@ gridDynObject gridDynObject_getSubObject (const gridDynObject obj, const char *c
     return creategridDynObject (compNew);
 }
 
-gridDynObject gridDynObject_findByUserId (const gridDynObject obj, const char *componentType, int ID)
+gridDynObject gridDynObject_findByUserId (gridDynObject obj, const char *componentType, int ID)
 {
     auto comp = getConstComponentPointer (obj);
 
@@ -380,7 +380,7 @@ gridDynObject gridDynObject_findByUserId (const gridDynObject obj, const char *c
     return creategridDynObject (compNew);
 }
 
-gridDynObject gridDynObject_getParent (const gridDynObject obj)
+gridDynObject gridDynObject_getParent (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
     if (comp == nullptr)
@@ -413,7 +413,7 @@ static const char *sensor_str = "sensor";
 static const char *submodel_str = "submodel";
 static const char *unknown_str = "unknown";
 
-const char *gridDynObject_getType (const gridDynObject obj)
+const char *gridDynObject_getType (gridDynObject obj)
 {
     auto comp = getConstComponentPointer (obj);
 

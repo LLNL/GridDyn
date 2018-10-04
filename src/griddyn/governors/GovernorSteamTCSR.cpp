@@ -64,7 +64,8 @@ coreObject *GovernorSteamTCSR::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorSteamTCSR::~GovernorSteamTCSR () {}
+GovernorSteamTCSR::~GovernorSteamTCSR () = default;
+
 // initial conditions
 void GovernorSteamTCSR::dynObjectInitializeB (const IOdata &inputs,
                                               const IOdata &desiredOutput,

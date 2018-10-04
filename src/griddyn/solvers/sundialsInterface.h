@@ -10,14 +10,13 @@
  * LLNS Copyright End
  */
 
-#ifndef _SUNDIALS_SOLVER_INTERFACE_H_
-#define _SUNDIALS_SOLVER_INTERFACE_H_
+#pragma once
 
 #include "solverInterface.h"
 #include "utilities/matrixDataSparse.hpp"
 // SUNDIALS libraries
+#include "griddyn/griddyn-config.h"  // Needed for SUNDIALS_OPENMP define
 #include "nvector/nvector_serial.h"
-#include "griddyn/griddyn-config.h" // Needed for SUNDIALS_OPENMP define
 #ifdef SUNDIALS_OPENMP
 #include "nvector/nvector_openmp.h"
 #include <omp.h>
@@ -32,7 +31,7 @@
 
 #include <sundials/sundials_linearsolver.h>
 #include <sundials/sundials_types.h>
-#include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix      */
+#include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix */
 
 #define ONE RCONST (1.0)
 #define ZERO RCONST (0.0)
@@ -123,7 +122,7 @@ class sundialsInterface : public SolverInterface
                             N_Vector tmp2);
 
   protected:
-    void KLUReInit (sparse_reinit_modes mode);
+    void KLUReInit (sparse_reinit_modes sparseReInitMode);
 };
 
 int sundialsJac (realtype time,
@@ -137,5 +136,3 @@ int sundialsJac (realtype time,
 
 }  // namespace solvers
 }  // namespace griddyn
-
-#endif

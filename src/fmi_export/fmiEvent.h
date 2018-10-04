@@ -28,6 +28,7 @@ public:
         string_parameter, //!< indicator that the event is a string parameter
 		input,	//!< indicator that the event corresponds to an input
 	};
+
 private:
 	fmiCoordinator *coord = nullptr; //!< pointer the coordinator
 	fmiEventType eventType = fmiEventType::input;	//!< the type of the event
@@ -53,10 +54,10 @@ public:
 	
 	virtual bool setTarget(coreObject *gdo, const std::string &var = "") override;
 
-    
 	virtual void updateObject(coreObject *gco, object_update_mode mode = object_update_mode::direct) override;
 	virtual coreObject *getOwner() const override;
 	friend class fmiCoordinator;
+
 private:
 	/** function to find the fmi coordinator so we can connect to that*/
 	void findCoordinator();

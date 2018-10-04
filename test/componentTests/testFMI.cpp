@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load)
     auto iq = apload.get("iq");
 	auto yp = apload.get("yp");
 	auto yq = apload.get("yq");
-	
+
     BOOST_CHECK_SMALL(p, 0.0001);
     BOOST_CHECK_CLOSE(ip, 3.0, 0.0001);
     BOOST_CHECK_CLOSE(yp, 3.0, 0.0001);
@@ -218,14 +218,14 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load_xml)
     using namespace griddyn::loads;
     std::string fileName = fmi_test_directory+ "approxLoad_testfmi.xml";
 
-  
-    
+
+
     gds = griddyn::readSimXMLFile(fileName);
     BOOST_REQUIRE(gds);
     auto obj = gds->getBus(1);
     BOOST_REQUIRE(obj != nullptr);
     auto apload = dynamic_cast<approximatingLoad *>(gds->getBus(1)->getLoad(0));
-   
+
     auto ld1 = dynamic_cast<griddyn::Load *>(apload->getSubObject("subobject",0));
     ld1->set("a2", 0.0);
     ld1->set("b2", 0);
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_fmi_approx_load_xml)
     BOOST_CHECK_SMALL(iq, 0.0001);
     BOOST_CHECK_SMALL(yq, 0.0001);
 
-    
+
     ld1 = nullptr;
 }
 

@@ -8,47 +8,49 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(coreObject_headers
+set(
+    coreObject_headers
+    coreDefinitions.hpp
+    coreExceptions.h
+    coreObject.h
+    coreObjectList.h
+    coreObjectTemplates.hpp
+    coreOwningPtr.hpp
+    coreProperties.hpp
+    factoryTemplates.hpp
+    helperObject.h
+    nullObject.h
+    objectFactory.hpp
+    objectFactoryTemplates.hpp
+    objectInterpreter.h
+    objectOperatorInterface.hpp
     propertyBuffer.h
-	coreDefinitions.hpp
-	coreProperties.hpp
-	objectFactory.hpp
-	objectFactoryTemplates.hpp
-	factoryTemplates.hpp
-	coreExceptions.h
-	coreOwningPtr.hpp
-	helperObject.h
-	coreObject.h
-	nullObject.h
-	coreObjectList.h
-	coreObjectTemplates.hpp
-	objectOperatorInterface.hpp
-	objectInterpreter.h
+)
 
-    )
+set(
+    coreObject_sources
+    coreExceptions.cpp
+    coreObject.cpp
+    coreObjectList.cpp
+    helperObject.cpp
+    nullObject.cpp
+    objectFactory.cpp
+    objectInterpreter.cpp
+    propertyBuffer.cpp
+)
 
-set(coreObject_sources
-	objectFactory.cpp
-	coreObject.cpp
-	nullObject.cpp
-	coreObjectList.cpp
-	coreExceptions.cpp
-	helperObject.cpp
-	propertyBuffer.cpp
-	objectInterpreter.cpp
-	)
+add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
+set_target_properties(coreObjects PROPERTIES FOLDER libraries)
+target_link_libraries(coreObjects PUBLIC utilities)
+install(
+    TARGETS coreObjects
+    EXPORT griddyn-targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+)
 
-	add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
-	set_target_properties (coreObjects PROPERTIES FOLDER libraries)
-	target_link_libraries(coreObjects PUBLIC utilities)
-	INSTALL(TARGETS coreObjects
-		EXPORT griddyn-targets
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		COMPONENT libraries)
-
-
-INSTALL(FILES ${coreObject_headers}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/core
-  COMPONENT headers)
-
-
+install(
+    FILES ${coreObject_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/core
+    COMPONENT headers
+)

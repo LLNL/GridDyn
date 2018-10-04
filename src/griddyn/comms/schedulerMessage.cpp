@@ -85,8 +85,8 @@ void schedulerMessagePayload::from_string (uint32_t type,
         m_target.resize (dvs);
         for (size_t kk = 0; kk < newTargets.size () - 1; kk += 2)
         {
-            m_target[kk >> 1] = newTargets[kk];  // divide by 2
-            m_time[(kk >> 1) + 1] = newTargets[kk + 1];
+            m_target[kk / 2] = newTargets[kk];
+            m_time[(kk / 2) + 1] = newTargets[kk + 1];
         }
     };
     switch (type)

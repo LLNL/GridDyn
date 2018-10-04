@@ -8,12 +8,9 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
-set(gridDynMain_sources
-	gridDynMain.cpp
-	)
+set(gridDynMain_sources gridDynMain.cpp)
 
-set(gridDynMain_headers
-	)
+set(gridDynMain_headers)
 
 add_executable(gridDynMain ${gridDynMain_sources} ${gridDynMain_headers})
 
@@ -28,10 +25,21 @@ if(DIME_ENABLE)
 endif(DIME_ENABLE)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
-add_custom_command(TARGET gridDynMain POST_BUILD        # Adds a post-build event to gridDynMain
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-        "${keyfile}"      # <--this is in-file
-        $<TARGET_FILE_DIR:gridDynMain>)                 # <--this is out-file path
+    add_custom_command(
+        TARGET
+        gridDynMain
+        POST_BUILD # Adds a post-build event to gridDynMain
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E
+            copy_if_different # which executes "cmake - E copy_if_different..."
+            "${keyfile}" # <--this is in-file
+            $<TARGET_FILE_DIR:gridDynMain>
+    ) # <--this is out-file path
 endforeach(keyfile)
 
-INSTALL(TARGETS gridDynMain RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+install(
+    TARGETS gridDynMain
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT
+    RUNTIME
+)

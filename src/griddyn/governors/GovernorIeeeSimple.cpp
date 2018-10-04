@@ -52,7 +52,7 @@ coreObject *GovernorIeeeSimple::clone (coreObject *obj) const
 }
 
 // destructor
-GovernorIeeeSimple::~GovernorIeeeSimple () {}
+GovernorIeeeSimple::~GovernorIeeeSimple () = default;
 void GovernorIeeeSimple::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
 {
     Governor::dynObjectInitializeA (time0, flags);

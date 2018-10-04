@@ -80,7 +80,7 @@ gridDynSimulation_initializeFromArgs (gridDynSimReference sim, int argc, char *a
     return runner->Initialize (argc, argv, (ignoreUnrecognized != 0));
 }
 
-griddyn_status gridDynSimulation_loadfile (gridDynSimReference sim, const char *filename, const char *fileType)
+griddyn_status gridDynSimulation_loadfile (gridDynSimReference sim, const char *fileName, const char *fileType)
 {
     auto runner = reinterpret_cast<GriddynRunner *> (sim);
 
@@ -94,11 +94,11 @@ griddyn_status gridDynSimulation_loadfile (gridDynSimReference sim, const char *
         auto typestr = std::string (fileType);
         if (typestr.empty ())
         {
-            loadFile (runner->getSim ().get (), filename);
+            loadFile (runner->getSim ().get (), fileName);
         }
         else
         {
-            loadFile (runner->getSim ().get (), filename, nullptr, typestr);
+            loadFile (runner->getSim ().get (), fileName, nullptr, typestr);
         }
         return griddyn_ok;
     }

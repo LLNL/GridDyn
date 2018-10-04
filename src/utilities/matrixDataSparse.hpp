@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -221,10 +221,10 @@ class matrixDataSparse : public matrixData<ValueT>
     }
     void diagMultiply (std::vector<ValueT> diag)
     {
-		for (auto &dataElement : data_)
-		{
-			dataElement.data *= diag[dataElement.col];
-		}
+        for (auto &dataElement : data_)
+        {
+            dataElement.data *= diag[dataElement.col];
+        }
     }
 
     std::vector<ValueT> vectorMult (std::vector<ValueT> V);

@@ -61,6 +61,8 @@
 
 #include "zip.h"
 
+#include "argv.h"
+
 #ifdef _WIN32
         #define USEWIN32IOAPI
         #include "iowin32.h"
@@ -75,7 +77,7 @@
 static int minizip_printf( const char * format, ... )
 {
 	return 1;
-} 
+}
 
 #ifdef _WIN32
 uLong filetime(f, tmzip, dt)
@@ -253,9 +255,9 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-int minizip(argc,argv)
+int minizip_main(argc,argv)
     int argc;
-    char *argv[];
+    char **argv;
 {
     int i;
     int opt_overwrite=0;
@@ -527,4 +529,26 @@ int minizip(argc,argv)
 
     free(buf);
     return 0;
+}
+
+
+/*
+ * Make minizip const-correct
+ *
+ * When running minizip from the command line, the os will copy the command line
+ * arguments. Here, we don't have that, so copy the arguments manually.
+ */
+int minizip(argc,argv)
+    int argc;
+    const char **argv;
+{
+    int i;
+    int rv;
+    char **new_argv;
+
+    new_argv = copy_argv(argc, argv);
+    rv = minizip_main(argc, new_argv);
+    free_argv(argc, new_argv);
+
+    return rv;
 }

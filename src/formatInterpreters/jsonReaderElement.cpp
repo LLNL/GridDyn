@@ -21,8 +21,7 @@ static const std::string nullStr;
 
 bool isElement (const Json_gd::Value &testValue);
 bool isAttribute (const Json_gd::Value &testValue);
-// this is not using default for gcc 4.9 compatibility
-jsonReaderElement::jsonReaderElement () noexcept {}
+jsonReaderElement::jsonReaderElement () = default;
 jsonReaderElement::jsonReaderElement (const std::string &fileName) { jsonReaderElement::loadFile (fileName); }
 void jsonReaderElement::clear ()
 {

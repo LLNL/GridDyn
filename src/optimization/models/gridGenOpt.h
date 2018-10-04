@@ -10,8 +10,7 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDGENOPT_H_
-#define GRIDGENOPT_H_
+#pragma once
 
 // headers
 #include "../gridOptObjects.h"
@@ -64,7 +63,7 @@ class gridGenOpt : public gridOptObject
     virtual void getTols (double tols[], const optimMode &oMode) override;
     virtual void getVariableType (double sdata[], const optimMode &oMode) override;
 
-    virtual void valueBounds (double time, double upLimit[], double lowerLimit[], const optimMode &oMode) override;
+    virtual void valueBounds (double time, double upperLimit[], double lowerLimit[], const optimMode &oMode) override;
 
     virtual void linearObj (const optimData &oD, vectData<double> &linObj, const optimMode &oMode) override;
     virtual void quadraticObj (const optimData &oD,
@@ -102,4 +101,3 @@ class gridGenOpt : public gridOptObject
 };
 
 }  // namespace griddyn
-#endif

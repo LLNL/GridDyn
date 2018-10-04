@@ -21,6 +21,7 @@
 #include "coupling/GhostSwingBusManager.h"
 #include "fileInput/fileInput.h"
 #include "griddyn/measurement/Recorder.h"
+#include "griddyn/events/Event.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
 #include "utilities/workQueue.h"
@@ -330,12 +331,26 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
         return gds->getErrorCode ();
     }
 
+    if (vm.count ("event") > 0)
+    {
+        auto eventList = vm["event"].as<stringVec> ();
+        for (auto &eS : eventList)
+        {
+            EventInfo gdEI;
+            gdEI.loadString (eS, gds->getRoot ());
+            std::shared_ptr<Event> gdE = make_event (gdEI, gds->getRoot ());
+            gds->add (std::move (gdE));
+        }
+    }
+
     int areas = gds->getInt ("totalareacount");
     int buses = gds->getInt ("totalbuscount");
     int links = gds->getInt ("totallinkcount");
+    int relays = gds->getInt ("totalrelaycount");
     int gens = gds->getInt ("gencount");
-    std::cout << "area count =" << areas << " buses=" << buses << " links= " << links << " gens= " << gens << '\n';
-
+    int loads = gds->getInt ("loadcount");
+    std::cout << "areas=" << areas << " buses=" << buses << " links=" << links << " relays=" << relays << " gens=" << gens << " loads=" << loads << '\n';
+    
     // set any flags used by the system
     if (vm.count ("flags") > 0)
     {
@@ -444,6 +459,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 		("param,P", po::value<std::vector<std::string>> (),"override simulation file parameters --param ParamName=<val>")
 		("dir",po::value<std::vector<std::string>> (),"add search directory for input files")
 		("import,i", po::value<std::vector<std::string>> (), "add import files loaded after the main input file")
+		("event", po::value<std::vector<std::string>> (), "add event after all input files")
 		("powerflow_only", "set the solver to stop after the power flow solution and use some powerflow specific models")
 		("powerflow-only", "set the solver to stop after the power flow solution and use some powerflow specific models")
 		("state-output", po::value<std::string> (),"file for final output state")

@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef FMI_MESUBMODEL_H_
-#define FMI_MESUBMODEL_H_
+#pragma once
 
 #include "core/propertyBuffer.h"
+#include "../fmi_import/fmiInfo.h"
 #include "fmiSupport.h"
 #include "griddyn/gridSubModel.h"
 #include <map>
@@ -48,7 +48,7 @@ class fmiMESubModel : public gridSubModel
     std::vector<outputEstimator *>
       oEst;  //!< vector of objects used for output estimation //TODO:: Make this an actual vector of objects
     coreTime localIntegrationTime = 0.01;
-    fmuMode prevFmiState;
+    fmuMode prevFmiState = fmuMode::instantiatedMode;
     std::vector<vInfo> stateInformation;
     std::vector<vInfo> outputInformation;
     std::vector<int> inputVarIndices;
@@ -154,5 +154,3 @@ class fmiMESubModel : public gridSubModel
 
 }  // namespace fmi
 }  // namespace griddyn
-
-#endif

@@ -14,7 +14,7 @@
 
 namespace griddyn
 {
-optComponentFactory::optComponentFactory (const std::string &component) : name (component) {}
+optComponentFactory::optComponentFactory (const std::string &typeName) : name (typeName) {}
 
 optComponentFactory::~optComponentFactory () = default;
 
@@ -57,13 +57,13 @@ optFactory *optComponentFactory::getFactory (const std::string &typeName)
     return nullptr;
 }
 
-gridOptObject *optComponentFactory::makeObject (const std::string &type)
+gridOptObject *optComponentFactory::makeObject (const std::string &objType)
 {
     gridOptObject *obj;
-    auto mfind = m_factoryMap.find (type);
+    auto mfind = m_factoryMap.find (objType);
     if (mfind != m_factoryMap.end ())
     {
-        obj = m_factoryMap[type]->makeObject ();
+        obj = m_factoryMap[objType]->makeObject ();
         return obj;
     }
     return nullptr;
@@ -227,7 +227,7 @@ void coreOptObjectFactory::setDefaultType (const std::string &defType)
 void coreOptObjectFactory::prepObjects (const std::string &optType,
                                         const std::string &typeName,
                                         count_t numObjects,
-                                        coreObject *obj)
+                                        coreObject *baseObj)
 {
     auto mfind = m_factoryMap.find (optType);
     if (mfind != m_factoryMap.end ())
@@ -235,12 +235,12 @@ void coreOptObjectFactory::prepObjects (const std::string &optType,
         auto obfact = m_factoryMap[optType]->getFactory (typeName);
         if (obfact != nullptr)
         {
-            obfact->prepObjects (numObjects, obj);
+            obfact->prepObjects (numObjects, baseObj);
         }
     }
 }
 
-void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, coreObject *obj)
+void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t numObjects, coreObject *baseObj)
 {
     if (m_defaultType.empty ())
     {
@@ -250,7 +250,7 @@ void coreOptObjectFactory::prepObjects (const std::string &typeName, count_t num
     auto obfact = m_factoryMap[m_defaultType]->getFactory (typeName);
     if (obfact != nullptr)
     {
-        obfact->prepObjects (numObjects, obj);
+        obfact->prepObjects (numObjects, baseObj);
     }
 }
 

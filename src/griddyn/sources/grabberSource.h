@@ -22,10 +22,10 @@ namespace sources
 class grabberSource : public rampSource
 {
   private:
-	std::unique_ptr<grabberSet> gset; //!< the grabberSet to get the data
-	std::string field;  //!< the field to grab
-	std::string target; //!< the name of the target
-	parameter_t multiplier; //!< a multiplier on the grabber value
+    std::unique_ptr<grabberSet> gset;  //!< the grabberSet to get the data
+    std::string field;  //!< the field to grab
+    std::string target;  //!< the name of the target
+    parameter_t multiplier;  //!< a multiplier on the grabber value
   public:
     grabberSource (const std::string &objName = "grabbersource_#");
     ~grabberSource ();
@@ -37,13 +37,13 @@ class grabberSource : public rampSource
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
-	/** update the target field of the grabber*/
-    void updateField (const std::string &newfield);
+    /** update the target field of the grabber*/
+    void updateField (const std::string &newField);
 
-	/** update the target object of the grabber*/
+    /** update the target object of the grabber*/
     void updateTarget (const std::string &newTarget);
 
-	/** update the target object of the grabber directly*/
+    /** update the target object of the grabber directly*/
     void updateTarget (coreObject *obj);
 
     virtual void setFlag (const std::string &flag, bool val) override;
@@ -54,9 +54,9 @@ class grabberSource : public rampSource
 
     virtual IOdata getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;
     virtual double
-    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;
+    getOutput (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t outputNum = 0) const override;
 
-	virtual double getOutput (index_t outputNum = 0) const override;
+    virtual double getOutput (index_t outputNum = 0) const override;
 
     virtual double
     getDoutdt (const IOdata &inputs, const stateData &sD, const solverMode &sMode, index_t num = 0) const override;

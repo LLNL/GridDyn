@@ -36,6 +36,7 @@ endif(MSVC)
 
 include_directories(${ZLIB_LOCATION}/include)
 set(SOURCES
+  argv.c
   ioapi.c
   miniunz.c
   minizip.c
@@ -50,12 +51,16 @@ endif(WIN32)
 
 set(HEADERS
   crypt.h
-  ioapi.h  
+  ioapi.h
   miniunz.h
   minizip.h
   #mztools.h
   unzip.h
 )
+
+set(INTERNAL_HEADERS
+  argv.h
+ )
 
 if(WIN32)
     set(HEADERS ${HEADERS} iowin32.h)

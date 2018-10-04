@@ -19,8 +19,7 @@
 
 static const std::string nullStr;
 
-// this is not using default for Gcc 4.9 compatibility
-iniReaderElement::iniReaderElement () noexcept {}
+iniReaderElement::iniReaderElement () = default;
 iniReaderElement::iniReaderElement (const std::string &fileName) { iniReaderElement::loadFile (fileName); }
 void iniReaderElement::clear () { currentSection.clear (); }
 

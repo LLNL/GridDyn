@@ -22,8 +22,7 @@
 #endif
 
 #include "utilities/stringConversion.h"
-// this is not using default for gcc 4.9 compatibility
-tinyxmlReaderElement::tinyxmlReaderElement () noexcept {}
+tinyxmlReaderElement::tinyxmlReaderElement () = default;
 tinyxmlReaderElement::tinyxmlReaderElement (const std::string &fileName)
 {
     tinyxmlReaderElement::loadFile (fileName);
@@ -33,7 +32,7 @@ tinyxmlReaderElement::tinyxmlReaderElement (const ticpp::Element *ticppElement, 
 {
 }
 
-tinyxmlReaderElement::~tinyxmlReaderElement()
+tinyxmlReaderElement::~tinyxmlReaderElement ()
 {
     element = nullptr;
     parent = nullptr;

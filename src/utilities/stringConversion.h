@@ -1,5 +1,5 @@
 /*
-* LLNS Copyright Start
+ * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
@@ -12,7 +12,6 @@
 
 #ifndef STRINGCONVERSION_H_
 #define STRINGCONVERSION_H_
-
 
 #include "charMapper.h"
 #include "stringOps.h"
@@ -73,8 +72,7 @@ inline long long numConv (const std::string &V)
 template <class X>
 inline X numConvComp (const std::string &V, size_t &rem)
 {
-    return (std::is_integral<X>::value) ? X (numConvComp<long long> (V, rem)) :
-                                          X (numConvComp<double> (V, rem));
+    return (std::is_integral<X>::value) ? X (numConvComp<long long> (V, rem)) : X (numConvComp<double> (V, rem));
 }
 
 template <>
@@ -94,7 +92,6 @@ inline long double numConvComp (const std::string &V, size_t &rem)
 {
     return std::stold (V, &rem);
 }
-
 
 template <>
 inline int numConvComp (const std::string &V, size_t &rem)
@@ -121,11 +118,7 @@ inline long long numConvComp (const std::string &V, size_t &rem)
 }
 
 /** check if the first character of the string is a valid numerical value*/
-inline bool nonNumericFirstCharacter (const std::string &V)
-{
-    return ((V.empty ()) || (numCheck[V[0]] == false));
-}
-
+inline bool nonNumericFirstCharacter (const std::string &V) { return ((V.empty ()) || (numCheck[V[0]] == false)); }
 
 /** check if the first character of the string is a valid numerical value*/
 inline bool nonNumericFirstOrLastCharacter (const std::string &V)
@@ -215,6 +208,5 @@ std::vector<X> str2vector (const stringVector &tokens, const X defValue)
     }
     return av;
 }
-
 
 #endif
