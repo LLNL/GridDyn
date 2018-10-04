@@ -11,7 +11,7 @@ before_cache:
   - ${TRAVIS_BUILD_DIR}/scripts/cleanup-cmake.sh
 
 after_failure:
-  - cat /home/travis/build/LLNL/GridDyn/build/logs/suitesparse_autobuild_build.log
+  - cat /home/travis/build/LLNL/GridDyn/build/logs/sundials_autobuild_config.log
   - cat /home/travis/build/LLNL/GridDyn/build/logs/sundials_autobuild_build.log
 
 env:

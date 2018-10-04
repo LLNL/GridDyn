@@ -140,7 +140,7 @@ endif()
 
     #message(STATUS "KLU_DIR=${SuiteSparse_LIBRARY_DIR}")
 
-    if (ENABLE_MPI)
+    if (ENABLE_KLU)
         set(SUNDIALS_KLU_ENABLE "-DKLU_ENABLE=ON")
         get_target_property(SuiteSparse_DIRECT_INCLUDE_DIR SuiteSparse::klu INTERFACE_INCLUDE_DIRECTORIES)
         find_path (SUNDIALS_KLU_INCLUDE_PATH klu.h
@@ -252,7 +252,7 @@ endif()
     #message(STATUS "KLU_DIR=${SuiteSparse_LIBRARY_DIR}")
 
     message(STATUS "extra c flags ${EXTRA_C_FLAGS}")
-    if (ENABLE_MPI)
+    if (ENABLE_KLU)
         set(SUNDIALS_KLU_ENABLE "-DKLU_ENABLE=ON")
         get_target_property(SuiteSparse_DIRECT_INCLUDE_DIR SuiteSparse::klu INTERFACE_INCLUDE_DIRECTORIES)
         find_path (SUNDIALS_KLU_INCLUDE_PATH klu.h
