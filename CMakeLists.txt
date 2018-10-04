@@ -516,7 +516,6 @@ endif()
 # Find (and test) the KLU libraries
 # ------------------------------------------------------------
 if(ENABLE_KLU)
-    # TODO this is KLU_ENABLE in a couple places
     include(addKLU_targets)
 endif()
 
