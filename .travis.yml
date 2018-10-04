@@ -12,6 +12,7 @@ before_cache:
 
 after_failure:
   - cat /home/travis/build/LLNL/GridDyn/build/logs/suitesparse_autobuild_build.log
+  - cat /home/travis/build/LLNL/GridDyn/build/logs/sundials_autobuild_build.log
 
 env:
   global:
