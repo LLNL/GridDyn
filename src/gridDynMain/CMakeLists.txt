@@ -16,9 +16,10 @@ add_executable(gridDynMain ${gridDynMain_sources} ${gridDynMain_headers})
 
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
-message(STATUS "execOnly:${executable_only_components}")
+message(STATUS "execOnly:${executable_only_components}") # TODO what even are these?
 
-target_link_libraries(gridDynMain ${executable_only_components} runner)
+# TODO why wasn't fmiBuilder required before?
+target_link_libraries(gridDynMain ${executable_only_components} runner fmiBuilder)
 
 if(DIME_ENABLE)
     target_link_libraries(gridDynMain networking)

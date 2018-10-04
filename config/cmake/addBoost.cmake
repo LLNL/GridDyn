@@ -101,7 +101,9 @@ endif()
 # Minimum version of Boost required for building HELICS
 set(BOOST_MINIMUM_VERSION 1.58)
 set(Boost_USE_STATIC_LIBS   ${USE_BOOST_STATIC_LIBS})
-find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS ${BOOST_REQUIRED_LIBRARIES} REQUIRED)
+
+# Note QUIET doesn't actually work here...
+find_package(Boost ${BOOST_MINIMUM_VERSION} COMPONENTS ${BOOST_REQUIRED_LIBRARIES} QUIET REQUIRED)
 
 # Minimum version of Boost required for building test suite
 if (Boost_VERSION LESS 106100)
