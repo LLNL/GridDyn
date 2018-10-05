@@ -557,6 +557,21 @@ add_library(
     ${sublibrary_files}
 )
 
+target_include_directories(
+    griddyn
+    PUBLIC
+    # TODO INSTALL_INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
+target_include_directories(
+    griddyn
+    # target_link_libraries(this, ticpp::ticpp cereal::cereal (and maybe others))
+    # when available (why is ticpp here at all? cereal is a little more justifiable)
+    PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+)
+
 target_link_libraries(griddyn PUBLIC coreObjects)
 
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)

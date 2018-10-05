@@ -50,13 +50,14 @@ if(ENABLE_FMI)
         message(WARNING "FMI support requires BOOST 1.61 or higher, disabling it")
     else()
         add_subdirectory(fmi)
-        target_link_libraries(griddyn_optional PUBLIC INTERFACE fmiGDLibrary)
+        target_link_libraries(griddyn_optional INTERFACE fmiGDLibrary)
         set(DL_REQUIRED ON)
     endif()
 endif(ENABLE_FMI)
 
 if(ENABLE_FMI_EXPORT)
     add_subdirectory(fmi_export)
+    target_link_libraries(griddyn_optional INTERFACE fmiBuilder)
 endif(ENABLE_FMI_EXPORT)
 
 # ------------------------------------------------------------

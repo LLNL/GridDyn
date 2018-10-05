@@ -86,6 +86,15 @@ if(TCP_ENABLE)
 endif()
 
 add_library(networking STATIC ${networking_sources} ${networking_headers})
+target_include_directories(
+    networking
+    # target_link_libraries(this, jsoncpp::jsoncpp) when available
+    PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
+
+# TODO might not need this
+target_link_libraries(networking PRIVATE griddyn)
+
 set_target_properties(networking PROPERTIES FOLDER libraries)
 
 install(
@@ -95,7 +104,7 @@ install(
     COMPONENT libraries
 )
 
-if((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+if(ZMQ_ENABLE OR ZMQ_NEEDED)
     target_compile_definitions(networking PRIVATE -DZMQ_ENABLE)
     if(ZMQ_USE_STATIC_LIBRARY)
         set(ZMQ_DEPENDENCY libzmq-static)

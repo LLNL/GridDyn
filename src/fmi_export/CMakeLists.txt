@@ -77,7 +77,7 @@ target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 
 install(
-    TARGETS fmiGridDynSharedLib
+    TARGETS fmiGridDynSharedLib fmiBuilder
     EXPORT griddyn-targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

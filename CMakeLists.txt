@@ -365,6 +365,7 @@ endif()
 
 include(compiler_flags)
 
+# TODO ??
 if(VERSION_OPTION)
     if(MSVC)
         target_compile_options(griddyn_base INTERFACE ${VERSION_OPTION})
@@ -379,19 +380,32 @@ endif(VERSION_OPTION)
 # ------------------------------------------------------------
 # BOOST  find the boost libraries
 # ------------------------------------------------------------
+# TODO check if boost works (libstdc++ vs libc++)
+set(
+    BOOST_BASE_LIBRARIES
+    filesystem
+    program_options
+    system
+)
+
+set(
+    BOOST_TEST_LIBRARIES
+    unit_test_framework
+)
+
 set(
     BOOST_REQUIRED_LIBRARIES
-    program_options
-    unit_test_framework
-    filesystem
-    system
-    date_time
-    timer
-    chrono
+    ${BOOST_BASE_LIBRARIES}
+    ${BOOST_TEST_LIBRARIES}
 )
+
 include(addBoost)
+
+foreach(BOOST_LIBRARY ${BOOST_BASE_LIBRARIES})
+    target_link_libraries(griddyn_base INTERFACE Boost::${BOOST_LIBRARY})
+endforeach()
+
 set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
-target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 
 # ------------------------------------------------------------
 # add coverage target
@@ -558,7 +572,7 @@ cmake_dependent_option(
     OFF
 )
 
-if((ENABLE_ZMQ) OR (ZMQ_NEEDED))
+if(ENABLE_ZMQ OR ZMQ_NEEDED)
     include(addZeroMQ)
     if(NOT ZeroMQ_FOUND)
         message(SEND_ERROR "unable to locate zmq library")
@@ -618,20 +632,13 @@ endif()
 # ------------------------------------------------------------
 # global include directories
 # ------------------------------------------------------------
-# TODO I don't think either of these are supposed to exist
+# TODO try to get rid of these
 target_include_directories(
     griddyn_base
     INTERFACE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
         $<BUILD_INTERFACE:${AUTOBUILD_INSTALL_PATH}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
-
-target_include_directories(
-    griddyn_base SYSTEM
-    INTERFACE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
-        $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>
 )
 
 # ------------------------------------------------------------

@@ -35,7 +35,7 @@ set(
     ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
 
-# SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
+# set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
 # ------------------------------------------------------------
 # building yaml
@@ -101,6 +101,12 @@ add_library(
     ${elementReader_files}
     ${elementReader_headers}
 )
+target_include_directories(
+    # target_link_libraries(this, jsoncpp::jsoncpp) when available
+    formatInterpreter
+    PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
+
 target_link_libraries(formatInterpreter PUBLIC tinyxml utilities)
 
 set_target_properties(formatInterpreter PROPERTIES FOLDER libraries)
