@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef ELEMENT_READER_TEMPLATES_H_
-#define ELEMENT_READER_TEMPLATES_H_
 #pragma once
 
 #include "core/coreExceptions.h"
@@ -114,6 +112,13 @@ COMPONENT *locateObjectFromElement (std::shared_ptr<readerElement> &element,
         double val = interpretString (ename, ri);
         auto index = static_cast<index_t> (val);
         if ((obj = searchObject->findByUserID (component, index)) != nullptr)
+        {
+            return dynamic_cast<COMPONENT *> (obj);
+        }
+    }
+    if (component == "extra")
+    {
+        if ((obj = searchObject->find(element->getName())) != nullptr)
         {
             return dynamic_cast<COMPONENT *> (obj);
         }
@@ -283,7 +288,6 @@ COMPONENT *ElementReaderSetup (std::shared_ptr<readerElement> &element,
     {
         mobj = locateObjectFromElement<COMPONENT> (element, component, ri, searchObject);
     }
-
     mobj = buildObject (element, mobj, component, ri, searchObject);
 
     setIndex (element, mobj, ri);
@@ -313,5 +317,3 @@ COMPONENT *ElementReader (std::shared_ptr<readerElement> &element,
 }
 
 }  // namespace griddyn
-
-#endif

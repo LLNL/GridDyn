@@ -274,7 +274,7 @@ static const IgnoreListType keywords{"type",      "ref",      "number",        "
                                      "generator", "array",    "relay",         "parent",  "genmodel",
                                      "line",      "solver",   "agc",           "reserve", "reservedispatch",
                                      "dispatch",  "econ",     "configuration", "custom",  "purpose",
-                                     "event",     "collector"};
+                                     "event",     "collector","extra"};
 
 void objSetAttributes (coreObject *obj,
                        std::shared_ptr<readerElement> &element,

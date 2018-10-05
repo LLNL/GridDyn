@@ -119,4 +119,3 @@ class fmiCoordinator : public griddyn::coreObject
 
 }  // namespace fmi
 }  // namespace griddyn
-#endif

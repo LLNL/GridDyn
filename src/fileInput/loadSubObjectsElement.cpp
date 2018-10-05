@@ -19,21 +19,21 @@
 #include <map>
 
 // A bunch of includes to load these kinds of objects
+#include "griddyn/Area.h"
+#include "griddyn/Block.h"
+#include "griddyn/Exciter.h"
+#include "griddyn/GenModel.h"
+#include "griddyn/Generator.h"
+#include "griddyn/Governor.h"
+#include "griddyn/Link.h"
+#include "griddyn/Relay.h"
+#include "griddyn/Source.h"
+#include "griddyn/Stabilizer.h"
 #include "griddyn/controllers/AGControl.h"
 #include "griddyn/controllers/reserveDispatcher.h"
 #include "griddyn/controllers/scheduler.h"
-#include "griddyn/Generator.h"
-#include "griddyn/Area.h"
 #include "griddyn/gridBus.h"
-#include "griddyn/Link.h"
 #include "griddyn/loads/zipLoad.h"
-#include "griddyn/Relay.h"
-#include "griddyn/Source.h"
-#include "griddyn/Block.h"
-#include "griddyn/Exciter.h"
-#include "griddyn/Governor.h"
-#include "griddyn/GenModel.h"
-#include "griddyn/Stabilizer.h"
 
 namespace griddyn
 {
@@ -55,6 +55,7 @@ loadFunctionMap{
 	{"block", READERSIGNATURE{return ElementReader (cd, static_cast<Block *>(nullptr), "block", ri, parent);}},
 	{"generator", READERSIGNATURE{return ElementReader (cd, static_cast<Generator *>(nullptr), "generator", ri, parent);}},
 	{"load", READERSIGNATURE{return ElementReader (cd, static_cast<Load *>(nullptr), "load", ri, parent);}},
+    {"extra", READERSIGNATURE{ return ElementReader(cd, static_cast<coreObject *>(nullptr), "extra", ri, parent); } },
 	{"bus", READERSIGNATURE{return readBusElement (cd, ri, parent);}},
 	{"relay", READERSIGNATURE{return readRelayElement (cd, ri, parent);}},
 	{"area", READERSIGNATURE{return readAreaElement (cd, ri, parent);}},
@@ -105,7 +106,7 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, co
         }
 
         if (fieldName == "local")  // shortcut to do more loading on the parent object most useful in loops to add
-                               // stacked parameters and imports
+                                   // stacked parameters and imports
         {
             loadElementInformation (parentObject, element, fieldName, ri, emptyIgnoreList);
         }
@@ -157,8 +158,8 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, co
                             }
                             else
                             {
-                                WARNPRINT (READER_WARN_IMPORTANT, "custom element " << argName
-                                                                                    << " not specified");
+                                WARNPRINT (READER_WARN_IMPORTANT,
+                                           "custom element " << argName << " not specified");
                             }
                         }
                         argName.pop_back ();
@@ -173,4 +174,4 @@ void loadSubObjects (std::shared_ptr<readerElement> &element, readerInfo &ri, co
     element->moveToParent ();
 }
 
-}//namespace griddyn
+}  // namespace griddyn
