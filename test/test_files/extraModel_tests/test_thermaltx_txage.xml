@@ -2,9 +2,9 @@
 <!--xml file to test matdyn execution-->
 <griddyn name="test_txage_thermaltx" version="0.0.1">
   <import file="powerflowWECC.raw"/>
-  
+
   <define name="bv" value=0.97/>
-  <define name="ba" value= -0.9854/>
+  <define name="ba" value=-0.9854/>
 
   <library>
     <control name="lineControl">
@@ -14,7 +14,7 @@
       <flags>direct_io</flags>
       <input>current</input>
       <input>voltage</input>
-      <input>breaker</input> 
+      <input>breaker</input>
       <commtype>basic</commtype>
     </sensor>
     <relay name = "txTemp">
@@ -29,13 +29,13 @@
       <initiallife>120</initiallife>
     </relay>
   </library>
-  
+
   <bus>
     <name>HighSide</name>
     <voltage>bv</voltage>
     <angle>ba</angle>
   </bus>
-  
+
   <bus>
     <name>LowSide</name>
     <voltage>bv</voltage>
@@ -56,7 +56,7 @@
     <from>HighSide</from>
     <to>LowSide</to>
     <tap>1.03</tap>
-    <r>0.00006</r> 
+    <r>0.00006</r>
     <x>0.00495</x>
     <rating units=MW>420</rating>
     <control terminal=1 ref="lineControl"/>
@@ -65,7 +65,7 @@
     <sensor terminal=2 ref="lineSensor" name="tx1_2sensor"/>
     <relay ref="txTemp" name="tx1temp"/>
   </transformer>
-  
+
   <relay ref="txLife" name="tx1life">
     <sink>TX1</sink>
     <input>tx1temp:hot_spot</input>
@@ -80,9 +80,9 @@
   <sensor name="tx1tempsensor">
     <input>tx1temp:ambient</input>
     <input>tx1temp:top_oil</input>
-    <input>tx1temp:hot_spot</input> 
+    <input>tx1temp:hot_spot</input>
     <input>tx1life:remaininglife</input>
-    <outputnames>ambient,top_oil,hot_spot,remaininglife</outputnames> 
+    <outputnames>ambient,top_oil,hot_spot,remaininglife</outputnames>
     <commtype>ct</commtype>
   </sensor>
 
@@ -95,10 +95,10 @@
     <reserveCount>1000</reserveCount>
   </recorder>
 
-  
+
   <timestart>0</timestart>
   <timestop>1200</timestop>
   <timestep>300</timestep>
-  <poweradjustthreshold>0.5</poweradjustthreshold> 
-  
+  <poweradjustthreshold>0.5</poweradjustthreshold>
+
 </griddyn>

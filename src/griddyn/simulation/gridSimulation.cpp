@@ -119,16 +119,16 @@ void gridSimulation::timestep (coreTime time, const IOdata &inputs, const solver
 void gridSimulation::saveRecorders ()
 {
     // save the recorder files
-    for (auto &col : collectorList)
+    for (auto const& col : collectorList)
     {
         try
         {
             col->flush ();
-            LOG_NORMAL ("collector successfully flushed to :" + col->getSinkName ());
+            LOG_NORMAL ("collector successfully flushed to: " + col->getSinkName ());
         }
         catch (const std::exception &e)
         {
-            LOG_ERROR ("unable to flush collector" + col->getSinkName () + ":" + std::string (e.what ()));
+            LOG_ERROR ("unable to flush collector " + col->getName() + " (to " + col->getSinkName () + "): " + std::string (e.what ()));
         }
     }
 }

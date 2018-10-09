@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef HELPEROBJECT_H_
-#define HELPEROBJECT_H_
 #pragma once
 
 #include <atomic>
@@ -129,4 +127,3 @@ a negative sign in front of the flag indicates the flag should be turned off
 */
 void setMultipleFlags (helperObject *obj, const std::string &flags);
 }  // namespace griddyn
-#endif

@@ -25,12 +25,12 @@ BOOST_AUTO_TEST_CASE (test_thermaltx_txage, * boost::unit_test::label("quick"))
 {
     std::string fileName = std::string (EXTRAMODEL_TEST_DIRECTORY "test_thermaltx_txage.xml");
     loadLibraries();
-	runTestXML(fileName,gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
+    runTestXML(fileName,gridDynSimulation::gridState_t::POWERFLOW_COMPLETE);
 
-	auto col=gds->findCollector("collector#0");
-	BOOST_CHECK_EQUAL(col->numberOfPoints(), 14);
+    auto col=gds->findCollector("collector#0");
+    BOOST_CHECK_EQUAL(col->numberOfPoints(), 14);
 
-	BOOST_CHECK_EQUAL(col->getWarningCount(), 0);
+    BOOST_CHECK_EQUAL(col->getWarningCount(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END ()
