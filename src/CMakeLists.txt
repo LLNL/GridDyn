@@ -3,7 +3,6 @@ add_subdirectory(coupling)
 add_subdirectory(fileInput)
 add_subdirectory(formatInterpreters)
 add_subdirectory(griddyn)
-add_subdirectory(gridDynLoader)
 add_subdirectory(gridDynMain)
 add_subdirectory(runner)
 add_subdirectory(utilities)
@@ -100,3 +99,10 @@ endif(ENABLE_OPTIMIZATION)
 if(BUILD_SHARED_LIBS)
     add_subdirectory(griddyn_shared)
 endif(BUILD_SHARED_LIBS)
+
+# ------------------------------------------------------------
+# Generate libraryLoader.cpp
+#
+# Do this last, it depends on parameters set in other folder CMakeLists
+# ------------------------------------------------------------
+add_subdirectory(gridDynLoader)
