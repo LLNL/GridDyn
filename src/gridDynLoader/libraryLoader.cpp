@@ -15,7 +15,7 @@
 #include "libraryLoader.h"
 #include "griddyn-config.h"
 
-#ifdef LOAD_EXTRA_MODELS
+#ifdef ENABLE_EXTRA_MODELS
 #include "extraModels.h"
 #endif
 
@@ -29,7 +29,7 @@ void loadLibraries()
 	loadFmiLibrary();
 #endif
 
-#ifdef LOAD_EXTRA_MODELS
+#ifdef ENABLE_EXTRA_MODELS
 	loadExtraModels("");
 #endif
 }

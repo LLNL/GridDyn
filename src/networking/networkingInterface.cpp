@@ -10,10 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifdef ZMQ_ENABLE
+#ifdef ENABLE_ZMQ
 #include "zmqInterface.h"
 #endif
-#ifdef TCP_ENABLE
+#ifdef ENABLE_TCP
 #include "tcpInterface.h"
 #endif
 
@@ -22,11 +22,11 @@ namespace griddyn
 {
 void loadNetworkingLibrary ()
 {
-#ifdef ZMQ_ENABLE
+#ifdef ENABLE_ZMQ
     loadZMQLibrary ();
 #endif
 
-#ifdef TCP_ENABLE
+#ifdef ENABLE_TCP
     loadTcpLibrary ();
 #endif
 

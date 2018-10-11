@@ -16,7 +16,7 @@
 #include "readElement.h"
 #include "readerHelper.h"
 
-#ifdef ENABLE_OPTIMIZATION
+#ifdef ENABLE_OPTIMIZATION_LIBRARY
 #include "optimization/gridDynOpt.h"
 #include "optimization/gridOptObjects.h"
 #include "optimization/models/gridAreaOpt.h"
@@ -31,7 +31,7 @@ using namespace readerConfig;
 
 static const IgnoreListType econIgnoreElements{"mode", "objecttype", "retype", "parent"};
 
-#ifndef ENABLE_OPTIMIZATION
+#ifndef ENABLE_OPTIMIZATION_LIBRARY
 coreObject *readEconElement (std::shared_ptr<readerElement> & /*element*/, readerInfo & /*ri*/, coreObject *searchObject)
 {
     return searchObject;

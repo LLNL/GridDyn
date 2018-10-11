@@ -25,20 +25,20 @@ endif(ENABLE_PLUGINS)
 # ------------------------------------------------------------
 # If extra models are used enabled try to locate the libraries
 # link against them.
-if(LOAD_EXTRA_MODELS)
+if(ENABLE_EXTRA_MODELS)
     add_subdirectory(extraModels)
     target_link_libraries(griddyn_optional INTERFACE extraModelLibrary)
-endif(LOAD_EXTRA_MODELS)
+endif(ENABLE_EXTRA_MODELS)
 
 # ------------------------------------------------------------
 # Enable compilation of extraSolvers?
 # ------------------------------------------------------------
 # If extra solvers are used enabled try to locate the libraries
 # link against them.
-if(LOAD_EXTRA_SOLVERS)
+if(ENABLE_EXTRA_SOLVERS)
     add_subdirectory(extraSolvers)
     target_link_libraries(griddyn_optional INTERFACE extraSolverLibrary)
-endif(LOAD_EXTRA_SOLVERS)
+endif(ENABLE_EXTRA_SOLVERS)
 
 # ------------------------------------------------------------
 # Enable compilation of FMI?
@@ -54,6 +54,9 @@ if(ENABLE_FMI)
     endif()
 endif(ENABLE_FMI)
 
+# ------------------------------------------------------------
+# Enable compilation of FMI_EXPORT?
+# ------------------------------------------------------------
 if(ENABLE_FMI_EXPORT)
     add_subdirectory(fmi_export)
     target_link_libraries(griddyn_optional INTERFACE fmiBuilder)
@@ -86,12 +89,12 @@ if(ENABLE_HELICS_EXECUTABLE)
 endif(ENABLE_HELICS_EXECUTABLE)
 
 # ------------------------------------------------------------
-# Enable compilation of optimization?
+# Enable compilation of optimization library?
 # ------------------------------------------------------------
-if(ENABLE_OPTIMIZATION)
+if(ENABLE_OPTIMIZATION_LIBRARY)
     add_subdirectory(optimization)
     target_link_libraries(griddyn_optional INTERFACE optimization)
-endif(ENABLE_OPTIMIZATION)
+endif(ENABLE_OPTIMIZATION_LIBRARY)
 
 # ------------------------------------------------------------
 # Enable compilation of the griddyn shared library?

@@ -119,7 +119,7 @@ void gridSimulation::timestep (coreTime time, const IOdata &inputs, const solver
 void gridSimulation::saveRecorders ()
 {
     // save the recorder files
-    for (auto const& col : collectorList)
+    for (auto& col : collectorList)
     {
         try
         {

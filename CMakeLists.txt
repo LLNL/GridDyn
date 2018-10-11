@@ -93,15 +93,13 @@ endif()
 include(CMakeDependentOption)
 
 option(
-    # TODO this happens in cmake/compiler_flags.cmake and cmake/installer/cmakelists
+    # TODO look at cmake/compiler_flags.cmake
     ENABLE_EXTRA_COMPILER_WARNINGS
     "disable compiler warning for GridDyn build"
     ON
 )
 
 option(
-    # TODO this needs a better name
-    # TODO should this depend on fmi?
     ENABLE_FMI_EXPORT
     "Enable construction of a binary fmi shared library for GridDyn"
     OFF
@@ -182,13 +180,13 @@ option(
 )
 
 option(
-    LOAD_EXTRA_MODELS
+    ENABLE_EXTRA_MODELS
     "Compile and load extraModels"
     ON
 )
 
 option(
-    LOAD_EXTRA_SOLVERS
+    ENABLE_EXTRA_SOLVERS
     "Compile and load extraSolvers"
     OFF
 )
@@ -231,7 +229,7 @@ option(
 )
 
 option(
-    ENABLE_OPTIMIZATION
+    ENABLE_OPTIMIZATION_LIBRARY
     "Enable Optimization libraries"
     OFF
 )
@@ -362,10 +360,18 @@ if(
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+if (NOT CMAKE_POSITION_INDEPENDENT_CODE)
+    show_variable(
+        CMAKE_POSITION_INDEPENDENT_CODE
+        BOOL
+        "Compile the static libraries so that they're relocatable"
+        OFF
+    )
+endif()
+
 
 include(compiler_flags)
 
-# TODO ??
 if(VERSION_OPTION)
     if(MSVC)
         target_compile_options(griddyn_base INTERFACE ${VERSION_OPTION})
@@ -380,7 +386,7 @@ endif(VERSION_OPTION)
 # ------------------------------------------------------------
 # BOOST  find the boost libraries
 # ------------------------------------------------------------
-# TODO check if boost works (libstdc++ vs libc++)
+# TODO check if boost works (e.g. libstdc++ vs libc++)
 set(
     BOOST_BASE_LIBRARIES
     filesystem
@@ -460,14 +466,15 @@ install(
 if(ENABLE_OPENMP)
     find_package(OpenMP QUIET)
     if(OPENMP_FOUND)
-        # TODO this needs to apply to each thing that might want openmp
-        # TODO also the COMPILE_LANGUAGE generator was in cmake as of 3.3, why was it conditional on 3.9?
-        target_compile_options(griddyn_base INTERFACE
-            $<$<COMPILE_LANGUAGE:C>:${OpenMP_C_FLAGS}>
-            $<$<COMPILE_LANGUAGE:CXX>:${OpenMP_CXX_FLAGS}>
-        )
-        # OpenMP::OpenMP_CXX wasn't added until CMake 3.9
-        target_link_libraries(griddyn_base INTERFACE ${OpenMP_C_FLAGS})
+        if(NOT ${CMAKE_VERSION} VERSION_LESS "3.9")
+            link_libraries(OpenMP::OpenMP_C OpenMP::OpenMP_CXX)
+        else()
+            add_compile_options(
+                $<$<COMPILE_LANGUAGE:C>:${OpenMP_C_FLAGS}>
+                $<$<COMPILE_LANGUAGE:CXX>:${OpenMP_CXX_FLAGS}>
+            )
+            link_libraries(${OpenMP_C_FLAGS})
+        endif()
     else(OPENMP_FOUND)
         message(
             STATUS
@@ -499,7 +506,6 @@ cmake_dependent_option(
 # ------------------------------------------------------------
 if(ENABLE_MULTITHREADING)
     if(NOT WIN32 OR MSYS)
-        # TODO ?? shouldn't this just be an if (MSYS)? anything else'll use pthreads and win32 probably won't have it
         set(THREADS_PREFER_PTHREAD_FLAG ON)
     endif()
     find_package(Threads REQUIRED)
@@ -673,11 +679,8 @@ if(ENABLE_GRIDDYN_DOXYGEN)
     endif(DOXYGEN_FOUND)
 endif(ENABLE_GRIDDYN_DOXYGEN)
 
-
-# TODO ???
 file(GLOB KEY_LIBRARY_FILES ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
-
 
 install(
     TARGETS griddyn_base griddyn_optional

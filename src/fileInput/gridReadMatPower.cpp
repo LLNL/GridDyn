@@ -20,7 +20,7 @@
 #include "griddyn/links/acLine.h"
 #include "griddyn/loads/zipLoad.h"
 
-#ifdef ENABLE_OPTIMIZATION
+#ifdef ENABLE_OPTIMIZATION_LIBRARY
 #include "optimization/gridDynOpt.h"
 #include "optimization/models/gridGenOpt.h"
 #include "optimization/optObjectFactory.h"
@@ -316,7 +316,7 @@ COST                    5 parameters defining total cost function f(p) begin in 
                             n + 1 coefficients of n-th order polynomial cost, starting with
                             highest order, where cost is f(p) = cn*p^n + ... + c1*p + c0
 */
-#ifdef ENABLE_OPTIMIZATION
+#ifdef ENABLE_OPTIMIZATION_LIBRARY
 void loadGenCostArray (coreObject *parentObject, mArray &genCost, int gencount)
 {
     auto gdo = dynamic_cast<gridDynOptimization *> (parentObject->getRoot ());

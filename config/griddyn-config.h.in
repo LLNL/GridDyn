@@ -26,7 +26,7 @@
 
 #cmakedefine ENABLE_FSKIT
 
-#cmakedefine ENABLE_OPTIMIZATION
+#cmakedefine ENABLE_OPTIMIZATION_LIBRARY
 
 #cmakedefine ENABLE_EXPERIMENTAL_TEST_CASES
 
@@ -38,11 +38,14 @@
 #cmakedefine ENABLE_GRIDDYN_TRACE_LOGGING
 #cmakedefine ENABLE_GRIDDYN_DEBUG_LOGGING
 
+#cmakedefine ENABLE_EXTRA_MODELS
+
 #cmakedefine YAML_FOUND
 
 #cmakedefine ENABLE_HELICS_EXECUTABLE
 
-#cmakedefine DIME_ENABLE
+#cmakedefine ENABLE_DIME
+#cmakedefine ENABLE_TCP
 
 #cmakedefine BOOST_STATIC
 

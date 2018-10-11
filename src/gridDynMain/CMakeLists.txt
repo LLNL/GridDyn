@@ -16,8 +16,7 @@ add_executable(gridDynMain ${gridDynMain_sources} ${gridDynMain_headers})
 
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
-# TODO does this need all 3 of these?
-target_link_libraries(gridDynMain ${executable_only_components} runner griddyn_base griddyn_optional)
+target_link_libraries(gridDynMain ${executable_only_components} griddyn_base griddyn_optional)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
     add_custom_command(

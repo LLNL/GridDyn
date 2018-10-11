@@ -16,8 +16,7 @@ endif ( MSVC )
 
 set(TEST_CXX_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_compiler_cxx)
 
-# TODO these shouldn't depend on whether the compiler is in c++17 mode,
-# and should be requested from the compiler (see CMAKE_CXX_KNOWN_FEATURES)
+# TODO check this
 if (ENABLE_CXX_17)
     try_compile(HAVE_OPTIONAL ${CMAKE_BINARY_DIR} ${TEST_CXX_DIRECTORY}/check_optional.cpp  COMPILE_DEFINITIONS ${VERSION_OPTION})
     try_compile(HAVE_VARIANT ${CMAKE_BINARY_DIR} ${TEST_CXX_DIRECTORY}/check_variant.cpp COMPILE_DEFINITIONS ${VERSION_OPTION})

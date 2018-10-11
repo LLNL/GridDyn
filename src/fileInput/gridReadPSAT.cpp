@@ -23,7 +23,7 @@
 #include "readerHelper.h"
 #include "utilities/stringOps.h"
 
-#ifdef ENABLE_OPTIMIZATION
+#ifdef ENABLE_OPTIMIZATION_LIBRARY
 #include "optimization/gridDynOpt.h"
 #include "optimization/models/gridGenOpt.h"
 #else
@@ -355,7 +355,7 @@ Column Variable Description Unit
 13 u Commitment variable boolean
 14 kTB Tie breaking cost $ / MWh
 */
-#ifndef ENABLE_OPTIMIZATION
+#ifndef ENABLE_OPTIMIZATION_LIBRARY
 void loadPsatSupplyArray (coreObject * /*parentObject*/,
                           const mArray & /*genCost*/,
                           const std::vector<gridBus *> & /*busList*/)
@@ -424,7 +424,7 @@ void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const
         }
     }
 }
-#endif  // ENABLE_OPTIMIZATION
+#endif  // ENABLE_OPTIMIZATION_LIBRARY
 
 /* Branch data
 Column Variable Description Unit

@@ -22,7 +22,7 @@
 #include "helics/helicsRunner.h"
 #endif
 
-#ifdef DIME_ENABLE
+#ifdef ENABLE_DIME
 #include "networking/dimeRunner.h"
 #endif
 
@@ -82,7 +82,7 @@ int main (int argc, char *argv[])
             break;
         }
 #endif
-#ifdef DIME_ENABLE
+#ifdef ENABLE_DIME
         if (strcmp ("--dime", argv[ii])==0)
         {
             execMode = execMode_t::dime;
@@ -169,7 +169,7 @@ int main (int argc, char *argv[])
     break;
     case execMode_t::dime:
     {
-#ifdef DIME_ENABLE
+#ifdef ENABLE_DIME
         auto runner = std::make_unique<dimeLib::dimeRunner> (gds);
 		gds->log(nullptr, print_level::summary,
 			std::string("Executing through DIME runner"));

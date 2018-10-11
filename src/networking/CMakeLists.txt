@@ -11,7 +11,7 @@
 set(networking_sources networkingInterface.cpp)
 set(networking_headers networkingInterface.h)
 
-if((ZMQ_ENABLE) OR (ZMQ_NEEDED))
+if(ENABLE_ZMQ OR ZMQ_NEEDED)
     set(
         zmqLibrary_sources
         zmqLibrary/zmqContextManager.cpp
@@ -41,7 +41,7 @@ if((ZMQ_ENABLE) OR (ZMQ_NEEDED))
 
 endif()
 
-if(DIME_ENABLE)
+if(ENABLE_DIME)
     set(
         dimeInterface_sources
         dimeCollector.cpp
@@ -63,7 +63,7 @@ if(DIME_ENABLE)
     list(APPEND networking_headers ${dimeInterface_headers})
 endif()
 
-if(TCP_ENABLE)
+if(ENABLE_TCP)
     set(
         tcpInterface_sources
         AsioServiceManager.cpp
@@ -104,8 +104,8 @@ install(
     COMPONENT libraries
 )
 
-if(ZMQ_ENABLE OR ZMQ_NEEDED)
-    target_compile_definitions(networking PRIVATE -DZMQ_ENABLE)
+if(ENABLE_ZMQ OR ZMQ_NEEDED)
+    target_compile_definitions(networking PRIVATE -DENABLE_ZMQ)
     if(ZMQ_USE_STATIC_LIBRARY)
         set(ZMQ_DEPENDENCY libzmq-static)
         target_compile_definitions(networking PUBLIC -DZMQ_STATIC)
@@ -125,14 +125,15 @@ if(ZMQ_ENABLE OR ZMQ_NEEDED)
     )
 endif()
 
-if(DIME_ENABLE)
+# TODO these shouldn't be doing -DENABLE_anything, that's what griddyn_config.h is for
+if(ENABLE_DIME)
     source_group("dime" FILES ${dimeInterface_sources} ${dimeInterface_headers})
-    target_compile_definitions(networking PRIVATE -DDIME_ENABLE)
+    target_compile_definitions(networking PRIVATE -DENABLE_DIME)
 endif()
 
-if(TCP_ENABLE)
+if(ENABLE_TCP)
     source_group("tcp" FILES ${tcpInterface_sources} ${tcpInterface_headers})
-    target_compile_definitions(networking PRIVATE -DTCP_ENABLE)
+    target_compile_definitions(networking PRIVATE -DENABLE_TCP)
 endif()
 
 install(
