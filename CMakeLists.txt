@@ -388,28 +388,16 @@ endif(VERSION_OPTION)
 # ------------------------------------------------------------
 # TODO check if boost works (e.g. libstdc++ vs libc++)
 set(
-    BOOST_BASE_LIBRARIES
+    BOOST_REQUIRED_LIBRARIES
     filesystem
     program_options
     system
-)
-
-set(
-    BOOST_TEST_LIBRARIES
     unit_test_framework
-)
-
-set(
-    BOOST_REQUIRED_LIBRARIES
-    ${BOOST_BASE_LIBRARIES}
-    ${BOOST_TEST_LIBRARIES}
 )
 
 include(addBoost)
 
-foreach(BOOST_LIBRARY ${BOOST_BASE_LIBRARIES})
-    target_link_libraries(griddyn_base INTERFACE Boost::${BOOST_LIBRARY})
-endforeach()
+target_link_libraries(griddyn_base INTERFACE Boostlibs::core)
 
 set(GRIDDYN_BOOST_VERSION_LEVEL ${BOOST_VERSION_LEVEL})
 

@@ -106,10 +106,7 @@ set(testMain_headers testHelper.h exeTestHelper.h)
 
 # add a baseline library for underlying dependencies and flags for test executables
 add_library(griddyn_test_base INTERFACE)
-
-foreach(BOOST_TEST_LIBRARY ${BOOST_TEST_LIBRARIES})
-    target_link_libraries(griddyn_test_base INTERFACE Boost::${BOOST_TEST_LIBRARY})
-endforeach()
+target_link_libraries(griddyn_test_base INTERFACE Boostlibs::test)
 
 target_link_libraries(griddyn_test_base INTERFACE griddyn_base)
 
