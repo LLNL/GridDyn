@@ -171,7 +171,7 @@ if (core_debug_size EQUAL 0)
 	list(GET Boost_LIBRARIES_core_release 0 first_lib)
 	set_target_properties(Boostlibs::core PROPERTIES IMPORTED_LOCATION ${first_lib})
 
-    foreach(item RANGE 1 ${rng})
+  foreach(item RANGE 1 ${rng})
 		list(GET Boost_LIBRARIES_core_release ${item} next_lib)
 		string(RANDOM LENGTH 7 rand_name)
 		if (${Boost_USE_STATIC_LIBS})

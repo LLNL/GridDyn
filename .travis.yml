@@ -231,7 +231,7 @@ before_script:
   - mkdir -p build && cd build
 
 script:
-  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON ..
+  - cmake ${JOB_OPTION_FLAGS} ${GRIDDYN_DEPENDENCY_FLAGS} ${GRIDDYN_OPTION_FLAGS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_DISABLE_FIND_PACKAGE_LAPACK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
   - cmake --build . -- -j2
 
   # Setup counters for coverage
@@ -242,6 +242,8 @@ script:
 
   # Gather coverage results
   - if [[ "$BUILD_TYPE" == "Coverage" ]]; then pushd .. && scripts/lcov-helper.sh gather-coverage-info --gcov ${GCOV_TOOL} --coveralls --codecov && popd ; fi
+
+after_failure: "cat /home/travis/build/LLNL/GridDyn/build/compile_commands.json"
 
 notifications:
     email: false
