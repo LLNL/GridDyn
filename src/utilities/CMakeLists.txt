@@ -86,14 +86,14 @@ set(
 add_library(utilities STATIC ${utilities_sources} ${utilities_headers})
 
 include(buildZlib)
-
 include(buildMiniZip)
+
 # ------------------------------------------------------------
 # building zlib
 # ------------------------------------------------------------
 set(ZLIB_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
+if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
     build_zlib()
 endif()
 include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
@@ -102,7 +102,7 @@ include(${AUTOBUILD_INSTALL_PATH}/cmake/zlib-targets.cmake)
 # building minizip
 # ------------------------------------------------------------
 set(ZLIB_INCLUDES ${AUTOBUILD_INSTALL_PATH}/include)
-if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
+if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)
     build_minizip()
 endif()
 include(${AUTOBUILD_INSTALL_PATH}/cmake/minizip-targets.cmake)

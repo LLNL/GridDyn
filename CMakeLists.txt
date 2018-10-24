@@ -252,6 +252,12 @@ option(
     OFF
 )
 
+option(
+    FORCE_DEPENDENCY_REBUILD
+    "Rebuild third party dependencies, even if already installed"
+    OFF
+)
+
 # -----------------
 # dependent options
 # -----------------
@@ -318,11 +324,9 @@ set_property(
     PROPERTY STRINGS ${optimization_levels}
 )
 
-
 if(NOT CMAKE_DEBUG_POSTFIX)
     set(CMAKE_DEBUG_POSTFIX d)
 endif()
-
 
 if(
     BUILD_PYTHON_INTERFACE

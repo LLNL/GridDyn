@@ -45,7 +45,7 @@ if(ENABLE_YAML)
     include(buildYAML)
     set(YAML_ROOT_DIR ${AUTOBUILD_INSTALL_PATH})
 
-    if(NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
+    if(FORCE_DEPENDENCY_REBUILD OR NOT EXISTS ${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
         build_yaml()
     endif()
     include(${AUTOBUILD_INSTALL_PATH}/cmake/yaml-cpp-targets.cmake)
@@ -101,6 +101,7 @@ add_library(
     ${elementReader_files}
     ${elementReader_headers}
 )
+
 target_include_directories(
     # target_link_libraries(this, jsoncpp::jsoncpp) when available
     formatInterpreter
