@@ -630,7 +630,6 @@ endif()
 # ------------------------------------------------------------
 # global include directories
 # ------------------------------------------------------------
-# TODO try to get rid of these
 target_include_directories(
     griddyn_base
     INTERFACE
