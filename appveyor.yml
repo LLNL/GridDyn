@@ -10,6 +10,10 @@ platform:
 configuration:
   - Release
 
+# TODO delete this after cache is fixed
+environment:
+  APPVEYOR_CACHE_SKIP_RESTORE: true
+
 cache:
   - build\libs
 
@@ -19,8 +23,7 @@ before_build:
   # Make the build directory if it doesn't already exist
   - IF NOT EXIST build mkdir build
   - cd build
-  # TODO -DBOOST_DIR?
-  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DENABLE_PACKAGE_BUILD=ON -DENABLE_FMI_EXPORT=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DBUILD_RELEASE_ONLY=ON -DFORCE_DEPENDENCY_REBUILD=ON
+  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DENABLE_PACKAGE_BUILD=ON -DENABLE_FMI_EXPORT=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DBUILD_RELEASE_ONLY=ON
   - cd ..
 
 build:

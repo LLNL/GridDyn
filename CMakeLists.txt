@@ -397,6 +397,7 @@ set(
     program_options
     system
     unit_test_framework
+    date_time
 )
 
 include(addBoost)
