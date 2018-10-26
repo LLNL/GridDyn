@@ -10,9 +10,9 @@ platform:
 configuration:
   - Release
 
-# TODO delete this after cache is fixed
+# Enable this if the build cache needs fixing
 environment:
-  APPVEYOR_CACHE_SKIP_RESTORE: true
+  APPVEYOR_CACHE_SKIP_RESTORE: false
 
 cache:
   - build\libs
