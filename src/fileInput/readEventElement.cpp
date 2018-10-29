@@ -84,19 +84,19 @@ void readEventElement (std::shared_ptr<readerElement> &aP, EventInfo &gdEI, read
     std::string field = getElementField (aP, "period", defMatchType);
     if (!field.empty ())
     {
-        gdEI.period = interpretString (field, ri);
+        gdEI.period = interpretString(field, ri);
     }
 
     field = getElementFieldOptions (aP, {"t", "time"}, defMatchType);
     if (!field.empty ())
     {
-        gdEI.time = str2vector<coreTime> (field, negTime);
+        gdEI.time = str2vector<coreTime> (ri.checkDefines(field), negTime);
     }
 
     field = getElementFieldOptions (aP, {"value", "val"}, defMatchType);
     if (!field.empty ())
     {
-        gdEI.value = str2vector (field, kNullVal);
+        gdEI.value = str2vector (ri.checkDefines(field), kNullVal);
     }
 
     name = getElementField (aP, "file", defMatchType);

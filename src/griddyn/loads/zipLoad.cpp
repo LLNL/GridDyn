@@ -415,6 +415,17 @@ void zipLoad::set (const std::string &param, double val, units_t unitType)
         }
         opFlags.set (use_power_factor_flag);
     }
+    else if (param == "scale")
+    {
+        P *= val;
+        Q *= val;
+        Ip *= val;
+        Iq *= val;
+        Yp *= val;
+        Yq *= val;
+        updatepfq();
+        checkFaultChange();
+    }
     else if (param == "qratio")
     {
         pfq = val;
