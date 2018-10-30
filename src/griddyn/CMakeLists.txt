@@ -599,7 +599,7 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
-# create a griddyn_config.h file for program options
+# create a griddyn-config.h file for program options
 configure_file(
     ${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in
     ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h

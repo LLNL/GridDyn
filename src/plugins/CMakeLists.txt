@@ -12,7 +12,6 @@ set(plugin_sources gridDynPlugins.cpp)
 
 set(plugin_headers gridDynPluginApi.h gridDynPlugins.h)
 
-# TODO static?
 add_library(pluginLibrary STATIC ${plugin_sources} ${plugin_headers})
 
 include_directories(.)

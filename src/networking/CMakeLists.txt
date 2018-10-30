@@ -105,7 +105,6 @@ install(
 )
 
 if(ENABLE_ZMQ OR ZMQ_NEEDED)
-    target_compile_definitions(networking PRIVATE -DENABLE_ZMQ)
     if(ZMQ_USE_STATIC_LIBRARY)
         set(ZMQ_DEPENDENCY libzmq-static)
         target_compile_definitions(networking PUBLIC -DZMQ_STATIC)
@@ -125,15 +124,12 @@ if(ENABLE_ZMQ OR ZMQ_NEEDED)
     )
 endif()
 
-# TODO these shouldn't be doing -DENABLE_anything, that's what griddyn_config.h is for
 if(ENABLE_DIME)
     source_group("dime" FILES ${dimeInterface_sources} ${dimeInterface_headers})
-    target_compile_definitions(networking PRIVATE -DENABLE_DIME)
 endif()
 
 if(ENABLE_TCP)
     source_group("tcp" FILES ${tcpInterface_sources} ${tcpInterface_headers})
-    target_compile_definitions(networking PRIVATE -DENABLE_TCP)
 endif()
 
 install(

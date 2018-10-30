@@ -38,6 +38,7 @@
 
 #include <string>
 #include <fskit/event-message.h>
+#include <boost/serialization/serialization.hpp>
 
 class ProtectionMessage : public fskit::EventMessage
 {

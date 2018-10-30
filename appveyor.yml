@@ -11,8 +11,9 @@ configuration:
   - Release
 
 # Enable this if the build cache needs fixing
+# (note that the build cache is not saved for PRs)
 environment:
-  APPVEYOR_CACHE_SKIP_RESTORE: false
+  APPVEYOR_CACHE_SKIP_RESTORE: true
 
 cache:
   - build\libs

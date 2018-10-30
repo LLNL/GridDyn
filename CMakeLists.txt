@@ -178,6 +178,7 @@ option(
     "Enable support for plugin modules"
     OFF
 )
+mark_as_advanced(ENABLE_PLUGINS)
 
 option(
     ENABLE_EXTRA_MODELS

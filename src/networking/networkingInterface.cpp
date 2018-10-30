@@ -10,6 +10,8 @@
  * LLNS Copyright End
  */
 
+#include "griddyn/griddyn-config.h"
+
 #ifdef ENABLE_ZMQ
 #include "zmqInterface.h"
 #endif

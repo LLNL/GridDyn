@@ -174,7 +174,7 @@ endforeach(keyfile)
 target_link_libraries(testLibrary fileInput griddyn_test_base)
 target_link_libraries(
     testComponents
-    ${executable_only_components}
+    griddyn_optional
     fileInput
     griddyn_test_base
 )

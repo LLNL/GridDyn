@@ -46,6 +46,7 @@
 
 #cmakedefine ENABLE_DIME
 #cmakedefine ENABLE_TCP
+#cmakedefine ENABLE_ZMQ
 
 #cmakedefine BOOST_STATIC
 

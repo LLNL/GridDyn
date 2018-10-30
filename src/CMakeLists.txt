@@ -109,3 +109,8 @@ endif(BUILD_SHARED_LIBS)
 # Do this last, it depends on parameters set in other folder CMakeLists
 # ------------------------------------------------------------
 add_subdirectory(gridDynLoader)
+
+set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
+set(optional_system_test_files ${optional_system_test_files} PARENT_SCOPE)
+set(optional_library_key_headers ${optional_library_key_headers} PARENT_SCOPE)
+set(optional_library_functions ${optional_library_functions} PARENT_SCOPE)

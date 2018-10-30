@@ -163,9 +163,6 @@ list(
 )
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
 
-list(APPEND executable_only_components fmiBuilder)
-set(executable_only_components ${executable_only_components} PARENT_SCOPE)
-
 install(
     FILES ${fmiBuilder_headers}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/fmi_export
