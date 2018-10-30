@@ -202,6 +202,7 @@ else()
 endif()
 
 set_target_properties(Boostlibs::core Boostlibs::test PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+set_target_properties(Boostlibs::core Boostlibs::test PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 set_target_properties(Boostlibs::core PROPERTIES INTERFACE_LINK_LIBRARIES "${boost_core_deps}")
 
 if (Boost_LIBRARIES_test_debug)
