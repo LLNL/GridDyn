@@ -292,7 +292,7 @@ void Governor::set (const std::string &param, const std::string &val)
 
 void Governor::set (const std::string &param, double val, units_t unitType)
 {
-    if (param == "k")
+    if ((param == "k")||(param=="droop"))
     {
         K = val;
         dbb.set (param, -K);
