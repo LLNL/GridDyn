@@ -557,13 +557,29 @@ add_library(
     ${sublibrary_files}
 )
 
+target_include_directories(
+    griddyn
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    # TODO is this right?
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_include_directories(
+    griddyn
+    # target_link_libraries(this, ticpp::ticpp cereal::cereal (and maybe others))
+    # when available (why is ticpp here at all? cereal is a little more justifiable)
+    PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>
+)
+
 target_link_libraries(griddyn PUBLIC coreObjects)
 
 target_link_libraries(griddyn PUBLIC SUNDIALS::SUNDIALS)
 target_link_libraries(griddyn PUBLIC coupling_static_lib)
-if(NOT DISABLE_KLU)
+if(ENABLE_KLU)
     target_link_libraries(griddyn PUBLIC SuiteSparse::klu)
-endif(NOT DISABLE_KLU)
+endif(ENABLE_KLU)
 
 source_group("loads" FILES ${load_sources})
 source_group("exciters" FILES ${exciter_sources})
@@ -583,7 +599,7 @@ source_group("controllers" FILES ${controller_sources})
 source_group("blocks" FILES ${block_sources})
 source_group("solvers" FILES ${solver_sources})
 
-# create a griddyn_config.h file for program options
+# create a griddyn-config.h file for program options
 configure_file(
     ${PROJECT_SOURCE_DIR}/config/griddyn-config.h.in
     ${AUTOBUILD_INSTALL_PATH}/include/griddyn/griddyn-config.h

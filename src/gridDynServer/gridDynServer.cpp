@@ -8,7 +8,7 @@ using namespace boost::posix_time;
 
 gridDynServer::gridDynServer()
 {
-	
+
 
 	port=4612;  //typical port number
 	ip_protocol=udp;  //use udp protocol as default
@@ -20,7 +20,7 @@ gridDynServer::gridDynServer()
 
 gridDynServer::~gridDynServer()
 {
-	
+
 	if (udpsock!=NULL)
 	{
 		delete udpsock;
@@ -31,19 +31,19 @@ gridDynServer::~gridDynServer()
 		if (active_tcp_sessions[kk]!=NULL)
 		{
 			delete active_tcp_sessions[kk];
-			
+
 		}
 	}
 	if (tcpacc!=NULL)
 	{
 		delete tcpacc;
 	}
-	
-	
+
+
 }
 void gridDynServer::stop_server()
 {
-	
+
 	if(ip_protocol == udp)
 	{
 		udpsock->socket_.close();
@@ -72,7 +72,7 @@ void gridDynServer::set(std::string param, int val)
 	{
 		port=val;
 	}
-	
+
 	else if (param.compare("ip_protocol")==0)
 	{
 		if ((val==0)|(val==1))
@@ -84,7 +84,7 @@ void gridDynServer::set(std::string param, int val)
 			std::cout<<"invalid ip protocol\n";
 		}
 	}
-	
+
 	else if (param.compare("timeBase")==0)
 	{
 		timeBase=val;
@@ -101,24 +101,24 @@ void gridDynServer::set(std::string param, int val)
 
 void gridDynServer::start_server(boost::asio::io_service &ios)
 {
-	
+
 		initialize();
-	
 
-	
-		
+
+
+
 	if(ip_protocol == udp)
-	{     
-		printf("\n\t\t|-------------------------------------------------------|\n");      
-		printf("\t\t|\t\tWelcome to PMU SERVER - UDP\t\t|\n");      
-		printf("\t\t|-------------------------------------------------------|\n");      
+	{
+		printf("\n\t\t|-------------------------------------------------------|\n");
+		printf("\t\t|\t\tWelcome to PMU SERVER - UDP\t\t|\n");
+		printf("\t\t|-------------------------------------------------------|\n");
 
 
-		//create a local endpoint and initialize a socket 
+		//create a local endpoint and initialize a socket
 		local_endpoint_udp=udp::endpoint(udp::v4(),port);
 		udpsock= new pmu_udp_socket(ios,local_endpoint_udp);
 
-		
+
 		//start to receive on this port
 		udpsock->socket_.async_receive_from(boost::asio::buffer(recv_buffer_),remote_endpoint_udp,
 			boost::bind(&gridDynServer::pmu_udp,this,boost::asio::placeholders::error,
@@ -126,14 +126,14 @@ void gridDynServer::start_server(boost::asio::io_service &ios)
 
 	} /* end of UDP protocol */
 
-	else 
-	{ 
-		printf("\n\t\t|-------------------------------------------------------|\n");      
-		printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");      
-		printf("\t\t|-------------------------------------------------------|\n");      
+	else
+	{
+		printf("\n\t\t|-------------------------------------------------------|\n");
+		printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");
+		printf("\t\t|-------------------------------------------------------|\n");
 
 
-		//create a local endpoint and initialize a socket 
+		//create a local endpoint and initialize a socket
 		local_endpoint_tcp=tcp::endpoint(tcp::v4(),port);
 		tcpacc= new pmu_tcp_acc(ios,local_endpoint_tcp);
 
@@ -143,15 +143,15 @@ void gridDynServer::start_server(boost::asio::io_service &ios)
 		sess->index=active_tcp_sessions.size();
 		active_tcp_sessions.push_back(sess);
 		session_lock.unlock();
-	
+
 		tcpacc->acceptor_.async_accept(sess->socket_,boost::bind(&gridDynServer::tcp_accept,
 			this,sess,boost::asio::placeholders::error));
 
-	
-#ifdef TCP_ENABLED
-		printf("\n\t\t|-------------------------------------------------------|\n");      
-		printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");      
-		printf("\t\t|-------------------------------------------------------|\n");      
+
+#ifdef ENABLE_TCP
+		printf("\n\t\t|-------------------------------------------------------|\n");
+		printf("\t\t|\t\tWelcome to PMU SERVER - TCP\t\t|\n");
+		printf("\t\t|-------------------------------------------------------|\n");
 
 		if ((TCP_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)	/* Create TCP socket */
 		{
@@ -206,7 +206,7 @@ void gridDynServer::start_server(boost::asio::io_service &ios)
 		if( (err = pthread_create(&TCP_thread,NULL,pmu_tcp,NULL)))
 		{
 			perror(strerror(err));
-			exit(1);	
+			exit(1);
 		}
 		pthread_join(TCP_thread, NULL);
 		close(TCP_sockfd);
@@ -303,7 +303,7 @@ void gridDynServer::send_data()
 							boost::bind(&pmu_tcp_session::data_sent,active_tcp_sessions[skipped[kk]],
 							boost::asio::placeholders::error,
 							boost::asio::placeholders::bytes_transferred));
-						
+
 					}
 				}
 				skipped.resize(0);
@@ -311,15 +311,15 @@ void gridDynServer::send_data()
 			session_lock.unlock();
 			if (data_sent==false)//nobody to send data to
 			{
-				
+
 				break;
 			}
 		}
-		
+
 		accumError+=intervalError;
 		if (accumError>1.0)
 		{
-			
+
 			accumError-=1.0;
 		}
 	}
@@ -350,12 +350,12 @@ void gridDynServer::pmu_udp(const boost::system::error_code &error, std::size_t 
 		 }
 	 }
 
-	
+
 	c = recv_buffer_[1];
 	c <<= 1; //get rid of the undefined bit
 	c >>= 5; //get rid of the version number
 
-	
+
 	udpsock->socket_.async_receive_from(boost::asio::buffer(recv_buffer_),remote_endpoint_udp,
 									boost::bind(&gridDynServer::pmu_udp,this,boost::asio::placeholders::error,
 									boost::asio::placeholders::bytes_transferred));
@@ -410,17 +410,17 @@ void gridDynServer::pmu_tcp(pmu_tcp_session *active_session,const boost::system:
 		return;
 
 	 }
-	
-	
+
+
 
 	c = active_session->recv_buffer_[1];
 	c <<= 1; //get rid of the undefined bit
 	c >>= 5; //get rid of the version number
 
-	if(c  == 0x04) 		/* Check if it is a command frame from PDC */ 
+	if(c  == 0x04) 		/* Check if it is a command frame from PDC */
 	{
-		if(id_pdc == vid)		/* Check if it is coming from authentic PDC/iPDC */ 
-		{	
+		if(id_pdc == vid)		/* Check if it is coming from authentic PDC/iPDC */
+		{
 			c = active_session->recv_buffer_[15];
 			c=c&0x0F;
 			switch(c)
@@ -430,14 +430,14 @@ void gridDynServer::pmu_tcp(pmu_tcp_session *active_session,const boost::system:
 				break;
 			case 0x02: /*turn on data transmission*/
 				active_session->cstate=pmu_tcp_session::sending;
-				
+
 					send_thread=boost::thread(&gridDynServer::send_data,this);
-				
-				
-				
+
+
+
 				break;
 			case 0x03: /*send header frame*/
-				
+
 				active_session->send_lock.lock();
 				active_session->socket_.async_send(boost::asio::buffer(header),
 					boost::bind(&pmu_tcp_session::data_sent,active_session,
@@ -445,7 +445,7 @@ void gridDynServer::pmu_tcp(pmu_tcp_session *active_session,const boost::system:
 					boost::asio::placeholders::bytes_transferred));
 				break;
 			case 0x04: /*send config-1 frame*/
-				
+
 				active_session->send_lock.lock();
 				active_session->socket_.async_send(boost::asio::buffer(cfg1),
 					boost::bind(&pmu_tcp_session::data_sent,active_session,
@@ -453,7 +453,7 @@ void gridDynServer::pmu_tcp(pmu_tcp_session *active_session,const boost::system:
 					boost::asio::placeholders::bytes_transferred));
 				break;
 			case 0x05: /*send config-2 frame*/
-			
+
 				active_session->send_lock.lock();
 				active_session->socket_.async_send(boost::asio::buffer(cfg2),
 					boost::bind(&pmu_tcp_session::data_sent,active_session,
@@ -463,17 +463,17 @@ void gridDynServer::pmu_tcp(pmu_tcp_session *active_session,const boost::system:
 			case 0x08: /*extended frame configuration*/
 				break;
 			}
-		} 
+		}
 
 		else		/* If Received Command Frame Id code not matched */
-		{  
-			printf("\n-> Received Command Frame not from authentic PDC, ID code not matched in command frame from PDC...!!!\n");									
+		{
+			printf("\n-> Received Command Frame not from authentic PDC, ID code not matched in command frame from PDC...!!!\n");
 		}
 	} /* end of processing with received Command frame */
 
-	else		/* If it is other than command frame */				
-	{ 
-		printf("\n-> Received Frame is not a command frame...!!!\n");									
+	else		/* If it is other than command frame */
+	{
+		printf("\n-> Received Frame is not a command frame...!!!\n");
 	}
 	active_session->socket_.async_read_some(boost::asio::buffer(active_session->recv_buffer_),
 									boost::bind(&gridDynServer::pmu_tcp,this,active_session,boost::asio::placeholders::error,
@@ -493,5 +493,3 @@ void gridDynServer::initialize()
 	recv_buffer_.resize(65536,0);
 
 }
-
-

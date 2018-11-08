@@ -19,7 +19,6 @@
  */
 
 #include "protection-message.h"
-#ifdef GRIDDYN_HAVE_FSKIT
 ProtectionMessage::ProtectionMessage ()
   : EventMessage (),
     m_messageType (ProtectionMessage::LOCAL_FAULT_EVENT)
@@ -31,19 +30,6 @@ ProtectionMessage::ProtectionMessage (ProtectionMessage::MESSAGE_TYPE t)
     m_messageType (t)
 {
 }
-
-#else
-ProtectionMessage::ProtectionMessage ()
-  : m_messageType (ProtectionMessage::LOCAL_FAULT_EVENT)
-{
-}
-
-ProtectionMessage::ProtectionMessage (ProtectionMessage::MESSAGE_TYPE t)
-  : m_messageType (t)
-{
-}
-
-#endif
 
 ProtectionMessage::~ProtectionMessage ()
 {

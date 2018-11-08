@@ -1,5 +1,5 @@
 
-OPTION(KLU_ENABLE "Enable KLU support (KLU is the primary spare linear solver, it can be disabled but it is not recommended)" ON)
+OPTION(ENABLE_KLU "Enable KLU support (KLU is the primary spare linear solver, it can be disabled but it is not recommended)" ON)
 OPTION(USE_KLU_SHARED "Use the KLU shared library instead of STATIC" OFF)
 
 SHOW_VARIABLE(SuiteSparse_INSTALL_PATH PATH
@@ -14,28 +14,28 @@ endif()
 if (NOT DEFINED SuiteSparse_DIR)
 	set(SuiteSparse_DIR ${SuiteSparse_INSTALL_PATH})
 endif()
-	
-if(KLU_ENABLE)
+
+if(ENABLE_KLU)
   IF(MSVC)
     set(SuiteSparse_USE_LAPACK_BLAS ON)
   ENDIF(MSVC)
-  
-  set(SUITESPARSE_CMAKE_SUFFIXES 
+
+  set(SUITESPARSE_CMAKE_SUFFIXES
 	lib/cmake/suitesparse-5.1.0
 	cmake/suitesparse-5.1.0
 	cmake
 	lib/cmake)
-	
+
 	if (WIN32 AND NOT MSYS)
       find_package(SuiteSparse QUIET COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
-		HINTS 
+		HINTS
 			${SuiteSparse_INSTALL_PATH}
 			${AUTOBUILD_INSTALL_PATH}
 		PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 		)
 	else()
    find_package(SuiteSparse QUIET COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
-		HINTS 
+		HINTS
 			${SuiteSparse_INSTALL_PATH}
 			${AUTOBUILD_INSTALL_PATH}
 		PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
@@ -53,7 +53,7 @@ if(KLU_ENABLE)
 			include(buildSuiteSparse)
 			build_suitesparse(${SuiteSparse_INSTALL_PATH})
 			find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
-				HINTS 
+				HINTS
 					${SuiteSparse_INSTALL_PATH}
 				PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 			)
@@ -61,15 +61,15 @@ if(KLU_ENABLE)
 			find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD)
 		if (NOT SuiteSparse_FOUND)
 			if (WIN32 AND NOT MSYS)
-				OPTION(AUTOBUILD_KLU "enable ZMQ to automatically download and build" ON)
+				OPTION(AUTOBUILD_KLU "enable KLU to automatically download and build" ON)
 			else()
-				OPTION(AUTOBUILD_KLU "enable ZMQ to automatically download and build" OFF)
+				OPTION(AUTOBUILD_KLU "enable KLU to automatically download and build" OFF)
 			endif()
 			if (AUTOBUILD_KLU)
 				include(buildSuiteSparse)
 				build_suitesparse(${SuiteSparse_INSTALL_PATH})
 				find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
-					HINTS 
+					HINTS
 						${SuiteSparse_INSTALL_PATH}
 					PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 				)
@@ -86,5 +86,5 @@ if(KLU_ENABLE)
 			endif(FORCE_SuiteSparse_REBUILD)
       endif()
 	endif()
-	
-endif(KLU_ENABLE)
+
+endif(ENABLE_KLU)

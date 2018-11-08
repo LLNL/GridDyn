@@ -21,9 +21,7 @@ std::mutex workQueue::instanceLock;
 
 workQueue::workQueue (int threadCount) : numWorkers (threadCount)
 {
-#ifdef DISABLE_MULTITHREADING
-    numWorkers = 0;
-#else
+#ifdef ENABLE_MULTITHREADING
     if (numWorkers < 0)
     {
         numWorkers = static_cast<int> (std::thread::hardware_concurrency ()) + 1;
@@ -33,6 +31,8 @@ workQueue::workQueue (int threadCount) : numWorkers (threadCount)
     {
         threadpool[kk] = std::thread (&workQueue::workerLoop, this);
     }
+#else
+    numWorkers = 0;
 #endif
 }
 

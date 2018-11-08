@@ -9,25 +9,24 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-#ifndef GRIDDYN_CONFIG_H
-#define GRIDDYN_CONFIG_H
 #pragma once
 
 #include "compiler-config.h"
 
-#cmakedefine GRIDDYN_HAVE_MPI
+#cmakedefine ENABLE_MPI
 
-#cmakedefine OPENMP_ENABLE
-#cmakedefine SUNDIALS_OPENMP
-#cmakedefine GRIDDYN_OPENMP
+#cmakedefine ENABLE_OPENMP
+#cmakedefine ENABLE_OPENMP_SUNDIALS
+#cmakedefine ENABLE_OPENMP_GRIDDYN
 
-#cmakedefine KLU_ENABLE
+#cmakedefine ENABLE_KLU
 
-#cmakedefine FMI_ENABLE
+#cmakedefine ENABLE_FMI
+#cmakedefine ENABLE_FMI_EXPORT
 
-#cmakedefine BUILD_SHARED_FMI_LIBRARY
+#cmakedefine ENABLE_FSKIT
 
-#cmakedefine OPTIMIZATION_ENABLE
+#cmakedefine ENABLE_OPTIMIZATION_LIBRARY
 
 #cmakedefine ENABLE_EXPERIMENTAL_TEST_CASES
 
@@ -35,15 +34,19 @@
 
 #cmakedefine LOAD_ARKODE
 
-#cmakedefine GRIDDYN_DISABLE_LOGGING
-#cmakedefine GRIDDYN_DISABLE_TRACE_LOGGING
-#cmakedefine GRIDDYN_DISABLE_DEBUG_LOGGING
+#cmakedefine ENABLE_GRIDDYN_LOGGING
+#cmakedefine ENABLE_GRIDDYN_TRACE_LOGGING
+#cmakedefine ENABLE_GRIDDYN_DEBUG_LOGGING
+
+#cmakedefine ENABLE_EXTRA_MODELS
 
 #cmakedefine YAML_FOUND
 
-#cmakedefine HELICS_EXECUTABLE
+#cmakedefine ENABLE_HELICS_EXECUTABLE
 
-#cmakedefine DIME_ENABLE
+#cmakedefine ENABLE_DIME
+#cmakedefine ENABLE_TCP
+#cmakedefine ENABLE_ZMQ
 
 #cmakedefine BOOST_STATIC
 
@@ -56,6 +59,3 @@
 #define GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION_STRING}"
 #define GRIDDYN_VERSION_STRING_SHORT "${GRIDDYN_VERSION_STRING_SHORT}"
 #define GRIDDYN_DATE "${GRIDDYN_DATE}"
-
-
-#endif

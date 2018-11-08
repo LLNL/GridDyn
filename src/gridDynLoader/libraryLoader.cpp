@@ -15,21 +15,21 @@
 #include "libraryLoader.h"
 #include "griddyn-config.h"
 
-#ifdef LOAD_EXTRA_MODELS
+#ifdef ENABLE_EXTRA_MODELS
 #include "extraModels.h"
 #endif
 
-#ifdef FMI_ENABLE
+#ifdef ENABLE_FMI
 #include "fmiGDinfo.h"
 #endif
 
 void loadLibraries()
 {
-#ifdef FMI_ENABLE
+#ifdef ENABLE_FMI
 	loadFmiLibrary();
 #endif
 
-#ifdef LOAD_EXTRA_MODELS
+#ifdef ENABLE_EXTRA_MODELS
 	loadExtraModels("");
 #endif
 }

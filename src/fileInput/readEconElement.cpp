@@ -16,7 +16,7 @@
 #include "readElement.h"
 #include "readerHelper.h"
 
-#ifdef OPTIMIZATION_ENABLE
+#ifdef ENABLE_OPTIMIZATION_LIBRARY
 #include "optimization/gridDynOpt.h"
 #include "optimization/gridOptObjects.h"
 #include "optimization/models/gridAreaOpt.h"
@@ -30,12 +30,13 @@ namespace griddyn
 using namespace readerConfig;
 
 static const IgnoreListType econIgnoreElements{"mode", "objecttype", "retype", "parent"};
-#ifndef OPTIMIZATION_ENABLE
 
+#ifndef ENABLE_OPTIMIZATION_LIBRARY
 coreObject *readEconElement (std::shared_ptr<readerElement> & /*element*/, readerInfo & /*ri*/, coreObject *searchObject)
 {
     return searchObject;
 }
+
 #else
 coreObject *readEconElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *searchObject)
 {
@@ -247,4 +248,3 @@ coreObject *readEconElement (std::shared_ptr<readerElement> &element, readerInfo
 }
 #endif
 }//namespace griddyn
-

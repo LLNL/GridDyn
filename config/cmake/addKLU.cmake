@@ -1,5 +1,4 @@
-
-OPTION(KLU_ENABLE "Enable KLU support" ON)
+OPTION(ENABLE_KLU "Enable KLU support" ON)
 
 SET(SuiteSparse_Autobuild_DIR ${PROJECT_BINARY_DIR}/libs)
 
@@ -16,13 +15,13 @@ else()
     OPTION(AUTOBUILD_KLU "enable Suitesparse to automatically download and build" OFF)
 endif()
 
-if(KLU_ENABLE)
+if(ENABLE_KLU)
   IF(MSVC)
     set(SuiteSparse_USE_LAPACK_BLAS ON)
   ENDIF(MSVC)
   FILE(GLOB_RECURSE SUITESPARSE_CONFIG_FILE ${SuiteSparse_DIR}/*/suitesparse-config.cmake)
 
-  # Check if SuiteSparse_DIR is the autobuild location 
+  # Check if SuiteSparse_DIR is the autobuild location
   if("${SuiteSparse_DIR}" STREQUAL "${SuiteSparse_Autobuild_DIR}")
 
     # Handle autobuilding (and rebuilding)
@@ -46,7 +45,7 @@ if(KLU_ENABLE)
       set(KLU_CMAKE TRUE)
       set(SuiteSparse_DIRECT_LIBRARY_DIR ${SuiteSparse_DIR}/lib)
       set(SuiteSparse_DIRECT_INCLUDE_DIR ${SuiteSparse_INCLUDE_DIRS}/suitesparse)
- 
+
     # No suitesparse cmake file found, error during autobuild or the user wants to use the system copy
     else(SUITESPARSE_CONFIG_FILE)
       if(AUTOBUILD_KLU)
@@ -54,7 +53,7 @@ if(KLU_ENABLE)
       else(AUTOBUILD_KLU)
         # Autobuild isn't enabled and the user didn't supply a location, search for a system copy
 		find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF UMFPACK SUITESPARSECONFIG CXSPARSE)
-	    if(SuiteSparse_FOUND) 
+	    if(SuiteSparse_FOUND)
 	      set(KLU_CMAKE FALSE)
           get_filename_component(SuiteSparse_DIRECT_LIBRARY_DIR ${SuiteSparse_KLU_LIBRARY_RELEASE} DIRECTORY)
 	      set(SuiteSparse_DIRECT_INCLUDE_DIR ${SuiteSparse_KLU_INCLUDE_DIR})
@@ -63,7 +62,7 @@ if(KLU_ENABLE)
             message(STATUS "using system suitesparse")
           endif()
 
-        # SuiteSparse was not found on the system 
+        # SuiteSparse was not found on the system
         else(SuiteSparse_FOUND)
           message(FATAL_ERROR "system suitesparse not found")
         endif(SuiteSparse_FOUND)
@@ -84,7 +83,7 @@ if(KLU_ENABLE)
     # No suitesparse cmake file was found, search the system for files
     else(SUITESPARSE_CONFIG_FILE)
 	  find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE)
-	  if(SuiteSparse_FOUND) 
+	  if(SuiteSparse_FOUND)
 	    set(KLU_CMAKE FALSE)
         get_filename_component(SuiteSparse_DIRECT_LIBRARY_DIR ${SuiteSparse_KLU_LIBRARY_RELEASE} DIRECTORY)
 	    set(SuiteSparse_DIRECT_INCLUDE_DIR ${SuiteSparse_KLU_INCLUDE_DIR})
@@ -107,4 +106,4 @@ if(KLU_ENABLE)
     endif(SUITESPARSE_CONFIG_FILE)
   endif()
 
-endif(KLU_ENABLE)
+endif(ENABLE_KLU)

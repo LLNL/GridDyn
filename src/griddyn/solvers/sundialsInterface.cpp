@@ -21,7 +21,7 @@
 #include "arkodeInterface.h"
 #endif
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -246,7 +246,7 @@ double sundialsInterface::get (const std::string &param) const
 
 void sundialsInterface::KLUReInit (sparse_reinit_modes sparseReInitModes)
 {
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
     if (flags[dense_flag])
     {
         return;

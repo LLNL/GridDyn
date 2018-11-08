@@ -1,4 +1,3 @@
-
 #--------------------------------------------------------------------------------
 # Copyright (c) 2012-2013, Lars Baehren <lbaehren@gmail.com>
 # All rights reserved.

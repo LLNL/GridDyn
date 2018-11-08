@@ -294,7 +294,7 @@ count_t collector::grabData (double *outputData, index_t N)
             if (static_cast<index_t> (datapoint.column + vals.size ()) < N)
             {
                 std::copy (vals.begin (), vals.end (), outputData + datapoint.column);
-                currentCount = (std::max) (currentCount, datapoint.column + static_cast<index_t> (vals.size ()));
+                currentCount = std::max<count_t> (currentCount, datapoint.column + static_cast<index_t> (vals.size ()));
             }
             else if (datapoint.column < N)
             {
@@ -305,10 +305,10 @@ count_t collector::grabData (double *outputData, index_t N)
         else if (datapoint.column < N)
         {
             outputData[datapoint.column] = datapoint.dataGrabber->grabData ();
-            currentCount = (std::max) (currentCount, datapoint.column + 1);
+            currentCount = std::max<count_t> (currentCount, datapoint.column + 1);
         }
     }
-    currentCount = (std::min) (currentCount, N);
+    currentCount = std::min (currentCount, N);
     return currentCount;
 }
 

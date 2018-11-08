@@ -100,27 +100,27 @@ enum units_type_t
 };
 
 /** @brief convert a units_t into a string
- should work in a cycle with getUnits function
-@param[in] unitType  the unit to convert to a string
-@return a string representing the units*/
+ * should work in a cycle with getUnits function
+ * @param[in] unitType  the unit to convert to a string
+ * @return a string representing the units*/
 std::string to_string (units_t unitType);
 
 /** @brief convert a string into a units_t
- should work in a cycle with to_string function
-@param[in] unitString  the string containing a representation of the units
-@param[in] defValue the default unit to use if the string conversion doesn't succeed
-@return a unit*/
+ * should work in a cycle with to_string function
+ * @param[in] unitString  the string containing a representation of the units
+ * @param[in] defValue the default unit to use if the string conversion doesn't succeed
+ * @return a unit
+ */
 units_t getUnits (const std::string &unitString, units_t defValue = defUnit);
 
 /** @brief convert a number in one unit to another unit
-@param[in] val  the value of the property in input units
-@param[in] in the units of val
-@param[in] out the units of the desired result
-@param[in] basePower  the basePower when converting from pu values
-@param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
-@return the numerical value of the property in output units,  badConversion if unable to convert between the
-specified units
-*/
+ * @param[in] val  the value of the property in input units
+ * @param[in] in the units of val
+ * @param[in] out the units of the desired result
+ * @param[in] basePower  the basePower when converting from pu values
+ * @param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
+ * @return the numerical value of the property in output units,  badConversion if unable to convert between the specified units
+ */
 double unitConversion (double val,
                        const units_t in,
                        const units_t out,
@@ -128,23 +128,22 @@ double unitConversion (double val,
                        double localBaseVoltage = 100);
 
 /** @brief convert between units of Time
-@param[in] val  the value of the property in input units
-@param[in] in the units of val
-@param[in] out the units of the desired result
-@return the numerical value of the property in output units,  badConversion if unable to convert between the
-specified units
-*/
-double unitConversionTime (double val, const units_t in, const units_t out);
+ * @param[in] val  the value of the property in input units
+ * @param[in] in the units of val
+ * @param[in] out the units of the desired result
+ * @return the numerical value of the property in output units,  badConversion if unable to convert between the specified units
+ */
+double unitConversionTime (double val, units_t in, units_t out);
 
 /** @brief convert between units used in power systems related to power, current, voltage, and resistance.
-@param[in] val  the value of the property in input units
-@param[in] in the units of val
-@param[in] out the units of the desired result
-@param[in] basePower  the basePower when converting from pu values
-@param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
-@return the numerical value of the property in output units,  badConversion if unable to convert between the
-specified units
-*/
+ * @param[in] val  the value of the property in input units
+ * @param[in] in the units of val
+ * @param[in] out the units of the desired result
+ * @param[in] basePower  the basePower when converting from pu values
+ * @param[in] localBaseVoltage  the base Voltage to use when converting to and from pu values
+ * @return the numerical value of the property in output units,  badConversion if unable to convert between the
+ * specified units
+ */
 
 double unitConversionPower (double val,
                             const units_t in,
@@ -159,7 +158,7 @@ double unitConversionPower (double val,
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionDistance (double val, const units_t in, const units_t out);
+double unitConversionDistance (double val, units_t in, units_t out);
 /** @brief convert a number between units of angle such as radians, deg
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -167,7 +166,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out);
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionAngle (double val, const units_t in, const units_t out);
+double unitConversionAngle (double val, units_t in, units_t out);
 
 /** @brief convert a number between units of frequency
 @param[in] val  the value of the property in input units
@@ -177,7 +176,7 @@ double unitConversionAngle (double val, const units_t in, const units_t out);
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionFreq (double val, const units_t in, const units_t out, double baseFreq = 60);
+double unitConversionFreq (double val, units_t in, units_t out, double baseFreq = 60);
 /** @brief convert a number between units of cost
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -186,7 +185,7 @@ double unitConversionFreq (double val, const units_t in, const units_t out, doub
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionCost (double val, const units_t in, const units_t out, double basePower = 100);
+double unitConversionCost (double val, units_t in, units_t out, double basePower = 100);
 /** @brief convert a number between units of Temperature
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -194,5 +193,5 @@ double unitConversionCost (double val, const units_t in, const units_t out, doub
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionTemperature (double val, const units_t in, const units_t out);
+double unitConversionTemperature (double val, units_t in, units_t out);
 }  // namespace gridUnits

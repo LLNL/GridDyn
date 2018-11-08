@@ -81,7 +81,9 @@ void CymeDistLoadME::loadConfigFile (const std::string &configFileName)
     configFile = configFileName;
     auto mval = doc["models"];
 
-    auto model = mval[configIndex];
+    // this is ambiguous when configIndex is int64_t. unsigned skips the < 0
+    // check, so pass this as signed
+    auto model = mval[static_cast<int>(configIndex)];
     if (model.isObject ())
     {
         auto fmu_path = model["fmu_path"].asString ();

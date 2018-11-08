@@ -33,10 +33,10 @@ namespace griddyn
 gridSimulation::gridSimulation (const std::string &objName) : Area (objName), simulationTime(timeZero)
 {
     EvQ = std::make_unique<eventQueue> ();
-#ifdef DISABLE_MULTITHREADING
-    gridLog = std::make_unique<utilities::LoggerNoThread> ();
-#else
+#ifdef ENABLE_MULTITHREADING
     gridLog = std::make_unique<utilities::Logger> ();
+#else
+    gridLog = std::make_unique<utilities::LoggerNoThread> ();
 #endif
 }
 
@@ -119,16 +119,16 @@ void gridSimulation::timestep (coreTime time, const IOdata &inputs, const solver
 void gridSimulation::saveRecorders ()
 {
     // save the recorder files
-    for (auto &col : collectorList)
+    for (auto& col : collectorList)
     {
         try
         {
             col->flush ();
-            LOG_NORMAL ("collector successfully flushed to :" + col->getSinkName ());
+            LOG_NORMAL ("collector successfully flushed to: " + col->getSinkName ());
         }
         catch (const std::exception &e)
         {
-            LOG_ERROR ("unable to flush collector" + col->getSinkName () + ":" + std::string (e.what ()));
+            LOG_ERROR ("unable to flush collector " + col->getName() + " (to " + col->getSinkName () + "): " + std::string (e.what ()));
         }
     }
 }

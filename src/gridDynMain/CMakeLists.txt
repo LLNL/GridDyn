@@ -16,13 +16,8 @@ add_executable(gridDynMain ${gridDynMain_sources} ${gridDynMain_headers})
 
 set(GRIDYNMAIN_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
-message(STATUS "execOnly:${executable_only_components}")
-
-target_link_libraries(gridDynMain ${executable_only_components} runner)
-
-if(DIME_ENABLE)
-    target_link_libraries(gridDynMain networking)
-endif(DIME_ENABLE)
+# TODO runner and fmiBuilder should be in a griddyn_exe library of some sort
+target_link_libraries(gridDynMain runner griddyn_base griddyn_optional)
 
 foreach(keyfile IN LISTS KEY_LIBRARY_FILES)
     add_custom_command(

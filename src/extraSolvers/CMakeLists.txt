@@ -155,7 +155,7 @@ elseif(BUILD_PARADAE_SOLVERS)
     list(APPEND extra_solver_headers ${paradae_headers})
 endif()
 
-if(GRIDDYN_HAVE_MPI)
+if(ENABLE_MPI)
     list(
         APPEND
             extra_solver_sources paradae/common/MapParam.cxx
@@ -221,9 +221,9 @@ if(BUILD_BRAID_SOLVER)
     target_compile_definitions(extraSolverLibrary PUBLIC "-DENABLE_BRAID")
 endif()
 
-if(GRIDDYN_HAVE_MPI)
+if(ENABLE_MPI)
     target_link_libraries(extraSolverLibrary PUBLIC MPI::MPI_C)
-endif(GRIDDYN_HAVE_MPI)
+endif(ENABLE_MPI)
 
 target_include_directories(
     extraSolverLibrary
