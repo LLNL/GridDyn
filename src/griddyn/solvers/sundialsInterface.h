@@ -15,14 +15,16 @@
 #include "solverInterface.h"
 #include "utilities/matrixDataSparse.hpp"
 // SUNDIALS libraries
-#include "griddyn/griddyn-config.h"  // Needed for SUNDIALS_OPENMP define
+#include "griddyn/griddyn-config.h"  // Needed for ENABLE_OPENMP_SUNDIALS define
 #include "nvector/nvector_serial.h"
-#ifdef SUNDIALS_OPENMP
+
+#ifdef ENABLE_OPENMP_SUNDIALS
 #include "nvector/nvector_openmp.h"
 #include <omp.h>
 #define NVECTOR_DESTROY(omp, vec) (omp) ? N_VDestroy_OpenMP (vec) : N_VDestroy_Serial (vec)
 #define NVECTOR_NEW(omp, size) (omp) ? N_VNew_OpenMP (size, omp_get_max_threads ()) : N_VNew_Serial (size)
 #define NVECTOR_DATA(omp, vec) (omp) ? NV_DATA_OMP (vec) : NV_DATA_S (vec)
+
 #else
 #define NVECTOR_DESTROY(omp, vec) N_VDestroy_Serial (vec)
 #define NVECTOR_NEW(omp, size) N_VNew_Serial (size)
@@ -50,7 +52,7 @@ void sundialsErrorHandlerFunc (int error_code,
                                char *msg,
                                void *user_data);
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 /** @brief check if the matrix is setup already
  *@param[in] J the matrix to check
  *@return true if the matrix has been loaded already false otherwise

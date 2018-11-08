@@ -77,7 +77,7 @@ target_link_libraries(fmiGridDynSharedLib PRIVATE runner)
 set(GRIDDYNFMILIBRARY_BINARY_LOC ${CMAKE_CURRENT_BINARY_DIR})
 
 install(
-    TARGETS fmiGridDynSharedLib
+    TARGETS fmiGridDynSharedLib fmiBuilder
     EXPORT griddyn-targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -162,9 +162,6 @@ list(
         ${CMAKE_CURRENT_SOURCE_DIR}/testFMIExport.cpp
 )
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
-
-list(APPEND executable_only_components fmiBuilder)
-set(executable_only_components ${executable_only_components} PARENT_SCOPE)
 
 install(
     FILES ${fmiBuilder_headers}

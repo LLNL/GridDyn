@@ -23,7 +23,7 @@
 #include <kinsol/kinsol_direct.h>
 #include <sunlinsol/sunlinsol_dense.h>
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -209,7 +209,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
 
     check_flag (&retval, "KINInit", 1);
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix (svsize, svsize);

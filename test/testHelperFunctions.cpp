@@ -1,8 +1,8 @@
 /*
 * LLNS Copyright Start
  * Copyright (c) 2014-2018, Lawrence Livermore National Security
- * This work was performed under the auspices of the U.S. Department 
- * of Energy by Lawrence Livermore National Laboratory in part under 
+ * This work was performed under the auspices of the U.S. Department
+ * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
  * Produced at the Lawrence Livermore National Laboratory.
  * All rights reserved.
@@ -100,10 +100,7 @@ std::ostream& operator<<(std::ostream& os, griddyn::gridDynSimulation::gridState
 
 void gridDynSimulationTestFixture::simpleRunTestXML(const std::string &fileName)
 {
-	gds = readSimXMLFile(fileName);
-	gds->consolePrintLevel = print_level::no_print;
-	gds->run();
-	requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
+	runTestXML(fileName, gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
 }
 
 void gridDynSimulationTestFixture::runTestXML(const std::string &fileName, gridDynSimulation::gridState_t finalState)
@@ -173,9 +170,9 @@ void gridDynSimulationTestFixture::detailedStageCheck(const std::string &fileNam
 	}
 	gds->dynInitialize();
 	runResidualCheck(gds, cDaeSolverMode);
-	
+
 	runJacobianCheck(gds, cDaeSolverMode);
-	
+
 	requireState(gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED);
 	if (finalState == gridDynSimulation::gridState_t::DYNAMIC_INITIALIZED)
 	{
@@ -206,7 +203,7 @@ void gridDynSimulationTestFixture::dynamicInitializationCheck(const std::string 
 
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 	mmatch = runResidualCheck(gds, cDaeSolverMode);
-	
+
 	BOOST_REQUIRE_EQUAL(mmatch, 0);
 }
 
@@ -281,7 +278,7 @@ int runResidualCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode &
 			BOOST_REQUIRE_EQUAL(mmatch, 0);
 		}
 	}
-	
+
 	return mmatch;
 }
 
@@ -309,7 +306,7 @@ int runAlgebraicCheck(std::unique_ptr<gridDynSimulation> &gds, const solverMode 
 		{
 			BOOST_REQUIRE_EQUAL(mmatch, 0);
 		}
-		
+
 	}
 	return mmatch;
 }

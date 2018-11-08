@@ -10,8 +10,13 @@ platform:
 configuration:
   - Release
 
+# Enable this if the build cache needs fixing
+# (note that the build cache is not saved for PRs)
+environment:
+  APPVEYOR_CACHE_SKIP_RESTORE: true
+
 cache:
-#  - build\libs # reenable this when the minizip pr is merged
+  - build\libs
 
 install:
 
@@ -19,7 +24,7 @@ before_build:
   # Make the build directory if it doesn't already exist
   - IF NOT EXIST build mkdir build
   - cd build
-  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DENABLE_PACKAGE_BUILD=ON -DBUILD_SHARED_FMI_LIBRARY=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DBUILD_RELEASE_ONLY=ON
+  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_INSTALL_PATH=C:/libraries/boost_1_63_0 -DENABLE_PACKAGE_BUILD=ON -DENABLE_FMI_EXPORT=ON -DBUILD_GRIDDYN_SHARED_LIBRARY=ON -DBUILD_RELEASE_ONLY=ON
   - cd ..
 
 build:

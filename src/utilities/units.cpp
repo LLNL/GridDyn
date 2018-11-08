@@ -168,7 +168,7 @@ static std::map<std::string, units_t> name2Unit{
   {"C", C},
   {"Celsius", C},
   {"K", K},
-  {"Kelvin", C},
+  {"Kelvin", K},
 };
 
 const static std::map<units_t, std::string> unit2Name{

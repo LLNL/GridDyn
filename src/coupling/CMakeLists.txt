@@ -12,10 +12,10 @@
 set(coupling_sources GhostSwingBusManager.cpp)
 
 set(coupling_headers GhostSwingBusManager.h GhostSwingBusMessageTypes.h)
-if(GRIDDYN_HAVE_MPI)
+if(ENABLE_MPI)
     list(APPEND coupling_sources MpiService.cpp)
     list(APPEND coupling_headers MpiService.h)
-endif(GRIDDYN_HAVE_MPI)
+endif(ENABLE_MPI)
 # require MPI for this project
 
 add_library(coupling_static_lib STATIC ${coupling_sources} ${coupling_headers})

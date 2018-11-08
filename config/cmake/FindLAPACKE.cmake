@@ -35,16 +35,15 @@
 #=============================================================================
 #
 set(LAPACKE_SEARCH_PATHS
-  ${LAPACKE_DIR_HINTS}
-  ${LAPACKE_DIR}
-  $ENV{LAPACKE_DIR}
-  $ENV{CMAKE_PREFIX_PATH}
-  ${CMAKE_PREFIX_PATH}
-  /usr
-  /usr/local
-  /usr/local/opt/lapack  ## Mac Homebrew install path
-  /opt/LAPACKE
-)
+    ${LAPACKE_DIR_HINTS}
+    ${LAPACKE_DIR}
+    $ENV{LAPACKE_DIR}
+    $ENV{CMAKE_PREFIX_PATH}
+    ${CMAKE_PREFIX_PATH}
+    /usr
+    /usr/local
+    /usr/local/opt/lapack  ## Mac Homebrew install path
+    /opt/LAPACKE)
 message(STATUS "LAPACKE_SEARCH_PATHS: ${LAPACKE_SEARCH_PATHS}")
 
 set(CMAKE_PREFIX_PATH ${LAPACKE_SEARCH_PATHS})
@@ -56,25 +55,25 @@ list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 ## to identify the LAPACKE_VERSION_STRING and improve searching.
 find_package(LAPACKE NO_MODULE QUIET)
 if(LAPACKE_FOUND)
-  if(EXISTS ${LAPACKE_DIR}/lapacke-config-version.cmake)
-    include(${LAPACKE_DIR}/lapacke-config-version.cmake)
-    set(LAPACKE_VERSION_STRING ${PACKAGE_VERSION})
-    unset(PACKAGE_VERSION) # Use cmake conventional naming
-  endif()
-  find_package(LAPACK NO_MODULE QUIET) #Require matching versions here!
-  find_package(BLAS NO_MODULE QUIET)   #Require matching versions here!
+    if(EXISTS ${LAPACKE_DIR}/lapacke-config-version.cmake)
+        include(${LAPACKE_DIR}/lapacke-config-version.cmake)
+        set(LAPACKE_VERSION_STRING ${PACKAGE_VERSION})
+        unset(PACKAGE_VERSION) # Use cmake conventional naming
+    endif()
+    find_package(LAPACK NO_MODULE QUIET) #Require matching versions here!
+    find_package(BLAS NO_MODULE QUIET)   #Require matching versions here!
 endif()
 
 ##################################################################################################
 ### First search for headers
-find_path(LAPACKE_CBLAS_INCLUDE_DIR 
-             NAMES cblas.h 
-             PATHS ${LAPACKE_SEARCH_PATHS} 
-             PATH_SUFFIXES include include/lapack)
-find_path(LAPACKE_LAPACKE_INCLUDE_DIR 
-             NAMES lapacke.h 
-             PATHS ${LAPACKE_SEARCH_PATHS} 
-             PATH_SUFFIXES include)
+find_path(LAPACKE_CBLAS_INCLUDE_DIR
+    NAMES cblas.h
+    PATHS ${LAPACKE_SEARCH_PATHS}
+    PATH_SUFFIXES include include/lapack)
+find_path(LAPACKE_LAPACKE_INCLUDE_DIR
+    NAMES lapacke.h
+    PATHS ${LAPACKE_SEARCH_PATHS}
+    PATH_SUFFIXES include)
 
 ##################################################################################################
 ### Second, search for libraries
@@ -82,19 +81,19 @@ set(PATH_SUFFIXES_LIST
   lib64
   lib
 )
-find_library(LAPACKE_LIB 
+find_library(LAPACKE_LIB
                  NAMES lapacke
                  PATHS ${LAPACKE_SEARCH_PATHS}
                  PATH_SUFFIXES ${PATH_SUFFIXES_LIST})
-find_library(CBLAS_LIB 
+find_library(CBLAS_LIB
                  NAMES cblas
                  PATHS ${LAPACKE_SEARCH_PATHS}
                  PATH_SUFFIXES ${PATH_SUFFIXES_LIST})
-find_library(LAPACK_LIB 
+find_library(LAPACK_LIB
                  NAMES lapack
                  PATHS ${LAPACKE_SEARCH_PATHS}
                  PATH_SUFFIXES ${PATH_SUFFIXES_LIST})
-find_library(BLAS_LIB 
+find_library(BLAS_LIB
                  NAMES blas
                  PATHS ${LAPACKE_SEARCH_PATHS}
                  PATH_SUFFIXES ${PATH_SUFFIXES_LIST})
@@ -146,18 +145,18 @@ if (LAPACKE_FOUND)
                                "\n"
                                "may be require special configurations.  The most common is the need to"
                                "explicitly link C programs against the gfortran support library.")
-                              
+
     endif()
   else()
     ## This code automated code is hard to determine if it is robust in many different environments.
     # Check for a common combination, and find required gfortran support libraries
     if("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*" AND "${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
        include(FortranCInterface)
-       FortranCInterface_VERIFY() 
+       FortranCInterface_VERIFY()
        if(NOT FortranCInterface_VERIFIED_C)
           message(FATAL_ERROR "C and fortran compilers are not compatible:\n${CMAKE_Fortran_COMPILER}:${CMAKE_C_COMPILER}")
        endif()
-       
+
        execute_process(COMMAND ${CMAKE_Fortran_COMPILER} -print-file-name=libgfortran.a OUTPUT_VARIABLE FORTRANSUPPORTLIB ERROR_QUIET)
        string(STRIP ${FORTRANSUPPORTLIB} FORTRANSUPPORTLIB)
        if(EXISTS "${FORTRANSUPPORTLIB}")

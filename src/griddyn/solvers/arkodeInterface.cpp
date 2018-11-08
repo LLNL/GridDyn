@@ -22,7 +22,7 @@
 #include <arkode/arkode.h>
 #include <arkode/arkode_direct.h>
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 #include <sunlinsol/sunlinsol_klu.h>
 #endif
 
@@ -189,7 +189,7 @@ double arkodeInterface::get (const std::string &param) const
     }
     else if (param == "jac calls")
     {
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
 //	CVodeCVodeSlsGetNumJacEvals(solverMem, &val);
 #else
         ARKDlsGetNumJacEvals (solverMem, &val);
@@ -346,7 +346,7 @@ void arkodeInterface::initialize (coreTime time0)
     retval = ARKodeSetMaxNumSteps (solverMem, 1500);
     check_flag (&retval, "ARKodeSetMaxNumSteps", 1);
 
-#ifdef KLU_ENABLE
+#ifdef ENABLE_KLU
     if (flags[dense_flag])
     {
         J = SUNDenseMatrix (svsize, svsize);

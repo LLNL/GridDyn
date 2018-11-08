@@ -32,7 +32,7 @@ set(
     exeTestHelper.cpp
 )
 
-if(NOT GRIDDYN_HAVE_MPI)
+if(NOT ENABLE_MPI)
     list(APPEND testComponent_sources componentTests/testGridLab.cpp)
 endif()
 
@@ -98,7 +98,7 @@ set(
     exeTestHelper.cpp
 )
 
-if(FMI_ENABLE)
+if(ENABLE_FMI)
     list(APPEND testExtra_sources extraTests/extraFMUtests.cpp)
 endif()
 
@@ -107,6 +107,7 @@ set(testMain_headers testHelper.h exeTestHelper.h)
 # add a baseline library for underlying dependencies and flags for test executables
 add_library(griddyn_test_base INTERFACE)
 target_link_libraries(griddyn_test_base INTERFACE Boostlibs::test)
+
 target_link_libraries(griddyn_test_base INTERFACE griddyn_base)
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test_files test_dir)
@@ -173,7 +174,7 @@ endforeach(keyfile)
 target_link_libraries(testLibrary fileInput griddyn_test_base)
 target_link_libraries(
     testComponents
-    ${executable_only_components}
+    griddyn_optional
     fileInput
     griddyn_test_base
 )

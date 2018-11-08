@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_SUITE (workQueue_tests, * boost::unit_test::label("quick"))
 
 // some tests only make sense if multithreading is enabled
 
-#ifndef DISABLE_MULTITHREADING
+#ifdef ENABLE_MULTITHREADING
 BOOST_AUTO_TEST_CASE (workQueue_test1)
 {
     int check = workQueue::getWorkerCount ();
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE (workQueue_test2)
     BOOST_CHECK_GE (elapsed_time.count (), 0.125);
 
     wq->destroyWorkerQueue ();
-#ifndef DISABLE_MULTITHREADING
+#ifdef ENABLE_MULTITHREADING
     wq = workQueue::instance (1);
     b1->reset ();
     start_t = std::chrono::high_resolution_clock::now ();
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE (workQueue_test2)
 #endif
 }
 
-#ifndef DISABLE_MULTITHREADING
+#ifdef ENABLE_MULTITHREADING
 BOOST_AUTO_TEST_CASE (workQueue_test3)
 {
     // Test a queue priority mechanisms

@@ -8,6 +8,8 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
+message(FATAL_ERROR "This file is significantly out-of-date with the root CMakeLists.txt")
+
 #project name
 project(GridDyn)
 

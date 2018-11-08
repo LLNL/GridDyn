@@ -14,7 +14,7 @@ set(runner_headers gridDynRunner.h)
 
 add_library(runner STATIC ${runner_sources} ${runner_headers})
 
-target_link_libraries(runner PUBLIC fileInput)
+target_link_libraries(runner PUBLIC fileInput utilities)
 
 set_target_properties(runner PROPERTIES FOLDER libraries)
 

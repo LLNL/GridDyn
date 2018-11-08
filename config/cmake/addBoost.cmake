@@ -1,5 +1,5 @@
 ##############################################################################
-#Copyright © 2017-2018,
+#Copyright Â© 2017-2018,
 #Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 #All rights reserved. See LICENSE file and DISCLAIMER for more details.
 ##############################################################################
@@ -171,7 +171,7 @@ if (core_debug_size EQUAL 0)
 	list(GET Boost_LIBRARIES_core_release 0 first_lib)
 	set_target_properties(Boostlibs::core PROPERTIES IMPORTED_LOCATION ${first_lib})
 
-    foreach(item RANGE 1 ${rng})
+  foreach(item RANGE 1 ${rng})
 		list(GET Boost_LIBRARIES_core_release ${item} next_lib)
 		string(RANDOM LENGTH 7 rand_name)
 		if (${Boost_USE_STATIC_LIBS})
@@ -201,6 +201,7 @@ else()
 	endforeach()
 endif()
 
+set_target_properties(Boostlibs::core Boostlibs::test PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 set_target_properties(Boostlibs::core Boostlibs::test PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 set_target_properties(Boostlibs::core PROPERTIES INTERFACE_LINK_LIBRARIES "${boost_core_deps}")
 
@@ -212,4 +213,3 @@ endif()
 
 #message(STATUS "Using Boost core debug libraries : ${Boost_LIBRARIES_core_debug}")
 #message(STATUS "Using Boost core release libraries : ${Boost_LIBRARIES_core_release}")
-
