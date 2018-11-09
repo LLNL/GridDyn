@@ -39,7 +39,7 @@ class fmuBuilder : public GriddynRunner
     std::unique_ptr<readerInfo> ri_;  //!< location of readerInfo
     std::string execPath;  //!< location of the executable making the fmu
     std::string platform = "all";  //!< target platform for the fmu
-    bool keep_dir = false;
+    // bool keep_dir = false; // unused
     /** private function for loading the subcomponents*/
     void loadComponents ();
     void generateXML (const std::string &xmlfile);

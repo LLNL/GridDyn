@@ -32,7 +32,10 @@
 
 namespace griddyn
 {
+
+namespace {
 const static bool unimplemented = false;
+}
 
 using namespace gridUnits;
 using namespace utilities::string_viewOps;
@@ -810,7 +813,7 @@ void epcReadFixedShunt (zipLoad *ld, string_view line, double /*base*/)
 
 void epcReadSwitchShunt (loads::svd* /*ld*/, string_view /*line*/, double /*base*/)
 {
-    assert (unimplemented);
+    throw unimplemented;
     /*
     auto strvec = splitlineBracket (line, " :", default_bracket_chars, delimiter_compression::on);
 

@@ -91,32 +91,32 @@ void tcpCommunicator::transmit (std::uint64_t destID, std::shared_ptr<commMessag
 void tcpCommunicator::initialize ()
 {
     // don't initialize twice if we already initialized
-    //	if (txSocket)
-    {
-        return;
-    }
+    // if (txSocket)
+    // {
+    //     return;
+    // }
 
     // set up transmission sockets and information
 
-    if (flags[use_tx_proxy])
-    {
-        //	auto localProxy = zmqProxyHub::getProxy(proxyName);
-        //	if (!localProxy->isRunning())
-        //	{
-        //		localProxy->startProxy();
-        //	}
-        //	txDescriptor.addOperation(socket_ops::connect, localProxy->getIncomingConnection());
-    }
+    // if (flags[use_tx_proxy])
+    // {
+    // 	auto localProxy = zmqProxyHub::getProxy(proxyName);
+    // 	if (!localProxy->isRunning())
+    // 	{
+    // 		localProxy->startProxy();
+    // 	}
+    // 	txDescriptor.addOperation(socket_ops::connect, localProxy->getIncomingConnection());
+    // }
 
-    if (flags[use_rx_proxy])
-    {
-        // auto localProxy = zmqProxyHub::getProxy(proxyName);
-        // if (!localProxy->isRunning())
-        //{
-        //	localProxy->startProxy();
-        //}
-        // rxDescriptor.addOperation(socket_ops::connect, localProxy->getIncomingConnection());
-    }
+    // if (flags[use_rx_proxy])
+    // {
+    //     auto localProxy = zmqProxyHub::getProxy(proxyName);
+    //     if (!localProxy->isRunning())
+    //     {
+    //     	localProxy->startProxy();
+    //     }
+    //     rxDescriptor.addOperation(socket_ops::connect, localProxy->getIncomingConnection());
+    // }
 
     // txDescriptor.addOperation(socket_ops::subscribe, getName());
     // rxDescriptor.addOperation(socket_ops::subscribe, getName());

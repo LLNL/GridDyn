@@ -46,7 +46,7 @@ void dimeCommunicator::cloneTo (Communicator *comm) const
 
 void dimeCommunicator::messageHandler (const zmq::multipart_t & /*msg */) {}
 
-void dimeCommunicator::addHeader (zmq::multipart_t &msg, std::shared_ptr<commMessage> & /* message */) {}
+void dimeCommunicator::addHeader (zmq::multipart_t & /*msg*/, std::shared_ptr<commMessage> & /* message */) {}
 
 void dimeCommunicator::addMessageBody (zmq::multipart_t & /* msg */, std::shared_ptr<commMessage> & /* message */)
 {
@@ -54,11 +54,7 @@ void dimeCommunicator::addMessageBody (zmq::multipart_t & /* msg */, std::shared
 
 void dimeCommunicator::set (const std::string &param, const std::string &val)
 {
-    if (param.empty ())
-    {
-    }
-
-    else
+    if (!param.empty ())
     {
         zmqCommunicator::set (param, val);
     }
@@ -68,10 +64,7 @@ void dimeCommunicator::set (const std::string &param, double val) { zmqCommunica
 
 void dimeCommunicator::setFlag (const std::string &flag, bool val)
 {
-    if (flag.empty ())
-    {
-    }
-    else
+    if (!flag.empty ())
     {
         zmqCommunicator::setFlag (flag, val);
     }

@@ -146,7 +146,7 @@ class fmiInfo
   private:
     std::map<std::string, std::string> headerInfo;  //!< the header information contained in strings
     double fmiVersion;  //!< the fmi version used
-    int numberOfEvents;  //!< the number of defined events
+    // int numberOfEvents;  //!< the number of defined events // currently unused
     int maxOrder;  //!< the maximum derivative order for CoSimulation FMU's
     std::bitset<32> capabilities;  //!< bitset containing the capabilities of the FMU
     std::vector<variableInformation> variables;  //!< information all the defined variables

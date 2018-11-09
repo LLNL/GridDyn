@@ -26,14 +26,12 @@ namespace griddyn
 class optFactory
 {
   public:
-    std::string name;
-    int m_level = 0;
-    optFactory (const std::string &component, const std::string &objName, int level = 0)
-        : name (objName), m_level (level)
+    optFactory (const std::string & /*component*/, const std::string &objName, int level = 0)
+        : m_name (objName), m_level (level)
     {
     }
-    optFactory (const stringVec &component, const std::string &objName, int level = 0)
-        : name (objName), m_level (level)
+    optFactory (const stringVec & /*component*/, const std::string &objName, int level = 0)
+        : m_name (objName), m_level (level)
     {
     }
     virtual gridOptObject *makeObject (coreObject *obj) = 0;
@@ -41,6 +39,13 @@ class optFactory
     virtual void prepObjects (count_t /*count*/, coreObject * /*obj*/) {}
     virtual count_t remainingPrepped () const { return 0; }
     virtual bool testObject (coreObject *) { return true; }
+
+    std::string name() { return m_name; }
+    int level() { return m_level; }
+
+  private:
+    std::string m_name;
+    int m_level = 0;
 };
 
 using optMap = std::map<std::string, optFactory *>;
@@ -48,7 +53,6 @@ using optMap = std::map<std::string, optFactory *>;
 class optComponentFactory
 {
   public:
-    std::string name;
     optComponentFactory () {}
     optComponentFactory (const std::string &typeName);
     ~optComponentFactory ();
@@ -63,6 +67,8 @@ class optComponentFactory
   protected:
     optMap m_factoryMap;
     std::vector<optFactory *> m_factoryList;
+  private:
+    std::string name;
 };
 
 // create a high level object factory for the coreObject class

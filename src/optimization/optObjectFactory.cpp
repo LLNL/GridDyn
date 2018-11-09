@@ -20,7 +20,7 @@ optComponentFactory::~optComponentFactory () = default;
 
 void optComponentFactory::registerFactory (optFactory *optFac)
 {
-    auto ret = m_factoryMap.insert (std::pair<std::string, optFactory *> (optFac->name, optFac));
+    auto ret = m_factoryMap.insert (std::pair<std::string, optFactory *> (optFac->name(), optFac));
     if (!ret.second)
     {
         ret.first->second = optFac;
@@ -77,12 +77,12 @@ gridOptObject *optComponentFactory::makeObject (coreObject *obj)
     auto ofm = m_factoryList[0];
     for (auto &of : m_factoryList)
     {
-        if (of->m_level > mxLevel)
+        if (of->level() > mxLevel)
         {
             if (of->testObject (obj))
             {
                 ofm = of;
-                mxLevel = of->m_level;
+                mxLevel = of->level();
             }
         }
     }
@@ -193,8 +193,7 @@ std::shared_ptr<optComponentFactory> coreOptObjectFactory::getFactory (const std
         return (m_factoryMap[factoryName]);
     }
     // make a new factory
-    auto tf = std::make_shared<optComponentFactory> ();
-    tf->name = factoryName;
+    auto tf = std::make_shared<optComponentFactory> (factoryName);
     m_factoryMap.insert (std::pair<std::string, std::shared_ptr<optComponentFactory>> (factoryName, tf));
     return tf;
 }

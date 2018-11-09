@@ -26,7 +26,8 @@ namespace griddyn
 {
 namespace fmi
 {
-static const bool unimplemented = false;
+
+const static bool unimplemented = false;
 
 fmiCoSimSubModel::fmiCoSimSubModel (const std::string &newName, std::shared_ptr<fmi2CoSimObject> fmi)
     : gridSubModel (newName), cs (std::move (fmi))
@@ -59,12 +60,13 @@ void fmiCoSimSubModel::dynObjectInitializeA (coreTime time, std::uint32_t flags)
     prevTime = time;
 }
 
-void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet)
+void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata & /*desiredOutput*/, IOdata & /*fieldSet*/)
 {
     if (opFlags[pflow_init_required])
     {
         if (opFlags[pFlow_initialized])
         {
+            throw unimplemented;
             /*
             cs->getStates(m_state.data());
             cs->setTime(prevTime - 0.01);
@@ -86,8 +88,8 @@ void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata 
                 }
 
             }
-            */
             opFlags.set (dyn_initialized);
+            */
         }
         else  // in pflow mode
         {
@@ -102,7 +104,7 @@ void fmiCoSimSubModel::dynObjectInitializeB (const IOdata &inputs, const IOdata 
     }
     else
     {
-        assert (unimplemented);
+        throw unimplemented;
         /*
         cs->setMode (fmuMode::initializationMode);
 
@@ -287,7 +289,7 @@ void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
     }
 }
 static const std::string localIntegrationtimeString ("localintegrationtime");
-void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::units_t /*unitType*/)
 {
     if ((param == "timestep") || (param == localIntegrationtimeString))
     {
@@ -304,7 +306,7 @@ void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::uni
         }
         else
         {
-            gridSubModel::set (param, val);
+            gridSubModel::set (param, val); // TODO isn't this where the unitType is supposed to go?
         }
     }
 }
@@ -322,7 +324,7 @@ double fmiCoSimSubModel::get (const std::string &param, gridUnits::units_t unitT
     return gridSubModel::get (param, unitType);
 }
 
-double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t mode)
+double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t /*mode*/)
 {
     double res = 0.0;
     double ich = 1.0;
@@ -334,7 +336,7 @@ double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t mode)
     }
     else
     {
-        assert (unimplemented);
+        throw unimplemented;
         /*
         const double gap = 1e-8;
         double out1, out2;
@@ -437,9 +439,9 @@ double fmiCoSimSubModel::getPartial (int depIndex, int refIndex, refMode_t mode)
     return res;
 }
 
-void fmiCoSimSubModel::timestep (coreTime time, const IOdata &inputs, const solverMode &sMode)
+void fmiCoSimSubModel::timestep (coreTime /*time*/, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
 {
-    assert(unimplemented);
+    throw unimplemented;
     /*
     double h = localIntegrationTime;
     int sv = 0;
@@ -488,13 +490,13 @@ void fmiCoSimSubModel::timestep (coreTime time, const IOdata &inputs, const solv
     */
 }
 
-void fmiCoSimSubModel::ioPartialDerivatives (const IOdata &inputs,
-                                             const stateData &sD,
-                                             matrixData<double> &md,
-                                             const IOlocs &inputLocs,
-                                             const solverMode &sMode)
+void fmiCoSimSubModel::ioPartialDerivatives (const IOdata & /*inputs*/,
+                                             const stateData & /*sD*/,
+                                             matrixData<double> & /*md*/,
+                                             const IOlocs & /*inputLocs*/,
+                                             const solverMode & /*sMode*/)
 {
-    assert(unimplemented);
+    throw unimplemented;
     /*
     updateInfo (inputs, sD, sMode);
     double res;
@@ -533,7 +535,7 @@ void fmiCoSimSubModel::ioPartialDerivatives (const IOdata &inputs,
     */
 }
 
-IOdata fmiCoSimSubModel::getOutputs (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const
+IOdata fmiCoSimSubModel::getOutputs (const IOdata & /*inputs*/, const stateData &sD, const solverMode &sMode) const
 {
     IOdata out (m_outputSize, 0);
     if (cs->getCurrentMode () >= fmuMode::initializationMode)
@@ -545,30 +547,31 @@ IOdata fmiCoSimSubModel::getOutputs (const IOdata &inputs, const stateData &sD, 
         if ((opFlags[use_output_estimator]) && (!sD.empty ()) && (!opFlags[fixed_output_interval]) &&
             (isDynamic (sMode)))
         {
+            throw unimplemented;
+            /*
             for (index_t pp = 0; pp < m_outputSize; ++pp)
             {
-                /*
                 if (outputInformation[pp].refMode >= refMode_t::level4)
                 {
                     const double res = oEst[pp]->estimate(sD.time, inputs, sD.state +
                         offsets.getDiffOffset(sMode)); out[pp] = res;
                 }
-                */
             }
+            */
         }
     }
     return out;
 }
 
 double fmiCoSimSubModel::getDoutdt (const IOdata & /*inputs*/,
-                                    const stateData &sD,
-                                    const solverMode &sMode,
-                                    index_t outputNum) const
+                                    const stateData & /*sD*/,
+                                    const solverMode & /*sMode*/,
+                                    index_t /*outputNum*/) const
 {
     return 0;
 }
 
-double fmiCoSimSubModel::getOutput (const IOdata &inputs,
+double fmiCoSimSubModel::getOutput (const IOdata & /*inputs*/,
                                     const stateData &sD,
                                     const solverMode &sMode,
                                     index_t outputNum) const
@@ -581,6 +584,7 @@ double fmiCoSimSubModel::getOutput (const IOdata &inputs,
         if ((opFlags[use_output_estimator]) && (!sD.empty ()) && (!opFlags[fixed_output_interval]) &&
             (isDynamic (sMode)))
         {
+            throw unimplemented;
             /*
             if (outputInformation[num].refMode >= refMode_t::level4)
             {
@@ -606,8 +610,9 @@ double fmiCoSimSubModel::getOutput (index_t outputNum) const
     return out;
 }
 
-void fmiCoSimSubModel::updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode)
+void fmiCoSimSubModel::updateLocalCache (const IOdata & /*inputs*/, const stateData & /*sD*/, const solverMode & /*sMode*/)
 {
+    throw unimplemented;
     /*
     fmi2Boolean eventMode;
     fmi2Boolean terminateSim;

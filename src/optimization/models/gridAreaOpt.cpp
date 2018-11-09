@@ -499,15 +499,15 @@ void gridAreaOpt::add (gridBusOpt *bus)
     }
 }
 
-void gridAreaOpt::add (gridAreaOpt *area)
+void gridAreaOpt::add (gridAreaOpt *areaOpt)
 {
-    if (!isMember (area))
+    if (!isMember (areaOpt))
     {
-        areaList.push_back (area);
-        area->setParent (this);
-        area->locIndex = static_cast<index_t> (areaList.size ()) - 1;
-        optObList.insert (area);
-        objectList.push_back (area);
+        areaList.push_back (areaOpt);
+        areaOpt->setParent (this);
+        areaOpt->locIndex = static_cast<index_t> (areaList.size ()) - 1;
+        optObList.insert (areaOpt);
+        objectList.push_back (areaOpt);
     }
 }
 
@@ -590,19 +590,19 @@ void gridAreaOpt::remove (gridLinkOpt *lnk)
 }
 
 // remove area
-void gridAreaOpt::remove (gridAreaOpt *area)
+void gridAreaOpt::remove (gridAreaOpt *areaOpt)
 {
-    if (areaList[area->locIndex]->getID () == area->getID ())
+    if (areaList[areaOpt->locIndex]->getID () == areaOpt->getID ())
     {
-        areaList[area->locIndex]->setParent (nullptr);
-        areaList.erase (areaList.begin () + area->locIndex);
-        for (auto kk = area->locIndex; kk < static_cast<index_t> (areaList.size ()); ++kk)
+        areaList[areaOpt->locIndex]->setParent (nullptr);
+        areaList.erase (areaList.begin () + areaOpt->locIndex);
+        for (auto kk = areaOpt->locIndex; kk < static_cast<index_t> (areaList.size ()); ++kk)
         {
             areaList[kk]->locIndex = kk;
         }
         auto oLb = objectList.begin ();
         auto oLe = objectList.end ();
-        auto aid = area->getID ();
+        auto aid = areaOpt->getID ();
         while (oLb != oLe)
         {
             if ((*oLb)->getID () == aid)

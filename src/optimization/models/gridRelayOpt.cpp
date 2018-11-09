@@ -223,7 +223,7 @@ coreObject *gridRelayOpt::find (const std::string &objName) const
     return obj;
 }
 
-coreObject *gridRelayOpt::getSubObject (const std::string &typeName, index_t /*num*/) const
+coreObject *gridRelayOpt::getSubObject (const std::string & /*typeName*/, index_t /*num*/) const
 {
     return nullptr;
     /*
