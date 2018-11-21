@@ -136,8 +136,8 @@ option(
 )
 
 option(
-    BUILD_CXX_SHARED_LIB
-    "Build a Shared Libraries of the CXX interface"
+    BUILD_GRIDDYN_SHARED_LIBRARY
+    "Build a shared library of the C/C++ interface"
     OFF
 )
 
@@ -304,7 +304,7 @@ cmake_dependent_option(
     OFF
 )
 
-mark_as_advanced(BUILD_CXX_SHARED_LIB)
+mark_as_advanced(BUILD_GRIDDYN_SHARED_LIBRARY)
 
 # add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
@@ -358,7 +358,6 @@ endif()
 if(
     INTERFACE_BUILD
     OR BUILD_GRIDDYN_SHARED_LIBRARY
-    OR BUILD_CXX_SHARED_LIB
     OR ENABLE_FMI_EXPORT
 )
     set(BUILD_SHARED_LIBS ON)

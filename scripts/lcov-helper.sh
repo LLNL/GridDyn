@@ -32,7 +32,7 @@ if [[ "$1" ]]; then
                         ;;
             esac
             done
- 
+
             if [[ "$SUBMIT_CODECOV" != "true" || "$SUBMIT_COVERALLS" == "true" ]]; then
                 # Get the coverage info from the test runs into a file
                 lcov --gcov-tool $GCOV_TOOL --no-external --directory . --capture --output-file coverage.info &> /dev/null
@@ -41,13 +41,20 @@ if [[ "$1" ]]; then
                 # Clean-up the coverage info
                 lcov --remove coverage.total 'test/*' 'tests/*' 'ThirdParty/*' 'dependencies/*' '/usr/*' --output-file coverage.info.cleaned > /dev/null
             fi
-            
+
             # Submit coverage info to dashboardv
             if [[ "$SUBMIT_COVERALLS" == "true" ]]; then
-                coveralls --gcov ${GCOV_TOOL} --lcov-file coverage.info.cleaned > /dev/null 
+                coveralls --gcov ${GCOV_TOOL} --lcov-file coverage.info.cleaned > /dev/null
             fi
             if [[ "$SUBMIT_CODECOV" == "true" ]]; then
-                bash <(curl -s https://codecov.io/bash) -x ${GCOV_TOOL} > /dev/null
+                curl -sf https://codecov.io/bash > /tmp/codecov.sh
+                STATUS=$?
+                if [[ "$STATUS" == "0" ]]; then
+                    bash /tmp/codecov.sh -x ${GCOV_TOOL} > /dev/null
+                else
+                    echo "Codecov is currently down, skipping submission"
+                fi
+                rm /tmp/codecov.sh
             fi
             ;;
         *)
@@ -57,4 +64,3 @@ if [[ "$1" ]]; then
 else
     echo "Usage: $0 setup-counters|gather-coverage-info"
 fi
-
