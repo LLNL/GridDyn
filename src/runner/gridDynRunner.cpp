@@ -273,7 +273,11 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds, readerInfo
         readerConfig::setPrintMode (temp);  // set the gridDynXML reader print mode
         // default is normal mode
     }
-
+	if (vm.count("log_level") > 0)
+	{
+		int temp = vm["log_level"].as<int>();
+		gds->set("printlevel", temp);
+	}
     if (vm.count ("warn") > 0)
     {
         int temp = vm["warn"].as<int> ();
@@ -453,7 +457,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 		("config-file-output", po::value<std::string> (), "file to store current configuration options")
 		("mpicount", "setup for an MPI run")
 		("version", "print version string")
-		("test", "run a test program[ignored in many cases]");
+		("test", "run a test program[ignored in many cases unless specific other options are used]");
 
     config.add_options () ("powerflow-output,o", po::value<std::string> (),"file output for the powerflow solution")
 		("param,P", po::value<std::vector<std::string>> (),"override simulation file parameters --param ParamName=<val>")
@@ -470,6 +474,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 		("quiet,q","set verbosity to 0 (ie only error output)")
 		("jac-output", po::value<std::string> (),"powerflow Jacobian file output")
 		("verbose,v", po::value<int> (),"specify verbosity output 0=verbose,1=normal, 2=summary,3=none")
+		("log_level", po::value<int>(), "specify logging level 0=verbose,1=normal, 2=summary,3=none")
         ("flags,f", po::value<std::vector<std::string>> (),"specify flags to feed to GridDyn")
 		("file-flags", po::value<std::vector<std::string>> (),"specify flags to feed to the file reader")
 		("define,D", po::value<std::vector<std::string>> (),"definition strings for the element file readers")
@@ -477,7 +482,7 @@ int argumentParser (int argc, char *argv[], po::variables_map &vm_map, bool allo
 		("warn,w", po::value<int> (), "specify warning level output 0=all, 1=important,2=none")
 		("threads", po::value<int> (), "specify the number of worker threads to use if multithreading is enabled")
 		("xml", po::value<std::string> (), "the xml reader to use: 1 for tinyxml, 2 for tinyxml2")
-		( "match-type", po::value<std::string> (),"the default parameter name matching algorithm to use for xml[exact|capital*|any] ");
+		( "match-type", po::value<std::string> (),"the default parameter name matching algorithm to use for xml[exact|capital*|any] exact may result in slightly faster loading but keys and elements must all be lower case");
 
     hidden.add_options () ("input", po::value<std::string> (), "input file");
 
