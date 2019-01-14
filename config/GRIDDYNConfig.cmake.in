@@ -22,8 +22,8 @@ set(${PN}_C_SHARED_LIBRARY "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@/@helics
 set(${PN}_C_SHARED_LIBRARY_DEBUG "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@/@helics_c_shared_file_debug@")
 endif()
 
-set(CXX_SHARED_BUILT @BUILD_CXX_SHARED_LIB@)
-if (CXX_SHARED_BUILT)
+set(SHARED_LIBRARY_BUILT @BUILD_GRIDDYN_SHARED_LIBRARY@)
+if (SHARED_LIBRARY_BUILT)
 set(${PN}_CXX_SHARED_LIBRARY "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@/@helics_cxx_shared_file@")
 set(${PN}_CXX_SHARED_LIBRARY_DEBUG "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@/@helics_cxx_shared_file_debug@")
 endif()
@@ -31,22 +31,22 @@ endif()
 set(${PN}_STATIC_LIBRARY "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/@helics_static_file@")
 set(${PN}_STATIC_LIBRARY_DEBUG "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/@helics_static_file_debug@")
 
-find_program(HELICS_PLAYER helics_player 
+find_program(HELICS_PLAYER helics_player
 	PATH ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@
 	NO_DEFAULT_PATH)
-	
-find_program(HELICS_RECORDER helics_recorder 
+
+find_program(HELICS_RECORDER helics_recorder
 	PATH ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@
 	NO_DEFAULT_PATH)
-	
-find_program(HELICS_APP helics_app 
+
+find_program(HELICS_APP helics_app
 	PATH ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@
 	NO_DEFAULT_PATH)
-	
-find_program(HELICS_BROKER helics_broker 
+
+find_program(HELICS_BROKER helics_broker
 	PATH ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@
 	NO_DEFAULT_PATH)
-	
+
 set(HELICS_HAVE_ZEROMQ @HELICS_HAVE_ZEROMQ)
 set(HELICS_HAVE_MPI @HELICS_HAVE_MPI)
 
@@ -86,4 +86,3 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/helics-targets.cmake)
 
 check_required_components(${PN})
-
