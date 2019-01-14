@@ -62,7 +62,7 @@ if (MSVC)
   if (NOT MSVC_RELEASE_BUILD_TYPE)
         set(MSVC_RELEASE_BUILD_TYPE "Release")
     endif()
-    message(STATUS "Configuring SuiteSparse Autobuild for ${MSVC_RELEASE_BUILD_TYPE}logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
+    message(STATUS "Configuring SuiteSparse Autobuild for ${MSVC_RELEASE_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
         -D CMAKE_LINKER=${linker_string}
         -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
