@@ -12,6 +12,7 @@ else()
 endif()
 
 if (NOT DEFINED SuiteSparse_DIR)
+	set(SuiteSparse_NOT_GIVEN TRUE)
 	set(SuiteSparse_DIR ${SuiteSparse_INSTALL_PATH})
 endif()
 
@@ -52,29 +53,26 @@ if(ENABLE_KLU)
 		if (AUTOBUILD_KLU)
 			include(buildSuiteSparse)
 			build_suitesparse(${SuiteSparse_INSTALL_PATH})
-			find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
+			message(STATUS "KLU DIR: ${SuiteSparse_DIR}")
+			unset(SuiteSparse_DIR)
+			message(STATUS "KLU DIR: ${SuiteSparse_DIR}")
+			#set(SuiteSparse_DIR ${SuiteSparse_INSTALL_PATH})
+			find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
 				HINTS
 					${SuiteSparse_INSTALL_PATH}
 				PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
 			)
 		else(AUTOBUILD_KLU)
-			find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD)
-		if (NOT SuiteSparse_FOUND)
-			if (WIN32 AND NOT MSYS)
-				OPTION(AUTOBUILD_KLU "enable KLU to automatically download and build" ON)
-			else()
-				OPTION(AUTOBUILD_KLU "enable KLU to automatically download and build" OFF)
+			# For Unix OSes, search for a system copy of KLU
+			# Try to avoid error from '-NOTFOUND' SuiteSparse_DIR cache entry after failed find_package
+			if (SuiteSparse_NOT_GIVEN)
+				set(SuiteSparse_DIR ${SuiteSparse_INSTALL_PATH})
+				unset(SuiteSparse_NOT_GIVEN)
 			endif()
-			if (AUTOBUILD_KLU)
-				include(buildSuiteSparse)
-				build_suitesparse(${SuiteSparse_INSTALL_PATH})
-				find_package(suitesparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD
-					HINTS
-						${SuiteSparse_INSTALL_PATH}
-					PATH_SUFFIXES ${SUITESPARSE_CMAKE_SUFFIXES}
-				)
-			endif(AUTOBUILD_KLU)
-		endif()
+			find_package(SuiteSparse COMPONENTS KLU AMD COLAMD BTF SUITESPARSECONFIG CXSPARSE UMFPACK CCOLAMD CAMD CHOLMOD)
+			if (NOT SuiteSparse_FOUND)
+				message(FATAL_ERROR "KLU was not found on the system and AUTOBUILD_KLU is set to OFF")
+			endif()
 		endif(AUTOBUILD_KLU)
 	else()
 		if(AUTOBUILD_KLU)
