@@ -39,9 +39,10 @@ ExternalProject_Add(suitesparse
     GIT_REPOSITORY  https://github.com/jlblancoc/suitesparse-metis-for-windows.git
     UPDATE_COMMAND " "
     BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/suitesparse
+    INSTALL_DIR ${install_path}
 
     CMAKE_ARGS
-        -D${prefix_install}_INSTALL_PREFIX=${install_path}
+       	-DCMAKE_INSTALL_PREFIX=${install_path}
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
@@ -50,9 +51,6 @@ ExternalProject_Add(suitesparse
         \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
         -DCMAKE_LINKER=${linker_string}
         -DBUILD_METIS=OFF
-
-
-    INSTALL_DIR ${install_path}
     )")
 
 
