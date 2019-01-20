@@ -1,9 +1,13 @@
+##############################################################################
+# Copyright © 2018,
+# Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
+#All rights reserved. See LICENSE file and DISCLAIMER for more details.
+##############################################################################
+
 
 IF (MSVC)
 	set(HELICS_PATH_HINTS
-		C:/local/helics_1_3_1
-		C:/local/helics_1_3_0
-		C:/local/helics_1_2_1
+		C:/local/helics_2_0_0
 		)
 ENDIF(MSVC)
 
@@ -16,7 +20,7 @@ set(HELICS_CMAKE_SUFFIXES
 	lib/cmake/HELICS/
 			cmake/HELICS/)
 	
-find_package(HELICS QUIET
+find_package(HELICS 2
 	HINTS 
 		${HELICS_INSTALL_PATH}
 		$ENV{HELICS_INSTALL_PATH}

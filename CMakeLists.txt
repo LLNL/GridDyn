@@ -32,6 +32,12 @@ set(GRIDDYN_DATE 4-28-2018)
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 set(GRIDDYN_VERSION_STRING_SHORT "${GRIDDYN_VERSION}")
 
+if(POLICY CMP0079)
+    # Policy CMP0079 introduced since CMake 3.13.2 changes a few things in target definitions with INTERFACE, use old until this is evaluated properly
+    # condition.
+    cmake_policy(SET CMP0079 NEW)
+  endif()
+  
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # ------------------------------------------------------------
@@ -504,6 +510,19 @@ if(ENABLE_MULTITHREADING)
     find_package(Threads REQUIRED)
     target_link_libraries(griddyn_base INTERFACE Threads::Threads)
 endif(ENABLE_MULTITHREADING)
+
+# -----------------------------------------------------------------------------
+# create the fmt header only targets
+# -----------------------------------------------------------------------------
+set(FMT_ASSUME_CPP14_SUPPORT ON)
+set(FMT_SILENT ON)
+# get the FMT header only library
+add_subdirectory(ThirdParty/fmt EXCLUDE_FROM_ALL)
+hide_variable(FMT_DOC)
+hide_variable(FMT_INSTALL)
+hide_variable(FMT_PEDANTIC)
+hide_variable(FMT_TEST)
+hide_variable(FMT_WERROR)
 
 # ------------------------------------------------------------
 # finding MPI
