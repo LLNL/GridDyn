@@ -75,7 +75,7 @@ class helicsCoordinator : public coreObject
 
   private:
     std::deque<helics::Publication> pubs_;  //!< list of all the publication
-    std::deque<helics::Subscription> subs_;  //!< container for all the subscription information
+    std::deque<helics::Input> subs_;  //!< container for all the subscription information
     std::deque<helics::Endpoint> epts_;  //!< container for all the endpoints
     std::vector<SubInfo> subI;
     std::vector<PubInfo> pubI;
@@ -228,7 +228,7 @@ class helicsCoordinator : public coreObject
     bool hasMessage (int32_t index) const;
 
     helics::Publication *getPublicationPointer (int32_t index);
-    helics::Subscription *getSubscriptionPointer (int32_t index);
+    helics::Input *getInputPointer (int32_t index);
     helics::Endpoint *getEndpointPointer (int32_t index);
 
 };

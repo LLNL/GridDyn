@@ -99,12 +99,12 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     {
         if (s.unitType != gridUnits::defUnit)
         {
-            subs_[ii] = helics::Subscription (helics::interface_availability::optional, vFed_, s.name,
+            subs_[ii] = helics::Input (helics::interface_availability::optional, vFed_, s.name,
                                               gridUnits::to_string (s.unitType));
         }
         else
         {
-            subs_[ii] = helics::Subscription (helics::interface_availability::optional, vFed_, s.name);
+            subs_[ii] = helics::Input (helics::interface_availability::optional, vFed_, s.name);
         }
         ++ii;
     }
@@ -294,7 +294,7 @@ helics::Publication *helicsCoordinator::getPublicationPointer (int32_t index)
     return nullptr;
 }
 
-helics::Subscription *helicsCoordinator::getSubscriptionPointer (int32_t index)
+helics::Input *helicsCoordinator::getInputPointer (int32_t index)
 {
     if (isValidIndex (index, subs_))
     {
