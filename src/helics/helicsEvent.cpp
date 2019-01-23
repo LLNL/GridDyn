@@ -147,14 +147,14 @@ void helicsEvent::initialize ()
             return;
         }
     }
-    auto sub = coord->getSubscriptionPointer (subid);
+    auto sub = coord->getInputPointer (subid);
     if (sub == nullptr)
     {
         return;
     }
     if (eventType == helicsEventType::string_parameter)
     {
-        sub->registerCallback<std::string> ([this](const std::string &update, helics::Time /*tval*/) {
+        sub->setInputNotificationCallback<std::string> ([this](const std::string &update, helics::Time /*tval*/) {
             updateStringValue (update);
             trigger ();
         });
@@ -163,7 +163,7 @@ void helicsEvent::initialize ()
     {
         if (vectorElement >= 0)
         {
-            sub->registerCallback<std::vector<double>> (
+            sub->setInputNotificationCallback<std::vector<double>> (
               [this](const std::vector<double> &update, helics::Time /*tval*/) {
                   if (vectorElement < static_cast<int32_t> (update.size ()))
                   {
@@ -174,7 +174,7 @@ void helicsEvent::initialize ()
         }
         else
         {
-            sub->registerCallback<double> ([this](double update, helics::Time /*tval*/) {
+            sub->setInputNotificationCallback<double> ([this](double update, helics::Time /*tval*/) {
                 setValue (update);
                 trigger ();
             });

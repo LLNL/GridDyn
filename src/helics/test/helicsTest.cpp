@@ -15,8 +15,8 @@
 #include "core/objectFactory.hpp"
 #include "griddyn/Generator.h"
 #include "griddyn/gridBus.h"
-#include "helics/apps/Player.hpp"
 #include "helics/apps/BrokerApp.hpp"
+#include "helics/apps/Player.hpp"
 #include "helics/apps/Recorder.hpp"
 #include "helics/helicsCoordinator.h"
 #include "helics/helicsLibrary.h"
@@ -64,38 +64,38 @@ BOOST_AUTO_TEST_CASE (time_conversion_test)
 
 BOOST_AUTO_TEST_CASE (test_pub_sub_str)
 {
-    helics::FederateInfo fi ("string_test");
+    helics::FederateInfo fi;
     fi.coreType = helics::core_type::TEST;
-    fi.coreInitString = "1";
+    fi.coreInitString = "--autobroker";
 
-    auto vFed = std::make_shared<helics::ValueFederate> (fi);
+    auto vFed = std::make_shared<helics::ValueFederate> ("string_test", fi);
     // register the publications
-    auto pubid = vFed->registerGlobalPublication<std::string> ("pub1");
+    auto &pubid = vFed->registerGlobalPublication<std::string> ("pub1");
 
-    auto subid = vFed->registerRequiredSubscription<std::string> ("pub1");
-    vFed->setTimeDelta (1.0);
-    vFed->enterExecutionState ();
+    auto &subid = vFed->registerSubscription ("pub1");
+    vFed->setProperty (helics::defs::properties::period, 1.0);
+    vFed->enterExecutingMode ();
     // publish string1 at time=0.0;
     vFed->publish (pubid, "string1");
     auto gtime = vFed->requestTime (1.0);
 
     BOOST_CHECK_EQUAL (gtime, 1.0);
-    std::string s;
     // get the value
-    vFed->getValue (subid, s);
+    std::string s = subid.getValue<std::string> ();
+
     // make sure the string is what we expect
     BOOST_CHECK_EQUAL (s, "string1");
     // publish a second string
     vFed->publish (pubid, "string2");
     // make sure the value is still what we expect
-    vFed->getValue (subid, s);
+    subid.getValue (s);
 
     BOOST_CHECK_EQUAL (s, "string1");
     // advance time
     gtime = vFed->requestTime (2.0);
     // make sure the value was updated
     BOOST_CHECK_EQUAL (gtime, 2.0);
-    vFed->getValue (subid, s);
+    subid.getValue (s);
 
     BOOST_CHECK_EQUAL (s, "string2");
     vFed->finalize ();
@@ -103,38 +103,37 @@ BOOST_AUTO_TEST_CASE (test_pub_sub_str)
 
 BOOST_AUTO_TEST_CASE (test_pub_sub_double)
 {
-    helics::FederateInfo fi ("double_test");
+    helics::FederateInfo fi;
     fi.coreType = helics::core_type::TEST;
-    fi.coreInitString = "1";
+    fi.coreInitString = "--autobroker";
 
-    auto vFed = std::make_shared<helics::ValueFederate> (fi);
+    auto vFed = std::make_shared<helics::ValueFederate> ("double_test", fi);
     // register the publications
     auto pubid = vFed->registerGlobalPublication<double> ("pub1");
 
-    auto subid = vFed->registerRequiredSubscription<double> ("pub1");
-    vFed->setTimeDelta (1.0);
-    vFed->enterExecutionState ();
+    auto &subid = vFed->registerSubscription ("pub1");
+    vFed->setProperty (helics::defs::properties::period, 1.0);
+    vFed->enterExecutingMode ();
     // publish string1 at time=0.0;
     vFed->publish (pubid, 27.0);
     auto gtime = vFed->requestTime (1.0);
 
     BOOST_CHECK_EQUAL (gtime, 1.0);
-    double s;
-    // get the value
-    vFed->getValue (subid, s);
+    double s = subid.getValue<double> ();
+
     // make sure the string is what we expect
     BOOST_CHECK_EQUAL (s, 27.0);
     // publish a second string
     vFed->publish (pubid, 23.234234);
     // make sure the value is still what we expect
-    vFed->getValue (subid, s);
+    s = vFed->getDouble (subid);
     BOOST_CHECK_EQUAL (s, 27.0);
 
     // advance time
     gtime = vFed->requestTime (2.0);
     // make sure the value was updated
     BOOST_CHECK_EQUAL (gtime, 2.0);
-    vFed->getValue (subid, s);
+    subid.getValue (s);
 
     BOOST_CHECK_CLOSE (s, 23.234234, 0.00001);
     vFed->finalize ();
@@ -415,7 +414,7 @@ BOOST_AUTO_TEST_CASE (test_collector_vector)
     auto pts = rec.pointCount ();
     BOOST_CHECK_EQUAL (pts, 41);
 
-	auto pt1 = rec.getValue (0);
+    auto pt1 = rec.getValue (0);
     BOOST_CHECK_EQUAL (pt1.first, "vout");
     BOOST_CHECK (pt1.second.compare (0, 3, "v4[") == 0);
     rec.finalize ();
@@ -435,8 +434,8 @@ BOOST_AUTO_TEST_CASE (test_event)
     auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
     auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
 
-	//add a single point
-    auto play = helics::apps::Player (helics::FederateInfo());
+    // add a single point
+    auto play = helics::apps::Player (helics::FederateInfo ());
     play.addPublication ("breaker", helics::helics_type_t::helicsDouble);
     play.addPoint (120.0, "breaker", 1.0);
 
@@ -453,14 +452,13 @@ BOOST_AUTO_TEST_CASE (test_event)
     hR->Finalize ();
     auto pts = rec.pointCount ();
     BOOST_CHECK_EQUAL (pts, 41 * 4);
-    auto endpt=rec.getValue(163);
-    BOOST_CHECK_EQUAL(numeric_conversion(endpt.second,45.7), 0.0);
+    auto endpt = rec.getValue (163);
+    BOOST_CHECK_EQUAL (numeric_conversion (endpt.second, 45.7), 0.0);
     rec.finalize ();
     // I want this freed first PT
     hR = nullptr;
     sim = nullptr;
 }
-
 
 BOOST_AUTO_TEST_CASE (test_vector_event)
 {

@@ -64,17 +64,15 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
                     switch (pubType)
                     {
                     case collectorPubType::as_vector:
-                        if (!pubName.empty())
+                        if (!pubName.empty ())
                         {
-                            mpubIndex =
-                                coord->addPublication(pubName, helics::helics_type_t::helicsVector);
+                            mpubIndex = coord->addPublication (pubName, helics::data_type::helics_vector);
                         }
                         break;
                     case collectorPubType::as_string:
-                        if (!pubName.empty())
+                        if (!pubName.empty ())
                         {
-                            mpubIndex =
-                                coord->addPublication(pubName, helics::helics_type_t::helicsString);
+                            mpubIndex = coord->addPublication (pubName, helics::data_type::helics_string);
                         }
                         break;
                     default:
@@ -88,16 +86,16 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
     {
         if (cp.columnCount == 1)
         {
-			if (pubType == collectorPubType::as_individual)
-			{
-                auto index = coord->addPublication (cp.colname, helics::helics_type_t::helicsDouble,
+            if (pubType == collectorPubType::as_individual)
+            {
+                auto index = coord->addPublication (cp.colname, helics::data_type::helics_double,
                                                     cp.dataGrabber->outputUnits);
                 pubs.emplace_back (cp.colname, index, false);
-			}
-			else
-			{
+            }
+            else
+            {
                 pubs.emplace_back (cp.colname, -1, false);
-			}
+            }
         }
         else
         {
@@ -179,7 +177,7 @@ void helicsCollector::set (const std::string &param, const std::string &val)
             pubType = collectorPubType::as_vector;
             if (mpubIndex >= 0)
             {
-                coord->updatePublication(mpubIndex, pubName, helics::helics_type_t::helicsVector);
+                coord->updatePublication (mpubIndex, pubName, helics::data_type::helics_vector);
             }
         }
         else if (val == "string")
@@ -187,7 +185,7 @@ void helicsCollector::set (const std::string &param, const std::string &val)
             pubType = collectorPubType::as_string;
             if (mpubIndex >= 0)
             {
-                coord->updatePublication(mpubIndex, pubName, helics::helics_type_t::helicsString);
+                coord->updatePublication (mpubIndex, pubName, helics::data_type::helics_string);
             }
         }
         else if (val == "individual")
@@ -204,24 +202,22 @@ void helicsCollector::set (const std::string &param, const std::string &val)
         pubName = val;
         if (mpubIndex >= 0)
         {
-            coord->updatePublication(mpubIndex, pubName,helics::helics_type_t::helicsAny);
+            coord->updatePublication (mpubIndex, pubName, helics::data_type::helics_any);
         }
         else if (coord)
         {
             switch (pubType)
             {
             case collectorPubType::as_vector:
-                if (!pubName.empty())
+                if (!pubName.empty ())
                 {
-                    mpubIndex =
-                        coord->addPublication(pubName, helics::helics_type_t::helicsVector);
+                    mpubIndex = coord->addPublication (pubName, helics::data_type::helics_vector);
                 }
                 break;
             case collectorPubType::as_string:
-                if (!pubName.empty())
+                if (!pubName.empty ())
                 {
-                    mpubIndex =
-                        coord->addPublication(pubName, helics::helics_type_t::helicsString);
+                    mpubIndex = coord->addPublication (pubName, helics::data_type::helics_string);
                 }
                 break;
             default:

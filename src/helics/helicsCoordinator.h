@@ -17,8 +17,8 @@
 #include "../utilities/stringConversion.h"
 #include "helics/helics.hpp"
 #include "helicsSupport.h"
-#include <deque>
 #include <complex>
+#include <deque>
 #include <mutex>
 #include <type_traits>
 #include <unordered_map>
@@ -31,7 +31,7 @@ namespace helicsLib
 class PubInfo
 {
   public:
-    helics::helics_type_t type;
+    helics::data_type type;
     gridUnits::units_t unitType = gridUnits::defUnit;
     std::string name;
 };
@@ -75,7 +75,7 @@ class helicsCoordinator : public coreObject
 
   private:
     std::deque<helics::Publication> pubs_;  //!< list of all the publication
-    std::deque<helics::Subscription> subs_;  //!< container for all the subscription information
+    std::deque<helics::Input> subs_;  //!< container for all the subscription information
     std::deque<helics::Endpoint> epts_;  //!< container for all the endpoints
     std::vector<SubInfo> subI;
     std::vector<PubInfo> pubI;
@@ -143,7 +143,7 @@ class helicsCoordinator : public coreObject
     @return an identifier value for the publication
     */
     int32_t addPublication (const std::string &pubName,
-                            helics::helics_type_t type,
+                            helics::data_type type,
                             gridUnits::units_t unitType = gridUnits::defUnit);
     /** update a publication
     @param[in] index the identifier for the publication
@@ -153,7 +153,7 @@ class helicsCoordinator : public coreObject
     */
     void updatePublication (int32_t index,
                             const std::string &pubName,
-                            helics::helics_type_t type,
+                            helics::data_type type,
                             gridUnits::units_t unitType = gridUnits::defUnit);
     /** add a subscription to the helics federate
     @param[in] pubName the name of the value to subscribe to
@@ -223,15 +223,14 @@ class helicsCoordinator : public coreObject
     void finalize ();
 
     /** check whether a value has been updated*/
-    bool isUpdated (int32_t index) const;
+    bool isUpdated (int32_t index);
     /** check whether an endpoint has a message*/
     bool hasMessage (int32_t index) const;
 
     helics::Publication *getPublicationPointer (int32_t index);
-    helics::Subscription *getSubscriptionPointer (int32_t index);
+    helics::Input *getInputPointer (int32_t index);
     helics::Endpoint *getEndpointPointer (int32_t index);
-
 };
 
-}  // namespace helics
+}  // namespace helicsLib
 }  // namespace griddyn
