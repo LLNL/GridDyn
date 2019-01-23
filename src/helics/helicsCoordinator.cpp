@@ -52,6 +52,11 @@ helicsCoordinator *helicsCoordinator::findCoordinator (const std::string &coordi
     return nullptr;
 }
 
+void helicsCoordinator::loadCommandLine (int argc, const char *const *argv)
+{
+    info_.loadInfoFromArgs (argc, argv);
+}
+
 helicsCoordinator::helicsCoordinator (const std::string &fedName) : coreObject ("helics")
 {
     registerCoordinator (fedName, this);
@@ -98,13 +103,13 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     {
         if (s.unitType != gridUnits::defUnit)
         {
-            subs_[ii] = helics::Input (helics::interface_availability::optional, vFed_, s.name,
-                                       gridUnits::to_string (s.unitType));
+            subs_[ii] = vFed_->registerSubscription (s.name, gridUnits::to_string (s.unitType));
         }
         else
         {
-            subs_[ii] = helics::Input (vFed_, s.name);
+            subs_[ii] = vFed_->registerSubscription (s.name);
         }
+        subs_[ii].setOption (helics::defs::options::connection_optional);
         ++ii;
     }
 

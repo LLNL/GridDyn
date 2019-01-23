@@ -93,8 +93,10 @@ class helicsCoordinator : public coreObject
     std::unordered_map<std::string, int32_t> pubMap_;  //!< map of all the publication names
     std::unordered_map<std::string, int32_t> eptMap_;  //!< map of all the endpoints
   public:
-    explicit helicsCoordinator (const std::string &fedName = std::string ());
+    explicit helicsCoordinator (const std::string &fedName = std::string{});
 
+    /** load the info structure from command line arguments*/
+    void loadCommandLine (int argc, const char *const *argv);
     /** register the information as part of a federate in HELICS
     @return a shared pointer to the federate object itself
     */

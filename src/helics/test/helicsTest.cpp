@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE (test_pub_sub_double)
 BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 {
     helicsCoordinator coord;
-    auto ind1 = coord.addPublication ("pub1", helics::helics_type_t::helicsDouble);
+    auto ind1 = coord.addPublication ("pub1", helics::data_type::helics_double);
     auto ind2 = coord.addSubscription ("pub1");
     BOOST_CHECK_GE (ind1, 0);
     BOOST_CHECK_GE (ind2, 0);
@@ -154,9 +154,10 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 
     // BOOST_CHECK (fed->currentState () == helics::Federate::op_states::startup);
     // fed->enterInitializationState ();
-    BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::initialization);
+
+    BOOST_CHECK (fed->getCurrentMode () == helics::Federate::modes::initializing);
     fed->enterExecutingMode ();
-    BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::execution);
+    BOOST_CHECK (fed->getCurrentMode () == helics::Federate::modes::executing);
 
     coord.publish (ind1, 23.234);
     fed->requestTime (3.0);
@@ -170,11 +171,10 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
 
 BOOST_AUTO_TEST_CASE (load_helics_xml)
 {
-    helics::FederateInfo fi ("source_test");
-    fi.coreType = helics::core_type::TEST;
-    fi.coreInitString = "2";
+    helics::FederateInfo fi (helics::core_type::TEST);
+    fi.coreInitString = "-f 2 --autobroker";
 
-    auto vFed = std::make_shared<helics::ValueFederate> (fi);
+    auto vFed = std::make_shared<helics::ValueFederate> ("source_test", fi);
     // register the publications
     auto pubid = vFed->registerGlobalPublication<double> ("sourceValue");
 
@@ -229,14 +229,13 @@ BOOST_AUTO_TEST_CASE (load_helics_xml)
 
 BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 {
-    helics::FederateInfo fi ("helics_load_test");
-    fi.coreType = helics::core_type::TEST;
+    helics::FederateInfo fi (helics::core_type::TEST);
     fi.coreName = "test2";
-    fi.coreInitString = "2";
-    auto vFed = std::make_shared<helics::ValueFederate> (fi);
+    fi.coreInitString = "-f 2 --autobroker";
+    auto vFed = std::make_shared<helics::ValueFederate> ("helics_load_test", fi);
     // register the publications
-    auto subid = vFed->registerOptionalSubscription<std::complex<double>> ("voltage3key");
-    auto pubid = vFed->registerGlobalPublication<std::complex<double>> ("load3val");
+    auto &subid = vFed->registerSubscription ("voltage3key");
+    auto &pubid = vFed->registerGlobalPublication<std::complex<double>> ("load3val");
 
     auto hR = new helicsRunner ();
     hR->InitializeFromString (helics_test_directory + "helics_test2.xml --core_type=test --core_name=test2");
@@ -252,7 +251,8 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
     vFed->enterInitializingMode ();
 
     vFed->enterExecutingMode ();
-    vFed->publish (pubid, std::complex<double> (130.0, 40.0));
+    pubid.publish (std::complex<double>{130.0, 40.0});
+
     res.get ();
 
     auto resT = std::async (std::launch::async, [&]() { return hR->Step (3.0); });
@@ -265,8 +265,8 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 
     double tret = resT.get ();
     BOOST_CHECK_EQUAL (tret, 3.0);
-    auto voltageVal = vFed->getValue<std::complex<double>> (subid);
-    vFed->publish (pubid, std::complex<double> (150.0, 70.0));
+    auto voltageVal = subid.getValue<std::complex<double>> ();
+    pubid.publish (std::complex<double>{150.0, 70.0});
 
     resT = std::async (std::launch::async, [&]() { return hR->Step (7.0); });
     tm = vFed->requestTime (7.0);
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 
     tret = resT.get ();
     BOOST_CHECK_EQUAL (tret, 7.0);
-    auto voltageVal2 = vFed->getValue<std::complex<double>> (subid);
+    auto voltageVal2 = subid.getValue<std::complex<double>> ();
 
     BOOST_CHECK_GT (std::abs (voltageVal), std::abs (voltageVal2));
     hR->Finalize ();
@@ -430,12 +430,12 @@ BOOST_AUTO_TEST_CASE (test_event)
 
     auto sim = hR->getSim ();
 
-    auto brk = helics::apps::BrokerApp ("3");
+    auto brk = helics::apps::BrokerApp ("-f 3");
     auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
     auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
 
     // add a single point
-    auto play = helics::apps::Player (helics::FederateInfo ());
+    auto play = helics::apps::Player (std::string{}, helics::FederateInfo ());
     play.addPublication ("breaker", helics::data_type::helics_double);
     play.addPoint (120.0, "breaker", 1.0);
 
@@ -467,12 +467,12 @@ BOOST_AUTO_TEST_CASE (test_vector_event)
 
     auto sim = hR->getSim ();
 
-    auto brk = helics::apps::BrokerApp ("3");
+    auto brk = helics::apps::BrokerApp ("-f 3");
     auto cmd = utilities::StringToCmdLine ("--tags=\"mag1,mag2,ang1,ang2\"");
     auto rec = helics::apps::Recorder (cmd.getArgCount (), cmd.getArgV ());
 
     // add a single point
-    auto play = helics::apps::Player (helics::FederateInfo ());
+    auto play = helics::apps::Player (std::string{}, helics::FederateInfo{});
     play.addPublication ("breakers", helics::data_type::helics_vector);
     play.addPoint (120.0, "breakers", "v[0.0,1.0,0.0,0.0]");
 
