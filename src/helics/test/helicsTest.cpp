@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE (helics_coordinator_tests1)
     // BOOST_CHECK (fed->currentState () == helics::Federate::op_states::startup);
     // fed->enterInitializationState ();
     BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::initialization);
-    fed->enterExecutionState ();
+    fed->enterExecutingMode ();
     BOOST_CHECK (fed->getCurrentState () == helics::Federate::op_states::execution);
 
     coord.publish (ind1, 23.234);
@@ -200,10 +200,10 @@ BOOST_AUTO_TEST_CASE (load_helics_xml)
 
     auto res = std::async (std::launch::async, [&]() { hR->simInitialize (); });
 
-    vFed->enterInitializationState ();
+    vFed->enterInitializingMode ();
 
     vFed->publish (pubid, 0.3);
-    vFed->enterExecutionState ();
+    vFed->enterExecutingMode ();
     res.get ();
 
     auto resT = std::async (std::launch::async, [&]() { return hR->Step (3.0); });
@@ -249,9 +249,9 @@ BOOST_AUTO_TEST_CASE (helics_xml_with_load)
 
     auto res = std::async (std::launch::async, [&]() { hR->simInitialize (); });
 
-    vFed->enterInitializationState ();
+    vFed->enterInitializingMode ();
 
-    vFed->enterExecutionState ();
+    vFed->enterExecutingMode ();
     vFed->publish (pubid, std::complex<double> (130.0, 40.0));
     res.get ();
 
@@ -436,7 +436,7 @@ BOOST_AUTO_TEST_CASE (test_event)
 
     // add a single point
     auto play = helics::apps::Player (helics::FederateInfo ());
-    play.addPublication ("breaker", helics::helics_type_t::helicsDouble);
+    play.addPublication ("breaker", helics::data_type::helics_double);
     play.addPoint (120.0, "breaker", 1.0);
 
     auto fut_rec = std::async (std::launch::async, [&rec]() { rec.runTo (250); });
@@ -473,7 +473,7 @@ BOOST_AUTO_TEST_CASE (test_vector_event)
 
     // add a single point
     auto play = helics::apps::Player (helics::FederateInfo ());
-    play.addPublication ("breakers", helics::helics_type_t::helicsVector);
+    play.addPublication ("breakers", helics::data_type::helics_vector);
     play.addPoint (120.0, "breakers", "v[0.0,1.0,0.0,0.0]");
 
     auto fut_rec = std::async (std::launch::async, [&rec]() { rec.runTo (250); });

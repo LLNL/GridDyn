@@ -66,13 +66,15 @@ void helicsCollector::dataPointAdded (const collectorPoint &cp)
                     case collectorPubType::as_vector:
                         if (!pubName.empty ())
                         {
-                            mpubIndex = coord->addPublication (pubName, helics::data_type::helics_vector);
+                            mpubIndex =
+                                coord->addPublication(pubName, helics::data_type::helics_vector);
                         }
                         break;
                     case collectorPubType::as_string:
                         if (!pubName.empty ())
                         {
-                            mpubIndex = coord->addPublication (pubName, helics::data_type::helics_string);
+                            mpubIndex =
+                                coord->addPublication(pubName, helics::data_type::helics_vector);
                         }
                         break;
                     default:

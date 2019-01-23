@@ -98,7 +98,8 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
     {
         if (s.unitType != gridUnits::defUnit)
         {
-            subs_[ii] = helics::Input (vFed_, s.name, gridUnits::to_string (s.unitType));
+            subs_[ii] = helics::Input (helics::interface_availability::optional, vFed_, s.name,
+                                       gridUnits::to_string (s.unitType));
         }
         else
         {
