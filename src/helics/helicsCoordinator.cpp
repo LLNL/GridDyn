@@ -100,7 +100,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         if (s.unitType != gridUnits::defUnit)
         {
             subs_[ii] = helics::Input (helics::interface_availability::optional, vFed_, s.name,
-                                              gridUnits::to_string (s.unitType));
+                                       gridUnits::to_string (s.unitType));
         }
         else
         {
@@ -116,7 +116,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         epts_[ii] = helics::Endpoint (mFed_, e.name, e.type);
         if (!e.target.empty ())
         {
-            epts_[ii].setTargetDestination (e.target);
+            epts_[ii].setDefaultDestination (e.target);
         }
         ++ii;
     }
@@ -267,7 +267,7 @@ void helicsCoordinator::sendMessage (int32_t index, const std::string &dest, con
     }
 }
 
-bool helicsCoordinator::isUpdated (int32_t index) const
+bool helicsCoordinator::isUpdated (int32_t index)
 {
     if (isValidIndex (index, subs_))
     {
@@ -312,9 +312,7 @@ helics::Endpoint *helicsCoordinator::getEndpointPointer (int32_t index)
     return nullptr;
 }
 
-int32_t helicsCoordinator::addPublication (const std::string &pubName,
-                                           helics::data_type type,
-                                           gridUnits::units_t unitType)
+int32_t helicsCoordinator::addPublication (const std::string &pubName, helics::data_type type, gridUnits::units_t unitType)
 {
     PubInfo p;
     p.name = pubName;
@@ -376,8 +374,7 @@ void helicsCoordinator::updateSubscription (int32_t index, const std::string &su
     }
 }
 
-int32_t
-helicsCoordinator::addEndpoint (const std::string &eptName, const std::string &type, const std::string &target)
+int32_t helicsCoordinator::addEndpoint (const std::string &eptName, const std::string &type, const std::string &target)
 {
     EptInfo e;
     e.name = eptName;
@@ -412,7 +409,7 @@ void helicsCoordinator::setEndpointTarget (int32_t index, const std::string &tar
     }
     if (isValidIndex (index, epts_))
     {
-        epts_[index].setTargetDestination (target);
+        epts_[index].setDefaultDestination (target);
     }
 }
 

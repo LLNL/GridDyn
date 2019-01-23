@@ -133,7 +133,7 @@ void helicsRunner::simInitialize()
     {
         throw(executionFailure(m_gds.get(),"unable to initialize helics federate"));
     }
-    fed_->enterExecutionState();
+    fed_->enterExecutingMode();
 }
 
 void helicsRunner::setCoordinatorOptions(boost::program_options::variables_map &helicsOptions)

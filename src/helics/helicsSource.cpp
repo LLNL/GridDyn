@@ -23,7 +23,7 @@ namespace griddyn
 {
 namespace helicsLib
 {
-helicsSource::helicsSource(const std::string &objName) : rampSource(objName),valueType(helics::helics_type_t::helicsDouble)
+helicsSource::helicsSource(const std::string &objName) : rampSource(objName),valueType(helics::data_type::helics_double)
 {
 	opFlags.set(pflow_init_required);
 }
@@ -97,7 +97,7 @@ void helicsSource::updateA(coreTime time)
 		return;
 	}
     double cval;
-    if (valueType == helics::helics_type_t::helicsVector)
+    if (valueType == helics::data_type::helics_vector)
     {
         auto vals = coord_->getValueAs<std::vector<double>>(valueIndex);
         cval = vals[elementIndex];
@@ -205,7 +205,7 @@ void helicsSource::set(const std::string &param, const std::string &val)
 	else if (param == "valuetype")
 	{
 		auto vType = helics::getTypeFromString(val);
-		if (vType == helics::helics_type_t::helicsInvalid)
+		if (vType == helics::data_type::helics_custom)
 		{
 			throw(invalidParameterValue("unrecognized value type " + val));
 		}

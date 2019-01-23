@@ -36,8 +36,8 @@ protected:
 	int32_t voltageIndex = -1;  //!< index for sending the voltage data
 	int32_t loadIndex = -1;  //!< index for getting the load data
 	gridUnits::units_t inputUnits = gridUnits::MW;
-	helics::helics_type_t loadType;
-    helics::helics_type_t voltageType;
+	helics::data_type loadType;
+    helics::data_type voltageType;
 	double scaleFactor = 1.0;			//!< scaling factor on the load
 	helicsCoordinator *coord=nullptr;  //!< the coordinator for interaction with the helics interface
 private:

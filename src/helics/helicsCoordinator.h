@@ -223,7 +223,7 @@ class helicsCoordinator : public coreObject
     void finalize ();
 
     /** check whether a value has been updated*/
-    bool isUpdated (int32_t index) const;
+    bool isUpdated (int32_t index);
     /** check whether an endpoint has a message*/
     bool hasMessage (int32_t index) const;
 
