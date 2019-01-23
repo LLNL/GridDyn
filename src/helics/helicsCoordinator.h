@@ -31,7 +31,7 @@ namespace helicsLib
 class PubInfo
 {
   public:
-    helics::helics_type_t type;
+    helics::data_type type;
     gridUnits::units_t unitType = gridUnits::defUnit;
     std::string name;
 };
@@ -143,7 +143,7 @@ class helicsCoordinator : public coreObject
     @return an identifier value for the publication
     */
     int32_t addPublication (const std::string &pubName,
-                            helics::helics_type_t type,
+                            helics::data_type type,
                             gridUnits::units_t unitType = gridUnits::defUnit);
     /** update a publication
     @param[in] index the identifier for the publication
@@ -153,7 +153,7 @@ class helicsCoordinator : public coreObject
     */
     void updatePublication (int32_t index,
                             const std::string &pubName,
-                            helics::helics_type_t type,
+                            helics::data_type type,
                             gridUnits::units_t unitType = gridUnits::defUnit);
     /** add a subscription to the helics federate
     @param[in] pubName the name of the value to subscribe to

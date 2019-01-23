@@ -15,7 +15,6 @@
 #include "helics/helics.hpp"
 #include "helics/helicsEvent.h"
 
-#include "helics/flag-definitions.h"
 #include "utilities/stringConversion.h"
 #include <algorithm>
 #include <utilities/mapOps.hpp>
@@ -121,7 +120,7 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         }
         ++ii;
     }
-    fed->enterInitializationState ();
+    fed->enterInitializingMode ();
     LOG_SUMMARY ("entered HELICS initialization state");
     for (auto evnt : events)
     {
@@ -314,7 +313,7 @@ helics::Endpoint *helicsCoordinator::getEndpointPointer (int32_t index)
 }
 
 int32_t helicsCoordinator::addPublication (const std::string &pubName,
-                                           helics::helics_type_t type,
+                                           helics::data_type type,
                                            gridUnits::units_t unitType)
 {
     PubInfo p;
@@ -340,7 +339,7 @@ int32_t helicsCoordinator::addSubscription (const std::string &subName, gridUnit
 
 void helicsCoordinator::updatePublication (int32_t index,
                                            const std::string &pubName,
-                                           helics::helics_type_t type,
+                                           helics::data_type type,
                                            gridUnits::units_t unitType)
 {
     if (isValidIndex (index, pubI))
@@ -350,7 +349,7 @@ void helicsCoordinator::updatePublication (int32_t index,
             pubI[index].name = pubName;
             pubMap_[pubName] = index;
         }
-        if (type != helics::helics_type_t::helicsAny)
+        if (type != helics::data_type::helics_any)
         {
             pubI[index].type = type;
         }
