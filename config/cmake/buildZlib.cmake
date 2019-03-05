@@ -50,7 +50,7 @@ if (MSVC)
     if (NOT BUILD_RELEASE_ONLY)
         message(STATUS "Configuring zlib Autobuild for Debug: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_debug.log")
         execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
-            -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} ..
+            -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
             WORKING_DIRECTORY ${trigger_build_dir}/build
             OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_debug.log
             )
@@ -69,7 +69,7 @@ if (MSVC)
 
         message(STATUS "Configuring zlib Autobuild for ${MSVC_RELEASE_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log")
         execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
-                -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
+                -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
                 WORKING_DIRECTORY ${trigger_build_dir}/build
                 OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config_release.log
                 )
@@ -83,7 +83,7 @@ if (MSVC)
 else(MSVC)
     message(STATUS "Configuring zlib Autobuild for ${LOCAL_BUILD_TYPE}: logging to ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_LINKER=${CMAKE_LINKER}
-        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
         OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zlib_autobuild_config.log
         )

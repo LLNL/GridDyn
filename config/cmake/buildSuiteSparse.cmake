@@ -63,7 +63,7 @@ if (MSVC)
     message(STATUS "Configuring SuiteSparse Autobuild for ${MSVC_RELEASE_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
         -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
+        -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
         OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_release.log
         )
@@ -79,7 +79,7 @@ if (NOT BUILD_RELEASE_ONLY)
     message(STATUS "Configuring SuiteSparse Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_debug.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
         -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} ..
+        -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
         OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config_debug.log
         )
@@ -95,7 +95,7 @@ else(MSVC)
 message(STATUS "Configuring SuiteSparse Autobuild for ${LOCAL_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
         -D CMAKE_LINKER=${linker_string}
-        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} ..
+        -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
         OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/suitesparse_autobuild_config.log
         )
