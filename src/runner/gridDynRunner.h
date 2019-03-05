@@ -95,7 +95,7 @@ class GriddynRunner
 
     /** get the current execution status of the simulation
     @param[out] timeReturn the current simulation time
-    @return GRIDDYN_PENDING if an asyncrhonous operation is ongoing otherwise returns the current state of the
+    @return GRIDDYN_PENDING if an asynchronous operation is ongoing otherwise returns the current state of the
     simulation*/
     virtual int getStatus (coreTime &timeReturn);
     /**
@@ -134,7 +134,6 @@ class GriddynRunner
     virtual std::shared_ptr<CLI::App> generateCommandLineParser ();
 
   private:
-    std::unique_ptr<boost::program_options::variables_map> vm;
     std::future<coreTime> async_ret;  //!< future code for the asynchronous operations
 };
 
@@ -165,4 +164,3 @@ int processCommandArguments (std::shared_ptr<gridDynSimulation> &gds,
                              boost::program_options::variables_map &vm);
 
 }  // namespace griddyn
-#endif
