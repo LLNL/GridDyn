@@ -11,8 +11,6 @@
  * -----------------------------------------------------------------
  */
 
-#ifndef GRIDDYN_GRIDDYN_RUNNER_H
-#define GRIDDYN_GRIDDYN_RUNNER_H
 #pragma once
 
 #include "griddyn/gridDynDefinitions.hpp"
@@ -24,14 +22,11 @@
 #ifndef GRIDDYN_PENDING
 #define GRIDDYN_PENDING (25)
 #endif
-// forward declaration for boost::program_options::variables_map
-namespace boost
+// forward declaration for CLI::App
+namespace CLI
 {
-namespace program_options
-{
-class variables_map;
-}
-}  // namespace boost
+class App;
+}  // namespace CLI
 
 namespace griddyn
 {
@@ -49,13 +44,7 @@ class GriddynRunner
     /** Destructor*/
     virtual ~GriddynRunner ();
     int InitializeFromString (const std::string &cmdargs);
-    /**
-    * Initialize a simulation run from command line arguments.
-    @param[in] argc the number of console arguments
-    @param[in] argv the actual console arguments
-    @return >0 normal stop,  0 normal, <0 error
-    */
-    virtual int Initialize (int argc, char *argv[]);
+
     /**
      * Initialize a simulation run from command line arguments.
      @param[in] argc the number of console arguments
@@ -63,7 +52,7 @@ class GriddynRunner
      @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be allowed
      @return >0 normal stop,  0 normal, <0 error
      */
-    virtual int Initialize (int argc, char *argv[], bool allowUnrecognized);
+    int Initialize (int argc, char *argv[], bool allowUnrecognized = false);
     /**
     * Initialize a simulation run from command line arguments using a given readerInfo structure
     @param[in] argc the number of console arguments
@@ -71,7 +60,7 @@ class GriddynRunner
     @param[in] ri the readerInfo structure that contains any additional reader information
     @return >0 normal stop,  0 normal, <0 error
     */
-    virtual int Initialize (int argc, char *argv[], readerInfo &ri, bool allowUnrecognized = false);
+    int Initialize (int argc, char *argv[], readerInfo &ri, bool allowUnrecognized = false);
     /** initialization the simulation object so it is ready to run*/
     virtual void simInitialize ();
     /**
@@ -141,6 +130,8 @@ class GriddynRunner
     decltype (std::chrono::high_resolution_clock::now ()) m_startTime;
     decltype (std::chrono::high_resolution_clock::now ()) m_stopTime;
     bool eventMode = false;
+
+    virtual std::shared_ptr<CLI::App> generateCommandLineParser ();
 
   private:
     std::unique_ptr<boost::program_options::variables_map> vm;

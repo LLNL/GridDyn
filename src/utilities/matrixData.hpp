@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef _MATRIX_DATA_H_
-#define _MATRIX_DATA_H_
 #pragma once
 
 #include "indexTypes.hpp"
@@ -289,5 +287,3 @@ class matrixData
 #endif
     }
 };
-
-#endif

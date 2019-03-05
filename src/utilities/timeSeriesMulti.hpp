@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef TIMESERIESMULTI_H_
-#define TIMESERIESMULTI_H_
 #pragma once
 
 // don't need the time series object but if you include this I want timeSeries to be included as well
@@ -623,5 +621,3 @@ dataType compare (const timeSeriesMulti<dataType, timeType> &ts1,
 {
     return compareVec (ts1[stream1], ts2[stream2], cnt);
 }
-
-#endif

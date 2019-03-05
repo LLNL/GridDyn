@@ -64,9 +64,18 @@ int helicsRunner::Initialize (int argc, char *argv[])
 
     bool test;
     CLI::App parser ("options related to helics executable", "helics_options");
-    parser.add_flag ("--test", test, "run a test of the Griddyn helics library");
+    parser.add_flag ("--test", test, "run a test of the GridDyn helics interactions");
     parser.allow_extras ();
     //clang-format on
+
+    try
+    {
+        parser.parse (argc, argv);
+    }
+    catch (...)
+    {
+        return 1;
+    }
 
     if (test)
     {
@@ -79,15 +88,6 @@ int helicsRunner::Initialize (int argc, char *argv[])
             std::cout << "HELICS tests failed\n";
         }
         */
-        return 1;
-    }
-
-    try
-    {
-        parser.parse (argc, argv);
-    }
-    catch (...)
-    {
         return 1;
     }
 

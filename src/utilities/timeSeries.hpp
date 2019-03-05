@@ -10,8 +10,6 @@
  * LLNS Copyright End
  */
 
-#ifndef TIMESERIES_H_
-#define TIMESERIES_H_
 #pragma once
 
 #include <cstdint>
@@ -419,5 +417,3 @@ class timeSeries
         fio.close ();
     }
 };
-
-#endif
