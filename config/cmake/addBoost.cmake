@@ -96,7 +96,7 @@ endif(MSVC)
 HIDE_VARIABLE(BOOST_TEST_PATH)
 
 if (NOT BOOST_REQUIRED_LIBRARIES)
-	set(BOOST_REQUIRED_LIBRARIES program_options unit_test_framework filesystem system date_time timer chrono)
+	set(BOOST_REQUIRED_LIBRARIES unit_test_framework filesystem system date_time timer chrono)
 endif()
 
 # Minimum version of Boost required for building HELICS
