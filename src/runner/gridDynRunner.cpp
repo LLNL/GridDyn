@@ -285,6 +285,20 @@ int GriddynRunner::loadCommandArgument(readerInfo &ri, bool allowUnrecognized)
             app->parse(arg_string);
         }
     }
+    catch (const CLI::CallForHelp &e)
+    {
+        app->exit(e);
+        return 1;
+    }
+    catch (const CLI::CallForAllHelp &e)
+    {
+        app->exit(e);
+        return 1;
+    }
+    catch (const CLI::Success &e)
+    {
+        return 1;
+    }
     catch (const CLI::Error &e)
     {
         return e.get_exit_code();
@@ -554,9 +568,8 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
     std::get<1>(*acdata) = "auto_capture.bin";
     std::get<2>(*acdata).push_back("auto");
 
-    auto acGroup = ptr->add_option_group("acgroup", "options related to automatic variable capture")
-                     ->ignore_case()
-                     ->ignore_underscore();
+    auto acGroup = ptr->add_option_group("acgroup", "options related to automatic variable capture");
+    acGroup->option_defaults()->ignore_case()->ignore_underscore();
     auto acp = acGroup->add_option("--auto-capture-period,--auto_capture_period", std::get<0>(*acdata),
                                    "period to capture the automatic recording");
     acGroup
