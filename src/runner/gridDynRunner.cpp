@@ -337,7 +337,6 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
                 }
                 catch (const unrecognizedParameter &)
                 {
-                    std::cout << "param " << str << " not able to be processed\n";
                     return false;
                 }
             }
@@ -352,7 +351,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
             loadFile(m_gds.get(), file, &ri);
             if (m_gds->getErrorCode() != 0)
             {
-                return false;
+                throw(CLI::Error(m_gds->getName(), "Error loading File " + file, m_gds->getErrorCode()));
             }
         }
         return true;
@@ -376,10 +375,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
     ptr
       ->add_option_function<std::string>(
         "--powerflow-output,-o,--power_flow_output",
-        [this](const std::string &input) {
-            m_gds->set("powerflowfile", input);
-            return true;
-        },
+        [this](const std::string &input) { m_gds->set("powerflowfile", input); },
         "file output for the powerflow solution")
       ->ignore_case()
       ->ignore_underscore()
@@ -414,7 +410,6 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
         "--jac_state,--jac_state_file",
         [this](const std::string &jac_file) {
             captureJacState(m_gds.get(), jac_file, m_gds->getSolverMode("pflow"));
-            return true;
         },
         "save the jacobian values of the power flow solution to a file")
       ->transform(defineTransform);
@@ -430,11 +425,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
 
     ptr
       ->add_option_function<std::string>(
-        "--log-file,--log_file,--log",
-        [this](const std::string &file) {
-            m_gds->set("logfile", file);
-            return true;
-        },
+        "--log-file,--log_file,--log", [this](const std::string &file) { m_gds->set("logfile", file); },
         "log file output")
       ->transform(defineTransform)
       ->ignore_case()
@@ -473,11 +464,7 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
       ->disable_flag_override();
     ptr
       ->add_option_function<int>(
-        "--threads,-j",
-        [](int val) {
-            workQueue::instance(val);
-            return true;
-        },
+        "--threads,-j", [](int val) { workQueue::instance(val); },
         "specify the number of worker threads to use if multithreading is enabled")
       ->check(CLI::PositiveNumber);
 
@@ -507,24 +494,14 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
       });
 
     readerGroup
-      ->add_option_function<std::string>(
-        "--xml",
-        [](const std::string &val) {
-            readerConfig::setDefaultXMLReader(val);
-            return true;
-        },
-        "the xml reader to use: 1 for tinyxml, 2 for tinyxml2")
+      ->add_option_function<std::string>("--xml", readerConfig::setDefaultXMLReader,
+                                         "the xml reader to use: 1 for tinyxml, 2 for tinyxml2")
       ->transform(
         CLI::CheckedTransformer({{"tinyxml", "1"}, {"tinyxml2", "2"}}, CLI::ignore_underscore, CLI::ignore_case));
 
     readerGroup
-      ->add_option_function<std::string>(
-        "--match-type",
-        [](const std::string &val) {
-            readerConfig::setDefaultMatchType(val);
-            return true;
-        },
-        "the default parameter name matching algorithm to use ")
+      ->add_option_function<std::string>("--match-type", readerConfig::setDefaultMatchType,
+                                         "the default parameter name matching algorithm to use ")
       ->transform(CLI::IsMember({"strict", "exact", "capital", "caps", "any", "all"}, CLI::ignore_case));
 
     readerGroup
@@ -535,7 +512,6 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
             {
                 ri.addDirectory(dirname);
             }
-            return true;
         },
         "add search directory for input files")
       ->check(CLI::ExistingPath)
