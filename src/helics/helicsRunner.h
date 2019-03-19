@@ -43,7 +43,7 @@ class helicsRunner : public GriddynRunner
     using GriddynRunner::Initialize;
 
   public:
-    virtual int Initialize (int argc, char *argv[]) override final;
+    virtual int Initialize (int argc, char *argv[], bool allowUnrecognized = true) override final;
 
     virtual void simInitialize () override;
     virtual coreTime Run () override;

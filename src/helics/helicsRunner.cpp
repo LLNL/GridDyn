@@ -58,7 +58,7 @@ helicsRunner::helicsRunner (std::shared_ptr<gridDynSimulation> sim) : GriddynRun
 
 helicsRunner::~helicsRunner () = default;
 
-int helicsRunner::Initialize (int argc, char *argv[])
+int helicsRunner::Initialize (int argc, char *argv[], bool allowUnrecognized)
 {
     // using namespace boost;
 
@@ -94,7 +94,7 @@ int helicsRunner::Initialize (int argc, char *argv[])
     readerInfo ri;
     loadHelicsReaderInfoDefinitions (ri);
 
-    int ret = GriddynRunner::Initialize (argc, argv, ri, true);
+    int ret = GriddynRunner::Initialize (argc, argv, ri, allowUnrecognized);
     if (ret != 0)
     {
         return ret;
