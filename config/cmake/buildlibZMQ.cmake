@@ -99,7 +99,7 @@ if (NOT BUILD_DEBUG_ONLY)
 
 	message(STATUS "Configuring ZeroMQ Autobuild for release logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config_release.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
-	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
+	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${MSVC_RELEASE_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A "${CMAKE_GENERATOR_PLATFORM}" ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config_release.log
         )
@@ -114,7 +114,7 @@ endif()
 if (NOT BUILD_RELEASE_ONLY)
 	message(STATUS "Configuring ZeroMQ Autobuild for debug logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config_debug.log")
 	execute_process(COMMAND ${CMAKE_COMMAND}  -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-	    -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
+	    -D CMAKE_BUILD_TYPE=Debug -G ${CMAKE_GENERATOR} -A "${CMAKE_GENERATOR_PLATFORM}" ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config_debug.log
         )
@@ -128,7 +128,7 @@ endif()
 else(MSVC) #for non visual studio platforms just autobuild the specified build type
 	message(STATUS "Configuring ZeroMQ Autobuild for ${LOCAL_BUILD_TYPE} logging to ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config.log")
     execute_process(COMMAND ${CMAKE_COMMAND}  -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
-	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A ${CMAKE_GENERATOR_PLATFORM} ..
+	    -D CMAKE_LINKER=${linker_string} -D CMAKE_BUILD_TYPE=${LOCAL_BUILD_TYPE} -G ${CMAKE_GENERATOR} -A "${CMAKE_GENERATOR_PLATFORM}" ..
         WORKING_DIRECTORY ${trigger_build_dir}/build
 		OUTPUT_FILE ${PROJECT_BINARY_DIR}/logs/zmq_autobuild_config.log
         )
