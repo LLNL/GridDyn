@@ -78,7 +78,7 @@ void longLine::set (const std::string &param, double val, gridUnits::units_t uni
     }
     else if (param == "length")
     {
-        length = unitConversionDistance (val, unitType, gridUnits::km);
+        length = gridUnits::unitConversionDistance (val, unitType, gridUnits::km);
     }
     else if (param == "fault")
     {

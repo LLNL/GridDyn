@@ -200,7 +200,7 @@ void gridGrabber::makeDescription () const
 
         if (outputUnits != defUnit)
         {
-            desc += '(' + to_string (outputUnits) + ')';
+            desc += '(' + gridUnits::to_string (outputUnits) + ')';
         }
     }
 }

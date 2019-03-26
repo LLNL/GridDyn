@@ -370,7 +370,7 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double Governor::get (const std::string &param, gridUnits::units_t unitType) const
+double Governor::get (const std::string &param, units_t unitType) const
 {
     double out = kNullVal;
     if (param == "k")
@@ -399,11 +399,11 @@ double Governor::get (const std::string &param, gridUnits::units_t unitType) con
     }
     else if (param == "pmax")
     {
-        out = unitConversion (Pmax, puMW, unitType, puMW, systemBasePower);
+        out = unitConversion (Pmax, puMW, unitType, systemBasePower);
     }
     else if (param == "pmin")
     {
-        out = unitConversion (Pmin, puMW, unitType, puMW, systemBasePower);
+        out = unitConversion (Pmin, puMW, unitType, systemBasePower);
     }
     else if (param == "deadband")
     {

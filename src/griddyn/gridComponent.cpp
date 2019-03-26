@@ -663,7 +663,7 @@ bool gridComponent::subObjectSet (const std::string &param, double val, gridUnit
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != gridUnits::units_t::defUnit)
+            if (pinfo.m_unitType != gridUnits::defUnit)
             {
                 pinfo.m_obj->set (pinfo.m_field, val, pinfo.m_unitType);
             }
@@ -721,7 +721,7 @@ double gridComponent::subObjectGet (const std::string &param, gridUnits::units_t
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != gridUnits::units_t::defUnit)
+            if (pinfo.m_unitType != gridUnits::defUnit)
             {
                 return pinfo.m_obj->get (pinfo.m_field, pinfo.m_unitType);
             }

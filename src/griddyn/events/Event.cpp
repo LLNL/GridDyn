@@ -125,7 +125,7 @@ void Event::loadField (coreObject *searchObj, const std::string &newField)
     }
 
     field = fdata.m_field;
-    if (fdata.m_unitType != gridUnits::units_t::defUnit)
+    if (fdata.m_unitType != gridUnits::defUnit)
     {
         unitType = fdata.m_unitType;
     }
@@ -225,7 +225,7 @@ void Event::setValue (double val, gridUnits::units_t newUnits)
         }
         else
         {
-            value = unitConversion (value, newUnits, unitType, m_obj->get ("basepower"));
+            value = gridUnits::unitConversion (value, newUnits, unitType, m_obj->get ("basepower"));
             if (value == kNullVal)
             {
                 value = val;

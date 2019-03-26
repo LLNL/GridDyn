@@ -390,12 +390,12 @@ bool subsystem::isConnected () const
 
 int subsystem::fixRealPower (double power,
                              id_type_t measureTerminal,
-                             id_type_t /*fixedterminal*/,
+                             id_type_t fixedterminal,
                              gridUnits::units_t unitType)
 {
     if (measureTerminal <= m_terminals)
     {
-        return terminalLink[measureTerminal - 1]->fixRealPower (power, cterm[measureTerminal - 1], unitType);
+        return terminalLink[measureTerminal - 1]->fixRealPower (power, cterm[measureTerminal - 1], fixedterminal, unitType);
     }
     return 0;
 }
@@ -403,12 +403,12 @@ int subsystem::fixRealPower (double power,
 int subsystem::fixPower (double rPower,
                          double qPower,
                          id_type_t measureTerminal,
-                         id_type_t /*fixedterminal*/,
+                         id_type_t fixedterminal,
                          gridUnits::units_t unitType)
 {
     if (measureTerminal <= m_terminals)
     {
-        return terminalLink[measureTerminal - 1]->fixPower (rPower, qPower, cterm[measureTerminal - 1], unitType);
+        return terminalLink[measureTerminal - 1]->fixPower (rPower, qPower, cterm[measureTerminal - 1], fixedterminal, unitType);
     }
     return 0;
 }
