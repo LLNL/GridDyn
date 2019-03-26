@@ -43,41 +43,42 @@ function (build_sundials_msvc)
         set(SUNDIALS_KLU_ENABLE "-DKLU_ENABLE=OFF")
     endif()
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 3.5)
-    include(ExternalProject)
-ExternalProject_Add(sundials
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/sundials
-    GIT_REPOSITORY  https://github.com/llnl/sundials.git
-    GIT_TAG v3.1.1
-    UPDATE_COMMAND " "
-    BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/sundials
+        cmake_minimum_required(VERSION 3.5)
+        include(ExternalProject)
+        ExternalProject_Add(sundials
+            SOURCE_DIR ${PROJECT_BINARY_DIR}/Download/sundials
+            GIT_REPOSITORY  https://github.com/llnl/sundials.git
+            GIT_TAG v3.1.1
+            UPDATE_COMMAND " "
+            BINARY_DIR ${PROJECT_BINARY_DIR}/ThirdParty/sundials
 
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${AUTOBUILD_INSTALL_PATH}
-        -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
-        -DBUILD_CVODES=OFF
-        -DBUILD_IDAS=OFF
-        -DBUILD_SHARED_LIBS=OFF
-        -DEXAMPLES_ENABLE_C=OFF
-        -DEXAMPLES_ENABLE_CXX=OFF
-        -DEXAMPLES_INSTALL=OFF
-        -DSUNDIALS_INDEX_TYPE=int32_t
-        -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-        \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
-        -DOPENMP_ENABLE=${ENABLE_OPENMP_SUNDIALS}
-    ${SUNDIALS_KLU_ENABLE}
-    ${SUNDIALS_KLU_INCLUDE_DIR}
-    ${SUNDIALS_KLU_LIBRARY_DIR}
-        -DCMAKE_C_COMPILER=${c_compiler_string}
-        -DCMAKE_LINKER=${linker_string}
-        -DCMAKE_DEBUG_POSTFIX=d
+            CMAKE_ARGS
+                -DCMAKE_INSTALL_PREFIX=${AUTOBUILD_INSTALL_PATH}
+                -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
+                -DBUILD_CVODES=OFF
+                -DBUILD_IDAS=OFF
+                -DBUILD_SHARED_LIBS=OFF
+                -DEXAMPLES_ENABLE_C=OFF
+                -DEXAMPLES_ENABLE_CXX=OFF
+                -DEXAMPLES_INSTALL=OFF
+                -DSUNDIALS_INDEX_TYPE=int32_t
+                -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
+                \"-DCMAKE_C_FLAGS=${EXTRA_C_FLAGS}\"
+                -DOPENMP_ENABLE=${ENABLE_OPENMP_SUNDIALS}
+                ${SUNDIALS_KLU_ENABLE}
+                ${SUNDIALS_KLU_INCLUDE_DIR}
+                ${SUNDIALS_KLU_LIBRARY_DIR}
+                -DCMAKE_C_COMPILER=${c_compiler_string}
+                -DCMAKE_LINKER=${linker_string}
+                -DCMAKE_DEBUG_POSTFIX=d
 
+            INSTALL_DIR ${AUTOBUILD_INSTALL_PATH}
+            )
+        "
+    )
 
-    INSTALL_DIR ${AUTOBUILD_INSTALL_PATH}
-    )")
+file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
 
-
-    file(WRITE ${trigger_build_dir}/CMakeLists.txt "${CMAKE_LIST_CONTENT}")
 if (NOT BUILD_RELEASE_ONLY)
     message(STATUS "Configuring Sundials Autobuild for debug: logging to ${PROJECT_BINARY_DIR}/logs/sundials_autobuild_config_debug.log")
     execute_process(COMMAND ${CMAKE_COMMAND} -Wno-dev -D CMAKE_CXX_COMPILER=${cxx_compiler_string} -D CMAKE_C_COMPILER=${c_compiler_string}
