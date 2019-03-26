@@ -389,6 +389,12 @@ if(VERSION_OPTION)
 endif(VERSION_OPTION)
 
 # ------------------------------------------------------------
+# Units
+# ------------------------------------------------------------
+include(addUnits)
+target_link_libraries(griddyn_base INTERFACE units::units)
+
+# ------------------------------------------------------------
 # BOOST  find the boost libraries
 # ------------------------------------------------------------
 # TODO check if boost works (e.g. libstdc++ vs libc++)
