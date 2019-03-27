@@ -391,7 +391,9 @@ endif(VERSION_OPTION)
 # ------------------------------------------------------------
 # Units
 # ------------------------------------------------------------
-include(addUnits)
+set(UNITS_ENABLE_TESTS Off)
+set(UNITS_HEADER_ONLY On)
+add_subdirectory(ThirdParty/units)
 target_link_libraries(griddyn_base INTERFACE units::units)
 
 # ------------------------------------------------------------

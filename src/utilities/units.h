@@ -11,6 +11,7 @@
  */
 #pragma once
 
+#include <units/units.hpp>
 #include <string>
 
 namespace gridUnits
@@ -18,72 +19,62 @@ namespace gridUnits
 const double badConversion = -1e48;
 const double PI = 3.141592653589793;
 /** @brief enumeration of common units in the power grid */
-enum units_t
-{
-    defUnit = 0,
-    // Power system units
-    MW = 1,
-    kW = 2,
-    Watt = 3,
-    MVAR = 4,
-    Volt = 5,
-    kV = 6,
-    Ohm = 7,
-    Amp = 8,
-    MWps = 9,  //!< MW/s
-    MWpmin = 10,  //!< MW/min
-    MWph = 11,  //!< MW/hr
 
-    // rotational speed
-    Hz = 51,
-    rps = 52,  // radians per second
-    rpm = 53,  // revolutions per minute
+using units_t = units::precise_unit;
 
-    // Per unit units
-    pu = 100,
-    puMW = 101,
-    puV = 105,
-    puOhm = 107,
-    puA = 108,
-    puMWps = 109,  //!< per unit MW/s
-    puMWpmin = 110,  //!< per unit MW/min
-    puMWph = 111,  //!< per unit MW/hr
-    puHz = 151,
+// pre-declared units
+constexpr units_t Amp = units::precise::Ampere;
+constexpr units_t C = units::precise::celsius;
+constexpr units_t cost = units::precise::currency;
+constexpr units_t defUnit = units::precise::defunit;
+constexpr units_t deg = units::precise::deg;
+constexpr units_t day = units::precise::day;
+constexpr units_t F = units::precise::F;
+constexpr units_t ft = units::precise::ft;
+constexpr units_t hour = units::precise::hr;
+constexpr units_t Hz = units::precise::Hz;
+constexpr units_t K = units::precise::Kelvin;
+constexpr units_t km = units::precise::km;
+constexpr units_t kV = units::precise::kV;
+constexpr units_t kW = units::precise::kW;
+constexpr units_t meter = units::precise::meter;
+constexpr units_t mile = units::precise::mile;
+constexpr units_t min = units::precise::min;
+constexpr units_t MVAR = units::precise::MW;
+constexpr units_t MW = units::precise::MW;
+constexpr units_t Ohm = units::precise::ohm;
+constexpr units_t pu = units::precise::pu;
+constexpr units_t puA = units::precise::puA;
+constexpr units_t puHz = units::precise::puHz;
+constexpr units_t puOhm = units::precise::puOhm;
+constexpr units_t puV = units::precise::puV;
+constexpr units_t puMW = units::precise::puMW;
+constexpr units_t rad = units::precise::rad;
+constexpr units_t rpm = units::precise::rpm;
+constexpr units_t sec = units::precise::second;
+constexpr units_t Volt = units::precise::volt;
+constexpr units_t Watt = units::precise::watt;
+constexpr units_t week = units::precise::week;
 
-    // distance Units
-    meter = 201,
-    km = 202,
-    mile = 203,
-    ft = 204,
+// Custom units
+constexpr units_t puMVAR = MVAR * pu;
 
-    // angle units
-    deg = 301,
-    rad = 302,
-
-    // time units,
-    sec = 401,
-    min = 402,
-    hour = 403,
-    day = 404,
-    week = 405,
-
-    // cost units
-    cost = 800,
-    Cph = 801,  //!< cost per hour
-    CpMWh = 802,  //!< cost per MWh
-    CpMW2h = 803,  //!< cost per MWh^2
-    CppuMWh = 804,  //!< cost per puMWh
-    CppuMW2h = 805,  //!< cost per puMWh^2
-    CpMVARh = 806,  //!< cost per MVARh
-    CpMVAR2h = 807,  //!< cost per MVARh^2
-    CppuMVARh = 808,  //!< cost per puMVARh
-    CppuMVAR2h = 809,  //!< cost per puMVARh^2
-
-    // temperature units
-    F = 1001,
-    C = 1002,
-    K = 1003,
-};
+constexpr units_t Cph = cost / hour;
+constexpr units_t CpMVARh = cost / MVAR / hour;
+constexpr units_t CpMVAR2h = cost / MVAR / hour / hour;
+constexpr units_t CpMWh = cost / MW / hour;
+constexpr units_t CpMW2h = cost / MW / hour / hour;
+constexpr units_t CppuMVARh = cost / puMVAR / hour;
+constexpr units_t CppuMVAR2h = cost / puMVAR / hour / hour;
+constexpr units_t CppuMWh = cost / puMW / hour;
+constexpr units_t CppuMW2h = cost / puMW / hour / hour;
+constexpr units_t MWph = MW / hour;
+constexpr units_t MWpmin = MW / min;
+constexpr units_t MWps = MW / sec;
+constexpr units_t puMWph = puMW / hour;
+constexpr units_t puMWpmin = puMW / min;
+constexpr units_t puMWps = puMW / sec;
+constexpr units_t rps = rad / sec;
 
 /** @brief enumeration of unit types related to the units*/
 enum units_type_t
@@ -194,4 +185,5 @@ double unitConversionCost (double val, units_t in, units_t out, double basePower
 specified units
 */
 double unitConversionTemperature (double val, units_t in, units_t out);
+
 }  // namespace gridUnits
