@@ -28,72 +28,42 @@ units_t getUnits (const std::string &unitString, units_t /* defValue */)
 double
 unitConversionPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  (void) basePower;
-  (void) localBaseVoltage;
-  return -1;
+  return units::convert(val, in, out, basePower, localBaseVoltage);
 }
 
 double unitConversionTemperature (double val, const units_t in, const units_t out)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  return -1;
+  return units::convert(val, in, out);
 }
 
 double unitConversionTime (double val, const units_t in, const units_t out)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  return -1;
+  return units::convert(val, in, out);
 }
 
 double unitConversionAngle (double val, const units_t in, const units_t out)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  return -1;
+  return units::convert(val, in, out);
 }
 
 double unitConversionDistance (double val, const units_t in, const units_t out)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  return -1;
+  return units::convert(val, in, out);
 }
 
 double unitConversionFreq (double val, const units_t in, const units_t out, double baseFreq)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  (void) baseFreq;
-  return -1;
+  return units::convert(val, in, out, baseFreq);
 }
 
 double unitConversionCost (double val, const units_t in, const units_t out, double basePower)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  (void) basePower;
-  return -1;
+  return units::convert(val, in, out, basePower);
 }
 
 double unitConversion (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
-  (void) val;
-  (void) in;
-  (void) out;
-  (void) basePower;
-  (void) localBaseVoltage;
-  return -1;
+  return units::convert(val, in, out, basePower, localBaseVoltage);
 }
 
 }  // namespace gridUnits
