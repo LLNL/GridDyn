@@ -1,4 +1,5 @@
-#include <stdint.h>
+#ifndef GRIDDYN_GRIDDYN_H
+#define GRIDDYN_GRIDDYN_H
 
 #include <griddyn/bits/griddyn_constants.h>
 #include <griddyn/bits/griddyn_types.h>
@@ -6,19 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef size_t    griddyn_idx_t;
-typedef double    griddyn_value_t;
-typedef int       griddyn_bool_t;
-typedef uint64_t  griddyn_flag_t;
-typedef int       griddyn_result_t;
-typedef int       griddyn_status_t;
-
-typedef struct griddyn_sim_   griddyn_sim;
-typedef struct griddyn_bus_   griddyn_bus;
-typedef struct griddyn_link_  griddyn_link;
-typedef struct griddyn_load_  griddyn_load;
-typedef struct griddyn_generator_ griddyn_generator;
 
 /** GridDyn simulation administration functionality */
 ///@{
@@ -95,3 +83,5 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_link_get_rating(griddyn_link const* li
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+#endif // GRIDDYN_GRIDDYN_H
