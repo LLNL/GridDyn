@@ -14,6 +14,8 @@
 #include "gridPrimary.h"
 #include <queue>
 
+#include "libgriddyn/griddyn/bits/griddyn_structs.h"
+
 namespace griddyn
 {
 class gridBus;  // forward class definition
@@ -52,7 +54,7 @@ it implements a trivial transport model Q=0, P1=Pset P2=-(Pset-LossFraction*Pset
 
 Each link has a disconnect switch at the from bus and the to bus
 */
-class Link : public gridPrimary
+class Link : public gridPrimary, public griddyn_link_
 {
   public:
     static std::atomic<count_t>

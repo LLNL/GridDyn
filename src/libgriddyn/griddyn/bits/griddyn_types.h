@@ -1,5 +1,7 @@
-#ifndef GRIDDYN_BITS_GRIDDYN_TYPES_H
-#define GRIDDYN_BITS_GRIDDYN_TYPES_H
+#ifndef LIBGRIDDYN_BITS_GRIDDYN_TYPES_H
+#define LIBGRIDDYN_BITS_GRIDDYN_TYPES_H
+
+#include <griddyn/bits/griddyn_structs.h>
 
 #include <stddef.h> // size_t
 

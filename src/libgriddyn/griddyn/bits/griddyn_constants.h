@@ -1,5 +1,5 @@
-#ifndef GRIDDYN_BITS_GRIDDYN_CONSTANTS_H
-#define GRIDDYN_BITS_GRIDDYN_CONSTANTS_H
+#ifndef LIBGRIDDYN_BITS_GRIDDYN_CONSTANTS_H
+#define LIBGRIDDYN_BITS_GRIDDYN_CONSTANTS_H
 
 #include <stdint.h> // uint32_t
 
@@ -46,4 +46,4 @@ typedef int       griddyn_status_t;
 } // extern "C"
 #endif
 
-#endif // GRIDDYN_BITS_GRIDDYN_CONSTANTS_H
+#endif // LIBGRIDDYN_BITS_GRIDDYN_CONSTANTS_H

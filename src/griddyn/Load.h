@@ -14,13 +14,15 @@
 
 #include "gridSecondary.h"
 
+#include "libgriddyn/griddyn/bits/griddyn_structs.h"
+
 namespace griddyn
 {
 class gridBus;
 
 /** primary load class defines the load component is a very simple constant power load
  */
-class Load : public gridSecondary
+class Load : public gridSecondary, public griddyn_load_
 {
   public:
     /** flags used in the load objec*/

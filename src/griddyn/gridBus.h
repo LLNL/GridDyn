@@ -13,6 +13,8 @@
 // headers
 #include "gridPrimary.h"
 
+#include "libgriddyn/griddyn/bits/griddyn_structs.h"
+
 #include <queue>
 
 namespace griddyn
@@ -57,7 +59,7 @@ basic management of subObjects and defines the interface.  It has no states and 
 whatever it gets set to
 
 */
-class gridBus : public gridPrimary
+class gridBus : public gridPrimary, public griddyn_bus_
 {
   public:
     /** @brief flags for the buses*/

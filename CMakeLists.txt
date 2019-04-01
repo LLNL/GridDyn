@@ -259,6 +259,12 @@ option(
     OFF
 )
 
+option(
+    GRIDDYN_ENABLE_LIBGRIDDYN
+    "Build the other C API library"
+    OFF
+)
+
 # -----------------
 # dependent options
 # -----------------

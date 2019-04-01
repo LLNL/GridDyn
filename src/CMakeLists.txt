@@ -104,6 +104,13 @@ if(BUILD_SHARED_LIBS)
 endif(BUILD_SHARED_LIBS)
 
 # ------------------------------------------------------------
+# Enable libgriddyn
+# ------------------------------------------------------------
+if (GRIDDYN_ENABLE_LIBGRIDDYN)
+    add_subdirectory(libgriddyn)
+endif (GRIDDYN_ENABLE_LIBGRIDDYN)
+
+# ------------------------------------------------------------
 # Generate libraryLoader.cpp
 #
 # Do this last, it depends on parameters set in other folder CMakeLists

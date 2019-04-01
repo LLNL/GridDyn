@@ -1,8 +1,9 @@
-#ifndef GRIDDYN_GRIDDYN_H
-#define GRIDDYN_GRIDDYN_H
+#ifndef LIBGRIDDYN_GRIDDYN_H
+#define LIBGRIDDYN_GRIDDYN_H
 
 #include <griddyn/bits/griddyn_constants.h>
 #include <griddyn/bits/griddyn_types.h>
+#include <griddyn/bits/griddyn_export.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,12 +12,13 @@ extern "C" {
 /** GridDyn simulation administration functionality */
 ///@{
 LIBGRIDDYN_EXPORT griddyn_sim*    griddyn_sim_new(char const* model_path);
-LIBGRIDDYN_EXPORT void            griddyn_sim_free();
+LIBGRIDDYN_EXPORT void            griddyn_sim_free(griddyn_sim* ctx);
+LIBGRIDDYN_EXPORT griddyn_sim*    griddyn_sim_clone(griddyn_sim const* ctx);
 
-LIBGRIDDYN_EXPORT griddyn_bus*    griddyn_sim_bus_list(griddyn_sim const* ctx);
+LIBGRIDDYN_EXPORT griddyn_bus*    griddyn_sim_bus_i(griddyn_sim const* ctx, griddyn_idx_t bus_idx);
 LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_sim_bus_count(griddyn_sim const* ctx);
 
-LIBGRIDDYN_EXPORT griddyn_link*   griddyn_sim_link_list(griddyn_sim const* ctx);
+LIBGRIDDYN_EXPORT griddyn_link*   griddyn_sim_link_i(griddyn_sim const* ctx, griddyn_idx_t link_idx);
 LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_sim_link_count(griddyn_sim const* ctx);
 LIBGRIDDYN_EXPORT void            griddyn_sim_link_get_adjacency_list(
                                     griddyn_sim const* ctx,
@@ -26,7 +28,7 @@ LIBGRIDDYN_EXPORT void            griddyn_sim_link_get_adjacency_list(
 
 /** GridDyn simulation run functionality */
 ///@{
-LIBGRIDDYN_EXPORT void            griddyn_sim_set_run_flags(griddyn_sim* ctx, griddyn_flags_t flags);
+LIBGRIDDYN_EXPORT void            griddyn_sim_set_run_flags(griddyn_sim* ctx, griddyn_flag_t flags);
 
 LIBGRIDDYN_EXPORT void            griddyn_sim_run(griddyn_sim* ctx);
 LIBGRIDDYN_EXPORT griddyn_result_t  griddyn_sim_get_run_result(griddyn_sim const* ctx);
@@ -48,7 +50,7 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_bus_get_voltage(griddyn_bus const* bus
 
 /** GridDyn load management */
 ///@{
-LIBGRIDDYN_EXPORT griddyn_load*   griddyn_bus_load_list(griddyn_bus const* bus);
+LIBGRIDDYN_EXPORT griddyn_load*   griddyn_bus_load_i(griddyn_sim const* ctx, griddyn_bus const* bus, griddyn_idx_t load_idx);
 LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_load_count(griddyn_bus const* bus);
 
 LIBGRIDDYN_EXPORT griddyn_bool_t  griddyn_load_is_svd(griddyn_load const* load);
@@ -62,7 +64,7 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_load_get_susceptance(griddyn_load cons
 
 /** GridDyn generator management */
 ///@{
-LIBGRIDDYN_EXPORT griddyn_generator*  griddyn_bus_generator_list(griddyn_bus const* bus);
+LIBGRIDDYN_EXPORT griddyn_generator* griddyn_bus_generator_i(griddyn_sim const* ctx, griddyn_bus const* bus, griddyn_idx_t bus_idx);
 LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_generator_count(griddyn_bus const* bus);
 
 LIBGRIDDYN_EXPORT griddyn_bool_t  griddyn_generator_get_status(griddyn_generator const* generator);
@@ -84,4 +86,4 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_link_get_rating(griddyn_link const* li
 } // extern "C"
 #endif
 
-#endif // GRIDDYN_GRIDDYN_H
+#endif // LIBGRIDDYN_GRIDDYN_H

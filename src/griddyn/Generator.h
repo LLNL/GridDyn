@@ -12,6 +12,8 @@
 #pragma once
 #include "gridSecondary.h"
 
+#include "libgriddyn/griddyn/bits/griddyn_structs.h"
+
 namespace utilities
 {
 class OperatingBoundary;
@@ -27,7 +29,7 @@ class gridSubModel;
 gridSecondary class and inherits from that class it has mechanics for dealing with the power flow solution modes of
 a generator with no dynamics
 */
-class Generator : public gridSecondary
+class Generator : public gridSecondary, public griddyn_generator_
 {
   public:
     /** @brief flags for controlling operation of the generator*/
