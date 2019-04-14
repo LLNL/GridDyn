@@ -1,5 +1,7 @@
 #include "griddyn_interface.hpp"
 
+#include "fileInput/fileInput.h"
+
 #include <string>
 #include <sstream>
 #include <vector>
@@ -9,6 +11,7 @@ griddyn_sim* griddyn_sim_new(char const* model_path)
 {
   auto sim_name = impl::get_next_sim_name();
   auto* interface = new impl::sim_interface(sim_name);
+  griddyn::loadFile(interface->get_simulation(), model_path);
   return interface;
 }
 
