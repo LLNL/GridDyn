@@ -27,7 +27,7 @@ griddyn_bool_t griddyn_link_is_transformer(griddyn_link const* link)
   bool tap_ne_1 = link_ptr->get("tap") != 1;
   bool is_adjustable_transformer = dynamic_cast<griddyn::links::adjustableTransformer const*>(link_ptr) != nullptr;
 
-  return tap_ne_1 or is_adjustable_transformer;
+  return tap_ne_1 || is_adjustable_transformer;
 }
 
 griddyn_value_t griddyn_link_get_current(griddyn_link const* link)
