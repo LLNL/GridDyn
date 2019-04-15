@@ -8,6 +8,10 @@
 # For details, see the LICENSE file.
 # LLNS Copyright End
 
+if (GRIDDYN_ENABLE_LIBGRIDDYN)
+  add_subdirectory(libgriddyn_tests)
+endif (GRIDDYN_ENABLE_LIBGRIDDYN)
+
 set(
     testComponent_sources
     componentTests/ConditionTests.cpp
