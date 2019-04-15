@@ -48,9 +48,6 @@ public:
     invalidate();
   }
 
-  // TODO: add cache_links, cache_busses, cache_loads_at_bus and delete the
-  // associated re-caching code scattered throughout
-
   griddyn::gridDynSimulation* get_simulation() { return sim_.get(); }
   griddyn::gridDynSimulation const* get_simulation() const { return sim_.get(); }
 
@@ -174,15 +171,16 @@ inline std::string get_next_sim_name()
 /**
  * Ensure a pointer passed in is safe to use
  * Currently, this only checks for null, but it should also be possible to
- * verify against all of the pointers we've ever given out
+ * verify against all of the pointers we've ever given out.
+ * Unfortunately, that adds another 2 layers of caching: sim -> valid in sim,
+ * and global -> sim. The first is manageable, the second is ugly, and
+ * disambiguating between them is a mess; all for questionable benefit.
  * Note: this should only be used in the various *_cast[_const]() functions
  */
 template<typename T>
 inline void vet_pointer(T const* ptr)
 {
   if (ptr == nullptr) abort();
-  // TODO(1): this should also assert based on some of the ideas in the
-  // previous comment
 }
 
 namespace detail {
