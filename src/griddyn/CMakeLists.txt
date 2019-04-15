@@ -557,6 +557,12 @@ add_library(
     ${sublibrary_files}
 )
 
+set_target_properties(
+  # Remove "lib" prefix, so it doesn't conflict with libgriddyn
+  griddyn PROPERTIES
+  PREFIX ""
+)
+
 target_include_directories(
     griddyn
     PUBLIC
