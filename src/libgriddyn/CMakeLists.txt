@@ -10,7 +10,8 @@ set_target_properties(
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON)
 
-target_link_libraries(libgriddyn PRIVATE griddyn_base)
+target_link_libraries(libgriddyn PRIVATE griddyn)
+target_link_libraries(libgriddyn PRIVATE formatInterpreter fileInput)
 
 target_include_directories(libgriddyn PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
