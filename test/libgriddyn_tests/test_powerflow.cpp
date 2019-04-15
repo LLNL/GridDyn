@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_CASE (powerflow_run)
 
   griddyn_sim_run(sim);
 
-  BOOST_CHECK(griddyn_sim_get_run_result(sim) == 0);
-  BOOST_CHECK(griddyn_sim_get_run_status(sim) == 2); // POWERFLOW_COMPLETE
+  BOOST_CHECK(griddyn_sim_get_run_result(sim) == GRIDDYN_RESULT_OK);
+  BOOST_CHECK(griddyn_sim_get_run_status(sim) == GRIDDYN_STATUS_POWERFLOW_COMPLETE);
   BOOST_CHECK(griddyn_sim_get_base_power(sim) == 100);
   BOOST_CHECK(griddyn_sim_get_load_real(sim) > 0);
   BOOST_CHECK(griddyn_sim_get_load_reactive(sim) > 0);
@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE (powerflow_run_with_flags)
   griddyn_sim_set_run_flags(sim, GRIDDYN_DC_MODE);
   griddyn_sim_run(sim);
 
-  BOOST_CHECK(griddyn_sim_get_run_result(sim) == 0);
-  BOOST_CHECK(griddyn_sim_get_run_status(sim) == 2); // POWERFLOW_COMPLETE
+  BOOST_CHECK(griddyn_sim_get_run_result(sim) == GRIDDYN_RESULT_OK);
+  BOOST_CHECK(griddyn_sim_get_run_status(sim) == GRIDDYN_STATUS_POWERFLOW_COMPLETE);
   BOOST_CHECK(griddyn_sim_get_base_power(sim) == 100);
   BOOST_CHECK(griddyn_sim_get_load_real(sim) > 0);
   BOOST_CHECK(griddyn_sim_get_load_reactive(sim) > 0);

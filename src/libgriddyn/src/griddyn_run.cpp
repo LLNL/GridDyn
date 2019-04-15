@@ -40,8 +40,7 @@ void griddyn_sim_run(griddyn_sim* ctx)
   auto* sim = interface->get_simulation();
   auto run_val = sim->run();
 
-  // gridState_t is a enum class, linearize it
-  // TODO: put the values in the constants header file
+  // gridState_t is a enum class; values correspond to GRIDDYN_STATUS_*
   auto state_val = static_cast<griddyn_status_t>(sim->currentProcessState());
   interface->set_run_result(run_val, state_val);
 }

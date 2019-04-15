@@ -37,6 +37,18 @@ typedef int       griddyn_status_t;
 #define GRIDDYN_DROOP_POWER_FLOW                    0x00800000
 #define GRIDDYN_USE_THREADS                         0x01000000
 
+#define GRIDDYN_RESULT_OK                           0
+
+// See: griddyn/simulation/gridSimulation.h
+#define GRIDDYN_STATUS_HALTED                      -2
+#define GRIDDYN_STATUS_GD_ERROR                    -1
+#define GRIDDYN_STATUS_STARTUP                      0
+#define GRIDDYN_STATUS_INITIALIZED                  1
+#define GRIDDYN_STATUS_POWERFLOW_COMPLETE           2
+#define GRIDDYN_STATUS_DYNAMIC_INITIALIZED          3
+#define GRIDDYN_STATUS_DYNAMIC_COMPLETE             4
+#define GRIDDYN_STATUS_DYNAMIC_PARTIAL              5
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
