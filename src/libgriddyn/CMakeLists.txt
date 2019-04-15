@@ -18,3 +18,24 @@ target_include_directories(libgriddyn PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 add_subdirectory(src)
+
+set(libgriddyn_headers
+  griddyn/libgriddyn.h
+  griddyn/bits/griddyn_constants.h
+  griddyn/bits/griddyn_export.h
+  griddyn/bits/griddyn_structs.h
+  griddyn/bits/griddyn_types.h
+)
+
+install(
+    TARGETS libgriddyn
+    EXPORT libgriddyn-targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+)
+
+install(
+    FILES ${libgriddyn_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT headers
+)
