@@ -2,8 +2,6 @@
 #include "griddyn/Load.h"
 #include "griddyn/loads/svd.h"
 
-// TODO: this is a huge amount of computation per load
-// make a griddyn_load_list struct that can be used to access a bus's loads directly?
 griddyn_load* griddyn_bus_load_i(griddyn_sim const* ctx, griddyn_bus const* bus, griddyn_idx_t load_idx)
 {
   auto const* interface = impl::interface_cast_const(ctx);
@@ -14,12 +12,6 @@ griddyn_load* griddyn_bus_load_i(griddyn_sim const* ctx, griddyn_bus const* bus,
 
   auto& load_vec = load_storage[map[bus_ptr]];
 
-  griddyn::Load* last = bus_ptr->getLoad(0);
-  for (griddyn_idx_t i = 1; last != nullptr; ++i)
-  {
-    load_vec.push_back(last);
-    last = bus_ptr->getLoad(i);
-  }
   return load_vec[load_idx];
 }
 
@@ -33,12 +25,6 @@ griddyn_idx_t griddyn_bus_load_count(griddyn_sim const* ctx, griddyn_bus const* 
 
   auto& load_vec = load_storage[map[bus_ptr]];
 
-  griddyn::Load* last = bus_ptr->getLoad(0);
-  for (griddyn_idx_t i = 1; last != nullptr; ++i)
-  {
-    load_vec.push_back(last);
-    last = bus_ptr->getLoad(i);
-  }
   return load_vec.size();
 }
 

@@ -31,7 +31,10 @@ public:
   sim_interface(Ts&&... args) :
     sim_(
       std::make_unique<griddyn::gridDynSimulation>(
-        std::forward<Ts...>(args)...)) {}
+        std::forward<Ts...>(args)...))
+  {
+    invalidate();
+  }
 
   sim_interface(sim_interface const& other) :
     last_sim_result_(other.last_sim_result_),
@@ -41,17 +44,27 @@ public:
     link_storage_(),
     load_storage_(),
     generator_storage_()
-    {}
+  {
+    invalidate();
+  }
 
   // TODO: add cache_links, cache_busses, cache_loads_at_bus and delete the
   // associated re-caching code scattered throughout
 
   griddyn::gridDynSimulation* get_simulation() { return sim_.get(); }
   griddyn::gridDynSimulation const* get_simulation() const { return sim_.get(); }
-  std::vector<griddyn::gridBus*>& get_bus_storage() const { return bus_storage_; }
-  std::vector<griddyn::Link*>& get_link_storage() const { return link_storage_; }
-  std::vector<std::vector<griddyn::Load*>>& get_load_storage() const { return load_storage_; }
-  std::vector<std::vector<griddyn::Generator*>>& get_generator_storage() const { return generator_storage_; }
+
+  std::vector<griddyn::gridBus*>& get_bus_storage() { return bus_storage_; }
+  std::vector<griddyn::gridBus*> const& get_bus_storage() const { return bus_storage_; }
+
+  std::vector<griddyn::Link*>& get_link_storage() { return link_storage_; }
+  std::vector<griddyn::Link*> const& get_link_storage() const { return link_storage_; }
+
+  std::vector<std::vector<griddyn::Load*>>& get_load_storage() { return load_storage_; }
+  std::vector<std::vector<griddyn::Load*>> const& get_load_storage() const { return load_storage_; }
+
+  std::vector<std::vector<griddyn::Generator*>>& get_generator_storage() { return generator_storage_; }
+  std::vector<std::vector<griddyn::Generator*>> const& get_generator_storage() const { return generator_storage_; }
 
   void set_run_result(griddyn_result_t run_result, griddyn_status_t run_status)
   {
@@ -69,20 +82,81 @@ public:
     return last_sim_status_;
   }
 
+  void invalidate()
+  {
+    invalidate_buses();
+    invalidate_links();
+    invalidate_loads();
+    invalidate_generators();
+  }
+
+  std::map<griddyn::gridBus const*, griddyn_idx_t> get_bus_idx_map() const
+  {
+    return bus_idx_map_;
+  }
+
 private:
   griddyn_result_t last_sim_result_ = 0;
   griddyn_status_t last_sim_status_ = 0;
   std::unique_ptr<griddyn::gridDynSimulation> sim_;
 
 private:
-  /**
-   * These are caches of their current values in griddyn, so updating them
-   * on a const sim_interface is okay
-   */
-  mutable std::vector<griddyn::gridBus*> bus_storage_;
-  mutable std::vector<griddyn::Link*> link_storage_;
-  mutable std::vector<std::vector<griddyn::Load*>> load_storage_;
-  mutable std::vector<std::vector<griddyn::Generator*>> generator_storage_;
+
+  void invalidate_buses()
+  {
+    sim_->getBusVector(bus_storage_, 0);
+
+    bus_idx_map_ = {};
+    for (griddyn_idx_t bus_idx = 0; bus_idx < bus_storage_.size(); ++bus_idx)
+    {
+      bus_idx_map_[bus_storage_[bus_idx]] = bus_idx;
+    }
+  }
+
+  void invalidate_links()
+  {
+    sim_->getLinkVector(link_storage_, 0);
+  }
+
+  void invalidate_loads()
+  {
+    load_storage_ = {};
+    for (auto&& bus : bus_storage_)
+    {
+      std::vector<griddyn::Load*> bus_loads;
+
+      griddyn::Load* last = bus->getLoad(0);
+      for (griddyn_idx_t i = 1; last != nullptr; ++i)
+      {
+        bus_loads.push_back(last);
+        last = bus->getLoad(i);
+      }
+      load_storage_.push_back(std::move(bus_loads));
+    }
+  }
+
+  void invalidate_generators()
+  {
+    generator_storage_ = {};
+    for (auto&& bus : bus_storage_)
+    {
+      std::vector<griddyn::Generator*> bus_gens;
+
+      griddyn::Generator* last = bus->getGen(0);
+      for (griddyn_idx_t i = 1; last != nullptr; ++i)
+      {
+        bus_gens.push_back(last);
+        last = bus->getGen(i);
+      }
+      generator_storage_.push_back(std::move(bus_gens));
+    }
+  }
+
+  std::vector<griddyn::gridBus*> bus_storage_;
+  std::vector<griddyn::Link*> link_storage_;
+  std::vector<std::vector<griddyn::Load*>> load_storage_;
+  std::vector<std::vector<griddyn::Generator*>> generator_storage_;
+  std::map<griddyn::gridBus const*, griddyn_idx_t> bus_idx_map_;
 };
 
 /**
@@ -204,18 +278,7 @@ inline griddyn::Generator const* generator_cast_const(griddyn_generator const* g
 inline std::map<griddyn::gridBus const*, griddyn_idx_t> get_bus_map(griddyn_sim const* ctx)
 {
   auto const* interface = interface_cast_const(ctx);
-  auto const* sim_ptr = sim_cast_const(ctx);
-
-  // make sure bus_list and link_list are populated
-  auto& bus_list = interface->get_bus_storage();
-  sim_ptr->getBusVector(bus_list, 0);
-
-  std::map<griddyn::gridBus const*, griddyn_idx_t> idx_map;
-  for (griddyn_idx_t bus_idx = 0; bus_idx < bus_list.size(); ++bus_idx)
-  {
-    idx_map[bus_list[bus_idx]] = bus_idx;
-  }
-  return idx_map;
+  return interface->get_bus_idx_map();
 }
 
 } // namespace impl

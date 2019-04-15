@@ -10,12 +10,6 @@ griddyn_generator* griddyn_bus_generator_i(griddyn_sim const* ctx, griddyn_bus c
 
   auto& generator_vec = generator_storage[map[bus_ptr]];
 
-  griddyn::Generator* last = bus_ptr->getGen(0);
-  for (griddyn_idx_t i = 1; last != nullptr; ++i)
-  {
-    generator_vec.push_back(last);
-    last = bus_ptr->getGen(i);
-  }
   return generator_vec[generator_idx];
 }
 
@@ -29,12 +23,6 @@ griddyn_idx_t griddyn_bus_generator_count(griddyn_sim const* ctx, griddyn_bus co
 
   auto& generator_vec = generator_storage[map[bus_ptr]];
 
-  griddyn::Generator* last = bus_ptr->getGen(0);
-  for (griddyn_idx_t i = 1; last != nullptr; ++i)
-  {
-    generator_vec.push_back(last);
-    last = bus_ptr->getGen(i);
-  }
   return generator_vec.size();
 }
 

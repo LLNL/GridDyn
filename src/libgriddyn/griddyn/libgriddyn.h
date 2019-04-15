@@ -20,10 +20,10 @@ LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_sim_bus_count(griddyn_sim const* ctx);
 
 LIBGRIDDYN_EXPORT griddyn_link*   griddyn_sim_link_i(griddyn_sim const* ctx, griddyn_idx_t link_idx);
 LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_sim_link_count(griddyn_sim const* ctx);
-LIBGRIDDYN_EXPORT void            griddyn_sim_link_get_adjacency_list(
-                                    griddyn_sim const* ctx,
-                                    griddyn_idx_t* from,
-                                    griddyn_idx_t* to);
+LIBGRIDDYN_EXPORT void            griddyn_link_get_buses(
+                                    griddyn_link const* link,
+                                    griddyn_bus** bus_1,
+                                    griddyn_bus** bus_2);
 ///@}
 
 /** GridDyn simulation run functionality */
@@ -51,7 +51,7 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_bus_get_voltage(griddyn_bus const* bus
 /** GridDyn load management */
 ///@{
 LIBGRIDDYN_EXPORT griddyn_load*   griddyn_bus_load_i(griddyn_sim const* ctx, griddyn_bus const* bus, griddyn_idx_t load_idx);
-LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_load_count(griddyn_bus const* bus);
+LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_load_count(griddyn_sim const* ctx, griddyn_bus const* bus);
 
 LIBGRIDDYN_EXPORT griddyn_bool_t  griddyn_load_is_svd(griddyn_load const* load);
 
@@ -65,7 +65,7 @@ LIBGRIDDYN_EXPORT griddyn_value_t griddyn_load_get_susceptance(griddyn_load cons
 /** GridDyn generator management */
 ///@{
 LIBGRIDDYN_EXPORT griddyn_generator* griddyn_bus_generator_i(griddyn_sim const* ctx, griddyn_bus const* bus, griddyn_idx_t bus_idx);
-LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_generator_count(griddyn_bus const* bus);
+LIBGRIDDYN_EXPORT griddyn_idx_t   griddyn_bus_generator_count(griddyn_sim const* ctx, griddyn_bus const* bus);
 
 LIBGRIDDYN_EXPORT griddyn_bool_t  griddyn_generator_get_status(griddyn_generator const* generator);
 LIBGRIDDYN_EXPORT void            griddyn_generator_set_status(griddyn_generator* generator, griddyn_bool_t status);
