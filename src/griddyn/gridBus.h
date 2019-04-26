@@ -17,6 +17,8 @@
 
 #include <queue>
 
+struct griddyn_bus_ {};
+
 namespace griddyn
 {
 // forward classes

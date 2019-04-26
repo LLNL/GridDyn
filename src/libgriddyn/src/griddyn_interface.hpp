@@ -13,6 +13,8 @@
 #include <sstream>
 #include <map>
 
+struct griddyn_sim_ {};
+
 namespace impl
 {
 
@@ -24,7 +26,7 @@ namespace impl
  * However, after modifying the simulation, calling get_* _again_ should give a
  * new, valid, pointer/array
  */
-class sim_interface : public griddyn_sim
+class sim_interface : public griddyn_sim_
 {
 public:
   template<typename... Ts>

@@ -16,6 +16,8 @@
 
 #include "libgriddyn/griddyn/bits/griddyn_structs.h"
 
+struct griddyn_link_ {};
+
 namespace griddyn
 {
 class gridBus;  // forward class definition

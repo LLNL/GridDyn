@@ -14,6 +14,8 @@
 
 #include "libgriddyn/griddyn/bits/griddyn_structs.h"
 
+struct griddyn_generator_ {};
+
 namespace utilities
 {
 class OperatingBoundary;
@@ -23,6 +25,7 @@ namespace griddyn
 {
 class scheduler;
 class gridSubModel;
+
 /**
 @ brief class describing a generator unit
  a generator is a power production unit in GridDyn.  the base generator class implements methods set forth in the
