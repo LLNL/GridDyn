@@ -54,6 +54,7 @@ cvodeInterface::cvodeInterface (const std::string &objName) : sundialsInterface 
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = false;
+    max_iterations = 1500;
 }
 
 cvodeInterface::cvodeInterface (gridDynSimulation *gds, const solverMode &sMode) : sundialsInterface (gds, sMode)
@@ -61,6 +62,7 @@ cvodeInterface::cvodeInterface (gridDynSimulation *gds, const solverMode &sMode)
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = false;
+    max_iterations = 1500;
 }
 
 cvodeInterface::~cvodeInterface ()
@@ -161,6 +163,12 @@ void cvodeInterface::set (const std::string &param, double val)
     {
         minStep = val;
         checkStepUpdate = true;
+    }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<count_t> (val);
+        int retval = CVodeSetMaxNumSteps (solverMem, max_iterations);
+        check_flag (&retval, "CVodeSetMaxNumSteps", 1);
     }
     else
     {
@@ -350,7 +358,7 @@ void cvodeInterface::initialize (coreTime time0)
     retval = CVodeSVtolerances (solverMem, tolerance / 100, abstols);
     check_flag (&retval, "CVodeSVtolerances", 1);
 
-    retval = CVodeSetMaxNumSteps (solverMem, 1500);
+    retval = CVodeSetMaxNumSteps (solverMem, max_iterations);
     check_flag (&retval, "CVodeSetMaxNumSteps", 1);
 
 #ifdef ENABLE_KLU
