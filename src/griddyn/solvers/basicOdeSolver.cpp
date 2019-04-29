@@ -129,7 +129,7 @@ int basicOdeSolver::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode
                     [Tstep](double a, double b) { return fma (Tstep, b, a); });
     solveTime += Tstep;
 
-    index_t iterations = 0;
+    count_t iterations = 0;
     // if we are in single step mode don't go into the loop
     if (stepMode == step_mode::normal)
     {
