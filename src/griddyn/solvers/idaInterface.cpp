@@ -53,8 +53,16 @@ int idaJac (realtype time,
 
 int idaRootFunc (realtype time, N_Vector state, N_Vector dstate_dt, realtype *gout, void *user_data);
 
-idaInterface::idaInterface (const std::string &objName) : sundialsInterface (objName) {}
-idaInterface::idaInterface (gridDynSimulation *gds, const solverMode &sMode) : sundialsInterface (gds, sMode) {}
+idaInterface::idaInterface (const std::string &objName) : sundialsInterface (objName)
+{
+  max_iterations = 1500;
+}
+
+idaInterface::idaInterface (gridDynSimulation *gds, const solverMode &sMode) : sundialsInterface (gds, sMode)
+{
+  max_iterations = 1500;
+}
+
 idaInterface::~idaInterface ()
 {
     // clear variables for IDA to use
@@ -308,7 +316,7 @@ void idaInterface::initialize (coreTime t0)
     retval = IDASVtolerances (solverMem, tolerance / 100, abstols);
     check_flag (&retval, "IDASVtolerances", 1);
 
-    retval = IDASetMaxNumSteps (solverMem, 1500);
+    retval = IDASetMaxNumSteps (solverMem, max_iterations);
     check_flag (&retval, "IDASetMaxNumSteps", 1);
 #ifdef ENABLE_KLU
     if (flags[dense_flag])
@@ -547,6 +555,12 @@ void idaInterface::loadMaskElements ()
     {
         tempState[v] = lstate[v];
     }
+}
+
+void idaInterface::updateMaxIterations()
+{
+    int retval = IDASetMaxNumSteps (solverMem, max_iterations);
+    check_flag (&retval, "IDASetMaxNumSteps", 1);
 }
 
 // IDA C Functions

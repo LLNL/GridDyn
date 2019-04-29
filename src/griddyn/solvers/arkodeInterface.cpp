@@ -52,6 +52,7 @@ arkodeInterface::arkodeInterface (const std::string &objName) : sundialsInterfac
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = false;
+    max_iterations = 1500;
 }
 
 arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode &sMode) : sundialsInterface (gds, sMode)
@@ -59,6 +60,7 @@ arkodeInterface::arkodeInterface (gridDynSimulation *gds, const solverMode &sMod
     mode.dynamic = true;
     mode.differential = true;
     mode.algebraic = false;
+    max_iterations = 1500;
 }
 
 arkodeInterface::~arkodeInterface ()
@@ -343,7 +345,7 @@ void arkodeInterface::initialize (coreTime time0)
     retval = ARKodeSVtolerances (solverMem, tolerance / 100, abstols);
     check_flag (&retval, "ARKodeSVtolerances", 1);
 
-    retval = ARKodeSetMaxNumSteps (solverMem, 1500);
+    retval = ARKodeSetMaxNumSteps (solverMem, max_iterations);
     check_flag (&retval, "ARKodeSetMaxNumSteps", 1);
 
 #ifdef ENABLE_KLU
@@ -465,6 +467,12 @@ void arkodeInterface::loadMaskElements ()
     {
         tempState[v] = lstate[v];
     }
+}
+
+void arkodeInterface::updateMaxIterations()
+{
+    int retval = ARKodeSetMaxNumSteps (solverMem, max_iterations);
+    check_flag (&retval, "ARKodeSetMaxNumSteps", 1);
 }
 
 // CVode C Functions

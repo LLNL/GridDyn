@@ -55,7 +55,7 @@ void SolverInterface::cloneTo (SolverInterface *si, bool fullCopy) const
     si->setName (getName ());
     si->solverLogFile = solverLogFile;
     si->printLevel = printLevel;
-    si->max_iterations = 10000;
+    si->max_iterations = max_iterations;
     auto ind = si->mode.offsetIndex;
     si->mode = mode;
     if (ind != kNullLocation)
@@ -314,6 +314,11 @@ void SolverInterface::set (const std::string &param, double val)
     else if (param == "index")
     {
         mode.offsetIndex = static_cast<index_t> (val);
+    }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<index_t> (val);
+        updateMaxIterations();
     }
     else
     {
@@ -606,6 +611,9 @@ void SolverInterface::logMessage (int errorCode, const std::string &message)
 }
 
 void SolverInterface::setMaxNonZeros (count_t nonZeroCount) { nnz = nonZeroCount; }
+
+// by default, nothing needs updating
+void SolverInterface::updateMaxIterations() {}
 
 // TODO:: change this function so the defaults can be something other than sundials solvers
 std::unique_ptr<SolverInterface> makeSolver (gridDynSimulation *gds, const solverMode &sMode)

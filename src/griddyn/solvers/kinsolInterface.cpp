@@ -51,6 +51,7 @@ kinsolInterface::kinsolInterface (const std::string &objName) : sundialsInterfac
     tolerance = 1e-8;
     mode.algebraic = true;
     mode.differential = false;
+    max_iterations = 50;
 }
 
 kinsolInterface::kinsolInterface (gridDynSimulation *gds, const solverMode &sMode) : sundialsInterface (gds, sMode)
@@ -58,6 +59,7 @@ kinsolInterface::kinsolInterface (gridDynSimulation *gds, const solverMode &sMod
     tolerance = 1e-8;
     mode.algebraic = true;
     mode.differential = false;
+    max_iterations = 50;
 }
 
 kinsolInterface::~kinsolInterface ()
@@ -252,7 +254,7 @@ void kinsolInterface::initialize (coreTime /*t0*/)
     retval = KINSetMaxSubSetupCalls (solverMem, 2);  // residual calls
     check_flag (&retval, "KINSetMaxSubSetupCalls", 1);
 
-    retval = KINSetNumMaxIters (solverMem, 50);  // residual calls
+    retval = KINSetNumMaxIters (solverMem, max_iterations);  // residual calls
     check_flag (&retval, "KINSetNumMaxIters", 1);
 
     retval = KINSetErrHandlerFn (solverMem, sundialsErrorHandlerFunc, this);
@@ -390,6 +392,12 @@ void kinsolInterface::setConstraints ()
         m_gds->getConstraints (NVECTOR_DATA (use_omp, consData), mode);
         KINSetConstraints (solverMem, consData);
     }
+}
+
+void kinsolInterface::updateMaxIterations()
+{
+    int retval = KINSetNumMaxIters (solverMem, max_iterations);
+    check_flag (&retval, "KINSetNumMaxIters", 1);
 }
 
 // function not in the class

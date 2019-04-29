@@ -358,6 +358,11 @@ class SolverInterface : public helperObject
     int getLastError () const { return lastErrorCode; }
     const std::string &getLastErrorString () const { return lastErrorString; }
 
+    /** @brief update the maximum number of iterations for solvers that store it internally
+    calls e.g. IDASetMaxNumSteps, if necessary
+    */
+    virtual void updateMaxIterations();
+
   protected:
     /** @brief check the output of actual solver calls for proper results
     @param[in] flagvalue a return code <0 usually indicates an error

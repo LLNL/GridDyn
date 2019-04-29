@@ -59,6 +59,9 @@ class idaInterface : public sundialsInterface
     double get (const std::string &param) const override;
 
     void setConstraints () override;
+
+    virtual void updateMaxIterations() override;
+
     // declare friend some helper functions
     friend int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
 

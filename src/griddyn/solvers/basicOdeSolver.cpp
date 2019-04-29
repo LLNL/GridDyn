@@ -128,10 +128,12 @@ int basicOdeSolver::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode
     std::transform (state.begin (), state.end (), deriv.begin (), state.begin (),
                     [Tstep](double a, double b) { return fma (Tstep, b, a); });
     solveTime += Tstep;
+
+    index_t iterations = 0;
     // if we are in single step mode don't go into the loop
     if (stepMode == step_mode::normal)
     {
-        while (solveTime < tStop)
+        while (solveTime < tStop && iterations < max_iterations)
         {
             Tstep = (std::min) (deltaT, tStop - solveTime);
             if (mode.pairedOffsetIndex != kNullLocation)
@@ -146,6 +148,7 @@ int basicOdeSolver::solve (coreTime tStop, coreTime &tReturn, step_mode stepMode
             std::transform (state.begin (), state.end (), deriv.begin (), state.begin (),
                             [Tstep](double a, double b) { return fma (Tstep, b, a); });
             solveTime += Tstep;
+            ++iterations;
         }
     }
     tReturn = solveTime;
