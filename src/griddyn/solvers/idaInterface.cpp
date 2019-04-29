@@ -133,7 +133,7 @@ void idaInterface::set (const std::string &param, double val)
     }
     else
     {
-        SolverInterface::set (param, val);
+        sundialsInterface::set (param, val);
     }
 }
 
