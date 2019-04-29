@@ -42,8 +42,6 @@ class kinsolInterface : public sundialsInterface
     int solve (coreTime tStop, coreTime &tReturn, step_mode stepMode = step_mode::normal) override;
     void setConstraints () override;
 
-    virtual void updateMaxIterations() override;
-
     void logSolverStats (print_level logLevel, bool iconly = false) const override;
     void logErrorWeights (print_level /*logLevel*/) const override {}
     virtual double get (const std::string &param) const override;

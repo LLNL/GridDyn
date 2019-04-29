@@ -63,8 +63,6 @@ class arkodeInterface : public sundialsInterface
     virtual void set (const std::string &param, double val) override;
     virtual double get (const std::string &param) const override;
 
-    virtual void updateMaxIterations() override;
-
     // declare friend some helper functions
     friend int arkodeFunc (realtype time, N_Vector state, N_Vector dstate_dt, void *user_data);
     friend int arkodeJac (realtype time,

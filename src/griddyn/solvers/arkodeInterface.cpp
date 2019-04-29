@@ -163,10 +163,17 @@ void arkodeInterface::set (const std::string &param, double val)
         minStep = val;
         checkStepUpdate = true;
     }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<count_t> (val);
+        int retval = ARKodeSetMaxNumSteps (solverMem, max_iterations);
+        check_flag (&retval, "ARKodeSetMaxNumSteps", 1);
+    }
     else
     {
         SolverInterface::set (param, val);
     }
+
     if (checkStepUpdate)
     {
         if (flags[initialized_flag])
@@ -467,12 +474,6 @@ void arkodeInterface::loadMaskElements ()
     {
         tempState[v] = lstate[v];
     }
-}
-
-void arkodeInterface::updateMaxIterations()
-{
-    int retval = ARKodeSetMaxNumSteps (solverMem, max_iterations);
-    check_flag (&retval, "ARKodeSetMaxNumSteps", 1);
 }
 
 // CVode C Functions

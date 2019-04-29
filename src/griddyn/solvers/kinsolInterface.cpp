@@ -281,6 +281,12 @@ void kinsolInterface::set (const std::string &param, double val)
     if (param.empty ())
     {
     }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<count_t> (val);
+        int retval = KINSetNumMaxIters (solverMem, max_iterations);
+        check_flag (&retval, "KINSetNumMaxIters", 1);
+    }
     else
     {
         sundialsInterface::set (param, val);
@@ -392,12 +398,6 @@ void kinsolInterface::setConstraints ()
         m_gds->getConstraints (NVECTOR_DATA (use_omp, consData), mode);
         KINSetConstraints (solverMem, consData);
     }
-}
-
-void kinsolInterface::updateMaxIterations()
-{
-    int retval = KINSetNumMaxIters (solverMem, max_iterations);
-    check_flag (&retval, "KINSetNumMaxIters", 1);
 }
 
 // function not in the class

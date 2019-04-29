@@ -164,6 +164,12 @@ void cvodeInterface::set (const std::string &param, double val)
         minStep = val;
         checkStepUpdate = true;
     }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<count_t> (val);
+        int retval = CVodeSetMaxNumSteps (solverMem, max_iterations);
+        check_flag (&retval, "CVodeSetMaxNumSteps", 1);
+    }
     else
     {
         SolverInterface::set (param, val);
@@ -479,12 +485,6 @@ void cvodeInterface::loadMaskElements ()
     {
         tempState[v] = lstate[v];
     }
-}
-
-void cvodeInterface::updateMaxIterations()
-{
-    int retval = CVodeSetMaxNumSteps (solverMem, max_iterations);
-    check_flag (&retval, "CVodeSetMaxNumSteps", 1);
 }
 
 // CVode C Functions

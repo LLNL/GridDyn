@@ -123,6 +123,20 @@ void idaInterface::setMaxNonZeros (count_t nonZeros)
     a1.clear ();
 }
 
+void idaInterface::set (const std::string &param, double val)
+{
+    if (param == "maxiterations")
+    {
+        max_iterations = static_cast<count_t> (val);
+        int retval = IDASetMaxNumSteps (solverMem, max_iterations);
+        check_flag (&retval, "IDASetMaxNumSteps", 1);
+    }
+    else
+    {
+        SolverInterface::set (param, val);
+    }
+}
+
 double idaInterface::get (const std::string &param) const
 {
     long int val = -1;
@@ -555,12 +569,6 @@ void idaInterface::loadMaskElements ()
     {
         tempState[v] = lstate[v];
     }
-}
-
-void idaInterface::updateMaxIterations()
-{
-    int retval = IDASetMaxNumSteps (solverMem, max_iterations);
-    check_flag (&retval, "IDASetMaxNumSteps", 1);
 }
 
 // IDA C Functions
