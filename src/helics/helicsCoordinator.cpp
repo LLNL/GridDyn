@@ -14,6 +14,10 @@
 #include "helics/application_api.hpp"
 #include "helics/helicsEvent.h"
 
+#include "griddyn/comms/commMessage.h"
+#include "griddyn/comms/communicationsCore.h"
+#include "griddyn/events/eventAdapters.h"
+#include "griddyn/gridDynSimulation.h"
 #include "utilities/stringConversion.h"
 #include <algorithm>
 #include <utilities/mapOps.hpp>
@@ -124,6 +128,9 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate ()
         }
         ++ii;
     }
+    // register a callback for handling messages from endpoints
+    mFed_->setMessageNotificationCallback ([this](helics::Endpoint &ep, helics::Time t) { this->receiveMessage (ep, t); });
+
     fed->enterInitializingMode ();
     LOG_SUMMARY ("entered HELICS initializing Mode");
     for (auto evnt : events)
@@ -200,6 +207,22 @@ void helicsCoordinator::set (const std::string &param, double val, gridUnits::un
     {
         coreObject::set (param, val, unitType);
     }
+}
+
+void helicsCoordinator::receiveMessage (helics::Endpoint &ep, helics::Time t)
+{
+    auto payload = ep.getMessage ()->to_string ();
+    std::shared_ptr<griddyn::commMessage> msg;
+    msg->from_string (payload);
+
+    auto event = std::make_unique<griddyn::functionEventAdapter> ([this, msg, &ep]() {
+        communicationsCore::instance ()->send (0, ep.getName (), std::move(msg));
+        return griddyn::change_code::no_change;
+    });
+
+    // convert helics::Time to griddynTime
+    event->m_nextTime = t;
+    gridDynSimulation::getInstance ()->add (std::shared_ptr<griddyn::eventAdapter> (std::move(event)));
 }
 
 void helicsCoordinator::sendMessage (int32_t index, const char *data, count_t size)

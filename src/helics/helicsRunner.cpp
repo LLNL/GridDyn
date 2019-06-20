@@ -62,7 +62,7 @@ int helicsRunner::Initialize (int argc, char *argv[], bool allowUnrecognized)
 {
     // using namespace boost;
 
-    bool test;
+    bool test = false;
     CLI::App parser ("options related to helics executable", "helics_options");
     parser.add_flag ("--test", test, "run a test of the GridDyn helics interactions");
     parser.allow_extras ();

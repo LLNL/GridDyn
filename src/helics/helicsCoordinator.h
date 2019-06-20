@@ -130,6 +130,7 @@ class helicsCoordinator : public coreObject
         throw (invalidParameterValue ());
     }
 
+	void receiveMessage (helics::Endpoint &ep, helics::Time t); /* catch-all callback for HELICS messages */
     void sendMessage (int32_t index, const char *data, count_t size);
     void sendMessage (int32_t index, const std::string &dest, const char *data, count_t size);
     void addHelper (std::shared_ptr<helperObject> ho) override;
