@@ -65,7 +65,7 @@ class zipLoad : public Load
     set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+//    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
 
     virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 
