@@ -13,6 +13,7 @@
 #pragma once
 
 #include "../Load.h"
+#include "griddyn_autogen.h"
 
 namespace griddyn
 {
@@ -58,6 +59,7 @@ class zipLoad : public Load
     virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
     virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
 
+    AUTOGEN_GET
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
     set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
