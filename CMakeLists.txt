@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # project name
-project(GRIDDYN VERSION 0.9.0)
+project(GRIDDYN VERSION 0.9.1)
 
 # version number
 set(GRIDDYN_VERSION_BUILD)
@@ -28,7 +28,7 @@ if(GRIDDYN_VERSION_BUILD)
     )
 endif()
 
-set(GRIDDYN_DATE 4-28-2018)
+set(GRIDDYN_DATE 7-11-2019)
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 set(GRIDDYN_VERSION_STRING_SHORT "${GRIDDYN_VERSION}")
 
@@ -248,7 +248,7 @@ option(
 )
 
 option(
-    ENABLE_TESTS
+    ENABLE_GRIDDYN_TESTS
     "Enable unit testing construction"
     ON
 )
@@ -712,7 +712,7 @@ endif(ENABLE_CLANG_TOOLS)
 # ------------------------------------------------------------
 # Enable testCore construction?
 # ------------------------------------------------------------
-if(ENABLE_TESTS)
+if(ENABLE_GRIDDYN_TESTS)
     # message(STATUS "otcf:${optional_component_test_files}")
     add_subdirectory(test)
     if(BUILD_SHARED_LIBS)
@@ -720,7 +720,7 @@ if(ENABLE_TESTS)
     endif(BUILD_SHARED_LIBS)
     enable_testing()
     # add_test(NAME gridDynTest COMMAND testCore)
-endif(ENABLE_TESTS)
+endif(ENABLE_GRIDDYN_TESTS)
 
 set(
     GRIDDYN_CMAKECONFIG_INSTALL_DIR
