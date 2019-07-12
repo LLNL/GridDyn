@@ -130,14 +130,15 @@ class helicsCoordinator : public coreObject
         throw(invalidParameterValue());
     }
 
-    void sendMessage(int32_t index, const char *data, count_t size);
-    void sendMessage(int32_t index, const std::string &dest, const char *data, count_t size);
-    void addHelper(std::shared_ptr<helperObject> ho) override;
-    void addEvent(helicsEvent *evnt);
-    void addCollector(helicsCollector *col);
-    void set(const std::string &param, const std::string &val) override;
-    void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    void setFlag(const std::string &flag, bool val) override;
+	void receiveMessage (helics::Endpoint &ep, helics::Time t); /* catch-all callback for HELICS messages */
+    void sendMessage (int32_t index, const char *data, count_t size);
+    void sendMessage (int32_t index, const std::string &dest, const char *data, count_t size);
+    void addHelper (std::shared_ptr<helperObject> ho) override;
+    void addEvent (helicsEvent *evnt);
+    void addCollector (helicsCollector *col);
+    void set (const std::string &param, const std::string &val) override;
+    void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    void setFlag (const std::string &flag, bool val) override;
     /** add a publication to the helics federate
     @param[in] pubName the name of the value to publish
     @param[in] type  the type of value one of helicsValueType
