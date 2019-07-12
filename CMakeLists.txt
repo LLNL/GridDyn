@@ -10,12 +10,15 @@
 
 # cmake >= 3.5 required, minimum_required sets policy
 cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
 
 # project name
 project(GRIDDYN VERSION 0.9.1)
 
 # version number
 set(GRIDDYN_VERSION_BUILD)
+set(GRIDDYN_DATE "7-11-2019")
+
 set(
     GRIDDYN_VERSION_UNDERSCORE
     "${GRIDDYN_VERSION_MAJOR}_${GRIDDYN_VERSION_MINOR}_${GRIDDYN_VERSION_PATCH}"
@@ -28,7 +31,7 @@ if(GRIDDYN_VERSION_BUILD)
     )
 endif()
 
-set(GRIDDYN_DATE 7-11-2019)
+
 set(GRIDDYN_VERSION_STRING "${GRIDDYN_VERSION} ${GRIDDYN_DATE}")
 set(GRIDDYN_VERSION_STRING_SHORT "${GRIDDYN_VERSION}")
 
@@ -48,6 +51,13 @@ set(
 )
 
 include(extraMacros)
+include(CMakeDependentOption)
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	set(GRIDDYN_ROOT_PROJ ON)
+else()
+    set(GRIDDYN_ROOT_PROJ OFF)
+endif()
 
 # ------------------------------------------------------------
 # set the install path to a local directory
@@ -96,14 +106,13 @@ endif()
 # -------
 # options
 # -------
-include(CMakeDependentOption)
 
-option(
-    # TODO look at cmake/compiler_flags.cmake
-    ENABLE_EXTRA_COMPILER_WARNINGS
-    "disable compiler warning for GridDyn build"
-    ON
-)
+if (GRIDDYN_ROOT_PROJ)
+if (DEFINED BUILD_TESTING)
+option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ${BUILD_TESTING})
+else()
+option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ON)
+endif()
 
 option(
     ENABLE_FMI_EXPORT
@@ -205,12 +214,6 @@ option(
 )
 
 option(
-    ENABLE_FSKIT
-    "Enable FSKIT support"
-    OFF
-)
-
-option(
     ENABLE_GRIDDYN_LOGGING
     "enable all normal, debug, and trace logging in GridDyn"
     ON
@@ -245,12 +248,6 @@ option(
     ENABLE_CLANG_TOOLS
     "if clang is found enable some custom targets for clang formatting and tidy"
     OFF
-)
-
-option(
-    ENABLE_GRIDDYN_TESTS
-    "Enable unit testing construction"
-    ON
 )
 
 option(
@@ -331,8 +328,13 @@ set_property(
     PROPERTY STRINGS ${optimization_levels}
 )
 
-if(NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX d)
+# -----------------------------------------------------------------------------
+# General project wide configuration for debug postfix
+# -----------------------------------------------------------------------------
+if(NOT NO_DEBUG_POSFIX)
+    if(NOT CMAKE_DEBUG_POSTFIX)
+        set(CMAKE_DEBUG_POSTFIX d)
+    endif()
 endif()
 
 if(
@@ -379,19 +381,53 @@ if (NOT CMAKE_POSITION_INDEPENDENT_CODE)
     )
 endif()
 
+if (NOT TARGET compile_flags_target)
+   add_library(compile_flags_target INTERFACE)
+endif()
 
-include(compiler_flags)
+if (GRIDDYN_ROOT_PROJECT)
+    include(compiler_flags)
 
-if(VERSION_OPTION)
-    if(MSVC)
-        target_compile_options(griddyn_base INTERFACE ${VERSION_OPTION})
+    message(STATUS "setting version build options to \"${CXX_STANDARD_FLAG}\"")
+	if(CXX_STANDARD_FLAG)
+		if(MSVC)
+			target_compile_options(griddyn_base INTERFACE ${CXX_STANDARD_FLAG})
+		else()
+			target_compile_options(
+				griddyn_base
+				INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}>
+			)
+		endif(MSVC)
+	endif(CXX_STANDARD_FLAG)
+	
+endif()
+
+if (GRIDDYN_ROOT_PROJ)
+cmake_dependent_option(
+    STATIC_STANDARD_LIB
+    "Link against a static standard lib"
+    OFF
+    "NOT USE_LIBCXX"
+    OFF
+)
+include(ucm)
+mark_as_advanced(STATIC_STANDARD_LIB)
+if(STATIC_STANDARD_LIB)
+    ucm_set_runtime(STATIC)
+else()
+    ucm_set_runtime(DYNAMIC)
+endif()
+
+if(MSVC)
+    option(EMBEDDED_DEBUG_INFO "embed debug info into obj files" OFF)
+    mark_as_advanced(EMBEDDED_DEBUG_INFO)
+    if(EMBEDDED_DEBUG_INFO)
+        ucm_set_embedded_debug(EMBEDDED)
     else()
-        target_compile_options(
-            griddyn_base
-            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>
-        )
-    endif(MSVC)
-endif(VERSION_OPTION)
+        ucm_set_embedded_debug(EXTERNAL)
+    endif()
+endif(MSVC)
+endif (GRIDDYN_ROOT_PROJ)
 
 # ------------------------------------------------------------
 # BOOST  find the boost libraries
@@ -510,6 +546,30 @@ if(ENABLE_MULTITHREADING)
     find_package(Threads REQUIRED)
     target_link_libraries(griddyn_base INTERFACE Threads::Threads)
 endif(ENABLE_MULTITHREADING)
+
+# -------------------------------------------------------------
+# Update git submodules
+# -------------------------------------------------------------
+include(updateGitSubmodules)
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/fmtlib/CMakeLists.txt")
+	submod_update(ThirdParty/fmtlib)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/jsoncpp/CMakeLists.txt")
+	submod_update(ThirdParty/jsoncpp)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/containers/gmlc/containers/BlockingQueue.hpp")
+	submod_update(ThirdParty/containers)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/concurrency/gmlc/concurrency/TriggerVariable.hpp")
+	submod_update(ThirdParty/concurrency)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/sundials/include/ida/ida.h")
+	submod_update(extern/sundials)
+endif()
 
 # -----------------------------------------------------------------------------
 # create the fmt header only targets
@@ -656,7 +716,20 @@ target_include_directories(
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
         $<BUILD_INTERFACE:${AUTOBUILD_INSTALL_PATH}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty/containers>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty/concurrency>
 )
+
+
+# -----------------------------------------------------------------------------
+# create the fmt header only targets
+# -----------------------------------------------------------------------------
+include(addfmt)
+
+# --------------------------------------------------------------
+#  Create the target for jsoncpp
+# -----------------------------------------------------------
+include(addJsoncpp)
 
 # ------------------------------------------------------------
 # load the required subdirectories
@@ -834,7 +907,7 @@ endif()
 # swig interface builds
 # ------------------------------------------------------------
 if(INTERFACE_BUILD)
-    add_subdirectory(swig)
+    add_subdirectory(interfaces)
 endif()
 
 # TODO make a cpack file, put this there
