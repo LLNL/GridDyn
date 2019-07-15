@@ -113,6 +113,7 @@ option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ${BUILD_TE
 else()
 option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ON)
 endif()
+endif()
 
 option(
     ENABLE_FMI_EXPORT
@@ -436,7 +437,6 @@ endif (GRIDDYN_ROOT_PROJ)
 set(
     BOOST_REQUIRED_LIBRARIES
     filesystem
-    program_options
     system
     unit_test_framework
     date_time
@@ -571,18 +571,6 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/sundials/include/ida/ida.h")
 	submod_update(extern/sundials)
 endif()
 
-# -----------------------------------------------------------------------------
-# create the fmt header only targets
-# -----------------------------------------------------------------------------
-set(FMT_ASSUME_CPP14_SUPPORT ON)
-set(FMT_SILENT ON)
-# get the FMT header only library
-add_subdirectory(ThirdParty/fmt EXCLUDE_FROM_ALL)
-hide_variable(FMT_DOC)
-hide_variable(FMT_INSTALL)
-hide_variable(FMT_PEDANTIC)
-hide_variable(FMT_TEST)
-hide_variable(FMT_WERROR)
 
 # ------------------------------------------------------------
 # finding MPI
