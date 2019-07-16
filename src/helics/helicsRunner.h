@@ -44,6 +44,7 @@ class helicsRunner : public GriddynRunner
 
   public:
     virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override;
+    virtual int Initialize (int argc, char *argv[], bool allowUnrecognized = true) override final;
 
     virtual void simInitialize() override;
     virtual coreTime Run() override;

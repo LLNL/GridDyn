@@ -32,7 +32,6 @@ set(
     tomlElement.cpp
     tomlReaderElement.cpp
     iniReaderElement.cpp
-    ${PROJECT_SOURCE_DIR}/ThirdParty/json/jsoncpp.cpp
 )
 
 # set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
@@ -87,6 +86,7 @@ add_library(
 )
 
 target_link_libraries(tinyxml griddyn_base)
+
 target_compile_definitions(tinyxml PUBLIC -DTIXML_USE_TICPP)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -110,6 +110,7 @@ target_include_directories(
 
 target_link_libraries(formatInterpreter PUBLIC tinyxml utilities)
 
+target_link_libraries(formatInterpreter PUBLIC jsoncpp_lib)
 set_target_properties(formatInterpreter PROPERTIES FOLDER libraries)
 
 if(YAML_FOUND)

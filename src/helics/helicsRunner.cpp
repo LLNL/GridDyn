@@ -20,7 +20,6 @@
 
 #include "gridDynLoader/libraryLoader.h"
 #include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 
 #include "CLI11/CLI11.hpp"
 #include "helics/helics.hpp"
@@ -101,8 +100,9 @@ int helicsRunner::Initialize(int argc, char *argv[])
     }
 
     readerInfo ri;
+    loadHelicsReaderInfoDefinitions(ri);
 
-    int ret = GriddynRunner::Initialize(argc, argv, ri, true);
+    int ret = GriddynRunner::Initialize(argc, argv, ri, allowUnrecognized);
     if (ret != 0)
     {
         return ret;

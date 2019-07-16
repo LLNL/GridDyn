@@ -67,11 +67,11 @@ class helicsCoordinator : public coreObject
 
   public:
     /** register a coordinator in the registry*/
-    static void registerCoordinator (const std::string &coordinatorName, helicsCoordinator *ptr);
+    static void registerCoordinator(const std::string &coordinatorName, helicsCoordinator *ptr);
     /** remove a coordinator from the registry*/
-    static void unregisterCoordinator (const std::string &coordinatorName);
+    static void unregisterCoordinator(const std::string &coordinatorName);
     /** find a coordinator in the registry*/
-    static helicsCoordinator *findCoordinator (const std::string &coordinatorName);
+    static helicsCoordinator *findCoordinator(const std::string &coordinatorName);
 
   private:
     std::deque<helics::Publication> pubs_;  //!< list of all the publication
@@ -93,43 +93,44 @@ class helicsCoordinator : public coreObject
     std::unordered_map<std::string, int32_t> pubMap_;  //!< map of all the publication names
     std::unordered_map<std::string, int32_t> eptMap_;  //!< map of all the endpoints
   public:
-    explicit helicsCoordinator (const std::string &fedName = std::string{});
+    explicit helicsCoordinator(const std::string &fedName = std::string{});
 
     /** load the info structure from command line arguments*/
-    void loadCommandLine (int argc, const char *const *argv);
+    void loadCommandLine(int argc, char *argv[]);
     /** register the information as part of a federate in HELICS
     @return a shared pointer to the federate object itself
     */
-    std::shared_ptr<helics::Federate> RegisterAsFederate ();
+    std::shared_ptr<helics::Federate> RegisterAsFederate();
     /** get a pointer to the federate
     @details will return an empty point if RegisterAsFederate hasn't been called yet*/
-    std::shared_ptr<helics::Federate> getFederate () { return fed; }
+    std::shared_ptr<helics::Federate> getFederate() { return fed; }
     /** set the value of a publication*/
     template <class ValueType>
-    void publish (int32_t index, const ValueType &val)
+    void publish(int32_t index, const ValueType &val)
     {
-        if (isValidIndex (index, pubs_))
+        if (isValidIndex(index, pubs_))
         {
             auto &pub = pubs_[index];
-            pub.publish (val);
+            pub.publish(val);
         }
         else
         {
-            throw (invalidParameterValue ());
+            throw(invalidParameterValue());
         }
     }
 
     template <class ValueType>
-    ValueType getValueAs (int32_t index)
+    ValueType getValueAs(int32_t index)
     {
-        if (isValidIndex (index, subs_))
+        if (isValidIndex(index, subs_))
         {
             auto &sub = subs_[index];
-            return sub.getValue<ValueType> ();
+            return sub.getValue<ValueType>();
         }
-        throw (invalidParameterValue ());
+        throw(invalidParameterValue());
     }
 
+	void receiveMessage (helics::Endpoint &ep, helics::Time t); /* catch-all callback for HELICS messages */
     void sendMessage (int32_t index, const char *data, count_t size);
     void sendMessage (int32_t index, const std::string &dest, const char *data, count_t size);
     void addHelper (std::shared_ptr<helperObject> ho) override;
@@ -144,33 +145,33 @@ class helicsCoordinator : public coreObject
     @param[in] unitType the units of the publication
     @return an identifier value for the publication
     */
-    int32_t addPublication (const std::string &pubName,
-                            helics::data_type type,
-                            gridUnits::units_t unitType = gridUnits::defUnit);
+    int32_t addPublication(const std::string &pubName,
+                           helics::data_type type,
+                           gridUnits::units_t unitType = gridUnits::defUnit);
     /** update a publication
     @param[in] index the identifier for the publication
     @param[in] pubName the name of the value to publish
     @param[in] type  the type of value one of helicsValueType
     @param[in] unitType the units of the publication
     */
-    void updatePublication (int32_t index,
-                            const std::string &pubName,
-                            helics::data_type type,
-                            gridUnits::units_t unitType = gridUnits::defUnit);
+    void updatePublication(int32_t index,
+                           const std::string &pubName,
+                           helics::data_type type,
+                           gridUnits::units_t unitType = gridUnits::defUnit);
     /** add a subscription to the helics federate
     @param[in] pubName the name of the value to subscribe to
     @param[in] unitType the units of the publication
     @return an identifier value for the publication
     */
-    int32_t addSubscription (const std::string &pubName, gridUnits::units_t unitType = gridUnits::defUnit);
+    int32_t addSubscription(const std::string &pubName, gridUnits::units_t unitType = gridUnits::defUnit);
     /** update a subscription
     @param[in] index the identifier for the subscription
     @param[in] pubName the name of the value to subscribe to
     @param[in] unitType the units of the publication
     */
-    void updateSubscription (int32_t index,
-                             const std::string &subName,
-                             gridUnits::units_t unitType = gridUnits::defUnit);
+    void updateSubscription(int32_t index,
+                            const std::string &subName,
+                            gridUnits::units_t unitType = gridUnits::defUnit);
 
     /** add an endpoint to the helics federate
     @param[in] eptName the name of the endpoint
@@ -178,60 +179,60 @@ class helicsCoordinator : public coreObject
     @param[in] target the default destination for the endpoint
     @return an identifier value for endpoint
     */
-    int32_t addEndpoint (const std::string &eptName,
-                         const std::string &type = std::string (),
-                         const std::string &target = std::string ());
+    int32_t addEndpoint(const std::string &eptName,
+                        const std::string &type = std::string(),
+                        const std::string &target = std::string());
     /** update an endpoint
     @param[in] eptName the name of the endpoint
     @param[in] type the type of the endpoint(empty string is acceptable)
     @return an identifier value for endpoint
     */
-    void updateEndpoint (int32_t index, const std::string &eptName, const std::string &type = std::string ());
+    void updateEndpoint(int32_t index, const std::string &eptName, const std::string &type = std::string());
     /** set the target destination for an endpoint
      */
-    void setEndpointTarget (int32_t index, const std::string &target);
+    void setEndpointTarget(int32_t index, const std::string &target);
 
     template <class ValueType>
-    void setDefault (int32_t index, const ValueType &val)
+    void setDefault(int32_t index, const ValueType &val)
     {
-        if (isValidIndex (index, subs_))
+        if (isValidIndex(index, subs_))
         {
             auto &sub = subs_[index];
-            sub.setDefault (val);
+            sub.setDefault(val);
         }
-        else if (isValidIndex (index, subI))
+        else if (isValidIndex(index, subI))
         {
             auto &sub = subI[index];
             sub.defaults = val;
         }
         else
         {
-            throw (invalidParameterValue ());
+            throw(invalidParameterValue());
         }
     }
 
   public:
     /** lookup an identifier for a previously declared subscription
     @return the subscription index or -1 if not existent*/
-    int32_t getSubscriptionIndex (const std::string &name) const;
+    int32_t getSubscriptionIndex(const std::string &name) const;
 
     /** lookup an identifier for a previously declared publication
     @return the publication index or -1 if not existent*/
-    int32_t getPublicationIndex (const std::string &name) const;
+    int32_t getPublicationIndex(const std::string &name) const;
     /** lookup an identifier for a previously declared endpoint
     @return the endpoint index or -1 if not existent*/
-    int32_t getEndpointIndex (const std::string &eptName) const;
+    int32_t getEndpointIndex(const std::string &eptName) const;
     /** finalize the federate and disconnect from Helics*/
-    void finalize ();
+    void finalize();
 
     /** check whether a value has been updated*/
-    bool isUpdated (int32_t index);
+    bool isUpdated(int32_t index);
     /** check whether an endpoint has a message*/
-    bool hasMessage (int32_t index) const;
+    bool hasMessage(int32_t index) const;
 
-    helics::Publication *getPublicationPointer (int32_t index);
-    helics::Input *getInputPointer (int32_t index);
-    helics::Endpoint *getEndpointPointer (int32_t index);
+    helics::Publication *getPublicationPointer(int32_t index);
+    helics::Input *getInputPointer(int32_t index);
+    helics::Endpoint *getEndpointPointer(int32_t index);
 };
 
 }  // namespace helicsLib

@@ -52,7 +52,7 @@ class GriddynRunner
      @param[in] allowUnrecognized set to true to indicate that the unrecognized arguments should be allowed
      @return >0 normal stop,  0 normal, <0 error
      */
-    int Initialize(int argc, char *argv[], bool allowUnrecognized = false);
+    virtual int Initialize(int argc, char *argv[], bool allowUnrecognized = false);
     /**
     * Initialize a simulation run from command line arguments using a given readerInfo structure
     @param[in] argc the number of console arguments

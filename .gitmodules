@@ -1,0 +1,19 @@
+[submodule "extern/sundials"]
+	path = extern/sundials
+	url = ../../LLNL/sundials.git
+[submodule "ThirdParty/fmtlib"]
+	path = ThirdParty/fmtlib
+	url = https://github.com/fmtlib/fmt.git
+[submodule "ThirdParty/containers"]
+	path = ThirdParty/containers
+	url = https://github.com/GMLC-TDC/containers.git
+[submodule "ThirdParty/concurrency"]
+	path = ThirdParty/concurrency
+	url = https://github.com/GMLC-TDC/concurrency.git
+[submodule "ThirdParty/jsoncpp"]
+	path = ThirdParty/jsoncpp
+	url = https://github.com/phlptp/jsoncpp.git
+	branch = fix_jsoncpp_shadow_warnings
+[submodule "ThirdParty/units"]
+	path = ThirdParty/units
+	url = https://github.com/LLNL/units.git

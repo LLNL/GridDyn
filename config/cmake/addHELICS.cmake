@@ -7,7 +7,7 @@
 
 IF (MSVC)
 	set(HELICS_PATH_HINTS
-		C:/local/helics_2_0_0
+		C:/local/helics_2_1_0
 		)
 ENDIF(MSVC)
 
@@ -20,7 +20,7 @@ set(HELICS_CMAKE_SUFFIXES
 	lib/cmake/HELICS/
 			cmake/HELICS/)
 	
-find_package(HELICS 2
+find_package(HELICS 2.1
 	HINTS 
 		${HELICS_INSTALL_PATH}
 		$ENV{HELICS_INSTALL_PATH}

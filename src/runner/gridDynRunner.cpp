@@ -24,7 +24,6 @@
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "utilities/stringOps.h"
-#include "utilities/stringToCmdLine.h"
 #include "utilities/workQueue.h"
 
 #include "CLI11/CLI11.hpp"

@@ -1,82 +1,92 @@
-if(NOT DEFINED SUNDIALS_DIR)
-  set(SUNDIALS_DIR ${AUTOBUILD_INSTALL_PATH} CACHE PATH "path to SUNDIALS")
+
+set(BUILD_CVODES OFF CACHE INTERNAL "")
+set(BUILD_IDAS OFF CACHE INTERNAL "")
+set(BUILD_IDA ON CACHE INTERNAL "")
+set(BUILD_KINSOL ON CACHE INTERNAL "")
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+set(EXAMPLES_ENABLE_C OFF CACHE INTERNAL "")
+set(EXAMPLES_ENABLE_CXX OFF CACHE INTERNAL "")
+set(EXAMPLES_INSTALL OFF CACHE INTERNAL "")
+set(SUNDIALS_INDEX_SIZE 32 CACHE INTERNAL "")
+
+if (ENABLE_OPENMP_SUNDIALS)
+set(OPENMP_ENABLE ON CACHE INTERNAL "")
+endif(ENABLE_OPENMP_SUNDIALS)
+
+if (ENABLE_KLU)
+        set(KLU_ENABLE ON CACHE INTERNAL "")
+        get_target_property(SuiteSparse_DIRECT_INCLUDE_DIR SuiteSparse::klu INTERFACE_INCLUDE_DIRECTORIES)
+        find_path (SUNDIALS_KLU_INCLUDE_PATH klu.h
+            HINTS ${SuiteSparse_DIRECT_INCLUDE_DIR}
+            PATH_SUFFIXES suitesparse)
+        set(KLU_INCLUDE_DIR "${SUNDIALS_KLU_INCLUDE_PATH}" CACHE INTERNAL "")
+
+        get_target_property(_klu_configs SuiteSparse::klu IMPORTED_CONFIGURATIONS)
+        if(_klu_configs)
+
+            set(klu_config "RELEASE")
+            if(NOT "RELEASE" IN_LIST _klu_configs)
+                    list(GET _klu_configs 0 klu_config)
+            endif()
+
+            get_target_property(KLU_LIBRARY_FILE SuiteSparse::klu IMPORTED_LOCATION_${klu_config})
+        else()
+            get_target_property(KLU_LIBRARY_FILE SuiteSparse::klu IMPORTED_LOCATION)
+        endif()
+        get_filename_component(SUNDIALS_KLU_LIBRARY_DIR_NAME ${KLU_LIBRARY_FILE} DIRECTORY)
+        set(KLU_LIBRARY_DIR ${SUNDIALS_KLU_LIBRARY_DIR_NAME} CACHE INTERNAL "")
+    else()
+        set(KLU_ENABLE OFF CACHE INTERNAL "")
+    endif()
+
+add_subdirectory(extern/sundials)
+
+add_library(sundials_all INTERFACE)
+target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/sundials/include>)
+target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/extern/sundials/include>)
+add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
+
+set(SUNDIALS_LIBRARIES
+	sundials_arkode_static
+	sundials_cvode_static
+	sundials_ida_static
+	sundials_kinsol_static
+	sundials_nvecserial_static
+	sundials_sunlinsolband_static
+	sundials_sunlinsoldense_static
+	sundials_sunlinsolpcg_static
+	sundials_sunlinsolspbcgs_static
+	sundials_sunlinsolspfgmr_static
+	sundials_sunlinsolspgmr_static
+	sundials_sunlinsolsptfqmr_static
+	sundials_sunmatrixband_static
+	sundials_sunmatrixdense_static
+	sundials_sunmatrixsparse_static
+	sundials_sunnonlinsolfixedpoint_static
+	sundials_sunnonlinsolnewton_static
+	sundials_generic_static_obj
+	sundials_nvecmanyvector_static
+	sundials_nvecopenmp_static
+	sundials_sunlinsolklu_static
+)
+set_target_properties ( ${SUNDIALS_LIBRARIES} PROPERTIES FOLDER sundials)
+
+target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
+if (MSVC)
+target_compile_options(sundials_cvode_static PRIVATE "/sdl-")
+target_compile_options(sundials_cvode_static PRIVATE "/W3")
 endif()
 
-SHOW_VARIABLE(SUNDIALS_DIR PATH
-  "SUNDIALS library directory" "${SUNDIALS_DIR}")
+if(NOT CMAKE_VERSION VERSION_LESS 3.13)
+message(STATUS "installing sundials as GridDyn EXPORT")
+install(TARGETS ${SUNDIALS_LIBRARIES}
+    EXPORT griddyn-targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT libs)
+	
+endif()
 
-  set(SUNDIALS_FIND_QUIETLY ON)
-
-  set(SUNDIALS_REQUIRED IDA KINSOL SUNMATRIXDENSE SUNLINSOLDENSE)
-  if (OPENMP_FOUND)
-	list(APPEND SUNDIALS_REQUIRED nvecopenmp)
-  endif(OPENMP_FOUND)
-
-  if (ENABLE_KLU)
-	list(APPEND SUNDIALS_REQUIRED sunmatrixsparse sunlinsolklu)
-  endif(ENABLE_KLU)
-
-find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
-
-  if(SUNDIALS_FOUND)
-	list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
-  OPTION(FORCE_SUNDIALS_REBUILD "force rebuild of sundials" OFF)
-	IF (AUTOBUILD_SUNDIALS)
-
-		IF(FORCE_SUNDIALS_REBUILD)
-			include(buildSundials)
-			if (MSVC)
-				build_sundials_msvc()
-			elseif(MINGW)
-			build_sundials_mingw()
-		else()
-			build_sundials()
-		endif()
-			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
-		ENDIF(FORCE_SUNDIALS_REBUILD)
-	ELSE (AUTOBUILD_SUNDIALS)
-	   IF(FORCE_SUNDIALS_REBUILD)
-			include(buildSundials)
-			if (MSVC)
-				build_sundials_msvc()
-			elseif(MINGW)
-			build_sundials_mingw()
-		else()
-			build_sundials()
-		endif()
-			set(SUNDIALS_FOUND OFF CACHE BOOL "sundials not found" FORCE)
-			set(SUNDIALS_LIBRARIES NOT_FOUND FORCE)
-			set(FORCE_SUNDIALS_REBUILD OFF CACHE BOOL "force rebuild of sundials" FORCE)
-			set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
-			find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
-		ENDIF(FORCE_SUNDIALS_REBUILD)
-	ENDIF(AUTOBUILD_SUNDIALS)
-  else(SUNDIALS_FOUND)
-    OPTION(AUTOBUILD_SUNDIALS "enable Sundials to automatically download and build" ON)
-    IF (AUTOBUILD_SUNDIALS)
-      include(buildSundials)
-      if (MSVC)
-			build_sundials_msvc()
-		elseif(MINGW)
-			build_sundials_mingw()
-		else()
-			build_sundials()
-		endif()
-      set(SUNDIALS_DIR ${PROJECT_BINARY_DIR}/libs)
-      find_package(SUNDIALS REQUIRED COMPONENTS ${SUNDIALS_REQUIRED} OPTIONAL_COMPONENTS CVODE ARKODE)
-    ENDIF(AUTOBUILD_SUNDIALS)
-  if (SUNDIALS_FOUND)
-    list(INSERT external_library_list 0 ${SUNDIALS_LIBRARIES})
-  else (SUNDIALS_FOUND)
-	message( FATAL_ERROR "sundials not found - unable to continue")
-	message( "Double check spelling specified libraries (search is case sensitive)")
-  endif(SUNDIALS_FOUND)
-  endif(SUNDIALS_FOUND)
-
-if (SUNDIALS_ARKODE_FOUND)
-set(LOAD_ARKODE TRUE)
-endif(SUNDIALS_ARKODE_FOUND)
-
-if (SUNDIALS_CVODE_FOUND)
-set(LOAD_CVODE TRUE)
-endif(SUNDIALS_CVODE_FOUND)
+install(TARGETS sundials_all EXPORT griddyn-targets)

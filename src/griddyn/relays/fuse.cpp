@@ -32,11 +32,11 @@ namespace griddyn
 namespace relays
 {
 using namespace gridUnits;
-fuse::fuse (const std::string &objName) : Relay (objName), useI2T (extra_bool) { opFlags.set (continuous_flag); }
+fuse::fuse(const std::string &objName) : Relay(objName), useI2T(extra_bool) { opFlags.set(continuous_flag); }
 
-coreObject *fuse::clone (coreObject *obj) const
+coreObject *fuse::clone(coreObject *obj) const
 {
-    auto nobj = cloneBase<fuse, Relay> (this, obj);
+    auto nobj = cloneBase<fuse, Relay>(this, obj);
     if (nobj == nullptr)
     {
         return obj;
@@ -50,41 +50,41 @@ coreObject *fuse::clone (coreObject *obj) const
     return nobj;
 }
 
-void fuse::setFlag (const std::string &flag, bool val)
+void fuse::setFlag(const std::string &flag, bool val)
 {
-    if (flag.empty ())
+    if (flag.empty())
     {
     }
     else
     {
-        Relay::setFlag (flag, val);
+        Relay::setFlag(flag, val);
     }
 }
 
-void fuse::set (const std::string &param, const std::string &val)
+void fuse::set(const std::string &param, const std::string &val)
 {
-    if (param.empty ())
+    if (param.empty())
     {
     }
     else
     {
-        Relay::set (param, val);
+        Relay::set(param, val);
     }
 }
 
-void fuse::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fuse::set(const std::string &param, double val, gridUnits::units_t unitType)
 {
     if (param == "limit")
     {
-        limit = unitConversion (val, unitType, puA, systemBasePower, Vbase);
+        limit = unitConversion(val, unitType, puA, systemBasePower, Vbase);
     }
     else if (param == "i2t")
     {
-        mp_I2T = unitConversion (val, unitType, puA, systemBasePower, Vbase);
+        mp_I2T = unitConversion(val, unitType, puA, systemBasePower, Vbase);
     }
     else if (param == "terminal")
     {
-        m_terminal = static_cast<int> (val);
+        m_terminal = static_cast<int>(val);
     }
     else if (param == "minblowtime")
     {
@@ -94,317 +94,317 @@ void fuse::set (const std::string &param, double val, gridUnits::units_t unitTyp
         }
         else
         {
-            LOG_WARNING ("minimum blow time must be greater or equal to 0.001");
-            throw (invalidParameterValue (param));
+            LOG_WARNING("minimum blow time must be greater or equal to 0.001");
+            throw(invalidParameterValue(param));
         }
     }
     else
     {
-        Relay::set (param, val, unitType);
+        Relay::set(param, val, unitType);
     }
 }
 
-void fuse::dynObjectInitializeA (coreTime time0, std::uint32_t flags)
+void fuse::dynObjectInitializeA(coreTime time0, std::uint32_t flags)
 {
-    auto ge = std::make_shared<Event> ();
+    auto ge = std::make_shared<Event>();
 
-    if (dynamic_cast<Link *> (m_sourceObject) != nullptr)
+    if (dynamic_cast<Link *>(m_sourceObject) != nullptr)
     {
-        add (std::shared_ptr<Condition> (
-          make_condition ("current" + std::to_string (m_terminal), ">=", limit, m_sourceObject)));
-        ge->setTarget (m_sinkObject, "switch" + std::to_string (m_terminal));
-        ge->setValue (1.0);
-        bus = static_cast<Link *> (m_sourceObject)->getBus (m_terminal);
+        add(std::shared_ptr<Condition>(
+          make_condition("current" + std::to_string(m_terminal), ">=", limit, m_sourceObject)));
+        ge->setTarget(m_sinkObject, "switch" + std::to_string(m_terminal));
+        ge->setValue(1.0);
+        bus = static_cast<Link *>(m_sourceObject)->getBus(m_terminal);
     }
     else
     {
-        add (std::shared_ptr<Condition> (make_condition ("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject)));
-        opFlags.set (nonlink_source_flag);
-        ge->setTarget (m_sinkObject, "status");
-        ge->setValue (0.0);
-        bus = static_cast<gridBus *> (m_sourceObject->find ("bus"));
+        add(std::shared_ptr<Condition>(make_condition("sqrt(p^2+q^2)/@bus:v", ">=", limit, m_sourceObject)));
+        opFlags.set(nonlink_source_flag);
+        ge->setTarget(m_sinkObject, "status");
+        ge->setValue(0.0);
+        bus = static_cast<gridBus *>(m_sourceObject->find("bus"));
     }
 
-    add (std::move (ge));
+    add(std::move(ge));
     // now make the Condition for the I2T condition
-    auto gc = std::make_unique<Condition> ();
-    auto gc2 = std::make_unique<Condition> ();
+    auto gc = std::make_unique<Condition>();
+    auto gc2 = std::make_unique<Condition>();
 
-    auto cg = std::make_unique<customGrabber> ();
-    cg->setGrabberFunction ("I2T", [this](coreObject *) { return cI2T; });
+    auto cg = std::make_unique<customGrabber>();
+    cg->setGrabberFunction("I2T", [this](coreObject *) { return cI2T; });
 
-    auto cgst = std::make_unique<customStateGrabber> (this);
-    cgst->setGrabberFunction ([](coreObject *obj, const stateData &sD, const solverMode &sMode) -> double {
-        return sD.state[static_cast<fuse *> (obj)->offsets.getDiffOffset (sMode)];
+    auto cgst = std::make_unique<customStateGrabber>(this);
+    cgst->setGrabberFunction([](coreObject *obj, const stateData &sD, const solverMode &sMode) -> double {
+        return sD.state[static_cast<fuse *>(obj)->offsets.getDiffOffset(sMode)];
     });
 
     // this one needs to be shared since I use it twice
-    auto gset = std::make_shared<grabberSet> (std::move (cg), std::move (cgst));
-    gc->setConditionLHS (gset);
+    auto gset = std::make_shared<grabberSet>(std::move(cg), std::move(cgst));
+    gc->setConditionLHS(gset);
 
-    gc2->setConditionLHS (std::move (gset));
-    gc->setConditionRHS (mp_I2T);
-    gc2->setConditionRHS (-mp_I2T / 2.0);
+    gc2->setConditionLHS(std::move(gset));
+    gc->setConditionRHS(mp_I2T);
+    gc2->setConditionRHS(-mp_I2T / 2.0);
 
-    gc->setComparison (comparison_type::gt);
-    gc2->setComparison (comparison_type::lt);
+    gc->setComparison(comparison_type::gt);
+    gc2->setComparison(comparison_type::lt);
 
-    add (std::shared_ptr<Condition> (std::move (gc)));
-    add (std::shared_ptr<Condition> (std::move (gc2)));
-    setConditionStatus (1, condition_status_t::disabled);
-    setConditionStatus (2, condition_status_t::disabled);
+    add(std::shared_ptr<Condition>(std::move(gc)));
+    add(std::shared_ptr<Condition>(std::move(gc2)));
+    setConditionStatus(1, condition_status_t::disabled);
+    setConditionStatus(2, condition_status_t::disabled);
 
     cI2T = 0;
 
     // add the event for setting up the fuse evaluation
-    auto ge2 = std::make_unique<functionEventAdapter> ([this]() { return setupFuseEvaluation (); });
-    add (std::shared_ptr<functionEventAdapter> (std::move (ge2)));
+    auto ge2 = std::make_unique<functionEventAdapter>([this]() { return setupFuseEvaluation(); });
+    add(std::shared_ptr<functionEventAdapter>(std::move(ge2)));
     if (mp_I2T <= 0.0)
     {
-        setActionTrigger (1, 0, 0.0);
+        setActionTrigger(1, 0, 0.0);
     }
     else
     {
-        setActionTrigger (1, 0, minBlowTime);
+        setActionTrigger(1, 0, minBlowTime);
     }
 
     // add the event for blowing the fuse after i2T is exceeded
-    auto ge3 = std::make_unique<functionEventAdapter> ([this]() { return blowFuse (); });
-    add (std::shared_ptr<functionEventAdapter> (std::move (ge3)));
-    setActionTrigger (2, 1, 0.0);
+    auto ge3 = std::make_unique<functionEventAdapter>([this]() { return blowFuse(); });
+    add(std::shared_ptr<functionEventAdapter>(std::move(ge3)));
+    setActionTrigger(2, 1, 0.0);
 
-    Relay::dynObjectInitializeA (time0, flags);
+    Relay::dynObjectInitializeA(time0, flags);
 }
 
-void fuse::conditionTriggered (index_t conditionNum, coreTime /*triggerTime*/)
+void fuse::conditionTriggered(index_t conditionNum, coreTime /*triggerTime*/)
 {
     if (conditionNum == 2)
     {
-        assert (opFlags[overlimit_flag]);
+        assert(opFlags[overlimit_flag]);
 
-        setConditionStatus (1, condition_status_t::disabled);
-        setConditionStatus (2, condition_status_t::disabled);
-        setConditionStatus (0, condition_status_t::active);
-        alert (this, JAC_COUNT_DECREASE);
-        opFlags.reset (overlimit_flag);
+        setConditionStatus(1, condition_status_t::disabled);
+        setConditionStatus(2, condition_status_t::disabled);
+        setConditionStatus(0, condition_status_t::active);
+        alert(this, JAC_COUNT_DECREASE);
+        opFlags.reset(overlimit_flag);
         useI2T = false;
     }
 }
 
-change_code fuse::blowFuse ()
+change_code fuse::blowFuse()
 {
-    opFlags.set (overlimit_flag);
-    setConditionStatus (0, condition_status_t::disabled);
-    setConditionStatus (1, condition_status_t::disabled);
-    setConditionStatus (2, condition_status_t::disabled);
-    alert (this, FUSE_BLOWN_CURRENT);
-    LOG_NORMAL ("Fuse " + std::to_string (m_terminal) + " blown on object " + m_sourceObject->getName ());
-    opFlags.set (fuse_blown_flag);
+    opFlags.set(overlimit_flag);
+    setConditionStatus(0, condition_status_t::disabled);
+    setConditionStatus(1, condition_status_t::disabled);
+    setConditionStatus(2, condition_status_t::disabled);
+    alert(this, FUSE_BLOWN_CURRENT);
+    LOG_NORMAL("Fuse " + std::to_string(m_terminal) + " blown on object " + m_sourceObject->getName());
+    opFlags.set(fuse_blown_flag);
     change_code cchange = change_code::non_state_change;
     if (mp_I2T > 0.0)
     {
-        alert (this, JAC_COUNT_DECREASE);
+        alert(this, JAC_COUNT_DECREASE);
         cchange = change_code::jacobian_change;
     }
-    return std::max (triggerAction (0), cchange);
+    return std::max(triggerAction(0), cchange);
 }
 
-change_code fuse::setupFuseEvaluation ()
+change_code fuse::setupFuseEvaluation()
 {
     if (mp_I2T <= 0.0)
     {
-        return blowFuse ();
+        return blowFuse();
     }
 
-    opFlags.set (overlimit_flag);
-    setConditionStatus (0, condition_status_t::disabled);
-    double I = getConditionValue (0);
-    cI2T = I2Tequation (I) * minBlowTime;
+    opFlags.set(overlimit_flag);
+    setConditionStatus(0, condition_status_t::disabled);
+    double I = getConditionValue(0);
+    cI2T = I2Tequation(I) * minBlowTime;
     if (cI2T > mp_I2T)
     {
-        return blowFuse ();
+        return blowFuse();
     }
 
-    setConditionStatus (1, condition_status_t::active);
-    setConditionStatus (2, condition_status_t::active);
-    alert (this, JAC_COUNT_INCREASE);
+    setConditionStatus(1, condition_status_t::active);
+    setConditionStatus(2, condition_status_t::active);
+    alert(this, JAC_COUNT_INCREASE);
     useI2T = true;
     return change_code::jacobian_change;
 }
 
-stateSizes fuse::LocalStateSizes (const solverMode &sMode) const
+stateSizes fuse::LocalStateSizes(const solverMode &sMode) const
 {
     stateSizes SS;
-    if ((!isAlgebraicOnly (sMode)) && (mp_I2T > 0.0))
+    if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
     {
         SS.diffSize = 1;
     }
     return SS;
 }
 
-count_t fuse::LocalJacobianCount (const solverMode &sMode) const
+count_t fuse::LocalJacobianCount(const solverMode &sMode) const
 {
-    if ((!isAlgebraicOnly (sMode)) && (mp_I2T > 0.0))
+    if ((!isAlgebraicOnly(sMode)) && (mp_I2T > 0.0))
     {
         return 12;
     }
     return 0;
 }
 
-void fuse::timestep (coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
+void fuse::timestep(coreTime time, const IOdata & /*inputs*/, const solverMode & /*sMode*/)
 {
     if (limit < kBigNum / 2.0)
     {
-        double val = getConditionValue (0);
+        double val = getConditionValue(0);
         if (val > limit)
         {
-            opFlags.set (fuse_blown_flag);
-            disable ();
-            alert (this, FUSE1_BLOWN_CURRENT);
+            opFlags.set(fuse_blown_flag);
+            disable();
+            alert(this, FUSE1_BLOWN_CURRENT);
         }
     }
     prevTime = time;
 }
 
-void fuse::converge (coreTime time,
-                     double state[],
-                     double dstate_dt[],
-                     const solverMode &sMode,
-                     converge_mode /*mode*/,
-                     double /*tol*/)
+void fuse::converge(coreTime time,
+                    double state[],
+                    double dstate_dt[],
+                    const solverMode &sMode,
+                    converge_mode /*mode*/,
+                    double /*tol*/)
 {
-    guessState (time, state, dstate_dt, sMode);
+    guessState(time, state, dstate_dt, sMode);
 }
 
-void fuse::jacobianElements (const IOdata & /*inputs*/,
-                             const stateData &sD,
-                             matrixData<double> &md,
-                             const IOlocs & /*inputLocs*/,
-                             const solverMode &sMode)
+void fuse::jacobianElements(const IOdata & /*inputs*/,
+                            const stateData &sD,
+                            matrixData<double> &md,
+                            const IOlocs & /*inputLocs*/,
+                            const solverMode &sMode)
 {
     // TODO don't use matrixDataSparse here use a translation matrix
     if (useI2T)
     {
         matrixDataSparse<double> d;
         IOdata out;
-        auto Voffset = bus->getOutputLoc (sMode, voltageInLocation);
-        auto inputs = bus->getOutputs (noInputs, sD, sMode);
-        auto inputLocs = bus->getOutputLocs (sMode);
+        auto Voffset = bus->getOutputLoc(sMode, voltageInLocation);
+        auto inputs = bus->getOutputs(noInputs, sD, sMode);
+        auto inputLocs = bus->getOutputLocs(sMode);
         if (opFlags[nonlink_source_flag])
         {
-            auto gs = static_cast<gridSecondary *> (m_sourceObject);
-            out = gs->getOutputs (inputs, sD, sMode);
-            gs->outputPartialDerivatives (inputs, sD, d, sMode);
-            gs->ioPartialDerivatives (inputs, sD, d, inputLocs, sMode);
+            auto gs = static_cast<gridSecondary *>(m_sourceObject);
+            out = gs->getOutputs(inputs, sD, sMode);
+            gs->outputPartialDerivatives(inputs, sD, d, sMode);
+            gs->ioPartialDerivatives(inputs, sD, d, inputLocs, sMode);
         }
         else
         {
-            auto lnk = static_cast<Link *> (m_sourceObject);
-            int bid = bus->getID ();
-            lnk->updateLocalCache (noInputs, sD, sMode);
-            out = lnk->getOutputs (bid, sD, sMode);
-            lnk->outputPartialDerivatives (bid, sD, d, sMode);
-            lnk->ioPartialDerivatives (bid, sD, d, inputLocs, sMode);
+            auto lnk = static_cast<Link *>(m_sourceObject);
+            auto bid = bus->getID();
+            lnk->updateLocalCache(noInputs, sD, sMode);
+            out = lnk->getOutputs(bid, sD, sMode);
+            lnk->outputPartialDerivatives(bid, sD, d, sMode);
+            lnk->ioPartialDerivatives(bid, sD, d, inputLocs, sMode);
         }
 
-        double I = getConditionValue (0, sD, sMode);
+        double I = getConditionValue(0, sD, sMode);
 
-        double V = bus->getVoltage (sD, sMode);
+        double V = bus->getVoltage(sD, sMode);
 
-        double S = std::hypot (out[PoutLocation], out[QoutLocation]);
+        double S = std::hypot(out[PoutLocation], out[QoutLocation]);
         double temp = 1.0 / (S * V);
         double dIdP = out[PoutLocation] * temp;
         double dIdQ = out[QoutLocation] * temp;
-        d.scaleRow (PoutLocation, dIdP);
-        d.scaleRow (QoutLocation, dIdQ);
+        d.scaleRow(PoutLocation, dIdP);
+        d.scaleRow(QoutLocation, dIdQ);
 
-        auto offset = offsets.getDiffOffset (sMode);
-        d.translateRow (PoutLocation, offset);
-        d.translateRow (QoutLocation, offset);
-        d.assignCheck (offset, Voffset, -S / (V * V));
+        auto offset = offsets.getDiffOffset(sMode);
+        d.translateRow(PoutLocation, offset);
+        d.translateRow(QoutLocation, offset);
+        d.assignCheck(offset, Voffset, -S / (V * V));
 
-        d.scaleRow (offset, 2.0 * I);
+        d.scaleRow(offset, 2.0 * I);
 
-        md.merge (d);
+        md.merge(d);
 
-        md.assign (offset, offset, -sD.cj);
+        md.assign(offset, offset, -sD.cj);
     }
-    else if (stateSize (sMode) > 0)
+    else if (stateSize(sMode) > 0)
     {
-        auto offset = offsets.getDiffOffset (sMode);
-        md.assign (offset, offset, -sD.cj);
+        auto offset = offsets.getDiffOffset(sMode);
+        md.assign(offset, offset, -sD.cj);
     }
 }
 
-void fuse::setState (coreTime time, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
+void fuse::setState(coreTime time, const double state[], const double /*dstate_dt*/[], const solverMode &sMode)
 {
-    if (stateSize (sMode) > 0)
+    if (stateSize(sMode) > 0)
     {
-        auto offset = offsets.getDiffOffset (sMode);
+        auto offset = offsets.getDiffOffset(sMode);
         cI2T = state[offset];
     }
     prevTime = time;
 }
 
-double fuse::I2Tequation (double current) { return (current * current - limit * limit); }
+double fuse::I2Tequation(double current) { return (current * current - limit * limit); }
 
-void fuse::residual (const IOdata & /*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
+void fuse::residual(const IOdata & /*inputs*/, const stateData &sD, double resid[], const solverMode &sMode)
 {
     if (useI2T)
     {
-        auto offset = offsets.getDiffOffset (sMode);
+        auto offset = offsets.getDiffOffset(sMode);
         const double *dst = sD.dstate_dt + offset;
 
         if (!opFlags[nonlink_source_flag])
         {
-            static_cast<Link *> (m_sourceObject)->updateLocalCache (noInputs, sD, sMode);
+            static_cast<Link *>(m_sourceObject)->updateLocalCache(noInputs, sD, sMode);
         }
-        double I1 = getConditionValue (0, sD, sMode);
-        resid[offset] = I2Tequation (I1) - *dst;
-        printf ("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", static_cast<double> (sD.time), I1, limit, offset,
-                resid[offset], *dst);
+        double I1 = getConditionValue(0, sD, sMode);
+        resid[offset] = I2Tequation(I1) - *dst;
+        printf("tt=%f::I1=%f,limit=%f, r[%d]=%f deriv=%f\n", static_cast<double>(sD.time), I1, limit, offset,
+               resid[offset], *dst);
     }
-    else if (stateSize (sMode) > 0)
+    else if (stateSize(sMode) > 0)
     {
-        auto offset = offsets.getDiffOffset (sMode);
+        auto offset = offsets.getDiffOffset(sMode);
         resid[offset] = -sD.dstate_dt[offset];
     }
 }
 
-void fuse::guessState (const coreTime /*time*/, double state[], double dstate_dt[], const solverMode &sMode)
+void fuse::guessState(const coreTime /*time*/, double state[], double dstate_dt[], const solverMode &sMode)
 {
     if (useI2T)
     {
-        auto offset = offsets.getDiffOffset (sMode);
+        auto offset = offsets.getDiffOffset(sMode);
 
-        double I1 = getConditionValue (0);
+        double I1 = getConditionValue(0);
         state[offset] = cI2T;
-        dstate_dt[offset] = I2Tequation (I1);
+        dstate_dt[offset] = I2Tequation(I1);
     }
-    else if (stateSize (sMode) > 0)
+    else if (stateSize(sMode) > 0)
     {
-        auto offset = offsets.getDiffOffset (sMode);
+        auto offset = offsets.getDiffOffset(sMode);
         state[offset] = 0;
         dstate_dt[offset] = 0;
     }
 }
 
-void fuse::getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
+void fuse::getStateName(stringVec &stNames, const solverMode &sMode, const std::string &prefix) const
 {
-    if (stateSize (sMode) > 0)
+    if (stateSize(sMode) > 0)
     {
-        auto offset = offsets.getDiffOffset (sMode);
-        if (offset >= static_cast<index_t> (stNames.size ()))
+        auto offset = offsets.getDiffOffset(sMode);
+        if (offset >= static_cast<index_t>(stNames.size()))
         {
-            stNames.resize (offset + 1);
+            stNames.resize(offset + 1);
         }
-        if (prefix.empty ())
+        if (prefix.empty())
         {
-            stNames[offset] = getName () + ":I2T";
+            stNames[offset] = getName() + ":I2T";
         }
         else
         {
-            stNames[offset] = prefix + "::" + getName () + ":I2T";
+            stNames[offset] = prefix + "::" + getName() + ":I2T";
         }
     }
 }
