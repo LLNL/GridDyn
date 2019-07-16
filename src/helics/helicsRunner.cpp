@@ -62,54 +62,9 @@ std::shared_ptr<CLI::App> helicsRunner::generateLocalCommandLineParser(readerInf
     loadHelicsReaderInfoDefinitions(ri);
 
     auto parser = std::make_shared<CLI::App>("options related to helics executable", "helics_options");
-    parser.add_flag("--helicstest", test, "run a test of the GridDyn helics interactions");
-    parser.allow_extras();
-}
-
-int helicsRunner::Initialize(int argc, char *argv[])
-{
-    // using namespace boost;
-
-    bool test;
-    CLI::App parser("options related to helics executable", "helics_options");
-    // parser.add_flag ("--test", test, "run a test of the GridDyn helics interactions");
-    // parser.allow_extras ();
-    // clang-format on
-
-    try
-    {
-        parser.parse(argc, argv);
-    }
-    catch (...)
-    {
-        return 1;
-    }
-
-    if (test)
-    {
-        /*if (griddyn::helicsLib::runHELICStests())
-        {
-            std::cout << "HELICS tests passed\n";
-        }
-        else
-        {
-            std::cout << "HELICS tests failed\n";
-        }
-        */
-        return 1;
-    }
-
-    readerInfo ri;
-    loadHelicsReaderInfoDefinitions(ri);
-
-    int ret = GriddynRunner::Initialize(argc, argv, ri, allowUnrecognized);
-    if (ret != 0)
-    {
-        return ret;
-    }
-    // command line options for the coordinator override any file input
-    coord_->loadCommandLine(argc, argv);
-    return 0;
+    // parser->add_flag("--helicstest", test, "run a test of the GridDyn helics interactions");
+    parser->allow_extras();
+    return parser;
 }
 
 void helicsRunner::simInitialize()
