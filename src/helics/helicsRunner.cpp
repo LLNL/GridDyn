@@ -38,39 +38,48 @@ namespace griddyn
 {
 namespace helicsLib
 {
-helicsRunner::helicsRunner ()
+helicsRunner::helicsRunner()
 {
-    griddyn::loadHELICSLibrary ();
-    m_gds = std::make_shared<gridDynSimulation> ();
+    griddyn::loadHELICSLibrary();
+    m_gds = std::make_shared<gridDynSimulation>();
 
-    coord_ = make_owningPtr<helicsCoordinator> ();
+    coord_ = make_owningPtr<helicsCoordinator>();
     // store the coordinator as a support object so everything can find it
-    m_gds->add (coord_.get ());
+    m_gds->add(coord_.get());
 }
 
-helicsRunner::helicsRunner (std::shared_ptr<gridDynSimulation> sim) : GriddynRunner (sim)
+helicsRunner::helicsRunner(std::shared_ptr<gridDynSimulation> sim) : GriddynRunner(sim)
 {
-    griddyn::loadHELICSLibrary ();
-    coord_ = make_owningPtr<helicsCoordinator> ();
+    griddyn::loadHELICSLibrary();
+    coord_ = make_owningPtr<helicsCoordinator>();
     // store the coordinator as a support object so everything can find it
-    m_gds->add (coord_.get ());
+    m_gds->add(coord_.get());
 }
 
-helicsRunner::~helicsRunner () = default;
+helicsRunner::~helicsRunner() = default;
 
-int helicsRunner::Initialize (int argc, char *argv[])
+std::shared_ptr<CLI::App> helicsRunner::generateLocalCommandLineParser(readerInfo &ri)
+{
+    loadHelicsReaderInfoDefinitions(ri);
+
+    auto parser = std::make_shared<CLI::App>("options related to helics executable", "helics_options");
+    parser.add_flag("--helicstest", test, "run a test of the GridDyn helics interactions");
+    parser.allow_extras();
+}
+
+int helicsRunner::Initialize(int argc, char *argv[])
 {
     // using namespace boost;
 
     bool test;
-    CLI::App parser ("options related to helics executable", "helics_options");
-    parser.add_flag ("--test", test, "run a test of the GridDyn helics interactions");
-    parser.allow_extras ();
-    //clang-format on
+    CLI::App parser("options related to helics executable", "helics_options");
+    // parser.add_flag ("--test", test, "run a test of the GridDyn helics interactions");
+    // parser.allow_extras ();
+    // clang-format on
 
     try
     {
-        parser.parse (argc, argv);
+        parser.parse(argc, argv);
     }
     catch (...)
     {
@@ -92,64 +101,63 @@ int helicsRunner::Initialize (int argc, char *argv[])
     }
 
     readerInfo ri;
-    loadHelicsReaderInfoDefinitions (ri);
 
-    int ret = GriddynRunner::Initialize (argc, argv, ri, true);
+    int ret = GriddynRunner::Initialize(argc, argv, ri, true);
     if (ret != 0)
     {
         return ret;
     }
     // command line options for the coordinator override any file input
-    coord_->loadCommandLine (argc, argv);
+    coord_->loadCommandLine(argc, argv);
     return 0;
 }
 
-void helicsRunner::simInitialize ()
+void helicsRunner::simInitialize()
 {
     // add an initialization function after the first part of the power flow init
-    m_gds->addInitOperation ([this]() {
-        fed_ = coord_->RegisterAsFederate ();
+    m_gds->addInitOperation([this]() {
+        fed_ = coord_->RegisterAsFederate();
         return ((fed_) ? 0 : -45);
     });
     int ret = 0;
-    ret = m_gds->pFlowInitialize ();
+    ret = m_gds->pFlowInitialize();
     if (ret != 0)
     {
-        throw (executionFailure (m_gds.get (), "power flow initialize failure"));
+        throw(executionFailure(m_gds.get(), "power flow initialize failure"));
     }
 
-    GriddynRunner::simInitialize ();  // TODO this will need to be unpacked for co-iteration on the power flow
-                                      // solution
+    GriddynRunner::simInitialize();  // TODO this will need to be unpacked for co-iteration on the power flow
+                                     // solution
     if (!fed_)
     {
-        throw (executionFailure (m_gds.get (), "unable to initialize helics federate"));
+        throw(executionFailure(m_gds.get(), "unable to initialize helics federate"));
     }
-    fed_->enterExecutingMode ();
+    fed_->enterExecutingMode();
 }
 
-coreTime helicsRunner::Run ()
+coreTime helicsRunner::Run()
 {
-    coreTime stop_time = m_gds->getStopTime ();
-    auto retTime = Step (stop_time);
-    fed_->finalize ();
+    coreTime stop_time = m_gds->getStopTime();
+    auto retTime = Step(stop_time);
+    fed_->finalize();
     return retTime;
 }
 
-coreTime helicsRunner::Step (coreTime time)
+coreTime helicsRunner::Step(coreTime time)
 {
     helics::Time time_granted = 0.0; /* the time step HELICS has allowed us to process */
     helics::Time time_desired = 0.0; /* the time step we would like to go to next */
 
-    while (m_gds->getSimulationTime () < time)
+    while (m_gds->getSimulationTime() < time)
     {
-        auto evntTime = m_gds->getEventTime ();
-        auto nextTime = std::min (evntTime, time);
-        time_desired = gd2helicsTime (nextTime);
+        auto evntTime = m_gds->getEventTime();
+        auto nextTime = std::min(evntTime, time);
+        time_desired = gd2helicsTime(nextTime);
         // printf("nextTime=%f\n", static_cast<double>(nextTime));
 
         try
         {
-            time_granted = fed_->requestTime (time_desired);
+            time_granted = fed_->requestTime(time_desired);
         }
         catch (...)
         {
@@ -159,7 +167,7 @@ coreTime helicsRunner::Step (coreTime time)
         // check if the granted time is too small to do anything about
         if (time_granted < time_desired)
         {
-            if (helics2gdTime (time_granted) - m_gds->getSimulationTime () < 0.00001)
+            if (helics2gdTime(time_granted) - m_gds->getSimulationTime() < 0.00001)
             {
                 continue;
             }
@@ -167,19 +175,19 @@ coreTime helicsRunner::Step (coreTime time)
 
         try
         {
-            m_gds->run (helics2gdTime (time_granted));
+            m_gds->run(helics2gdTime(time_granted));
         }
         catch (const std::runtime_error &re)
         {
-            std::cerr << "execution error in GridDyn" << re.what () << '\n';
-            fed_->error (m_gds->getErrorCode (), re.what ());
+            std::cerr << "execution error in GridDyn" << re.what() << '\n';
+            fed_->error(m_gds->getErrorCode(), re.what());
 
-            throw (re);
+            throw(re);
         }
     }
-    return m_gds->getSimulationTime ();
+    return m_gds->getSimulationTime();
 }
 
-void helicsRunner::Finalize () { fed_->finalize (); }
+void helicsRunner::Finalize() { fed_->finalize(); }
 }  // namespace helicsLib
 }  // namespace griddyn

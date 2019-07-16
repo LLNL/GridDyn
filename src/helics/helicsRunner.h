@@ -35,22 +35,22 @@ class helicsRunner : public GriddynRunner
       coord_;  //!< the coordinator object for managing object that manage the HELICS coordination
     std::shared_ptr<helics::Federate> fed_;  //!< pointer to the helics federate object
   public:
-    helicsRunner ();
-    explicit helicsRunner (std::shared_ptr<gridDynSimulation> sim);
-    ~helicsRunner ();
+    helicsRunner();
+    explicit helicsRunner(std::shared_ptr<gridDynSimulation> sim);
+    ~helicsRunner();
 
   private:
     using GriddynRunner::Initialize;
 
   public:
-    virtual int Initialize (int argc, char *argv[]) override final;
+    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override;
 
-    virtual void simInitialize () override;
-    virtual coreTime Run () override;
+    virtual void simInitialize() override;
+    virtual coreTime Run() override;
 
-    virtual coreTime Step (coreTime time) override;
+    virtual coreTime Step(coreTime time) override;
 
-    virtual void Finalize () override;
+    virtual void Finalize() override;
 };
 
 }  // namespace helicsLib
