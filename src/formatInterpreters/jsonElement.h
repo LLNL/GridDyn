@@ -12,23 +12,23 @@
 
 #pragma once
 
-#include "json/jsoncpp.h"
+#include "json\json.h"
 
 class jsonElement
 {
   public:
     int elementIndex = 0;
     std::string name;
-    Json_gd::ArrayIndex arrayIndex = 0;
-    jsonElement () noexcept {}
-    jsonElement (Json_gd::Value vElement, std::string newName);
+    Json::ArrayIndex arrayIndex = 0;
+    jsonElement() noexcept {}
+    jsonElement(Json::Value vElement, std::string newName);
 
-    void clear ();
-    const Json_gd::Value &getElement () const { return (arraytype) ? element[arrayIndex] : element; }
-    Json_gd::ArrayIndex count () const { return (arraytype) ? element.size () : Json_gd::ArrayIndex (1); }
-    bool isNull () const { return (arraytype) ? element[arrayIndex].isNull () : element.isNull (); }
+    void clear();
+    const Json::Value &getElement() const { return (arraytype) ? element[arrayIndex] : element; }
+    Json::ArrayIndex count() const { return (arraytype) ? element.size() : Json::ArrayIndex(1); }
+    bool isNull() const { return (arraytype) ? element[arrayIndex].isNull() : element.isNull(); }
 
   private:
-    Json_gd::Value element = Json_gd::nullValue;
+    Json::Value element = Json::nullValue;
     bool arraytype = false;
 };

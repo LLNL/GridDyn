@@ -9,7 +9,9 @@ set(EXAMPLES_ENABLE_CXX OFF CACHE INTERNAL "")
 set(EXAMPLES_INSTALL OFF CACHE INTERNAL "")
 set(SUNDIALS_INDEX_SIZE 32 CACHE INTERNAL "")
 
-	
+if (ENABLE_OPENMP_SUNDIALS)
+set(OPENMP_ENABLE ON CACHE INTERNAL "")
+endif(ENABLE_OPENMP_SUNDIALS)
 
 if (ENABLE_KLU)
         set(KLU_ENABLE ON CACHE INTERNAL "")
@@ -40,7 +42,7 @@ if (ENABLE_KLU)
 add_subdirectory(extern/sundials)
 
 add_library(sundials_all INTERFACE)
-target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}extern/sundials/include>)
+target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/sundials/include>)
 target_include_directories(sundials_all INTERFACE $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/extern/sundials/include>)
 add_library(SUNDIALS::SUNDIALS ALIAS sundials_all) 
 
@@ -64,9 +66,12 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunnonlinsolnewton_static
 	sundials_generic_static_obj
 	sundials_nvecmanyvector_static
+	sundials_nvecopenmp_static
+	sundials_sunlinsolklu_static
 )
 set_target_properties ( ${SUNDIALS_LIBRARIES} PROPERTIES FOLDER sundials)
 
+target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
 if (MSVC)
 target_compile_options(sundials_cvode_static PRIVATE "/sdl-")
 target_compile_options(sundials_cvode_static PRIVATE "/W3")
