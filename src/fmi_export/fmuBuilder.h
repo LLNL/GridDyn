@@ -49,11 +49,10 @@ class fmuBuilder : public GriddynRunner
     fmuBuilder (std::shared_ptr<gridDynSimulation> gds);
     virtual ~fmuBuilder ();
 
-  private:
-    using GriddynRunner::Initialize;
-
   public:
-    virtual int Initialize (int argc, char *argv[]) override final;
+
+    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override final;
+
     /** build the FMU at the given location
     @param[in] fmuLocation optional argument to specify the location to build the FMU*/
     void MakeFmu (const std::string &fmuLocation = "");

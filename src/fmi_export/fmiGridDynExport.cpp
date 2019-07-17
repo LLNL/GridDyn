@@ -207,7 +207,7 @@ fmi2Status fmi2ExitInitializationMode (fmi2Component comp)
     }
     catch (const coreObjectException &e)
     {
-        runner->logger (0, "Simulation Initialization failed");
+        runner->logger (0, std::string("Simulation Initialization failed:")+e.what());
         return fmi2Error;
     }
     runner->UpdateOutputs ();

@@ -42,8 +42,6 @@ fmiRunner::fmiRunner (const std::string &name,
 
 fmiRunner::~fmiRunner () = default;
 
-int fmiRunner::Initialize (int /*argc*/, char * /*argv*/ []) { return 0; }
-
 int fmiRunner::Reset ()
 {
     m_gds = std::make_shared<gridDynSimulation> (identifier);

@@ -15,6 +15,7 @@
 
 #include "coreObject.h"
 #include <exception>
+#include <stdexcept>
 
 namespace griddyn
 {

@@ -138,6 +138,8 @@ class GriddynRunner
     /** actually load the command line arguments*/
     int loadCommandArgument(readerInfo &ri, bool allow_unrecognized);
 
+  protected:
+    std::string execPath; //!< the executable path from command line arguments
   private:
     std::future<coreTime> async_ret;  //!< future code for the asynchronous operations
     int argc_val{0};

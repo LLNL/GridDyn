@@ -51,14 +51,8 @@ class fmiRunner : public GriddynRunner
                const fmi2CallbackFunctions *functions,
                bool ModelExchange = false);
     ~fmiRunner ();
-    // most of the stuff that would be in here is dealt with in the constructor and has to be handled differently
-    // in the FMU
-  private:
-    using GriddynRunner::Initialize;
-
+    
   public:
-    virtual int Initialize (int argc, char *argv[]) override final;
-
     virtual coreTime Run () override;
 
     /** update the FMI outputs*/

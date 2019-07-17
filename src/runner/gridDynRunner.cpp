@@ -277,6 +277,8 @@ int GriddynRunner::loadCommandArgument(readerInfo &ri, bool allowUnrecognized)
     {
         if (argc_val > 0)
         {
+           
+                execPath = argv_vals[0];
             app->parse(argc_val, argv_vals);
         }
         else
@@ -294,7 +296,7 @@ int GriddynRunner::loadCommandArgument(readerInfo &ri, bool allowUnrecognized)
         app->exit(e);
         return 1;
     }
-    catch (const CLI::Success &e)
+    catch (const CLI::Success &)
     {
         return 1;
     }
@@ -434,8 +436,8 @@ std::shared_ptr<CLI::App> GriddynRunner::generateBaseCommandLineParser(readerInf
       ->add_flag_function(
         "--verbose{3},-v{3},--quiet{0},-q{0},--printlevel{2},--summary{1}",
         [this](int64_t val) {
-            readerConfig::setPrintMode(val);
-            m_gds->set("printlevel", val);
+            readerConfig::setPrintMode(static_cast<int>(val));
+            m_gds->set("printlevel", static_cast<double>(val));
         },
         "specify print output verbosity")
       ->transform(
