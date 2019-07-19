@@ -39,9 +39,6 @@ class helicsRunner : public GriddynRunner
     explicit helicsRunner(std::shared_ptr<gridDynSimulation> sim);
     ~helicsRunner();
 
-  private:
-    using GriddynRunner::Initialize;
-
   public:
     virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override;
 
