@@ -55,7 +55,7 @@ void SolverInterface::cloneTo (SolverInterface *si, bool fullCopy) const
     si->setName (getName ());
     si->solverLogFile = solverLogFile;
     si->printLevel = printLevel;
-    si->max_iterations = 10000;
+    si->max_iterations = max_iterations;
     auto ind = si->mode.offsetIndex;
     si->mode = mode;
     if (ind != kNullLocation)
@@ -314,6 +314,10 @@ void SolverInterface::set (const std::string &param, double val)
     else if (param == "index")
     {
         mode.offsetIndex = static_cast<index_t> (val);
+    }
+    else if (param == "maxiterations")
+    {
+        max_iterations = static_cast<index_t> (val);
     }
     else
     {

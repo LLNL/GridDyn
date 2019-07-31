@@ -56,9 +56,11 @@ class idaInterface : public sundialsInterface
 
     void logSolverStats (print_level logLevel, bool iconly = false) const override;
     void logErrorWeights (print_level logLevel) const override;
-    double get (const std::string &param) const override;
+    virtual void set (const std::string &param, double val) override;
+    virtual double get (const std::string &param) const override;
 
     void setConstraints () override;
+
     // declare friend some helper functions
     friend int idaFunc (realtype time, N_Vector state, N_Vector dstate_dt, N_Vector resid, void *user_data);
 
