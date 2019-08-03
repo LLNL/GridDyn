@@ -23,13 +23,6 @@ endif()
     #mktemp dir in build tree
     file(MAKE_DIRECTORY ${trigger_build_dir} ${trigger_build_dir}/build)
 
-    #set prefix for _INSTALL_PREFIX based on OS
-    if(WIN32)
-        set(prefix_install "SUITESPARSE")
-    else()
-        set(prefix_install "CMAKE")
-    endif()
-
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
     cmake_minimum_required(VERSION 3.5)
@@ -42,7 +35,8 @@ ExternalProject_Add(suitesparse
     INSTALL_DIR ${install_path}
 
     CMAKE_ARGS
-       	-DCMAKE_INSTALL_PREFIX=${install_path}
+        -DCMAKE_INSTALL_PREFIX=${install_path}
+        -DSUITESPARSE_INSTALL_PREFIX=${install_path}
         -DCMAKE_BUILD_TYPE=\$\{CMAKE_BUILD_TYPE\}
         -DCMAKE_CXX_COMPILER=${cxx_compiler_string}
         -DCMAKE_C_COMPILER=${c_compiler_string}
