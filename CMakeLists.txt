@@ -10,7 +10,11 @@
 
 # cmake >= 3.5 required, minimum_required sets policy
 cmake_minimum_required(VERSION 3.5)
-cmake_policy(VERSION 3.5)
+
+if (POLICY CMP0079)
+cmake_policy(SET CMP0079 NEW)
+endif()
+
 # project name
 project(GRIDDYN VERSION 0.9.0)
 
