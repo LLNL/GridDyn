@@ -16,10 +16,10 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
-#include "json/json.h"
+#include "json/jsoncpp.h"
 #pragma warning(pop)
 #else
-#include "json/json.h"
+#include "json/jsoncpp.h"
 #endif
 
 dimeClientInterface::dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress)
