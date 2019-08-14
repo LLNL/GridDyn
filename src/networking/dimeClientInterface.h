@@ -54,5 +54,4 @@ class dimeClientInterface
 
   private:
     std::unique_ptr<zmq::socket_t> socket;
-    std::unique_ptr<Json_gd::StreamWriter> writer{};
 };
