@@ -49,14 +49,19 @@ void dimeClientInterface::init ()
     outgoing["name"] = name;
     outgoing["listen_to_events"] = false;
 
-    std::stringstream ss;
-    writer->write(outgoing, &ss);
+    Json_gd::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    auto writer = builder.newStreamWriter ();
+    std::stringstream sstr;
+    writer->write (outgoing, &sstr);
+    delete writer;
 
-    socket->send (ss.str());
+    socket->send (sstr.str ());
 
     char buffer[3] = {};
     auto sz = socket->recv (buffer, 3, 0);
-    if ((sz != 2) || (strncmp(buffer, "OK", 3) != 0))
+    if ((sz != 2) || (strncmp (buffer, "OK", 3) != 0))
     {
         throw initFailure ();
     }
@@ -71,7 +76,13 @@ void dimeClientInterface::close ()
         outgoing["name"] = name;
 
         std::stringstream ss;
-        writer->write(outgoing, &ss);
+
+        Json_gd::StreamWriterBuilder builder;
+        builder["commentStyle"] = "None";
+        builder["indentation"] = "   ";  // or whatever you like
+        auto writer = builder.newStreamWriter ();
+        writer->write (outgoing, &ss);
+        delete writer;
 
         socket->send (ss.str ());
 
@@ -110,8 +121,15 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     outgoing["args"] = varName;
 
     std::stringstream ss;
-    writer->write(outgoing, &ss);
-    socket->send (ss.str());
+
+    Json_gd::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    auto writer = builder.newStreamWriter ();
+    writer->write (outgoing, &ss);
+    delete writer;
+
+    socket->send (ss.str ());
 
     char buffer[3];
     auto sz = socket->recv (buffer, 3, 0);
@@ -128,20 +146,22 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     outgoingData["meta"]["var_name"] = varName;
     encodeVariableMessage (outgoingData, val);
 
-    std::stringstream().swap(ss); // reset ss
-    writer->write(outgoingData, &ss);
+    std::stringstream ().swap (ss);  // reset ss
+
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "   ";  // or whatever you like
+    writer = builder.newStreamWriter ();
+    writer->write (outgoing, &ss);
+    delete writer;
     socket->send (ss.str ());
 
     sz = socket->recv (buffer, 3, 0);
-    if (sz != 2) // TODO check for "OK"
+    if (sz != 2)  // TODO check for "OK"
     {
         throw (sendFailure ());
     }
 }
 
-void dimeClientInterface::broadcast (const std::string &varName, double val)
-{
-    send_var (varName, val);
-}
+void dimeClientInterface::broadcast (const std::string &varName, double val) { send_var (varName, val); }
 
 void dimeClientInterface::get_devices () {}
