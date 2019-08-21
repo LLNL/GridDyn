@@ -16,10 +16,10 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4702)
-#include "json/jsoncpp.h"
+#include "json/json.h"
 #pragma warning(pop)
 #else
-#include "json/jsoncpp.h"
+#include "json/json.h"
 #endif
 
 dimeClientInterface::dimeClientInterface (const std::string &dimeName, const std::string &dimeAddress)
@@ -44,12 +44,12 @@ void dimeClientInterface::init ()
     socket = std::make_unique<zmq::socket_t> (context->getBaseContext (), zmq::socket_type::req);
     socket->connect (address);
 
-    Json_gd::Value outgoing;
+    Json::Value outgoing;
     outgoing["command"] = "connect";
     outgoing["name"] = name;
     outgoing["listen_to_events"] = false;
 
-    Json_gd::StreamWriterBuilder builder;
+    Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
     builder["indentation"] = "   ";  // or whatever you like
     auto writer = builder.newStreamWriter ();
@@ -71,13 +71,13 @@ void dimeClientInterface::close ()
 {
     if (socket)
     {
-        Json_gd::Value outgoing;
+        Json::Value outgoing;
         outgoing["command"] = "exit";
         outgoing["name"] = name;
 
         std::stringstream ss;
 
-        Json_gd::StreamWriterBuilder builder;
+        Json::StreamWriterBuilder builder;
         builder["commentStyle"] = "None";
         builder["indentation"] = "   ";  // or whatever you like
         auto writer = builder.newStreamWriter ();
@@ -93,14 +93,14 @@ void dimeClientInterface::close ()
 
 void dimeClientInterface::sync () {}
 
-void encodeVariableMessage (Json_gd::Value &data, double val)
+void encodeVariableMessage (Json::Value &data, double val)
 {
-    Json_gd::Value content;
+    Json::Value content;
     content["stdout"] = "";
     content["figures"] = "";
     content["datadir"] = "/tmp MatlabData/";
 
-    Json_gd::Value response;
+    Json::Value response;
     response["content"] = content;
     response["result"] = val;
     response["success"] = true;
@@ -113,7 +113,7 @@ void encodeVariableMessage (Json_gd::Value &data, double val)
 void dimeClientInterface::send_var (const std::string &varName, double val, const std::string &recipient)
 {
     // outgoing = { 'command': 'send', 'name' : self.name, 'args' : var_name }
-    Json_gd::Value outgoing;
+    Json::Value outgoing;
 
     outgoing["command"] = (recipient.empty ()) ? "broadcast" : "send";
 
@@ -122,7 +122,7 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
 
     std::stringstream ss;
 
-    Json_gd::StreamWriterBuilder builder;
+    Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
     builder["indentation"] = "   ";  // or whatever you like
     auto writer = builder.newStreamWriter ();
@@ -135,7 +135,7 @@ void dimeClientInterface::send_var (const std::string &varName, double val, cons
     auto sz = socket->recv (buffer, 3, 0);
     // TODO check recv value
 
-    Json_gd::Value outgoingData;
+    Json::Value outgoingData;
     outgoingData["command"] = "response";
     outgoingData["name"] = name;
     if (!recipient.empty ())

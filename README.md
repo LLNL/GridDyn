@@ -4,20 +4,22 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/e3rygs874w04a25n?svg=true)](https://ci.appveyor.com/project/griddyn/griddyn)
 [![Gitter chat](https://badges.gitter.im/LLNL/GridDyn.png)](https://gitter.im/LLNL/GridDyn)
 
-GridDyn is a power system simulator developed at Lawrence Livermore National Laboratory.
-The name is a concatenation of Grid Dynamics, and as such usually pronounced as "Grid Dine".
-It was created to meet a research need for exploring coupling between transmission, distribution, and communications system simulations.
-While good open source tools existed on the distribution side, the open source tools on the transmission side were limited in usability
-either in the language or platform or simulation capability, and commercial tools while quite capable simply did not allow the access
-to the internals required to conduct the research. Thus the decision was made to design a platform that met the needs of the research project.
-Building off of prior efforts in grid simulation, GridDyn was designed to meet the current and future research needs of the various grid related
-research and computational efforts. It is written in C++ making use of recent improvements in the C++ standards. It is intended to be cross platform with
-regard to operating system and machine scale. The design goals were for the software to be easy to couple with other simulation,
-and be easy to modify and extend. It is very much still in development and as such, the interfaces and code is likely to change,
-in some cases significantly as more experience and testing is done. It is our expectation that the performance, reliability,
-capabilities, and flexibility will continue to improve as projects making use of the code continue and new ones develop.
-We expect there are still many issues so any bug reports or fixes are welcome.
-And hopefully even in its current state and as the software improves the broader power systems research community will find it useful.
+[![Join the chat at https://gitter.im/LLNL/GridDyn](https://badges.gitter.im/LLNL/GridDyn.svg)](https://gitter.im/LLNL/GridDyn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+GridDyn is a power system simulator developed at Lawrence Livermore National Laboratory. 
+The name is a concatenation of Grid Dynamics, and as such usually pronounced as "Grid Dine". 
+It was created to meet a research need for exploring coupling between transmission, distribution, and communications system simulations.  
+While good open source tools existed on the distribution side,  the open source tools on the transmission side were limited in usability 
+either in the language or platform or simulation capability, and commercial tools while quite capable simply did not allow the access 
+to the internals required to conduct the research.    Thus the decision was made to design a platform that met the needs of the research project.  
+Building off of prior efforts in grid simulation, GridDyn was designed to meet the current and future research needs of the various grid related 
+research and computational efforts.  It is written in C++ making use of recent improvements in the C++ standards.  It is intended to be cross platform with 
+regard to operating system and machine scale.  The design goals were for the software to be easy to couple with other simulation, 
+and be easy to modify and extend.  It is very much still in development and as such, the interfaces and code is likely to change, 
+in some cases significantly as more experience and testing is done.   It is our expectation that the performance, reliability, 
+capabilities, and flexibility will continue to improve as projects making use of the code continue and new ones develop.  
+We expect there are still many issues so any bug reports or fixes are welcome.   
+ And hopefully even in its current state and as the software improves the broader power systems research community will find it useful.
 
 Documentation
 ----------------

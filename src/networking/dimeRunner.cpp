@@ -14,13 +14,11 @@
 
 // headers
 #include "dimeRunner.h"
-#include "coupling/GhostSwingBusManager.h"
 #include "dimeInterface.h"
 #include "fileInput/fileInput.h"
 #include "griddyn/gridDynSimulation.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
+#include "CLI11/CLI11.hpp"
 
 #include <chrono>
 #include <cstdio>
@@ -33,41 +31,34 @@ namespace griddyn
 {
 namespace dimeLib
 {
-// using namespace boost;
-namespace po = boost::program_options;
 
-dimeRunner::dimeRunner ()
+dimeRunner::dimeRunner()
 {
-    loadDimeLibrary ();
-    m_gds = std::make_shared<gridDynSimulation> ();
+    loadDimeLibrary();
+    m_gds = std::make_shared<gridDynSimulation>();
 }
 
-dimeRunner::~dimeRunner () = default;
+dimeRunner::~dimeRunner() = default;
 
-dimeRunner::dimeRunner (std::shared_ptr<gridDynSimulation> sim) : GriddynRunner (std::move (sim))
+dimeRunner::dimeRunner(std::shared_ptr<gridDynSimulation> sim) : GriddynRunner(std::move(sim))
 {
-    loadDimeLibrary ();
+    loadDimeLibrary();
 }
 
-int dimeRunner::Initialize (int argc, char *argv[])
-{
-    po::variables_map dimeOptions;
+std::shared_ptr<CLI::App> dimeRunner::generateLocalCommandLineParser(readerInfo &ri) {
+    loadDimeReaderInfoDefinitions(ri);
 
-    po::options_description dimeOp ("dime options");
-    // clang-format off
-	dimeOp.add_options()
-		("test", "test dime program")
-		("broker", po::value < std::string >(), "specify the broker address")
-		("period", po::value<double>(), "specify the synchronization period");
+    auto parser = std::make_shared<CLI::App>("options related to helics executable", "helics_options");
+    parser->add_option("--broker", "specify the broker address");
+    parser->add_option("--period", "specify the synchronization period");
+    parser->allow_extras();
+    return parser;
+}
 
-    // clang-format on
-    auto parsed = po::command_line_parser (argc, argv).options (dimeOp).allow_unregistered ().run ();
-    po::store (parsed, dimeOptions);
-    po::notify (dimeOptions);
-
-    if (dimeOptions.count ("test") != 0u)
+/*
+    if (dimeOptions.count("test") != 0u)
     {
-        /*if (griddyn::helicsLib::runDimetests())
+        if (griddyn::helicsLib::runDimetests())
         {
             std::cout << "HELICS tests passed\n";
         }
@@ -75,33 +66,20 @@ int dimeRunner::Initialize (int argc, char *argv[])
         {
             std::cout << "HELICS tests failed\n";
         }
-        */
         return 1;
     }
-    readerInfo ri;
-    loadDimeReaderInfoDefinitions (ri);
+   
+*/
+coreTime dimeRunner::Run() { return GriddynRunner::Run(); }
 
-    int ret = GriddynRunner::Initialize (argc, argv, ri, true);
-    if (ret != 0)
-    {
-        return ret;
-    }
-    m_gds->pFlowInitialize ();
-    // register with the helics broker
-    return 0;
-}
-
-coreTime dimeRunner::Run () { return GriddynRunner::Run (); }
-
-coreTime dimeRunner::Step (coreTime time)
+coreTime dimeRunner::Step(coreTime time)
 {
-    auto retTime = GriddynRunner::Step (time);
+    auto retTime = GriddynRunner::Step(time);
     // coord->updateOutputs(retTime);
     return retTime;
 }
 
-void dimeRunner::Finalize () { GriddynRunner::Finalize (); }
+void dimeRunner::Finalize() { GriddynRunner::Finalize(); }
 
-void dimeRunner::setInterfaceOptions (boost::program_options::variables_map & /*dimeOptions*/) {}
 }  // namespace dimeLib
 }  // namespace griddyn

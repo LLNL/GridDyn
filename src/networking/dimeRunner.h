@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef _DIME_RUNNER_H_
-#define _DIME_RUNNER_H_
+#pragma once
 
 #include "core/coreOwningPtr.hpp"
 #include "runner/gridDynRunner.h"
@@ -34,11 +32,8 @@ class dimeRunner : public GriddynRunner
     dimeRunner (std::shared_ptr<gridDynSimulation> sim);
     ~dimeRunner ();
 
-  private:
-    using GriddynRunner::Initialize;
-
   public:
-    virtual int Initialize (int argc, char *argv[]) final;
+    virtual std::shared_ptr<CLI::App> generateLocalCommandLineParser(readerInfo &ri) override;
 
     virtual coreTime Run (void) override;
 
@@ -46,10 +41,7 @@ class dimeRunner : public GriddynRunner
 
     virtual void Finalize (void) override;
 
-  private:
-    void setInterfaceOptions (boost::program_options::variables_map &dimeOptions);
 };
 
 }  // namespace dimeLib
 }  // namespace griddyn
-#endif

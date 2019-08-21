@@ -576,6 +576,14 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/sundials/include/ida/ida.h")
 	submod_update(extern/sundials)
 endif()
 
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/utilities/gmlc/utilities/stringOps.h")
+	submod_update(ThirdParty/utilities)
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/units/units/units.hpp")
+	submod_update(ThirdParty/units)
+endif()
+
 
 # ------------------------------------------------------------
 # finding MPI
@@ -723,6 +731,23 @@ include(addfmt)
 #  Create the target for jsoncpp
 # -----------------------------------------------------------
 include(addJsoncpp)
+
+# --------------------------------------------------------------
+#  Create the target for unitslib
+# -----------------------------------------------------------
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14) # Supported values are ``11``, ``14``, and ``17``.
+endif()
+set(BUILD_UNITS_STATIC_LIBRARY ON CACHE INTERNAL "")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ThirdParty/units" "${PROJECT_BINARY_DIR}/ThirdParty/units")
+set_target_properties(units-static PROPERTIES FOLDER Extern)
+
+# -----------------------------------------------------------------------------
+# create utilities target
+# -----------------------------------------------------------------------------
+add_subdirectory(ThirdParty/utilities)
+set_target_properties(gmlc_utilities PROPERTIES FOLDER Extern)
+target_include_directories(gmlc_utilities SYSTEM PRIVATE $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
 # ------------------------------------------------------------
 # load the required subdirectories

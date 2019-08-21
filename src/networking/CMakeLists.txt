@@ -94,6 +94,7 @@ target_include_directories(
 
 # TODO might not need this
 target_link_libraries(networking PRIVATE griddyn)
+target_link_libraries(networking PUBLIC jsoncpp_lib)
 
 set_target_properties(networking PROPERTIES FOLDER libraries)
 

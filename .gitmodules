@@ -17,3 +17,6 @@
 [submodule "ThirdParty/units"]
 	path = ThirdParty/units
 	url = https://github.com/LLNL/units.git
+[submodule "ThirdParty/utilities"]
+	path = ThirdParty/utilities
+	url = https://github.com/GMLC-TDC/utilities.git
