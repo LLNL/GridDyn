@@ -33,6 +33,7 @@
 BOOST_FIXTURE_TEST_SUITE(input_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
+using namespace gmlc::utilities;
 
 namespace data = boost::unit_test::data;
 

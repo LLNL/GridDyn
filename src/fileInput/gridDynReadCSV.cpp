@@ -20,7 +20,7 @@
 #include "readerHelper.h"
 #include "griddyn/Relay.h"
 #include "gmlc/utilities/stringOps.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -30,7 +30,9 @@ namespace griddyn
 {
 using namespace gridUnits;
 using namespace readerConfig;
-using namespace utilities::string_viewOps;
+using namespace gmlc::utilities::string_viewOps;
+using namespace gmlc::utilities;
+
 
 enum mode_state
 {

@@ -34,7 +34,8 @@
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 int getPSSversion (const std::string &line);
 void rawReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);

@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE (model_test1)
 	requireState(gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
     std::vector<double> st2 = gds->getState ();
 
-    auto cdiff = countDiffs (st, st2, 0.001, 0.01);
+    auto cdiff = gmlc::utilities::countDiffs (st, st2, 0.001, 0.01);
 
     BOOST_CHECK_EQUAL (cdiff, 0u);
 }

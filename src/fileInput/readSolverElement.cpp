@@ -35,7 +35,7 @@ void loadSolverElement (std::shared_ptr<readerElement> &element, readerInfo &ri,
     // check for the field attributes
     if (!name.empty ())
     {
-        int index = numeric_conversion (name, -1);
+        int index = gmlc::utilities::numeric_conversion (name, -1);
 
         if (index >= 0)
         {

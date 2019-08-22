@@ -14,6 +14,8 @@
 #include "formatInterpreters/tinyxml2ReaderElement.h"
 #include "gmlc/utilities/stringConversion.h"
 
+using namespace gmlc::utilities;
+
 fmiInfo::fmiInfo () = default;
 
 fmiInfo::fmiInfo (const std::string &xmlFile) { loadFile (xmlFile); }

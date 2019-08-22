@@ -15,7 +15,7 @@
 #include "griddyn/simulation/diagnostics.h"
 #include "griddyn/blocks/blockLibrary.h"
 #include "../testHelper.h"
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/timeSeriesMulti.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <map>
@@ -29,6 +29,7 @@ static const std::string block_test_directory = std::string (GRIDDYN_TEST_DIRECT
 BOOST_FIXTURE_TEST_SUITE (block_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 using namespace griddyn;
 using namespace griddyn::blocks;
+using namespace gmlc::utilities;
 BOOST_AUTO_TEST_CASE (test_gain_block)
 {
     std::string fileName = block_test_directory + "block_tests1.xml";

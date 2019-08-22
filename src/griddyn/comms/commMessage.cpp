@@ -62,7 +62,7 @@ std::string commMessage::to_string() const
     if (code != 0xFFFF'FFFF)
     {
         message.push_back('[');
-        appendInteger(message, code);
+        stringOps::appendInteger(message, code);
         message.push_back(']');
     }
     if (payload)
@@ -250,7 +250,7 @@ uint32_t MessageTypeRegistry::getType(const std::string &name) const
             return fnd->second;
         }
         auto ret = std::string("type_");
-        appendInteger(ret, type);
+        stringOps::appendInteger(ret, type);
         return ret;
     }
 

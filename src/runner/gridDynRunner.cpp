@@ -39,7 +39,7 @@ namespace filesystem = boost::filesystem;
 
 namespace griddyn
 {
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
 
 GriddynRunner::GriddynRunner() = default;
 

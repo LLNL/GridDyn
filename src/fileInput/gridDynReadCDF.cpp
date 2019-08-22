@@ -26,7 +26,8 @@
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 void cdfReadBusLine (gridBus *bus, const std::string &line, double base, const basicReaderInfo &bri);
 void cdfReadBranch (coreObject *parentObject,

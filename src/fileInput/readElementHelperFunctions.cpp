@@ -17,6 +17,7 @@
 namespace griddyn
 {
 using namespace readerConfig;
+using namespace gmlc::utilities;
 std::string
 findElementName (std::shared_ptr<readerElement> &element, const std::string &ename, readerConfig::match_type matching)
 {

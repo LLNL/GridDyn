@@ -14,15 +14,18 @@
 
 #include "elementReaderTemplates.hpp"
 #include "readerHelper.h"
-#include "utilities/string_viewOps.h"
+#include "gmlc/utilities/string_viewOps.h"
 #include <cmath>
 
 namespace griddyn
 {
 using namespace readerConfig;
+using namespace gmlc::utilities;
+
+using gmlc::utilities::string_view;
 
 static const IgnoreListType ignoreConditionVariables{"condition"};
-bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *parentObject);
+bool checkCondition (string_view cond, readerInfo &ri, coreObject *parentObject);
 // "aP" is the XML element passed from the reader
 void loadConditionElement (std::shared_ptr<readerElement> &element, readerInfo &ri, coreObject *parentObject)
 {
@@ -77,10 +80,9 @@ bool compare (const X &val1, const X &val2, char op1, char op2)
     }
 }
 
-bool checkCondition (utilities::string_view cond, readerInfo &ri, coreObject *parentObject)
+bool checkCondition (string_view cond, readerInfo &ri, coreObject *parentObject)
 {
-    using utilities::string_view;
-    using namespace utilities::string_viewOps;
+    using namespace gmlc::utilities::string_viewOps;
     trim (cond);
     bool rev = false;
     if ((cond[0] == '!') || (cond[0] == '~'))

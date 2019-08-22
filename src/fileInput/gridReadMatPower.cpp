@@ -35,6 +35,7 @@
 namespace griddyn
 {
 using namespace gridUnits;
+using namespace gmlc::utilities;
 
 using mArray = std::vector<std::vector<double>>;
 

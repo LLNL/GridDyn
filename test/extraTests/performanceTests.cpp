@@ -28,6 +28,7 @@
 #include <fstream>
 
 using namespace griddyn;
+using namespace gmlc::utilities;
 
 BOOST_FIXTURE_TEST_SUITE (performance_tests, gridDynSimulationTestFixture)
 

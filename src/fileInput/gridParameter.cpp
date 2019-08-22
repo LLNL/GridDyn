@@ -13,7 +13,7 @@
 #include "gridParameter.h"
 #include "core/coreExceptions.h"
 #include "griddyn/gridDynDefinitions.hpp"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 namespace griddyn
 {
@@ -33,8 +33,9 @@ void gridParameter::reset ()
 
 void gridParameter::fromString (const std::string &str)
 {
-    using namespace utilities::string_viewOps;
-    utilities::string_view strv (str);
+    using namespace gmlc::utilities::string_viewOps;
+	using gmlc::utilities::string_view;
+    string_view strv (str);
     valid = false;
     size_t rlc = strv.find_last_of ('=');
     if (rlc == std::string::npos)
@@ -46,7 +47,7 @@ void gridParameter::fromString (const std::string &str)
 
     // now read the value
     strVal = strv.substr (rlc + 1).to_string ();
-    value = numeric_conversionComplete (strVal, kNullVal);
+    value = gmlc::utilities::numeric_conversionComplete(strVal, kNullVal);
     stringType = (value == kNullVal);
 
     rlc = fld.find_first_of ('(');

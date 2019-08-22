@@ -26,6 +26,8 @@
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static std::shared_ptr<coreObjectFactory> cof = coreObjectFactory::instance ();
 
 void loadGENROU (coreObject *parentObject, stringVec &tokens);

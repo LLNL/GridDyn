@@ -21,7 +21,7 @@
 #include "griddyn/gridDynSimulation.h"
 #include "griddyn/loads/zipLoad.h"
 #include "readerHelper.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -30,7 +30,9 @@
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace utilities::string_viewOps;
+using namespace gmlc::utilities::string_viewOps;
+using gmlc::utilities::string_view;
+using namespace gmlc::utilities;
 
 void loadGenExcArray (coreObject *parentObject, mArray &excData, std::vector<Generator *> &genList);
 void loadGenDynArray (coreObject *parentObject, mArray &genData, std::vector<Generator *> &genList);

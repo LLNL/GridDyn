@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (area_test1)
 
 
     auto st2 = gds2->getState ();
-    auto diffs = countDiffs (st, st2, 0.00001);
+    auto diffs = gmlc::utilities::countDiffs (st, st2, 0.00001);
     BOOST_CHECK (diffs == 0);
 }
 

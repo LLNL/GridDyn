@@ -32,6 +32,8 @@ static const std::string xmlTestDirectory (GRIDDYN_TEST_DIRECTORY "/xml_tests/")
 BOOST_FIXTURE_TEST_SUITE(xml_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))
 
 using namespace griddyn;
+using namespace gmlc::utilities;
+
 BOOST_AUTO_TEST_CASE (xml_test1)
 {
     // test the loading of a single bus

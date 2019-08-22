@@ -28,7 +28,8 @@
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 void ptiReadBus (gridBus *bus, const std::string &line, basicReaderInfo &opt);
 void ptiReadLoad (Load *ld, const std::string &line, basicReaderInfo &opt);

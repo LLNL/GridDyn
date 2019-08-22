@@ -244,6 +244,8 @@ stringVec fmiCoSimSubModel::getInputNames () const { return cs->getInputNames ()
 
 void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
+
     if ((param == "fmu") || (param == "file"))
     {
         if (!(cs))

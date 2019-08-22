@@ -24,6 +24,7 @@
 namespace griddyn
 {
 using namespace readerConfig;
+using namespace gmlc::utilities;
 
 void loadElementInformation (coreObject *obj,
                              std::shared_ptr<readerElement> &element,

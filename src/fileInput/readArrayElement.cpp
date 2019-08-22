@@ -108,7 +108,7 @@ int readElementInteger (std::shared_ptr<readerElement> &element,
         return ret;
     }
 
-    ret = numeric_conversionComplete<int> (strVal, -kBigINT);
+    ret = gmlc::utilities::numeric_conversionComplete<int> (strVal, -kBigINT);
     if (ret == -kBigINT)  // we have a more complicated string
     {
         double val = interpretString (strVal, ri);

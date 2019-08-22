@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE (root_exciter_test)
     std::vector<double> st2 = gds->getState ();
 
     // check for stability
-    auto diff = countDiffs (st, st2, 0.0001);
+    auto diff = gmlc::utilities::countDiffs (st, st2, 0.0001);
     BOOST_CHECK_EQUAL (diff, 0u);
 }
 

@@ -32,6 +32,7 @@ static const IgnoreListType eventIgnoreStrings{"file",        "name",   "column"
 
 void readEventElement (std::shared_ptr<readerElement> &aP, EventInfo &gdEI, readerInfo &ri, coreObject *obj)
 {
+	using namespace gmlc::utilities;
     if (aP->getName () != "event")
     {
         gdEI.type = aP->getName ();

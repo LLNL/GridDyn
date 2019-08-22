@@ -27,6 +27,8 @@ namespace griddyn
 {
 namespace relays
 {
+	using namespace gmlc::utilities;
+
 zonalRelay::zonalRelay (const std::string &objName) : Relay (objName) { opFlags.set (continuous_flag); }
 
 coreObject *zonalRelay::clone (coreObject *obj) const

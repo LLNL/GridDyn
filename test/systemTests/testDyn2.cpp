@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleEvent)
     BOOST_REQUIRE (gds->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
     std::vector<double> st2 = gds->getState ();
 
-    auto diff = countDiffsIgnoreCommon (st, st2, 0.02);
+    auto diff = gmlc::utilities::countDiffsIgnoreCommon (st, st2, 0.02);
     // check for stability
     BOOST_CHECK_EQUAL (diff, 0u);
 }
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE (dyn_test_simpleChunked)
     BOOST_REQUIRE (gds2->currentProcessState () == gridDynSimulation::gridState_t::DYNAMIC_COMPLETE);
     std::vector<double> st2 = gds2->getState ();
 
-    auto diff = countDiffsIgnoreCommon (st, st2, 0.0001);
+    auto diff = gmlc::utilities::countDiffsIgnoreCommon (st, st2, 0.0001);
 
     BOOST_CHECK (diff == 0);
 }

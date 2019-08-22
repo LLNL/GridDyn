@@ -20,6 +20,8 @@
 #include <cstdlib>
 
 using namespace griddyn;
+using gmlc::utilities::countDiffs;
+
 static std::string pFlow_test_directory = std::string (GRIDDYN_TEST_DIRECTORY "/pFlow_tests/");
 
 BOOST_FIXTURE_TEST_SUITE (output_tests, gridDynSimulationTestFixture, * boost::unit_test::label("quick"))

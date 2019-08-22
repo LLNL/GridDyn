@@ -27,7 +27,8 @@
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 void pspReadBus (gridBus *bus, const std::string &line, double base, const basicReaderInfo &bri);
 void pspReadBranch (coreObject *parentObject,
