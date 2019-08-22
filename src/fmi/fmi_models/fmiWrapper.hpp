@@ -12,10 +12,10 @@
 
 #ifndef FMI_WRAPPER_H_
 #define FMI_WRAPPER_H_
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <string>
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "core/coreObjectTemplates.hpp"
 #include "core/coreExceptions.h"
 #include "griddyn/gridComponent.h"

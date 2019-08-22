@@ -12,10 +12,12 @@
 
 #include "gridDynActions.h"
 #include "core/coreExceptions.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 gridDynAction::gridDynAction (gd_action_t action) noexcept : command (action) {}
 
 gridDynAction::gridDynAction (const std::string &operation) { process (operation); }

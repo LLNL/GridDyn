@@ -17,7 +17,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <complex>

@@ -20,12 +20,13 @@
 #include "griddyn/measurement/Condition.h"
 #include "griddyn/events/Event.h"
 #include "core/coreExceptions.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <cmath>
 
 namespace griddyn {
 namespace extra {
+
 txThermalModel::txThermalModel(const std::string &objName) : sensor(objName)
 {
 	opFlags.reset(continuous_flag);  //this is a not a continuous model
@@ -85,7 +86,7 @@ void txThermalModel::set(const std::string &param, const std::string &val)
 {
 	if ((param == "txtype") || (param == "cooling"))
 	{
-		auto v2 = convertToLowerCase(val);
+		auto v2 = gmlc::utilities::convertToLowerCase(val);
 		if (v2 == "auto")
 		{
 			opFlags.set(auto_parameter_load);

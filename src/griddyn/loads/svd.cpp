@@ -13,7 +13,7 @@
 #include "svd.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cmath>
 
@@ -259,6 +259,7 @@ void svd::reset (reset_levels /*level*/) {}
 void svd::getVariableType (double /*sdata*/[], const solverMode & /*sMode*/) {}
 void svd::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if ((param == "blocks") || (param == "block"))
     {
         auto bin = stringOps::splitline (val);

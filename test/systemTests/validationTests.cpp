@@ -17,7 +17,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <iostream>
 #include <map>

@@ -15,8 +15,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "reserveDispatcher.h"
 #include "scheduler.h"
-#include "utilities/stringOps.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/timeSeries.hpp"
 
 namespace griddyn
 {
@@ -194,7 +194,7 @@ void schedulerRamp::set (const std::string &param, const std::string &val)
 {
     if (param == "rampmode")
     {
-        auto v2 = convertToLowerCase (val);
+        auto v2 = gmlc::utilities::convertToLowerCase (val);
         if (v2 == "midpoint")
         {
             mode = midPoint;

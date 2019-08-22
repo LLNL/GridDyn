@@ -28,7 +28,7 @@
 #include "griddyn/simulation/gridSimulation.h"
 #endif
 
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cstdlib>
 

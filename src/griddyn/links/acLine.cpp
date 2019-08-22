@@ -20,8 +20,8 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "utilities/matrixDataCompact.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <complex>
@@ -29,7 +29,7 @@
 namespace griddyn
 {
 using namespace gridUnits;
-
+using namespace gmlc::utilities;
 // make the object factory types
 
 // helper defines to have things make more sense

@@ -22,15 +22,16 @@
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixDataSparse.hpp"
 #include "utilities/matrixDataTranslate.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/timeSeries.hpp"
 
 #include <boost/format.hpp>
 
 namespace griddyn
 {
 using namespace gridUnits;
-using namespace stringOps;
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 
 sensor::sensor (const std::string &objName) : Relay (objName)
 {

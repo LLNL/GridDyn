@@ -11,7 +11,7 @@
 */
 
 #include "griddyn/gridDynDefinitions.hpp"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <iostream>

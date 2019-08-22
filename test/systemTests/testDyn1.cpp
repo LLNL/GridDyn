@@ -14,7 +14,7 @@
 #include "griddyn/primary/infiniteBus.h"
 #include "griddyn/simulation/diagnostics.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 // test case for coreObject object

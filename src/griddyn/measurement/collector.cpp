@@ -18,12 +18,14 @@
 #include "core/objectInterpreter.h"
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
-#include "utilities/stringOps.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/timeSeries.hpp"
 #include <cmath>
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static classFactory<collector> collFac ("collector");
 
 static childClassFactory<Recorder, collector>

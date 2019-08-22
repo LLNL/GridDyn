@@ -9,13 +9,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef FILELOAD_H_
-#define FILELOAD_H_
-
+#pragma once
 #include "rampLoad.h"
 
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/timeSeriesMulti.hpp"
 
 namespace griddyn
 {
@@ -33,7 +30,7 @@ class fileLoad : public rampLoad
 
   protected:
     std::string fileName_;  //!< the name of the file
-    timeSeriesMulti<double, coreTime> schedLoad;  //!< time series containing the load information
+    gmlc::utilities::timeSeriesMulti<double, coreTime> schedLoad;  //!< time series containing the load information
     gridUnits::units_t inputUnits = gridUnits::defUnit;
     double scaleFactor = 1.0;  //!< scaling factor on the load
     index_t currIndex = 0;  //!< the current index on timeSeries
@@ -63,4 +60,3 @@ class fileLoad : public rampLoad
 }  // namespace loads
 }  // namespace griddyn
 
-#endif

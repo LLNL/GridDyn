@@ -13,8 +13,8 @@
 #include "helperObject.h"
 #include "coreExceptions.h"
 #include "utilities/dataDictionary.h"
-#include "utilities/stringOps.h"
-#include "utilities/string_viewOps.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/string_viewOps.h"
 namespace griddyn
 {
 // start at 100 since there are some objects that use low numbers as a check for interface number and the id as
@@ -62,9 +62,11 @@ void helperObject::makeNewOID() { m_oid = ++s_obcnt; }
 coreObject *helperObject::getOwner () const { return nullptr; }
 void setMultipleFlags (helperObject *obj, const std::string &flags)
 {
+	using namespace gmlc::utilities;
+
     auto lcflags = convertToLowerCase (flags);
-    auto flgs = utilities::string_viewOps::split (lcflags);
-    utilities::string_viewOps::trim (flgs);
+    auto flgs = string_viewOps::split (lcflags);
+    string_viewOps::trim (flgs);
     for (const auto &flag : flgs)
     {
 		if (flag.empty())
@@ -77,7 +79,7 @@ void setMultipleFlags (helperObject *obj, const std::string &flags)
         }
         else
         {
-            obj->setFlag (flag.substr (1, utilities::string_view::npos).to_string (), false);
+            obj->setFlag (flag.substr (1, string_view::npos).to_string (), false);
         }
     }
 }

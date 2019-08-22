@@ -23,7 +23,7 @@
 #include "griddyn/events/Event.h"
 #include "griddyn/measurement/Recorder.h"
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/workQueue.h"
 
 #include "CLI11/CLI11.hpp"

@@ -16,7 +16,7 @@
 #include "fmiMESubModel.h"
 #include "core/coreObjectTemplates.hpp"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "core/coreExceptions.h"
 #include "utilities/ThreePhaseFunctions.h"
 

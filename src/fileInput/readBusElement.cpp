@@ -18,7 +18,7 @@
 
 #include "core/objectInterpreter.h"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "core/objectFactory.hpp"
 

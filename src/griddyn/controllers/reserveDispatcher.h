@@ -10,12 +10,10 @@
  * LLNS Copyright End
  */
 
-#ifndef RESERVEDISPATCHER_H_
-#define RESERVEDISPATCHER_H_
 #pragma once
 
 #include "../gridSubModel.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -73,4 +71,3 @@ class reserveDispatcher : public coreObject
 };
 
 }  // namespace griddyn
-#endif

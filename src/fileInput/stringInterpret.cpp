@@ -13,7 +13,7 @@
 #include "core/objectInterpreter.h"
 #include "fileInput.h"
 #include "utilities/functionInterpreter.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "utilities/string_viewConversion.h"
 #include <cctype>
 #include <cmath>

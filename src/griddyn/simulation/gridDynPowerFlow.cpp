@@ -20,7 +20,7 @@
 #include "powerFlowErrorRecovery.h"
 #include "../simulation/diagnostics.h"
 #include "../solvers/solverInterface.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 // system headers
 #include <cmath>
 #include <cstdio>
@@ -430,7 +430,7 @@ bool gridDynSimulation::loadBalance (double prevPower, const std::vector<double>
         }
     }
 
-    availPower = sum (avail);
+    availPower = gmlc::utilities::sum (avail);
     for (size_t kk = 0; kk < gbusses.size (); ++kk)
     {
         if (avail[kk] > 0.0)

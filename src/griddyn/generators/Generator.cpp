@@ -19,8 +19,8 @@
 #include "core/objectInterpreter.h"
 #include "utilities/OperatingBoundary.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "variableGenerator.h"
 
 //#include <set>
@@ -235,7 +235,7 @@ void Generator::setState (coreTime time,
     if (isDynamic (sMode))
     {
         Pset += dPdt * (time - prevTime);
-        Pset = valLimit (Pset, Pmin, Pmax);
+        Pset = gmlc::utilities::valLimit(Pset, Pmin, Pmax);
     }
     else if (stateSize (sMode) > 0)
     {

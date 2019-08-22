@@ -23,7 +23,7 @@
 
 #include "../solvers/solverMode.hpp"
 #include "utilities/mapOps.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <iterator>
 #include <map>
 
@@ -321,7 +321,7 @@ fobjectPair getObjectFunction (const gridComponent *comp, const std::string &fie
         return funcfind->second;
     }
     std::string fld;
-    auto num = stringOps::trailingStringInt (field, fld);
+    auto num = gmlc::utilities::stringOps::trailingStringInt (field, fld);
     if ((fld == "output") || (fld == "o") || (fld == "out"))
     {
         return {[num](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (num); }, defUnit};
@@ -425,7 +425,7 @@ fobjectPair getObjectFunction (const Relay *rel, const std::string &field)
     }
 
     std::string fld;
-    int num = stringOps::trailingStringInt (field, fld, 0);
+    int num = gmlc::utilities::stringOps::trailingStringInt (field, fld, 0);
     fobjectPair retPair (nullptr, defUnit);
     if ((field == "cv") || (field == "currentvalue") || (field == "value") || (field == "output"))
     {

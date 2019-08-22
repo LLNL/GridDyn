@@ -19,7 +19,7 @@
 #include "griddyn/Link.h"
 #include "readerHelper.h"
 #include "griddyn/Relay.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/string_viewConversion.h"
 
 #include <cstdlib>

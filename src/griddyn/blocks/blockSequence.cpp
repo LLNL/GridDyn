@@ -14,8 +14,8 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {

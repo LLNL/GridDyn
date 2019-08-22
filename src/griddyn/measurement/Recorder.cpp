@@ -14,7 +14,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <boost/filesystem.hpp>
 
 namespace griddyn
@@ -58,6 +58,8 @@ void Recorder::cloneTo (collector *col) const
 	nrec->precision = precision;
 	nrec->autosave = autosave;
 }
+
+using namespace gmlc::utilities;
 
 void Recorder::set (const std::string &param, double val)
 {

@@ -14,10 +14,12 @@
 #include "coreExceptions.h"
 #include "nullObject.h"
 #include "utilities/dataDictionary.h"
-#include "utilities/stringOps.h"
-#include "utilities/string_viewOps.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/string_viewOps.h"
 #include <cassert>
 #include <cmath>
+
+using namespace gmlc::utilities;
 
 namespace griddyn
 {
@@ -32,7 +34,7 @@ coreObject::coreObject (const std::string &objName) : m_refCount (0), m_oid (s_o
     if (!name.empty () && (name.back () == '#'))
     {
         name.pop_back ();
-        appendInteger (name, m_oid);
+        stringOps::appendInteger (name, m_oid);
     }
     parent = &nullObject0;
 }
@@ -77,15 +79,15 @@ void coreObject::updateName ()
     {
     case '$':
         name.pop_back ();
-        appendInteger (name, id);
+        stringOps::appendInteger (name, id);
         break;
     case '#':
         name.pop_back ();
-        appendInteger (name, m_oid);
+        stringOps::appendInteger(name, m_oid);
         break;
     case '@':
         name.pop_back ();
-        appendInteger (name, locIndex);
+        stringOps::appendInteger(name, locIndex);
         break;
     default:
         break;
@@ -483,9 +485,10 @@ void removeReference (coreObject *objToDelete, const coreObject *parent)
 
 void setMultipleFlags (coreObject *obj, const std::string &flags)
 {
+	using namespace gmlc::utilities;
     auto lcflags = convertToLowerCase (flags);
-    auto flgs = utilities::string_viewOps::split (lcflags);
-    utilities::string_viewOps::trim (flgs);
+    auto flgs = string_viewOps::split (lcflags);
+    string_viewOps::trim (flgs);
     for (const auto &flag : flgs)
     {
         if (flag.empty ())
@@ -498,7 +501,7 @@ void setMultipleFlags (coreObject *obj, const std::string &flags)
         }
         else
         {
-            obj->setFlag (flag.substr (1, utilities::string_view::npos).to_string (), false);
+            obj->setFlag (flag.substr (1, string_view::npos).to_string (), false);
         }
     }
 }

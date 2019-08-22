@@ -21,8 +21,8 @@
 #include "griddyn/links/adjustableTransformer.h"
 #include "griddyn/loads/svd.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <cassert>
 #include <cmath>

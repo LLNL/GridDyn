@@ -11,7 +11,7 @@
 */
 #include "controlMessage.h"
 #include "../gridDynDefinitions.hpp"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 namespace griddyn
 {
@@ -34,8 +34,8 @@ REGISTER_MESSAGE_TYPE (m11, "GET SCHEDULED", controlMessagePayload::GET_SCHEDULE
 REGISTER_MESSAGE_TYPE (m12, "CANCEL", controlMessagePayload::CANCEL);
 REGISTER_MESSAGE_TYPE (m13, "CANCEL SUCCESS", controlMessagePayload::CANCEL_SUCCESS);
 REGISTER_MESSAGE_TYPE (m14, "CANCEL FAIL", controlMessagePayload::CANCEL_FAIL);
-using namespace stringOps;
-
+using namespace gmlc::utilities::stringOps;
+using namespace gmlc::utilities;
 std::string controlMessagePayload::to_string (uint32_t type, uint32_t /*code*/) const
 {
     std::string temp;

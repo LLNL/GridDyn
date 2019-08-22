@@ -20,7 +20,7 @@
 #include "formatInterpreters/tinyxmlReaderElement.h"
 #include "formatInterpreters/yamlReaderElement.h"
 #include "readElementFile.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/filesystem.hpp>

@@ -16,7 +16,7 @@
 #include "core/coreExceptions.h"
 #include "core/factoryTemplates.hpp"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/units.h"
 
 #include "Player.h"
@@ -28,6 +28,8 @@
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static classFactory<Event> evntFac (std::vector<std::string>{"event", "simple", "single"}, "event");
 namespace events
 {

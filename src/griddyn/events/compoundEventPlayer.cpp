@@ -14,7 +14,7 @@
 
 #include "core/coreExceptions.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <sstream>
 
 namespace griddyn

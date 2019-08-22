@@ -19,11 +19,12 @@
 #include "gridGrabbers.h"
 #include "objectGrabbers.h"
 #include "../simulation/gridSimulation.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
 using namespace gridUnits;
+using namespace gmlc::utilities;
 
 void autoGrabbers (coreObject *obj, std::vector<std::unique_ptr<gridGrabber>> &v);
 void allGrabbers (const std::string &mode, coreObject *obj, std::vector<std::unique_ptr<gridGrabber>> &v);

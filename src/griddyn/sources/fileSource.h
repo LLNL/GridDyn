@@ -10,11 +10,10 @@
 * LLNS Copyright End
 */
 
-#ifndef FILE_SOURCE_H_
-#define FILE_SOURCE_H_
+#pragma once
 
 #include "rampSource.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/timeSeries.hpp"
 
 namespace griddyn
 {
@@ -32,7 +31,7 @@ public:
 	};
 private:
 	std::string fileName_;  //!< name of the file
-	timeSeries<double, coreTime> schedLoad;  //!< time series containing the output schedule
+	gmlc::utilities::timeSeries<double, coreTime> schedLoad;  //!< time series containing the output schedule
 	index_t currIndex = 0;                //!< the current location in the file
 	count_t count = 0;            //!< the total number of elements in the file
 	index_t m_column = 0;         //!< the column of the file to use
@@ -59,6 +58,4 @@ private:
 };
 }//namespace sources
 }//namespace griddyn
-
-#endif
 

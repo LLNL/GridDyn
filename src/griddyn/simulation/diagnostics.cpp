@@ -17,7 +17,7 @@
 
 #include "utilities/gridRandom.h"
 #include "utilities/matrixDataSparse.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cassert>
 #include <fstream>
 
@@ -66,7 +66,7 @@ checkResid (gridDynSimulation *gds, coreTime time, const std::shared_ptr<SolverI
         ++sdata;
         ++rb;
     }
-    return absMaxLoc (resid);
+    return gmlc::utilities::absMaxLoc (resid);
 }
 
 int JacobianCheck (gridDynSimulation *gds, const solverMode &queryMode, double jacTol, bool useStateNames)
@@ -559,7 +559,7 @@ void dynamicSolverConvergenceTest (gridDynSimulation *gds,
     double limitVal = 1.51;
     bFile.write (reinterpret_cast<char *> (&inc), sizeof (double));
     bFile.write (reinterpret_cast<char *> (&limitVal), sizeof (double));
-    auto vsi = vecFindgt (vStates, 0.5);
+    auto vsi = gmlc::utilities::vecFindgt (vStates, 0.5);
     auto lstate = vsi.back ();
     size_t cvs = vsi.size ();
     bFile.write (reinterpret_cast<char *> (&cvs), sizeof (size_t));

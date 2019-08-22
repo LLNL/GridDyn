@@ -22,7 +22,7 @@
 #include "faultResetRecovery.h"
 #include "gridDynSimulationFileOps.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 // system libraries
 #include <algorithm>
 #include <cassert>

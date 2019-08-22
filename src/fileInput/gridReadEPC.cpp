@@ -21,8 +21,8 @@
 #include "griddyn/primary/acBus.h"
 #include "griddyn/primary/dcBus.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/string_viewConversion.h"
 
 #include <cstdlib>

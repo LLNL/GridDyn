@@ -15,7 +15,7 @@
 #include "fmi/fmi_import/fmiObjects.h"
 #include "griddyn/gridBus.h"
 #include "griddyn/simulation/diagnostics.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>

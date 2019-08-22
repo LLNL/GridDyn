@@ -19,8 +19,8 @@
 #include "griddyn/griddyn-config.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/matrixDataTranslate.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -33,6 +33,7 @@ namespace griddyn
 {
 namespace links
 {
+	using namespace gmlc::utilities;
 using namespace gridUnits;
 adjustableTransformer::adjustableTransformer (const std::string &objName) : acLine (objName) {}
 adjustableTransformer::adjustableTransformer (double rP, double xP, const std::string &objName)

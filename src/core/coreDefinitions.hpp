@@ -13,7 +13,7 @@
 #pragma once
 
 #include "../utilities/indexTypes.hpp"
-#include "../utilities/timeRepresentation.hpp"
+#include "gmlc/utilities/timeRepresentation.hpp"
 
 #include <string>
 #include <type_traits>

@@ -12,12 +12,13 @@
 
 #include "tomlReaderElement.h"
 #include "tomlElement.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
 
 static const std::string nullStr{};
+using gmlc::utilities::numeric_conversionComplete;
 
 bool isElement (const toml::Value &testValue);
 bool isAttribute (const toml::Value &testValue);

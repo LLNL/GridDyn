@@ -15,7 +15,7 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "core/objectFactoryTemplates.hpp"
 

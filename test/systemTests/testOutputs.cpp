@@ -14,7 +14,7 @@
 
 #include "griddyn/simulation/gridDynSimulationFileOps.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>

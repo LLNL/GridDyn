@@ -19,14 +19,15 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "../gridBus.h"
-#include "utilities/stringConversion.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cmath>
 #include <complex>
 
 namespace griddyn
 {
 using namespace gridUnits;
+using namespace gmlc::utilities;
 
 static typeFactory<subsystem> gf ("link", std::vector<std::string>{"subsystem", "simple"});
 

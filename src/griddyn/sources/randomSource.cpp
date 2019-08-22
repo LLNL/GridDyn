@@ -14,9 +14,11 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/gridRandom.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <iostream>
+
+using gmlc::utilities::convertToLowerCase;
 
 namespace griddyn
 {

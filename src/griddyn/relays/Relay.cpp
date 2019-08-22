@@ -29,7 +29,7 @@
 #include "fuse.h"
 #include "loadRelay.h"
 #include "pmu.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "zonalRelay.h"
 #include <stdexcept>
 #include <boost/format.hpp>
@@ -813,6 +813,7 @@ void Relay::clearCondChecks (index_t conditionNumber)
 
 std::unique_ptr<eventAdapter> Relay::make_alarm (const std::string &val)
 {
+	using namespace gmlc::utilities;
     auto lc = convertToLowerCase (val);
     if (lc.compare (0, 5, "alarm") == 0)
     {

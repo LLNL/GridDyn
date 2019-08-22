@@ -11,7 +11,9 @@
  */
 
 #include "objectInterpreter.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
+
+using namespace gmlc::utilities;
 
 namespace griddyn
 {

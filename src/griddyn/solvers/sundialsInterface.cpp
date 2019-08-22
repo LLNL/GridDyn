@@ -33,7 +33,7 @@
 #include "sundialsMatrixData.h"
 #include "utilities/matrixCreation.h"
 #include "utilities/matrixDataFilter.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <cstdio>
 

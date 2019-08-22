@@ -14,7 +14,7 @@
 #include "../gridBus.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <iostream>
 
 namespace griddyn
@@ -77,7 +77,7 @@ void motorLoad3::converge ()
 
     double Vr = -V * Vcontrol * sin (theta);
     double Vm = V * Vcontrol * cos (theta);
-    solve2x2 (Vr, Vm, Vm, -Vr, Pmot / scale, Qtest, ir, im);
+    gmlc::utilities::solve2x2(Vr, Vm, Vm, -Vr, Pmot / scale, Qtest, ir, im);
     double err = 10;
     int ccnt = 0;
     double perr = 10;
@@ -337,7 +337,8 @@ void motorLoad3::updateCurrents (const IOdata &inputs, const stateData &sD, cons
     vr = -V * Vcontrol * sin (theta);
     vm = V * Vcontrol * cos (theta);
 
-    solve2x2 (r, -xp, xp, r, vr - Loc.diffStateLoc[1], vm - Loc.diffStateLoc[2], Loc.destLoc[0], Loc.destLoc[1]);
+    gmlc::utilities::solve2x2(r, -xp, xp, r, vr - Loc.diffStateLoc[1], vm - Loc.diffStateLoc[2], Loc.destLoc[0],
+                              Loc.destLoc[1]);
 }
 
 void motorLoad3::derivative (const IOdata & /*inputs*/,

@@ -16,7 +16,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "dispatcher.h"
 #include "griddyn/griddyn-config.h"
-#include "utilities/timeSeries.hpp"
+#include "gmlc/utilities/timeSeries.hpp"
+
 namespace griddyn
 {
 using namespace gridUnits;
@@ -88,7 +89,7 @@ void scheduler::setTarget (std::vector<double> &time, std::vector<double> &targe
 
 void scheduler::setTarget (const std::string &fileName)
 {
-    timeSeries<double, coreTime> targets;
+    gmlc::utilities::timeSeries<double, coreTime> targets;
     targets.loadFile (fileName);
 
     std::list<tsched> flist;

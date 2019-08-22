@@ -18,7 +18,7 @@
 #include "griddyn/loads/zipLoad.h"
 #include "griddyn/primary/acBus.h"
 #include "readerHelper.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cstdlib>
 #include <fstream>

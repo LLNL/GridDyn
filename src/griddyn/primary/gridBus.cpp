@@ -25,8 +25,8 @@
 #include "dcBus.h"
 #include "griddyn/griddyn-config.h"
 #include "infiniteBus.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -1598,7 +1598,7 @@ void gridBus::rootTrigger (coreTime time,
     size_t rootCount = 0;
     int rootOffset = offsets.getRootOffset (sMode);
 
-    auto rootsfound = vecFindne (rootMask, 0, rootOffset + rootCount, rootOffset + rootSize (sMode));
+    auto rootsfound = gmlc::utilities::vecFindne (rootMask, 0, rootOffset + rootCount, rootOffset + rootSize (sMode));
 
     if (!rootsfound.empty ())
     {

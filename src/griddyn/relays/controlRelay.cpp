@@ -20,7 +20,7 @@
 #include "../events/eventQueue.h"
 #include "../measurement/gridGrabbers.h"
 #include "../simulation/gridSimulation.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <boost/format.hpp>
 
@@ -65,7 +65,7 @@ void controlRelay::addMeasurement (const std::string &measure)
 
     for (auto &ggb : vals)
     {
-        pointNames_.emplace (convertToLowerCase (ggb->getDesc ()),
+        pointNames_.emplace (gmlc::utilities::convertToLowerCase (ggb->getDesc ()),
                              static_cast<index_t> (measurement_points_.size ()));
         measurement_points_.push_back (std::move (ggb));
     }
@@ -412,7 +412,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
     actions[act].measureAction = true;
     actions[act].sourceID = sourceID;
     actions[act].triggerTime = eventTime;
-    makeLowerCase (message->m_field);
+    gmlc::utilities::makeLowerCase(message->m_field);
     actions[act].field = message->m_field;
     if (!(message->m_units.empty ()))
     {
@@ -434,7 +434,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime e
     actions[act].measureAction = false;
     actions[act].sourceID = sourceID;
     actions[act].triggerTime = eventTime;
-    makeLowerCase (message->m_field);
+    gmlc::utilities::makeLowerCase(message->m_field);
     actions[act].field = message->m_field;
     actions[act].val = message->m_value;
 

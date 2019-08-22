@@ -22,8 +22,8 @@
 #include "core/objectInterpreter.h"
 #include "dcLink.h"
 #include "utilities/matrixDataCompact.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include "../measurement/objectGrabbers.h"
 
@@ -221,7 +221,7 @@ void Link::set (const std::string &param, const std::string &val)
     }
     else if (param == "status")
     {
-        auto v2 = convertToLowerCase (val);
+        auto v2 = gmlc::utilities::convertToLowerCase (val);
         if ((v2 == "closed") || (v2 == "connected"))
         {
             reconnect ();
@@ -812,6 +812,7 @@ double Link::getImagImpedance (id_type_t busId) const
 
 double Link::getTotalImpedance (id_type_t busId) const
 {
+	using gmlc::utilities::signn;
     if (isBus2 (busId, B2))  // from bus
     {
         //  printf("id2 impedance=%f\n", signn(linkFlows.P2 + linkFlows.Q2)*(linkInfo.v2*linkInfo.v2) /

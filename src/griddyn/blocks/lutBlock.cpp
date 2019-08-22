@@ -13,9 +13,9 @@
 #include "lutBlock.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringConversion.h"
-#include "utilities/timeSeries.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <utility>
 
 namespace griddyn
@@ -85,6 +85,7 @@ void lutBlock::blockJacobianElements (double input,
 // set parameters
 void lutBlock::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if (param == "lut")
     {
         auto v2 = str2vector (val, -kBigNum, ";,:");

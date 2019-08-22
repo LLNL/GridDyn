@@ -23,11 +23,12 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "listMaintainer.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
 using namespace gridUnits;
+using namespace gmlc::utilities;
 
 std::atomic<count_t> Area::areaCounter{0};
 

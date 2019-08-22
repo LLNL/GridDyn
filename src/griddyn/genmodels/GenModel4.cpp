@@ -14,7 +14,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 namespace griddyn
@@ -128,7 +128,8 @@ void GenModel4::algebraicUpdate (const IOdata &inputs,
 {
     auto Loc = offsets.getLocations (sD, update, sMode, this);
     updateLocalCache (inputs, sD, sMode);
-    solve2x2 (Rs, (Xqp), -(Xdp), Rs, Loc.diffStateLoc[2] - Vd, Loc.diffStateLoc[3] - Vq, Loc.destLoc[0],
+    gmlc::utilities::solve2x2(Rs, (Xqp), -(Xdp), Rs, Loc.diffStateLoc[2] - Vd, Loc.diffStateLoc[3] - Vq,
+                              Loc.destLoc[0],
               Loc.destLoc[1]);
     m_output = -(Loc.destLoc[1] * Vq + Loc.destLoc[0] * Vd);
 }

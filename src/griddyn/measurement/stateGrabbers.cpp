@@ -27,6 +27,8 @@
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 static grabberInterpreter<stateGrabber, stateOpGrabber, stateFunctionGrabber>
   sgInterpret ([](const std::string &fld, coreObject *obj) { return std::make_unique<stateGrabber> (fld, obj); });
 

@@ -20,7 +20,7 @@
 #include "griddyn/gridBus.h"
 #include "griddyn/links/acLine.h"
 #include "griddyn/simulation/diagnostics.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 //#include <crtdbg.h>
 // test case for link objects

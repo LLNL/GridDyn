@@ -11,13 +11,15 @@
  */
 
 #include "schedulerMessage.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <cstring>
 
 namespace griddyn
 {
 namespace comms
 {
+	using namespace gmlc::utilities;
+
 static dPayloadFactory<schedulerMessagePayload, BASE_SCHEDULER_MESSAGE_NUMBER, BASE_SCHEDULER_MESSAGE_NUMBER + 16>
   dmf ("scheduler");
 

@@ -12,7 +12,7 @@
 
 #include "rampSource.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <ctime>
 
 namespace griddyn

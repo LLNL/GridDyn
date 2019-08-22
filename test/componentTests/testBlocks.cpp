@@ -16,7 +16,7 @@
 #include "griddyn/blocks/blockLibrary.h"
 #include "../testHelper.h"
 #include "utilities/timeSeriesMulti.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <map>
 #include <boost/test/unit_test.hpp>

@@ -23,7 +23,7 @@
 #include "../loads/zipLoad.h"
 #include "../measurement/collector.h"
 #include "utilities/logger.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <map>
 #include <utility>
@@ -136,6 +136,7 @@ void gridSimulation::saveRecorders ()
 static const std::string consoleprint ("consoleprintlevel");
 void gridSimulation::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     std::string temp;
     if ((param == "recorddirectory") || (param == "outputdirectory"))
     {
@@ -298,7 +299,7 @@ std::shared_ptr<collector> gridSimulation::findCollector (const std::string &col
             return col;
         }
     }
-    auto ind = stringOps::trailingStringInt(collectorName);
+    auto ind = gmlc::utilities::stringOps::trailingStringInt(collectorName);
     if (isValidIndex(ind, collectorList))
     {
         return collectorList[ind];

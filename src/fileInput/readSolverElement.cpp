@@ -15,7 +15,7 @@
 #include "fileInput.h"
 #include "readElement.h"
 #include "griddyn/solvers/solverInterface.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 namespace griddyn
 {

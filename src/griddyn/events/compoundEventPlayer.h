@@ -10,14 +10,12 @@
  * LLNS Copyright End
  */
 
-#ifndef GRIDDYN_COMPOUND_EVENT_PLAYER_H_
-#define GRIDDYN_COMPOUND_EVENT_PLAYER_H_
 #pragma once
 // headers
 //#include "gridDynSimulation.h"
 
 #include "compoundEvent.h"
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/timeSeriesMulti.hpp"
 
 namespace griddyn
 {
@@ -28,7 +26,7 @@ class compoundEventPlayer : public compoundEvent
 {
   protected:
     coreTime period = maxTime;  //!< period of the player
-    timeSeriesMulti<double, coreTime> ts;  //!< the time series containing the data for the player
+    gmlc::utilities::timeSeriesMulti<double, coreTime> ts;  //!< the time series containing the data for the player
     index_t currIndex = kNullLocation;  //!< the current index of the player
     std::string eFile;  //!< the file name
     std::vector<index_t> columns;  //!< the columns of the time series to use for the different fields
@@ -68,4 +66,3 @@ class compoundEventPlayer : public compoundEvent
 };
 }  // namespace events
 }  // namespace griddyn
-#endif

@@ -19,8 +19,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "utilities/matrixDataCompact.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <iostream>
 
@@ -228,7 +228,7 @@ void dcBus::timestep (coreTime time, const IOdata &inputs, const solverMode &sMo
 // set properties
 void dcBus::set (const std::string &param, const std::string &val)
 {
-    auto val_lowerCase = convertToLowerCase (val);
+    auto val_lowerCase = gmlc::utilities::convertToLowerCase (val);
     if ((param == "type") || (param == "bustype") || (param == "pflowtype"))
     {
         if ((val_lowerCase == "slk") || (val_lowerCase == "swing") || (val_lowerCase == "slack"))

@@ -9,12 +9,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDDYN_RECORDER_H_
-#define GRIDDYN_RECORDER_H_
+#pragma once
 
 #include "collector.h"
-#include "utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/timeSeriesMulti.hpp"
 
 namespace griddyn
 {
@@ -23,7 +21,7 @@ class Recorder : public collector
 {
   protected:
     coreTime lastSaveTime = negTime;  //!< the last time the recorder saved to file
-    timeSeriesMulti<double, coreTime> dataset;  //!< the actual time series data
+    gmlc::utilities::timeSeriesMulti<double, coreTime> dataset;  //!< the actual time series data
     std::string fileName_;  //!< the fileName to store the data
     std::string directory_;  //!< the directory to generate the specified file
 
@@ -90,4 +88,3 @@ class Recorder : public collector
 };
 
 }  // namespace griddyn
-#endif

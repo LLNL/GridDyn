@@ -11,7 +11,9 @@
 */
 
 #include "readerElement.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
+
+using namespace gmlc::utilities;
 
 readerAttribute::readerAttribute () = default;
 readerAttribute::readerAttribute (std::string attName, std::string attText) : name (std::move(attName)), text (std::move(attText)) {}

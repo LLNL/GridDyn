@@ -13,8 +13,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include "utilities/stringOps.h"
-#include "utilities/stringToCmdLine.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <iostream>
 
@@ -306,15 +305,4 @@ BOOST_AUTO_TEST_CASE (splitLineBracket_tests)
     BOOST_CHECK (testres3[1] == "$23.45,34,23.3$");
 }
 
-BOOST_AUTO_TEST_CASE (string2cmdLine_test)
-{
-    utilities::StringToCmdLine cmdargs ("--arg1 --arg2=bob --arg3=\"string1 string2\" --arg3=\"\"bob\"\"");
-
-    BOOST_CHECK_EQUAL (cmdargs.getArgCount (), 5);
-
-    auto args = cmdargs.getArgV ();
-    BOOST_CHECK_EQUAL ("--arg1", args[1]);
-    BOOST_CHECK_EQUAL ("--arg3=string1 string2", args[3]);
-	BOOST_CHECK_EQUAL("--arg3=\"bob\"", args[4]);
-}
 BOOST_AUTO_TEST_SUITE_END ()

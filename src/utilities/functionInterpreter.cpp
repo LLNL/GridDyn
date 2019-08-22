@@ -21,8 +21,8 @@
 #include "griddyn/griddyn-config.h"
 #include "gridRandom.h"
 #include "mapOps.hpp"
-#include "stringOps.h"
-#include "vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -32,6 +32,7 @@ static constexpr double local_inf = 1e48;
 static const double log2val = log (2.0);
 static const double log10val = log (10.0);
 
+using namespace gmlc::utilities;
 using namespace utilities;
 
 static const std::map<std::string, std::function<double()>> FuncList0{

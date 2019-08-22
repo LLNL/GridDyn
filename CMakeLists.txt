@@ -731,6 +731,7 @@ include(addfmt)
 #  Create the target for jsoncpp
 # -----------------------------------------------------------
 include(addJsoncpp)
+set_target_properties(jsoncpp_lib PROPERTIES FOLDER Extern)
 
 # --------------------------------------------------------------
 #  Create the target for unitslib

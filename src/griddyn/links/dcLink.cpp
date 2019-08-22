@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
 #include "../primary/dcBus.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <cstring>

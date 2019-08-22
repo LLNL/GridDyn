@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "json/reader.h"
 #include "json/value.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <fstream>
 #include <iostream>
 

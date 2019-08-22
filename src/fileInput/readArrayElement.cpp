@@ -15,7 +15,7 @@
 #include "readElement.h"
 #include "readerHelper.h"
 
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <numeric>
 
 namespace griddyn

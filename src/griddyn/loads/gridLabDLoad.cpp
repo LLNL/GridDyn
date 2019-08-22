@@ -16,9 +16,9 @@
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
 #include "coupling/GhostSwingBusManager.h"
-#include "utilities/stringConversion.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringConversion.h"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -964,6 +964,7 @@ std::vector<double> gridLabDLoad::run3GridLabB (bool unbalancedAlert)
 
 void gridLabDLoad::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     std::string numstr;
     int num;
 

@@ -12,7 +12,7 @@
 
 #include "interpolatingPlayer.h"
 #include "core/objectInterpreter.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "core/coreExceptions.h"
 #include <sstream>

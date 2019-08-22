@@ -17,6 +17,8 @@
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 std::unique_ptr<Condition> make_condition (const std::string &condString, coreObject *rootObject)
 {
     auto cString = stringOps::xmlCharacterCodeReplace (condString);

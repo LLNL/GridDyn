@@ -18,7 +18,7 @@
 #include "griddyn/GenModel.h"
 #include "griddyn/Governor.h"
 
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 #include <cstdio>
 #include <fstream>

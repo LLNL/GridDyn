@@ -16,7 +16,7 @@
 #include "readerHelper.h"
 
 #include "griddyn/events/Event.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include "utilities/units.h"
 #include <iostream>
 

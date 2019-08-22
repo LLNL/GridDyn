@@ -14,7 +14,7 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 //#include <ctime>
 namespace griddyn

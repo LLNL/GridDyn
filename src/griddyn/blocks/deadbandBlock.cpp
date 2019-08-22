@@ -13,8 +13,8 @@
 #include "deadbandBlock.h"
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {

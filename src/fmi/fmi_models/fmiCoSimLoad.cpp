@@ -16,7 +16,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "fmiMESubModel.h"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {

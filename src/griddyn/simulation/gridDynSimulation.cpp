@@ -26,7 +26,7 @@
 #include "gridDynSimulationFileOps.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -814,6 +814,7 @@ count_t gridDynSimulation::nonZeros (const solverMode &sMode) const
 // --------------- set properties ---------------
 void gridDynSimulation::set (const std::string &param, const std::string &val)
 {
+	using namespace gmlc::utilities;
     if (param == "powerflowfile")
     {
         powerFlowFile = val;

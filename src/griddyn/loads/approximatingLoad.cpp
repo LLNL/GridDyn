@@ -15,14 +15,16 @@
 #include "core/coreExceptions.h"
 #include "core/coreObjectTemplates.hpp"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/workQueue.h"
 #include <complex>
 
 #include <cassert>
 #include <cmath>
 #include <iostream>
+
+using gmlc::utilities::convertToLowerCase;
 
 //#define SGS_DEBUG
 namespace griddyn

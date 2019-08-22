@@ -23,9 +23,9 @@
 #include "acBus.h"
 #include "core/coreExceptions.h"
 #include "core/objectFactoryTemplates.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 //#include "matrixDataSparse.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include <cassert>
 #include <cmath>
@@ -38,6 +38,7 @@ namespace griddyn
 static childTypeFactory<acBus, gridBus> gbfac ("bus", stringVec{"psystem"});
 
 using namespace gridUnits;
+using namespace gmlc::utilities;
 
 acBus::acBus (const std::string &objName) : gridBus (objName), busController (this)
 {
@@ -2385,7 +2386,7 @@ void acBus::localConverge (const solverMode &sMode, int mode, double tol)
                 Ptii = partDeriv.at (PoutLocation, angleInLocation);
                 Qvii = partDeriv.at (QoutLocation, voltageInLocation);
                 Qtii = partDeriv.at (QoutLocation, angleInLocation);
-                double detA = solve2x2 (Pvii, Ptii, Qvii, Qtii, DP, DQ, dV, dT);
+                double detA = gmlc::utilities::solve2x2 (Pvii, Ptii, Qvii, Qtii, DP, DQ, dV, dT);
                 if (std::isnormal (detA))
                 {
                     dV = dVcheck (dV, v1);

@@ -13,14 +13,16 @@
 #include "fileLoad.h"
 #include "core/coreObjectTemplates.hpp"
 #include "../gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
 namespace loads
 {
+	using namespace gmlc::utilities;
+
 fileLoad::fileLoad (const std::string &objName) : rampLoad (objName) {}
 
 fileLoad::fileLoad (const std::string &objName, std::string fileName)

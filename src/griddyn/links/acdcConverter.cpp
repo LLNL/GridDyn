@@ -18,7 +18,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "../primary/dcBus.h"
 #include "utilities/matrixDataSparse.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <cstring>

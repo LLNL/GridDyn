@@ -17,7 +17,7 @@
 #include "../gridBus.h"
 #include "otherGenModels.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {

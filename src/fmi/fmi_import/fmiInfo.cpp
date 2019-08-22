@@ -12,7 +12,7 @@
 
 #include "fmiInfo.h"
 #include "formatInterpreters/tinyxml2ReaderElement.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 
 fmiInfo::fmiInfo () = default;
 

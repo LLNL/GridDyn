@@ -12,7 +12,7 @@
 
 #include "formatInterpreters/readerElement.h"
 #include "readElement.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {

@@ -17,8 +17,8 @@
 #include "core/coreObjectTemplates.hpp"
 #include "outputEstimator.h"
 #include "utilities/matrixData.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <algorithm>
 
@@ -26,6 +26,8 @@ namespace griddyn
 {
 namespace fmi
 {
+	using namespace gmlc::utilities;
+
 fmiMESubModel::fmiMESubModel (const std::string &newName, std::shared_ptr<fmi2ModelExchangeObject> fmi)
     : gridSubModel (newName), me (std::move (fmi))
 {

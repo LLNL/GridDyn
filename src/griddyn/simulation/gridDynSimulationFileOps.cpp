@@ -29,9 +29,9 @@
 #endif
 
 #include "utilities/matrixDataSparse.hpp"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/units.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 
 #include <cmath>
@@ -41,6 +41,7 @@
 namespace griddyn
 {
 using namespace gridUnits;
+using gmlc::utilities::convertToLowerCase;
 
 void savePowerFlow (gridDynSimulation *gds, const std::string &fileName)
 {

@@ -12,7 +12,7 @@
 
 #include "iniReaderElement.h"
 #include "inih/INIReader.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -152,7 +152,7 @@ double iniReaderElement::getAttributeValue (const std::string &attributeName) co
     {
         return readerNullVal;
     }
-    return numeric_conversionComplete (doc->Get (currentSection, attributeName), readerNullVal);
+    return gmlc::utilities::numeric_conversionComplete (doc->Get (currentSection, attributeName), readerNullVal);
 }
 
 std::shared_ptr<readerElement> iniReaderElement::firstChild () const

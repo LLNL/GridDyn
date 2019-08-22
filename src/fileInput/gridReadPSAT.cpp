@@ -21,7 +21,7 @@
 #include "griddyn/primary/acBus.h"
 #include "griddyn/relays/pmu.h"
 #include "readerHelper.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #ifdef ENABLE_OPTIMIZATION_LIBRARY
 #include "optimization/gridDynOpt.h"

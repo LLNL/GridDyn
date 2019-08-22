@@ -15,7 +15,7 @@
 #include "core/objectInterpreter.h"
 #include "gridBus.h"
 #include "gridSubModel.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 namespace griddyn
 {

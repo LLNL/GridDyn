@@ -15,7 +15,7 @@
 
 #include "utilities/string_viewConversion.h"
 
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>

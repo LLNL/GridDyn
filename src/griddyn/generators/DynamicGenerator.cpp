@@ -25,8 +25,8 @@
 #include "isocController.h"
 #include "utilities/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 //#include <set>
 /*
@@ -83,8 +83,8 @@ const std::map<std::string, DynamicGenerator::dynModel_t> dynModelFromStringMap{
 
 DynamicGenerator::dynModel_t DynamicGenerator::dynModelFromString (const std::string &dynModelType)
 {
-    auto str = convertToLowerCase (dynModelType);
-    return mapFind (dynModelFromStringMap, str, dynModel_t::invalid);
+    auto str = gmlc::utilities::convertToLowerCase(dynModelType);
+    return mapFind(dynModelFromStringMap, str, dynModel_t::invalid);
 }
 
 void DynamicGenerator::buildDynModel (dynModel_t dynModel)
@@ -353,7 +353,7 @@ void DynamicGenerator::setState (coreTime time,
             }
         }
         Pset += dPdt * (time - prevTime);
-        Pset = valLimit (Pset, Pmin, Pmax);
+        Pset = gmlc::utilities::valLimit(Pset, Pmin, Pmax);
         updateLocalCache (noInputs, emptyStateData, cLocalSolverMode);
     }
     else if (stateSize (sMode) > 0)
@@ -1168,7 +1168,7 @@ void DynamicGenerator::generateSubModelInputs (const IOdata &inputs, const state
 
     double scale = systemBasePower / machineBasePower;
     double Pcontrol = pSetControlUpdate (inputs, sD, sMode);
-    Pcontrol = valLimit (Pcontrol, Pmin, Pmax);
+    Pcontrol = gmlc::utilities::valLimit(Pcontrol, Pmin, Pmax);
 
     subInputs.inputs[governor_loc][govpSetInLocation] = Pcontrol * scale;
 

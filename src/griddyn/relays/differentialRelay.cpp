@@ -19,7 +19,6 @@
 #include "../gridBus.h"
 #include "../measurement/Condition.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/timeSeries.hpp"
 
 namespace griddyn
 {

@@ -11,10 +11,12 @@
  */
 
 #include "tinyxml2ReaderElement.h"
-#include "utilities/string_viewConversion.h"
+#include "gmlc/utilities/string_viewConversion.h"
 #include <tinyxml2/tinyxml2.h>
 
 using namespace tinyxml2;
+using namespace gmlc::utilities;
+
 // this is not using default for gcc 4.9 compatibility
 tinyxml2ReaderElement::tinyxml2ReaderElement () = default;
 tinyxml2ReaderElement::tinyxml2ReaderElement (const std::string &fileName)

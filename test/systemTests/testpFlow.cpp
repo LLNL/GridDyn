@@ -14,7 +14,7 @@
 #include "core/coreExceptions.h"
 #include "griddyn/solvers/solverInterface.h"
 #include "../testHelper.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cstdio>
 #include <iostream>

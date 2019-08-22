@@ -25,7 +25,7 @@
 #include "grabberInterpreter.hpp"
 #include "objectGrabbers.h"
 #include "utilities/functionInterpreter.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <cmath>
 #include <map>

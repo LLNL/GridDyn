@@ -12,8 +12,8 @@
 
 #include "pulseSource.h"
 #include "core/coreObjectTemplates.hpp"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cmath>
 
 namespace griddyn
@@ -121,7 +121,7 @@ void pulseSource::set (const std::string &param, const std::string &val)
 {
     if ((param == "type") || (param == "pulsetype"))
     {
-        auto vtype = convertToLowerCase (val);
+        auto vtype = gmlc::utilities::convertToLowerCase(val);
         if (vtype == "square")
         {
             ptype = pulse_type_t::square;

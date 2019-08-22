@@ -12,7 +12,7 @@
 
 #include "units.h"
 
-#include "stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 
 #include "mapOps.hpp"
 #include <utility>
@@ -231,7 +231,7 @@ units_t getUnits (const std::string &unitString, units_t defValue)
     {
         return defValue;
     }
-    auto unitName = convertToLowerCase (unitString);
+    auto unitName = gmlc::utilities::convertToLowerCase (unitString);
     return mapFind (name2Unit, unitName, defValue);
 }
 

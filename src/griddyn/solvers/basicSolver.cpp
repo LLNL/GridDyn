@@ -13,11 +13,13 @@
 #include "basicSolver.h"
 
 #include "../gridDynSimulation.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
+	using namespace gmlc::utilities;
+
 namespace solvers
 {
 basicSolver::basicSolver (mode_t alg) : algorithm (alg) { mode.algebraic = true; }

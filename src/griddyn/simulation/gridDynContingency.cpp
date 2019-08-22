@@ -19,7 +19,7 @@
 #include "../gridDynSimulation.h"
 #include "../loads/zipLoad.h"
 #include "../simulation/diagnostics.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include "utilities/workQueue.h"
 
 namespace griddyn

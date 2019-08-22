@@ -17,7 +17,7 @@
 #include "griddyn/gridDynSimulation.h"
 #include "readerHelper.h"
 #include "utilities/gridRandom.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <sstream>
 #include <boost/filesystem.hpp>
 

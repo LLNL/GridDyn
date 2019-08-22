@@ -14,7 +14,7 @@
 #include "../Link.h"
 #include "acBus.h"
 #include "../gridSecondary.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -229,8 +229,11 @@ void BusControls::removeVoltageControlObject (id_type_t oid, bool update)
     }
 }
 
+using gmlc::utilities::sum;
+
 void BusControls::updateVoltageControls ()
 {
+	
     double vfsum = sum (vcfrac) + sum (vclinkFrac);
     proxyVControlObject.clear ();
     bool non_direct_remote = false;
