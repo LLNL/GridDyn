@@ -76,17 +76,3 @@ if (MSVC)
 target_compile_options(sundials_cvode_static PRIVATE "/sdl-")
 target_compile_options(sundials_cvode_static PRIVATE "/W3")
 endif()
-
-if(NOT CMAKE_VERSION VERSION_LESS 3.13)
-message(STATUS "installing sundials as GridDyn EXPORT")
-install(TARGETS ${SUNDIALS_LIBRARIES}
-    EXPORT griddyn-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT libs)
-	
-endif()
-
-install(TARGETS sundials_all EXPORT griddyn-targets)
