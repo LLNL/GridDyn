@@ -374,6 +374,7 @@ endif()
 
 if (NOT TARGET compile_flags_target)
    add_library(compile_flags_target INTERFACE)
+
 endif()
 
 if (GRIDDYN_ROOT_PROJECT)
@@ -392,6 +393,14 @@ if (GRIDDYN_ROOT_PROJECT)
 	endif(CXX_STANDARD_FLAG)
 	
 endif()
+
+   install(
+    TARGETS compile_flags_target
+    EXPORT griddyn-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 if (GRIDDYN_ROOT_PROJ)
 cmake_dependent_option(

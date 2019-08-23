@@ -18,7 +18,7 @@
 #include "../events/Event.h"
 #include "../measurement/Condition.h"
 #include "gmlc/utilities/stringConversion.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 #include <algorithm>
 
 #include <boost/format.hpp>
@@ -79,7 +79,7 @@ void zonalRelay::set (const std::string &param, const std::string &val)
                 throw (invalidParameterValue (param));
             }
         }
-        set ("zones", dvals.size ());
+        set ("zones", static_cast<double>(dvals.size ()));
         m_zoneLevels = std::move (dvals);
     }
     else if (param == "delay")

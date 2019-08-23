@@ -16,7 +16,7 @@
 #include "reserveDispatcher.h"
 #include "scheduler.h"
 #include "gmlc/utilities/stringOps.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 
 namespace griddyn
 {

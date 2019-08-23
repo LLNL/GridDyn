@@ -12,7 +12,7 @@
 
 #include "controlRelay.h"
 #include "core/coreExceptions.h"
-//#include "utilities/timeSeries.hpp"
+//#include "utilities/TimeSeries.hpp"
 #include "../comms/Communicator.h"
 #include "../comms/controlMessage.h"
 #include "core/coreObjectTemplates.hpp"

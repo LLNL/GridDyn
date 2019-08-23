@@ -19,7 +19,7 @@
 #include "gridGrabbers.h"
 #include "stateGrabber.h"
 #include "gmlc/utilities/stringOps.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 #include <cmath>
 
 namespace griddyn

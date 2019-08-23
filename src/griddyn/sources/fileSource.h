@@ -13,7 +13,7 @@
 #pragma once
 
 #include "rampSource.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 
 namespace griddyn
 {

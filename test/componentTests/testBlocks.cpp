@@ -15,7 +15,7 @@
 #include "griddyn/simulation/diagnostics.h"
 #include "griddyn/blocks/blockLibrary.h"
 #include "../testHelper.h"
-#include "gmlc/utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <cstdio>
 #include <map>

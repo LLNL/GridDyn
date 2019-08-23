@@ -15,7 +15,7 @@
 #include "fileInput/fileInput.h"
 #include "griddyn/measurement/collector.h"
 #include "../testHelper.h"
-#include "gmlc/utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cmath>

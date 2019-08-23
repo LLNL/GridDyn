@@ -15,7 +15,7 @@
 //#include "gridDynSimulation.h"
 
 #include "compoundEvent.h"
-#include "gmlc/utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 
 namespace griddyn
 {

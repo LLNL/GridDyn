@@ -13,7 +13,7 @@
 #pragma once
 
 #include "Event.h"
-#include "gmlc/utilities/timeSeriesMulti.hpp"
+#include "gmlc/utilities/TimeSeriesMulti.hpp"
 
 #include <future>
 namespace griddyn

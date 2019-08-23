@@ -14,7 +14,7 @@
 #include "core/coreObjectTemplates.hpp"
 #include "utilities/matrixData.hpp"
 #include "gmlc/utilities/stringConversion.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <utility>
 
@@ -168,7 +168,7 @@ double lutBlock::computeValue (double input)
         auto lower = std::lower_bound (lut.begin () + lindex, lut.end (), std::make_pair (input, 0.0));
         auto upper = lower;
         ++upper;
-        lindex = upper - lut.begin ();
+        lindex = static_cast<int>(upper - lut.begin ());
         vlower = lower->first;
         vupper = upper->first;
         m = (upper->second - lower->second) / (vupper - vlower);

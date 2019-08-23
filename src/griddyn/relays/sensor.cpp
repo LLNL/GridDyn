@@ -23,7 +23,7 @@
 #include "utilities/matrixDataSparse.hpp"
 #include "utilities/matrixDataTranslate.hpp"
 #include "gmlc/utilities/stringConversion.h"
-#include "gmlc/utilities/timeSeries.hpp"
+#include "gmlc/utilities/TimeSeries.hpp"
 
 #include <boost/format.hpp>
 
