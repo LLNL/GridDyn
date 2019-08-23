@@ -16,18 +16,7 @@ add_library(extraModelLibrary STATIC ${extra_sources} ${extra_headers})
 set_target_properties(extraModelLibrary PROPERTIES FOLDER libraries)
 
 target_link_libraries(extraModelLibrary PUBLIC griddyn)
-install(
-    TARGETS extraModelLibrary
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
 
-install(
-    FILES ${extra_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/extraModels
-    COMPONENT headers
-)
 
 list(APPEND optional_library_key_headers extraModels/extraModels.h)
 list(APPEND optional_library_functions loadExtraModels)

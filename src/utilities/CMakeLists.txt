@@ -98,13 +98,6 @@ if(UNSIGNED_INDEXING)
 endif(UNSIGNED_INDEXING)
 
 install(
-    TARGETS utilities
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
     FILES ${utilities_headers}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/utilities
     COMPONENT headers

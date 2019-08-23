@@ -85,16 +85,3 @@ target_link_libraries(gridDynLoader griddyn_optional)
 if(DL_REQUIRED OR ENABLE_FMI)
     target_link_libraries(gridDynLoader ${CMAKE_DL_LIBS})
 endif(DL_REQUIRED OR ENABLE_FMI)
-
-install(
-    TARGETS gridDynLoader
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES libraryLoader.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-    COMPONENT headers
-)

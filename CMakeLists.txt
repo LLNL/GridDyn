@@ -319,21 +319,6 @@ mark_as_advanced(BUILD_GRIDDYN_SHARED_LIBRARY)
 add_library(griddyn_base INTERFACE)
 add_library(griddyn_optional INTERFACE)
 
-# TODO this should be in compiler_flags
-show_variable(
-    COMPILER_OPTIMIZATION_LEVEL
-    STRING
-    "set the optimization level for the compiler (not implemented yet)"
-    "normal"
-)
-
-set(optimization_levels normal;high;machine;full)
-
-set_property(
-    CACHE COMPILER_OPTIMIZATION_LEVEL
-    PROPERTY STRINGS ${optimization_levels}
-)
-
 # -----------------------------------------------------------------------------
 # General project wide configuration for debug postfix
 # -----------------------------------------------------------------------------
@@ -784,13 +769,6 @@ endif(ENABLE_GRIDDYN_DOXYGEN)
 
 file(GLOB KEY_LIBRARY_FILES ${PROJECT_BINARY_DIR}/libs/bin/*)
 message(STATUS "key files ${KEY_LIBRARY_FILES}")
-
-install(
-    TARGETS griddyn_base griddyn_optional
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
 
 # TODO this should probably be in a different file
 # ------------------------------------------------------------

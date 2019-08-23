@@ -119,13 +119,6 @@ if(YAML_FOUND)
 endif(YAML_FOUND)
 
 install(
-    TARGETS formatInterpreter tinyxml
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
     FILES ${elementReader_headers}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
     COMPONENT headers

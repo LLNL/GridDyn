@@ -80,12 +80,6 @@ set_target_properties(fmiGDLibrary PROPERTIES FOLDER fmi)
 
 target_link_libraries(fmiGDLibrary griddyn formatInterpreter)
 
-install(
-    TARGETS fmiGDLibrary
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
 
 list(APPEND optional_library_key_headers fmi/fmiGDinfo.h)
 list(APPEND optional_library_functions loadFmiLibrary)
@@ -99,9 +93,3 @@ list(
         ${PROJECT_SOURCE_DIR}/test/componentTests/testFMI.cpp
 )
 set(optional_component_test_files ${optional_component_test_files} PARENT_SCOPE)
-
-install(
-    FILES ${fmiImport_headers} ${fmiGD_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
-    COMPONENT headers
-)

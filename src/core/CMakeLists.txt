@@ -49,15 +49,3 @@ target_include_directories(
     PUBLIC # TODO stop leaking the variant include, make this private
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty>)
 
-install(
-    TARGETS coreObjects
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${coreObject_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/core
-    COMPONENT headers
-)

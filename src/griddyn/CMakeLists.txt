@@ -609,16 +609,3 @@ install(
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn
     COMPONENT headers
 )
-
-install(
-    TARGETS griddyn
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
-install(
-    FILES ${header_files}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/griddyn
-    COMPONENT headers
-)
