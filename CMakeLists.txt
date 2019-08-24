@@ -898,7 +898,7 @@ if(ENABLE_GRIDDYN_TESTS)
             Valgrind
     )
 
-    if(BUILD_GRIDDYN_SHARED_LIBRARY)
+    if(ENABLE_SHARED_LIBS)
         add_test(NAME testSharedLibrary COMMAND shared_library_tests)
         set_property(TEST testSharedLibrary PROPERTY LABELS Nightly Release)
 
