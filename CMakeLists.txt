@@ -51,12 +51,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # ------------------------------------------------------------
 # set the module path and include some common macros
 # ------------------------------------------------------------
-set(
-    CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
-)
-
-include(extraMacros)
-include(CMakeDependentOption)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	set(GRIDDYN_ROOT_PROJ ON)
@@ -64,26 +58,39 @@ else()
     set(GRIDDYN_ROOT_PROJ OFF)
 endif()
 
+if (GRIDDYN_ROOT_PROJ)
+set(CMAKE_MODULE_PATH
+     ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
+)
+else()
+	set(ORIGINAL_MODULE_PATH ${CMAKE_MODULE_PATH})
+	set(CMAKE_MODULE_PATH
+    "${PROJECT_SOURCE_DIR}/config/cmake/" ${CMAKE_MODULE_PATH}
+)
+endif()
+
+include(extraMacros)
+include(CMakeDependentOption)
 # ------------------------------------------------------------
 # set the install path to a local directory
 # ------------------------------------------------------------
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if(WIN32)
-        if(MSYS)
+        if(MSYS OR CYGWIN)
             set(
                 CMAKE_INSTALL_PREFIX
                 "/usr/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path"
                 FORCE
             )
-        else(MSYS)
+        else()
             set(
                 CMAKE_INSTALL_PREFIX
                 "C:/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path"
                 FORCE
             )
-        endif(MSYS)
+        endif()
     endif(WIN32)
 endif()
 
@@ -267,6 +274,7 @@ option(
     "Rebuild third party dependencies, even if already installed"
     OFF
 )
+
 
 # -----------------
 # dependent options
@@ -844,7 +852,7 @@ install(
 # ------------------------------------------------------------
 # CTest
 # ------------------------------------------------------------
-if(ENABLE_TESTS)
+if(ENABLE_GRIDDYN_TESTS)
     include(CTest)
     find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 
@@ -1007,3 +1015,8 @@ if(ENABLE_PACKAGE_BUILD)
     # THIS LINE MUST BE LAST
     include(CPack)
 endif(ENABLE_PACKAGE_BUILD)
+
+if (NOT GRIDDYN_ROOT_PROJ)
+	#restore the original module path
+	set(CMAKE_MODULE_PATH ${ORIGINAL_MODULE_PATH})
+endif()
