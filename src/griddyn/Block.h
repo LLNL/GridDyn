@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef GRIDCONTROLBLOCKS_H_
-#define GRIDCONTROLBLOCKS_H_
+#pragma once
 
 #pragma once
 #include "gridSubModel.h"
@@ -243,5 +241,3 @@ class Block : public gridSubModel
 std::unique_ptr<Block> make_block (const std::string &blockstr);
 
 }  // namespace griddyn
-
-#endif  // GRIDCONTROLBLOCKS_H_

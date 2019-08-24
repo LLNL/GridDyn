@@ -65,12 +65,19 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunnonlinsolfixedpoint_static
 	sundials_sunnonlinsolnewton_static
 	sundials_nvecmanyvector_static
-	sundials_nvecopenmp_static
+	
 	sundials_sunlinsolklu_static
 )
 set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
+
+if (TARGET sundials_nvecopenmp_static )
+   set_target_properties ( sundials_nvecopenmp_static PROPERTIES FOLDER sundials)
+
+   target_link_libraries(sundials_all INTERFACE sundials_nvecopenmp_static)
+endif()
+
 if (MSVC)
 target_compile_options(sundials_cvode_static PRIVATE "/sdl-")
 target_compile_options(sundials_cvode_static PRIVATE "/W3")
