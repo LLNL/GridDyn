@@ -64,12 +64,11 @@ set(SUNDIALS_LIBRARIES
 	sundials_sunmatrixsparse_static
 	sundials_sunnonlinsolfixedpoint_static
 	sundials_sunnonlinsolnewton_static
-	sundials_generic_static_obj
 	sundials_nvecmanyvector_static
 	sundials_nvecopenmp_static
 	sundials_sunlinsolklu_static
 )
-set_target_properties ( ${SUNDIALS_LIBRARIES} PROPERTIES FOLDER sundials)
+set_target_properties ( ${SUNDIALS_LIBRARIES} sundials_generic_static_obj PROPERTIES FOLDER sundials)
 
 target_link_libraries(sundials_all INTERFACE ${SUNDIALS_LIBRARIES})
 if (MSVC)
