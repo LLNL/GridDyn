@@ -34,11 +34,11 @@ class pmu : public sensor
 
   protected:
     coreTime transmissionPeriod = 1.0 / 30.0;  //!< the rate of data transmission
-    parameter_t Tv = 0.05;  //!< filter time constant for the voltage measurement
-    parameter_t Ttheta = 0.05;  //!< filter time constant for the angle measurement
-    parameter_t Tcurrent = 0.05;  //!< filter time constant for the current measurement
-    parameter_t Trocof = 0.05;  //!< filter time constant for computing the ROCOF
-    parameter_t sampleRate = 720.0;  //!< [Hz] the actual sample time
+    model_parameter Tv = 0.05;  //!< filter time constant for the voltage measurement
+    model_parameter Ttheta = 0.05;  //!< filter time constant for the angle measurement
+    model_parameter Tcurrent = 0.05;  //!< filter time constant for the current measurement
+    model_parameter Trocof = 0.05;  //!< filter time constant for computing the ROCOF
+    model_parameter sampleRate = 720.0;  //!< [Hz] the actual sample time
   private:
     coreTime nextTransmitTime = maxTime;  //!< the time of the next transmission
     coreTime lastTransmitTime = negTime;  //!< the time of the last transmission
@@ -49,9 +49,9 @@ class pmu : public sensor
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 

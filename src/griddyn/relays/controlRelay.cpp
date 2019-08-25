@@ -108,7 +108,7 @@ void controlRelay::set (const std::string &param, const std::string &val)
     }
 }
 
-void controlRelay::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlRelay::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "autoname")
     {
@@ -416,7 +416,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
     actions[act].field = message->m_field;
     if (!(message->m_units.empty ()))
     {
-        actions[act].unitType = gridUnits::getUnits (message->m_units);
+        actions[act].unitType = units::unit_cast(units::unit_from_string(message->m_units));
     }
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
 	/** this is so the get event triggers last*/
@@ -440,7 +440,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime e
 
     if (!message->m_units.empty ())
     {
-        actions[act].unitType = gridUnits::getUnits (message->m_units);
+        actions[act].unitType = units::unit_cast(units::unit_from_string(message->m_units));
     }
 
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);

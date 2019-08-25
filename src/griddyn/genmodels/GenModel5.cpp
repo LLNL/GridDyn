@@ -253,7 +253,7 @@ static const stringVec genModel5Names{"id", "iq", "delta", "freq", "edp", "eqp",
 stringVec GenModel5::localStateNames () const { return genModel5Names; }
 // set parameters
 void GenModel5::set (const std::string &param, const std::string &val) { return GenModel4::set (param, val); }
-void GenModel5::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModel5::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "tqopp") || (param == "tq0pp"))
     {

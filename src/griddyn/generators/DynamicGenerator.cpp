@@ -47,7 +47,7 @@ namespace griddyn
 {
 static typeFactory<DynamicGenerator> gf ("generator", stringVec{"local_dynamic"});
 
-using namespace gridUnits;
+using namespace units;
 
 // default bus object
 
@@ -651,7 +651,7 @@ void DynamicGenerator::setFlag (const std::string &flag, bool val)
     }
 }
 
-void DynamicGenerator::set (const std::string &param, double val, units_t unitType)
+void DynamicGenerator::set (const std::string &param, double val, unit unitType)
 {
     if (param.length () == 1)
     {
@@ -717,12 +717,12 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
         }
         else
         {
-            m_Vtarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+            m_Vtarget = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
         }
     }
     else if ((param == "rating") || (param == "base") || (param == "mbase"))
     {
-        machineBasePower = unitConversion (val, unitType, MVAR, systemBasePower, localBaseVoltage);
+        machineBasePower = convert (val, unitType, MVAR, systemBasePower, localBaseVoltage);
         opFlags.set (independent_machine_base);
         if (genModel != nullptr)
         {
@@ -732,7 +732,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
 
     else if (param == "basepower")
     {
-        systemBasePower = unitConversion (val, unitType, gridUnits::MW);
+        systemBasePower = convert (val, unitType, units::MW);
         if (opFlags[independent_machine_base])
         {
         }
@@ -747,7 +747,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
     }
     else if ((param == "basefrequency") || (param == "basefreq"))
     {
-        systemBaseFrequency = unitConversionFreq (val, unitType, rps);
+        systemBaseFrequency = convertFreq (val, unitType, rps);
         if (genModel != nullptr)
         {
             genModel->set (param, systemBaseFrequency);
@@ -760,10 +760,10 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
 
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (machineBasePower < 0)
         {
-            machineBasePower = unitConversionPower (Pmax, puMW, MW, systemBasePower);
+            machineBasePower = convert(Pmax, puMW, MW, systemBasePower);
         }
         if (gov != nullptr)
         {
@@ -772,7 +772,7 @@ void DynamicGenerator::set (const std::string &param, double val, units_t unitTy
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Pmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (gov != nullptr)
         {
             gov->set ("pmin", Pmin * systemBasePower / machineBasePower);

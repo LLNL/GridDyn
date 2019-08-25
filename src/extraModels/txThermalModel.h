@@ -54,10 +54,10 @@ public:
 	virtual void setFlag(const std::string &flag, bool val=true) override;
 	virtual void set(const std::string &param, const std::string &val) override;
 
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 	using sensor::add;
 	virtual void add(coreObject *obj) override final;
-	virtual double get(const std::string & param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+	virtual double get(const std::string & param, units::unit unitType = units::defunit) const override;
 
 	virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 	virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata & desiredOutput, IOdata &fieldSet) override;

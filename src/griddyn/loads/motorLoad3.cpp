@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace loads
 {
-using namespace gridUnits;
+using namespace units;
 
 // setup the load object factories
 
@@ -188,7 +188,7 @@ void motorLoad3::set (const std::string &param, const std::string &val)
     }
 }
 
-void motorLoad3::set (const std::string &param, double val, gridUnits::units_t unitType)
+void motorLoad3::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "rs")
     {

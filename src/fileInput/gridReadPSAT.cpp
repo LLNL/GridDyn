@@ -41,7 +41,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 void loadPSATBusArray (coreObject *parentObject,
                        double basepower,

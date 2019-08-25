@@ -21,7 +21,7 @@ namespace griddyn
 {
 namespace governors
 {
-using namespace gridUnits;
+using namespace units;
 
 GovernorReheat::GovernorReheat (const std::string &objName) : Governor (objName)
 {
@@ -233,7 +233,7 @@ index_t GovernorReheat::findIndex (const std::string &field, const solverMode & 
 // set parameters
 void GovernorReheat::set (const std::string &param, const std::string &val) { Governor::set (param, val); }
 
-void GovernorReheat::set (const std::string &param, double val, units_t unitType)
+void GovernorReheat::set (const std::string &param, double val, unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     if ((param == "ts") || (param == "t1"))

@@ -29,7 +29,7 @@ namespace links
 static const double k3sq2 = (3.0 * sqrt (2.0) / kPI);
 static const double k3sq2sq = k3sq2 * k3sq2;
 
-using namespace gridUnits;
+using namespace units;
 const std::string rect = "rectifier_$";
 const std::string inv = "inverter_$";
 const std::string bidir = "acdcConveter_$";
@@ -195,7 +195,7 @@ void acdcConverter::set (const std::string &param, const std::string &val)
     }
 }
 
-void acdcConverter::set (const std::string &param, double val, units_t unitType)
+void acdcConverter::set (const std::string &param, double val, unit unitType)
 {
     if (param == "r")
     {
@@ -207,7 +207,7 @@ void acdcConverter::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "p") || (param == "pset"))
     {
-        Pset = unitConversion (val, unitType, puMW, systemBasePower);
+        Pset = convert (val, unitType, puMW, systemBasePower);
         Pset = (Pset < 0) ? dirMult * Pset : Pset;
         opFlags.set (fixed_target_power);
         control_mode = control_mode_t::power;
@@ -792,12 +792,12 @@ void acdcConverter::updateLocalCache ()
 int acdcConverter::fixRealPower (double power,
                                  id_type_t /*measureTerminal*/,
                                  id_type_t fixedTerminal,
-                                 gridUnits::units_t unitType)
+                                 units::unit unitType)
 {
     if (fixedTerminal != 1)
     {
         Pset = (power < 0) ? dirMult * power : power;
-        Pset = unitConversion (Pset, unitType, puMW, systemBasePower);
+        Pset = convert (Pset, unitType, puMW, systemBasePower);
         opFlags.set (fixed_target_power);
         Idc = Pset / B2->getVoltage ();
         updateLocalCache ();
@@ -810,7 +810,7 @@ int acdcConverter::fixPower (double /*power*/,
                              double /*qpower*/,
                              id_type_t /*measureTerminal*/,
                              id_type_t /*fixedTerminal*/,
-                             gridUnits::units_t /*unitType*/)
+                             units::unit /*unitType*/)
 {
     return 0;
 }

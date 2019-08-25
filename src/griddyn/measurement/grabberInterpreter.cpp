@@ -23,7 +23,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities;
 
 void autoGrabbers (coreObject *obj, std::vector<std::unique_ptr<gridGrabber>> &v);

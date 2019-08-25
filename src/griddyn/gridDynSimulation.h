@@ -281,9 +281,9 @@ class gridDynSimulation : public gridSimulation
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual std::string getString (const std::string &param) const override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 

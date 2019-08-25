@@ -40,7 +40,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using gmlc::utilities::convertToLowerCase;
 
 void savePowerFlow (gridDynSimulation *gds, const std::string &fileName)
@@ -108,7 +108,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
         {
             fprintf (fp, "%d, %d,\"%s\", %7.6f, %+8.4f, %7.5f, %7.5f, %7.5f, %7.5f, %7.5f, %7.5f\n",
                      Area->getUserID (), bus->getUserID (), bus->getName ().c_str (), bus->getVoltage (),
-                     unitConversionAngle (bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
+                     convert(bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
                      bus->getGenerationReactive () * basePower, bus->getLoadReal () * basePower,
                      bus->getLoadReactive () * basePower, bus->getLinkReal () * basePower,
                      bus->getLinkReactive () * basePower);
@@ -126,7 +126,7 @@ void savePowerFlowCSV (gridDynSimulation *gds, const std::string &fileName)
     {
         fprintf (fp, "%d, %d, \"%s\", %7.6f, %+8.4f, %7.5f, %7.5f, %7.5f, %7.5f, %7.5f, %7.5f\n", 1,
                  bus->locIndex + 1, bus->getName ().c_str (), bus->getVoltage (),
-                 unitConversionAngle (bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
+                 convert(bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
                  bus->getGenerationReactive () * basePower, bus->getLoadReal () * basePower,
                  bus->getLoadReactive () * basePower, bus->getLinkReal () * basePower,
                  bus->getLinkReactive () * basePower);
@@ -166,7 +166,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
             fprintf (fp,
                      "%d\t\t %d\t\t\"%-20s\"\t\t %7.6f\t %+8.4f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\n",
                      Area->getUserID (), bus->getUserID (), bus->getName ().c_str (), bus->getVoltage (),
-                     unitConversionAngle (bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
+                     convert(bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
                      bus->getGenerationReactive () * basePower, bus->getLoadReal () * basePower,
                      bus->getLoadReactive () * basePower, bus->getLinkReal () * basePower,
                      bus->getLinkReactive () * basePower);
@@ -184,7 +184,7 @@ void savePowerFlowTXT (gridDynSimulation *gds, const std::string &fileName)
     {
         fprintf (fp, "%d\t\t %d\t\t \"%-20s\"\t %7.6f\t %8.4f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\t %7.5f\n",
                  1, bus->getUserID (), bus->getName ().c_str (), bus->getVoltage (),
-                 unitConversionAngle (bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
+                 convert(bus->getAngle (), rad, deg), bus->getGenerationReal () * basePower,
                  bus->getGenerationReactive () * basePower, bus->getLoadReal () * basePower,
                  bus->getLoadReactive () * basePower, bus->getLinkReal () * basePower,
                  bus->getLinkReactive () * basePower);
@@ -288,10 +288,10 @@ void cdfBusPrint (FILE *fp, int areaNum, gridBus *bus)
     fprintf (fp, "%4u %-12s %2u%3u %2d %6.4f%7.2f", bus->getUserID (), bus->getName ().c_str (), areaNum,
              bus->getInt ("zone"), type, bus->getVoltage (), bus->getAngle () * 180.0 / kPI);
 
-    double P = bus->get ("p", gridUnits::MW);
-    double Q = bus->get ("q", gridUnits::MW);
-    double genP = -bus->get ("genreal", gridUnits::MW);
-    double genQ = -bus->get ("genreactive", gridUnits::MW);
+    double P = bus->get ("p", units::MW);
+    double Q = bus->get ("q", units::MW);
+    double genP = -bus->get ("genreal", units::MW);
+    double genQ = -bus->get ("genreactive", units::MW);
 
     fprintf (fp, "%9.2f%9.2f%9.2f%8.2f", P, Q, genP, genQ);
     double vmax = (std::min) (bus->get ("vmax"), deflim1);
@@ -319,8 +319,8 @@ void cdfBusPrint (FILE *fp, int areaNum, gridBus *bus)
         fprintf (fp, " %7.1f %6.3f%8.4f%8.4f", bus->get ("basevoltage"), bus->get ("vtarget"), vmax, vmin);
     }
 
-    double yp = bus->get ("yp", gridUnits::MW);
-    double yq = -bus->get ("yq", gridUnits::MW);
+    double yp = bus->get ("yp", units::MW);
+    double yq = -bus->get ("yq", units::MW);
     fprintf (fp, "%8.4f%8.4f %4d\n", yp, yq, 0);
 }
 
@@ -390,16 +390,16 @@ void cdfLinkPrint (FILE *fp, int areaNum, acLine *lnk)
             break;
         case 2:
             type = 3;
-            maxVal = alnk->get ("qmax", gridUnits::MW);
-            minVal = alnk->get ("qmin", gridUnits::MW);
+            maxVal = alnk->get ("qmax", units::MW);
+            minVal = alnk->get ("qmin", units::MW);
             minAdj = alnk->get ("mintap");
             maxAdj = alnk->get ("maxtap");
             ssize = alnk->get ("stepsize");
             break;
         case 3:
             type = 4;
-            maxVal = alnk->get ("pmax", gridUnits::MW);
-            minVal = alnk->get ("pmin", gridUnits::MW);
+            maxVal = alnk->get ("pmax", units::MW);
+            minVal = alnk->get ("pmin", units::MW);
             minAdj = alnk->get ("mintapangle");
             maxAdj = alnk->get ("maxtapangle");
             ssize = alnk->get ("stepsize");
@@ -421,11 +421,11 @@ void cdfLinkPrint (FILE *fp, int areaNum, acLine *lnk)
 
     fprintf (fp, "%4d %4d %2d %2d 1 %1d", lnk->getBus (1)->getUserID (), lnk->getBus (2)->getUserID (),
              lnk->getInt ("zone"), areaNum, type);
-    fprintf (fp, "%10.6f%10.6f%11.5f", lnk->get ("r"), lnk->get ("x"), lnk->get ("b", gridUnits::MW));
+    fprintf (fp, "%10.6f%10.6f%11.5f", lnk->get ("r"), lnk->get ("x"), lnk->get ("b", units::MW));
 
-    double rat1 = lnk->get ("ratinga", gridUnits::MW);
-    double rat2 = lnk->get ("ratingb", gridUnits::MW);
-    double rat3 = lnk->get ("erating", gridUnits::MW);
+    double rat1 = lnk->get ("ratinga", units::MW);
+    double rat2 = lnk->get ("ratingb", units::MW);
+    double rat3 = lnk->get ("erating", units::MW);
     if ((rat1 < 0) || (rat1 > deflim1))
     {
         rat1 = 0.0;

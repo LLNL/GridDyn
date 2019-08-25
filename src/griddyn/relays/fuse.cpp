@@ -31,7 +31,7 @@ namespace griddyn
 {
 namespace relays
 {
-using namespace gridUnits;
+using namespace units;
 fuse::fuse(const std::string &objName) : Relay(objName), useI2T(extra_bool) { opFlags.set(continuous_flag); }
 
 coreObject *fuse::clone(coreObject *obj) const
@@ -72,15 +72,15 @@ void fuse::set(const std::string &param, const std::string &val)
     }
 }
 
-void fuse::set(const std::string &param, double val, gridUnits::units_t unitType)
+void fuse::set(const std::string &param, double val, units::unit unitType)
 {
     if (param == "limit")
     {
-        limit = unitConversion(val, unitType, puA, systemBasePower, Vbase);
+        limit = convert(val, unitType, puA, systemBasePower, Vbase);
     }
     else if (param == "i2t")
     {
-        mp_I2T = unitConversion(val, unitType, puA, systemBasePower, Vbase);
+        mp_I2T = convert(val, unitType, puA, systemBasePower, Vbase);
     }
     else if (param == "terminal")
     {

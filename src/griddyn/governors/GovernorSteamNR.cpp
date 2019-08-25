@@ -143,7 +143,7 @@ index_t GovernorSteamNR::findIndex (const std::string &field, const solverMode &
 // set parameters
 void GovernorSteamNR::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 
-void GovernorSteamNR::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GovernorSteamNR::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
 

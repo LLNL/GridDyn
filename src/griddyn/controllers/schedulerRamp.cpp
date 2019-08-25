@@ -224,12 +224,12 @@ void schedulerRamp::set (const std::string &param, const std::string &val)
 
 void schedulerRamp::dispatcherLink () {}
 
-void schedulerRamp::set (const std::string &param, double val, gridUnits::units_t unitType)
+void schedulerRamp::set (const std::string &param, double val, units::unit unitType)
 {
     double temp;
     if (param == "ramp")
     {
-        rampUp = gridUnits::unitConversion (val, unitType, gridUnits::puMWps, m_Base);
+        rampUp = units::convert (val, unitType, gridUnits::puMWps, m_Base);
         rampDown = rampUp;
     }
     else if (param == "rampup")
@@ -582,7 +582,7 @@ void schedulerRamp::insertTarget (tsched ts)
     }
 }
 
-double schedulerRamp::get (const std::string &param, gridUnits::units_t unitType) const
+double schedulerRamp::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param == "reserve")

@@ -35,8 +35,8 @@ public:
 protected:
 	std::function<double(double)> fptr;        //!< function object for single argument functions
 	std::function<double(double, double)> fptr2;        //!< function object for multiple argument functions
-	parameter_t gain = 1.0;         //!< extra gain factor
-	parameter_t arg2 = 0.0;         //!< second argument for 2 argument functions
+	model_parameter gain = 1.0;         //!< extra gain factor
+	model_parameter arg2 = 0.0;         //!< second argument for 2 argument functions
 public:
 	/** @brief default constructor*/
 	functionBlock();
@@ -49,7 +49,7 @@ public:
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 	//virtual index_t findIndex(const std::string &field, const solverMode &sMode) const;
 
 	//virtual void blockDerivative(double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;

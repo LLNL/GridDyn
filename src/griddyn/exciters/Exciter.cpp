@@ -268,7 +268,7 @@ static const stringVec exciterFields{"ef"};
 stringVec Exciter::localStateNames () const { return exciterFields; }
 void Exciter::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
 // set parameters
-void Exciter::set (const std::string &param, double val, gridUnits::units_t unitType)
+void Exciter::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "vref")
     {

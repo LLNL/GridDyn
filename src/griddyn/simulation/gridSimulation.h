@@ -185,10 +185,10 @@ class gridSimulation : public Area
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual std::string getString (const std::string &param) const override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     void alert (coreObject *object, int code) override;
     virtual void log (coreObject *object, print_level level, const std::string &message) override;

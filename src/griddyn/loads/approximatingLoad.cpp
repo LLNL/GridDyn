@@ -604,7 +604,7 @@ void approximatingLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void approximatingLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void approximatingLoad::set (const std::string &param, double val, units::unit unitType)
 {
     // TODO:: PT convert some to a setFlags function
     if ((param == "spread") || (param == "band"))

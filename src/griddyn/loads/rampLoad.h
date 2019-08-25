@@ -40,7 +40,7 @@ class rampLoad : public zipLoad
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
     /** set the ramps to 0*/

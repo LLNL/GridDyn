@@ -26,7 +26,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities;
 
 static typeFactory<subsystem> gf ("link", std::vector<std::string>{"subsystem", "simple"});
@@ -95,7 +95,7 @@ coreObject *subsystem::getSubObject (const std::string &typeName, index_t num) c
     return subarea.getSubObject (typeName, num);
 }
 
-void subsystem::setAll (const std::string &type, const std::string &param, double val, gridUnits::units_t unitType)
+void subsystem::setAll (const std::string &type, const std::string &param, double val, units::unit unitType)
 {
     subarea.setAll (type, param, val, unitType);
 }
@@ -286,7 +286,7 @@ void subsystem::set (const std::string &param, const std::string &val)
     }
 }
 
-void subsystem::set (const std::string &param, double val, units_t unitType)
+void subsystem::set (const std::string &param, double val, unit unitType)
 {
     if (param == "terminals")
     {
@@ -305,7 +305,7 @@ void subsystem::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double subsystem::get (const std::string &param, units_t unitType) const
+double subsystem::get (const std::string &param, unit unitType) const
 {
     double val = subarea.get (param, unitType);
     if (val == kNullVal)
@@ -392,7 +392,7 @@ bool subsystem::isConnected () const
 int subsystem::fixRealPower (double power,
                              id_type_t measureTerminal,
                              id_type_t /*fixedterminal*/,
-                             gridUnits::units_t unitType)
+                             units::unit unitType)
 {
     if (measureTerminal <= m_terminals)
     {
@@ -405,7 +405,7 @@ int subsystem::fixPower (double rPower,
                          double qPower,
                          id_type_t measureTerminal,
                          id_type_t /*fixedterminal*/,
-                         gridUnits::units_t unitType)
+                         units::unit unitType)
 {
     if (measureTerminal <= m_terminals)
     {

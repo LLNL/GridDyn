@@ -41,10 +41,10 @@ class gridComponent : public coreObject
     offsetTable offsets;  //!< a table of offsets for the different solver modes
     count_t m_inputSize = 0;  //!< the required size of the inputs input
     count_t m_outputSize = 0;  //!< the number of outputs the subModel produces
-    parameter_t systemBaseFrequency =
+    model_parameter systemBaseFrequency =
       kWS;  //!<[radians per second] the base frequency of the system default to 60Hz
-    parameter_t systemBasePower = 100;  //!<[MVA] base power for all PU computations
-    parameter_t localBaseVoltage = kNullVal;  //!< [kV] base voltage for object
+    model_parameter systemBasePower = 100;  //!<[MVA] base power for all PU computations
+    model_parameter localBaseVoltage = kNullVal;  //!< [kV] base voltage for object
 
     std::vector<double> m_state;  //!< storage location for internal state
     std::vector<double> m_dstate_dt;  //!< storage location for internal state differential
@@ -138,10 +138,10 @@ see gridComponent::dynInitializeA for more details
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     /** check if the parameter being set is for a subobject, determine which sub object and perform the set
      * operation*/
-    bool subObjectSet (const std::string &param, double val, gridUnits::units_t unitType);
+    bool subObjectSet (const std::string &param, double val, units::unit unitType);
     /** check if the parameter being set is for a subobject, determine which sub object and perform the set
      * operation*/
     bool subObjectSet (const std::string &param, const std::string &val);
@@ -157,14 +157,14 @@ see gridComponent::dynInitializeA for more details
     */
     void parentSetFlag (index_t flagID, bool val, coreObject *checkParent);
     virtual bool getFlag (const std::string &flag) const override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     /** check if the parameter being get is for a subobject, determine which sub object and perform the setFlag
     operation
     @param[in] param the subobject string to query the value of
     @parma[in] unitType the type of units to convert the output to
     @return a value corresponding to the request or a null value
     */
-    double subObjectGet (const std::string &param, gridUnits::units_t unitType) const;
+    double subObjectGet (const std::string &param, units::unit unitType) const;
     /** add a grid object to the subObject container
     @param[in] comp the component to add
     */
@@ -501,7 +501,7 @@ see gridComponent::dynInitializeA for more details
     virtual void setAll (const std::string &type,
                          const std::string &param,
                          double val,
-                         gridUnits::units_t unitType = gridUnits::defUnit);
+                         units::unit unitType = units::defunit);
     /** @brief get the local state names
     used within a couple functions to automate the population of the state names and finding of the indices  states
     should be algebraic states first,  then differential states
@@ -517,18 +517,18 @@ see gridComponent::dynInitializeA for more details
     /** @brief get the unit type for a particular input
     @param[in] inputNum the index of the input to get the units for
     @return a unit value corresponding to the particular input*/
-    virtual gridUnits::units_t inputUnits (index_t inputNum) const;
+    virtual units::unit inputUnits (index_t inputNum) const;
 
     /** @brief get the unit type for a particular output
    @param[in] outputNum the index of the output to get the units for
     @return a unit value corresponding to the particular output*/
-    virtual gridUnits::units_t outputUnits (index_t outputNum) const;
+    virtual units::unit outputUnits (index_t outputNum) const;
 
     /** get the systemBasePower*/
-    parameter_t basePower () const { return systemBasePower; }
+    model_parameter basePower () const { return systemBasePower; }
 
     /** get the localBaseVoltage*/
-    parameter_t baseVoltage () const { return localBaseVoltage; }
+    model_parameter baseVoltage () const { return localBaseVoltage; }
     /** @brief get a vector of output Names
     @details the return data is a vector of vectors of string the first element of each vector is the typical
     output Name the others are alternatives

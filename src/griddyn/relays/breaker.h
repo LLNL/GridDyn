@@ -36,8 +36,8 @@ class breaker : public Relay
     coreTime minClearingTime = timeZero;  //!<[s] minimum clearing time for from bus breaker
     coreTime recloseTime1 = timeOneSecond;  //!<[s] first reclose time
     coreTime recloseTime2 = 5.0;  //!<[s] second reclose time
-    parameter_t recloserTap = 0.0;  //!< From side tap multiplier
-    parameter_t limit = 1.0;  //!<[puA] maximum current in puA
+    model_parameter recloserTap = 0.0;  //!< From side tap multiplier
+    model_parameter limit = 1.0;  //!<[puA] maximum current in puA
     coreTime lastRecloseTime = negTime;  //!<[s] last reclose time
     coreTime recloserResetTime =
       coreTime (60.0);  //!<[s] time the breaker has to be on before the recloser count resets
@@ -60,7 +60,7 @@ class breaker : public Relay
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags) override;
     virtual void updateA (coreTime time) override;

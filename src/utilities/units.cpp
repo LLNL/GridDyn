@@ -292,7 +292,7 @@ inline bool conversionNotNeeded (const units_t in, const units_t out)
 }
 
 double
-unitConversionPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
+unitConversion(double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -501,7 +501,7 @@ unitConversionPower (double val, const units_t in, const units_t out, double bas
     return ret;
 }
 
-double unitConversionTemperature (double val, const units_t in, const units_t out)
+double convertTemperature (double val, const units_t in, const units_t out)
 {
     if (conversionNotNeeded (in, out))
     {
@@ -546,7 +546,7 @@ double unitConversionTemperature (double val, const units_t in, const units_t ou
     return ret;
 }
 
-double unitConversionTime (double val, const units_t in, const units_t out)
+double convertTime(double val, const units_t in, const units_t out)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -658,7 +658,7 @@ double unitConversionTime (double val, const units_t in, const units_t out)
     return ret;
 }
 
-double unitConversionAngle (double val, const units_t in, const units_t out)
+double convertAngle (double val, const units_t in, const units_t out)
 {
     // check if no conversion is needed
 
@@ -684,7 +684,7 @@ double unitConversionAngle (double val, const units_t in, const units_t out)
     }
     return ret;
 }
-double unitConversionDistance (double val, const units_t in, const units_t out)
+double convertDistance (double val, const units_t in, const units_t out)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -735,7 +735,7 @@ double unitConversionDistance (double val, const units_t in, const units_t out)
     return ret;
 }
 
-double unitConversionFreq (double val, const units_t in, const units_t out, double baseFreq)
+double convertFreq (double val, const units_t in, const units_t out, double baseFreq)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -817,7 +817,7 @@ double unitConversionFreq (double val, const units_t in, const units_t out, doub
     return ret;
 }
 
-double unitConversionCost (double val, const units_t in, const units_t out, double basePower)
+double convertCost (double val, const units_t in, const units_t out, double basePower)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -881,7 +881,7 @@ double unitConversionCost (double val, const units_t in, const units_t out, doub
     return ret;
 }
 
-double unitConversion (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
+double convertPower (double val, const units_t in, const units_t out, double basePower, double localBaseVoltage)
 {
     // check if no conversion is needed
     if (conversionNotNeeded (in, out))
@@ -896,34 +896,34 @@ double unitConversion (double val, const units_t in, const units_t out, double b
     switch (utype)
     {
     case electrical:
-        ret = unitConversionPower (val, in, out, basePower, localBaseVoltage);
+        ret = convertPower(val, in, out, basePower, localBaseVoltage);
         break;
     case rotation:
         if (basePower == 50.0)
         {
-            ret = unitConversionFreq (val, in, out, 50.0);
+            ret = convertFreq (val, in, out, 50.0);
         }
         else
         {
-            ret = unitConversionFreq (val, in, out, 60.0);
+            ret = convertFreq (val, in, out, 60.0);
         }
         break;
     // distance Units
     case distance:
-        ret = unitConversionDistance (val, in, out);
+        ret = convertDistance (val, in, out);
         break;
     // angle units
     case angle:
-        ret = unitConversionAngle (val, in, out);
+        ret = convertAngle (val, in, out);
         break;
     case time:
-        ret = unitConversionTime (val, in, out);
+        ret = convertTime(val, in, out);
         break;
     case price:
-        ret = unitConversionCost (val, in, out, basePower);
+        ret = convertCost (val, in, out, basePower);
         break;
     case temperature:
-        ret = unitConversionTemperature (val, in, out);
+        ret = convertTemperature (val, in, out);
         break;
     default:
         break;

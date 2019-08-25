@@ -24,7 +24,7 @@ class Source : public gridSubModel
   protected:
     double m_tempOut = 0;  //!< temporary output corresponding to desired time
     coreTime lastTime = timeZero;  //!< storage for the previously queried time
-    gridUnits::units_t outputUnits_ = gridUnits::defUnit;  //!< specify the units of the output
+    units::unit outputUnits_ = units::defunit;  //!< specify the units of the output
   public:
     /** constructor
     @param[in] objname the name of the object
@@ -35,7 +35,7 @@ class Source : public gridSubModel
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void timestep (coreTime time, const IOdata &inputs, const solverMode &sMode) override;
 
@@ -46,7 +46,7 @@ class Source : public gridSubModel
     virtual double getOutput (index_t outputNum = 0) const override;
     virtual index_t getOutputLoc (const solverMode &sMode, index_t num = 0) const override;
 
-    virtual gridUnits::units_t outputUnits (index_t outputNum) const override;
+    virtual units::unit outputUnits (index_t outputNum) const override;
 
     virtual count_t outputDependencyCount (index_t num, const solverMode &sMode) const override;
     virtual void

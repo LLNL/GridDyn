@@ -149,37 +149,37 @@ void txThermalModel::set(const std::string &param, const std::string &val)
 	}
 }
 
-using namespace gridUnits;
+using namespace units;
 
-void txThermalModel::set(const std::string &param, double val, units_t unitType)
+void txThermalModel::set(const std::string &param, double val, unit unitType)
 {
 	if ((param == "ambient") || (param == "ambienttemp"))
 	{
-		ambientTemp = unitConversionTemperature(val, unitType, C);
+		ambientTemp = convertTemperature(val, unitType, C);
 	}
 	else if ((param == "dtempdt") || (param == "temp_rate_of_change"))
 	{
-		dTempdt = unitConversionTemperature(val, unitType, C);
+		dTempdt = convertTemperature(val, unitType, C);
 	}
 	else if ((param == "dths") || (param == "rated_hot_spot_rise") || (param == "dthsr"))
 	{
-		DThs = unitConversionTemperature(val, unitType, C);
+		DThs = convertTemperature(val, unitType, C);
 	}
 	else if ((param == "dttor") || (param == "rated_top_oil_rise") || (param == "dtto"))
 	{
-		DTtor = unitConversionTemperature(val, unitType, C);
+		DTtor = convertTemperature(val, unitType, C);
 	}
 	else if ((param == "ttor") || (param == "oil_time_constant"))
 	{
-		Ttor = unitConversionTime(val, unitType, sec);
+		Ttor = convertTime(val, unitType, sec);
 	}
 	else if ((param == "tgr") || (param == "winding_time_constant"))
 	{
-		Tgr = unitConversionTime(val, unitType, sec);
+		Tgr = convertTime(val, unitType, sec);
 	}
 	else if ((param == "alarmtemp") || (param == "alarmtemp1"))
 	{
-		alarmTemp1 = unitConversionTemperature(val, unitType, C);
+		alarmTemp1 = convertTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(0)->setConditionRHS(alarmTemp1);
@@ -188,7 +188,7 @@ void txThermalModel::set(const std::string &param, double val, units_t unitType)
 	}
 	else if (param == "alarmtemp2")
 	{
-		alarmTemp2 = unitConversionTemperature(val, unitType, C);
+		alarmTemp2 = convertTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(1)->setConditionRHS(alarmTemp1);
@@ -197,7 +197,7 @@ void txThermalModel::set(const std::string &param, double val, units_t unitType)
 	}
 	else if (param == "cutouttemp")
 	{
-		cutoutTemp = unitConversionTemperature(val, unitType, C);
+		cutoutTemp = convertTemperature(val, unitType, C);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(2)->setConditionRHS(alarmTemp1);
@@ -206,7 +206,7 @@ void txThermalModel::set(const std::string &param, double val, units_t unitType)
 	}
 	else if (param == "alarmdelay")
 	{
-		alarmDelay = unitConversionTime(val, unitType, sec);
+		alarmDelay = convertTime(val, unitType, sec);
 		if (opFlags[dyn_initialized])
 		{
 			setActionTrigger(0, 0, alarmDelay);
@@ -234,7 +234,7 @@ void txThermalModel::set(const std::string &param, double val, units_t unitType)
 	}
 }
 
-double txThermalModel::get(const std::string & param, gridUnits::units_t unitType) const
+double txThermalModel::get(const std::string & param, units::unit unitType) const
 {
 
 	return sensor::get(param, unitType);

@@ -827,7 +827,7 @@ void Block::setFlag (const std::string &flag, bool val)
 
 // set parameters
 void Block::set (const std::string &param, const std::string &val) { gridSubModel::set (param, val); }
-void Block::set (const std::string &param, double val, gridUnits::units_t unitType)
+void Block::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
 
@@ -890,7 +890,7 @@ void Block::set (const std::string &param, double val, gridUnits::units_t unitTy
     }
 }
 
-double Block::get (const std::string &param, gridUnits::units_t unitType) const
+double Block::get (const std::string &param, units::unit unitType) const
 {
     if (param == "maxstepsize")
     {

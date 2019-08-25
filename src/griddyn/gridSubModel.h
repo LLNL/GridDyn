@@ -9,9 +9,8 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+#pragma once
 
-#ifndef GRIDSUBMODEL_H_
-#define GRIDSUBMODEL_H_
 #include "gridComponent.h"
 
 namespace griddyn
@@ -41,9 +40,8 @@ class gridSubModel : public gridComponent
     virtual void
     dynInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override final;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 };
 
 }  // namespace griddyn
 
-#endif

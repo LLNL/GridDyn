@@ -24,7 +24,7 @@
 
 // test case for coreObject object
 
-using namespace gridUnits;
+using namespace units;
 using namespace griddyn;
 
 BOOST_AUTO_TEST_SUITE (core_tests, * boost::unit_test::label("quick"))
@@ -143,25 +143,25 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
     double basepower = 100;
     //  double basevoltage = 10;
     // power conversions
-    val1 = unitConversion (100.0, MW, kW);
+    val1 = convert (100.0, MW, kW);
     BOOST_CHECK_CLOSE (val1, 100000, 0.0001);
-    val1 = unitConversion (100.0, MW, Watt);
+    val1 = convert (100.0, MW, Watt);
     BOOST_CHECK_CLOSE (val1, 100000000, 0.0001);
-    val1 = unitConversion (1000000.0, Watt, MW);
+    val1 = convert (1000000.0, Watt, MW);
     BOOST_CHECK_CLOSE (val1, 1, 0.0001);
-    val1 = unitConversion (100000.0, kW, MW);
+    val1 = convert (100000.0, kW, MW);
     BOOST_CHECK_CLOSE (val1, 100, 0.0001);
-    val1 = unitConversion (100000.0, kW, puMW, basepower);
+    val1 = convert (100000.0, kW, puMW, basepower);
     BOOST_CHECK_CLOSE (val1, 1, 0.0001);
     // angle conversions
-    val1 = unitConversion (10, deg, rad);
+    val1 = convert (10, deg, rad);
     BOOST_CHECK_CLOSE (val1, 0.17453292, 0.0001);
-    val1 = unitConversion (0.17453292, rad, deg);
+    val1 = convert (0.17453292, rad, deg);
     BOOST_CHECK_CLOSE (val1, 10, 0.0001);
     // pu conversions
-    val1 = unitConversion (1.0, puOhm, Ohm, 0.1, 0.6);
+    val1 = convert (1.0, puOhm, Ohm, 0.1, 0.6);
     BOOST_CHECK_CLOSE (val1, 3.600, 0.001);
-    val1 = unitConversion (1.0, puA, Amp, 0.1, 0.6);
+    val1 = convert (1.0, puA, Amp, 0.1, 0.6);
     BOOST_CHECK_CLOSE (val1, 166.6666666, 0.01);
 }
 

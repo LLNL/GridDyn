@@ -123,7 +123,7 @@ void stateGrabber::updateField (const std::string &fld)
     }
 }
 
-using namespace gridUnits;
+using namespace units;
 
 /** map of all the alternate strings that can be used*/
 static const std::map<std::string, std::string> stringTranslate{ {"v", "voltage"},

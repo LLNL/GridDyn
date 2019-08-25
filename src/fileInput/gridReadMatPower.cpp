@@ -34,7 +34,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities;
 
 using mArray = std::vector<std::vector<double>>;
@@ -170,7 +170,7 @@ void loadBusArray (coreObject *parentObject,
         }
         // buses[kk][6] is the area which should be used at some point
 
-        bus->setVoltageAngle (busData[7], unitConversionAngle (busData[8], deg, rad));
+        bus->setVoltageAngle (busData[7], convertAngle (busData[8], deg, rad));
         bus->set ("vmax", busData[11]);
         bus->set ("vmin", busData[12]);
     }

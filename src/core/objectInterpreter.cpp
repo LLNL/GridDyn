@@ -38,7 +38,7 @@ void objInfo::LoadInfo (const std::string &Istring, const coreObject *obj)
     if (rlc != std::string::npos)
     {
         size_t rlc2 = m_field.find_last_of (')');
-        m_unitType = gridUnits::getUnits (m_field.substr (rlc + 1, rlc2 - rlc - 1));
+        m_unitType = units::unit_cast(units::unit_from_string(m_field.substr (rlc + 1, rlc2 - rlc - 1)));
         m_field = convertToLowerCase (m_field.substr (0, rlc));
     }
 

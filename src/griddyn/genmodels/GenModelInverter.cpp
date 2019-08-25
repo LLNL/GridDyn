@@ -353,7 +353,7 @@ void GenModelInverter::set (const std::string &param, const std::string &val)
     return gridSubModel::set (param, val);
 }
 
-void GenModelInverter::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModelInverter::set (const std::string &param, double val, units::unit unitType)
 {
     if (param.length () == 1)
     {
@@ -381,11 +381,11 @@ void GenModelInverter::set (const std::string &param, double val, gridUnits::uni
     }
     else if (param == "maxangle")
     {
-        maxAngle = gridUnits::unitConversionAngle (val, unitType, gridUnits::rad);
+        maxAngle = units::convert(val, unitType, units::rad);
     }
     else if (param == "minangle")
     {
-        minAngle = gridUnits::unitConversionAngle (val, unitType, gridUnits::rad);
+        minAngle = units::convert(val, unitType, units::rad);
     }
     else if (param == "rs")
     {

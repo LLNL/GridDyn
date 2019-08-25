@@ -98,13 +98,6 @@ target_link_libraries(networking PUBLIC jsoncpp_lib)
 
 set_target_properties(networking PROPERTIES FOLDER libraries)
 
-install(
-    TARGETS networking
-    EXPORT griddyn-targets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT libraries
-)
-
 if(ENABLE_ZMQ OR ZMQ_NEEDED)
     if(ZMQ_USE_STATIC_LIBRARY)
         set(ZMQ_DEPENDENCY libzmq-static)
@@ -132,12 +125,6 @@ endif()
 if(ENABLE_TCP)
     source_group("tcp" FILES ${tcpInterface_sources} ${tcpInterface_headers})
 endif()
-
-install(
-    FILES ${networking_headers}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/griddyn/networking
-    COMPONENT headers
-)
 
 list(APPEND optional_library_key_headers networking/networkingInterface.h)
 list(APPEND optional_library_functions loadNetworkingLibrary)

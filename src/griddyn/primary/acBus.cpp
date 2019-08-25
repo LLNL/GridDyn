@@ -37,7 +37,7 @@ namespace griddyn
 // factory is for the cloning function
 static childTypeFactory<acBus, gridBus> gbfac ("bus", stringVec{"psystem"});
 
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities;
 
 acBus::acBus (const std::string &objName) : gridBus (objName), busController (this)
@@ -1299,12 +1299,12 @@ void acBus::set (const std::string &param, const std::string &val)
     }
 }
 
-void acBus::set (const std::string &param, double val, units_t unitType)
+void acBus::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltage") || (param == "vol") || (param == "v") || (param == "vmag") || (param == "v0") ||
         (param == "voltage0"))
     {
-        voltage = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        voltage = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
         if ((type == busType::PV) || (type == busType::SLK))
         {
             vTarget = voltage;
@@ -1312,7 +1312,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "angle") || (param == "ang") || (param == "a") || (param == "theta") || (param == "angle0"))
     {
-        angle = unitConversion (val, unitType, rad);
+        angle = convert (val, unitType, rad);
         if ((type == busType::SLK) || (type == busType::afix))
         {
             aTarget = angle;
@@ -1320,7 +1320,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "basefrequency") || (param == "basefreq"))
     {
-        systemBaseFrequency = unitConversionFreq (val, unitType, rps);
+        systemBaseFrequency = convertFreq (val, unitType, rps);
 
         for (auto &gen : attachedGens)
         {
@@ -1337,7 +1337,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "vtarget")
     {
-        vTarget = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        vTarget = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
         /*powerFlowAdjust the target in all the generators as well*/
         for (auto &gen : attachedGens)
         {
@@ -1346,7 +1346,7 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "atarget")
     {
-        aTarget = unitConversion (val, unitType, rad);
+        aTarget = convert (val, unitType, rad);
     }
     else if (param == "qmax")
     {
@@ -1358,12 +1358,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+                busController.Qmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            busController.Qmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "qmin")
@@ -1376,12 +1376,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+                busController.Qmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            busController.Qmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "pmax")
@@ -1394,12 +1394,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+                busController.Pmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Pmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            busController.Pmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "pmin")
@@ -1412,12 +1412,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
             }
             else
             {
-                busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+                busController.Pmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
             }
         }
         else
         {
-            busController.Pmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+            busController.Pmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         }
     }
     else if (param == "vmax")
@@ -1430,12 +1430,12 @@ void acBus::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "autogenp")
     {
-        busController.autogenP = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        busController.autogenP = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         opFlags.set (use_autogen);
     }
     else if (param == "autogenq")
     {
-        busController.autogenQ = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        busController.autogenQ = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         opFlags.set (use_autogen);
     }
     else if (param == "autogendelay")
@@ -3124,16 +3124,16 @@ double acBus::getRegTotal () const { return 0; }
  **/
 double acBus::getSched () const { return 0; }
 
-double acBus::get (const std::string &param, units_t unitType) const
+double acBus::get (const std::string &param, unit unitType) const
 {
     double val = kNullVal;
     if (param == "vtarget")
     {
-        val = unitConversionPower (vTarget, puV, unitType, systemBasePower, localBaseVoltage);
+        val = convert(vTarget, puV, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "atarget")
     {
-        val = unitConversionAngle (aTarget, rad, unitType);
+        val = convertAngle (aTarget, rad, unitType);
     }
     else if (param == "participation")
     {

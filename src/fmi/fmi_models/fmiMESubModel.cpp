@@ -325,7 +325,7 @@ void fmiMESubModel::set (const std::string &param, const std::string &val)
     }
 }
 
-void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiMESubModel::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "timestep") || (param == "localintegrationtime"))
     {
@@ -361,7 +361,7 @@ void fmiMESubModel::set (const std::string &param, double val, gridUnits::units_
     }
 }
 
-double fmiMESubModel::get (const std::string &param, gridUnits::units_t unitType) const
+double fmiMESubModel::get (const std::string &param, units::unit unitType) const
 {
     if (param == "localintegrationtime")
     {

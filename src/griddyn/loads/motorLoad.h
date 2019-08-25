@@ -32,24 +32,24 @@ class motorLoad : public Load
     };
 
   protected:
-    parameter_t Pmot = -kBigNum;  //!< the mechanical power of the motor
-    parameter_t r = 0.01;  //!< the motor resistance
-    parameter_t x = 0.15;  //!< the motor impedance
-    parameter_t r1 = 0.05;  //!< primary resistance on the motor
-    parameter_t x1 = 0.15;  //!< primary inductance of the motor
-    parameter_t xm = 5.0;  //!< the inductive load of the motor
-    parameter_t H = 3.0;  //!< the inertial constant on the motor
-    parameter_t alpha = 1.0;  //!< alpha parameter for torque conversion
-    parameter_t beta = 0;  //!< beta parameter for torque conversion
-    parameter_t gamma = 0;  //!< gamma parameter for torque conversion
-    parameter_t a = 1.0;  //!< a parameter for torque conversion
-    parameter_t b = 0;  //!< b parameter for torque conversion
-    parameter_t c = 0;  //!< c parameter for torque conversion
-    parameter_t mBase = -100;  //!< system machine base
-    parameter_t Vcontrol = 1.0;  //!< whether the motor has some voltage controls for tweaking power (basically a
+    model_parameter Pmot = -kBigNum;  //!< the mechanical power of the motor
+    model_parameter r = 0.01;  //!< the motor resistance
+    model_parameter x = 0.15;  //!< the motor impedance
+    model_parameter r1 = 0.05;  //!< primary resistance on the motor
+    model_parameter x1 = 0.15;  //!< primary inductance of the motor
+    model_parameter xm = 5.0;  //!< the inductive load of the motor
+    model_parameter H = 3.0;  //!< the inertial constant on the motor
+    model_parameter alpha = 1.0;  //!< alpha parameter for torque conversion
+    model_parameter beta = 0;  //!< beta parameter for torque conversion
+    model_parameter gamma = 0;  //!< gamma parameter for torque conversion
+    model_parameter a = 1.0;  //!< a parameter for torque conversion
+    model_parameter b = 0;  //!< b parameter for torque conversion
+    model_parameter c = 0;  //!< c parameter for torque conversion
+    model_parameter mBase = -100;  //!< system machine base
+    model_parameter Vcontrol = 1.0;  //!< whether the motor has some voltage controls for tweaking power (basically a
                                  //!< transformer attached motor
-    parameter_t init_slip = -1.0;  //!< the initial slip of the motor
-    parameter_t scale = 1.0;  //!< scaling factor for the motor
+    model_parameter init_slip = -1.0;  //!< the initial slip of the motor
+    model_parameter scale = 1.0;  //!< scaling factor for the motor
   public:
     /** @brief constructor
     @param[in] objName  the name of the object
@@ -67,7 +67,7 @@ class motorLoad : public Load
   public:
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void setState (coreTime time,
                            const double state[],

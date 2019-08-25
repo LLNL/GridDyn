@@ -170,7 +170,7 @@ void derivativeBlock::blockJacobianElements (double input,
 
 // set parameters
 void derivativeBlock::set (const std::string &param, const std::string &val) { Block::set (param, val); }
-void derivativeBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void derivativeBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "t1") || (param == "t"))
     {

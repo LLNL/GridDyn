@@ -29,7 +29,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 static const fobjectPair nullPair{nullptr, defUnit};
 static const fvecPair nullVecPair{nullptr, defUnit};

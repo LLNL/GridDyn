@@ -71,13 +71,13 @@ void gridSubModel::dynInitializeB (const IOdata &inputs, const IOdata &desiredOu
     }
 }
 
-double gridSubModel::get (const std::string &param, gridUnits::units_t unitType) const
+double gridSubModel::get (const std::string &param, units::unit unitType) const
 {
     auto fptr = getObjectFunction (this, param);
     if (fptr.first)
     {
         coreObject *tobj = const_cast<gridSubModel *> (this);
-        return unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower);
+        return convert (fptr.first (tobj), fptr.second, unitType, systemBasePower);
     }
 
     return gridComponent::get (param, unitType);

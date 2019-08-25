@@ -43,8 +43,8 @@ class stateGrabber : public objectOperatorInterface
   public:
     std::string field;  //!< name of the field to capture
 
-    gridUnits::units_t outputUnits = gridUnits::defUnit;  //!< desired output units
-    gridUnits::units_t inputUnits = gridUnits::defUnit;  //!< units of the input
+    units::unit outputUnits = units::defunit;  //!< desired output units
+    units::unit inputUnits = units::defunit;  //!< units of the input
     index_t offset = kInvalidLocation;  //!< the state offset location
     bool loaded = false;  //!< flag indicating the grabber is loaded
     bool cacheUpdateRequired = false;  //!< flag indicating that the cache should be updated before the call
@@ -107,7 +107,7 @@ class stateGrabber : public objectOperatorInterface
 
 using fstateobjectPair =
   std::pair<std::function<double(gridComponent *, const stateData &sD, const solverMode &sMode)>,
-            gridUnits::units_t>;
+            units::unit>;
 
 /** construct a vector of state grabbers from a specific command string
 @param[in] command the string command to generate the grabbers

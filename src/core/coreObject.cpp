@@ -42,7 +42,7 @@ coreObject::coreObject (const std::string &objName) : m_refCount (0), m_oid (s_o
 // this constructor is only used for building some select nullObjects
 coreObject::coreObject (id_type_t coid) : m_refCount (0), m_oid (coid)
 {
-    id = coid;
+    id = static_cast<index_t>(coid);
     parent = nullptr;
 }
 coreObject::~coreObject () = default;
@@ -293,7 +293,7 @@ bool coreObject::getFlag (const std::string &flag) const
     return ret;
 }
 
-double coreObject::get (const std::string &param, gridUnits::units_t unitType) const
+double coreObject::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param == "eventcode")
@@ -302,7 +302,7 @@ double coreObject::get (const std::string &param, gridUnits::units_t unitType) c
     }
     else if (param == "period")
     {
-        val = gridUnits::unitConversion (static_cast<double> (updatePeriod), gridUnits::sec, unitType);
+        val = units::convert(static_cast<double>(updatePeriod), units::second, unitType);
     }
     else if ((param == "time") || (param == "currenttime"))
     {
@@ -319,15 +319,15 @@ double coreObject::get (const std::string &param, gridUnits::units_t unitType) c
     return val;
 }
 
-void coreObject::set (const std::string &param, double val, gridUnits::units_t unitType)
+void coreObject::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "updateperiod") || (param == "period"))
     {
-        updatePeriod = gridUnits::unitConversion (val, unitType, gridUnits::sec);
+        updatePeriod = units::convert (val, unitType, units::second);
     }
     else if ((param == "updaterate") || (param == "rate"))
     {
-        double rt = gridUnits::unitConversion (val, unitType, gridUnits::Hz);
+        double rt = units::convert (val, unitType, units::Hz);
         if (rt <= 0.0)
         {
             updatePeriod = kBigNum;
@@ -339,7 +339,7 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
     }
     else if (param == "nextupdatetime")
     {
-        nextUpdateTime = gridUnits::unitConversion (val, unitType, gridUnits::sec);
+        nextUpdateTime = units::convert (val, unitType, units::second);
     }
     else if ((param == "number") || (param == "renumber") || (param == "id"))
     {
@@ -355,7 +355,7 @@ void coreObject::set (const std::string &param, double val, gridUnits::units_t u
         {
             setFlag (param, (val > 0.1));
         }
-        catch (const unrecognizedParameter &e)
+        catch (const unrecognizedParameter &)
         {
             auto lower = convertToLowerCase (param);
             if (lower != param)

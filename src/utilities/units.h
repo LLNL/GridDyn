@@ -133,7 +133,7 @@ double unitConversion (double val,
  * @param[in] out the units of the desired result
  * @return the numerical value of the property in output units,  badConversion if unable to convert between the specified units
  */
-double unitConversionTime (double val, units_t in, units_t out);
+double convertTime(double val, units_t in, units_t out);
 
 /** @brief convert between units used in power systems related to power, current, voltage, and resistance.
  * @param[in] val  the value of the property in input units
@@ -145,7 +145,7 @@ double unitConversionTime (double val, units_t in, units_t out);
  * specified units
  */
 
-double unitConversionPower (double val,
+double convertPower(double val,
                             const units_t in,
                             const units_t out,
                             double basePower = 100,
@@ -158,7 +158,7 @@ double unitConversionPower (double val,
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionDistance (double val, units_t in, units_t out);
+double convertDistance (double val, units_t in, units_t out);
 /** @brief convert a number between units of angle such as radians, deg
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -166,7 +166,7 @@ double unitConversionDistance (double val, units_t in, units_t out);
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionAngle (double val, units_t in, units_t out);
+double convertAngle (double val, units_t in, units_t out);
 
 /** @brief convert a number between units of frequency
 @param[in] val  the value of the property in input units
@@ -176,7 +176,7 @@ double unitConversionAngle (double val, units_t in, units_t out);
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionFreq (double val, units_t in, units_t out, double baseFreq = 60);
+double convertFreq (double val, units_t in, units_t out, double baseFreq = 60);
 /** @brief convert a number between units of cost
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -185,7 +185,7 @@ double unitConversionFreq (double val, units_t in, units_t out, double baseFreq 
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionCost (double val, units_t in, units_t out, double basePower = 100);
+double convertCost (double val, units_t in, units_t out, double basePower = 100);
 /** @brief convert a number between units of Temperature
 @param[in] val  the value of the property in input units
 @param[in] in the units of val
@@ -193,5 +193,5 @@ double unitConversionCost (double val, units_t in, units_t out, double basePower
 @return the numerical value of the property in output units,  badConversion if unable to convert between the
 specified units
 */
-double unitConversionTemperature (double val, units_t in, units_t out);
+double convertTemperature (double val, units_t in, units_t out);
 }  // namespace gridUnits

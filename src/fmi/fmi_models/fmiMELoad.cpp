@@ -74,7 +74,7 @@ void fmiMELoad::set (const std::string &param, const std::string &val)
 		fmiMEWrapper<Load>::set(param, val);
 	}
 }
-void fmiMELoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiMELoad::set (const std::string &param, double val, units::unit unitType)
 {
 	if (param.empty())
 	{

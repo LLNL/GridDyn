@@ -70,11 +70,11 @@ void Source::set (const std::string &param, const std::string &val)
 }
 
 void Source::setLevel (double newLevel) { m_tempOut = m_output = newLevel; }
-void Source::set (const std::string &param, double val, gridUnits::units_t unitType)
+void Source::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "val") || (param == "setval") || (param == "level") || (param == "value") || (param == "output"))
     {
-        setLevel (gridUnits::unitConversion(val,unitType,outputUnits_,systemBasePower,localBaseVoltage));
+        setLevel (units::convert(val,unitType,outputUnits_,systemBasePower,localBaseVoltage));
     }
     else
     {
@@ -125,9 +125,9 @@ double Source::getOutput (const IOdata & /*inputs*/,
 
 double Source::getOutput (index_t outputNum) const { return (outputNum == 0) ? m_tempOut : kNullVal; }
 
-gridUnits::units_t Source::outputUnits(index_t outputNum) const
+units::unit Source::outputUnits(index_t outputNum) const
 {
-    return (outputNum == 0) ? outputUnits_ : gridUnits::defUnit;
+    return (outputNum == 0) ? outputUnits_ : units::defunit;
 }
 
 index_t Source::getOutputLoc (const solverMode & /*sMode*/, index_t /*outputNum*/) const { return kNullLocation; }

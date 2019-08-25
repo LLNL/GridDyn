@@ -31,7 +31,7 @@ class fileLoad : public rampLoad
   protected:
     std::string fileName_;  //!< the name of the file
     gmlc::utilities::timeSeriesMulti<double, coreTime> schedLoad;  //!< time series containing the load information
-    gridUnits::units_t inputUnits = gridUnits::defUnit;
+    units::unit inputUnits = units::defunit;
     double scaleFactor = 1.0;  //!< scaling factor on the load
     index_t currIndex = 0;  //!< the current index on timeSeries
     count_t count = 0;
@@ -51,7 +51,7 @@ class fileLoad : public rampLoad
     virtual void setFlag (const std::string &flag, bool val = true) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
   private:
     count_t loadFile ();

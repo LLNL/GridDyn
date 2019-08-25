@@ -289,7 +289,7 @@ void fmiCoSimSubModel::set (const std::string &param, const std::string &val)
     }
 }
 static const std::string localIntegrationtimeString ("localintegrationtime");
-void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiCoSimSubModel::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "timestep") || (param == localIntegrationtimeString))
     {
@@ -311,7 +311,7 @@ void fmiCoSimSubModel::set (const std::string &param, double val, gridUnits::uni
     }
 }
 
-double fmiCoSimSubModel::get (const std::string &param, gridUnits::units_t unitType) const
+double fmiCoSimSubModel::get (const std::string &param, units::unit unitType) const
 {
     if (param == localIntegrationtimeString)
     {

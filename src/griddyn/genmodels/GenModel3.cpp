@@ -235,7 +235,7 @@ void GenModel3::set (const std::string &param, const std::string &val)
     return GenModelClassical::set (param, val);
 }
 
-void GenModel3::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModel3::set (const std::string &param, double val, units::unit unitType)
 {
     if (param == "x")
     {

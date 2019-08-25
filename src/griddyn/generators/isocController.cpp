@@ -123,7 +123,7 @@ void isocController::timestep (coreTime time, const IOdata &inputs, const solver
 }
 
 void isocController::set (const std::string &param, const std::string &val) { gridSubModel::set (param, val); }
-void isocController::set (const std::string &param, double val, gridUnits::units_t unitType)
+void isocController::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "deadband") || (param == "db"))
     {

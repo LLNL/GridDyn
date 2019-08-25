@@ -171,7 +171,7 @@ void delayBlock::blockJacobianElements (double input,
 
 // set parameters
 void delayBlock::set (const std::string &param, const std::string &val) { return coreObject::set (param, val); }
-void delayBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void delayBlock::set (const std::string &param, double val, units::unit unitType)
 {
     // param = gridDynSimulation::toLower(param);
     if ((param == "t1") || (param == "t"))

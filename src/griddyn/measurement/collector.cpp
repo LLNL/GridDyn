@@ -501,7 +501,7 @@ void collector::add (const gridGrabberInfo &gdRI, coreObject *obj)
                 fldGrabbers[0]->gain *= gdRI.gain;
                 fldGrabbers[0]->bias *= gdRI.gain;
                 fldGrabbers[0]->bias += gdRI.bias;
-                if (gdRI.outputUnits != gridUnits::defUnit)
+                if (gdRI.outputUnits != units::defunit)
                 {
                     fldGrabbers[0]->outputUnits = gdRI.outputUnits;
                 }

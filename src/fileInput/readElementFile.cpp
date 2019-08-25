@@ -125,7 +125,7 @@ void readImports (std::shared_ptr<readerElement> &element,
 static const std::string unitString1 ("units");
 static const std::string unitString2 ("unit");
 
-gridUnits::units_t readUnits (const std::shared_ptr<readerElement> &element, const std::string &field)
+units::unit readUnits (const std::shared_ptr<readerElement> &element, const std::string &field)
 {
     std::string uname = element->getAttributeText (unitString1);
     // actually specifying a "unit" attribute takes precedence
@@ -136,7 +136,7 @@ gridUnits::units_t readUnits (const std::shared_ptr<readerElement> &element, con
     if (!uname.empty ())
     {
         auto retUnits = gridUnits::getUnits (uname);
-        if (retUnits == gridUnits::defUnit)
+        if (retUnits == units::defunit)
         {
             WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
         }
@@ -150,14 +150,14 @@ gridUnits::units_t readUnits (const std::shared_ptr<readerElement> &element, con
         {
             uname = field.substr (p + 1, field.length () - 2 - p);
             auto retUnits = gridUnits::getUnits (uname);
-            if (retUnits == gridUnits::defUnit)
+            if (retUnits == units::defunit)
             {
                 WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
             }
             return retUnits;
         }
     }
-    return gridUnits::defUnit;
+    return units::defunit;
 }
 
 static const std::string valueString ("value");
@@ -171,7 +171,7 @@ gridParameter getElementParam (const std::shared_ptr<readerElement> &element)
 
 void getElementParam (const std::shared_ptr<readerElement> &element, gridParameter &param)
 {
-    param.paramUnits = gridUnits::defUnit;
+    param.paramUnits = units::defunit;
     param.valid = false;
     std::string fieldName = convertToLowerCase (element->getName ());
 
@@ -256,7 +256,7 @@ void checkForEndUnits (gridParameter &param, const std::string &paramStr)
     {
         auto N = paramStr.find_last_of ("012345689. )]");
         auto Unit = gridUnits::getUnits (paramStr.substr (N + 1));
-        if (Unit != gridUnits::defUnit)
+        if (Unit != units::defunit)
         {
             param.value = val;
             param.paramUnits = Unit;
@@ -286,7 +286,7 @@ void objSetAttributes (coreObject *obj,
     auto att = element->getFirstAttribute ();
     while (att.isValid ())
     {
-        gridUnits::units_t unitType = gridUnits::defUnit;
+        units::unit unitType = units::defunit;
         std::string fieldName = convertToLowerCase (att.getName ());
 
         if (fieldName.back () == ')')

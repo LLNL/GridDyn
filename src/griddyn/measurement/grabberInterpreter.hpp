@@ -148,7 +148,7 @@ class grabberInterpreter
     {
         coreObject *mobj = obj;
         std::string field (command);
-        gridUnits::units_t outUnit = gridUnits::defUnit;
+        units::unit outUnit = units::defunit;
         // get the object which to grab from
         size_t fieldSeperatorLocation = command.find_last_of (":?");
         if (fieldSeperatorLocation != std::string::npos)

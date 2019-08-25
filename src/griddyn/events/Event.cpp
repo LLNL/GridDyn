@@ -127,7 +127,7 @@ void Event::loadField (coreObject *searchObj, const std::string &newField)
     }
 
     field = fdata.m_field;
-    if (fdata.m_unitType != gridUnits::units_t::defUnit)
+    if (fdata.m_unitType != units::defunit)
     {
         unitType = fdata.m_unitType;
     }
@@ -201,8 +201,8 @@ void Event::set (const std::string &param, const std::string &val)
     }
     else if (param == "units")
     {
-        auto newUnits = gridUnits::getUnits (val);
-        if (newUnits == gridUnits::defUnit)
+        units::unit newUnits=unit_cast(units::unit_from_string (val));
+        if (newUnits == units::defunit)
         {
             throw (invalidParameterValue (param));
         }
@@ -216,18 +216,18 @@ void Event::set (const std::string &param, const std::string &val)
 
 void Event::setTime (coreTime time) { triggerTime = time; }
 
-void Event::setValue (double val, gridUnits::units_t newUnits)
+void Event::setValue (double val, units::unit newUnits)
 {
     value = val;
-    if (newUnits != gridUnits::defUnit)
+    if (newUnits != units::defunit)
     {
-        if (unitType == gridUnits::defUnit)
+        if (unitType == units::defunit)
         {
             unitType = newUnits;
         }
         else
         {
-            value = unitConversion (value, newUnits, unitType, m_obj->get ("basepower"));
+            value = convert (value, newUnits, unitType, m_obj->get ("basepower"));
             if (value == kNullVal)
             {
                 value = val;
@@ -247,9 +247,9 @@ std::string Event::to_string ()
         ss << " | ";
     }
     ss << fullObjectName (m_obj) << ':' << field;
-    if (unitType != gridUnits::defUnit)
+    if (unitType != units::defunit)
     {
-        ss << '(' << gridUnits::to_string (unitType) << ')';
+        ss << '(' << units::to_string (unitType) << ')';
     }
     ss << " = " << value;
     return ss.str ();

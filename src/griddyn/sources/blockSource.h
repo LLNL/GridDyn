@@ -44,8 +44,8 @@ class blockSource : public Source
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     // virtual void derivative(const IOdata &inputs, const stateData &sD, double deriv[], const solverMode &sMode);
 

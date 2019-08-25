@@ -283,7 +283,7 @@ void schedulerReg::regSettings (bool active, double upFrac, double downFrac)
 
 void schedulerReg::set (const std::string &param, const std::string &val) { schedulerRamp::set (param, val); }
 
-void schedulerReg::set (const std::string &param, double val, gridUnits::units_t unitType)
+void schedulerReg::set (const std::string &param, double val, units::unit unitType)
 {
     double temp;
     if (param == "max")
@@ -404,7 +404,7 @@ void schedulerReg::dispatcherLink ()
     schedulerRamp::dispatcherLink ();
 }
 
-double schedulerReg::get (const std::string &param, gridUnits::units_t unitType) const
+double schedulerReg::get (const std::string &param, units::unit unitType) const
 {
     double val;
     if (param == "min")

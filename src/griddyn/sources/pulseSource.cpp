@@ -28,7 +28,7 @@ double period;
 double duty_cylce;
 double A;
 double nextCycleTime;*/
-using namespace gridUnits;
+using namespace units;
 
 pulseSource::pulseSource (const std::string &objName, double startVal)
     : Source (objName, startVal), baseValue (startVal)
@@ -166,7 +166,7 @@ void pulseSource::setLevel (double val)
     cycleTime = cycleTime - period;
 }
 
-void pulseSource::set (const std::string &param, double val, units_t unitType)
+void pulseSource::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "a") || (param == "amplitude")||(param=="amp"))
     {

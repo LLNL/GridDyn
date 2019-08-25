@@ -83,9 +83,9 @@ void pmu::set (const std::string &param, const std::string &val)
     }
 }
 
-using namespace gridUnits;
+using namespace units;
 
-void pmu::set (const std::string &param, double val, units_t unitType)
+void pmu::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "tv") || (param == "voltagedelay"))
     {
@@ -121,7 +121,7 @@ void pmu::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "transmitperiod") || (param == "period"))
     {
-        transmissionPeriod = unitConversionTime (val, unitType, gridUnits::sec);
+        transmissionPeriod = convert(val, unitType, units::second);
     }
     else if (param == "samplerate")
     {
@@ -133,7 +133,7 @@ void pmu::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double pmu::get (const std::string &param, gridUnits::units_t unitType) const
+double pmu::get (const std::string &param, units::unit unitType) const
 {
     if ((param == "tv") || (param == "voltagedelay"))
     {
@@ -344,7 +344,7 @@ void pmu::generateAndTransmitMessage () const
         {
             payload->multiFields[ii] = oname[ii][0];
             payload->multiValues[ii] = res[ii];
-            payload->multiUnits[ii] = gridUnits::to_string (outputUnits (ii));
+            payload->multiUnits[ii] = to_string (outputUnits (ii));
         }
 
         cManager.send (std::move (cm));

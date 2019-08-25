@@ -58,7 +58,7 @@ public:
   virtual void dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
   virtual void set (const std::string &param, const std::string &val) override;
-  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
   virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
   virtual void blockDerivative (double input, double didt, const stateData &sD, double deriv[], const solverMode &sMode) override;

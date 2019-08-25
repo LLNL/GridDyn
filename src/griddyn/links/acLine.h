@@ -61,19 +61,19 @@ class acLine : public Link
 {
   public:
   protected:
-    parameter_t mp_B = 0.0;  //!< [pu] per unit shunt capacitance (jb/2 on each end of the line)
-    parameter_t mp_G = 0.0;  //!< [pu] per unit shunt conductance (g/2 on each end of the line)
-    parameter_t fault = -1.0;  //!< fault location along the line keep at <0 for no fault
+    model_parameter mp_B = 0.0;  //!< [pu] per unit shunt capacitance (jb/2 on each end of the line)
+    model_parameter mp_G = 0.0;  //!< [pu] per unit shunt conductance (g/2 on each end of the line)
+    model_parameter fault = -1.0;  //!< fault location along the line keep at <0 for no fault
     double g = 0.0;  //!< [pu] per unit conductance (calculated parameter)
     double b = 0.0;  //!< [pu] per unit susceptance (calculated parameter)
-    parameter_t tap = 1.0;  //!< tap position, neutral t = 1;
-    parameter_t tapAngle = 0.0;  //!< [deg] phase angle for phase shifting transformer
+    model_parameter tap = 1.0;  //!< tap position, neutral t = 1;
+    model_parameter tapAngle = 0.0;  //!< [deg] phase angle for phase shifting transformer
 
-    parameter_t minAngle = -kPI / 2.0;  //!< the minimum angle of the link can handle
-    parameter_t maxAngle = kPI / 2.0;  //!< the maximum angle the link can handle--related to rating
-    parameter_t length = 0.0;  //!< [km] transmission line length
-    parameter_t r = 0;  //!< [pu] per unit resistance
-    parameter_t x = 0.00000001;  //!< [pu] per unit reactance
+    model_parameter minAngle = -kPI / 2.0;  //!< the minimum angle of the link can handle
+    model_parameter maxAngle = kPI / 2.0;  //!< the maximum angle the link can handle--related to rating
+    model_parameter length = 0.0;  //!< [km] transmission line length
+    model_parameter r = 0;  //!< [pu] per unit resistance
+    model_parameter x = 0.00000001;  //!< [pu] per unit reactance
     linkI constLinkInfo;  //!< holder for static link bus information
     linkC linkComp;  //!< holder for some computed information
     linkPart LinkDeriv;  //!< holder for computed derivative information
@@ -121,7 +121,7 @@ class acLine : public Link
     virtual int fixRealPower (double power,
                               id_type_t measureTerminal,
                               id_type_t fixedTerminal = 0,
-                              gridUnits::units_t unitType = gridUnits::defUnit) override;
+                              units::unit unitType = units::defunit) override;
 
     /** @brief allow the power flow to be fixed by adjusting the properties of one bus or another
      performs the calculations necessary to get the power at the measureTerminal to be a certain value
@@ -138,7 +138,7 @@ class acLine : public Link
                           double qPower,
                           id_type_t measureTerminal,
                           id_type_t fixedTerminal = 0,
-                          gridUnits::units_t unitType = gridUnits::defUnit) override;
+                          units::unit unitType = units::defunit) override;
 
     /** @brief check for any violations of link limits or other factors based on power flow results
      checks things like the maximum angle,  power flow /current limits based on ratings and a few other things
@@ -160,10 +160,10 @@ class acLine : public Link
     virtual double getAngle (const double state[], const solverMode &sMode) const override;
 
     virtual void getParameterStrings (stringVec &pstr, paramStringType pstype) const override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     /** @brief check if two buses should be merged and the line effects ignored
      */

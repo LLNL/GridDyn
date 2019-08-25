@@ -40,7 +40,7 @@ public:
 	virtual void dynObjectInitializeB(const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 	virtual void blockAlgebraicUpdate(double input, const stateData &sD, double update[], const solverMode &sMode) override;
 	//virtual double blockResidual (double input, double didt, const stateData &sD, double resid[], const solverMode &sMode) override;

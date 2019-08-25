@@ -206,11 +206,11 @@ std::string gridSimulation::getString (const std::string &param) const
     return Area::getString (param);
 }
 
-void gridSimulation::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridSimulation::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "timestart") || (param == "start") || (param == "starttime"))
     {
-        startTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        startTime = units::convert(val, unitType, units::second);
     }
     else if ((param == "abstime") || (param == "walltime"))
     {
@@ -218,7 +218,7 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     }
     else if ((param == "stoptime") || (param == "stop") || (param == "timestop"))
     {
-        stopTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        stopTime = units::convert(val, unitType, units::second);
     }
     else if (param == "printlevel")
     {
@@ -252,23 +252,23 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     }
     else if ((param == "steptime") || (param == "step") || (param == "timestep"))
     {
-        stepTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        stepTime = units::convert(val, unitType, units::second);
     }
     else if ((param == "minupdatetime"))
     {
-        minUpdateTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        minUpdateTime = units::convert(val, unitType, units::second);
     }
     else if (param == "maxupdatetime")
     {
-        maxUpdateTime = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        maxUpdateTime = units::convert(val, unitType, units::second);
     }
     else if (param == "staterecordperiod")
     {
-        state_record_period = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        state_record_period = units::convert(val, unitType, units::second);
     }
     else if (param == "recordstop")
     {
-        recordStop = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        recordStop = units::convert(val, unitType, units::second);
     }
     else if (param == "version")
     {
@@ -276,7 +276,7 @@ void gridSimulation::set (const std::string &param, double val, gridUnits::units
     }
     else if (param == "recordstart")
     {
-        recordStart = gridUnits::unitConversionTime (val, unitType, gridUnits::sec);
+        recordStart = units::convert(val, unitType, units::second);
     }
     else
     {
@@ -452,7 +452,7 @@ void gridSimulation::alert (coreObject *object, int code)
     }
 }
 
-double gridSimulation::get (const std::string &param, gridUnits::units_t unitType) const
+double gridSimulation::get (const std::string &param, units::unit unitType) const
 {
     count_t ival = kInvalidCount;
     double fval = kNullVal;
@@ -486,23 +486,23 @@ double gridSimulation::get (const std::string &param, gridUnits::units_t unitTyp
     }
     else if ((param == "stepsize") || (param == "steptime"))
     {
-        fval = gridUnits::unitConversionTime (stepTime, gridUnits::sec, unitType);
+        fval = units::convert(stepTime, units::second, unitType);
     }
     else if ((param == "stop") || (param == "stoptime"))
     {
-        fval = gridUnits::unitConversionTime (stopTime, gridUnits::sec, unitType);
+        fval = units::convert(stopTime, units::second, unitType);
     }
     else if ((param == "currenttime") || (param == "time"))
     {
-        fval = gridUnits::unitConversionTime (getSimulationTime(), gridUnits::sec, unitType);
+        fval = units::convert(getSimulationTime(), units::second, unitType);
     }
     else if (param == "starttime")
     {
-        fval = gridUnits::unitConversionTime (getStartTime (), gridUnits::sec, unitType);
+        fval = units::convert(getStartTime (), units::second, unitType);
     }
     else if (param == "eventtime")
     {
-        fval = gridUnits::unitConversionTime (getEventTime (), gridUnits::sec, unitType);
+        fval = units::convert(getEventTime (), units::second, unitType);
     }
     else if (param == "state")
     {

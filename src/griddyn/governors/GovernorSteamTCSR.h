@@ -24,11 +24,11 @@ class GovernorSteamTCSR : public GovernorSteamNR
 {
   public:
   protected:
-    parameter_t Trh;  //!< [s] steam reheat chest time constant
-    parameter_t Tco;  //!< [s] steam reheat chest time constant
-    parameter_t Fch;  //!< [s] steam reheat chest time constant
-    parameter_t Fip;  //!< [s] steam reheat chest time constant
-    parameter_t Flp;  //!< [s] steam reheat chest time constant
+    model_parameter Trh;  //!< [s] steam reheat chest time constant
+    model_parameter Tco;  //!< [s] steam reheat chest time constant
+    model_parameter Fch;  //!< [s] steam reheat chest time constant
+    model_parameter Fip;  //!< [s] steam reheat chest time constant
+    model_parameter Flp;  //!< [s] steam reheat chest time constant
   public:
     GovernorSteamTCSR (const std::string &objName = "govSteamTCSR_#");
     virtual coreObject *clone (coreObject *obj = nullptr) const override;
@@ -39,7 +39,7 @@ class GovernorSteamTCSR : public GovernorSteamNR
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
     virtual void

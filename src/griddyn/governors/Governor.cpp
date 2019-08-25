@@ -37,7 +37,7 @@ static childTypeFactory<GovernorSteamTCSR, Governor> gfgov4 ("governor", stringV
 static childTypeFactory<GovernorTgov1, Governor> gfgov5 ("governor", stringVec{"tgov1"});
 
 }  // namespace governors
-using namespace gridUnits;
+using namespace units;
 
 Governor::Governor (const std::string &objName)
     : gridSubModel (objName), dbb ("deadband"), cb (T1, "filter"), delay (T3, "outFilter")
@@ -290,7 +290,7 @@ void Governor::set (const std::string &param, const std::string &val)
     }
 }
 
-void Governor::set (const std::string &param, double val, units_t unitType)
+void Governor::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "k")||(param=="droop"))
     {
@@ -319,22 +319,22 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "omegaref") || (param == "wref"))
     {
-        Wref = unitConversion (val, unitType, rps);
+        Wref = convert (val, unitType, rad/second);
         // TODO:PT deal with changing reference frequency
     }
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower);
+        Pmax = convert (val, unitType, puMW, systemBasePower);
         delay.set ("max", Pmax);
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower);
+        Pmin = convert (val, unitType, puMW, systemBasePower);
         delay.set ("min", Pmin);
     }
     else if (param == "deadband")
     {
-        deadbandHigh = unitConversionFreq (val, unitType, puHz, systemBaseFrequency);
+        deadbandHigh = convert (val, unitType, puHz, systemBaseFrequency);
         if (deadbandHigh > 1.0)
         {
             deadbandHigh = deadbandHigh - 1.0;
@@ -344,7 +344,7 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "deadbandhigh")
     {
-        deadbandHigh = unitConversionFreq (val, unitType, puHz, systemBaseFrequency);
+        deadbandHigh = convert(val, unitType, puHz, systemBaseFrequency);
         if (deadbandHigh > 1.0)
         {
             deadbandHigh = deadbandHigh - 1.0;
@@ -353,7 +353,7 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
     else if (param == "deadbandlow")
     {
-        deadbandLow = -unitConversionFreq (val, unitType, puHz, systemBaseFrequency);
+        deadbandLow = -convert (val, unitType, puHz, systemBaseFrequency);
         if (deadbandLow > 0.95)
         {
             deadbandLow = deadbandLow - 1.0;
@@ -370,7 +370,7 @@ void Governor::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double Governor::get (const std::string &param, gridUnits::units_t unitType) const
+double Governor::get (const std::string &param, units::unit unitType) const
 {
     double out = kNullVal;
     if (param == "k")
@@ -395,27 +395,27 @@ double Governor::get (const std::string &param, gridUnits::units_t unitType) con
     }
     else if ((param == "omegaref") || (param == "wref"))
     {
-        out = unitConversion (Wref, rps, unitType);
+        out = convert (Wref, rad/second, unitType);
     }
     else if (param == "pmax")
     {
-        out = unitConversion (Pmax, puMW, unitType, puMW, systemBasePower);
+        out = convert (Pmax, puMW, unitType, systemBasePower);
     }
     else if (param == "pmin")
     {
-        out = unitConversion (Pmin, puMW, unitType, puMW, systemBasePower);
+        out = convert (Pmin, puMW, unitType, systemBasePower);
     }
     else if (param == "deadband")
     {
-        out = unitConversionFreq (deadbandHigh, puHz, unitType, systemBaseFrequency);
+        out = convert (deadbandHigh, puHz, unitType, systemBaseFrequency);
     }
     else if (param == "deadbandhigh")
     {
-        out = unitConversionFreq (deadbandHigh, puHz, unitType, systemBaseFrequency);
+        out = convert (deadbandHigh, puHz, unitType, systemBaseFrequency);
     }
     else if (param == "deadbandlow")
     {
-        out = unitConversionFreq (deadbandHigh, puHz, unitType, systemBaseFrequency);
+        out = convert(deadbandHigh, puHz, unitType, systemBaseFrequency);
     }
     else
     {

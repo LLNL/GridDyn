@@ -23,7 +23,7 @@ namespace griddyn
 {
 namespace links
 {
-using namespace gridUnits;
+using namespace units;
 
 static typeFactory<zBreaker> glf ("link", stringVec{"zbreaker", "zline", "busbreaker"});
 
@@ -50,7 +50,7 @@ void zBreaker::set (const std::string &param, const std::string &val)
     }
 }
 
-void zBreaker::set (const std::string &param, double val, units_t unitType)
+void zBreaker::set (const std::string &param, double val, unit unitType)
 {
     if (param.empty())
     {
@@ -151,7 +151,7 @@ void zBreaker::unmerge ()
 int zBreaker::fixRealPower (double /*power*/,
                             id_type_t /*measureTerminal*/,
                             id_type_t /*fixedTerminal*/,
-                            gridUnits::units_t /*unitType*/)
+                            units::unit /*unitType*/)
 {
     return 1;
 }
@@ -159,7 +159,7 @@ int zBreaker::fixPower (double /*rPower*/,
                         double /*qPower*/,
                         id_type_t /*measureTerminal*/,
                         id_type_t /*fixedTerminal*/,
-                        gridUnits::units_t /*unitType*/)
+                        units::unit /*unitType*/)
 {
     return 1;
 }

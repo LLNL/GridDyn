@@ -279,7 +279,7 @@ void aggregateLoad::set (const std::string &param, const std::string &val)
         zipLoad::set (param, val);
     }
 }
-void aggregateLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void aggregateLoad::set (const std::string &param, double val, units::unit unitType)
 {
     std::string iparam;
     int num = trailingStringInt (param, iparam, -1);

@@ -30,7 +30,7 @@ static typeFactory<dcBus> gbf ("bus",
                                stringVec{"dc"
                                          "hvdc"});
 
-using namespace gridUnits;
+using namespace units;
 
 dcBus::dcBus (const std::string &objName) : gridBus (objName), busController (this) {}
 
@@ -304,7 +304,7 @@ void dcBus::set (const std::string &param, const std::string &val)
     }
 }
 
-void dcBus::set (const std::string &param, double val, units_t unitType)
+void dcBus::set (const std::string &param, double val, unit unitType)
 {
     if (param.empty ())
     {

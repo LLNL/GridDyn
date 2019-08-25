@@ -81,9 +81,9 @@ class fmiMESubModel : public gridSubModel
     virtual stringVec getInputNames () const;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
     virtual stateSizes LocalStateSizes (const solverMode &sMode) const override;
 

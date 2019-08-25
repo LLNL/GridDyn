@@ -33,7 +33,7 @@ public:
 	// parameter set functions
 
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 	virtual void dynObjectInitializeA(coreTime time0, std::uint32_t flags) override;
@@ -44,9 +44,9 @@ public:
 	virtual double quickupdateP() override;
 
 
-	virtual int fixRealPower(double power, id_type_t  measureTerminal, id_type_t  fixedTerminal = 0, gridUnits::units_t = gridUnits::defUnit) override;
+	virtual int fixRealPower(double power, id_type_t  measureTerminal, id_type_t  fixedTerminal = 0, units::unit = units::defunit) override;
 
-	virtual int fixPower(double rPower, double qPower, id_type_t  measureTerminal, id_type_t  fixedTerminal = 0, gridUnits::units_t = gridUnits::defUnit) override;
+	virtual int fixPower(double rPower, double qPower, id_type_t  measureTerminal, id_type_t  fixedTerminal = 0, units::unit = units::defunit) override;
 
 	virtual void coordinateMergeStatus();
 

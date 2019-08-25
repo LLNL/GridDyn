@@ -359,7 +359,7 @@ class fmiWrapper : public BaseObj
             BaseObj::set (param, val);
         }
     }
-    void set (const std::string &param, double val, gridUnits::units_t unitType) override
+    void set (const std::string &param, double val, units::unit unitType) override
     {
         bool valid = false;
         try

@@ -32,7 +32,7 @@ class Load : public gridSecondary
   protected:
     double P = 0.0;  //!< [pu] real component of the load (constant Power)
     double Q = 0.0;  //!< [pu] imaginary component of the load (constant Power)
-    parameter_t pfq = 0.0;  //!< power factor multiply  sqrt((1-pf*pf)/pf*pf)
+    model_parameter pfq = 0.0;  //!< power factor multiply  sqrt((1-pf*pf)/pf*pf)
   public:
     /** constructor which takes the object name*/
     explicit Load (const std::string &objName = "load_$");
@@ -48,22 +48,22 @@ class Load : public gridSecondary
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     /** set the real output power with the specified units
     @param[in] level the real power output setting
     @param[in] unitType the units on the real power
       */
-    virtual void setLoad (double level, gridUnits::units_t unitType = gridUnits::defUnit);
+    virtual void setLoad (double level, units::unit unitType = units::defunit);
     /** set the real and reactive output power with the specified units
     @param[in] Plevel the real power output setting
     @param[in] Qlevel the reactive power output setting
     @param[in] unitType the units on the real power
     */
-    virtual void setLoad (double Plevel, double Qlevel, gridUnits::units_t unitType = gridUnits::defUnit);
+    virtual void setLoad (double Plevel, double Qlevel, units::unit unitType = units::defunit);
 
     virtual double
     getRealPower (const IOdata &inputs, const stateData &sD, const solverMode &sMode) const override;

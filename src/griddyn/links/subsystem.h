@@ -76,10 +76,10 @@ public:
 
   // parameter set functions
   virtual void set (const std::string &param,  const std::string &val) override;
-  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  void setAll (const std::string &type, const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
+  void setAll (const std::string &type, const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-  virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+  virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
   // find components
   virtual coreObject * find (const std::string &objName) const override;
@@ -124,8 +124,8 @@ public:
   //is connected
   virtual bool isConnected () const override;
 
-  virtual int fixRealPower (double power, id_type_t measureTerminal, id_type_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
-  virtual int fixPower (double rPower, double qPower, id_type_t measureTerminal, id_type_t fixedterminal = 0, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual int fixRealPower (double power, id_type_t measureTerminal, id_type_t fixedterminal = 0, units::unit unitType = units::defunit) override;
+  virtual int fixPower (double rPower, double qPower, id_type_t measureTerminal, id_type_t fixedterminal = 0, units::unit unitType = units::defunit) override;
 
   virtual void followNetwork (int network,std::queue<gridBus *> &stk) override;
   virtual void updateBus (gridBus *bus, index_t busnumber) override;

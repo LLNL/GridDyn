@@ -28,8 +28,8 @@ class busRelay : public Relay
     };
 
   protected:
-    parameter_t cutoutVoltage = 0.0;  //!<[puV] low voltage limit
-    parameter_t cutoutFrequency = 0.0;  //!<[puHz] trip on low frequency
+    model_parameter cutoutVoltage = 0.0;  //!<[puV] low voltage limit
+    model_parameter cutoutFrequency = 0.0;  //!<[puHz] trip on low frequency
     coreTime voltageDelay = timeZero;  //!< [s] period of time the voltage must be below limit to activate
     coreTime frequencyDelay = timeZero;  //!< [s] period of time the frequency must be below limit to activate
   public:
@@ -39,7 +39,7 @@ class busRelay : public Relay
     virtual void set (const std::string &param, const std::string &val) override;
 
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 

@@ -25,7 +25,7 @@ namespace griddyn
 {
 namespace links
 {
-using namespace gridUnits;
+using namespace units;
 dcLink::dcLink (const std::string &objName) : Link (objName)
 {
     opFlags.set (dc_only);
@@ -100,7 +100,7 @@ double dcLink::getMaxTransfer () const
 }
 // set properties
 void dcLink::set (const std::string &param, const std::string &val) { return Link::set (param, val); }
-void dcLink::set (const std::string &param, double val, units_t unitType)
+void dcLink::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "r") || (param == "rdc"))
     {
@@ -440,7 +440,7 @@ void dcLink::updateLocalCache ()
 int dcLink::fixRealPower (double power,
                           id_type_t measureTerminal,
                           id_type_t fixedTerminal,
-                          gridUnits::units_t unitType)
+                          units::unit unitType)
 {
     int ret = 0;
     opFlags.set (fixed_target_power);
@@ -448,7 +448,7 @@ int dcLink::fixRealPower (double power,
     {
         fixedTerminal = measureTerminal;
     }
-    Pset = unitConversion (power, unitType, puMW, systemBasePower);
+    Pset = convert (power, unitType, puMW, systemBasePower);
     if ((fixedTerminal == 2) || (fixedTerminal == B2->getID ()))
     {
         if (B2->getType () == gridBus::busType::SLK)
@@ -544,7 +544,7 @@ int dcLink::fixPower (double power,
                       double /*qPower*/,
                       id_type_t measureTerminal,
                       id_type_t fixedTerminal,
-                      gridUnits::units_t unitType)
+                      units::unit unitType)
 {
     return fixRealPower (power, measureTerminal, fixedTerminal, unitType);
 }

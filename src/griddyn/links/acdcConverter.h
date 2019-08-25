@@ -50,24 +50,24 @@ class acdcConverter : public Link
         power,
         voltage
     };
-    parameter_t r = 0.0;  //!< [puOhm] per unit resistance
-    parameter_t x = 0.001;  //!< [puOhm] per unit reactance
-    parameter_t tap = 1.0;  //!< converter tap
+    model_parameter r = 0.0;  //!< [puOhm] per unit resistance
+    model_parameter x = 0.001;  //!< [puOhm] per unit reactance
+    model_parameter tap = 1.0;  //!< converter tap
     double angle = 0.0;  //!< converter firing or extinction angle
-    parameter_t Idcmax = kBigNum;  //!<[puA] max reference current
-    parameter_t Idcmin = -kBigNum;  //!<[puA] min reference current
-    parameter_t mp_Ki = 0.03;  //!< integral gain angle control
-    parameter_t mp_Kp = 0.97;  //!< proportional gain angle control
+    model_parameter Idcmax = kBigNum;  //!<[puA] max reference current
+    model_parameter Idcmin = -kBigNum;  //!<[puA] min reference current
+    model_parameter mp_Ki = 0.03;  //!< integral gain angle control
+    model_parameter mp_Kp = 0.97;  //!< proportional gain angle control
     double Idc = 0.0;  //!< storage for dc current
     mode_t type = mode_t::bidirectional;  //!< converter type
-    parameter_t vTarget = 1.0;  //!< [puV] ac voltage target
-    parameter_t mp_controlKi = -0.03;  //!< integral gain angle control
-    parameter_t mp_controlKp = -0.97;  //!< proportional gain angle control
-    parameter_t tD = 0.01;  //!< controller time delay
-    parameter_t baseTap = 1.0;  //!< base l evel tap of the converter
+    model_parameter vTarget = 1.0;  //!< [puV] ac voltage target
+    model_parameter mp_controlKi = -0.03;  //!< integral gain angle control
+    model_parameter mp_controlKp = -0.97;  //!< proportional gain angle control
+    model_parameter tD = 0.01;  //!< controller time delay
+    model_parameter baseTap = 1.0;  //!< base l evel tap of the converter
     double dirMult = 1.0;
-    parameter_t minAngle = -kPI / 2.0;  //!< [rad] minimum tap angle
-    parameter_t maxAngle = kPI / 2.0;  //!< [rad]  maximum tap angle
+    model_parameter minAngle = -kPI / 2.0;  //!< [rad] minimum tap angle
+    model_parameter maxAngle = kPI / 2.0;  //!< [rad]  maximum tap angle
     control_mode_t control_mode = control_mode_t::voltage;
 
     coreOwningPtr<blocks::pidBlock> firingAngleControl;  //!< block controlling firing angle
@@ -102,7 +102,7 @@ class acdcConverter : public Link
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     // dynInitializeB dynamics
     // virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags);
@@ -138,12 +138,12 @@ class acdcConverter : public Link
     virtual int fixRealPower (double power,
                               id_type_t terminal,
                               id_type_t fixedTerminal = 0,
-                              gridUnits::units_t unitType = gridUnits::defUnit) override;
+                              units::unit unitType = units::defunit) override;
     virtual int fixPower (double rPower,
                           double qPower,
                           id_type_t measureTerminal,
                           id_type_t fixedTerminal = 0,
-                          gridUnits::units_t unitType = gridUnits::defUnit) override;
+                          units::unit unitType = units::defunit) override;
 
     virtual void
     getStateName (stringVec &stNames, const solverMode &sMode, const std::string &prefix = "") const override;

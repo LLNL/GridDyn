@@ -79,7 +79,7 @@ void grabberSource::set (const std::string &param, const std::string &val)
     }
 }
 
-void grabberSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void grabberSource::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "gain") || (param == "multipler"))
     {
@@ -95,7 +95,7 @@ void grabberSource::set (const std::string &param, double val, gridUnits::units_
     }
 }
 
-double grabberSource::get (const std::string &param, gridUnits::units_t unitType) const
+double grabberSource::get (const std::string &param, units::unit unitType) const
 {
     if (param == "multiplier")
     {

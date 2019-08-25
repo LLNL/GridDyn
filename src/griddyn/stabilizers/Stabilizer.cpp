@@ -57,7 +57,7 @@ index_t Stabilizer::findIndex (const std::string & /*field*/, const solverMode &
 
 void Stabilizer::set (const std::string &param, const std::string &val) { return coreObject::set (param, val); }
 // set parameters
-void Stabilizer::set (const std::string &param, double val, gridUnits::units_t unitType)
+void Stabilizer::set (const std::string &param, double val, units::unit unitType)
 {
     {
         coreObject::set (param, val, unitType);

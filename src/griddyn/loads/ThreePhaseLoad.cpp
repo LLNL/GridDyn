@@ -24,7 +24,7 @@ namespace griddyn
 {
 namespace loads
 {
-using namespace gridUnits;
+using namespace units;
 
 
 ThreePhaseLoad::ThreePhaseLoad (const std::string &objName) : Load (objName) {}
@@ -62,16 +62,16 @@ coreObject *ThreePhaseLoad::clone (coreObject *obj) const
     return nobj;
 }
 
-void ThreePhaseLoad::setLoad (double level, units_t unitType)
+void ThreePhaseLoad::setLoad (double level, unit unitType)
 {
-    setP (unitConversion (level, unitType, puMW, systemBasePower));
+    setP (convert (level, unitType, puMW, systemBasePower));
     Pa = Pb = Pc = getP () / 3.0;
 }
 
-void ThreePhaseLoad::setLoad (double Plevel, double Qlevel, units_t unitType)
+void ThreePhaseLoad::setLoad (double Plevel, double Qlevel, unit unitType)
 {
-    setP (unitConversion (Plevel, unitType, puMW, systemBasePower));
-    setQ (unitConversion (Qlevel, unitType, puMW, systemBasePower));
+    setP (convert (Plevel, unitType, puMW, systemBasePower));
+    setQ (convert (Qlevel, unitType, puMW, systemBasePower));
     Pa = Pb = Pc = getP () / 3.0;
     Qa = Qb = Qc = getQ () / 3.0;
 }
@@ -125,28 +125,28 @@ void ThreePhaseLoad::set (const std::string &param, const std::string &val)
 double ThreePhaseLoad::getBaseAngle () const { return (opFlags[use_abs_angle]) ? bus->getAngle () : 0.0; }
 
 
-double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
+double ThreePhaseLoad::get (const std::string &param, unit unitType) const
 {
     if (param.length () == 2)
     {
         switch (param[0])
         {
         case 'p':
-            return unitConversion (phaseSelector (param[1], Pa, Pb, Pc, kNullVal), puMW, unitType,
+            return convert (phaseSelector (param[1], Pa, Pb, Pc, kNullVal), puMW, unitType,
                                    systemBasePower);
         case 'q':
-            return unitConversion (phaseSelector (param[1], Qa, Qb, Qc, kNullVal), puMW, unitType,
+            return convert (phaseSelector (param[1], Qa, Qb, Qc, kNullVal), puMW, unitType,
                                    systemBasePower);
         case 'v':
         {
             double V = bus->getVoltage ();
-            return unitConversion (V, puV, unitType, systemBasePower, localBaseVoltage);
+            return convert (V, puV, unitType, systemBasePower, localBaseVoltage);
         }
         case 'a':
         {
             double A = getBaseAngle ();
             double phaseAngle = phaseSelector (param[1], A, A + 2.0 * kPI / 3.0, A + 4.0 * kPI / 3.0, kNullVal);
-            return unitConversion (phaseAngle, rad, unitType, systemBasePower, localBaseVoltage);
+            return convert (phaseAngle, rad, unitType, systemBasePower, localBaseVoltage);
         }
         default:
             break;
@@ -158,13 +158,13 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
         {
             auto Vc = std::polar (bus->getVoltage (), getBaseAngle ());
             Vc = Vc * phaseSelector (param[2], alpha0, alpha, alpha2, alpha0);
-            return unitConversion (Vc.real (), puV, unitType, systemBasePower, localBaseVoltage);
+            return convert (Vc.real (), puV, unitType, systemBasePower, localBaseVoltage);
         }
         if (param.compare (0, 2, "vj") == 0)  // get the reactive part of the voltage
         {
             auto Vc = std::polar (bus->getVoltage (), getBaseAngle ());
             Vc = Vc * phaseSelector (param[2], alpha0, alpha, alpha2, alpha0);
-            return unitConversion (Vc.imag (), puV, unitType, systemBasePower, localBaseVoltage);
+            return convert (Vc.imag (), puV, unitType, systemBasePower, localBaseVoltage);
         }
     }
     else if (param.compare (0, 4, "imag") == 0)
@@ -176,7 +176,7 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
             auto va = std::polar (bus->getVoltage (), getBaseAngle ());
             auto sa = std::complex<double> (Pa, Qa);
             auto ia = sa / va;
-            return unitConversion (std::abs (ia) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
+            return convert (std::abs (ia) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
         }
         case 'b':
         {
@@ -184,7 +184,7 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
             auto sb = std::complex<double> (Pb, Qb);
             auto ib = sb / vb;
 
-            return unitConversion (std::abs (ib) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
+            return convert (std::abs (ib) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
         }
         case 'c':
         {
@@ -192,7 +192,7 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
             auto sc = std::complex<double> (Pc, Qc);
             auto ic = sc / vc;
 
-            return unitConversion (std::abs (ic) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
+            return convert (std::abs (ic) / multiplier, puA, unitType, systemBasePower, localBaseVoltage);
         }
         }
     }
@@ -205,21 +205,21 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
             auto va = std::polar (bus->getVoltage (), getBaseAngle ());
             auto sa = std::complex<double> (Pa, Qa);
             auto ia = sa / va;
-            return unitConversion (std::arg (ia), rad, unitType);
+            return convert (std::arg (ia), rad, unitType);
         }
         case 'b':
         {
             auto vb = std::polar (bus->getVoltage (), getBaseAngle ()) * alpha;
             auto sb = std::complex<double> (Pb, Qb);
             auto ib = sb / vb;
-            return unitConversion (std::arg (ib), rad, unitType);
+            return convert (std::arg (ib), rad, unitType);
         }
         case 'c':
         {
             auto vc = std::polar (bus->getVoltage (), getBaseAngle ()) * alpha2;
             auto sc = std::complex<double> (Pc, Qc);
             auto ic = sc / vc;
-            return unitConversion (std::arg (ic), rad, unitType);
+            return convert (std::arg (ic), rad, unitType);
         }
         }
     }
@@ -230,7 +230,7 @@ double ThreePhaseLoad::get (const std::string &param, units_t unitType) const
     return Load::get (param, unitType);
 }
 
-void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType)
+void ThreePhaseLoad::set (const std::string &param, double val, unit unitType)
 {
     if (param.length () == 2)
     {
@@ -240,13 +240,13 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             switch (param[1])
             {
             case 'a':
-                setPa (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setPa (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'b':
-                setPb (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setPb (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'c':
-                setPc (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setPc (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             }
             break;
@@ -254,13 +254,13 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             switch (param[1])
             {
             case 'a':
-                setQa (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setQa (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'b':
-                setQb (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setQb (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             case 'c':
-                setQc (unitConversion (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
+                setQc (convert (val * multiplier, unitType, puMW, systemBasePower, localBaseVoltage));
                 break;
             }
             break;
@@ -280,7 +280,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto ia = sa / va;
 
             auto newia =
-              std::polar (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
+              std::polar (convert (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
                           std::arg (ia));
             auto newP = newia * va;
             setPa (newP.real ());
@@ -295,7 +295,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto ib = sb / vb;
 
             auto newib =
-              std::polar (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
+              std::polar (convert (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
                           std::arg (ib));
             auto newP = newib * vb;
             setPb (newP.real ());
@@ -309,7 +309,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto ic = sc / vc;
 
             auto newic =
-              std::polar (unitConversion (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
+              std::polar (convert (val, unitType, puA, systemBasePower, localBaseVoltage) * multiplier,
                           std::arg (ic));
             auto newP = newic * vc;
             setPc (newP.real ());
@@ -327,7 +327,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto va = std::polar (bus->getVoltage (), getBaseAngle ());
             auto sa = std::complex<double> (Pa, Qa);
             auto ia = sa / va;
-            auto newia = std::polar (std::abs (ia), unitConversion (val, unitType, rad));
+            auto newia = std::polar (std::abs (ia), convert (val, unitType, rad));
             auto newP = newia * va;
             setPa (newP.real ());
             setQa (newP.imag ());
@@ -338,7 +338,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto vb = std::polar (bus->getVoltage (), getBaseAngle ()) * alpha;
             auto sb = std::complex<double> (Pb, Qb);
             auto ib = sb / vb;
-            auto newib = std::polar (std::abs (ib), unitConversion (val, unitType, rad));
+            auto newib = std::polar (std::abs (ib), convert (val, unitType, rad));
             auto newP = newib * vb;
             setPb (newP.real ());
             setQb (newP.imag ());
@@ -349,7 +349,7 @@ void ThreePhaseLoad::set (const std::string &param, double val, units_t unitType
             auto vc = std::polar (bus->getVoltage (), getBaseAngle ()) * alpha2;
             auto sc = std::complex<double> (Pc, Qc);
             auto ic = sc / vc;
-            auto newic = std::polar (std::abs (ic), unitConversion (val, unitType, rad));
+            auto newic = std::polar (std::abs (ic), convert (val, unitType, rad));
             auto newP = newic * vc;
             setPc (newP.real ());
             setQc (newP.imag ());

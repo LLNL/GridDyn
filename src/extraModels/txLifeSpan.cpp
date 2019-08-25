@@ -83,17 +83,17 @@ void txLifeSpan::set (const std::string &param, const std::string &val)
 	}
 }
 
-using namespace gridUnits;
+using namespace units;
 
-void txLifeSpan::set (const std::string &param, double val, units_t unitType)
+void txLifeSpan::set (const std::string &param, double val, unit unitType)
 {
 	if ((param == "initial") || (param == "initiallife"))
 	{
-		initialLife = unitConversionTime(val, unitType, hour);
+		initialLife = convertTime(val, unitType, hour);
 	}
 	else if (param == "basetemp")
 	{
-		baseTemp = unitConversionTemperature(val, unitType, C);
+		baseTemp = convertTemperature(val, unitType, C);
 	}
 	else if ((param == "agingrate") || (param == "agingconstant"))
 	{
@@ -105,7 +105,7 @@ void txLifeSpan::set (const std::string &param, double val, units_t unitType)
 	}
 }
 
-double txLifeSpan::get(const std::string & param, gridUnits::units_t unitType) const
+double txLifeSpan::get(const std::string & param, units::unit unitType) const
 {
 
 	return sensor::get(param, unitType);

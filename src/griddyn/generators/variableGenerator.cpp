@@ -18,7 +18,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 variableGenerator::variableGenerator (const std::string &objName) : DynamicGenerator (objName)
 {
@@ -124,15 +124,15 @@ void variableGenerator::set (const std::string &param, const std::string &val)
     DynamicGenerator::set (param, val);
 }
 
-void variableGenerator::set (const std::string &param, double val, units_t unitType)
+void variableGenerator::set (const std::string &param, double val, unit unitType)
 {
     if (param == "vcutout")
     {
-        mp_Vcutout = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        mp_Vcutout = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmax")
     {
-        mp_Vmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        mp_Vmax = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else
 

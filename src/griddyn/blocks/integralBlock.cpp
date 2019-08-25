@@ -133,7 +133,7 @@ double integralBlock::step (coreTime time, double inputA)
 
 // set parameters
 void integralBlock::set (const std::string &param, const std::string &val) { Block::set (param, val); }
-void integralBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void integralBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "iv") || (param == "initial_value"))
     {

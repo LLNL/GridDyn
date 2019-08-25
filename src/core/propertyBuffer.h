@@ -24,7 +24,7 @@ namespace griddyn
 {
 class coreObject;
 /** define a variant type for the different types of properties that may be set*/
-using property_type = mpark::variant<double, std::pair<double, gridUnits::units_t>, int, bool, std::string>;
+using property_type = mpark::variant<double, std::pair<double, units::unit>, int, bool, std::string>;
 
 /** class for temporarily holding object properties if the object has delayed initialization or something to that
 effect
@@ -41,7 +41,7 @@ class propertyBuffer
     /** add a double property to to the buffer*/
     void set (const std::string &param, double val);
     /** add a double property with units to the buffer*/
-    void set (const std::string &param, double val, gridUnits::units_t unitType);
+    void set (const std::string &param, double val, units::unit unitType);
     /** add an integer property to the buffer*/
     void set (const std::string &param, int val);
     /** add a flag property to the buffer*/
@@ -78,7 +78,7 @@ class propertyBuffer
                 obj->set (prop.first, mpark::get<double> (prop.second));
                 break;
             case 1:
-                obj->set (prop.first, mpark::get<std::pair<double, gridUnits::units_t>> (prop.second).first);
+                obj->set (prop.first, mpark::get<std::pair<double, units::unit>> (prop.second).first);
                 break;
             case 2:
                 obj->set (prop.first, mpark::get<int> (prop.second));

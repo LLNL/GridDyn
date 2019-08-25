@@ -62,9 +62,9 @@ class scheduler : public Source
   public:
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     /** tie the scheduler to a dispatcher */
     virtual void dispatcherLink ();
     /** get the maximum available power withing a specified time window
@@ -139,9 +139,9 @@ class schedulerRamp : public scheduler
     virtual double getRamp () const;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     virtual void setReserveTarget (double target);
     double getReserveTarget () { return reserveUse; }
@@ -206,9 +206,9 @@ class schedulerReg : public schedulerRamp
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
     virtual void dispatcherLink () override;
     virtual double getMax (coreTime time = maxTime) const override;
     virtual double getMin (coreTime time = maxTime) const override;

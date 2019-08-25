@@ -9,9 +9,7 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef CONTINUATION_H_
-#define CONTINUATION_H_
+#pragma once
 
 #include "../events/Event.h"
 #include "../measurement/collector.h"
@@ -27,7 +25,7 @@ public:
   std::string m_field;
   double m_startValue;
   double m_stepSize;
-  gridUnits::units_t m_unitType = gridUnits::defUnit;
+  units::unit m_unitType = units::defunit;
 protected:
   int m_currentStep = 0;
   coreObject *m_obj = nullptr;
@@ -56,4 +54,4 @@ public:
 };
 
 }//namespace griddyn
-#endif
+

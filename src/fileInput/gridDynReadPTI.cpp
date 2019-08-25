@@ -27,7 +27,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities::stringOps;
 using namespace gmlc::utilities;
 

@@ -41,7 +41,7 @@ static childTypeFactory<acBus, gridBus>
 static childTypeFactory<dcBus, gridBus> gbfdc ("bus", stringVec{"dc", "hvdc"});
 static childTypeFactory<infiniteBus, gridBus> igbc ("bus", stringVec{"inf", "infinite"});
 
-using namespace gridUnits;
+using namespace units;
 
 gridBus::gridBus (const std::string &objName) : gridPrimary (objName), outputs (3), outLocs (3)
 {
@@ -476,7 +476,7 @@ void gridBus::timestep (coreTime time, const IOdata & /*inputs*/, const solverMo
 void gridBus::setAll (const std::string &objtype,
                       const std::string &param,
                       double val,
-                      gridUnits::units_t unitType)
+                      units::unit unitType)
 {
     if ((objtype == "gen") || (objtype == "generator"))
     {
@@ -580,7 +580,7 @@ void gridBus::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridBus::set (const std::string &param, double val, units_t unitType)
+void gridBus::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltage") || (param == "vol"))
     {
@@ -591,19 +591,19 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
                 alert (this, POTENTIAL_FAULT_CHANGE);
             }
         }
-        voltage = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        voltage = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if ((param == "angle") || (param == "ang"))
     {
-        angle = unitConversion (val, unitType, rad);
+        angle = convert (val, unitType, rad);
     }
     else if ((param == "freq") || (param == "frequency") || (param == "dadt"))
     {
-        freq = unitConversion (val, unitType, puHz, systemBaseFrequency);
+        freq = convert (val, unitType, puHz, systemBaseFrequency);
     }
     else if ((param == "basevoltage") || (param == "base vol") || (param == "vbase") || (param == "voltagebase"))
     {
-        localBaseVoltage = unitConversionPower (val, unitType, kV);
+        localBaseVoltage = convert(val, unitType, kV);
         for (auto &gen : attachedGens)
         {
             gen->set ("basevoltage", val);
@@ -615,7 +615,7 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "p") || (param == "gen p"))
     {
-        S.genP = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        S.genP = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         if (attachedGens.size () == 1)
         {
             attachedGens[0]->set ("p", S.genP);
@@ -636,7 +636,7 @@ void gridBus::set (const std::string &param, double val, units_t unitType)
     }
     else if ((param == "q") || (param == "gen q"))
     {
-        S.genQ = unitConversion (val, unitType, puMW);
+        S.genQ = convert (val, unitType, puMW);
         if (attachedGens.size () == 1)
         {
             attachedGens[0]->set ("q", S.genQ);
@@ -1493,16 +1493,16 @@ void gridBus::registerPowerControl (gridComponent * /*obj*/) {}
 
 void gridBus::removePowerControl (gridComponent * /*obj*/) {}
 
-double gridBus::get (const std::string &param, units_t unitType) const
+double gridBus::get (const std::string &param, unit unitType) const
 {
     double val;
     if (param == "voltage")
     {
-        val = unitConversionPower (voltage, puV, unitType, systemBasePower, localBaseVoltage);
+        val = convert(voltage, puV, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "angle")
     {
-        val = unitConversionAngle (angle, rad, unitType);
+        val = convertAngle (angle, rad, unitType);
     }
     else if (param == "vtol")
     {
@@ -1518,27 +1518,27 @@ double gridBus::get (const std::string &param, units_t unitType) const
     }
     else if ((param == "genreal") || (param == "generationreal"))
     {
-        val = unitConversionPower (getGenerationReal (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getGenerationReal (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if ((param == "genreactive") || (param == "generationreactive"))
     {
-        val = unitConversionPower (getGenerationReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getGenerationReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "loadreal")
     {
-        val = unitConversionPower (getLoadReal (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getLoadReal (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "loadreactive")
     {
-        val = unitConversionPower (getLoadReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getLoadReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "linkreal")
     {
-        val = unitConversionPower (getLinkReal (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getLinkReal (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "linkreactive")
     {
-        val = unitConversionPower (getLinkReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
+        val = convert(getLinkReactive (), puMW, unitType, systemBasePower, localBaseVoltage);
     }
     else if (param == "gencount")
     {
@@ -1567,7 +1567,7 @@ double gridBus::get (const std::string &param, units_t unitType) const
         if (fptr.first)
         {
             coreObject *tobj = const_cast<gridBus *> (this);
-            val = unitConversion (fptr.first (tobj), fptr.second, unitType, systemBasePower, localBaseVoltage);
+            val = convert (fptr.first (tobj), fptr.second, unitType, systemBasePower, localBaseVoltage);
         }
         else
         {
@@ -1656,18 +1656,18 @@ static const std::vector<stringVec> outputNamesStr{
 
 const std::vector<stringVec> &gridBus::outputNames () const { return outputNamesStr; }
 
-gridUnits::units_t gridBus::outputUnits (index_t outputNum) const
+units::unit gridBus::outputUnits (index_t outputNum) const
 {
     switch (outputNum)
     {
     case voltageInLocation:
-        return gridUnits::puV;
+        return units::puV;
     case angleInLocation:
-        return gridUnits::rad;
+        return units::rad;
     case frequencyInLocation:
-        return gridUnits::puHz;
+        return units::puHz;
     default:
-        return gridUnits::defUnit;
+        return units::defunit;
     }
 }
 

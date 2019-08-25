@@ -215,7 +215,7 @@ index_t controlBlock::findIndex (const std::string &field, const solverMode &sMo
 
 // set parameters
 void controlBlock::set (const std::string &param, const std::string &val) { Block::set (param, val); }
-void controlBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void controlBlock::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
 

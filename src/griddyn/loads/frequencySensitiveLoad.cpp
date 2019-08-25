@@ -27,7 +27,7 @@ namespace griddyn
 {
 namespace loads
 {
-using namespace gridUnits;
+using namespace units;
 
 frequencySensitiveLoad::frequencySensitiveLoad (const std::string &objName) : Load (objName) {}
 
@@ -100,7 +100,7 @@ void frequencySensitiveLoad::set (const std::string &param, const std::string &v
     }
 }
 
-double frequencySensitiveLoad::get (const std::string &param, units_t unitType) const
+double frequencySensitiveLoad::get (const std::string &param, unit unitType) const
 {
     if (param == "dpdf")
     {
@@ -117,7 +117,7 @@ double frequencySensitiveLoad::get (const std::string &param, units_t unitType) 
     return subLoad->get (param, unitType);
 }
 
-void frequencySensitiveLoad::set (const std::string &param, double val, units_t unitType)
+void frequencySensitiveLoad::set (const std::string &param, double val, unit unitType)
 {
     if (param == "dpdf")
     {

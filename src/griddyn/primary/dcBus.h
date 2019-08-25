@@ -81,7 +81,7 @@ class dcBus : public gridBus
     // parameter set functions
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void guessState (coreTime time, double state[], double dstate_dt[], const solverMode &sMode) override;
     virtual void

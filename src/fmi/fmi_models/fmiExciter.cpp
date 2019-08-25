@@ -55,7 +55,7 @@ void fmiExciter::set (const std::string &param, const std::string &val)
 	}
 }
 
-void fmiExciter::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiExciter::set (const std::string &param, double val, units::unit unitType)
 {
 	if (param.empty())
 	{

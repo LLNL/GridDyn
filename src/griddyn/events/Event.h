@@ -36,7 +36,7 @@ class EventInfo
     stringVec fieldList;  //!< list of fields associated with the event
     std::vector<coreObject *> targetObjs;  //!< the event targets
     std::vector<index_t> columns;  //!< file columns associated with an event
-    std::vector<gridUnits::units_t> units;  //!< units associated with an event
+    std::vector<units::unit> units;  //!< units associated with an event
   public:
     EventInfo () = default;
     EventInfo (const std::string &eventString, coreObject *rootObj);
@@ -54,7 +54,7 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     double value = 0.0;  //!< new value
     coreTime triggerTime;  //!< the time the event is scheduled to be triggered
     coreObject *m_obj = nullptr;  //!< the target object of the event
-    gridUnits::units_t unitType = gridUnits::defUnit;  //!< units of the event
+    units::unit unitType = units::defunit;  //!< units of the event
     index_t eventId;  //!< a unique Identifier code for the event
     bool armed = false;  //!< flag indicating if the event is armed or not
     bool resettable = false;  //!< flag indicating if the event can be reset;
@@ -107,7 +107,7 @@ class Event : public helperObject, public eventInterface, public objectOperatorI
     @param[in] val the new value
     @param[in] newUnits the units associated with the value
     */
-    virtual void setValue (double val, gridUnits::units_t newUnits = gridUnits::defUnit);
+    virtual void setValue (double val, units::unit newUnits = units::defunit);
     /** generate a string description of the event*/
     virtual std::string to_string ();
     /** update the event target

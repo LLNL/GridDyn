@@ -58,15 +58,15 @@ class acBus : public gridBus
     busType prevType = busType::PQ;  //!< previous type container if the type automatically changes
     dynBusType prevDynType = dynBusType::normal;  //!< previous type container if the type automatically changes
     matrixDataCompact<2, 3> partDeriv;  //!< structure containing the partial derivatives
-    parameter_t aTarget = 0.0;  //!< an angle Target(for SLK and afix bus types)
-    parameter_t vTarget = 1.0;  //!< a target voltage
-    parameter_t participation = 1.0;  //!< overall participation factor in power regulation for an area
-    parameter_t refAngle = 0.0;  //!< reference Angle
-    parameter_t Vmin = 0;  //!< [pu]    voltage minimum
-    parameter_t Vmax = kBigNum;  //!< [pu]    voltage maximum
-    parameter_t tieError = 0.0;  //!< tieLine error
-    parameter_t prevPower = 0.0;  //!< previous power level
-    parameter_t Tw = 0.1;  //!< time constant for the frequency estimator
+    model_parameter aTarget = 0.0;  //!< an angle Target(for SLK and afix bus types)
+    model_parameter vTarget = 1.0;  //!< a target voltage
+    model_parameter participation = 1.0;  //!< overall participation factor in power regulation for an area
+    model_parameter refAngle = 0.0;  //!< reference Angle
+    model_parameter Vmin = 0;  //!< [pu]    voltage minimum
+    model_parameter Vmax = kBigNum;  //!< [pu]    voltage maximum
+    model_parameter tieError = 0.0;  //!< tieLine error
+    model_parameter prevPower = 0.0;  //!< previous power level
+    model_parameter Tw = 0.1;  //!< time constant for the frequency estimator
 
     coreTime lastSetTime = negTime;  //!< last set time
     coreOwningPtr<Block> fblock;  //!< pointer to frequency estimator block
@@ -140,9 +140,9 @@ class acBus : public gridBus
     virtual void setFlag (const std::string &flag, bool val) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // parameter get functions
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     // solver functions
     virtual void jacobianElements (const IOdata &inputs,

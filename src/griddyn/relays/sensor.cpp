@@ -29,7 +29,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities::stringOps;
 using namespace gmlc::utilities;
 
@@ -386,7 +386,7 @@ void sensor::setupOutput (index_t num, const std::string &outputString)
     }
 }
 
-void sensor::set (const std::string &param, double val, gridUnits::units_t unitType)
+void sensor::set (const std::string &param, double val, units::unit unitType)
 {
     std::string iparam;
     int num = trailingStringInt (param, iparam, -1);
@@ -434,7 +434,7 @@ void sensor::set (const std::string &param, double val, gridUnits::units_t unitT
     }
 }
 
-double sensor::get (const std::string &param, gridUnits::units_t unitType) const
+double sensor::get (const std::string &param, units::unit unitType) const
 {
     index_t ind = lookupOutputIndex (param);
     if (ind != kNullLocation)
@@ -521,7 +521,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         // only local set
         try
         {
-            set (convertToLowerCase (m->m_field), m->m_value, gridUnits::getUnits (m->m_units));
+            set (convertToLowerCase (m->m_field), m->m_value, units::unit_cast(units::unit_from_string (m->m_units)));
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (cm::SET_SUCCESS);
@@ -544,7 +544,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         break;
     case cm::GET:
     {
-        val = get (convertToLowerCase (m->m_field), gridUnits::getUnits (m->m_units));
+        val = get(convertToLowerCase(m->m_field), units::unit_cast(units::unit_from_string(m->m_units)));
         auto reply = std::make_shared<commMessage> (cm::GET_RESULT);
         auto rep = reply->getPayload<cm> ();
         assert (rep);
@@ -573,7 +573,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         rep->multiFields = m->multiFields;
         for (const auto &fieldName : m->multiFields)
         {
-            val = get (convertToLowerCase (fieldName), gridUnits::getUnits (m->m_units));
+            val = get(convertToLowerCase(fieldName), units::unit_cast(units::unit_from_string(m->m_units)));
             m->multiValues.push_back (val);
         }
         rep->m_time = prevTime;

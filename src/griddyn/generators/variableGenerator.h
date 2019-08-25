@@ -28,8 +28,8 @@ class variableGenerator : public DynamicGenerator
   protected:
     Source *m_source = nullptr;  //!< reference to the generation source block
     Block *m_cBlock = nullptr;  //!< reference to the control block
-    parameter_t mp_Vcutout = -1.0;  //!<[pu] the cutout voltage
-    parameter_t mp_Vmax = kBigNum;  //!< [pu] the maximum operating voltage
+    model_parameter mp_Vcutout = -1.0;  //!<[pu] the cutout voltage
+    model_parameter mp_Vmax = kBigNum;  //!< [pu] the maximum operating voltage
   public:
     //!< @brief new submodel locations for the extra variable generator block extends the ones defined in Generator
     enum extra_block_locations
@@ -51,7 +51,7 @@ class variableGenerator : public DynamicGenerator
   public:
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void add (coreObject *obj) override;
 

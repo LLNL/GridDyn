@@ -48,7 +48,7 @@ void CymeDistLoadME::set(const std::string &param, const std::string &val)
     }
 }
 
-void CymeDistLoadME::set(const std::string &param, double val, gridUnits::units_t unitType)
+void CymeDistLoadME::set(const std::string &param, double val, units::unit unitType)
 {
     if ((param == "configindex") || (param == "config"))
     {

@@ -181,7 +181,7 @@ std::string interpolatingPlayer::to_string()
 			ss << " | ";
 		}
 		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
+		if (unitType != units::defunit)
 		{
 			ss << '(' << gridUnits::to_string(unitType) << ')';
 		}
@@ -197,7 +197,7 @@ std::string interpolatingPlayer::to_string()
 	else
 	{
 		ss << fullObjectName(m_obj) << ':' << field;
-		if (unitType != gridUnits::defUnit)
+		if (unitType != units::defunit)
 		{
 			ss << '(' << gridUnits::to_string(unitType) << ')';
 		}

@@ -21,16 +21,16 @@ class Generator;
 class isocController : public gridSubModel
 {
   protected:
-    parameter_t db = 0.005;
-    parameter_t upStep = -0.01;
-    parameter_t downStep = 0.02 * 0.25;
-    parameter_t upPeriod = 1.0;
-    parameter_t downPeriod = 0.25;
-    parameter_t maxLevel = 1.0;
-    parameter_t minLevel = -1.0;
-    parameter_t lastFreq = 0.0;
-    parameter_t integralTrigger = 0.02;
-    parameter_t integratorLevel = 0.0;
+    model_parameter db = 0.005;
+    model_parameter upStep = -0.01;
+    model_parameter downStep = 0.02 * 0.25;
+    model_parameter upPeriod = 1.0;
+    model_parameter downPeriod = 0.25;
+    model_parameter maxLevel = 1.0;
+    model_parameter minLevel = -1.0;
+    model_parameter lastFreq = 0.0;
+    model_parameter integralTrigger = 0.02;
+    model_parameter integratorLevel = 0.0;
     Generator *gen = nullptr;
 
   public:
@@ -47,7 +47,7 @@ class isocController : public gridSubModel
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     /** set the upper and lower limits usable for the isocController
     @param[in] maxV  the upper limit on the value
     @parma[in] minV  the lower limit on the value

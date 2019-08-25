@@ -42,6 +42,7 @@ set(
 add_library(coreObjects STATIC ${coreObject_headers} ${coreObject_sources})
 set_target_properties(coreObjects PROPERTIES FOLDER libraries)
 target_link_libraries(coreObjects PUBLIC utilities)
+target_link_libraries(coreObjects PUBLIC units-static)
 
 target_include_directories(
     coreObjects

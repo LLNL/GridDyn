@@ -33,7 +33,7 @@ coreObject *rampSource::clone (coreObject *obj) const
 
 // set properties
 void rampSource::set (const std::string &param, const std::string &val) { Source::set (param, val); }
-void rampSource::set (const std::string &param, double val, gridUnits::units_t unitType)
+void rampSource::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "dodt") || (param == "ramp") || (param == "rate"))
     {

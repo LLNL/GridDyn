@@ -24,20 +24,20 @@ class sineSource : public pulseSource
 public:
 	static const char pulsed_flag = object_flag4; //!< indicator that the source should be pulsed
 protected:
-	parameter_t frequency = 0.0;			//!<[Hz] frequency of an oscillation
-	parameter_t phase = 0.0;				//!<[rad]  the offset angle
+	model_parameter frequency = 0.0;			//!<[Hz] frequency of an oscillation
+	model_parameter phase = 0.0;				//!<[rad]  the offset angle
 	coreTime lastCycle = negTime;		///!< time of the last cycle completion
-	parameter_t Amp = 0.0;					//!< the amplitude of the pulse
+	model_parameter Amp = 0.0;					//!< the amplitude of the pulse
 	coreTime sinePeriod = maxTime;		//!< the period of the sinusoid
-	parameter_t dfdt = 0.0;				///!<[Hz/s] the rate of change of frequency
-	parameter_t dAdt = 0.0;				//!< [1/s] the rate of change of amplitude
+	model_parameter dfdt = 0.0;				///!<[Hz/s] the rate of change of frequency
+	model_parameter dAdt = 0.0;				//!< [1/s] the rate of change of amplitude
 
 public:
 	sineSource(const std::string &objName = "sineSource_#", double startVal = 0.0);
 
 	virtual coreObject * clone(coreObject *obj = nullptr) const override;
 	virtual void set(const std::string &param, const std::string &val) override;
-	virtual void set(const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+	virtual void set(const std::string &param, double val, units::unit unitType = units::defunit) override;
 
 	virtual void pFlowObjectInitializeA(coreTime time0, std::uint32_t flags) override;
 

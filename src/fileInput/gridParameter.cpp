@@ -27,7 +27,7 @@ gridParameter::gridParameter (std::string fld, std::string val)
 
 void gridParameter::reset ()
 {
-    valid = false, stringType = false, paramUnits = gridUnits::defUnit;
+    valid = false, stringType = false, paramUnits = units::defunit;
     applyIndex.resize (0);
 }
 

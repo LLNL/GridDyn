@@ -23,7 +23,7 @@ namespace loads
 {
 static typeFactory<svd> svdld ("load", stringVec{"svd", "switched shunt", "switchedshunt", "ssd"});
 
-using namespace gridUnits;
+using namespace units;
 
 svd::svd (const std::string &objName) : rampLoad (objName) {}
 svd::svd (double rP, double rQ, const std::string &objName) : rampLoad (rP, rQ, objName)
@@ -62,9 +62,9 @@ void svd::setControlBus (gridBus *cBus)
     }
 }
 
-void svd::setLoad (double level, units_t unitType)
+void svd::setLoad (double level, unit unitType)
 {
-    double dlevel = unitConversion (level, unitType, puMW, systemBasePower);
+    double dlevel = convert (level, unitType, puMW, systemBasePower);
     int setLevel = checkSetting (dlevel);
     if (setLevel >= 0)
     {
@@ -72,10 +72,10 @@ void svd::setLoad (double level, units_t unitType)
     }
 }
 
-void svd::setLoad (double Plevel, double Qlevel, units_t unitType)
+void svd::setLoad (double Plevel, double Qlevel, unit unitType)
 {
-    setYp (unitConversion (Plevel, unitType, puMW, systemBasePower));
-    double dlevel = unitConversion (Qlevel, unitType, puMW, systemBasePower);
+    setYp (convert (Plevel, unitType, puMW, systemBasePower));
+    double dlevel = convert (Qlevel, unitType, puMW, systemBasePower);
     int setLevel = checkSetting (dlevel);
     if (setLevel >= 0)
     {
@@ -304,35 +304,35 @@ void svd::set (const std::string &param, const std::string &val)
         zipLoad::set (param, val);
     }
 }
-void svd::set (const std::string &param, double val, units_t unitType)
+void svd::set (const std::string &param, double val, unit unitType)
 {
     if (param == "qlow")
     {
-        Qlow = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qlow = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qhigh")
     {
-        Qhigh = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qhigh = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "qmin")
     {
-        Qmin = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qmin = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     if (param == "qmax")
     {
-        Qmax = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        Qmax = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmax")
     {
-        Vmax = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        Vmax = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "vmin")
     {
-        Vmin = unitConversion (val, unitType, puV, systemBasePower, localBaseVoltage);
+        Vmin = convert (val, unitType, puV, systemBasePower, localBaseVoltage);
     }
     else if (param == "yq")
     {
-        double temp = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+        double temp = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
         setLoad (temp);
     }
     else if (param == "step")
@@ -349,7 +349,7 @@ void svd::set (const std::string &param, double val, units_t unitType)
         {
             if (Cblocks[0].second == 0)
             {
-                Cblocks[0].second = unitConversion (val, unitType, puMW, systemBasePower, localBaseVoltage);
+                Cblocks[0].second = convert (val, unitType, puMW, systemBasePower, localBaseVoltage);
                 Qhigh = Qlow + Cblocks[0].first * Cblocks[0].second;
                 stepCount = Cblocks[0].first;
             }
@@ -391,9 +391,9 @@ void svd::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-void svd::addBlock (int steps, double Qstep, gridUnits::units_t unitType)
+void svd::addBlock (int steps, double Qstep, units::unit unitType)
 {
-    Qstep = gridUnits::unitConversion (Qstep, unitType, gridUnits::puMW, systemBasePower);
+    Qstep = units::convert (Qstep, unitType, gridUnits::puMW, systemBasePower);
     Cblocks.emplace_back (steps, Qstep);
     Qhigh += steps * Qstep;
     stepCount += steps;

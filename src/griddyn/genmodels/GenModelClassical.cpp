@@ -456,7 +456,7 @@ static const stringVec genModelClassicStateNames{"id", "iq", "delta", "freq"};
 stringVec GenModelClassical::localStateNames () const { return genModelClassicStateNames; }
 // set parameters
 void GenModelClassical::set (const std::string &param, const std::string &val) { coreObject::set (param, val); }
-void GenModelClassical::set (const std::string &param, double val, gridUnits::units_t unitType)
+void GenModelClassical::set (const std::string &param, double val, units::unit unitType)
 {
     if (param.length () == 1)
     {
@@ -475,7 +475,7 @@ void GenModelClassical::set (const std::string &param, double val, gridUnits::un
             H = val / 2.0;
             break;
         case 'd':
-            D = gridUnits::unitConversionFreq (val, unitType, gridUnits::puHz, systemBaseFrequency);
+            D = units::convert(val, unitType, units::puHz, systemBaseFrequency);
             break;
 
         default:

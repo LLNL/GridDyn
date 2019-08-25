@@ -34,7 +34,7 @@ namespace griddyn
 {
 const static bool unimplemented = false;
 
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities::string_viewOps;
 using gmlc::utilities::string_view;
 using namespace gmlc::utilities;

@@ -132,7 +132,7 @@ void lutBlock::set (const std::string &param, const std::string &val)
     }
 }
 
-void lutBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void lutBlock::set (const std::string &param, double val, units::unit unitType)
 {
     if (param[0] == '#')
     {

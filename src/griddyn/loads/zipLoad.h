@@ -30,10 +30,10 @@ class zipLoad : public Load
     };
 
   private:
-    parameter_t Ip = 0.0;  //!< [pu] real current; (constant current)
-    parameter_t Iq = 0.0;  //!< [pu] imaginary current (constant current)
-    parameter_t Yp = 0.0;  //!< [pu] the impedance load in MW
-    parameter_t Yq = 0.0;  //!< [pu]  the reactive impedance load in MVar
+    model_parameter Ip = 0.0;  //!< [pu] real current; (constant current)
+    model_parameter Iq = 0.0;  //!< [pu] imaginary current (constant current)
+    model_parameter Yp = 0.0;  //!< [pu] the impedance load in MW
+    model_parameter Yq = 0.0;  //!< [pu]  the reactive impedance load in MVar
   protected:
     double Pout = 0.0;  //!<[puMW] the actual output power
     double Qout = 0.0;  //!<[puMVA] the actual output power
@@ -60,10 +60,10 @@ class zipLoad : public Load
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual void setFlag (const std::string &flag, bool val = true) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     virtual void updateLocalCache (const IOdata &inputs, const stateData &sD, const solverMode &sMode) override;
 

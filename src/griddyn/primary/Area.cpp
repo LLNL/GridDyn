@@ -27,7 +27,7 @@
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 using namespace gmlc::utilities;
 
 std::atomic<count_t> Area::areaCounter{0};
@@ -417,7 +417,7 @@ coreObject *Area::getSubObject(const std::string &typeName, index_t num) const
     return nullptr;
 }
 
-void Area::setAll(const std::string &type, const std::string &param, double val, gridUnits::units_t unitType)
+void Area::setAll(const std::string &type, const std::string &param, double val, units::unit unitType)
 {
     if (type == "all")
     {
@@ -957,11 +957,11 @@ void Area::getParameterStrings(stringVec &pstr, paramStringType pstype) const
     getParamString<Area, gridComponent>(this, pstr, locNumStrings, locStrStrings, flagStrings, pstype);
 }
 
-void Area::set(const std::string &param, double val, units_t unitType)
+void Area::set(const std::string &param, double val, unit unitType)
 {
     if (param == "basepower")
     {
-        systemBasePower = unitConversion(val, unitType, MW);
+        systemBasePower = convert(val, unitType, MW);
         for (auto &obj : primaryObjects)
         {
             obj->set(param, val);
@@ -972,7 +972,7 @@ void Area::set(const std::string &param, double val, units_t unitType)
         // the default unit in this case should be Hz since that is what everyone assumes but we
         // need to store it in rps NOTE: we only do this assumed conversion for an area/simulation
 
-        systemBaseFrequency = unitConversionFreq(val, (unitType == defUnit) ? Hz : unitType, rps);
+        systemBaseFrequency = convertFreq(val, (unitType == defUnit) ? Hz : unitType, rps);
 
         for (auto obj : primaryObjects)
         {
@@ -985,7 +985,7 @@ void Area::set(const std::string &param, double val, units_t unitType)
     }
 }
 
-double Area::get(const std::string &param, units_t unitType) const
+double Area::get(const std::string &param, unit unitType) const
 {
     double val = 0.0;
     size_t vali = 0;
@@ -1065,7 +1065,7 @@ double Area::get(const std::string &param, units_t unitType) const
     {
         auto unit = getObjectFunction(this, param).second;
         coreObject *tobj = const_cast<Area *>(this);
-        val = unitConversion(fptr(tobj), unit, unitType);
+        val = convert(fptr(tobj), unit, unitType);
     }
     else
     {

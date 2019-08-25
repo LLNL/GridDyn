@@ -34,7 +34,7 @@ namespace griddyn
 namespace links
 {
 	using namespace gmlc::utilities;
-using namespace gridUnits;
+using namespace units;
 adjustableTransformer::adjustableTransformer (const std::string &objName) : acLine (objName) {}
 adjustableTransformer::adjustableTransformer (double rP, double xP, const std::string &objName)
     : acLine (rP, xP, objName)
@@ -165,7 +165,7 @@ void adjustableTransformer::set (const std::string &param, const std::string &va
     }
 }
 
-void adjustableTransformer::set (const std::string &param, double val, units_t unitType)
+void adjustableTransformer::set (const std::string &param, double val, unit unitType)
 {
     if (param == "tap")
     {
@@ -174,7 +174,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     }
     else if (param == "tapangle")
     {
-        tapAngle = unitConversion (val, unitType, rad);
+        tapAngle = convert (val, unitType, rad);
         tapAngle0 = tapAngle;
     }
     else if ((param == "no_pflow_control") || (param == "no_pflow_adjustments"))
@@ -243,37 +243,37 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     }
     else if (param == "pmin")
     {
-        Pmin = unitConversion (val, unitType, puMW, systemBasePower);
+        Pmin = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "pmax")
     {
-        Pmax = unitConversion (val, unitType, puMW, systemBasePower);
+        Pmax = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "ptarget")
     {
-        Ptarget = unitConversion (val, unitType, puMW, systemBasePower);
+        Ptarget = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "qmin")
     {
-        Qmin = unitConversion (val, unitType, puMW, systemBasePower);
+        Qmin = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "qmax")
     {
-        Qmax = unitConversion (val, unitType, puMW, systemBasePower);
+        Qmax = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "qtarget")
     {
-        Qtarget = unitConversion (val, unitType, puMW, systemBasePower);
+        Qtarget = convert (val, unitType, puMW, systemBasePower);
     }
     else if (param == "target")
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            Qtarget = unitConversion (val, unitType, puMW, systemBasePower);
+            Qtarget = convert (val, unitType, puMW, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            Ptarget = unitConversion (val, unitType, puMW, systemBasePower);
+            Ptarget = convert (val, unitType, puMW, systemBasePower);
         }
         else
         {
@@ -284,11 +284,11 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            Qmin = unitConversion (val, unitType, puMW, systemBasePower);
+            Qmin = convert (val, unitType, puMW, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            Pmin = unitConversion (val, unitType, puMW, systemBasePower);
+            Pmin = convert (val, unitType, puMW, systemBasePower);
         }
         else
         {
@@ -299,11 +299,11 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            Qmax = unitConversion (val, unitType, puMW, systemBasePower);
+            Qmax = convert (val, unitType, puMW, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            Pmax = unitConversion (val, unitType, puMW, systemBasePower);
+            Pmax = convert (val, unitType, puMW, systemBasePower);
         }
         else
         {
@@ -339,7 +339,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     }
     else if (param == "mintapangle")
     {
-        minTapAngle = unitConversion (val, unitType, rad);
+        minTapAngle = convert (val, unitType, rad);
         if (tapAngle < minTapAngle)
         {
             LOG_WARNING ("specified tap angle below minimum");
@@ -356,7 +356,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     }
     else if (param == "maxtapangle")
     {
-        maxTapAngle = unitConversion (val, unitType, rad);
+        maxTapAngle = convert (val, unitType, rad);
         if (tapAngle > maxTapAngle)
         {
             LOG_WARNING ("specified tap angle above maximum");
@@ -367,7 +367,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     {
         if (cMode == control_mode_t::MW_control)
         {
-            stepSize = unitConversion (val, unitType, rad);
+            stepSize = convert (val, unitType, rad);
         }
         else
         {
@@ -403,7 +403,7 @@ void adjustableTransformer::set (const std::string &param, double val, units_t u
     }
 }
 
-double adjustableTransformer::get (const std::string &param, gridUnits::units_t unitType) const
+double adjustableTransformer::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
 
@@ -429,37 +429,37 @@ double adjustableTransformer::get (const std::string &param, gridUnits::units_t 
     }
     else if (param == "pmin")
     {
-        val = unitConversion (Pmin, puMW, unitType, systemBasePower);
+        val = convert (Pmin, puMW, unitType, systemBasePower);
     }
     else if (param == "pmax")
     {
-        val = unitConversion (Pmax, puMW, unitType, systemBasePower);
+        val = convert (Pmax, puMW, unitType, systemBasePower);
     }
     else if (param == "ptarget")
     {
-        val = unitConversion (Ptarget, puMW, unitType, systemBasePower);
+        val = convert (Ptarget, puMW, unitType, systemBasePower);
     }
     else if (param == "qmin")
     {
-        val = unitConversion (Qmin, puMW, unitType, systemBasePower);
+        val = convert (Qmin, puMW, unitType, systemBasePower);
     }
     else if (param == "qmax")
     {
-        val = unitConversion (Qmin, puMW, unitType, systemBasePower);
+        val = convert (Qmin, puMW, unitType, systemBasePower);
     }
     else if (param == "qtarget")
     {
-        val = unitConversion (Qtarget, puMW, unitType, systemBasePower);
+        val = convert (Qtarget, puMW, unitType, systemBasePower);
     }
     else if (param == "target")
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            val = unitConversion (Qtarget, puMW, unitType, systemBasePower);
+            val = convert (Qtarget, puMW, unitType, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            val = unitConversion (Ptarget, puMW, unitType, systemBasePower);
+            val = convert (Ptarget, puMW, unitType, systemBasePower);
         }
         else
         {
@@ -470,11 +470,11 @@ double adjustableTransformer::get (const std::string &param, gridUnits::units_t 
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            val = unitConversion (Qmin, puMW, unitType, systemBasePower);
+            val = convert (Qmin, puMW, unitType, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            val = unitConversion (Pmin, puMW, unitType, systemBasePower);
+            val = convert (Pmin, puMW, unitType, systemBasePower);
         }
         else
         {
@@ -485,11 +485,11 @@ double adjustableTransformer::get (const std::string &param, gridUnits::units_t 
     {
         if (cMode == control_mode_t::MVar_control)
         {
-            val = unitConversion (Qmax, puMW, unitType, systemBasePower);
+            val = convert (Qmax, puMW, unitType, systemBasePower);
         }
         else if (cMode == control_mode_t::MW_control)
         {
-            val = unitConversion (Pmax, puMW, unitType, systemBasePower);
+            val = convert (Pmax, puMW, unitType, systemBasePower);
         }
         else
         {
@@ -510,11 +510,11 @@ double adjustableTransformer::get (const std::string &param, gridUnits::units_t 
     }
     else if (param == "mintapangle")
     {
-        val = unitConversionAngle (minTapAngle, rad, unitType);
+        val = convertAngle (minTapAngle, rad, unitType);
     }
     else if (param == "maxtapangle")
     {
-        val = unitConversionAngle (maxTapAngle, rad, unitType);
+        val = convertAngle (maxTapAngle, rad, unitType);
     }
     else if ((param == "stepsize") || (param == "tapchange"))
     {

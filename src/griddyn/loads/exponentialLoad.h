@@ -24,8 +24,8 @@ class exponentialLoad : public Load
 {
   public:
   protected:
-    parameter_t alphaP = 0.0;  //!< the voltage exponent parameter for the real power output
-    parameter_t alphaQ = 0.0;  //!< the voltage exponent parameter for the reactive power output
+    model_parameter alphaP = 0.0;  //!< the voltage exponent parameter for the real power output
+    model_parameter alphaQ = 0.0;  //!< the voltage exponent parameter for the reactive power output
 
   public:
     explicit exponentialLoad (const std::string &objName = "expLoad_$");
@@ -40,7 +40,7 @@ class exponentialLoad : public Load
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual void ioPartialDerivatives (const IOdata &inputs,
                                        const stateData &sD,

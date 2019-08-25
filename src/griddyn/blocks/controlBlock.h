@@ -29,8 +29,8 @@ class controlBlock : public Block
 {
   public:
   protected:
-    parameter_t m_T1 = 0.1;  //!< delay time constant
-    parameter_t m_T2 = 0.0;  //!< upper time constant
+    model_parameter m_T1 = 0.1;  //!< delay time constant
+    model_parameter m_T2 = 0.0;  //!< upper time constant
   public:
     //!< default constructor
     explicit controlBlock (const std::string &objName = "controlBlock_#");
@@ -54,7 +54,7 @@ class controlBlock : public Block
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     virtual index_t findIndex (const std::string &field, const solverMode &sMode) const override;
 
     virtual void blockDerivative (double input,

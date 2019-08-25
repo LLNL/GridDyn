@@ -59,7 +59,7 @@ class dcLink : public Link
 
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     // dynInitializeB dynamics
     // virtual void dynObjectInitializeA (coreTime time0, std::uint32_t flags);
@@ -92,12 +92,12 @@ class dcLink : public Link
     virtual int fixRealPower (double power,
                               id_type_t measureTerminal,
                               id_type_t fixedTerminal = 0,
-                              gridUnits::units_t unitType = gridUnits::defUnit) override;
+                              units::unit unitType = units::defunit) override;
     virtual int fixPower (double power,
                           double qPower,
                           id_type_t measureTerminal,
                           id_type_t fixedTerminal = 0,
-                          gridUnits::units_t unitType = gridUnits::defUnit) override final;
+                          units::unit unitType = units::defunit) override final;
 };
 
 }  // namespace links

@@ -38,12 +38,12 @@ class Exciter : public gridSubModel
     };
 
   protected:
-    parameter_t Vrmin = -5.1;  //!< [pu] lower voltage limit
-    parameter_t Vrmax = 6;  //!< [pu] upper voltage limit
-    parameter_t Vref = 1.0;  //!< [pu] reference voltage for voltage regulator
-    parameter_t Ka = 10;  //!< [pu] amplifier gain
-    parameter_t Ta = 0.004;  //!< [s]    amplifier time constant
-    parameter_t vBias =
+    model_parameter Vrmin = -5.1;  //!< [pu] lower voltage limit
+    model_parameter Vrmax = 6;  //!< [pu] upper voltage limit
+    model_parameter Vref = 1.0;  //!< [pu] reference voltage for voltage regulator
+    model_parameter Ka = 10;  //!< [pu] amplifier gain
+    model_parameter Ta = 0.004;  //!< [s]    amplifier time constant
+    model_parameter vBias =
       0.0;  //!< bias field level for adjusting the field output so the ref can remain at some nominal level
     int limitState = 0;  //!< indicator of which state has the limits applied
   public:
@@ -56,7 +56,7 @@ class Exciter : public gridSubModel
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
     virtual stringVec localStateNames () const override;
 

@@ -275,7 +275,7 @@ void fileLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void fileLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fileLoad::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "scalefactor") || (param == "scaling"))
     {
@@ -304,10 +304,10 @@ count_t fileLoad::loadFile ()
     if (!schedLoad.empty ())
     {
         schedLoad.addData (maxTime, schedLoad.lastData ());
-        if (inputUnits != gridUnits::defUnit)
+        if (inputUnits != units::defunit)
         {
             double scalar =
-              gridUnits::unitConversion (1.0, inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
+              units::convert (1.0, inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
             if (scalar != 1.0)
             {
                 schedLoad.scaleData (scalar);

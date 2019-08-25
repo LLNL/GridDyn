@@ -48,9 +48,9 @@ public:
   virtual void pFlowObjectInitializeA (coreTime time0, std::uint32_t flags) override;
 
   virtual void set (const std::string &param,  const std::string &val) override;
-  virtual void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+  virtual void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-  virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+  virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 private:
   /** @brief helper function to generate all the internal links*/
   void generateIntermediateLinks ();

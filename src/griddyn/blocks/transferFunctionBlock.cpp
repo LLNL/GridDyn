@@ -255,7 +255,7 @@ void transferFunctionBlock::set (const std::string &param, const std::string &va
     }
 }
 
-void transferFunctionBlock::set (const std::string &param, double val, gridUnits::units_t unitType)
+void transferFunctionBlock::set (const std::string &param, double val, units::unit unitType)
 {
     // param   = gridDynSimulation::toLower(param);
     std::string pstr;

@@ -111,7 +111,7 @@ void gridSecondary::pFlowObjectInitializeA (coreTime time0, std::uint32_t flags)
 }
 
 void gridSecondary::set (const std::string &param, const std::string &val) { gridComponent::set (param, val); }
-void gridSecondary::set (const std::string &param, double val, gridUnits::units_t unitType)
+void gridSecondary::set (const std::string &param, double val, units::unit unitType)
 {
     if (!param.empty ())
     {
@@ -208,22 +208,22 @@ static const std::vector<stringVec> outputNamesStr{
 
 const std::vector<stringVec> &gridSecondary::outputNames () const { return outputNamesStr; }
 
-gridUnits::units_t gridSecondary::inputUnits (index_t inputNum) const
+units::unit gridSecondary::inputUnits (index_t inputNum) const
 {
     switch (inputNum)
     {
     case voltageInLocation:
-        return gridUnits::puV;
+        return units::puV;
     case angleInLocation:
-        return gridUnits::rad;
+        return units::rad;
     case frequencyInLocation:
-        return gridUnits::puHz;
+        return units::puHz;
     default:
-        return gridUnits::defUnit;
+        return units::defunit;
     }
 }
 
-gridUnits::units_t gridSecondary::outputUnits (index_t outputNum) const
+units::unit gridSecondary::outputUnits (index_t outputNum) const
 {
     switch (outputNum)
     {
@@ -233,7 +233,7 @@ gridUnits::units_t gridSecondary::outputUnits (index_t outputNum) const
         return gridUnits::puMW;
 
     default:
-        return gridUnits::defUnit;
+        return units::defunit;
     }
 }
 

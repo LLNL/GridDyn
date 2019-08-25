@@ -79,7 +79,7 @@ void fmiCoSimLoad3phase::set (const std::string &param, const std::string &val)
 		fmiCoSimWrapper<loads::ThreePhaseLoad>::set(param, val);
 	}
 }
-void fmiCoSimLoad3phase::set (const std::string &param, double val, gridUnits::units_t unitType)
+void fmiCoSimLoad3phase::set (const std::string &param, double val, units::unit unitType)
 {
 	if (param.empty())
 	{
