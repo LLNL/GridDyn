@@ -13,7 +13,7 @@
 
 #include "core/coreDefinitions.hpp"
 #include "core/helperObject.h"
-#include "gmlc/containers/simpleQueue.hpp"
+#include "gmlc/containers/SimpleQueue.hpp"
 #include <cstdint>
 #include <functional>
 #include <memory>
