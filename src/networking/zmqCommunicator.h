@@ -9,10 +9,7 @@
 * For details, see the LICENSE file.
 * LLNS Copyright End
 */
-
-#ifndef ZMQ_COMMUNICATOR_HEADER_
-#define ZMQ_COMMUNICATOR_HEADER_
-
+#pragma once
 #include "griddyn/comms/Communicator.h"
 #include "zmqLibrary/zmqSocketDescriptor.h"
 #include <bitset>
@@ -87,4 +84,3 @@ protected:
 
 }//namespace zmqInterface
 }//namespace griddyn
-#endif

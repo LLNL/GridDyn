@@ -11,6 +11,18 @@
 set(networking_sources networkingInterface.cpp)
 set(networking_headers networkingInterface.h)
 
+option(
+    ENABLE_TCP
+    "Enable TCP connection library"
+    ON
+)
+
+option(
+    ENABLE_DIME
+    "Enable connection with Dime"
+    OFF
+)
+
 if(ENABLE_ZMQ OR ZMQ_NEEDED)
     set(
         zmqLibrary_sources

@@ -482,7 +482,7 @@ void gridLabDLoad::runGridLabA (coreTime time, const IOdata &inputs)
     // get the right timer interval
     if (dt > (timeOneSecond))
     {
-        tInt = dt.seconds ();
+        tInt = static_cast<int>(dt.seconds ());
         m_lastCallTime += static_cast<double> (tInt);
     }
 
@@ -760,7 +760,7 @@ void gridLabDLoad::run3GridLabA (coreTime time, const IOdata &inputs)
     {
         for (size_t kk = 0; kk < task_id.size (); ++kk)
         {
-            gsm->sendVoltageStep (task_id[kk], Vg, tInt);
+            gsm->sendVoltageStep (task_id[kk], Vg, static_cast<unsigned int>(tInt));
             if (opFlags[dual_mode_flag])
             {
                 if (opFlags[dyn_initialized])

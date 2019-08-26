@@ -19,7 +19,7 @@
 #include "griddyn/Generator.h"
 #include "utilities/matrixData.hpp"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <utility>
@@ -27,8 +27,6 @@
 namespace griddyn
 {
 static optObjectFactory<gridGenOpt, Generator> opgen ("basic", "gen", 0, true);
-
-using namespace gridUnits;
 
 gridGenOpt::gridGenOpt (const std::string &objName) : gridOptObject (objName) {}
 
@@ -384,8 +382,9 @@ void gridGenOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridGenOpt::set (const std::string &param, double val, units_t unitType)
+void gridGenOpt::set(const std::string &param, double val, units::unit unitType)
 {
+	using namespace units;
     if (param[0] == 'p')
     {
         try
@@ -443,7 +442,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
         {
             Pcoeff.resize (2);
         }
-        Pcoeff[1] = unitConversion (val, unitType, CppuMWh, systemBasePower);
+        Pcoeff[1] = convert (val, unitType, currency/puMW/hr, systemBasePower);
     }
     else if ((param == "quadraticp") || (param == "quadp") || (param == "quadratic") || (param == "quad"))
     {
@@ -451,7 +450,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
         {
             Pcoeff.resize (3);
         }
-        Pcoeff[2] = unitConversion (val, unitType, CppuMW2h, systemBasePower);
+        Pcoeff[2] = convert(val, unitType, currency / (puMW.pow(2)) / hr, systemBasePower);
     }
     else if (param == "constantq")
     {
@@ -467,7 +466,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
         {
             Qcoeff.resize (2);
         }
-        Qcoeff[1] = unitConversion (val, unitType, CppuMVARh, systemBasePower);
+        Qcoeff[1] = convert(val, unitType, currency / puMW / hr, systemBasePower);
     }
     else if ((param == "quadraticq") || (param == "quadq"))
     {
@@ -475,25 +474,25 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
         {
             Qcoeff.resize (3);
         }
-        Qcoeff[1] = unitConversion (val, unitType, CppuMVAR2h, systemBasePower);
+        Qcoeff[1] = convert(val, unitType, currency / (puMW.pow(2)) / hr, systemBasePower);
     }
     else if ((param == "penalty_cost") || (param == "penalty"))
     {
-        m_penaltyCost = unitConversion (val, unitType, CppuMWh, systemBasePower);
+        m_penaltyCost = convert(val, unitType, currency / puMW / hr, systemBasePower);
     }
     else if (param == "pmax")
     {
-        m_Pmax = unitConversion (val, unitType, puMW, systemBasePower);
+        m_Pmax = convert (val, unitType, puMW, systemBasePower);
         optFlags.set (limit_override);
     }
     else if (param == "pmin")
     {
-        m_Pmin = unitConversion (val, unitType, puMW, systemBasePower);
+        m_Pmin = convert (val, unitType, puMW, systemBasePower);
         optFlags.set (limit_override);
     }
     else if (param == "forecast")
     {
-        m_forecast = unitConversion (val, unitType, puMW, systemBasePower);
+        m_forecast = convert(val, unitType, puMW, systemBasePower);
     }
     else
     {
@@ -501,7 +500,7 @@ void gridGenOpt::set (const std::string &param, double val, units_t unitType)
     }
 }
 
-double gridGenOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridGenOpt::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param == "#")

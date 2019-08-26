@@ -18,9 +18,9 @@
 #include "griddyn/comms/communicationsCore.h"
 #include "griddyn/events/eventAdapters.h"
 #include "griddyn/gridDynSimulation.h"
-#include "utilities/stringConversion.h"
+#include "gmlc/utilities/stringConversion.h"
 #include <algorithm>
-#include <utilities/mapOps.hpp>
+#include "gmlc/containers/mapOps.hpp"
 
 namespace griddyn
 {
@@ -87,10 +87,10 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate()
     pubs_.resize(pubI.size());
     for (auto &p : pubI)
     {
-        if (p.unitType != gridUnits::defUnit)
+        if (p.unitType != units::defunit)
         {
             pubs_[ii] =
-              helics::Publication(helics::GLOBAL, vFed_, p.name, p.type, gridUnits::to_string(p.unitType));
+              helics::Publication(helics::GLOBAL, vFed_, p.name, p.type, to_string(p.unitType));
         }
         else
         {
@@ -102,9 +102,9 @@ std::shared_ptr<helics::Federate> helicsCoordinator::RegisterAsFederate()
     subs_.resize(subI.size());
     for (auto &s : subI)
     {
-        if (s.unitType != gridUnits::defUnit)
+        if (s.unitType != units::defunit)
         {
-            subs_[ii] = vFed_->registerSubscription(s.name, gridUnits::to_string(s.unitType));
+            subs_[ii] = vFed_->registerSubscription(s.name, to_string(s.unitType));
         }
         else
         {
@@ -189,7 +189,7 @@ void helicsCoordinator::set(const std::string &param, const std::string &val)
     }
 }
 
-void helicsCoordinator::set(const std::string &param, double val, gridUnits::units_t unitType)
+void helicsCoordinator::set(const std::string &param, double val, units::unit unitType)
 {
     auto propVal = helics::getPropertyIndex(param);
     if (propVal >= 0)
@@ -283,7 +283,7 @@ helics::Endpoint *helicsCoordinator::getEndpointPointer(int32_t index)
 }
 
 int32_t
-helicsCoordinator::addPublication(const std::string &pubName, helics::data_type type, gridUnits::units_t unitType)
+helicsCoordinator::addPublication(const std::string &pubName, helics::data_type type, units::unit unitType)
 {
     PubInfo p;
     p.name = pubName;
@@ -295,7 +295,7 @@ helicsCoordinator::addPublication(const std::string &pubName, helics::data_type 
     return ind;
 }
 
-int32_t helicsCoordinator::addSubscription(const std::string &subName, gridUnits::units_t unitType)
+int32_t helicsCoordinator::addSubscription(const std::string &subName, units::unit unitType)
 {
     SubInfo s;
     s.name = subName;
@@ -309,7 +309,7 @@ int32_t helicsCoordinator::addSubscription(const std::string &subName, gridUnits
 void helicsCoordinator::updatePublication(int32_t index,
                                           const std::string &pubName,
                                           helics::data_type type,
-                                          gridUnits::units_t unitType)
+                                          units::unit unitType)
 {
     if (isValidIndex(index, pubI))
     {
@@ -322,14 +322,14 @@ void helicsCoordinator::updatePublication(int32_t index,
         {
             pubI[index].type = type;
         }
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
             pubI[index].unitType = unitType;
         }
     }
 }
 
-void helicsCoordinator::updateSubscription(int32_t index, const std::string &subName, gridUnits::units_t unitType)
+void helicsCoordinator::updateSubscription(int32_t index, const std::string &subName, units::unit unitType)
 {
     if (isValidIndex(index, subI))
     {
@@ -338,7 +338,7 @@ void helicsCoordinator::updateSubscription(int32_t index, const std::string &sub
             subI[index].name = subName;
             subMap_[subName] = index;
         }
-        if (unitType != gridUnits::defUnit)
+        if (unitType != units::defunit)
         {
             subI[index].unitType = unitType;
         }

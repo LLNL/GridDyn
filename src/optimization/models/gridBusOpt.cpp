@@ -21,9 +21,9 @@
 #include "griddyn/Generator.h"
 #include "griddyn/gridBus.h"
 #include "griddyn/loads/zipLoad.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 #include <cmath>
 #include <utility>
@@ -32,7 +32,7 @@ namespace griddyn
 {
 static optObjectFactory<gridBusOpt, gridBus> opbus ("basic", "bus");
 
-using namespace gridUnits;
+using namespace units;
 
 gridBusOpt::gridBusOpt (const std::string &objName) : gridOptObject (objName) {}
 
@@ -523,7 +523,7 @@ void gridBusOpt::remove (gridLinkOpt *lnk)
 void gridBusOpt::setAll (const std::string &type,
                          const std::string &param,
                          double val,
-                         gridUnits::units_t unitType)
+                         units::unit unitType)
 {
     if ((type == "gen") || (type == "generator"))
     {
@@ -550,7 +550,7 @@ void gridBusOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridBusOpt::set (const std::string &param, double val, units_t unitType)
+void gridBusOpt::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltagetolerance") || (param == "vtol"))
     {
@@ -647,7 +647,7 @@ gridOptObject *gridBusOpt::getLoad (index_t x) const
 
 gridOptObject *gridBusOpt::getGen (index_t x) const { return (isValidIndex (x, genList)) ? genList[x] : nullptr; }
 
-double gridBusOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridBusOpt::get (const std::string &param, units::unit unitType) const
 {
     double fval = kNullVal;
     count_t ival = kInvalidCount;

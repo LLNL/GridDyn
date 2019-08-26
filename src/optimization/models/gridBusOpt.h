@@ -93,11 +93,11 @@ class gridBusOpt : public gridOptObject
     void setAll (const std::string &type,
                  const std::string &param,
                  double val,
-                 gridUnits::units_t unitType = gridUnits::defUnit);
+                 units::unit unitType = units::defunit);
     void set (const std::string &param, const std::string &val) override;
-    void set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    void set (const std::string &param, double val, units::unit unitType = units::defunit) override;
     // parameter get functions
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     // void alert (coreObject *object, int code);
 

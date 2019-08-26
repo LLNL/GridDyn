@@ -711,7 +711,7 @@ std::vector<index_t> getLocalStates (const gridComponent *comp, const solverMode
 {
     std::vector<index_t> st;
     auto &off = comp->getOffsets (sMode);
-    st.reserve (off.local.algSize + off.local.diffSize + off.local.vSize + off.local.aSize);
+    st.reserve (static_cast<size_t>(off.local.algSize) + off.local.diffSize + off.local.vSize + off.local.aSize);
     for (index_t ii = 0; ii < off.local.algSize; ++ii)
     {
         st.push_back (off.algOffset + ii);

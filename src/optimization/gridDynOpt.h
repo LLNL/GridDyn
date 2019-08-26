@@ -85,9 +85,9 @@ class gridDynOptimization : public gridDynSimulation
     }
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
-    set (const std::string &param, double val, gridUnits::units_t unitType = gridUnits::defUnit) override;
+    set (const std::string &param, double val, units::unit unitType = units::defunit) override;
 
-    virtual double get (const std::string &param, gridUnits::units_t unitType = gridUnits::defUnit) const override;
+    virtual double get (const std::string &param, units::unit unitType = units::defunit) const override;
 
     void setFlag (const std::string &flag, bool val = true) override;
     void setFlags (size_t param, int val);

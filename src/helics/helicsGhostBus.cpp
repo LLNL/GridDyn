@@ -16,8 +16,8 @@
 #include "helicsCoordinator.h"
 #include "helicsLibrary.h"
 #include "helicsSupport.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
@@ -54,8 +54,8 @@ void helicsGhostBus::updateA (coreTime time)
 {
     if (!loadKey.empty ())
     {
-        double Pact = unitConversion (S.sumP (), gridUnits::puMW, outUnits, systemBasePower);
-        double Qact = unitConversion (S.sumQ (), gridUnits::puMW, outUnits, systemBasePower);
+        double Pact = convert (S.sumP (), units::puMW, outUnits, systemBasePower);
+        double Qact = convert (S.sumQ (), units::puMW, outUnits, systemBasePower);
         std::complex<double> ld (Pact, Qact);
 
         coord_->publish (loadIndex, ld);
@@ -119,7 +119,7 @@ void helicsGhostBus::set (const std::string &param, const std::string &val)
     }
     else if ((param == "outunits") || (param == "outputunits"))
     {
-        outUnits = gridUnits::getUnits (val);
+        outUnits = units::unit_cast_from_string (val);
     }
     else
     {
@@ -127,7 +127,7 @@ void helicsGhostBus::set (const std::string &param, const std::string &val)
     }
 }
 
-void helicsGhostBus::set (const std::string &param, double val, gridUnits::units_t unitType)
+void helicsGhostBus::set (const std::string &param, double val, units::unit unitType)
 {
     if (param[0] == '#')
     {

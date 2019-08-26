@@ -10,13 +10,15 @@
 * LLNS Copyright End
 */
 
+#include "core/factoryTemplates.hpp"
+#include "core/objectFactory.hpp"
+
 #include "zmqInterface.h"
 #include "dimeCommunicator.h"
 #include "dimeCollector.h"
 #include "zmqCommunicator.h"
 
-#include "core/factoryTemplates.hpp"
-#include "core/objectFactory.hpp"
+
 
 
 namespace griddyn

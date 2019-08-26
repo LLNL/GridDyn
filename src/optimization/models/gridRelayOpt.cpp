@@ -17,7 +17,7 @@
 #include "gridAreaOpt.h"
 #include "griddyn/Relay.h"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <cmath>
 #include <utility>
 
@@ -25,7 +25,7 @@ namespace griddyn
 {
 static optObjectFactory<gridRelayOpt, Relay> opRelay ("basic", "relay");
 
-using namespace gridUnits;
+using namespace units;
 
 gridRelayOpt::gridRelayOpt (const std::string &objName) : gridOptObject (objName) {}
 
@@ -198,7 +198,7 @@ void gridRelayOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridRelayOpt::set (const std::string &param, double val, units_t unitType)
+void gridRelayOpt::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltagetolerance") || (param == "vtol"))
     {
@@ -251,7 +251,7 @@ coreObject *gridRelayOpt::findByUserID (const std::string &typeName, index_t sea
     return nullptr;
 }
 
-double gridRelayOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridRelayOpt::get (const std::string &param, units::unit unitType) const
 {
     double val = kNullVal;
     if (param[0] == '#')

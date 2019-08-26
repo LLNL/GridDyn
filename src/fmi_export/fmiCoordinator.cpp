@@ -14,7 +14,7 @@
 #include "fmiCollector.h"
 #include "fmiEvent.h"
 
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include <algorithm>
 
 namespace griddyn

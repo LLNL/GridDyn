@@ -396,31 +396,31 @@ void loadPsatSupplyArray (coreObject *parentObject, const mArray &genCost, const
 
         if (genLine[6] > 0.0)
         {
-            go->set ("constantp", genLine[6], Cph);
+            go->set ("constantp", genLine[6], currency/hr);
         }
         if (genLine[9] > 0.0)
         {
-            go->set ("constantq", genLine[9], Cph);
+            go->set("constantq", genLine[9], currency / hr);
         }
         if (genLine[7] > 0.0)
         {
-            go->set ("linearp", genLine[7], CpMWh);
+            go->set("linearp", genLine[7], currency / MW/hr);
         }
         if (genLine[10] > 0.0)
         {
-            go->set ("linearq", genLine[10], CpMVARh);
+            go->set("linearq", genLine[10], currency / MVAR / hr);
         }
         if (genLine[8] != 0.0)
         {
-            go->set ("quadraticp", genLine[8], CpMW2h);
+            go->set("quadraticp", genLine[8], currency / (MW.pow(2)) / hr);
         }
         if (genLine[11] != 0.0)
         {
-            go->set ("quadraticq", genLine[11], CpMVAR2h);
+            go->set("quadraticq", genLine[11], currency / (MVAR.pow(2)) / hr);
         }
         if (genLine[13] != 0.0)
         {
-            go->set ("penalty", genLine[13], CpMWh);
+            go->set("penalty", genLine[13], currency / MW / hr);
         }
     }
 }

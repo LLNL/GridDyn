@@ -76,10 +76,17 @@ include(CMakeDependentOption)
 # ------------------------------------------------------------
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if(WIN32)
-        if(MSYS OR CYGWIN)
+        if(MSYS)
             set(
                 CMAKE_INSTALL_PREFIX
                 "/usr/local/griddyn_${GRIDDYN_VERSION_UNDERSCORE}/"
+                CACHE PATH "default install path"
+                FORCE
+            )
+		elif (CYGWIN)
+			set(
+                CMAKE_INSTALL_PREFIX
+                "/usr/local/helics_${HELICS_VERSION_UNDERSCORE}/"
                 CACHE PATH "default install path"
                 FORCE
             )
@@ -92,6 +99,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
             )
         endif()
     endif(WIN32)
+endif()
+
+if (MSYS OR CYGWIN OR UNIX OR APPLE)
+	set(UNIX_LIKE TRUE)
 endif()
 
 show_variable(
@@ -126,6 +137,17 @@ else()
 option(ENABLE_GRIDDYN_TESTS "Enable the test executables to be built" ON)
 endif()
 endif()
+
+
+option(GRIDDYN_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ${GRIDDYN_ROOT_PROJ})
+mark_as_advanced(GRIDDYN_WITH_CMAKE_PACKAGE)
+
+# Install instructions for this target
+if(GRIDDYN_WITH_CMAKE_PACKAGE)
+    set(GRIDDYN_EXPORT_COMMAND EXPORT griddyn-targets)
+else(GRIDDYN_WITH_CMAKE_PACKAGE)
+    set(GRIDDYN_EXPORT_COMMAND)
+endif(GRIDDYN_WITH_CMAKE_PACKAGE)
 
 option(
     ENABLE_FMI_EXPORT
@@ -290,22 +312,6 @@ cmake_dependent_option(
 )
 
 cmake_dependent_option(
-    ENABLE_TCP
-    "Enable TCP connection library"
-    ON
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-
-cmake_dependent_option(
-    ENABLE_DIME
-    "Enable connection with Dime"
-    OFF
-    "ENABLE_NETWORKING_LIBRARY"
-    OFF
-)
-
-cmake_dependent_option(
     ENABLE_GRIDDYN_TRACE_LOGGING
     "enable trace logging"
     ON
@@ -366,9 +372,9 @@ if(
     INTERFACE_BUILD
     OR BUILD_GRIDDYN_SHARED_LIBRARY
     OR ENABLE_FMI_EXPORT
-	OR BUILD_SHARED_LIBS
+	OR ENABLE_SHARED_LIBS
 )
-    set(BUILD_SHARED_LIBS ON)
+    set(ENABLE_SHARED_LIBS ON)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -405,7 +411,7 @@ endif()
 
    install(
     TARGETS compile_flags_target
-    EXPORT griddyn-targets
+    ${GRIDDYN_EXPORT_COMMAND}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -803,9 +809,9 @@ endif(ENABLE_CLANG_TOOLS)
 if(ENABLE_GRIDDYN_TESTS)
     # message(STATUS "otcf:${optional_component_test_files}")
     add_subdirectory(test)
-    if(BUILD_SHARED_LIBS)
+    if(ENABLE_SHARED_LIBS)
         add_subdirectory(test/testSharedLibrary)
-    endif(BUILD_SHARED_LIBS)
+    endif(ENABLE_SHARED_LIBS)
     enable_testing()
     # add_test(NAME gridDynTest COMMAND testCore)
 endif(ENABLE_GRIDDYN_TESTS)

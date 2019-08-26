@@ -15,8 +15,8 @@
 #include "griddyn/gridBus.h"
 #include "helicsCoordinator.h"
 #include "helicsLibrary.h"
-#include "utilities/stringOps.h"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/stringOps.h"
+#include "gmlc/utilities/vectorOps.hpp"
 #include <map>
 
 namespace griddyn
@@ -103,8 +103,8 @@ coreTime helicsLoad::updateB ()
         return nextUpdateTime;
     }
     res = res * scaleFactor;
-    double newP = unitConversion (res.real (), inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
-    double newQ = unitConversion (res.imag (), inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
+    double newP = convert (res.real (), inputUnits, units::puMW, systemBasePower, localBaseVoltage);
+    double newQ = convert (res.imag (), inputUnits, units::puMW, systemBasePower, localBaseVoltage);
 
     if (opFlags[use_ramp])
     {
@@ -230,7 +230,7 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     }
     else if ((param == "units") || (param == "inputunits"))
     {
-        inputUnits = gridUnits::getUnits (val);
+        inputUnits = units::unit_cast_from_string (val);
     }
 
     else
@@ -240,7 +240,7 @@ void helicsLoad::set (const std::string &param, const std::string &val)
     }
 }
 
-void helicsLoad::set (const std::string &param, double val, gridUnits::units_t unitType)
+void helicsLoad::set (const std::string &param, double val, units::unit unitType)
 {
     if ((param == "scalefactor") || (param == "scaling"))
     {
@@ -259,8 +259,8 @@ void helicsLoad::setSubscription ()
     {
         if (!loadKey.empty ())
         {
-            auto Punit = unitConversion (getP (), gridUnits::puMW, inputUnits, systemBasePower);
-            auto Qunit = unitConversion (getQ (), gridUnits::puMW, inputUnits, systemBasePower);
+            auto Punit = convert (getP (), units::puMW, inputUnits, systemBasePower);
+            auto Qunit = convert (getQ (), units::puMW, inputUnits, systemBasePower);
             std::string def =
               std::to_string (Punit / scaleFactor) + "+" + std::to_string (Qunit / scaleFactor) + "j";
             if (loadIndex < 0)

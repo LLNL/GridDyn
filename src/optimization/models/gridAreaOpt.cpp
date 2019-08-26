@@ -21,13 +21,13 @@
 #include "griddyn/Area.h"
 #include "griddyn/Link.h"
 #include "griddyn/gridBus.h"
-#include "utilities/stringOps.h"
+#include "gmlc/utilities/stringOps.h"
 #include "utilities/vectData.hpp"
-#include "utilities/vectorOps.hpp"
+#include "gmlc/utilities/vectorOps.hpp"
 
 namespace griddyn
 {
-using namespace gridUnits;
+using namespace units;
 
 static optObjectFactory<gridAreaOpt, Area> opa ("basic", "area");
 
@@ -642,7 +642,7 @@ void gridAreaOpt::remove (gridRelayOpt *relay)
 void gridAreaOpt::setAll (const std::string &type,
                           const std::string &param,
                           double val,
-                          gridUnits::units_t unitType)
+                          units::unit unitType)
 {
     if (type == "area")
     {
@@ -698,7 +698,7 @@ void gridAreaOpt::set (const std::string &param, const std::string &val)
     }
 }
 
-void gridAreaOpt::set (const std::string &param, double val, units_t unitType)
+void gridAreaOpt::set (const std::string &param, double val, unit unitType)
 {
     if ((param == "voltagetolerance") || (param == "vtol"))
     {
@@ -849,7 +849,7 @@ gridOptObject *gridAreaOpt::getRelay (index_t index) const
     return (isValidIndex (index, relayList)) ? relayList[index] : nullptr;
 }
 
-double gridAreaOpt::get (const std::string &param, gridUnits::units_t unitType) const
+double gridAreaOpt::get (const std::string &param, units::unit unitType) const
 {
     double fval = kNullVal;
     size_t ival = kNullLocation;

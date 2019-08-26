@@ -199,7 +199,7 @@ gridDynObject_setValueUnits (gridDynObject obj, const char *parameter, double va
     {
         return griddyn_invalid_object;
     }
-    auto unitType = (units == nullptr) ? gridUnits::defUnit : gridUnits::getUnits (units);
+    auto unitType = (units == nullptr) ? units::defunit : units::unit_cast_from_string (units);
     try
     {
         comp->set (parameter, value, unitType);
@@ -281,7 +281,7 @@ gridDynObject_getValueUnits (gridDynObject obj, const char *parameter, const cha
         return griddyn_invalid_object;
     }
 
-    auto unitType = (units == nullptr) ? gridUnits::defUnit : gridUnits::getUnits (units);
+    auto unitType = (units == nullptr) ? units::defunit : units::unit_cast_from_string (units);
     try
     {
         *result = comp->get (parameter, unitType);
