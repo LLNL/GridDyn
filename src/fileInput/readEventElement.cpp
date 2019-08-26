@@ -17,7 +17,7 @@
 
 #include "griddyn/events/Event.h"
 #include "gmlc/utilities/stringConversion.h"
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include <iostream>
 
 namespace griddyn
@@ -77,7 +77,7 @@ void readEventElement (std::shared_ptr<readerElement> &aP, EventInfo &gdEI, read
     for (auto &ss : unitList)
     {
         ss = ri.checkDefines (ss);
-        gdEI.units.push_back (gridUnits::getUnits (ss));
+        gdEI.units.push_back (units::unit_cast_from_string(ss));
     }
 
     gdEI.description = getElementField (aP, "description", defMatchType);

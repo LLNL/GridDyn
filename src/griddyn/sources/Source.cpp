@@ -61,7 +61,7 @@ void Source::set (const std::string &param, const std::string &val)
     }
     else if ((param == "units") || (param == "outputunits"))
     {
-        outputUnits_ = gridUnits::getUnits(val);
+        outputUnits_ = units::unit_cast_from_string(val);
     }
     else
     {

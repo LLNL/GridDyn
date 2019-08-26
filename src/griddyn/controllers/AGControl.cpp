@@ -61,8 +61,8 @@ public:
         double currentValue();
 
         double addGen(scheduler *sched);
-        void set (const std::string &param, double val,unit unitType=defUnit);
-        void set (const std::string &param, double val,unit unitType=defUnit){return set(param,&val,
+        void set (const std::string &param, double val,unit unitType=defunit);
+        void set (const std::string &param, double val,unit unitType=defunit){return set(param,&val,
 unitType);};
 
         void regChange();

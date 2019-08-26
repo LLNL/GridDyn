@@ -145,9 +145,9 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
     // power conversions
     val1 = convert (100.0, MW, kW);
     BOOST_CHECK_CLOSE (val1, 100000, 0.0001);
-    val1 = convert (100.0, MW, Watt);
+    val1 = convert (100.0, MW, W);
     BOOST_CHECK_CLOSE (val1, 100000000, 0.0001);
-    val1 = convert (1000000.0, Watt, MW);
+    val1 = convert (1000000.0, W, MW);
     BOOST_CHECK_CLOSE (val1, 1, 0.0001);
     val1 = convert (100000.0, kW, MW);
     BOOST_CHECK_CLOSE (val1, 100, 0.0001);
@@ -159,9 +159,9 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
     val1 = convert (0.17453292, rad, deg);
     BOOST_CHECK_CLOSE (val1, 10, 0.0001);
     // pu conversions
-    val1 = convert (1.0, puOhm, Ohm, 0.1, 0.6);
+    val1 = convert (1.0, puOhm, ohm, 0.1, 0.6);
     BOOST_CHECK_CLOSE (val1, 3.600, 0.001);
-    val1 = convert (1.0, puA, Amp, 0.1, 0.6);
+    val1 = convert (1.0, puA, A, 0.1, 0.6);
     BOOST_CHECK_CLOSE (val1, 166.6666666, 0.01);
 }
 
@@ -221,10 +221,10 @@ BOOST_AUTO_TEST_CASE(object_tests_probe)
 			obj->setName(std::string());
 			BOOST_CHECK_EQUAL(obj->getName(), "");
 			obj->set("", "empty"); //this should not throw an exception
-			obj->set("", 0.34, defUnit);  //this should not throw an exception
+			obj->set("", 0.34, defunit);  //this should not throw an exception
 			obj->setFlag("", false);  //This should not throw an exception
 			obj->set("#unknown", "empty"); //this should not throw an exception
-			obj->set("#unknown", 0.34, defUnit);  //this should not throw an exception
+			obj->set("#unknown", 0.34, defunit);  //this should not throw an exception
 			obj->setFlag("#unknown", false);  //This should not throw an exception
 
 			if (obj->isCloneable())

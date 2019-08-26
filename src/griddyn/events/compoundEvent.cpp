@@ -149,7 +149,7 @@ std::string compoundEvent::to_string()
 		ss << fullObjectName(targetObjects[0]) << ':' << fields[0];
 		if (units[0] != units::defunit)
 		{
-			ss << '(' << gridUnits::to_string(units[0]) << ')';
+			ss << '(' << units::to_string(units[0]) << ')';
 		}
 		ss << " = " << values[0];
 		for (index_t kk = 1; kk < static_cast<index_t>(values.size()); ++kk)
@@ -157,7 +157,7 @@ std::string compoundEvent::to_string()
 			ss << "; "<<fullObjectName(targetObjects[kk]) << ':' << fields[kk];
 			if (units[kk] != units::defunit)
 			{
-				ss << '(' << gridUnits::to_string(units[kk]) << ')';
+				ss << '(' << units::to_string(units[kk]) << ')';
 			}
 			ss << " = " << values[kk];
 		}

@@ -23,7 +23,7 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "isocController.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "utilities/matrixDataScale.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "gmlc/utilities/vectorOps.hpp"
@@ -747,7 +747,7 @@ void DynamicGenerator::set (const std::string &param, double val, unit unitType)
     }
     else if ((param == "basefrequency") || (param == "basefreq"))
     {
-        systemBaseFrequency = convertFreq (val, unitType, rps);
+        systemBaseFrequency = convert (val, unitType, rad/s);
         if (genModel != nullptr)
         {
             genModel->set (param, systemBaseFrequency);

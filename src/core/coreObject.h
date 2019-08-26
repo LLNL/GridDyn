@@ -173,7 +173,7 @@ class coreObject
      * @brief sets a numeric parameter of an object
      * @param[in] param the name of the parameter to change
      * @param[in] val the value of the parameter to set
-     * @param[in] unitType a type indicating the units of the val a defUnit default value
+     * @param[in] unitType a type indicating the units of the val a defunit default value
      */
     virtual void set (const std::string &param, double val, units::unit unitType = units::defunit);
     /** @brief get flags
@@ -190,7 +190,7 @@ class coreObject
     /**
      * @brief get a parameter from the object
      * @param[in] param the name of the parameter to get
-     * @param[in] unitType a type indicating the units of the val a defUnit default value
+     * @param[in] unitType a type indicating the units of the val a defunit default value
      * @return val the value of the parameter returns kNullVal if no property is found
      */
     virtual double get (const std::string &param, units::unit unitType = units::defunit) const;

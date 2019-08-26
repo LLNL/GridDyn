@@ -229,7 +229,7 @@ void schedulerRamp::set (const std::string &param, double val, units::unit unitT
     double temp;
     if (param == "ramp")
     {
-        rampUp = units::convert (val, unitType, gridUnits::puMWps, m_Base);
+        rampUp = units::convert (val, unitType, units::puMW/units::s, m_Base);
         rampDown = rampUp;
     }
     else if (param == "rampup")

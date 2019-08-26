@@ -170,7 +170,7 @@ void loadBusArray (coreObject *parentObject,
         }
         // buses[kk][6] is the area which should be used at some point
 
-        bus->setVoltageAngle (busData[7], convertAngle (busData[8], deg, rad));
+        bus->setVoltageAngle (busData[7], convert(busData[8], deg, rad));
         bus->set ("vmax", busData[11]);
         bus->set ("vmin", busData[12]);
     }
@@ -278,19 +278,19 @@ int loadGenArray (coreObject *parentObject, mArray &gens, std::vector<gridBus *>
             }
             if (genLine[16] != 0)
             {
-                gen->set ("rampreg", genLine[16], MWps);
+                gen->set ("rampreg", genLine[16], MW/s);
             }
             if (genLine[17] != 0)
             {
-                gen->set ("ramp10", genLine[17], MWps);
+                gen->set ("ramp10", genLine[17], MW/s);
             }
             if (genLine[18] != 0)
             {
-                gen->set ("ramp30", genLine[18], MWps);
+                gen->set ("ramp30", genLine[18], MW/s);
             }
             if (genLine[19] != 0)
             {
-                gen->set ("rampq", genLine[19], MWps);
+                gen->set ("rampq", genLine[19], MW/s);
             }
             if (genLine[20] != 0)
             {

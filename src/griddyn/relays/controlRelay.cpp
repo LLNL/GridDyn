@@ -416,7 +416,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateGetEvent (coreTime e
     actions[act].field = message->m_field;
     if (!(message->m_units.empty ()))
     {
-        actions[act].unitType = units::unit_cast(units::unit_from_string(message->m_units));
+        actions[act].unitType = units::unit_cast_from_string(message->m_units);
     }
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
 	/** this is so the get event triggers last*/
@@ -440,7 +440,7 @@ std::unique_ptr<functionEventAdapter> controlRelay::generateSetEvent (coreTime e
 
     if (!message->m_units.empty ())
     {
-        actions[act].unitType = units::unit_cast(units::unit_from_string(message->m_units));
+        actions[act].unitType = units::unit_cast_from_string(message->m_units);
     }
 
     auto fea = std::make_unique<functionEventAdapter> ([act, this]() { return executeAction (act); }, eventTime);
@@ -465,7 +465,7 @@ index_t controlRelay::getFreeAction ()
     }
     // if we didn't find an open one,  make the actions vector longer and return the new index
 
-    actions.resize ((asize + 1) * 2);  // double the size
+    actions.resize ((static_cast<size_t>(asize) + 1) * 2);  // double the size
     return asize;
 }
 }  // namespace relays

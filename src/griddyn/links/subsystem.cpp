@@ -396,7 +396,7 @@ int subsystem::fixRealPower (double power,
 {
     if (measureTerminal <= m_terminals)
     {
-        return terminalLink[measureTerminal - 1]->fixRealPower (power, cterm[measureTerminal - 1], unitType);
+        return terminalLink[measureTerminal - 1]->fixRealPower (power, cterm[measureTerminal - 1],1, unitType);
     }
     return 0;
 }
@@ -409,7 +409,7 @@ int subsystem::fixPower (double rPower,
 {
     if (measureTerminal <= m_terminals)
     {
-        return terminalLink[measureTerminal - 1]->fixPower (rPower, qPower, cterm[measureTerminal - 1], unitType);
+        return terminalLink[measureTerminal - 1]->fixPower (rPower, qPower, cterm[measureTerminal - 1],1, unitType);
     }
     return 0;
 }

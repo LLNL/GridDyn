@@ -17,7 +17,6 @@
 #include "core/factoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "gmlc/utilities/stringOps.h"
-#include "utilities/units.h"
 
 #include "Player.h"
 #include "compoundEvent.h"

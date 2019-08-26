@@ -134,7 +134,7 @@ void sensor::add (Block *blk)
 {
     if (blk->locIndex != kNullLocation)
     {
-        ensureSizeAtLeast (filterBlocks, blk->locIndex + 1, static_cast<Block *> (nullptr));
+        ensureSizeAtLeast (filterBlocks, static_cast<size_t>(blk->locIndex) + 1, static_cast<Block *> (nullptr));
         filterBlocks[blk->locIndex] = blk;
     }
     else
@@ -277,7 +277,7 @@ void sensor::set (const std::string &param, const std::string &val)
         {
             if (num >= static_cast<int> (outputs.size ()))
             {
-                outputStrings.resize (num + 1);
+                outputStrings.resize (static_cast<size_t>(num) + 1);
             }
             outputStrings[num] = splitline (val);
         }
@@ -304,7 +304,7 @@ void sensor::set (const std::string &param, const std::string &val)
         {
             if (seq.size () == 2u)
             {
-                ensureSizeAtLeast (blockInputs, seq[1] + 1, -1);
+                ensureSizeAtLeast (blockInputs, static_cast<size_t>(seq[1]) + 1, -1);
                 blockInputs[seq[1]] = seq[0];
             }
             else
@@ -521,7 +521,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         // only local set
         try
         {
-            set (convertToLowerCase (m->m_field), m->m_value, units::unit_cast(units::unit_from_string (m->m_units)));
+            set (convertToLowerCase (m->m_field), m->m_value, units::unit_cast_from_string (m->m_units));
             if (!opFlags[no_message_reply])  // unless told not to respond return with the
             {
                 auto gres = std::make_shared<commMessage> (cm::SET_SUCCESS);
@@ -544,7 +544,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         break;
     case cm::GET:
     {
-        val = get(convertToLowerCase(m->m_field), units::unit_cast(units::unit_from_string(m->m_units)));
+        val = get(convertToLowerCase(m->m_field), units::unit_cast_from_string(m->m_units));
         auto reply = std::make_shared<commMessage> (cm::GET_RESULT);
         auto rep = reply->getPayload<cm> ();
         assert (rep);
@@ -573,7 +573,7 @@ void sensor::receiveMessage (std::uint64_t sourceID, std::shared_ptr<commMessage
         rep->multiFields = m->multiFields;
         for (const auto &fieldName : m->multiFields)
         {
-            val = get(convertToLowerCase(fieldName), units::unit_cast(units::unit_from_string(m->m_units)));
+            val = get(convertToLowerCase(fieldName), units::unit_cast_from_string(m->m_units));
             m->multiValues.push_back (val);
         }
         rep->m_time = prevTime;

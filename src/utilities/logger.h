@@ -1,7 +1,8 @@
 /*
-Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Copyright © 2017-2019,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC.  See
+the top-level NOTICE for additional details. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
 */
 /*
  * LLNS Copyright Start
@@ -14,66 +15,19 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
+
 #pragma once
 
-#include "BlockingQueue.hpp"
-#include "TripWire.hpp"
 #include <atomic>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
-#include <thread>
+#include <mutex>
 
-namespace utilities
+namespace helics
 {
-/** class to manage a single thread for all logging*/
-class LoggingCore
-{
-  private:
-    static std::atomic<bool> fastShutdown;  // set to true to enable a fast shutdown
-    std::thread loggingThread;  //!< the thread object containing the thread running the actual Logger
-    std::vector<std::function<void(std::string &&message)>> functions;  //!< container for the functions
-    std::mutex functionLock;  //!< lock for updating the functions
-    BlockingQueue<std::pair<int32_t, std::string>>
-      loggingQueue;  //!< the actual queue containing the strings to log
-    tripwire::TripWireDetector tripDetector;
-
-  public:
-    /** default constructor*/
-    LoggingCore ();
-    /** destructor*/
-    ~LoggingCore ();
-    /** add a message for the LoggingCore or just general console print
-     */
-    void addMessage (const std::string &message);
-    /** move a message for the LoggingCore or just general console print
-     */
-    void addMessage (std::string &&message);
-    /** add a message for a specific Logger
-    @param index the index of the function callback to use
-    @param message the message to send
-    */
-    void addMessage (int index, const std::string &message);
-    /** add a message for a specific Logger
-    @param index the index of the function callback to use
-    @param message the message to send
-    */
-    void addMessage (int index, std::string &&message);
-    /** add a file processing callback (not just files)
-    @param newFunction the callback to call on receipt of a message
-    */
-    int addFileProcessor (std::function<void(std::string &&message)> newFunction);
-    /** remove a function callback*/
-    void haltOperations (int);
-    /** update a callback for a particular instance*/
-    void updateProcessingFunction (int index, std::function<void(std::string &&message)> newFunction);
-    /** enable a fast shutdown in situations where a thread may be force-ably terminated*/
-    static void setFastShutdown ();
-
-  private:
-    void processingLoop ();
-};
+class LoggingCore;
 
 /** class implementing a thread safe Logger
 @details the Logger uses a queuing mechanism and condition variable to store messages to a queue and print/display
@@ -93,36 +47,36 @@ class Logger
     /** default constructor*/
     Logger ();
     /** construct and link to the specified logging Core*/
-    Logger (std::shared_ptr<LoggingCore> core);
+    explicit Logger (std::shared_ptr<LoggingCore> core);
     /**destructor*/
     ~Logger ();
     /** open a file to write the log messages
-    @param[in] file the name of the file to write messages to*/
+    @param file the name of the file to write messages to*/
     void openFile (const std::string &file);
     /** function to start the logging thread
-    @param[in] cLevel the console print level
-    @param[in] fLevel the file print level  messages coming in below these levels will be printed*/
+    @param cLevel the console print level
+    @param fLevel the file print level  messages coming in below these levels will be printed*/
     void startLogging (int cLevel, int fLevel);
     /** overload of @see startLogging with unspecified logging levels*/
     void startLogging () { startLogging (consoleLevel, fileLevel); }
     /** stop logging for a time messages received while halted are ignored*/
     void haltLogging ();
     /** log a message at a particular level
-    @param[in] level the level of the message
-    @param[in] logMessage the actual message to log
+    @param level the level of the message
+    @param logMessage the actual message to log
     */
     void log (int level, std::string logMessage);
     /** message to log without regard for levels*
-    @param[in] logMessage the message to log
+    @param logMessage the message to log
     */
-    void log (std::string logMessage) { log (-100000, logMessage); }
+    void log (std::string logMessage) { log (-100000, std::move (logMessage)); }
     /** flush the log queue*/
     void flush ();
     /** check if the Logger is running*/
     bool isRunning () const;
     /** alter the printing levels
-    @param[in] cLevel the level to print to the console
-    @param[in] fLevel the level to print to the file if it is open*/
+    @param cLevel the level to print to the console
+    @param fLevel the level to print to the file if it is open*/
     void changeLevels (int cLevel, int fLevel);
 
   private:
@@ -142,25 +96,25 @@ class LoggerNoThread
     /** default constructor*/
     LoggerNoThread ();
     /**this does nothing with the argument since it is not threaded here to match the API of Logger*/
-    LoggerNoThread (const std::shared_ptr<LoggingCore> &core);
+    explicit LoggerNoThread (const std::shared_ptr<LoggingCore> &core);
     /** open a file to write the log messages
-    @param[in] file the name of the file to write messages to*/
+    @param file the name of the file to write messages to*/
     void openFile (const std::string &file);
     /** function to start the logging thread
-    @param[in] cLevel the console print level
-    @param[in] fLevel the file print level  messages coming in below these levels will be printed*/
+    @param cLevel the console print level
+    @param fLevel the file print level  messages coming in below these levels will be printed*/
     void startLogging (int cLevel, int fLevel);
-    /** overload of ::startLogging with unspecified logging levels*/
+    /** overload of /ref startLogging with unspecified logging levels*/
     void startLogging () { startLogging (consoleLevel, fileLevel); }
     // NOTE:: the interface for log in the noThreadLogging is slightly different
     // due to the threaded Logger making use of move semantics which isn't that useful in the noThreadLogger
     /** log a message at a particular level
-    @param[in] level the level of the message
-    @param[in] logMessage the actual message to log
+    @param level the level of the message
+    @param logMessage the actual message to log
     */
     void log (int level, const std::string &logMessage);
     /** message to log without regard for levels*
-    @param[in] logMessage the message to log
+    @param logMessage the message to log
     */
     void log (const std::string &logMessage) { log (-100000, logMessage); }
     /** check if the logging thread is running*/
@@ -168,36 +122,8 @@ class LoggerNoThread
     /** flush the log queue*/
     void flush ();
     /** alter the printing levels
-    @param[in] cLevel the level to print to the console
-    @param[in] fLevel the level to print to the file if it is open*/
+    @param cLevel the level to print to the console
+    @param fLevel the level to print to the file if it is open*/
     void changeLevels (int cLevel, int fLevel);
 };
-
-/** class defining a singleton manager for all logging use*/
-class LoggerManager
-{
-  private:
-    static std::map<std::string, std::shared_ptr<LoggerManager>>
-      loggers;  //!< container for pointers to all the available contexts
-    std::string name;  //!< context name
-    std::shared_ptr<LoggingCore> loggingControl;  //!< pointer to the actual Logger
-    LoggerManager (const std::string &loggerName);
-
-  public:
-    /** get a pointer to a logging manager so it cannot go out of scope*/
-    static std::shared_ptr<LoggerManager> getLoggerManager (const std::string &loggerName = "");
-    /** get a pointer to a logging core*/
-    static std::shared_ptr<LoggingCore> getLoggerCore (const std::string &loggerName = "");
-    /** close the named Logger
-    @details prevents the Logger from being retrieved through this class
-    but does not necessarily destroy the Logger*/
-    static void closeLogger (const std::string &loggerName = "");
-    /** sends a message to the default Logger*/
-    static void logMessage (const std::string &message);
-
-    /*destructor*/
-    virtual ~LoggerManager ();
-    /** get the name of the logger*/
-    const std::string &getName () const { return name; }
-};
-}  // namespace utilities
+}  // namespace helics

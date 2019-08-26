@@ -16,23 +16,20 @@ set(
     saturation.cpp
     ThreePhaseFunctions.cpp
     matrixOps.cpp
-    units.cpp
     functionInterpreter.cpp
     workQueue.cpp
     zipUtilities.cpp
     matrixCreation.cpp
     logger.cpp
+	loggerCore.cpp
     matrixDataSparse.cpp
     OperatingBoundary.cpp
-    TripWire.cpp
 )
 
 set(
     utilities_headers
-    units.h
     dataDictionary.hpp
     ThreePhaseFunctions.h
-    optionalDef.hpp
     gridRandom.h
     saturation.h
     vectData.hpp
@@ -51,15 +48,13 @@ set(
     matrixDataFilter.hpp
     matrixDataCustomWriteOnly.hpp
     functionInterpreter.h
-    TripWire.hpp
     workQueue.h
-    simpleQueue.hpp
     zipUtilities.h
-    mapOps.hpp
     valuePredictor.hpp
     matrixCreation.h
     indexTypes.hpp
     logger.h
+	loggerCore.hpp
     OperatingBoundary.h
 )
 

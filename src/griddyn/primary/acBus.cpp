@@ -26,6 +26,7 @@
 #include "gmlc/utilities/vectorOps.hpp"
 //#include "matrixDataSparse.hpp"
 #include "gmlc/utilities/stringOps.h"
+#include "griddyn/compiler-config.h"
 
 #include <cassert>
 #include <cmath>
@@ -1320,7 +1321,7 @@ void acBus::set (const std::string &param, double val, unit unitType)
     }
     else if ((param == "basefrequency") || (param == "basefreq"))
     {
-        systemBaseFrequency = convertFreq (val, unitType, rps);
+        systemBaseFrequency = convert (val, unitType, rad/s);
 
         for (auto &gen : attachedGens)
         {
@@ -3133,7 +3134,7 @@ double acBus::get (const std::string &param, unit unitType) const
     }
     else if (param == "atarget")
     {
-        val = convertAngle (aTarget, rad, unitType);
+        val = convert (aTarget, rad, unitType);
     }
     else if (param == "participation")
     {

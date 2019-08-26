@@ -89,11 +89,11 @@ void txLifeSpan::set (const std::string &param, double val, unit unitType)
 {
 	if ((param == "initial") || (param == "initiallife"))
 	{
-		initialLife = convertTime(val, unitType, hour);
+		initialLife = convert(val, unitType, hr);
 	}
 	else if (param == "basetemp")
 	{
-		baseTemp = convertTemperature(val, unitType, C);
+		baseTemp = convert(val, unitType, degC);
 	}
 	else if ((param == "agingrate") || (param == "agingconstant"))
 	{

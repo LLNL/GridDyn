@@ -393,7 +393,7 @@ void svd::set (const std::string &param, double val, unit unitType)
 
 void svd::addBlock (int steps, double Qstep, units::unit unitType)
 {
-    Qstep = units::convert (Qstep, unitType, gridUnits::puMW, systemBasePower);
+    Qstep = units::convert (Qstep, unitType, units::puMW, systemBasePower);
     Cblocks.emplace_back (steps, Qstep);
     Qhigh += steps * Qstep;
     stepCount += steps;

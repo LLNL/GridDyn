@@ -30,7 +30,7 @@
 
 #include "utilities/matrixDataSparse.hpp"
 #include "gmlc/utilities/stringOps.h"
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <boost/filesystem.hpp>
 

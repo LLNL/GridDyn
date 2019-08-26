@@ -135,7 +135,7 @@ units::unit readUnits (const std::shared_ptr<readerElement> &element, const std:
     }
     if (!uname.empty ())
     {
-        auto retUnits = gridUnits::getUnits (uname);
+        auto retUnits = units::unit_cast_from_string(uname);
         if (retUnits == units::defunit)
         {
             WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
@@ -149,7 +149,7 @@ units::unit readUnits (const std::shared_ptr<readerElement> &element, const std:
         if (p != std::string::npos)
         {
             uname = field.substr (p + 1, field.length () - 2 - p);
-            auto retUnits = gridUnits::getUnits (uname);
+            auto retUnits = units::unit_cast_from_string(uname);
             if (retUnits == units::defunit)
             {
                 WARNPRINT (READER_WARN_ALL, "unknown unit " << uname);
@@ -255,7 +255,7 @@ void checkForEndUnits (gridParameter &param, const std::string &paramStr)
     if (val != readerNullVal)
     {
         auto N = paramStr.find_last_of ("012345689. )]");
-        auto Unit = gridUnits::getUnits (paramStr.substr (N + 1));
+        auto Unit = units::unit_cast_from_string(paramStr.substr (N + 1));
         if (Unit != units::defunit)
         {
             param.value = val;
@@ -295,7 +295,7 @@ void objSetAttributes (coreObject *obj,
             if (p != std::string::npos)
             {
                 std::string ustring = fieldName.substr (p + 1, fieldName.length () - 2 - p);
-                unitType = gridUnits::getUnits (ustring);
+                unitType = units::unit_cast_from_string(ustring);
                 fieldName = fieldName.substr (0, p - 1);
             }
         }
@@ -458,7 +458,7 @@ void readConfigurationFields (std::shared_ptr<readerElement> &sim, readerInfo & 
             {
                 try
                 {
-                    auto seed = std::stoll (cfgAtt.getText ());
+                    auto seed = std::stoul(cfgAtt.getText ());
                     utilities::gridRandom::setSeed (seed);
                 }
                 catch (const std::invalid_argument &)

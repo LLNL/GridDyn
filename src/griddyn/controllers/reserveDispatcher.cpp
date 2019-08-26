@@ -55,8 +55,8 @@ public:
 
         virtual void addGen(scheduler *sched);
         virtual void removeSched(scheduler *sched);
-        virtual void set (const std::string &param, double val,unit unitType=defUnit);
-        virtual void set (const std::string &param, double val,unit unitType=defUnit){return set(param,&val,
+        virtual void set (const std::string &param, double val,unit unitType=defunit);
+        virtual void set (const std::string &param, double val,unit unitType=defunit){return set(param,&val,
 unitType);};
 
         double getAvailable(){return sum(&resAvailable)-sum(&resUsed);};

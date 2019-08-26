@@ -91,7 +91,7 @@ void infiniteBus::set (const std::string &param, double val, unit unitType)
     }
     else if (param == "dfdt")
     {
-        dfdt = convertFreq (val, unitType, puHz, systemBaseFrequency);
+        dfdt = convert (val, unitType, puHz, systemBaseFrequency);
     }
     else
     {

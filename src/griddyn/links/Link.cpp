@@ -658,7 +658,7 @@ double Link::getBusAngle (id_type_t busId) const
 {
     if (busId < 500_ind)
     {
-        auto B = getBus (busId);
+        auto B = getBus (static_cast<index_t>(busId));
         if (B != nullptr)
         {
             return B->getAngle ();
@@ -674,7 +674,7 @@ double Link::getBusAngle (id_type_t busId) const
         return (B2 != nullptr) ? B2->getAngle () : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus (busId);
+    auto B = getBus (static_cast<index_t>(busId));
     if (B != nullptr)
     {
         return B->getAngle ();
@@ -686,7 +686,7 @@ double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_
 {
     if (busId < 500_ind)
     {
-        auto B = getBus (busId);
+        auto B = getBus (static_cast<index_t>(busId));
         if (B != nullptr)
         {
             return B->getAngle ();
@@ -702,7 +702,7 @@ double Link::getBusAngle (const stateData &sD, const solverMode &sMode, id_type_
         return (B2 != nullptr) ? B2->getAngle (sD, sMode) : kNullVal;
     }
     // now just default to the original behavior
-    auto B = getBus (busId);
+    auto B = getBus (static_cast<index_t>(busId));
     if (B != nullptr)
     {
         return B->getAngle (sD, sMode);

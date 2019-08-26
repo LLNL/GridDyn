@@ -20,7 +20,7 @@
 #include "functionInterpreter.h"
 #include "griddyn/griddyn-config.h"
 #include "gridRandom.h"
-#include "mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>

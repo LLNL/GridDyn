@@ -510,11 +510,11 @@ double adjustableTransformer::get (const std::string &param, units::unit unitTyp
     }
     else if (param == "mintapangle")
     {
-        val = convertAngle (minTapAngle, rad, unitType);
+        val = convert (minTapAngle, rad, unitType);
     }
     else if (param == "maxtapangle")
     {
-        val = convertAngle (maxTapAngle, rad, unitType);
+        val = convert(maxTapAngle, rad, unitType);
     }
     else if ((param == "stepsize") || (param == "tapchange"))
     {
@@ -1147,12 +1147,12 @@ void adjustableTransformer::outputPartialDerivatives (id_type_t busId,
         if (cMode == control_mode_t::MW_control)
         {
             tapAngle = sD.state[offset];
-            tapAnglePartial (busId, sD, md, sMode);
+            tapAnglePartial (static_cast<index_t>(busId), sD, md, sMode);
         }
         else
         {
             tap = sD.state[offset];
-            tapPartial (busId, sD, md, sMode);
+            tapPartial(static_cast<index_t>(busId), sD, md, sMode);
         }
     }
     else if ((isDynamic (sMode)) && (opFlags[has_dyn_states]))

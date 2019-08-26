@@ -303,7 +303,7 @@ void sourceLoad::set (const std::string &param, double val, units::unit unitType
         {
             if ((static_cast<int> (sources.size ()) > keyind->second) && (sources[keyind->second] != nullptr))
             {
-                sources[keyind->second]->set ("level", units::convert (val, unitType, gridUnits::puMW,
+                sources[keyind->second]->set ("level", units::convert (val, unitType, units::puMW,
                                                                                   systemBasePower));
                 return;
             }

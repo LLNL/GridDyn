@@ -155,31 +155,31 @@ void txThermalModel::set(const std::string &param, double val, unit unitType)
 {
 	if ((param == "ambient") || (param == "ambienttemp"))
 	{
-		ambientTemp = convertTemperature(val, unitType, C);
+		ambientTemp = convert(val, unitType, degC);
 	}
 	else if ((param == "dtempdt") || (param == "temp_rate_of_change"))
 	{
-		dTempdt = convertTemperature(val, unitType, C);
+		dTempdt = convert(val, unitType, degC);
 	}
 	else if ((param == "dths") || (param == "rated_hot_spot_rise") || (param == "dthsr"))
 	{
-		DThs = convertTemperature(val, unitType, C);
+		DThs = convert(val, unitType, degC);
 	}
 	else if ((param == "dttor") || (param == "rated_top_oil_rise") || (param == "dtto"))
 	{
-		DTtor = convertTemperature(val, unitType, C);
+		DTtor = convert(val, unitType, degC);
 	}
 	else if ((param == "ttor") || (param == "oil_time_constant"))
 	{
-		Ttor = convertTime(val, unitType, sec);
+		Ttor = convert(val, unitType, second);
 	}
 	else if ((param == "tgr") || (param == "winding_time_constant"))
 	{
-		Tgr = convertTime(val, unitType, sec);
+		Tgr = convert(val, unitType, second);
 	}
 	else if ((param == "alarmtemp") || (param == "alarmtemp1"))
 	{
-		alarmTemp1 = convertTemperature(val, unitType, C);
+		alarmTemp1 = convert(val, unitType, degC);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(0)->setConditionRHS(alarmTemp1);
@@ -188,7 +188,7 @@ void txThermalModel::set(const std::string &param, double val, unit unitType)
 	}
 	else if (param == "alarmtemp2")
 	{
-		alarmTemp2 = convertTemperature(val, unitType, C);
+		alarmTemp2 = convert(val, unitType, degC);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(1)->setConditionRHS(alarmTemp1);
@@ -197,7 +197,7 @@ void txThermalModel::set(const std::string &param, double val, unit unitType)
 	}
 	else if (param == "cutouttemp")
 	{
-		cutoutTemp = convertTemperature(val, unitType, C);
+		cutoutTemp = convert(val, unitType, degC);
 		if (opFlags[dyn_initialized])
 		{
 			getCondition(2)->setConditionRHS(alarmTemp1);
@@ -206,7 +206,7 @@ void txThermalModel::set(const std::string &param, double val, unit unitType)
 	}
 	else if (param == "alarmdelay")
 	{
-		alarmDelay = convertTime(val, unitType, sec);
+		alarmDelay = convert(val, unitType, second);
 		if (opFlags[dyn_initialized])
 		{
 			setActionTrigger(0, 0, alarmDelay);

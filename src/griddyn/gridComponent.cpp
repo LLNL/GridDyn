@@ -664,7 +664,7 @@ bool gridComponent::subObjectSet (const std::string &param, double val, units::u
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != units::unit::defUnit)
+            if (pinfo.m_unitType != units::defunit)
             {
                 pinfo.m_obj->set (pinfo.m_field, val, pinfo.m_unitType);
             }
@@ -722,7 +722,7 @@ double gridComponent::subObjectGet (const std::string &param, units::unit unitTy
         objInfo pinfo (param, this);
         if (pinfo.m_obj != nullptr)
         {
-            if (pinfo.m_unitType != units::unit::defUnit)
+            if (pinfo.m_unitType != units::defunit)
             {
                 return pinfo.m_obj->get (pinfo.m_field, pinfo.m_unitType);
             }
@@ -791,11 +791,11 @@ void gridComponent::set (const std::string &param, double val, units::unit unitT
     else if ((param == "basevoltage") || (param == "vbase") || (param == "voltagebase") || (param == "basev") ||
              (param == "bv") || (param == "base voltage"))
     {
-        localBaseVoltage = units::convert (val, unitType, gridUnits::kV);
+        localBaseVoltage = units::convert (val, unitType, units::kV);
     }
     else if ((param == "basefreq") || (param == "basefrequency") || (param == "systembasefrequency"))
     {
-        systemBaseFrequency = units::convertFreq (val, unitType, gridUnits::rps);
+        systemBaseFrequency = units::convert(val, unitType, units::rad/units::s);
         setAll ("all", "basefreq", systemBasePower);
     }
     else if (subObjectSet (param, val, unitType))
@@ -827,7 +827,7 @@ double gridComponent::get (const std::string &param, units::unit unitType) const
     double out = kNullVal;
     if (param == "basepower")
     {
-        out = units::convert (systemBasePower, gridUnits::MVAR, unitType, systemBasePower);
+        out = units::convert (systemBasePower, units::MVAR, unitType, systemBasePower);
     }
     else if (param == "subobjectcount")
     {
@@ -835,11 +835,11 @@ double gridComponent::get (const std::string &param, units::unit unitType) const
     }
     else if (param == "basefrequency")
     {
-        out = units::convertFreq (systemBaseFrequency, gridUnits::rps, unitType);
+        out = units::convert (systemBaseFrequency, units::rad/units::s, unitType);
     }
     else if (param == "basevoltage")
     {
-        out = units::convertFreq (localBaseVoltage, gridUnits::kV, unitType);
+        out = units::convert (localBaseVoltage, units::kV, unitType);
     }
     else if (param == "jacsize")
     {

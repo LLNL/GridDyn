@@ -9,12 +9,10 @@
  * For details, see the LICENSE file.
  * LLNS Copyright End
  */
-
-#ifndef PROPERTY_BUFFER_H_
-#define PROPERTY_BUFFER_H_
+#pragma once
 
 #include "core/coreOwningPtr.hpp"
-#include "utilities/units.h"
+#include "units/units.hpp"
 #include <extra_includes/variant.hpp>
 #include <string>
 #include <utility>
@@ -97,4 +95,3 @@ class propertyBuffer
 };
 
 }  // namespace griddyn
-#endif

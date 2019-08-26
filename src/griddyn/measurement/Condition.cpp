@@ -13,7 +13,7 @@
 #include "Condition.h"
 #include "grabberInterpreter.hpp"
 #include "grabberSet.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 
 namespace griddyn
 {

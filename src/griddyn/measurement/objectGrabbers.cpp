@@ -22,7 +22,7 @@
 #include "../relays/sensor.h"
 
 #include "../solvers/solverMode.hpp"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include <iterator>
 #include <map>
@@ -31,8 +31,8 @@ namespace griddyn
 {
 using namespace units;
 
-static const fobjectPair nullPair{nullptr, defUnit};
-static const fvecPair nullVecPair{nullptr, defUnit};
+static const fobjectPair nullPair{nullptr, defunit};
+static const fvecPair nullVecPair{nullptr, defunit};
 
 // TODO:: merge this map with the one in stateGrabber
 /** map of all the alternate strings that can be used*/
@@ -137,19 +137,19 @@ static const std::map<std::string, std::string> stringTranslate{{"v", "voltage"}
 static const std::map<std::string, fobjectPair> objectFunctions{
   {"connected",
    {[](coreObject *obj) { return static_cast<double> (static_cast<gridComponent *> (obj)->isConnected ()); },
-    defUnit}},
+    defunit}},
   {"enabled",
    {[](coreObject *obj) { return static_cast<double> (static_cast<gridComponent *> (obj)->isEnabled ()); },
-    defUnit}},
+    defunit}},
   {"armed",
    {[](coreObject *obj) { return static_cast<double> (static_cast<gridComponent *> (obj)->isArmed ()); },
-    defUnit}},
-  {"output", {[](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (0); }, defUnit}},
+    defunit}},
+  {"output", {[](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (0); }, defunit}},
   {"deriv",
    {[](coreObject *obj) {
         return static_cast<gridComponent *> (obj)->getDoutdt (noInputs, emptyStateData, cLocalSolverMode, 0);
     },
-    defUnit}}};
+    defunit}}};
 
 static const std::map<std::string, fobjectPair> busFunctions{
   {"voltage", {[](coreObject *obj) { return static_cast<gridBus *> (obj)->getVoltage (); }, puV}},
@@ -309,7 +309,7 @@ static const std::map<std::string, fobjectPair> linkFunctions{
                                      (!static_cast<Link *> (obj)->checkFlag (Link::switch2_open_flag))) &&
                                     (static_cast<Link *> (obj)->isEnabled ()));
     },
-    defUnit}},
+    defunit}},
 };
 
 fobjectPair getObjectFunction (const gridComponent *comp, const std::string &field)
@@ -324,7 +324,7 @@ fobjectPair getObjectFunction (const gridComponent *comp, const std::string &fie
     auto num = gmlc::utilities::stringOps::trailingStringInt (field, fld);
     if ((fld == "output") || (fld == "o") || (fld == "out"))
     {
-        return {[num](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (num); }, defUnit};
+        return {[num](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (num); }, defunit};
     }
     if ((fld == "deriv") || (fld == "dodt") || (fld == "doutdt"))
     {
@@ -332,7 +332,7 @@ fobjectPair getObjectFunction (const gridComponent *comp, const std::string &fie
                     return static_cast<gridComponent *> (obj)->getDoutdt (noInputs, emptyStateData,
                                                                           cLocalSolverMode, num);
                 },
-                defUnit};
+                defunit};
     }
 
     // try to lookup named outputs
@@ -340,7 +340,7 @@ fobjectPair getObjectFunction (const gridComponent *comp, const std::string &fie
     if (outIndex != kNullLocation)
     {
         return {[outIndex](coreObject *obj) { return static_cast<gridComponent *> (obj)->getOutput (outIndex); },
-                defUnit};
+                defunit};
     }
     return nullPair;
 }
@@ -426,7 +426,7 @@ fobjectPair getObjectFunction (const Relay *rel, const std::string &field)
 
     std::string fld;
     int num = gmlc::utilities::stringOps::trailingStringInt (field, fld, 0);
-    fobjectPair retPair (nullptr, defUnit);
+    fobjectPair retPair (nullptr, defunit);
     if ((field == "cv") || (field == "currentvalue") || (field == "value") || (field == "output"))
     {
         retPair.first = [](coreObject *obj) -> double { return static_cast<Relay *> (obj)->getOutput (0); };
@@ -511,7 +511,7 @@ fvecPair getObjectVectorFunction (const gridComponent * /*comp*/, const std::str
                     data.clear ();
                     std::copy (B.begin (), B.end (), std::back_inserter (data));
                 },
-                defUnit};
+                defunit};
     }
     return nullVecPair;
 }

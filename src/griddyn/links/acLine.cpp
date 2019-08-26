@@ -298,7 +298,7 @@ void acLine::set (const std::string &param, double val, unit unitType)
     stringOps::trailingStringInt (param, outparam, 1);
     if (outparam == "length")
     {
-        length = convertDistance (val, unitType, km);
+        length = convert (val, unitType, km);
     }
     else if ((outparam == "tap") || (param == "ratio"))
     {
@@ -311,11 +311,11 @@ void acLine::set (const std::string &param, double val, unit unitType)
     else if (outparam == "fault")
     {
         double temp = val;
-        if (unitType != defUnit)
+        if (unitType != defunit)
         {
             if (length > 0.0)
             {
-                temp = convertDistance (val, unitType, km);
+                temp = convert (val, unitType, km);
                 temp = temp / length;
             }
         }

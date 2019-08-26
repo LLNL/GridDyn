@@ -506,7 +506,7 @@ void dcBus::jacobianElements (const IOdata & /*inputs*/,
             }
         }
     }
-    int gid = getID ();
+    id_type_t gid = getID ();
     for (auto &link : attachedLinks)
     {
         link->outputPartialDerivatives (gid, sD, od, sMode);

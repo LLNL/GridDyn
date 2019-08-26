@@ -228,9 +228,9 @@ units::unit gridSecondary::outputUnits (index_t outputNum) const
     switch (outputNum)
     {
     case PoutLocation:
-        return gridUnits::puMW;
+        return units::puMW;
     case QoutLocation:
-        return gridUnits::puMW;
+        return units::puMW;
 
     default:
         return units::defunit;

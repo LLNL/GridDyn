@@ -1502,7 +1502,7 @@ double gridBus::get (const std::string &param, unit unitType) const
     }
     else if (param == "angle")
     {
-        val = convertAngle (angle, rad, unitType);
+        val = convert (angle, rad, unitType);
     }
     else if (param == "vtol")
     {

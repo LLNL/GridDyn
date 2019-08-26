@@ -17,7 +17,7 @@
 #include "core/factoryTemplates.hpp"
 #include "idaInterface.h"
 #include "kinsolInterface.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "gmlc/utilities/stringConversion.h"
 #include <iostream>
 #include <new>

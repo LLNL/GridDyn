@@ -24,7 +24,7 @@
 #include "core/objectFactoryTemplates.hpp"
 #include "core/objectInterpreter.h"
 #include "gridDynSimulationFileOps.h"
-#include "utilities/mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "utilities/matrixData.hpp"
 #include "gmlc/utilities/stringOps.h"
 #include <cassert>

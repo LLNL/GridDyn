@@ -202,7 +202,7 @@ std::string Player::to_string ()
         ss << fullObjectName (m_obj) << ':' << field;
         if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = " << value;
         if (!ts.empty ())
@@ -218,7 +218,7 @@ std::string Player::to_string ()
         ss << fullObjectName (m_obj) << ':' << field;
         if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = {" << eFile;
         if (column > 0)

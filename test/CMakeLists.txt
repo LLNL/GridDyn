@@ -53,7 +53,6 @@ set(
     libraryTests/testMatrixData.cpp
     libraryTests/testWorkQueue.cpp
     libraryTests/testZipUtilities.cpp
-    libraryTests/simpleQueueTests.cpp
     libraryTests/testOperatingBounds.cpp
     libraryTests/testValuePredictors.cpp
 )

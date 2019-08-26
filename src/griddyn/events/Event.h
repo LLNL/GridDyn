@@ -17,7 +17,7 @@
 
 #include "core/objectOperatorInterface.hpp"
 #include "eventInterface.hpp"
-#include "utilities/units.h"
+#include "units/units.hpp"
 
 namespace griddyn
 {

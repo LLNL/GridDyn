@@ -54,7 +54,7 @@ void gridParameter::fromString (const std::string &str)
     if (rlc != string_view::npos)
     {
         size_t rlc2 = fld.find_last_of (')');
-        paramUnits = gridUnits::getUnits (fld.substr (rlc + 1, rlc2 - rlc - 1).to_string ());
+        paramUnits = units::unit_cast_from_string (fld.substr (rlc + 1, rlc2 - rlc - 1).to_string ());
         field = fld.substr (0, rlc).to_string ();
     }
     else

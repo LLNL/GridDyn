@@ -123,7 +123,7 @@ double gridGrabber::grabData ()
     if (fptr)
     {
         val = fptr (cobj);
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             val =
               convert (val, inputUnits, outputUnits, cobj->get ("basepower"), cobj->get ("basevoltage"));
@@ -143,7 +143,7 @@ void gridGrabber::grabVectorData (std::vector<double> &vdata)
     if ((loaded) && (vectorGrab))
     {
         fptrV (cobj, vdata);
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             auto localBasePower = cobj->get ("basepower");
             auto localBaseVoltage = cobj->get ("basevoltage");
@@ -198,7 +198,7 @@ void gridGrabber::makeDescription () const
     {
         desc = (cobj != nullptr) ? (cobj->getName () + ':' + field) : field;
 
-        if (outputUnits != defUnit)
+        if (outputUnits != defunit)
         {
             desc += '(' + to_string (outputUnits) + ')';
         }

@@ -972,11 +972,11 @@ void Area::set(const std::string &param, double val, unit unitType)
         // the default unit in this case should be Hz since that is what everyone assumes but we
         // need to store it in rps NOTE: we only do this assumed conversion for an area/simulation
 
-        systemBaseFrequency = convertFreq(val, (unitType == defUnit) ? Hz : unitType, rps);
+        systemBaseFrequency = convert(val, (unitType == defunit) ? Hz : unitType, rad/s);
 
         for (auto obj : primaryObjects)
         {
-            obj->set(param, systemBaseFrequency, rps);
+            obj->set(param, systemBaseFrequency, rad/s);
         }
     }
     else

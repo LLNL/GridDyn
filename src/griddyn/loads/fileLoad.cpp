@@ -262,7 +262,7 @@ void fileLoad::set (const std::string &param, const std::string &val)
     }
     else if (param == "units")
     {
-        inputUnits = gridUnits::getUnits (val);
+        inputUnits = units::unit_cast_from_string (val);
     }
     else if ((param == "mode") || (param == "timemode"))
     {
@@ -307,7 +307,7 @@ count_t fileLoad::loadFile ()
         if (inputUnits != units::defunit)
         {
             double scalar =
-              units::convert (1.0, inputUnits, gridUnits::puMW, systemBasePower, localBaseVoltage);
+              units::convert (1.0, inputUnits, units::puMW, systemBasePower, localBaseVoltage);
             if (scalar != 1.0)
             {
                 schedLoad.scaleData (scalar);

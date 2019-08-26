@@ -11,7 +11,7 @@
  */
 
 #include "gridRandom.h"
-#include "mapOps.hpp"
+#include "gmlc/containers/mapOps.hpp"
 #include "gmlc/utilities/vectorOps.hpp"
 #include <algorithm>
 #include <ctime>

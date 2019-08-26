@@ -167,7 +167,7 @@ class grabberInterpreter
             size_t closeParenthesisLocation = field.find_first_of (')', openParenthesisLocation);
             std::string unitName =
               field.substr (openParenthesisLocation + 1, closeParenthesisLocation - openParenthesisLocation - 1);
-            outUnit = gridUnits::getUnits (unitName);
+            outUnit = units::unit_cast_from_string(unitName);
             field = field.substr (0, openParenthesisLocation);
         }
         std::unique_ptr<baseX> ggb = createX (field, mobj);

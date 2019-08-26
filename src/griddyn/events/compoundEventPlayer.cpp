@@ -163,7 +163,7 @@ std::string compoundEventPlayer::to_string ()
         ss << fullObjectName (m_obj) << ':' << field;
         if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = " << value;
         if (Ntargets > 0)
@@ -179,7 +179,7 @@ std::string compoundEventPlayer::to_string ()
         ss << fullObjectName (m_obj) << ':' << field;
         if (unitType != units::defunit)
         {
-            ss << '(' << gridUnits::to_string (unitType) << ')';
+            ss << '(' << units::to_string (unitType) << ')';
         }
         ss << " = <" << eFile;
 

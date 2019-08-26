@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE (test_param_specs)
     BOOST_CHECK_CLOSE (ld1->get ("yq"), 0.11, 0.0001);
 
     BOOST_CHECK_CLOSE (ld2->get ("p"), 0.31, 0.0001);
-    BOOST_CHECK_CLOSE (ld2->get ("q", gridUnits::MVAR), 14.8, 0.0001);
+    BOOST_CHECK_CLOSE (ld2->get ("q", units::MVAR), 14.8, 0.0001);
     BOOST_CHECK_CLOSE (ld2->get ("yp"), 1.27, 0.0001);
     BOOST_CHECK_CLOSE (ld2->get ("yq"), 0.74, 0.0001);
     // TODO:: PT this capability is not enabled yet
