@@ -14,6 +14,8 @@
 #define MOTOR_LOAD_H_
 
 #include "../Load.h"
+#include "griddyn_autogen.h"
+
 namespace griddyn
 {
 namespace loads
@@ -65,6 +67,7 @@ class motorLoad : public Load
     dynObjectInitializeB (const IOdata &inputs, const IOdata &desiredOutput, IOdata &fieldSet) override;
 
   public:
+    AUTOGEN_GET
     virtual void set (const std::string &param, const std::string &val) override;
     virtual void
     set (const std::string &param, double val, units::unit unitType = units::defunit) override;
