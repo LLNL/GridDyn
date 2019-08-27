@@ -276,10 +276,6 @@ class Parse:
                 # print c.kind, c.spelling, c.raw_comment, c.location
                 # print c.referenced.access_specifier
                 #
-                # Do not extract PROTECTED parameter_t
-                #
-                # if c.referenced is not None and c.referenced.access_specifier.name == 'PROTECTED':
-                #    continue
                 # ---------------------------------
                 # enum must be attached to a class
                 # ---------------------------------
@@ -311,7 +307,7 @@ class Parse:
                             # print c.raw_comment
                             begin = c.raw_comment.find("[") + 1
                             end = c.raw_comment.find("]")
-                            template = "unitConversion ({}, {}, unitType, systemBasePower)".format(
+                            template = "convert ({}, {}, unitType, systemBasePower)".format(
                                 "{}", c.raw_comment[begin:end])
                             Parameters.update(OrderedDict({key: template}))
                         else:
@@ -362,7 +358,7 @@ class createFile:
 
         print()
         print(tab * " ", 'using namespace std;')
-        print(tab * " ", 'using namespace gridUnits;')
+        print(tab * " ", 'using namespace units;')
         print(tab * " ", 'using namespace ' + "::".join(namespace) + ";")
 
         if namespaceStringVec:
@@ -591,7 +587,7 @@ class createFile:
                 print(tab * " ", "{")
                 tab = tab + tabsize
                 #
-                # Need to return custom parameter if it is in tthe Set
+                # Need to return custom parameter if it is in the Set
                 #
                 if(HasSetCustomParam):
                     print(tab * " ", "if(" + curClass + "CustomSetCheck(param))")
@@ -992,8 +988,8 @@ def main():
     index = clang.cindex.Index.create()
     # myPath = os.path.dirname(sys.argv[1])
     myFilename = os.path.basename(sys.argv[1])
-    includes = "-I/software/griddyn/src/griddyn -I/software/griddyn/src/" + \
-        "-I/software/griddyn/src/utilities -I/software/griddyn/gridDyn"
+    includes = "-I../../src/griddyn -I../../src/" + \
+        "-I../../src/utilities -I../../gridDyn"
     includes = includes.split()
     myFileParse = Parse()
     # dump_children(index.parse(sys.argv[1], args=includes + ["-std=c++14"]).cursor, myFilename)
