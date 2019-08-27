@@ -201,7 +201,7 @@ void Event::set (const std::string &param, const std::string &val)
     else if (param == "units")
     {
         units::unit newUnits=unit_cast(units::unit_from_string (val));
-        if (newUnits == units::defunit)
+        if (!is_valid(newUnits))
         {
             throw (invalidParameterValue (param));
         }
@@ -218,7 +218,7 @@ void Event::setTime (coreTime time) { triggerTime = time; }
 void Event::setValue (double val, units::unit newUnits)
 {
     value = val;
-    if (newUnits != units::defunit)
+    if (is_valid(newUnits))
     {
         if (unitType == units::defunit)
         {

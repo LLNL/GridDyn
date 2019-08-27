@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE (test_unit_functions)
     // pu conversions
     val1 = convert (1.0, puOhm, ohm, 0.1, 0.6);
     BOOST_CHECK_CLOSE (val1, 3.600, 0.001);
-    val1 = convert (1.0, puA, A, 0.1, 0.6);
+    val1 = convert (1.0, puA, A, 100000.0, 600.0);
     BOOST_CHECK_CLOSE (val1, 166.6666666, 0.01);
 }
 

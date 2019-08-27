@@ -218,7 +218,7 @@ void helicsSource::set (const std::string &param, const std::string &val)
     else if (param == "units")
     {
         auto uval = units::unit_cast_from_string (val);
-        if (uval == units::defunit)
+        if (!units::is_valid(uval))
         {
             if (val != "default")
             {
