@@ -186,12 +186,6 @@ option(
 )
 
 option(
-    BUILD_GRIDDYN_SHARED_LIBRARY
-    "Build a shared library of the C/C++ interface"
-    OFF
-)
-
-option(
     ENABLE_CODE_COVERAGE_TEST
     "Build a target for testing code coverage"
     OFF
@@ -327,8 +321,6 @@ cmake_dependent_option(
     OFF
 )
 
-mark_as_advanced(BUILD_GRIDDYN_SHARED_LIBRARY)
-
 # add a baseline library for underlying dependencies and flags
 add_library(griddyn_base INTERFACE)
 add_library(griddyn_optional INTERFACE)
@@ -342,6 +334,15 @@ if(NOT NO_DEBUG_POSFIX)
     endif()
 endif()
 
+if (BUILD_SHARED_LIBS)
+	set(BUILD_GRIDDYN_C_SHARED_LIBRARY ON)
+	set(BUILD_GRIDDYN_CXX_SHARED_LIBRARY ON)
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+else()
+	option(BUILD_GRIDDYN_C_SHARED_LIBRARY OFF "Enable construction of GridDyn binary C based shared library")
+	option(BUILD_GRIDDYN_CXX_SHARED_LIBRARY OFF "Build the GridDyn C++ shared library")
+endif()
+
 if(
     BUILD_PYTHON_INTERFACE
     OR BUILD_PYTHON2_INTERFACE
@@ -350,7 +351,7 @@ if(
     OR BUILD_OCTAVE_INTERFACE
 )
     set(INTERFACE_BUILD ON)
-    hide_variable(BUILD_GRIDDYN_SHARED_LIBRARY)
+    hide_variable(BUILD_GRIDDYN_C_SHARED_LIBRARY)
     show_variable(
         DISABLE_SWIG
         BOOL
@@ -360,21 +361,16 @@ if(
 else()
     set(INTERFACE_BUILD OFF)
     hide_variable(DISABLE_SWIG)
-    show_variable(
-        BUILD_GRIDDYN_SHARED_LIBRARY
-        BOOL
-        "Enable construction of GridDyn binary C based shared library"
-        OFF
-    )
 endif()
+
+
 
 if(
     INTERFACE_BUILD
-    OR BUILD_GRIDDYN_SHARED_LIBRARY
+    OR BUILD_GRIDDYN_CXX_SHARED_LIBRARY
+	OR BUILD_GRIDDYN_C_SHARED_LIBRARY
     OR ENABLE_FMI_EXPORT
-	OR ENABLE_SHARED_LIBS
 )
-    set(ENABLE_SHARED_LIBS ON)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -809,9 +805,9 @@ endif(ENABLE_CLANG_TOOLS)
 if(ENABLE_GRIDDYN_TESTS)
     # message(STATUS "otcf:${optional_component_test_files}")
     add_subdirectory(test)
-    if(ENABLE_SHARED_LIBS)
+    if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
         add_subdirectory(test/testSharedLibrary)
-    endif(ENABLE_SHARED_LIBS)
+    endif()
     enable_testing()
     # add_test(NAME gridDynTest COMMAND testCore)
 endif(ENABLE_GRIDDYN_TESTS)
@@ -905,7 +901,7 @@ if(ENABLE_GRIDDYN_TESTS)
             Valgrind
     )
 
-    if(ENABLE_SHARED_LIBS)
+    if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
         add_test(NAME testSharedLibrary COMMAND shared_library_tests)
         set_property(TEST testSharedLibrary PROPERTY LABELS Nightly Release)
 

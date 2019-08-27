@@ -99,9 +99,9 @@ endif(ENABLE_OPTIMIZATION_LIBRARY)
 # ------------------------------------------------------------
 # Enable compilation of the griddyn shared library?
 # ------------------------------------------------------------
-if(ENABLE_SHARED_LIBS)
+if(BUILD_GRIDDYN_C_SHARED_LIBRARY)
     add_subdirectory(griddyn_shared)
-endif(ENABLE_SHARED_LIBS)
+endif(BUILD_GRIDDYN_C_SHARED_LIBRARY)
 
 # ------------------------------------------------------------
 # Generate libraryLoader.cpp
