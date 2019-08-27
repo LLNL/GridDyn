@@ -87,7 +87,8 @@ class Parse:
             node {cland.index} -- [clang cursor]
             fn {string} -- [filename]
         """
-
+        # Ask clang to parse every node of the Abstract Syntax tree.
+        #
         for c in node.get_children():
             filename = str(c.location)
             # if(filename.find("griddyn_autogen") != -1):
@@ -96,20 +97,31 @@ class Parse:
             # print "Data %s" % (c.data)
             if(str(c.location).find(str(fn)) != -1):
                 #
-                # we can read a line directly in the source file.includes
+                # we can read a line directly in the source file.
+                # using c.location.file.name and openening the file.
+                # Sometimes clang tell me where is the line in the file,
+                # So I extract it from "contents" and parse it manually.
                 #
                 filename = c.location.file.name
                 with open(filename, 'r') as fh:
                     contents = fh.read()
+
                 # print c.kind, c.spelling, c.type.spelling, c.access_specifier
                 # if c.kic.kinnd == clang.cindex.CursorKind.FIELD_DECL and
                 # (c.type.spelling.find('parameter_t') != -1):
+
+                #
+                # Save all the namespace found by clang.
                 if c.kind == clang.cindex.CursorKind.NAMESPACE:
                     self.namespaceList.append(c.spelling)
 
+                # "model_parameter" are found in CLASS_DECL
+                # Here we create an Ordered Dictionary with all
+                # possible extractions.  These are used later when
+                # we create the file.
                 if c.kind == clang.cindex.CursorKind.CLASS_DECL:
                     self.autogen.update(OrderedDict(
-                        {c.spelling: {'Parameters': OrderedDict(),  # Parameter_t for Get and Set
+                        {c.spelling: {'Parameters': OrderedDict(),  # model_parameter for Get and Set
                                       'StringParam': OrderedDict(),
                                       'AliasParam': OrderedDict(),
                                       'AliasFlags': OrderedDict(),
@@ -137,6 +149,9 @@ class Parse:
                                       'HasGetString': False}
                          }))
 
+                    # This save the parent class in case we need to call the parent of that function.
+                    # i.e. Load::get() for motorLoad::get()
+                    #
                     self.parentClass[c.spelling] = []
                     for child in c.get_children():
                         if child.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER:
@@ -146,8 +161,11 @@ class Parse:
 
                 #
                 # Extract information when METHOD Declaration Macro are found in .h class file.
+                # Here we read all macros in order to create the .cpp file for GET/SET
                 #
-                if(c.kind == clang.cindex.CursorKind.CXX_METHOD) and self.currentClass != '':
+                if (c.kind == clang.cindex.CursorKind.CXX_METHOD) and self.currentClass != '':
+                    # Extract the macro from the source file.
+                    # Set the appropriate autogen value.
                     declaration = contents[c.extent.start.offset:c.extent.end.offset]
                     autogen = self.autogen[self.currentClass]
                     if declaration == GET:
@@ -232,12 +250,16 @@ class Parse:
                         self.autogen['HasMacro'] = True
                 #
                 # Extract information from CLASS Comment block
-                # The comment block does not triggered the function, but the macro declaration does.
+                # Here we read all custom parameters, strings and flags from the comment.
                 #
                 if(c.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL and
                         c.brief_comment is not None):
-                    if(c.brief_comment.find(AUTOGEN) != -1):
+                    # We are looking for the string "--AUTOGEN--" in the comment.
+                    if (c.brief_comment.find(AUTOGEN) != -1):
+                        # debug...
                         # print "brief", c.brief_comment, c.kind
+
+                        # Extract each section for clarity
 
                         GetCustomParam = self.autogen[self.currentClass]['GetCustomParam']
                         SetCustomParam = self.autogen[self.currentClass]['SetCustomParam']
@@ -246,6 +268,8 @@ class Parse:
                         SetFlagsParam = self.autogen[self.currentClass]['SetFlagCustomParam']
                         GetFlagsParam = self.autogen[self.currentClass]['GetFlagCustomParam']
 
+                        # Extract from the comment, custom parameters, flags, or strings
+                        # Each one are split by space after "<TAG>:"
                         Comment = c.raw_comment.split('\n')
                         for i in range(len(Comment)):
                             if Comment[i].find('GET_CUSTOM') != -1:
@@ -277,7 +301,7 @@ class Parse:
                 # print c.referenced.access_specifier
                 #
                 # ---------------------------------
-                # enum must be attached to a class
+                # Section to parse "ENUM" for flags
                 # ---------------------------------
                 if c.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL and(
                         c.type.spelling.find('flags') != -1) and \
@@ -293,6 +317,8 @@ class Parse:
                     Flags.update(OrderedDict({c.displayname: c.type.spelling}))
                     pass
 
+                # This section parse each model_parameter
+                # It will extract the [units] and {aliases}
                 if c.kind == clang.cindex.CursorKind.FIELD_DECL and (
                         c.type.spelling.find('model_parameter') != -1):
                     # print(c.referenced.access_specifier.name)
@@ -327,6 +353,9 @@ class Parse:
 
 
 class createFile:
+    """Create AutoGen.cpp file for a specific ".h" if AUTOGEN macros are present.
+
+    """
 
     def __init__(self):
         self.tab = 0
@@ -367,6 +396,8 @@ class createFile:
         print()
         #
         # create enum class
+        # i.e. enum class motorLoadParams {  PMOT, SCALE, };
+        #
         for i in range(len(allClass)):
             parameters = autogen[allClass[i]]['Parameters']
             HasSet = autogen[allClass[i]]['HasSet']
@@ -380,8 +411,7 @@ class createFile:
                 print()
 
         #
-        # create map pairs.
-        #
+        # create map pairs, and all custom parameters
         allcustomLocNum = []
         allcustomLocFlags = []
         allcustomLocString = []
@@ -395,6 +425,7 @@ class createFile:
                 HasSetCustomFlags = autogenCl['HasSetFlagCustomParam']
                 HasGetCustomFlags = autogenCl['HasGetFlagCustomParam']
 
+                # Create CustomParamGET function
                 if(HasGetCustomParam):
                     GetCustomParam = autogen[allClass[i]]['GetCustomParam']
                     if(len(GetCustomParam) > 0):
@@ -405,6 +436,7 @@ class createFile:
                             print(GetCustomParam[param], end=' ')
                         print("};")
 
+                # Create CustomParamSet fucntion
                 if(HasSetCustomParam):
                     SetCustomParam = autogen[allClass[i]]['SetCustomParam']
                     if(len(SetCustomParam) > 0):
@@ -414,7 +446,7 @@ class createFile:
                             allcustomLocNum.append(SetCustomParam[param].replace('"', '').replace(',', ''))
                             print(SetCustomParam[param], end=' ')
                         print("};")
-
+                # Create CustomFlagGet function
                 if(HasGetCustomFlags):
                     GetFlagCustomParam = autogen[allClass[i]]['GetFlagCustomParam']
                     if(len(GetFlagCustomParam) > 0):
@@ -424,7 +456,7 @@ class createFile:
                             allcustomLocFlags.append(GetFlagCustomParam[param].replace('"', '').replace(',', ''))
                             print(GetFlagCustomParam[param], end=' ')
                         print("};")
-
+                # Create CustomFlagSet function
                 if(HasSetCustomFlags):
                     SetFlagCustomParam = autogen[allClass[i]]['SetFlagCustomParam']
                     if(len(SetFlagCustomParam) > 0):
@@ -434,7 +466,7 @@ class createFile:
                             allcustomLocFlags.append(SetFlagCustomParam[param].replace('"', '').replace(',', ''))
                             print(SetFlagCustomParam[param], end=' ')
                         print("};")
-
+                # Create CustomParamGetString function
                 if(HasGetStringParam):
                     GetStringCustomParam = autogen[allClass[i]]['GetStringCustomParam']
                     if(len(GetStringCustomParam) > 0):
@@ -444,7 +476,7 @@ class createFile:
                             allcustomLocString.append(GetStringCustomParam[param].replace('"', '').replace(',', ''))
                             print(GetStringCustomParam[param], end=' ')
                         print("};")
-
+                # Create CustomParamSetString function
                 if(HasSetStringParam):
                     SetStringCustomParam = autogen[allClass[i]]['SetStringCustomParam']
                     if(len(SetStringCustomParam) > 0):
@@ -455,6 +487,7 @@ class createFile:
                             print(SetStringCustomParam[param], end=' ')
                         print("};")
                 print()
+        # We create the static constant for model parameter, flags and string
         for i in range(len(allClass)):
             parameters = autogen[allClass[i]]['Parameters']
             aliases = autogen[allClass[i]]['AliasParam']
@@ -477,6 +510,7 @@ class createFile:
                 self.printLocalParam("allowedStringParameters", stringParam,  allcustomLocString, {}, allClass[i])
 
         print()
+        # Create the namespace found when parsing.
         for ns in namespace:
             print(tab * " ", end=' ')
             print("namespace {} ".format(ns), "{ ")
@@ -486,6 +520,8 @@ class createFile:
 
     def printLocalParam(self, name, paramList, customList, aliases, griddynClass):
         """
+        This function is used to create a "stringVec" for model_paramameter, flags and strings.
+        It will also create aliases.
         """
         tab = self.tab
 
@@ -513,7 +549,9 @@ class createFile:
         self.tab = tab
 
     def printMapPair(self, name, paramList, aliases, griddynClass, local):
-        """CreateMap  parameter list.
+        """Create Map parameter list.
+                static const map<string, motorLoadParams> ParamsMapmotorLoad{
+                {"pmot", motorLoadParams::PMOT},... }
 
         Arguments:
             paramList {list of parameters} -- create map pairs.
@@ -552,6 +590,7 @@ class createFile:
 
     def printSetFunction(self, autogen, allClass, parentClass):
         """
+        Create the Set function with custom parameters.
 
         Arguments:
             paramList {list} -- parameter list
